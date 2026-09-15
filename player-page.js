@@ -644,20 +644,15 @@
         raw = (reponse.data.matchs || []).find(function (x) { return String(x.id) === String(matchId); });
       }
     } catch (_e) { /* repli ci-dessous */ }
-    // Repli : detail public de CE match (match/<id>.json, lib/public-data-split.js),
-    // puis seulement l'ancien data.json complet (~25 Mo). Pas de ?t=Date.now().
+    // Repli : detail public de CE match (match/<id>.json, lib/public-data-split.js).
+    // Plus de repli sur data.json (~25 Mo, audit perf 15/09/2026). Pas de ?t=Date.now().
     var fusion = function (complet, partiel) { var m = Object.assign({}, complet, partiel || {}); delete m.detail_omitted; return m; };
     if (!raw || raw.detail_omitted) {
       var detail = await fetch('/match/' + encodeURIComponent(matchId) + '.json', { cache: 'no-cache' })
         .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
       if (detail && String(detail.id) === String(matchId)) raw = fusion(detail, raw);
     }
-    if (!raw || raw.detail_omitted) {
-      var data = await fetch('/data.json', { cache: 'no-cache' }).then(function (r) { return r.json(); });
-      var complet = (data.matchs || []).find(function (x) { return String(x.id) === String(matchId); });
-      if (complet) raw = fusion(complet, raw);
-      else if (raw) raw = fusion({}, raw);
-    }
+    if (!raw || raw.detail_omitted) throw new Error(t('match_page.match_ended_or_missing', 'Match terminé ou introuvable'));
     if (!raw) throw new Error(t('player_page.error_match_not_found', 'Match introuvable.'));
 
     var vm = window.IasharkMatchViewModel.buildMatchViewModel(raw);

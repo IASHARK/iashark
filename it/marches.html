@@ -241,7 +241,8 @@ async function loadMatches(){
   try{
     // Liste legere (data-home.json) : memes champs de carte que data.json, sans le detail.
     var r=await fetch('/data-home.json',{cache:'no-cache'});
-    if(!r.ok)r=await fetch('/data.json',{cache:'no-cache'});
+    // Plus de repli sur /data.json (~25 Mo, audit perf 15/09/2026).
+    if(!r.ok)throw new Error('HTTP '+r.status);
     var j=await r.json();
     allMatchsData=(j.matchs||[]).filter(function(m){return !m.no_signal&&m.pari_rec;});
   }catch(e){ allMatchsData=[]; }

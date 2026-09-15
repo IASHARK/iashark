@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" defer></script>
 <link rel="stylesheet" href="/assets/tailwind.css">
 <link rel="stylesheet" href="/assets/account.css">
 </head>
@@ -37,7 +37,7 @@
     <a href="/mot-de-passe-oublie.html" data-href="mot-de-passe-oublie.html" class="mt-5 inline-flex h-11 items-center rounded-xl bg-cyan px-5 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90" data-i18n="auth.reset_request_new_link">Demander un nouveau lien</a>
   </div>
 
-  <form id="formulaire" hidden novalidate class="mt-6 rounded-2xl border border-hairline bg-surface p-6">
+  <form id="formulaire" onsubmit="event.preventDefault()" hidden novalidate class="mt-6 rounded-2xl border border-hairline bg-surface p-6">
     <div>
       <label for="password" class="block text-[13px] font-semibold text-soft" data-i18n="auth.new_password_label">Nouveau mot de passe</label>
       <div class="relative mt-2">
@@ -76,13 +76,17 @@
 </main>
 
 <script src="/i18n/i18n.js"></script>
-<script src="/app-client.js"></script>
-<script src="/auth-pages.js"></script>
+<script src="/app-client.js" defer></script>
+<script src="/auth-pages.js" defer></script>
 <script>
   if (window.I18N && window.I18N.init) { window.I18N.init(); }
-  IasharkAuth.brancherOeil('oeil', 'password');
-  document.getElementById('formulaire').addEventListener('submit', IasharkAuth.reinitialiser);
-  IasharkAuth.preparerReinit();
+  // supabase-js, app-client.js et auth-pages.js sont en defer (audit perf
+  // 15/09/2026) : branchement une fois executes, avant DOMContentLoaded.
+  document.addEventListener('DOMContentLoaded', function () {
+    IasharkAuth.brancherOeil('oeil', 'password');
+    document.getElementById('formulaire').addEventListener('submit', IasharkAuth.reinitialiser);
+    IasharkAuth.preparerReinit();
+  });
 </script>
 <script src="/site-prefs.js"></script>
 </body>

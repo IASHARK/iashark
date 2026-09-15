@@ -25,7 +25,7 @@
   if (window.__iasharkSiteHeader) return;
   window.__iasharkSiteHeader = true;
 
-  var SUPABASE_UMD = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+  var SUPABASE_UMD = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js';
 
   var localeMatch = location.pathname.match(/^\/(fr|en|es|de|it|pt|gb|mx|za)(?:\/|$)/);
   var prefix = localeMatch ? '/' + localeMatch[1] : '';

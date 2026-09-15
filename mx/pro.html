@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" defer></script>
 <link rel="stylesheet" href="/assets/tailwind.css">
 <link rel="stylesheet" href="/assets/tools-page.css">
 <link rel="stylesheet" href="/assets/lang-switcher.css">
@@ -160,12 +160,12 @@
   <a href="/mx/compte.html"><span>&#9817;</span><b data-i18n="nav.account">CUENTA</b></a>
 </nav>
 
-<script src="/app-client.js"></script>
+<script src="/app-client.js" defer></script>
 <script src="/i18n/i18n.js"></script>
 <script src="/lib/tools-domain.js"></script>
 <script src="/lib/market-labels.js"></script><script src="/lib/market-config.js"></script><script src="/tools-page.js"></script>
 <script src="/auth-header.js"></script>
-<script>IasharkAuthHeader.mount('#authHeaderSlot')</script>
+<script>document.addEventListener('DOMContentLoaded',function(){IasharkAuthHeader.mount('#authHeaderSlot');});</script>
 <script src="/lang-switcher.js"></script>
 <script>IasharkLangSwitcher.mount('#langSwitchSlot')</script>
 <script src="/site-prefs.js"></script>

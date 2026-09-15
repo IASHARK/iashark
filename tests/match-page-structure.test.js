@@ -142,12 +142,29 @@ test("le mur d'acces et l'en-tete n'exposent ni pari, ni probabilite du modele",
 });
 
 // SEO : le resume statique des pages match n'est plus masque en CSS (texte
-// cache) ; l'application le remplace par son en-tete, qui porte le seul h1.
-test("le resume SEO n'est pas masque et la page garde un seul h1",()=>{
+// cache). Revu DELIBEREMENT le 15/09/2026 (audit perf, CLS 0,7) : il n'est plus
+// supprime au rendu ; il garde le seul h1 et l'en-tete de l'application passe
+// en h2 sur ces pages (h1 sur match.html?id= sans resume statique).
+test("le resume SEO n'est pas masque, n'est plus supprime et la page garde un seul h1",()=>{
   assert.doesNotMatch(css,/\.match-shell>div:not\(#matchRoot\)\{[^}]*display:none/);
-  assert.match(js,/function remplacerResumeSeo\(\)/);
+  assert.match(js,/function resumeSeoStatique\(\)/);
+  assert.doesNotMatch(js,/remplacerResumeSeo|\.remove\(\)/,"le resume statique ne doit plus etre retire du DOM");
+  assert.match(js,/const enH2=demo\|\|!!resumeSeoStatique\(\)/);
   assert.equal((js.match(/<h1\b/g)||[]).length,1,"un seul h1 genere par la page");
   assert.match(js,/<h1 class="hero-teams">/);
+});
+
+// PERF (audit 15/09/2026) : logos de l'en-tete sans lazy, dimensionnes et
+// prioritaires (element LCP) ; aucun repli sur /data.json (~25 Mo).
+test("en-tete : logos dimensionnes, charges en priorite ; pas de repli data.json",()=>{
+  const hero=js.slice(js.indexOf("function hero(vm)"),js.indexOf("const REL_NIVEAUX"));
+  assert.match(hero,/img\(i\.home\.logo,'',60,60,\{eager:true,priority:true\}\)/);
+  assert.match(hero,/img\(i\.away\.logo,'',60,60,\{eager:true,priority:true\}\)/);
+  assert.doesNotMatch(hero,/class="card hero reveal"/,"l'en-tete ne doit pas demarrer en opacite 0");
+  assert.match(js,/fetchpriority="high"/);
+  assert.doesNotMatch(js,/fetch\('\/data\.json'/);
+  assert.match(js,/function renderIntrouvable\(\)/);
+  assert.match(js,/match_page\.match_ended_or_missing/);
 });
 
 // La carte buteur menait avec un tableau plat de quatre lignes, puis avec la

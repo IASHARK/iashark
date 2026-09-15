@@ -112,8 +112,8 @@ test("la page passe par match-data, qui decide ce qu'un visiteur recoit", () => 
   assert.ok(bloc.indexOf("functions.invoke") > 0);
   assert.ok(bloc.indexOf("functions.invoke") < bloc.indexOf("fetch('/match/"),
     "le fichier public est lu avant la fonction protegee");
-  assert.ok(bloc.indexOf("functions.invoke") < bloc.indexOf("fetch('/data.json"),
-    "le fichier public est lu avant la fonction protegee");
+  // Plus aucun repli sur data.json (~25 Mo, audit perf 15/09/2026).
+  assert.equal(bloc.indexOf("/data.json"), -1, "repli sur data.json reintroduit");
 });
 
 test("les images reservent leur place et le mouvement est optionnel", () => {

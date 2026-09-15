@@ -9,7 +9,7 @@
 <link rel="canonical" href="https://iashark.com/checkout-succes.html">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c12'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='40' fill='%2322d3ee'%3E🦈%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" defer></script>
 <script src="/funnel-track.js"></script>
 <script src="/i18n/i18n.js"></script>
 <style>
@@ -61,7 +61,9 @@ var i18nReady=avecDelai((window.I18N&&window.I18N.init)?window.I18N.init():null,
 
 var SUPA_URL = 'https://ksvjraqitxouwiabecai.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzdmpyYXFpdHhvdXdpYWJlY2FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODcwMjMsImV4cCI6MjA4ODM2MzAyM30.Eh3qk4tATM40hoYxdErAllLEo1y8KNt4BSCET_fAgT8';
-var sb = (window.supabase&&window.supabase.createClient)?window.supabase.createClient(SUPA_URL, SUPA_KEY):null;
+// supabase-js est charge en defer (audit perf 15/09/2026) : client cree a
+// DOMContentLoaded, apres son execution.
+var sb = null;
 
 // Le webhook Stripe met a jour users.plan de facon asynchrone (evenement
 // customer.subscription.* recu apres le retour sur cette page) - on
@@ -111,9 +113,12 @@ async function pollAccess(attempt){
     statusEl.textContent = t('checkout_pages.success_slow',"L'activation peut prendre un peu plus de temps — rends-toi sur ton compte dans une minute.");
   }
 }
-i18nReady
-  .then(function(){ return avecDelai(syncAccess(),6000,null); })
-  .then(function(){ pollAccess(0); }, function(){ pollAccess(0); });
+document.addEventListener('DOMContentLoaded', function(){
+  sb = (window.supabase&&window.supabase.createClient)?window.supabase.createClient(SUPA_URL, SUPA_KEY):null;
+  i18nReady
+    .then(function(){ return avecDelai(syncAccess(),6000,null); })
+    .then(function(){ pollAccess(0); }, function(){ pollAccess(0); });
+});
 </script>
 <script src="/site-prefs.js"></script>
 <script src="/bottom-navigation.js"></script></body>

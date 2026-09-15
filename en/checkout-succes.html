@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" defer></script>
 <script src="/funnel-track.js"></script>
 <script src="/i18n/i18n.js"></script>
 <style>
@@ -84,7 +84,9 @@ var i18nReady=avecDelai((window.I18N&&window.I18N.init)?window.I18N.init():null,
 
 var SUPA_URL = 'https://ksvjraqitxouwiabecai.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzdmpyYXFpdHhvdXdpYWJlY2FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODcwMjMsImV4cCI6MjA4ODM2MzAyM30.Eh3qk4tATM40hoYxdErAllLEo1y8KNt4BSCET_fAgT8';
-var sb = (window.supabase&&window.supabase.createClient)?window.supabase.createClient(SUPA_URL, SUPA_KEY):null;
+// supabase-js est charge en defer (audit perf 15/09/2026) : client cree a
+// DOMContentLoaded, apres son execution.
+var sb = null;
 
 // Le webhook Stripe met a jour users.plan de facon asynchrone (evenement
 // customer.subscription.* recu apres le retour sur cette page) - on
@@ -134,9 +136,12 @@ async function pollAccess(attempt){
     statusEl.textContent = t('checkout_pages.success_slow',"L'activation peut prendre un peu plus de temps — rends-toi sur ton compte dans une minute.");
   }
 }
-i18nReady
-  .then(function(){ return avecDelai(syncAccess(),6000,null); })
-  .then(function(){ pollAccess(0); }, function(){ pollAccess(0); });
+document.addEventListener('DOMContentLoaded', function(){
+  sb = (window.supabase&&window.supabase.createClient)?window.supabase.createClient(SUPA_URL, SUPA_KEY):null;
+  i18nReady
+    .then(function(){ return avecDelai(syncAccess(),6000,null); })
+    .then(function(){ pollAccess(0); }, function(){ pollAccess(0); });
+});
 </script>
 <script src="/site-prefs.js"></script>
 <script src="/bottom-navigation.js"></script><!--SEO_FOOTER_NAV--><nav class="seo-foot-nav" aria-label="Site navigation" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#91a0b3;text-align:center"><p style="margin:0 0 4px"><span style="color:#c3ccd8">Leagues:</span> <a href="/en/leagues/premier-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Premier League</a> · <a href="/en/leagues/champions-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Champions League</a> · <a href="/en/leagues/la-liga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">La Liga</a> · <a href="/en/leagues/serie-a.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Serie A</a> · <a href="/en/leagues/bundesliga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Bundesliga</a> · <a href="/en/leagues/ligue-1.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Ligue 1</a> · <a href="/en/leagues/europa-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Europa League</a> · <a href="/en/leagues/conference-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Conference League</a> · <a href="/en/leagues/eredivisie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Eredivisie</a> · <a href="/en/leagues/liga-portugal.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga Portugal</a> · <a href="/en/leagues/mls.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">MLS</a> · <a href="/en/leagues/allsvenskan.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Allsvenskan</a> · <a href="/en/leagues/j1-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">J1 League</a> · <a href="/en/leagues/premier-soccer-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Premier Soccer League</a> · <a href="/en/leagues/liga-profesional-argentina.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga Profesional Argentina</a> · <a href="/en/leagues/primera-a-colombia.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Primera A Colombia</a> · <a href="/en/leagues/liga-1-peru.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga 1 Peru</a> · <a href="/en/leagues/primera-division-chile.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Primera Division Chile</a></p><p style="margin:0"><a href="/en/clubs/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Clubs and derbies</a> · <a href="/en/blog/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Blog and guides</a> · <a href="/en/marches.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Markets analysed</a> · <a href="/en/methodologie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Methodology</a></p></nav><!--/SEO_FOOTER_NAV-->

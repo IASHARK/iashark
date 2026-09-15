@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" defer></script>
 <link rel="stylesheet" href="/assets/tailwind.css">
 <link rel="stylesheet" href="/assets/account.css">
 <meta property="og:type" content="website">
@@ -58,7 +58,7 @@
     <a href="/fr/mot-de-passe-oublie.html" data-href="mot-de-passe-oublie.html" class="mt-5 inline-flex h-11 items-center rounded-xl bg-cyan px-5 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90" data-i18n="auth.reset_request_new_link">Demander un nouveau lien</a>
   </div>
 
-  <form id="formulaire" hidden novalidate class="mt-6 rounded-2xl border border-hairline bg-surface p-6">
+  <form id="formulaire" onsubmit="event.preventDefault()" hidden novalidate class="mt-6 rounded-2xl border border-hairline bg-surface p-6">
     <div>
       <label for="password" class="block text-[13px] font-semibold text-soft" data-i18n="auth.new_password_label">Nouveau mot de passe</label>
       <div class="relative mt-2">
@@ -97,13 +97,17 @@
 </main>
 
 <script src="/i18n/i18n.js"></script>
-<script src="/app-client.js"></script>
-<script src="/auth-pages.js"></script>
+<script src="/app-client.js" defer></script>
+<script src="/auth-pages.js" defer></script>
 <script>
   if (window.I18N && window.I18N.init) { window.I18N.init(); }
-  IasharkAuth.brancherOeil('oeil', 'password');
-  document.getElementById('formulaire').addEventListener('submit', IasharkAuth.reinitialiser);
-  IasharkAuth.preparerReinit();
+  // supabase-js, app-client.js et auth-pages.js sont en defer (audit perf
+  // 15/09/2026) : branchement une fois executes, avant DOMContentLoaded.
+  document.addEventListener('DOMContentLoaded', function () {
+    IasharkAuth.brancherOeil('oeil', 'password');
+    document.getElementById('formulaire').addEventListener('submit', IasharkAuth.reinitialiser);
+    IasharkAuth.preparerReinit();
+  });
 </script>
 <script src="/site-prefs.js"></script>
 <!--SEO_FOOTER_NAV--><nav class="seo-foot-nav" aria-label="Navigation du site" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#91a0b3;text-align:center"><p style="margin:0 0 4px"><span style="color:#c3ccd8">Championnats :</span> <a href="/fr/leagues/ligue-1.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Ligue 1</a> · <a href="/fr/leagues/champions-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Champions League</a> · <a href="/fr/leagues/premier-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Premier League</a> · <a href="/fr/leagues/la-liga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">La Liga</a> · <a href="/fr/leagues/serie-a.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Serie A</a> · <a href="/fr/leagues/bundesliga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Bundesliga</a> · <a href="/fr/leagues/europa-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Europa League</a> · <a href="/fr/leagues/conference-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Conference League</a> · <a href="/fr/leagues/eredivisie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Eredivisie</a> · <a href="/fr/leagues/liga-portugal.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga Portugal</a> · <a href="/fr/leagues/mls.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">MLS</a> · <a href="/fr/leagues/allsvenskan.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Allsvenskan</a> · <a href="/fr/leagues/j1-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">J1 League</a> · <a href="/fr/leagues/liga-mx.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga MX</a> · <a href="/fr/leagues/premier-soccer-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Premier Soccer League</a> · <a href="/fr/leagues/liga-profesional-argentina.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga Profesional Argentina</a> · <a href="/fr/leagues/primera-a-colombia.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Primera A Colombia</a> · <a href="/fr/leagues/liga-1-peru.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga 1 Peru</a> · <a href="/fr/leagues/primera-division-chile.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Primera Division Chile</a></p><p style="margin:0"><a href="/fr/clubs/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Clubs et derbies</a> · <a href="/fr/articles/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Articles</a> · <a href="/blog.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Blog et guides</a> · <a href="/fr/marches.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Marchés analysés</a> · <a href="/fr/methodologie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Méthodologie</a></p></nav><!--/SEO_FOOTER_NAV-->

@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" defer></script>
 <link rel="stylesheet" href="/assets/tailwind.css">
 <link rel="stylesheet" href="/assets/account.css">
 <meta property="og:type" content="website">
@@ -63,7 +63,7 @@
   <section class="rounded-2xl border border-hairline bg-surface p-6 sm:p-7">
     <h2 class="text-[19px] font-bold tracking-tight" data-i18n="auth.login_form_heading">Anmelden</h2>
 
-    <form id="form" novalidate class="mt-6">
+    <form id="form" onsubmit="event.preventDefault()" novalidate class="mt-6">
       <div>
         <label for="email" class="block text-[13px] font-semibold text-soft" data-i18n="auth.email_label">E-Mail</label>
         <input id="email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required
@@ -101,13 +101,17 @@
 </main>
 
 <script src="/i18n/i18n.js"></script>
-<script src="/app-client.js"></script>
-<script src="/auth-pages.js"></script>
+<script src="/app-client.js" defer></script>
+<script src="/auth-pages.js" defer></script>
 <script>
   if (window.I18N && window.I18N.init) { window.I18N.init(); }
-  IasharkAuth.redirigerSiConnecte();
-  IasharkAuth.brancherOeil('oeil', 'password');
-  document.getElementById('form').addEventListener('submit', IasharkAuth.connexion);
+  // supabase-js, app-client.js et auth-pages.js sont en defer (audit perf
+  // 15/09/2026) : branchement une fois executes, avant DOMContentLoaded.
+  document.addEventListener('DOMContentLoaded', function () {
+    IasharkAuth.redirigerSiConnecte();
+    IasharkAuth.brancherOeil('oeil', 'password');
+    document.getElementById('form').addEventListener('submit', IasharkAuth.connexion);
+  });
 </script>
 <script src="/site-prefs.js"></script>
 <!--SEO_FOOTER_NAV--><nav class="seo-foot-nav" aria-label="Seitennavigation" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#91a0b3;text-align:center"><p style="margin:0 0 4px"><span style="color:#c3ccd8">Wettbewerbe:</span> <a href="/de/leagues/bundesliga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Bundesliga</a> · <a href="/de/leagues/champions-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Champions League</a> · <a href="/de/leagues/europa-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Europa League</a> · <a href="/de/leagues/conference-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Conference League</a></p><p style="margin:0"><a href="/de/blog/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Blog und Ratgeber</a> · <a href="/de/marches.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Analysierte Märkte</a></p></nav><!--/SEO_FOOTER_NAV-->

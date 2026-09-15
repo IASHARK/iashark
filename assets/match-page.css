@@ -47,6 +47,13 @@ a{color:inherit}
 .match-error{min-height:400px;display:grid;place-items:center;text-align:center}
 .match-error a{color:var(--accent)}
 .loading-card{min-height:320px;display:grid;place-items:center;gap:10px;color:var(--muted);font-size:13px}
+/* Audit perf 15/09/2026 (CLS 0,7) : place reservee pour l'en-tete + le signal ou
+   le mur d'acces injectes (mesures : 844-883 px au-dela de 640 px de large,
+   851-938 px en dessous). Le bloc d'informations statique qui suit reste
+   hors ecran jusqu'au rendu : plus de decalage visible. */
+#matchRoot>.loading-card{min-height:830px;align-content:start;padding-top:120px}
+/* Apercu (en-tete deja affiche) : place du signal ou du mur d'acces (554-593 px). */
+#matchRoot .page>.sig-pending{min-height:550px}
 .bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:20;height:88px;display:flex;justify-content:center;gap:min(12vw,180px);background:var(--card);border-top:1px solid var(--line)}
 .bottom-nav a{width:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;color:var(--dim);text-decoration:none}
 .bottom-nav a.active{color:var(--accent)}
@@ -357,6 +364,8 @@ a{color:inherit}
   .brand img{width:128px;height:50px}
   .btn-login{padding:8px 11px;font-size:9.5px}
   .match-shell{width:calc(100% - 16px)}
+  #matchRoot>.loading-card{min-height:840px}
+  #matchRoot .page>.sig-pending{min-height:620px}
   .match-shell>div:not(#matchRoot) h1{font-size:22px!important}
   .page{gap:10px;padding:8px 0}
   .secs{gap:12px}

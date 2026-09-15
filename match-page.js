@@ -27,7 +27,14 @@ const odds=v=>n(v)===null?'—':Number(v).toLocaleString(localeTag(),{minimumFra
 // Ecart en points : toujours signe ("+4,4 pts", "−2,1 pts").
 const pts=v=>n(v)===null?'—':`${v>0?'+':v<0?'−':''}${fmt(Math.abs(v))} ${t('match_page.points_short','pts')}`;
 const clamp=v=>Math.max(0,Math.min(100,n(v)||0));
-const img=(src,alt)=>src?`<img src="${esc(src)}" alt="${esc(alt)}" loading="lazy">`:'';
+// Dimensions toujours posees (aucun decalage quand l'image arrive). eager :
+// image au-dessus de la ligne de flottaison (en-tete), jamais lazy ;
+// priority : element LCP probable (logos d'equipes de l'en-tete).
+const img=(src,alt,w,h,opts)=>{
+  if(!src)return '';
+  const o=opts||{};
+  return `<img src="${esc(src)}" alt="${esc(alt)}"${w?` width="${w}" height="${h}"`:''}${o.eager?'':' loading="lazy" decoding="async"'}${o.priority?' fetchpriority="high"':''}>`;
+};
 const empty=txt=>`<div class="empty">${esc(txt)}</div>`;
 
 // Icones : purement decoratives (aria-hidden), memes tokens de couleur.
@@ -133,17 +140,22 @@ function hero(vm){
   const c=vm.conditions;
   const lieu=c.venue||c.weather?`<div class="hero-venue">${c.venue?`<span>${cardIcon('pin')}${esc(c.venue)}</span>`:''}${c.weather?`<span>${cardIcon('cloud')}${esc(temperature(c.weather.temperature))}${meteo(c.weather.description)?' · '+esc(meteo(c.weather.description)):''}</span>`:''}</div>`:'';
   // Page exemple-analyse : son H1 est statique (bandeau), l'en-tete y passe en h2.
+  // Page statique /match/<id>.html : le resume SEO garde son h1 et reste en
+  // place (plus de suppression = plus de decalage), l'en-tete passe en h2.
   const demo=typeof IASHARK_DEMO!=='undefined'&&IASHARK_DEMO;
-  const titreOuvrant=demo?'<h2 class="hero-teams">':'<h1 class="hero-teams">',titreFermant=demo?'</h2>':'</h1>';
-  return `<header class="card hero reveal">
+  const enH2=demo||!!resumeSeoStatique();
+  const titreOuvrant=enH2?'<h2 class="hero-teams">':'<h1 class="hero-teams">',titreFermant=enH2?'</h2>':'</h1>';
+  // Pas de classe reveal sur l'en-tete : visible des le rendu (element LCP),
+  // jamais en opacite 0 le temps d'une animation.
+  return `<header class="card hero">
     <div class="hero-top">
-      <span class="hero-league">${img(i.league.logo,'')}<span>${esc(ln)}</span></span>
+      <span class="hero-league">${img(i.league.logo,'',18,18,{eager:true})}<span>${esc(ln)}</span></span>
       <span class="hero-time">${esc(dh.date||t('match_page.date_tbc','Date à confirmer'))} · <b>${esc(dh.time||'—')}</b></span>
     </div>
     ${titreOuvrant}
-      <span class="hero-team">${img(i.home.logo,'')}<span class="hero-name">${esc(i.home.name)}</span></span>
+      <span class="hero-team">${img(i.home.logo,'',60,60,{eager:true,priority:true})}<span class="hero-name">${esc(i.home.name)}</span></span>
       <span class="hero-vs">${esc(t('match_page.vs_label','vs'))}</span>
-      <span class="hero-team">${img(i.away.logo,'')}<span class="hero-name">${esc(i.away.name)}</span></span>
+      <span class="hero-team">${img(i.away.logo,'',60,60,{eager:true,priority:true})}<span class="hero-name">${esc(i.away.name)}</span></span>
     ${titreFermant}
     <div class="hero-meta"><div>${teamMeta(s.home,f.home)}</div><div>${teamMeta(s.away,f.away)}</div></div>
     ${lieu}
@@ -465,7 +477,7 @@ function threatsCard(vm){
     const largeur=prob===null?null:clamp(prob);
     corps+=`<${tag} class="threat group"${href}>
       <div class="threat-id">
-        ${img(p.photo,'')}
+        ${img(p.photo,'',54,54)}
         <div class="threat-who">
           <b>${esc(buteur(p.name))}</b>
           <small>${esc(p.team||'')}${p.position?' · '+esc(poste(p.position)):''}</small>
@@ -517,7 +529,7 @@ function outputsCard(vm){
   // ligne discrete. Si TOUT manque, la carte disparait.
   const cols=[],manquant=[];
   if(x){
-    cols.push(`<div class="outputs-col outputs-xg"><small>${esc(t('match_page.stat_expected_goals','Buts attendus'))} (xG)</small><div class="xg-row">${img(i.home.logo,'')}<b>${fmt(x.home)}</b><span>${esc(i.home.name)} – ${esc(i.away.name)}</span><b>${fmt(x.away)}</b>${img(i.away.logo,'')}</div></div>`);
+    cols.push(`<div class="outputs-col outputs-xg"><small>${esc(t('match_page.stat_expected_goals','Buts attendus'))} (xG)</small><div class="xg-row">${img(i.home.logo,'',26,26)}<b>${fmt(x.home)}</b><span>${esc(i.home.name)} – ${esc(i.away.name)}</span><b>${fmt(x.away)}</b>${img(i.away.logo,'',26,26)}</div></div>`);
   } else manquant.push(t('match_page.xg_unavailable','xG indisponibles'));
   if(s.length){
     const ml=window.IasharkMarketLabels;
@@ -785,11 +797,12 @@ function bindSticky(){
   },{threshold:0}).observe(anchor);
 }
 
-// Bloc SEO statique des pages /match/<id>.html (h1 + resume) : VISIBLE tant
-// que l'analyse charge, puis remplace par l'en-tete de l'application, qui
-// porte le seul h1 de la page. Jamais de texte masque en CSS.
-function remplacerResumeSeo(){
-  document.querySelectorAll('.match-shell>div:not(#matchRoot)').forEach(el=>el.remove());
+// Bloc SEO statique des pages /match/<id>.html (h1 + resume). Il RESTE en
+// place apres le rendu (audit perf 15/09/2026 : sa suppression decalait toute
+// la page, CLS 0,7) et garde le seul h1 ; l'en-tete de l'application passe
+// alors en h2 (hero). Jamais de texte masque en CSS. null sur match.html?id=.
+function resumeSeoStatique(){
+  return document.querySelector('.match-shell>div:not(#matchRoot)');
 }
 
 function viewModel(raw){
@@ -820,7 +833,6 @@ function render(raw){
     faqCard(vm)
   ];
   const corps=sections.filter(Boolean).map(node=>`<div class="sec">${node}</div>`).join('');
-  remplacerResumeSeo();
   root.innerHTML=`<div class="page">${hero(vm)}<div class="secs">${corps}</div></div>${signalSticky(vm)}`;
   bindMotion();
   bindSticky();
@@ -896,7 +908,6 @@ function gateCard(vm,opts){
 }
 function renderAuthWall(raw){
   const vm=viewModel(raw);
-  remplacerResumeSeo();
   root.innerHTML=gateCard(vm,{
     title:t('match_page.gate_free_title','Match gratuit du jour'),
     text:t('match_page.gate_free_text','Ce match est gratuit, mais il faut un compte IASHARK gratuit (inscription ou connexion) pour voir l’analyse complète.'),
@@ -907,7 +918,6 @@ function renderAuthWall(raw){
 }
 function renderProWall(raw){
   const vm=viewModel(raw);
-  remplacerResumeSeo();
   root.innerHTML=gateCard(vm,{
     title:t('match_page.gate_pro_title','Analyse réservée aux membres Pro'),
     text:t('match_page.gate_pro_text','Le marché recommandé, la confiance du modèle et l’analyse complète de ce match sont réservés aux membres Pro. Le match du jour, lui, reste gratuit.'),
@@ -915,6 +925,23 @@ function renderProWall(raw){
     cta:t('match_page.gate_pro_cta','Devenir Pro')
   });
   bindMotion();
+}
+
+// Apercu : en-tete du match (donnees publiques, aucune sortie du modele) et
+// place reservee du signal / mur d'acces, le temps de lire la session.
+function renderApercu(raw){
+  try{
+    root.innerHTML=`<div class="page">${hero(viewModel(raw))}<div class="loading-card sig-pending"><span></span><p>${esc(t('match_page.loading_analysis','Chargement de l’analyse…'))}</p></div></div>`;
+  }catch(e){}
+}
+
+// Detail du match absent : message + lien vers la page championnat de la
+// version (fil d'Ariane du bloc d'informations statique), sinon l'accueil.
+function renderIntrouvable(){
+  const hub=document.querySelector('.match-facts a[href*="/leagues/"]');
+  const href=hub?hub.getAttribute('href'):lien('');
+  const libelle=hub?t('match_page.league_matches_link','Voir les matchs de la compétition'):t('match_page.back_to_home','Retour à l\'accueil');
+  root.innerHTML=`<div class="match-error"><b>${esc(t('match_page.match_ended_or_missing','Match terminé ou introuvable'))}</b><a href="${esc(href)}">${esc(libelle)}</a></div>`;
 }
 
 // Bloc SEO statique : libelles de marche poses bruts dans data-market-label,
@@ -941,22 +968,38 @@ function bindBackLink(){
 async function init(){
   bindBackLink();
   try{
+    const demoMode=typeof IASHARK_DEMO!=='undefined'&&IASHARK_DEMO&&typeof PRELOADED_MATCH!=='undefined';
+    let raw=typeof PRELOADED_MATCH!=='undefined'?PRELOADED_MATCH:null;
+    // match.html ouvert sans ?id= (ou id vide/"null") : aucune requete vers
+    // /match/null.json ni match-data, message "Match introuvable" directement.
+    const idBrut=typeof FIXED_MATCH_ID!=='undefined'&&FIXED_MATCH_ID!=null?String(FIXED_MATCH_ID):new URLSearchParams(location.search).get('id');
+    const id=idBrut&&!/^(null|undefined)$/.test(idBrut.trim())?idBrut.trim():(raw&&raw.id!=null?String(raw.id):null);
+    // Donnees PUBLIQUES (liste legere + detail du match) demandees tout de
+    // suite, en parallele du dictionnaire et sans attendre supabase-js (charge
+    // en defer) : l'en-tete s'affiche des que les deux sont la (element LCP,
+    // audit perf 15/09/2026). Aucun champ premium ici.
+    const lire=u=>fetch(u,{cache:'no-cache'}).then(r=>r.ok?r.json():null).catch(()=>null);
+    const fusion=(complet,partiel)=>{const m=Object.assign({},complet,partiel||{});delete m.detail_omitted;return m;};
+    const publiques=demoMode||!id?null:Promise.all([
+      lire('/data-home.json'),
+      raw&&!raw.detail_omitted?null:lire('/match/'+encodeURIComponent(id)+'.json')
+    ]);
     // Dictionnaire charge AVANT tout rendu : jamais un flash en francais.
     if(window.I18N&&window.I18N.init){ try{ await window.I18N.init(); }catch(e){} }
     traduireShellSeo();
     // Marche sans ressource d'aide au jeu confirmee : ligne "Aide :" masquee.
     if(window.IASHARK_MARKET&&!window.IASHARK_MARKET.helpline)document.querySelectorAll('[data-helpline-row]').forEach(el=>{el.hidden=true;});
     // MODE DEMO (exemple-analyse.html) : analyse reelle figee dans le HTML.
-    if(typeof IASHARK_DEMO!=='undefined'&&IASHARK_DEMO&&typeof PRELOADED_MATCH!=='undefined'){
+    if(demoMode){
       render(PRELOADED_MATCH);
       return;
     }
-    let raw=typeof PRELOADED_MATCH!=='undefined'?PRELOADED_MATCH:null;
-    // match.html ouvert sans ?id= (ou id vide/"null") : aucune requete vers
-    // /match/null.json ni match-data, message "Match introuvable" directement.
-    const idBrut=typeof FIXED_MATCH_ID!=='undefined'&&FIXED_MATCH_ID!=null?String(FIXED_MATCH_ID):new URLSearchParams(location.search).get('id');
-    const id=idBrut&&!/^(null|undefined)$/.test(idBrut.trim())?idBrut.trim():(raw&&raw.id!=null?String(raw.id):null);
     if(!id)throw new Error(t('match_page.match_not_found','Match introuvable'));
+    const [liste,detail]=await publiques;
+    if(detail&&String(detail.id)===String(id))raw=fusion(detail,raw);
+    if(raw&&!raw.detail_omitted)renderApercu(raw);
+    // Session : app-client.js et supabase-js (defer) sont executes avant DOMContentLoaded.
+    await new Promise(ok=>{if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ok,{once:true});else ok();});
     let list=null;
     let ctx={session:null,isPro:false};
     if(window.IasharkApp){
@@ -969,26 +1012,16 @@ async function init(){
         }
       }
     }
-    // Sans session : liste legere data-home.json et detail match/<id>.json en
-    // parallele (lib/public-data-split.js). cache:'no-cache' revalide (ETag).
-    const lire=u=>fetch(u,{cache:'no-cache'}).then(r=>r.ok?r.json():null).catch(()=>null);
-    const fusion=(complet,partiel)=>{const m=Object.assign({},complet,partiel||{});delete m.detail_omitted;return m;};
-    if(!list||!raw||raw.detail_omitted){
-      const [liste,detail]=await Promise.all([
-        list?null:lire('/data-home.json'),
-        raw&&!raw.detail_omitted?null:lire('/match/'+encodeURIComponent(id)+'.json')
-      ]);
-      if(!list&&liste&&Array.isArray(liste.matchs))list=liste.matchs;
-      if(detail&&String(detail.id)===String(id))raw=fusion(detail,raw);
-    }
-    if(!list||!raw||raw.detail_omitted){
-      const data=await fetch('/data.json',{cache:'no-cache'}).then(r=>r.json());
-      list=list||data.matchs||[];
-      const complet=(data.matchs||[]).find(x=>String(x.id)===String(id));
-      if(complet)raw=fusion(complet,raw);
-      else if(raw)raw=fusion({},raw);
-    }
-    if(!raw)throw new Error(t('match_page.match_not_found','Match introuvable'));
+    // Sans session : liste legere data-home.json et detail match/<id>.json lus
+    // plus haut (lib/public-data-split.js). cache:'no-cache' revalide (ETag).
+    if(!list&&liste&&Array.isArray(liste.matchs))list=liste.matchs;
+    // Plus AUCUN repli sur /data.json (~25 Mo, audit perf 15/09/2026) : sans
+    // detail publie (match/<id>.json retire apres le match, ou identifiant
+    // inconnu), la page le dit et renvoie vers la competition.
+    if(!raw||raw.detail_omitted){renderIntrouvable();return;}
+    // Liste du jour indisponible : aucun match n'est suppose offert (mur Pro
+    // pour un non-abonne), jamais l'inverse.
+    list=list||[];
     const isFree=String(raw.id)===String(IasharkFreeMatch.pickFreeMatchId(list,null,(window.IASHARK_MARKET&&window.IASHARK_MARKET.code)||null));
     if(isFree&&!ctx.session){renderAuthWall(raw);return;}
     if(!isFree&&!ctx.isPro){renderProWall(raw);return;}

@@ -80,8 +80,9 @@ async function chargerDonnees(portee: { id: string | null; list: boolean }): Pro
 // pari en clair -, vbet, fiabilite detaillee, textes d'analyse, buteurs
 // probables).
 //
-// conf (indice 0-10), has_signal et no_signal restent volontairement publics :
-// ils disent qu'une analyse existe, sans la donner.
+// has_signal et no_signal restent volontairement publics : ils disent qu'une
+// analyse existe, sans la donner. conf (note sur 10 = probabilite du modele /
+// 10) est premium depuis le 15/09/2026 (decision proprietaire).
 const PREMIUM_FIELDS = [
   // Colonnes dediees de match_premium_data.
   "pari_rec", "cote_rec", "model_probability", "markets_compared", "market_id", "marche",
@@ -89,7 +90,7 @@ const PREMIUM_FIELDS = [
   // Traductions premium (raw_response.narrative_i18n).
   "facteur_x_i18n", "verdict_shark_i18n",
   // match_premium_data.premium_fields (migration 0020).
-  "p1", "pn", "p2", "po15", "po25", "btts", "lambda_h", "lambda_a",
+  "conf", "p1", "pn", "p2", "po15", "po25", "btts", "lambda_h", "lambda_a",
   "market_aware_p1", "market_aware_pN", "market_aware_p2",
   "market_consensus_p1", "market_consensus_pN", "market_consensus_p2",
   "mc_scores", "scores", "simulation_count",
@@ -239,6 +240,12 @@ Deno.serve(async (req: Request) => {
         if (m.detail_omitted === true && detailFields.has(f)) continue;
         enrichi[f] = etendus[f];
       }
+    }
+    // conf (note sur 10 = model_probability / 10, premium depuis le 15/09/2026) :
+    // lignes ecrites avant ce changement sans conf dans premium_fields. Meme
+    // formule que le pipeline ; sans probabilite (pas de pari), pas de note.
+    if (enrichi.conf == null && premium.model_probability != null && Number.isFinite(Number(premium.model_probability))) {
+      enrichi.conf = Math.round(Number(premium.model_probability)) / 10;
     }
     return {
       ...enrichi,

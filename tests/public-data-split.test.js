@@ -30,7 +30,7 @@ test("la liste des champs premium couvre la fonction Edge et le pipeline", () =>
 // ne retire ni n'ajoute rien : c'est ce que ce test verifie.
 test("aucun champ premium n'est ajoute par le decoupage", () => {
   const publics = [
-    { id: 1, home: { n: "A" }, away: { n: "B" }, has_signal: true, player_history: { home: [1], away: [] }, stade: { desc: "x" }, conf: 7 },
+    { id: 1, home: { n: "A" }, away: { n: "B" }, has_signal: true, player_history: { home: [1], away: [] }, stade: { desc: "x" } },
     { id: 2, home: { n: "C" }, away: { n: "D" }, is_free: true, pari_rec: "Over 2.5", cote_rec: "1.9", player_history: { home: [], away: [] } },
   ];
   const s = split.buildPublicSplit(publics, { generated_at: "2026-09-14T08:00:00Z", run_id: "DAILY" });

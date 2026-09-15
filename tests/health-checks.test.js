@@ -23,14 +23,14 @@ function pub(id, extra) {
   return Object.assign({
     id: id, home: { n: "Home " + id, id: id * 10 }, away: { n: "Away " + id, id: id * 10 + 1 },
     league: "Premier League", league_key: "premier", league_id: 39, date: "2026-09-14 21:00",
-    conf: 6.5, model_output_available: true, has_signal: true, no_signal: false,
+    model_output_available: true, has_signal: true, no_signal: false,
     c1: "1.85", cn: "3.60", c2: "4.10", is_free: false,
   }, extra || {});
 }
 
 const fixtures = {
   fresh: () => ({ generated_at: "2026-09-14T06:25:00Z", run_id: "DAILY_2026-09-14", matchs: [
-    pub(1, { is_free: true, pari_rec: "1", analyse_card: "Texte offert" }), // offert : champs premium autorises
+    pub(1, { is_free: true, pari_rec: "1", conf: 6.5, analyse_card: "Texte offert" }), // offert : champs premium autorises
     pub(2, { league: "Ligue 1", league_key: "ligue1", league_id: 61 }),
     pub(3, { league: "Major League Soccer", league_key: "mls", league_id: 253, date: "2026-09-15 02:30" }),
   ] }),
@@ -101,6 +101,19 @@ test("fixture fuite premium : alerte critique avec champs et match", () => {
   assert.ok(leak.leak_paths.length >= 3);
   assert.ok(checks.isGateFailure(leak));
   assert.ok(alerts.hasLeak(r));
+});
+
+// 15/09/2026 : conf (note sur 10 = probabilite du modele / 10) est premium.
+test("conf sur un match non offert : fuite critique qui bloque la publication", () => {
+  const f = fixtures.fresh();
+  f.matchs[1].conf = 6.9;
+  const r = evaluate(f);
+  const leak = byId(r, "fuite-data-home");
+  assert.equal(leak.status, "fail");
+  assert.equal(leak.critical, true);
+  assert.match(leak.detail, /FUITE PREMIUM : 1 match\(s\).*conf.*ex\. match 2/);
+  assert.ok(checks.isGateFailure(leak));
+  assert.equal(byId(evaluate(fixtures.fresh()), "fuite-data-home").status, "ok", "conf du match offert : autorise");
 });
 
 test("repli data.json : fuite, safe_pick et date du run_output", () => {

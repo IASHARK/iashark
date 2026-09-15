@@ -44,11 +44,15 @@ test("findMatchLeaks ignore le match offert et signale les matchs payants", () =
   const leaks = checks.findMatchLeaks([
     match(1, { is_free: true, pari_rec: "1", kelly: 2 }),
     match(2, { market_id: "FT_1X2" }),
+    // conf (note sur 10 = probabilite du modele / 10) : premium depuis le 15/09/2026.
     match(3, { conf: 6.9 }),
+    match(4, { is_free: true, conf: 7.2 }),
   ], FIELDS);
-  assert.equal(leaks.length, 1);
+  assert.equal(leaks.length, 2);
   assert.equal(leaks[0].id, "2");
   assert.deepEqual(leaks[0].paths, ["market_id"]);
+  assert.equal(leaks[1].id, "3");
+  assert.deepEqual(leaks[1].paths, ["conf"], "conf sur un match non offert = fuite");
 });
 
 test("checkPremiumLeaks : fail avec les champs, ok sans fuite", () => {

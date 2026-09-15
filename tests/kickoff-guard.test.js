@@ -83,7 +83,7 @@ test("closeMatchForPick : plus aucun pari ni champ premium, fiche d'information 
   assert.equal(m.has_signal, false);
   assert.equal(m.is_free, false);
   assert.equal(m.no_signal_reason, "KICKOFF_PASSED");
-  assert.equal(m.conf, 7.5, "conf retombe sur la qualite des donnees, plus sur la probabilite du pari");
+  assert.ok(!("conf" in m), "conf (note sur 10, premium) retiree avec le pari, jamais reposee");
   assert.deepEqual([m.home.n, m.away.n, m.date, m.league], ["A", "B", "2026-09-14 04:30", "Liga MX"]);
   assert.equal(row.pari_rec, ""); assert.equal(row.cote_rec, null); assert.equal(row.model_probability, null);
   assert.equal(row.kelly, "0"); assert.equal(row.edge, ""); assert.equal(row.verdict_shark, ""); assert.equal(row.facteur_x, "");

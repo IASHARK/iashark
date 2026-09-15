@@ -25,20 +25,20 @@ test("le match gratuit vient d'une seule source, partagee par les deux pages", (
 });
 
 const horloge = { day: "2026-09-02", now: "2026-09-02 10:00" };
-const m = (id, date, extra) => Object.assign({ id, date, conf: 5 }, extra || {});
+const m = (id, date, extra) => Object.assign({ id, date }, extra || {});
 
 test("prefere un match reellement analyse plutot qu'un match sans signal", () => {
   const list = [
-    m(1, "2026-09-02 20:00", { conf: 9 }),                        // aucun signal
-    m(2, "2026-09-02 21:00", { pari_rec: "Over 2.5", conf: 6 })   // analyse
+    m(1, "2026-09-02 20:00", { data_quality_score: 90 }),                        // aucun signal
+    m(2, "2026-09-02 21:00", { pari_rec: "Over 2.5", data_quality_score: 60 })   // analyse
   ];
   assert.equal(pickFreeMatchId(list, horloge), 2);
 });
 
 test("no_signal exclut le match, meme s'il porte un pari_rec", () => {
   const list = [
-    m(1, "2026-09-02 20:00", { pari_rec: "Over 2.5", no_signal: true, conf: 9 }),
-    m(2, "2026-09-02 21:00", { pari_rec: "BTTS Oui", conf: 5 })
+    m(1, "2026-09-02 20:00", { pari_rec: "Over 2.5", no_signal: true, data_quality_score: 90 }),
+    m(2, "2026-09-02 21:00", { pari_rec: "BTTS Oui", data_quality_score: 50 })
   ];
   assert.equal(pickFreeMatchId(list, horloge), 2);
 });
@@ -46,13 +46,13 @@ test("no_signal exclut le match, meme s'il porte un pari_rec", () => {
 test("a defaut de match analyse aujourd'hui, va chercher un autre jour plutot que de ne rien montrer", () => {
   const list = [
     m(1, "2026-09-02 20:00"),                                     // aujourd'hui, sans signal
-    m(2, "2026-09-03 18:00", { pari_rec: "Under 2.5", conf: 7 })  // demain, analyse
+    m(2, "2026-09-03 18:00", { pari_rec: "Under 2.5" })  // demain, analyse
   ];
   assert.equal(pickFreeMatchId(list, horloge), 2);
 });
 
 test("si vraiment aucun match n'a de signal, montre quand meme un match plutot que rien", () => {
-  const list = [m(1, "2026-09-02 20:00", { conf: 4 }), m(2, "2026-09-02 22:00", { conf: 8 })];
+  const list = [m(1, "2026-09-02 20:00", { data_quality_score: 40 }), m(2, "2026-09-02 22:00", { data_quality_score: 80 })];
   assert.equal(pickFreeMatchId(list, horloge), 2);
 });
 
@@ -62,16 +62,19 @@ test("liste vide ou absente -> null, jamais une exception", () => {
   assert.equal(pickFreeMatch(undefined, horloge), null);
 });
 
-// L'ecart prime sur la confiance brute. Attention : normEdge() traite une
-// valeur <= 10 comme une echelle sur 10 (donc x10) et au-dessus comme un
-// pourcentage. Ce test compare donc deux ecarts sur la MEME echelle, sinon
-// il testerait l'heuristique de normalisation et non le classement.
-test("classe par ecart modele/marche quand il existe, pas par la confiance brute", () => {
+// 15/09/2026 : conf (note sur 10 = probabilite du modele / 10) et edge sont
+// premium. Le repli heuristique ne classe que sur un critere PUBLIC
+// (data_quality_score) : meme choix pour un visiteur et un abonne Pro, et
+// l'ordre ne trahit jamais la probabilite.
+test("repli heuristique : classe par qualite des donnees publique, jamais par conf ni edge", () => {
   const list = [
-    m(1, "2026-09-02 20:00", { pari_rec: "A", conf: 9, edge: 12 }),
-    m(2, "2026-09-02 21:00", { pari_rec: "B", conf: 3, edge: 25 })
+    m(1, "2026-09-02 20:00", { pari_rec: "A", conf: 9.5, edge: 40, data_quality_score: 55 }),
+    m(2, "2026-09-02 21:00", { pari_rec: "B", conf: 3, edge: 2, data_quality_score: 80 })
   ];
   assert.equal(pickFreeMatchId(list, horloge), 2);
+  const FM = require("../lib/free-match.js");
+  assert.equal(FM.score({ conf: 9, edge: 30 }), 0, "sans donnee publique : score neutre");
+  assert.equal(FM.score({ conf: 9, data_quality_score: 70 }), FM.score({ conf: 1, data_quality_score: 70 }));
 });
 
 // 13/09/2026 : le match offert restait celui de la veille jusqu'au passage

@@ -121,6 +121,8 @@ function tmpRootWithPremiumData(isFree) {
   var dir = fs.mkdtempSync(path.join(os.tmpdir(), "club-hubs-"));
   var m = { id: 999001, date: "2099-01-01 21:00", league: "Premier League", league_key: "premier", home: { n: "Arsenal", id: 42 }, away: { n: "Tottenham", id: 47 }, conf: 7.4, is_free: isFree, model_output_available: true };
   SPLIT.PREMIUM_FIELDS.forEach(function (f) { m[f] = "SENTINEL_" + f; });
+  // conf est premium (15/09/2026) : valeur reelle, lisible seulement sur le match offert.
+  m.conf = 7.4;
   m.edge = 0.123456; m.kelly = 0.0789123; m.model_probability = 0.6180339;
   fs.writeFileSync(path.join(dir, "data-home.json"), JSON.stringify({ generated_at: "2098-12-01T06:00:00Z", matchs: [m] }));
   return dir;

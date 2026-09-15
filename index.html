@@ -1010,28 +1010,15 @@ function onSearchInput(v){
   renderMatchs();
 }
 
-function normConf(c){c=parseFloat(c)||0;return c<=1?c*10:c;}
-function parseEdge(m){if(m==null||m.edge==null||m.edge==='')return null;var n=parseFloat(String(m.edge).replace(',','.'));return isNaN(n)?null:n;}
-
-/* FIX: l'edge peut arriver dans 3 échelles différentes selon la source (0-1, 0-10 ou 0-100).
-   On normalise systématiquement sur une échelle 0-100 avant tout calcul, pour ne plus jamais
-   dépasser un score de 10/10 à l'affichage. */
-function normEdge(e){
-  if(e==null||isNaN(e))return null;
-  if(e<=1)return e*100;   // ex: 0.74 -> 74
-  if(e<=10)return e*10;   // ex: 7.4  -> 74
-  return Math.min(e,100); // ex: 74   -> 74 (déjà sur 0-100, on plafonne par sécurité)
-}
-function ovrConf(m){
-  var e=normEdge(parseEdge(m));
-  if(e!=null)return e;
-  return Math.min(normConf(m.conf)*10,100);
-}
-// Probabilite estimee affichee : conf (probabilite du modele / 10) uniquement,
-// jamais l'ecart (edge) qu'ovrConf() privilegie pour le tri.
-function probConf(m){return Math.min(normConf(m.conf)*10,100);}
-function confClass(m){var c=ovrConf(m);return c>=75?'high':c>=60?'med':'low';}
-function confTier(m){var v=ovrConf(m)/10;return v>=8?'tier-red':v>=7?'tier-orange':'tier-blue';}
+// Note sur 10 (conf = probabilite du modele pour le pari recommande / 10) :
+// champ PREMIUM (lib/premium-fields.js, 15/09/2026). Il n'existe que sur le
+// match offert du jour et dans la reponse match-data d'un abonne Pro. Absent :
+// null, et rien de chiffre n'est affiche (ni NaN, ni 0,0, ni "/10" vide).
+// Couleurs et paliers se basent sur cette PROBABILITE, jamais sur l'ecart (edge).
+function normConf(c){var x=parseFloat(c);if(isNaN(x)||x<0)return null;return x<=1?x*10:x;}
+function probConf(m){var c=normConf(m&&m.conf);return c==null?null:Math.min(c*10,100);}
+function confClass(m){var c=probConf(m);return c==null?'':c>=75?'high':c>=60?'med':'low';}
+function confTier(m){var c=probConf(m);return c==null?'':c>=80?'tier-red':c>=70?'tier-orange':'tier-blue';}
 function teamLogo(t){if(!t)return'';var altN=String(tf('home_app.logo_alt','Logo {team}',{team:(t.n||'')})).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');if(t.photo)return'<img class="mc-team-logo" width="38" height="38" src="'+t.photo+'" onerror="this.style.display=\'none\'" alt="'+altN+'">';if(t.logo)return'<img class="mc-team-logo" width="38" height="38" src="'+t.logo+'" onerror="this.style.display=\'none\'" alt="'+altN+'">';if(t.id)return'<img class="mc-team-logo" width="38" height="38" src="https://media.api-sports.io/football/teams/'+t.id+'.png" onerror="this.outerHTML=\'<div class=mc-team-logo-placeholder>\'+(this.getAttribute(\'data-ini\')||\'?\')+\'</div>\'" data-ini="'+(t.n||'').slice(0,2).toUpperCase()+'" alt="'+altN+'">';return'<div class="mc-team-logo-placeholder">'+(t.n||'?').slice(0,2).toUpperCase()+'</div>';}
 function translateMarket(r){if(!r)return r;if(window.IasharkMarketLabels&&window.IasharkMarketLabels.marketLabel){var lib=window.IasharkMarketLabels.marketLabel(r);if(lib&&lib!==r)return lib;}var s=String(r).toLowerCase();if(s.includes('over 2.5'))return'Plus de 2,5 buts';if(s.includes('under 2.5'))return'Moins de 2,5 buts';if(s.includes('over 1.5'))return'Plus de 1,5 but';if(s.includes('btts non')||s.includes('une équipe ne marque'))return'Une équipe ne marque pas';if(s.includes('btts')||s.includes('les deux équipes'))return'Les deux équipes marquent';if(s.includes('dc 1x')||s==='1x')return'DC 1X';if(s.includes('dc x2')||s==='x2')return'DC X2';return r;}
 
@@ -1092,8 +1079,9 @@ function buildCard(m){
   // conf = probabilite du modele pour le marche retenu / 10 : c'est une
   // probabilite, donc jamais affichee sur une carte verrouillee (match non
   // offert) - uniquement sur le match offert du jour ou pour un abonne Pro.
+  // conf absent (abonne dont match-data n'a pas encore la note) : aucun chiffre.
   var confBlock=(!aSignal||locked)?'':(fiable
-    ?'<div class="mc-conf"><span class="mc-conf-lbl">PROBABILITÉ ESTIMÉE</span><b class="mc-conf-val">'+fmtConf(m)+'</b><span class="mc-conf-max">/10</span></div>'
+    ?(probConf(m)!=null?'<div class="mc-conf '+confClass(m)+'"><span class="mc-conf-lbl">PROBABILITÉ ESTIMÉE</span><b class="mc-conf-val">'+fmtConf(m)+'</b><span class="mc-conf-max">/10</span></div>':'')
     :'<div class="mc-conf mc-conf-preliminary"><span class="mc-conf-lbl">Analyse préliminaire</span></div>');
   // Avant, on floutait le vrai marche en CSS - une protection de facade, la
   // donnee etant lisible dans le DOM. Le serveur ne l'envoie plus du tout :
@@ -1128,7 +1116,9 @@ function buildCard(m){
     +'</a>';
 }
 function fmtConf(m){
-  var v=probConf(m)/10;
+  var p=probConf(m);
+  if(p==null)return '';
+  var v=p/10;
   return (Math.round(v*10)/10).toLocaleString(localeTag(),{minimumFractionDigits:1,maximumFractionDigits:1});
 }
 
@@ -1154,7 +1144,7 @@ function buildHeroFeature(m){
     +'<div class="feature-meta"><div class="feature-league">'+leagueHeader(m)+'</div><div class="feature-meta-right"><span class="feature-free">Analyse gratuite</span><span>'+dayLabel(m)+' · '+heure+'</span></div></div>'
     +'<div class="feature-teams"><div class="feature-team">'+heroLogo(m.home,hn)+esc(hn)+'</div><div class="feature-vs">VS</div><div class="feature-team">'+heroLogo(m.away,an)+esc(an)+'</div></div>'
     +'<div class="feature-signal"><div class="signal-label">Marché recommandé</div><div class="signal-market">'+market+'</div>'
-    +'<div class="signal-data"><div class="signal-stat"><span>Probabilité estimée</span><strong>'+Math.round(probConf(m))+' %</strong></div></div>'
+    +(probConf(m)!=null?'<div class="signal-data"><div class="signal-stat"><span>Probabilité estimée</span><strong>'+Math.round(probConf(m))+' %</strong></div></div>':'')
     +'<div class="feature-evidence"><span class="evidence-chip">Forme récente</span><span class="evidence-chip">Données avancées</span><span class="evidence-chip">Contexte du match</span></div></div></a>';
 }
 

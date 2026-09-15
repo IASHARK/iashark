@@ -124,7 +124,7 @@ test("historique.json (depot public) : aucun pari en attente en clair hors match
   }
 });
 
-test("l'analyse offerte reste complete, les amorces publiques restent presentes", () => {
+test("l'analyse offerte reste complete, les amorces publiques restent presentes (conf n'en est plus une)", () => {
   const d = JSON.parse(read("data-home.json"));
   for (const m of d.matchs.filter((x) => x.is_free === true && x.pari_rec)) {
     const detail = JSON.parse(read("match/" + m.id + ".json"));
@@ -136,7 +136,7 @@ test("l'analyse offerte reste complete, les amorces publiques restent presentes"
   }
   const avecSignal = d.matchs.filter((m) => m.is_free !== true && m.has_signal === true);
   for (const m of avecSignal) {
-    assert.ok(m.conf != null, "conf (amorce) retire de la liste pour " + m.id);
+    assert.equal(m.conf, undefined, "conf (note sur 10, premium depuis le 15/09/2026) publiee pour " + m.id);
     assert.ok(m.home && m.away && m.date, "identite du match retiree pour " + m.id);
   }
 });

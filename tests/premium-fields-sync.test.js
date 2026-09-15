@@ -40,7 +40,7 @@ test("la liste unique : colonnes + traductions + premium_fields, sans doublon", 
 });
 
 test("amorces et faits publics : jamais classes premium", () => {
-  const publics = ["id", "home", "away", "date", "league", "league_key", "is_free", "conf", "has_signal", "no_signal", "no_signal_label",
+  const publics = ["id", "home", "away", "date", "league", "league_key", "is_free", "has_signal", "no_signal", "no_signal_label",
     "data_quality_score", "data_quality_label", "model_output_available", "analysis_tier", "stade", "classement", "injuries",
     "form_home", "form_away", "h2h", "lineups", "player_history", "current_squads", "c1", "cn", "c2", "co25", "pinnacle_snapshot",
     "match_stats_home", "events_home", "tendances", "fatigue", "elo_home", "elo_away", "key_absences"];
@@ -53,11 +53,11 @@ test("stripPremium : tout retire hors match offert, has_signal conserve l'amorce
   assert.deepEqual(PREMIUM.premiumLeaks(pub), []);
   assert.deepEqual(PREMIUM.deepPremiumLeaks(pub), []);
   assert.equal(pub.has_signal, true);
-  assert.equal(pub.conf, 6.9);
+  assert.equal(pub.conf, undefined, "conf (note sur 10) est premium depuis le 15/09/2026");
   assert.deepEqual(pub.fatigue, complet.fatigue, "fatigue.val est un fait, pas la cle premium val");
   const offert = Object.assign({}, complet, { is_free: true });
   assert.equal(PREMIUM.stripPremium(offert), offert, "le match offert reste complet");
-  assert.deepEqual(Object.keys(PREMIUM.premiumPayload(complet)).sort(), ["btts", "p1", "paris_safe", "top_scorers"]);
+  assert.deepEqual(Object.keys(PREMIUM.premiumPayload(complet)).sort(), ["btts", "conf", "p1", "paris_safe", "top_scorers"]);
 });
 
 test("deepPremiumLeaks detecte un champ premium imbrique ou de premier niveau", () => {

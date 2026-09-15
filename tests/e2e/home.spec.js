@@ -30,6 +30,12 @@ for (const v of VERSIONS) {
         const hrefs = await cards.evaluateAll((els) => els.map((a) => a.getAttribute('href')));
         expect(hrefs.length).toBeGreaterThan(0);
         for (const h of hrefs) expect(pathOf(h, baseURL), 'lien de carte hors version').toMatch(new RegExp(`^/${v.dir}/`));
+        // conf (note sur 10 = probabilite du modele / 10) est premium : aucune
+        // carte verrouillee n'affiche de note, ni chiffre vide.
+        const locked = page.locator('#cardsList a.mc.locked');
+        await expect(locked.locator('.mc-conf-val, .mc-conf-max')).toHaveCount(0);
+        const lockedText = (await locked.evaluateAll((els) => els.map((e) => e.innerText))).join(' | ');
+        expect(lockedText, 'note sur 10 sur une carte verrouillee').not.toMatch(/\/\s*10\b|NaN/);
       });
 
       await test.step('ressource d\'aide au jeu du marche', async () => {

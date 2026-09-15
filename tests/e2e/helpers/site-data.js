@@ -51,7 +51,7 @@ function shiftMatch(m, days) {
 }
 
 const PREMIUM_TEMPLATE_FALLBACK = {
-  pari_rec: 'Under 3.5', cote_rec: 1.62, model_probability: 66.1, market_id: 'under-35', marche: 'TOTAL_BUTS',
+  pari_rec: 'Under 3.5', cote_rec: 1.62, model_probability: 66.1, conf: 6.6, market_id: 'under-35', marche: 'TOTAL_BUTS',
   markets_compared: [{ id: 'under-35', market: 'Under 3.5', probability: 71.2, consensus: 61.7, edge: 9.5 }],
 };
 

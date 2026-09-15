@@ -1,0 +1,75 @@
+{{! Gabarit commun des emails de relance (lib/lifecycle-email.js). Meme charte que emails/templates/* : CSS inline, bloc <style> reserve au mode sombre et au mobile. Le marqueur LIFECYCLE_BLOCKS recoit le corps (textes emails/lifecycle/copy.<locale>.json). Lien de desinscription en 1 clic, mention 18+ et aide du pays dans CHAQUE email. STATUT : REVIEW. }}<!DOCTYPE html>
+<html lang="{{htmlLang}}" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<title>{{subject}}</title>
+<style>
+:root { color-scheme: light dark; supported-color-schemes: light dark; }
+@media (prefers-color-scheme: dark) {
+  .bg-page { background-color: #0b1118 !important; }
+  .bg-card { background-color: #131c27 !important; border-color: #263444 !important; }
+  .bg-soft { background-color: #18232f !important; border-color: #2f6f86 !important; }
+  .bg-warn { background-color: #2a2213 !important; border-color: #6b5320 !important; }
+  .tx { color: #e9eef4 !important; }
+  .tx-soft { color: #a9b6c4 !important; }
+  .bd { border-color: #263444 !important; }
+  .lnk { color: #62d6ec !important; }
+}
+[data-ogsc] .bg-page { background-color: #0b1118 !important; }
+[data-ogsc] .bg-card { background-color: #131c27 !important; }
+[data-ogsc] .bg-soft { background-color: #18232f !important; }
+[data-ogsc] .bg-warn { background-color: #2a2213 !important; }
+[data-ogsc] .tx { color: #e9eef4 !important; }
+[data-ogsc] .tx-soft { color: #a9b6c4 !important; }
+[data-ogsc] .lnk { color: #62d6ec !important; }
+@media only screen and (max-width: 620px) {
+  .container { width: 100% !important; }
+  .pad { padding: 20px !important; }
+}
+</style>
+</head>
+<body class="bg-page" style="margin:0;padding:0;background-color:#f2f4f7;-webkit-text-size-adjust:100%;">
+<div style="display:none;max-height:0;max-width:0;overflow:hidden;opacity:0;mso-hide:all;font-size:1px;line-height:1px;color:#f2f4f7;">{{preheader}}</div>
+<table role="presentation" class="bg-page" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background-color:#f2f4f7;border-collapse:collapse;">
+<tr>
+<td align="center" style="padding:24px 12px;">
+<table role="presentation" class="container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;border-collapse:collapse;">
+<tr>
+<td class="tx" style="padding:4px 4px 16px;font-family:Arial,Helvetica,sans-serif;font-size:20px;line-height:24px;font-weight:bold;letter-spacing:3px;color:#0b1a2a;">IASHARK</td>
+</tr>
+<tr>
+<td class="bg-card pad" style="padding:32px;background-color:#ffffff;border:1px solid #dfe4ea;border-radius:12px;font-family:Arial,Helvetica,sans-serif;">
+
+<h1 class="tx" style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:24px;line-height:31px;font-weight:bold;color:#0b1a2a;">{{title}}</h1>
+<p class="tx" style="margin:0 0 14px;font-size:15px;line-height:24px;color:#1f2d3a;">{{greeting}}</p>
+<!--LIFECYCLE_BLOCKS-->
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;margin:10px 0 0;">
+<tr><td class="bg-warn" style="padding:16px 18px;background-color:#fff8eb;border:1px solid #f0d49c;border-radius:8px;font-family:Arial,Helvetica,sans-serif;">
+<p class="tx" style="margin:0 0 8px;font-size:14px;line-height:21px;font-weight:bold;color:#3a2a0c;">{{rgTitle}}</p>
+<p class="tx" style="margin:0 0 8px;font-size:14px;line-height:21px;color:#3a2a0c;">{{rgBody}}</p>
+<p class="tx" style="margin:0;font-size:14px;line-height:21px;color:#3a2a0c;">{{rgHelp}} <a class="lnk" href="{{helplineUrl}}" target="_blank" style="color:#0a6d8f;text-decoration:underline;">{{helplineUrl}}</a> · <a class="lnk" href="{{responsibleUrl}}" target="_blank" style="color:#0a6d8f;text-decoration:underline;">{{rgMore}}</a></p>
+</td></tr>
+</table>
+
+</td>
+</tr>
+<tr>
+<td class="tx-soft" style="padding:18px 8px 6px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#5d6b79;">
+{{footerReason}}<br>
+<a class="lnk" href="{{unsubscribeUrl}}" target="_blank" style="color:#0a6d8f;text-decoration:underline;font-weight:bold;">{{unsubscribeLabel}}</a> · <a class="lnk" href="{{manageUrl}}" target="_blank" style="color:#0a6d8f;text-decoration:underline;">{{manageLabel}}</a><br>
+{{senderLabel}}{{sep}}IASHARK · {{companyOperatorName}} · {{companyAddress}}<br>
+<a class="lnk" href="{{privacyUrl}}" target="_blank" style="color:#0a6d8f;text-decoration:underline;">{{privacyLabel}}</a> · <a class="lnk" href="{{legalUrl}}" target="_blank" style="color:#0a6d8f;text-decoration:underline;">{{legalLabel}}</a> · <a class="lnk" href="{{homeUrl}}" target="_blank" style="color:#0a6d8f;text-decoration:underline;">iashark.com</a>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>

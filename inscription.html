@@ -76,6 +76,18 @@
         <p id="password2Err" hidden class="mt-1.5 text-[12.5px] text-red-300"></p>
       </div>
 
+      <!-- Consentement aux emails de relance (RGPD/CNIL, UK PECR, MX LFPDPPP,
+           ZA POPIA) : case facultative, JAMAIS pre-cochee, sans effet sur la
+           creation du compte. Lue par auth-pages.js (metadonnees de signUp),
+           enregistree par le declencheur de supabase/migrations/0024. -->
+      <div class="mt-5 flex items-start gap-2.5">
+        <input id="emailMarketing" name="emailMarketing" type="checkbox" class="mt-[3px] h-4 w-4 shrink-0 accent-cyan" aria-describedby="emailMarketingAide">
+        <div>
+          <label for="emailMarketing" class="block text-[13.5px] leading-snug text-ink" data-i18n="email_prefs.signup_label">Recevoir les analyses offertes et conseils d’utilisation par email</label>
+          <p id="emailMarketingAide" class="mt-1 text-[12px] leading-relaxed text-soft" data-i18n="email_prefs.signup_hint">Facultatif. Au plus un email tous les 3 jours, désinscription en 1 clic dans chaque email.</p>
+        </div>
+      </div>
+
       <button type="submit" id="submit"
               class="mt-6 h-12 w-full rounded-xl bg-cyan text-[15px] font-bold text-[#04141b] transition hover:bg-cyan/90 disabled:cursor-wait disabled:opacity-60" data-i18n="auth.signup_submit">Créer mon compte</button>
 

@@ -480,7 +480,43 @@
       + carte(interrupteur('notifMatch', tr('compte_page.notif_new_analysis_title', 'Nouvelle analyse'), tr('compte_page.notif_new_analysis_detail', 'Recevoir un email quand une nouvelle analyse est publiée.'), prefs.notify_match_analysis !== false)
         + interrupteur('notifHebdo', tr('compte_page.notif_weekly_title', 'Récapitulatif hebdomadaire'), tr('compte_page.notif_weekly_detail', 'Recevoir un résumé chaque semaine.'), prefs.notify_weekly_recap !== false))
       + '<div class="mt-4 flex flex-wrap items-center gap-3">' + boutonPrimaire('enregistrerNotifs', tr('compte_page.save_btn', 'Enregistrer')) + '</div>'
-      + '<p id="msgNotifs" hidden aria-live="polite"></p>';
+      + '<p id="msgNotifs" hidden aria-live="polite"></p>'
+      + emailsRelance();
+  }
+
+  /* Emails de relance (analyses offertes, conseils) : consentement explicite
+     stocke dans public.email_preferences (migration 0024), enregistre au clic,
+     distinct des deux interrupteurs ci-dessus (qui valent "oui" par defaut et
+     ne sont donc pas un consentement). Table absente (migration pas encore
+     appliquee) : reglage annonce indisponible, jamais un faux interrupteur. */
+  var EMAIL_CONSENT_TEXT_VERSION = '2026-09-15';
+  var emailPrefs = { etat: 'inconnu', optIn: false };
+  function emailsRelance() {
+    var titre = tr('email_prefs.account_title', 'Analyses offertes et conseils par email');
+    return '<div class="mt-6">' + carte(emailPrefs.etat === 'ok'
+        ? interrupteur('emailMarketing', titre, tr('email_prefs.account_detail', 'Le match offert, les matchs du week-end et des conseils d’utilisation, au plus un email tous les 3 jours, désinscription en 1 clic dans chaque email. Les emails liés à votre compte (abonnement, sécurité) ne dépendent pas de ce réglage.'), emailPrefs.optIn)
+        : '<p class="text-[14.5px] font-semibold">' + esc(titre) + '</p><p class="mt-1 text-[13px] leading-relaxed text-soft">' + esc(tr('email_prefs.account_unavailable', 'Ce réglage n’est pas encore disponible.')) + '</p>')
+      + '<p id="msgEmailMarketing" hidden aria-live="polite"></p></div>';
+  }
+  async function enregistrerEmailMarketing() {
+    var bouton = $('emailMarketing');
+    var voulu = bouton.getAttribute('aria-checked') === 'true';
+    var dir = repertoire() || 'fr';
+    var ligne = { user_id: ctx.user.id, marketing_opt_in: voulu, opt_in_source: 'account', market: dir,
+      locale: { gb: 'en', za: 'en', mx: 'es-mx' }[dir] || dir };
+    if (voulu) ligne.opt_in_text_version = EMAIL_CONSENT_TEXT_VERSION;
+    bouton.disabled = true;
+    retour('msgEmailMarketing', '');
+    try {
+      var r = await sb.from('email_preferences').upsert(ligne, { onConflict: 'user_id' });
+      if (r.error) throw r.error;
+      emailPrefs.optIn = voulu;
+      retour('msgEmailMarketing', tr('compte_page.msg_preferences_saved', 'Préférences enregistrées.'), 'success');
+    } catch (e) {
+      bouton.setAttribute('aria-checked', voulu ? 'false' : 'true');
+      retour('msgEmailMarketing', lisible(e), 'error');
+    }
+    bouton.disabled = false;
   }
 
   function securite() {
@@ -657,6 +693,7 @@
     });
     if ($('enregistrerPrefs')) $('enregistrerPrefs').addEventListener('click', enregistrerPreferences);
     if ($('enregistrerNotifs')) $('enregistrerNotifs').addEventListener('click', enregistrerNotifications);
+    if ($('emailMarketing')) $('emailMarketing').addEventListener('click', enregistrerEmailMarketing);
     if ($('souscrire')) {
       monterConsentement();
       $('souscrire').addEventListener('click', function () { facturation('create-checkout-session', $('souscrire')); });
@@ -1032,9 +1069,13 @@
       sb.from('user_preferences').select('*').eq('user_id', ctx.user.id).maybeSingle(),
       sb.from('subscriptions').select('status,current_period_end,cancel_at_period_end,created_at')
         .eq('user_id', ctx.user.id).order('created_at', { ascending: false }).limit(1).maybeSingle(),
-      sb.from('betting_decisions').select('id', { count: 'exact', head: true }).eq('user_id', ctx.user.id)
+      sb.from('betting_decisions').select('id', { count: 'exact', head: true }).eq('user_id', ctx.user.id),
+      sb.from('email_preferences').select('marketing_opt_in').eq('user_id', ctx.user.id).maybeSingle()
     ]);
     prefs = resultats[0].data || {};
+    emailPrefs = resultats[3].error
+      ? { etat: 'indisponible', optIn: false }
+      : { etat: 'ok', optIn: !!(resultats[3].data && resultats[3].data.marketing_opt_in === true) };
     // Favoris : liste locale (visiteur) fusionnee avec celle du compte.
     if (window.IasharkFavLeagues) {
       favStore = window.IasharkFavLeagues.createStore();

@@ -1,0 +1,103 @@
+{
+  "_status": "REVIEW - da far rivedere (giurista + madrelingua) prima dell'attivazione. Nessuna promessa di vincita. La pagina Metodologia non esiste ancora in italiano (link alla pagina inglese).",
+  "locale": "it",
+  "common": {
+    "greeting": "Ciao,",
+    "colon": ": ",
+    "kickoff_label": "Calcio d'inizio",
+    "match_link": "Vedi la partita",
+    "rg_title": "Gioco responsabile · 18+",
+    "rg_body": "IASHARK pubblica analisi statistiche sul calcio. Non è un sito di scommesse: non accetta puntate, e una probabilità non è mai una certezza. Scommettere comporta rischi (perdita di denaro, dipendenza). Servizio riservato ai maggiori di 18 anni.",
+    "rg_help_phone": "Hai bisogno di aiuto? {{helplineName}}: {{helplinePhone}}.",
+    "rg_help_nophone": "Hai bisogno di aiuto? {{helplineName}}:",
+    "rg_more": "Le nostre risorse sul gioco responsabile",
+    "footer_reason_marketing": "Ricevi questa email perché hai accettato di ricevere le analisi gratuite e i consigli d'uso di IASHARK.",
+    "footer_reason_welcome": "Email inviata dopo la creazione del tuo account IASHARK.",
+    "unsubscribe": "Annulla l'iscrizione con un clic",
+    "manage": "Gestisci le email in Il mio account",
+    "privacy": "Privacy",
+    "legal": "Note legali",
+    "sender": "Mittente"
+  },
+  "campaigns": {
+    "welcome": {
+      "subject": "Benvenuto su IASHARK: da dove iniziare",
+      "preheader": "Come usare il sito, la partita gratuita e la metodologia.",
+      "title": "Benvenuto su IASHARK",
+      "blocks": [
+        { "type": "p", "text": "Il tuo account gratuito IASHARK è pronto. Ecco come usare il sito in pochi minuti." },
+        { "type": "list", "ordered": true, "items": [
+          "Ogni giorno l'analisi completa di una partita è gratuita: la trovi in evidenza nella pagina iniziale.",
+          "Nella pagina di una partita leggi le probabilità stimate dal modello, i fattori considerati e i loro limiti.",
+          "La pagina Metodologia spiega da dove vengono questi numeri e come leggerli."
+        ] },
+        { "type": "p", "if": "hasFreeMatch", "text": "La partita gratuita del momento:" },
+        { "type": "match", "if": "hasFreeMatch" },
+        { "type": "cta", "label": "Leggi la metodologia (pagina in inglese)", "link": "methodology" },
+        { "type": "link", "label": "Vai al mio account", "link": "account" },
+        { "type": "p", "if": "notOptedIn", "text": "Non hai chiesto di ricevere via email le nostre analisi gratuite e i consigli: ti invieremo solo le email relative al tuo account. Puoi cambiare idea in qualsiasi momento in Il mio account, sezione Notifiche." }
+      ]
+    },
+    "free_match": {
+      "subject": "La partita gratuita del giorno: {{freeMatchHome}} – {{freeMatchAway}}",
+      "preheader": "L'analisi completa di questa partita è aperta gratis con il tuo account.",
+      "title": "La tua analisi gratuita del giorno",
+      "blocks": [
+        { "type": "p", "text": "Ogni giorno IASHARK apre gratis a tutti gli account l'analisi completa di una partita. Ecco quella di oggi:" },
+        { "type": "match" },
+        { "type": "p", "text": "Troverai le probabilità stimate, i fattori usati dal modello e i punti di attenzione. Sono stime statistiche: l'esito di una partita resta incerto." },
+        { "type": "cta", "label": "Vedi l'analisi gratuita", "link": "freeMatch" }
+      ]
+    },
+    "pro_features": {
+      "subject": "Cosa sblocca IASHARK Pro",
+      "preheader": "L'elenco dei contenuti Pro e il loro prezzo, senza giri di parole.",
+      "title": "Cosa aggiunge Pro al tuo account gratuito",
+      "blocks": [
+        { "type": "p", "text": "Il tuo account gratuito dà accesso all'analisi completa di una partita al giorno, al blog e agli strumenti in prova. Ecco cosa aggiunge Pro:" },
+        { "type": "list", "items": [
+          "L'analisi completa su tutte le partite",
+          "I sei strumenti collegati alle probabilità del modello",
+          "Il diario delle decisioni sincronizzato",
+          "Il monitoraggio della bankroll collegato all'account"
+        ] },
+        { "type": "p", "text": "Prezzo sulla versione {{siteVersion}} del sito: {{proPrice}} al mese, senza vincoli, disdicibile in qualsiasi momento da Il mio account." },
+        { "type": "p", "text": "Pro dà accesso a più analisi e strumenti; non rende nessuna partita più prevedibile." },
+        { "type": "cta", "label": "Vedi i dettagli dell'offerta", "link": "pricing" },
+        { "type": "p", "text": "Se l'account gratuito ti basta, non devi fare nulla." }
+      ]
+    },
+    "inactive_7d": {
+      "subject": "Le partite di questo fine settimana su IASHARK",
+      "preheader": "Alcune partite del fine settimana seguite da IASHARK.",
+      "title": "Ecco le partite di questo fine settimana",
+      "blocks": [
+        { "type": "p", "text": "Ecco alcune partite di questo fine settimana seguite da IASHARK:" },
+        { "type": "matches" },
+        { "type": "p", "text": "L'analisi completa di una partita resta gratuita ogni giorno con il tuo account." },
+        { "type": "cta", "label": "Vedi tutte le partite", "link": "home" }
+      ]
+    },
+    "inactive_30d": {
+      "subject": "Il tuo account IASHARK è ancora attivo",
+      "preheader": "L'analisi gratuita del giorno resta disponibile con il tuo account.",
+      "title": "Il tuo account è ancora qui",
+      "blocks": [
+        { "type": "p", "text": "È da un po' che non torni su IASHARK. Il tuo account gratuito è ancora attivo e l'analisi completa di una partita resta gratuita ogni giorno." },
+        { "type": "cta", "label": "Torna su IASHARK", "link": "home" },
+        { "type": "p", "text": "Se queste email non ti sono più utili, annulla l'iscrizione con un clic dal link in fondo a questo messaggio. Se non visiti il sito e non apri le nostre email, smetteremo comunque di scriverti tra 30 giorni." }
+      ]
+    },
+    "pro_weekly_summary": {
+      "subject": "Il tuo riepilogo IASHARK: le partite del fine settimana",
+      "preheader": "Le partite del fine settimana seguite da IASHARK.",
+      "title": "Riepilogo della settimana",
+      "blocks": [
+        { "type": "p", "text": "Ecco alcune partite del fine settimana seguite da IASHARK. I tuoi strumenti Pro sono disponibili dalla pagina Strumenti." },
+        { "type": "matches" },
+        { "type": "cta", "label": "Apri gli strumenti", "link": "tools" },
+        { "type": "p", "text": "Puoi disattivare questo riepilogo in Il mio account, sezione Notifiche." }
+      ]
+    }
+  }
+}

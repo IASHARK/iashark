@@ -1,0 +1,103 @@
+{
+  "_status": "REVIEW - to be reviewed (lawyer + native speaker) before activation. Used by /en/, /gb/ and /za/. No promise of winnings.",
+  "locale": "en",
+  "common": {
+    "greeting": "Hello,",
+    "colon": ": ",
+    "kickoff_label": "Kick-off",
+    "match_link": "View the match",
+    "rg_title": "Safer gambling · 18+",
+    "rg_body": "IASHARK publishes statistical football analysis. We are not a bookmaker and we do not take bets, and a probability is never a certainty. Betting involves risks (losing money, addiction). You must be 18 or over.",
+    "rg_help_phone": "Need help? {{helplineName}}: {{helplinePhone}}.",
+    "rg_help_nophone": "Need help? {{helplineName}}:",
+    "rg_more": "Our safer gambling resources",
+    "footer_reason_marketing": "You are receiving this email because you agreed to receive IASHARK's free analyses and tips on using the site.",
+    "footer_reason_welcome": "Sent after you created your IASHARK account.",
+    "unsubscribe": "Unsubscribe in one click",
+    "manage": "Manage my emails in My account",
+    "privacy": "Privacy",
+    "legal": "Legal notice",
+    "sender": "Sender"
+  },
+  "campaigns": {
+    "welcome": {
+      "subject": "Welcome to IASHARK: where to start",
+      "preheader": "How to use the site, the free match and our methodology.",
+      "title": "Welcome to IASHARK",
+      "blocks": [
+        { "type": "p", "text": "Your free IASHARK account is ready. Here is how to use the site in a few minutes." },
+        { "type": "list", "ordered": true, "items": [
+          "Every day, the full analysis of one match is free: it is highlighted on the home page.",
+          "On a match page, read the probabilities estimated by the model, the factors it takes into account and their limits.",
+          "The Methodology page explains where these figures come from and how to read them."
+        ] },
+        { "type": "p", "if": "hasFreeMatch", "text": "The current free match:" },
+        { "type": "match", "if": "hasFreeMatch" },
+        { "type": "cta", "label": "Read the methodology", "link": "methodology" },
+        { "type": "link", "label": "Go to my account", "link": "account" },
+        { "type": "p", "if": "notOptedIn", "text": "You did not ask to receive our free analyses and tips by email, so we will only send you emails about your account. You can change your mind at any time in My account, under Notifications." }
+      ]
+    },
+    "free_match": {
+      "subject": "Today's free match: {{freeMatchHome}} – {{freeMatchAway}}",
+      "preheader": "The full analysis of this match is open for free with your account.",
+      "title": "Your free analysis of the day",
+      "blocks": [
+        { "type": "p", "text": "Every day, IASHARK opens the full analysis of one match to every account, free of charge. Here is today's:" },
+        { "type": "match" },
+        { "type": "p", "text": "You will find the estimated probabilities, the factors used by the model and the points to watch. These are statistical estimates: the outcome of a match remains uncertain." },
+        { "type": "cta", "label": "View the free analysis", "link": "freeMatch" }
+      ]
+    },
+    "pro_features": {
+      "subject": "What IASHARK Pro unlocks",
+      "preheader": "The list of Pro content and its price, plainly.",
+      "title": "What Pro adds to your free account",
+      "blocks": [
+        { "type": "p", "text": "Your free account gives you the full analysis of one match a day, the blog and a preview of the tools. Here is what Pro adds:" },
+        { "type": "list", "items": [
+          "The full analysis on every match",
+          "The six tools connected to the model's probabilities",
+          "The synced decisions journal",
+          "Bankroll tracking linked to your account"
+        ] },
+        { "type": "p", "text": "Price on the {{siteVersion}} version of the site: {{proPrice}} per month, no commitment, cancel at any time from My account." },
+        { "type": "p", "text": "Pro gives you more analyses and tools; it does not make any match more predictable." },
+        { "type": "cta", "label": "See the plan details", "link": "pricing" },
+        { "type": "p", "text": "If the free account is enough for you, there is nothing to do." }
+      ]
+    },
+    "inactive_7d": {
+      "subject": "This weekend's matches on IASHARK",
+      "preheader": "Some of the weekend fixtures covered by IASHARK.",
+      "title": "Here are this weekend's matches",
+      "blocks": [
+        { "type": "p", "text": "Here are some of this weekend's fixtures covered by IASHARK:" },
+        { "type": "matches" },
+        { "type": "p", "text": "The full analysis of one match is still free every day with your account." },
+        { "type": "cta", "label": "See all matches", "link": "home" }
+      ]
+    },
+    "inactive_30d": {
+      "subject": "Your IASHARK account is still active",
+      "preheader": "The free analysis of the day is still available with your account.",
+      "title": "Your account is still here",
+      "blocks": [
+        { "type": "p", "text": "You have not been back to IASHARK for a while. Your free account is still active, and the full analysis of one match is still free every day." },
+        { "type": "cta", "label": "Back to IASHARK", "link": "home" },
+        { "type": "p", "text": "If these emails are no longer useful, unsubscribe in one click with the link at the bottom of this message. If you neither visit nor open our emails, we will stop writing to you in 30 days anyway." }
+      ]
+    },
+    "pro_weekly_summary": {
+      "subject": "Your IASHARK summary: this weekend's matches",
+      "preheader": "The weekend fixtures covered by IASHARK.",
+      "title": "Weekly summary",
+      "blocks": [
+        { "type": "p", "text": "Here are some of the weekend fixtures covered by IASHARK. Your Pro tools are available from the Tools page." },
+        { "type": "matches" },
+        { "type": "cta", "label": "Open the tools", "link": "tools" },
+        { "type": "p", "text": "You can turn off this summary in My account, under Notifications." }
+      ]
+    }
+  }
+}

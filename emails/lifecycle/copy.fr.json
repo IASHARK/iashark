@@ -1,0 +1,103 @@
+{
+  "_status": "REVIEW - textes a faire relire (juriste + relecture native) avant activation. Aucune promesse de gain.",
+  "locale": "fr",
+  "common": {
+    "greeting": "Bonjour,",
+    "colon": " : ",
+    "kickoff_label": "Coup d'envoi",
+    "match_link": "Voir le match",
+    "rg_title": "Jeu responsable · 18+",
+    "rg_body": "IASHARK publie des analyses statistiques de football. Ce n'est pas un site de paris : aucune mise n'est prise, et une probabilité n'est jamais une certitude. Les paris comportent des risques (perte d'argent, dépendance). Service réservé aux personnes de 18 ans et plus.",
+    "rg_help_phone": "Besoin d'aide ? {{helplineName}} : {{helplinePhone}}.",
+    "rg_help_nophone": "Besoin d'aide ? {{helplineName}} :",
+    "rg_more": "Nos ressources jeu responsable",
+    "footer_reason_marketing": "Vous recevez cet email car vous avez accepté de recevoir les analyses offertes et conseils d'utilisation d'IASHARK.",
+    "footer_reason_welcome": "Email envoyé à la suite de la création de votre compte IASHARK.",
+    "unsubscribe": "Se désinscrire en 1 clic",
+    "manage": "Gérer mes emails dans Mon compte",
+    "privacy": "Confidentialité",
+    "legal": "Mentions légales",
+    "sender": "Expéditeur"
+  },
+  "campaigns": {
+    "welcome": {
+      "subject": "Bienvenue sur IASHARK : par où commencer",
+      "preheader": "Comment utiliser le site, le match offert et la méthodologie.",
+      "title": "Bienvenue sur IASHARK",
+      "blocks": [
+        { "type": "p", "text": "Votre compte gratuit IASHARK est créé. Voici comment utiliser le site en quelques minutes." },
+        { "type": "list", "ordered": true, "items": [
+          "Chaque jour, l'analyse complète d'un match est offerte : elle est signalée sur la page d'accueil.",
+          "Sur la page d'un match, lisez les probabilités estimées par le modèle, les facteurs pris en compte et leurs limites.",
+          "La page Méthodologie explique d'où viennent ces chiffres et comment les lire."
+        ] },
+        { "type": "p", "if": "hasFreeMatch", "text": "Le match offert en ce moment :" },
+        { "type": "match", "if": "hasFreeMatch" },
+        { "type": "cta", "label": "Lire la méthodologie", "link": "methodology" },
+        { "type": "link", "label": "Accéder à mon compte", "link": "account" },
+        { "type": "p", "if": "notOptedIn", "text": "Vous n'avez pas demandé à recevoir nos analyses offertes et conseils d'utilisation par email : vous ne recevrez de notre part que les emails liés à votre compte. Vous pouvez changer d'avis à tout moment dans Mon compte, rubrique Notifications." }
+      ]
+    },
+    "free_match": {
+      "subject": "Le match offert du jour : {{freeMatchHome}} – {{freeMatchAway}}",
+      "preheader": "L'analyse complète de ce match est ouverte gratuitement avec votre compte.",
+      "title": "Votre analyse offerte du jour",
+      "blocks": [
+        { "type": "p", "text": "Chaque jour, IASHARK ouvre gratuitement l'analyse complète d'un match à tous les comptes. Voici celle du jour :" },
+        { "type": "match" },
+        { "type": "p", "text": "Vous y trouverez les probabilités estimées, les facteurs retenus par le modèle et les points de vigilance. Ce sont des estimations statistiques : l'issue d'un match reste incertaine." },
+        { "type": "cta", "label": "Voir l'analyse offerte", "link": "freeMatch" }
+      ]
+    },
+    "pro_features": {
+      "subject": "Ce que débloque IASHARK Pro",
+      "preheader": "La liste des contenus Pro et leur prix, sans détour.",
+      "title": "Ce que Pro ajoute à votre compte gratuit",
+      "blocks": [
+        { "type": "p", "text": "Votre compte gratuit donne accès à l'analyse complète d'un match par jour, au blog et aux outils en découverte. Voici ce que Pro ajoute :" },
+        { "type": "list", "items": [
+          "L'analyse complète sur tous les matchs",
+          "Les six outils branchés sur les probabilités du modèle",
+          "Le journal des décisions synchronisé",
+          "Le suivi de bankroll lié au compte"
+        ] },
+        { "type": "p", "text": "Prix sur la version {{siteVersion}} du site : {{proPrice}} par mois, sans engagement, résiliable à tout moment depuis Mon compte." },
+        { "type": "p", "text": "Pro donne accès à davantage d'analyses et d'outils ; il ne rend aucun match plus prévisible." },
+        { "type": "cta", "label": "Voir le détail de l'offre", "link": "pricing" },
+        { "type": "p", "text": "Si le compte gratuit vous suffit, vous n'avez rien à faire." }
+      ]
+    },
+    "inactive_7d": {
+      "subject": "Les matchs de ce week-end sur IASHARK",
+      "preheader": "Des affiches du week-end couvertes par IASHARK.",
+      "title": "Voici les matchs de ce week-end",
+      "blocks": [
+        { "type": "p", "text": "Voici des affiches de ce week-end couvertes par IASHARK :" },
+        { "type": "matches" },
+        { "type": "p", "text": "L'analyse complète d'un match reste offerte chaque jour avec votre compte gratuit." },
+        { "type": "cta", "label": "Voir tous les matchs", "link": "home" }
+      ]
+    },
+    "inactive_30d": {
+      "subject": "Votre compte IASHARK est toujours actif",
+      "preheader": "L'analyse offerte du jour reste accessible avec votre compte gratuit.",
+      "title": "Votre compte est toujours là",
+      "blocks": [
+        { "type": "p", "text": "Vous n'êtes pas revenu sur IASHARK depuis un moment. Votre compte gratuit est toujours actif, et l'analyse complète d'un match reste offerte chaque jour." },
+        { "type": "cta", "label": "Revenir sur IASHARK", "link": "home" },
+        { "type": "p", "text": "Si ces emails ne vous sont plus utiles, désinscrivez-vous en un clic avec le lien en bas de ce message. Sans visite ni ouverture de votre part, nous arrêterons de toute façon de vous écrire dans 30 jours." }
+      ]
+    },
+    "pro_weekly_summary": {
+      "subject": "Votre résumé IASHARK : les matchs du week-end",
+      "preheader": "Les affiches du week-end couvertes par IASHARK.",
+      "title": "Résumé de la semaine",
+      "blocks": [
+        { "type": "p", "text": "Voici des affiches du week-end couvertes par IASHARK. Vos outils Pro sont accessibles depuis la page Outils." },
+        { "type": "matches" },
+        { "type": "cta", "label": "Ouvrir les outils", "link": "tools" },
+        { "type": "p", "text": "Vous pouvez désactiver ce résumé dans Mon compte, rubrique Notifications." }
+      ]
+    }
+  }
+}

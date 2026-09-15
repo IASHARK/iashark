@@ -179,6 +179,22 @@
     }
   }
 
+  /* ---------- Consentement aux emails de relance ----------
+     Case facultative et jamais pre-cochee de inscription.html (absente des
+     copies /<dir>/ tant que build-locales n'a pas ete relance : consentement
+     alors a false). Metadonnees lues par le declencheur SQL
+     handle_new_user_email_preferences (migration 0024), qui pose la date cote
+     serveur. Version = date du texte de la case (preuve du consentement). */
+  var EMAIL_CONSENT_TEXT_VERSION = '2026-09-15';
+  var LOCALE_DU_REPERTOIRE = { fr: 'fr', en: 'en', es: 'es', de: 'de', it: 'it', pt: 'pt', gb: 'en', za: 'en', mx: 'es-mx' };
+  function donneesEmails(consenti) {
+    var m = location.pathname.match(/^\/(fr|en|es|de|it|pt|gb|za|mx)(?:\/|$)/);
+    var dir = m ? m[1] : 'fr';
+    var data = { iashark_marketing_opt_in: consenti ? 'true' : 'false', iashark_locale: LOCALE_DU_REPERTOIRE[dir], iashark_market: dir };
+    if (consenti) data.iashark_marketing_text_version = EMAIL_CONSENT_TEXT_VERSION;
+    return data;
+  }
+
   /* ---------- Inscription ---------- */
   async function inscription(e) {
     if (e) e.preventDefault();
@@ -193,7 +209,8 @@
 
     var relacher = occuper($('submit'), t('auth.signup_submit_loading', 'Création…'));
     try {
-      var res = await sb.auth.signUp({ email: email, password: pwd });
+      var caseEmails = $('emailMarketing');
+      var res = await sb.auth.signUp({ email: email, password: pwd, options: { data: donneesEmails(!!caseEmails && caseEmails.checked === true) } });
       if (res.error) throw res.error;
       // La verification d'email est desactivee sur ce projet : signUp ouvre
       // une session directement. Le cas sans session ne devrait pas se

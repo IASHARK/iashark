@@ -5,9 +5,9 @@
 <meta name="iashark-market" content="mx">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Acerca de IASHARK México: método, datos y límites</title>
-<meta name="description" content="Cómo analiza IASHARK el futbol: fuentes de datos, modelos de Poisson y Dixon-Coles, ratings Elo, simulación Monte Carlo, límites e información legal.">
+<meta name="description" content="Cómo analiza IASHARK el futbol: de dónde vienen los datos, cómo calcula el modelo, sus límites e información legal.">
 <meta property="og:title" content="Acerca de IASHARK México: método, datos y límites">
-<meta property="og:description" content="Cómo analiza IASHARK el futbol: fuentes de datos, modelos de Poisson y Dixon-Coles, ratings Elo, simulación Monte Carlo, límites e información legal.">
+<meta property="og:description" content="Cómo analiza IASHARK el futbol: de dónde vienen los datos, cómo calcula el modelo, sus límites e información legal.">
 <meta property="og:type" content="website">
 <link rel="canonical" href="https://iashark.com/mx/a-propos.html">
 <link rel="alternate" hreflang="fr" href="https://iashark.com/fr/a-propos.html">
@@ -144,7 +144,7 @@ footer .foot-links a{color:#22d3ee;}
   <div class="sec">
     <div class="sec-lbl" data-i18n="about_page.method_label">METODOLOGÍA</div>
     <h2 data-i18n="about_page.method_title">Cómo funciona el modelo</h2>
-    <p data-i18n="about_page.method_text">Para cada partido, el sistema parte de las estadísticas reales de ambos equipos en la temporada actual y la anterior: goles marcados y recibidos, y xG y tiros recientes cuando están disponibles. Con ellas estima los goles esperados de cada equipo y, después, la probabilidad de cada marcador con un modelo de Dixon-Coles. En los mercados 1X2, más/menos de 2.5 goles y ambos equipos marcan, esas probabilidades se corrigen con una calibración aprendida de temporadas pasadas. Las momios nunca entran en este cálculo.</p>
+    <p data-i18n="about_page.method_text">Para cada partido, el sistema parte de las estadísticas reales de ambos equipos en la temporada actual y la anterior: goles marcados y recibidos, y la calidad de las ocasiones creadas y concedidas cuando los datos recientes lo permiten. Con ellas estima los goles esperados de cada equipo y, después, la probabilidad de cada marcador. En los mercados 1X2, más/menos de 2.5 goles y ambos equipos marcan, esas probabilidades se corrigen con una calibración aprendida de temporadas pasadas. Las momios nunca entran en este cálculo.</p>
 
     <div class="model-grid">
       <div class="model-card">
@@ -153,11 +153,11 @@ footer .foot-links a{color:#22d3ee;}
       </div>
       <div class="model-card">
         <div class="mtitle" data-i18n="about_page.card_crossed_title">UN MODELO DE MARCADORES</div>
-        <div class="mdesc" data-i18n="about_page.card_crossed_text">Las probabilidades salen de un único modelo de marcadores (Dixon-Coles), calibrado en tres mercados. No es una votación entre modelos: el cálculo de Poisson y la simulación solo sirven para medir el acuerdo que se muestra en la fiabilidad.</div>
+        <div class="mdesc" data-i18n="about_page.card_crossed_text">Las probabilidades salen de un único modelo de marcadores, calibrado en tres mercados. No es una votación entre modelos: los cálculos paralelos y la simulación solo sirven para medir el acuerdo que se muestra en la fiabilidad.</div>
       </div>
       <div class="model-card">
         <div class="mtitle" data-i18n="about_page.card_simulations_title">SIMULACIONES</div>
-        <div class="mdesc" data-i18n="about_page.card_simulations_text">Cada partido se simula 5.000 veces (método de Monte Carlo) para mostrar los marcadores más probables. Estas simulaciones no sirven para elegir la apuesta.</div>
+        <div class="mdesc" data-i18n="about_page.card_simulations_text">Cada partido se vuelve a jugar un gran número de veces para mostrar los marcadores más probables. Estas simulaciones no sirven para elegir la apuesta.</div>
       </div>
       <div class="model-card">
         <div class="mtitle" data-i18n="about_page.card_reliability_title">ÍNDICE DE CONFIABILIDAD</div>
@@ -166,7 +166,8 @@ footer .foot-links a{color:#22d3ee;}
     </div>
 
     <p data-i18n-html="about_page.method_selection">El mercado destacado se elige automáticamente con una regla fija: entre los mercados que calcula el modelo y que una casa de apuestas cotiza realmente, el de mayor <b>probabilidad estimada</b>, con prioridad para los que alcanzan un momio mínimo, y por debajo de un tope de probabilidad. Un partido ya empezado, o a punto de empezar en el momento del cálculo, no recibe ninguna apuesta. La probabilidad mostrada es la del modelo, nunca modificada después. Un modelo de lenguaje redacta luego el texto explicativo, pero no calcula, no elige y no modifica ninguna cifra.</p>
-    <p data-i18n-html="about_page.method_value"><b>La diferencia con el mercado</b>: el modelo compara después su probabilidad con la que implica el momio, una vez retirado el margen de la casa (método de Shin cuando es posible). Esta diferencia se muestra a título informativo: no sirve para elegir el mercado y no garantiza ninguna ganancia.</p>
+    <p data-i18n-html="about_page.method_value"><b>La diferencia con el mercado</b>: el modelo compara después su probabilidad con la que implica el momio, una vez retirado el margen de la casa. Esta diferencia se muestra a título informativo: no sirve para elegir el mercado y no garantiza ninguna ganancia.</p>
+    <p data-i18n-html="about_page.method_undisclosed"><b>Lo que no detallamos</b>: ni las fórmulas, ni las ponderaciones, ni los umbrales, ni la lista exacta de variables, ni el nombre de las herramientas que ejecutan el cálculo. Lo que sí publicamos: el principio de cada etapa, lo que entra y lo que no entra en el cálculo, y los casos en los que el sistema se abstiene.</p>
     <p data-requires-page="methodologie.html" style="margin-top:6px"><a href="/mx/methodologie.html" data-href="methodologie.html" style="color:var(--cyan);text-decoration:underline" data-i18n="about_page.method_link">Leer la metodología completa: datos, cálculos, límites</a></p>
   </div>
 

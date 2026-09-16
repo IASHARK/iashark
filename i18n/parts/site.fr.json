@@ -5,16 +5,16 @@
     "plan_pro_commitment": "Sans engagement — résiliable à tout moment",
     "hero_title": "Aucune émotion.<br><b>Que des probabilités.</b>",
     "cta_note": "Sans carte bancaire · <b>1 analyse offerte chaque jour</b>",
-    "strip_poisson": "MODÈLE <b>POISSON</b>",
-    "strip_dc": "<b>DIXON-COLES</b> AJUSTEMENT BAS SCORES",
-    "strip_mc": "SIMULATION <b>MONTE CARLO</b>",
-    "strip_elo": "CLASSEMENT <b>ELO</b> DYNAMIQUE",
-    "strip_shin": "PROBABILITÉS <b>SHIN</b>",
-    "strip_kelly": "KELLY <b>FRACTIONNÉ</b>",
-    "title_method": "Quatre modèles, <b>un seul signal</b> par match.",
+    "title_method": "Quatre étapes, <b>un seul signal</b> par match.",
     "title_practice": "De la donnée brute au <b>signal exploitable.</b>",
     "title_access": "Commence gratuitement. <b>Passe à Pro</b> quand tu veux tout voir.",
-    "final_title": "Le prochain match a déjà <b>un signal.</b>"
+    "final_title": "Le prochain match a déjà <b>un signal.</b>",
+    "strip_1": "BUTS ATTENDUS <b>PAR ÉQUIPE</b>",
+    "strip_2": "<b>PROBABILITÉ</b> DE CHAQUE SCORE",
+    "strip_3": "<b>SIMULATION</b> DU MATCH",
+    "strip_4": "SAISON EN COURS <b>ET PRÉCÉDENTE</b>",
+    "strip_5": "<b>MARGE DU BOOKMAKER</b> RETIRÉE",
+    "strip_6": "AUCUN <b>PARI FORCÉ</b>"
   },
   "footer": {
     "cookies": "Cookies",
@@ -28,13 +28,13 @@
     "hero_text": "IASHARK analyse chaque match à partir de données sportives réelles de la saison en cours et de la précédente, et d'un modèle statistique de score. Pas de martingale ni de système miracle — la même méthode, appliquée de façon identique, match après match.",
     "method_label": "MÉTHODOLOGIE",
     "method_title": "Comment le modèle fonctionne",
-    "method_text": "Pour chaque match, le système part des statistiques réelles des deux équipes sur la saison en cours et la saison précédente : buts marqués et encaissés, xG et tirs récents quand ils sont disponibles. Il en déduit les buts attendus de chaque équipe, puis la probabilité de chaque score avec un modèle de Dixon-Coles. Pour les marchés 1X2, plus/moins de 2,5 buts et « les deux équipes marquent », ces probabilités sont corrigées par une calibration apprise sur les saisons passées. Les cotes n'entrent jamais dans ce calcul.",
+    "method_text": "Pour chaque match, le système part des statistiques réelles des deux équipes sur la saison en cours et la saison précédente : buts marqués et encaissés, et la qualité des occasions créées et concédées quand les données récentes le permettent. Il en déduit les buts attendus de chaque équipe, puis la probabilité de chaque score. Pour les marchés 1X2, plus/moins de 2,5 buts et « les deux équipes marquent », ces probabilités sont corrigées par une calibration apprise sur les saisons passées. Les cotes n'entrent jamais dans ce calcul.",
     "card_history_title": "SAISON EN COURS ET PRÉCÉDENTE",
     "card_history_text": "Le calcul s'appuie sur la saison en cours et la saison précédente. En début de saison, la saison précédente et une moyenne de référence pèsent davantage, puis de moins en moins à mesure que les matchs sont joués.",
     "card_crossed_title": "UN MODÈLE DE SCORE",
-    "card_crossed_text": "Les probabilités viennent d'un seul modèle de score (Dixon-Coles), calibré sur trois marchés. Ce n'est pas un vote entre modèles : le calcul de Poisson et la simulation servent seulement à mesurer l'accord affiché dans la fiabilité.",
+    "card_crossed_text": "Les probabilités viennent d'un seul modèle de score, calibré sur trois marchés. Ce n'est pas un vote entre modèles : les calculs parallèles et la simulation servent seulement à mesurer l'accord affiché dans la fiabilité.",
     "card_simulations_title": "SIMULATIONS",
-    "card_simulations_text": "Chaque match est simulé 5 000 fois (méthode de Monte-Carlo) pour afficher les scores les plus probables. Ces simulations ne servent pas à choisir le pari.",
+    "card_simulations_text": "Chaque match est rejoué un grand nombre de fois pour afficher les scores les plus probables. Ces simulations ne servent pas à choisir le pari.",
     "card_reliability_title": "SCORE DE FIABILITÉ",
     "card_reliability_text": "Un indicateur séparé combine l'accord entre les calculs, la qualité des données disponibles et le nombre de matchs joués, pour ce match précis — il ne modifie jamais la probabilité.",
     "single_label": "À LIRE AVANT TOUT",
@@ -49,7 +49,7 @@
     "footer_note": "IASHARK — Les analyses publiées sont à titre indicatif uniquement",
     "hero_title": "Pas de flair.<br>Des <b>données</b>, un modèle statistique,<br>une méthode constante.",
     "method_selection": "Le marché mis en avant est choisi automatiquement par une règle fixe : parmi les marchés calculés par le modèle et réellement cotés par un bookmaker, celui dont la <b>probabilité estimée</b> est la plus élevée, en priorité parmi ceux qui atteignent une cote minimale, et sous un plafond de probabilité. Un match déjà commencé, ou sur le point de commencer au moment du calcul, ne reçoit aucun pari. La probabilité affichée est celle du modèle, jamais modifiée après coup. Un modèle de langage rédige ensuite le texte d'explication, mais ne calcule, ne choisit ni ne modifie aucun chiffre.",
-    "method_value": "<b>L'écart avec le marché</b> : le modèle compare ensuite sa probabilité à celle qu'implique la cote, après retrait de la marge du bookmaker (méthode de Shin quand c'est possible). Cet écart est affiché à titre d'information : il ne sert pas à choisir le marché et ne garantit aucun gain.",
+    "method_value": "<b>L'écart avec le marché</b> : le modèle compare ensuite sa probabilité à celle qu'implique la cote, après retrait de la marge du bookmaker. Cet écart est affiché à titre d'information : il ne sert pas à choisir le marché et ne garantit aucun gain.",
     "single_text": "Le cœur du système analyse <b>chaque match indépendamment</b> — un pari simple à la fois, jamais des combinaisons de plusieurs paris.",
     "legal_not_operator": "<b>IASHARK n'est pas un opérateur de paris sportifs.</b> Nous ne prenons aucune mise, ne gérons aucun compte joueur et ne procédons à aucun encaissement de gains. Pour parier réellement, vous devez passer par un opérateur agréé par l'ANJ (Autorité Nationale des Jeux).",
     "legal_not_advisor": "<b>Nous ne sommes ni conseillers financiers, ni traders professionnels agréés, ni professionnels du pari sportif.</b> IASHARK est un outil d'analyse statistique à but informatif et éducatif — en aucun cas un service de conseil en investissement, en trading ou en paris.",
@@ -65,7 +65,8 @@
       "za": "<b>IASHARK n'est pas un opérateur de jeux d'argent.</b> Nous ne prenons aucune mise, ne gérons aucun compte joueur et ne procédons à aucun encaissement de gains. Pour parier réellement en Afrique du Sud, vous devez passer par un bookmaker agréé par l'autorité des jeux de votre province.",
       "mx": "<b>IASHARK n'est pas un opérateur de paris sportifs.</b> Nous ne prenons aucune mise, ne gérons aucun compte joueur et ne procédons à aucun encaissement de gains. Pour parier réellement au Mexique, vous devez passer par un opérateur disposant d'un permis en vigueur du ministère de l'Intérieur (SEGOB)."
     },
-    "method_link": "Lire la méthodologie complète : données, calculs, limites"
+    "method_link": "Lire la méthodologie complète : données, calculs, limites",
+    "method_undisclosed": "<b>Ce que nous ne détaillons pas</b> : ni les formules, ni les pondérations, ni les seuils, ni la liste exacte des variables, ni le nom des outils qui font tourner le calcul. Ce que nous publions en revanche : le principe de chaque étape, ce qui entre dans le calcul et ce qui n'y entre pas, et les cas où le système refuse de se prononcer."
   },
   "pricing_page": {
     "meta_title": "Abonnement Pro — IASHARK",
@@ -216,7 +217,7 @@
   },
   "demo_data": {
     "conseil_public": "« Première mi-temps : moins de 1,5 but » est le marché le mieux soutenu par les données de ce match : probabilité modèle de 64% et tranches de buts en première mi-temps parmi les plus faibles du match.",
-    "analyse_card": "Les données de buts par tranche confirment que la première mi-temps concentre seulement 40% des buts totaux attendus (14%+13%+13%), contre 61% en seconde période (19%+20%+22%). Le modèle Monte-Carlo place le score 1-1 comme top résultat à 10%, et 1-0 à 8%, ce qui implique qu'une grande majorité de simulations reste à 0 ou 1 but à la mi-temps. PSG affiche un xG de 1.94 sur l'ensemble du match, ce qui laisse peu de volume en première mi-temps seule, d'autant que Monaco (#1) a gardé sa cage inviolée lors de son unique déplacement extérieur cette saison.",
+    "analyse_card": "Les données de buts par tranche confirment que la première mi-temps concentre seulement 40% des buts totaux attendus (14%+13%+13%), contre 61% en seconde période (19%+20%+22%). La simulation place le score 1-1 comme top résultat à 10%, et 1-0 à 8%, ce qui implique qu'une grande majorité de simulations reste à 0 ou 1 but à la mi-temps. PSG affiche un xG de 1.94 sur l'ensemble du match, ce qui laisse peu de volume en première mi-temps seule, d'autant que Monaco (#1) a gardé sa cage inviolée lors de son unique déplacement extérieur cette saison.",
     "contexte": "PSG est classé #12 à domicile avec 2 nuls consécutifs en forme, tandis que Monaco est classé #1 à l'extérieur avec 2 victoires consécutives et 1 clean sheet sur 1 match à l'extérieur. Les xG de PSG s'établissent à 1.94 offensif et 1.07 défensif, ceux de Monaco à 1.60 offensif et 1.39 défensif, reflétant deux équipes offensives mais dont l'essentiel de la production de buts se concentre en seconde mi-temps.",
     "pari_rec": "Première mi-temps : moins de 1,5 but",
     "market_source": "Cotes moyennes multi-bookmakers",
@@ -257,5 +258,24 @@
     "billed_month": "Prélevé chaque mois · sans engagement · résiliable à tout moment",
     "billed_year": "Prélevé {price} une fois par an · renouvellement automatique chaque année · résiliable avant l’échéance",
     "unavailable": "Bientôt disponible"
+  },
+  "landing_page": {
+    "hero_sub": "IASHARK part des <b>statistiques réelles des deux équipes, saison en cours et saison précédente</b>, pour produire un signal de probabilité sur chaque match, avant le coup d'envoi.",
+    "title_method_pre": "Quatre étapes, ",
+    "model1_tag": "ÉTAPE 1",
+    "model1_name": "Forces en présence",
+    "model1_desc": "Ce que chaque équipe produit et concède dans sa situation réelle, à domicile ou à l'extérieur, comparé au niveau de sa compétition.",
+    "model2_tag": "ÉTAPE 2",
+    "model2_name": "Prudence en début de saison",
+    "model2_desc": "Quand peu de matchs ont été joués, la saison précédente et un niveau de référence pèsent davantage, puis s'effacent.",
+    "model3_tag": "ÉTAPE 3",
+    "model3_name": "Probabilité de chaque marché",
+    "model3_desc": "Les buts attendus deviennent la probabilité de chaque score, puis de chaque marché, corrigée par une calibration apprise sur les saisons passées.",
+    "model4_tag": "ÉTAPE 4",
+    "model4_name": "Simulation du match",
+    "model4_desc": "Le match est rejoué un grand nombre de fois pour faire apparaître les scores les plus probables. La simulation ne choisit pas le pari.",
+    "step1_desc": "Calendriers, classements, résultats récents, confrontations directes et absences annoncées, championnat par championnat.",
+    "step2_desc": "Buts attendus, probabilité de chaque score, puis de chaque marché — sans jamais utiliser les cotes.",
+    "description": "Buts attendus, probabilité de chaque marché, écart avec la cote : IASHARK analyse chaque match avec un vrai modèle statistique. Un match gratuit chaque jour."
   }
 }

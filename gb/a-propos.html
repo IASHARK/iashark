@@ -5,9 +5,9 @@
 <meta name="iashark-market" content="gb">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>About IASHARK UK: How Our Football Models Work</title>
-<meta name="description" content="How IASHARK analyses football: data sources, Poisson and Dixon-Coles models, Elo ratings, Monte Carlo simulation, known limits and legal information.">
+<meta name="description" content="How IASHARK analyses football: where the data comes from, how the model calculates, its known limits and legal information.">
 <meta property="og:title" content="About IASHARK UK: How Our Football Models Work">
-<meta property="og:description" content="How IASHARK analyses football: data sources, Poisson and Dixon-Coles models, Elo ratings, Monte Carlo simulation, known limits and legal information.">
+<meta property="og:description" content="How IASHARK analyses football: where the data comes from, how the model calculates, its known limits and legal information.">
 <meta property="og:type" content="website">
 <link rel="canonical" href="https://iashark.com/gb/a-propos.html">
 <link rel="alternate" hreflang="fr" href="https://iashark.com/fr/a-propos.html">
@@ -144,7 +144,7 @@ footer .foot-links a{color:#22d3ee;}
   <div class="sec">
     <div class="sec-lbl" data-i18n="about_page.method_label">METHODOLOGY</div>
     <h2 data-i18n="about_page.method_title">How the model works</h2>
-    <p data-i18n="about_page.method_text">For each match, the system starts from both teams' real statistics over the current and previous seasons: goals scored and conceded, plus recent xG and shots when available. From these it estimates each team's expected goals, then the probability of every score with a Dixon-Coles model. For the 1X2, over/under 2.5 goals and both-teams-to-score markets, these probabilities are corrected by a calibration learnt from past seasons. Odds never enter this calculation.</p>
+    <p data-i18n="about_page.method_text">For each match, the system starts from both teams' real statistics over the current and previous seasons: goals scored and conceded, plus the quality of the chances created and conceded when recent data allows. From these it estimates each team's expected goals, then the probability of every score. For the 1X2, over/under 2.5 goals and both-teams-to-score markets, these probabilities are corrected by a calibration learnt from past seasons. Odds never enter this calculation.</p>
 
     <div class="model-grid">
       <div class="model-card">
@@ -153,11 +153,11 @@ footer .foot-links a{color:#22d3ee;}
       </div>
       <div class="model-card">
         <div class="mtitle" data-i18n="about_page.card_crossed_title">ONE SCORE MODEL</div>
-        <div class="mdesc" data-i18n="about_page.card_crossed_text">Probabilities come from a single score model (Dixon-Coles), calibrated on three markets. It is not a vote between models: the Poisson calculation and the simulation are only used to measure the agreement shown in the reliability indicator.</div>
+        <div class="mdesc" data-i18n="about_page.card_crossed_text">Probabilities come from a single score model, calibrated on three markets. It is not a vote between models: the parallel calculations and the simulation are only used to measure the agreement shown in the reliability indicator.</div>
       </div>
       <div class="model-card">
         <div class="mtitle" data-i18n="about_page.card_simulations_title">SIMULATIONS</div>
-        <div class="mdesc" data-i18n="about_page.card_simulations_text">Each match is simulated 5,000 times (Monte Carlo method) to show the most likely scores. These simulations are not used to choose the bet.</div>
+        <div class="mdesc" data-i18n="about_page.card_simulations_text">Each match is replayed a large number of times to show the most likely scores. These simulations are not used to choose the bet.</div>
       </div>
       <div class="model-card">
         <div class="mtitle" data-i18n="about_page.card_reliability_title">RELIABILITY SCORE</div>
@@ -166,7 +166,8 @@ footer .foot-links a{color:#22d3ee;}
     </div>
 
     <p data-i18n-html="about_page.method_selection">The highlighted market is chosen automatically by a fixed rule: among the markets the model calculates and a bookmaker actually prices, the one with the highest <b>estimated probability</b>, preferably among those reaching a minimum price, and below a probability cap. A match that has already started, or is about to start when the calculation runs, gets no bet. The probability shown is the model's own, never adjusted afterwards. A language model then writes the explanatory text, but it does not calculate, choose or change any figure.</p>
-    <p data-i18n-html="about_page.method_value"><b>The gap with the market</b>: the model then compares its probability with the one implied by the odds, once the bookmaker's margin is removed (Shin's method where possible). This gap is shown for information: it is not used to choose the market and guarantees no winnings.</p>
+    <p data-i18n-html="about_page.method_value"><b>The gap with the market</b>: the model then compares its probability with the one implied by the odds, once the bookmaker's margin is removed. This gap is shown for information: it is not used to choose the market and guarantees no winnings.</p>
+    <p data-i18n-html="about_page.method_undisclosed"><b>What we do not detail</b>: neither the formulas, the weightings, the thresholds, the exact list of variables, nor the names of the tools that run the calculation. What we do publish: the principle behind each step, what does and does not enter the calculation, and the cases where the system declines to make a call.</p>
     <p data-requires-page="methodologie.html" style="margin-top:6px"><a href="/gb/methodologie.html" data-href="methodologie.html" style="color:var(--cyan);text-decoration:underline" data-i18n="about_page.method_link">Read the full methodology: data, calculations, limits</a></p>
   </div>
 

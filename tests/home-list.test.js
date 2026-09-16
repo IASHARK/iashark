@@ -77,12 +77,16 @@ test("pastille de niveau : 3 libelles, 3 barres (3/3, 2/3, 1/3), note « pas une
   assert.equal(HL.probBandOf({ prob_band: 0.8 }), null);
 });
 
-test("Pro confirme ou match offert : Proba. x/10, jauge, marche ; sans signal : pas de pari force", () => {
+test("Pro confirme ou match offert : Proba. x/10 et jauge, jamais le marche ; sans signal : pas de pari force", () => {
   const pro = HL.renderMatchRow(Object.assign(base({ prob_band: "high" }), SECRET), ctx({ isPro: true }), helpers(), 0);
   assert.match(pro, /is-open/);
   assert.match(pro, /<b>7,7<\/b><small>\/10<\/small>/);
   assert.match(pro, /hl-gauge/);
-  assert.match(pro, /Plus de 2,5 buts/);
+  // Le marche retenu a quitte la liste le 16/09/2026 : il se lit sur la fiche
+  // du match. Ni a l'ecran, ni dans l'aria-label — sinon le pari repart par le
+  // lecteur d'ecran.
+  assert.doesNotMatch(pro, /Plus de 2,5 buts/, "le marche retenu est revenu dans la liste");
+  assert.doesNotMatch(pro, /Marché/, "le marche retenu est revenu dans la liste");
   assert.doesNotMatch(pro, /hl-band|hl-lockpill/, "le Pro garde la note exacte, pas la pastille");
   const free = HL.renderMatchRow(Object.assign(base({ is_free: true }), SECRET), ctx({ freeMatchId: 1570383, hasAccount: true }), helpers(), 0);
   assert.match(free, /is-open is-free/);

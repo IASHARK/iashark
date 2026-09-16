@@ -243,7 +243,7 @@ function renderMatchRow(m,ctx,H,index){
           +'<span class="hl-prob"><b>'+a.prob+'</b><small>/10</small></span></span>'
           +'<span class="hl-gauge" aria-hidden="true"><i style="--p:'+Math.round(a.probNum*10)+'%"></i></span>'
         :'<span class="hl-prelim">'+esc(t('home_list.preliminary','Analyse préliminaire'))+'</span>')
-      +'<span class="hl-market"><span class="hl-market-lbl">'+esc(t('home_list.market_short','Marché :'))+'</span><span class="hl-market-txt">'+esc(a.market)+'</span></span></span>';
+      +'</span>';
   }else if(a.state==='gated'){
     zone='<span class="hl-zone"><span class="hl-ready"><i class="hl-dot" aria-hidden="true"></i>'+esc(t('home_list.free_gated','Analyse offerte'))+'</span>'
       +'<span class="hl-freepill">'+esc(t('home_list.free_gated_cta','Compte gratuit'))+'</span></span>';
@@ -255,7 +255,7 @@ function renderMatchRow(m,ctx,H,index){
   }
 
   var anaAria=a.state==='locked'?t('home_list.aria_locked','Analyse prête, réservée aux abonnés Pro.')+(a.band?' '+bandLabel(a.band)+'. '+bandNote():'')
-    :a.state==='open'?(a.prob!=null?tf('home_list.aria_prob','Probabilité estimée {p} sur 10.',{p:a.prob})+' ':'')+tf('home_list.aria_market','Marché conseillé : {market}.',{market:a.market})
+    :a.state==='open'?(a.prob!=null?tf('home_list.aria_prob','Probabilité estimée {p} sur 10.',{p:a.prob}):t('home_list.aria_open','Analyse disponible.'))
       +(a.free?' '+t('home_list.aria_free','Analyse offerte.'):'')
     :a.state==='gated'?t('home_list.aria_free_gated','Analyse offerte avec un compte gratuit.')
     :a.state==='pending'?t('home_app.analysis_in_progress','Analyse en cours')+'.':a.label+'.';

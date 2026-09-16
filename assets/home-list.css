@@ -169,10 +169,6 @@
   box-shadow:0 0 8px rgba(32,213,239,.6);transform-origin:left;animation:hlGrow .9s cubic-bezier(.23,1,.32,1) both;}
 @keyframes hlGrow{from{transform:scaleX(0)}}
 .hl-prelim{font-size:10px;font-style:italic;color:var(--soft,#a6b4c6);}
-.hl-market{display:flex;justify-content:flex-end;gap:4px;max-width:100%;min-width:0;font-size:11px;line-height:13px;}
-.hl-market-lbl{flex:none;color:var(--soft,#a6b4c6);}
-.hl-market-txt{min-width:0;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.hl-market-lbl{display:none;}
 .hl-freepill{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:999px;border:1px solid rgba(32,213,239,.45);background:rgba(32,213,239,.08);color:var(--cyan,#20d5ef);font-size:10.5px;font-weight:800;white-space:nowrap;}
 .hl-row.is-free{box-shadow:inset 3px 0 0 var(--cyan,#20d5ef);background:linear-gradient(90deg,rgba(32,213,239,.07),transparent 65%);}
 .hl-d{display:none;}
@@ -237,8 +233,6 @@
   .hl-prob-lbl{font-size:10px;}
   .hl-prob b{font-size:17px;}
   .hl-gauge{max-width:250px;height:4px;}
-  .hl-market{font-size:12.5px;line-height:15px;}
-  .hl-market-lbl{display:inline;}
   .hl-d{display:inline;}
   .hl-m{display:none;}
 }

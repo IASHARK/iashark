@@ -16,7 +16,7 @@
 <link rel="alternate" hreflang="it" href="https://iashark.com/it/landing.html">
 <link rel="alternate" hreflang="pt" href="https://iashark.com/pt/landing.html">
 <link rel="alternate" hreflang="x-default" href="https://iashark.com/en/landing.html">
-<meta name="description" content="Poisson, Dixon-Coles, Monte Carlo, Elo: o IASHARK analisa cada jogo com modelos estatísticos reais. Um jogo grátis todos os dias.">
+<meta name="description" content="Golos esperados, probabilidade de cada mercado, diferença face à odd: o IASHARK analisa cada jogo com um verdadeiro modelo estatístico. Um jogo grátis todos os dias.">
 <meta name="robots" content="noindex, follow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -46,9 +46,9 @@ a{color:inherit;}
 .hdr-in{max-width:1100px;margin:0 auto;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;text-decoration:none;}
 .logo span{color:var(--cyan);}
-/* Logo image, comme les autres en-tetes (QA 14/09/2026). PNG sans alpha : lighten efface son fond noir. */
+/* Logo image, comme les autres en-tetes (QA 14/09/2026). */
 .logo{display:inline-flex;align-items:center;min-height:44px;}
-.logo img{display:block;height:28px;width:auto;mix-blend-mode:lighten;}
+.logo img{display:block;height:28px;width:auto;}
 .btn-nav{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:8px 16px;border-radius:8px;border:1px solid rgba(34,211,238,0.3);background:rgba(34,211,238,0.08);color:var(--cyan);text-decoration:none;transition:.2s;}
 .btn-nav:hover{background:rgba(34,211,238,0.16);}
 
@@ -160,7 +160,7 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 <meta property="og:site_name" content="IASHARK">
 <meta property="og:locale" content="pt_PT">
 <meta property="og:title" content="IASHARK — O modelo que lê o jogo antes do apito inicial">
-<meta property="og:description" content="Poisson, Dixon-Coles, Monte Carlo, Elo: o IASHARK analisa cada jogo com modelos estatísticos reais. Um jogo grátis todos os dias.">
+<meta property="og:description" content="Golos esperados, probabilidade de cada mercado, diferença face à odd: o IASHARK analisa cada jogo com um verdadeiro modelo estatístico. Um jogo grátis todos os dias.">
 <meta property="og:url" content="https://iashark.com/pt/landing.html">
 <meta property="og:image" content="https://iashark.com/icon-512.png">
 <meta name="twitter:card" content="summary">
@@ -182,7 +182,7 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
     <div class="hero-shark reveal">🦈</div>
     <div class="eyebrow reveal" style="animation-delay:.05s"><span class="dot"></span> <span data-i18n="landing_page.eyebrow">MODELO ESTATÍSTICO · FUTEBOL</span></div>
     <h1 class="reveal" style="animation-delay:.1s" data-i18n-html="landing_v2.hero_title">Zero emoções.<br><b>Só probabilidades.</b></h1>
-    <p class="sub reveal" style="animation-delay:.15s" data-i18n-html="landing_page.hero_sub">O IASHARK combina <b>xG, forma recente, desgaste de calendário e confrontos diretos</b> para produzir um sinal de probabilidade em cada jogo, antes do apito inicial.</p>
+    <p class="sub reveal" style="animation-delay:.15s" data-i18n-html="landing_page.hero_sub">O IASHARK parte das <b>estatísticas reais das duas equipas, época atual e anterior</b>, para produzir um sinal de probabilidade em cada jogo, antes do apito inicial.</p>
     <div class="cta-row reveal" style="animation-delay:.2s">
       <a href="/pt/" data-href="" class="btn-primary" data-i18n="landing_page.hero_cta">VER O JOGO GRATUITO DE HOJE</a>
       <div class="cta-note" data-i18n-html="landing_v2.cta_note">Sem cartão de crédito · <b>1 análise oferecida todos os dias</b></div>
@@ -191,8 +191,8 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 
   <div class="signal-strip reveal" style="animation-delay:.3s">
     <div class="track">
-      <span data-i18n-html="landing_v2.strip_poisson">MODELO <b>POISSON</b></span><span data-i18n-html="landing_v2.strip_dc"><b>DIXON-COLES</b> AJUSTE DE RESULTADOS BAIXOS</span><span data-i18n-html="landing_v2.strip_mc">SIMULAÇÃO <b>MONTE CARLO</b></span><span data-i18n-html="landing_v2.strip_elo">CLASSIFICAÇÃO <b>ELO</b> DINÂMICA</span><span data-i18n-html="landing_v2.strip_shin">PROBABILIDADES <b>SHIN</b></span><span data-i18n-html="landing_v2.strip_kelly">KELLY <b>FRACIONADO</b></span>
-      <span data-i18n-html="landing_v2.strip_poisson">MODELO <b>POISSON</b></span><span data-i18n-html="landing_v2.strip_dc"><b>DIXON-COLES</b> AJUSTE DE RESULTADOS BAIXOS</span><span data-i18n-html="landing_v2.strip_mc">SIMULAÇÃO <b>MONTE CARLO</b></span><span data-i18n-html="landing_v2.strip_elo">CLASSIFICAÇÃO <b>ELO</b> DINÂMICA</span><span data-i18n-html="landing_v2.strip_shin">PROBABILIDADES <b>SHIN</b></span><span data-i18n-html="landing_v2.strip_kelly">KELLY <b>FRACIONADO</b></span>
+      <span data-i18n-html="landing_v2.strip_1">GOLOS ESPERADOS <b>POR EQUIPA</b></span><span data-i18n-html="landing_v2.strip_2"><b>PROBABILIDADE</b> DE CADA RESULTADO</span><span data-i18n-html="landing_v2.strip_3"><b>SIMULAÇÃO</b> DO JOGO</span><span data-i18n-html="landing_v2.strip_4">ÉPOCA ATUAL <b>E ANTERIOR</b></span><span data-i18n-html="landing_v2.strip_5"><b>MARGEM DA CASA</b> RETIRADA</span><span data-i18n-html="landing_v2.strip_6">NENHUMA <b>APOSTA FORÇADA</b></span>
+      <span data-i18n-html="landing_v2.strip_1">GOLOS ESPERADOS <b>POR EQUIPA</b></span><span data-i18n-html="landing_v2.strip_2"><b>PROBABILIDADE</b> DE CADA RESULTADO</span><span data-i18n-html="landing_v2.strip_3"><b>SIMULAÇÃO</b> DO JOGO</span><span data-i18n-html="landing_v2.strip_4">ÉPOCA ATUAL <b>E ANTERIOR</b></span><span data-i18n-html="landing_v2.strip_5"><b>MARGEM DA CASA</b> RETIRADA</span><span data-i18n-html="landing_v2.strip_6">NENHUMA <b>APOSTA FORÇADA</b></span>
     </div>
   </div>
 </div>
@@ -200,12 +200,12 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 <section class="methode">
   <div class="wrap">
     <div class="sec-lbl" data-i18n="landing_page.lbl_method">O MÉTODO</div>
-    <h2 class="sec-title" data-i18n-html="landing_v2.title_method">Quatro modelos, <b>um único sinal</b> por jogo.</h2>
+    <h2 class="sec-title" data-i18n-html="landing_v2.title_method">Quatro etapas, <b>um único sinal</b> por jogo.</h2>
     <div class="model-grid">
-      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model1_tag">MODELO 1</div><div class="model-name" data-i18n="landing_page.model1_name">Poisson</div><div class="model-desc" data-i18n="landing_page.model1_desc">Distribuição de golos esperados para cada equipa, em casa e fora.</div></div>
-      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model2_tag">MODELO 2</div><div class="model-name" data-i18n="landing_page.model2_name">Dixon-Coles</div><div class="model-desc" data-i18n="landing_page.model2_desc">Correção de resultados baixos (0-0, 1-0, 1-1) que o Poisson puro subestima.</div></div>
-      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model3_tag">MODELO 3</div><div class="model-name" data-i18n="landing_page.model3_name">Monte Carlo</div><div class="model-desc" data-i18n="landing_page.model3_desc">Milhares de simulações do jogo para obter uma distribuição de resultados robusta.</div></div>
-      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model4_tag">MODELO 4</div><div class="model-name" data-i18n="landing_page.model4_name">Elo e Shin</div><div class="model-desc" data-i18n="landing_page.model4_desc">Força real das equipas ao longo do tempo, e correção do viés das probabilidades implícitas.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model1_tag">ETAPA 1</div><div class="model-name" data-i18n="landing_page.model1_name">Forças em presença</div><div class="model-desc" data-i18n="landing_page.model1_desc">O que cada equipa produz e sofre na sua situação real, em casa ou fora, comparado com o nível da sua competição.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model2_tag">ETAPA 2</div><div class="model-name" data-i18n="landing_page.model2_name">Prudência no início da época</div><div class="model-desc" data-i18n="landing_page.model2_desc">Quando poucos jogos foram disputados, a época anterior e um nível de referência pesam mais, e depois esbatem-se.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model3_tag">ETAPA 3</div><div class="model-name" data-i18n="landing_page.model3_name">Probabilidade de cada mercado</div><div class="model-desc" data-i18n="landing_page.model3_desc">Os golos esperados tornam-se a probabilidade de cada resultado e depois de cada mercado, corrigida por uma calibração aprendida em épocas passadas.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model4_tag">ETAPA 4</div><div class="model-name" data-i18n="landing_page.model4_name">Simulação do jogo</div><div class="model-desc" data-i18n="landing_page.model4_desc">O jogo é rejogado um grande número de vezes para fazer sobressair os resultados mais prováveis. A simulação não escolhe a aposta.</div></div>
     </div>
   </div>
 </section>
@@ -215,8 +215,8 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
     <div class="sec-lbl" data-i18n="landing_page.lbl_practice">NA PRÁTICA</div>
     <h2 class="sec-title" data-i18n-html="landing_v2.title_practice">Do dado bruto a um <b>sinal utilizável.</b></h2>
     <div class="step-list">
-      <div class="step reveal"><div class="step-num">01</div><div><div class="step-title" data-i18n="landing_page.step1_title">Recolhemos os dados</div><div class="step-desc" data-i18n="landing_page.step1_desc">Calendários, alinhamentos prováveis, histórico de confrontos e estatísticas xG atualizados continuamente, liga a liga.</div></div></div>
-      <div class="step reveal"><div class="step-num">02</div><div><div class="step-title" data-i18n="landing_page.step2_title">O modelo calcula</div><div class="step-desc" data-i18n="landing_page.step2_desc">Poisson, Dixon-Coles e Monte Carlo correm em paralelo para produzir uma distribuição de probabilidades para cada mercado.</div></div></div>
+      <div class="step reveal"><div class="step-num">01</div><div><div class="step-title" data-i18n="landing_page.step1_title">Recolhemos os dados</div><div class="step-desc" data-i18n="landing_page.step1_desc">Calendários, classificações, resultados recentes, confrontos diretos e ausências anunciadas, liga a liga.</div></div></div>
+      <div class="step reveal"><div class="step-num">02</div><div><div class="step-title" data-i18n="landing_page.step2_title">O modelo calcula</div><div class="step-desc" data-i18n="landing_page.step2_desc">Golos esperados, probabilidade de cada resultado e depois de cada mercado — sem nunca usar as odds.</div></div></div>
       <div class="step reveal"><div class="step-num">03</div><div><div class="step-title" data-i18n="landing_page.step3_title">Recebes o sinal</div><div class="step-desc" data-i18n="landing_page.step3_desc">Uma ficha clara por jogo: probabilidade, nível de fiabilidade, e o mercado onde o modelo deteta uma diferença com o mercado real.</div></div></div>
     </div>
   </div>
@@ -275,7 +275,7 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
     </div>
   </div>
 </footer>
-<!--SEO_FOOTER_NAV--><nav class="seo-foot-nav" aria-label="Navegação do site" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#91a0b3;text-align:center"><p style="margin:0 0 4px"><span style="color:#c3ccd8">Competições:</span> <a href="/pt/leagues/liga-portugal.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga Portugal</a> · <a href="/pt/leagues/champions-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Champions League</a> · <a href="/pt/leagues/europa-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Europa League</a> · <a href="/pt/leagues/conference-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Conference League</a></p><p style="margin:0"><a href="/pt/blog/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Blog e guias</a> · <a href="/pt/marches.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Mercados analisados</a></p></nav><!--/SEO_FOOTER_NAV-->
+<!--SEO_FOOTER_NAV--><nav class="seo-foot-nav" aria-label="Navegação do site" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#91a0b3;text-align:center"><p style="margin:0 0 4px"><span style="color:#c3ccd8">Competições:</span> <a href="/pt/leagues/liga-portugal.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga Portugal</a> · <a href="/pt/leagues/champions-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Champions League</a> · <a href="/pt/leagues/europa-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Europa League</a> · <a href="/pt/leagues/conference-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Conference League</a></p><p style="margin:0"><a href="/pt/blog/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Blog e guias</a> · <a href="/pt/marches.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Mercados analisados</a> · <a href="/pt/methodologie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Metodologia</a></p></nav><!--/SEO_FOOTER_NAV-->
 
 <script src="/i18n/i18n.js"></script>
 <script src="/lib/market-config.js"></script>

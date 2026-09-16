@@ -22,8 +22,11 @@
   var MARKETS=['gb','mx','za'];
   var seg=(location.pathname.match(/^\/([a-z]{2})(?:\/|$)/)||[])[1]||'';
   function message(text,isError){output.textContent=text;output.className='billing-message'+(isError?' error':'');}
+  // Duree choisie (lib/pro-plan-picker.js, "month" coche par defaut). Sans
+  // selecteur : "month", valeur par defaut acceptee par create-checkout-session.
+  var picker=null;
   function payload(){
-    var body={},M=window.IASHARK_MARKET;
+    var body={interval:picker?picker.interval():'month'},M=window.IASHARK_MARKET;
     if(M&&typeof M.dir==='string'){
       // lib/market-config.js : checkoutMarket vaut null pour le marche EUR par
       // defaut, auquel cas aucun champ market n'est envoye.
@@ -59,8 +62,15 @@
     var i18n=(window.I18N&&window.I18N.init)?Promise.resolve().then(function(){return window.I18N.init();}).catch(function(){}):null;
     var ctx=(await Promise.all([i18n,IasharkApp.context()]))[1];
     var box=document.getElementById('checkoutConsent');
-    if(ctx.isPro){if(box)box.hidden=true;loaded();unlock();button.textContent=t('pricing_page.cta_pro_member','Accéder aux analyses');button.onclick=function(){location.href=localHref('');};return;}
+    var pickerBox=document.getElementById('proPlanPicker');
+    // Abonne : aucun second paiement (changer de duree = portail, depuis le compte).
+    if(ctx.isPro){if(box)box.hidden=true;if(pickerBox)pickerBox.hidden=true;loaded();unlock();button.textContent=t('pricing_page.cta_pro_member','Accéder aux analyses');button.onclick=function(){location.href=localHref('');};return;}
     if(!box){box=document.createElement('div');box.id='checkoutConsent';button.parentNode.insertBefore(box,button);}
+    if(pickerBox&&window.IasharkProPlanPicker){
+      picker=window.IasharkProPlanPicker.mount(pickerBox,{onChange:function(){if(output.classList.contains('error'))message('',false);}});
+      // Duree vendue mais Price Stripe absent : "bientot disponible", jamais un autre prix.
+      if(picker)picker.loadAvailability();
+    }
     var lib=await consentLib();
     var consent=lib?lib.mount(box,{buttons:[button]}):null;
     loaded();
@@ -73,6 +83,7 @@
       if(!consent){message(t('checkout_consent.error_load','Les conditions de paiement n’ont pas pu être chargées. Rechargez la page.'),true);return;}
       // Le bloc de consentement affiche deja son message d'erreur : un seul message a l'ecran.
       if(!consent.check()){message('',false);return;}
+      if(picker&&!picker.isAvailable()){message(t('pricing_page.checkout_interval_not_configured','Cette durée n’est pas encore ouverte au paiement. Choisis une autre durée ou reviens bientôt. Aucun montant n’a été prélevé.'),true);return;}
       var current=await IasharkApp.context();
       if(!current.user){location.href=localHref('compte.html#plan');return;}
       button.disabled=true;message(t('pricing_page.checkout_opening','Ouverture du paiement sécurisé…'));
@@ -87,6 +98,12 @@
           if(consent.check())message(data.message||consent.text('error_required'),true);else message('',false);
         }else if(data&&data.processed===false&&data.reason==='market_not_configured'){
           message(t('pricing_page.checkout_market_not_configured','Le paiement n’est pas encore ouvert pour ce pays. Aucun montant n’a été prélevé.'),true);
+        }else if(data&&data.processed===false&&data.reason==='interval_not_configured'){
+          message(t('pricing_page.checkout_interval_not_configured','Cette durée n’est pas encore ouverte au paiement. Choisis une autre durée ou reviens bientôt. Aucun montant n’a été prélevé.'),true);
+        }else if(data&&data.processed===false&&data.reason==='already_subscribed'){
+          message(t('pricing_page.checkout_already_subscribed','Tu as déjà un abonnement Pro. Pour changer de durée, passe par ton compte.'),true);
+        }else if(data&&data.processed===false&&data.reason==='price_mismatch'){
+          message(t('pricing_page.checkout_price_mismatch','Le paiement de cette durée est momentanément indisponible. Aucun montant n’a été prélevé.'),true);
         }else{
           message(t('pricing_page.checkout_unavailable','Le paiement en ligne sera bientôt disponible.'),true);
         }

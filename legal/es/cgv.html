@@ -136,7 +136,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Juego responsable</a>
   </nav>
   <h1 class="page-title">Condiciones generales de venta</h1>
-  <div class="page-date">Última actualización: 13 de septiembre de 2026</div>
+  <div class="page-date">Última actualización: 16 de septiembre de 2026</div>
 
   <div class="warn-box">
     <p>⚠️ IASHARK NO ES UN SITIO DE APUESTAS: EN ESTE SITIO NO SE ACEPTA NINGUNA APUESTA. NUESTROS ANÁLISIS SON ESTIMACIONES ESTADÍSTICAS SIN NINGUNA GARANTÍA DE RESULTADO.<br>EL JUEGO CON DINERO CONLLEVA RIESGOS: ENDEUDAMIENTO Y ADICCIÓN. ¿NECESITA AYUDA? PÓNGASE EN CONTACTO CON UN SERVICIO DE AYUDA DE SU PAÍS O CON GAMBLING THERAPY (GRATUITO, EN LÍNEA): <a href="https://www.gamblingtherapy.org" target="_blank" rel="noopener">GAMBLINGTHERAPY.ORG</a>.<br>EXCLUSIVAMENTE PARA PERSONAS DE 18 AÑOS O MÁS.</p>
@@ -171,31 +171,37 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <p>El alcance del acceso gratuito puede cambiar. Usted es responsable de mantener la confidencialidad de sus datos de acceso.</p>
   </section>
 
+  <!-- LEGAL REVIEW: articles 5 to 9 rewritten on 16/09/2026 for the single Pro plan sold weekly, monthly or annually - REVIEW status, translation adapted from the French terms (legal/fr/cgv.html), to be reviewed by a lawyer before the Stripe prices are opened; same open points J1 to J6 as the French version. Prices and computed values taken from config/markets.json (tests/cgv-pro-prices.test.js). -->
   <section class="section">
     <h2>Artículo 5 — Suscripción IASHARK Pro</h2>
-    <p>Durante su vigencia, la suscripción IASHARK Pro da acceso a las siguientes funcionalidades:</p>
+    <p>IASHARK Pro es una oferta única. Durante su vigencia, la suscripción da acceso a las siguientes funcionalidades:</p>
     <ul>
       <li>análisis completo de todos los partidos y competiciones disponibles;</li>
       <li>filtros avanzados e indicadores de fiabilidad detallados;</li>
       <li>un diario de decisiones sincronizado con su cuenta;</li>
       <li>seguimiento del bankroll vinculado a su cuenta.</li>
     </ul>
+    <p>La suscripción puede contratarse por un periodo semanal, mensual o anual. <strong>El contenido y las funcionalidades son idénticos sea cual sea el periodo elegido</strong>: solo cambian el importe y la frecuencia de los cobros.</p>
     <p>La lista de competiciones cubiertas y el detalle de las funcionalidades pueden cambiar, pero el servicio nunca se reducirá de forma sustancial durante un periodo ya pagado.</p>
   </section>
 
   <section class="section">
-    <h2>Artículo 6 — Precio</h2>
+    <h2>Artículo 6 — Precios y duraciones</h2>
     <div class="highlight">
-      <p><strong>Suscripción IASHARK Pro: 19,95 € al mes, IVA incluido.</strong><br>
-      Sin compromiso de permanencia. Se renueva automáticamente cada mes hasta su cancelación.</p>
+      <p><strong>Semanal: 6,99 € por semana, IVA incluido.</strong> Se cobra al suscribirse y después cada semana el mismo día. Renovación automática cada semana hasta su cancelación, sin compromiso de permanencia.</p>
+      <p><strong>Mensual: 19,95 € al mes, IVA incluido.</strong> Se cobra al suscribirse y después cada mes en la misma fecha. Renovación automática cada mes hasta su cancelación, sin compromiso de permanencia.</p>
+      <p><strong>Anual: 199 € al año, IVA incluido.</strong> Se cobra una sola vez al suscribirse y después en cada fecha de aniversario. Periodo pagado por doce meses y renovado automáticamente por un año salvo cancelación antes del vencimiento (artículo 9).</p>
     </div>
-    <p>El precio aplicable es el que se muestra en la página Suscripción y se resume en la página de pago antes de que usted confirme su pedido. Cualquier modificación del precio se le notificará antes de su entrada en vigor; solo se aplicará a partir del siguiente periodo de facturación y usted podrá cancelar su suscripción antes de esa fecha.</p>
+    <p>A título informativo, 199 € al año equivalen a 16,59 € al mes, es decir, un 16 % menos que doce meses con la tarifa mensual (239,40 €).</p>
+    <p>El precio aplicable es el que se muestra en la página Suscripción para el periodo elegido y se resume en la página de pago antes de que usted confirme su pedido. Cualquier modificación del precio se le notificará antes de su entrada en vigor; solo se aplicará a partir del siguiente periodo de facturación y usted podrá cancelar su suscripción antes de esa fecha.</p>
   </section>
 
   <section class="section">
     <h2>Artículo 7 — Pago y renovación</h2>
-    <p>El pago es seguro y lo gestiona Stripe (<a href="https://stripe.com" target="_blank" rel="noopener">stripe.com</a>). IASHARK no almacena ningún dato de tarjeta bancaria. El primer pago se cobra en el momento de la suscripción y, a continuación, cada mes en la misma fecha.</p>
-    <p>Si falla el pago de una renovación, nuestro proveedor de pagos puede volver a intentarlo. El acceso Pro se mantiene durante 4 días tras el final del periodo pagado; si no se regulariza el pago, la cuenta vuelve al acceso gratuito.</p>
+    <p>El pago es seguro y lo gestiona Stripe (<a href="https://stripe.com" target="_blank" rel="noopener">stripe.com</a>). IASHARK no almacena ningún dato de tarjeta bancaria. El primer pago se cobra en el momento de la suscripción. Después, la suscripción se renueva automáticamente al final de cada periodo, por un periodo de la misma duración y al precio vigente en ese momento.</p>
+    <p><strong>Plan anual: información antes de la renovación.</strong> Le informaremos por correo electrónico, no antes de tres meses y no después de un mes antes del vencimiento, de la posibilidad de no renovar su suscripción anual. El correo indica la fecha de vencimiento, el importe que se cobrará y cómo cancelar en línea.</p>
+    <p><strong>Cambio de duración.</strong> Puede cambiar de duración desde «Mi cuenta», en el área de facturación de nuestro proveedor de pagos. El paso a una duración más larga (por ejemplo, de mensual a anual) surte efecto de inmediato: el nuevo periodo se cobra en ese momento, descontando a prorrata la parte no utilizada del periodo en curso. El paso a una duración más corta (por ejemplo, de anual a mensual) surte efecto al final del periodo ya pagado, sin reembolso ni cobro adicional hasta entonces. El importe y la fecha de efecto se muestran antes de su confirmación. Una suscripción activa no puede contratarse por segunda vez.</p>
+    <p>Si falla el pago de una renovación, nuestro proveedor de pagos puede volver a intentarlo. El acceso Pro se mantiene durante 1 día tras el final del periodo pagado en el plan semanal y durante 4 días en los planes mensual y anual; si no se regulariza el pago, la cuenta vuelve al acceso gratuito.</p>
   </section>
 
   <section class="section">
@@ -203,13 +209,13 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <!-- LEGAL REVIEW: withdrawal clause updated 2026-09-13 for checkout consent boxes -->
     <!-- LEGAL REVIEW: (a) points (1) and (2) of the LEGAL REVIEW note at the top of this page describe the checkout before the consent boxes and must be re-checked once the new checkout is live; (b) art. L221-28 13° c) and L221-13 al. 2 require a confirmation of the consumer's express consent and acknowledgement on a durable medium before the end of the withdrawal period - check that the post-payment confirmation email actually contains it, otherwise the withdrawal right is not lost; (c) clause drafted on the digital content basis (L221-28 13°): if the subscription is classified as a service (L221-28 1° / L221-25), the right is only lost once the service is fully performed and a proportionate amount is payable on withdrawal - redraft required. -->
     <!-- LEGAL REVIEW: clause aligned 2026-09-13 with checkout consent boxes; confirm digital service vs digital content classification (CJEU C-234/25) and proportionate amount method -->
-    <p>Dispone de 14 días desde la suscripción para desistir sin indicar el motivo. Al pagar, usted solicita expresamente que la suscripción comience de inmediato; esta solicitud no le priva del derecho de desistimiento. Si desiste en ese plazo, le reembolsaremos en un máximo de 14 días desde su solicitud, descontando un importe proporcional al servicio prestado hasta que nos comunicó su decisión, calculado a prorrata del tiempo de acceso dentro del periodo pagado. No se debe importe alguno si no se recabó dicha solicitud expresa.</p>
-    <p>La suscripción requiere marcar la casilla de aceptación de estas condiciones; se registran la versión aceptada, el idioma y la fecha.</p>
+    <p>Dispone de 14 días desde la suscripción para desistir sin indicar el motivo. Al pagar, usted solicita expresamente que la suscripción comience de inmediato; esta solicitud no le priva del derecho de desistimiento. Si desiste en ese plazo, le reembolsaremos en un máximo de 14 días desde su solicitud, descontando un importe proporcional al servicio prestado hasta que nos comunicó su decisión, calculado a prorrata del tiempo de acceso dentro del periodo pagado (semana, mes o año según el plan). Este derecho se aplica sea cual sea el periodo elegido. No se debe importe alguno si no se recabó dicha solicitud expresa.</p>
+    <p>La suscripción requiere marcar la casilla de aceptación de estas condiciones; se registran la versión aceptada, el idioma, la fecha y el periodo elegido.</p>
     <p>Para desistir, envíenos antes de que finalice el plazo una declaración inequívoca por correo electrónico a <a href="mailto:contact@iashark.com">contact@iashark.com</a>, por ejemplo utilizando el modelo que figura a continuación. Le reembolsaremos a más tardar en un plazo de 14 días a partir de la recepción de su solicitud, utilizando el mismo medio de pago empleado para la suscripción.</p>
     <div class="highlight">
       <p><strong>Modelo de formulario de desistimiento</strong><br>
       A la atención de IASHARK, contact@iashark.com:<br>
-      Por la presente le comunico que desisto del contrato relativo a la suscripción IASHARK Pro contratada el [fecha], a nombre de [nombre], dirección de correo electrónico de la cuenta: [correo electrónico].<br>
+      Por la presente le comunico que desisto del contrato relativo a la suscripción IASHARK Pro (periodo: [semanal / mensual / anual]) contratada el [fecha], a nombre de [nombre], dirección de correo electrónico de la cuenta: [correo electrónico].<br>
       Fecha y firma (solo si se envía en papel).</p>
     </div>
   </section>
@@ -217,7 +223,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
   <section class="section">
     <h2>Artículo 9 — Cancelación</h2>
     <p>Puede cancelar su suscripción en cualquier momento, de forma gratuita y en línea, desde la página «Mi cuenta», que da acceso al área de facturación segura de nuestro proveedor de pagos. También puede solicitar la cancelación por correo electrónico a <a href="mailto:contact@iashark.com">contact@iashark.com</a>.</p>
-    <p>La cancelación surte efecto al final del periodo de facturación en curso: usted conserva el acceso Pro hasta esa fecha y no se realiza ningún cobro adicional. Salvo que se ejerza el derecho de desistimiento conforme al artículo 8, el periodo de facturación ya iniciado no se reembolsa.</p>
+    <p>La cancelación surte efecto al final del periodo de facturación en curso (semana, mes o año): usted conserva el acceso Pro hasta esa fecha y no se realiza ningún cobro adicional. Salvo que se ejerza el derecho de desistimiento conforme al artículo 8, el periodo de facturación ya iniciado no se reembolsa.</p>
+    <p>Plan anual: si no ha recibido la información prevista en el artículo 7, puede poner fin gratuitamente a la suscripción en cualquier momento a partir de la fecha de renovación; las cantidades abonadas por el periodo posterior a la cancelación se le reembolsarán en un plazo de treinta días (artículo L215-1 del Código de Consumo francés).</p>
     <p>La eliminación de su cuenta desde «Mi cuenta» conlleva la cancelación previa de cualquier suscripción activa.</p>
   </section>
 
@@ -271,5 +278,6 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
 <script src="/lib/market-config.js"></script>
 <script src="/site-prefs.js"></script>
 <script src="/bottom-navigation.js"></script>
+<script src="/site-header.js" defer></script>
 </body>
 </html>

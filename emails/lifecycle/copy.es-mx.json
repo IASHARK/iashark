@@ -61,7 +61,8 @@
           "El diario de decisiones sincronizado",
           "El seguimiento de bankroll vinculado a la cuenta"
         ] },
-        { "type": "p", "text": "Precio en la versión {{siteVersion}} del sitio: {{proPrice}} al mes, sin plazo forzoso, puedes cancelar cuando quieras desde Mi cuenta." },
+        { "type": "p", "if": "hasProYear", "text": "Precios en la versión {{siteVersion}} del sitio: {{proWeekPrice}} a la semana, {{proPrice}} al mes o {{proYearPrice}} al año. El mismo acceso Pro con cualquier plazo, puedes cancelar cuando quieras desde Mi cuenta." },
+        { "type": "p", "if": "hasNoProYear", "text": "Precios en la versión {{siteVersion}} del sitio: {{proWeekPrice}} a la semana o {{proPrice}} al mes. El mismo acceso Pro con cualquier plazo, puedes cancelar cuando quieras desde Mi cuenta." },
         { "type": "p", "text": "Pro da acceso a más análisis y herramientas; no hace que ningún partido sea más predecible." },
         { "type": "cta", "label": "Ver el detalle del plan", "link": "pricing" },
         { "type": "p", "text": "Si la cuenta gratuita te basta, no tienes que hacer nada." }

@@ -5,9 +5,9 @@
 <meta name="iashark-market" content="fr">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Über IASHARK: Methodik, Datenquellen und Grenzen</title>
-<meta name="description" content="Wie IASHARK Fußball analysiert: Datenquellen, Poisson- und Dixon-Coles-Modelle, Elo-Wertungen, Monte-Carlo-Simulation, Grenzen und rechtliche Hinweise.">
+<meta name="description" content="Wie IASHARK Fußball analysiert: woher die Daten kommen, wie das Modell rechnet, seine Grenzen und rechtliche Hinweise.">
 <meta property="og:title" content="Über IASHARK: Methodik, Datenquellen und Grenzen">
-<meta property="og:description" content="Wie IASHARK Fußball analysiert: Datenquellen, Poisson- und Dixon-Coles-Modelle, Elo-Wertungen, Monte-Carlo-Simulation, Grenzen und rechtliche Hinweise.">
+<meta property="og:description" content="Wie IASHARK Fußball analysiert: woher die Daten kommen, wie das Modell rechnet, seine Grenzen und rechtliche Hinweise.">
 <meta property="og:type" content="website">
 <link rel="canonical" href="https://iashark.com/de/a-propos.html">
 <link rel="alternate" hreflang="fr" href="https://iashark.com/fr/a-propos.html">
@@ -40,9 +40,9 @@ a{color:inherit;text-decoration:none;}
 .hdr{position:sticky;top:0;z-index:99;background:rgba(8,12,18,0.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--text);}
 .logo span{color:var(--cyan);}
-/* Logo image, comme les autres en-tetes (QA 14/09/2026). PNG sans alpha : lighten efface son fond noir. */
+/* Logo image, comme les autres en-tetes (QA 14/09/2026). */
 .logo{display:inline-flex;align-items:center;min-height:44px;}
-.logo img{display:block;height:28px;width:auto;mix-blend-mode:lighten;}
+.logo img{display:block;height:28px;width:auto;}
 .btn-ghost{display:inline-flex;align-items:center;min-height:36px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);border:1px solid var(--border);padding:6px 12px;border-radius:8px;}
 
 .wrap{max-width:720px;margin:0 auto;padding:0 20px;}
@@ -144,7 +144,7 @@ footer .foot-links a{color:#22d3ee;}
   <div class="sec">
     <div class="sec-lbl" data-i18n="about_page.method_label">METHODIK</div>
     <h2 data-i18n="about_page.method_title">So funktioniert das Modell</h2>
-    <p data-i18n="about_page.method_text">Für jedes Spiel geht das System von den echten Statistiken beider Mannschaften in der laufenden und der vorherigen Saison aus: erzielte und kassierte Tore sowie aktuelle xG- und Schusswerte, sofern verfügbar. Daraus schätzt es die erwarteten Tore jeder Mannschaft und anschließend mit einem Dixon-Coles-Modell die Wahrscheinlichkeit jedes Ergebnisses. Für die Märkte 1X2, über/unter 2,5 Tore und beide Teams treffen werden diese Wahrscheinlichkeiten durch eine aus früheren Saisons gelernte Kalibrierung korrigiert. Quoten fließen nie in diese Berechnung ein.</p>
+    <p data-i18n="about_page.method_text">Für jedes Spiel geht das System von den echten Statistiken beider Mannschaften in der laufenden und der vorherigen Saison aus: erzielte und kassierte Tore sowie die Qualität der herausgespielten und zugelassenen Chancen, sofern aktuelle Daten das zulassen. Daraus schätzt es die erwarteten Tore jeder Mannschaft und anschließend die Wahrscheinlichkeit jedes Ergebnisses. Für die Märkte 1X2, über/unter 2,5 Tore und beide Teams treffen werden diese Wahrscheinlichkeiten durch eine aus früheren Saisons gelernte Kalibrierung korrigiert. Quoten fließen nie in diese Berechnung ein.</p>
 
     <div class="model-grid">
       <div class="model-card">
@@ -153,11 +153,11 @@ footer .foot-links a{color:#22d3ee;}
       </div>
       <div class="model-card">
         <div class="mtitle" data-i18n="about_page.card_crossed_title">EIN ERGEBNISMODELL</div>
-        <div class="mdesc" data-i18n="about_page.card_crossed_text">Die Wahrscheinlichkeiten stammen aus einem einzigen Ergebnismodell (Dixon-Coles), kalibriert für drei Märkte. Es ist keine Abstimmung zwischen Modellen: Die Poisson-Berechnung und die Simulation dienen nur dazu, die in der Zuverlässigkeit angezeigte Übereinstimmung zu messen.</div>
+        <div class="mdesc" data-i18n="about_page.card_crossed_text">Die Wahrscheinlichkeiten stammen aus einem einzigen Ergebnismodell, kalibriert für drei Märkte. Es ist keine Abstimmung zwischen Modellen: Die parallelen Berechnungen und die Simulation dienen nur dazu, die in der Zuverlässigkeit angezeigte Übereinstimmung zu messen.</div>
       </div>
       <div class="model-card">
         <div class="mtitle" data-i18n="about_page.card_simulations_title">SIMULATIONEN</div>
-        <div class="mdesc" data-i18n="about_page.card_simulations_text">Jedes Spiel wird 5.000-mal simuliert (Monte-Carlo-Methode), um die wahrscheinlichsten Ergebnisse anzuzeigen. Diese Simulationen dienen nicht zur Auswahl der Wette.</div>
+        <div class="mdesc" data-i18n="about_page.card_simulations_text">Jedes Spiel wird sehr oft nachgespielt, um die wahrscheinlichsten Ergebnisse anzuzeigen. Diese Simulationen dienen nicht zur Auswahl der Wette.</div>
       </div>
       <div class="model-card">
         <div class="mtitle" data-i18n="about_page.card_reliability_title">ZUVERLÄSSIGKEITSSCORE</div>
@@ -166,7 +166,9 @@ footer .foot-links a{color:#22d3ee;}
     </div>
 
     <p data-i18n-html="about_page.method_selection">Der hervorgehobene Markt wird automatisch nach einer festen Regel gewählt: unter den Märkten, die das Modell berechnet und die ein Buchmacher tatsächlich anbietet, derjenige mit der höchsten <b>geschätzten Wahrscheinlichkeit</b>, vorrangig unter denen mit einer Mindestquote und unterhalb einer Wahrscheinlichkeitsobergrenze. Ein Spiel, das zum Zeitpunkt der Berechnung bereits begonnen hat oder kurz vor dem Anpfiff steht, erhält keine Wette. Die angezeigte Wahrscheinlichkeit ist die des Modells und wird nie nachträglich geändert. Ein Sprachmodell schreibt anschließend den Erklärtext, berechnet, wählt oder ändert aber keine Zahl.</p>
-    <p data-i18n-html="about_page.method_value"><b>Der Abstand zum Markt</b>: Das Modell vergleicht seine Wahrscheinlichkeit anschließend mit der von der Quote implizierten, nach Abzug der Buchmachermarge (Shin-Methode, wo möglich). Dieser Abstand dient nur der Information: Er wird nicht zur Wahl des Marktes verwendet und garantiert keinen Gewinn.</p>
+    <p data-i18n-html="about_page.method_value"><b>Der Abstand zum Markt</b>: Das Modell vergleicht seine Wahrscheinlichkeit anschließend mit der von der Quote implizierten, nach Abzug der Buchmachermarge. Dieser Abstand dient nur der Information: Er wird nicht zur Wahl des Marktes verwendet und garantiert keinen Gewinn.</p>
+    <p data-i18n-html="about_page.method_undisclosed"><b>Was wir nicht offenlegen</b>: weder die Formeln noch die Gewichtungen, die Schwellenwerte, die genaue Liste der Variablen oder die Namen der Werkzeuge, die die Berechnung ausführen. Was wir dagegen veröffentlichen: das Prinzip jedes Schritts, was in die Berechnung einfließt und was nicht, und die Fälle, in denen das System sich enthält.</p>
+    <p data-requires-page="methodologie.html" style="margin-top:6px"><a href="/de/methodologie.html" data-href="methodologie.html" style="color:var(--cyan);text-decoration:underline" data-i18n="about_page.method_link">Vollständige Methodik lesen: Daten, Berechnungen, Grenzen</a></p>
   </div>
 
   <!-- ═══ SIMPLE VS COMBINE ═══ -->
@@ -207,9 +209,9 @@ footer .foot-links a{color:#22d3ee;}
   <p><span data-i18n="about_page.footer_warning">⚠️ GLÜCKSSPIEL KANN GEFÄHRLICH SEIN — SPIELEN SIE VERANTWORTUNGSVOLL · VERBOTEN UNTER 18 JAHREN</span><br>
   <span data-i18n="about_page.footer_note">IASHARK — Die veröffentlichten Analysen dienen ausschließlich der Orientierung</span><br>
   <span data-i18n="match_page.shell_help_label">Hilfe:</span> <a data-market-helpline="url" href="https://www.gamblingtherapy.org" style="color:#22d3ee">gamblingtherapy.org</a><span data-market-helpline-if="phone" hidden> · <span data-market-helpline="phone" hidden></span></span></p>
-  <p class="foot-links"><a href="/de/mentions-legales.html" data-href="mentions-legales.html" data-i18n="footer.mentions_legales">Impressum</a> · <a href="/de/cgv.html" data-href="cgv.html" data-i18n="footer.cgv">AGB</a> · <a href="/de/confidentialite.html" data-href="confidentialite.html" data-i18n="footer.confidentialite">Datenschutz</a> · <a href="/de/cookies.html" data-href="cookies.html" data-i18n="footer.cookies">Cookies</a> · <a href="/de/jeu-responsable.html" data-href="jeu-responsable.html" data-i18n="footer.responsible_gambling">Verantwortungsvolles Spielen</a></p>
+  <p class="foot-links"><a href="/de/mentions-legales.html" data-href="mentions-legales.html" data-i18n="footer.mentions_legales">Impressum</a> · <a href="/de/cgv.html" data-href="cgv.html" data-i18n="footer.cgv">AGB</a> · <a href="/de/confidentialite.html" data-href="confidentialite.html" data-i18n="footer.confidentialite">Datenschutz</a> · <a href="/de/cookies.html" data-href="cookies.html" data-i18n="footer.cookies">Cookies</a> · <a href="/de/jeu-responsable.html" data-href="jeu-responsable.html" data-i18n="footer.responsible_gambling">Verantwortungsvolles Spielen</a><span data-requires-page="methodologie.html"> · <a href="/de/methodologie.html" data-href="methodologie.html" data-i18n="footer.methodology">Methodik</a></span></p>
 </footer>
-<!--SEO_FOOTER_NAV--><nav class="seo-foot-nav" aria-label="Seitennavigation" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#91a0b3;text-align:center"><p style="margin:0 0 4px"><span style="color:#c3ccd8">Wettbewerbe:</span> <a href="/de/leagues/bundesliga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Bundesliga</a> · <a href="/de/leagues/champions-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Champions League</a> · <a href="/de/leagues/europa-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Europa League</a> · <a href="/de/leagues/conference-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Conference League</a></p><p style="margin:0"><a href="/de/blog/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Blog und Ratgeber</a> · <a href="/de/marches.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Analysierte Märkte</a></p></nav><!--/SEO_FOOTER_NAV-->
+<!--SEO_FOOTER_NAV--><nav class="seo-foot-nav" aria-label="Seitennavigation" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#91a0b3;text-align:center"><p style="margin:0 0 4px"><span style="color:#c3ccd8">Wettbewerbe:</span> <a href="/de/leagues/bundesliga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Bundesliga</a> · <a href="/de/leagues/champions-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Champions League</a> · <a href="/de/leagues/europa-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Europa League</a> · <a href="/de/leagues/conference-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Conference League</a></p><p style="margin:0"><a href="/de/blog/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Blog und Ratgeber</a> · <a href="/de/marches.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Analysierte Märkte</a> · <a href="/de/methodologie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Methodik</a></p></nav><!--/SEO_FOOTER_NAV-->
 
 <nav class="nav-bottom" aria-label="Hauptnavigation" data-i18n-attr="aria-label:geo.nav.aria_label">
   <a href="https://iashark.com/de/" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div><div class="nav-lbl" data-i18n="nav.home">START</div></a>
@@ -252,5 +254,6 @@ footer .foot-links a{color:#22d3ee;}
 })();
 </script>
 <script src="/site-prefs.js"></script>
-<script src="/bottom-navigation.js"></script></body>
+<script src="/bottom-navigation.js"></script><script src="/site-header.js" defer></script>
+</body>
 </html>

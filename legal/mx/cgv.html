@@ -137,7 +137,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Juego responsable</a>
   </nav>
   <h1 class="page-title">Términos y condiciones</h1>
-  <div class="page-date">Última actualización: 13 de septiembre de 2026</div>
+  <div class="page-date">Última actualización: 16 de septiembre de 2026</div>
 
   <div class="warn-box">
     <p>⚠️ IASHARK NO ES UNA CASA DE APUESTAS: NO RECIBIMOS NI COLOCAMOS APUESTAS. NUESTROS ANÁLISIS SON ESTIMACIONES ESTADÍSTICAS, SIN GARANTÍA DE RESULTADOS NI DE GANANCIAS.<br>LAS APUESTAS PUEDEN GENERAR ADICCIÓN. ORIENTACIÓN GRATUITA LAS 24 HORAS: LÍNEA DE LA VIDA <a href="tel:8009112000">800 911 2000</a>.<br>PROHIBIDO PARA MENORES DE 18 AÑOS.</p>
@@ -167,13 +167,14 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <p>Crear una cuenta es gratis y solo requiere un correo electrónico válido. La cuenta gratuita incluye un análisis completo de un partido al día y el resto del contenido gratuito descrito en nuestra página de precios. El contenido de la cuenta gratuita puede cambiar.</p>
   </section>
 
+  <!-- LEGAL REVIEW: sections 5, 6, 7 (first sentence) and 8 rewritten on 16/09/2026 for the single Pro plan sold weekly, monthly or annually - REVIEW status, to be reviewed by Mexican counsel before the Stripe prices are opened. Open points: (J1) LFPC art. 76 Bis notice before each recurring charge - delays below (annual D-30 and D-7, monthly D-7, weekly D-2) to be confirmed, weekly D-2 = BLOCKED_LEGAL; (J2) art. 56 revocation for digital subscriptions; (J3) PROFECO registration of the adhesion contract. The renewal notices are ready in the email system (renewal_reminder / annual_renewal_reminder, scan by market and billing period) but sending stays inactive until Resend and the scheduled jobs are enabled: do not open the MX prices before that. Prices and computed values taken from config/markets.json (tests/cgv-pro-prices.test.js). -->
   <section class="section">
-    <h2>5. Suscripciones de pago</h2>
+    <h2>5. Suscripción Pro y plazos</h2>
     <ul>
-      <li><strong>Características</strong> — los planes de pago dan acceso a las funciones adicionales descritas en nuestra página de precios al momento de contratar.</li>
-      <li><strong>Precio</strong> — el precio total en pesos mexicanos (MXN), con los impuestos aplicables incluidos, se muestra en la página de precios y en la página de pago antes de que confirmes.</li>
-      <li><strong>Periodicidad</strong> — los planes pueden cobrarse de forma mensual o anual, según la opción disponible.</li>
-      <li><strong>Revisión de tu pedido</strong> — antes de pagar puedes revisar el plan y el precio, corregir errores o salir sin contratar.</li>
+      <li><strong>Características</strong> — IASHARK Pro es un plan único que da acceso a todos los análisis y herramientas descritos en nuestra página de precios al momento de contratar. <strong>Las funciones son exactamente las mismas con cualquier plazo</strong>; solo cambian el monto y la frecuencia del cobro.</li>
+      <li><strong>Precio</strong> — precios totales en pesos mexicanos (MXN), con los impuestos aplicables incluidos: <strong>MX$69 por semana</strong>, <strong>MX$199 por mes</strong> o <strong>MX$1,990 por año</strong>. A modo informativo, MX$1,990 al año equivalen a MX$165.84 al mes, un 16 % menos que pagar 12 meses con el precio mensual (MX$2,388). El precio del plazo elegido se muestra en la página de precios y en la página de pago antes de que confirmes.</li>
+      <li><strong>Periodicidad</strong> — cobro automático cada semana o cada mes hasta que canceles; el plan anual se cobra una vez al año y se renueva por otro año salvo que canceles antes.</li>
+      <li><strong>Revisión de tu pedido</strong> — antes de pagar puedes revisar el plazo y el precio, corregir errores o salir sin contratar.</li>
       <li><strong>Acceso</strong> — las funciones de pago se activan en cuanto se confirma tu pago.</li>
       <li><strong>Comprobante</strong> — puedes consultar los datos de tu suscripción y de tus pagos en el área de facturación segura que se abre desde la página "Mi cuenta".</li>
     </ul>
@@ -183,10 +184,12 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <h2>6. Pago y renovación automática</h2>
     <p>Los pagos se procesan de forma segura a través de Stripe. IASHARK no ve ni almacena los datos completos de tu tarjeta.</p>
     <ul>
-      <li>Pagas al inicio de cada periodo de facturación (cada mes o cada año, según tu plan).</li>
-      <li><strong>Tu suscripción se renueva automáticamente</strong> al final de cada periodo, hasta que la canceles.</li>
+      <li>Pagas al inicio de cada periodo de facturación (semana, mes o año, según el plazo elegido).</li>
+      <li><strong>Tu suscripción se renueva automáticamente</strong> al final de cada periodo, por un periodo igual, hasta que la canceles.</li>
+      <li><strong>Aviso antes del cobro.</strong> Te enviaremos un correo antes de cada renovación con la fecha del cobro, el monto exacto y cómo cancelar en línea: plan anual, 30 días y 7 días antes; plan mensual, 7 días antes; plan semanal, 2 días antes.</li>
+      <li><strong>Cambio de plazo.</strong> Puedes cambiar entre semanal, mensual y anual desde "Mi cuenta". El cambio a un plazo más largo aplica de inmediato: el nuevo periodo se cobra en ese momento, descontando de forma proporcional la parte no usada del periodo en curso. El cambio a un plazo más corto aplica al final del periodo que ya pagaste, sin reembolso ni cargo adicional mientras tanto. Antes de confirmar verás el nuevo monto y la fecha en que aplica. Una suscripción activa no se puede contratar dos veces.</li>
       <li>Si cambiamos el precio, te avisaremos con anticipación. El nuevo precio solo se aplicará a partir de tu siguiente renovación y podrás cancelar antes de que entre en vigor.</li>
-      <li>Si falla el pago de una renovación, nuestro proveedor de pagos puede intentarlo de nuevo. Tu acceso de pago se mantiene durante 4 días después del final del periodo pagado; si el pago no se realiza, tu cuenta vuelve al plan gratuito.</li>
+      <li>Si falla el pago de una renovación, nuestro proveedor de pagos puede intentarlo de nuevo. Tu acceso de pago se mantiene durante 1 día después del final del periodo pagado en el plan semanal y durante 4 días en los planes mensual y anual; si el pago no se realiza, tu cuenta vuelve al plan gratuito.</li>
     </ul>
   </section>
 
@@ -195,7 +198,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <!-- LEGAL REVIEW: withdrawal clause updated 2026-09-13 for checkout consent boxes -->
     <!-- LEGAL REVIEW: (a) no waiver is described for Mexico (LFPC rights are irrenunciables, art. 1): the checkout only asks for acceptance of the terms and the aviso de privacidad; (b) art. 56 last paragraph excludes services whose performance date is 10 business days or less from the purchase order - whether an online subscription is a venta mediata o indirecta (art. 51) and whether this exception applies to immediate access must be confirmed by Mexican counsel; (c) LFPC art. 76 Bis fracc. VIII and IX (DOF 12/12/2025, in force 13/12/2025): express informed consent to recurring charges, notice at least 5 calendar days before an automatic renewal, and an immediate cancellation mechanism - check that checkout, renewal emails and account cancellation comply before /mx plans are sold. -->
     <!-- LEGAL REVIEW: clause aligned 2026-09-13 with checkout consent boxes; confirm digital service vs digital content classification (CJEU C-234/25) and proportionate amount method -->
-    <p>La suscripción implica un cobro automático recurrente (mensual o anual según el plan) por el monto indicado en la página del plan y en la página de pago; al marcar la casilla de aceptación das tu consentimiento expreso e informado a ese cobro (art. 76 Bis, fracc. VIII LFPC). Puedes cancelar de forma inmediata en cualquier momento desde tu cuenta (fracc. IX). Cuando resulte aplicable el art. 56 LFPC, podrás revocar tu consentimiento dentro de los 5 días hábiles siguientes, sin responsabilidad, mediante aviso a <a href="mailto:contact@iashark.com">contact@iashark.com</a>. Tus derechos conforme a la LFPC son irrenunciables.</p>
+    <p>La suscripción implica un cobro automático recurrente (semanal, mensual o anual según el plazo elegido) por el monto indicado en la página del plan y en la página de pago; al marcar la casilla de aceptación das tu consentimiento expreso e informado a ese cobro (art. 76 Bis, fracc. VIII LFPC). Puedes cancelar de forma inmediata en cualquier momento desde tu cuenta (fracc. IX). Cuando resulte aplicable el art. 56 LFPC, podrás revocar tu consentimiento dentro de los 5 días hábiles siguientes, sin responsabilidad, mediante aviso a <a href="mailto:contact@iashark.com">contact@iashark.com</a>. Tus derechos conforme a la LFPC son irrenunciables.</p>
     <p>Para ejercer este derecho, envíanos un aviso a <a href="mailto:contact@iashark.com">contact@iashark.com</a> indicando que revocas la contratación, con el correo de tu cuenta y la fecha en que contrataste.</p>
   </section>
 
@@ -203,7 +206,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <h2>8. Cancelación de tu suscripción</h2>
     <ul>
       <li>Puedes cancelar en cualquier momento y sin costo desde la página "Mi cuenta" (que abre el área de facturación segura de nuestro proveedor de pagos) o escribiéndonos por correo.</li>
-      <li>La cancelación surte efecto al final del periodo de facturación en curso: conservas el acceso de pago hasta esa fecha y no se te volverá a cobrar.</li>
+      <li>La cancelación surte efecto al final del periodo de facturación en curso (semana, mes o año): conservas el acceso de pago hasta esa fecha y no se te volverá a cobrar.</li>
       <li>Salvo lo previsto en el apartado 7 y en los demás casos en que la ley te dé derecho a un reembolso, no se reembolsa el periodo ya iniciado.</li>
       <li>Si eliminas tu cuenta desde "Mi cuenta", primero se cancela cualquier suscripción activa.</li>
     </ul>
@@ -260,5 +263,6 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
 <script src="/lib/market-config.js"></script>
 <script src="/site-prefs.js"></script>
 <script src="/bottom-navigation.js"></script>
+<script src="/site-header.js" defer></script>
 </body>
 </html>

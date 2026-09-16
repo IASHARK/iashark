@@ -5,12 +5,15 @@
 
    AUDIT (03/09/2026) — ce fichier n'affiche QUE des donnees reelles :
    - public.users            : email, plan, role, capital, created_at
-   - public.user_preferences : display_name, favorite_leagues, language,
-                               timezone, notify_match_analysis,
-                               notify_weekly_recap
+   - public.user_preferences : display_name, language, timezone,
+                               notify_match_analysis, notify_weekly_recap
+                               (la colonne favorite_leagues existe encore en
+                               base mais n'est plus ni ecrite ni lue : voir
+                               la section « Mes compétitions préférées »)
    - public.subscriptions    : status, current_period_end,
-                               cancel_at_period_end (ecrite uniquement par le
-                               webhook Stripe, jamais par le client)
+                               cancel_at_period_end, billing_interval
+                               (ecrite uniquement par le webhook Stripe et
+                               sync-subscription, jamais par le client)
    - public.betting_decisions: nombre de décisions enregistrées
    Tout le reste est absent du projet et n'est donc pas invente ici :
    - pas de liste des sessions actives (le SDK Supabase ne l'expose pas),
@@ -90,10 +93,6 @@
   function repertoire() {
     var seg = String(location.pathname.split('/')[1] || '').toLowerCase();
     return REPERTOIRES.indexOf(seg) !== -1 ? seg : null;
-  }
-  // Nom de championnat stocke tel quel en base ; seul l'affichage est traduit.
-  function nomChampionnat(nom) {
-    return nom === 'Ligue des Champions' ? tr('special_competitions.ldc', nom) : nom;
   }
   var $ = function (id) { return document.getElementById(id); };
 
@@ -177,6 +176,16 @@
     }
     return null;
   }
+  /* Duree de l'abonnement (offre Pro unique, 3 durees). Lue sur la ligne
+     subscriptions ecrite par le serveur a partir du Price Stripe ; jamais
+     deduite d'un prix. Valeur absente (abonnement anterieur a la migration
+     0026, pas encore resynchronise) : "En cours de synchronisation". */
+  function libelleDuree() {
+    if (!abo) return null;
+    var cles = { week: ['compte_page.interval_week', 'Hebdomadaire'], month: ['compte_page.interval_month', 'Mensuelle'], year: ['compte_page.interval_year', 'Annuelle'] };
+    var c = cles[abo.billing_interval];
+    return c ? tr(c[0], c[1]) : tr('compte_page.interval_unknown', 'En cours de synchronisation');
+  }
   var TON = {
     ok: 'border-emerald-500/30 bg-emerald-500/[.07] text-emerald-300',
     attention: 'border-amber-500/30 bg-amber-500/[.07] text-amber-200',
@@ -234,7 +243,6 @@
       es: tr('compte_page.lang_name_es', 'Espanol'), de: tr('compte_page.lang_name_de', 'Deutsch'),
       it: tr('compte_page.lang_name_it', 'Italiano'), pt: tr('compte_page.lang_name_pt', 'Portugues')
     };
-    var ligues = Array.isArray(prefs.favorite_leagues) ? prefs.favorite_leagues : [];
     var etat = etatAbonnement();
 
     var planResume;
@@ -310,11 +318,20 @@
           + '<p class="mt-2.5 text-[26px] font-extrabold leading-none tracking-tight">' + tr('compte_page.plan_pro_name', 'IASHARK Pro') + '</p></div>'
           + '<span class="inline-flex items-center rounded-full border border-cyan/40 bg-cyan/10 px-2.5 py-1 text-[11px] font-bold tracking-wider text-cyan">' + tr('compte_page.badge_pro', 'PRO') + '</span></div>'
           + bandeau
+          + (abo ? '<div class="mt-5">'
+            + ligneResume(tr('compte_page.sub_interval_label', 'Durée'), esc(libelleDuree()))
+            + (abo.current_period_end && !abo.cancel_at_period_end && abo.status !== 'canceled' && date(abo.current_period_end) ? ligneResume(tr('compte_page.next_renewal_label', 'Prochaine échéance'), esc(date(abo.current_period_end))) : '')
+            + '</div>' : '')
           + (abo ? '' : '<p class="mt-5 text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.pro_manual_grant_detail', 'Aucun abonnement payant n’est enregistré sur ce compte : l’accès Pro y a été accordé manuellement.') + '</p>')
           + '<div class="mt-6 flex flex-wrap gap-3">'
           + (abo ? boutonPrimaire('portail', tr('compte_page.manage_subscription_cta', 'Gérer mon abonnement')) : '')
+          // Changer de duree : portail Stripe, ecran de changement d'offre de
+          // l'abonnement (jamais un second paiement). Duree plus longue : effet
+          // immediat au prorata ; plus courte : a la fin de la periode payee
+          // (reglages du portail client Stripe).
+          + (abo && ['active', 'trialing'].indexOf(abo.status) !== -1 && !abo.cancel_at_period_end ? boutonSecondaire('changerDuree', tr('compte_page.change_interval_cta', 'Changer de durée')) : '')
           + '</div>'
-          + (abo ? '<p class="mt-3 text-[12.5px] leading-relaxed text-soft">' + tr('compte_page.billing_portal_note', 'Moyen de paiement, factures et résiliation se gèrent dans l’espace sécurisé de notre prestataire de paiement.') + '</p>' : '')
+          + (abo ? '<p class="mt-3 text-[12.5px] leading-relaxed text-soft">' + tr('compte_page.billing_portal_note', 'Moyen de paiement, factures et résiliation se gèrent dans l’espace sécurisé de notre prestataire de paiement.') + ' ' + tr('compte_page.change_interval_note', 'Passer à une durée plus longue prend effet tout de suite, au prorata ; passer à une durée plus courte prend effet à la fin de la période déjà payée. Le montant et la date d’effet sont affichés avant confirmation.') + '</p>' : '')
           + '<p id="msgFacturation" hidden aria-live="polite"></p>');
     }
 
@@ -336,8 +353,10 @@
         + (etat && etat.ton === 'alerte' ? '<div class="mt-5 rounded-xl border px-4 py-3.5 text-[13.5px] leading-relaxed ' + TON[etat.ton] + '"><b class="font-semibold">' + esc(etat.titre) + '</b><span class="mt-0.5 block opacity-90">' + esc(etat.detail) + '</span></div>' : ''))
       + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-cyan">' + tr('compte_page.with_pro_heading', 'Avec Pro') + '</h2>'
         // Prix affiche en EUR uniquement : voir note ci-dessus, hors perimetre ici.
-        + '<p class="mt-2.5 text-[22px] font-extrabold leading-none tracking-tight"><span data-market-price="pro">' + esc(prixPro()) + '</span> ' + esc(tr('compte_page.per_month', '/ mois')) + '</p>'
-        + '<p class="mt-2 text-[13.5px] text-soft">' + tr('compte_page.pro_no_commitment', 'Sans engagement, résiliable à tout moment.') + '</p>'
+        // Selecteur Semaine / Mois / Annee (lib/pro-plan-picker.js), monte par
+        // brancher() ; repli sans module : prix mensuel.
+        + '<div id="proPlanPicker"><p class="mt-2.5 text-[22px] font-extrabold leading-none tracking-tight"><span data-market-price="pro.month">' + esc(prixPro()) + '</span> ' + esc(tr('compte_page.per_month', '/ mois')) + '</p></div>'
+        + '<p class="mt-2 text-[13.5px] text-soft">' + tr('compte_page.pro_durations_note', 'À la semaine, au mois ou à l’année : même accès Pro, résiliable à tout moment.') + '</p>'
         + '<ul class="mt-5 space-y-2.5">'
         + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_all_matches', 'L’analyse complète sur tous les matchs') + '</li>'
         + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_six_tools', 'Les six outils branchés sur les probabilités du modèle') + '</li>'
@@ -352,14 +371,9 @@
       + '</div>';
   }
 
-  /* Préférences. Le multi-select de championnats remplace le champ texte
-     libre : personne n'a a deviner l'orthographe exacte. Les valeurs deja
-     enregistrées qui ne figurent pas dans la liste sont conservees telles
-     quelles plutot que silencieusement effacees. */
-  var CHAMPIONNATS = [
-    'Ligue 1', 'Ligue 2', 'Premier League', 'Championship', 'La Liga', 'Serie A', 'Bundesliga',
-    'Eredivisie', 'Primeira Liga', 'Jupiler Pro League', 'Süper Lig', 'Ligue des Champions', 'Europa League'
-  ];
+  /* Préférences : profil, affichage, bankroll. Les competitions preferees ne
+     sont PAS ici — elles ont leur propre section (« Mes compétitions
+     préférées »), qui ecrit dans le store lu par l'accueil. */
   function fuseaux() {
     // Vraie liste du navigateur quand il l'expose (tous les navigateurs
     // recents), sinon repli sur les fuseaux les plus courants pour l'audience
@@ -371,9 +385,6 @@
       'Europe/Madrid', 'America/Montreal', 'Africa/Casablanca', 'Africa/Dakar', 'UTC'];
   }
   function preferences() {
-    var ligues = Array.isArray(prefs.favorite_leagues) ? prefs.favorite_leagues.slice() : [];
-    var connues = CHAMPIONNATS.slice();
-    ligues.forEach(function (l) { if (connues.indexOf(l) === -1) connues.push(l); });
     var langues = [
       ['fr', tr('compte_page.lang_name_fr', 'Français')], ['en', tr('compte_page.lang_name_en', 'English')],
       ['es', tr('compte_page.lang_name_es', 'Espanol')], ['de', tr('compte_page.lang_name_de', 'Deutsch')],
@@ -394,18 +405,18 @@
         // "contact@iashark.com" n'est pas traduit : c'est une adresse email.
         + '<p class="mt-1.5 text-[12.5px] text-soft">' + tr('compte_page.change_email_note_prefix', 'Pour changer d’adresse, écrivez à ') + '<a href="mailto:contact@iashark.com" class="text-cyan transition hover:underline">contact@iashark.com</a>.</p></div>'
         + '</div>')
+      // Les championnats suivis etaient regles ici par une liste de cases a
+      // cocher ecrivant public.user_preferences.favorite_leagues — colonne
+      // qu'aucun autre fichier du depot ne lisait : le choix etait confirme
+      // ("Préférences enregistrées.") et n'avait aucun effet, ni sur
+      // l'accueil ni ailleurs (constat du 16/09/2026). La liste etait en plus
+      // codee en dur avec des competitions non couvertes (Ligue 2,
+      // Championship, Jupiler Pro League, Süper Lig). Un seul reglage
+      // subsiste, celui qui agit : les etoiles de la section Compétitions,
+      // qui ecrivent le store lu par home-list.js.
       + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.leagues_label', 'Championnats suivis') + '</h2>'
-        + '<p class="mt-2 text-[13.5px] text-soft">' + tr('compte_page.leagues_hint', 'Utilisés pour mettre vos compétitions en avant.') + '</p>'
-        + '<fieldset class="mt-4"><legend class="sr-only">' + tr('compte_page.leagues_label', 'Championnats suivis') + '</legend>'
-        + '<div class="grid gap-x-5 gap-y-2.5 sm:grid-cols-2">'
-        // Noms de championnats jamais traduits (identifiants sportifs, voir
-        // i18n/i18n.js en tete de fichier).
-        + connues.map(function (nom, i) {
-            return '<label class="flex cursor-pointer items-center gap-2.5 text-[14px]">'
-              + '<input type="checkbox" class="h-4 w-4 accent-cyan" data-ligue="' + i + '" value="' + esc(nom) + '"'
-              + (ligues.indexOf(nom) !== -1 ? ' checked' : '') + '>' + esc(nomChampionnat(nom)) + '</label>';
-          }).join('')
-        + '</div></fieldset>')
+        + '<p class="mt-2 text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.leagues_moved_hint', 'Vos compétitions se choisissent dans la section Compétitions : elles remontent alors en premier dans la liste des matchs de l’accueil.') + '</p>'
+        + '<div class="mt-4"><button type="button" data-aller="competitions" class="text-[13.5px] font-semibold text-cyan transition hover:underline">' + tr('compte_page.fav_leagues_cta', 'Choisir mes compétitions') + '</button></div>')
       + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.display_heading', 'Affichage') + '</h2>'
         + '<div class="mt-4 grid gap-4 sm:grid-cols-2">'
         + '<div><label for="langue" class="block text-[13px] font-semibold text-soft">' + tr('compte_page.language_label', 'Langue') + '</label>'
@@ -694,10 +705,13 @@
     if ($('enregistrerNotifs')) $('enregistrerNotifs').addEventListener('click', enregistrerNotifications);
     if ($('emailMarketing')) $('emailMarketing').addEventListener('click', enregistrerEmailMarketing);
     if ($('souscrire')) {
+      selecteur = ($('proPlanPicker') && window.IasharkProPlanPicker) ? window.IasharkProPlanPicker.mount($('proPlanPicker'), {}) : null;
+      if (selecteur) selecteur.loadAvailability();
       monterConsentement();
       $('souscrire').addEventListener('click', function () { facturation('create-checkout-session', $('souscrire')); });
     }
     if ($('portail')) $('portail').addEventListener('click', function () { facturation('create-portal-session', $('portail')); });
+    if ($('changerDuree')) $('changerDuree').addEventListener('click', function () { facturation('create-portal-session', $('changerDuree'), { flow: 'change_interval' }); });
     if ($('exporter')) $('exporter').addEventListener('click', exporter);
     if ($('refusSuivi')) $('refusSuivi').addEventListener('click', basculerSuivi);
     racine.querySelectorAll('[data-fav-ligue]').forEach(function (b) {
@@ -714,8 +728,6 @@
   async function enregistrerPreferences() {
     var relacher = occuper($('enregistrerPrefs'), tr('compte_page.saving_label', 'Enregistrement…'));
     retour('msgPrefs', '');
-    var ligues = [];
-    racine.querySelectorAll('[data-ligue]').forEach(function (c) { if (c.checked) ligues.push(c.value); });
     var capitalBrut = $('bankroll').value.trim();
     var capital = capitalBrut === '' ? null : Number(capitalBrut);
     if (capital !== null && !(capital > 0)) {
@@ -724,7 +736,6 @@
     var ligne = {
       user_id: ctx.user.id,
       display_name: $('nomAffiche').value.trim().slice(0, 40) || null,
-      favorite_leagues: ligues,
       language: $('langue').value,
       timezone: $('fuseau').value.trim() || 'Europe/Paris',
       notify_match_analysis: prefs.notify_match_analysis !== false,
@@ -785,6 +796,8 @@
       document.head.appendChild(s);
     });
   }
+  // Selecteur de duree de la carte « Avec Pro » (compte gratuit).
+  var selecteur = null;
   function monterConsentement() {
     consentement = null;
     var bloc = $('checkoutConsent'), bouton = $('souscrire');
@@ -795,7 +808,7 @@
     });
   }
 
-  async function facturation(fonction, bouton) {
+  async function facturation(fonction, bouton, options) {
     var consentementPaiement = null;
     if (fonction === 'create-checkout-session') {
       if (!consentement) {
@@ -808,6 +821,10 @@
         return;
       }
       consentementPaiement = consentement.payload();
+      if (selecteur && !selecteur.isAvailable()) {
+        retour('msgFacturation', tr('pricing_page.checkout_interval_not_configured', 'Cette durée n’est pas encore ouverte au paiement. Choisis une autre durée ou reviens bientôt. Aucun montant n’a été prélevé.'), 'error');
+        return;
+      }
     }
     var relacher = occuper(bouton, tr('compte_page.opening_label', 'Ouverture…'));
     retour('msgFacturation', '');
@@ -816,10 +833,16 @@
       var token = s.data.session && s.data.session.access_token;
       // Paiement : marche (gb/mx/za, sinon absent = marche FR historique) et
       // repertoire de site (retour sur /<dir>/checkout-succes.html). Le portail
-      // de facturation n'en a pas besoin.
+      // de facturation recoit le repertoire (retour sur /<dir>/compte.html) et,
+      // pour « Changer de duree », le flux de changement d'offre.
       var corps = {};
+      var dir = repertoire();
+      if (fonction === 'create-portal-session') {
+        if (dir) corps.dir = dir;
+        if (options && options.flow === 'change_interval') corps.flow = 'change_interval';
+      }
       if (fonction === 'create-checkout-session') {
-        var dir = repertoire();
+        corps.interval = selecteur ? selecteur.interval() : 'month';
         var code = String((marche() && (marche().checkoutMarket || marche().code)) || dir || '').toLowerCase();
         if (code === 'gb' || code === 'mx' || code === 'za') corps.market = code;
         if (dir) corps.dir = dir;
@@ -836,6 +859,18 @@
       if (j.code === 'consent_required') {
         if (consentement && !consentement.check()) retour('msgFacturation', '');
         else retour('msgFacturation', j.message || tr('checkout_consent.error_required', 'Cochez les cases obligatoires ci-dessus pour continuer vers le paiement.'), 'error');
+        return;
+      }
+      if (j.processed === false && j.reason === 'interval_not_configured') {
+        retour('msgFacturation', tr('pricing_page.checkout_interval_not_configured', 'Cette durée n’est pas encore ouverte au paiement. Choisis une autre durée ou reviens bientôt. Aucun montant n’a été prélevé.'), 'error');
+        return;
+      }
+      if (j.processed === false && j.reason === 'already_subscribed') {
+        retour('msgFacturation', tr('pricing_page.checkout_already_subscribed', 'Tu as déjà un abonnement Pro. Pour changer de durée, passe par ton compte.'), 'error');
+        return;
+      }
+      if (j.processed === false && j.reason === 'price_mismatch') {
+        retour('msgFacturation', tr('pricing_page.checkout_price_mismatch', 'Le paiement de cette durée est momentanément indisponible. Aucun montant n’a été prélevé.'), 'error');
         return;
       }
       if (j.processed === false && j.reason === 'market_not_configured') {
@@ -895,7 +930,7 @@
         sb.from('users').select('email,plan,role,capital,created_at,updated_at').eq('id', ctx.user.id).maybeSingle(),
         sb.from('user_preferences').select('*').eq('user_id', ctx.user.id).maybeSingle(),
         sb.from('betting_decisions').select('*').eq('user_id', ctx.user.id),
-        sb.from('subscriptions').select('status,current_period_end,cancel_at_period_end,created_at').eq('user_id', ctx.user.id),
+        sb.from('subscriptions').select('status,billing_interval,current_period_end,cancel_at_period_end,created_at').eq('user_id', ctx.user.id),
         // Droit d'acces : visites liees au compte (funnel_events, politique
         // RLS funnel_events_select_own de 0025). Lecture seule de SES lignes.
         sb.from('funnel_events').select('created_at,event_type,page,locale,session_id,metadata')
@@ -1079,7 +1114,7 @@
     }
     var resultats = await Promise.all([
       sb.from('user_preferences').select('*').eq('user_id', ctx.user.id).maybeSingle(),
-      sb.from('subscriptions').select('status,current_period_end,cancel_at_period_end,created_at')
+      sb.from('subscriptions').select('status,billing_interval,current_period_end,cancel_at_period_end,created_at')
         .eq('user_id', ctx.user.id).order('created_at', { ascending: false }).limit(1).maybeSingle(),
       sb.from('betting_decisions').select('id', { count: 'exact', head: true }).eq('user_id', ctx.user.id),
       sb.from('email_preferences').select('marketing_opt_in').eq('user_id', ctx.user.id).maybeSingle()
@@ -1092,6 +1127,12 @@
     if (window.IasharkFavLeagues) {
       favStore = window.IasharkFavLeagues.createStore();
       try { await favStore.connectRemote(window.IasharkFavLeagues.supabaseAdapter(sb)); } catch (_e) {}
+    }
+    // Colonne billing_interval absente (migration 0026 pas encore appliquee) :
+    // relecture sans elle, pour ne jamais afficher un abonne comme sans abonnement.
+    if (resultats[1].error) {
+      resultats[1] = await sb.from('subscriptions').select('status,current_period_end,cancel_at_period_end,created_at')
+        .eq('user_id', ctx.user.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
     }
     abo = resultats[1].data || null;
     nbDecisions = resultats[2].count || 0;

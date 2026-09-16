@@ -164,11 +164,12 @@ test("prix : MX$ pour le peso, prix du marche ecrit dans le HTML genere", () => 
   assert.equal(builder.formatPrice("mx", "pro"), "MX$199");
   assert.match(builder.formatPrice("za", "pro"), /^R\s?199$/);
   assert.equal(builder.formatPrice("gb", "pro"), "£14.99");
-  const src = '<p><b data-market-price="pro">19,95 €</b><span data-market-price="edge">x</span></p>';
-  assert.equal(builder.bakeMarket(src, "mx"), '<p><b data-market-price="pro">MX$199</b><span data-market-price="edge">MX$299</span></p>');
-  assert.match(builder.bakeMarket(src, "en"), /data-market-price="edge" data-market-price-unavailable="">x</);
-  assert.match(read("mx/abonnement.html"), /data-market-price="pro"[^>]*>MX\$199</);
-  assert.match(read("gb/abonnement.html"), /data-market-price="pro"[^>]*>£14\.99</);
+  const src = '<p><b data-market-price="pro">19,95 €</b><span data-market-price="pro.year">x</span></p>';
+  assert.equal(builder.bakeMarket(src, "mx"), '<p><b data-market-price="pro">MX$199</b><span data-market-price="pro.year">MX$1,990</span></p>');
+  // Duree non vendue (annuel ZA) : texte intact et attribut, jamais un prix invente.
+  assert.match(builder.bakeMarket(src, "za"), /data-market-price="pro\.year" data-market-price-unavailable="">x</);
+  assert.match(read("mx/abonnement.html"), /data-market-price="pro\.month"[^>]*>MX\$199</);
+  assert.match(read("gb/abonnement.html"), /data-market-price="pro\.month"[^>]*>£14\.99</);
   assert.doesNotMatch(read("gb/index.html"), /id="heroPrice"[^>]*>[^<]*€/);
 });
 

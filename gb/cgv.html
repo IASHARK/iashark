@@ -153,7 +153,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Safer gambling</a>
   </nav>
   <h1 class="page-title">Terms of service and sale</h1>
-  <div class="page-date">Last updated: 13 September 2026</div>
+  <div class="page-date">Last updated: 16 September 2026</div>
 
   <div class="warn-box">
     <p>⚠️ IASHARK IS NOT A BOOKMAKER: WE DO NOT ACCEPT, PLACE OR TAKE BETS. OUR ANALYSES ARE STATISTICAL ESTIMATES — NO OUTCOME OR WINNINGS ARE GUARANTEED.<br>GAMBLING CAN CAUSE HARM. FREE, CONFIDENTIAL SUPPORT 24/7: NATIONAL GAMBLING HELPLINE <a href="tel:+448088020133">0808 8020 133</a>.<br>18+ ONLY.</p>
@@ -183,20 +183,29 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <p>Creating an account is free and requires a valid email address. A free account includes one full match analysis per day and the other free content described on our pricing page. What is included in the free account may change.</p>
   </section>
 
+  <!-- LEGAL REVIEW: sections 5, 6, 7 (model form) and 8 rewritten on 16/09/2026 for the single Pro plan sold weekly, monthly or annually - REVIEW status, to be reviewed by a UK lawyer before the Stripe prices are opened. Open points: (J1) start date of the DMCC Act 2024 subscription contracts regime (reminder notices, easy exit, renewal cooling-off) - the 30-day annual reminder below is good practice until then; (J2) no pro-rata refund on the annual plan vs CRA 2015 Part 2; (J4) reg. 36/37 on a weekly plan. Prices and computed values taken from config/markets.json (tests/cgv-pro-prices.test.js). Annual reminder template ready (annual_renewal_reminder), sending inactive until Resend and the scheduled job are enabled. -->
   <section class="section">
-    <h2>5. Paid subscriptions</h2>
-    <p>Paid plans give access to additional features, as described on our pricing page at the time you subscribe. Plans may be billed monthly or annually, where offered.</p>
-    <p>Before you pay, the checkout page shows the plan, its main features, the total price in pounds sterling (GBP) including any applicable taxes, the billing frequency and the fact that the subscription renews automatically. The contract is formed when your payment is confirmed. We will send you confirmation of your subscription by email.</p>
+    <h2>5. Pro subscription and billing periods</h2>
+    <p>IASHARK Pro is a single plan. It gives access to all the analyses and tools described on our pricing page at the time you subscribe. You can pay for Pro <strong>weekly, monthly or annually</strong>; <strong>the features are exactly the same whichever billing period you choose</strong>, only the amount and the frequency of payment change.</p>
+    <ul>
+      <li><strong>Weekly</strong> — £4.99 per week, renews automatically every week until you cancel.</li>
+      <li><strong>Monthly</strong> — £14.99 per month, renews automatically every month until you cancel.</li>
+      <li><strong>Annual</strong> — £149 per year, renews automatically for another year unless you cancel before the renewal date.</li>
+    </ul>
+    <p>All prices are total prices in pounds sterling (GBP), including any applicable taxes. For information, £149 a year works out at £12.42 a month, which is 17% less than paying monthly for 12 months (£179.88).</p>
+    <p>Before you pay, the checkout page shows the billing period, the plan's main features, the total price in pounds sterling (GBP) including any applicable taxes, the billing frequency and the fact that the subscription renews automatically. The contract is formed when your payment is confirmed. We will send you confirmation of your subscription by email.</p>
   </section>
 
   <section class="section">
     <h2>6. Payment and automatic renewal</h2>
     <p>Payments are processed securely by Stripe. We never see or store your full card details.</p>
     <ul>
-      <li>You pay at the start of each billing period (each month or each year, depending on your plan).</li>
-      <li><strong>Your subscription renews automatically</strong> at the end of each billing period, at the price then in force, until you cancel it.</li>
+      <li>You pay at the start of each billing period (week, month or year, depending on the period you chose).</li>
+      <li><strong>Your subscription renews automatically</strong> at the end of each billing period, for the same period and at the price then in force, until you cancel it.</li>
+      <li><strong>Annual plan: renewal reminder.</strong> At least 30 days before your annual subscription renews, we will email you the renewal date, the amount that will be charged and how to cancel online.</li>
+      <li><strong>Changing billing period.</strong> You can switch between weekly, monthly and annual from "My account". Moving to a longer period takes effect immediately: the new period is charged straight away, less a pro-rata credit for the unused part of the current one. Moving to a shorter period takes effect at the end of the period you have already paid for, with no refund and no extra charge until then. Our payment provider's secure billing area shows the new price and when the change takes effect before you confirm. An active subscription cannot be bought a second time.</li>
       <li>If we change the price, we will tell you in advance. The new price will only apply from your next renewal, and you can cancel before it applies.</li>
-      <li>If a renewal payment fails, our payment provider may retry it. Your paid access continues for 4 days after the end of the paid period; if payment is still not made, your account returns to the free plan.</li>
+      <li>If a renewal payment fails, our payment provider may retry it. Your paid access continues for 1 day after the end of the paid period on the weekly plan, and for 4 days on the monthly and annual plans; if payment is still not made, your account returns to the free plan.</li>
     </ul>
   </section>
 
@@ -205,13 +214,13 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <!-- LEGAL REVIEW: withdrawal clause updated 2026-09-13 for checkout consent boxes -->
     <!-- LEGAL REVIEW: (a) point (1) of the LEGAL REVIEW note at the top of this page describes the checkout before the consent boxes and must be re-checked once the new checkout is live; (b) reg. 37(4)(c) and reg. 16(3): the confirmation of the contract on a durable medium must include confirmation of the consent and acknowledgement - this clause says the confirmation email will include it; check it is implemented (point (2) of the note at the top says no confirmation email is implemented yet), otherwise the consumer bears no cost for content supplied; (c) clause drafted on the digital content basis (reg. 37): if the subscription is classified as a service (reg. 36), the right to cancel is only lost once the service is fully performed and a proportionate amount is payable on cancellation - redraft required. -->
     <!-- LEGAL REVIEW: clause aligned 2026-09-13 with checkout consent boxes; confirm digital service vs digital content classification (CJEU C-234/25) and proportionate amount method -->
-    <p>You may cancel within 14 days of subscribing without giving a reason (Consumer Contracts Regulations 2013). At checkout you ask for your subscription to start immediately and acknowledge that you lose the right to cancel once you get access to the digital content (reg. 37). If any part of the subscription is treated as a service and you cancel within 14 days, you pay a proportionate amount for what was supplied until you told us (reg. 36) and we refund the rest within 14 days. Your rights under the Consumer Rights Act 2015 are not affected.</p>
+    <p>You may cancel within 14 days of subscribing without giving a reason (Consumer Contracts Regulations 2013), whichever billing period you choose. At checkout you ask for your subscription to start immediately and acknowledge that you lose the right to cancel once you get access to the digital content (reg. 37). If any part of the subscription is treated as a service and you cancel within 14 days, you pay a proportionate amount for what was supplied until you told us (reg. 36) and we refund the rest within 14 days. Your rights under the Consumer Rights Act 2015 are not affected.</p>
     <p>Subscribing requires ticking a box accepting these Terms; the accepted version, language and date are recorded.</p>
     <p><strong>How to cancel.</strong> Email <a href="mailto:contact@iashark.com">contact@iashark.com</a> with a clear statement that you are cancelling, before the 14 days end. You can use the model form below, but you do not have to. We will refund you without undue delay and no later than 14 days after we are told of your decision, using the payment method you used.</p>
     <div class="highlight">
       <p><strong>Model cancellation form</strong><br>
       To: IASHARK, contact@iashark.com<br>
-      I hereby give notice that I cancel my contract for the supply of the following service: IASHARK subscription [plan].<br>
+      I hereby give notice that I cancel my contract for the supply of the following service: IASHARK Pro subscription (billing period: [weekly / monthly / annual]).<br>
       Ordered on: [date]<br>
       Name: [name]<br>
       Account email address: [email]<br>
@@ -223,7 +232,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <h2>8. Cancelling your subscription at any time</h2>
     <p>You can stop your subscription renewing at any time, free of charge, from the "My account" page (which opens our payment provider's secure billing area), or by emailing us.</p>
     <ul>
-      <li>Cancellation takes effect at the end of your current billing period. You keep paid access until then and you will not be charged again.</li>
+      <li>Cancellation takes effect at the end of your current billing period (week, month or year). You keep paid access until then and you will not be charged again.</li>
       <li>Apart from your 14-day right to cancel and your statutory rights (for example if the service is faulty), we do not refund the rest of a billing period that has already started.</li>
       <li>Deleting your account from "My account" cancels any active subscription first.</li>
     </ul>
@@ -284,5 +293,6 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
 <script src="/lib/market-config.js"></script>
 <script src="/site-prefs.js"></script>
 <script src="/bottom-navigation.js"></script>
+<script src="/site-header.js" defer></script>
 </body>
 </html>

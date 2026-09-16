@@ -289,12 +289,12 @@ test("renewal_reminder_scan : fenetre J+7 heure de Mexico, montant de l'apercu S
     [STRIPE + "/invoices/create_preview"]: () => ({ body: { amount_due: 17910, currency: "mxn" } }),
     [RESEND]: { body: { id: "email_mx" } }
   };
-  const env = Object.assign({ STRIPE_SECRET_KEY: "sk_test_x", STRIPE_PRICE_ID_MX: "price_mx", RESEND_API_KEY: "re_test", EMAIL_FROM: "a@iashark.com" }, COMPANY_ENV);
+  const env = Object.assign({ STRIPE_SECRET_KEY: "sk_test_x", RESEND_API_KEY: "re_test", EMAIL_FROM: "a@iashark.com" }, COMPANY_ENV);
   const { deps, calls } = makeDeps({ env, db, routes });
   const res = await handleRequest(post({ type: "renewal_reminder_scan" }), deps);
   const body = await res.json();
   assert.equal(res.status, 200);
-  assert.deepEqual(query, { priceId: "price_mx", startIso: "2026-09-21T06:00:00.000Z", endIso: "2026-09-22T06:00:00.000Z" });
+  assert.deepEqual(query, { market: "mx", interval: "month", startIso: "2026-09-21T06:00:00.000Z", endIso: "2026-09-22T06:00:00.000Z" });
   assert.deepEqual([body.checked, body.sent, body.skipped, body.failed], [3, 1, 2, 0]);
   assert.deepEqual(body.results.map((r) => r.reason || r.status), ["sent", "cancel_at_period_end", "renewal_date_changed"]);
   const preview = calls.find((c) => c.url.endsWith("/invoices/create_preview"));
@@ -316,7 +316,7 @@ test("renewal_reminder_scan : daysBefore parametrable, dryRun, configuration abs
     [STRIPE + "/subscriptions/"]: { body: mxSubscription("sub_OK", { items: { data: [{ current_period_end: Date.parse("2026-09-17T15:00:00Z") / 1000, price: { unit_amount: 19900, currency: "mxn", recurring: { interval: "month" } } }] } }) },
     [STRIPE + "/invoices/create_preview"]: { body: { amount_due: 19900, currency: "mxn" } }
   };
-  const env = { STRIPE_SECRET_KEY: "sk_test_x", STRIPE_PRICE_ID_MX: "price_mx", MX_RENEWAL_REMINDER_DAYS: "3" };
+  const env = { STRIPE_SECRET_KEY: "sk_test_x", MX_RENEWAL_REMINDER_DAYS: "3" };
   let t = makeDeps({ env, db, routes });
   let body = await (await handleRequest(post({ type: "renewal_reminder_scan", dryRun: true }), t.deps)).json();
   assert.equal(query.startIso, "2026-09-17T06:00:00.000Z", "MX_RENEWAL_REMINDER_DAYS=3");
@@ -326,12 +326,12 @@ test("renewal_reminder_scan : daysBefore parametrable, dryRun, configuration abs
 
   body = await (await handleRequest(post({ type: "renewal_reminder_scan", daysBefore: 10 }), t.deps)).json();
   assert.equal(body.window.localDate, "2026-09-24");
-  assert.equal((await handleRequest(post({ type: "renewal_reminder_scan", daysBefore: 90 }), t.deps)).status, 400);
+  assert.equal((await handleRequest(post({ type: "renewal_reminder_scan", daysBefore: 91 }), t.deps)).status, 400);
 
   t = makeDeps({ db });
   body = await (await handleRequest(post({ type: "renewal_reminder_scan" }), t.deps)).json();
   assert.deepEqual([body.processed, body.reason], [false, "not_configured"]);
-  assert.deepEqual(body.missing, ["STRIPE_PRICE_ID_MX", "STRIPE_SECRET_KEY"]);
+  assert.deepEqual(body.missing, ["STRIPE_SECRET_KEY"]);
   assert.equal(t.calls.length, 0);
 });
 
@@ -347,4 +347,57 @@ test("renewal_reminder par stripeSubscriptionId (webhook invoice.upcoming) : san
   const body = await (await handleRequest(post({ type: "renewal_reminder", stripeSubscriptionId: "sub_OK" }), deps)).json();
   assert.deepEqual([body.ok, body.sent, body.reason, body.market], [true, false, "resend_not_configured", "mx"]);
   assert.ok(!calls.some((c) => c.url === RESEND));
+});
+
+// ------------------------------------- scan planifie : rappel annuel par marche
+
+test("renewal_reminder_scan annuel : selection marche + duree, langue du paiement, cle J-n, ZA sans gabarit", async () => {
+  const { handleRequest } = await loadHandler();
+  let query = null;
+  const annual = {
+    id: "sub_FRY", status: "active", cancel_at_period_end: false,
+    customer: { id: "cus_fr", email: "annuel@example.fr" },
+    metadata: { market: "fr", consent_dir: "it" },
+    items: { data: [{ current_period_end: Date.parse("2026-10-29T10:00:00Z") / 1000, price: { unit_amount: 19900, currency: "eur", recurring: { interval: "year" }, product: { name: "IASHARK Pro" } } }] }
+  };
+  const db = { listRenewingSubscriptions: async (args) => { query = args; return [{ stripe_subscription_id: "sub_FRY" }]; } };
+  const routes = {
+    [STRIPE + "/subscriptions/"]: { body: annual },
+    [STRIPE + "/invoices/create_preview"]: { body: { amount_due: 19900, currency: "eur" } },
+    [RESEND]: { body: { id: "email_fr_year" } }
+  };
+  const env = Object.assign({ STRIPE_SECRET_KEY: "sk_test_x", RESEND_API_KEY: "re_test", EMAIL_FROM: "a@iashark.com" }, COMPANY_ENV);
+  const t = makeDeps({ env, db, routes });
+  const body = await (await handleRequest(post({ type: "renewal_reminder_scan", market: "fr", interval: "year" }), t.deps)).json();
+  assert.deepEqual([query.market, query.interval], ["fr", "year"], "selection par marche et duree (migration 0026)");
+  assert.equal(body.window.daysBefore, 45, "FR : J-45 par defaut (L215-1)");
+  assert.equal(body.window.localDate, "2026-10-29");
+  assert.deepEqual([body.checked, body.sent, body.skipped, body.failed], [1, 1, 0, 0]);
+  const sent = t.calls.filter((c) => c.url === RESEND);
+  assert.equal(sent[0].init.headers["Idempotency-Key"], "annual_renewal_reminder:fr:sub_FRY:2026-10-29:J-45");
+  const payload = JSON.parse(sent[0].init.body);
+  assert.deepEqual(payload.to, ["annuel@example.fr"]);
+  assert.match(payload.subject, /Il tuo abbonamento annuale IASHARK Pro si rinnova il 29 ottobre 2026/, "langue du repertoire du paiement (/it/)");
+  assert.match(payload.text, /L215-1/);
+  assert.match(payload.text, /199,00\s€/);
+
+  // Resend non configure : rendu valide, aucun envoi (rappels inactifs).
+  const t2 = makeDeps({ env: { STRIPE_SECRET_KEY: "sk_test_x" }, db, routes });
+  const b2 = await (await handleRequest(post({ type: "renewal_reminder_scan", market: "fr", interval: "year" }), t2.deps)).json();
+  assert.deepEqual([b2.sent, b2.notSent], [0, 1]);
+  assert.ok(!t2.calls.some((c) => c.url === RESEND));
+
+  // ZA : aucun annuel vendu, aucun gabarit, aucun appel Stripe.
+  const t3 = makeDeps({ env: { STRIPE_SECRET_KEY: "sk_test_x" }, db, routes });
+  const b3 = await (await handleRequest(post({ type: "renewal_reminder_scan", market: "za", interval: "year" }), t3.deps)).json();
+  assert.deepEqual([b3.processed, b3.reason, b3.market], [false, "no_template_for_market", "za"]);
+  assert.equal(t3.calls.length, 0);
+  // FR mensuel : aucun rappel prevu (contrat a duree indeterminee).
+  const b4 = await (await handleRequest(post({ type: "renewal_reminder_scan", market: "fr", interval: "month" }), t3.deps)).json();
+  assert.equal(b4.reason, "no_template_for_market");
+  // Duree invalide, et delai hors fenetre legale : avertissement journalise.
+  assert.equal((await handleRequest(post({ type: "renewal_reminder_scan", market: "fr", interval: "day" }), t3.deps)).status, 400);
+  const t5 = makeDeps({ env: { STRIPE_SECRET_KEY: "sk_test_x" }, db, routes });
+  await handleRequest(post({ type: "renewal_reminder_scan", market: "fr", interval: "year", daysBefore: 10, dryRun: true }), t5.deps);
+  assert.ok(t5.logs.some((l) => l[0] === "warn" && /hors de la fenetre recommandee/.test(l[1])), "delai hors fenetre signale");
 });

@@ -77,12 +77,16 @@ test("pastille de niveau : 3 libelles, 3 barres (3/3, 2/3, 1/3), note « pas une
   assert.equal(HL.probBandOf({ prob_band: 0.8 }), null);
 });
 
-test("Pro confirme ou match offert : Proba. x/10, jauge, marche ; sans signal : pas de pari force", () => {
+test("Pro confirme ou match offert : Proba. x/10 et jauge, jamais le marche ; sans signal : pas de pari force", () => {
   const pro = HL.renderMatchRow(Object.assign(base({ prob_band: "high" }), SECRET), ctx({ isPro: true }), helpers(), 0);
   assert.match(pro, /is-open/);
   assert.match(pro, /<b>7,7<\/b><small>\/10<\/small>/);
   assert.match(pro, /hl-gauge/);
-  assert.match(pro, /Plus de 2,5 buts/);
+  // Le marche retenu a quitte la liste le 16/09/2026 : il se lit sur la fiche
+  // du match. Ni a l'ecran, ni dans l'aria-label — sinon le pari repart par le
+  // lecteur d'ecran.
+  assert.doesNotMatch(pro, /Plus de 2,5 buts/, "le marche retenu est revenu dans la liste");
+  assert.doesNotMatch(pro, /Marché/, "le marche retenu est revenu dans la liste");
   assert.doesNotMatch(pro, /hl-band|hl-lockpill/, "le Pro garde la note exacte, pas la pastille");
   const free = HL.renderMatchRow(Object.assign(base({ is_free: true }), SECRET), ctx({ freeMatchId: 1570383, hasAccount: true }), helpers(), 0);
   assert.match(free, /is-open is-free/);
@@ -190,12 +194,19 @@ test("matchs favoris : store {id, ko}, nettoyage des matchs passes, fusion avec 
   assert.deepEqual(calls, [{ data: { fav_matches: [{ id: "8", ko: now + 1e6 }] } }], "seul fav_matches est ecrit (fav_leagues intact)");
 });
 
-test("competition : favoris puis A->Z, en-tete « N matchs · M analyses pretes », ajout aux favoris suivi", () => {
+test("competition : favoris puis A->Z, en-tete « N matchs » sans decompte d'analyses, ajout aux favoris suivi", () => {
   const H = helpers();
   const groups = HL.groupByLeague([base({ league: "La Liga" }), base({ id: 2, league_key: "el", league: "Europa League", has_signal: false, no_signal: true }), base({ id: 3 })], H);
   assert.deepEqual(groups.map((g) => g.name), ["Europa League", "La Liga"]);
   const block = HL.renderLeagueBlock(groups[1], ctx(), H, 0);
-  assert.match(block, /2 matchs · <b>2 analyses prêtes<\/b>/);
+  // Le decompte « M analyses prêtes » a ete retire de l'en-tete le 16/09/2026 :
+  // il repetait ce que chaque ligne dit deja, et chargeait la barre de competition.
+  assert.match(block, />2 matchs</);
+  const stats = (block.match(/<span class="hl-league-stats">([^<]*(?:<[^>]+>[^<]*)*?)<\/span>/) || [])[1] || "";
+  assert.doesNotMatch(stats, /analyse/i, "le decompte d'analyses est revenu dans l'en-tete : " + stats);
+  // L'aria-label des lignes verrouillees, lui, continue de decrire l'etat au
+  // lecteur d'ecran : c'est la seule mention qui doit subsister.
+  assert.match(block, /aria-label="[^"]*Analyse prête, réservée aux abonnés Pro/);
   assert.match(block, /data-track="laliga" data-track-kind="home_fav_add"/);
   const favBlock = HL.renderLeagueBlock(groups[1], ctx({ favorites: { has: () => true, list: () => ["laliga"] } }), H, 0);
   assert.doesNotMatch(favBlock, /home_fav_add/, "retrait d'un favori : pas d'evenement d'ajout");

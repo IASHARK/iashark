@@ -1515,7 +1515,18 @@
     "privacy_policy_link": "Privacy policy",
     "privacy_opt_out_saved": "Done: your visits are no longer linked to your account.",
     "privacy_opt_in_saved": "Your visits are linked to your account again.",
-    "privacy_opt_out_device_only": "Saved on this device. Saving to your account failed: try again later to apply it to your other devices."
+    "privacy_opt_out_device_only": "Saved on this device. Saving to your account failed: try again later to apply it to your other devices.",
+    "sub_interval_label": "Billing period",
+    "interval_week": "Weekly",
+    "interval_month": "Monthly",
+    "interval_year": "Annual",
+    "interval_unknown": "Syncing",
+    "next_renewal_label": "Next renewal",
+    "change_interval_cta": "Change billing period",
+    "change_interval_note": "Moving to a longer billing period takes effect straight away, pro rata; moving to a shorter one takes effect at the end of the period you have already paid for. The amount and the date it takes effect are shown before you confirm.",
+    "pro_durations_note": "Weekly, monthly or annual: the same Pro access, cancel anytime.",
+    "leagues_moved_hint": "Your competitions are chosen in the Competitions section: they then appear first in the match list on the home page.",
+    "fav_leagues_cta": "Choose my competitions"
   },
   "history_page": {
     "title_span": "HIST",
@@ -1572,42 +1583,29 @@
   },
   "landing_page": {
     "title": "IASHARK — The model that reads the match before kickoff",
-    "description": "Poisson, Dixon-Coles, Monte Carlo, Elo: IASHARK analyzes every match with real statistical models. One free match every day.",
+    "description": "Expected goals, probability of every market, gap with the odds: IASHARK analyses every match with a real statistical model. One free match every day.",
     "nav_cta": "VISIT THE SITE →",
     "eyebrow": "STATISTICAL MODEL · FOOTBALL",
-    "hero_sub": "IASHARK combines <b>xG, recent form, schedule fatigue and head-to-head</b> to produce a probability signal on every match, before kickoff.",
+    "hero_sub": "IASHARK starts from <b>both teams' real statistics, current and previous season</b>, to produce a probability signal on every match, before kickoff.",
     "hero_cta": "SEE TODAY'S FREE MATCH",
     "hero_cta_note_pre": "No credit card · ",
     "hero_cta_note_b": "1 free analysis every day",
-    "strip_poisson": "",
-    "strip_poisson_b": "POISSON MODEL",
-    "strip_dc_b": "DIXON-COLES",
-    "strip_dc_rest": " LOW-SCORE ADJUSTMENT",
-    "strip_mc": "",
-    "strip_mc_b": "MONTE CARLO SIMULATION",
-    "strip_elo": "",
-    "strip_elo_b": "DYNAMIC ELO",
-    "strip_elo_rest": " RANKING",
-    "strip_shin": "",
-    "strip_shin_b": "SHIN PROBABILITIES",
-    "strip_kelly": "",
-    "strip_kelly_b": "FRACTIONAL KELLY",
     "lbl_method": "THE METHOD",
-    "title_method_pre": "Four models, ",
+    "title_method_pre": "Four steps, ",
     "title_method_b": "one signal",
     "title_method_post": " per match.",
-    "model1_tag": "MODEL 1",
-    "model1_name": "Poisson",
-    "model1_desc": "Distribution of expected goals for each team, home and away.",
-    "model2_tag": "MODEL 2",
-    "model2_name": "Dixon-Coles",
-    "model2_desc": "Correction for low scores (0-0, 1-0, 1-1) that pure Poisson underestimates.",
-    "model3_tag": "MODEL 3",
-    "model3_name": "Monte Carlo",
-    "model3_desc": "Thousands of match simulations to get a robust distribution of outcomes.",
-    "model4_tag": "MODEL 4",
-    "model4_name": "Elo & Shin",
-    "model4_desc": "Real team strength over time, and correction of the implied-probability bias.",
+    "model1_tag": "STEP 1",
+    "model1_name": "Team strengths",
+    "model1_desc": "What each team produces and concedes in its real situation, at home or away, compared with the level of its competition.",
+    "model2_tag": "STEP 2",
+    "model2_name": "Caution early in the season",
+    "model2_desc": "When few matches have been played, the previous season and a reference level weigh more, then fade away.",
+    "model3_tag": "STEP 3",
+    "model3_name": "Probability of every market",
+    "model3_desc": "Expected goals become the probability of every scoreline, then of every market, corrected by a calibration learnt from past seasons.",
+    "model4_tag": "STEP 4",
+    "model4_name": "Match simulation",
+    "model4_desc": "The match is replayed a large number of times to bring out the most likely scorelines. The simulation does not choose the bet.",
     "proof_title_pre": "Nothing to hide. ",
     "proof_title_b": "Everything is tracked.",
     "proof_desc": "Every published analysis stays visible in our history: recommended market, announced probability, real result. You check, we never rewrite anything after the fact.",
@@ -1616,9 +1614,9 @@
     "title_practice_pre": "From raw data to a ",
     "title_practice_b": "usable signal.",
     "step1_title": "We ingest the data",
-    "step1_desc": "Schedules, probable lineups, head-to-head history and xG stats fed in continuously, league by league.",
+    "step1_desc": "Fixtures, standings, recent results, head-to-head history and announced absences, league by league.",
     "step2_title": "The model computes",
-    "step2_desc": "Poisson, Dixon-Coles and Monte Carlo run in parallel to produce a probability distribution for each market.",
+    "step2_desc": "Expected goals, the probability of every scoreline, then of every market — never using the odds.",
     "step3_title": "You get the signal",
     "step3_desc": "A clear sheet per match: probability, reliability level, and the market where the model detects a gap with the real market.",
     "lbl_access": "ACCESS",
@@ -1722,7 +1720,7 @@
       },
       "landing": {
         "title": "IASHARK — The model that reads the match before kickoff",
-        "description": "Poisson, Dixon-Coles, Monte Carlo, Elo: IASHARK analyses every match with real statistical models. One free match every day."
+        "description": "Expected goals, probability of every market, gap with the odds: IASHARK analyses every match with a real statistical model. One free match every day."
       }
     },
     "switcher": {
@@ -1807,7 +1805,11 @@
     "seo_times_paris": "Paris time",
     "premium_detail_updating": "Detailed analysis being updated",
     "free_gate_label": "Free analysis",
-    "free_gate_text": "Create a free account to see the free analysis"
+    "free_gate_text": "Create a free account to see the free analysis",
+    "pro_other_durations": "Also available weekly ({pro_week_price}) or annually ({pro_year_price}).",
+    "pro_other_durations_week": "Also available weekly ({pro_week_price}).",
+    "free_card_cta": "See the full analysis",
+    "free_gate_cta": "Create a free account"
   },
   "site_header": {
     "nav_today": "Today's analyses",
@@ -1822,16 +1824,16 @@
     "plan_pro_commitment": "No commitment — cancel anytime",
     "hero_title": "No emotion.<br><b>Only probabilities.</b>",
     "cta_note": "No credit card · <b>1 free analysis every day</b>",
-    "strip_poisson": "<b>POISSON MODEL</b>",
-    "strip_dc": "<b>DIXON-COLES</b> LOW-SCORE ADJUSTMENT",
-    "strip_mc": "<b>MONTE CARLO SIMULATION</b>",
-    "strip_elo": "<b>DYNAMIC ELO</b> RANKING",
-    "strip_shin": "<b>SHIN PROBABILITIES</b>",
-    "strip_kelly": "<b>FRACTIONAL KELLY</b>",
-    "title_method": "Four models, <b>one signal</b> per match.",
+    "title_method": "Four steps, <b>one signal</b> per match.",
     "title_practice": "From raw data to a <b>usable signal.</b>",
     "title_access": "Start for free. <b>Upgrade to Pro</b> when you want to see everything.",
-    "final_title": "The next match already has <b>a signal.</b>"
+    "final_title": "The next match already has <b>a signal.</b>",
+    "strip_1": "<b>EXPECTED GOALS</b> PER TEAM",
+    "strip_2": "<b>PROBABILITY</b> OF EVERY SCORELINE",
+    "strip_3": "MATCH <b>SIMULATION</b>",
+    "strip_4": "CURRENT <b>AND PREVIOUS SEASON</b>",
+    "strip_5": "<b>BOOKMAKER MARGIN</b> REMOVED",
+    "strip_6": "NO <b>FORCED BET</b>"
   },
   "about_page": {
     "meta_title": "About — IASHARK",
@@ -1840,13 +1842,13 @@
     "hero_text": "IASHARK analyses every match using real sports data from the current and previous seasons and a statistical score model. No martingale, no miracle system — the same method, applied in exactly the same way, match after match.",
     "method_label": "METHODOLOGY",
     "method_title": "How the model works",
-    "method_text": "For each match, the system starts from both teams' real statistics over the current and previous seasons: goals scored and conceded, plus recent xG and shots when available. From these it estimates each team's expected goals, then the probability of every score with a Dixon-Coles model. For the 1X2, over/under 2.5 goals and both-teams-to-score markets, these probabilities are corrected by a calibration learnt from past seasons. Odds never enter this calculation.",
+    "method_text": "For each match, the system starts from both teams' real statistics over the current and previous seasons: goals scored and conceded, plus the quality of the chances created and conceded when recent data allows. From these it estimates each team's expected goals, then the probability of every score. For the 1X2, over/under 2.5 goals and both-teams-to-score markets, these probabilities are corrected by a calibration learnt from past seasons. Odds never enter this calculation.",
     "card_history_title": "CURRENT AND PREVIOUS SEASON",
     "card_history_text": "The calculation uses the current season and the previous one. Early in the season, the previous season and a reference average carry more weight, then less and less as matches are played.",
     "card_crossed_title": "ONE SCORE MODEL",
-    "card_crossed_text": "Probabilities come from a single score model (Dixon-Coles), calibrated on three markets. It is not a vote between models: the Poisson calculation and the simulation are only used to measure the agreement shown in the reliability indicator.",
+    "card_crossed_text": "Probabilities come from a single score model, calibrated on three markets. It is not a vote between models: the parallel calculations and the simulation are only used to measure the agreement shown in the reliability indicator.",
     "card_simulations_title": "SIMULATIONS",
-    "card_simulations_text": "Each match is simulated 5,000 times (Monte Carlo method) to show the most likely scores. These simulations are not used to choose the bet.",
+    "card_simulations_text": "Each match is replayed a large number of times to show the most likely scores. These simulations are not used to choose the bet.",
     "card_reliability_title": "RELIABILITY SCORE",
     "card_reliability_text": "A separate indicator combines agreement between the calculations, the quality of the available data and the number of matches played, for that specific match — it never changes the probability.",
     "single_label": "READ THIS FIRST",
@@ -1861,7 +1863,7 @@
     "footer_note": "IASHARK — Published analyses are for information purposes only",
     "hero_title": "No gut feeling.<br>Just <b>data</b>, a statistical model,<br>one consistent method.",
     "method_selection": "The highlighted market is chosen automatically by a fixed rule: among the markets the model calculates and a bookmaker actually prices, the one with the highest <b>estimated probability</b>, preferably among those reaching a minimum price, and below a probability cap. A match that has already started, or is about to start when the calculation runs, gets no bet. The probability shown is the model's own, never adjusted afterwards. A language model then writes the explanatory text, but it does not calculate, choose or change any figure.",
-    "method_value": "<b>The gap with the market</b>: the model then compares its probability with the one implied by the odds, once the bookmaker's margin is removed (Shin's method where possible). This gap is shown for information: it is not used to choose the market and guarantees no winnings.",
+    "method_value": "<b>The gap with the market</b>: the model then compares its probability with the one implied by the odds, once the bookmaker's margin is removed. This gap is shown for information: it is not used to choose the market and guarantees no winnings.",
     "single_text": "At its core, the system analyses <b>each match independently</b> — one single bet at a time, never combinations of several bets.",
     "legal_not_operator": "<b>IASHARK is not a sports betting operator.</b> We do not take any stakes, manage any player accounts or pay out any winnings. To place a real bet in France, you must use an operator licensed by the ANJ (Autorité Nationale des Jeux, the French gambling regulator).",
     "legal_not_advisor": "<b>We are not financial advisers, licensed professional traders or sports betting professionals.</b> IASHARK is a statistical analysis tool for informational and educational purposes — in no way an investment, trading or betting advisory service.",
@@ -1877,7 +1879,8 @@
       "za": "<b>IASHARK is not a gambling operator.</b> We do not take any stakes, manage any player accounts or pay out any winnings. To place a real bet in South Africa, you must use a bookmaker licensed by the gambling board of your province.",
       "mx": "<b>IASHARK is not a gambling operator.</b> We do not take any stakes, manage any player accounts or pay out any winnings. To place a real bet in Mexico, you must use an operator holding a valid permit from the Ministry of the Interior (SEGOB)."
     },
-    "method_link": "Read the full methodology: data, calculations, limits"
+    "method_link": "Read the full methodology: data, calculations, limits",
+    "method_undisclosed": "<b>What we do not detail</b>: neither the formulas, the weightings, the thresholds, the exact list of variables, nor the names of the tools that run the calculation. What we do publish: the principle behind each step, what does and does not enter the calculation, and the cases where the system declines to make a call."
   },
   "pricing_page": {
     "meta_title": "Pro subscription — IASHARK",
@@ -1887,7 +1890,7 @@
     "heading": "Unlock all of IASHARK",
     "intro": "Get access to every analysis and to the tools for tracking your decisions methodically.",
     "per_month": "/ month",
-    "commitment": "No commitment · Cancel anytime",
+    "commitment": "The same Pro access for every period · Cancel anytime",
     "pro_feat_analyses": "Full analysis on every match",
     "pro_feat_filters": "Advanced filters and detailed reliability",
     "pro_feat_journal": "Synced decisions journal",
@@ -1914,7 +1917,10 @@
     "checkout_opening": "Opening secure payment…",
     "checkout_market_not_configured": "Payment isn't available yet in this country. No amount has been charged.",
     "checkout_unavailable": "Online payment will be available soon.",
-    "checkout_error": "Unable to open payment right now."
+    "checkout_error": "Unable to open payment right now.",
+    "checkout_interval_not_configured": "This billing period isn’t open for payment yet. Choose another period or come back soon. Nothing has been charged.",
+    "checkout_already_subscribed": "You already have a Pro subscription. To change your billing period, go to your account.",
+    "checkout_price_mismatch": "Payment for this billing period is temporarily unavailable. Nothing has been charged."
   },
   "demo_page": {
     "meta_title": "Example IASHARK analysis — Paris Saint Germain vs Monaco",
@@ -2014,7 +2020,7 @@
   },
   "demo_data": {
     "conseil_public": "Under 1.5 first-half goals is the market best supported by this match's data: a 64% model probability, and first-half goal windows among the lowest of the match.",
-    "analyse_card": "The goals-by-window data confirm that the first half accounts for only 40% of total expected goals (14%+13%+13%), against 61% in the second half (19%+20%+22%). The Monte Carlo model has 1-1 as the most likely score at 10%, and 1-0 at 8%, which implies that a large majority of simulations stay at 0 or 1 goal at half-time. PSG show an xG of 1.94 over the whole match, which leaves little volume for the first half alone, especially as Monaco (#1) kept a clean sheet in their only away game this season.",
+    "analyse_card": "The goals-by-window data confirm that the first half accounts for only 40% of total expected goals (14%+13%+13%), against 61% in the second half (19%+20%+22%). The simulation has 1-1 as the most likely score at 10%, and 1-0 at 8%, which implies that a large majority of simulations stay at 0 or 1 goal at half-time. PSG show an xG of 1.94 over the whole match, which leaves little volume for the first half alone, especially as Monaco (#1) kept a clean sheet in their only away game this season.",
     "contexte": "PSG are ranked #12 at home, with 2 consecutive draws in their recent form, while Monaco are ranked #1 away, with 2 consecutive wins and 1 clean sheet in 1 away match. PSG's xG stands at 1.94 for and 1.07 against, Monaco's at 1.60 for and 1.39 against, reflecting two attacking sides whose goal output is mostly concentrated in the second half.",
     "pari_rec": "First half: under 1.5 goals",
     "market_source": "Average odds across multiple bookmakers",
@@ -2237,7 +2243,8 @@
     },
     "free_gated": "Free analysis",
     "free_gated_cta": "Free account",
-    "aria_free_gated": "Free analysis with a free account."
+    "aria_free_gated": "Free analysis with a free account.",
+    "aria_open": "Analysis available."
   },
   "rg_footer": {
     "age_line": "18+ · Under-18s prohibited · Play responsibly"
@@ -2258,5 +2265,20 @@
     "unsub_error": "We could not unsubscribe you. Please try again in a few moments, or write to contact@iashark.com.",
     "unsub_account_link": "Manage my emails in My account",
     "unsub_home_link": "Back to the site"
+  },
+  "pro_plans": {
+    "legend": "Choose your billing period",
+    "week_label": "Week",
+    "month_label": "Month",
+    "year_label": "Year",
+    "per_week": "/ week",
+    "per_month": "/ month",
+    "per_year": "/ year",
+    "year_equiv": "that’s {price} / month",
+    "year_savings": "{pct}% less than 12 months at the monthly price",
+    "billed_week": "Charged every week · no minimum term · cancel anytime",
+    "billed_month": "Charged every month · no minimum term · cancel anytime",
+    "billed_year": "Charged {price} once a year · renews automatically every year · cancel before renewal",
+    "unavailable": "Coming soon"
   }
 }

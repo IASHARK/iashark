@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title data-i18n="geo.meta.landing.title">IASHARK — Le modèle qui lit le match avant qu'il commence</title>
-<meta name="description" content="Poisson, Dixon-Coles, Monte Carlo, Elo : IASHARK analyse chaque match avec de vrais modèles statistiques. Un match gratuit chaque jour." data-i18n-attr="content:geo.meta.landing.description">
+<meta name="description" content="Buts attendus, probabilité de chaque marché, écart avec la cote : IASHARK analyse chaque match avec un vrai modèle statistique. Un match gratuit chaque jour." data-i18n-attr="content:geo.meta.landing.description">
 <meta name="robots" content="noindex, follow">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
@@ -32,9 +32,9 @@ a{color:inherit;}
 .hdr-in{max-width:1100px;margin:0 auto;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;text-decoration:none;}
 .logo span{color:var(--cyan);}
-/* Logo image, comme les autres en-tetes (QA 14/09/2026). PNG sans alpha : lighten efface son fond noir. */
+/* Logo image, comme les autres en-tetes (QA 14/09/2026). */
 .logo{display:inline-flex;align-items:center;min-height:44px;}
-.logo img{display:block;height:28px;width:auto;mix-blend-mode:lighten;}
+.logo img{display:block;height:28px;width:auto;}
 .btn-nav{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:8px 16px;border-radius:8px;border:1px solid rgba(34,211,238,0.3);background:rgba(34,211,238,0.08);color:var(--cyan);text-decoration:none;transition:.2s;}
 .btn-nav:hover{background:rgba(34,211,238,0.16);}
 
@@ -159,7 +159,7 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
     <div class="hero-shark reveal">🦈</div>
     <div class="eyebrow reveal" style="animation-delay:.05s"><span class="dot"></span> <span data-i18n="landing_page.eyebrow">MODÈLE STATISTIQUE · FOOTBALL</span></div>
     <h1 class="reveal" style="animation-delay:.1s" data-i18n-html="landing_v2.hero_title">Aucune émotion.<br><b>Que des probabilités.</b></h1>
-    <p class="sub reveal" style="animation-delay:.15s" data-i18n-html="landing_page.hero_sub">IASHARK croise <b>xG, forme récente, fatigue de calendrier et face-à-face</b> pour produire un signal de probabilité sur chaque match, avant le coup d'envoi.</p>
+    <p class="sub reveal" style="animation-delay:.15s" data-i18n-html="landing_page.hero_sub">IASHARK part des <b>statistiques réelles des deux équipes, saison en cours et saison précédente</b>, pour produire un signal de probabilité sur chaque match, avant le coup d'envoi.</p>
     <div class="cta-row reveal" style="animation-delay:.2s">
       <a href="/" data-href="" class="btn-primary" data-i18n="landing_page.hero_cta">VOIR LE MATCH GRATUIT DU JOUR</a>
       <div class="cta-note" data-i18n-html="landing_v2.cta_note">Sans carte bancaire · <b>1 analyse offerte chaque jour</b></div>
@@ -168,8 +168,8 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 
   <div class="signal-strip reveal" style="animation-delay:.3s">
     <div class="track">
-      <span data-i18n-html="landing_v2.strip_poisson">MODÈLE <b>POISSON</b></span><span data-i18n-html="landing_v2.strip_dc"><b>DIXON-COLES</b> AJUSTEMENT BAS SCORES</span><span data-i18n-html="landing_v2.strip_mc">SIMULATION <b>MONTE CARLO</b></span><span data-i18n-html="landing_v2.strip_elo">CLASSEMENT <b>ELO</b> DYNAMIQUE</span><span data-i18n-html="landing_v2.strip_shin">PROBABILITÉS <b>SHIN</b></span><span data-i18n-html="landing_v2.strip_kelly">KELLY <b>FRACTIONNÉ</b></span>
-      <span data-i18n-html="landing_v2.strip_poisson">MODÈLE <b>POISSON</b></span><span data-i18n-html="landing_v2.strip_dc"><b>DIXON-COLES</b> AJUSTEMENT BAS SCORES</span><span data-i18n-html="landing_v2.strip_mc">SIMULATION <b>MONTE CARLO</b></span><span data-i18n-html="landing_v2.strip_elo">CLASSEMENT <b>ELO</b> DYNAMIQUE</span><span data-i18n-html="landing_v2.strip_shin">PROBABILITÉS <b>SHIN</b></span><span data-i18n-html="landing_v2.strip_kelly">KELLY <b>FRACTIONNÉ</b></span>
+      <span data-i18n-html="landing_v2.strip_1">BUTS ATTENDUS <b>PAR ÉQUIPE</b></span><span data-i18n-html="landing_v2.strip_2"><b>PROBABILITÉ</b> DE CHAQUE SCORE</span><span data-i18n-html="landing_v2.strip_3"><b>SIMULATION</b> DU MATCH</span><span data-i18n-html="landing_v2.strip_4">SAISON EN COURS <b>ET PRÉCÉDENTE</b></span><span data-i18n-html="landing_v2.strip_5"><b>MARGE DU BOOKMAKER</b> RETIRÉE</span><span data-i18n-html="landing_v2.strip_6">AUCUN <b>PARI FORCÉ</b></span>
+      <span data-i18n-html="landing_v2.strip_1">BUTS ATTENDUS <b>PAR ÉQUIPE</b></span><span data-i18n-html="landing_v2.strip_2"><b>PROBABILITÉ</b> DE CHAQUE SCORE</span><span data-i18n-html="landing_v2.strip_3"><b>SIMULATION</b> DU MATCH</span><span data-i18n-html="landing_v2.strip_4">SAISON EN COURS <b>ET PRÉCÉDENTE</b></span><span data-i18n-html="landing_v2.strip_5"><b>MARGE DU BOOKMAKER</b> RETIRÉE</span><span data-i18n-html="landing_v2.strip_6">AUCUN <b>PARI FORCÉ</b></span>
     </div>
   </div>
 </div>
@@ -177,12 +177,12 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 <section class="methode">
   <div class="wrap">
     <div class="sec-lbl" data-i18n="landing_page.lbl_method">LA MÉTHODE</div>
-    <h2 class="sec-title" data-i18n-html="landing_v2.title_method">Quatre modèles, <b>un seul signal</b> par match.</h2>
+    <h2 class="sec-title" data-i18n-html="landing_v2.title_method">Quatre étapes, <b>un seul signal</b> par match.</h2>
     <div class="model-grid">
-      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model1_tag">MODÈLE 1</div><div class="model-name" data-i18n="landing_page.model1_name">Poisson</div><div class="model-desc" data-i18n="landing_page.model1_desc">Distribution du nombre de buts attendus pour chaque équipe, à domicile et à l'extérieur.</div></div>
-      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model2_tag">MODÈLE 2</div><div class="model-name" data-i18n="landing_page.model2_name">Dixon-Coles</div><div class="model-desc" data-i18n="landing_page.model2_desc">Correction des scores faibles (0-0, 1-0, 1-1) que le Poisson pur sous-estime.</div></div>
-      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model3_tag">MODÈLE 3</div><div class="model-name" data-i18n="landing_page.model3_name">Monte Carlo</div><div class="model-desc" data-i18n="landing_page.model3_desc">Des milliers de simulations du match pour obtenir une distribution de résultats robuste.</div></div>
-      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model4_tag">MODÈLE 4</div><div class="model-name" data-i18n="landing_page.model4_name">Elo & Shin</div><div class="model-desc" data-i18n="landing_page.model4_desc">Force réelle des équipes dans le temps, et correction du biais des probabilités implicites.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model1_tag">ÉTAPE 1</div><div class="model-name" data-i18n="landing_page.model1_name">Forces en présence</div><div class="model-desc" data-i18n="landing_page.model1_desc">Ce que chaque équipe produit et concède dans sa situation réelle, à domicile ou à l'extérieur, comparé au niveau de sa compétition.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model2_tag">ÉTAPE 2</div><div class="model-name" data-i18n="landing_page.model2_name">Prudence en début de saison</div><div class="model-desc" data-i18n="landing_page.model2_desc">Quand peu de matchs ont été joués, la saison précédente et un niveau de référence pèsent davantage, puis s'effacent.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model3_tag">ÉTAPE 3</div><div class="model-name" data-i18n="landing_page.model3_name">Probabilité de chaque marché</div><div class="model-desc" data-i18n="landing_page.model3_desc">Les buts attendus deviennent la probabilité de chaque score, puis de chaque marché, corrigée par une calibration apprise sur les saisons passées.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model4_tag">ÉTAPE 4</div><div class="model-name" data-i18n="landing_page.model4_name">Simulation du match</div><div class="model-desc" data-i18n="landing_page.model4_desc">Le match est rejoué un grand nombre de fois pour faire apparaître les scores les plus probables. La simulation ne choisit pas le pari.</div></div>
     </div>
   </div>
 </section>
@@ -192,8 +192,8 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
     <div class="sec-lbl" data-i18n="landing_page.lbl_practice">EN PRATIQUE</div>
     <h2 class="sec-title" data-i18n-html="landing_v2.title_practice">De la donnée brute au <b>signal exploitable.</b></h2>
     <div class="step-list">
-      <div class="step reveal"><div class="step-num">01</div><div><div class="step-title" data-i18n="landing_page.step1_title">On ingère la donnée</div><div class="step-desc" data-i18n="landing_page.step1_desc">Calendriers, compositions probables, historique des confrontations et statistiques xG remontés en continu, championnat par championnat.</div></div></div>
-      <div class="step reveal"><div class="step-num">02</div><div><div class="step-title" data-i18n="landing_page.step2_title">Le modèle calcule</div><div class="step-desc" data-i18n="landing_page.step2_desc">Poisson, Dixon-Coles et Monte Carlo tournent en parallèle pour produire une distribution de probabilités sur chaque marché.</div></div></div>
+      <div class="step reveal"><div class="step-num">01</div><div><div class="step-title" data-i18n="landing_page.step1_title">On ingère la donnée</div><div class="step-desc" data-i18n="landing_page.step1_desc">Calendriers, classements, résultats récents, confrontations directes et absences annoncées, championnat par championnat.</div></div></div>
+      <div class="step reveal"><div class="step-num">02</div><div><div class="step-title" data-i18n="landing_page.step2_title">Le modèle calcule</div><div class="step-desc" data-i18n="landing_page.step2_desc">Buts attendus, probabilité de chaque score, puis de chaque marché — sans jamais utiliser les cotes.</div></div></div>
       <div class="step reveal"><div class="step-num">03</div><div><div class="step-title" data-i18n="landing_page.step3_title">Tu reçois le signal</div><div class="step-desc" data-i18n="landing_page.step3_desc">Une fiche claire par match : probabilité, niveau de fiabilité, et le marché où le modèle détecte un écart avec le marché réel.</div></div></div>
     </div>
   </div>

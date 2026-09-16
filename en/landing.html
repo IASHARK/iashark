@@ -16,7 +16,7 @@
 <link rel="alternate" hreflang="it" href="https://iashark.com/it/landing.html">
 <link rel="alternate" hreflang="pt" href="https://iashark.com/pt/landing.html">
 <link rel="alternate" hreflang="x-default" href="https://iashark.com/en/landing.html">
-<meta name="description" content="Poisson, Dixon-Coles, Monte Carlo, Elo: IASHARK analyses every match with real statistical models. One free match every day.">
+<meta name="description" content="Expected goals, probability of every market, gap with the odds: IASHARK analyses every match with a real statistical model. One free match every day.">
 <meta name="robots" content="noindex, follow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -46,9 +46,9 @@ a{color:inherit;}
 .hdr-in{max-width:1100px;margin:0 auto;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;text-decoration:none;}
 .logo span{color:var(--cyan);}
-/* Logo image, comme les autres en-tetes (QA 14/09/2026). PNG sans alpha : lighten efface son fond noir. */
+/* Logo image, comme les autres en-tetes (QA 14/09/2026). */
 .logo{display:inline-flex;align-items:center;min-height:44px;}
-.logo img{display:block;height:28px;width:auto;mix-blend-mode:lighten;}
+.logo img{display:block;height:28px;width:auto;}
 .btn-nav{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:8px 16px;border-radius:8px;border:1px solid rgba(34,211,238,0.3);background:rgba(34,211,238,0.08);color:var(--cyan);text-decoration:none;transition:.2s;}
 .btn-nav:hover{background:rgba(34,211,238,0.16);}
 
@@ -160,7 +160,7 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 <meta property="og:site_name" content="IASHARK">
 <meta property="og:locale" content="en">
 <meta property="og:title" content="IASHARK — The model that reads the match before kickoff">
-<meta property="og:description" content="Poisson, Dixon-Coles, Monte Carlo, Elo: IASHARK analyses every match with real statistical models. One free match every day.">
+<meta property="og:description" content="Expected goals, probability of every market, gap with the odds: IASHARK analyses every match with a real statistical model. One free match every day.">
 <meta property="og:url" content="https://iashark.com/en/landing.html">
 <meta property="og:image" content="https://iashark.com/icon-512.png">
 <meta name="twitter:card" content="summary">
@@ -182,7 +182,7 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
     <div class="hero-shark reveal">🦈</div>
     <div class="eyebrow reveal" style="animation-delay:.05s"><span class="dot"></span> <span data-i18n="landing_page.eyebrow">STATISTICAL MODEL · FOOTBALL</span></div>
     <h1 class="reveal" style="animation-delay:.1s" data-i18n-html="landing_v2.hero_title">No emotion.<br><b>Only probabilities.</b></h1>
-    <p class="sub reveal" style="animation-delay:.15s" data-i18n-html="landing_page.hero_sub">IASHARK combines <b>xG, recent form, schedule fatigue and head-to-head</b> to produce a probability signal on every match, before kickoff.</p>
+    <p class="sub reveal" style="animation-delay:.15s" data-i18n-html="landing_page.hero_sub">IASHARK starts from <b>both teams' real statistics, current and previous season</b>, to produce a probability signal on every match, before kickoff.</p>
     <div class="cta-row reveal" style="animation-delay:.2s">
       <a href="/en/" data-href="" class="btn-primary" data-i18n="landing_page.hero_cta">SEE TODAY'S FREE MATCH</a>
       <div class="cta-note" data-i18n-html="landing_v2.cta_note">No credit card · <b>1 free analysis every day</b></div>
@@ -191,8 +191,8 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 
   <div class="signal-strip reveal" style="animation-delay:.3s">
     <div class="track">
-      <span data-i18n-html="landing_v2.strip_poisson"><b>POISSON MODEL</b></span><span data-i18n-html="landing_v2.strip_dc"><b>DIXON-COLES</b> LOW-SCORE ADJUSTMENT</span><span data-i18n-html="landing_v2.strip_mc"><b>MONTE CARLO SIMULATION</b></span><span data-i18n-html="landing_v2.strip_elo"><b>DYNAMIC ELO</b> RANKING</span><span data-i18n-html="landing_v2.strip_shin"><b>SHIN PROBABILITIES</b></span><span data-i18n-html="landing_v2.strip_kelly"><b>FRACTIONAL KELLY</b></span>
-      <span data-i18n-html="landing_v2.strip_poisson"><b>POISSON MODEL</b></span><span data-i18n-html="landing_v2.strip_dc"><b>DIXON-COLES</b> LOW-SCORE ADJUSTMENT</span><span data-i18n-html="landing_v2.strip_mc"><b>MONTE CARLO SIMULATION</b></span><span data-i18n-html="landing_v2.strip_elo"><b>DYNAMIC ELO</b> RANKING</span><span data-i18n-html="landing_v2.strip_shin"><b>SHIN PROBABILITIES</b></span><span data-i18n-html="landing_v2.strip_kelly"><b>FRACTIONAL KELLY</b></span>
+      <span data-i18n-html="landing_v2.strip_1"><b>EXPECTED GOALS</b> PER TEAM</span><span data-i18n-html="landing_v2.strip_2"><b>PROBABILITY</b> OF EVERY SCORELINE</span><span data-i18n-html="landing_v2.strip_3">MATCH <b>SIMULATION</b></span><span data-i18n-html="landing_v2.strip_4">CURRENT <b>AND PREVIOUS SEASON</b></span><span data-i18n-html="landing_v2.strip_5"><b>BOOKMAKER MARGIN</b> REMOVED</span><span data-i18n-html="landing_v2.strip_6">NO <b>FORCED BET</b></span>
+      <span data-i18n-html="landing_v2.strip_1"><b>EXPECTED GOALS</b> PER TEAM</span><span data-i18n-html="landing_v2.strip_2"><b>PROBABILITY</b> OF EVERY SCORELINE</span><span data-i18n-html="landing_v2.strip_3">MATCH <b>SIMULATION</b></span><span data-i18n-html="landing_v2.strip_4">CURRENT <b>AND PREVIOUS SEASON</b></span><span data-i18n-html="landing_v2.strip_5"><b>BOOKMAKER MARGIN</b> REMOVED</span><span data-i18n-html="landing_v2.strip_6">NO <b>FORCED BET</b></span>
     </div>
   </div>
 </div>
@@ -200,12 +200,12 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 <section class="methode">
   <div class="wrap">
     <div class="sec-lbl" data-i18n="landing_page.lbl_method">THE METHOD</div>
-    <h2 class="sec-title" data-i18n-html="landing_v2.title_method">Four models, <b>one signal</b> per match.</h2>
+    <h2 class="sec-title" data-i18n-html="landing_v2.title_method">Four steps, <b>one signal</b> per match.</h2>
     <div class="model-grid">
-      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model1_tag">MODEL 1</div><div class="model-name" data-i18n="landing_page.model1_name">Poisson</div><div class="model-desc" data-i18n="landing_page.model1_desc">Distribution of expected goals for each team, home and away.</div></div>
-      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model2_tag">MODEL 2</div><div class="model-name" data-i18n="landing_page.model2_name">Dixon-Coles</div><div class="model-desc" data-i18n="landing_page.model2_desc">Correction for low scores (0-0, 1-0, 1-1) that pure Poisson underestimates.</div></div>
-      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model3_tag">MODEL 3</div><div class="model-name" data-i18n="landing_page.model3_name">Monte Carlo</div><div class="model-desc" data-i18n="landing_page.model3_desc">Thousands of match simulations to get a robust distribution of outcomes.</div></div>
-      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model4_tag">MODEL 4</div><div class="model-name" data-i18n="landing_page.model4_name">Elo &amp; Shin</div><div class="model-desc" data-i18n="landing_page.model4_desc">Real team strength over time, and correction of the implied-probability bias.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model1_tag">STEP 1</div><div class="model-name" data-i18n="landing_page.model1_name">Team strengths</div><div class="model-desc" data-i18n="landing_page.model1_desc">What each team produces and concedes in its real situation, at home or away, compared with the level of its competition.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model2_tag">STEP 2</div><div class="model-name" data-i18n="landing_page.model2_name">Caution early in the season</div><div class="model-desc" data-i18n="landing_page.model2_desc">When few matches have been played, the previous season and a reference level weigh more, then fade away.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model3_tag">STEP 3</div><div class="model-name" data-i18n="landing_page.model3_name">Probability of every market</div><div class="model-desc" data-i18n="landing_page.model3_desc">Expected goals become the probability of every scoreline, then of every market, corrected by a calibration learnt from past seasons.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model4_tag">STEP 4</div><div class="model-name" data-i18n="landing_page.model4_name">Match simulation</div><div class="model-desc" data-i18n="landing_page.model4_desc">The match is replayed a large number of times to bring out the most likely scorelines. The simulation does not choose the bet.</div></div>
     </div>
   </div>
 </section>
@@ -215,8 +215,8 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
     <div class="sec-lbl" data-i18n="landing_page.lbl_practice">IN PRACTICE</div>
     <h2 class="sec-title" data-i18n-html="landing_v2.title_practice">From raw data to a <b>usable signal.</b></h2>
     <div class="step-list">
-      <div class="step reveal"><div class="step-num">01</div><div><div class="step-title" data-i18n="landing_page.step1_title">We ingest the data</div><div class="step-desc" data-i18n="landing_page.step1_desc">Schedules, probable lineups, head-to-head history and xG stats fed in continuously, league by league.</div></div></div>
-      <div class="step reveal"><div class="step-num">02</div><div><div class="step-title" data-i18n="landing_page.step2_title">The model computes</div><div class="step-desc" data-i18n="landing_page.step2_desc">Poisson, Dixon-Coles and Monte Carlo run in parallel to produce a probability distribution for each market.</div></div></div>
+      <div class="step reveal"><div class="step-num">01</div><div><div class="step-title" data-i18n="landing_page.step1_title">We ingest the data</div><div class="step-desc" data-i18n="landing_page.step1_desc">Fixtures, standings, recent results, head-to-head history and announced absences, league by league.</div></div></div>
+      <div class="step reveal"><div class="step-num">02</div><div><div class="step-title" data-i18n="landing_page.step2_title">The model computes</div><div class="step-desc" data-i18n="landing_page.step2_desc">Expected goals, the probability of every scoreline, then of every market — never using the odds.</div></div></div>
       <div class="step reveal"><div class="step-num">03</div><div><div class="step-title" data-i18n="landing_page.step3_title">You get the signal</div><div class="step-desc" data-i18n="landing_page.step3_desc">A clear sheet per match: probability, reliability level, and the market where the model detects a gap with the real market.</div></div></div>
     </div>
   </div>

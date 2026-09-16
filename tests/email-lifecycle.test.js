@@ -82,7 +82,9 @@ test("contexte de site derive de config/markets.json (devise, prix Pro, aide jeu
     assert.equal(ctx.htmlLang, d.htmlLang, dir);
     const help = d.helpline ? CONFIG._helplines[d.helpline] : CONFIG[d.market].helpline;
     assert.equal(ctx.helpline.url, help.url, dir + " aide");
-    assert.equal(ctx.proPriceMinor, Math.round(CONFIG[d.market].prices.pro.amount * 100), dir + " prix Pro");
+    const pro = CONFIG[d.market].prices.pro;
+    assert.equal(ctx.proPriceMinor, Math.round(pro.month.amount * 100), dir + " prix Pro mensuel");
+    for (const iv of ["week", "month", "year"]) assert.equal(ctx.proPricesMinor[iv], pro[iv] ? Math.round(pro[iv].amount * 100) : null, dir + " prix Pro " + iv);
     assert.ok(L.MARKET_TIMEZONES[d.market], dir + " fuseau");
   }
   assert.deepEqual(Object.keys(CONFIG._dirs).sort(), L.DIRS.slice().sort());
@@ -193,14 +195,19 @@ test("campagnes par langue : sujet, prix de la version, consentement absent, ech
   const fr = (await renderAll()).filter((x) => x.dir === "fr");
   const by = (c) => fr.find((x) => x.campaign === c).r;
   assert.equal(by("free_match").subject, "Le match offert du jour : Barcelona – Racing Santander");
-  assert.ok(by("pro_features").text.replace(/[  ]/g, " ").includes("19,95 € par mois"));
+  const j5 = by("pro_features").text.replace(/[  ]/g, " ");
+  assert.ok(j5.includes("6,99 € par semaine, 19,95 € par mois ou 199,00 € par an"), "J5 : les 3 durees et leurs prix");
   assert.ok(by("pro_features").text.includes("Français"));
   assert.ok(by("inactive_7d").text.includes("Paris SG – Marseille") && by("inactive_7d").text.includes("Arsenal – Chelsea"));
   assert.ok(!by("inactive_7d").text.includes("Monaco"), "match hors week-end");
   const gb = (await renderAll()).find((x) => x.dir === "gb" && x.campaign === "pro_features").r;
-  assert.ok(gb.text.includes("£14.99 per month") && gb.text.includes("English (UK)"));
+  assert.ok(gb.text.includes("£4.99 per week, £14.99 per month or £149.00 per year") && gb.text.includes("English (UK)"));
   const mx = (await renderAll()).find((x) => x.dir === "mx" && x.campaign === "pro_features").r;
-  assert.ok(mx.text.includes("$199.00 MXN"));
+  assert.ok(mx.text.includes("$69.00 MXN a la semana, $199.00 MXN al mes o $1,990.00 MXN al año"));
+  const za = (await renderAll()).find((x) => x.dir === "za" && x.campaign === "pro_features").r;
+  const zaText = za.text.replace(/[  ]/g, " ");
+  assert.match(zaText, /R 69,00 per week or R 199,00 per month\./, "ZA : semaine et mois");
+  assert.doesNotMatch(zaText, /per year|1 999/, "ZA : aucun annuel");
 
   const unsubscribeUrl = await unsubUrl("fr");
   const welcomeNo = L.renderLifecycleEmail(BUNDLE, "welcome", "fr", { marketingOptIn: false, freeMatch: null }, { unsubscribeUrl });

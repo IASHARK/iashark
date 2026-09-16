@@ -1,6 +1,8 @@
 // Fonction Edge send-transactional-email : branchement Deno de handler.ts.
 // Emails transactionnels via Resend (confirmation d'abonnement FR/GB, rappel
-// de renouvellement MX). Appel SERVEUR uniquement (en-tete x-internal-secret).
+// de renouvellement MX, rappel avant reconduction des abonnements annuels
+// fr/gb/mx en 7 langues). Appel SERVEUR uniquement (en-tete x-internal-secret).
+// INACTIF tant que RESEND_API_KEY n'est pas configure (no-op journalise).
 //
 // Secrets (Supabase > Edge Functions > Secrets) :
 //   EMAIL_INTERNAL_SECRET   obligatoire (sinon 503) - partage avec les appelants
@@ -12,7 +14,17 @@
 //   EMAIL_ALLOW_BLOCKED_DECISION     "true" = envoyer malgre des mentions manquantes
 //   STRIPE_PORTAL_LOGIN_URL          optionnel, lien https://billing.stripe.com/p/login/...
 //   MX_RENEWAL_REMINDER_DAYS         optionnel, defaut 7
-//   STRIPE_SECRET_KEY, STRIPE_PRICE_ID_MX   deja utilises par les fonctions de paiement
+//   STRIPE_SECRET_KEY                       deja utilise par les fonctions de paiement
+//   (plus aucun STRIPE_PRICE_ID_* : selection par market + billing_interval, migration 0026)
+//
+// Planification (pg_cron + pg_net, a creer apres activation de Resend), une
+// tache par regle, corps JSON :
+//   {"type":"renewal_reminder_scan","market":"fr","interval":"year","daysBefore":45}
+//   {"type":"renewal_reminder_scan","market":"gb","interval":"year","daysBefore":30}
+//   {"type":"renewal_reminder_scan","market":"mx","interval":"year","daysBefore":30}
+//   {"type":"renewal_reminder_scan","market":"mx","interval":"year","daysBefore":7}
+//   {"type":"renewal_reminder_scan","market":"mx","interval":"month","daysBefore":7}
+//   (hebdomadaire MX a J-2 : BLOCKED_LEGAL, ne pas planifier avant avis juridique)
 //   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY fournis par Supabase
 //
 // Apres modification d'un gabarit : node lib/email-build.js (regenere
@@ -30,11 +42,14 @@ const supabase = SUPA_URL && SERVICE_KEY
 
 const db: SubscriptionStore | null = supabase
   ? {
-    async listRenewingSubscriptions({ priceId, startIso, endIso }) {
+    // Selection par marche et duree (colonnes de la migration 0026) : plus
+    // de dependance a un unique STRIPE_PRICE_ID_MX.
+    async listRenewingSubscriptions({ market, interval, startIso, endIso }) {
       const { data, error } = await supabase
         .from("subscriptions")
-        .select("stripe_subscription_id,user_id,status,price_id,current_period_end,cancel_at_period_end")
-        .eq("price_id", priceId)
+        .select("stripe_subscription_id,user_id,status,price_id,billing_interval,market,current_period_end,cancel_at_period_end")
+        .eq("market", market)
+        .eq("billing_interval", interval)
         .in("status", ["active", "trialing"])
         .eq("cancel_at_period_end", false)
         .gte("current_period_end", startIso)

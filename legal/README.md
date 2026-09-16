@@ -146,16 +146,16 @@ Chaque dossier contient les 5 mêmes fichiers autonomes. Le tableau indique le `
 13. **Régime des abonnements du DMCC Act 2024**, attendu au printemps 2027 : il imposera des rappels de renouvellement, une sortie facile et un cooling-off à chaque renouvellement.
 14. **Informations sur les modes alternatifs de règlement des litiges (ADR)** à confirmer. Vérifier aussi la règle « aucun remboursement au prorata sur l'annuel » au regard des clauses abusives (CRA 2015, Part 2).
 15. **Couverture de l'Irlande du Nord.** La National Gambling Helpline et GAMSTOP visent la Grande-Bretagne ; il faut identifier une ressource propre à l'Irlande du Nord.
-16. **Prix en GBP** non configuré dans Stripe (`STRIPE_PRICE_ID_GB`).
+16. **Prix en GBP** non configurés dans Stripe (`STRIPE_PRICE_ID_GB_WEEK`, `_MONTH`, `_YEAR`).
 
 ### Afrique du Sud
 17. **Information Officer** : son nom n'est pas renseigné et il n'est pas enregistré auprès de l'Information Regulator. Confirmer aussi que POPIA s'applique à un responsable établi hors d'Afrique du Sud (POPIA s3), et documenter la base s72 de chaque transfert.
 18. **CPA s14 et plan annuel (BLOCKED_DECISION).**
-    - À l'échéance, un contrat à durée déterminée se poursuit au mois, sauf demande contraire du consommateur. Or le plan « Annual R1,999/yr » affiché sur `/za` suppose un renouvellement annuel.
+    - À l'échéance, un contrat à durée déterminée se poursuit au mois, sauf demande contraire du consommateur. Or la durée annuelle de l'offre Pro (R1 999/an, proposition du 15/09/2026) suppose un renouvellement annuel. Options (a)/(b) : voir la proposition de CGV ZA du plan tarifaire.
     - Il faut implémenter la notice d'échéance (entre 80 et 40 jours ouvrables avant la fin du terme).
     - Il faut décider de la politique de pénalité ou de remboursement en cas de résiliation anticipée.
 19. **Plaintes ECT s49** : confirmer l'organe compétent actuel (« Consumer Affairs Committee »). Confirmer aussi que CPA s16 ne s'applique qu'en cas de démarchage direct.
-20. **Prix en ZAR** non configuré dans Stripe ; TVA sur les e-services à vérifier.
+20. **Prix en ZAR** non configurés dans Stripe (`STRIPE_PRICE_ID_ZA_WEEK`, `_MONTH`, `_YEAR`) ; TVA sur les e-services à vérifier.
 
 ### Mexique
 21. **Règlement de la nouvelle LFPDPPP** : vérifier s'il a été publié.

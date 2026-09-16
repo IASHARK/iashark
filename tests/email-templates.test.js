@@ -336,7 +336,9 @@ test("refus : mauvaise devise, marche sans gabarit, donnees invalides", () => {
   assert.throws(() => renderFr({ amountMinor: 19.95 }), code("invalid_amount"));
   assert.throws(() => renderFr({ startDate: "hier" }), code("invalid_date"));
   assert.throws(() => renderFr({ customerEmail: "pas-un-email" }), code("invalid_email"));
-  assert.throws(() => renderFr({ interval: "week" }), code("invalid_interval"));
+  assert.throws(() => renderFr({ interval: "day" }), code("invalid_interval"));
+  assert.match(renderFr({ interval: "week" }).text, /Hebdomadaire \(chaque semaine\)/);
+  assert.match(renderFr({ interval: "year" }).text, /Annuelle \(chaque année\)/);
   assert.throws(() => renderFr({ planName: "" }), code("invalid_plan"));
   assert.throws(() => renderMx({ renewalDate: "2026-09-01T00:00:00Z" }), code("renewal_in_past"));
   assert.throws(() => renderMx({ amountMinor: 0 }), code("invalid_amount"));
@@ -421,13 +423,14 @@ test("renewalWindow : jour calendaire local (Mexique sans heure d'ete, Paris au 
   assert.equal(dst.end, "2026-03-30T22:00:00.000Z");
 });
 
-test("parseReminderDays : defaut 7, parametrable, bornes 1..30", () => {
+test("parseReminderDays : defaut 7, parametrable, bornes 1..90 (information avant reconduction annuelle)", () => {
   assert.equal(lib.DEFAULT_REMINDER_DAYS, 7);
   assert.equal(lib.parseReminderDays(undefined), 7);
   assert.equal(lib.parseReminderDays(""), 7);
   assert.equal(lib.parseReminderDays("10"), 10);
   assert.equal(lib.parseReminderDays(3), 3);
-  for (const bad of [0, 31, 2.5, "abc", "-1", {}]) assert.throws(() => lib.parseReminderDays(bad), (e) => e.code === "invalid_reminder_days", String(bad));
+  assert.equal(lib.parseReminderDays(90), 90);
+  for (const bad of [0, 91, 2.5, "abc", "-1", {}]) assert.throws(() => lib.parseReminderDays(bad), (e) => e.code === "invalid_reminder_days", String(bad));
 });
 
 test("utilitaires : safeEqual, maskEmail, cleanIdempotencyKey", () => {
@@ -439,4 +442,135 @@ test("utilitaires : safeEqual, maskEmail, cleanIdempotencyKey", () => {
   assert.equal(lib.maskEmail("nope"), "(aucune)");
   assert.equal(lib.cleanIdempotencyKey("purchase_confirmation:fr:sub_1"), "purchase_confirmation:fr:sub_1");
   assert.equal(lib.cleanIdempotencyKey("a b"), null);
+});
+
+// ------------------------------------------ rappel avant reconduction annuelle
+
+const CONFIG_MARKETS = JSON.parse(fs.readFileSync(path.join(ROOT, "config", "markets.json"), "utf8"));
+const Lifecycle = require("../lib/lifecycle-email.js");
+const ANNUAL = { fr: ["EUR", 19900], en: ["EUR", 19900], es: ["EUR", 19900], de: ["EUR", 19900], it: ["EUR", 19900], pt: ["EUR", 19900], gb: ["GBP", 14900], mx: ["MXN", 199000] };
+const renderAnnual = (dir, over, opts) => lib.renderEmail(TEMPLATES, "annual_renewal_reminder", dir,
+  Object.assign({ planName: "IASHARK Pro", amountMinor: ANNUAL[dir] ? ANNUAL[dir][1] : 19900, currency: ANNUAL[dir] ? ANNUAL[dir][0] : "EUR", renewalDate: "2026-10-29T10:00:00Z", customerEmail: "client@example.com", reference: "sub_Y1" }, over || {}),
+  Object.assign({ now: NOW }, opts || {}));
+
+test("rappel annuel : un repertoire par version vendant l'annuel (ZA exclu), textes complets en 7 langues", () => {
+  const dirs = Object.keys(lib.REMINDER_DIRS).sort();
+  const soldYear = Object.keys(CONFIG_MARKETS._dirs).filter((d) => {
+    const pro = CONFIG_MARKETS[CONFIG_MARKETS._dirs[d].market].prices.pro;
+    return pro.year && pro.year.amount;
+  }).sort();
+  assert.deepEqual(dirs, soldYear, "un repertoire par version du site qui vend l'annuel");
+  assert.ok(!dirs.includes("za"), "ZA : annuel non ouvert, aucun gabarit de rappel");
+  for (const d of dirs) {
+    const conf = CONFIG_MARKETS._dirs[d], r = lib.REMINDER_DIRS[d];
+    assert.deepEqual([r.market, r.locale, r.htmlLang, r.intlLocale], [conf.market, conf.locale, conf.htmlLang, conf.intlLocale], d);
+    const expected = conf.helpline ? CONFIG_MARKETS._helplines[conf.helpline] : CONFIG_MARKETS[conf.market].helpline;
+    const used = r.helpline || lib.MARKETS[r.market].helpline;
+    assert.equal(used.url, expected.url, d + " : aide jeu responsable");
+    assert.equal(used.phone || null, expected.phone || null, d + " : numero d'aide");
+  }
+  assert.deepEqual(Object.keys(lib.ANNUAL_REMINDER_COPY).sort(), ["de", "en", "es", "es-mx", "fr", "it", "pt"]);
+  const keys = Object.keys(lib.ANNUAL_REMINDER_COPY.fr).sort();
+  for (const loc of Object.keys(lib.ANNUAL_REMINDER_COPY)) {
+    assert.deepEqual(Object.keys(lib.ANNUAL_REMINDER_COPY[loc]).sort(), keys, loc);
+    for (const k of keys) assert.ok(String(lib.ANNUAL_REMINDER_COPY[loc][k]).trim(), loc + "." + k);
+  }
+  assert.deepEqual(Object.keys(lib.ANNUAL_REMINDER_DAYS).sort(), ["fr", "gb", "mx"]);
+  assert.deepEqual([lib.ANNUAL_REMINDER_DAYS.fr.def, lib.ANNUAL_REMINDER_DAYS.fr.min, lib.ANNUAL_REMINDER_DAYS.fr.max], [45, 30, 90], "FR : fenetre L215-1 (3 mois a 1 mois)");
+  assert.equal(lib.ANNUAL_REMINDER_DAYS.gb.def, 30);
+  assert.equal(lib.ANNUAL_REMINDER_DAYS.mx.def, 30);
+  assert.equal(lib.reminderKindFor("fr", "year"), "annual_renewal_reminder");
+  assert.equal(lib.reminderKindFor("gb", "year"), "annual_renewal_reminder");
+  assert.equal(lib.reminderKindFor("za", "year"), null);
+  assert.equal(lib.reminderKindFor("mx", "month"), "renewal_reminder");
+  assert.equal(lib.reminderKindFor("mx", "week"), "renewal_reminder");
+  assert.equal(lib.reminderKindFor("fr", "month"), null);
+  assert.equal(lib.reminderKindFor("gb", "week"), null);
+});
+
+test("rappel annuel : 8 versions, montant et date du marche, mentions obligatoires, aucun trou, aucune promesse de gain", () => {
+  const EXPECT = {
+    fr: { start: "Votre abonnement annuel", amount: "199,00 €", legal: "L215-1" },
+    en: { start: "Your annual", amount: "€199.00", legal: "L215-1" },
+    es: { start: "Tu suscripción anual", amount: "199,00 €", legal: "L215-1" },
+    de: { start: "Ihr Jahresabonnement", amount: "199,00 €", legal: "L215-1" },
+    it: { start: "Il tuo abbonamento annuale", amount: "199,00 €", legal: "L215-1" },
+    pt: { start: "A tua subscrição anual", amount: "199,00 €", legal: "L215-1" },
+    gb: { start: "Your annual", amount: "£149.00", legal: null },
+    mx: { start: "Tu suscripción anual", amount: "$1,990.00 MXN", legal: "PROFECO" }
+  };
+  for (const dir of Object.keys(EXPECT)) {
+    const r = renderAnnual(dir);
+    const text = norm(r.text);
+    const e = EXPECT[dir];
+    assert.equal(r.market, dir);
+    assert.equal(r.locale, lib.REMINDER_DIRS[dir].htmlLang, dir);
+    assert.ok(r.subject.startsWith(e.start), dir + " objet : " + r.subject);
+    assert.ok(text.includes(e.amount), dir + " montant " + e.amount);
+    assert.match(text, /2026/, dir + " date");
+    assert.ok(text.includes("IASHARK Pro"), dir);
+    if (e.legal) assert.ok(text.includes(e.legal), dir + " base legale " + e.legal);
+    else assert.doesNotMatch(text, /L215-1/, dir + " : pas de droit francais");
+    for (const [part, value] of [["subject", r.subject], ["html", r.html], ["text", r.text]]) {
+      assert.doesNotMatch(value, /\{\{|\}\}/, dir + " " + part);
+      assert.doesNotMatch(value, /\b(undefined|NaN|null)\b/, dir + " " + part);
+    }
+    const brackets = (stripStyle(r.html) + "\n" + r.text).match(/\[[^\]]*\]/g) || [];
+    for (const b of brackets) assert.match(b, /^\[BLOCKED_DECISION: COMPANY_[A-Z_]+\]$/, dir + " crochet inattendu " + b);
+    // Vocabulaire interdit (sur, gagnant, garanti, bonus et equivalents).
+    const visibleText = stripStyle(r.html).replace(/<[^>]+>/g, " ") + " " + r.text + " " + r.subject;
+    assert.deepEqual(Lifecycle.findForbiddenWords(visibleText, lib.REMINDER_DIRS[dir].locale), [], dir);
+    // Liens : pages du repertoire existantes, aide jeu responsable, support.
+    const { hrefs, textUrls } = linksOf(r);
+    const helplineUrl = (lib.REMINDER_DIRS[dir].helpline || lib.MARKETS[lib.REMINDER_DIRS[dir].market].helpline).url;
+    for (const url of hrefs.concat(textUrls)) {
+      if (url === helplineUrl || EXTERNAL_ALLOWED.includes(url)) continue;
+      assert.ok(url.startsWith("https://iashark.com/" + dir + "/"), dir + " lien hors repertoire : " + url);
+      const rel = url.slice("https://iashark.com/".length);
+      assert.ok(fs.existsSync(path.join(ROOT, rel.endsWith("/") ? rel + "index.html" : rel)), dir + " page inexistante : " + url);
+    }
+    assert.ok(hrefs.includes("https://iashark.com/" + dir + "/compte.html"), dir + " lien Mon compte");
+    // Compatibilite clients mail.
+    assert.match(r.html, /<meta name="color-scheme" content="light dark">/, dir);
+    assert.match(r.html, /\[data-ogsc\]/, dir);
+    assert.doesNotMatch(r.html, /<script|<img|<iframe|<form|javascript:/i, dir);
+    assert.ok(Buffer.byteLength(r.html) < 102 * 1024, dir);
+    assert.doesNotMatch(r.text, /<[a-z]/i, dir);
+    assert.match(r.html, new RegExp('<html lang="' + lib.REMINDER_DIRS[dir].htmlLang + '"'), dir);
+  }
+  // Changement de duree et resiliation avant l'echeance : toujours annonces.
+  assert.match(norm(renderAnnual("fr").text), /Changer de durée[\s\S]*fin de la période annuelle déjà payée/);
+  assert.match(renderAnnual("gb").text, /Change billing period/);
+  assert.deepEqual(renderAnnual("fr", {}, { company: FULL_COMPANY }).blockedDecisions, []);
+  const code = (c) => (e) => e instanceof lib.EmailRenderError && e.code === c;
+  assert.throws(() => renderAnnual("za"), code("unsupported_market"));
+  assert.throws(() => renderAnnual("nl"), code("unsupported_market"));
+  assert.throws(() => renderAnnual("gb", { currency: "EUR" }), code("currency_mismatch"));
+  assert.throws(() => renderAnnual("fr", { renewalDate: "2026-09-01T00:00:00Z" }), code("renewal_in_past"));
+  assert.throws(() => renderAnnual("fr", { amountMinor: 0 }), code("invalid_amount"));
+});
+
+test("annualRenewalReminderFromStripe : annuel uniquement, langue du repertoire du paiement, cle d'idempotence J-n", () => {
+  const annualSub = (over) => stripeSub(Object.assign({
+    metadata: { market: "fr", consent_dir: "de" },
+    items: { data: [{ quantity: 1, current_period_end: Date.parse("2026-10-29T10:00:00Z") / 1000, price: { unit_amount: 19900, currency: "eur", recurring: { interval: "year", interval_count: 1 }, product: { name: "IASHARK Pro" } } }] }
+  }, over || {}));
+  const preview = { amount_due: 19900, currency: "eur" };
+  const m = lib.annualRenewalReminderFromStripe({ subscription: annualSub(), preview, now: NOW, market: "fr", daysBefore: 45 });
+  assert.equal(m.ok, true);
+  assert.deepEqual([m.kind, m.market, m.marketCode], ["annual_renewal_reminder", "de", "fr"], "langue du repertoire du paiement");
+  assert.equal(m.idempotencyKey, "annual_renewal_reminder:fr:sub_ABC:2026-10-29:J-45");
+  assert.equal(m.renewalLocalDate, "2026-10-29");
+  assert.deepEqual([m.data.amountMinor, m.data.currency], [19900, "EUR"]);
+  // Repertoire inconnu ou d'un autre marche : repertoire principal du marche.
+  assert.equal(lib.annualRenewalReminderFromStripe({ subscription: annualSub({ metadata: { market: "fr", consent_dir: "gb" } }), preview, now: NOW, market: "fr" }).market, "fr");
+  assert.equal(lib.annualRenewalReminderFromStripe({ subscription: annualSub({ metadata: { market: "fr" } }), preview, now: NOW, market: "fr" }).idempotencyKey, "annual_renewal_reminder:fr:sub_ABC:2026-10-29", "sans J-n si le delai n'est pas precise");
+  // Refus explicites : ZA, duree mensuelle, marche de l'abonnement different.
+  assert.equal(lib.annualRenewalReminderFromStripe({ subscription: annualSub(), preview, now: NOW, market: "za" }).reason, "no_template_for_market");
+  assert.equal(lib.annualRenewalReminderFromStripe({ subscription: stripeSub({ metadata: { market: "fr" } }), preview, now: NOW, market: "fr" }).reason, "interval_mismatch", "abonnement mensuel");
+  assert.equal(lib.annualRenewalReminderFromStripe({ subscription: annualSub(), preview, now: NOW, market: "gb" }).reason, "market_mismatch");
+  assert.equal(lib.annualRenewalReminderFromStripe({ subscription: annualSub({ cancel_at_period_end: true }), preview, now: NOW, market: "fr" }).reason, "cancel_at_period_end");
+  assert.equal(lib.annualRenewalReminderFromStripe({ subscription: annualSub(), preview: null, now: NOW, market: "fr" }).reason, "amount_unavailable");
+  // Le rappel MX mensuel ignore un abonnement dont la duree a change dans le portail.
+  assert.equal(lib.renewalReminderFromStripe({ subscription: annualSub({ metadata: { market: "mx" } }), preview: { amount_due: 199000, currency: "mxn" }, now: NOW, market: "mx", interval: "month" }).reason, "interval_mismatch");
 });

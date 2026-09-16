@@ -1,0 +1,48 @@
+Subject: {{tSubject}}
+{{! Rappel avant reconduction d'un abonnement Pro ANNUEL - gabarit commun aux repertoires fr, en, es, de, it, pt (marche EUR), gb et mx ; textes par langue dans lib/email-render.js (ANNUAL_REMINDER_COPY, 7 langues). FR : information L215-1 (entre 3 mois et 1 mois avant l'echeance). STATUT : REVIEW (juriste + relecture native). Montant lu dans l'apercu de facture Stripe, jamais estime. Version texte de annual-renewal-reminder.html : meme contenu. }}IASHARK
+
+{{tTitle}}
+
+{{tGreeting}}
+
+{{tIntro}}
+
+{{tSummaryTitle}}
+- {{tLabelPlan}}{{sep}}{{planName}}
+- {{tLabelAmount}}{{sep}}{{amount}} {{tAmountNote}}
+- {{tLabelDate}}{{sep}}{{renewalDate}}
+- {{tLabelPeriod}}{{sep}}{{tPeriodValue}}
+- {{tLabelAccount}}{{sep}}{{customerEmail}}
+{{#reference}}- {{tLabelReference}}{{sep}}{{reference}}
+{{/reference}}
+{{tKeep}}
+
+{{tNotRenewTitle}}
+{{tNotRenew}}
+{{tCtaLabel}}{{sep}}{{accountUrl}}
+{{#portalUrl}}{{tPortalLabel}} {{portalUrl}}
+{{/portalUrl}}
+{{tSwitchNote}}
+{{#tLegalBasis}}
+{{tLegalBasis}}
+{{/tLegalBasis}}
+{{tTermsLabel}} {{cgvUrl}}
+
+{{tSellerTitle}}
+- {{tLabelTradingName}}{{sep}}IASHARK
+- {{tLabelOperator}}{{sep}}{{companyOperatorName}}
+- {{tLabelAddress}}{{sep}}{{companyAddress}}
+- {{tLabelRegistration}}{{sep}}{{companyRegistration}}
+- {{tLabelPhone}}{{sep}}{{companyPhone}}
+- {{tLabelEmail}}{{sep}}{{supportEmail}}
+
+{{tRgTitle}}
+{{tRgBody}}
+{{tRgHelp}} {{helplineUrl}}
+{{tRgMore}}{{sep}}{{responsibleUrl}}
+
+--
+{{tFooter}}
+{{tLinkCgv}}{{sep}}{{cgvUrl}}
+{{tLinkPrivacy}}{{sep}}{{privacyUrl}}
+{{tLinkLegal}}{{sep}}{{legalUrl}}

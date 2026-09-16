@@ -17,8 +17,15 @@
 //    -> les donnees sont relues chez Stripe (jamais confiance dans un montant
 //    envoye par l'appelant) ; chemin utilise par stripe-webhook.
 // 2. {type, market, to, data, idempotencyKey?} -> rendu direct (tests manuels).
-// 3. {type:"renewal_reminder_scan", daysBefore?, dryRun?} -> execution
-//    planifiee (pg_cron) : rappels MX des renouvellements a J+daysBefore.
+// 3. {type:"renewal_reminder_scan", market?, interval?, daysBefore?, dryRun?}
+//    -> execution planifiee (pg_cron), une tache par regle marche x duree x
+//    delai. Defauts : market "mx", interval "month" (rappel MX historique).
+//    interval "year" (fr, gb, mx) : gabarit annual_renewal_reminder dans la
+//    langue du repertoire du paiement ; delai par defaut fr 45 j, gb 30 j,
+//    mx 30 j (Email.ANNUAL_REMINDER_DAYS). ZA : aucun gabarit (pas d'annuel).
+//    Selection : public.subscriptions.market + billing_interval (migration 0026).
+// Type "annual_renewal_reminder" : memes chemins 1 et 2 que renewal_reminder
+// (market = repertoire du site pour le rendu direct).
 import * as Email from "./email-bundle.generated.mjs";
 
 export type GetEnv = (name: string) => string | undefined | null;
@@ -28,11 +35,13 @@ export type RenewingSubscriptionRow = {
   user_id?: string | null;
   status?: string | null;
   price_id?: string | null;
+  billing_interval?: string | null;
+  market?: string | null;
   current_period_end?: string | null;
   cancel_at_period_end?: boolean | null;
 };
 export type SubscriptionStore = {
-  listRenewingSubscriptions: (args: { priceId: string; startIso: string; endIso: string }) => Promise<RenewingSubscriptionRow[]>;
+  listRenewingSubscriptions: (args: { market: string; interval: string; startIso: string; endIso: string }) => Promise<RenewingSubscriptionRow[]>;
 };
 export type HandlerDeps = {
   env: GetEnv;
@@ -227,6 +236,21 @@ async function handleFromStripe(deps: HandlerDeps, body: Json): Promise<Response
   let mapped: Json;
   if (type === "purchase_confirmation") {
     mapped = Email.purchaseConfirmationFromStripe({ subscription: sub });
+  } else if (type === Email.ANNUAL_KIND) {
+    const subMarket = String(((sub.metadata as Record<string, unknown> | undefined)?.market as string) || "fr").toLowerCase();
+    const reason = Email.renewalReminderSkipReason(sub, now, subMarket);
+    if (reason) {
+      mapped = { ok: false, reason };
+    } else {
+      let preview: Json;
+      try {
+        preview = await previewNextInvoice(deps, stripeKey, id);
+      } catch (err) {
+        deps.log.error(TAG + " apercu de facture Stripe impossible pour " + id + " : " + errorText(err));
+        return json(502, { ok: false, error: "stripe_unavailable", type });
+      }
+      mapped = Email.annualRenewalReminderFromStripe({ subscription: sub, preview, now, market: subMarket });
+    }
   } else {
     const reason = Email.renewalReminderSkipReason(sub, now);
     if (reason) {
@@ -262,29 +286,42 @@ async function handleFromStripe(deps: HandlerDeps, body: Json): Promise<Response
 }
 
 async function handleScan(deps: HandlerDeps, body: Json): Promise<Response> {
+  // Regle marche x duree x delai. Defauts : market "mx", interval "month"
+  // (comportement historique du rappel MX mensuel).
+  const market = typeof body.market === "string" ? body.market.toLowerCase() : "mx";
+  const interval = typeof body.interval === "string" ? body.interval.toLowerCase() : "month";
+  if (!["week", "month", "year"].includes(interval)) return json(400, { ok: false, error: "invalid_interval" });
+  const kind = Email.reminderKindFor(market, interval) as string | null;
+  if (!kind) {
+    deps.log.info(TAG + " scan des rappels " + market + "/" + interval + " non execute : aucun gabarit pour ce marche et cette duree.");
+    return json(200, { ok: true, processed: false, reason: "no_template_for_market", market, interval });
+  }
+  const annual = kind === Email.ANNUAL_KIND;
+  const rule = annual ? (Email.ANNUAL_REMINDER_DAYS as Record<string, { def: number; min: number; max: number }>)[market] : null;
   let days: number;
   try {
-    days = Email.parseReminderDays(body.daysBefore ?? envValue(deps, "MX_RENEWAL_REMINDER_DAYS"));
+    days = Email.parseReminderDays(body.daysBefore ?? (annual ? rule!.def : envValue(deps, "MX_RENEWAL_REMINDER_DAYS")));
   } catch (err) {
     const r = renderErrorResponse(err);
     if (r) return json(400, { ok: false, error: "invalid_days_before" });
     throw err;
   }
-  if (days < Email.MIN_RECOMMENDED_REMINDER_DAYS) {
+  if (rule && (days < rule.min || days > rule.max)) {
+    deps.log.warn(TAG + " daysBefore=" + days + " hors de la fenetre recommandee pour l'annuel " + market + " (" + rule.min + " a " + rule.max + " j, a confirmer par un juriste).");
+  } else if (!annual && days < Email.MIN_RECOMMENDED_REMINDER_DAYS) {
     deps.log.warn(TAG + " daysBefore=" + days + " : delai inferieur au minimum recommande (" + Email.MIN_RECOMMENDED_REMINDER_DAYS + " j, a confirmer par un juriste).");
   }
-  const priceId = envValue(deps, "STRIPE_PRICE_ID_MX");
   const stripeKey = envValue(deps, "STRIPE_SECRET_KEY");
-  const missing = [!priceId && "STRIPE_PRICE_ID_MX", !stripeKey && "STRIPE_SECRET_KEY", !deps.db && "SUPABASE_SERVICE_ROLE_KEY"].filter(Boolean);
+  const missing = [!stripeKey && "STRIPE_SECRET_KEY", !deps.db && "SUPABASE_SERVICE_ROLE_KEY"].filter(Boolean);
   if (missing.length) {
-    deps.log.info(TAG + " scan des rappels MX non execute (no-op), configuration absente : " + missing.join(","));
+    deps.log.info(TAG + " scan des rappels " + market + "/" + interval + " non execute (no-op), configuration absente : " + missing.join(","));
     return json(200, { ok: true, processed: false, reason: "not_configured", missing });
   }
   const now = deps.now();
-  const win = Email.renewalWindow(now, days, Email.MARKETS.mx.timeZone);
+  const win = Email.renewalWindow(now, days, Email.MARKETS[market].timeZone);
   let rows: RenewingSubscriptionRow[];
   try {
-    rows = await (deps.db as SubscriptionStore).listRenewingSubscriptions({ priceId: priceId as string, startIso: win.start, endIso: win.end });
+    rows = await (deps.db as SubscriptionStore).listRenewingSubscriptions({ market, interval, startIso: win.start, endIso: win.end });
   } catch (err) {
     deps.log.error(TAG + " lecture public.subscriptions impossible : " + errorText(err));
     return json(500, { ok: false, error: "db_unavailable" });
@@ -296,14 +333,18 @@ async function handleScan(deps: HandlerDeps, body: Json): Promise<Response> {
     const id = row.stripe_subscription_id;
     try {
       const sub = await retrieveSubscription(deps, stripeKey as string, id);
-      const reason = Email.renewalReminderSkipReason(sub, now);
+      const reason = Email.renewalReminderSkipReason(sub, now, market);
       if (reason) {
         summary.skipped++;
         results.push({ subscription: id, status: "skipped", reason });
         continue;
       }
       const preview = await previewNextInvoice(deps, stripeKey as string, id);
-      const mapped = Email.renewalReminderFromStripe({ subscription: sub, preview, now }) as Json;
+      // Annuel : J-n dans la cle d'idempotence (plusieurs rappels par echeance,
+      // ex. MX J-30 et J-7). Rappel MX mensuel / hebdomadaire : cle historique.
+      const mapped = (annual
+        ? Email.annualRenewalReminderFromStripe({ subscription: sub, preview, now, market, daysBefore: days })
+        : Email.renewalReminderFromStripe({ subscription: sub, preview, now, market, interval })) as Json;
       if (!mapped.ok) {
         summary.skipped++;
         results.push({ subscription: id, status: "skipped", reason: mapped.reason });
@@ -315,7 +356,7 @@ async function handleScan(deps: HandlerDeps, body: Json): Promise<Response> {
         results.push({ subscription: id, status: "skipped", reason: "renewal_date_changed" });
         continue;
       }
-      const rendered = renderFor(deps, "renewal_reminder", "mx", mapped.data);
+      const rendered = renderFor(deps, kind, String(mapped.market), mapped.data);
       const d = await deliver(deps, rendered, String(mapped.to), String(mapped.idempotencyKey), dryRun);
       if (d.sent) summary.sent++;
       else if (d.httpStatus) summary.failed++;
@@ -323,11 +364,11 @@ async function handleScan(deps: HandlerDeps, body: Json): Promise<Response> {
       results.push({ subscription: id, status: d.sent ? "sent" : (d.httpStatus ? "failed" : "not_sent"), reason: d.reason || null });
     } catch (err) {
       summary.failed++;
-      deps.log.error(TAG + " rappel MX " + id + " en erreur : " + errorText(err));
+      deps.log.error(TAG + " rappel " + market + "/" + interval + " " + id + " en erreur : " + errorText(err));
       results.push({ subscription: id, status: "failed", reason: "error" });
     }
   }
-  deps.log.info(TAG + " scan rappels MX " + win.localDate + " (J-" + days + ") : " + JSON.stringify(summary));
+  deps.log.info(TAG + " scan rappels " + market + "/" + interval + " " + win.localDate + " (J-" + days + ") : " + JSON.stringify(summary));
   return json(summary.failed ? 207 : 200, { ok: summary.failed === 0, processed: true, window: win, dryRun, ...summary, results });
 }
 
@@ -355,7 +396,7 @@ export async function handleRequest(req: Request, deps: HandlerDeps): Promise<Re
   }
   try {
     if (body.type === "renewal_reminder_scan") return await handleScan(deps, body);
-    if (body.type !== "purchase_confirmation" && body.type !== "renewal_reminder") return json(400, { ok: false, error: "unknown_type" });
+    if (body.type !== "purchase_confirmation" && body.type !== "renewal_reminder" && body.type !== Email.ANNUAL_KIND) return json(400, { ok: false, error: "unknown_type" });
     if (body.stripeSubscriptionId !== undefined) return await handleFromStripe(deps, body);
     return await handleDirect(deps, body);
   } catch (err) {

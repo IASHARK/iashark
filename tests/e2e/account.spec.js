@@ -44,6 +44,18 @@ for (const v of VERSIONS) {
       await page.goto(`/${v.dir}/compte.html#abonnement`);
       await expect(page.locator('#panneau')).toContainText(tr(dict, 'compte_page.plan_pro_name'));
       await expect(page.locator('#panneau')).toContainText(tr(dict, 'compte_page.sub_status_active_title'));
+      // Offre Pro unique : duree actuelle, prochaine echeance, changement de duree via le portail.
+      await expect(page.locator('#panneau')).toContainText(tr(dict, 'compte_page.sub_interval_label'));
+      await expect(page.locator('#panneau')).toContainText(tr(dict, 'compte_page.interval_month'));
+      await expect(page.locator('#panneau')).toContainText(tr(dict, 'compte_page.next_renewal_label'));
+      const change = page.locator('#changerDuree');
+      await expect(change).toHaveText(tr(dict, 'compte_page.change_interval_cta'));
+      const changeCall = supa.waitForCall('create-portal-session');
+      await change.click();
+      const cc = await changeCall;
+      expect(cc.body).toEqual(Object.assign({ flow: 'change_interval' }, v.dir ? { dir: v.dir } : {}));
+      await page.waitForURL(STRIPE_PORTAL_URL);
+      await page.goto(`/${v.dir}/compte.html#abonnement`);
       await expect(page.locator('#souscrire')).toHaveCount(0);
       const portal = page.locator('#portail');
       await expect(portal).toHaveText(tr(dict, 'compte_page.manage_subscription_cta'));

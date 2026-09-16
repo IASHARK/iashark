@@ -1515,7 +1515,18 @@
     "privacy_policy_link": "Datenschutzerklärung",
     "privacy_opt_out_saved": "Erledigt: Deine Besuche sind nicht mehr mit deinem Konto verknüpft.",
     "privacy_opt_in_saved": "Deine Besuche sind wieder mit deinem Konto verknüpft.",
-    "privacy_opt_out_device_only": "Auf diesem Gerät gespeichert. Das Speichern in deinem Konto ist fehlgeschlagen: Versuche es später erneut, damit es auch auf deinen anderen Geräten gilt."
+    "privacy_opt_out_device_only": "Auf diesem Gerät gespeichert. Das Speichern in deinem Konto ist fehlgeschlagen: Versuche es später erneut, damit es auch auf deinen anderen Geräten gilt.",
+    "sub_interval_label": "Laufzeit",
+    "interval_week": "Wöchentlich",
+    "interval_month": "Monatlich",
+    "interval_year": "Jährlich",
+    "interval_unknown": "Wird synchronisiert",
+    "next_renewal_label": "Nächste Verlängerung",
+    "change_interval_cta": "Laufzeit ändern",
+    "change_interval_note": "Der Wechsel zu einer längeren Laufzeit gilt sofort und wird anteilig verrechnet; der Wechsel zu einer kürzeren Laufzeit gilt ab dem Ende des bereits bezahlten Zeitraums. Betrag und Datum werden vor der Bestätigung angezeigt.",
+    "pro_durations_note": "Wöchentlich, monatlich oder jährlich: derselbe Pro-Zugang, jederzeit kündbar.",
+    "leagues_moved_hint": "Deine Wettbewerbe wählst du im Bereich Wettbewerbe: Sie erscheinen dann zuerst in der Spielliste der Startseite.",
+    "fav_leagues_cta": "Meine Wettbewerbe wählen"
   },
   "history_page": {
     "title_span": "HISTOR",
@@ -1572,42 +1583,29 @@
   },
   "landing_page": {
     "title": "IASHARK — Das Modell, das das Spiel vor dem Anpfiff liest",
-    "description": "Poisson, Dixon-Coles, Monte Carlo, Elo: IASHARK analysiert jedes Spiel mit echten statistischen Modellen. Ein kostenloses Spiel jeden Tag.",
+    "description": "Erwartete Tore, Wahrscheinlichkeit jedes Marktes, Abstand zur Quote: IASHARK analysiert jedes Spiel mit einem echten statistischen Modell. Ein kostenloses Spiel jeden Tag.",
     "nav_cta": "ZUR WEBSITE →",
     "eyebrow": "STATISTISCHES MODELL · FUSSBALL",
-    "hero_sub": "IASHARK kombiniert <b>xG, aktuelle Form, Spielplan-Müdigkeit und direkten Vergleich</b>, um vor jedem Spiel ein Wahrscheinlichkeitssignal zu erzeugen.",
+    "hero_sub": "IASHARK geht von den <b>echten Statistiken beider Mannschaften aus der laufenden und der vorherigen Saison</b> aus, um vor jedem Spiel ein Wahrscheinlichkeitssignal zu erzeugen.",
     "hero_cta": "HEUTIGES GRATISSPIEL ANSEHEN",
     "hero_cta_note_pre": "Keine Kreditkarte · ",
     "hero_cta_note_b": "1 kostenlose Analyse pro Tag",
-    "strip_poisson": "",
-    "strip_poisson_b": "POISSON-MODELL",
-    "strip_dc_b": "DIXON-COLES",
-    "strip_dc_rest": " KORREKTUR NIEDRIGER ERGEBNISSE",
-    "strip_mc": "",
-    "strip_mc_b": "MONTE-CARLO-SIMULATION",
-    "strip_elo": "",
-    "strip_elo_b": "DYNAMISCHES ELO",
-    "strip_elo_rest": "-RANKING",
-    "strip_shin": "",
-    "strip_shin_b": "SHIN-WAHRSCHEINLICHKEITEN",
-    "strip_kelly": "",
-    "strip_kelly_b": "FRAKTIONIERTES KELLY",
     "lbl_method": "DIE METHODE",
-    "title_method_pre": "Vier Modelle, ",
+    "title_method_pre": "Vier Schritte, ",
     "title_method_b": "ein Signal",
     "title_method_post": " pro Spiel.",
-    "model1_tag": "MODELL 1",
-    "model1_name": "Poisson",
-    "model1_desc": "Verteilung der erwarteten Tore für jedes Team, zu Hause und auswärts.",
-    "model2_tag": "MODELL 2",
-    "model2_name": "Dixon-Coles",
-    "model2_desc": "Korrektur niedriger Ergebnisse (0:0, 1:0, 1:1), die das reine Poisson-Modell unterschätzt.",
-    "model3_tag": "MODELL 3",
-    "model3_name": "Monte Carlo",
-    "model3_desc": "Tausende Spielsimulationen für eine robuste Ergebnisverteilung.",
-    "model4_tag": "MODELL 4",
-    "model4_name": "Elo & Shin",
-    "model4_desc": "Echte Teamstärke über die Zeit, und Korrektur der Verzerrung impliziter Wahrscheinlichkeiten.",
+    "model1_tag": "SCHRITT 1",
+    "model1_name": "Kräfteverhältnis",
+    "model1_desc": "Was jede Mannschaft in ihrer tatsächlichen Situation erzielt und zulässt, zu Hause oder auswärts, verglichen mit dem Niveau ihres Wettbewerbs.",
+    "model2_tag": "SCHRITT 2",
+    "model2_name": "Vorsicht zu Saisonbeginn",
+    "model2_desc": "Wenn erst wenige Spiele absolviert sind, wiegen die vorherige Saison und ein Referenzniveau schwerer und verlieren dann an Gewicht.",
+    "model3_tag": "SCHRITT 3",
+    "model3_name": "Wahrscheinlichkeit jedes Marktes",
+    "model3_desc": "Aus den erwarteten Toren wird die Wahrscheinlichkeit jedes Ergebnisses und dann jedes Marktes, korrigiert durch eine aus früheren Saisons gelernte Kalibrierung.",
+    "model4_tag": "SCHRITT 4",
+    "model4_name": "Spielsimulation",
+    "model4_desc": "Das Spiel wird sehr oft nachgespielt, um die wahrscheinlichsten Ergebnisse sichtbar zu machen. Die Simulation wählt die Wette nicht aus.",
     "proof_title_pre": "Nichts zu verbergen. ",
     "proof_title_b": "Alles wird dokumentiert.",
     "proof_desc": "Jede veröffentlichte Analyse bleibt in unserer Historie sichtbar: empfohlener Markt, angekündigte Wahrscheinlichkeit, tatsächliches Ergebnis. Du prüfst nach, wir schreiben im Nachhinein nichts um.",
@@ -1616,9 +1614,9 @@
     "title_practice_pre": "Von Rohdaten zu einem ",
     "title_practice_b": "nutzbaren Signal.",
     "step1_title": "Wir erfassen die Daten",
-    "step1_desc": "Spielpläne, voraussichtliche Aufstellungen, direkter Vergleich und xG-Statistiken, laufend aktualisiert, Liga für Liga.",
+    "step1_desc": "Spielpläne, Tabellen, aktuelle Ergebnisse, direkte Vergleiche und gemeldete Ausfälle, Liga für Liga.",
     "step2_title": "Das Modell rechnet",
-    "step2_desc": "Poisson, Dixon-Coles und Monte Carlo laufen parallel, um eine Wahrscheinlichkeitsverteilung für jeden Markt zu erzeugen.",
+    "step2_desc": "Erwartete Tore, Wahrscheinlichkeit jedes Ergebnisses und dann jedes Marktes – ohne jemals die Quoten zu verwenden.",
     "step3_title": "Du erhältst das Signal",
     "step3_desc": "Ein klares Datenblatt pro Spiel: Wahrscheinlichkeit, Zuverlässigkeitsstufe, und der Markt, bei dem das Modell eine Abweichung vom realen Markt erkennt.",
     "lbl_access": "DER ZUGANG",
@@ -1722,7 +1720,7 @@
       },
       "landing": {
         "title": "IASHARK — Das Modell, das das Spiel vor dem Anpfiff liest",
-        "description": "Poisson, Dixon-Coles, Monte Carlo, Elo: IASHARK analysiert jedes Spiel mit echten statistischen Modellen. Ein kostenloses Spiel jeden Tag."
+        "description": "Erwartete Tore, Wahrscheinlichkeit jedes Marktes, Abstand zur Quote: IASHARK analysiert jedes Spiel mit einem echten statistischen Modell. Ein kostenloses Spiel jeden Tag."
       }
     },
     "switcher": {
@@ -1807,7 +1805,11 @@
     "seo_times_paris": "Pariser Zeit",
     "premium_detail_updating": "Detaillierte Analyse wird aktualisiert",
     "free_gate_label": "Gratis-Analyse",
-    "free_gate_text": "Erstelle ein kostenloses Konto, um die Gratis-Analyse zu sehen"
+    "free_gate_text": "Erstelle ein kostenloses Konto, um die Gratis-Analyse zu sehen",
+    "pro_other_durations": "Auch wöchentlich ({pro_week_price}) oder jährlich ({pro_year_price}).",
+    "pro_other_durations_week": "Auch wöchentlich ({pro_week_price}).",
+    "free_card_cta": "Vollständige Analyse ansehen",
+    "free_gate_cta": "Kostenloses Konto erstellen"
   },
   "site_header": {
     "nav_today": "Heutige Analysen",
@@ -1822,16 +1824,16 @@
     "plan_pro_commitment": "Ohne Vertragsbindung — jederzeit kündbar",
     "hero_title": "Keine Emotionen.<br><b>Nur Wahrscheinlichkeiten.</b>",
     "cta_note": "Keine Kreditkarte · <b>1 kostenlose Analyse pro Tag</b>",
-    "strip_poisson": "<b>POISSON-MODELL</b>",
-    "strip_dc": "<b>DIXON-COLES</b> KORREKTUR NIEDRIGER ERGEBNISSE",
-    "strip_mc": "<b>MONTE-CARLO-SIMULATION</b>",
-    "strip_elo": "<b>DYNAMISCHES ELO</b>-RANKING",
-    "strip_shin": "<b>SHIN-WAHRSCHEINLICHKEITEN</b>",
-    "strip_kelly": "<b>FRAKTIONIERTES KELLY</b>",
-    "title_method": "Vier Modelle, <b>ein Signal</b> pro Spiel.",
+    "title_method": "Vier Schritte, <b>ein Signal</b> pro Spiel.",
     "title_practice": "Von Rohdaten zu einem <b>nutzbaren Signal.</b>",
     "title_access": "Starte kostenlos. <b>Wechsle zu Pro</b>, wenn du alles sehen willst.",
-    "final_title": "Das nächste Spiel hat bereits <b>ein Signal.</b>"
+    "final_title": "Das nächste Spiel hat bereits <b>ein Signal.</b>",
+    "strip_1": "<b>ERWARTETE TORE</b> PRO TEAM",
+    "strip_2": "<b>WAHRSCHEINLICHKEIT</b> JEDES ERGEBNISSES",
+    "strip_3": "<b>SPIELSIMULATION</b>",
+    "strip_4": "LAUFENDE <b>UND VORHERIGE SAISON</b>",
+    "strip_5": "<b>BUCHMACHERMARGE</b> ABGEZOGEN",
+    "strip_6": "KEINE <b>ERZWUNGENE WETTE</b>"
   },
   "about_page": {
     "meta_title": "Über uns — IASHARK",
@@ -1840,13 +1842,13 @@
     "hero_text": "IASHARK analysiert jedes Spiel mit echten Sportdaten der laufenden und der vorherigen Saison und einem statistischen Ergebnismodell. Keine Martingale, kein Wundersystem – dieselbe Methode, genau gleich angewendet, Spiel für Spiel.",
     "method_label": "METHODIK",
     "method_title": "So funktioniert das Modell",
-    "method_text": "Für jedes Spiel geht das System von den echten Statistiken beider Mannschaften in der laufenden und der vorherigen Saison aus: erzielte und kassierte Tore sowie aktuelle xG- und Schusswerte, sofern verfügbar. Daraus schätzt es die erwarteten Tore jeder Mannschaft und anschließend mit einem Dixon-Coles-Modell die Wahrscheinlichkeit jedes Ergebnisses. Für die Märkte 1X2, über/unter 2,5 Tore und beide Teams treffen werden diese Wahrscheinlichkeiten durch eine aus früheren Saisons gelernte Kalibrierung korrigiert. Quoten fließen nie in diese Berechnung ein.",
+    "method_text": "Für jedes Spiel geht das System von den echten Statistiken beider Mannschaften in der laufenden und der vorherigen Saison aus: erzielte und kassierte Tore sowie die Qualität der herausgespielten und zugelassenen Chancen, sofern aktuelle Daten das zulassen. Daraus schätzt es die erwarteten Tore jeder Mannschaft und anschließend die Wahrscheinlichkeit jedes Ergebnisses. Für die Märkte 1X2, über/unter 2,5 Tore und beide Teams treffen werden diese Wahrscheinlichkeiten durch eine aus früheren Saisons gelernte Kalibrierung korrigiert. Quoten fließen nie in diese Berechnung ein.",
     "card_history_title": "LAUFENDE UND VORHERIGE SAISON",
     "card_history_text": "Die Berechnung nutzt die laufende und die vorherige Saison. Zu Saisonbeginn zählen die Vorsaison und ein Referenzdurchschnitt stärker, danach mit jedem gespielten Spiel weniger.",
     "card_crossed_title": "EIN ERGEBNISMODELL",
-    "card_crossed_text": "Die Wahrscheinlichkeiten stammen aus einem einzigen Ergebnismodell (Dixon-Coles), kalibriert für drei Märkte. Es ist keine Abstimmung zwischen Modellen: Die Poisson-Berechnung und die Simulation dienen nur dazu, die in der Zuverlässigkeit angezeigte Übereinstimmung zu messen.",
+    "card_crossed_text": "Die Wahrscheinlichkeiten stammen aus einem einzigen Ergebnismodell, kalibriert für drei Märkte. Es ist keine Abstimmung zwischen Modellen: Die parallelen Berechnungen und die Simulation dienen nur dazu, die in der Zuverlässigkeit angezeigte Übereinstimmung zu messen.",
     "card_simulations_title": "SIMULATIONEN",
-    "card_simulations_text": "Jedes Spiel wird 5.000-mal simuliert (Monte-Carlo-Methode), um die wahrscheinlichsten Ergebnisse anzuzeigen. Diese Simulationen dienen nicht zur Auswahl der Wette.",
+    "card_simulations_text": "Jedes Spiel wird sehr oft nachgespielt, um die wahrscheinlichsten Ergebnisse anzuzeigen. Diese Simulationen dienen nicht zur Auswahl der Wette.",
     "card_reliability_title": "ZUVERLÄSSIGKEITSSCORE",
     "card_reliability_text": "Ein separater Indikator kombiniert die Übereinstimmung der Berechnungen, die Qualität der verfügbaren Daten und die Zahl der gespielten Spiele für genau dieses Spiel – er verändert nie die Wahrscheinlichkeit.",
     "single_label": "BITTE ZUERST LESEN",
@@ -1861,7 +1863,7 @@
     "footer_note": "IASHARK — Die veröffentlichten Analysen dienen ausschließlich der Orientierung",
     "hero_title": "Kein Bauchgefühl.<br>Sondern <b>Daten</b>, ein statistisches Modell,<br>eine gleichbleibende Methode.",
     "method_selection": "Der hervorgehobene Markt wird automatisch nach einer festen Regel gewählt: unter den Märkten, die das Modell berechnet und die ein Buchmacher tatsächlich anbietet, derjenige mit der höchsten <b>geschätzten Wahrscheinlichkeit</b>, vorrangig unter denen mit einer Mindestquote und unterhalb einer Wahrscheinlichkeitsobergrenze. Ein Spiel, das zum Zeitpunkt der Berechnung bereits begonnen hat oder kurz vor dem Anpfiff steht, erhält keine Wette. Die angezeigte Wahrscheinlichkeit ist die des Modells und wird nie nachträglich geändert. Ein Sprachmodell schreibt anschließend den Erklärtext, berechnet, wählt oder ändert aber keine Zahl.",
-    "method_value": "<b>Der Abstand zum Markt</b>: Das Modell vergleicht seine Wahrscheinlichkeit anschließend mit der von der Quote implizierten, nach Abzug der Buchmachermarge (Shin-Methode, wo möglich). Dieser Abstand dient nur der Information: Er wird nicht zur Wahl des Marktes verwendet und garantiert keinen Gewinn.",
+    "method_value": "<b>Der Abstand zum Markt</b>: Das Modell vergleicht seine Wahrscheinlichkeit anschließend mit der von der Quote implizierten, nach Abzug der Buchmachermarge. Dieser Abstand dient nur der Information: Er wird nicht zur Wahl des Marktes verwendet und garantiert keinen Gewinn.",
     "single_text": "Der Kern des Systems analysiert <b>jedes Spiel unabhängig</b> — jeweils eine Einzelwette, nie Kombinationen aus mehreren Wetten.",
     "legal_not_operator": "<b>IASHARK ist kein Sportwettenanbieter.</b> Wir nehmen keine Einsätze an, verwalten keine Spielerkonten und zahlen keine Gewinne aus. Um tatsächlich zu wetten, müssen Sie in Frankreich einen von der ANJ (Autorité Nationale des Jeux, der französischen Glücksspielaufsicht) zugelassenen Anbieter nutzen.",
     "legal_not_advisor": "<b>Wir sind weder Finanzberater noch zugelassene professionelle Trader noch Sportwetten-Profis.</b> IASHARK ist ein statistisches Analysetool zu Informations- und Bildungszwecken — keinesfalls ein Beratungsdienst für Investitionen, Trading oder Wetten.",
@@ -1877,7 +1879,8 @@
       "za": "<b>IASHARK ist kein Glücksspielanbieter.</b> Wir nehmen keine Einsätze an, verwalten keine Spielerkonten und zahlen keine Gewinne aus. Um in Südafrika tatsächlich zu wetten, müssen Sie einen Buchmacher nutzen, der von der Glücksspielbehörde Ihrer Provinz lizenziert ist.",
       "mx": "<b>IASHARK ist kein Sportwettenanbieter.</b> Wir nehmen keine Einsätze an, verwalten keine Spielerkonten und zahlen keine Gewinne aus. Um in Mexiko tatsächlich zu wetten, müssen Sie einen Anbieter mit gültiger Genehmigung des Innenministeriums (SEGOB) nutzen."
     },
-    "method_link": "Vollständige Methodik lesen: Daten, Berechnungen, Grenzen"
+    "method_link": "Vollständige Methodik lesen: Daten, Berechnungen, Grenzen",
+    "method_undisclosed": "<b>Was wir nicht offenlegen</b>: weder die Formeln noch die Gewichtungen, die Schwellenwerte, die genaue Liste der Variablen oder die Namen der Werkzeuge, die die Berechnung ausführen. Was wir dagegen veröffentlichen: das Prinzip jedes Schritts, was in die Berechnung einfließt und was nicht, und die Fälle, in denen das System sich enthält."
   },
   "pricing_page": {
     "meta_title": "Pro-Abonnement — IASHARK",
@@ -1887,7 +1890,7 @@
     "heading": "Schalte ganz IASHARK frei",
     "intro": "Greif auf alle Analysen zu und auf die Tools, mit denen du deine Entscheidungen methodisch verfolgst.",
     "per_month": "/ Monat",
-    "commitment": "Ohne Vertragsbindung · Jederzeit kündbar",
+    "commitment": "Derselbe Pro-Zugang bei jeder Laufzeit · Jederzeit kündbar",
     "pro_feat_analyses": "Vollständige Analyse für alle Spiele",
     "pro_feat_filters": "Erweiterte Filter und detaillierte Zuverlässigkeit",
     "pro_feat_journal": "Synchronisiertes Entscheidungsjournal",
@@ -1914,7 +1917,10 @@
     "checkout_opening": "Sichere Zahlung wird geöffnet…",
     "checkout_market_not_configured": "Die Zahlung ist für dieses Land noch nicht freigeschaltet. Es wurde kein Betrag abgebucht.",
     "checkout_unavailable": "Die Online-Zahlung ist bald verfügbar.",
-    "checkout_error": "Die Zahlung kann gerade nicht geöffnet werden."
+    "checkout_error": "Die Zahlung kann gerade nicht geöffnet werden.",
+    "checkout_interval_not_configured": "Für diese Laufzeit ist die Zahlung noch nicht freigeschaltet. Wähle eine andere Laufzeit oder schau bald wieder vorbei. Es wurde kein Betrag abgebucht.",
+    "checkout_already_subscribed": "Du hast bereits ein Pro-Abonnement. Die Laufzeit änderst du in deinem Konto.",
+    "checkout_price_mismatch": "Die Zahlung für diese Laufzeit ist vorübergehend nicht verfügbar. Es wurde kein Betrag abgebucht."
   },
   "demo_page": {
     "meta_title": "IASHARK-Beispielanalyse — Paris Saint Germain vs Monaco",
@@ -2014,7 +2020,7 @@
   },
   "demo_data": {
     "conseil_public": "Unter 1,5 Tore in der ersten Halbzeit ist der Markt, den die Daten dieses Spiels am stärksten stützen: 64 % Modellwahrscheinlichkeit und Tor-Zeitabschnitte in der ersten Halbzeit, die zu den niedrigsten des Spiels gehören.",
-    "analyse_card": "Die Tordaten nach Zeitabschnitten bestätigen, dass auf die erste Halbzeit nur 40 % der insgesamt erwarteten Tore entfallen (14 % + 13 % + 13 %), gegenüber 61 % in der zweiten Halbzeit (19 % + 20 % + 22 %). Das Monte-Carlo-Modell sieht das 1:1 mit 10 % als wahrscheinlichstes Ergebnis und das 1:0 bei 8 %, was bedeutet, dass eine große Mehrheit der Simulationen zur Halbzeit bei 0 oder 1 Tor bleibt. PSG kommt über das gesamte Spiel auf einen xG-Wert von 1,94, was für die erste Halbzeit allein wenig Volumen lässt, zumal Monaco (#1) in seinem einzigen Auswärtsspiel dieser Saison ohne Gegentor geblieben ist.",
+    "analyse_card": "Die Tordaten nach Zeitabschnitten bestätigen, dass auf die erste Halbzeit nur 40 % der insgesamt erwarteten Tore entfallen (14 % + 13 % + 13 %), gegenüber 61 % in der zweiten Halbzeit (19 % + 20 % + 22 %). Die Simulation sieht das 1:1 mit 10 % als wahrscheinlichstes Ergebnis und das 1:0 bei 8 %, was bedeutet, dass eine große Mehrheit der Simulationen zur Halbzeit bei 0 oder 1 Tor bleibt. PSG kommt über das gesamte Spiel auf einen xG-Wert von 1,94, was für die erste Halbzeit allein wenig Volumen lässt, zumal Monaco (#1) in seinem einzigen Auswärtsspiel dieser Saison ohne Gegentor geblieben ist.",
     "contexte": "PSG steht in der Heimtabelle auf #12 und kommt mit 2 Unentschieden in Folge, während Monaco in der Auswärtstabelle auf #1 steht, mit 2 Siegen in Folge und 1 Spiel ohne Gegentor in 1 Auswärtsspiel. Die xG-Werte von PSG liegen offensiv bei 1,94 und defensiv bei 1,07, die von Monaco offensiv bei 1,60 und defensiv bei 1,39, was zwei offensive Teams widerspiegelt, deren Torproduktion sich jedoch überwiegend auf die zweite Halbzeit konzentriert.",
     "pari_rec": "Erste Halbzeit: unter 1,5 Tore",
     "market_source": "Durchschnittsquoten mehrerer Buchmacher",
@@ -2237,7 +2243,8 @@
     },
     "free_gated": "Gratis-Analyse",
     "free_gated_cta": "Kostenloses Konto",
-    "aria_free_gated": "Gratis-Analyse mit kostenlosem Konto."
+    "aria_free_gated": "Gratis-Analyse mit kostenlosem Konto.",
+    "aria_open": "Analyse verfügbar."
   },
   "rg_footer": {
     "age_line": "18+ · Für Minderjährige verboten · Verantwortungsvoll spielen"
@@ -2258,5 +2265,20 @@
     "unsub_error": "Die Abmeldung ist fehlgeschlagen. Bitte versuchen Sie es gleich noch einmal oder schreiben Sie an contact@iashark.com.",
     "unsub_account_link": "E-Mails in Mein Konto verwalten",
     "unsub_home_link": "Zurück zur Website"
+  },
+  "pro_plans": {
+    "legend": "Wähle deine Laufzeit",
+    "week_label": "Woche",
+    "month_label": "Monat",
+    "year_label": "Jahr",
+    "per_week": "/ Woche",
+    "per_month": "/ Monat",
+    "per_year": "/ Jahr",
+    "year_equiv": "entspricht {price} / Monat",
+    "year_savings": "{pct} % weniger als 12 Monate zum Monatspreis",
+    "billed_week": "Wöchentliche Abbuchung · ohne Mindestlaufzeit · jederzeit kündbar",
+    "billed_month": "Monatliche Abbuchung · ohne Mindestlaufzeit · jederzeit kündbar",
+    "billed_year": "Abbuchung von {price} einmal pro Jahr · verlängert sich automatisch jährlich · vor Ablauf kündbar",
+    "unavailable": "Bald verfügbar"
   }
 }

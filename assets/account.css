@@ -104,10 +104,6 @@ dialog[open]{animation:accIn .16s ease-out}
 /* Liens d'en-tete (logo, "Retour au site") : 44 px de haut sans changer le
    rendu, la barre fait deja 56 px. */
 body>header a{display:inline-flex;align-items:center;min-height:44px}
-/* Le PNG du logo n'a pas de canal alpha : sans fusion, son rectangle noir
-   se voit sur le fond de page. `lighten` ne garde que les pixels clairs
-   (meme technique que les pages legales). */
-body>header img[src*="iashark-logo"]{mix-blend-mode:lighten}
 /* Liens d'action en texte du Account Center ("Modifier", "Voir
    l'abonnement"...) : zone cliquable etendue par padding compense par une
    marge negative, la mise en page ne bouge pas. */

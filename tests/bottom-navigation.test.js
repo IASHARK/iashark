@@ -22,14 +22,15 @@ const excluded=new Set([
 // dans /<dir>/articles|articulos/ par scripts/build-local-articles.js, qui y
 // injecte la navigation). emails/ : gabarits d'e-mails transactionnels, jamais
 // servis comme pages. dist/ : copie de build des pages deja controlees ici.
-// tests/ : rapports Playwright generes (tests/e2e/output).
+// tests/ : rapports Playwright generes (tests/e2e/output). scratchpad/ :
+// maquettes de travail des agents, jamais servies comme pages.
 // legal/ : sources des pages legales par repertoire, jamais servies telles
 // quelles (recopiees dans /<dir>/ par scripts/build-locales.js, qui y injecte
 // la navigation ; /legal/* est redirige en 301 par _redirects).
 function htmlFiles(dir=root,prefix=''){
   return fs.readdirSync(dir,{withFileTypes:true}).flatMap((entry)=>{
     const rel=path.join(prefix,entry.name);
-    if(entry.isDirectory()&&!['node_modules','.git','.agents','.codex','docs','iashark-v2-concept','prototypes','legal','content','emails','dist','tests'].includes(entry.name))return htmlFiles(path.join(dir,entry.name),rel);
+    if(entry.isDirectory()&&!['node_modules','.git','.agents','.codex','docs','iashark-v2-concept','prototypes','scratchpad','legal','content','emails','dist','tests'].includes(entry.name))return htmlFiles(path.join(dir,entry.name),rel);
     return entry.isFile()&&entry.name.endsWith('.html')?[rel]:[];
   });
 }

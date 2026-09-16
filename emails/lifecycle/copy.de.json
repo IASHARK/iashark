@@ -61,7 +61,8 @@
           "Das synchronisierte Entscheidungsjournal",
           "Die Bankroll-Verfolgung, verknüpft mit dem Konto"
         ] },
-        { "type": "p", "text": "Preis auf der Version {{siteVersion}} der Website: {{proPrice}} pro Monat, ohne Vertragsbindung, jederzeit in Mein Konto kündbar." },
+        { "type": "p", "if": "hasProYear", "text": "Preise auf der Version {{siteVersion}} der Website: {{proWeekPrice}} pro Woche, {{proPrice}} pro Monat oder {{proYearPrice}} pro Jahr. Derselbe Pro-Zugang bei jeder Laufzeit, jederzeit in Mein Konto kündbar." },
+        { "type": "p", "if": "hasNoProYear", "text": "Preise auf der Version {{siteVersion}} der Website: {{proWeekPrice}} pro Woche oder {{proPrice}} pro Monat. Derselbe Pro-Zugang bei jeder Laufzeit, jederzeit in Mein Konto kündbar." },
         { "type": "p", "text": "Pro bietet mehr Analysen und Tools; es macht kein Spiel vorhersehbarer." },
         { "type": "cta", "label": "Details zum Angebot", "link": "pricing" },
         { "type": "p", "text": "Wenn Ihnen das kostenlose Konto genügt, müssen Sie nichts tun." }

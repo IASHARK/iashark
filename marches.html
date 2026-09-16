@@ -303,6 +303,10 @@ function renderMatchMarkets(){
 }
 loadMatches();
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" defer></script>
+<script src="/app-client.js" defer></script>
+<script src="/auth-header.js" defer></script>
+<script>document.addEventListener('DOMContentLoaded',function(){if(window.IasharkAuthHeader)IasharkAuthHeader.mount('#authHeaderSlot');});</script>
 <script src="/lang-switcher.js"></script>
 <script>IasharkLangSwitcher.mount('#langSwitchSlot');IasharkLangSwitcher.applyRememberedChoiceOnce();</script>
 <script src="/site-prefs.js"></script>

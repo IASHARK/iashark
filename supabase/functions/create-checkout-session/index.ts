@@ -1,6 +1,7 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import Stripe from "npm:stripe@17";
 import { validateConsent } from "./consent.ts";
+import { availability, priceMatches, resolvePriceId } from "./pricing.ts";
 
 // Creation de session de paiement — MASTER V2.1 §3.2/§21/§23. Meme
 // discipline "desactive par defaut" que supabase/functions/stripe-webhook/ :
@@ -29,47 +30,32 @@ const SUPA_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPA_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const PAYMENT_PROVIDER = Deno.env.get("PAYMENT_PROVIDER") || "disabled";
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
-const STRIPE_PRICE_ID = Deno.env.get("STRIPE_PRICE_ID");
 const SITE_URL = Deno.env.get("SITE_URL") || "https://iashark.com";
 
-// Expansion GB/MX/ZA (config/markets.json) : un marche = une devise = un
-// Price Stripe distinct (Stripe n'accepte qu'une devise fixe par Price, pas
-// de conversion a la volee). Chaque cle est le nom de la variable d'env lue
-// pour CE marche - les valeurs elles-memes doivent etre creees dans le
-// dashboard Stripe (action externe, hors de portee de ce code) avant que le
-// marche correspondant ne passe reellement "LIVE" dans markets.json.
+// OFFRE PRO UNIQUE, 3 DUREES (decision du proprietaire du 16/09/2026 ;
+// l'ancienne offre a deux niveaux est abandonnee). Un marche = une devise ; une duree = un Price Stripe distinct.
+// Table des prix attendus et des noms de secrets : prices.generated.ts,
+// GENERE depuis config/markets.json (scripts/build-locales.js) ; logique pure
+// de resolution et de controle : pricing.ts (teste par node --test).
 //
-// Repli sur STRIPE_PRICE_ID (FR) UNIQUEMENT quand aucun marche n'est precise
-// du tout (retro-compatibilite du flux FR existant, qui n'envoie jamais ce
-// champ). Si un marche EST precise mais que sa variable n'est pas configuree,
-// on NE bascule PAS silencieusement sur le prix FR - un visiteur UK qui voit
-// "£14.99" ne doit jamais etre facture au tarif FR en euros parce que la cle
-// manquait cote serveur. On renvoie une erreur explicite a la place, et le
-// frontend doit alors afficher un message "bientot disponible" pour ce
-// marche precis (meme discipline honnete que PAYMENT_PROVIDER != "stripe").
-const MARKET_STRIPE_PRICE_ENV: Record<string, string> = {
-  gb: "STRIPE_PRICE_ID_GB",
-  mx: "STRIPE_PRICE_ID_MX",
-  za: "STRIPE_PRICE_ID_ZA",
-};
+// Regles (jamais de repli silencieux vers un autre prix, une autre duree ou
+// une autre devise) :
+// - market absent = marche EUR "fr" (flux historique) ; market gb/mx/za =
+//   marche pays ; toute autre valeur = market_not_configured ;
+// - interval absent = PRO_DEFAULT_INTERVAL ("month", retro-compatibilite des
+//   pages deja en cache) ; interval invalide = 400 invalid_interval ;
+// - secret de la duree absent = processed:false, reason
+//   "interval_not_configured" (ou "market_not_configured" si aucune duree du
+//   marche n'est configuree) -> le front affiche "bientot disponible" ;
+// - seul repli admis : STRIPE_PRICE_ID (ancien secret) pour le MENSUEL FR ;
+// - avant toute session, le Price Stripe est relu et doit correspondre
+//   exactement (devise, periodicite x1, montant TTC) au prix affiche, sinon
+//   processed:false, reason "price_mismatch".
+const getEnv = (name: string) => Deno.env.get(name);
 
-type PriceResolution =
-  | { ok: true; priceId: string; usedMarket: string }
-  | { ok: false; requestedMarket: string };
-
-function resolvePriceId(market: unknown): PriceResolution {
-  const key = typeof market === "string" ? market.toLowerCase() : "";
-  if (!key) {
-    // Aucun marche precise : comportement historique, flux FR sur STRIPE_PRICE_ID.
-    return STRIPE_PRICE_ID
-      ? { ok: true, priceId: STRIPE_PRICE_ID, usedMarket: "fr" }
-      : { ok: false, requestedMarket: "fr" };
-  }
-  const envName = MARKET_STRIPE_PRICE_ENV[key];
-  const marketPriceId = envName ? Deno.env.get(envName) : undefined;
-  if (marketPriceId) return { ok: true, priceId: marketPriceId, usedMarket: key };
-  return { ok: false, requestedMarket: key };
-}
+// Abonnements qui interdisent une seconde souscription (aucun double
+// paiement : changer de duree passe par le portail client).
+const LIVE_STATUSES = ["active", "trialing", "past_due"];
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -148,9 +134,13 @@ Deno.serve(async (req: Request) => {
   let requestedDir: unknown = undefined;
   let requestedConsent: unknown = undefined;
   let requestedLocale: unknown = undefined;
+  let requestedInterval: unknown = undefined;
+  let requestedMode: unknown = undefined;
   try {
     const body = await req.clone().json();
     requestedMarket = body?.market;
+    requestedInterval = body?.interval;
+    requestedMode = body?.mode;
     requestedDir = body?.dir;
     requestedConsent = body?.consent;
     requestedLocale = body?.consent?.locale || body?.locale || body?.dir;
@@ -158,17 +148,31 @@ Deno.serve(async (req: Request) => {
     // pas de corps JSON - comportement par defaut (marche FR), et donc pas de
     // consentement : la demande sera refusee plus bas (consent_required).
   }
-  const resolution = resolvePriceId(requestedMarket);
+  if (requestedMode === "availability") {
+    return new Response(JSON.stringify({ ok: true, processed: false, mode: "availability", intervals: availability(getEnv, requestedMarket) }), {
+      status: 200,
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+    });
+  }
+
+  const resolution = resolvePriceId(getEnv, requestedMarket, requestedInterval);
 
   if (!resolution.ok) {
-    console.log(`[create-checkout-session] marche="${resolution.requestedMarket}" demande mais aucun Price Stripe configure pour lui - refus explicite (jamais de repli silencieux vers un autre marche/devise).`);
-    return new Response(JSON.stringify({ ok: true, processed: false, market: resolution.requestedMarket, reason: "market_not_configured" }), {
+    if (resolution.reason === "invalid_interval") {
+      return new Response(JSON.stringify({ ok: false, code: "invalid_interval" }), {
+        status: 400,
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      });
+    }
+    console.log(`[create-checkout-session] marche="${resolution.requestedMarket}" duree="${resolution.interval}" demandee mais aucun Price Stripe configure (${resolution.reason}) - refus explicite (jamais de repli vers un autre prix, une autre duree ou une autre devise).`);
+    return new Response(JSON.stringify({ ok: true, processed: false, market: resolution.requestedMarket, interval: resolution.interval, reason: resolution.reason }), {
       status: 200,
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
   }
   const STRIPE_PRICE_ID_RESOLVED = resolution.priceId;
   const usedMarket = resolution.usedMarket;
+  const usedInterval = resolution.interval;
 
   // Consentement avant paiement (consent.ts) : acceptation des CGV, et pour
   // les marches fr/gb/za la demande expresse d'execution immediate (regime
@@ -206,8 +210,39 @@ Deno.serve(async (req: Request) => {
   }
   const user = userData.user;
 
+  // Aucun second abonnement : un compte deja abonne (quelle que soit la
+  // duree) change de duree dans le portail client, jamais par un nouveau
+  // paiement. Lecture sous RLS (policy subscriptions_select_own).
+  const { data: live } = await supabaseAuth
+    .from("subscriptions")
+    .select("stripe_subscription_id")
+    .eq("user_id", user.id)
+    .in("status", LIVE_STATUSES)
+    .limit(1);
+  if (live && live.length) {
+    return new Response(JSON.stringify({ ok: true, processed: false, reason: "already_subscribed" }), {
+      status: 200,
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+    });
+  }
+  const { data: mapping } = await supabaseAuth
+    .from("billing_customers")
+    .select("stripe_customer_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
   try {
     const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" });
+    // Prix affiche == prix facture : le Price configure doit correspondre
+    // exactement a config/markets.json (devise, duree x1, montant TTC).
+    const price = await stripe.prices.retrieve(STRIPE_PRICE_ID_RESOLVED);
+    if (!priceMatches(price, { currency: resolution.currency, unitAmount: resolution.unitAmount, interval: usedInterval })) {
+      console.error(`[create-checkout-session] Price Stripe incoherent pour ${usedMarket}/${usedInterval} : attendu ${resolution.unitAmount} ${resolution.currency}/${usedInterval}, recu ${price.unit_amount} ${price.currency}/${price.recurring?.interval}x${price.recurring?.interval_count} actif=${price.active} tax=${price.tax_behavior} - refus.`);
+      return new Response(JSON.stringify({ ok: true, processed: false, market: usedMarket, interval: usedInterval, reason: "price_mismatch" }), {
+        status: 200,
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      });
+    }
     // Retour apres paiement dans le repertoire du visiteur (/gb/, /mx/, /en/...) :
     // checkout-succes.html et checkout-annule.html sont generes dans chaque
     // repertoire par scripts/build-locales.js. Liste blanche stricte (jamais une
@@ -223,14 +258,14 @@ Deno.serve(async (req: Request) => {
       mode: "subscription",
       line_items: [{ price: STRIPE_PRICE_ID_RESOLVED, quantity: 1 }],
       client_reference_id: user.id,
-      customer_email: user.email,
+      ...(mapping?.stripe_customer_id ? { customer: mapping.stripe_customer_id } : { customer_email: user.email }),
       success_url: returnBase + "/checkout-succes.html?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: returnBase + "/checkout-annule.html",
       // Trace durable du consentement (CGV, execution immediate, version des
       // CGV, langue, repertoire, horodatages client et serveur) sur la session
       // ET sur l'abonnement Stripe, qui survit a la session.
-      metadata: { market: usedMarket, ...consent.metadata },
-      subscription_data: { metadata: { market: usedMarket, ...consent.metadata } },
+      metadata: { market: usedMarket, plan: "pro", interval: usedInterval, ...consent.metadata },
+      subscription_data: { metadata: { market: usedMarket, plan: "pro", interval: usedInterval, ...consent.metadata } },
     });
     return new Response(JSON.stringify({ ok: true, processed: true, url: session.url }), {
       status: 200,

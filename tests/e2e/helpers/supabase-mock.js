@@ -22,7 +22,7 @@ const PERSONAS = {
   free: { key: 'free', id: '00000000-0000-4000-8000-0000000000f1', email: 'e2e.free@example.test', plan: 'free', role: 'user', capital: null, subscription: null },
   pro: {
     key: 'pro', id: '00000000-0000-4000-8000-0000000000b2', email: 'e2e.pro@example.test', plan: 'pro', role: 'user', capital: 500,
-    subscription: { status: 'active', current_period_end: isoInDays(21), cancel_at_period_end: false, created_at: isoInDays(-9) },
+    subscription: { status: 'active', billing_interval: 'month', current_period_end: isoInDays(21), cancel_at_period_end: false, created_at: isoInDays(-9) },
   },
   admin: { key: 'admin', id: '00000000-0000-4000-8000-0000000000a3', email: 'e2e.admin@example.test', plan: 'free', role: 'admin', capital: null, subscription: null },
 };
@@ -60,6 +60,7 @@ class SupabaseMock {
     this.calls = [];
     this.unmocked = [];
     this.fnHandlers = {};
+    this.availabilityMap = null;  // durees ouvertes au paiement (create-checkout-session, mode availability)
     this.userMetadata = {};       // user_metadata par persona (auth.updateUser)
     this._waiters = [];
   }
@@ -88,6 +89,9 @@ class SupabaseMock {
   // Reponse d'une fonction Edge : objet {status, json} ou fonction (body, call) -> {status, json}.
   // Un tableau = file de reponses successives (la derniere est reutilisee).
   onFunction(name, handler) { this.fnHandlers[name] = Array.isArray(handler) ? handler.slice() : handler; }
+
+  // Durees ouvertes au paiement renvoyees au selecteur (defaut : toutes).
+  availability(map) { this.availabilityMap = Object.assign({}, map); }
 
   callsTo(name) { return this.calls.filter((c) => c.kind === 'function' && c.name === name); }
 
@@ -187,6 +191,12 @@ class SupabaseMock {
     // ---------------- Edge Functions ----------------
     if (p.startsWith('/functions/v1/')) {
       const name = p.slice('/functions/v1/'.length).replace(/\/.*$/, '');
+      // Lecture des durees ouvertes (lib/pro-plan-picker.js) : servie a part,
+      // jamais comptee comme une tentative de paiement ni consommee dans la
+      // file de reponses du test.
+      if (name === 'create-checkout-session' && body && body.mode === 'availability') {
+        return json(200, { ok: true, processed: false, mode: 'availability', intervals: Object.assign({ week: true, month: true, year: true }, this.availabilityMap || {}) });
+      }
       const fnCall = Object.assign({ kind: 'function', name }, call);
       this._record(fnCall);
       let handler = this.fnHandlers[name];

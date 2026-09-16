@@ -1515,7 +1515,16 @@
     "privacy_policy_link": "Política de privacidade",
     "privacy_opt_out_saved": "Feito: as tuas visitas já não estão associadas à tua conta.",
     "privacy_opt_in_saved": "As tuas visitas voltaram a estar associadas à tua conta.",
-    "privacy_opt_out_device_only": "Guardado neste dispositivo. Não foi possível guardar na tua conta: tenta novamente mais tarde para aplicar nos teus outros dispositivos."
+    "privacy_opt_out_device_only": "Guardado neste dispositivo. Não foi possível guardar na tua conta: tenta novamente mais tarde para aplicar nos teus outros dispositivos.",
+    "sub_interval_label": "Duração",
+    "interval_week": "Semanal",
+    "interval_month": "Mensal",
+    "interval_year": "Anual",
+    "interval_unknown": "A sincronizar",
+    "next_renewal_label": "Próximo vencimento",
+    "change_interval_cta": "Mudar a duração",
+    "change_interval_note": "Mudar para uma duração mais longa produz efeito de imediato, com cálculo proporcional; mudar para uma mais curta produz efeito no fim do período já pago. O valor e a data de efeito são mostrados antes da confirmação.",
+    "pro_durations_note": "Semanal, mensal ou anual: o mesmo acesso Pro, cancelável a qualquer momento."
   },
   "history_page": {
     "title_span": "HISTÓR",
@@ -1807,7 +1816,9 @@
     "seo_times_paris": "hora de Paris",
     "premium_detail_updating": "Análise detalhada em atualização",
     "free_gate_label": "Análise grátis",
-    "free_gate_text": "Crie uma conta gratuita para ver a análise grátis"
+    "free_gate_text": "Crie uma conta gratuita para ver a análise grátis",
+    "pro_other_durations": "Também semanal ({pro_week_price}) ou anual ({pro_year_price}).",
+    "pro_other_durations_week": "Também semanal ({pro_week_price})."
   },
   "site_header": {
     "nav_today": "Análises do dia",
@@ -1887,7 +1898,7 @@
     "heading": "Desbloqueia todo o IASHARK",
     "intro": "Acede a todas as análises e às ferramentas para acompanhar as tuas decisões com método.",
     "per_month": "/ mês",
-    "commitment": "Sem compromisso · Cancelável a qualquer momento",
+    "commitment": "O mesmo acesso Pro em qualquer duração · Cancelável a qualquer momento",
     "pro_feat_analyses": "Análise completa em todos os jogos",
     "pro_feat_filters": "Filtros avançados e fiabilidade detalhada",
     "pro_feat_journal": "Diário de decisões sincronizado",
@@ -1914,7 +1925,10 @@
     "checkout_opening": "A abrir o pagamento seguro…",
     "checkout_market_not_configured": "O pagamento ainda não está disponível para este país. Não foi cobrado nenhum valor.",
     "checkout_unavailable": "O pagamento online estará disponível em breve.",
-    "checkout_error": "Não é possível abrir o pagamento neste momento."
+    "checkout_error": "Não é possível abrir o pagamento neste momento.",
+    "checkout_interval_not_configured": "O pagamento desta duração ainda não está disponível. Escolhe outra duração ou volta em breve. Não foi cobrado nenhum valor.",
+    "checkout_already_subscribed": "Já tens uma subscrição Pro. Para mudar a duração, vai à tua conta.",
+    "checkout_price_mismatch": "O pagamento desta duração está temporariamente indisponível. Não foi cobrado nenhum valor."
   },
   "demo_page": {
     "meta_title": "Exemplo de análise IASHARK — Paris Saint Germain vs Monaco",
@@ -2258,5 +2272,20 @@
     "unsub_error": "Não foi possível concluir o cancelamento. Tente novamente dentro de instantes ou escreva para contact@iashark.com.",
     "unsub_account_link": "Gerir os meus emails em A minha conta",
     "unsub_home_link": "Voltar ao site"
+  },
+  "pro_plans": {
+    "legend": "Escolhe a duração",
+    "week_label": "Semana",
+    "month_label": "Mês",
+    "year_label": "Ano",
+    "per_week": "/ semana",
+    "per_month": "/ mês",
+    "per_year": "/ ano",
+    "year_equiv": "ou seja, {price} / mês",
+    "year_savings": "{pct}% menos do que 12 meses ao preço mensal",
+    "billed_week": "Cobrado todas as semanas · sem compromisso · cancelável a qualquer momento",
+    "billed_month": "Cobrado todos os meses · sem compromisso · cancelável a qualquer momento",
+    "billed_year": "Cobrado {price} uma vez por ano · renovação automática anual · cancelável antes do vencimento",
+    "unavailable": "Brevemente"
   }
 }

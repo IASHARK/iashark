@@ -137,7 +137,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Responsible gambling</a>
   </nav>
   <h1 class="page-title">Terms of service and sale</h1>
-  <div class="page-date">Last updated: 13 September 2026</div>
+  <div class="page-date">Last updated: 16 September 2026</div>
 
   <div class="warn-box">
     <p>⚠️ IASHARK IS NOT A BOOKMAKER: WE DO NOT ACCEPT OR PLACE BETS. OUR ANALYSES ARE STATISTICAL ESTIMATES — NO OUTCOME OR WINNINGS ARE GUARANTEED.<br>GAMBLING CAN BE ADDICTIVE. FREE 24-HOUR COUNSELLING: NATIONAL RESPONSIBLE GAMBLING PROGRAMME <a href="tel:0800006008">0800 006 008</a>.<br>NO PERSONS UNDER 18.</p>
@@ -167,13 +167,14 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <p>Creating an account is free and requires a valid email address. A free account includes one full match analysis per day and the other free content described on our pricing page. What is included in the free account may change.</p>
   </section>
 
+  <!-- LEGAL REVIEW: sections 5, 6 and 8 rewritten on 16/09/2026 for the single Pro plan - REVIEW status, to be reviewed by a South African lawyer before the Stripe prices are opened. Owner decision 16/09/2026: the annual period is NOT offered in South Africa at launch (CPA s14 fixed-term agreement: notice 80 to 40 business days before expiry, month-to-month continuation, early-cancellation penalty policy undecided) - no annual price, no annual option, no STRIPE_PRICE_ID_ZA_YEAR. Before opening it: add the annual price in config/markets.json, the s14 notice process and the fixed-term clauses. Prices taken from config/markets.json (tests/cgv-pro-prices.test.js). -->
   <section class="section">
-    <h2>5. Paid subscriptions and how to order</h2>
+    <h2>5. Pro subscription and how to order</h2>
     <ul>
-      <li><strong>Main characteristics</strong> — paid plans give access to the additional features described on our pricing page at the time you subscribe.</li>
-      <li><strong>Price</strong> — the full price in South African rand (ZAR), including any applicable taxes, is shown on the pricing page and on the checkout page before you pay.</li>
-      <li><strong>Duration</strong> — monthly plans have no minimum term. Annual plans, where offered, are fixed-term agreements of 12 months.</li>
-      <li><strong>Reviewing your order</strong> — before you pay, the checkout page lets you review the plan and price, correct any mistake, or leave without ordering.</li>
+      <li><strong>Main characteristics</strong> — IASHARK Pro is a single plan with the additional features described on our pricing page at the time you subscribe. <strong>The features are exactly the same whichever billing period you choose.</strong></li>
+      <li><strong>Price</strong> — full prices in South African rand (ZAR), including any applicable taxes: <strong>R69 per week</strong> or <strong>R199 per month</strong>. The price of the period you choose is shown on the pricing page and on the checkout page before you pay.</li>
+      <li><strong>Duration</strong> — weekly and monthly plans have no minimum term. No annual plan is offered at present.</li>
+      <li><strong>Reviewing your order</strong> — before you pay, the checkout page lets you review the billing period and price, correct any mistake, or leave without ordering.</li>
       <li><strong>Access</strong> — paid features are made available as soon as your payment is confirmed.</li>
       <li><strong>Record of your transaction</strong> — your subscription and billing details can be viewed and saved from the secure billing area opened from the "My account" page.</li>
     </ul>
@@ -183,10 +184,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <h2>6. Payment and automatic renewal</h2>
     <p>Payments are processed by Stripe, using a payment system that is secure according to accepted technological standards. We never see or store your full card details.</p>
     <ul>
-      <li>You pay at the start of each billing period.</li>
-      <li><strong>Monthly plans renew automatically</strong> every month until you cancel them.</li>
+      <li>You pay at the start of each billing period (week or month).</li>
+      <li><strong>Weekly and monthly plans renew automatically</strong> for the same period until you cancel them.</li>
+      <li><strong>Changing billing period.</strong> You can switch between weekly and monthly from "My account". Moving to the longer period (monthly) takes effect immediately, less a pro-rata credit for the unused part of the current week; moving to the shorter period (weekly) takes effect at the end of the month you have already paid for. The new price and when the change takes effect are shown before you confirm. An active subscription cannot be bought a second time.</li>
       <li>If we change the price, we will tell you in advance. The new price will only apply from your next billing period, and you can cancel before it applies.</li>
-      <li>If a renewal payment fails, our payment provider may retry it. Your paid access continues for 4 days after the end of the paid period; if payment is still not made, your account returns to the free plan.</li>
+      <li>If a renewal payment fails, our payment provider may retry it. Your paid access continues for 1 day after the end of the paid period on the weekly plan, and for 4 days on the monthly plan; if payment is still not made, your account returns to the free plan.</li>
     </ul>
   </section>
 
@@ -203,9 +205,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
 
   <section class="section">
     <h2>8. Cancelling your subscription</h2>
-    <p><strong>Monthly plans.</strong> You can cancel at any time, free of charge, from the "My account" page (which opens our payment provider's secure billing area) or by emailing us. Cancellation takes effect at the end of your current billing period: you keep paid access until then and will not be charged again. Apart from your cooling-off rights and your other rights under the CPA, the billing period already started is not refunded.</p>
-    <p><strong>Annual (fixed-term) plans.</strong> Under section 14 of the CPA, you may cancel a fixed-term agreement at any time by giving us 20 business days' notice in writing. Any amount due or refundable on early cancellation will be calculated as permitted by section 14 of the CPA and its regulations. Not more than 80 and not less than 40 business days before your annual term expires, we will notify you of the upcoming expiry, of any material changes that would apply if the agreement continues, and of your options. At the end of the fixed term, unless you tell us to end the agreement on the expiry date or you agree to renew it for a further fixed term, it continues on a month-to-month basis, as provided in section 14 of the CPA.</p>
-    <!-- BLOCKED_DECISION: early-cancellation refund / reasonable cancellation penalty policy for annual plans (CPA s14) and treatment of the agreement at the end of the annual term - business decision required before annual plans are sold in South Africa. -->
+    <p><strong>Weekly and monthly plans.</strong> You can cancel at any time, free of charge, from the "My account" page (which opens our payment provider's secure billing area) or by emailing us. Cancellation takes effect at the end of your current billing period: you keep paid access until then and will not be charged again. Apart from your cooling-off rights and your other rights under the CPA, the billing period already started is not refunded.</p>
+    <!-- BLOCKED_DECISION: annual plan not offered in South Africa at launch (owner decision 16/09/2026). Before it is sold: CPA s14 fixed-term clauses (20 business days' notice, early-cancellation refund or reasonable penalty policy, notice 80 to 40 business days before expiry, month-to-month continuation) must be added here after legal review. -->
     <p>Deleting your account from "My account" cancels any active subscription first.</p>
   </section>
 

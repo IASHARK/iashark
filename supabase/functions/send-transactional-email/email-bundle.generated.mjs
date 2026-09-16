@@ -59,10 +59,12 @@ const module = { exports: {} };
     }
   };
 
-  // Types d'email -> marches couverts par un gabarit.
+  // Types d'email -> marches couverts par un gabarit. annual_renewal_reminder :
+  // un gabarit commun ("all") rendu pour chaque repertoire de REMINDER_DIRS.
   var TEMPLATE_KINDS = {
     purchase_confirmation: ["fr", "gb"],
-    renewal_reminder: ["mx"]
+    renewal_reminder: ["mx"],
+    annual_renewal_reminder: ["all"]
   };
 
   // Champs d'identite du vendeur -> secret Supabase correspondant.
@@ -77,7 +79,9 @@ const module = { exports: {} };
 
   var DEFAULT_REMINDER_DAYS = 7;
   var MIN_REMINDER_DAYS = 1;
-  var MAX_REMINDER_DAYS = 30;
+  // 90 jours : fenetre de l'information avant reconduction annuelle (FR :
+  // entre 3 mois et 1 mois avant l'echeance).
+  var MAX_REMINDER_DAYS = 90;
   // En dessous, log d'avertissement (delai minimal legal MX a confirmer par
   // un juriste : le premier jet _shared/email cite 5 jours naturels, art. 76 Bis
   // LFPC reforme DOF 12/12/2025 - non verifie ici).
@@ -85,6 +89,156 @@ const module = { exports: {} };
 
   var ACTIVE_STATUSES = ["active", "trialing"];
   var hasOwn = Object.prototype.hasOwnProperty;
+
+  // ------------------------------------------- rappel annuel avant reconduction
+  // Offre Pro unique vendue en 3 durees (decision du proprietaire du 16/09/2026).
+  // Abonnement ANNUEL : information avant reconduction (FR : L215-1, entre 3 mois
+  // et 1 mois avant l'echeance ; GB : bonne pratique J-30, regime DMCC a venir ;
+  // MX : aviso J-30 et J-7). ZA : aucun annuel vendu au lancement, aucun gabarit.
+  // Un gabarit commun (emails/templates/annual-renewal-reminder.*) et les textes
+  // ci-dessous (7 langues, STATUT : REVIEW, relecture juriste + native).
+  // Repertoires : miroir de config/markets.json#_dirs et _helplines
+  // (tests/email-templates.test.js fait echouer toute derive).
+  var ANNUAL_KIND = "annual_renewal_reminder";
+  var INTERNATIONAL_HELPLINE = { name: "Gambling Therapy", phone: null, url: "https://www.gamblingtherapy.org", display: "gamblingtherapy.org" };
+  var REMINDER_DIRS = {
+    fr: { market: "fr", locale: "fr", htmlLang: "fr", intlLocale: "fr-FR" },
+    en: { market: "fr", locale: "en", htmlLang: "en", intlLocale: "en-GB", helpline: INTERNATIONAL_HELPLINE },
+    es: { market: "fr", locale: "es", htmlLang: "es", intlLocale: "es-ES", helpline: INTERNATIONAL_HELPLINE },
+    de: { market: "fr", locale: "de", htmlLang: "de", intlLocale: "de-DE", helpline: INTERNATIONAL_HELPLINE },
+    it: { market: "fr", locale: "it", htmlLang: "it", intlLocale: "it-IT", helpline: INTERNATIONAL_HELPLINE },
+    pt: { market: "fr", locale: "pt", htmlLang: "pt", intlLocale: "pt-PT", helpline: INTERNATIONAL_HELPLINE },
+    gb: { market: "gb", locale: "en", htmlLang: "en-GB", intlLocale: "en-GB" },
+    mx: { market: "mx", locale: "es-mx", htmlLang: "es-MX", intlLocale: "es-MX" }
+  };
+  // Delai d'envoi par marche (jours avant l'echeance) : defaut et fenetre
+  // recommandee (hors fenetre : avertissement dans les journaux, a confirmer
+  // par un juriste). Planification : une tache pg_cron par regle.
+  var ANNUAL_REMINDER_DAYS = {
+    fr: { def: 45, min: 30, max: 90 },
+    gb: { def: 30, min: 30, max: 90 },
+    mx: { def: 30, min: 5, max: 90 }
+  };
+  var ANNUAL_REMINDER_COPY = {
+    fr: {
+      sep: " : ", subject: "Votre abonnement annuel {plan} sera reconduit le {date}", preheader: "Le {date}, {amount} seront prélevés. Vous pouvez ne pas reconduire en résiliant avant cette date.",
+      title: "Votre abonnement annuel arrive à échéance", greeting: "Bonjour,",
+      intro: "Votre abonnement annuel {plan} arrive à échéance le {date}. Sans action de votre part, il sera reconduit automatiquement pour un an et {amount} seront prélevés à cette date.",
+      summaryTitle: "Récapitulatif", labelPlan: "Offre", labelAmount: "Montant qui sera prélevé", labelDate: "Date d’échéance et de prélèvement", labelPeriod: "Durée", labelAccount: "Compte", labelReference: "Référence",
+      periodValue: "Annuelle (reconduction pour un an)", amountNote: "TTC",
+      keep: "Si vous souhaitez conserver votre abonnement annuel, vous n’avez rien à faire.",
+      notRenewTitle: "Vous pouvez ne pas reconduire", notRenew: "Pour ne pas reconduire votre abonnement, résiliez avant le {date} depuis Mon compte, bouton « Gérer mon abonnement ». Vous gardez l’accès Pro jusqu’à l’échéance et aucun nouveau prélèvement n’est effectué.",
+      switchNote: "Vous pouvez aussi passer à la formule mensuelle ou hebdomadaire depuis le même espace, bouton « Changer de durée » : le changement prend effet à la fin de la période annuelle déjà payée.",
+      ctaLabel: "Aller dans Mon compte", portalLabel: "Accès direct à l’espace de facturation :",
+      legalBasis: "Cette information vous est adressée conformément à l’article L215-1 du Code de la consommation.", termsLabel: "Conditions générales de vente :",
+      sellerTitle: "Vendeur", labelTradingName: "Nom commercial", labelOperator: "Raison sociale / exploitant", labelAddress: "Adresse", labelRegistration: "SIREN / SIRET", labelPhone: "Téléphone", labelEmail: "Email",
+      rgTitle: "Jeu responsable · 18+", rgBody: "IASHARK publie des analyses statistiques de football. Ce n’est pas un site de paris : aucune mise n’est prise, et une probabilité n’est jamais une certitude. Les paris comportent des risques (perte d’argent, dépendance). Service réservé aux personnes de 18 ans et plus.",
+      rgHelpPhone: "Besoin d’aide ? {name} : {phone}.", rgHelpNoPhone: "Besoin d’aide ? {name} :", rgMore: "Nos ressources jeu responsable",
+      footer: "Email d’information envoyé à {email} avant la reconduction de votre abonnement annuel. Question : {support}.", linkCgv: "CGV", linkPrivacy: "Confidentialité", linkLegal: "Mentions légales"
+    },
+    en: {
+      sep: ": ", subject: "Your annual {plan} subscription renews on {date}", preheader: "On {date}, {amount} will be charged. You can choose not to renew by cancelling before that date.",
+      title: "Your annual subscription is coming to an end", greeting: "Hello,",
+      intro: "Your annual {plan} subscription ends on {date}. If you do nothing, it will renew automatically for one year and {amount} will be charged on that date.",
+      summaryTitle: "Summary", labelPlan: "Plan", labelAmount: "Amount to be charged", labelDate: "Renewal and payment date", labelPeriod: "Billing period", labelAccount: "Account", labelReference: "Reference",
+      periodValue: "Annual (renews for one year)", amountNote: "(VAT included)",
+      keep: "If you want to keep your annual subscription, you don’t need to do anything.",
+      notRenewTitle: "You can choose not to renew", notRenew: "To stop it renewing, cancel before {date} from My account, using the “Manage my subscription” button. You keep Pro access until the end date and you will not be charged again.",
+      switchNote: "You can also switch to monthly or weekly billing from the same place, using the “Change billing period” button: the change takes effect at the end of the annual period you have already paid for.",
+      ctaLabel: "Go to My account", portalLabel: "Direct link to the billing area:",
+      legalBasis: "This information is sent to you under Article L215-1 of the French Consumer Code.", termsLabel: "Terms and conditions:",
+      sellerTitle: "Seller", labelTradingName: "Trading name", labelOperator: "Operator", labelAddress: "Address", labelRegistration: "SIREN / SIRET (France)", labelPhone: "Phone", labelEmail: "Email",
+      rgTitle: "Responsible gambling · 18+", rgBody: "IASHARK publishes statistical football analysis. It is not a betting site: no bets are taken, and a probability is never a certainty. Gambling involves risks (losing money, addiction). For adults aged 18 and over only.",
+      rgHelpPhone: "Need help? {name}: {phone}.", rgHelpNoPhone: "Need help? {name}:", rgMore: "Our responsible gambling resources",
+      footer: "Information email sent to {email} before your annual subscription renews. Questions: {support}.", linkCgv: "Terms", linkPrivacy: "Privacy", linkLegal: "Legal notice"
+    },
+    es: {
+      sep: ": ", subject: "Tu suscripción anual {plan} se renovará el {date}", preheader: "El {date} se cobrarán {amount}. Puedes no renovarla si la cancelas antes de esa fecha.",
+      title: "Tu suscripción anual llega a su vencimiento", greeting: "Hola:",
+      intro: "Tu suscripción anual {plan} vence el {date}. Si no haces nada, se renovará automáticamente por un año y se cobrarán {amount} en esa fecha.",
+      summaryTitle: "Resumen", labelPlan: "Plan", labelAmount: "Importe que se cobrará", labelDate: "Fecha de vencimiento y de cobro", labelPeriod: "Duración", labelAccount: "Cuenta", labelReference: "Referencia",
+      periodValue: "Anual (renovación por un año)", amountNote: "(IVA incluido)",
+      keep: "Si quieres conservar tu suscripción anual, no tienes que hacer nada.",
+      notRenewTitle: "Puedes no renovarla", notRenew: "Para que no se renueve, cancela antes del {date} desde Mi cuenta, con el botón «Gestionar mi suscripción». Conservas el acceso Pro hasta el vencimiento y no se realiza ningún cobro nuevo.",
+      switchNote: "También puedes pasar a la modalidad mensual o semanal desde el mismo espacio, con el botón «Cambiar la duración»: el cambio se aplica al final del periodo anual ya pagado.",
+      ctaLabel: "Ir a Mi cuenta", portalLabel: "Acceso directo al área de facturación:",
+      legalBasis: "Esta información se te envía conforme al artículo L215-1 del Código de Consumo francés.", termsLabel: "Condiciones generales de venta:",
+      sellerTitle: "Vendedor", labelTradingName: "Nombre comercial", labelOperator: "Titular", labelAddress: "Dirección", labelRegistration: "SIREN / SIRET (Francia)", labelPhone: "Teléfono", labelEmail: "Correo electrónico",
+      rgTitle: "Juego responsable · 18+", rgBody: "IASHARK publica análisis estadísticos de fútbol. No es un sitio de apuestas: no se acepta ninguna apuesta y una probabilidad nunca es una certeza. Las apuestas conllevan riesgos (pérdida de dinero, adicción). Servicio reservado a mayores de 18 años.",
+      rgHelpPhone: "¿Necesitas ayuda? {name}: {phone}.", rgHelpNoPhone: "¿Necesitas ayuda? {name}:", rgMore: "Nuestros recursos de juego responsable",
+      footer: "Correo informativo enviado a {email} antes de la renovación de tu suscripción anual. Dudas: {support}.", linkCgv: "Condiciones", linkPrivacy: "Privacidad", linkLegal: "Aviso legal"
+    },
+    "es-mx": {
+      sep: ": ", subject: "Tu suscripción anual {plan} se renueva el {date}", preheader: "El {date} se cobrarán {amount}. Si no quieres renovar, puedes cancelar en línea antes de esa fecha.",
+      title: "Tu plan anual se renueva por un año más", greeting: "Hola:",
+      intro: "Te avisamos con anticipación que tu suscripción anual {plan} se renovará automáticamente por un año más el {date} y que ese día se hará el cargo de {amount} a tu método de pago.",
+      summaryTitle: "Detalle del próximo cobro", labelPlan: "Plan", labelAmount: "Monto que se cobrará", labelDate: "Fecha del cobro", labelPeriod: "Plazo", labelAccount: "Cuenta", labelReference: "Referencia",
+      periodValue: "Anual (se renueva por un año)", amountNote: "(pesos mexicanos, impuestos aplicables incluidos)",
+      keep: "Si quieres seguir con tu plan anual, no tienes que hacer nada.",
+      notRenewTitle: "Cómo cancelar en línea", notRenew: "Si no quieres renovar, cancela antes del {date} desde Mi cuenta, con el botón «Gestionar mi suscripción». La cancelación es inmediata, sin costo y sin penalización; conservas el acceso de pago hasta el final del periodo que ya pagaste.",
+      switchNote: "También puedes cambiar a un plazo mensual o semanal desde el mismo lugar, con el botón «Cambiar de plazo»: el cambio aplica al final del periodo anual que ya pagaste.",
+      ctaLabel: "Ir a Mi cuenta", portalLabel: "Acceso directo al área de facturación:",
+      legalBasis: "Nada de este aviso limita los derechos que te otorga la Ley Federal de Protección al Consumidor, que son irrenunciables. También puedes acudir a la PROFECO: Teléfono del Consumidor 800 468 8722.", termsLabel: "Términos y condiciones:",
+      sellerTitle: "Datos del proveedor", labelTradingName: "Nombre comercial", labelOperator: "Titular", labelAddress: "Domicilio", labelRegistration: "Número de registro (SIREN / SIRET, Francia)", labelPhone: "Teléfono", labelEmail: "Correo electrónico",
+      rgTitle: "Juego responsable · 18+", rgBody: "IASHARK ofrece análisis estadísticos de fútbol: no es una casa de apuestas, no recibe apuestas y una probabilidad nunca es una certeza. Las apuestas pueden generar adicción. Prohibido para menores de 18 años.",
+      rgHelpPhone: "Orientación gratuita: {name}, {phone}.", rgHelpNoPhone: "Orientación gratuita: {name}.", rgMore: "Juego responsable",
+      footer: "Aviso de renovación enviado automáticamente a {email} porque tienes una suscripción anual activa con cobro recurrente. Aclaraciones: {support}.", linkCgv: "Términos", linkPrivacy: "Aviso de privacidad", linkLegal: "Aviso legal"
+    },
+    de: {
+      sep: ": ", subject: "Ihr Jahresabonnement {plan} verlängert sich am {date}", preheader: "Am {date} werden {amount} abgebucht. Wenn Sie vorher kündigen, wird nicht verlängert.",
+      title: "Ihr Jahresabonnement läuft ab", greeting: "Guten Tag,",
+      intro: "Ihr Jahresabonnement {plan} läuft am {date} ab. Wenn Sie nichts tun, verlängert es sich automatisch um ein Jahr und an diesem Tag werden {amount} abgebucht.",
+      summaryTitle: "Übersicht", labelPlan: "Angebot", labelAmount: "Abzubuchender Betrag", labelDate: "Ablauf- und Abbuchungsdatum", labelPeriod: "Laufzeit", labelAccount: "Konto", labelReference: "Referenz",
+      periodValue: "Jährlich (Verlängerung um ein Jahr)", amountNote: "(inkl. MwSt.)",
+      keep: "Wenn Sie Ihr Jahresabonnement behalten möchten, müssen Sie nichts tun.",
+      notRenewTitle: "Sie müssen nicht verlängern", notRenew: "Damit sich Ihr Abonnement nicht verlängert, kündigen Sie vor dem {date} in Mein Konto über die Schaltfläche „Mein Abonnement verwalten“. Sie behalten den Pro-Zugang bis zum Ablaufdatum, und es erfolgt keine weitere Abbuchung.",
+      switchNote: "An derselben Stelle können Sie über „Laufzeit ändern“ auch zur monatlichen oder wöchentlichen Zahlung wechseln: Der Wechsel gilt ab dem Ende des bereits bezahlten Jahreszeitraums.",
+      ctaLabel: "Zu Mein Konto", portalLabel: "Direkter Zugang zum Abrechnungsbereich:",
+      legalBasis: "Diese Information erhalten Sie gemäß Artikel L215-1 des französischen Verbrauchergesetzbuchs.", termsLabel: "Allgemeine Verkaufsbedingungen:",
+      sellerTitle: "Verkäufer", labelTradingName: "Handelsname", labelOperator: "Betreiber", labelAddress: "Adresse", labelRegistration: "SIREN / SIRET (Frankreich)", labelPhone: "Telefon", labelEmail: "E-Mail",
+      rgTitle: "Verantwortungsvolles Spielen · 18+", rgBody: "IASHARK veröffentlicht statistische Fußballanalysen. Es ist keine Wettseite: Es werden keine Wetten angenommen, und eine Wahrscheinlichkeit ist nie eine Gewissheit. Wetten sind mit Risiken verbunden (Geldverlust, Abhängigkeit). Nur für Personen ab 18 Jahren.",
+      rgHelpPhone: "Brauchen Sie Hilfe? {name}: {phone}.", rgHelpNoPhone: "Brauchen Sie Hilfe? {name}:", rgMore: "Unsere Informationen zum verantwortungsvollen Spielen",
+      footer: "Informations-E-Mail an {email} vor der Verlängerung Ihres Jahresabonnements. Fragen: {support}.", linkCgv: "AGB", linkPrivacy: "Datenschutz", linkLegal: "Impressum"
+    },
+    it: {
+      sep: ": ", subject: "Il tuo abbonamento annuale {plan} si rinnova il {date}", preheader: "Il {date} verranno addebitati {amount}. Puoi non rinnovare disdicendo prima di quella data.",
+      title: "Il tuo abbonamento annuale è in scadenza", greeting: "Ciao,",
+      intro: "Il tuo abbonamento annuale {plan} scade il {date}. Se non fai nulla, si rinnoverà automaticamente per un anno e in quella data verranno addebitati {amount}.",
+      summaryTitle: "Riepilogo", labelPlan: "Offerta", labelAmount: "Importo che verrà addebitato", labelDate: "Data di scadenza e di addebito", labelPeriod: "Durata", labelAccount: "Account", labelReference: "Riferimento",
+      periodValue: "Annuale (rinnovo per un anno)", amountNote: "(IVA inclusa)",
+      keep: "Se vuoi mantenere l’abbonamento annuale, non devi fare nulla.",
+      notRenewTitle: "Puoi non rinnovare", notRenew: "Per non rinnovare, disdici prima del {date} da Il mio account, con il pulsante «Gestisci il mio abbonamento». Mantieni l’accesso Pro fino alla scadenza e non verrà effettuato alcun nuovo addebito.",
+      switchNote: "Dallo stesso spazio puoi anche passare alla formula mensile o settimanale, con il pulsante «Cambia durata»: il cambio ha effetto alla fine del periodo annuale già pagato.",
+      ctaLabel: "Vai a Il mio account", portalLabel: "Accesso diretto all’area di fatturazione:",
+      legalBasis: "Questa informazione ti viene inviata ai sensi dell’articolo L215-1 del Codice del consumo francese.", termsLabel: "Condizioni generali di vendita:",
+      sellerTitle: "Venditore", labelTradingName: "Nome commerciale", labelOperator: "Titolare", labelAddress: "Indirizzo", labelRegistration: "SIREN / SIRET (Francia)", labelPhone: "Telefono", labelEmail: "Email",
+      rgTitle: "Gioco responsabile · 18+", rgBody: "IASHARK pubblica analisi statistiche sul calcio. Non è un sito di scommesse: non si accettano puntate e una probabilità non è mai una certezza. Le scommesse comportano rischi (perdita di denaro, dipendenza). Servizio riservato ai maggiori di 18 anni.",
+      rgHelpPhone: "Hai bisogno di aiuto? {name}: {phone}.", rgHelpNoPhone: "Hai bisogno di aiuto? {name}:", rgMore: "Le nostre risorse sul gioco responsabile",
+      footer: "Email informativa inviata a {email} prima del rinnovo del tuo abbonamento annuale. Domande: {support}.", linkCgv: "Condizioni", linkPrivacy: "Privacy", linkLegal: "Note legali"
+    },
+    pt: {
+      sep: ": ", subject: "A tua subscrição anual {plan} renova-se a {date}", preheader: "A {date} serão cobrados {amount}. Podes não renovar se cancelares antes dessa data.",
+      title: "A tua subscrição anual está a chegar ao fim", greeting: "Olá,",
+      intro: "A tua subscrição anual {plan} termina a {date}. Se não fizeres nada, renova-se automaticamente por um ano e nessa data serão cobrados {amount}.",
+      summaryTitle: "Resumo", labelPlan: "Oferta", labelAmount: "Montante a cobrar", labelDate: "Data de vencimento e de cobrança", labelPeriod: "Duração", labelAccount: "Conta", labelReference: "Referência",
+      periodValue: "Anual (renovação por um ano)", amountNote: "(IVA incluído)",
+      keep: "Se quiseres manter a tua subscrição anual, não precisas de fazer nada.",
+      notRenewTitle: "Podes não renovar", notRenew: "Para não renovar, cancela antes de {date} em A minha conta, no botão «Gerir a minha subscrição». Manténs o acesso Pro até ao vencimento e não é efetuada nenhuma nova cobrança.",
+      switchNote: "No mesmo espaço podes também mudar para a modalidade mensal ou semanal, no botão «Mudar a duração»: a mudança produz efeito no fim do período anual já pago.",
+      ctaLabel: "Ir para A minha conta", portalLabel: "Acesso direto à área de faturação:",
+      legalBasis: "Esta informação é-te enviada nos termos do artigo L215-1 do Código do Consumo francês.", termsLabel: "Condições gerais de venda:",
+      sellerTitle: "Vendedor", labelTradingName: "Nome comercial", labelOperator: "Titular", labelAddress: "Morada", labelRegistration: "SIREN / SIRET (França)", labelPhone: "Telefone", labelEmail: "Email",
+      rgTitle: "Jogo responsável · 18+", rgBody: "A IASHARK publica análises estatísticas de futebol. Não é um site de apostas: não são aceites apostas e uma probabilidade nunca é uma certeza. As apostas comportam riscos (perda de dinheiro, dependência). Serviço reservado a maiores de 18 anos.",
+      rgHelpPhone: "Precisas de ajuda? {name}: {phone}.", rgHelpNoPhone: "Precisas de ajuda? {name}:", rgMore: "Os nossos recursos de jogo responsável",
+      footer: "Email informativo enviado para {email} antes da renovação da tua subscrição anual. Dúvidas: {support}.", linkCgv: "Condições", linkPrivacy: "Privacidade", linkLegal: "Aviso legal"
+    }
+  };
+  // Variantes par repertoire (meme langue, autre marche) : GB = anglais, prix
+  // en GBP avec taxes applicables, pas de reference au droit francais.
+  var ANNUAL_REMINDER_DIR_OVERRIDES = {
+    gb: { amountNote: "(including any applicable taxes)", legalBasis: "" }
+  };
+
 
   function EmailRenderError(code, message) {
     this.name = "EmailRenderError";
@@ -267,14 +421,15 @@ const module = { exports: {} };
   }
 
   var PERIOD_LABELS = {
-    fr: { month: "Mensuelle (chaque mois)", year: "Annuelle (chaque année)", months: "Tous les {n} mois", years: "Tous les {n} ans" },
-    gb: { month: "Monthly", year: "Annual (every year)", months: "Every {n} months", years: "Every {n} years" },
-    mx: { month: "Mensual (cada mes)", year: "Anual (cada año)", months: "Cada {n} meses", years: "Cada {n} años" }
+    fr: { week: "Hebdomadaire (chaque semaine)", month: "Mensuelle (chaque mois)", year: "Annuelle (chaque année)", weeks: "Toutes les {n} semaines", months: "Tous les {n} mois", years: "Tous les {n} ans" },
+    gb: { week: "Weekly (every week)", month: "Monthly", year: "Annual (every year)", weeks: "Every {n} weeks", months: "Every {n} months", years: "Every {n} years" },
+    mx: { week: "Semanal (cada semana)", month: "Mensual (cada mes)", year: "Anual (cada año)", weeks: "Cada {n} semanas", months: "Cada {n} meses", years: "Cada {n} años" }
   };
 
   function periodLabel(market, interval, count) {
     var L = PERIOD_LABELS[market];
     var n = typeof count === "number" && count > 1 ? Math.floor(count) : 1;
+    if (interval === "week") return n > 1 ? L.weeks.replace("{n}", n) : L.week;
     if (interval === "month") return n > 1 ? L.months.replace("{n}", n) : L.month;
     if (interval === "year") return n > 1 ? L.years.replace("{n}", n) : L.year;
     fail("invalid_interval", "Periodicite inconnue : " + interval);
@@ -396,16 +551,67 @@ const module = { exports: {} };
     return view;
   }
 
-  // Rendu complet. templates = { <type>: { <marche>: { html, text } } }.
+  // Configuration d'un repertoire du rappel annuel (devise et fuseau du marche,
+  // aide jeu responsable du repertoire).
+  function reminderDirConfig(dir) {
+    var key = typeof dir === "string" ? dir.trim().toLowerCase() : "";
+    if (!hasOwn.call(REMINDER_DIRS, key)) return null;
+    var d = REMINDER_DIRS[key], m = MARKETS[d.market];
+    return { market: d.market, dir: key, locale: d.locale, htmlLang: d.htmlLang, intlLocale: d.intlLocale, currency: m.currency, timeZone: m.timeZone, helpline: d.helpline || m.helpline };
+  }
+
+  function annualReminderView(cfg, d, options) {
+    requireObject(d);
+    var now = toDate(options.now) || fail("invalid_now", "options.now obligatoire pour le rappel (fonction pure)");
+    var renewal = requireDate(d.renewalDate, "renewalDate");
+    if (renewal.getTime() <= now.getTime()) fail("renewal_in_past", "renewalDate doit etre dans le futur");
+    var amountMinor = requireAmount(d.amountMinor, "amountMinor", false);
+    requireCurrency(d.currency, cfg);
+    if (!isValidEmail(d.customerEmail)) fail("invalid_email", "customerEmail invalide");
+    var C = {};
+    [ANNUAL_REMINDER_COPY[cfg.locale], ANNUAL_REMINDER_DIR_OVERRIDES[cfg.dir] || {}].forEach(function (src) {
+      Object.keys(src).forEach(function (k) { C[k] = src[k]; });
+    });
+    var view = commonView(cfg, options);
+    view.htmlLang = cfg.htmlLang;
+    view.planName = requirePlanName(d.planName);
+    view.amount = formatMoney(amountMinor, cfg.currency, cfg.intlLocale);
+    view.currencyCode = cfg.currency;
+    view.renewalDate = formatDate(renewal, cfg.intlLocale, cfg.timeZone);
+    view.customerEmail = d.customerEmail;
+    view.reference = cleanToken(d.reference, /^[A-Za-z0-9_\-]{1,100}$/);
+    view.sep = C.sep;
+    var vars = { plan: view.planName, amount: view.amount, date: view.renewalDate, email: d.customerEmail, support: SUPPORT_EMAIL, name: cfg.helpline.name, phone: cfg.helpline.phone || "" };
+    var fillText = function (s) { return String(s).replace(/\{(\w+)\}/g, function (m, k) { return hasOwn.call(vars, k) ? vars[k] : m; }); };
+    Object.keys(C).forEach(function (k) {
+      if (k === "sep" || k === "rgHelpPhone" || k === "rgHelpNoPhone") return;
+      view["t" + k.charAt(0).toUpperCase() + k.slice(1)] = fillText(C[k]);
+    });
+    view.tRgHelp = fillText(cfg.helpline.phone ? C.rgHelpPhone : C.rgHelpNoPhone);
+    return view;
+  }
+
+  // Rendu complet. templates = { <type>: { <marche>: { html, text } } } ;
+  // annual_renewal_reminder : { all: { html, text } }, market = repertoire du site.
   function renderEmail(templates, kind, market, data, options) {
     options = options || {};
     if (!hasOwn.call(TEMPLATE_KINDS, kind)) fail("unknown_kind", "Type d'email inconnu : " + kind);
-    var mk = normalizeMarket(market);
-    if (!mk || TEMPLATE_KINDS[kind].indexOf(mk) === -1) fail("unsupported_market", "Aucun gabarit " + kind + " pour le marche " + market);
-    var tpl = templates && templates[kind] && templates[kind][mk];
-    if (!tpl || typeof tpl.html !== "string" || typeof tpl.text !== "string") fail("template_missing", "Gabarit absent : " + kind + "." + mk);
-    var cfg = MARKETS[mk];
-    var view = kind === "purchase_confirmation" ? purchaseView(cfg, data, options) : reminderView(cfg, data, options);
+    var cfg, tpl, view, mk;
+    if (kind === ANNUAL_KIND) {
+      cfg = reminderDirConfig(market);
+      if (!cfg) fail("unsupported_market", "Aucun gabarit " + kind + " pour le repertoire " + market);
+      mk = cfg.dir;
+      tpl = templates && templates[kind] && templates[kind].all;
+      if (!tpl || typeof tpl.html !== "string" || typeof tpl.text !== "string") fail("template_missing", "Gabarit absent : " + kind);
+      view = annualReminderView(cfg, data, options);
+    } else {
+      mk = normalizeMarket(market);
+      if (!mk || TEMPLATE_KINDS[kind].indexOf(mk) === -1) fail("unsupported_market", "Aucun gabarit " + kind + " pour le marche " + market);
+      tpl = templates && templates[kind] && templates[kind][mk];
+      if (!tpl || typeof tpl.html !== "string" || typeof tpl.text !== "string") fail("template_missing", "Gabarit absent : " + kind + "." + mk);
+      cfg = MARKETS[mk];
+      view = kind === "purchase_confirmation" ? purchaseView(cfg, data, options) : reminderView(cfg, data, options);
+    }
     var parts = splitSubject(tpl.text);
     var subject = renderTemplate(parts.subject, view, false).replace(/\s+/g, " ").trim();
     view.subject = subject;
@@ -441,7 +647,7 @@ const module = { exports: {} };
   function planNameFromPrice(price) {
     if (price && price.product && typeof price.product === "object" && typeof price.product.name === "string" && price.product.name.trim()) return price.product.name.trim();
     if (price && typeof price.nickname === "string" && price.nickname.trim()) return price.nickname.trim();
-    // create-checkout-session ne vend qu'un Price par marche : l'abonnement Pro.
+    // Offre unique : IASHARK Pro (3 durees, meme produit Stripe).
     return "IASHARK Pro";
   }
 
@@ -503,9 +709,12 @@ const module = { exports: {} };
     };
   }
 
-  function renewalReminderSkipReason(sub, now) {
+  // market : marche du gabarit a envoyer (defaut "mx", seul gabarit de rappel
+  // existant ; fr/gb/za = MISSING, voir pricing-plan/legal/EMAILS_RAPPEL_RENOUVELLEMENT.md).
+  function renewalReminderSkipReason(sub, now, market) {
+    var expected = market || "mx";
     if (!sub || typeof sub !== "object" || typeof sub.id !== "string") return "subscription_missing";
-    if (normalizeMarket(stringMap(sub.metadata).market) !== "mx") return "not_mx_market";
+    if (normalizeMarket(stringMap(sub.metadata).market || "fr") !== expected) return expected === "mx" ? "not_mx_market" : "market_mismatch";
     if (ACTIVE_STATUSES.indexOf(sub.status) === -1) return "subscription_not_active";
     if (sub.cancel_at_period_end) return "cancel_at_period_end";
     var end = periodEndIso(sub);
@@ -519,8 +728,10 @@ const module = { exports: {} };
   function renewalReminderFromStripe(input) {
     input = input || {};
     var sub = input.subscription;
-    var reason = renewalReminderSkipReason(sub, input.now);
+    var market = input.market || "mx";
+    var reason = renewalReminderSkipReason(sub, input.now, market);
     if (reason) return skip(reason);
+    var tz = (MARKETS[market] && MARKETS[market].timeZone) || MARKETS.mx.timeZone;
     var preview = input.preview;
     // Montant EXACT de la prochaine facture (remises, taxes) : jamais estime.
     if (!preview || typeof preview.amount_due !== "number" || typeof preview.currency !== "string") return skip("amount_unavailable");
@@ -529,20 +740,77 @@ const module = { exports: {} };
     if (!to) return skip("customer_email_missing");
     var price = firstItem(sub).price || {};
     var recurring = price.recurring || {};
+    // La duree a pu changer dans le portail depuis la derniere synchronisation.
+    if (input.interval && recurring.interval && recurring.interval !== input.interval) return skip("interval_mismatch");
     var renewal = periodEndIso(sub);
     return {
       ok: true,
       kind: "renewal_reminder",
-      market: "mx",
+      market: market,
       to: to,
-      renewalLocalDate: localDateKey(new Date(renewal), MARKETS.mx.timeZone),
-      idempotencyKey: "renewal_reminder:mx:" + sub.id + ":" + localDateKey(new Date(renewal), MARKETS.mx.timeZone),
+      renewalLocalDate: localDateKey(new Date(renewal), tz),
+      // daysBefore dans la cle : deux rappels (J-30 et J-7) d'une meme echeance
+      // ne se dedoublonnent pas entre eux.
+      idempotencyKey: "renewal_reminder:" + market + ":" + sub.id + ":" + localDateKey(new Date(renewal), tz) + (input.daysBefore ? ":J-" + input.daysBefore : ""),
       data: {
         planName: planNameFromPrice(price),
         amountMinor: preview.amount_due,
         currency: preview.currency.toUpperCase(),
         interval: recurring.interval || null,
         intervalCount: recurring.interval_count || 1,
+        renewalDate: renewal,
+        customerEmail: to,
+        reference: sub.id
+      }
+    };
+  }
+
+  // Gabarit de rappel pour un marche et une duree (null = aucun gabarit : ZA,
+  // hebdomadaire / mensuel hors MX, marche inconnu).
+  function reminderKindFor(market, interval) {
+    if (interval === "year") return hasOwn.call(ANNUAL_REMINDER_DAYS, market) ? ANNUAL_KIND : null;
+    if (interval === "month" || interval === "week") return TEMPLATE_KINDS.renewal_reminder.indexOf(market) !== -1 ? "renewal_reminder" : null;
+    return null;
+  }
+
+  // Langue du rappel : repertoire du site lors du paiement (metadata Stripe
+  // consent_dir, posee par create-checkout-session) s'il appartient au marche,
+  // sinon le repertoire principal du marche (fr, gb, mx).
+  function reminderDirFor(market, sub) {
+    var dir = String(stringMap(sub && sub.metadata).consent_dir || "").toLowerCase();
+    return hasOwn.call(REMINDER_DIRS, dir) && REMINDER_DIRS[dir].market === market ? dir : market;
+  }
+
+  // Abonnement ANNUEL (fr, gb, mx) + apercu de la prochaine facture -> rappel
+  // avant reconduction. Montant EXACT de l'apercu Stripe, jamais estime.
+  function annualRenewalReminderFromStripe(input) {
+    input = input || {};
+    var sub = input.subscription;
+    var market = input.market;
+    if (!hasOwn.call(ANNUAL_REMINDER_DAYS, market)) return skip("no_template_for_market");
+    var reason = renewalReminderSkipReason(sub, input.now, market);
+    if (reason) return skip(reason);
+    var price = firstItem(sub).price || {};
+    if ((price.recurring || {}).interval !== "year") return skip("interval_mismatch");
+    var preview = input.preview;
+    if (!preview || typeof preview.amount_due !== "number" || typeof preview.currency !== "string") return skip("amount_unavailable");
+    if (preview.amount_due <= 0) return skip("nothing_to_charge");
+    var to = customerEmailOf(sub, preview, input.customerEmail);
+    if (!to) return skip("customer_email_missing");
+    var renewal = periodEndIso(sub);
+    var local = localDateKey(new Date(renewal), MARKETS[market].timeZone);
+    return {
+      ok: true,
+      kind: ANNUAL_KIND,
+      market: reminderDirFor(market, sub),
+      marketCode: market,
+      to: to,
+      renewalLocalDate: local,
+      idempotencyKey: ANNUAL_KIND + ":" + market + ":" + sub.id + ":" + local + (input.daysBefore ? ":J-" + input.daysBefore : ""),
+      data: {
+        planName: planNameFromPrice(price),
+        amountMinor: preview.amount_due,
+        currency: preview.currency.toUpperCase(),
         renewalDate: renewal,
         customerEmail: to,
         reference: sub.id
@@ -593,6 +861,10 @@ const module = { exports: {} };
     SUPPORT_EMAIL: SUPPORT_EMAIL,
     MARKETS: MARKETS,
     TEMPLATE_KINDS: TEMPLATE_KINDS,
+    ANNUAL_KIND: ANNUAL_KIND,
+    REMINDER_DIRS: REMINDER_DIRS,
+    ANNUAL_REMINDER_DAYS: ANNUAL_REMINDER_DAYS,
+    ANNUAL_REMINDER_COPY: ANNUAL_REMINDER_COPY,
     COMPANY_FIELDS: COMPANY_FIELDS,
     DEFAULT_REMINDER_DAYS: DEFAULT_REMINDER_DAYS,
     MIN_RECOMMENDED_REMINDER_DAYS: MIN_RECOMMENDED_REMINDER_DAYS,
@@ -607,6 +879,9 @@ const module = { exports: {} };
     purchaseConfirmationFromStripe: purchaseConfirmationFromStripe,
     renewalReminderSkipReason: renewalReminderSkipReason,
     renewalReminderFromStripe: renewalReminderFromStripe,
+    reminderKindFor: reminderKindFor,
+    reminderDirFor: reminderDirFor,
+    annualRenewalReminderFromStripe: annualRenewalReminderFromStripe,
     parseReminderDays: parseReminderDays,
     renewalWindow: renewalWindow,
     localDateKey: localDateKey,
@@ -632,6 +907,12 @@ export const TEMPLATES = {
       "html": "{{! Aviso previo de renovacion automatica - Mexico (mx, es-MX). LFPC art. 76 Bis (informacion clara del cobro recurrente y cancelacion inmediata en linea) ; datos de PROFECO tomados de legal/mx/cgv.html (apartados 6 a 8 y 12, 13/09/2026). Enviado N dias antes de la renovacion (por defecto 7). ESTADO: REVIEW. CSS en linea ; el bloque <style> solo sirve para el modo oscuro y movil. }}<!DOCTYPE html>\n<html lang=\"es-MX\" xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<meta name=\"x-apple-disable-message-reformatting\">\n<meta name=\"format-detection\" content=\"telephone=no, date=no, address=no, email=no\">\n<meta name=\"color-scheme\" content=\"light dark\">\n<meta name=\"supported-color-schemes\" content=\"light dark\">\n<title>{{subject}}</title>\n<style>\n:root { color-scheme: light dark; supported-color-schemes: light dark; }\n@media (prefers-color-scheme: dark) {\n  .bg-page { background-color: #0b1118 !important; }\n  .bg-card { background-color: #131c27 !important; border-color: #263444 !important; }\n  .bg-soft { background-color: #18232f !important; border-color: #2f6f86 !important; }\n  .bg-warn { background-color: #2a2213 !important; border-color: #6b5320 !important; }\n  .tx { color: #e9eef4 !important; }\n  .tx-soft { color: #a9b6c4 !important; }\n  .bd { border-color: #263444 !important; }\n  .lnk { color: #62d6ec !important; }\n}\n[data-ogsc] .bg-page { background-color: #0b1118 !important; }\n[data-ogsc] .bg-card { background-color: #131c27 !important; }\n[data-ogsc] .bg-soft { background-color: #18232f !important; }\n[data-ogsc] .bg-warn { background-color: #2a2213 !important; }\n[data-ogsc] .tx { color: #e9eef4 !important; }\n[data-ogsc] .tx-soft { color: #a9b6c4 !important; }\n[data-ogsc] .lnk { color: #62d6ec !important; }\n@media only screen and (max-width: 620px) {\n  .container { width: 100% !important; }\n  .pad { padding: 20px !important; }\n}\n</style>\n</head>\n<body class=\"bg-page\" style=\"margin:0;padding:0;background-color:#f2f4f7;-webkit-text-size-adjust:100%;\">\n<div style=\"display:none;max-height:0;max-width:0;overflow:hidden;opacity:0;mso-hide:all;font-size:1px;line-height:1px;color:#f2f4f7;\">El {{renewalDate}} se cobrarán {{amount}}. Si no quieres renovar, puedes cancelar en línea antes de esa fecha.</div>\n<table role=\"presentation\" class=\"bg-page\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"width:100%;background-color:#f2f4f7;border-collapse:collapse;\">\n<tr>\n<td align=\"center\" style=\"padding:24px 12px;\">\n<table role=\"presentation\" class=\"container\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"width:600px;max-width:600px;border-collapse:collapse;\">\n<tr>\n<td class=\"tx\" style=\"padding:4px 4px 16px;font-family:Arial,Helvetica,sans-serif;font-size:20px;line-height:24px;font-weight:bold;letter-spacing:3px;color:#0b1a2a;\">IASHARK</td>\n</tr>\n<tr>\n<td class=\"bg-card pad\" style=\"padding:32px;background-color:#ffffff;border:1px solid #dfe4ea;border-radius:12px;font-family:Arial,Helvetica,sans-serif;\">\n\n<h1 class=\"tx\" style=\"margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:24px;line-height:31px;font-weight:bold;color:#0b1a2a;\">Tu suscripción se renueva en {{daysUntilLabel}}</h1>\n<p class=\"tx\" style=\"margin:0 0 14px;font-size:15px;line-height:24px;color:#1f2d3a;\">Hola:</p>\n<p class=\"tx\" style=\"margin:0 0 20px;font-size:15px;line-height:24px;color:#1f2d3a;\">Te avisamos con anticipación que tu suscripción {{planName}} se renovará automáticamente el <strong style=\"font-weight:bold;\">{{renewalDate}}</strong> y que ese día se hará el cargo a tu método de pago.</p>\n\n<h2 class=\"tx\" style=\"margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:24px;font-weight:bold;color:#0b1a2a;\">Detalle del próximo cobro</h2>\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"width:100%;border-collapse:collapse;margin:0 0 18px;\">\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:10px 12px 10px 0;font-size:14px;line-height:20px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">Plan</th><td class=\"tx bd\" style=\"padding:10px 0;font-size:15px;line-height:20px;font-weight:bold;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">{{planName}}</td></tr>\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:10px 12px 10px 0;font-size:14px;line-height:20px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">Monto que se cobrará</th><td class=\"tx bd\" style=\"padding:10px 0;font-size:15px;line-height:20px;font-weight:bold;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">{{amount}} (pesos mexicanos, impuestos aplicables incluidos)</td></tr>\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:10px 12px 10px 0;font-size:14px;line-height:20px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">Fecha del cobro</th><td class=\"tx bd\" style=\"padding:10px 0;font-size:15px;line-height:20px;font-weight:bold;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">{{renewalDate}}</td></tr>\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:10px 12px 10px 0;font-size:14px;line-height:20px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">Periodicidad</th><td class=\"tx bd\" style=\"padding:10px 0;font-size:15px;line-height:20px;font-weight:bold;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">{{periodicity}}</td></tr>\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:10px 12px 10px 0;font-size:14px;line-height:20px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">Cuenta</th><td class=\"tx bd\" style=\"padding:10px 0;font-size:15px;line-height:20px;font-weight:bold;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">{{customerEmail}}</td></tr>\n{{#reference}}<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:10px 12px 10px 0;font-size:14px;line-height:20px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">Referencia</th><td class=\"tx bd\" style=\"padding:10px 0;font-size:13px;line-height:20px;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">{{reference}}</td></tr>{{/reference}}\n</table>\n<p class=\"tx\" style=\"margin:0 0 26px;font-size:15px;line-height:24px;color:#1f2d3a;\">Si quieres seguir usando {{planName}}, no tienes que hacer nada.</p>\n\n<h2 class=\"tx\" style=\"margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:24px;font-weight:bold;color:#0b1a2a;\">Cómo cancelar en línea</h2>\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"width:100%;border-collapse:collapse;margin:0 0 14px;\">\n<tr><td class=\"bg-soft\" style=\"padding:14px 16px;background-color:#f4f7fa;border-left:4px solid #0a6d8f;font-family:Arial,Helvetica,sans-serif;\">\n<p class=\"tx\" style=\"margin:0 0 8px;font-size:15px;line-height:23px;color:#1f2d3a;\">1. Entra a <a class=\"lnk\" href=\"{{accountUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">Mi cuenta</a> con tu correo {{customerEmail}}.</p>\n<p class=\"tx\" style=\"margin:0 0 8px;font-size:15px;line-height:23px;color:#1f2d3a;\">2. Haz clic en «Gestionar mi suscripción». Se abre el área de facturación segura de nuestro proveedor de pagos (Stripe).</p>\n<p class=\"tx\" style=\"margin:0;font-size:15px;line-height:23px;color:#1f2d3a;\">3. Elige cancelar la suscripción. La cancelación es inmediata, sin costo y sin penalización.</p>\n</td></tr>\n</table>\n{{#portalUrl}}<p class=\"tx\" style=\"margin:0 0 14px;font-size:15px;line-height:24px;color:#1f2d3a;\">Acceso directo al área de facturación: <a class=\"lnk\" href=\"{{portalUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">{{portalUrl}}</a></p>{{/portalUrl}}\n<p class=\"tx\" style=\"margin:0 0 20px;font-size:15px;line-height:24px;color:#1f2d3a;\">Si cancelas antes del {{renewalDate}}, no se hará este cobro. Conservas el acceso de pago hasta el final del periodo que ya pagaste. También puedes pedir la cancelación escribiendo a <a class=\"lnk\" href=\"mailto:{{supportEmail}}\" style=\"color:#0a6d8f;text-decoration:underline;\">{{supportEmail}}</a>.</p>\n\n<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:separate;margin:0 0 26px;\">\n<tr><td align=\"center\" bgcolor=\"#0a6d8f\" style=\"background-color:#0a6d8f;border-radius:8px;\"><a href=\"{{accountUrl}}\" target=\"_blank\" style=\"display:inline-block;padding:13px 24px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:20px;font-weight:bold;color:#ffffff;text-decoration:none;border-radius:8px;\">Ir a Mi cuenta</a></td></tr>\n</table>\n\n<h2 class=\"tx\" style=\"margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:24px;font-weight:bold;color:#0b1a2a;\">Tus derechos</h2>\n<p class=\"tx\" style=\"margin:0 0 14px;font-size:15px;line-height:24px;color:#1f2d3a;\">Nada de este aviso limita los derechos que te otorga la Ley Federal de Protección al Consumidor, que son irrenunciables. Para cualquier aclaración o reclamación, escríbenos a <a class=\"lnk\" href=\"mailto:{{supportEmail}}\" style=\"color:#0a6d8f;text-decoration:underline;\">{{supportEmail}}</a>.</p>\n<p class=\"tx\" style=\"margin:0 0 14px;font-size:15px;line-height:24px;color:#1f2d3a;\">También puedes acudir a la Procuraduría Federal del Consumidor (PROFECO): Teléfono del Consumidor 800 468 8722 (lada sin costo) o 55 5568 8722 (Ciudad de México y área metropolitana), <a class=\"lnk\" href=\"https://www.gob.mx/profeco\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">gob.mx/profeco</a>.</p>\n<p class=\"tx\" style=\"margin:0 0 26px;font-size:15px;line-height:24px;color:#1f2d3a;\">Términos y condiciones: <a class=\"lnk\" href=\"{{cgvUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">{{cgvUrl}}</a></p>\n\n<h2 class=\"tx\" style=\"margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:24px;font-weight:bold;color:#0b1a2a;\">Datos del proveedor</h2>\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"width:100%;border-collapse:collapse;margin:0 0 26px;\">\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:8px 12px 8px 0;font-size:13px;line-height:19px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">Nombre comercial</th><td class=\"tx bd\" style=\"padding:8px 0;font-size:14px;line-height:19px;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">IASHARK (empresario individual establecido en Francia)</td></tr>\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:8px 12px 8px 0;font-size:13px;line-height:19px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">Titular</th><td class=\"tx bd\" style=\"padding:8px 0;font-size:14px;line-height:19px;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">{{companyOperatorName}}</td></tr>\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:8px 12px 8px 0;font-size:13px;line-height:19px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">Domicilio</th><td class=\"tx bd\" style=\"padding:8px 0;font-size:14px;line-height:19px;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">{{companyAddress}}</td></tr>\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:8px 12px 8px 0;font-size:13px;line-height:19px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">Número de registro (SIREN / SIRET, Francia)</th><td class=\"tx bd\" style=\"padding:8px 0;font-size:14px;line-height:19px;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">{{companyRegistration}}</td></tr>\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:8px 12px 8px 0;font-size:13px;line-height:19px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">Teléfono</th><td class=\"tx bd\" style=\"padding:8px 0;font-size:14px;line-height:19px;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">{{companyPhone}}</td></tr>\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:8px 12px 8px 0;font-size:13px;line-height:19px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">Correo electrónico</th><td class=\"tx bd\" style=\"padding:8px 0;font-size:14px;line-height:19px;color:#0b1a2a;border-bottom:1px solid #e6eaef;\"><a class=\"lnk\" href=\"mailto:{{supportEmail}}\" style=\"color:#0a6d8f;text-decoration:underline;\">{{supportEmail}}</a></td></tr>\n</table>\n\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"width:100%;border-collapse:collapse;margin:0;\">\n<tr><td class=\"bg-warn\" style=\"padding:16px 18px;background-color:#fff8eb;border:1px solid #f0d49c;border-radius:8px;font-family:Arial,Helvetica,sans-serif;\">\n<p class=\"tx\" style=\"margin:0 0 8px;font-size:14px;line-height:21px;font-weight:bold;color:#3a2a0c;\">Juego responsable · 18+</p>\n<p class=\"tx\" style=\"margin:0 0 8px;font-size:14px;line-height:21px;color:#3a2a0c;\">IASHARK ofrece análisis estadísticos: no es una casa de apuestas, no recibe apuestas y no garantiza ganancias. Prohibido para menores de 18 años.</p>\n<p class=\"tx\" style=\"margin:0;font-size:14px;line-height:21px;color:#3a2a0c;\">Las apuestas pueden generar adicción. Orientación gratuita las 24 horas: {{helplineName}}, {{helplinePhone}} (<a class=\"lnk\" href=\"{{helplineUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">{{helplineDisplay}}</a>). Más información: <a class=\"lnk\" href=\"{{responsibleUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">Juego responsable</a>.</p>\n</td></tr>\n</table>\n\n</td>\n</tr>\n<tr>\n<td class=\"tx-soft\" style=\"padding:18px 8px 6px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#5d6b79;\">\nAviso de renovación enviado automáticamente a {{customerEmail}} porque tienes una suscripción activa con cobro recurrente. Aclaraciones: <a class=\"lnk\" href=\"mailto:{{supportEmail}}\" style=\"color:#0a6d8f;text-decoration:underline;\">{{supportEmail}}</a>.<br>\n<a class=\"lnk\" href=\"{{cgvUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">Términos</a> · <a class=\"lnk\" href=\"{{privacyUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">Aviso de privacidad</a> · <a class=\"lnk\" href=\"{{legalUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">Aviso legal</a> · <a class=\"lnk\" href=\"{{homeUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">iashark.com</a>\n</td>\n</tr>\n</table>\n</td>\n</tr>\n</table>\n</body>\n</html>\n",
       "text": "Subject: Tu suscripción {{planName}} se renueva el {{renewalDate}}\n{{! Version de texto de renewal-reminder.mx.html: mismo contenido, sin omitir nada. }}IASHARK\n\nTu suscripción se renueva en {{daysUntilLabel}}\n===============================================\n\nHola:\n\nTe avisamos con anticipación que tu suscripción {{planName}} se renovará automáticamente el {{renewalDate}} y que ese día se hará el cargo a tu método de pago.\n\nDETALLE DEL PRÓXIMO COBRO\n- Plan: {{planName}}\n- Monto que se cobrará: {{amount}} (pesos mexicanos, impuestos aplicables incluidos)\n- Fecha del cobro: {{renewalDate}}\n- Periodicidad: {{periodicity}}\n- Cuenta: {{customerEmail}}\n{{#reference}}- Referencia: {{reference}}\n{{/reference}}\nSi quieres seguir usando {{planName}}, no tienes que hacer nada.\n\nCÓMO CANCELAR EN LÍNEA\n1. Entra a Mi cuenta con tu correo {{customerEmail}}: {{accountUrl}}\n2. Haz clic en «Gestionar mi suscripción». Se abre el área de facturación segura de nuestro proveedor de pagos (Stripe).\n3. Elige cancelar la suscripción. La cancelación es inmediata, sin costo y sin penalización.\n{{#portalUrl}}Acceso directo al área de facturación: {{portalUrl}}\n{{/portalUrl}}\nSi cancelas antes del {{renewalDate}}, no se hará este cobro. Conservas el acceso de pago hasta el final del periodo que ya pagaste. También puedes pedir la cancelación escribiendo a {{supportEmail}}.\n\nTUS DERECHOS\nNada de este aviso limita los derechos que te otorga la Ley Federal de Protección al Consumidor, que son irrenunciables. Para cualquier aclaración o reclamación, escríbenos a {{supportEmail}}.\nTambién puedes acudir a la Procuraduría Federal del Consumidor (PROFECO): Teléfono del Consumidor 800 468 8722 (lada sin costo) o 55 5568 8722 (Ciudad de México y área metropolitana), https://www.gob.mx/profeco\nTérminos y condiciones: {{cgvUrl}}\n\nDATOS DEL PROVEEDOR\n- Nombre comercial: IASHARK (empresario individual establecido en Francia)\n- Titular: {{companyOperatorName}}\n- Domicilio: {{companyAddress}}\n- Número de registro (SIREN / SIRET, Francia): {{companyRegistration}}\n- Teléfono: {{companyPhone}}\n- Correo electrónico: {{supportEmail}}\n\nJUEGO RESPONSABLE · 18+\nIASHARK ofrece análisis estadísticos: no es una casa de apuestas, no recibe apuestas y no garantiza ganancias. Prohibido para menores de 18 años.\nLas apuestas pueden generar adicción. Orientación gratuita las 24 horas: {{helplineName}}, {{helplinePhone}} ({{helplineUrl}}). Más información: {{responsibleUrl}}\n\n--\nAviso de renovación enviado automáticamente a {{customerEmail}} porque tienes una suscripción activa con cobro recurrente. Aclaraciones: {{supportEmail}}.\nTérminos: {{cgvUrl}}\nAviso de privacidad: {{privacyUrl}}\nAviso legal: {{legalUrl}}\n"
     }
+  },
+  "annual_renewal_reminder": {
+    "all": {
+      "html": "{{! Rappel avant reconduction d'un abonnement Pro ANNUEL - gabarit commun (repertoires fr, en, es, de, it, pt, gb, mx) ; textes par langue dans lib/email-render.js (ANNUAL_REMINDER_COPY, 7 langues). FR : information L215-1 du Code de la consommation. STATUT : REVIEW. CSS en ligne ; le bloc <style> ne sert qu'au mode sombre et au mobile. }}<!DOCTYPE html>\n<html lang=\"{{htmlLang}}\" xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<meta name=\"x-apple-disable-message-reformatting\">\n<meta name=\"format-detection\" content=\"telephone=no, date=no, address=no, email=no\">\n<meta name=\"color-scheme\" content=\"light dark\">\n<meta name=\"supported-color-schemes\" content=\"light dark\">\n<title>{{subject}}</title>\n<style>\n:root { color-scheme: light dark; supported-color-schemes: light dark; }\n@media (prefers-color-scheme: dark) {\n  .bg-page { background-color: #0b1118 !important; }\n  .bg-card { background-color: #131c27 !important; border-color: #263444 !important; }\n  .bg-soft { background-color: #18232f !important; border-color: #2f6f86 !important; }\n  .bg-warn { background-color: #2a2213 !important; border-color: #6b5320 !important; }\n  .tx { color: #e9eef4 !important; }\n  .tx-soft { color: #a9b6c4 !important; }\n  .bd { border-color: #263444 !important; }\n  .lnk { color: #62d6ec !important; }\n}\n[data-ogsc] .bg-page { background-color: #0b1118 !important; }\n[data-ogsc] .bg-card { background-color: #131c27 !important; }\n[data-ogsc] .bg-soft { background-color: #18232f !important; }\n[data-ogsc] .bg-warn { background-color: #2a2213 !important; }\n[data-ogsc] .tx { color: #e9eef4 !important; }\n[data-ogsc] .tx-soft { color: #a9b6c4 !important; }\n[data-ogsc] .lnk { color: #62d6ec !important; }\n@media only screen and (max-width: 620px) {\n  .container { width: 100% !important; }\n  .pad { padding: 20px !important; }\n}\n</style>\n</head>\n<body class=\"bg-page\" style=\"margin:0;padding:0;background-color:#f2f4f7;-webkit-text-size-adjust:100%;\">\n<div style=\"display:none;max-height:0;max-width:0;overflow:hidden;opacity:0;mso-hide:all;font-size:1px;line-height:1px;color:#f2f4f7;\">{{tPreheader}}</div>\n<table role=\"presentation\" class=\"bg-page\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"width:100%;background-color:#f2f4f7;border-collapse:collapse;\">\n<tr>\n<td align=\"center\" style=\"padding:24px 12px;\">\n<table role=\"presentation\" class=\"container\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"width:600px;max-width:600px;border-collapse:collapse;\">\n<tr>\n<td class=\"tx\" style=\"padding:4px 4px 16px;font-family:Arial,Helvetica,sans-serif;font-size:20px;line-height:24px;font-weight:bold;letter-spacing:3px;color:#0b1a2a;\">IASHARK</td>\n</tr>\n<tr>\n<td class=\"bg-card pad\" style=\"padding:32px;background-color:#ffffff;border:1px solid #dfe4ea;border-radius:12px;font-family:Arial,Helvetica,sans-serif;\">\n\n<h1 class=\"tx\" style=\"margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:24px;line-height:31px;font-weight:bold;color:#0b1a2a;\">{{tTitle}}</h1>\n<p class=\"tx\" style=\"margin:0 0 14px;font-size:15px;line-height:24px;color:#1f2d3a;\">{{tGreeting}}</p>\n<p class=\"tx\" style=\"margin:0 0 20px;font-size:15px;line-height:24px;color:#1f2d3a;\">{{tIntro}}</p>\n\n<h2 class=\"tx\" style=\"margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:24px;font-weight:bold;color:#0b1a2a;\">{{tSummaryTitle}}</h2>\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"width:100%;border-collapse:collapse;margin:0 0 18px;\">\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:10px 12px 10px 0;font-size:14px;line-height:20px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">{{tLabelPlan}}</th><td class=\"tx bd\" style=\"padding:10px 0;font-size:15px;line-height:20px;font-weight:bold;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">{{planName}}</td></tr>\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:10px 12px 10px 0;font-size:14px;line-height:20px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">{{tLabelAmount}}</th><td class=\"tx bd\" style=\"padding:10px 0;font-size:15px;line-height:20px;font-weight:bold;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">{{amount}} {{tAmountNote}}</td></tr>\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:10px 12px 10px 0;font-size:14px;line-height:20px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">{{tLabelDate}}</th><td class=\"tx bd\" style=\"padding:10px 0;font-size:15px;line-height:20px;font-weight:bold;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">{{renewalDate}}</td></tr>\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:10px 12px 10px 0;font-size:14px;line-height:20px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">{{tLabelPeriod}}</th><td class=\"tx bd\" style=\"padding:10px 0;font-size:15px;line-height:20px;font-weight:bold;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">{{tPeriodValue}}</td></tr>\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:10px 12px 10px 0;font-size:14px;line-height:20px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">{{tLabelAccount}}</th><td class=\"tx bd\" style=\"padding:10px 0;font-size:15px;line-height:20px;font-weight:bold;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">{{customerEmail}}</td></tr>\n{{#reference}}<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:10px 12px 10px 0;font-size:14px;line-height:20px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">{{tLabelReference}}</th><td class=\"tx bd\" style=\"padding:10px 0;font-size:13px;line-height:20px;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">{{reference}}</td></tr>{{/reference}}\n</table>\n<p class=\"tx\" style=\"margin:0 0 26px;font-size:15px;line-height:24px;color:#1f2d3a;\">{{tKeep}}</p>\n\n<h2 class=\"tx\" style=\"margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:24px;font-weight:bold;color:#0b1a2a;\">{{tNotRenewTitle}}</h2>\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"width:100%;border-collapse:collapse;margin:0 0 14px;\">\n<tr><td class=\"bg-soft\" style=\"padding:14px 16px;background-color:#f4f7fa;border-left:4px solid #0a6d8f;font-family:Arial,Helvetica,sans-serif;\">\n<p class=\"tx\" style=\"margin:0 0 8px;font-size:15px;line-height:23px;color:#1f2d3a;\">{{tNotRenew}}</p>\n<p class=\"tx\" style=\"margin:0;font-size:15px;line-height:23px;color:#1f2d3a;\">{{tSwitchNote}}</p>\n</td></tr>\n</table>\n{{#portalUrl}}<p class=\"tx\" style=\"margin:0 0 14px;font-size:15px;line-height:24px;color:#1f2d3a;\">{{tPortalLabel}} <a class=\"lnk\" href=\"{{portalUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">{{portalUrl}}</a></p>{{/portalUrl}}\n<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:separate;margin:6px 0 26px;\">\n<tr><td align=\"center\" bgcolor=\"#0a6d8f\" style=\"background-color:#0a6d8f;border-radius:8px;\"><a href=\"{{accountUrl}}\" target=\"_blank\" style=\"display:inline-block;padding:13px 24px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:20px;font-weight:bold;color:#ffffff;text-decoration:none;border-radius:8px;\">{{tCtaLabel}}</a></td></tr>\n</table>\n\n{{#tLegalBasis}}<p class=\"tx\" style=\"margin:0 0 14px;font-size:15px;line-height:24px;color:#1f2d3a;\">{{tLegalBasis}}</p>{{/tLegalBasis}}\n<p class=\"tx\" style=\"margin:0 0 26px;font-size:15px;line-height:24px;color:#1f2d3a;\">{{tTermsLabel}} <a class=\"lnk\" href=\"{{cgvUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">{{cgvUrl}}</a></p>\n\n<h2 class=\"tx\" style=\"margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:24px;font-weight:bold;color:#0b1a2a;\">{{tSellerTitle}}</h2>\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"width:100%;border-collapse:collapse;margin:0 0 26px;\">\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:8px 12px 8px 0;font-size:13px;line-height:19px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">{{tLabelTradingName}}</th><td class=\"tx bd\" style=\"padding:8px 0;font-size:14px;line-height:19px;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">IASHARK</td></tr>\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:8px 12px 8px 0;font-size:13px;line-height:19px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">{{tLabelOperator}}</th><td class=\"tx bd\" style=\"padding:8px 0;font-size:14px;line-height:19px;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">{{companyOperatorName}}</td></tr>\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:8px 12px 8px 0;font-size:13px;line-height:19px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">{{tLabelAddress}}</th><td class=\"tx bd\" style=\"padding:8px 0;font-size:14px;line-height:19px;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">{{companyAddress}}</td></tr>\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:8px 12px 8px 0;font-size:13px;line-height:19px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">{{tLabelRegistration}}</th><td class=\"tx bd\" style=\"padding:8px 0;font-size:14px;line-height:19px;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">{{companyRegistration}}</td></tr>\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:8px 12px 8px 0;font-size:13px;line-height:19px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">{{tLabelPhone}}</th><td class=\"tx bd\" style=\"padding:8px 0;font-size:14px;line-height:19px;color:#0b1a2a;border-bottom:1px solid #e6eaef;\">{{companyPhone}}</td></tr>\n<tr><th scope=\"row\" class=\"tx-soft bd\" style=\"text-align:left;vertical-align:top;width:44%;padding:8px 12px 8px 0;font-size:13px;line-height:19px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;\">{{tLabelEmail}}</th><td class=\"tx bd\" style=\"padding:8px 0;font-size:14px;line-height:19px;color:#0b1a2a;border-bottom:1px solid #e6eaef;\"><a class=\"lnk\" href=\"mailto:{{supportEmail}}\" style=\"color:#0a6d8f;text-decoration:underline;\">{{supportEmail}}</a></td></tr>\n</table>\n\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"width:100%;border-collapse:collapse;margin:0;\">\n<tr><td class=\"bg-warn\" style=\"padding:16px 18px;background-color:#fff8eb;border:1px solid #f0d49c;border-radius:8px;font-family:Arial,Helvetica,sans-serif;\">\n<p class=\"tx\" style=\"margin:0 0 8px;font-size:14px;line-height:21px;font-weight:bold;color:#3a2a0c;\">{{tRgTitle}}</p>\n<p class=\"tx\" style=\"margin:0 0 8px;font-size:14px;line-height:21px;color:#3a2a0c;\">{{tRgBody}}</p>\n<p class=\"tx\" style=\"margin:0;font-size:14px;line-height:21px;color:#3a2a0c;\">{{tRgHelp}} <a class=\"lnk\" href=\"{{helplineUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">{{helplineDisplay}}</a> · <a class=\"lnk\" href=\"{{responsibleUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">{{tRgMore}}</a></p>\n</td></tr>\n</table>\n\n</td>\n</tr>\n<tr>\n<td class=\"tx-soft\" style=\"padding:18px 8px 6px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#5d6b79;\">\n{{tFooter}}<br>\n<a class=\"lnk\" href=\"{{cgvUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">{{tLinkCgv}}</a> · <a class=\"lnk\" href=\"{{privacyUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">{{tLinkPrivacy}}</a> · <a class=\"lnk\" href=\"{{legalUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">{{tLinkLegal}}</a> · <a class=\"lnk\" href=\"{{homeUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">iashark.com</a>\n</td>\n</tr>\n</table>\n</td>\n</tr>\n</table>\n</body>\n</html>\n",
+      "text": "Subject: {{tSubject}}\n{{! Rappel avant reconduction d'un abonnement Pro ANNUEL - gabarit commun aux repertoires fr, en, es, de, it, pt (marche EUR), gb et mx ; textes par langue dans lib/email-render.js (ANNUAL_REMINDER_COPY, 7 langues). FR : information L215-1 (entre 3 mois et 1 mois avant l'echeance). STATUT : REVIEW (juriste + relecture native). Montant lu dans l'apercu de facture Stripe, jamais estime. Version texte de annual-renewal-reminder.html : meme contenu. }}IASHARK\n\n{{tTitle}}\n\n{{tGreeting}}\n\n{{tIntro}}\n\n{{tSummaryTitle}}\n- {{tLabelPlan}}{{sep}}{{planName}}\n- {{tLabelAmount}}{{sep}}{{amount}} {{tAmountNote}}\n- {{tLabelDate}}{{sep}}{{renewalDate}}\n- {{tLabelPeriod}}{{sep}}{{tPeriodValue}}\n- {{tLabelAccount}}{{sep}}{{customerEmail}}\n{{#reference}}- {{tLabelReference}}{{sep}}{{reference}}\n{{/reference}}\n{{tKeep}}\n\n{{tNotRenewTitle}}\n{{tNotRenew}}\n{{tCtaLabel}}{{sep}}{{accountUrl}}\n{{#portalUrl}}{{tPortalLabel}} {{portalUrl}}\n{{/portalUrl}}\n{{tSwitchNote}}\n{{#tLegalBasis}}\n{{tLegalBasis}}\n{{/tLegalBasis}}\n{{tTermsLabel}} {{cgvUrl}}\n\n{{tSellerTitle}}\n- {{tLabelTradingName}}{{sep}}IASHARK\n- {{tLabelOperator}}{{sep}}{{companyOperatorName}}\n- {{tLabelAddress}}{{sep}}{{companyAddress}}\n- {{tLabelRegistration}}{{sep}}{{companyRegistration}}\n- {{tLabelPhone}}{{sep}}{{companyPhone}}\n- {{tLabelEmail}}{{sep}}{{supportEmail}}\n\n{{tRgTitle}}\n{{tRgBody}}\n{{tRgHelp}} {{helplineUrl}}\n{{tRgMore}}{{sep}}{{responsibleUrl}}\n\n--\n{{tFooter}}\n{{tLinkCgv}}{{sep}}{{cgvUrl}}\n{{tLinkPrivacy}}{{sep}}{{privacyUrl}}\n{{tLinkLegal}}{{sep}}{{legalUrl}}\n"
+    }
   }
 };
 export function renderEmail(kind, market, data, options) {
@@ -642,6 +923,9 @@ export const {
   SUPPORT_EMAIL,
   MARKETS,
   TEMPLATE_KINDS,
+  ANNUAL_KIND,
+  REMINDER_DIRS,
+  ANNUAL_REMINDER_DAYS,
   COMPANY_FIELDS,
   DEFAULT_REMINDER_DAYS,
   MIN_RECOMMENDED_REMINDER_DAYS,
@@ -654,6 +938,9 @@ export const {
   purchaseConfirmationFromStripe,
   renewalReminderSkipReason,
   renewalReminderFromStripe,
+  reminderKindFor,
+  reminderDirFor,
+  annualRenewalReminderFromStripe,
   parseReminderDays,
   renewalWindow,
   localDateKey,

@@ -4,7 +4,10 @@
   "_xDefaultDir": "fr",
   "_hreflangXDefault_readme": "Cible hreflang x-default (audit SEO 15/09/2026) : premiere version de cette liste presente dans le groupe d'equivalents de la page. /en/ (anglais international) sert mieux qu'un /fr/ les visiteurs dont la langue n'a pas de version (nl, sv, ja...), et c'est deja la page que la racine / (302 geolocalisee) renvoie a Googlebot (Country=us). _xDefaultDir reste 'fr' : il ne designe PAS le x-default mais le repertoire historique servi a la racine (/match/<id>.html, /blog/, 301 des anciennes URLs racine) ; le changer deplacerait toutes les pages match FR indexees. Groupe sans /en/ (ex. Liga MX : fr, mx, es) : x-default vers /fr/.",
   "_hreflangXDefault": ["en", "fr"],
-  "_planKeys": ["free", "pro", "edge", "annual_edge"],
+  "_planKeys": ["free", "pro"],
+  "_proIntervals_readme": "Offre unique Pro vendue sous 3 durees (decision du proprietaire du 16/09/2026 ; l'ancienne offre a deux niveaux est abandonnee). prices.pro.<week|month|year>.amount = prix TTC du marche. Duree absente ou null = non vendue dans ce marche : option non affichee, jamais de prix invente. Duree vendue mais secret Stripe absent = option marquee 'bientot disponible', jamais facturee a un autre prix. Duree par defaut du selecteur : _proDefaultInterval. data-market-price=\"pro\" reste un alias du prix mensuel (retro-compatibilite). stripeEnvKeys.<duree> = nom du secret Supabase contenant l'id du Price Stripe ; stripeEnvKeyLegacyMonth = ancien secret accepte uniquement comme repli du mensuel de CE marche.",
+  "_proIntervals": ["week", "month", "year"],
+  "_proDefaultInterval": "month",
   "_legalFiles": {
     "legal_notice": "mentions-legales.html",
     "terms": "cgv.html",
@@ -37,7 +40,8 @@
     "currency": "EUR",
     "urlPrefix": "/fr/",
     "dirs": ["fr", "en", "es", "de", "it", "pt"],
-    "stripeEnvKey": "STRIPE_PRICE_ID",
+    "stripeEnvKeys": {"week": "STRIPE_PRICE_ID_FR_WEEK", "month": "STRIPE_PRICE_ID_FR_MONTH", "year": "STRIPE_PRICE_ID_FR_YEAR"},
+    "stripeEnvKeyLegacyMonth": "STRIPE_PRICE_ID",
     "checkoutMarket": null,
     "paidAdsEnabled": false,
     "adsGamblingCertRequired": false,
@@ -45,11 +49,13 @@
     "minAge": 18,
     "prices": {
       "free": {"amount": 0, "interval": "month"},
-      "pro": {"amount": 19.95, "interval": "month"},
-      "edge": null,
-      "annual_edge": null
+      "pro": {
+        "week": {"amount": 6.99},
+        "month": {"amount": 19.95},
+        "year": {"amount": 199}
+      }
     },
-    "pricesSource": "Aucun des documents 06/07/08/18 ne fixe de prix EUR. pro = 19,95 EUR/mois = prix deja affiche sur le site (abonnement.html, cgv.html, index.html, account-page.js). edge / annual_edge : aucun prix EUR n'existe -> null (BLOCKED_DECISION, jamais invente ; lib/market-config.js pose alors data-market-price-unavailable sans toucher au texte).",
+    "pricesSource": "Decision du proprietaire du 16/09/2026 : 6,99 EUR/semaine, 19,95 EUR/mois (prix deja affiche), 199 EUR/an. Ancienne offre a deux niveaux abandonnee.",
     "helpline": {"name": "Joueurs Info Service", "phone": "09 74 75 13 13", "tel": "0974751313", "url": "https://www.joueurs-info-service.fr", "display": "joueurs-info-service.fr"},
     "compliance": {
       "responsibleGamblingHelpline": "Joueurs Info Service - 09 74 75 13 13 - joueurs-info-service.fr",
@@ -65,7 +71,8 @@
     "currency": "GBP",
     "urlPrefix": "/gb/",
     "dirs": ["gb"],
-    "stripeEnvKey": "STRIPE_PRICE_ID_GB",
+    "stripeEnvKeys": {"week": "STRIPE_PRICE_ID_GB_WEEK", "month": "STRIPE_PRICE_ID_GB_MONTH", "year": "STRIPE_PRICE_ID_GB_YEAR"},
+    "stripeEnvKeyLegacyMonth": null,
     "checkoutMarket": "gb",
     "paidAdsEnabled": false,
     "adsGamblingCertRequired": true,
@@ -73,11 +80,13 @@
     "minAge": 18,
     "prices": {
       "free": {"amount": 0, "interval": "month"},
-      "pro": {"amount": 14.99, "interval": "month"},
-      "edge": {"amount": 24.99, "interval": "month"},
-      "annual_edge": {"amount": 199, "interval": "year"}
+      "pro": {
+        "week": {"amount": 4.99},
+        "month": {"amount": 14.99},
+        "year": {"amount": 149}
+      }
     },
-    "pricesSource": "06_IAShark_UK_Launch_Kit §1 (identique a doc 18 §5.3) : Pro £14.99, Edge £24.99, Annuel £199. 'Annuel' = Annual Edge : £199 > 12 x £14.99 (179,88), ce ne peut pas etre un Pro annuel.",
+    "pricesSource": "Decision du proprietaire du 16/09/2026 : GBP 4.99/week, 14.99/month (06_IAShark_UK_Launch_Kit), 149/year. Ancienne offre a 24.99/mois et 199/an abandonnee.",
     "helpline": {"name": "National Gambling Helpline (GamCare / BeGambleAware)", "phone": "0808 8020 133", "tel": "08088020133", "url": "https://www.begambleaware.org", "display": "begambleaware.org"},
     "compliance": {
       "responsibleGamblingHelpline": "GamCare / BeGambleAware - National Gambling Helpline 0808 8020 133 - begambleaware.org",
@@ -93,7 +102,8 @@
     "currency": "MXN",
     "urlPrefix": "/mx/",
     "dirs": ["mx"],
-    "stripeEnvKey": "STRIPE_PRICE_ID_MX",
+    "stripeEnvKeys": {"week": "STRIPE_PRICE_ID_MX_WEEK", "month": "STRIPE_PRICE_ID_MX_MONTH", "year": "STRIPE_PRICE_ID_MX_YEAR"},
+    "stripeEnvKeyLegacyMonth": null,
     "checkoutMarket": "mx",
     "paidAdsEnabled": false,
     "adsGamblingCertRequired": true,
@@ -101,11 +111,13 @@
     "minAge": 18,
     "prices": {
       "free": {"amount": 0, "interval": "month"},
-      "pro": {"amount": 199, "interval": "month"},
-      "edge": {"amount": 299, "interval": "month"},
-      "annual_edge": {"amount": 1990, "interval": "year"}
+      "pro": {
+        "week": {"amount": 69},
+        "month": {"amount": 199},
+        "year": {"amount": 1990}
+      }
     },
-    "pricesSource": "07_IAShark_Mexico_Launch_Kit §1 : Pro MX$199, Edge MX$299, Annuel MX$1 990. Le doc dit seulement 'Annuel' : libelle 'Edge Anual' repris de la page /mx/ deja publiee (a confirmer cote business).",
+    "pricesSource": "Decision du proprietaire du 16/09/2026 : MX$69/semana, MX$199/mes (07_IAShark_Mexico_Launch_Kit), MX$1 990/ano. Ancienne offre a MX$299/mes abandonnee.",
     "helpline": {"name": "Línea de la Vida (CONASAMA)", "phone": "800 911 2000", "tel": "8009112000", "url": "https://www.gob.mx/conasama/articulos/linea-de-la-vida-800-911-2000", "display": "gob.mx/conasama", "hours": "gratuita, 24/7"},
     "compliance": {
       "responsibleGamblingHelpline": "Línea de la Vida (CONASAMA / Secretaría de Salud) - 800 911 2000 - gratuita, 24 h/24, 365 j/an - gob.mx/conasama",
@@ -121,7 +133,8 @@
     "currency": "ZAR",
     "urlPrefix": "/za/",
     "dirs": ["za"],
-    "stripeEnvKey": "STRIPE_PRICE_ID_ZA",
+    "stripeEnvKeys": {"week": "STRIPE_PRICE_ID_ZA_WEEK", "month": "STRIPE_PRICE_ID_ZA_MONTH"},
+    "stripeEnvKeyLegacyMonth": null,
     "checkoutMarket": "za",
     "paidAdsEnabled": false,
     "adsGamblingCertRequired": true,
@@ -129,11 +142,13 @@
     "minAge": 18,
     "prices": {
       "free": {"amount": 0, "interval": "month"},
-      "pro": {"amount": 199, "interval": "month"},
-      "edge": {"amount": 299, "interval": "month"},
-      "annual_edge": {"amount": 1999, "interval": "year"}
+      "pro": {
+        "week": {"amount": 69},
+        "month": {"amount": 199},
+        "year": null
+      }
     },
-    "pricesSource": "08_IAShark_South_Africa_Launch_Kit §1 : Pro R199, Edge R299, Annuel R1 999. Le doc dit seulement 'Annuel' : libelle 'Annual Edge' repris de la page /za/ deja publiee (a confirmer cote business).",
+    "pricesSource": "Decision du proprietaire du 16/09/2026 : R69/week, R199/month (08_IAShark_South_Africa_Launch_Kit). Ancienne offre a R299/mois abandonnee. Annuel (R1 999/an) NON OUVERT au lancement : contrat a duree determinee CPA s14 (legal/README.md point 18) -> year null, aucune option Annee affichee (ni prix, ni 'bientot disponible'), aucun secret STRIPE_PRICE_ID_ZA_YEAR lu. Pour l'ouvrir plus tard : prix ici + stripeEnvKeys.year + CGV ZA + notice s14.",
     "helpline": {"name": "National Responsible Gambling Programme (NRGP)", "phone": "0800 006 008", "tel": "0800006008", "url": "https://www.responsiblegambling.org.za", "display": "responsiblegambling.org.za"},
     "compliance": {
       "responsibleGamblingHelpline": "National Responsible Gambling Programme (NRGP) - 0800 006 008 - responsiblegambling.org.za",

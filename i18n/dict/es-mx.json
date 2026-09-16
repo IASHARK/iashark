@@ -1515,7 +1515,16 @@
     "privacy_policy_link": "Aviso de privacidad",
     "privacy_opt_out_saved": "Listo: tus visitas ya no están vinculadas a tu cuenta.",
     "privacy_opt_in_saved": "Tus visitas vuelven a estar vinculadas a tu cuenta.",
-    "privacy_opt_out_device_only": "Guardado en este dispositivo. No se pudo guardar en tu cuenta: inténtalo más tarde para aplicarlo en tus otros dispositivos."
+    "privacy_opt_out_device_only": "Guardado en este dispositivo. No se pudo guardar en tu cuenta: inténtalo más tarde para aplicarlo en tus otros dispositivos.",
+    "sub_interval_label": "Plazo",
+    "interval_week": "Semanal",
+    "interval_month": "Mensual",
+    "interval_year": "Anual",
+    "interval_unknown": "Sincronizando",
+    "next_renewal_label": "Próximo cobro",
+    "change_interval_cta": "Cambiar de plazo",
+    "change_interval_note": "Cambiar a un plazo más largo aplica de inmediato, con prorrateo; cambiar a uno más corto aplica al final del periodo que ya pagaste. Antes de confirmar verás el monto y la fecha en que aplica.",
+    "pro_durations_note": "Semanal, mensual o anual: el mismo acceso Pro, cancela cuando quieras."
   },
   "history_page": {
     "title_span": "HISTOR",
@@ -1807,7 +1816,9 @@
     "seo_times_paris": "hora de París",
     "premium_detail_updating": "Análisis detallado en actualización",
     "free_gate_label": "Análisis gratis",
-    "free_gate_text": "Crea una cuenta gratis para ver el análisis gratis"
+    "free_gate_text": "Crea una cuenta gratis para ver el análisis gratis",
+    "pro_other_durations": "También semanal ({pro_week_price}) o anual ({pro_year_price}).",
+    "pro_other_durations_week": "También semanal ({pro_week_price})."
   },
   "site_header": {
     "nav_today": "Análisis del día",
@@ -1887,7 +1898,7 @@
     "heading": "Desbloquea todo IASHARK",
     "intro": "Accede a todos los análisis y a las herramientas para darle seguimiento a tus decisiones con método.",
     "per_month": "/ mes",
-    "commitment": "Sin plazo forzoso · Cancela cuando quieras",
+    "commitment": "El mismo acceso Pro con cualquier plazo · Cancela cuando quieras",
     "pro_feat_analyses": "Análisis completo de todos los partidos",
     "pro_feat_filters": "Filtros avanzados y confiabilidad detallada",
     "pro_feat_journal": "Diario de decisiones sincronizado",
@@ -1914,7 +1925,10 @@
     "checkout_opening": "Abriendo el pago seguro…",
     "checkout_market_not_configured": "El pago todavía no está disponible en este país. No se hizo ningún cargo.",
     "checkout_unavailable": "El pago en línea estará disponible muy pronto.",
-    "checkout_error": "Por ahora no es posible abrir el pago."
+    "checkout_error": "Por ahora no es posible abrir el pago.",
+    "checkout_interval_not_configured": "Este plazo todavía no está disponible para pagar. Elige otro plazo o vuelve pronto. No se hizo ningún cargo.",
+    "checkout_already_subscribed": "Ya tienes una suscripción Pro. Para cambiar de plazo, entra a tu cuenta.",
+    "checkout_price_mismatch": "El pago de este plazo no está disponible por ahora. No se hizo ningún cargo."
   },
   "demo_page": {
     "meta_title": "Ejemplo de análisis IASHARK — Paris Saint Germain vs Monaco",
@@ -2258,5 +2272,20 @@
     "unsub_error": "No pudimos completar tu baja. Intenta de nuevo en unos momentos o escribe a contact@iashark.com.",
     "unsub_account_link": "Administrar mis correos en Mi cuenta",
     "unsub_home_link": "Regresar al sitio"
+  },
+  "pro_plans": {
+    "legend": "Elige tu plazo",
+    "week_label": "Semana",
+    "month_label": "Mes",
+    "year_label": "Año",
+    "per_week": "/ semana",
+    "per_month": "/ mes",
+    "per_year": "/ año",
+    "year_equiv": "equivale a {price} / mes",
+    "year_savings": "{pct} % menos que 12 meses con el precio mensual",
+    "billed_week": "Cobro automático cada semana · sin plazo forzoso · cancela cuando quieras",
+    "billed_month": "Cobro automático cada mes · sin plazo forzoso · cancela cuando quieras",
+    "billed_year": "Cobro automático de {price} una vez al año · se renueva cada año · te avisamos antes del cobro · cancela cuando quieras",
+    "unavailable": "Muy pronto"
   }
 }

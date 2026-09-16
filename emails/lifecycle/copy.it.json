@@ -61,7 +61,8 @@
           "Il diario delle decisioni sincronizzato",
           "Il monitoraggio della bankroll collegato all'account"
         ] },
-        { "type": "p", "text": "Prezzo sulla versione {{siteVersion}} del sito: {{proPrice}} al mese, senza vincoli, disdicibile in qualsiasi momento da Il mio account." },
+        { "type": "p", "if": "hasProYear", "text": "Prezzi sulla versione {{siteVersion}} del sito: {{proWeekPrice}} a settimana, {{proPrice}} al mese o {{proYearPrice}} all'anno. Lo stesso accesso Pro per ogni durata, disdicibile in qualsiasi momento da Il mio account." },
+        { "type": "p", "if": "hasNoProYear", "text": "Prezzi sulla versione {{siteVersion}} del sito: {{proWeekPrice}} a settimana o {{proPrice}} al mese. Lo stesso accesso Pro per ogni durata, disdicibile in qualsiasi momento da Il mio account." },
         { "type": "p", "text": "Pro dà accesso a più analisi e strumenti; non rende nessuna partita più prevedibile." },
         { "type": "cta", "label": "Vedi i dettagli dell'offerta", "link": "pricing" },
         { "type": "p", "text": "Se l'account gratuito ti basta, non devi fare nulla." }

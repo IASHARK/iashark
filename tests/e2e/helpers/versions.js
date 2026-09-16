@@ -2,7 +2,7 @@
 // Les 9 versions publiques du site (config/markets.json#_dirs). Une ligne par
 // repertoire : ce que chaque scenario E2E attend de cette version.
 //
-// Prix : jamais recopies ici. Le montant Pro de chaque version est lu dans
+// Prix : jamais recopies ici. Les montants Pro (semaine, mois, annee) sont lus dans
 // config/markets.json (source de verite GEO : pays/devise/prix) ; seule la
 // devise attendue par version est ecrite en dur, pour qu'un repertoire branche
 // sur le mauvais marche (ex. /gb/ en EUR) fasse echouer la suite.
@@ -39,11 +39,13 @@ function currencyOfCheckoutMarket(market) {
 
 const ALL_VERSIONS = BASE_VERSIONS.map((v) => {
   const m = marketOfDir(v.dir);
-  const pro = m.prices && m.prices.pro;
+  const pro = (m.prices && m.prices.pro) || {};
+  const amount = (iv) => (pro[iv] && typeof pro[iv].amount === 'number' ? pro[iv].amount : null);
   return Object.assign({}, v, {
     configCurrency: m.currency,
-    proAmount: pro ? pro.amount : null,
-    proInterval: pro ? pro.interval : null,
+    // proAmount = mensuel (duree cochee par defaut) ; proAmounts = les 3 durees.
+    proAmount: amount('month'),
+    proAmounts: { week: amount('week'), month: amount('month'), year: amount('year') },
     currencySymbol: CURRENCY_SYMBOLS[v.currency],
   });
 });

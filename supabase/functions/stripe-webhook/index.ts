@@ -93,17 +93,28 @@ const ACTIVE_LIKE_STATUSES = new Set(["active", "trialing"]);
 // Stripe passe l'abonnement en "past_due" et relance le paiement pendant
 // plusieurs jours. Couper l'acces des la premiere tentative echouee
 // punirait un client fidele pour un incident bancaire de quelques heures.
-// On garde donc l'acces 4 jours apres la fin de la periode payee, puis on
-// coupe. Re-evalue a chaque evenement Stripe, a chaque appel de
+// On garde donc l'acces 4 jours (1 jour pour l'hebdomadaire) apres la fin de
+// la periode payee, puis on coupe. Re-evalue a chaque evenement Stripe, a chaque appel de
 // sync-subscription, et une fois par jour par la tache planifiee
-// public.expire_past_due_access() (migration 0007) - pour que la coupure
+// public.expire_past_due_access() (migrations 0011 et 0026) - pour que la coupure
 // tombe bien meme si aucun evenement n'arrive ce jour-la.
 const PAST_DUE_GRACE_DAYS = 4;
+// Abonnement hebdomadaire : 1 jour seulement (decision du 16/09/2026 : 4 jours
+// representaient plus de la moitie d'une periode de 7 jours). Mensuel, annuel
+// et duree inconnue (NULL, abonnements anterieurs a la migration 0026) : 4 jours.
+// Meme regle que public.expire_past_due_access() (migration 0026).
+// Copie identique dans stripe-webhook et sync-subscription
+// (tests/billing-interval-sync.test.js).
+const PAST_DUE_GRACE_DAYS_WEEKLY = 1;
 
-function grantsProAccess(status: string, periodEnd: string | null): boolean {
+function pastDueGraceDays(billingInterval: string | null): number {
+  return billingInterval === "week" ? PAST_DUE_GRACE_DAYS_WEEKLY : PAST_DUE_GRACE_DAYS;
+}
+
+function grantsProAccess(status: string, periodEnd: string | null, billingInterval: string | null): boolean {
   if (ACTIVE_LIKE_STATUSES.has(status)) return true;
   if (status === "past_due" && periodEnd) {
-    return Date.now() < new Date(periodEnd).getTime() + PAST_DUE_GRACE_DAYS * 86400000;
+    return Date.now() < new Date(periodEnd).getTime() + pastDueGraceDays(billingInterval) * 86400000;
   }
   return false;
 }
@@ -118,6 +129,29 @@ function periodEndIso(sub: Stripe.Subscription): string | null {
     ?.current_period_end as number | undefined;
   const ts = onSub ?? onItem;
   return ts ? new Date(ts * 1000).toISOString() : null;
+}
+
+// Duree et marche de l'abonnement, lus sur l'objet Stripe reel (jamais sur
+// une donnee du navigateur). Offre Pro unique : la duree ne change pas les
+// droits (seule la tolerance d'impaye depend d'elle, voir grantsProAccess). Metadata "market" posee par create-checkout-session ; absente
+// = flux historique FR (meme regle que resolvePriceId et lib/email-render.js).
+// Copie identique dans stripe-webhook et sync-subscription
+// (tests/billing-interval-sync.test.js).
+const BILLING_INTERVALS = new Set(["week", "month", "year"]);
+const BILLING_MARKETS = new Set(["fr", "gb", "mx", "za"]);
+function billingFields(sub: Stripe.Subscription): { billing_interval: string | null; billing_interval_count: number | null; market: string | null } {
+  const recurring = sub.items?.data?.[0]?.price?.recurring;
+  const interval = recurring?.interval ?? null;
+  const count = typeof recurring?.interval_count === "number" ? recurring.interval_count : null;
+  const rawMarket = String((sub.metadata as Record<string, string> | null)?.market || "fr").toLowerCase();
+  if (interval && !BILLING_INTERVALS.has(interval)) {
+    console.error("[billing] abonnement " + sub.id + " : periodicite Stripe inattendue " + interval + " - billing_interval laisse a NULL.");
+  }
+  return {
+    billing_interval: interval && BILLING_INTERVALS.has(interval) ? interval : null,
+    billing_interval_count: count,
+    market: BILLING_MARKETS.has(rawMarket) ? rawMarket : null,
+  };
 }
 
 Deno.serve(async (req: Request) => {
@@ -249,6 +283,7 @@ Deno.serve(async (req: Request) => {
     }
     const status = deleted ? "canceled" : sub.status;
     const periodEnd = periodEndIso(sub);
+    const billing = billingFields(sub);
     const { error: subError } = await supabase.from("subscriptions").upsert({
       stripe_subscription_id: sub.id,
       user_id: userId,
@@ -256,12 +291,13 @@ Deno.serve(async (req: Request) => {
       price_id: sub.items.data[0]?.price?.id || null,
       current_period_end: periodEnd,
       cancel_at_period_end: !!sub.cancel_at_period_end,
+      ...billing,
     }, { onConflict: "stripe_subscription_id" });
     if (subError) throw new Error("ecriture subscriptions: " + subError.message);
 
     // users.plan reflete l'etat reel de l'abonnement - jamais mis a jour
     // par le client (voir compte.html, aucune ecriture directe).
-    const newPlan = grantsProAccess(status, periodEnd) ? "pro" : "free";
+    const newPlan = grantsProAccess(status, periodEnd, billing.billing_interval) ? "pro" : "free";
     const { data: updated, error: planError } = await supabase
       .from("users")
       .update({ plan: newPlan })
@@ -316,7 +352,7 @@ Deno.serve(async (req: Request) => {
         // deux evenements ci-dessus se perdent, une facture payee suffit a
         // reconstituer l'etat reel de l'abonnement. invoice.payment_failed
         // est traite par le meme chemin : chaque relance de Stripe re-evalue
-        // la tolerance impaye de 4 jours (voir grantsProAccess).
+        // la tolerance impaye (4 jours, 1 jour pour l'hebdomadaire : voir grantsProAccess).
         const invoice = event.data.object as unknown as Record<string, unknown>;
         const rawSub = invoice.subscription ??
           (invoice.parent as Record<string, Record<string, unknown>> | undefined)?.subscription_details?.subscription;

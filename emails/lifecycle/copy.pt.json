@@ -61,7 +61,8 @@
           "O diário de decisões sincronizado",
           "O acompanhamento da bankroll ligado à conta"
         ] },
-        { "type": "p", "text": "Preço na versão {{siteVersion}} do site: {{proPrice}} por mês, sem compromisso, cancelável a qualquer momento em A minha conta." },
+        { "type": "p", "if": "hasProYear", "text": "Preços na versão {{siteVersion}} do site: {{proWeekPrice}} por semana, {{proPrice}} por mês ou {{proYearPrice}} por ano. O mesmo acesso Pro em qualquer duração, cancelável a qualquer momento em A minha conta." },
+        { "type": "p", "if": "hasNoProYear", "text": "Preços na versão {{siteVersion}} do site: {{proWeekPrice}} por semana ou {{proPrice}} por mês. O mesmo acesso Pro em qualquer duração, cancelável a qualquer momento em A minha conta." },
         { "type": "p", "text": "O Pro dá acesso a mais análises e ferramentas; não torna nenhum jogo mais previsível." },
         { "type": "cta", "label": "Ver os detalhes da oferta", "link": "pricing" },
         { "type": "p", "text": "Se a conta gratuita lhe basta, não tem de fazer nada." }

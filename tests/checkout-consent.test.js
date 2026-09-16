@@ -197,8 +197,8 @@ test("create-checkout-session : 400 consent_required traduit, consentement stock
   assert.match(refus, /code: consent\.code/);
   assert.match(refus, /msg\(MESSAGES, "consent_required", pickLocale\(req, requestedLocale\)\)/);
   const bloc = src.slice(sessionAt, sessionAt + 900);
-  assert.match(bloc, /metadata: \{ market: usedMarket, \.\.\.consent\.metadata \}/);
-  assert.match(bloc, /subscription_data: \{ metadata: \{ market: usedMarket, \.\.\.consent\.metadata \} \}/);
+  assert.match(bloc, /metadata: \{ market: usedMarket, plan: "pro", interval: usedInterval, \.\.\.consent\.metadata \}/);
+  assert.match(bloc, /subscription_data: \{ metadata: \{ market: usedMarket, plan: "pro", interval: usedInterval, \.\.\.consent\.metadata \} \}/);
   const table = src.slice(src.indexOf("consent_required: {"), src.indexOf("consent_required: {") + 1500);
   for (const loc of LOCALES) assert.match(table, new RegExp('(^|\\s|")' + loc.replace("-", "\\-") + '"?: "'), "message consent_required manquant en " + loc);
 });

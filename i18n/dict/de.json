@@ -1515,7 +1515,16 @@
     "privacy_policy_link": "Datenschutzerklärung",
     "privacy_opt_out_saved": "Erledigt: Deine Besuche sind nicht mehr mit deinem Konto verknüpft.",
     "privacy_opt_in_saved": "Deine Besuche sind wieder mit deinem Konto verknüpft.",
-    "privacy_opt_out_device_only": "Auf diesem Gerät gespeichert. Das Speichern in deinem Konto ist fehlgeschlagen: Versuche es später erneut, damit es auch auf deinen anderen Geräten gilt."
+    "privacy_opt_out_device_only": "Auf diesem Gerät gespeichert. Das Speichern in deinem Konto ist fehlgeschlagen: Versuche es später erneut, damit es auch auf deinen anderen Geräten gilt.",
+    "sub_interval_label": "Laufzeit",
+    "interval_week": "Wöchentlich",
+    "interval_month": "Monatlich",
+    "interval_year": "Jährlich",
+    "interval_unknown": "Wird synchronisiert",
+    "next_renewal_label": "Nächste Verlängerung",
+    "change_interval_cta": "Laufzeit ändern",
+    "change_interval_note": "Der Wechsel zu einer längeren Laufzeit gilt sofort und wird anteilig verrechnet; der Wechsel zu einer kürzeren Laufzeit gilt ab dem Ende des bereits bezahlten Zeitraums. Betrag und Datum werden vor der Bestätigung angezeigt.",
+    "pro_durations_note": "Wöchentlich, monatlich oder jährlich: derselbe Pro-Zugang, jederzeit kündbar."
   },
   "history_page": {
     "title_span": "HISTOR",
@@ -1807,7 +1816,9 @@
     "seo_times_paris": "Pariser Zeit",
     "premium_detail_updating": "Detaillierte Analyse wird aktualisiert",
     "free_gate_label": "Gratis-Analyse",
-    "free_gate_text": "Erstelle ein kostenloses Konto, um die Gratis-Analyse zu sehen"
+    "free_gate_text": "Erstelle ein kostenloses Konto, um die Gratis-Analyse zu sehen",
+    "pro_other_durations": "Auch wöchentlich ({pro_week_price}) oder jährlich ({pro_year_price}).",
+    "pro_other_durations_week": "Auch wöchentlich ({pro_week_price})."
   },
   "site_header": {
     "nav_today": "Heutige Analysen",
@@ -1887,7 +1898,7 @@
     "heading": "Schalte ganz IASHARK frei",
     "intro": "Greif auf alle Analysen zu und auf die Tools, mit denen du deine Entscheidungen methodisch verfolgst.",
     "per_month": "/ Monat",
-    "commitment": "Ohne Vertragsbindung · Jederzeit kündbar",
+    "commitment": "Derselbe Pro-Zugang bei jeder Laufzeit · Jederzeit kündbar",
     "pro_feat_analyses": "Vollständige Analyse für alle Spiele",
     "pro_feat_filters": "Erweiterte Filter und detaillierte Zuverlässigkeit",
     "pro_feat_journal": "Synchronisiertes Entscheidungsjournal",
@@ -1914,7 +1925,10 @@
     "checkout_opening": "Sichere Zahlung wird geöffnet…",
     "checkout_market_not_configured": "Die Zahlung ist für dieses Land noch nicht freigeschaltet. Es wurde kein Betrag abgebucht.",
     "checkout_unavailable": "Die Online-Zahlung ist bald verfügbar.",
-    "checkout_error": "Die Zahlung kann gerade nicht geöffnet werden."
+    "checkout_error": "Die Zahlung kann gerade nicht geöffnet werden.",
+    "checkout_interval_not_configured": "Für diese Laufzeit ist die Zahlung noch nicht freigeschaltet. Wähle eine andere Laufzeit oder schau bald wieder vorbei. Es wurde kein Betrag abgebucht.",
+    "checkout_already_subscribed": "Du hast bereits ein Pro-Abonnement. Die Laufzeit änderst du in deinem Konto.",
+    "checkout_price_mismatch": "Die Zahlung für diese Laufzeit ist vorübergehend nicht verfügbar. Es wurde kein Betrag abgebucht."
   },
   "demo_page": {
     "meta_title": "IASHARK-Beispielanalyse — Paris Saint Germain vs Monaco",
@@ -2258,5 +2272,20 @@
     "unsub_error": "Die Abmeldung ist fehlgeschlagen. Bitte versuchen Sie es gleich noch einmal oder schreiben Sie an contact@iashark.com.",
     "unsub_account_link": "E-Mails in Mein Konto verwalten",
     "unsub_home_link": "Zurück zur Website"
+  },
+  "pro_plans": {
+    "legend": "Wähle deine Laufzeit",
+    "week_label": "Woche",
+    "month_label": "Monat",
+    "year_label": "Jahr",
+    "per_week": "/ Woche",
+    "per_month": "/ Monat",
+    "per_year": "/ Jahr",
+    "year_equiv": "entspricht {price} / Monat",
+    "year_savings": "{pct} % weniger als 12 Monate zum Monatspreis",
+    "billed_week": "Wöchentliche Abbuchung · ohne Mindestlaufzeit · jederzeit kündbar",
+    "billed_month": "Monatliche Abbuchung · ohne Mindestlaufzeit · jederzeit kündbar",
+    "billed_year": "Abbuchung von {price} einmal pro Jahr · verlängert sich automatisch jährlich · vor Ablauf kündbar",
+    "unavailable": "Bald verfügbar"
   }
 }

@@ -9,8 +9,9 @@
                                timezone, notify_match_analysis,
                                notify_weekly_recap
    - public.subscriptions    : status, current_period_end,
-                               cancel_at_period_end (ecrite uniquement par le
-                               webhook Stripe, jamais par le client)
+                               cancel_at_period_end, billing_interval
+                               (ecrite uniquement par le webhook Stripe et
+                               sync-subscription, jamais par le client)
    - public.betting_decisions: nombre de décisions enregistrées
    Tout le reste est absent du projet et n'est donc pas invente ici :
    - pas de liste des sessions actives (le SDK Supabase ne l'expose pas),
@@ -177,6 +178,16 @@
     }
     return null;
   }
+  /* Duree de l'abonnement (offre Pro unique, 3 durees). Lue sur la ligne
+     subscriptions ecrite par le serveur a partir du Price Stripe ; jamais
+     deduite d'un prix. Valeur absente (abonnement anterieur a la migration
+     0026, pas encore resynchronise) : "En cours de synchronisation". */
+  function libelleDuree() {
+    if (!abo) return null;
+    var cles = { week: ['compte_page.interval_week', 'Hebdomadaire'], month: ['compte_page.interval_month', 'Mensuelle'], year: ['compte_page.interval_year', 'Annuelle'] };
+    var c = cles[abo.billing_interval];
+    return c ? tr(c[0], c[1]) : tr('compte_page.interval_unknown', 'En cours de synchronisation');
+  }
   var TON = {
     ok: 'border-emerald-500/30 bg-emerald-500/[.07] text-emerald-300',
     attention: 'border-amber-500/30 bg-amber-500/[.07] text-amber-200',
@@ -310,11 +321,20 @@
           + '<p class="mt-2.5 text-[26px] font-extrabold leading-none tracking-tight">' + tr('compte_page.plan_pro_name', 'IASHARK Pro') + '</p></div>'
           + '<span class="inline-flex items-center rounded-full border border-cyan/40 bg-cyan/10 px-2.5 py-1 text-[11px] font-bold tracking-wider text-cyan">' + tr('compte_page.badge_pro', 'PRO') + '</span></div>'
           + bandeau
+          + (abo ? '<div class="mt-5">'
+            + ligneResume(tr('compte_page.sub_interval_label', 'Durée'), esc(libelleDuree()))
+            + (abo.current_period_end && !abo.cancel_at_period_end && abo.status !== 'canceled' && date(abo.current_period_end) ? ligneResume(tr('compte_page.next_renewal_label', 'Prochaine échéance'), esc(date(abo.current_period_end))) : '')
+            + '</div>' : '')
           + (abo ? '' : '<p class="mt-5 text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.pro_manual_grant_detail', 'Aucun abonnement payant n’est enregistré sur ce compte : l’accès Pro y a été accordé manuellement.') + '</p>')
           + '<div class="mt-6 flex flex-wrap gap-3">'
           + (abo ? boutonPrimaire('portail', tr('compte_page.manage_subscription_cta', 'Gérer mon abonnement')) : '')
+          // Changer de duree : portail Stripe, ecran de changement d'offre de
+          // l'abonnement (jamais un second paiement). Duree plus longue : effet
+          // immediat au prorata ; plus courte : a la fin de la periode payee
+          // (reglages du portail client Stripe).
+          + (abo && ['active', 'trialing'].indexOf(abo.status) !== -1 && !abo.cancel_at_period_end ? boutonSecondaire('changerDuree', tr('compte_page.change_interval_cta', 'Changer de durée')) : '')
           + '</div>'
-          + (abo ? '<p class="mt-3 text-[12.5px] leading-relaxed text-soft">' + tr('compte_page.billing_portal_note', 'Moyen de paiement, factures et résiliation se gèrent dans l’espace sécurisé de notre prestataire de paiement.') + '</p>' : '')
+          + (abo ? '<p class="mt-3 text-[12.5px] leading-relaxed text-soft">' + tr('compte_page.billing_portal_note', 'Moyen de paiement, factures et résiliation se gèrent dans l’espace sécurisé de notre prestataire de paiement.') + ' ' + tr('compte_page.change_interval_note', 'Passer à une durée plus longue prend effet tout de suite, au prorata ; passer à une durée plus courte prend effet à la fin de la période déjà payée. Le montant et la date d’effet sont affichés avant confirmation.') + '</p>' : '')
           + '<p id="msgFacturation" hidden aria-live="polite"></p>');
     }
 
@@ -336,8 +356,10 @@
         + (etat && etat.ton === 'alerte' ? '<div class="mt-5 rounded-xl border px-4 py-3.5 text-[13.5px] leading-relaxed ' + TON[etat.ton] + '"><b class="font-semibold">' + esc(etat.titre) + '</b><span class="mt-0.5 block opacity-90">' + esc(etat.detail) + '</span></div>' : ''))
       + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-cyan">' + tr('compte_page.with_pro_heading', 'Avec Pro') + '</h2>'
         // Prix affiche en EUR uniquement : voir note ci-dessus, hors perimetre ici.
-        + '<p class="mt-2.5 text-[22px] font-extrabold leading-none tracking-tight"><span data-market-price="pro">' + esc(prixPro()) + '</span> ' + esc(tr('compte_page.per_month', '/ mois')) + '</p>'
-        + '<p class="mt-2 text-[13.5px] text-soft">' + tr('compte_page.pro_no_commitment', 'Sans engagement, résiliable à tout moment.') + '</p>'
+        // Selecteur Semaine / Mois / Annee (lib/pro-plan-picker.js), monte par
+        // brancher() ; repli sans module : prix mensuel.
+        + '<div id="proPlanPicker"><p class="mt-2.5 text-[22px] font-extrabold leading-none tracking-tight"><span data-market-price="pro.month">' + esc(prixPro()) + '</span> ' + esc(tr('compte_page.per_month', '/ mois')) + '</p></div>'
+        + '<p class="mt-2 text-[13.5px] text-soft">' + tr('compte_page.pro_durations_note', 'À la semaine, au mois ou à l’année : même accès Pro, résiliable à tout moment.') + '</p>'
         + '<ul class="mt-5 space-y-2.5">'
         + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_all_matches', 'L’analyse complète sur tous les matchs') + '</li>'
         + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_six_tools', 'Les six outils branchés sur les probabilités du modèle') + '</li>'
@@ -694,10 +716,13 @@
     if ($('enregistrerNotifs')) $('enregistrerNotifs').addEventListener('click', enregistrerNotifications);
     if ($('emailMarketing')) $('emailMarketing').addEventListener('click', enregistrerEmailMarketing);
     if ($('souscrire')) {
+      selecteur = ($('proPlanPicker') && window.IasharkProPlanPicker) ? window.IasharkProPlanPicker.mount($('proPlanPicker'), {}) : null;
+      if (selecteur) selecteur.loadAvailability();
       monterConsentement();
       $('souscrire').addEventListener('click', function () { facturation('create-checkout-session', $('souscrire')); });
     }
     if ($('portail')) $('portail').addEventListener('click', function () { facturation('create-portal-session', $('portail')); });
+    if ($('changerDuree')) $('changerDuree').addEventListener('click', function () { facturation('create-portal-session', $('changerDuree'), { flow: 'change_interval' }); });
     if ($('exporter')) $('exporter').addEventListener('click', exporter);
     if ($('refusSuivi')) $('refusSuivi').addEventListener('click', basculerSuivi);
     racine.querySelectorAll('[data-fav-ligue]').forEach(function (b) {
@@ -785,6 +810,8 @@
       document.head.appendChild(s);
     });
   }
+  // Selecteur de duree de la carte « Avec Pro » (compte gratuit).
+  var selecteur = null;
   function monterConsentement() {
     consentement = null;
     var bloc = $('checkoutConsent'), bouton = $('souscrire');
@@ -795,7 +822,7 @@
     });
   }
 
-  async function facturation(fonction, bouton) {
+  async function facturation(fonction, bouton, options) {
     var consentementPaiement = null;
     if (fonction === 'create-checkout-session') {
       if (!consentement) {
@@ -808,6 +835,10 @@
         return;
       }
       consentementPaiement = consentement.payload();
+      if (selecteur && !selecteur.isAvailable()) {
+        retour('msgFacturation', tr('pricing_page.checkout_interval_not_configured', 'Cette durée n’est pas encore ouverte au paiement. Choisis une autre durée ou reviens bientôt. Aucun montant n’a été prélevé.'), 'error');
+        return;
+      }
     }
     var relacher = occuper(bouton, tr('compte_page.opening_label', 'Ouverture…'));
     retour('msgFacturation', '');
@@ -816,10 +847,16 @@
       var token = s.data.session && s.data.session.access_token;
       // Paiement : marche (gb/mx/za, sinon absent = marche FR historique) et
       // repertoire de site (retour sur /<dir>/checkout-succes.html). Le portail
-      // de facturation n'en a pas besoin.
+      // de facturation recoit le repertoire (retour sur /<dir>/compte.html) et,
+      // pour « Changer de duree », le flux de changement d'offre.
       var corps = {};
+      var dir = repertoire();
+      if (fonction === 'create-portal-session') {
+        if (dir) corps.dir = dir;
+        if (options && options.flow === 'change_interval') corps.flow = 'change_interval';
+      }
       if (fonction === 'create-checkout-session') {
-        var dir = repertoire();
+        corps.interval = selecteur ? selecteur.interval() : 'month';
         var code = String((marche() && (marche().checkoutMarket || marche().code)) || dir || '').toLowerCase();
         if (code === 'gb' || code === 'mx' || code === 'za') corps.market = code;
         if (dir) corps.dir = dir;
@@ -836,6 +873,18 @@
       if (j.code === 'consent_required') {
         if (consentement && !consentement.check()) retour('msgFacturation', '');
         else retour('msgFacturation', j.message || tr('checkout_consent.error_required', 'Cochez les cases obligatoires ci-dessus pour continuer vers le paiement.'), 'error');
+        return;
+      }
+      if (j.processed === false && j.reason === 'interval_not_configured') {
+        retour('msgFacturation', tr('pricing_page.checkout_interval_not_configured', 'Cette durée n’est pas encore ouverte au paiement. Choisis une autre durée ou reviens bientôt. Aucun montant n’a été prélevé.'), 'error');
+        return;
+      }
+      if (j.processed === false && j.reason === 'already_subscribed') {
+        retour('msgFacturation', tr('pricing_page.checkout_already_subscribed', 'Tu as déjà un abonnement Pro. Pour changer de durée, passe par ton compte.'), 'error');
+        return;
+      }
+      if (j.processed === false && j.reason === 'price_mismatch') {
+        retour('msgFacturation', tr('pricing_page.checkout_price_mismatch', 'Le paiement de cette durée est momentanément indisponible. Aucun montant n’a été prélevé.'), 'error');
         return;
       }
       if (j.processed === false && j.reason === 'market_not_configured') {
@@ -895,7 +944,7 @@
         sb.from('users').select('email,plan,role,capital,created_at,updated_at').eq('id', ctx.user.id).maybeSingle(),
         sb.from('user_preferences').select('*').eq('user_id', ctx.user.id).maybeSingle(),
         sb.from('betting_decisions').select('*').eq('user_id', ctx.user.id),
-        sb.from('subscriptions').select('status,current_period_end,cancel_at_period_end,created_at').eq('user_id', ctx.user.id),
+        sb.from('subscriptions').select('status,billing_interval,current_period_end,cancel_at_period_end,created_at').eq('user_id', ctx.user.id),
         // Droit d'acces : visites liees au compte (funnel_events, politique
         // RLS funnel_events_select_own de 0025). Lecture seule de SES lignes.
         sb.from('funnel_events').select('created_at,event_type,page,locale,session_id,metadata')
@@ -1079,7 +1128,7 @@
     }
     var resultats = await Promise.all([
       sb.from('user_preferences').select('*').eq('user_id', ctx.user.id).maybeSingle(),
-      sb.from('subscriptions').select('status,current_period_end,cancel_at_period_end,created_at')
+      sb.from('subscriptions').select('status,billing_interval,current_period_end,cancel_at_period_end,created_at')
         .eq('user_id', ctx.user.id).order('created_at', { ascending: false }).limit(1).maybeSingle(),
       sb.from('betting_decisions').select('id', { count: 'exact', head: true }).eq('user_id', ctx.user.id),
       sb.from('email_preferences').select('marketing_opt_in').eq('user_id', ctx.user.id).maybeSingle()
@@ -1092,6 +1141,12 @@
     if (window.IasharkFavLeagues) {
       favStore = window.IasharkFavLeagues.createStore();
       try { await favStore.connectRemote(window.IasharkFavLeagues.supabaseAdapter(sb)); } catch (_e) {}
+    }
+    // Colonne billing_interval absente (migration 0026 pas encore appliquee) :
+    // relecture sans elle, pour ne jamais afficher un abonne comme sans abonnement.
+    if (resultats[1].error) {
+      resultats[1] = await sb.from('subscriptions').select('status,current_period_end,cancel_at_period_end,created_at')
+        .eq('user_id', ctx.user.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
     }
     abo = resultats[1].data || null;
     nbDecisions = resultats[2].count || 0;

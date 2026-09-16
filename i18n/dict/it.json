@@ -1515,7 +1515,16 @@
     "privacy_policy_link": "Informativa sulla privacy",
     "privacy_opt_out_saved": "Fatto: le tue visite non sono più collegate al tuo account.",
     "privacy_opt_in_saved": "Le tue visite sono di nuovo collegate al tuo account.",
-    "privacy_opt_out_device_only": "Salvato su questo dispositivo. Il salvataggio sul tuo account non è riuscito: riprova più tardi per applicarlo anche agli altri dispositivi."
+    "privacy_opt_out_device_only": "Salvato su questo dispositivo. Il salvataggio sul tuo account non è riuscito: riprova più tardi per applicarlo anche agli altri dispositivi.",
+    "sub_interval_label": "Durata",
+    "interval_week": "Settimanale",
+    "interval_month": "Mensile",
+    "interval_year": "Annuale",
+    "interval_unknown": "Sincronizzazione in corso",
+    "next_renewal_label": "Prossima scadenza",
+    "change_interval_cta": "Cambia durata",
+    "change_interval_note": "Il passaggio a una durata più lunga ha effetto subito, con calcolo pro rata; il passaggio a una durata più breve ha effetto alla fine del periodo già pagato. Importo e data di efficacia sono mostrati prima della conferma.",
+    "pro_durations_note": "Settimanale, mensile o annuale: lo stesso accesso Pro, annullabile in qualsiasi momento."
   },
   "history_page": {
     "title_span": "STOR",
@@ -1807,7 +1816,9 @@
     "seo_times_paris": "ora di Parigi",
     "premium_detail_updating": "Analisi dettagliata in aggiornamento",
     "free_gate_label": "Analisi gratuita",
-    "free_gate_text": "Crea un account gratuito per vedere l’analisi gratuita"
+    "free_gate_text": "Crea un account gratuito per vedere l’analisi gratuita",
+    "pro_other_durations": "Anche settimanale ({pro_week_price}) o annuale ({pro_year_price}).",
+    "pro_other_durations_week": "Anche settimanale ({pro_week_price})."
   },
   "site_header": {
     "nav_today": "Analisi del giorno",
@@ -1887,7 +1898,7 @@
     "heading": "Sblocca tutto IASHARK",
     "intro": "Accedi a tutte le analisi e agli strumenti per seguire le tue decisioni con metodo.",
     "per_month": "/ mese",
-    "commitment": "Senza vincoli · Annullabile in qualsiasi momento",
+    "commitment": "Lo stesso accesso Pro per ogni durata · Annullabile in qualsiasi momento",
     "pro_feat_analyses": "Analisi completa su tutte le partite",
     "pro_feat_filters": "Filtri avanzati e affidabilità dettagliata",
     "pro_feat_journal": "Diario delle decisioni sincronizzato",
@@ -1914,7 +1925,10 @@
     "checkout_opening": "Apertura del pagamento sicuro…",
     "checkout_market_not_configured": "Il pagamento non è ancora disponibile per questo paese. Non è stato addebitato alcun importo.",
     "checkout_unavailable": "Il pagamento online sarà presto disponibile.",
-    "checkout_error": "Impossibile aprire il pagamento al momento."
+    "checkout_error": "Impossibile aprire il pagamento al momento.",
+    "checkout_interval_not_configured": "Il pagamento per questa durata non è ancora disponibile. Scegli un’altra durata o torna presto. Non è stato addebitato alcun importo.",
+    "checkout_already_subscribed": "Hai già un abbonamento Pro. Per cambiare durata, vai al tuo account.",
+    "checkout_price_mismatch": "Il pagamento per questa durata è momentaneamente non disponibile. Non è stato addebitato alcun importo."
   },
   "demo_page": {
     "meta_title": "Esempio di analisi IASHARK — Paris Saint Germain vs Monaco",
@@ -2258,5 +2272,20 @@
     "unsub_error": "Non è stato possibile completare la disiscrizione. Riprova tra qualche istante oppure scrivi a contact@iashark.com.",
     "unsub_account_link": "Gestisci le email in Il mio account",
     "unsub_home_link": "Torna al sito"
+  },
+  "pro_plans": {
+    "legend": "Scegli la durata",
+    "week_label": "Settimana",
+    "month_label": "Mese",
+    "year_label": "Anno",
+    "per_week": "/ settimana",
+    "per_month": "/ mese",
+    "per_year": "/ anno",
+    "year_equiv": "pari a {price} / mese",
+    "year_savings": "{pct}% in meno rispetto a 12 mesi con la tariffa mensile",
+    "billed_week": "Addebito ogni settimana · senza vincoli · annullabile in qualsiasi momento",
+    "billed_month": "Addebito ogni mese · senza vincoli · annullabile in qualsiasi momento",
+    "billed_year": "Addebito di {price} una volta all’anno · rinnovo automatico ogni anno · disdicibile prima della scadenza",
+    "unavailable": "Presto disponibile"
   }
 }

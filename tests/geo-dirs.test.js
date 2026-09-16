@@ -60,10 +60,12 @@ test("config : repertoires publics et prix des marches conformes aux docs 06/07/
   assert.deepEqual([DIRS.gb.htmlLang, DIRS.za.htmlLang, DIRS.mx.htmlLang], ["en-GB", "en-ZA", "es-MX"]);
   assert.deepEqual([DIRS.gb.locale, DIRS.za.locale, DIRS.mx.locale], ["en", "en", "es-mx"]);
   ["en", "es", "de", "it", "pt", "fr"].forEach(function (d) { assert.equal(DIRS[d].market, "fr", d + " = marche EUR par defaut"); });
-  function amounts(m) { return ["free", "pro", "edge", "annual_edge"].map(function (k) { return MARKETS[m].prices[k] && MARKETS[m].prices[k].amount; }); }
-  assert.deepEqual(amounts("gb"), [0, 14.99, 24.99, 199]);
-  assert.deepEqual(amounts("mx"), [0, 199, 299, 1990]);
-  assert.deepEqual(amounts("za"), [0, 199, 299, 1999]);
+  // Offre Pro unique, 3 durees (tests/pro-pricing.test.js detaille les montants).
+  function amounts(m) { var p = MARKETS[m].prices; return [p.free.amount, p.pro.week.amount, p.pro.month.amount, p.pro.year ? p.pro.year.amount : null]; }
+  assert.deepEqual(amounts("gb"), [0, 4.99, 14.99, 149]);
+  assert.deepEqual(amounts("mx"), [0, 69, 199, 1990]);
+  assert.deepEqual(amounts("za"), [0, 69, 199, null], "ZA : annuel non ouvert au lancement");
+  assert.deepEqual(amounts("fr"), [0, 6.99, 19.95, 199]);
   assert.deepEqual([MARKETS.gb.currency, MARKETS.mx.currency, MARKETS.za.currency, MARKETS.fr.currency], ["GBP", "MXN", "ZAR", "EUR"]);
   assert.equal(MARKETS.mx.helpline.phone, "800 911 2000", "MX : Línea de la Vida (CONASAMA), verifiee par l'agent juridique (legal/README.md)");
 });
@@ -137,7 +139,7 @@ test("lib/market-config.js : donnees synchronisees depuis config/markets.json, p
   var gb = loadMarket("/gb/pro.html").IASHARK_MARKET;
   assert.deepEqual([gb.code, gb.dir, gb.lang, gb.currency, gb.checkoutMarket], ["gb", "gb", "en-GB", "GBP", "gb"]);
   assert.equal(gb.formatPrice("pro"), new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(14.99));
-  assert.match(gb.formatPrice("annual_edge"), /199/);
+  assert.match(gb.formatPrice("pro.year"), /149/);
   assert.equal(gb.legal.pages.terms, "/gb/cgv.html");
   assert.equal(gb.helpline.phone, "0808 8020 133");
 
@@ -148,15 +150,17 @@ test("lib/market-config.js : donnees synchronisees depuis config/markets.json, p
 
   var za = loadMarket("/za/").IASHARK_MARKET;
   assert.deepEqual([za.currency, za.lang], ["ZAR", "en-ZA"]);
-  assert.match(za.formatPrice("annual_edge"), /1\D?999/);
+  assert.equal(za.formatPrice("pro.year"), null, "ZA : annuel non ouvert, aucun prix");
+  assert.match(za.formatPrice("pro.week"), /69/);
 
   var en = loadMarket("/en/").IASHARK_MARKET;
   assert.deepEqual([en.code, en.currency, en.checkoutMarket], ["fr", "EUR", null]);
-  assert.equal(en.formatPrice("edge"), null, "aucun prix EUR Edge : jamais invente");
+  assert.equal(en.formatPrice("pro.quarter"), null, "duree inconnue : aucun prix invente");
+  assert.equal(en.formatPrice("edge"), null, "offre Edge abandonnee : aucun prix");
   assert.equal(en.legal.pages.privacy, "/en/confidentialite.html");
 
   // Remplissage : prix absent -> texte intact + attribut ; aide ; devise ; lien legal.
-  var price = fakeEl("SPAN", { "data-market-price": "edge" });
+  var price = fakeEl("SPAN", { "data-market-price": "pro.quarter" });
   var pro = fakeEl("SPAN", { "data-market-price": "pro" });
   var cur = fakeEl("SPAN", { "data-market-currency": "" });
   var help = fakeEl("SPAN", { "data-market-helpline": "" });
@@ -322,14 +326,13 @@ test("landings pays gb/za/mx : aucun historique ni 'public record', liens dans l
       assert.ok(h.indexOf("/" + d + "/") === 0 || /^\/(en|es|mx)\/blog\//.test(h), d + "/landing.html : lien hors repertoire " + h);
     });
     assert.match(html, /<script src="\/lib\/market-config\.js"><\/script>/, d);
-    ["free", "pro"].forEach(function (k) { assert.match(html, new RegExp('data-market-price="' + k + '"'), d + " " + k); });
-    // Audit QA 14/09/2026 : checkout = un seul prix Stripe par marche. Tant que
-    // des prix par plan n'existent pas cote serveur, aucun plan Edge / Annual
-    // Edge (ni prix, ni bouton) n'est propose : rien ne peut facturer le
-    // mauvais plan.
-    ["edge", "annual_edge"].forEach(function (k) { assert.doesNotMatch(visible, new RegExp('data-market-price="' + k + '"'), d + " " + k + " visible"); });
-    assert.doesNotMatch(visible, /subscribe(Edge|Annual)Btn/, d + " : bouton Edge/Annual visible");
-    assert.doesNotMatch(read(d + "/" + d + "-page.js"), /wireCheckout\("subscribe(Edge|Annual)Btn"/, d + " : bouton Edge/Annual encore cable");
+    ["free", "pro.week", "pro.month"].concat(d === "za" ? [] : ["pro.year"]).forEach(function (k) { assert.match(html, new RegExp('data-market-price="' + k.replace(".", "\\.") + '"'), d + " " + k); });
+    if (d === "za") assert.doesNotMatch(html, /data-market-price="pro\.year"/, "ZA : aucune option annuelle");
+    // Offre Edge abandonnee (decision du proprietaire du 16/09/2026) : ni texte, ni
+    // prix, ni bouton, ni commentaire ; un seul bouton Pro qui envoie la duree.
+    assert.doesNotMatch(html, /\bEdge\b|annual_edge|subscribe(Edge|Annual)Btn/, d + " : reference a l'offre Edge");
+    // "Edge Function" = infrastructure Supabase, pas l'offre.
+    assert.doesNotMatch(read(d + "/" + d + "-page.js").replace(/(Supabase )?Edge Functions?|fonctions? Edge/gi, ""), /\bEdge\b|subscribe(Edge|Annual)Btn/, d + "-page.js : reference a l'offre Edge");
     // Aucune note interne visible (TODO juridique) : commentaire HTML seulement.
     assert.doesNotMatch(visible, /legal-todo|\[TODO/, d + " : TODO juridique visible");
     assert.match(html, /<!-- LEGAL REVIEW:/, d + " : information juridique a conserver en commentaire");

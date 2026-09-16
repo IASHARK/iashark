@@ -1,15 +1,13 @@
 "use strict";
 // IASHARK /mx/ acquisition page - MXN pricing display, P0 landing analytics
-// (doc 18 S7) and Pro/Edge/Annual Edge checkout wiring against the shared
+// (doc 18 S7) and Pro checkout wiring (single plan sold weekly, monthly or annually) against the shared
 // create-checkout-session Supabase Edge Function. Mirrors gb/gb-page.js
 // exactly (same client pattern as abonnement-page.js/account-page.js's
 // facturation(), with { market: "mx" } added to the request body - see
-// supabase/functions/create-checkout-session which already resolves a
-// market-specific Stripe price via STRIPE_PRICE_ID_MX and returns
-// { processed:false, reason:"market_not_configured" } honestly when that env
-// var isn't set, exactly the current real state for MX - confirmed by
-// reading resolvePriceId()/MARKET_ENV_KEYS in that function before writing
-// this file).
+// supabase/functions/create-checkout-session, which resolves the Stripe price
+// for this market and billing period (STRIPE_PRICE_ID_MX_WEEK / _MONTH / _YEAR)
+// and returns { processed:false, reason:"interval_not_configured" |
+// "market_not_configured" } honestly when the matching secret isn't set).
 (function () {
   // ---- Price display ------------------------------------------------------
   // Prices come from lib/market-config.js (window.IASHARK_MARKET, built from
@@ -38,23 +36,26 @@
   if (window.iasharkTrack) iasharkTrack("landing_view", landingMeta);
 
   // ---- Checkout wiring ----------------------------------------------------
-  // KNOWN LIMITATION, surfaced here rather than hidden (same discipline as
-  // gb-page.js): create-checkout-session resolves ONE Stripe price per
-  // market (STRIPE_PRICE_ID_MX) - it has no concept yet of Pro vs Edge vs
-  // Annual Edge as distinct server-side prices, and "Edge" does not exist
-  // anywhere else in the codebase as a plan value (only 'pro' exists on
-  // public.users.plan). Until real per-tier Stripe prices exist and the
-  // function is extended to resolve them, all three buttons below call the
-  // same endpoint with the same { market: "mx" } body, and - today, with
-  // STRIPE_PRICE_ID_MX unset - all get back processed:false /
-  // reason:"market_not_configured" from the server. That is shown to the
-  // visitor honestly below, in Mexican Spanish, never papered over with a
-  // fake URL or a fake success state.
+  // Single Pro plan (owner decision 16/09/2026, the former second paid
+  // tier is abandoned) sold weekly, monthly or annually. The visitor picks the billing
+  // period in lib/pro-plan-picker.js (month pre-selected); the request body
+  // carries it as { interval }. create-checkout-session resolves the Stripe
+  // Price for this market AND period (STRIPE_PRICE_ID_MX_WEEK / _MONTH / _YEAR),
+  // checks it matches the displayed price, and never falls back to another
+  // period, price or currency: a missing Price comes back as processed:false
+  // (interval_not_configured / market_not_configured), shown honestly below.
+  var picker = (window.IasharkProPlanPicker && document.getElementById("proPlanPicker"))
+    ? window.IasharkProPlanPicker.mount(document.getElementById("proPlanPicker"), {})
+    : null;
+  // Duree vendue mais Price Stripe absent cote serveur : marquee "coming soon"
+  // des l'affichage (create-checkout-session, mode availability).
+  if (picker) picker.loadAvailability();
+
   // ---- Consentimiento antes del pago ------------------------------------
   // lib/checkout-consent.js muestra en #checkoutConsent la casilla obligatoria
   // (Términos y condiciones + consentimiento expreso al cobro recurrente, LFPC
   // art. 76 Bis VIII) y una línea informativa; no se pide ninguna renuncia
-  // (LFPC art. 1, derechos irrenunciables). Los tres botones quedan
+  // (LFPC art. 1, derechos irrenunciables). El botón de pago queda
   // aria-disabled hasta marcarla. create-checkout-session vuelve a verificar
   // el consentimiento en el servidor. Si el módulo no carga, no se llama al
   // checkout.
@@ -128,9 +129,14 @@
         return;
       }
 
+      var interval = picker ? picker.interval() : "month";
+      if (picker && !picker.isAvailable()) {
+        show("Este plazo todavía no está disponible para pagar. Elige otro plazo o vuelve pronto. No se hizo ningún cargo.", true);
+        return;
+      }
       btn.disabled = true;
       show("Abriendo el pago seguro…");
-      if (window.iasharkTrack) iasharkTrack("checkout_started", { market: "mx", tier: tierLabel });
+      if (window.iasharkTrack) iasharkTrack("checkout_started", { market: "mx", tier: tierLabel, interval: interval });
 
       try {
         var session = await window.IasharkApp.supabase.auth.getSession();
@@ -138,7 +144,7 @@
         var response = await fetch(window.IasharkApp.url + "/functions/v1/create-checkout-session", {
           method: "POST",
           headers: { apikey: window.IasharkApp.key, Authorization: "Bearer " + token, "Content-Type": "application/json" },
-          body: JSON.stringify({ market: "mx", dir: "mx", consent: consent.payload() })
+          body: JSON.stringify({ market: "mx", dir: "mx", interval: interval, consent: consent.payload() })
         });
         var data = await response.json();
         if (data && data.url) {
@@ -157,9 +163,18 @@
         // PAYMENT_PROVIDER=disabled messaging pattern (abonnement-page.js /
         // account-page.js / gb-page.js), covers both processed:false shapes
         // the function can return (generic disabled, and
-        // reason:"market_not_configured", which is the real current state
-        // for MX since STRIPE_PRICE_ID_MX is not set - confirmed by reading
-        // supabase/functions/create-checkout-session before writing this).
+        // reason:"market_not_configured" when no MX price secret is set yet).
+        if (data && data.reason === "already_subscribed") {
+          show("Ya tienes una suscripción Pro. Para cambiar de plazo, entra a tu cuenta.", true);
+          btn.disabled = false;
+          return;
+        }
+        if (data && data.reason === "interval_not_configured") {
+          if (window.iasharkTrack) iasharkTrack("checkout_unavailable", { market: "mx", tier: tierLabel, interval: interval, reason: "interval_not_configured" });
+          show("Este plazo todavía no está disponible para pagar. Elige otro plazo o vuelve pronto. No se hizo ningún cargo.", true);
+          btn.disabled = false;
+          return;
+        }
         if (window.iasharkTrack) {
           iasharkTrack("checkout_unavailable", { market: "mx", tier: tierLabel, reason: (data && data.reason) || "payment_disabled" });
         }
@@ -172,9 +187,6 @@
     });
   }
 
-  // Seul Pro est propose (audit QA 14/09/2026) : les cartes Edge et Annual
-  // Edge sont retirees de la page tant que create-checkout-session ne connait
-  // qu'un prix Stripe par marche (voir KNOWN LIMITATION ci-dessus). Aucun
-  // bouton Edge/Annual n'est cable : rien ne peut facturer le mauvais plan.
+  // Un seul bouton de paiement : l'offre Pro, avec la duree choisie.
   wireCheckout("subscribeProBtn", "proMsg", "pro");
 })();

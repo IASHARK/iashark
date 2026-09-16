@@ -152,7 +152,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Responsible gambling</a>
   </nav>
   <h1 class="page-title">Terms of sale</h1>
-  <div class="page-date">Last updated: 13 September 2026</div>
+  <div class="page-date">Last updated: 16 September 2026</div>
 
   <div class="warn-box">
     <p>⚠️ IASHARK IS NOT A BETTING SITE: NO BETS ARE TAKEN ON THIS SITE. OUR ANALYSES ARE STATISTICAL ESTIMATES WITH NO GUARANTEE OF ANY OUTCOME.<br>GAMBLING INVOLVES RISKS: DEBT AND ADDICTION. NEED HELP? CONTACT A HELP SERVICE IN YOUR COUNTRY OR GAMBLING THERAPY (FREE, ONLINE): <a href="https://www.gamblingtherapy.org" target="_blank" rel="noopener">GAMBLINGTHERAPY.ORG</a>.<br>FOR ADULTS AGED 18 AND OVER ONLY.</p>
@@ -187,31 +187,37 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <p>The scope of free access may change. You are responsible for keeping your login details confidential.</p>
   </section>
 
+  <!-- LEGAL REVIEW: articles 5 to 9 rewritten on 16/09/2026 for the single Pro plan sold weekly, monthly or annually - REVIEW status, translation of the French terms (legal/fr/cgv.html) to be reviewed by a lawyer before the Stripe prices are opened; same open points J1 to J6 as the French version. Prices and computed values taken from config/markets.json (tests/cgv-pro-prices.test.js). -->
   <section class="section">
     <h2>Article 5 — IASHARK Pro subscription</h2>
-    <p>For its duration, the IASHARK Pro subscription gives access to the following features:</p>
+    <p>IASHARK Pro is a single plan. For its duration, the subscription gives access to the following features:</p>
     <ul>
       <li>full analysis of all available matches and competitions;</li>
       <li>advanced filters and detailed reliability indicators;</li>
       <li>a decision journal synchronised with your account;</li>
       <li>bankroll tracking linked to your account.</li>
     </ul>
+    <p>You can subscribe for a weekly, monthly or annual period. <strong>The content and features are the same whichever period you choose</strong>: only the amount and the frequency of payment change.</p>
     <p>The list of competitions covered and the details of the features may change, but the service will never be substantially reduced during a period that has already been paid for.</p>
   </section>
 
   <section class="section">
-    <h2>Article 6 — Price</h2>
+    <h2>Article 6 — Prices and billing periods</h2>
     <div class="highlight">
-      <p><strong>IASHARK Pro subscription: €19.95 per month, VAT included.</strong><br>
-      No minimum term. Renews automatically every month until cancelled.</p>
+      <p><strong>Weekly: €6.99 per week, VAT included.</strong> Charged when you subscribe, then every week on the same day. Renews automatically every week until cancelled, no minimum term.</p>
+      <p><strong>Monthly: €19.95 per month, VAT included.</strong> Charged when you subscribe, then every month on the same date. Renews automatically every month until cancelled, no minimum term.</p>
+      <p><strong>Annual: €199 per year, VAT included.</strong> Charged once when you subscribe, then on each anniversary date. Paid for twelve months and renewed automatically for one year unless cancelled before the renewal date (Article 9).</p>
     </div>
-    <p>The applicable price is the one displayed on the Subscription page and summarised on the payment page before you confirm your order. Any price change will be notified to you before it takes effect; it will only apply from the next billing period and you may cancel your subscription before that date.</p>
+    <p>For information, €199 a year works out at €16.59 a month, which is 16% less than twelve months at the monthly price (€239.40).</p>
+    <p>The applicable price is the one displayed on the Subscription page for the chosen period and summarised on the payment page before you confirm your order. Any price change will be notified to you before it takes effect; it will only apply from the next billing period and you may cancel your subscription before that date.</p>
   </section>
 
   <section class="section">
     <h2>Article 7 — Payment and renewal</h2>
-    <p>Payment is secured and handled by Stripe (<a href="https://stripe.com" target="_blank" rel="noopener">stripe.com</a>). IASHARK does not store any bank card data. The first payment is taken when you subscribe, then every month on the same date.</p>
-    <p>If a renewal payment fails, our payment provider may retry it. Pro access is maintained for 4 days after the end of the paid period; if payment is not made, the account returns to free access.</p>
+    <p>Payment is secured and handled by Stripe (<a href="https://stripe.com" target="_blank" rel="noopener">stripe.com</a>). IASHARK does not store any bank card data. The first payment is taken when you subscribe. The subscription then renews automatically at the end of each period, for a period of the same length and at the price then in force.</p>
+    <p><strong>Annual plan: information before renewal.</strong> We will email you no earlier than three months and no later than one month before the renewal date to remind you that you may choose not to renew your annual subscription. The email states the renewal date, the amount that will be charged and how to cancel online.</p>
+    <p><strong>Changing billing period.</strong> You can change your billing period from "My account", in our payment provider's secure billing area. Moving to a longer period (for example from monthly to annual) takes effect immediately: the new period is charged straight away, less a pro rata credit for the unused part of the current period. Moving to a shorter period (for example from annual to monthly) takes effect at the end of the period already paid for, with no refund and no extra charge until then. The amount and the date the change takes effect are shown before you confirm. An active subscription cannot be taken out a second time.</p>
+    <p>If a renewal payment fails, our payment provider may retry it. Pro access is maintained for 1 day after the end of the paid period on the weekly plan, and for 4 days on the monthly and annual plans; if payment is not made, the account returns to free access.</p>
   </section>
 
   <section class="section">
@@ -219,13 +225,13 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <!-- LEGAL REVIEW: withdrawal clause updated 2026-09-13 for checkout consent boxes -->
     <!-- LEGAL REVIEW: (a) points (1) and (2) of the LEGAL REVIEW note at the top of this page describe the checkout before the consent boxes and must be re-checked once the new checkout is live; (b) art. L221-28 13° c) and L221-13 al. 2 require a confirmation of the consumer's express consent and acknowledgement on a durable medium before the end of the withdrawal period - check that the post-payment confirmation email actually contains it, otherwise the withdrawal right is not lost; (c) clause drafted on the digital content basis (L221-28 13°): if the subscription is classified as a service (L221-28 1° / L221-25), the right is only lost once the service is fully performed and a proportionate amount is payable on withdrawal - redraft required. -->
     <!-- LEGAL REVIEW: clause aligned 2026-09-13 with checkout consent boxes; confirm digital service vs digital content classification (CJEU C-234/25) and proportionate amount method -->
-    <p>You have 14 days from subscribing to withdraw without giving a reason. At checkout you expressly ask for your subscription to start immediately; this request does not remove your right of withdrawal. If you withdraw within that period, we refund you within 14 days of your request, less an amount proportionate to the service provided until you informed us, calculated pro rata to the access period within the paid period. Nothing is owed if that express request was not collected.</p>
-    <p>Subscribing requires ticking a box accepting these Terms; the accepted version, language and date are recorded.</p>
+    <p>You have 14 days from subscribing to withdraw without giving a reason. At checkout you expressly ask for your subscription to start immediately; this request does not remove your right of withdrawal. If you withdraw within that period, we refund you within 14 days of your request, less an amount proportionate to the service provided until you informed us, calculated pro rata to the access period within the paid period (week, month or year depending on the plan). This right applies whichever period you choose. Nothing is owed if that express request was not collected.</p>
+    <p>Subscribing requires ticking a box accepting these Terms; the accepted version, language, date and chosen period are recorded.</p>
     <p>To withdraw, send us an unequivocal statement by email to <a href="mailto:contact@iashark.com">contact@iashark.com</a> before the deadline, for example using the model below. You will be refunded no later than 14 days after we receive your request, using the same means of payment as for your subscription.</p>
     <div class="highlight">
       <p><strong>Model withdrawal form</strong><br>
       To IASHARK, contact@iashark.com:<br>
-      I hereby give notice that I withdraw from the contract for the IASHARK Pro subscription taken out on [date], in the name of [name], account email address: [email].<br>
+      I hereby give notice that I withdraw from the contract for the IASHARK Pro subscription (billing period: [weekly / monthly / annual]) taken out on [date], in the name of [name], account email address: [email].<br>
       Date and signature (if sent on paper).</p>
     </div>
   </section>
@@ -233,7 +239,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
   <section class="section">
     <h2>Article 9 — Cancellation</h2>
     <p>You can cancel your subscription at any time, free of charge and online, from the "My account" page, which gives access to our payment provider's secure billing area. You can also request cancellation by email at <a href="mailto:contact@iashark.com">contact@iashark.com</a>.</p>
-    <p>Cancellation takes effect at the end of the current billing period: you keep Pro access until that date and no further payment is taken. Except where the right of withdrawal is exercised under Article 8, the billing period already started is not refunded.</p>
+    <p>Cancellation takes effect at the end of the current billing period (week, month or year): you keep Pro access until that date and no further payment is taken. Except where the right of withdrawal is exercised under Article 8, the billing period already started is not refunded.</p>
+    <p>Annual plan: if you did not receive the information provided for in Article 7, you may end the subscription free of charge at any time from the renewal date; any amount paid for the period after cancellation is then refunded within thirty days (Article L215-1 of the French Consumer Code).</p>
     <p>Deleting your account from "My account" first cancels any active subscription.</p>
   </section>
 

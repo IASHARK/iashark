@@ -265,7 +265,7 @@ Doc 00 §16: stop above 18 € (PE) / 20 € (CO).
 | Topic | State | Detail |
 |---|---|---|
 | Dedicated LATAM version | **MISSING** | `/es/` = Spain/EUR/FR-EU law, not suitable as a paid landing for PE/CO (see recommendation below) |
-| Local prices | **BLOCKED_DECISION** | Doc 09 test prices for PE/CO; nothing for AR/CL; no Edge/annual price |
+| Local prices | **BLOCKED_DECISION** | Doc 09 test prices for PE/CO; nothing for AR/CL. Since 15/09/2026 the offer is a single Pro plan sold weekly/monthly/annually (the old second tier was removed): a LATAM market needs 3 prices |
 | Currency | **BLOCKED_DECISION** | Doc 09 = local currency (PEN, COP). USD is not recommended by the docs |
 | Stripe by country | **PARTIAL** | stripe.com/global (read 2026-09-14): only **Brazil and Mexico** are Stripe account countries in LATAM, so **no local Stripe entity in AR/CO/PE/CL**. The French Stripe account can still take international cards (cross-border fees, possibly higher decline rates). The docs list minimums in ARS and COP; **PEN and CLP presentment could not be confirmed** from the static page → check in the Dashboard. **No local payment methods** (PSE/Nequi in CO, Yape/PagoEfectivo in PE, etc.) through Stripe → a local PSP is a separate decision (doc 04 §7: declare the betting-information activity) |
 | Legal pages by country | **MISSING** | No `legal/pe`, `legal/co`, `legal/ar`, `legal/cl`. Local data-protection law and consumer terms to be written **with a lawyer** (never invented) |
@@ -294,7 +294,7 @@ Doc 00 §16: stop above 18 € (PE) / 20 € (CO).
 2. **Timing vs the docs.** Doc 09 says "validate Mexico first", then Peru, then Colombia; doc 18 says "don't open PE/CO during the UK sprint". Confirm that opening now is **catalogue/organic only**, with no paid spend.
 3. **URL architecture.** `/pe/` + `/co/` country directories (recommended), `/es/` alone, or something else? Full copy or lightweight layer?
 4. **Currency.** Local PEN/COP (doc 09) or USD? For AR/CL: ARS (FX controls, high inflation) / CLP?
-5. **Prices.** Confirm S/29.90 (PE) and COP 29,900 (CO) as Pro. Edge/annual? AR/CL prices?
+5. **Prices.** Confirm S/29.90 (PE) and COP 29,900 (CO) as Pro monthly, plus weekly and annual prices (single Pro plan, 3 billing periods). AR/CL prices?
 6. **PSP.** Accept Stripe FR with international cards only (no local payment methods), or research a local PSP (KYB + disclosure of the betting-information activity, doc 04 §7)?
 7. **Local legal opinion** per launched country (doc 04: "recommended before paid for a betting-information model"): who, when, what budget?
 8. **Responsible-gambling resources per country:** who sources and validates them (organisation, URL, phone)? Until then: `MISSING`, never invented.

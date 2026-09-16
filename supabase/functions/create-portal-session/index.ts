@@ -6,6 +6,13 @@ const SUPA_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const PAYMENT_PROVIDER = Deno.env.get("PAYMENT_PROVIDER") || "disabled";
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
 const SITE_URL = Deno.env.get("SITE_URL") || "https://iashark.com";
+// Configuration du portail client (dashboard Stripe -> Customer portal) qui
+// autorise le changement de duree entre les Prices du produit Pro. Optionnel :
+// sans ce secret, la configuration par defaut du compte Stripe est utilisee.
+const STRIPE_PORTAL_CONFIGURATION_ID = Deno.env.get("STRIPE_PORTAL_CONFIGURATION_ID");
+// Retour dans le repertoire du visiteur (liste blanche stricte, meme liste que
+// create-checkout-session) : un abonne /gb/ ne revient plus sur /compte.html FR.
+const ALLOWED_DIRS = ["fr", "en", "es", "de", "it", "pt", "gb", "za", "mx"];
 const headers = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-iashark-locale",
@@ -58,9 +65,29 @@ Deno.serve(async (req: Request) => {
   if (authError || !auth.user) return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers });
   const { data: mapping, error: mappingError } = await supabase.from("billing_customers").select("stripe_customer_id").eq("user_id", auth.user.id).maybeSingle();
   if (mappingError || !mapping) return new Response(JSON.stringify({ error: "billing_customer_not_found" }), { status: 404, headers });
+  let body: Record<string, unknown> = {};
+  try { body = await req.json(); } catch (_e) { /* corps vide : portail general */ }
+  const dirKey = typeof body.dir === "string" ? body.dir.toLowerCase() : "";
+  const returnUrl = SITE_URL + (ALLOWED_DIRS.includes(dirKey) ? "/" + dirKey : "") + "/compte.html#abonnement";
   try {
     const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2026-07-29.dahlia" });
-    const session = await stripe.billingPortal.sessions.create({ customer: mapping.stripe_customer_id, return_url: SITE_URL + "/compte.html" });
+    const params: Stripe.BillingPortal.SessionCreateParams = { customer: mapping.stripe_customer_id, return_url: returnUrl };
+    if (STRIPE_PORTAL_CONFIGURATION_ID) params.configuration = STRIPE_PORTAL_CONFIGURATION_ID;
+    // "Changer de duree" : ouvre directement l'ecran de changement d'offre du
+    // portail sur l'abonnement vivant du compte (lu sous RLS).
+    if (body.flow === "change_interval") {
+      const { data: live } = await supabase.from("subscriptions").select("stripe_subscription_id")
+        .eq("user_id", auth.user.id).in("status", ["active", "trialing"])
+        .order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (live?.stripe_subscription_id) {
+        params.flow_data = {
+          type: "subscription_update",
+          subscription_update: { subscription: live.stripe_subscription_id },
+          after_completion: { type: "redirect", redirect: { return_url: returnUrl } },
+        };
+      }
+    }
+    const session = await stripe.billingPortal.sessions.create(params);
     return new Response(JSON.stringify({ ok: true, processed: true, url: session.url }), { headers });
   } catch (error) {
     console.error("[create-portal-session]", (error as Error).message);

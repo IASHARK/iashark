@@ -1515,7 +1515,16 @@
     "privacy_policy_link": "Privacy policy",
     "privacy_opt_out_saved": "Done: your visits are no longer linked to your account.",
     "privacy_opt_in_saved": "Your visits are linked to your account again.",
-    "privacy_opt_out_device_only": "Saved on this device. Saving to your account failed: try again later to apply it to your other devices."
+    "privacy_opt_out_device_only": "Saved on this device. Saving to your account failed: try again later to apply it to your other devices.",
+    "sub_interval_label": "Billing period",
+    "interval_week": "Weekly",
+    "interval_month": "Monthly",
+    "interval_year": "Annual",
+    "interval_unknown": "Syncing",
+    "next_renewal_label": "Next renewal",
+    "change_interval_cta": "Change billing period",
+    "change_interval_note": "Moving to a longer billing period takes effect straight away, pro rata; moving to a shorter one takes effect at the end of the period you have already paid for. The amount and the date it takes effect are shown before you confirm.",
+    "pro_durations_note": "Weekly, monthly or annual: the same Pro access, cancel anytime."
   },
   "history_page": {
     "title_span": "HIST",
@@ -1807,7 +1816,9 @@
     "seo_times_paris": "Paris time",
     "premium_detail_updating": "Detailed analysis being updated",
     "free_gate_label": "Free analysis",
-    "free_gate_text": "Create a free account to see the free analysis"
+    "free_gate_text": "Create a free account to see the free analysis",
+    "pro_other_durations": "Also available weekly ({pro_week_price}) or annually ({pro_year_price}).",
+    "pro_other_durations_week": "Also available weekly ({pro_week_price})."
   },
   "site_header": {
     "nav_today": "Today's analyses",
@@ -1887,7 +1898,7 @@
     "heading": "Unlock all of IASHARK",
     "intro": "Get access to every analysis and to the tools for tracking your decisions methodically.",
     "per_month": "/ month",
-    "commitment": "No commitment · Cancel anytime",
+    "commitment": "The same Pro access for every period · Cancel anytime",
     "pro_feat_analyses": "Full analysis on every match",
     "pro_feat_filters": "Advanced filters and detailed reliability",
     "pro_feat_journal": "Synced decisions journal",
@@ -1914,7 +1925,10 @@
     "checkout_opening": "Opening secure payment…",
     "checkout_market_not_configured": "Payment isn't available yet in this country. No amount has been charged.",
     "checkout_unavailable": "Online payment will be available soon.",
-    "checkout_error": "Unable to open payment right now."
+    "checkout_error": "Unable to open payment right now.",
+    "checkout_interval_not_configured": "This billing period isn’t open for payment yet. Choose another period or come back soon. Nothing has been charged.",
+    "checkout_already_subscribed": "You already have a Pro subscription. To change your billing period, go to your account.",
+    "checkout_price_mismatch": "Payment for this billing period is temporarily unavailable. Nothing has been charged."
   },
   "demo_page": {
     "meta_title": "Example IASHARK analysis — Paris Saint Germain vs Monaco",
@@ -2258,5 +2272,20 @@
     "unsub_error": "We could not unsubscribe you. Please try again in a few moments, or write to contact@iashark.com.",
     "unsub_account_link": "Manage my emails in My account",
     "unsub_home_link": "Back to the site"
+  },
+  "pro_plans": {
+    "legend": "Choose your billing period",
+    "week_label": "Week",
+    "month_label": "Month",
+    "year_label": "Year",
+    "per_week": "/ week",
+    "per_month": "/ month",
+    "per_year": "/ year",
+    "year_equiv": "that’s {price} / month",
+    "year_savings": "{pct}% less than 12 months at the monthly price",
+    "billed_week": "Charged every week · no minimum term · cancel anytime",
+    "billed_month": "Charged every month · no minimum term · cancel anytime",
+    "billed_year": "Charged {price} once a year · renews automatically every year · cancel before renewal",
+    "unavailable": "Coming soon"
   }
 }

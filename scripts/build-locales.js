@@ -101,12 +101,15 @@ function marketConfigLib() {
   }
   return marketConfigLib.cache;
 }
+// planKey : "free", "pro" (= mensuel, retro-compatibilite), "pro.week",
+// "pro.month", "pro.year" (ou pro_week...). Resolution par la meme fonction
+// pure que le runtime (lib/market-config.js#priceFor).
 function formatPrice(dir, planKey) {
   var conf = DIRS[dir];
   var market = MARKETS[conf.market];
-  var p = market && market.prices && market.prices[planKey];
-  if (!p || typeof p.amount !== "number") return null;
-  return marketConfigLib().formatAmount(p.amount, market.currency, conf.intlLocale);
+  var amount = market ? marketConfigLib().priceFor(market.prices || {}, planKey) : null;
+  if (amount == null) return null;
+  return marketConfigLib().formatAmount(amount, market.currency, conf.intlLocale);
 }
 // Ressource d'aide d'un repertoire (surcharge _dirs.<dir>.helpline, sinon marche).
 function helplineFor(dir) {
@@ -189,7 +192,7 @@ function rewriteInternalLinks(html, dir) {
 // ---------------------------------------------------------------------------
 // <head> : titre/description traduits, canonical, hreflang, og:url, <html lang>.
 function fillPlaceholders(s, dir) {
-  return String(s).replace(/\{(free|pro|edge|annual_edge)_price\}/g, function (all, key) {
+  return String(s).replace(/\{(free|pro|pro_week|pro_month|pro_year)_price\}/g, function (all, key) {
     var v = formatPrice(dir, key);
     if (v == null) throw new Error("Placeholder " + all + " : pas de prix " + key + " pour le marche " + DIRS[dir].market);
     return v;
@@ -457,7 +460,8 @@ function marketRuntimeData() {
   });
   return {
     defaultMarket: MARKETS._defaultMarket || "fr", defaultDir: X_DEFAULT_DIR,
-    planKeys: MARKETS._planKeys || [], legalFiles: LEGAL_FILES, dirs: dirs, markets: markets,
+    planKeys: MARKETS._planKeys || [], proIntervals: MARKETS._proIntervals || ["week", "month", "year"],
+    proDefaultInterval: MARKETS._proDefaultInterval || "month", legalFiles: LEGAL_FILES, dirs: dirs, markets: markets,
     helplines: MARKETS._helplines || {}
   };
 }
@@ -472,6 +476,38 @@ function syncMarketConfig() {
     ";\n  /*IASHARK_MARKETS_DATA_END*/";
   writeIfChanged(file, src.replace(re, function () { return block; }));
   marketConfigLib.cache = null;
+}
+
+// supabase/functions/create-checkout-session/prices.generated.ts : table des
+// prix Pro attendus (unite mineure) et des secrets Stripe par marche et duree,
+// recopiee depuis config/markets.json. La fonction s'en sert pour refuser un
+// Price Stripe dont devise / periodicite / montant ne correspondent pas au
+// prix affiche (jamais de facturation d'un autre prix que celui montre).
+function checkoutPriceTable() {
+  var out = {};
+  Object.keys(MARKETS).filter(function (k) { return k.charAt(0) !== "_"; }).forEach(function (k) {
+    var m = MARKETS[k], lib = marketConfigLib(), row = { currency: m.currency, intervals: {} };
+    (MARKETS._proIntervals || ["week", "month", "year"]).forEach(function (iv) {
+      var amount = lib.proAmount(m.prices || {}, iv);
+      var env = m.stripeEnvKeys && m.stripeEnvKeys[iv];
+      if (amount == null || !env) return;
+      row.intervals[iv] = { unitAmount: Math.round(amount * 100), envKey: env,
+        legacyEnvKey: iv === "month" ? (m.stripeEnvKeyLegacyMonth || null) : null };
+    });
+    out[k] = row;
+  });
+  return out;
+}
+function syncCheckoutPriceTable() {
+  var file = path.join(ROOT, "supabase/functions/create-checkout-session/prices.generated.ts");
+  var body = "// GENERE par scripts/build-locales.js depuis config/markets.json - ne pas modifier a la main.\n" +
+    "export type IntervalKey = \"week\" | \"month\" | \"year\";\n" +
+    "export type PriceRow = { unitAmount: number; envKey: string; legacyEnvKey: string | null };\n" +
+    "export const PRO_INTERVALS: IntervalKey[] = " + JSON.stringify(MARKETS._proIntervals || ["week", "month", "year"]) + ";\n" +
+    "export const PRO_DEFAULT_INTERVAL: IntervalKey = " + JSON.stringify(MARKETS._proDefaultInterval || "month") + ";\n" +
+    "export const PRO_PRICES: Record<string, { currency: string; intervals: Partial<Record<IntervalKey, PriceRow>> }> = " +
+    JSON.stringify(checkoutPriceTable(), null, 2) + ";\n";
+  writeIfChanged(file, body);
 }
 
 // lib/league-names.js : un nom d'affichage par competition, recopie depuis
@@ -653,6 +689,10 @@ function bakeI18n(html, dict, market) {
 //                                            data-market-price-unavailable)
 //   [data-market-price-line="<plan>"][data-market-price-tpl="<cle i18n>"]
 //                                         -> gabarit du dictionnaire, {price}
+//                                            (+ {pro_week_price}, {pro_month_price},
+//                                            {pro_year_price} ; si l'un manque :
+//                                            data-market-price-tpl-fallback)
+//   [data-market-price-if="<plan>"]       -> hidden si ce prix n'existe pas
 //   [data-market-helpline="|name|phone|url"] (+ href sur <a>)
 //   [data-market-helpline-if="phone"]     -> hidden sans numero
 //   [data-market-label][data-home][data-away] -> libelle de marche dans la
@@ -695,12 +735,25 @@ function setHidden(tag, hidden) {
   if (!hidden && has) return tag.replace(/\shidden(="[^"]*")?(?=[\s>\/])/, "");
   return tag;
 }
+// Gabarit de ligne de prix : {price} + prix Pro par duree. null si le gabarit
+// manque ou si une duree citee n'est pas vendue dans ce marche (jamais de
+// prix invente : la page tente alors data-market-price-tpl-fallback).
+function fillPriceTemplate(tpl, dir, price) {
+  if (typeof tpl !== "string") return null;
+  var missing = false;
+  var out = tpl.replace(/\{price\}/g, price).replace(/\{(pro_week|pro_month|pro_year)_price\}/g, function (all, key) {
+    var v = formatPrice(dir, key);
+    if (v == null) missing = true;
+    return v == null ? all : v;
+  });
+  return missing ? null : out;
+}
 var marketLabelsLib = null;
 function bakeMarket(html, dir) {
   var conf = DIRS[dir];
   var dict = DICTS[conf.locale];
   var help = helplineFor(dir);
-  html = rewriteElements(html, ["data-market-price", "data-market-price-line", "data-market-helpline", "data-market-helpline-if", "data-market-label", "data-seo-date"], function (tag, name) {
+  html = rewriteElements(html, ["data-market-price", "data-market-price-line", "data-market-price-if", "data-market-helpline", "data-market-helpline-if", "data-market-label", "data-seo-date"], function (tag, name) {
     var plan = attrValue(tag, "data-market-price");
     if (plan != null) {
       var price = formatPrice(dir, plan);
@@ -710,10 +763,13 @@ function bakeMarket(html, dir) {
     var linePlan = attrValue(tag, "data-market-price-line");
     if (linePlan != null) {
       var linePrice = formatPrice(dir, linePlan);
-      var tpl = get(dict, attrValue(tag, "data-market-price-tpl") || "");
-      if (linePrice == null || typeof tpl !== "string") return null;
-      return { tag: tag, inner: escText(tpl.replace(/\{price\}/g, linePrice)) };
+      if (linePrice == null) return null;
+      var filled = fillPriceTemplate(get(dict, attrValue(tag, "data-market-price-tpl") || ""), dir, linePrice);
+      if (filled == null) filled = fillPriceTemplate(get(dict, attrValue(tag, "data-market-price-tpl-fallback") || ""), dir, linePrice);
+      return filled == null ? null : { tag: tag, inner: escText(filled) };
     }
+    var ifPlan = attrValue(tag, "data-market-price-if");
+    if (ifPlan != null) return { tag: setHidden(tag, formatPrice(dir, ifPlan) == null), inner: null };
     var part = attrValue(tag, "data-market-helpline");
     if (part != null) {
       // Ressource absente, ou sans numero : masque ET vide (jamais le numero
@@ -768,6 +824,7 @@ function syncCustomLandingHeads(altDirs) {
 
 function build() {
   syncMarketConfig();
+  syncCheckoutPriceTable();
   syncLeagueNames();
   var report = { stale: {}, pages: 0, legal: 0, missingLegal: [], removed: [] };
 
@@ -837,7 +894,7 @@ module.exports = {
   DIRS: DIRS, DIR_CODES: DIR_CODES, PAGE_FILES: PAGE_FILES, LEGAL_FILE_LIST: LEGAL_FILE_LIST,
   mapPath: mapPath, rewriteInternalLinks: rewriteInternalLinks, bakeI18n: bakeI18n, formatPrice: formatPrice,
   bakeMarket: bakeMarket, helplineFor: helplineFor, leagueNamesData: leagueNamesData,
-  marketRuntimeData: marketRuntimeData, redirectsContent: redirectsContent, build: build,
+  marketRuntimeData: marketRuntimeData, checkoutPriceTable: checkoutPriceTable, redirectsContent: redirectsContent, build: build,
   stripUnavailablePageLinks: stripUnavailablePageLinks,
   buildHead: buildHead, setHtmlLang: setHtmlLang, injectRuntime: injectRuntime, metaFor: metaFor,
   homeJsonLd: homeJsonLd, homeSeoBlock: homeSeoBlock, rewriteHomeMatchSummary: rewriteHomeMatchSummary

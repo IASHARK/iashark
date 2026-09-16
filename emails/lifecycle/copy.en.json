@@ -61,7 +61,8 @@
           "The synced decisions journal",
           "Bankroll tracking linked to your account"
         ] },
-        { "type": "p", "text": "Price on the {{siteVersion}} version of the site: {{proPrice}} per month, no commitment, cancel at any time from My account." },
+        { "type": "p", "if": "hasProYear", "text": "Prices on the {{siteVersion}} version of the site: {{proWeekPrice}} per week, {{proPrice}} per month or {{proYearPrice}} per year. The same Pro access whichever period you choose, cancel at any time from My account." },
+        { "type": "p", "if": "hasNoProYear", "text": "Prices on the {{siteVersion}} version of the site: {{proWeekPrice}} per week or {{proPrice}} per month. The same Pro access whichever period you choose, cancel at any time from My account." },
         { "type": "p", "text": "Pro gives you more analyses and tools; it does not make any match more predictable." },
         { "type": "cta", "label": "See the plan details", "link": "pricing" },
         { "type": "p", "text": "If the free account is enough for you, there is nothing to do." }

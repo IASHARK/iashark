@@ -5,9 +5,11 @@
 
    AUDIT (03/09/2026) — ce fichier n'affiche QUE des donnees reelles :
    - public.users            : email, plan, role, capital, created_at
-   - public.user_preferences : display_name, favorite_leagues, language,
-                               timezone, notify_match_analysis,
-                               notify_weekly_recap
+   - public.user_preferences : display_name, language, timezone,
+                               notify_match_analysis, notify_weekly_recap
+                               (la colonne favorite_leagues existe encore en
+                               base mais n'est plus ni ecrite ni lue : voir
+                               la section « Mes compétitions préférées »)
    - public.subscriptions    : status, current_period_end,
                                cancel_at_period_end, billing_interval
                                (ecrite uniquement par le webhook Stripe et
@@ -91,10 +93,6 @@
   function repertoire() {
     var seg = String(location.pathname.split('/')[1] || '').toLowerCase();
     return REPERTOIRES.indexOf(seg) !== -1 ? seg : null;
-  }
-  // Nom de championnat stocke tel quel en base ; seul l'affichage est traduit.
-  function nomChampionnat(nom) {
-    return nom === 'Ligue des Champions' ? tr('special_competitions.ldc', nom) : nom;
   }
   var $ = function (id) { return document.getElementById(id); };
 
@@ -245,7 +243,6 @@
       es: tr('compte_page.lang_name_es', 'Espanol'), de: tr('compte_page.lang_name_de', 'Deutsch'),
       it: tr('compte_page.lang_name_it', 'Italiano'), pt: tr('compte_page.lang_name_pt', 'Portugues')
     };
-    var ligues = Array.isArray(prefs.favorite_leagues) ? prefs.favorite_leagues : [];
     var etat = etatAbonnement();
 
     var planResume;
@@ -374,14 +371,9 @@
       + '</div>';
   }
 
-  /* Préférences. Le multi-select de championnats remplace le champ texte
-     libre : personne n'a a deviner l'orthographe exacte. Les valeurs deja
-     enregistrées qui ne figurent pas dans la liste sont conservees telles
-     quelles plutot que silencieusement effacees. */
-  var CHAMPIONNATS = [
-    'Ligue 1', 'Ligue 2', 'Premier League', 'Championship', 'La Liga', 'Serie A', 'Bundesliga',
-    'Eredivisie', 'Primeira Liga', 'Jupiler Pro League', 'Süper Lig', 'Ligue des Champions', 'Europa League'
-  ];
+  /* Préférences : profil, affichage, bankroll. Les competitions preferees ne
+     sont PAS ici — elles ont leur propre section (« Mes compétitions
+     préférées »), qui ecrit dans le store lu par l'accueil. */
   function fuseaux() {
     // Vraie liste du navigateur quand il l'expose (tous les navigateurs
     // recents), sinon repli sur les fuseaux les plus courants pour l'audience
@@ -393,9 +385,6 @@
       'Europe/Madrid', 'America/Montreal', 'Africa/Casablanca', 'Africa/Dakar', 'UTC'];
   }
   function preferences() {
-    var ligues = Array.isArray(prefs.favorite_leagues) ? prefs.favorite_leagues.slice() : [];
-    var connues = CHAMPIONNATS.slice();
-    ligues.forEach(function (l) { if (connues.indexOf(l) === -1) connues.push(l); });
     var langues = [
       ['fr', tr('compte_page.lang_name_fr', 'Français')], ['en', tr('compte_page.lang_name_en', 'English')],
       ['es', tr('compte_page.lang_name_es', 'Espanol')], ['de', tr('compte_page.lang_name_de', 'Deutsch')],
@@ -416,18 +405,18 @@
         // "contact@iashark.com" n'est pas traduit : c'est une adresse email.
         + '<p class="mt-1.5 text-[12.5px] text-soft">' + tr('compte_page.change_email_note_prefix', 'Pour changer d’adresse, écrivez à ') + '<a href="mailto:contact@iashark.com" class="text-cyan transition hover:underline">contact@iashark.com</a>.</p></div>'
         + '</div>')
+      // Les championnats suivis etaient regles ici par une liste de cases a
+      // cocher ecrivant public.user_preferences.favorite_leagues — colonne
+      // qu'aucun autre fichier du depot ne lisait : le choix etait confirme
+      // ("Préférences enregistrées.") et n'avait aucun effet, ni sur
+      // l'accueil ni ailleurs (constat du 16/09/2026). La liste etait en plus
+      // codee en dur avec des competitions non couvertes (Ligue 2,
+      // Championship, Jupiler Pro League, Süper Lig). Un seul reglage
+      // subsiste, celui qui agit : les etoiles de la section Compétitions,
+      // qui ecrivent le store lu par home-list.js.
       + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.leagues_label', 'Championnats suivis') + '</h2>'
-        + '<p class="mt-2 text-[13.5px] text-soft">' + tr('compte_page.leagues_hint', 'Utilisés pour mettre vos compétitions en avant.') + '</p>'
-        + '<fieldset class="mt-4"><legend class="sr-only">' + tr('compte_page.leagues_label', 'Championnats suivis') + '</legend>'
-        + '<div class="grid gap-x-5 gap-y-2.5 sm:grid-cols-2">'
-        // Noms de championnats jamais traduits (identifiants sportifs, voir
-        // i18n/i18n.js en tete de fichier).
-        + connues.map(function (nom, i) {
-            return '<label class="flex cursor-pointer items-center gap-2.5 text-[14px]">'
-              + '<input type="checkbox" class="h-4 w-4 accent-cyan" data-ligue="' + i + '" value="' + esc(nom) + '"'
-              + (ligues.indexOf(nom) !== -1 ? ' checked' : '') + '>' + esc(nomChampionnat(nom)) + '</label>';
-          }).join('')
-        + '</div></fieldset>')
+        + '<p class="mt-2 text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.leagues_moved_hint', 'Vos compétitions se choisissent dans la section Compétitions : elles remontent alors en premier dans la liste des matchs de l’accueil.') + '</p>'
+        + '<div class="mt-4"><button type="button" data-aller="competitions" class="text-[13.5px] font-semibold text-cyan transition hover:underline">' + tr('compte_page.fav_leagues_cta', 'Choisir mes compétitions') + '</button></div>')
       + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.display_heading', 'Affichage') + '</h2>'
         + '<div class="mt-4 grid gap-4 sm:grid-cols-2">'
         + '<div><label for="langue" class="block text-[13px] font-semibold text-soft">' + tr('compte_page.language_label', 'Langue') + '</label>'
@@ -739,8 +728,6 @@
   async function enregistrerPreferences() {
     var relacher = occuper($('enregistrerPrefs'), tr('compte_page.saving_label', 'Enregistrement…'));
     retour('msgPrefs', '');
-    var ligues = [];
-    racine.querySelectorAll('[data-ligue]').forEach(function (c) { if (c.checked) ligues.push(c.value); });
     var capitalBrut = $('bankroll').value.trim();
     var capital = capitalBrut === '' ? null : Number(capitalBrut);
     if (capital !== null && !(capital > 0)) {
@@ -749,7 +736,6 @@
     var ligne = {
       user_id: ctx.user.id,
       display_name: $('nomAffiche').value.trim().slice(0, 40) || null,
-      favorite_leagues: ligues,
       language: $('langue').value,
       timezone: $('fuseau').value.trim() || 'Europe/Paris',
       notify_match_analysis: prefs.notify_match_analysis !== false,

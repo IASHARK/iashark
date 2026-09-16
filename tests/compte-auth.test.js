@@ -190,7 +190,7 @@ test("les interrupteurs sont accessibles au clavier et annoncent leur etat", () 
 
 test("les preferences ecrivent dans les vraies colonnes de user_preferences", () => {
   const schema = lire("supabase/migrations/0010_user_workspace.sql");
-  for (const colonne of ["display_name", "favorite_leagues", "language", "timezone", "notify_match_analysis", "notify_weekly_recap"]) {
+  for (const colonne of ["display_name", "language", "timezone", "notify_match_analysis", "notify_weekly_recap"]) {
     assert.ok(schema.includes(colonne), `${colonne} absente du schema`);
     assert.ok(compteJs.includes(colonne), `${colonne} jamais ecrite par la page`);
   }
@@ -207,4 +207,24 @@ test("la bankroll n'a qu'une source de verite", () => {
   // pas en garder une seconde copie dans user_preferences.
   assert.match(compteJs, /update\(\{ capital: capital \}\)/);
   assert.ok(!/bankroll:/.test(compteJs.slice(compteJs.indexOf("var ligne = {"), compteJs.indexOf("var ligne = {") + 400)));
+});
+
+// Constat du 16/09/2026 : la section Préférences proposait des cases
+// « Championnats suivis » qui ecrivaient public.user_preferences.favorite_leagues.
+// Aucun fichier du depot ne lisait cette colonne — l'utilisateur cochait, la page
+// repondait « Préférences enregistrées. », et rien ne changeait nulle part. Le
+// seul reglage qui agit est celui de la section « Mes compétitions préférées »,
+// qui passe par lib/fav-leagues.js (user_metadata.fav_leagues), le store que
+// home-list.js lit pour remonter les competitions favorites sur l'accueil.
+test("competitions preferees : un seul reglage, celui que l'accueil lit vraiment", () => {
+  assert.doesNotMatch(compteJs, /favorite_leagues:/, "la page reecrit une colonne que personne ne lit");
+  assert.doesNotMatch(compteJs, /data-ligue=/, "les cases mortes « Championnats suivis » sont revenues");
+  // Le vrai reglage, lui, reste en place et branche sur le store partage.
+  assert.match(compteJs, /data-fav-ligue=/, "les etoiles des competitions ont disparu");
+  assert.match(compteJs, /IasharkFavLeagues\.createStore\(\)/, "le store partage n'est plus utilise");
+  assert.match(compteJs, /supabaseAdapter\(sb\)/, "les favoris ne sont plus synchronises avec le compte");
+  // home-list.js lit ce meme store : c'est ce qui rend le choix visible.
+  assert.match(lire("home-list.js"), /IasharkFavLeagues/, "l'accueil ne lit plus les competitions favorites");
+  // Et la section Préférences renvoie vers l'endroit ou le choix a un effet.
+  assert.match(compteJs, /data-aller="competitions"/, "aucun renvoi depuis Préférences vers la section Compétitions");
 });

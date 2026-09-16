@@ -199,7 +199,7 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 .btn-login:hover{color:var(--cyan);background:transparent;}
 .btn-start{height:40px;padding:0 20px;border:1px solid rgba(32,213,239,.6);border-radius:8px;color:var(--cyan);text-decoration:none;display:inline-flex;align-items:center;font-size:12px;font-weight:700;transition:.2s;}
 .btn-start:hover{background:rgba(32,213,239,.08);}
-.feature-card{display:block;width:100%;max-width:100%;height:100%;min-height:370px;border-radius:18px;border:1px solid rgba(32,213,239,.28);background:linear-gradient(145deg,rgba(14,29,44,.97),rgba(7,16,26,.98));box-shadow:0 24px 70px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.035);padding:24px;position:relative;overflow:hidden;cursor:pointer;transition:.25s;color:inherit;text-decoration:none;}
+.feature-card{display:block;width:100%;max-width:100%;height:100%;min-height:340px;border-radius:18px;border:1px solid rgba(32,213,239,.28);background:linear-gradient(145deg,rgba(14,29,44,.97),rgba(7,16,26,.98));box-shadow:0 24px 70px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.035);padding:24px;position:relative;overflow:hidden;cursor:pointer;transition:.25s;color:inherit;text-decoration:none;}
 .feature-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% -20%,rgba(32,213,239,.12),transparent 45%);pointer-events:none;}
 .feature-card:hover{transform:translateY(-3px);border-color:rgba(32,213,239,.48);}
 .feature-meta{display:flex;align-items:center;justify-content:space-between;color:#8393a7;font-size:11px;position:relative;}
@@ -215,12 +215,24 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 .signal-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.6px;color:var(--cyan);text-transform:uppercase;}
 .signal-market{font-size:25px;line-height:1.2;font-weight:800;margin:7px 0 17px;}
 .signal-market.signal-gate{font-size:19px;line-height:1.35;font-weight:700;color:var(--text);}
-.signal-data{display:block;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;text-align:left;}
-.signal-stat{padding:12px 16px;background:rgba(7,16,26,.88);}
-.signal-stat span{display:block;color:#708197;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
-.signal-stat strong{font-size:20px;color:var(--cyan);}
-.feature-evidence{display:flex;justify-content:center;gap:8px;margin-top:12px;}
-.evidence-chip{padding:7px 10px;border:1px solid var(--line);border-radius:8px;color:#a7b3c2;font-size:10px;white-space:nowrap;}
+/* Marche retenu et probabilite sur une seule ligne : l'ancienne mise en page
+   empilait un titre, une valeur, puis une boite bordee a l'interieur d'une
+   carte deja bordee. A gauche ce que le modele conseille, a droite le chiffre. */
+.signal-row{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;text-align:left;}
+.signal-pick{min-width:0;}
+.signal-prob{flex:none;text-align:right;}
+.signal-prob span{display:block;color:#708197;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;}
+.signal-prob strong{font-size:27px;line-height:1;color:var(--cyan);}
+/* L'invitation a cliquer manquait : la carte etait une grande surface muette.
+   Ce n'est pas un bouton (toute la carte est deja un lien) mais un repere
+   visuel qui dit ou l'on va. */
+.feature-cta{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:11px 18px;border-radius:11px;
+  border:1px solid rgba(32,213,239,.35);background:rgba(32,213,239,.08);
+  color:var(--cyan);font-size:13px;font-weight:700;transition:background-color .18s ease,border-color .18s ease;}
+.feature-cta i{font-style:normal;transition:transform .18s ease;}
+.feature-card:hover .feature-cta{background:rgba(32,213,239,.14);border-color:rgba(32,213,239,.55);}
+.feature-card:hover .feature-cta i{transform:translateX(3px);}
+@media(prefers-reduced-motion:reduce){.feature-cta,.feature-cta i{transition:none;}.feature-card:hover .feature-cta i{transform:none;}}
 .feature-loading{height:370px;border:1px solid var(--line);border-radius:18px;display:grid;place-items:center;color:#6d7d90;font-family:'Space Mono',monospace;font-size:10px;}
 .league-badge{height:72px;min-width:210px;padding:0 30px;display:flex;align-items:center;justify-content:center;gap:12px;color:#9eabba;font-size:11px;font-weight:700;text-transform:uppercase;position:relative;white-space:nowrap;}
 .league-badge::after{content:'';position:absolute;right:0;width:1px;height:26px;background:var(--line);}
@@ -280,9 +292,8 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
   .league-rail-inner{height:64px}.league-badge{height:64px;min-width:170px;padding:0 22px}.league-badge img{width:34px;height:34px;padding:4px;border-radius:8px}
   .decisions{padding:24px 18px 45px}.decisions-head{display:block}.decision-controls{margin-top:15px;justify-content:space-between}.champ-dropdown{width:150px}.cards-list{grid-template-columns:1fr}.mc{min-height:235px}
   .nav-bottom{display:flex}.responsible-footer{padding-bottom:30px!important}
-  .feature-evidence{flex-wrap:wrap;overflow:visible}
 }
-@media(max-width:430px){.hero-title{font-size:37px}.hero-trust .trust-item:nth-child(2){display:none}.feature-meta{font-size:9px}.feature-team{font-size:11px}.signal-market{font-size:22px}.decision-controls{gap:8px}.day-tabs{gap:7px}.champ-dropdown{width:132px}.mc{padding:16px}}
+@media(max-width:430px){.signal-row{flex-direction:column;align-items:flex-start;gap:12px}.signal-prob{text-align:left}.feature-cta{width:100%;justify-content:center}.hero-title{font-size:37px}.hero-trust .trust-item:nth-child(2){display:none}.feature-meta{font-size:9px}.feature-team{font-size:11px}.signal-market{font-size:22px}.decision-controls{gap:8px}.day-tabs{gap:7px}.champ-dropdown{width:132px}.mc{padding:16px}}
 
 /* =======================================================================
    TUNNEL DE VENTE — sections ajoutees sous la liste des matchs.
@@ -968,13 +979,12 @@ function buildHeroFeature(m){
   // offerte ». Aucun champ payant n'est lu dans ce cas.
   var ouvert=!!(authCtx&&authCtx.session);
   var market=!ouvert?null:m.pari_rec?translateMarket(m.pari_rec):(marketIdLabel(m)||m.no_signal_label||t('home_app.analysis_in_progress','Analyse en cours'));
-  var preuves='<div class="feature-evidence"><span class="evidence-chip">Forma reciente</span><span class="evidence-chip">Datos avanzados</span><span class="evidence-chip">Contexto del partido</span></div>';
   var signal=ouvert
-    ?'<div class="feature-signal"><div class="signal-label">MERCADO RECOMENDADO</div><div class="signal-market">'+market+'</div>'
-      +(probConf(m)!=null?'<div class="signal-data"><div class="signal-stat"><span>Probabilidad estimada</span><strong>'+Math.round(probConf(m))+' %</strong></div></div>':'')
-      +preuves+'</div>'
+    ?'<div class="feature-signal"><div class="signal-row"><div class="signal-pick"><div class="signal-label">MERCADO RECOMENDADO</div><div class="signal-market">'+market+'</div></div>'
+      +(probConf(m)!=null?'<div class="signal-prob"><span>Probabilidad estimada</span><strong>'+Math.round(probConf(m))+' %</strong></div>':'')
+      +'</div><span class="feature-cta">'+esc(t('home_app.free_card_cta','Voir l’analyse complète'))+'<i aria-hidden="true">→</i></span></div>'
     :'<div class="feature-signal feature-gate"><div class="signal-label">'+esc(t('home_app.free_gate_label','Analyse offerte'))+'</div><div class="signal-market signal-gate">'+esc(t('home_app.free_gate_text','Créer un compte gratuit pour voir l’analyse offerte'))+'</div>'
-      +preuves+'</div>';
+      +'<span class="feature-cta">'+esc(t('home_app.free_gate_cta','Créer un compte gratuit'))+'<i aria-hidden="true">→</i></span></div>';
   function heroLogo(tm,name){var u=tm&&(tm.photo||tm.logo||(tm.id?'https://media.api-sports.io/football/teams/'+tm.id+'.png':''));return u?'<img src="'+u+'" width="72" height="72" alt="'+esc(tf('home_app.logo_alt','Logo {team}',{team:name}))+'">':'<div class="mc-team-logo-placeholder">'+esc(name.slice(0,2).toUpperCase())+'</div>';}
   return'<a class="feature-card" href="'+esc(lien('match.html?id='+encodeURIComponent(m.id)))+'" aria-label="'+tf('home_app.card_aria_view','Voir l\'analyse {home} contre {away}',{home:esc(hn),away:esc(an)})+'">'
     +'<div class="feature-meta"><div class="feature-league">'+leagueHeader(m)+'</div><div class="feature-meta-right"><span class="feature-free">Análisis gratuito</span><span>'+dayLabel(m)+' · '+heure+'</span></div></div>'

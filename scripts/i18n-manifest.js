@@ -401,7 +401,6 @@ var PAGES = [
       {find: "<div class=\"feature-meta-right\"><span class=\"feature-free\">Analyse gratuite</span><span>'+dayLabel(m)+' · '+heure+'</span></div>", build: function(d,l,esc){ var free={fr:'Analyse gratuite',en:'Free analysis',es:'Análisis gratuito',de:'Kostenlose Analyse',it:'Analisi gratuita',pt:'Análise gratuita'}; return '<div class="feature-meta-right"><span class="feature-free">'+free[l]+"</span><span>'+dayLabel(m)+' · '+heure+'</span></div>"; }},
       {find: '<div class="signal-label">Marché recommandé</div>', build: function(d,l){ return '<div class="signal-label">' + HOME_V2[l].recommended + '</div>'; }},
       {find: '<span>Probabilité estimée</span>', build: function(d,l,esc){ return '<span>' + esc(HOME_V2[l].modelConfidence) + '</span>'; }},
-      {find: '<span class="evidence-chip">Forme récente</span><span class="evidence-chip">Données avancées</span><span class="evidence-chip">Contexte du match</span>', build: function(d,l){ var h=HOME_V2[l]; return '<span class="evidence-chip">' + h.recent + '</span><span class="evidence-chip">' + h.advanced + '</span><span class="evidence-chip">' + h.context + '</span>'; }},
       {find: "'<div class=\"feature-loading\">AUCUN MATCH DISPONIBLE</div>'", build: function(d,l,esc){ return "'<div class=\"feature-loading\">" + esc(HOME_V2[l].noHero) + "</div>'"; }},
       {find: "if(el)el.innerHTML='<div class=\"empty-state\"><h3>ERREUR CHARGEMENT</h3><p>Réessaie dans un instant.</p></div>';",
        build: function(d, l, esc){

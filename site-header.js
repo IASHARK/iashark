@@ -37,7 +37,7 @@
     + '.site-header__brand{display:flex;align-items:center;text-decoration:none;font-family:"Bebas Neue",Impact,sans-serif;'
     + 'font-size:23px;letter-spacing:2.5px;color:#f4f7fa;line-height:1;}'
     + '.site-header__brand span{color:#16d6f4;}'
-    + '.site-header__brand img{width:132px;height:40px;object-fit:contain;object-position:left center;mix-blend-mode:lighten;}'
+    + '.site-header__brand img{width:132px;height:40px;object-fit:contain;object-position:left center;}'
     + '.site-header__nav{display:flex;align-items:center;gap:6px;margin-left:6px;}'
     + '.site-header__nav a{font-family:"Space Mono",ui-monospace,monospace;font-size:9.5px;letter-spacing:1.4px;'
     + 'text-transform:uppercase;color:#9baec0;text-decoration:none;padding:7px 11px;border-radius:8px;transition:.18s;}'
@@ -90,9 +90,21 @@
           }).join('')
       + '</nav>'
       + '<div class="site-header__actions">'
+      +   '<span id="langSwitchSlot"></span>'
       +   '<span id="authHeaderSlot"><a class="btn-login" href="' + lienSite('compte.html', prefix + '/compte.html') + '" data-sh-text="cta.login">CONNEXION</a></span>'
       + '</div>';
     return header;
+  }
+
+  function loadStyle(href){
+    return new Promise(function(resolve){
+      if (document.querySelector('link[href="' + href + '"]')) return resolve();
+      var l = document.createElement('link');
+      l.rel = 'stylesheet';
+      l.href = href;
+      l.onload = l.onerror = function(){ resolve(); };  // une feuille absente ne bloque rien
+      document.head.appendChild(l);
+    });
   }
 
   function loadScript(src){
@@ -132,10 +144,24 @@
     var header = buildHeader();
     // Remplace l'en-tete historique de la page plutot que d'en empiler deux
     // (meme strategie que bottom-navigation.js avec .nav-bottom/.bottom-nav).
-    var legacy = document.querySelector('header.hdr, header.topbar, .topbar');
+    var legacy = document.querySelector('header.hdr, header.topbar, .topbar, header.site-header, header.site-hdr');
     if (legacy) legacy.replaceWith(header);
     else document.body.insertBefore(header, document.body.firstChild);
     traduire(header);
+
+    // Langue : le selecteur renvoie vers LA MEME page dans le repertoire cible
+    // (/de/a-propos.html depuis /fr/a-propos.html), et applyRememberedChoiceOnce
+    // honore un choix deja fait quand on arrive sur une page racine sans prefixe.
+    Promise.resolve()
+      .then(function(){ return window.IasharkLangSwitcher ? null : loadStyle('/assets/lang-switcher.css').then(function(){ return loadScript('/lang-switcher.js'); }); })
+      .then(function(){
+        if (!window.IasharkLangSwitcher) return;
+        window.IasharkLangSwitcher.mount('#langSwitchSlot');
+        window.IasharkLangSwitcher.applyRememberedChoiceOnce();
+      })
+      .catch(function(err){
+        if (window.console) console.warn('[site-header] selecteur de langue indisponible:', err && err.message);
+      });
 
     // Etat de connexion : on n'echoue jamais bruyamment. Si supabase ou
     // auth-header.js ne se chargent pas, le bouton CONNEXION deja affiche

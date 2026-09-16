@@ -88,7 +88,6 @@ function fullDate(day){
   try{return new Intl.DateTimeFormat(localeTag(),{weekday:'long',day:'numeric',month:'long',timeZone:'UTC'}).format(new Date(day+'T12:00:00Z'));}catch(e){return day;}
 }
 function countLabel(n){return n===1?t('home_list.match_one','1 match'):tf('home_list.match_many','{n} matchs',{n:n});}
-function readyLabel(n){return n===1?t('home_list.ready_one','1 analyse prête'):tf('home_list.ready_many','{n} analyses prêtes',{n:n});}
 
 // Trois onglets de largeur egale. Un jour sans match : onglet desactive « aucun match ».
 function renderDateStrip(days,activeDay){
@@ -231,8 +230,7 @@ function renderMatchRow(m,ctx,H,index){
   if(a.state==='locked'){
     // Aucune donnee de pari : badge, niveau public et pilule abstraite (barres CSS, pas de chiffre).
     zone='<span class="hl-zone">'
-      +'<span class="hl-zone-top"><span class="hl-ready"><i class="hl-dot" aria-hidden="true"></i>'+esc(t('home_list.ready','Analyse prête'))+'</span>'
-      +(a.band?bandHtml(a.band):'')+'</span>'
+      +(a.band?'<span class="hl-zone-top">'+bandHtml(a.band)+'</span>':'')
       +'<span class="hl-lockpill" aria-hidden="true">'+ICON.lock
       +'<span class="hl-ghost"><i class="g1"></i><i class="g2"></i><i class="g3"></i><i class="g4"></i></span>'
       +'<span class="hl-lockpill-pro">PRO</span>'
@@ -280,7 +278,7 @@ function renderLeagueBlock(g,ctx,H,startIndex){
   var fav=!!favs.has(g.key),open=!(ctx.collapsed||{})[g.key],k=esc(g.key);
   var hid='hl-h-'+k,pid='hl-p-'+k;
   var favLbl=tf(fav?'home_list.fav_remove':'home_list.fav_add',fav?'Retirer {league} de mes compétitions':'Ajouter {league} à mes compétitions',{league:g.name});
-  var stats=esc(countLabel(g.matches.length))+(g.ready?' · <b>'+esc(readyLabel(g.ready))+'</b>':'');
+  var stats=esc(countLabel(g.matches.length));
   // Ajout aux favoris : kind dedie (cle de competition seulement).
   var track=fav?'':' data-track="'+k+'" data-track-kind="home_fav_add"';
   return '<section class="hl-league'+(fav?' is-fav':'')+(open?'':' is-collapsed')+'" data-league="'+k+'">'

@@ -190,12 +190,19 @@ test("matchs favoris : store {id, ko}, nettoyage des matchs passes, fusion avec 
   assert.deepEqual(calls, [{ data: { fav_matches: [{ id: "8", ko: now + 1e6 }] } }], "seul fav_matches est ecrit (fav_leagues intact)");
 });
 
-test("competition : favoris puis A->Z, en-tete « N matchs · M analyses pretes », ajout aux favoris suivi", () => {
+test("competition : favoris puis A->Z, en-tete « N matchs » sans decompte d'analyses, ajout aux favoris suivi", () => {
   const H = helpers();
   const groups = HL.groupByLeague([base({ league: "La Liga" }), base({ id: 2, league_key: "el", league: "Europa League", has_signal: false, no_signal: true }), base({ id: 3 })], H);
   assert.deepEqual(groups.map((g) => g.name), ["Europa League", "La Liga"]);
   const block = HL.renderLeagueBlock(groups[1], ctx(), H, 0);
-  assert.match(block, /2 matchs · <b>2 analyses prêtes<\/b>/);
+  // Le decompte « M analyses prêtes » a ete retire de l'en-tete le 16/09/2026 :
+  // il repetait ce que chaque ligne dit deja, et chargeait la barre de competition.
+  assert.match(block, />2 matchs</);
+  const stats = (block.match(/<span class="hl-league-stats">([^<]*(?:<[^>]+>[^<]*)*?)<\/span>/) || [])[1] || "";
+  assert.doesNotMatch(stats, /analyse/i, "le decompte d'analyses est revenu dans l'en-tete : " + stats);
+  // L'aria-label des lignes verrouillees, lui, continue de decrire l'etat au
+  // lecteur d'ecran : c'est la seule mention qui doit subsister.
+  assert.match(block, /aria-label="[^"]*Analyse prête, réservée aux abonnés Pro/);
   assert.match(block, /data-track="laliga" data-track-kind="home_fav_add"/);
   const favBlock = HL.renderLeagueBlock(groups[1], ctx({ favorites: { has: () => true, list: () => ["laliga"] } }), H, 0);
   assert.doesNotMatch(favBlock, /home_fav_add/, "retrait d'un favori : pas d'evenement d'ajout");

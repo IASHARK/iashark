@@ -28,6 +28,32 @@ for (const v of VERSIONS) {
       });
     }
 
+    // Journal Pro (fonction vendue) : la base exige estimated_probability (0010).
+    // Avant le 18/09/2026, le formulaire ne l'envoyait pas : chaque enregistrement
+    // echouait avec l'erreur brute de la base, en anglais.
+    test('Pro simule : le journal enregistre une decision avec sa probabilite estimee', async ({ page, supa, dictFor }) => {
+      const dict = await dictFor(v.locale);
+      await supa.as('pro');
+      await page.goto(`/${v.dir}/pro.html#journal`);
+      const add = page.locator('#jrAdd').first();
+      await expect(add).toBeVisible();
+      await add.click();
+      await expect(page.locator('#jrProb')).toHaveValue('52.6');
+      await page.locator('#jrOdds').fill('2.5');
+      await expect(page.locator('#jrProb'), 'suit la cote tant qu\'elle n\'est pas modifiee').toHaveValue('40');
+      await page.locator('#jrMatch').fill('PSG – Marseille');
+      await page.locator('#jrMarket').fill('Plus de 2,5 buts');
+      await page.locator('#jrStake').fill('10');
+      await page.locator('#jrSave').click();
+      await expect(page.locator('#jrDlg')).not.toBeVisible();
+      const insert = supa.calls.find((c) => c.kind === 'rest' && c.method === 'POST' && /betting_decisions/.test(c.path));
+      expect(insert, 'insertion dans betting_decisions').toBeTruthy();
+      const row = Array.isArray(insert.body) ? insert.body[0] : insert.body;
+      expect(row).toMatchObject({ match_label: 'PSG – Marseille', market: 'Plus de 2,5 buts', odds: 2.5, stake: 10, estimated_probability: 40 });
+      await expect(page.locator('body')).not.toContainText('violates not-null');
+      expect(tr(dict, 'tools_page.journal_save_error')).toBeTruthy();
+    });
+
     test('Pro simule : le scanner affiche les marches reels', async ({ page, supa, siteData, dictFor }) => {
       const dict = await dictFor(v.locale);
       await supa.as('pro');

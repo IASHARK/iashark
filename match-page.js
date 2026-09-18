@@ -830,9 +830,18 @@ function scenarioCard(vm){
   const g=vm.editorial.goalTiming;
   if(!g||!g.slots.length)return empty(t('match_page.scenario_unavailable','Pas assez de buts enregistrés pour établir une répartition fiable.'));
   const slots=g.slots.map(sl=>({t:sl.label,prob:sl.share}));
+  // Periode reelle : les derniers matchs de chaque equipe dans la competition
+  // (compteur du pipeline), jamais « cette saison » (18/09/2026 : la saison
+  // venait de commencer, les buts venaient aussi de la saison precedente).
+  const gh=g.games&&g.games.home,ga=g.games&&g.games.away;
+  const periode=(gh>0&&ga>0)
+    ?(gh===ga?tf('match_page.scenario_source_games_same',' lors de leurs {n} derniers matchs.',{n:gh})
+      :tf('match_page.scenario_source_games_each',' lors de leurs {home} et {away} derniers matchs.',{home:gh,away:ga}))
+      +t('match_page.scenario_source_note',' Fréquence observée, pas une prévision pour celui-ci.')
+    :t('match_page.scenario_source_suffix',' sur leurs derniers matchs. Fréquence observée, pas une prévision pour celui-ci.');
   return `${scenarioChart(slots)}
     <div class="scenario-insight"><b aria-hidden="true">!</b><span>${esc(t('match_page.scenario_peak_prefix','Tranche la plus fournie : '))}<b>${esc(g.peak.label)}${esc(t('match_page.scenario_peak_middle',' min'))}</b> — ${Math.round(g.peak.share)}${esc(t('match_page.scenario_peak_suffix',' % des buts des deux équipes y sont tombés.'))}</span></div>
-    <p class="scenario-source">${esc(t('match_page.scenario_source_prefix','Sur '))}${g.totalGoals}${esc(t('match_page.scenario_source_middle',' buts marqués par '))}${esc(vm.identity.home.name)}${esc(t('match_page.scenario_source_and',' et '))}${esc(vm.identity.away.name)}${esc(t('match_page.scenario_source_suffix',' cette saison. Fréquence observée sur leurs matchs passés, pas une prévision pour celui-ci.'))}</p>`;
+    <p class="scenario-source">${esc(t('match_page.scenario_source_prefix','Sur '))}${g.totalGoals}${esc(t('match_page.scenario_source_middle',' buts marqués par '))}${esc(vm.identity.home.name)}${esc(t('match_page.scenario_source_and',' et '))}${esc(vm.identity.away.name)}${esc(periode)}</p>`;
 }
 
 // QUESTIONS FREQUENTES — en dernier. Faits publics (quand/ou, forme,

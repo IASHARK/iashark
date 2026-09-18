@@ -31,7 +31,11 @@ const MATCH_TIME = require("../lib/match-time.js");
 const REGISTRY_FILE = "data/match-pages-registry.json";
 const HOUR = 3600 * 1000;
 const DAY = 24 * HOUR;
-const SITEMAP_MAX_AGE_HOURS = 48;
+// Audit SEO du 18/09/2026 : un match joue restait 48 h dans le sitemap sous un
+// title « pronostic et stats » alors que la page affiche « analyse plus
+// proposee » (22 URL soumises a Google). Il sort du sitemap des qu'il est
+// termine (coup d'envoi + FINISHED_AFTER_MINUTES) ; la page reste servie.
+const SITEMAP_MAX_AGE_HOURS = 2;
 const NOINDEX_AFTER_DAYS = 7;
 const REMOVE_AFTER_DAYS = 30;
 const REDIRECT_RETENTION_DAYS = 90;

@@ -38,6 +38,52 @@
     if(MARKETS.indexOf(seg)!==-1)body.market=seg;
     return body;
   }
+  // --- Le match d'ou vient le visiteur ---------------------------------------
+  // Tunnel reel (analytics 09/2026) : match -> « Debloquer » -> abonnement.
+  // Sans ce contexte la page vendait un abonnement generique, et le retour
+  // Stripe (succes ou annulation) laissait l'acheteur loin de son match. Le
+  // chemin est lu dans ?next= (interne seulement) ou dans le referrer
+  // same-origin, puis garde en sessionStorage pour checkout-succes /
+  // checkout-annule. Jamais envoye au serveur, jamais un chemin externe.
+  var RETOUR_KEY='iashark.checkout.return';
+  function cheminInterne(p){return typeof p==='string'&&p.charAt(0)==='/'&&p.charAt(1)!=='/'&&p.indexOf('\\')===-1;}
+  function contexteMatch(){
+    var next=new URLSearchParams(location.search).get('next')||'';
+    var chemin=cheminInterne(next)?next:'';
+    if(!chemin){
+      try{var ref=document.referrer?new URL(document.referrer):null;if(ref&&ref.origin===location.origin&&/\/match\.html$/.test(ref.pathname))chemin=ref.pathname+ref.search;}catch(e){}
+    }
+    if(!chemin||!/\/match\.html(\?|$)/.test(chemin))return null;
+    var id=null;
+    try{id=new URL(chemin,location.origin).searchParams.get('id');}catch(e){}
+    return {path:chemin,id:id&&/^\d+$/.test(id)?id:null,label:''};
+  }
+  var contexte=contexteMatch();
+  function memoriserRetour(){
+    try{if(contexte)sessionStorage.setItem(RETOUR_KEY,JSON.stringify(contexte));else sessionStorage.removeItem(RETOUR_KEY);}catch(e){}
+  }
+  // Ligne de contexte au-dessus du choix de duree : « Tu etais sur Banfield –
+  // Barracas Central ». Les noms viennent du JSON public du match (aucun
+  // champ premium) ; sans id ou sans reponse, la ligne reste generique.
+  function afficherContexte(){
+    var slot=document.getElementById('proContext');
+    if(!slot||!contexte)return;
+    var texte=t('pricing_page.context_match','Tu étais sur {match} — l’analyse complète s’ouvre dès le paiement validé.');
+    var rendre=function(label){
+      var parts=texte.split('{match}');
+      slot.textContent='';
+      slot.appendChild(document.createTextNode(parts[0]));
+      var b=document.createElement('b');b.textContent=label;slot.appendChild(b);
+      slot.appendChild(document.createTextNode(parts.slice(1).join('{match}')));
+      slot.hidden=false;
+    };
+    if(!contexte.id){rendre(t('pricing_page.context_match_generic','ce match'));return;}
+    fetch('/match/'+contexte.id+'.json',{cache:'force-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(m){
+      var h=m&&m.home&&m.home.n,a=m&&m.away&&m.away.n;
+      if(h&&a){contexte.label=h+' – '+a;memoriserRetour();}
+      rendre(contexte.label||t('pricing_page.context_match_generic','ce match'));
+    }).catch(function(){rendre(t('pricing_page.context_match_generic','ce match'));});
+  }
   // Consentement obligatoire avant paiement (lib/checkout-consent.js : CGV +
   // demande d'execution immediate selon le marche), reverifie par
   // create-checkout-session. Charge a la demande si la page generee ne
@@ -64,7 +110,9 @@
     var box=document.getElementById('checkoutConsent');
     var pickerBox=document.getElementById('proPlanPicker');
     // Abonne : aucun second paiement (changer de duree = portail, depuis le compte).
-    if(ctx.isPro){if(box)box.hidden=true;if(pickerBox)pickerBox.hidden=true;loaded();unlock();button.textContent=t('pricing_page.cta_pro_member','Accéder aux analyses');button.onclick=function(){location.href=localHref('');};return;}
+    // Un Pro venu d'un match y retourne : c'est l'analyse qu'il voulait lire.
+    if(ctx.isPro){if(box)box.hidden=true;if(pickerBox)pickerBox.hidden=true;loaded();unlock();button.textContent=t('pricing_page.cta_pro_member','Accéder aux analyses');button.onclick=function(){location.href=contexte?contexte.path:localHref('');};return;}
+    afficherContexte();
     if(!box){box=document.createElement('div');box.id='checkoutConsent';button.parentNode.insertBefore(box,button);}
     if(pickerBox&&window.IasharkProPlanPicker){
       picker=window.IasharkProPlanPicker.mount(pickerBox,{onChange:function(){if(output.classList.contains('error'))message('',false);}});
@@ -85,7 +133,15 @@
       if(!consent.check()){message('',false);return;}
       if(picker&&!picker.isAvailable()){message(t('pricing_page.checkout_interval_not_configured','Cette durée n’est pas encore ouverte au paiement. Choisis une autre durée ou reviens bientôt. Aucun montant n’a été prélevé.'),true);return;}
       var current=await IasharkApp.context();
-      if(!current.user){location.href=localHref('compte.html#plan');return;}
+      // Sans compte : inscription directe (le visiteur qui clique « Devenir
+      // Pro » n'en a presque jamais), avec retour ICI - duree et match
+      // conserves - au lieu du detour compte -> connexion -> « Mon compte »
+      // qui perdait les inscrits avant le paiement. « Deja un compte ? » sur
+      // la page d'inscription garde le meme retour (auth-pages.js#propagerNext).
+      if(!current.user){
+        var retour=location.pathname+(contexte?'?next='+encodeURIComponent(contexte.path):'');
+        location.href=localHref('inscription.html?next='+encodeURIComponent(retour));return;
+      }
       button.disabled=true;message(t('pricing_page.checkout_opening','Ouverture du paiement sécurisé…'));
       try{
         var session=await IasharkApp.supabase.auth.getSession();
@@ -93,7 +149,7 @@
         var body=payload();body.consent=consent.payload();
         var response=await fetch(IasharkApp.url+'/functions/v1/create-checkout-session',{method:'POST',headers:{apikey:IasharkApp.key,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(body)});
         var data=await response.json();
-        if(data.url){location.href=data.url;return;}
+        if(data.url){memoriserRetour();location.href=data.url;return;}
         if(data&&data.code==='consent_required'){
           if(consent.check())message(data.message||consent.text('error_required'),true);else message('',false);
         }else if(data&&data.processed===false&&data.reason==='market_not_configured'){

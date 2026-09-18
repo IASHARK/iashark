@@ -176,10 +176,14 @@ function buildCalibrationRows(finalProbs, homeGoals, awayGoals, meta) {
   const isHome = homeGoals > awayGoals;
   const isDraw = homeGoals === awayGoals;
   const isAway = homeGoals < awayGoals;
-  const isOver25 = homeGoals + awayGoals > 2.5;
+  const total = homeGoals + awayGoals;
+  const isOver25 = total > 2.5;
   const isBtts = homeGoals > 0 && awayGoals > 0;
-  const d = finalProbs.derived;
-  return [
+  // derived_raw : copie PRE-calibration exposee par lib/engine.js depuis que
+  // calcFinalProbs calibre aussi les familles derivees en place (18/09/2026).
+  // Sans elle, tout refit fitterait une correction par-dessus une correction.
+  const d = finalProbs.derived_raw || finalProbs.derived;
+  const rows = [
     { prob: d.p1, outcome: isHome ? 1 : 0, market: "1X2", outcomeLabel: "HOME", ...meta },
     { prob: d.pN, outcome: isDraw ? 1 : 0, market: "1X2", outcomeLabel: "DRAW", ...meta },
     { prob: d.p2, outcome: isAway ? 1 : 0, market: "1X2", outcomeLabel: "AWAY", ...meta },
@@ -189,6 +193,33 @@ function buildCalibrationRows(finalProbs, homeGoals, awayGoals, meta) {
     },
     { prob: d.btts.yes, outcome: isBtts ? 1 : 0, market: "BTTS_YES", outcomeLabel: "BTTS_YES", ...meta },
   ];
+  // Familles DERIVEES de la meme matrice (18/09/2026). Constat sur les 290
+  // picks reels resolus du moteur deterministe : double chance et totaux par
+  // equipe, jamais calibres, gagnaient l'argmax de selection avec des
+  // probabilites gonflees puis perdaient (~-12% de ROI chacune), pendant que
+  // les marches calibres gagnaient. Une seule ligne binaire par match et par
+  // marche, toutes resolubles depuis le score final - rien d'invente.
+  const one = (market, prob, outcome) => rows.push({ prob, outcome: outcome ? 1 : 0, market, outcomeLabel: market, ...meta });
+  one("DC_12", d.doubleChance.oneTwo, !isDraw);
+  one("OVER_1_5", d.overUnder["1.5"].over, total > 1.5);
+  one("OVER_3_5", d.overUnder["3.5"].over, total > 3.5);
+  one("HOME_TEAM_OVER_1_5", d.teamTotals.home["1.5"].over, homeGoals > 1.5);
+  one("AWAY_TEAM_OVER_1_5", d.teamTotals.away["1.5"].over, awayGoals > 1.5);
+  one("HOME_CLEAN_SHEET", d.cleanSheet.home, awayGoals === 0);
+  one("AWAY_CLEAN_SHEET", d.cleanSheet.away, homeGoals === 0);
+  one("HOME_WIN_TO_NIL", d.winToNil.home, isHome && awayGoals === 0);
+  one("AWAY_WIN_TO_NIL", d.winToNil.away, isAway && homeGoals === 0);
+  one("HOME_WIN_OVER_1_5", d.resultTotals.home.over1_5, isHome && total > 1.5);
+  one("HOME_WIN_OVER_2_5", d.resultTotals.home.over2_5, isHome && total > 2.5);
+  one("HOME_WIN_OVER_3_5", d.resultTotals.home.over3_5, isHome && total > 3.5);
+  one("HOME_WIN_UNDER_2_5", d.resultTotals.home.under2_5, isHome && total < 2.5);
+  one("HOME_WIN_UNDER_3_5", d.resultTotals.home.under3_5, isHome && total < 3.5);
+  one("AWAY_WIN_OVER_1_5", d.resultTotals.away.over1_5, isAway && total > 1.5);
+  one("AWAY_WIN_OVER_2_5", d.resultTotals.away.over2_5, isAway && total > 2.5);
+  one("AWAY_WIN_OVER_3_5", d.resultTotals.away.over3_5, isAway && total > 3.5);
+  one("AWAY_WIN_UNDER_2_5", d.resultTotals.away.under2_5, isAway && total < 2.5);
+  one("AWAY_WIN_UNDER_3_5", d.resultTotals.away.under3_5, isAway && total < 3.5);
+  return rows;
 }
 
 function probabilityDecileBucket(prob) {

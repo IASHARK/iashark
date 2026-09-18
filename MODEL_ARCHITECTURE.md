@@ -16,7 +16,7 @@ Document vivant, mis à jour à chaque changement réel du moteur. Décrit ce qu
 
 **Garde-fou anti-régression** : `tests/pipeline-source-guards.test.js` inspecte le texte source réel de `.github/workflows/update-data.yml` (pas une copie parallèle) et échoue si la variable `anchored` réapparaît, si un marché 1X2/DC cesse d'utiliser `pureProbs`, ou si `marketAware` est référencé dans le bloc de calcul edge/Kelly.
 
-Aucune des trois probabilités n'est une **probabilité statistiquement calibrée** au sens du MASTER (§10.S, isotonic/Platt/temperature scaling contre l'historique réel des résultats) — ce moteur de calibration n'existe pas encore. Voir `CALIBRATION_REPORT.md` pour ce qui est réellement mesuré (et ce qui ne l'est pas). Rappel explicite de l'utilisateur : `MARKET_IMPLIED_PROBABILITY_PROXY` (voir `CALIBRATION_REPORT.md`) est un benchmark/proxy, **pas** une validation du nouveau moteur déterministe.
+**Calibration (mise à jour 18/09/2026).** `PURE_IASHARK_PROBABILITY` est calibrée post-hoc par régression isotonique (`lib/calibration.js`, courbes dans `lib/data/calibration-params.json`, ajustées sur 2021-2023 et validées sur 2024-2025 — voir `ENGINE_RECALIBRATION_REPORT.md`). Depuis le 18/09/2026, la calibration couvre 1X2, Over/Under 1.5/2.5/3.5, BTTS et les familles dérivées de la même matrice (totaux par équipe 1.5, clean sheet, victoire sans encaisser, résultat + total) : 21 marchés branchés sur 22 mesurés, chacun uniquement si Brier ET ECE s'améliorent sur le holdout. `calcFinalProbs` calibre `derived` **en place** et expose la matrice brute dans `derived_raw` (seule source des outils de mesure). Restent bruts : double chance 1X/X2 (dérivées des 1X2 calibrés), première mi-temps (aucun score à la mi-temps hors-ligne), marchés de tirs (modèle distinct, non mesuré), lignes non mesurées (O/U 0.5, 4.5+, totaux 0.5/2.5/3.5, scores exacts). Motif : sur les 290 premiers picks réels du moteur déterministe, les familles non calibrées remportaient l'argmax de sélection avec des probabilités gonflées puis perdaient (~-12 % de ROI), pendant que les marchés calibrés gagnaient. Rappel explicite de l'utilisateur : `MARKET_IMPLIED_PROBABILITY_PROXY` (voir `CALIBRATION_REPORT.md`) est un benchmark/proxy, **pas** une validation du nouveau moteur déterministe.
 
 ## Vue d'ensemble
 
@@ -24,8 +24,9 @@ Aucune des trois probabilités n'est une **probabilité statistiquement calibré
 DONNÉES (api-football)
    │
    ├─► Modèles de score : Poisson, Dixon-Coles, Monte-Carlo seedable (lib/models.js)
-   │        + Elo (inline dans update-data.yml, pas encore extrait)
-   │        └─► calcFinalProbs() : ensemble pondéré (0.32/0.36/0.22/0.10 avec Elo)
+   │        + Elo (inline dans update-data.yml) : calculé et affiché, **jamais utilisé dans la probabilité** (`elo_used:false`)
+   │        └─► calcFinalProbs() : **Dixon-Coles pur, rho=-0.0845** (GATE A3, ex-blend 0.35 Poisson + 0.65 DC démontré équivalent) ;
+   │            Poisson pur et Monte-Carlo ne servent qu'à l'affichage et à « l'accord des modèles »
    │
    ├─► Score distribution → marchés (lib/markets/score-matrix.js, §10.V)
    │        Une seule matrice P(h,a) dérive : 1X2, DC, DNB, O/U 0.5-6.5,

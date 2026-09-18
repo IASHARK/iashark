@@ -107,8 +107,12 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb', 'mx'].includes(x.dir))) {
       const locked = await expectLockedRowsClean(page);
       test.skip(!locked, 'Aucune analyse payante le jour affiche');
       const row = page.locator('#homeList .hl-row.is-locked').first();
-      await expect(row.locator('.hl-ready')).toHaveText(tr(dict, 'home_list.ready'));
+      // Le badge « Analyse prête » a ete retire de la ligne verrouillee le
+      // 16/09/2026 : il doublait le cadenas affiche juste a cote. L'etat reste
+      // annonce au lecteur d'ecran par l'aria-label de la ligne.
+      await expect(row.locator('.hl-ready')).toHaveCount(0);
       await expect(row.locator('.hl-lockpill')).toBeAttached();
+      expect(await row.getAttribute('aria-label'), 'etat verrouille annonce au lecteur d\'ecran').toContain(tr(dict, 'home_list.aria_locked'));
       await expect(row).toHaveAttribute('data-track-kind', 'home_row_lock');
       expect(pathOf(await row.getAttribute('href'), baseURL), 'ligne verrouillee -> page match (mur Pro)').toMatch(new RegExp(`^/${v.dir}/match\\.html\\?id=\\d+$`));
       // Accueil simplifie : ni banniere « X analyses pretes », ni recherche, ni filtres, ni bloc favoris separe.

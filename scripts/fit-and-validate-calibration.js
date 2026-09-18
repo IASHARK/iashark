@@ -49,7 +49,20 @@ const {
 const { probabilityDecileBucket } = require("./backtest-current-engine-offline.js");
 
 const REPO_ROOT = path.join(__dirname, "..");
-const MARKETS = ["1X2", "OVER_2_5", "BTTS_YES"];
+// 18/09/2026 : les familles DERIVEES de la meme matrice rejoignent le fit.
+// Constat sur les 290 picks reels resolus du moteur deterministe : les
+// marches non calibres (double chance, totaux par equipe...) remportaient
+// l'argmax de selection avec des probabilites gonflees, puis perdaient
+// (~-12% de ROI), pendant que les marches calibres gagnaient. Toutes ces
+// familles se resolvent depuis le score final : meme replay, memes regles.
+const MARKETS = [
+  "1X2", "OVER_2_5", "BTTS_YES",
+  "DC_12", "OVER_1_5", "OVER_3_5",
+  "HOME_TEAM_OVER_1_5", "AWAY_TEAM_OVER_1_5",
+  "HOME_CLEAN_SHEET", "AWAY_CLEAN_SHEET", "HOME_WIN_TO_NIL", "AWAY_WIN_TO_NIL",
+  "HOME_WIN_OVER_1_5", "HOME_WIN_OVER_2_5", "HOME_WIN_OVER_3_5", "HOME_WIN_UNDER_2_5", "HOME_WIN_UNDER_3_5",
+  "AWAY_WIN_OVER_1_5", "AWAY_WIN_OVER_2_5", "AWAY_WIN_OVER_3_5", "AWAY_WIN_UNDER_2_5", "AWAY_WIN_UNDER_3_5",
+];
 
 function parseArgs(argv) {
   const out = {
@@ -223,7 +236,7 @@ function buildReport(results, meta) {
   md += "- **Cout connu** : isotonic regression peut surapprendre sur de petits echantillons (chaque coude de la courbe est litteralement un point de donnee sur les cas extremes). Mitige par le choix de granularite ci-dessous.\n\n";
 
   md += "## Granularite du fit : GLOBAL (5 ligues combinees), pas par ligue\n\n";
-  md += `- Chaque marche (1X2, Over/Under 2.5, BTTS) recoit **une seule courbe de calibration, ajustee sur les 5 ligues combinees** — jamais une courbe par ligue.\n`;
+  md += `- Chaque marche (1X2, Over/Under 2.5, BTTS, et depuis le 18/09/2026 les familles derivees de la meme matrice : double chance 12, Over 1.5/3.5, totaux par equipe 1.5, clean sheet, victoire sans encaisser, resultat + total) recoit **une seule courbe de calibration, ajustee sur les 5 ligues combinees** — jamais une courbe par ligue.\n`;
   md += `- Justification chiffree : sur TRAIN (saisons ${meta.trainSeasons.join(",")}), le volume par ligue pour 1X2 tombe a quelques centaines de matchs (donc ~mille lignes 1X2 apres pooling HOME/DRAW/AWAY) par ligue — et \`CURRENT_ENGINE_CALIBRATION_REPORT.md\` montre deja des tranches a n aussi bas que 27-115 pour Over/Under 2.5 et BTTS meme en poolant les 5 ligues sur 5 saisons entieres. Fitter par ligue diviserait cet echantillon par 5, rendant les tranches de queue (0-10%, 90-100%) quasi vides — PAVA sur des blocs a n<10 produit des coudes bruyants, non generalisables, l'inverse de l'objectif. Le diagnostic montre par ailleurs un biais de MEME SIGNE (surconfiance en haut d'echelle) sur 3 des 5 ligues (Premier League, Bundesliga, Ligue 1) et une calibration deja correcte sur les 2 autres (La Liga, Serie A) — pas un biais qui varie de façon opposee d'une ligue a l'autre, ce qui justifie un fit partage plutot que 5 fits independants qui capteraient surtout du bruit d'echantillonnage inter-ligue.\n`;
   md += "- Limite explicite : si une ligue future a un biais de calibration structurellement DIFFERENT (pas seulement plus bruyant) des 5 ici etudiees, le fit global le lui appliquerait quand meme — a surveiller si de nouvelles ligues (GB/MX/ZA, en cours d'expansion dans ce depot) montrent un pattern differe une fois assez de matchs resolus.\n\n";
 
@@ -265,7 +278,7 @@ function buildReport(results, meta) {
 
   md += "## Limites et avertissements explicites\n\n";
   md += "1. **Effet de bord non corrige (hors perimetre autorise de cette tache)** : `.github/workflows/update-data.yml` calcule un `model_agreement` (accord Poisson/Dixon-Coles/Monte-Carlo) en comparant `pureProbs.p1` (calibre si branche) a `pureProbs.dixon.p1`/`pureProbs.montecarlo.p1` (jamais calibres — sous-objets de diagnostic bruts, intentionnellement non touches par cette tache, voir section suivante). Consequence attendue : sur les tranches ou la correction de calibration est la plus forte (haute confiance), l'ecart entre le p1 calibre et les sous-modeles bruts va mecaniquement augmenter, ce qui peut faire baisser artificiellement le label `model_agreement` (Fort/Moyen/Faible) sans que les modeles sous-jacents aient reellement moins convergé. Signale ici pour decision produit separee — ne PAS corriger silencieusement en modifiant `update-data.yml`, hors du perimetre confie pour cette tache (`lib/engine.js`, `lib/models.js`, `lib/calibration.js`).\n";
-  md += "2. **Champs NON calibres, intentionnellement** : `derived` (matrice complete de marches non valides par le backtest — double chance, team totals, clean sheet, etc.), `poisson`/`dixon`/`montecarlo` (sous-objets de diagnostic bruts, utilises pour `model_agreement` et l'affichage de transparence \"accord entre modeles\"), `over15`/`over35` (jamais mesures par `CURRENT_ENGINE_CALIBRATION_REPORT.md`, donc jamais recalibres sans preuve). Seuls `p1`/`pN`/`p2`, `over25`/`under25`, `bttsY`/`bttsN` sont concernes — exactement les champs mesures par le backtest.\n";
+  md += "2. **Champs NON calibres, intentionnellement** : `poisson`/`dixon`/`montecarlo` (sous-objets de diagnostic bruts, utilises pour `model_agreement` et l'affichage de transparence \"accord entre modeles\"), les lignes non mesurees ici (Over/Under 0.5 et 4.5+, totaux par equipe 0.5/2.5/3.5, scores exacts, bandes de buts), la premiere mi-temps (aucun score a la mi-temps dans `data/gate-b1`) et les marches de tirs (modele distinct, aucun decompte de tirs resolu hors-ligne). Double chance 1X / X2 ne recoivent pas de courbe propre : elles sont derivees des probabilites 1X2 deja calibrees. Depuis le 18/09/2026, `derived` est calibre EN PLACE par `lib/engine.js` pour tous les marches marques `wired:true` ; la copie brute vit dans `derived_raw`.\n";
   md += "3. **Fit global (5 ligues)** : voir section granularite ci-dessus — un biais de calibration futur structurellement different par ligue ne serait pas capture par une seule courbe partagee.\n";
   md += `4. **Warmup et perimetre identiques au diagnostic original** (moteur COEUR uniquement, aucun blend saison precedente/xG/Elo/marche, aucune cote disponible dans \`data/gate-b1\`) — voir \`CURRENT_ENGINE_CALIBRATION_REPORT.md\` pour le detail complet, non repete ici.\n`;
   const overResult = results.find((r) => r.market === "OVER_2_5");
@@ -273,7 +286,7 @@ function buildReport(results, meta) {
     const pct = Math.round((overResult.clampStats.triggered / overResult.clampStats.total) * 1000) / 10;
     md += `5. **Clamp de coherence sur Over/Under 2.5** (voir section OVER_2_5 ci-dessus) : se declenche sur ${pct}% des matchs reels (${overResult.clampStats.triggered}/${overResult.clampStats.total}) — pas un cas marginal. Consequence directe : la correction de calibration sur Over/Under 2.5 est PLUS FAIBLE que ce qu'une courbe isotonic non contrainte produirait, sur une part non negligeable des matchs a fort volume de buts attendu. C'est un compromis assume (coherence mathematique inter-marches > correction maximale sur un seul marche isole) plutot qu'un defaut cache — les chiffres AVANT/APRES de ce rapport le refletent deja honnetement.\n`;
   }
-  md += "6. **`buildCalibrationRows` (`scripts/backtest-current-engine-offline.js`) lit `finalProbs.derived`, jamais les champs top-level** : necessaire depuis que `lib/engine.js#calcFinalProbs` peut retourner des champs top-level DEJA calibres — sinon tout refit futur calibrerait une correction par-dessus une correction deja appliquee, et `CURRENT_ENGINE_CALIBRATION_REPORT.md` cesserait silencieusement de mesurer le moteur COEUR des qu'on le regenere. Verifie explicitement : `node scripts/backtest-current-engine-offline.js` reproduit `CURRENT_ENGINE_CALIBRATION_REPORT.md` chiffre pour chiffre (seul le timestamp de generation differe) meme avec la calibration branchee live.\n";
+  md += "6. **`buildCalibrationRows` (`scripts/backtest-current-engine-offline.js`) lit `finalProbs.derived_raw` (copie PRE-calibration), jamais `derived` ni les champs top-level** : necessaire depuis que `lib/engine.js#calcFinalProbs` retourne des champs DEJA calibres — sinon tout refit futur calibrerait une correction par-dessus une correction deja appliquee, et `CURRENT_ENGINE_CALIBRATION_REPORT.md` cesserait silencieusement de mesurer le moteur COEUR des qu'on le regenere. Verifie explicitement : `node scripts/backtest-current-engine-offline.js` reproduit `CURRENT_ENGINE_CALIBRATION_REPORT.md` chiffre pour chiffre (seul le timestamp de generation differe) meme avec la calibration branchee live.\n";
 
   md += "\n## Reproductibilite\n\n```\nnode scripts/fit-and-validate-calibration.js\n```\n\nCe script est 100% offline (reutilise `data/gate-b1/*.json`), n'est branche dans AUCUNE page publique ni pipeline GitHub Actions — c'est un outil d'ajustement/validation a executer manuellement quand une re-calibration est necessaire (nouvelles saisons resolues, changement du moteur coeur, etc.), pas un service en production.\n";
 

@@ -2,6 +2,14 @@
 
 Changements qui affectent le calcul des probabilités, marchés, edge/Kelly ou la manière dont ils sont décidés. Journal complet et non-technique dans `IASHARK_V2_EXECUTION_STATE.md` ; ce fichier ne liste que ce qui touche le moteur lui-même.
 
+## 2026-09-18 (soir) — retour arrière : familles dérivées débranchées
+
+- **Constat** (audit du 18/09, données publiées à 11:01 UTC) : les 18 courbes des familles dérivées branchées le matin produisaient des probabilités aberrantes. Apprises sur une plage étroite de probabilités brutes, avec des extrémités portées par très peu d'échantillons (valeurs de bord à 0, 0,5, 0,727 ou 1), elles s'appliquaient hors de leur plage (`applyIsotonicCurve` renvoie alors la valeur de bord). Exemple réel : clean sheet extérieur 35,8 % brut → 72,7 % publié, retenu comme pari du match offert du 19/09 ; « domicile plus de 1,5 but » ramené à 0 sous 28 % brut. Sur une grille réaliste de lambdas, écarts médians de 4 à 9 points et maximums de 20 à 36 points selon la famille. Le gain de Brier/ECE sur le holdout ne voyait pas ces extrémités.
+- **Fix** : `lib/data/calibration-params.json` — `wired:false` (+ `unwired_on`, `unwired_reason`) pour ces 18 familles ; seules restent branchées les trois courbes validées le 13/09 (1X2, Over 2.5, BTTS). Le moteur revient au comportement en production avant ce matin ; `derived_raw` et le fit à 22 marchés sont conservés pour le refit.
+- **Garde-fous** (`tests/engine-derived-calibration.test.js`) : liste explicite des courbes validées (brancher une famille impose de modifier ce test) et test de couverture — une courbe branchée doit avoir été apprise sur au moins 90 % des probabilités brutes réalistes (il aurait bloqué `HOME_TEAM_OVER_1_5`, `AWAY_CLEAN_SHEET`, `HOME_WIN_UNDER_2_5`).
+- **Avant de rebrancher** : refit avec effectif minimal par palier (pas de palier à 0 ou 1 sur une poignée de matchs), aucune extrapolation hors plage (probabilité brute conservée), validation hors échantillon **par déciles de probabilité brute**, pas seulement sur le Brier global.
+- **Données publiées** : les picks du run du 18/09 (11:01 UTC) ont été calculés avec les courbes du matin ; ils restent en ligne jusqu'au prochain run de `update-data.yml` (lancement manuel recommandé dès la fusion).
+
 ## 2026-09-18 — calibration de toute la matrice de buts
 
 - **Constat** (290 picks réels résolus du moteur déterministe, 30/08 → 14/09) : la règle de sélection (argmax de probabilité) comparait des marchés calibrés (1X2, Over 2.5, BTTS) à des marchés bruts (double chance, totaux par équipe, résultat + total, clean sheet). Les bruts, gonflés par la surconfiance mesurée du moteur cœur, gagnaient l'argmax puis perdaient (double chance −12 %, totaux par équipe −12 % de ROI) pendant que les calibrés gagnaient (O/U +18 %). Rejeu de règles « valeur » sur 31 matchs complets : aucune n'aide, l'EV sans garde-fou est catastrophique — le problème n'est pas le critère, c'est la comparabilité des probabilités.

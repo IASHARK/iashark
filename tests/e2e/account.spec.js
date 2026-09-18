@@ -48,12 +48,29 @@ for (const v of VERSIONS) {
       await expect(page.locator('#panneau')).toContainText(tr(dict, 'compte_page.sub_interval_label'));
       await expect(page.locator('#panneau')).toContainText(tr(dict, 'compte_page.interval_month'));
       await expect(page.locator('#panneau')).toContainText(tr(dict, 'compte_page.next_renewal_label'));
+      // « Changer de duree » seulement si plusieurs durees sont payables en
+      // ligne (config/markets.json#checkoutOpen) : jamais un bouton vers une
+      // duree que l'on ne peut pas acheter.
+      const sold = ['week', 'month', 'year'].filter((iv) => typeof v.proAmounts[iv] === 'number');
+      const openCount = sold.filter((iv) => !Array.isArray(v.checkoutOpen) || v.checkoutOpen.includes(iv)).length;
       const change = page.locator('#changerDuree');
-      await expect(change).toHaveText(tr(dict, 'compte_page.change_interval_cta'));
-      const changeCall = supa.waitForCall('create-portal-session');
-      await change.click();
-      const cc = await changeCall;
-      expect(cc.body).toEqual(Object.assign({ flow: 'change_interval' }, v.dir ? { dir: v.dir } : {}));
+      if (openCount > 1) {
+        await expect(change).toHaveText(tr(dict, 'compte_page.change_interval_cta'));
+        const changeCall = supa.waitForCall('create-portal-session');
+        await change.click();
+        const cc = await changeCall;
+        expect(cc.body).toEqual(Object.assign({ flow: 'change_interval' }, v.dir ? { dir: v.dir } : {}));
+        await page.waitForURL(STRIPE_PORTAL_URL);
+        await page.goto(`/${v.dir}/compte.html#abonnement`);
+      } else {
+        await expect(change).toHaveCount(0);
+      }
+      // Resiliation en ligne nommee comme telle (L215-1-1) : ouvre l'espace securise.
+      const cancel = page.locator('#resilier');
+      await expect(cancel).toHaveText(tr(dict, 'compte_page.cancel_subscription_cta'));
+      const cancelCall = supa.waitForCall('create-portal-session');
+      await cancel.click();
+      expect((await cancelCall).persona).toBe('pro');
       await page.waitForURL(STRIPE_PORTAL_URL);
       await page.goto(`/${v.dir}/compte.html#abonnement`);
       await expect(page.locator('#souscrire')).toHaveCount(0);

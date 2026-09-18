@@ -135,6 +135,7 @@ for (const v of VERSIONS) {
 
     test('duree annuelle choisie : interval=year envoye @mobile', async ({ page, supa }) => {
       test.skip(typeof v.proAmounts.year !== 'number', `annuel non vendu sur /${v.dir}/ (config/markets.json)`);
+      test.skip(Array.isArray(v.checkoutOpen) && !v.checkoutOpen.includes('year'), `annuel pas encore payable en ligne sur /${v.dir}/ (checkoutOpen)`);
       await supa.as('free');
       supa.onFunction('create-checkout-session', { status: 200, json: { processed: true, url: STRIPE_CHECKOUT_URL } });
       await page.goto(`/${v.dir}/abonnement.html`);
@@ -146,6 +147,7 @@ for (const v of VERSIONS) {
     });
 
     test('duree non configuree cote Stripe : "bientot disponible", aucun paiement', async ({ page, supa, dictFor }) => {
+      test.skip(Array.isArray(v.checkoutOpen) && !v.checkoutOpen.includes('week'), `semaine deja fermee par la configuration sur /${v.dir}/ (test dedie ci-dessous)`);
       const dict = await dictFor(v.locale);
       await supa.as('free');
       supa.availability({ week: false, month: true, year: true });
@@ -195,6 +197,33 @@ for (const v of VERSIONS) {
       await expect(page).toHaveURL(new RegExp(`/${v.dir}/$`));
       expect(supa.callsTo('create-checkout-session')).toHaveLength(0);
     });
+    // Decision du 18/09/2026 : seule une duree payable en ligne peut etre
+    // choisie. Les autres restent affichees, marquees « Bientot disponible »,
+    // non selectionnables, et le paiement n'envoie jamais qu'une duree ouverte.
+    test('durees pas encore payables : affichees « bientot disponible », non selectionnables @mobile', async ({ page, supa, dictFor }) => {
+      test.skip(!Array.isArray(v.checkoutOpen), `toutes les durees ouvertes sur /${v.dir}/`);
+      const dict = await dictFor(v.locale);
+      await supa.as('free');
+      supa.onFunction('create-checkout-session', { status: 200, json: { processed: true, url: STRIPE_CHECKOUT_URL } });
+      await page.goto(`/${v.dir}/abonnement.html`);
+      const sold = ['week', 'month', 'year'].filter((iv) => typeof v.proAmounts[iv] === 'number');
+      const closed = sold.filter((iv) => !v.checkoutOpen.includes(iv));
+      await expect(page.locator('#proPlanPicker input[type="radio"]')).toHaveCount(sold.length);
+      for (const iv of closed) {
+        const label = page.locator(`#proPlanPicker .iash-plan[data-interval="${iv}"]`);
+        await expect(label).toHaveClass(/is-soon/);
+        await expect(label).toContainText(tr(dict, 'pro_plans.unavailable'));
+        await expect(page.locator(`#proPlanPicker input[value="${iv}"]`)).toBeDisabled();
+        await label.click({ force: true });
+        await expect(page.locator(`#proPlanPicker input[value="${iv}"]`)).not.toBeChecked();
+      }
+      await expect(page.locator('#proPlanPicker input[value="month"]')).toBeChecked();
+      await tickAll(page);
+      const call = supa.waitForCall('create-checkout-session');
+      await page.locator('#subscribeButton').click();
+      expect(v.checkoutOpen, 'duree envoyee au paiement').toContain((await call).body.interval);
+    });
+
     // Tunnel reel (analytics 09/2026) : match -> « Debloquer » -> abonnement.
     // Le match d'origine est nomme sur la page, suit l'inscription et est
     // memorise pour les pages de retour Stripe.

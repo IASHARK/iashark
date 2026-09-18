@@ -180,11 +180,22 @@
      subscriptions ecrite par le serveur a partir du Price Stripe ; jamais
      deduite d'un prix. Valeur absente (abonnement anterieur a la migration
      0026, pas encore resynchronise) : "En cours de synchronisation". */
+  // Audit du 18/09/2026 : tant que la migration 0026 n'est pas appliquee,
+  // billing_interval n'existe pas et TOUS les abonnes voyaient « En cours de
+  // synchronisation » en permanence. Duree inconnue = ligne masquee (null),
+  // jamais un etat « en cours » qui ne se termine pas.
   function libelleDuree() {
     if (!abo) return null;
     var cles = { week: ['compte_page.interval_week', 'Hebdomadaire'], month: ['compte_page.interval_month', 'Mensuelle'], year: ['compte_page.interval_year', 'Annuelle'] };
     var c = cles[abo.billing_interval];
-    return c ? tr(c[0], c[1]) : tr('compte_page.interval_unknown', 'En cours de synchronisation');
+    return c ? tr(c[0], c[1]) : null;
+  }
+  // « Changer de duree » n'a de sens que si plusieurs durees sont payables en
+  // ligne (config/markets.json#checkoutOpen, lib/market-config.js).
+  function plusieursDureesOuvertes() {
+    var M = window.IASHARK_MARKET;
+    if (!M || typeof M.proOffer !== 'function') return false;
+    try { return M.proOffer().intervals.filter(function (i) { return i.amount != null && i.open !== false; }).length > 1; } catch (e) { return false; }
   }
   var TON = {
     ok: 'border-emerald-500/30 bg-emerald-500/[.07] text-emerald-300',
@@ -319,7 +330,7 @@
           + '<span class="inline-flex items-center rounded-full border border-cyan/40 bg-cyan/10 px-2.5 py-1 text-[11px] font-bold tracking-wider text-cyan">' + tr('compte_page.badge_pro', 'PRO') + '</span></div>'
           + bandeau
           + (abo ? '<div class="mt-5">'
-            + ligneResume(tr('compte_page.sub_interval_label', 'Durée'), esc(libelleDuree()))
+            + (libelleDuree() ? ligneResume(tr('compte_page.sub_interval_label', 'Durée'), esc(libelleDuree())) : '')
             + (abo.current_period_end && !abo.cancel_at_period_end && abo.status !== 'canceled' && date(abo.current_period_end) ? ligneResume(tr('compte_page.next_renewal_label', 'Prochaine échéance'), esc(date(abo.current_period_end))) : '')
             + '</div>' : '')
           + (abo ? '' : '<p class="mt-5 text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.pro_manual_grant_detail', 'Aucun abonnement payant n’est enregistré sur ce compte : l’accès Pro y a été accordé manuellement.') + '</p>')
@@ -329,7 +340,12 @@
           // l'abonnement (jamais un second paiement). Duree plus longue : effet
           // immediat au prorata ; plus courte : a la fin de la periode payee
           // (reglages du portail client Stripe).
-          + (abo && ['active', 'trialing'].indexOf(abo.status) !== -1 && !abo.cancel_at_period_end ? boutonSecondaire('changerDuree', tr('compte_page.change_interval_cta', 'Changer de durée')) : '')
+          + (abo && ['active', 'trialing'].indexOf(abo.status) !== -1 && !abo.cancel_at_period_end && plusieursDureesOuvertes() ? boutonSecondaire('changerDuree', tr('compte_page.change_interval_cta', 'Changer de durée')) : '')
+          // Resiliation en ligne visible et nommee comme telle (Code de la
+          // consommation L215-1-1, decret 2023-417 : fonctionnalite « resilier
+          // votre contrat » directement accessible). Elle ouvre le meme espace
+          // securise Stripe, ou l'annulation se confirme.
+          + (abo && ['active', 'trialing', 'past_due', 'unpaid'].indexOf(abo.status) !== -1 && !abo.cancel_at_period_end ? boutonSecondaire('resilier', tr('compte_page.cancel_subscription_cta', 'Résilier mon abonnement')) : '')
           + '</div>'
           + (abo ? '<p class="mt-3 text-[12.5px] leading-relaxed text-soft">' + tr('compte_page.billing_portal_note', 'Moyen de paiement, factures et résiliation se gèrent dans l’espace sécurisé de notre prestataire de paiement.') + ' ' + tr('compte_page.change_interval_note', 'Passer à une durée plus longue prend effet tout de suite, au prorata ; passer à une durée plus courte prend effet à la fin de la période déjà payée. Le montant et la date d’effet sont affichés avant confirmation.') + '</p>' : '')
           + '<p id="msgFacturation" hidden aria-live="polite"></p>');
@@ -356,7 +372,7 @@
         // Selecteur Semaine / Mois / Annee (lib/pro-plan-picker.js), monte par
         // brancher() ; repli sans module : prix mensuel.
         + '<div id="proPlanPicker"><p class="mt-2.5 text-[22px] font-extrabold leading-none tracking-tight"><span data-market-price="pro.month">' + esc(prixPro()) + '</span> ' + esc(tr('compte_page.per_month', '/ mois')) + '</p></div>'
-        + '<p class="mt-2 text-[13.5px] text-soft">' + tr('compte_page.pro_durations_note', 'À la semaine, au mois ou à l’année : même accès Pro, résiliable à tout moment.') + '</p>'
+        + '<p class="mt-2 text-[13.5px] text-soft">' + tr('compte_page.pro_durations_note', 'Même accès Pro quelle que soit la durée · résiliable à tout moment.') + '</p>'
         + '<ul class="mt-5 space-y-2.5">'
         + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_all_matches', 'L’analyse complète sur tous les matchs') + '</li>'
         + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_six_tools', 'Les six outils branchés sur les probabilités du modèle') + '</li>'
@@ -726,6 +742,7 @@
     }
     if ($('portail')) $('portail').addEventListener('click', function () { facturation('create-portal-session', $('portail')); });
     if ($('changerDuree')) $('changerDuree').addEventListener('click', function () { facturation('create-portal-session', $('changerDuree'), { flow: 'change_interval' }); });
+    if ($('resilier')) $('resilier').addEventListener('click', function () { facturation('create-portal-session', $('resilier')); });
     if ($('exporter')) $('exporter').addEventListener('click', exporter);
     if ($('refusSuivi')) $('refusSuivi').addEventListener('click', basculerSuivi);
     racine.querySelectorAll('[data-fav-ligue]').forEach(function (b) {

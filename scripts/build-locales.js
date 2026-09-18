@@ -450,6 +450,9 @@ function marketRuntimeData() {
     markets[k] = {
       currency: m.currency, locale: m.locale, htmlLang: m.htmlLang, intlLocale: m.intlLocale,
       status: m.status, minAge: m.minAge, checkoutMarket: m.checkoutMarket || null,
+      // Durees payables en ligne (config/markets.json#<marche>.checkoutOpen) ;
+      // null = toutes les durees vendues (le serveur tranche).
+      checkoutOpen: Array.isArray(m.checkoutOpen) ? m.checkoutOpen.slice() : null,
       prices: m.prices || {}, helpline: m.helpline || null
     };
   });

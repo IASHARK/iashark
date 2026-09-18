@@ -132,10 +132,11 @@ test("build-locales : ligne des durees de l'accueil et prix masques cuits dans l
   const src = read("index.html");
   assert.match(src, /id="prixProDurees" data-market-price-line="pro\.week" data-market-price-tpl="home_app\.pro_other_durations" data-market-price-tpl-fallback="home_app\.pro_other_durations_week"/);
   const line = (d) => norm((read(d + "/index.html").match(/id="prixProDurees"[^>]*>([^<]*)</) || [])[1] || "");
-  assert.equal(line("fr"), "Aussi à la semaine (6,99 €) ou à l’année (199 €).");
-  assert.equal(line("gb"), "Also available weekly (£4.99) or annually (£149).");
-  assert.equal(line("mx"), "También semanal (MX$69) o anual (MX$1,990).");
-  assert.equal(line("za"), "Also available weekly (R 69).", "ZA : aucune mention d'annuel");
+  // 18/09/2026 : semaine et annee ne sont pas encore payables en ligne -> « bientot ».
+  assert.equal(line("fr"), "Bientôt aussi à la semaine (6,99 €) ou à l’année (199 €).");
+  assert.equal(line("gb"), "Coming soon: weekly (£4.99) or annually (£149).");
+  assert.equal(line("mx"), "Próximamente también semanal (MX$69) o anual (MX$1,990).");
+  assert.equal(line("za"), "Coming soon: weekly (R 69).", "ZA : aucune mention d'annuel");
   for (const d of ["en", "es", "de", "it", "pt"]) assert.match(line(d), /6[.,]99/, d);
   // Carte Pro de l'accueil : prix mensuel (duree par defaut) conserve.
   assert.match(norm(read("za/index.html")), /id="prixPro" data-market-price="pro"[^>]*>R ?199</);
@@ -270,6 +271,37 @@ test("selecteur : 3 options (2 en ZA), Mois coche par defaut, equivalent et econ
   assert.doesNotMatch(rendered, /pro_plans\./i, "une cle i18n brute est affichee sur la page d'abonnement");
 });
 
+test("checkoutOpen : seules les durees payables en ligne sont selectionnables, les autres « bientot disponible »", () => {
+  // Decision du proprietaire du 18/09/2026 : en production, seul le mensuel est
+  // payable (la fonction de paiement deployee ignore la duree). Une duree vendue
+  // mais fermee reste affichee, jamais cochee ni cochable.
+  assert.deepEqual(MARKETS.fr.checkoutOpen, ["month"], "FR : seul le mensuel est ouvert au paiement");
+  const offer = lib.proOffer(MARKETS.fr.prices, "EUR", "fr-FR", MARKETS.fr.checkoutOpen);
+  assert.deepEqual(offer.intervals.map((i) => [i.interval, i.open]), [["week", false], ["month", true], ["year", false]]);
+  assert.ok(lib.proOffer(MARKETS.gb.prices, "GBP", "en-GB").intervals.every((i) => i.open), "sans liste : toutes ouvertes");
+  const P = loadPicker();
+  const t = (k) => P.textFor(k, null, {});
+  assert.equal(P.pickDefault(offer, "week"), "month", "duree fermee demandee -> mois");
+  assert.equal(P.pickDefault(offer, "year"), "month");
+  const html = P.buildHtml(offer, t, "c", P.pickDefault(offer), {});
+  for (const iv of ["week", "year"]) {
+    assert.match(html, new RegExp('<label class="iash-plan is-soon" for="iashPlanc_' + iv + '" data-interval="' + iv + '" aria-disabled="true">'), iv + " : bientot disponible");
+    assert.match(html, new RegExp('value="' + iv + '" disabled>'), iv + " : non selectionnable");
+  }
+  assert.match(html, /value="month" checked>/);
+  assert.equal((html.match(/Bientôt disponible/g) || []).length, 2);
+  // Le serveur ne peut pas rouvrir une duree fermee par la configuration.
+  const win = { I18N: null, IasharkApp: null };
+  new Function("window", read("lib/pro-plan-picker.js"))(win);
+  const el = { innerHTML: "", ownerDocument: { getElementById: () => ({}), readyState: "complete" }, querySelectorAll: () => [], firstChild: { classList: { add() {} } } };
+  const api = win.IasharkProPlanPicker.mount(el, { market: { proOffer: () => offer, code: "fr" } });
+  api.setAvailability({ week: true, month: true, year: true });
+  assert.equal(api.isAvailable("week"), false);
+  assert.equal(api.isAvailable("year"), false);
+  assert.equal(api.isAvailable("month"), true);
+  assert.equal(api.interval(), "month");
+});
+
 test("front : chaque point d'entree du checkout envoie la duree, marque les durees non ouvertes et ne les facture jamais", () => {
   for (const f of ["abonnement-page.js", "account-page.js", "gb/gb-page.js", "mx/mx-page.js", "za/za-page.js"]) {
     const js = read(f);
@@ -298,6 +330,14 @@ test("compte : duree, prochaine echeance, changement de duree par le portail, se
   assert.match(js, /compte_page\.next_renewal_label/);
   assert.match(js, /boutonSecondaire\('changerDuree'/);
   assert.match(js, /facturation\('create-portal-session', \$\('changerDuree'\), \{ flow: 'change_interval' \}\)/);
+  // 18/09/2026 : « Changer de duree » seulement si plusieurs durees sont payables ;
+  // resiliation en ligne nommee comme telle (L215-1-1) ; duree inconnue = ligne masquee.
+  assert.match(js, /function plusieursDureesOuvertes\(\)/);
+  assert.match(js, /!abo.cancel_at_period_end && plusieursDureesOuvertes\(\) \? boutonSecondaire\('changerDuree'/);
+  assert.match(js, /boutonSecondaire\('resilier', tr\('compte_page.cancel_subscription_cta'/);
+  assert.match(js, /\$\('resilier'\).addEventListener\('click', function \(\) \{ facturation\('create-portal-session', \$\('resilier'\)\); \}\)/);
+  assert.doesNotMatch(js, /compte_page.interval_unknown/, "plus d'etat « en cours de synchronisation » permanent");
+  for (const l of LOCALES) assert.equal(typeof JSON.parse(read("i18n/dict/" + l + ".json")).compte_page.cancel_subscription_cta, "string", l);
   assert.match(js, /if \(options && options\.flow === 'change_interval'\) corps\.flow = 'change_interval';/);
   assert.match(js, /corps\.interval = selecteur \? selecteur\.interval\(\) : 'month';/);
   assert.match(js, /select\('status,billing_interval,current_period_end,cancel_at_period_end,created_at'\)/);

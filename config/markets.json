@@ -43,6 +43,8 @@
     "stripeEnvKeys": {"week": "STRIPE_PRICE_ID_FR_WEEK", "month": "STRIPE_PRICE_ID_FR_MONTH", "year": "STRIPE_PRICE_ID_FR_YEAR"},
     "stripeEnvKeyLegacyMonth": "STRIPE_PRICE_ID",
     "checkoutMarket": null,
+    "checkoutOpen": ["month"],
+    "checkoutOpen_readme": "Durees REELLEMENT payables en production (decision du proprietaire du 18/09/2026). La fonction create-checkout-session deployee ne connait que le tarif mensuel (secret STRIPE_PRICE_ID) : semaine et annee restent affichees mais marquees « Bientot disponible », non selectionnables (lib/pro-plan-picker.js), jusqu'a la creation de leurs Price Stripe ET le deploiement de la version du depot. Ajouter une duree ici UNIQUEMENT quand elle est payable en ligne. Champ absent = toutes les durees vendues sont considerees ouvertes (le serveur tranche).",
     "paidAdsEnabled": false,
     "adsGamblingCertRequired": false,
     "status": "LIVE",

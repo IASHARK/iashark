@@ -43,6 +43,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .status{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1px;color:var(--muted);margin-bottom:20px;min-height:14px;}
 .status.ready{color:var(--green);}
 .cta{display:block;width:100%;padding:15px 13px;border-radius:10px;border:1px solid var(--bc);background:rgba(34,211,238,0.1);color:var(--cyan);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;text-decoration:none;text-align:center;}
+.cta.secondary{margin-top:10px;border-color:var(--border);background:none;color:var(--muted);}
+.cta[hidden]{display:none;}
 </style>
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
 <meta property="og:type" content="website">
@@ -63,7 +65,10 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <div class="title" data-i18n="checkout_pages.success_heading">Zahlung bestätigt</div>
     <div class="body" data-i18n="checkout_pages.success_body">Danke! Dein Pro-Abonnement wird gerade aktiviert — das dauert normalerweise nur ein paar Sekunden.</div>
     <div class="status" id="statusTxt" data-i18n="checkout_pages.success_checking">Dein Zugang wird überprüft...</div>
-    <a href="/de/compte.html" data-href="compte.html" class="cta" data-i18n="checkout_pages.success_cta_account">ZU MEINEM KONTO →</a>
+    <!-- Match d'origine (abonnement-page.js#memoriserRetour) : c'est l'analyse que
+         l'acheteur voulait lire ; on l'y ramene des que l'acces Pro est confirme. -->
+    <a href="/de/" id="ctaMatch" class="cta" hidden data-i18n="checkout_pages.success_cta_match">SPIELANALYSE ANSEHEN →</a>
+    <a href="/de/compte.html" data-href="compte.html" id="ctaAccount" class="cta" data-i18n="checkout_pages.success_cta_account">ZU MEINEM KONTO →</a>
   </div>
 </div>
 <script>
@@ -81,6 +86,32 @@ function avecDelai(promesse,ms,valeur){
   ]);
 }
 var i18nReady=avecDelai((window.I18N&&window.I18N.init)?window.I18N.init():null,3000,null);
+
+// Match d'origine memorise avant le depart vers Stripe : chemin interne
+// uniquement. Bouton principal vers le match, compte en secondaire, et
+// retour automatique (compte a rebours visible) une fois l'acces confirme.
+var RETOUR=null;
+try{
+  var ctxRetour=JSON.parse(sessionStorage.getItem('iashark.checkout.return')||'null');
+  var p=ctxRetour&&ctxRetour.path;
+  if(typeof p==='string'&&p.charAt(0)==='/'&&p.charAt(1)!=='/'&&p.indexOf('\\')===-1&&/\/match\.html(\?|$)/.test(p))RETOUR={path:p,label:typeof ctxRetour.label==='string'?ctxRetour.label:''};
+}catch(e){}
+if(RETOUR){
+  var ctaMatch=document.getElementById('ctaMatch');ctaMatch.href=RETOUR.path;ctaMatch.hidden=false;
+  document.getElementById('ctaAccount').classList.add('secondary');
+}
+var retourLance=false;
+function retourAuMatch(){
+  if(!RETOUR||retourLance)return;retourLance=true;
+  var statusEl=document.getElementById('statusTxt'),reste=3;
+  var label=RETOUR.label||t('checkout_pages.success_redirect_match','ton match');
+  var tick=function(){
+    statusEl.textContent=t('checkout_pages.success_active','Accès Pro activé ✓')+' — '+t('checkout_pages.success_redirect_note','Retour sur {match} dans {s} s…').replace('{match}',label).replace('{s}',String(reste));
+    if(reste<=0){try{sessionStorage.removeItem('iashark.checkout.return');}catch(e){}location.href=RETOUR.path;return;}
+    reste-=1;setTimeout(tick,1000);
+  };
+  tick();
+}
 
 var SUPA_URL = 'https://ksvjraqitxouwiabecai.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzdmpyYXFpdHhvdXdpYWJlY2FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODcwMjMsImV4cCI6MjA4ODM2MzAyM30.Eh3qk4tATM40hoYxdErAllLEo1y8KNt4BSCET_fAgT8';
@@ -124,6 +155,7 @@ async function pollAccess(attempt){
     if(ures && ures.data && ures.data.plan==='pro'){
       statusEl.textContent = t('checkout_pages.success_active','Accès Pro activé ✓');
       statusEl.classList.add('ready');
+      retourAuMatch();
       return;
     }
   }catch(e){}

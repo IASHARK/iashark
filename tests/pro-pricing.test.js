@@ -249,12 +249,25 @@ test("selecteur : 3 options (2 en ZA), Mois coche par defaut, equivalent et econ
   assert.equal((soon.match(/class="iash-plan[^"]*is-soon/g) || []).length, 1);
   assert.match(soon, /Bientôt disponible/);
   // Textes : labels explicites > dictionnaire (variante marche) > repli francais.
-  const I = { dict: {}, t: (k) => ({ "pro_plans.legend": "Choose your billing period", "pro_plans.legend_za": "Choose (ZA)" })[k] || null };
+  // Le faux I18N reproduit le VRAI contrat de i18n/i18n.js#t : une cle absente
+  // renvoie LA CLE (fallback != null ? fallback : key), jamais null. L'ancien
+  // mock renvoyait null et n'a donc jamais vu le bug de production du
+  // 18/09/2026 : le selecteur affichait "pro_plans.week_label_fr" sur les
+  // trois offres de la page d'abonnement.
+  const I = {
+    dict: { pro_plans: { legend: "Choose your billing period", legend_za: "Choose (ZA)", week_label: "1 week", per_week: "/ week", billed_week: "Billed {price} each week" } },
+    t: (k, f) => (f != null ? f : k),
+  };
   const Pi = loadPicker(I);
   assert.equal(Pi.textFor("legend", { code: "gb" }), "Choose your billing period");
   assert.equal(Pi.textFor("legend", { code: "za" }), "Choose (ZA)");
   assert.equal(Pi.textFor("legend", { code: "gb" }, { legend: "X" }), "X");
   assert.equal(Pi.textFor("unavailable", { code: "gb" }), "Bientôt disponible");
+  // Regression : la variante par marche n'existe pas -> la cle generique, jamais la clef brute.
+  assert.equal(Pi.textFor("week_label", { code: "fr" }), "1 week");
+  assert.equal(Pi.textFor("billed_week", { code: "mx" }), "Billed {price} each week");
+  const rendered = Pi.buildHtml(offerOf("fr"), (k) => Pi.textFor(k, { code: "fr" }, {}), "u", "month", null);
+  assert.doesNotMatch(rendered, /pro_plans\./i, "une cle i18n brute est affichee sur la page d'abonnement");
 });
 
 test("front : chaque point d'entree du checkout envoie la duree, marque les durees non ouvertes et ne les facture jamais", () => {

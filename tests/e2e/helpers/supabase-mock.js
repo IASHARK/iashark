@@ -57,6 +57,7 @@ class SupabaseMock {
     this.siteData = siteData;
     this.persona = null;          // persona dont la session est injectee
     this.loginPersona = null;     // persona renvoyee par login-guard (connexion simulee)
+    this.signupPersona = null;    // persona renvoyee par /auth/v1/signup (inscription simulee)
     this.calls = [];
     this.unmocked = [];
     this.fnHandlers = {};
@@ -85,6 +86,10 @@ class SupabaseMock {
 
   // La prochaine connexion (login-guard) reussit pour cette persona.
   loginSucceedsAs(personaKey) { this.loginPersona = PERSONAS[personaKey]; }
+  // La prochaine inscription (POST /auth/v1/signup) ouvre une session pour
+  // cette persona - meme forme que /auth/v1/token (verification d'email
+  // desactivee sur le projet : signUp renvoie directement une session).
+  signupSucceedsAs(personaKey) { this.signupPersona = PERSONAS[personaKey]; }
 
   // Reponse d'une fonction Edge : objet {status, json} ou fonction (body, call) -> {status, json}.
   // Un tableau = file de reponses successives (la derniere est reutilisee).
@@ -155,6 +160,13 @@ class SupabaseMock {
           this.userMetadata[caller.key] = Object.assign({}, this.userMetadata[caller.key] || {}, body.data);
         }
         return json(200, Object.assign(userOf(caller), { user_metadata: Object.assign({}, this.userMetadata[caller.key] || {}) }));
+      }
+      if (p === '/auth/v1/signup' && req.method() === 'POST') {
+        const who = this.signupPersona;
+        if (!who) return json(422, { code: 422, error_code: 'signup_disabled', msg: 'e2e: aucune persona d\'inscription (supa.signupSucceedsAs)' });
+        this.signupPersona = null;
+        const sess = sessionOf(who); sess.user.user_metadata = Object.assign({}, this.userMetadata[who.key] || {});
+        return json(200, sess);
       }
       if (p === '/auth/v1/token') {
         const who = caller || this.persona || this.loginPersona;

@@ -229,8 +229,16 @@ test("ce que la page affirme est vrai dans le code (sans en publier les valeurs)
   // « la probabilite estimee = probabilite du modele / 10 », fixee par le code.
   assert.match(pipeline, /conf:pickedMarket\?Math\.round\(\(pickedMarket\.prob\/10\)\*10\)\/10/);
   // « une correction apprise sur l'historique est appliquee a une partie des marches ».
+  // « une correction apprise sur cet historique est appliquee a une partie des
+  // marches » : les trois marches d'origine (1X2, Over 2.5, BTTS) restent
+  // branches, et depuis le 18/09/2026 les familles derivees de la meme matrice
+  // (totaux par equipe, clean sheet, resultat + total...) le sont aussi quand
+  // le holdout le justifie - le nombre exact est une decision du fit, pas du
+  // test. « Une partie » reste vrai : premiere mi-temps et tirs ne sont pas
+  // calibres (voir ENGINE_RECALIBRATION_REPORT.md).
   const calib = JSON.parse(read("lib/data/calibration-params.json"));
-  assert.equal(JSON.stringify(calib).split('"wired":true').length - 1, 3, "trois courbes de calibration branchees");
+  ["1X2", "OVER_2_5", "BTTS_YES"].forEach(function (k) { assert.equal(calib.markets[k] && calib.markets[k].wired, true, k + " : courbe de calibration debranchee"); });
+  assert.ok(JSON.stringify(calib).split('"wired":true').length - 1 >= 3, "moins de trois courbes de calibration branchees");
   assert.match(read("home-list.js"), /tf\('home_list\.aria_prob','Probabilité estimée \{p\} sur 10\.'/);
 });
 

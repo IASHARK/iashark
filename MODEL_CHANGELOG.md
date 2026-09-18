@@ -2,6 +2,15 @@
 
 Changements qui affectent le calcul des probabilités, marchés, edge/Kelly ou la manière dont ils sont décidés. Journal complet et non-technique dans `IASHARK_V2_EXECUTION_STATE.md` ; ce fichier ne liste que ce qui touche le moteur lui-même.
 
+## 2026-09-18 — calibration de toute la matrice de buts
+
+- **Constat** (290 picks réels résolus du moteur déterministe, 30/08 → 14/09) : la règle de sélection (argmax de probabilité) comparait des marchés calibrés (1X2, Over 2.5, BTTS) à des marchés bruts (double chance, totaux par équipe, résultat + total, clean sheet). Les bruts, gonflés par la surconfiance mesurée du moteur cœur, gagnaient l'argmax puis perdaient (double chance −12 %, totaux par équipe −12 % de ROI) pendant que les calibrés gagnaient (O/U +18 %). Rejeu de règles « valeur » sur 31 matchs complets : aucune n'aide, l'EV sans garde-fou est catastrophique — le problème n'est pas le critère, c'est la comparabilité des probabilités.
+- **Fix** : `scripts/backtest-current-engine-offline.js#buildCalibrationRows` émet désormais une ligne par match pour 19 familles dérivées (toutes résolubles depuis le score final), `scripts/fit-and-validate-calibration.js` ajuste et valide 22 marchés (train 2021-2023, holdout 2024-2025, 2 735 matchs jamais vus), et `lib/engine.js#calcFinalProbs` applique chaque courbe branchée à `derived` **en place**, puis rétablit la cohérence (échelles O/U et totaux, sous-ensembles bornés par la victoire du camp, gagner sans encaisser ≤ clean sheet). **21 marchés branchés sur 22** ; `AWAY_WIN_TO_NIL` refusé (Brier +0.0001 sur le holdout). ECE des totaux par équipe : 7.6 → 1.5 pt (domicile), 9.7 → 3.7 pt (extérieur).
+- `derived_raw` (nouveau) : copie pré-calibration de la matrice, seule entrée des outils de mesure — un refit ne calibre jamais par-dessus une calibration.
+- Double chance et Draw No Bet dérivent des 1X2 **calibrés** (jamais une courbe propre). Le clamp d'Over 2.5 s'appuie sur Over 1.5/3.5 désormais calibrés (1X2 et BTTS strictement inchangés ; Over 2.5 bouge sur ~1 match sur 30).
+- Aucun changement de `lib/decision.js` ni du pipeline : l'argmax reste l'argmax, il compare enfin des grandeurs homogènes. Garde-fou : `tests/engine-derived-calibration.test.js`.
+- Non traité, à mesurer avant d'agir : marchés de tirs (meilleure famille sur 290 picks, +18 %, mais 100 % → 64 % entre les deux moitiés de période, et aucune calibration possible sans décompte de tirs résolu) ; première mi-temps ; prior de ligue constant 1.35/1.10 et planchers 1.05/0.90 de `calcLambdas` ; probabilité « juste » naïve (marge incluse) hors 1X2/O2.5/BTTS.
+
 ## 2026-08-29 (suite — fermeture du moteur avant Phase 5)
 
 - **`model_probability` (nouveau champ, 0-100)** devient LA probabilité du marché retenu — jamais appelée "confiance". C'est la dernière valeur calculée par l'ensemble (Poisson/Dixon-Coles/Monte-Carlo/Elo, +ancrage marché Shin pour 1X2/DC), tracée dans le code pour confirmer qu'aucune valeur intermédiaire ne fuite (voir `MODEL_ARCHITECTURE.md`, section "asymétrie entre marchés").

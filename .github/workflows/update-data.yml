@@ -1338,9 +1338,9 @@ jobs:
                 :'')
               +(d.topScorerCandidates&&d.topScorerCandidates.length
                 ?'\n=== BUTEURS PROBABLES - DEJA SELECTIONNES PAR LE SYSTEME (ne pas en choisir d\'autres) ===\n'
-                 +'Ces '+d.topScorerCandidates.length+' joueurs sont deja retenus par un calcul deterministe (volume de tirs cadres/90, taux de conversion lisse statistiquement, fiabilite du temps de jeu, force defensive de l\'adversaire) - PAS sur leurs seuls buts recents, souvent trompeurs sur petit echantillon. Ton role : explique pourquoi CES chiffres precis en font une menace de but credible, sans en proposer d\'autres.\n'
+                 +'Ces '+d.topScorerCandidates.length+' joueurs sont deja retenus par un calcul deterministe (volume de tirs cadres/90, taux de conversion lisse statistiquement, titulaires probables d\'apres les dernieres feuilles de match, absents annonces exclus, buts attendus de leur equipe face a cette defense) - PAS sur leurs seuls buts recents, souvent trompeurs sur petit echantillon. Ton role : explique pourquoi CES chiffres precis en font une menace de but credible, sans en proposer d\'autres.\n'
                  +d.topScorerCandidates.map(function(p){
-                   return '- '+p.name+' ('+(p.team_id===d.homeId?d.home:d.away)+', '+(p.position||'poste inconnu')+') : '+p.appearances+' matchs suivis cette saison, '+p.goals+' but(s), '+(p.shotsOn90!=null?p.shotsOn90:'?')+' tirs cadres/90, '+(p.shotsTotal90!=null?p.shotsTotal90:'?')+' tirs/90, taux de conversion lisse '+Math.round(p.smoothedConversion*100)+'% (moyenne du groupe compare : '+Math.round(p.baselineConversion*100)+'%), multiplicateur adversaire '+p.opponentDefenseMultiplier+' (1.0=neutre, >1=defense adverse plus permeable), score de menace '+p.goalThreatScore+'/100.';
+                   return '- '+p.name+' ('+(p.team_id===d.homeId?d.home:d.away)+', '+(p.position||'poste inconnu')+') : '+p.appearances+' matchs suivis cette saison, '+p.goals+' but(s), '+(p.shotsOn90!=null?p.shotsOn90:'?')+' tirs cadres/90, '+(p.shotsTotal90!=null?p.shotsTotal90:'?')+' tirs/90, taux de conversion lisse '+Math.round(p.smoothedConversion*100)+'% (moyenne du groupe compare : '+Math.round(p.baselineConversion*100)+'%), multiplicateur adversaire '+p.opponentDefenseMultiplier+' (1.0=neutre, >1=defense adverse plus permeable), score de menace '+p.goalThreatScore+'/100'+(p.startsLast!=null&&p.teamMatchesLast?', titulaire lors de '+p.startsLast+' des '+p.teamMatchesLast+' derniers matchs de son equipe':'')+'.';
                  }).join('\n')+'\n'
                 :'')
               +'\n=== DECISION DEJA PRISE PAR LE SYSTEME (ne pas la remettre en cause) ===\n'
@@ -2532,23 +2532,6 @@ jobs:
               var odds=parseOdds(oddsRaw);
               var critH=calcCriteres(sH,true,rkH);
               var critA=calcCriteres(sA,false,rkA);
-              // Effectif actuel passe au selecteur : un joueur transfere garde son
-              // historique sous son ancien club et ressortait comme "buteur a
-              // surveiller" pour une equipe qu'il a quittee.
-              var topScorerCandidates=pickTopScorerCandidates(playerHistoryH,playerHistoryA,home.id,away.id,critH,critA,2,{home:currentSquadH,away:currentSquadA});
-              // Bio + stats saison completes UNIQUEMENT pour les 2 candidats
-              // buteurs deja selectionnes (pas tout l'effectif - cout API
-              // borne, meme appel que getPlayerSeasonStats deja utilise et
-              // cache ailleurs, aucune requete dupliquee si le meme joueur
-              // ressort par ailleurs). Alimente la fiche joueur (age/taille/
-              // poids/blessure, stats saison, moyennes/90).
-              for(var tsi=0;tsi<topScorerCandidates.length;tsi++){
-                var tsCand=topScorerCandidates[tsi];
-                var tsStats=await getPlayerSeasonStats(tsCand.player_id,tsCand.team_id,seasonForLeague(lg.id,SEASON));
-                await sleep(150);
-                tsCand.bio=tsStats?tsStats.bio:null;
-                tsCand.seasonFull=tsStats?tsStats.seasonFull:null;
-              }
               var fatigueH=calcFatigue(last10H);
               var fatigueA=calcFatigue(last10A);
               var tendances=calcTendances(last10H,last10A);
@@ -2635,6 +2618,29 @@ jobs:
                 } else {
                   console.log('  [WC lambdas] Pas de stats qualifs disponibles pour '+home.name+' ou '+away.name+' - repli sur stats tournoi/floor');
                 }
+              }
+              // Effectif actuel passe au selecteur : un joueur transfere garde son
+              // historique sous son ancien club et ressortait comme "buteur a
+              // surveiller" pour une equipe qu'il a quittee.
+              // 18/09/2026 : selection par le calcul avant compositions
+              // (lib/insights.js#scorerModel), le meme que la carte « Marches
+              // joueurs » de la page : titulaires probables uniquement, jamais un
+              // absent annonce, buts attendus du moteur pour CE match. Place apres
+              // le calcul des lambdas definitifs (ceux publies en lambda_h/lambda_a).
+              var topScorerCandidates=pickTopScorerCandidates(playerHistoryH,playerHistoryA,home.id,away.id,critH,critA,2,{home:currentSquadH,away:currentSquadA},
+                {lambda:modelDataAvailable?{home:lambdas.lambdaH,away:lambdas.lambdaA}:null,absences:injRaw||[]});
+              // Bio + stats saison completes UNIQUEMENT pour les 2 candidats
+              // buteurs deja selectionnes (pas tout l'effectif - cout API
+              // borne, meme appel que getPlayerSeasonStats deja utilise et
+              // cache ailleurs, aucune requete dupliquee si le meme joueur
+              // ressort par ailleurs). Alimente la fiche joueur (age/taille/
+              // poids/blessure, stats saison, moyennes/90).
+              for(var tsi=0;tsi<topScorerCandidates.length;tsi++){
+                var tsCand=topScorerCandidates[tsi];
+                var tsStats=await getPlayerSeasonStats(tsCand.player_id,tsCand.team_id,seasonForLeague(lg.id,SEASON));
+                await sleep(150);
+                tsCand.bio=tsStats?tsStats.bio:null;
+                tsCand.seasonFull=tsStats?tsStats.seasonFull:null;
               }
               // === Separation stricte des 3 probabilites (MASTER V2.1 S10.2) ===
               // PURE_IASHARK_PROBABILITY : uniquement donnees football + modeles

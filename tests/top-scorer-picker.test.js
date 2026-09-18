@@ -133,3 +133,45 @@ test("un effectif manifestement incomplet n'exclut personne", () => {
   assert.ok(r.some((p) => p.player_id === 1),
     "un effectif de 2 joueurs a suffi a exclure un titulaire");
 });
+
+// 18/09/2026 : avec context, la selection passe par le calcul avant
+// compositions (lib/insights.js#scorerModel), le meme que la carte de la page.
+function feuilles(teamId, joueurs) {
+  const rows = [];
+  for (let i = 0; i < 8; i++) {
+    joueurs.forEach((j) => {
+      const s = j.spec(i);
+      if (s) rows.push({ fixture_id: 500 + i, date: `2026-09-${String(20 - i).padStart(2, "0")}`, player_id: j.id, team_id: teamId, name: j.name, position: j.position, starter: s.starter, minutes: s.minutes, goals: s.goals || 0, shots_on: s.shots_on == null ? null : s.shots_on, shots_total: s.shots_on == null ? 0 : s.shots_on * 2 });
+    });
+  }
+  return rows;
+}
+const onze = (teamId) => [1, 2, 3, 4, 5, 6].map((k) => ({ id: teamId * 10 + k, name: "Joueur " + teamId + "-" + k, position: k === 1 ? "G" : k < 5 ? "D" : "M", spec: () => ({ starter: true, minutes: 90, shots_on: k === 6 ? 1 : null }) }));
+
+test("avec context : un remplacant a gros ratio n'est jamais retenu, seulement des titulaires probables", () => {
+  const joueurs = onze(100).concat([
+    { id: 1, name: "Titulaire Cadreur", position: "F", spec: () => ({ starter: true, minutes: 85, goals: 0, shots_on: 2 }) },
+    { id: 2, name: "Joker", position: "F", spec: (i) => ({ starter: false, minutes: 15, goals: i < 2 ? 1 : 0, shots_on: i < 3 ? 2 : null }) },
+  ]);
+  const r = pickTopScorerCandidates(feuilles(100, joueurs), [], 100, 200, null, null, 2, null, { lambda: { home: 1.6, away: 1.1 }, absences: [] });
+  assert.ok(r.length >= 1);
+  assert.ok(!r.some((p) => p.name === "Joker"));
+  assert.equal(r[0].name, "Titulaire Cadreur");
+  assert.ok(r[0].scoringProbability > 0 && r[0].startsLast >= 4);
+  assert.ok(Number.isFinite(r[0].goalThreatScore), "le score de menace reste publie pour la fiche joueur");
+});
+
+test("avec context : un blesse annonce n'est jamais retenu", () => {
+  const joueurs = onze(100).concat([
+    { id: 1, name: "Buteur Blesse", position: "F", spec: () => ({ starter: true, minutes: 90, goals: 1, shots_on: 3 }) },
+    { id: 3, name: "Doublure", position: "F", spec: () => ({ starter: true, minutes: 70, goals: 0, shots_on: 1 }) },
+  ]);
+  const r = pickTopScorerCandidates(feuilles(100, joueurs), [], 100, 200, null, null, 2, null, { lambda: null, absences: [{ name: "Buteur Blesse", team: 100 }] });
+  assert.ok(!r.some((p) => p.name === "Buteur Blesse"));
+  assert.ok(r.some((p) => p.name === "Doublure"));
+});
+
+test("avec context : donnees vides ou abimees -> tableau vide, jamais une exception", () => {
+  assert.deepEqual(pickTopScorerCandidates([], [], 100, 200, null, null, 2, null, { lambda: null, absences: null }), []);
+  assert.deepEqual(pickTopScorerCandidates(null, undefined, 100, 200, null, null, 2, undefined, {}), []);
+});

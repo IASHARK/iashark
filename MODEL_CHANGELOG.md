@@ -2,6 +2,35 @@
 
 Changements qui affectent le calcul des probabilités, marchés, edge/Kelly ou la manière dont ils sont décidés. Journal complet et non-technique dans `IASHARK_V2_EXECUTION_STATE.md` ; ce fichier ne liste que ce qui touche le moteur lui-même.
 
+## 2026-09-18 (nuit) — buteur le plus probable avant les compositions
+
+- **Constat** : la carte « Marchés joueurs » classait les joueurs sur leurs buts et tirs cadrés par 90 minutes de la saison en cours, sans regarder s'ils jouent. Sur les 137 matchs publiés le 18/09, le buteur mis en avant n'avait été titulaire dans aucun des 5 derniers matchs de son équipe dans 12 cas (Tottenham – Aston Villa : Alysson Edward, 1 but en 87 minutes, 21,7 %), et des attaquants titulaires sans but s'affichaient à 0 %. Le sélecteur du pipeline (`top_scorers`, buteurs cités dans le texte d'analyse) ignorait aussi les blessés annoncés.
+- **Fix** : calcul unique `lib/insights.js#scorerModel` (déjà chargé par toutes les pages match, aucune page HTML modifiée) :
+  - estimation de titularisation sur les 5 derniers matchs de l'équipe, pondérée vers le plus récent ; les matchs avant la première feuille d'une recrue ne comptent pas ;
+  - minutes attendues ;
+  - taux de buts régularisé vers la moyenne du poste, avec les tirs cadrés à 75 % : une série sans but d'un joueur qui cadre ne le fait plus disparaître ;
+  - part du joueur dans les buts de son équipe ;
+  - buts attendus de l'équipe dans ce match selon le moteur (`lambda_h`/`lambda_a`, qui intègrent la défense adverse) ;
+  - P = 1 − exp(−0,8 × λ × part).
+  - Seuls les titulaires probables sont mis en avant, jamais un absent annoncé ni un joueur sorti de l'effectif. L'affichage est plafonné à 45 %.
+- **Branchements** :
+  - `lib/match-view-model.js#prelineupScorers` remplace `scoringThreatRanking` + `withScoringProbability` ;
+  - la carte affiche le nombre réel de titularisations récentes (« 4/5 »). L'estimation de titularisation n'est jamais publiée (décision du 04/09) ;
+  - `lib/markets/top-scorer-picker.js` sélectionne via le même calcul quand le pipeline passe `context` (lambdas définitifs + blessés). L'appel dans `update-data.yml` est déplacé après le calcul des lambdas. Le score de menace /100 reste publié pour la fiche joueur.
+- **Réglage hors échantillon** (`scripts/backtest-prelineup-scorer.js`, Premier League, le calcul ne voit que les 10 dernières feuilles de chaque équipe, comme `player_history`) :
+  - moyennes par poste apprises sur 2022-23 ;
+  - poids des tirs et échelle réglés sur 2023-24 ;
+  - vérification sur 2024-25 à paramètres gelés, sur 350 matchs.
+
+  | Critère (2024-25) | Nouveau calcul | Méthode précédente | Naïf (plus de buts sur 10 matchs) |
+  |---|---|---|---|
+  | Buteur mis en avant qui marque | 32,9 % | 25,4 % | 28,3 % |
+  | Buteur mis en avant titulaire | 86,6 % | 68,3 % | — |
+  | Probabilité moyenne annoncée / observée | 5,10 % / 5,11 % | — | — |
+
+  Calibration : 3/14/24/34 % annoncés → 3/14/24/33 % observés. Au-delà de 40 %, le calcul surestime (44 % → 33 % observés sur 2023-24), d'où le plafond à 45 %.
+- **Non traité** : les buteurs ne sont pas encore suivis dans les résultats publiés (aucune mesure en production) ; les penalties ne sont pas modélisés à part ; la calibration a été mesurée en Premier League seulement (à revérifier sur d'autres championnats quand le cache du labo les couvrira).
+
 ## 2026-09-18 (soir) — retour arrière : familles dérivées débranchées
 
 - **Constat** (audit du 18/09, données publiées à 11:01 UTC) : les 18 courbes des familles dérivées branchées le matin produisaient des probabilités aberrantes. Apprises sur une plage étroite de probabilités brutes, avec des extrémités portées par très peu d'échantillons (valeurs de bord à 0, 0,5, 0,727 ou 1), elles s'appliquaient hors de leur plage (`applyIsotonicCurve` renvoie alors la valeur de bord). Exemple réel : clean sheet extérieur 35,8 % brut → 72,7 % publié, retenu comme pari du match offert du 19/09 ; « domicile plus de 1,5 but » ramené à 0 sous 28 % brut. Sur une grille réaliste de lambdas, écarts médians de 4 à 9 points et maximums de 20 à 36 points selon la famille. Le gain de Brier/ECE sur le holdout ne voyait pas ces extrémités.

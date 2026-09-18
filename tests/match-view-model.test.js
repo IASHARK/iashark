@@ -152,7 +152,10 @@ test('Buteurs potentiels : classe par signal de menace reel (buts/90 + tirs cadr
     current_squads: { home: [{ player_id: 10, name: 'Buteur Reel' }, { player_id: 11, name: 'Milieu Passeur' }], away: [] }
   }));
   assert.equal(vm.players.scoringThreat[0].name, 'Buteur Reel', 'le milieu a un impact generique plus haut (rating+passes cles) mais aucun signal de menace de but reel');
-  assert.ok(!vm.players.scoringThreat.some(p => p.name === 'Milieu Passeur'), 'aucun but ni tir cadre reel -> pas de menace de but publiee');
+  // Depuis le 18/09/2026 (calcul avant compositions, lib/insights.js#scorerModel),
+  // un titulaire sans tir garde une probabilite residuelle - jamais devant le buteur.
+  const milieu = vm.players.scoringThreat.find(p => p.name === 'Milieu Passeur');
+  assert.ok(!milieu || milieu.scoringProbability < vm.players.scoringThreat[0].scoringProbability / 2, 'aucun tir cadre en 5 matchs : loin derriere le buteur');
 });
 
 test('Buteurs potentiels : un remplacant a gros ratio sur peu de minutes ne passe jamais devant un titulaire regulier', () => {

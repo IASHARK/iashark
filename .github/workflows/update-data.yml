@@ -36,7 +36,7 @@ jobs:
           const { fractionalKelly } = require('./lib/betting.js');
           const { resolveMarketWin, extractRegulationScore } = require('./lib/resolvers.js');
           const { parseOdds } = require('./lib/odds.js');
-          const { pickMarketDeterministic, computeRiskLabel, computeModelAgreement, computeDataQualityScore, computeReliability, scoresConsistentWithMarket } = require('./lib/decision.js');
+          const { pickMarketDeterministic, pickMarketFair, fairMarketProbabilities, SELECTION, computeRiskLabel, computeModelAgreement, computeDataQualityScore, computeReliability, scoresConsistentWithMarket } = require('./lib/decision.js');
           const { buildPoissonMatrix, buildDixonColesMatrix, blendMatrices, deriveMarketsFromMatrix } = require('./lib/markets/score-matrix.js');
           const { blendEarlySeasonRate } = require('./lib/markets/early-season.js');
           const { countLineProbability } = require('./lib/markets/count-model.js');
@@ -1320,7 +1320,7 @@ jobs:
                 ?'\n=== MARCHES MODELISES ET COTES ===\n'
                  +'(probabilites de la matrice Dixon-Coles, calibrees sur 1X2 / plus de 2.5 buts / BTTS ; cotes collectees, pas forcement >= 1.50)\n'
                  +d.all_markets.map(function(m){
-                   return m.market+' | Proba modele: '+m.prob+'% | Cote: '+m.cote;
+                   return m.market+' | Proba modele seul: '+m.prob+'%'+(m.estimate!=null?' | Estimation retenue (cotes sans marge + modele): '+m.estimate+'%':'')+' | Cote: '+m.cote;
                  }).join('\n')+'\n'
                 :'Aucun marche a la fois modelise et cote pour ce match.\n')
               +(d.mc_scores&&d.mc_scores.length
@@ -1346,7 +1346,7 @@ jobs:
               +'\n=== DECISION DEJA PRISE PAR LE SYSTEME (ne pas la remettre en cause) ===\n'
               +(d.no_signal
                 ?'Aucun marche retenu : le modele n\'a pas pu calculer de facon fiable pour ce match (historique insuffisant ou donnees de la saison en cours indisponibles). N\'invente ni marche ni cote : explique factuellement, en 1-2 phrases, pourquoi aucun marche n\'est retenu aujourd\'hui.\n'
-                :'Marche retenu : '+d.picked_market.market+' ('+(d.picked_market.cote!=null&&d.picked_market.cote!==''?'cote '+d.picked_market.cote:'sans cote disponible')+', probabilite modele '+Math.round(d.picked_market.prob)+'%). C\'est le marche de plus haute probabilite modele parmi les marches cotes au moins 1.50 (a defaut parmi tous les marches cotes, ou sans cote si aucune n\'existe) - deja calcule par le systeme. Ne le remets JAMAIS en cause, n\'en propose jamais un autre, ne cite jamais un autre marche comme "meilleur choix".\n')
+                :'Marche retenu : '+d.picked_market.market+' ('+(d.picked_market.cote!=null&&d.picked_market.cote!==''?'cote '+d.picked_market.cote:'sans cote disponible')+', probabilite estimee '+Math.round(d.picked_market.prob)+'%). C\'est le marche le plus probable parmi les marches cotes entre 1.40 et 2.00, en combinant ce que disent les cotes (marge du bookmaker retiree) et le modele (a defaut au-dessus de 2.00, puis sous 1.40, ou sans cote si aucune n\'existe) - deja calcule par le systeme. Cite l\'estimation retenue, pas la probabilite du modele seul. Ne le remets JAMAIS en cause, n\'en propose jamais un autre, ne cite jamais un autre marche comme "meilleur choix".\n')
               +'\n=== TON ROLE (STRICT) ===\n'
               +'Tu es un analyste sportif professionnel. Tu ne calcules RIEN : le marche, la cote, la probabilite, l\'edge, le niveau de risque ET les buteurs probables sont deja decides ci-dessus par du code deterministe, pas par toi. Tu ne renvoies AUCUN nombre de probabilite, AUCUNE cote, AUCUN marche choisi, AUCUN score de confiance, AUCUN autre buteur que ceux listes ci-dessus - uniquement du texte qui EXPLIQUE les decisions deja prises, en citant les donnees reelles fournies plus haut.\n'
               +'ANCRAGE OBLIGATOIRE DES TEXTES : contexte et facteur_x doivent citer un chiffre EXACT tire des donnees ci-dessus (classement #X, forme 5 derniers, xG, ecart ELO, % de buts par tranche, etc.). N\'invente jamais un enjeu ou un classement qui n\'apparait pas dans les donnees fournies - si aucune donnee d\'enjeu n\'est disponible (pas de ligne "Enjeu DOM/EXT"), ne mentionne pas d\'enjeu du tout plutot que d\'en inventer un vague. Une phrase sans chiffre precis est invalide.\n\n';
@@ -2790,7 +2790,13 @@ jobs:
               // le resultat deja decide pour le commenter en texte - si Claude est
               // indisponible, ce bloc produit exactement la meme decision (§10.AJ:
               // "le moteur doit fonctionner a 100% sans lui").
-              var pickedMarket=pickMarketDeterministic(allMarkets,{minOdds:1.50});
+              // 19/09/2026 (decision du proprietaire) : une meme regle pour toutes
+              // les familles. Reference commune = probabilite du bookmaker marge
+              // retiree (80 %) + modele (20 %) ; plus haute estimation parmi les
+              // cotes SELECTION.minOdds a SELECTION.maxOdds. Voir
+              // lib/decision.js#pickMarketFair et MODEL_CHANGELOG.md.
+              var fairSelection=pickMarketFair(allMarkets,{shin:shinProbs});
+              var pickedMarket=fairSelection?fairSelection.market:null;
               // ECHELLE DE REPLI (demande explicite : "le moteur ne doit plus
               // passer, il doit forcement me trouver un marche").
               // Avant, tout match sans marche cote >= 1.50 sortait sans aucune
@@ -2799,11 +2805,11 @@ jobs:
               // On descend maintenant les paliers plutot que d'abandonner, mais
               // on n'invente JAMAIS de cote : quand il n'y en a pas, le marche
               // est publie sans prix et le drapeau odds_available le dit.
-              var pickDowngrade=null;
+              var pickDowngrade=fairSelection?fairSelection.downgrade:null;
               if(!pickedMarket&&allMarkets.length){
-                // Des marches sont cotes, mais tous sous 1.50. On prend le plus
-                // probable quand meme : la cote est reelle, seul le seuil de
-                // rentabilite qu'on s'etait fixe n'est pas atteint.
+                // Dernier recours (19/09/2026) : des marches sont cotes mais aucune
+                // probabilite juste n'a pu etre calculee (aucun livre complet). On
+                // prend le plus probable selon le modele, signale sous le seuil.
                 pickedMarket=pickMarketDeterministic(allMarkets,{});
                 if(pickedMarket)pickDowngrade='LOW_ODDS';
               }
@@ -2820,7 +2826,7 @@ jobs:
               }
               // Match commence/imminent : aucun marche retenu, quel que soit le palier.
               if(!kickoffGateFix.open){ pickedMarket=null; pickDowngrade=null; }
-              var eligibleMarkets=allMarkets.filter(function(m){return parseFloat(m.cote)>=1.50;});
+              var eligibleMarkets=allMarkets.filter(function(m){return parseFloat(m.cote)>=SELECTION.minOdds;});
               // Score(s) le(s) plus probable(s) affiches a l'utilisateur : filtres
               // pour rester coherents avec le marche recommande (ex: pas de "1-0"
               // affiche a cote d'un pick "Over 2.5") - repli honnete sur le
@@ -2829,15 +2835,24 @@ jobs:
               var displayScores=pureProbs.montecarlo?scoresConsistentWithMarket(pureProbs.montecarlo.top_scores_full,pickedMarket&&pickedMarket.id,3):[];
               // Vue comparative publique : uniquement des marchés réellement modélisés
               // ET cotés. Aucun chiffre de secours n'est fabriqué pour remplir la carte.
-              var marketsCompared=allMarkets.slice().sort(function(a,b){return b.prob-a.prob;}).slice(0,4).map(function(m){
-                return {
-                  id:m.id,
-                  market:m.market,
-                  probability:Math.round(m.prob*10)/10,
-                  consensus:Number.isFinite(Number(m.marketProb))?Math.round(Number(m.marketProb)*10)/10:null,
-                  edge:Number.isFinite(Number(m.marketProb))?Math.round((m.prob-Number(m.marketProb))*10)/10:null
-                };
-              });
+              // 19/09/2026 : meme echelle que le pari retenu. Estimation publiee =
+              // 80 % probabilite juste du bookmaker + 20 % modele, comparee a la
+              // probabilite juste (marge retiree) ; le pari retenu ouvre la liste.
+              var fairById=fairMarketProbabilities(allMarkets,{shin:shinProbs});
+              var estimateOf=function(m){var f=fairById.get(m.id);return f==null?null:(1-SELECTION.modelWeight)*f+SELECTION.modelWeight*Number(m.prob);};
+              var marketsCompared=allMarkets.map(function(m){
+                var f=fairById.get(m.id),e=estimateOf(m);
+                var ref=f!=null?f:(Number.isFinite(Number(m.marketProb))?Number(m.marketProb):null);
+                var p=e!=null?e:Number(m.prob);
+                return {id:m.id,market:m.market,probability:Math.round(p*10)/10,consensus:ref!=null?Math.round(ref*10)/10:null,edge:ref!=null?Math.round((p-ref)*10)/10:null};
+              }).sort(function(a,b){
+                // Pari retenu d'abord, puis les marches de base du tableau de la page
+                // (resultat, plus de 2,5 buts, BTTS) pour qu'ils soient sur la meme
+                // echelle, puis les plus probables.
+                var BASE=['home-win','draw','away-win','over-25','btts-yes'];
+                var rang=function(x){return pickedMarket&&x.id===pickedMarket.id?2:(BASE.indexOf(x.id)!==-1?1:0);};
+                return (rang(b)-rang(a))||(b.probability-a.probability);
+              }).slice(0,8);
               // DATA_QUALITY_FAIL_* (item 1) : distinct de INSUFFICIENT_MODEL_DATA
               // (qui reste le cas legitime "vraie saison vide, meme apres
               // repli") - permet a l'operateur/au monitoring de distinguer un
@@ -2852,8 +2867,9 @@ jobs:
               if(pickedMarket){
                 var choseCote=parseFloat(pickedMarket.cote);
                 var choseProb=pickedMarket.prob;
-                if(pickedMarket.marketProb!=null){
-                  edgeVal=(choseProb-pickedMarket.marketProb>=0?'+':'')+(choseProb-pickedMarket.marketProb).toFixed(1)+'%';
+                var refProb=pickedMarket.fairProb!=null?pickedMarket.fairProb:pickedMarket.marketProb;
+                if(refProb!=null){
+                  edgeVal=(choseProb-refProb>=0?'+':'')+(choseProb-refProb).toFixed(1)+'%';
                 }
                 if(choseProb&&choseCote&&choseCote>1){
                   var k=fractionalKelly(choseProb/100,choseCote,0.25);
@@ -2934,10 +2950,10 @@ jobs:
                 pinnacle_c1:marketOdds?marketOdds.c1:null,pinnacle_c2:marketOdds?marketOdds.c2:null,
                 market_source:usingPinnacle?'Pinnacle (sharp)':(marketOdds?'Cotes moyennes multi-bookmakers':null),
                 final_p1:pureProbs.p1,final_pN:pureProbs.pN,final_p2:pureProbs.p2,
-                all_markets:allMarkets,node_kelly:nodeKelly,
+                all_markets:allMarkets.map(function(m){var e=estimateOf(m);return Object.assign({},m,{estimate:e!=null?Math.round(e*10)/10:null});}),node_kelly:nodeKelly,
                 picked_market:pickedMarket,no_signal:noSignal,no_signal_reason:noSignalReason,
                 topScorerCandidates:topScorerCandidates,
-                market_selection_audit:{modelled:allMarketCandidates.filter(function(m){return Number.isFinite(Number(m.prob));}).length,supported_quotes:supportedQuoteCount,modelled_and_quoted:allMarkets.length,eligible:eligibleMarkets.length,minimum_odds:1.50,rejected_no_reliable_model:unmodelledDynamicQuoteCount},
+                market_selection_audit:{modelled:allMarketCandidates.filter(function(m){return Number.isFinite(Number(m.prob));}).length,supported_quotes:supportedQuoteCount,modelled_and_quoted:allMarkets.length,eligible:eligibleMarkets.length,minimum_odds:SELECTION.minOdds,maximum_odds:SELECTION.maxOdds,rejected_no_reliable_model:unmodelledDynamicQuoteCount},
                 lineup_home_formation:lineups&&lineups.home?lineups.home.formation:null,
                 lineup_away_formation:lineups&&lineups.away?lineups.away.formation:null,
                 streakH,streakA,forme5H,forme5A,
@@ -3012,20 +3028,17 @@ jobs:
                 status:(f.status&&f.status.short)||null,
                 val:!noSignal&&kellyVal!=='0',
                 hot:!noSignal&&modelAgreement.label==='Fort'&&kellyVal!=='0',
-                // model_probability : PURE_IASHARK_PROBABILITY (§10.2) pour le marche
-                // retenu (0-100, deterministe) - matrice Dixon-Coles calibree (1X2/O2.5/
-                // BTTS, lib/engine.js#calcFinalProbs ; Elo non utilise), et RIEN d'autre : aucune cote n'entre dans ce calcul, jamais,
-                // pour aucun marche (1X2/DC inclus - corrige ce jalon, ils etaient
-                // auparavant ancres au marche via un blend Shin, cf MODEL_ARCHITECTURE.md
-                // et tests/pure-probability.test.js). C'est le meme nombre utilise pour
-                // choisir le marche (lib/decision.js#pickMarketDeterministic) et pour
-                // calculer edge/Kelly contre market_consensus_* ci-dessous - jamais une
-                // valeur intermediaire brute, jamais MARKET_AWARE contre son propre
-                // marche source (interdit explicitement par le MASTER). Ce n'EST PAS une
-                // "probabilite calibree" au sens statistique (isotonic/Platt, §10.S) :
-                // aucune calibration post-hoc n'a encore ete mesuree pour ce moteur (voir
-                // CALIBRATION_REPORT.md).
+                // model_probability (19/09/2026, decision du proprietaire) : estimation
+                // PUBLIEE pour le marche retenu (0-100) = 80 % probabilite juste du
+                // bookmaker (marge retiree) + 20 % modele (lib/decision.js#pickMarketFair).
+                // Remplace la probabilite pure du modele (MASTER V2.1 §10.2) pour le choix
+                // et l'affichage : mesuree sur 7 439 matchs, la probabilite pure faisait
+                // choisir les marches que le modele surestime (49,6 % de paris gagnes
+                // contre 60,0 %). La probabilite pure reste publiee dans p1/pn/p2/po25/btts
+                // (« Ce que dit le modele ») et dans all_markets pour l'analyse.
                 model_probability:pickedMarket?Math.round(pickedMarket.prob*10)/10:null,
+                // La probabilite juste du bookmaker du pari retenu (reference de la page)
+                // est la 'consensus' de sa ligne dans markets_compared (premium, en tete).
                 // Les 3 probabilites S10.2 exposees separement et explicitement pour le
                 // marche 1X2 (celui qui a les 3 versions calculees) - jamais fusionnees.
                 market_consensus_p1:shinProbs?shinProbs.p1:null,market_consensus_pN:shinProbs?shinProbs.pN:null,market_consensus_p2:shinProbs?shinProbs.p2:null,

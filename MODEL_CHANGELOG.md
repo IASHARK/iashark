@@ -2,6 +2,41 @@
 
 Changements qui affectent le calcul des probabilités, marchés, edge/Kelly ou la manière dont ils sont décidés. Journal complet et non-technique dans `IASHARK_V2_EXECUTION_STATE.md` ; ce fichier ne liste que ce qui touche le moteur lui-même.
 
+## 2026-09-19 — choix du pari : une même règle pour toutes les familles
+
+- **Constat.** Banc d'essai sur les vraies cotes historiques (football-data.co.uk, 12 championnats, `scripts/backtest-market-selection.js`), en rejouant le moteur de production (`calcLambdas` + `calcFinalProbs`, sans le mélange xG faute d'historique). L'ancienne règle, « plus haute probabilité du modèle, cote ≥ 1,50 », n'était pas neutre : chaque famille a son propre calcul, et celle dont le calcul exagère gagnait l'argmax.
+
+  | Règle d'avant | Paris gagnés | Cote moyenne | Résultat |
+  |---|---|---|---|
+  | 2023-24 + 2024-25 (7 439 matchs) | 49,6 % | 1,97 | −8,2 % des mises |
+  | 2025-26 | 49,7 % | — | — |
+
+  La double chance X2 représentait 35 % des choix et l'under 23 %, exactement les familles que le modèle surestime (X2 : 58,7 % annoncés, 56,0 % réels ; domicile : 41,3 % annoncés, 44,0 % réels).
+- **Règle** (`lib/decision.js#pickMarketFair`, `SELECTION`) :
+  - la référence commune est la probabilité du bookmaker, marge retirée livre par livre : 1X2 (Shin si disponible), paires plus/moins d'une même ligne (buts, buts par équipe, 1re mi-temps, tirs), BTTS ;
+  - la double chance est la somme des issues 1X2 justes ;
+  - pour un marché coté d'un seul côté (clean sheet, combinés, gagne sans encaisser…), on retire la marge la plus forte mesurée sur le match ;
+  - le modèle entre pour 20 % seulement : au-delà, le taux de réussite baisse (réglage 2020-23, w = 0 : 56,3 % ; w = 1 : 51,5 %) ;
+  - on retient la plus haute estimation parmi les cotes 1,40–2,00, à défaut au-dessus de 2,00, à défaut sous 1,40 (LOW_ODDS). Toutes les familles restent candidates.
+
+  | Règle de production | Paris gagnés | Cote moyenne | Résultat |
+  |---|---|---|---|
+  | 2023-24 + 2024-25 | 60,0 % | 1,68 | −3,2 % des mises |
+  | 2025-26 | 57,0 % | 1,65 | — |
+  | Réglage 2020-23 | 59,8 % | — | — |
+
+  Répartition équilibrée : over 26 %, X2 22 %, 1X 17 %, under 16 %, domicile 13 %, extérieur 5 %.
+- **Publié** :
+  - `model_probability` = cette estimation ; décision du propriétaire du 19/09/2026, qui remplace MASTER V2.1 §10.2 (« probabilité pure seule pour choisir ») pour le choix et l'affichage du pari ;
+  - `markets_compared` : estimation contre probabilité juste, avec le pari retenu en tête puis les marchés de base, 8 lignes ;
+  - la page compare le pari à la probabilité juste de sa ligne, avec repli sur 1 / cote pour les données antérieures, et la ligne du tableau reprend les mêmes chiffres (`lib/match-view-model.js#recommendedReference`) ;
+  - `p1/pn/p2/po25/btts` restent la probabilité pure du modèle (« Ce que dit le modèle ») ;
+  - page Méthodologie mise à jour dans les 9 versions, principe seulement, sans chiffre.
+- **Limites** :
+  - aucune règle testée ne gagne d'argent sur la durée sur ces marchés : la marge du bookmaker l'emporte. L'écart affiché entre notre estimation et la cote est donc faible, souvent négatif ;
+  - tirs, BTTS, totaux par équipe, 1re mi-temps et combinés n'ont pas de cotes historiques publiques : même règle appliquée, non mesurée sur le passé ;
+  - à suivre en production : taux de réussite par famille chaque semaine.
+
 ## 2026-09-18 (nuit) — buteur le plus probable avant les compositions
 
 - **Constat** : la carte « Marchés joueurs » classait les joueurs sur leurs buts et tirs cadrés par 90 minutes de la saison en cours, sans regarder s'ils jouent. Sur les 137 matchs publiés le 18/09, le buteur mis en avant n'avait été titulaire dans aucun des 5 derniers matchs de son équipe dans 12 cas (Tottenham – Aston Villa : Alysson Edward, 1 but en 87 minutes, 21,7 %), et des attaquants titulaires sans but s'affichaient à 0 %. Le sélecteur du pipeline (`top_scorers`, buteurs cités dans le texte d'analyse) ignorait aussi les blessés annoncés.

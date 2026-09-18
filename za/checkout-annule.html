@@ -42,6 +42,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .ctas{display:flex;flex-direction:column;gap:10px;}
 .cta{display:block;width:100%;padding:15px 13px;border-radius:10px;border:1px solid var(--ba);background:rgba(245,158,11,0.1);color:var(--amber);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;text-decoration:none;text-align:center;}
 .cta.secondary{border-color:var(--border);background:none;color:var(--muted);}
+.cta[hidden]{display:none;}
+.trust{margin-top:18px;font-size:11px;color:var(--muted);letter-spacing:.04em;}
 </style>
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
 <meta property="og:type" content="website">
@@ -61,14 +63,35 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <div class="icon">↩️</div>
     <div class="title" data-i18n="checkout_pages.cancel_heading">Payment cancelled</div>
     <div class="body" data-i18n="checkout_pages.cancel_body">No payment has been made. You can try again whenever you like, with no commitment.</div>
+    <!-- Page de reprise, pas une impasse (tunnel 09/2026 : un visiteur y est
+         passe deux fois sans jamais revenir au paiement). Le premier bouton
+         ramene au choix de duree ; le match d'origine, s'il est connu, est
+         propose juste en dessous. -->
     <div class="ctas">
-      <a href="/za/pro.html" data-href="pro.html" class="cta" data-i18n="checkout_pages.cancel_cta_tools">BACK TO THE TOOLS SPACE →</a>
-      <a href="/za/compte.html" data-href="compte.html" class="cta secondary" data-i18n="checkout_pages.cancel_cta_account">MY ACCOUNT →</a>
+      <a href="/za/abonnement.html" data-href="abonnement.html" id="ctaRetry" class="cta" data-i18n="checkout_pages.cancel_cta_retry">TRY AGAIN — NO COMMITMENT →</a>
+      <a href="/za/" id="ctaMatch" class="cta secondary" hidden data-i18n="checkout_pages.cancel_cta_match">BACK TO THE MATCH →</a>
+      <a href="/za/compte.html" data-href="compte.html" id="ctaAccount" class="cta secondary" data-i18n="checkout_pages.cancel_cta_account">MY ACCOUNT →</a>
     </div>
+    <p class="trust" data-i18n="checkout_pages.cancel_trust">Secure payment · Cancel anytime</p>
   </div>
 </div>
-<script>if(window.iasharkTrack) iasharkTrack('checkout_cancel_view');
-if(window.I18N&&window.I18N.init){window.I18N.init();}</script>
+<script>
+(function(){
+  if(window.iasharkTrack) iasharkTrack('checkout_cancel_view');
+  // Match d'origine memorise par abonnement-page.js avant le depart vers
+  // Stripe : chemin interne uniquement, sinon les liens restent generiques.
+  var ctx=null;try{ctx=JSON.parse(sessionStorage.getItem('iashark.checkout.return')||'null');}catch(e){}
+  var path=ctx&&ctx.path;
+  if(typeof path==='string'&&path.charAt(0)==='/'&&path.charAt(1)!=='/'&&path.indexOf('\\')===-1&&/\/match\.html(\?|$)/.test(path)){
+    var retry=document.getElementById('ctaRetry');
+    retry.setAttribute('data-href','abonnement.html?next='+encodeURIComponent(path));
+    retry.href='/za/abonnement.html?next='+encodeURIComponent(path);
+    var match=document.getElementById('ctaMatch');match.href=path;match.hidden=false;
+    document.getElementById('ctaAccount').hidden=true;
+  }
+  if(window.I18N&&window.I18N.init){window.I18N.init();}
+})();
+</script>
 <script src="/site-prefs.js"></script>
 <script src="/bottom-navigation.js"></script><script src="/site-header.js" defer></script>
 <!--SEO_FOOTER_NAV--><nav class="seo-foot-nav" aria-label="Site navigation" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#91a0b3;text-align:center"><p style="margin:0 0 4px"><span style="color:#c3ccd8">Leagues:</span> <a href="/za/leagues/premier-soccer-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Premier Soccer League</a> · <a href="/za/leagues/premier-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Premier League</a> · <a href="/za/leagues/champions-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Champions League</a> · <a href="/za/leagues/europa-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Europa League</a> · <a href="/za/leagues/conference-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Conference League</a></p><p style="margin:0"><a href="/za/clubs/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">PSL clubs and derby</a> · <a href="/za/articles/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">South African articles</a> · <a href="/en/blog/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Blog and guides</a> · <a href="/za/marches.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Markets analysed</a> · <a href="/za/methodologie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Methodology</a></p></nav><!--/SEO_FOOTER_NAV-->

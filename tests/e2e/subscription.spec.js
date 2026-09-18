@@ -38,10 +38,13 @@ for (const v of VERSIONS) {
       expect(v.configCurrency, `config/markets.json : /${v.dir}/ n'est pas facture en ${v.currency}`).toBe(v.currency);
       expect(typeof v.proAmount, `config/markets.json : aucun prix Pro pour /${v.dir}/`).toBe('number');
       await page.goto(`/${v.dir}/abonnement.html`);
-      // Selecteur de duree : 3 options, "Mois" coche par defaut, memes donnees
-      // sur mobile et desktop (@mobile).
+      // Selecteur de duree : une option par duree VENDUE sur ce marche
+      // (config/markets.json ; l'annuel ZA est volontairement ferme, jamais un
+      // prix invente), "Mois" coche par defaut, memes donnees sur mobile et
+      // desktop (@mobile).
+      const sold = ['week', 'month', 'year'].filter((iv) => typeof v.proAmounts[iv] === 'number');
       const radios = page.locator('#proPlanPicker input[type="radio"]');
-      await expect(radios).toHaveCount(3);
+      await expect(radios).toHaveCount(sold.length);
       await expect(page.locator('#proPlanPicker input[value="month"]')).toBeChecked();
       const market = await page.evaluate(() => {
         const M = window.IASHARK_MARKET;
@@ -52,7 +55,7 @@ for (const v of VERSIONS) {
       expect(market).toEqual({ dir: v.dir, currency: v.currency, checkoutMarket: v.checkoutMarket, amounts: v.proAmounts });
 
       const others = Object.keys(CURRENCY_PATTERNS).filter((c) => c !== v.currency);
-      for (const iv of ['week', 'month', 'year']) {
+      for (const iv of sold) {
         const price = page.locator(`#proPlanPicker [data-market-price="pro.${iv}"]`);
         await expect(price).toBeVisible();
         const t = normalizeSpaces(await price.innerText());
@@ -60,9 +63,15 @@ for (const v of VERSIONS) {
         expect(t, `prix ${iv} "${t}" : symbole ${CURRENCY_SYMBOLS[v.currency]} attendu`).toMatch(CURRENCY_PATTERNS[v.currency]);
         for (const c of others) expect(t, `prix ${iv} "${t}" : devise d'un autre marche (${c})`).not.toMatch(CURRENCY_PATTERNS[c]);
       }
-      // Economie de l'annuel : calculee (arrondi inferieur), jamais inventee.
-      const expectedPct = Math.floor((1 - v.proAmounts.year / (12 * v.proAmounts.month)) * 100 + 1e-9);
-      await expect(page.locator('#proPlanPicker .iash-plan-save')).toContainText(String(expectedPct));
+      // Economie de l'annuel : calculee (arrondi inferieur), jamais inventee ;
+      // aucune mention d'economie quand l'annuel n'est pas vendu.
+      if (sold.includes('year')) {
+        const expectedPct = Math.floor((1 - v.proAmounts.year / (12 * v.proAmounts.month)) * 100 + 1e-9);
+        await expect(page.locator('#proPlanPicker .iash-plan-save')).toContainText(String(expectedPct));
+      } else {
+        await expect(page.locator('#proPlanPicker .iash-plan-save')).toHaveCount(0);
+        await expect(page.locator('#proPlanPicker input[value="year"]')).toHaveCount(0);
+      }
       await expect(page.locator('body')).not.toContainText(/\bEdge\b/);
       // Le titre de la page ne doit jamais annoncer le prix d'un autre marche.
       const title = normalizeSpaces(await page.title());
@@ -94,9 +103,12 @@ for (const v of VERSIONS) {
       }
       await expect(pay).toHaveAttribute('aria-disabled', 'false');
 
-      // Anonyme avec consentement : envoye vers le compte (connexion) de la version.
+      // Anonyme avec consentement : inscription directe de la version (un
+      // visiteur qui clique « Devenir Pro » n'a presque jamais de compte), avec
+      // retour sur cette page - jamais le detour compte -> connexion -> « Mon compte ».
       await pay.click();
-      await expect(page).toHaveURL(new RegExp(`/${v.dir}/connexion\\.html\\?next=`));
+      await expect(page).toHaveURL(new RegExp(`/${v.dir}/inscription\\.html\\?next=`));
+      expect(new URL(page.url()).searchParams.get('next')).toBe(`/${v.dir}/abonnement.html`);
       expect(consoleErrors).toEqual([]);
     });
 
@@ -122,6 +134,7 @@ for (const v of VERSIONS) {
     });
 
     test('duree annuelle choisie : interval=year envoye @mobile', async ({ page, supa }) => {
+      test.skip(typeof v.proAmounts.year !== 'number', `annuel non vendu sur /${v.dir}/ (config/markets.json)`);
       await supa.as('free');
       supa.onFunction('create-checkout-session', { status: 200, json: { processed: true, url: STRIPE_CHECKOUT_URL } });
       await page.goto(`/${v.dir}/abonnement.html`);
@@ -181,6 +194,40 @@ for (const v of VERSIONS) {
       await pay.click();
       await expect(page).toHaveURL(new RegExp(`/${v.dir}/$`));
       expect(supa.callsTo('create-checkout-session')).toHaveLength(0);
+    });
+    // Tunnel reel (analytics 09/2026) : match -> « Debloquer » -> abonnement.
+    // Le match d'origine est nomme sur la page, suit l'inscription et est
+    // memorise pour les pages de retour Stripe.
+    test('venu d\'un match : contexte affiche, retour propage a l\'inscription et memorise pour Stripe @mobile', async ({ page, supa, siteData }) => {
+      test.skip(!siteData.paid, 'Aucun match payant dans les donnees');
+      const id = String(siteData.paid.id);
+      const d = await siteData.detail(id);
+      const matchPath = `/${v.dir}/match.html?id=${id}`;
+      await page.goto(`/${v.dir}/abonnement.html?next=${encodeURIComponent(matchPath)}`);
+      await expect(page.locator('#proContext')).toBeVisible();
+      await expect(page.locator('#proContext b')).toHaveText(`${d.home.n} – ${d.away.n}`);
+      await tickAll(page);
+      await page.locator('#subscribeButton').click();
+      await expect(page).toHaveURL(new RegExp(`/${v.dir}/inscription\\.html\\?next=`));
+      const next = new URL(page.url()).searchParams.get('next');
+      expect(next).toMatch(new RegExp(`^/${v.dir}/abonnement\\.html\\?next=`));
+      expect(new URL(next, 'http://e2e').searchParams.get('next'), 'le match suit l\'inscription').toBe(matchPath);
+
+      // Compte gratuit : le depart vers Stripe memorise le match, et la page
+      // d'annulation propose d'y revenir ou de reprendre le paiement.
+      await supa.as('free');
+      supa.onFunction('create-checkout-session', { status: 200, json: { processed: true, url: STRIPE_CHECKOUT_URL } });
+      await page.goto(`/${v.dir}/abonnement.html?next=${encodeURIComponent(matchPath)}`);
+      await tickAll(page);
+      await page.locator('#subscribeButton').click();
+      await page.waitForURL(STRIPE_CHECKOUT_URL);
+      await page.goto(`/${v.dir}/checkout-annule.html`);
+      await expect(page.locator('#ctaMatch')).toBeVisible();
+      expect(await page.locator('#ctaMatch').getAttribute('href')).toBe(matchPath);
+      const retry = await page.locator('#ctaRetry').getAttribute('href');
+      expect(retry).toMatch(new RegExp(`^/${v.dir}/abonnement\\.html\\?next=`));
+      expect(new URL(retry, 'http://e2e').searchParams.get('next')).toBe(matchPath);
+      await expect(page.locator('#ctaAccount')).toBeHidden();
     });
   });
 }

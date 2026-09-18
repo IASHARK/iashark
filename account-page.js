@@ -687,6 +687,20 @@
     window.scrollTo({ top: 0, behavior: 'auto' });
   }
 
+  // Page vers laquelle revenir apres connexion/inscription. Un chemin interne
+  // uniquement (meme regle que auth-pages.js#destination) : jamais une URL
+  // absolue ni un //hote, sinon la page devient une redirection ouverte.
+  function retourApresConnexion() {
+    var brut = new URLSearchParams(location.search).get('next') || '';
+    var interne = function (p) { return p && p.charAt(0) === '/' && p.charAt(1) !== '/' && p.indexOf('\\') === -1; };
+    if (interne(brut)) return brut;
+    try {
+      var ref = document.referrer ? new URL(document.referrer) : null;
+      if (ref && ref.origin === location.origin && /\/(match|abonnement|pro)\.html$/.test(ref.pathname)) return ref.pathname + ref.search;
+    } catch (_e) {}
+    return location.pathname + location.hash;
+  }
+
   /* ---------- Branchements ---------- */
   function brancher() {
     racine.querySelectorAll('[data-aller]').forEach(function (el) {
@@ -1108,8 +1122,15 @@
       // Page reservee aux comptes connectes. Les donnees elles-memes sont
       // protegees par RLS cote base : sans session, aucune requete ne
       // renvoie quoi que ce soit, cette redirection n'est que le confort.
-      var retourVers = encodeURIComponent(location.pathname + location.hash);
-      location.replace(lien('connexion.html?next=' + retourVers));
+      // Constat du 18/09/2026 sur les parcours reels : un visiteur clique
+      // « Débloquer » sur un match, arrive ici, est envoye a la connexion avec
+      // next=compte.html - lui-meme - et, une fois inscrit, se retrouve sur
+      // « Mon compte » sans son match. Les trois inscrits du jour ont tous du
+      // repartir de l'accueil pour le retrouver. La page match (hors
+      // perimetre ici) ne transmet pas de ?next : on prend le sien s'il
+      // existe, sinon le referent quand c'est une page du site qui vaut le
+      // retour (match, abonnement, outils), sinon cette page.
+      location.replace(lien('connexion.html?next=' + encodeURIComponent(retourApresConnexion())));
       return;
     }
     var resultats = await Promise.all([

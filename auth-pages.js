@@ -128,6 +128,28 @@
     return brut;
   }
 
+  /* ---------- ?next= suit le visiteur d'une page d'auth a l'autre ----------
+     « Pas encore de compte ? » (connexion -> inscription) et « Déjà membre ? »
+     (inscription -> connexion) perdaient le ?next=. Un visiteur envoye a la
+     connexion depuis un match, qui choisit de s'inscrire, atterrissait sur
+     « Mon compte » au lieu de revenir sur son match. */
+  function propagerNext() {
+    var brut = new URLSearchParams(location.search).get('next') || '';
+    if (!brut || brut.charAt(0) !== '/' || brut.charAt(1) === '/' || brut.indexOf('\\') !== -1) return;
+    var liens = document.querySelectorAll('a[href*="inscription.html"], a[href*="connexion.html"]');
+    var avecNext = function (u) { return u.indexOf('next=') !== -1 ? u : u + (u.indexOf('?') === -1 ? '?' : '&') + 'next=' + encodeURIComponent(brut); };
+    for (var i = 0; i < liens.length; i++) {
+      var href = liens[i].getAttribute('href') || '';
+      liens[i].setAttribute('href', avecNext(href));
+      // site-prefs.js reecrit href depuis data-href une fois le dictionnaire
+      // charge (I18N.href conserve la query) : le next doit donc vivre aussi
+      // dans data-href, sinon il est efface juste apres avoir ete pose.
+      var dataHref = liens[i].getAttribute('data-href');
+      if (dataHref) liens[i].setAttribute('data-href', avecNext(dataHref));
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', propagerNext); else propagerNext();
+
   /* ---------- Connexion ---------- */
   async function connexion(e) {
     if (e) e.preventDefault();
@@ -221,7 +243,11 @@
         // politique RLS de funnel_events rejetait l'evenement (cle anon seule).
         var nouvelleSession = res.data.session;
         if (window.iasharkTrack) window.iasharkTrack('signup_completed', {}, nouvelleSession.user && nouvelleSession.user.id, nouvelleSession.access_token);
-        location.href = localHref('compte.html?bienvenue=1');
+        // Retour la ou l'inscription a commence (match, abonnement...) quand
+        // un ?next= interne existe ; sinon « Mon compte » avec le message de
+        // bienvenue. Avant : compte.html en dur, le match etait perdu.
+        var dest = destination();
+        location.href = dest === localHref('compte.html') ? localHref('compte.html?bienvenue=1') : dest;
         return;
       }
       relacher();

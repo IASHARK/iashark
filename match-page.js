@@ -604,7 +604,11 @@ function threatsCard(vm,opts){
     // Deux decimales fixes sur les moyennes par 90, pour que les colonnes
     // du panneau s'alignent.
     const deux=v=>Number(v).toLocaleString(localeTag(),{minimumFractionDigits:2,maximumFractionDigits:2});
+    // Titularisations sur les derniers matchs de l'equipe : ce qui fait de lui
+    // un titulaire probable (compositions pas encore connues).
+    const titu=n(p.startsLast)!==null&&n(p.teamMatchesLast)>0?[`${p.startsLast}/${p.teamMatchesLast}`,t('match_page.stat_recent_starts','Titularisations récentes')]:null;
     const stats=[
+      titu,
       n(p.goals90)!==null&&p.goals90>0?[deux(p.goals90),t('match_page.stat_goals_per90','Buts / 90 min')]:null,
       n(p.shotsOn90)!==null&&p.shotsOn90>0?[deux(p.shotsOn90),t('match_page.stat_shots_on_target_per90','Tirs cadrés / 90 min')]:null,
       n(p.expectedGoals90)!==null?[deux(p.expectedGoals90),t('match_page.stat_expected_goals_per90','Buts attendus / 90 min')]:null,
@@ -643,7 +647,7 @@ function threatsCard(vm,opts){
       return `<li><span>${esc(label)}</span><b>${pct(x.probability)}</b></li>`;
     }).join('')}</ul>`;
   }
-  corps+=`<p class="pm-note">${esc(t('match_page.players_note','Probabilités estimées à partir des statistiques réelles des joueurs, sans cote de bookmaker.'))}</p>`;
+  corps+=`<p class="pm-note">${esc(t('match_page.players_note','Estimé avant les compositions officielles : seuls les titulaires probables (titularisations récentes) sont mis en avant, avec leurs tirs cadrés et buts récents et les buts attendus de leur équipe dans ce match. Aucune cote de bookmaker.'))}</p>`;
   return card(t('match_page.player_markets_title','Marchés joueurs'),corps,'threats-card','target2',opts);
 }
 

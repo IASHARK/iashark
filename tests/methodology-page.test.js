@@ -222,7 +222,10 @@ test("ce que la page affirme est vrai dans le code (sans en publier les valeurs)
   // « Le calcul est lance automatiquement une fois par jour. »
   assert.match(pipeline, /cron: '0 6 \* \* \*'/, "le calcul quotidien annonce n'existe plus");
   // « une cote minimale » et « un plafond de probabilite » (valeurs non publiees).
-  assert.match(pipeline, /pickMarketDeterministic\(allMarkets,\{minOdds:1\.50\}\)/, "la cote minimale annoncee n'existe plus");
+  // « une cote minimale et une cote maximale », « les cotes, marge retiree, et le
+  // modele » (19/09/2026, lib/decision.js#pickMarketFair).
+  assert.match(pipeline, /var fairSelection=pickMarketFair\(allMarkets,\{shin:shinProbs\}\)/, "le choix annonce (cotes sans marge + modele) n'existe plus");
+  assert.match(read("lib/decision.js"), /const SELECTION = Object\.freeze\(\{ minOdds: \d\.\d+, maxOdds: \d\.\d+, modelWeight: 0\.\d+ \}\);/, "la cote minimale/maximale annoncee n'existe plus");
   assert.match(read("lib/decision.js"), /const PROBABILITE_MAX_RECOMMANDABLE = 97;/, "le plafond de probabilite annonce n'existe plus");
   // « le classement de reference est affiche mais n'entre pas dans les probabilites ».
   assert.match(read("lib/engine.js"), /elo_used:false/);

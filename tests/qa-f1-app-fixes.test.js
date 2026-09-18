@@ -57,8 +57,8 @@ test("free-match : jour LOCAL du visiteur, mode historique (Paris) inchange", ()
   assert.equal(pickFreeMatchId(liste, paris), 10);
   // Horloge historique sans tz : comparaison des chaines de Paris.
   assert.equal(pickFreeMatchId(liste, { day: "2026-09-14", now: "2026-09-14 10:00" }), 10);
-  // Horloge par defaut (locale) : liste datee dans le futur, car un match deja
-  // commence n'est plus jamais offert (16/09/2026).
+  // Horloge par defaut (locale) : liste datee dans le futur ; une designation
+  // d'un jour passe n'est jamais offerte (le match du jour, lui, l'est jusqu'a minuit).
   const demain = new Date(Date.now() + 2 * 86400e3).toISOString().slice(0, 10);
   assert.ok(pickFreeMatch([{ id: 12, date: demain + " 20:00", is_free: true, pari_rec: "C" }]), "horloge par defaut (locale) sans erreur");
   assert.equal(pickFreeMatch(liste), null, "analyses offertes deja jouees : aucun match offert");

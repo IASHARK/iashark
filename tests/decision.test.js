@@ -224,3 +224,95 @@ test("le seuil de quasi-certitude ne coupe pas les marches legitimes", () => {
   const limite = { id: "limite", market: "Limite", prob: 96.9, cote: "1.55" };
   assert.equal(pickMarketDeterministic([limite], { minOdds: 1.5 }).id, "limite");
 });
+
+// ---------------------------------------------------------------------------
+// pickMarketFair (19/09/2026) : une meme regle pour toutes les familles.
+const { pickMarketFair, fairMarketProbabilities, SELECTION } = require("../lib/decision.js");
+const mk = (id, cote, prob) => ({ id, market: id, cote: String(cote), prob });
+
+test("fairMarketProbabilities : marge retiree livre par livre (1X2, paires, BTTS), double chance = somme des issues justes", () => {
+  const f = fairMarketProbabilities([
+    mk("home-win", 2.0, 50), mk("draw", 3.5, 25), mk("away-win", 4.0, 25),
+    mk("dc-1x", 1.25, 75), mk("over-25", 1.9, 55), mk("under-25", 1.9, 45),
+    mk("btts-yes", 1.8, 60), mk("btts-no", 2.0, 40),
+  ]);
+  const s1x2 = 1 / 2 + 1 / 3.5 + 1 / 4;
+  assert.ok(Math.abs(f.get("home-win") - (100 / 2) / s1x2) < 1e-9);
+  assert.ok(Math.abs(f.get("home-win") + f.get("draw") + f.get("away-win") - 100) < 1e-9);
+  assert.ok(Math.abs(f.get("dc-1x") - (f.get("home-win") + f.get("draw"))) < 1e-9);
+  assert.ok(Math.abs(f.get("over-25") - 50) < 1e-9, "paire symetrique : 50/50 apres retrait de marge");
+  assert.ok(Math.abs(f.get("btts-yes") + f.get("btts-no") - 100) < 1e-9);
+});
+
+test("fairMarketProbabilities : un combine n'est jamais apparie a son « moins de », marche d'un seul cote = marge la plus forte du match retiree", () => {
+  const f = fairMarketProbabilities([
+    mk("over-25", 1.8, 55), mk("under-25", 1.9, 45),          // marge ~7,2 %
+    mk("home-team-over-15", 2.0, 40), mk("home-team-under-15", 1.6, 60), // marge 12,5 %
+    mk("home-win-over-25", 3.0, 30), mk("home-win-under-25", 4.0, 20),   // combines
+    mk("home-clean-sheet", 2.5, 38),
+  ]);
+  const marge = 1 / 2.0 + 1 / 1.6 - 1;
+  assert.ok(Math.abs(f.get("home-win-over-25") - (100 / 3.0) / (1 + marge)) < 1e-9);
+  assert.ok(Math.abs(f.get("home-win-under-25") - (100 / 4.0) / (1 + marge)) < 1e-9);
+  assert.ok(Math.abs(f.get("home-clean-sheet") - (100 / 2.5) / (1 + marge)) < 1e-9);
+  // Sans aucun livre complet, pas de probabilite juste inventee.
+  assert.equal(fairMarketProbabilities([mk("home-clean-sheet", 2.5, 38)]).size, 0);
+});
+
+test("fairMarketProbabilities : paires de tirs et de 1re mi-temps reconnues ; Shin prioritaire pour le 1X2", () => {
+  const f = fairMarketProbabilities([
+    mk("total-shots-over-22_5", 1.85, 70), mk("total-shots-under-22_5", 1.85, 30),
+    mk("fh-over-05", 1.4, 70), mk("fh-under-05", 2.8, 30),
+    mk("home-win", 2.0, 50), mk("draw", 3.4, 26), mk("away-win", 4.0, 24),
+  ], { shin: { p1: 48, pN: 28, p2: 24 } });
+  assert.ok(Math.abs(f.get("total-shots-over-22_5") - 50) < 1e-9);
+  assert.ok(Math.abs(f.get("fh-over-05") + f.get("fh-under-05") - 100) < 1e-9);
+  assert.ok(Math.abs(f.get("home-win") - 48) < 1e-9);
+});
+
+test("pickMarketFair : une famille qui s'exagere ne gagne plus (le cas des tirs), le plus probable pour de vrai l'emporte", () => {
+  const r = pickMarketFair([
+    // Tirs : le modele dit 80 %, le bookmaker ~50 % (paire symetrique a 1,85).
+    mk("total-shots-over-22_5", 1.85, 80), mk("total-shots-under-22_5", 1.85, 20),
+    // Moins de 2,5 buts a 1,55 : bookmaker ~61 %, modele 63 %.
+    mk("under-25", 1.55, 63), mk("over-25", 2.45, 37),
+  ]);
+  assert.equal(r.market.id, "under-25");
+  assert.equal(r.downgrade, null);
+  // Estimation publiee = 80 % juste + 20 % modele, jamais la probabilite du modele seul.
+  const juste = (1 / 1.55) / (1 / 1.55 + 1 / 2.45) * 100;
+  assert.ok(Math.abs(r.market.prob - (0.8 * juste + 0.2 * 63)) < 1e-9);
+  assert.equal(r.market.modelProb, 63);
+  assert.ok(Math.abs(r.market.fairProb - juste) < 1e-9);
+});
+
+test("pickMarketFair : fourchette de cotes, puis au-dessus du maximum, puis sous le minimum (LOW_ODDS)", () => {
+  assert.equal(SELECTION.minOdds, 1.40);
+  assert.equal(SELECTION.maxOdds, 2.00);
+  // 1,20 plus probable mais hors fourchette : le 1,60 est retenu.
+  const dans = pickMarketFair([mk("dc-1x", 1.2, 80), mk("home-win", 1.6, 60), mk("draw", 4.5, 22), mk("away-win", 6, 18)]);
+  assert.equal(dans.market.id, "home-win");
+  // Rien entre 1,40 et 2,00 : le plus probable au-dessus de 2,00, sans signalement.
+  const dessus = pickMarketFair([mk("over-25", 1.25, 75), mk("under-25", 3.8, 25), mk("btts-yes", 2.2, 44), mk("btts-no", 1.3, 56)]);
+  assert.equal(dessus.market.id, "btts-yes");
+  assert.equal(dessus.downgrade, null);
+  // Tout sous 1,40 : le plus probable quand meme, signale LOW_ODDS.
+  const dessous = pickMarketFair([mk("over-15", 1.2, 80), mk("under-15", 1.3, 20)]);
+  assert.equal(dessous.downgrade, "LOW_ODDS");
+  assert.equal(dessous.market.id, "over-15");
+});
+
+test("pickMarketFair : l'ordre du tableau et la famille ne changent rien ; plafond de 97 % respecte", () => {
+  const a = [mk("over-25", 1.7, 55), mk("under-25", 2.2, 45), mk("btts-yes", 1.75, 54), mk("btts-no", 2.05, 46)];
+  assert.equal(pickMarketFair(a).market.id, pickMarketFair(a.slice().reverse()).market.id);
+  const quasiCertain = pickMarketFair([mk("over-05", 1.5, 99), mk("under-05", 2.5, 1), mk("over-25", 1.9, 50), mk("under-25", 1.9, 50)]);
+  assert.notEqual(quasiCertain.market.id, "over-05");
+});
+
+test("pickMarketFair : donnees vides ou abimees -> null, jamais une exception ni un marche invente", () => {
+  assert.equal(pickMarketFair([]), null);
+  assert.equal(pickMarketFair(null), null);
+  assert.equal(pickMarketFair([mk("over-25", "--", 55), mk("under-25", "", 45)]), null);
+  assert.equal(pickMarketFair([{ id: "over-25", cote: "1.9" }, { id: "under-25", cote: "1.9", prob: "abc" }]), null);
+  assert.equal(pickMarketFair([mk("home-clean-sheet", 1.8, 50)]), null, "aucun livre complet : pas de probabilite juste, le pipeline garde ses replis");
+});

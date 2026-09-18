@@ -54,11 +54,14 @@ test("pipeline source: market_consensus_* et market_aware_* sont exposes separem
   assert.ok(/market_aware_p1:marketAware\.p1/.test(source), "market_aware_p1 doit venir de l'objet marketAware, distinct de pureProbs et market_consensus");
 });
 
-test("pipeline source: pickMarketDeterministic/edge/Kelly ne recoivent jamais l'objet marketAware (uniquement allMarkets, construit depuis pureProbs)", () => {
-  // pickedMarket est calcule depuis allMarkets uniquement.
-  assert.match(source, /var pickedMarket=pickMarketDeterministic\(allMarkets,\{minOdds:1\.50\}\)/);
+test("pipeline source: le pari vient de pickMarketFair (cotes sans marge + modele), edge/Kelly ne recoivent jamais l'objet marketAware", () => {
+  // 19/09/2026 (decision du proprietaire) : une meme regle pour toutes les
+  // familles, lib/decision.js#pickMarketFair, a partir de allMarkets et des
+  // probabilites Shin du 1X2. marketAware (ancien melange 1X2) n'y entre pas.
+  assert.match(source, /var fairSelection=pickMarketFair\(allMarkets,\{shin:shinProbs\}\);\n\s*var pickedMarket=fairSelection\?fairSelection\.market:null;/);
   // Aucun site d'appel de fractionalKelly/edge ne doit referencer marketAware.
-  const kellyBlock = source.slice(source.indexOf("var pickedMarket=pickMarketDeterministic"), source.indexOf("var noSignal="));
+  const kellyBlock = source.slice(source.indexOf("var fairSelection=pickMarketFair"), source.indexOf("var noSignal="));
+  assert.ok(kellyBlock.length > 100, "bloc de selection introuvable");
   assert.ok(!/marketAware/.test(kellyBlock), "le calcul edge/Kelly ne doit jamais utiliser marketAware (interdiction explicite MASTER §10.2)");
 });
 
@@ -115,7 +118,7 @@ test("pipeline source: explanation_status publie honnêtement l'echec de genAnal
   // La selection (pari_rec/cote_rec/model_probability) doit rester
   // calculee AVANT l'appel a genAnalyse et ne jamais dependre de `an`.
   const beforeGenAnalyse = source.slice(0, source.indexOf("var an=await genAnalyse"));
-  assert.match(beforeGenAnalyse, /var pickedMarket=pickMarketDeterministic/, "pickedMarket doit deja exister avant l'appel a genAnalyse");
+  assert.match(beforeGenAnalyse, /var pickedMarket=fairSelection\?fairSelection\.market:null;/, "pickedMarket doit deja exister avant l'appel a genAnalyse");
 });
 
 test("pipeline source: genAnalyse ne fabrique jamais de contenu si le JSON est illisible - retourne null (jamais un objet partiel invente)", () => {

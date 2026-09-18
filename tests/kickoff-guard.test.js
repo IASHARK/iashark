@@ -111,7 +111,7 @@ const source = fs.readFileSync(path.join(__dirname, "..", ".github", "workflows"
 test("pipeline : garde evaluee par fixture AVANT la selection du pari, pari force a null si fermee", () => {
   assert.match(source, /require\('\.\/lib\/kickoff-guard\.js'\)/);
   const gate = source.indexOf("var kickoffGateFix=kickoffGate(fix,Date.now()");
-  const pick = source.indexOf("var pickedMarket=pickMarketDeterministic(allMarkets,{minOdds:1.50})");
+  const pick = source.indexOf("var pickedMarket=fairSelection?fairSelection.market:null;");
   const forceNull = source.indexOf("if(!kickoffGateFix.open){ pickedMarket=null; pickDowngrade=null; }");
   const matchObj = source.indexOf("var matchObj={");
   assert.ok(gate > 0 && pick > gate && forceNull > pick && matchObj > forceNull, "ordre garde -> selection -> forcage null -> matchObj");

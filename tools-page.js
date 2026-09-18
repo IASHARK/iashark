@@ -257,7 +257,7 @@
         + '</ul></div>'
         + '<div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">'
         + kpi('19', t('tools_page.scan_kpi_leagues', 'Championnats analysés chaque jour'))
-        + kpi('5000', t('tools_page.scan_kpi_models', 'Simulations Monte-Carlo par match'))
+        + kpi('5000', t('tools_page.scan_kpi_models', 'Simulations par match'))
         + kpi('1', t('tools_page.scan_kpi_free', 'Analyse complète offerte par jour'))
         + '</div>'
         + panneauPro(t('tools_page.scan_pro_title', 'Le scanner classe tous les marchés du jour par écart.'),

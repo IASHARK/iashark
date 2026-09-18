@@ -33,7 +33,11 @@ test('une carte xG sans deux valeurs réelles reste masquée',()=>{
 
 test('la liste des sources ne prétend pas utiliser des données absentes',()=>{
   const labels=display.sourceLabels({injuries:[],market_source:'Aucune cote fiable'});
-  assert.deepEqual(labels,['Calendrier et équipes · API-Football']);
+  assert.deepEqual(labels,['Calendrier et équipes']);
+  // Aucun nom de fournisseur de donnees ou de cotes dans les sources affichees.
+  const all=display.sourceLabels({crit_home:null,crit_away:null,injuries:[{p:'x'}],market_source:'Pinnacle (sharp)'});
+  assert.ok(all.every((l)=>!/api-?football|pinnacle/i.test(l)),all.join(' | '));
+  assert.ok(all.includes('Cotes du marché'));
 });
 
 test('les probabilités du modèle restent masquées quand la complétude vaut zéro',()=>{

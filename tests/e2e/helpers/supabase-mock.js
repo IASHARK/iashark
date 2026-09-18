@@ -196,6 +196,16 @@ class SupabaseMock {
         if (table === 'subscriptions') return rows(caller.subscription ? [caller.subscription] : []);
         return rows([]); // user_preferences, betting_decisions, ...
       }
+      // Journal Pro : memes contraintes NOT NULL que public.betting_decisions
+      // (migration 0010). Le formulaire n'envoyait pas estimated_probability :
+      // la vraie base refusait chaque enregistrement (audit du 18/09/2026).
+      if (table.split('?')[0] === 'betting_decisions' && req.method() === 'POST') {
+        const row = Array.isArray(body) ? body[0] : (body || {});
+        const missing = ['user_id', 'match_label', 'market', 'odds', 'estimated_probability', 'stake'].filter((k) => row[k] == null);
+        if (missing.length) return json(400, { code: '23502', details: null, hint: null, message: 'null value in column "' + missing[0] + '" of relation "betting_decisions" violates not-null constraint' });
+        const saved = Object.assign({ id: 'e2e-decision-1', status: 'pending', result_pnl: null, created_at: new Date().toISOString() }, row);
+        return wantsObject ? json(201, saved) : json(201, [saved]);
+      }
       // Ecritures (upsert preferences, funnel_events...) : acceptees sans effet.
       return route.fulfill({ status: 201, headers: cors });
     }

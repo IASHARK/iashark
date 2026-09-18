@@ -257,7 +257,7 @@
         + '</ul></div>'
         + '<div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">'
         + kpi('19', t('tools_page.scan_kpi_leagues', 'Championnats analysés chaque jour'))
-        + kpi('5000', t('tools_page.scan_kpi_models', 'Simulations Monte-Carlo par match'))
+        + kpi('5000', t('tools_page.scan_kpi_models', 'Simulations par match'))
         + kpi('1', t('tools_page.scan_kpi_free', 'Analyse complète offerte par jour'))
         + '</div>'
         + panneauPro(t('tools_page.scan_pro_title', 'Le scanner classe tous les marchés du jour par écart.'),
@@ -667,6 +667,11 @@
       + champ('jrMatch', t('tools_page.label_match', 'Match'), { type: 'text', placeholder: 'PSG – Marseille' })
       + champ('jrMarket', t('tools_page.journal_market_label', 'Marché'), { type: 'text', placeholder: t('tools_page.journal_market_placeholder', 'Plus de 2,5 buts') })
       + champ('jrOdds', t('tools_page.label_odds', 'Cote'), { min: 1.01, step: 0.01, value: 1.90 })
+      // Probabilite estimee : colonne obligatoire de betting_decisions (0 < p < 100).
+      // BUG REEL (audit du 18/09/2026) : le formulaire ne l'envoyait pas, chaque
+      // enregistrement du journal Pro echouait. Pre-remplie avec la probabilite
+      // de la cote (100 / cote), modifiable ; suit la cote tant qu'elle n'est pas modifiee.
+      + champ('jrProb', t('tools_page.journal_prob_label', 'Ta probabilité estimée'), { unit: '%', min: 1, max: 99, step: 0.1, value: 52.6, help: t('tools_page.journal_prob_help', 'Par défaut : la probabilité correspondant à la cote.') })
       + champ('jrStake', t('tools_page.journal_stake_label', 'Mise'), { unit: symboleDevise(), min: 0.01, step: 0.01 })
       + '</div><p id="jrMsg" class="mt-3 text-[12.5px] text-soft"></p>'
       + '<div class="mt-5 flex gap-3"><button value="cancel" class="flex-1 rounded-xl border border-hairline px-4 py-2.5 text-[13px] font-semibold text-ink">' + esc(t('tools_page.journal_cancel_btn', 'Annuler')) + '</button>'
@@ -676,6 +681,12 @@
     var dlg = document.getElementById('jrDlg');
     var open = document.getElementById('jrAdd');
     if (open && dlg) open.addEventListener('click', function () { dlg.showModal(); });
+    var probEl = document.getElementById('jrProb'), oddsEl = document.getElementById('jrOdds'), probTouchee = false;
+    if (probEl) probEl.addEventListener('input', function () { probTouchee = true; });
+    if (oddsEl && probEl) oddsEl.addEventListener('input', function () {
+      var c = Number(oddsEl.value);
+      if (!probTouchee && c > 1) probEl.value = String(Math.round(1000 / c) / 10);
+    });
     var save = document.getElementById('jrSave');
     if (save) save.addEventListener('click', function () {
       var msg = document.getElementById('jrMsg');
@@ -685,14 +696,16 @@
         match_label: (($('#jrMatch') || {}).value || '').trim(),
         market: (($('#jrMarket') || {}).value || '').trim(),
         odds: Number(($('#jrOdds') || {}).value),
-        stake: Number(($('#jrStake') || {}).value)
+        stake: Number(($('#jrStake') || {}).value),
+        estimated_probability: Number(($('#jrProb') || {}).value)
       };
-      if (!row.match_label || !row.market || !(row.stake > 0) || !(row.odds > 1)) {
-        if (msg) msg.textContent = t('tools_page.journal_form_incomplete_msg', 'Complète le match, le marché, une cote > 1 et une mise > 0.');
+      if (!row.match_label || !row.market || !(row.stake > 0) || !(row.odds > 1) || !(row.estimated_probability > 0 && row.estimated_probability < 100)) {
+        if (msg) msg.textContent = t('tools_page.journal_form_incomplete_prob_msg', 'Complète le match, le marché, une cote > 1, une mise > 0 et une probabilité entre 1 et 99 %.');
         return;
       }
       window.IasharkApp.supabase.from('betting_decisions').insert(row).select().single().then(function (q) {
-        if (q.error) { if (msg) msg.textContent = q.error.message; return; }
+        // Jamais le message brut de la base (anglais, technique) a l'ecran.
+        if (q.error) { if (msg) msg.textContent = t('tools_page.journal_save_error', 'Impossible d’enregistrer cette décision pour le moment. Vérifie les champs puis réessaie.'); return; }
         etat.decisions.unshift(q.data);
         if (dlg) dlg.close();
         activer('journal');

@@ -46,6 +46,9 @@ const ALL_VERSIONS = BASE_VERSIONS.map((v) => {
     // proAmount = mensuel (duree cochee par defaut) ; proAmounts = les 3 durees.
     proAmount: amount('month'),
     proAmounts: { week: amount('week'), month: amount('month'), year: amount('year') },
+    // Durees payables en ligne (config/markets.json#<marche>.checkoutOpen) ;
+    // null = toutes les durees vendues.
+    checkoutOpen: Array.isArray(m.checkoutOpen) ? m.checkoutOpen.slice() : null,
     currencySymbol: CURRENCY_SYMBOLS[v.currency],
   });
 });

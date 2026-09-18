@@ -40,13 +40,51 @@ const DERIVED_KEYS = [
   ["AWAY_WIN_UNDER_3_5", (d) => d.resultTotals.away.under3_5],
 ];
 
-test("les parametres branches couvrent les familles derivees, et le fit a bien tourne sur les deux metriques", () => {
+// 18/09/2026 (soir) : les courbes des familles derivees branchees le matin ont
+// ete DEBRANCHEES. Apprises sur une plage etroite, avec des extremites portees
+// par tres peu d'echantillons, elles s'appliquaient hors de leur plage (valeur
+// de bord) et doublaient certaines probabilites en production (clean sheet
+// exterieur 36 % -> 73 % sur le match offert du 19/09). Seules restent les trois
+// courbes validees le 13/09. Rebrancher une famille exige un refit avec effectif
+// minimal par palier ET de passer le test de couverture ci-dessous.
+const VALIDATED = ["1X2", "BTTS_YES", "OVER_2_5"];
+
+test("seules les courbes validees sont branchees, et le fit a bien tourne sur les deux metriques", () => {
   const wired = Object.entries(PARAMS.markets).filter(([, m]) => m.wired);
-  assert.ok(wired.length >= 15, "au moins 15 courbes branchees attendues, trouve " + wired.length);
+  assert.deepEqual(wired.map(([k]) => k).sort(), VALIDATED, "courbes branchees inattendues");
+  for (const [k, m] of Object.entries(PARAMS.markets)) {
+    if (!m.wired && !VALIDATED.includes(k) && m.unwired_on) assert.match(m.unwired_reason || "", /plage/, k + " : raison du debranchement documentee");
+  }
   for (const [k, m] of wired) {
     assert.ok(m.holdout_brier_after < m.holdout_brier_before, k + " : branche sans amelioration du Brier sur le holdout");
     assert.ok(m.holdout_ece_after < m.holdout_ece_before, k + " : branche sans amelioration de l'ECE sur le holdout");
     assert.ok(m.n_holdout >= 1000, k + " : holdout trop petit pour brancher (" + m.n_holdout + ")");
+  }
+});
+
+// Garde-fou qui aurait arrete le branchement du 18/09 : une courbe branchee doit
+// avoir ete apprise sur la plage des probabilites BRUTES que le moteur produit
+// reellement. Hors de sa plage, applyIsotonicCurve renvoie la valeur de bord,
+// portee par une poignee d'echantillons (0 ou 1 aux extremes) : c'est la que
+// naissent les probabilites aberrantes.
+test("toute courbe branchee couvre au moins 90 % des probabilites brutes realistes", () => {
+  const GETTERS = {
+    "1X2": (d) => [d.p1, d.pN, d.p2],
+    OVER_2_5: (d) => [d.overUnder["2.5"].over],
+    BTTS_YES: (d) => [d.btts.yes],
+  };
+  DERIVED_KEYS.forEach(([k, get]) => { if (!GETTERS[k]) GETTERS[k] = (d) => [get(d)]; });
+  const inputs = {};
+  for (let lh = 0.9; lh <= 2.61; lh += 0.1) for (let la = 0.7; la <= 2.11; la += 0.1) {
+    const raw = calcFinalProbs(lh, la, null).derived_raw;
+    for (const k of Object.keys(GETTERS)) (inputs[k] = inputs[k] || []).push(...GETTERS[k](raw));
+  }
+  for (const [k, m] of Object.entries(PARAMS.markets)) {
+    if (!m.wired) continue;
+    assert.ok(GETTERS[k], k + " : branchee mais sans entree connue pour ce test");
+    const pts = m.curve.points, lo = pts[0].x, hi = pts[pts.length - 1].x;
+    const xs = inputs[k], inside = xs.filter((x) => x >= lo && x <= hi).length / xs.length;
+    assert.ok(inside >= 0.9, k + " : seulement " + Math.round(inside * 100) + " % des probabilites realistes dans la plage apprise [" + lo.toFixed(2) + " ; " + hi.toFixed(2) + "]");
   }
 });
 

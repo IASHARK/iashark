@@ -122,9 +122,11 @@
   if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', wireOptOut); } else { wireOptOut(); }
 })();
 
-/* Suivi interne anonyme des visites (funnel-track.js) charge sur TOUTES les
-   pages depuis ce script partage. Sans cookie ni lien avec un compte : voir
-   l'en-tete de funnel-track.js. */
+/* Mesure interne des visites (funnel-track.js) chargee sur TOUTES les pages
+   depuis ce script partage. Sans cookie ; pour un utilisateur CONNECTE, les
+   evenements portent l'identifiant du compte (sauf option « Ne pas lier mes
+   visites a mon compte ») - voir l'en-tete de funnel-track.js et la page
+   cookies (audit du 18/09/2026 : l'ancien commentaire disait le contraire). */
 (function(){
   if(window.__iasharkTrackLoaded || document.querySelector('script[src$="funnel-track.js"]')) return;
   var s = document.createElement('script');

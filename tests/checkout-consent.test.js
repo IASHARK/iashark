@@ -71,7 +71,12 @@ test("sans les cases, le paiement est bloque ; le payload suit le regime", () =>
   assert.deepEqual([...lib.missing({ terms: false }, mx)], ["terms"]);
   assert.deepEqual([...lib.missing({ terms: true }, mx)], []);
   const p = lib.buildPayload({ terms: true, waiver: true }, eu, { locale: "en", dir: "", ts: "2026-09-13T00:00:00.000Z" });
-  assert.deepEqual({ ...p }, { terms: true, waiver: true, terms_version: lib.TERMS_VERSION, locale: "en", dir: "", ts: "2026-09-13T00:00:00.000Z" });
+  assert.deepEqual({ ...p }, { terms: true, waiver: true, terms_version: lib.termsVersionFor(""), locale: "en", dir: "", ts: "2026-09-13T00:00:00.000Z" });
+  // 18/09/2026 : CGV FR (et pages racine, francaises) en version propre ; les autres repertoires gardent la version commune.
+  assert.equal(lib.termsVersionFor("fr"), "2026-09-18");
+  assert.equal(lib.termsVersionFor(""), "2026-09-18");
+  assert.equal(lib.termsVersionFor("gb"), lib.TERMS_VERSION);
+  assert.equal(lib.buildPayload({ terms: true, waiver: true }, eu, { dir: "fr" }).terms_version, "2026-09-18");
   assert.equal(lib.buildPayload({ terms: true, waiver: true }, mx, {}).waiver, null, "mx : aucune renonciation envoyee");
   assert.match(lib.TERMS_VERSION, /^\d{4}-\d{2}-\d{2}$/);
 });

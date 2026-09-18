@@ -217,19 +217,20 @@ test("score final : historique regle, confrontations directes, forme vue depuis 
   assert.equal(L.findFinalScore(entry, { matchs: [{ home: { n: "X" }, away: { n: "Y" }, h2h: [{ d: "2026-03-15", home: "Club America", away: "Guadalajara Chivas", s: "4-0" }] }] }), null);
 });
 
-test("hors sitemap 48 h apres le coup d'envoi (FR et versions localisees)", () => {
+test("hors sitemap des la fin du match (coup d'envoi + 2 h, FR et versions localisees)", () => {
   const root = tmpRoot();
   try {
     cycle(root, [RICH], at(-DAY));
-    cycle(root, [], at(47 * HOUR));
+    cycle(root, [], at(1.5 * HOUR));
     assert.match(readT(root, "sitemap-fr.xml"), /<loc>https:\/\/iashark\.com\/match\/777001\.html<\/loc>/);
     assert.match(readT(root, "sitemap-matches-i18n.xml"), /\/mx\/match\/777001\.html/);
-    cycle(root, [], at(49 * HOUR));
+    cycle(root, [], at(3 * HOUR));
     assert.ok(exists(root, "match/777001.html"), "page toujours servie");
     assert.doesNotMatch(readT(root, "sitemap-fr.xml"), /777001/);
     assert.doesNotMatch(readT(root, "sitemap-matches-i18n.xml"), /777001/);
-    assert.equal(L.stageFor("2026-09-19T19:00:00Z", KICKOFF + 47 * HOUR, false).inSitemap, true);
-    assert.equal(L.stageFor("2026-09-19T19:00:00Z", KICKOFF + 48 * HOUR, false).inSitemap, false);
+    assert.equal(L.stageFor("2026-09-19T19:00:00Z", KICKOFF + 1.5 * HOUR, false).inSitemap, true);
+    assert.equal(L.stageFor("2026-09-19T19:00:00Z", KICKOFF + 2 * HOUR, false).inSitemap, false);
+    assert.equal(L.SITEMAP_MAX_AGE_HOURS * 60, L.FINISHED_AFTER_MINUTES || 120, "sortie du sitemap = match termine");
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
 

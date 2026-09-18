@@ -1595,7 +1595,8 @@
           "Dernière visite : " + (last ? H.daysAgo(last, now) : "jamais vue"),
           "inscrit " + H.daysAgo(u.created_at, now),
           u.source_group ? (u.source_group === "direct" ? "venu en direct" : "via " + H.sourceLabel(u.source_group)) : null,
-          H.isCountry(u.country) ? H.countryName(u.country) : null,
+          // Ville quand admin_members la fournit (migration 0028), sinon le pays seul.
+          (u.city || H.isCountry(u.country)) ? H.placeLabel(u) : null,
           st.key === "pro" && st.idleDays >= 7 ? "absent depuis " + st.idleDays + " jours" : null,
           u.tracking_opt_out ? "a refusé le suivi de ses visites" : null
         ].filter(Boolean).join(" · ");

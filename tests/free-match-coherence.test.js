@@ -86,8 +86,10 @@ test("plusieurs matchs designes : prend celui du jour, puis le prochain a venir"
     m(2, "2026-09-03 21:00", { is_free: true, pari_rec: "B" })
   ];
   assert.equal(pickFreeMatchId(list, { day: "2026-09-02", now: "2026-09-02 20:59" }), 1);
-  // 16/09/2026 : match du jour commence -> jamais offert, on passe a la designation suivante.
-  assert.equal(pickFreeMatchId(list, { day: "2026-09-02", now: "2026-09-02 23:59" }), 2);
+  // 18/09/2026 (decision du proprietaire) : le match offert du jour le reste
+  // jusqu'a minuit, meme commence ou termine ; a minuit, celui du lendemain.
+  assert.equal(pickFreeMatchId(list, { day: "2026-09-02", now: "2026-09-02 21:30" }), 1, "commence : toujours offert");
+  assert.equal(pickFreeMatchId(list, { day: "2026-09-02", now: "2026-09-02 23:59" }), 1, "termine, avant minuit : toujours offert");
   assert.equal(pickFreeMatchId(list, { day: "2026-09-03", now: "2026-09-03 00:01" }), 2);
   assert.equal(pickFreeMatchId(list, { day: "2026-09-01", now: "2026-09-01 12:00" }), 1);
 });
@@ -154,12 +156,14 @@ test("l'accueil et la page match passent le meme marche au module partage", () =
   }
 });
 
-// 16/09/2026 (audit du site en ligne) : le match offert n'est jamais un match
-// deja commence ou termine, sur l'accueil comme sur la page match.
-test("match offert : jamais un match commence ou termine (designation ou repli)", () => {
+// 18/09/2026 (decision du proprietaire, remplace la regle du 16/09) : la
+// designation du jour reste offerte jusqu'a minuit, meme deja jouee ; une
+// designation d'un jour passe ne l'est jamais, un match non designe non plus.
+test("match offert : celui du jour jusqu'a minuit, jamais un jour passe ni un match non designe", () => {
   const h = { day: "2026-09-02", now: "2026-09-02 21:30" };
-  assert.equal(pickFreeMatchId([m(1, "2026-09-02 00:00", { is_free: true, pari_rec: "A" })], h), null, "seule designation deja jouee : aucun match offert");
-  assert.equal(pickFreeMatchId([m(1, "2026-09-02 00:00", { is_free: true, pari_rec: "A" }), m(3, "2026-09-02 22:00", { pari_rec: "C", data_quality_score: 99 })], h), null, "jamais un match non designe a la place");
+  assert.equal(pickFreeMatchId([m(1, "2026-09-02 00:00", { is_free: true, pari_rec: "A" })], h), 1, "designation du jour deja jouee : offerte jusqu'a minuit");
+  assert.equal(pickFreeMatchId([m(1, "2026-09-01 21:00", { is_free: true, pari_rec: "A" })], h), null, "designation de la veille : plus offerte");
+  assert.equal(pickFreeMatchId([m(1, "2026-09-02 00:00", { is_free: true, pari_rec: "A" }), m(3, "2026-09-02 22:00", { pari_rec: "C", data_quality_score: 99 })], h), 1, "jamais un match non designe a la place");
   assert.equal(pickFreeMatchId([m(1, "2026-09-02 21:00", { pari_rec: "A", data_quality_score: 90 }), m(2, "2026-09-02 22:00", { pari_rec: "B", data_quality_score: 10 })], h), 2, "repli : match a venir seulement");
   assert.equal(pickFreeMatchId([m(1, "2026-09-02 21:00", { pari_rec: "A" })], h), null);
 });

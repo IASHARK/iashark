@@ -72,6 +72,11 @@ jobs:
           // publiee, jamais offert ni candidat canonique pour un match deja commence,
           // imminent (<= maintenant + 15 min) ou dont le statut API n'est pas NS/TBD.
           const { kickoffGate, closeMatchForPick, filterOpenCandidates, KICKOFF_MARGIN_MINUTES, eligibleForFree, reasonableParisSlot } = require('./lib/kickoff-guard.js');
+          // GEL DE L'ANALYSE A SA PREMIERE PUBLICATION (19/09/2026, lib/pick-freeze.js) :
+          // une analyse deja publiee avec un pari retenu garde ce pari, sa probabilite,
+          // sa cote et ses textes jusqu'au coup d'envoi ; le match offert d'un jour
+          // deja designe le reste ; l'historique suit le pari publie.
+          var PICK_FREEZE=require('./lib/pick-freeze.js');
           // Pages SEO statiques (titres/JSON-LD des pages match, versions
           // localisees, pages championnat) : scripts/seo-pages.js.
           var SEO_PAGES=require('./scripts/seo-pages.js');
@@ -1866,9 +1871,17 @@ jobs:
                 console.log('  Resolu foot: '+found.match+' -> '+found.result+' ('+gh+'-'+ga+')');
               }
             }catch(e){console.log('  Resultats hier erreur:',e.message);}
+            var realignees=0;
             for(var mi=0;mi<matchsData.length;mi++){
               var m=matchsData[mi];
               var alreadyExists=histo.predictions.find(function(p){return p.fixture_id===m.id||(p.home===m.home.n&&p.away===m.away.n&&p.date&&p.date.substring(0,10)===TODAY);});
+              // GEL DU PARI (19/09/2026, lib/pick-freeze.js) : une prediction encore en
+              // attente suit le pari PUBLIE (fige jusqu'au coup d'envoi, celui que voient
+              // les abonnes), jamais un pari recalcule puis abandonne. Cas : prediction
+              // enregistree avant le gel, run sans lecture des publications, coup
+              // d'envoi deplace (nouvelle premiere publication).
+              try{ if(alreadyExists&&m.pari_rec&&PICK_FREEZE.alignPendingPrediction(alreadyExists,m)) realignees++; }
+              catch(e){ console.log('  [GEL] prediction non realignee : '+(e&&e.message)); }
               if(!alreadyExists&&m.pari_rec){
                 var betLabel=m.pari_rec;
                 var betCote=parseFloat(m.cote_rec)||null;
@@ -1906,6 +1919,7 @@ jobs:
             // aucune prediction n'est perdue definitivement (MASTER §15.3, corrige
             // ce jalon : l'ancien slice(0,300) supprimait silencieusement tout au-dela
             // des 300 plus recentes, a chaque run, sans aucune archive).
+            if(realignees) console.log('  [GEL] '+realignees+' prediction(s) en attente realignee(s) sur le pari publie.');
             await writePredictionsArchive(histo.predictions);
             // Cache JSON local : fenetre recente bornee pour la taille de page
             // (§33), plus genereuse que l'ancien plafond (500 au lieu de 300) - ce
@@ -2244,6 +2258,47 @@ jobs:
             }
             console.log('  [archive] '+ecrites+'/'+rows.length+' predictions archivees dans Supabase (predictions_archive, sans plafond).');
           }
+          // GEL DU PARI (19/09/2026, lib/pick-freeze.js) : relit dans match_premium_data
+          // l'analyse deja publiee de chaque fixture du run, AVANT tout calcul et toute
+          // ecriture. C'est exactement ce que la fonction match-data sert aux abonnes
+          // Pro (colonnes + premium_fields + raw_response.narrative_i18n). Lecture seule.
+          // -> { lues: {id:true} (etat precedent connu), lignes: {id: ligne}, echecs }.
+          // Jamais bloquant : un echec est un ::warning (les paris deja publies de ces
+          // matchs peuvent alors changer a ce run) et le calcul continue normalement.
+          async function lirePublicationsPrecedentes(ids){
+            var out={lues:{},lignes:{},echecs:0};
+            var uniques=(ids||[]).map(String).filter(function(v,i,a){ return /^\d+$/.test(v)&&a.indexOf(v)===i; });
+            if(!uniques.length) return out;
+            if(!SUPA_URL_PIPELINE||!SUPA_SERVICE_KEY){
+              out.echecs=uniques.length;
+              console.log('::warning title=Gel des paris::SUPABASE_SERVICE_ROLE_KEY absente : analyses deja publiees illisibles, les paris deja publies peuvent changer a ce run.');
+              return out;
+            }
+            try{
+              var colonnes=PICK_FREEZE.PREMIUM_ROW_SELECT;
+              var base=SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/match_premium_data?select=';
+              for(var i=0;i<uniques.length;i+=50){
+                var lot=uniques.slice(i,i+50), rep=null;
+                for(var essai=0;essai<2&&!Array.isArray(rep);essai++){
+                  if(essai) await sleep(1000);
+                  rep=await rawHttpGetJson(base+colonnes+'&fixture_id=in.('+lot.join(',')+')',{'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY});
+                  // Migration 0020 absente : premium_fields est alors dans raw_response.premium_fields.
+                  if(!Array.isArray(rep)&&/premium_fields/.test(String(rep&&rep.message||''))) colonnes=colonnes.replace(',premium_fields','');
+                }
+                if(Array.isArray(rep)){
+                  lot.forEach(function(id){ out.lues[id]=true; });
+                  rep.forEach(function(r){ if(r&&r.fixture_id!=null) out.lignes[String(r.fixture_id)]=r; });
+                } else out.echecs+=lot.length;
+              }
+            }catch(e){
+              // Erreur inattendue : aucun etat precedent n'est suppose connu.
+              out={lues:{},lignes:{},echecs:uniques.length};
+              console.log('  [GEL] erreur de lecture : '+(e&&e.message));
+            }
+            if(out.echecs) console.log('::warning title=Gel des paris::lecture de match_premium_data impossible pour '+out.echecs+' match(s) : leurs paris deja publies peuvent changer a ce run (calcul normal).');
+            console.log('  [GEL] '+Object.keys(out.lignes).length+' analyse(s) precedente(s) relue(s) sur '+uniques.length+' match(s) du run.');
+            return out;
+          }
           async function main(){
             console.log('=== IASHARK',TODAY,'===');
             // OBSERVABILITE RUN_OUTPUT_ENGINE : identifie sans ambiguite,
@@ -2379,7 +2434,11 @@ jobs:
             var prevPinnacleOdds={};
             var prevByFixture={};
             try{if(fs.existsSync('data.json')){var prevData=JSON.parse(fs.readFileSync('data.json','utf8'));(prevData.matchs||[]).forEach(function(m){if(m.pinnacle_snapshot){prevPinnacleOdds[m.home.n+'|'+m.away.n]=m.pinnacle_snapshot;}if(m&&m.id!=null){prevByFixture[String(m.id)]=m;}});}}catch(e){}
-            console.log('Recalcul actif : chaque fixture est reevaluee avec les dernieres donnees et cotes disponibles');
+            // GEL DU PARI (lib/pick-freeze.js) : analyses deja publiees, relues avant
+            // tout calcul et toute ecriture de ce run. Appliquees apres la garde coup
+            // d'envoi (second passage), voir « GEL DE L'ANALYSE » plus bas.
+            var PUBLICATIONS_PRECEDENTES=await lirePublicationsPrecedentes(Object.keys(FIXTURE_BY_ID));
+            console.log('Recalcul actif : chaque fixture est reevaluee avec les dernieres donnees et cotes disponibles ; une analyse deja publiee avec un pari garde ce pari jusqu\'au coup d\'envoi (gel).');
             var matchsData=[];
             var premiumRows=[];
             var narrativeJobs=[];
@@ -3337,6 +3396,53 @@ jobs:
             });
             RUN_OUTPUT_CANDIDATES=filterOpenCandidates(RUN_OUTPUT_CANDIDATES,FIXTURE_BY_ID,KICKOFF_CHECK_MS,{marginMinutes:KICKOFF_MARGIN_MINUTES});
             console.log('  [KICKOFF] second passage : '+fermesKickoff+' match(s) ferme(s) au pronostic (commence, imminent ou statut non NS/TBD).');
+            // ===== GEL DE L'ANALYSE A SA PREMIERE PUBLICATION (19/09/2026) =====
+            // Decision du proprietaire : une fois l'analyse d'un match publiee avec un
+            // pari retenu (pari_rec non vide), ce pari, sa probabilite affichee, sa cote et
+            // tout ce que l'analyse en dit (comparatif, fiabilite, risque, chiffres du
+            // modele, textes rediges et traductions) ne changent plus jusqu'au coup
+            // d'envoi. Les nouvelles regles et donnees ne valent que pour les matchs
+            // publies pour la premiere fois ; les faits publics (cotes brutes, forme,
+            // classement, blessures, compositions...) continuent de se mettre a jour.
+            // Regles et cas limites : lib/pick-freeze.js#freezeAnalysis.
+            // Place ICI : apres la garde coup d'envoi (second passage : un match ferme
+            // ne retrouve jamais de pari) et apres les traductions, AVANT la selection
+            // canonique, le match offert, les fichiers publics, les lignes premium,
+            // les snapshots et l'historique - qui recoivent donc tous le pari publie.
+            var GEL_FIGES={}, GEL_COMPTES={};
+            allMatchsData.forEach(function(m,iGel){
+              if(!m||m.id==null) return;
+              var cleGel=String(m.id);
+              // Ligne premium du match (la derniere, celle que garde l'upsert).
+              var iLignes=[];
+              premiumRows.forEach(function(r,ir){ if(r&&String(r.fixture_id)===cleGel) iLignes.push(ir); });
+              // Precedent : ligne relue, null si aucune ligne, undefined si illisible.
+              var precedent=PUBLICATIONS_PRECEDENTES.lues[cleGel]?(PUBLICATIONS_PRECEDENTES.lignes[cleGel]||null):undefined;
+              var gel;
+              try{
+                gel=PICK_FREEZE.freezeAnalysis(m,precedent,{
+                  nowMs:KICKOFF_CHECK_MS, fixture:FIXTURE_BY_ID[cleGel], previousPublic:prevByFixture[cleGel]||null,
+                  premiumRow:iLignes.length?premiumRows[iLignes[iLignes.length-1]]:null
+                });
+              }catch(e){
+                // Jamais bloquant : calcul du jour publie tel quel pour ce match.
+                console.log('::warning title=Gel des paris::fixture '+cleGel+' : gel non applique ('+(e&&e.message)+'), son pari peut changer a ce run.');
+                GEL_COMPTES.ERROR=(GEL_COMPTES.ERROR||0)+1;
+                return;
+              }
+              allMatchsData[iGel]=gel.match;
+              iLignes.forEach(function(ir){ premiumRows[ir]=gel.premiumRow; });
+              GEL_COMPTES[gel.status]=(GEL_COMPTES[gel.status]||0)+1;
+              if(gel.status==='FROZEN') GEL_FIGES[cleGel]=true;
+            });
+            // Journaux publics : des compteurs seulement, jamais le pari.
+            console.log('  [GEL] '+Object.keys(GEL_COMPTES).sort().map(function(k){ return k+'='+GEL_COMPTES[k]; }).join(' ')+' (FROZEN = analyse deja publiee conservee a l identique).');
+            // SAFE_PICK / combines canoniques : seulement sur les matchs publies pour la
+            // premiere fois (l'injection SAFE_PICK remplacerait le pari d'un match fige).
+            RUN_OUTPUT_CANDIDATES=PICK_FREEZE.withoutFrozenCandidates(RUN_OUTPUT_CANDIDATES,GEL_FIGES);
+            // Snapshot 'prediction' (match_snapshots) : celui de la premiere publication
+            // reste en place, ce sont les donnees d'entree qui expliquent le pari fige.
+            snapshotRows=snapshotRows.filter(function(r){ return !GEL_FIGES[String(r&&r.fixture_id)]; });
             var RUN_OUTPUT_SNAPSHOT_TIME = new Date().toISOString();
             var runOutput = runOutputForSnapshot({
               candidates: RUN_OUTPUT_CANDIDATES,
@@ -3449,14 +3555,26 @@ jobs:
                 }
                 return liste.reduce(function(b,m){ return (b===null||(Number(m.conf)||0)>(Number(b.conf)||0))?m:b; }, null);
               };
+              // GEL (19/09/2026, lib/pick-freeze.js#keptFreeDesignations) : l'analyse
+              // offerte d'un jour deja designee par un run precedent (is_free du
+              // data.json publie) le reste pour ce jour tant qu'elle peut etre servie
+              // (meme fixture, meme jour, pari publie, coup d'envoi a venir, statut
+              // NS/TBD). Le proprietaire l'annonce aux membres le matin : elle ne
+              // bascule pas au run de midi. Sinon (commence, reporte, annule) : choix
+              // habituel ci-dessous parmi les matchs analysables.
+              var gardes={};
+              try{ gardes=PICK_FREEZE.keptFreeDesignations(Object.keys(prevByFixture).map(function(k){ return prevByFixture[k]; }),allMatchsData,{today:TODAY,nowMs:OFFRE_MS,fixturesById:FIXTURE_BY_ID}); }
+              catch(e){ console.log('::warning title=Gel des paris::match offert : designation precedente non relue ('+(e&&e.message)+').'); }
               var jours=[];
               allMatchsData.forEach(function(m){
                 var j=jourDe(m);
                 if(analysable(m) && j>=TODAY && jours.indexOf(j)===-1) jours.push(j);
               });
+              Object.keys(gardes).forEach(function(j){ if(j>=TODAY && jours.indexOf(j)===-1) jours.push(j); });
               jours.sort();
               var elus={};
               jours.slice(0,2).forEach(function(j){
+                if(gardes[j]){ elus[j]=gardes[j]; return; }
                 var duJour=allMatchsData.filter(function(m){ return analysable(m) && jourDe(m)===j; });
                 // Creneau raisonnable en heure de Paris (12:00-22:59) de preference.
                 var creneau=duJour.filter(function(m){ return reasonableParisSlot(m); });
@@ -3477,7 +3595,7 @@ jobs:
               if(!cles.length) console.log('  [ACCES] aucune analyse exploitable a offrir.');
               cles.forEach(function(k){
                 var m=elus[k];
-                console.log('  [ACCES] analyse offerte du '+k+(m.is_canonical_pick?' (SAFE_PICK canonique)':'')+' : '+m.id+' ('+(m.home&&m.home.n)+' vs '+(m.away&&m.away.n)+') '+(m.league||''));
+                console.log('  [ACCES] analyse offerte du '+k+(gardes[k]===m?' (designation conservee)':'')+(m.is_canonical_pick?' (SAFE_PICK canonique)':'')+' : '+m.id+' ('+(m.home&&m.home.n)+' vs '+(m.away&&m.away.n)+') '+(m.league||''));
               });
             })();
             // Buteurs du jour : APRES la garde coup d'envoi (second passage) et
@@ -3580,7 +3698,7 @@ jobs:
           JSEOF
       - name: Signaler le mode de recalcul
         run: |
-          echo "Les fixtures sont recalculees a chaque execution; les snapshots historiques restent conserves separement."
+          echo "Les fixtures sont recalculees a chaque execution; une analyse deja publiee avec un pari garde ce pari jusqu'au coup d'envoi (lib/pick-freeze.js); les snapshots historiques restent conserves separement."
       - name: Verifier la couverture reelle des ligues de lancement (API-Football)
         continue-on-error: true
         env:

@@ -108,7 +108,7 @@ Chaque dossier contient les 5 mêmes fichiers autonomes. Le tableau indique le `
 
 ## 4. Points à faire confirmer par un juriste, et décisions bloquées
 
-Versions des CGV (19/09/2026) : version en vigueur `2026-09-19` pour les 9 dossiers (`lib/checkout-consent.js#TERMS_VERSION`, envoyée avec le consentement) ; versions précédentes dans `legal/<dir>/archives/cgv-<date>.html` (non publiées : `legal/` est exclu de `dist/`).
+Versions des CGV (19/09/2026) : version en vigueur `2026-09-19` pour les 9 dossiers (`lib/checkout-consent.js#TERMS_VERSION`, envoyée avec le consentement) ; versions précédentes dans `legal/<dir>/archives/cgv-<date>.html` (non publiées : `legal/` est exclu de `dist/`). Durées payables (décision du propriétaire du 19/09/2026, `config/markets.json#checkoutOpen`) : versions EUR semaine et mois — **annuel non ouvert** tant que les rappels avant reconduction (L215-1) ne sont pas envoyés, annoncé comme tel dans les CGV fr, es, de, it, pt ; /gb/ mois ; /mx/ semaine, mois, année ; /za/ semaine, mois ; /en/ (USD) mois. `create-checkout-session` refuse toute durée fermée (champ `open` de `prices.generated.ts`).
 
 ### Tous marchés
 1. **BLOCKED_DECISION : identité légale incomplète.**

@@ -728,6 +728,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
       <a href="/confidentialite.html" style="color:#22d3ee;text-decoration:underline;margin:0 8px;">Confidentialité</a>
       <a href="/methodologie.html" data-requires-page="methodologie.html" style="color:#22d3ee;text-decoration:underline;margin:0 8px;">Méthodologie</a>
     </div>
+    <div style="margin-top:6px;" data-market-helpline-extra-if hidden><span data-market-helpline-extra="name"></span> · <a data-market-helpline-extra="url" href="#" style="color:#22d3ee;text-decoration:none;"></a><span data-market-helpline-extra-if="phone"> · <span data-market-helpline-extra="phone"></span></span></div>
   </div>
 </footer>
 
@@ -756,6 +757,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 <script src="/lib/display-data.js"></script>
 <script src="/lib/match-time.js"></script>
 <script src="/lib/league-names.js"></script>
+<script src="/lib/team-names.js"></script>
 <script src="/lib/free-match.js"></script>
 <script src="/lib/market-labels.js"></script>
 <script src="/lib/fav-leagues.js"></script>
@@ -817,6 +819,12 @@ function estFr(){return !(window.I18N&&window.I18N.locale)||window.I18N.locale==
 function localeTag(){return (window.I18N&&window.I18N.localeTag)?window.I18N.localeTag():'fr-FR';}
 // Internal link kept inside the current language/market directory (/gb/, /mx/...).
 function lien(p){return (window.I18N&&window.I18N.href)?window.I18N.href(p):'/'+p;}
+// Lien d'un match : page statique indexable de la version (/<dir>/match/<id>.html,
+// lib/league-names.js#staticMatchPath) quand elle existe, sinon le shell
+// match.html?id= (audit SEO du 19/09/2026 : les cartes liaient le shell noindex).
+function lienMatch(m){var LN=window.IasharkLeagueNames,d=window.I18N&&window.I18N.dir;var p=(LN&&LN.staticMatchPath&&m)?LN.staticMatchPath(m.id,String(m.league_key||'').toLowerCase(),d):null;return p||lien('match.html?id='+encodeURIComponent(m&&m.id));}
+// Nom d'affichage d'une equipe (lib/team-names.js : « América », « Pumas UNAM »).
+function nomEquipe(tm){return window.IasharkTeamNames?IasharkTeamNames.displayName(tm):((tm&&tm.n)||'');}
 // Prices of the current GEO market (lib/market-config.js). Without a GEO
 // market (historic FR/EUR site) the static prices of the page stay as they are.
 function prixProMarche(){
@@ -978,7 +986,7 @@ function dayLabel(m){
   return d.length===3?d[2]+'/'+d[1]:'';
 }
 function buildHeroFeature(m){
-  var heure=esc(heureLocale(m)),hn=m.home&&m.home.n||'',an=m.away&&m.away.n||'';
+  var heure=esc(heureLocale(m)),hn=m.home&&nomEquipe(m.home)||'',an=m.away&&nomEquipe(m.away)||'';
   // Pas de gate fiableHero ici : la confiance est deja affichee sans lui
   // juste en dessous (feature-signal), et ce bandeau met en avant le SEUL
   // match entierement gratuit de la page - le garder bloque sur
@@ -997,7 +1005,7 @@ function buildHeroFeature(m){
     :'<div class="feature-signal feature-gate"><div class="signal-label">'+esc(t('home_app.free_gate_label','Analyse offerte'))+'</div><div class="signal-market signal-gate">'+esc(t('home_app.free_gate_text','Créer un compte gratuit pour voir l’analyse offerte'))+'</div>'
       +'<span class="feature-cta">'+esc(t('home_app.free_gate_cta','Créer un compte gratuit'))+'<i aria-hidden="true">→</i></span></div>';
   function heroLogo(tm,name){var u=tm&&(tm.photo||tm.logo||(tm.id?'https://media.api-sports.io/football/teams/'+tm.id+'.png':''));return u?'<img src="'+u+'" width="72" height="72" alt="'+esc(tf('home_app.logo_alt','Logo {team}',{team:name}))+'">':'<div class="mc-team-logo-placeholder">'+esc(name.slice(0,2).toUpperCase())+'</div>';}
-  return'<a class="feature-card" href="'+esc(lien('match.html?id='+encodeURIComponent(m.id)))+'" aria-label="'+tf('home_app.card_aria_view','Voir l\'analyse {home} contre {away}',{home:esc(hn),away:esc(an)})+'">'
+  return'<a class="feature-card" href="'+esc(lienMatch(m))+'" aria-label="'+tf('home_app.card_aria_view','Voir l\'analyse {home} contre {away}',{home:esc(hn),away:esc(an)})+'">'
     +'<div class="feature-meta"><div class="feature-league">'+leagueHeader(m)+'</div><div class="feature-meta-right"><span class="feature-free">Analyse gratuite</span><span>'+dayLabel(m)+' · '+heure+'</span></div></div>'
     +'<div class="feature-teams"><div class="feature-team">'+heroLogo(m.home,hn)+esc(hn)+'</div><div class="feature-vs">VS</div><div class="feature-team">'+heroLogo(m.away,an)+esc(an)+'</div></div>'
     +signal+'</a>';
@@ -1021,7 +1029,7 @@ function renderMatchs(){
   // l'ouvre vraiment. Tant que le match n'est pas resolu, le lien reste
   // l'ancre #decisions : jamais de lien mort.
   var ctaHero=document.querySelector('.hero-cta');
-  if(ctaHero&&featured)ctaHero.setAttribute('href',lien('match.html?id='+encodeURIComponent(featured.id)));
+  if(ctaHero&&featured)ctaHero.setAttribute('href',lienMatch(featured));
   // Liste des matchs : le match offert RESTE dans sa competition, avec la puce
   // « Offert » (decision validee le 15/09/2026). Meme identifiant que la vitrine.
   // Sans compte : la ligne du match offert ne montre pas l'analyse (compte gratuit exige, comme la page match).
@@ -1039,7 +1047,7 @@ function monterListe(){
     helpers:{
       heure:heureLocale,matchDay:matchDayStr,compareMatches:compareMatchs,
       leagueName:leagueName,leagueFlag:leagueFlag,leagueLogoUrl:leagueLogoUrl,leagueCountry:leagueCountry,
-      translateMarket:translateMarket,marketIdLabel:marketIdLabel,lien:lien,
+      translateMarket:translateMarket,marketIdLabel:marketIdLabel,lien:lien,matchHref:lienMatch,
       pickFreeMatch:function(list){return IasharkFreeMatch.pickFreeMatch(list,null,(window.IASHARK_MARKET&&window.IASHARK_MARKET.code)||null);}
     }
   });

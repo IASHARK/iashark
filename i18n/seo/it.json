@@ -2,6 +2,13 @@
   "_readme": "SEO copy for /it/. Termini di ricerca: 'pronostici calcio', 'pronostici Serie A', 'probabilità', 'quote', 'goal/no goal'. See i18n/seo/gb.json#_readme.",
   "tz": "Europe/Rome",
   "tz_label": "ora italiana",
+  "intlLocale": "it-IT",
+  "clock_options": {
+    "hour": "2-digit",
+    "minute": "2-digit"
+  },
+  "clock_zone": "{time} ({tz})",
+  "clock_list": "{time}",
   "sport": "Calcio",
   "org_description": "IASHARK analizza le partite di calcio con modelli statistici e confronta le probabilità stimate con le quote dei bookmaker. Non è un bookmaker.",
   "meta": {
@@ -34,7 +41,7 @@
     "eyebrow": "COME FUNZIONA",
     "title": "Pronostici calcio basati sulle probabilità, non sulle sensazioni",
     "paragraphs": [
-      "IASHARK elabora i pronostici di calcio con un modello statistico dei risultati che non usa mai le quote. Per ogni partita di Serie A, Premier League, Champions League e delle altre competizioni coperte, il modello stima la probabilità di ogni risultato, del numero di gol e del goal/no goal, poi la confronta con la probabilità implicita nelle quote dei bookmaker.",
+      "Il modello statistico di IASHARK stima le possibilità di ogni squadra dai dati delle partite: risultati, gol, forma e rendimento in casa e in trasferta. Per ogni partita di Serie A, Premier League, Champions League e delle altre competizioni coperte, stima la probabilità di ogni risultato, del numero di gol e del goal/no goal. Le quote dei bookmaker, senza margine, servono a confrontare queste stime e a scegliere tra i mercati realmente offerti.",
       "Si tratta di stime statistiche: il calcio resta incerto, nessun risultato è garantito e IASHARK non è un bookmaker. La qualità dei dati varia da un campionato all'altro, per questo ogni analisi indica la propria affidabilità. Vietato ai minori di 18 anni."
     ],
     "leagues_title": "Pronostici per competizione",
@@ -48,7 +55,8 @@
       "ligue1",
       "el",
       "ecl"
-    ]
+    ],
+    "summary_tz": "ora italiana"
   },
   "breadcrumb": {
     "home": "Home",
@@ -202,7 +210,8 @@
     "h2h_title": "Precedenti",
     "h2h_row": "{date}: {home} {score} {away}",
     "lineups_title": "Formazioni iniziali",
-    "lineup_row": "{team} ({formation}): {players}"
+    "lineup_row": "{team} ({formation}): {players}",
+    "h1": "{home} vs {away}"
   },
   "nav": {
     "aria": "Navigazione del sito",

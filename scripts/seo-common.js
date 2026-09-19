@@ -27,6 +27,58 @@ function dictFor(dir) {
 function get(obj, keyPath) {
   return keyPath.split(".").reduce(function (o, k) { return o != null ? o[k] : null; }, obj);
 }
+// Locale Intl des dates et heures du HTML statique d'une version :
+// i18n/seo/<dir>.json#intlLocale (ex. /en/ : en-US, format americain « Sep 19 »,
+// « 9:30 PM ») sinon config/markets.json#_dirs.<dir>.intlLocale.
+function intlLocaleFor(dir) {
+  var s = seoConf(dir);
+  return (s && typeof s.intlLocale === "string" && s.intlLocale) || DIRS[dir].intlLocale;
+}
+
+// ---------------------------------------------------------------------------
+// Dates et heures du HTML statique, dans le fuseau et la locale de la version
+// (i18n/seo/<dir>.json : tz, intlLocale, clock_options, clock_zone, clock_list).
+function fmtIn(d, dir, opts) {
+  var o = Object.assign({ timeZone: seoConf(dir).tz }, opts);
+  try { return new Intl.DateTimeFormat(intlLocaleFor(dir), o).format(d); } catch (e) { return d.toISOString().slice(0, 16).replace("T", " "); }
+}
+// Heure seule ("20:45", "9:30 PM").
+function clockIn(d, dir) {
+  var co = seoConf(dir).clock_options;
+  return fmtIn(d, dir, co && typeof co === "object" ? co : { hour: "2-digit", minute: "2-digit" });
+}
+// Heure UTC 24 h ("01:30"), seconde heure de /en/.
+function utcClock(d) {
+  try { return new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(d); } catch (e) { return d.toISOString().slice(11, 16); }
+}
+// Heure avec fuseau explicite : clock_zone (bloc d'informations d'une page
+// match, defaut "{time} ({tz})") ou clock_list (listes : accueil, hubs,
+// defaut "{time}"). /en/ : "9:30 PM ET (01:30 UTC)".
+function zonedClock(d, dir, kind) {
+  var s = seoConf(dir);
+  var tpl = kind === "list" ? (s.clock_list || "{time}") : (s.clock_zone || "{time} ({tz})");
+  return fill(tpl, { time: clockIn(d, dir), utc: utcClock(d), tz: s.tz_label });
+}
+// Jour calendaire (AAAA-MM-JJ) d'un instant dans le fuseau de la version.
+function dayKeyIn(d, dir) {
+  try {
+    var p = {};
+    new Intl.DateTimeFormat("en-US", { timeZone: seoConf(dir).tz, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(d).forEach(function (x) { p[x.type] = x.value; });
+    return p.year + "-" + p.month + "-" + p.day;
+  } catch (e) { return d.toISOString().slice(0, 10); }
+}
+// Instant ISO 8601 avec le decalage du fuseau de la version
+// ("2026-09-19T21:30:00-04:00") : startDate des JSON-LD SportsEvent.
+function isoWithOffset(d, tz) {
+  try {
+    var p = {};
+    new Intl.DateTimeFormat("en-US", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }).formatToParts(d).forEach(function (x) { p[x.type] = x.value; });
+    var wall = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second);
+    var off = Math.round((wall - Math.floor(d.getTime() / 1000) * 1000) / 60000);
+    var sign = off < 0 ? "-" : "+", a = Math.abs(off);
+    return p.year + "-" + p.month + "-" + p.day + "T" + ("0" + (+p.hour % 24)).slice(-2) + ":" + p.minute + ":" + p.second + sign + ("0" + Math.floor(a / 60)).slice(-2) + ":" + ("0" + (a % 60)).slice(-2);
+  } catch (e) { return d.toISOString().replace(/\.\d{3}Z$/, "Z"); }
+}
 
 function escHtml(s) {
   return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
@@ -76,8 +128,10 @@ function guideLabel(dir, file) {
 var OG_LOCALES = { fr: "fr_FR", en: "en_GB", "en-GB": "en_GB", "en-ZA": "en_ZA", es: "es_ES", "es-MX": "es_MX", de: "de_DE", it: "it_IT", pt: "pt_PT" };
 function ogLocale(dir) {
   var hl = DIRS[dir].htmlLang;
-  // /en/ vise un public international : pas de pays impose.
-  if (dir === "en") return "en";
+  // /en/ : version anglaise internationale ciblant explicitement les Etats-Unis
+  // depuis le 19/09/2026 (heure ET, format en-US, offre USD). og:locale exige
+  // la forme langue_PAYS : en_US (l'ancien "en" n'etait pas une valeur valide).
+  if (dir === "en") return "en_US";
   return OG_LOCALES[hl] || hl.replace("-", "_");
 }
 
@@ -107,11 +161,42 @@ function xDefaultDir(dirs) {
   return null;
 }
 // Alternates d'une URL declinee dans les repertoires donnes (+ x-default).
-function alternatesFor(pathOf, dirs) {
+// aliases (facultatif) : {dir: ["es-US", "es"]} = codes hreflang
+// SUPPLEMENTAIRES portes par la meme URL (config/leagues.json#hreflangAliases,
+// ex. Liga MX : /mx/ sert aussi es-US). Un alias n'est ajoute que si aucune
+// autre version du groupe ne declare deja ce code (jamais deux URLs pour un
+// meme code).
+function alternatesFor(pathOf, dirs, aliases) {
   dirs = dirs || DIR_CODES;
   var out = dirs.map(function (d) { return { hreflang: DIRS[d].hreflang, href: SITE_URL + pathOf(d) }; });
+  var taken = {};
+  out.forEach(function (a) { taken[a.hreflang.toLowerCase()] = true; });
+  if (aliases && typeof aliases === "object") {
+    dirs.forEach(function (d) {
+      (Array.isArray(aliases[d]) ? aliases[d] : []).forEach(function (code) {
+        if (typeof code !== "string" || !/^[a-z]{2}(-[A-Z]{2})?$/.test(code) || taken[code.toLowerCase()]) return;
+        taken[code.toLowerCase()] = true;
+        out.push({ hreflang: code, href: SITE_URL + pathOf(d) });
+      });
+    });
+  }
   var xd = dirs.length > 1 ? xDefaultDir(dirs) : null;
   if (xd) out.push({ hreflang: "x-default", href: SITE_URL + pathOf(xd) });
+  return out;
+}
+// Alias hreflang d'une competition (config/leagues.json#hreflangAliases).
+function leagueHreflangAliases(key) {
+  var l = key ? leagueByKey(key) : null;
+  return l && l.hreflangAliases && typeof l.hreflangAliases === "object" ? l.hreflangAliases : null;
+}
+// Versions d'une competition redirigees vers une autre version de la meme
+// langue (config/leagues.json#seoRedirectDirs, ex. Liga MX : es -> mx, audit
+// SEO /mx/ du 19/09/2026) : {dir: cible} ou {}.
+function leagueRedirectDirs(key) {
+  var l = key ? leagueByKey(key) : null;
+  var r = l && l.seoRedirectDirs && typeof l.seoRedirectDirs === "object" ? l.seoRedirectDirs : {};
+  var out = {};
+  Object.keys(r).forEach(function (d) { if (DIRS[d] && DIRS[r[d]] && d !== r[d]) out[d] = r[d]; });
   return out;
 }
 
@@ -138,7 +223,12 @@ function nearestDirs(dir, scope) {
   // Version de la langue de base d'abord (gb/za -> en, mx -> es), puis les autres de meme langue.
   if (base && DIRS[base]) add(base);
   DIR_CODES.forEach(function (d) { if (base && DIRS[d].locale.split("-")[0] === base) add(d); });
-  HREFLANG_X_DEFAULT.forEach(add);
+  // Puis la preference x-default (en), les autres versions generees, et la
+  // version francaise EN DERNIER pour un lecteur non francophone (audit SEO US
+  // du 19/09/2026 : /en/ renvoyait la Liga MX vers les pages francaises).
+  HREFLANG_X_DEFAULT.forEach(function (d) { if (d !== X_DEFAULT_DIR || base === "fr") add(d); });
+  scope.forEach(function (d) { if (d !== X_DEFAULT_DIR) add(d); });
+  add(X_DEFAULT_DIR);
   scope.forEach(add);
   return out;
 }
@@ -205,11 +295,18 @@ function clubPageFor(teamId, dir, root) {
 // Liens de navigation d'une version (accueil, pied de page) : hubs ligue du
 // perimetre, clubs, articles, blog, marches, methodologie. Libelles :
 // i18n/seo/<dir>.json#nav.
-function versionNav(dir, root) {
-  var s = seoConf(dir), n = s.nav;
+// Competitions du perimetre d'une version, dans l'ordre de ses priorites
+// (i18n/seo/<dir>.json#home.priority_leagues, ex. /en/ : MLS d'abord), puis
+// l'ordre de config/leagues.json.
+function orderedLeagueKeys(dir) {
+  var s = seoConf(dir);
   var prio = (s.home && s.home.priority_leagues) || [];
   var scope = leaguesInScope(dir).map(function (l) { return l.key; });
-  var keys = prio.filter(function (k) { return scope.indexOf(k) !== -1; }).concat(scope.filter(function (k) { return prio.indexOf(k) === -1; }));
+  return prio.filter(function (k) { return scope.indexOf(k) !== -1; }).concat(scope.filter(function (k) { return prio.indexOf(k) === -1; }));
+}
+function versionNav(dir, root) {
+  var s = seoConf(dir), n = s.nav;
+  var keys = orderedLeagueKeys(dir);
   var leagues = keys.map(function (k) { return { href: leagueHubPath(dir, k), label: leagueByKey(k).displayName }; })
     .filter(function (x) { return exists(x.href, root); });
   var sections = [];
@@ -256,12 +353,14 @@ function leagueKind(key) { return LEAGUE_KIND[key] || "national"; }
 
 module.exports = {
   ROOT: ROOT, SITE_URL: SITE_URL, MARKETS: MARKETS, DIRS: DIRS, DIR_CODES: DIR_CODES, X_DEFAULT_DIR: X_DEFAULT_DIR, LEAGUES: LEAGUES,
-  seoConf: seoConf, dictFor: dictFor, get: get, escHtml: escHtml, fill: fill, slugify: slugify,
+  seoConf: seoConf, dictFor: dictFor, get: get, intlLocaleFor: intlLocaleFor, escHtml: escHtml, fill: fill, slugify: slugify,
+  fmtIn: fmtIn, clockIn: clockIn, utcClock: utcClock, zonedClock: zonedClock, dayKeyIn: dayKeyIn, isoWithOffset: isoWithOffset,
   leagueByKey: leagueByKey, leagueSlug: leagueSlug, homePath: homePath, leagueHubPath: leagueHubPath, matchPath: matchPath,
   blogHubPath: blogHubPath, guidePath: guidePath, guideLabel: guideLabel, GUIDE_TITLE_KEYS: GUIDE_TITLE_KEYS,
   ogLocale: ogLocale, ldScript: ldScript, breadcrumbLd: breadcrumbLd, hreflangLinks: hreflangLinks, alternatesFor: alternatesFor,
+  leagueHreflangAliases: leagueHreflangAliases, leagueRedirectDirs: leagueRedirectDirs,
   HREFLANG_X_DEFAULT: HREFLANG_X_DEFAULT, xDefaultDir: xDefaultDir, leagueDirs: leagueDirs, leaguesInScope: leaguesInScope,
-  nearestDirs: nearestDirs, nearestDir: nearestDir, clubsHubPath: clubsHubPath, articlesHubPath: articlesHubPath, methodologyPath: methodologyPath,
+  nearestDirs: nearestDirs, nearestDir: nearestDir, orderedLeagueKeys: orderedLeagueKeys, clubsHubPath: clubsHubPath, articlesHubPath: articlesHubPath, methodologyPath: methodologyPath,
   clubEntries: clubEntries, leagueClubPages: leagueClubPages, clubPageFor: clubPageFor, versionNav: versionNav,
   footerNavHtml: footerNavHtml, injectFooterNav: injectFooterNav, FOOTER_NAV_OPEN: FOOTER_NAV_OPEN, FOOTER_NAV_CLOSE: FOOTER_NAV_CLOSE,
   fitText: fitText, leagueKind: leagueKind

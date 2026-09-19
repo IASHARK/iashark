@@ -1,6 +1,6 @@
 // GENERE par scripts/build-locales.js depuis config/markets.json - ne pas modifier a la main.
 export type IntervalKey = "week" | "month" | "year";
-export type PriceRow = { unitAmount: number; envKey: string; legacyEnvKey: string | null; priceId: string | null };
+export type PriceRow = { unitAmount: number; envKey: string; legacyEnvKey: string | null; priceId: string | null; open: boolean };
 export const PRO_INTERVALS: IntervalKey[] = ["week","month","year"];
 export const PRO_DEFAULT_INTERVAL: IntervalKey = "month";
 export const PRO_PRICES: Record<string, { currency: string; intervals: Partial<Record<IntervalKey, PriceRow>> }> = {
@@ -11,19 +11,22 @@ export const PRO_PRICES: Record<string, { currency: string; intervals: Partial<R
         "unitAmount": 699,
         "envKey": "STRIPE_PRICE_ID_FR_WEEK",
         "legacyEnvKey": null,
-        "priceId": "price_1UHPKzCz0CerLuxwrFe5hklH"
+        "priceId": "price_1UHPKzCz0CerLuxwrFe5hklH",
+        "open": true
       },
       "month": {
         "unitAmount": 1995,
         "envKey": "STRIPE_PRICE_ID_FR_MONTH",
         "legacyEnvKey": "STRIPE_PRICE_ID",
-        "priceId": "price_1UB7tpCz0CerLuxwNxsTsMRM"
+        "priceId": "price_1UB7tpCz0CerLuxwNxsTsMRM",
+        "open": true
       },
       "year": {
         "unitAmount": 19900,
         "envKey": "STRIPE_PRICE_ID_FR_YEAR",
         "legacyEnvKey": null,
-        "priceId": "price_1UHPL0Cz0CerLuxw26Kh72BF"
+        "priceId": "price_1UHPL0Cz0CerLuxw26Kh72BF",
+        "open": false
       }
     }
   },
@@ -34,19 +37,22 @@ export const PRO_PRICES: Record<string, { currency: string; intervals: Partial<R
         "unitAmount": 499,
         "envKey": "STRIPE_PRICE_ID_GB_WEEK",
         "legacyEnvKey": null,
-        "priceId": null
+        "priceId": null,
+        "open": false
       },
       "month": {
         "unitAmount": 1499,
         "envKey": "STRIPE_PRICE_ID_GB_MONTH",
         "legacyEnvKey": null,
-        "priceId": "price_1UHPIRCz0CerLuxwwMv0zpmY"
+        "priceId": "price_1UHPIRCz0CerLuxwwMv0zpmY",
+        "open": true
       },
       "year": {
         "unitAmount": 14900,
         "envKey": "STRIPE_PRICE_ID_GB_YEAR",
         "legacyEnvKey": null,
-        "priceId": null
+        "priceId": null,
+        "open": false
       }
     }
   },
@@ -57,19 +63,22 @@ export const PRO_PRICES: Record<string, { currency: string; intervals: Partial<R
         "unitAmount": 6900,
         "envKey": "STRIPE_PRICE_ID_MX_WEEK",
         "legacyEnvKey": null,
-        "priceId": "price_1UHPKuCz0CerLuxwIFBrhhxf"
+        "priceId": "price_1UHPKuCz0CerLuxwIFBrhhxf",
+        "open": true
       },
       "month": {
         "unitAmount": 19900,
         "envKey": "STRIPE_PRICE_ID_MX_MONTH",
         "legacyEnvKey": null,
-        "priceId": "price_1UHPKtCz0CerLuxwQHegdC33"
+        "priceId": "price_1UHPKtCz0CerLuxwQHegdC33",
+        "open": true
       },
       "year": {
         "unitAmount": 199000,
         "envKey": "STRIPE_PRICE_ID_MX_YEAR",
         "legacyEnvKey": null,
-        "priceId": "price_1UHPKvCz0CerLuxwMfX8KdmC"
+        "priceId": "price_1UHPKvCz0CerLuxwMfX8KdmC",
+        "open": true
       }
     }
   },
@@ -80,13 +89,15 @@ export const PRO_PRICES: Record<string, { currency: string; intervals: Partial<R
         "unitAmount": 6900,
         "envKey": "STRIPE_PRICE_ID_ZA_WEEK",
         "legacyEnvKey": null,
-        "priceId": "price_1UHPKyCz0CerLuxwOHUtjn4i"
+        "priceId": "price_1UHPKyCz0CerLuxwOHUtjn4i",
+        "open": true
       },
       "month": {
         "unitAmount": 19900,
         "envKey": "STRIPE_PRICE_ID_ZA_MONTH",
         "legacyEnvKey": null,
-        "priceId": "price_1UHPKxCz0CerLuxw9cieICvO"
+        "priceId": "price_1UHPKxCz0CerLuxw9cieICvO",
+        "open": true
       }
     }
   },
@@ -97,7 +108,8 @@ export const PRO_PRICES: Record<string, { currency: string; intervals: Partial<R
         "unitAmount": 1999,
         "envKey": "STRIPE_PRICE_ID_US_MONTH",
         "legacyEnvKey": null,
-        "priceId": "price_1UHPIGCz0CerLuxwjBlGekGk"
+        "priceId": "price_1UHPIGCz0CerLuxwjBlGekGk",
+        "open": true
       }
     }
   }

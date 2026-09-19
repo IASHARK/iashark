@@ -2,6 +2,13 @@
   "_readme": "SEO copy for /pt/ (português europeu). Termos de pesquisa: 'prognósticos futebol', 'Liga Portugal', 'probabilidades', 'odds', 'ambas marcam', 'golos'. See i18n/seo/gb.json#_readme.",
   "tz": "Europe/Lisbon",
   "tz_label": "hora de Portugal continental",
+  "intlLocale": "pt-PT",
+  "clock_options": {
+    "hour": "2-digit",
+    "minute": "2-digit"
+  },
+  "clock_zone": "{time} ({tz})",
+  "clock_list": "{time}",
   "sport": "Futebol",
   "org_description": "O IASHARK analisa jogos de futebol com modelos estatísticos e compara as probabilidades estimadas com as odds das casas de apostas. Não é uma casa de apostas.",
   "meta": {
@@ -34,7 +41,7 @@
     "eyebrow": "COMO FUNCIONA",
     "title": "Prognósticos de futebol baseados em probabilidades, não em palpites",
     "paragraphs": [
-      "O IASHARK elabora prognósticos de futebol com um modelo estatístico de resultados que nunca usa as odds. Para cada jogo da Liga Portugal, da Premier League, da Liga dos Campeões e das outras competições cobertas, o modelo estima a probabilidade de cada resultado, do número de golos e de ambas as equipas marcarem, e compara-a com a probabilidade implícita nas odds das casas de apostas.",
+      "O modelo estatístico do IASHARK estima as hipóteses de cada equipa a partir dos dados dos jogos: resultados, golos, forma e rendimento em casa e fora. Para cada jogo da Liga Portugal, da Premier League, da Liga dos Campeões e das outras competições cobertas, estima a probabilidade de cada resultado, do número de golos e de ambas as equipas marcarem. As odds das casas de apostas, sem a margem, servem para comparar essas estimativas e escolher entre os mercados realmente oferecidos.",
       "São estimativas estatísticas: o futebol é incerto, nenhum resultado é garantido e o IASHARK não é uma casa de apostas. A qualidade dos dados varia de liga para liga, por isso cada análise indica a sua fiabilidade. Proibido a menores de 18 anos."
     ],
     "leagues_title": "Prognósticos por competição",
@@ -48,7 +55,8 @@
       "bundesliga",
       "ligue1",
       "el"
-    ]
+    ],
+    "summary_tz": "hora de Portugal continental"
   },
   "breadcrumb": {
     "home": "Início",
@@ -202,7 +210,8 @@
     "h2h_title": "Confrontos diretos",
     "h2h_row": "{date}: {home} {score} {away}",
     "lineups_title": "Onzes iniciais",
-    "lineup_row": "{team} ({formation}): {players}"
+    "lineup_row": "{team} ({formation}): {players}",
+    "h1": "{home} vs {away}"
   },
   "nav": {
     "aria": "Navegação do site",

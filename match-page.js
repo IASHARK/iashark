@@ -203,7 +203,8 @@ function formStrip(rows,standingsForm){
   }).join('')}</ol>`;
 }
 function teamMeta(s,rows){
-  const bits=s?`<small>${esc(rangOrdinal(s.rank))} · ${esc(s.pts)} ${esc(t('match_page.points_short','pts'))}</small>`:'';
+  // Rang dans son groupe (conference MLS, Clausura...) : le groupe est nomme.
+  const bits=s?`<small>${esc(rangOrdinal(s.rank))}${s.group?` (${esc(s.group)})`:''} · ${esc(s.pts)} ${esc(t('match_page.points_short','pts'))}</small>`:'';
   return `${bits}${formStrip(rows,s&&s.form)}`;
 }
 // Nom de competition : config/leagues.json (lib/league-names.js) d'abord.
@@ -505,6 +506,10 @@ function classementFold(vm){
   };
   const lignes=[[i.home,ligneDe(i.home,'home')],[i.away,ligneDe(i.away,'away')]].filter(x=>x[1]);
   if(!lignes.length)return '';
+  // Groupe (conference MLS, « Clausura », zone) : jamais un classement de groupe
+  // presente comme celui de toute la competition (audit du 19/09/2026).
+  const groupes=lignes.map(x=>x[1].group||c.group||'');
+  const memeGroupe=groupes.every(g=>g===groupes[0]);
   lignes.sort((a,b)=>(n(a[1].rank)===null?99:n(a[1].rank))-(n(b[1].rank)===null?99:n(b[1].rank)));
   const v=x=>n(x)===null?'—':esc(n(x));
   const diff=x=>n(x)===null?'—':`${x>0?'+':x<0?'−':''}${Math.abs(n(x))}`;
@@ -512,9 +517,9 @@ function classementFold(vm){
   const resume=lignes.filter(x=>n(x[1].rank)!==null).map(([tm,s])=>`<b>${esc(tm.name)}</b> ${esc(rangOrdinal(s.rank))}`).join(' · ');
   const corps=`<div class="st-scroll"><table class="st-table">
       <thead><tr><th scope="col">${esc(t('match_page.standings_col_rank','#'))}</th><th scope="col" class="st-team">${esc(t('match_page.standings_col_team','Équipe'))}</th>${COLS.map(([k,fb])=>`<th scope="col">${esc(t('match_page.standings_col_'+k,fb))}</th>`).join('')}<th scope="col">${esc(t('match_page.standings_col_gd','Diff.'))}</th><th scope="col">${esc(t('match_page.standings_col_pts','Pts'))}</th></tr></thead>
-      <tbody>${lignes.map(([tm,s])=>`<tr><td>${v(s.rank)}</td><th scope="row" class="st-team"><span>${logoEquipe(tm.logo,tm.name)}${esc(tm.name)}</span></th>${COLS.map(([k])=>`<td>${v(s[k])}</td>`).join('')}<td>${diff(s.gd)}</td><td class="st-pts">${v(s.pts)}</td></tr>`).join('')}</tbody>
+      <tbody>${lignes.map(([tm,s],ix)=>`<tr><td>${v(s.rank)}</td><th scope="row" class="st-team"><span>${logoEquipe(tm.logo,tm.name)}${esc(tm.name)}${!memeGroupe&&groupes[ix]?` <small>(${esc(groupes[ix])})</small>`:''}</span></th>${COLS.map(([k])=>`<td>${v(s[k])}</td>`).join('')}<td>${diff(s.gd)}</td><td class="st-pts">${v(s.pts)}</td></tr>`).join('')}</tbody>
     </table></div>
-    ${c.league_name?`<p class="st-note">${esc(c.league_name)} · ${esc(t('match_page.standings_note','classement actuel'))}</p>`:''}`;
+    ${c.league_name?`<p class="st-note">${esc([c.league_name,memeGroupe?groupes[0]:null].filter(Boolean).join(' · '))} · ${esc(t('match_page.standings_note','classement actuel'))}</p>`:''}`;
   return fold({key:'classement',title:t('match_page.standings_title','Classement'),icon:'table',summary:resume,body:corps,open:true});
 }
 function h2hFold(vm){
@@ -1074,10 +1079,15 @@ function resumeSeoStatique(){
   return document.querySelector('.match-shell>div:not(#matchRoot)');
 }
 
+// Titre de l'onglet : seulement sur le shell dynamique match.html?id= (noindex).
+// Page statique /<dir>/match/<id>.html (FIXED_MATCH_ID) et page exemple : le
+// titre SEO du serveur reste (audit du 19/09/2026 : « X vs Y — IASHARK »
+// effacait « prediction and stats (League) » du titre rendu lu par Google).
 function viewModel(raw){
   const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
   vm._raw=raw;
-  document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
+  const statique=typeof window.FIXED_MATCH_ID!=='undefined'||(typeof IASHARK_DEMO!=='undefined'&&IASHARK_DEMO);
+  if(!statique)document.title=tf('match_page.document_title','{home} vs {away} — IASHARK',{home:vm.identity.home.name,away:vm.identity.away.name});
   return vm;
 }
 

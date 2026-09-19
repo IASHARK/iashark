@@ -151,6 +151,9 @@ function h2hEntries(list) {
     return out.home && out.away && out.s ? out : null;
   }).filter(Boolean);
 }
+// Lignes des deux equipes. group = nom du groupe affiche (conference MLS,
+// « Clausura », « Clausura - Group A »...), pose par le pipeline depuis le
+// 19/09/2026 (lib/standings-groups.js) ; absent pour un classement unique.
 function standingRows(classement, m) {
   var rows = classement && Array.isArray(classement.standings) ? classement.standings : [];
   var ids = [num(m.home.id), num(m.away.id)].filter(function (x) { return x != null; });
@@ -158,7 +161,7 @@ function standingRows(classement, m) {
   return rows.filter(function (r) {
     return r && ((r.team_id != null && ids.indexOf(num(r.team_id)) !== -1) || names.indexOf(r.name) !== -1);
   }).slice(0, 2).map(function (r) {
-    return compact({ rank: num(r.rank), name: str(r.name), team_id: num(r.team_id), played: num(r.played), won: num(r.won), drawn: num(r.drawn), lost: num(r.lost), gd: num(r.gd), pts: num(r.pts) });
+    return compact({ rank: num(r.rank), name: str(r.name), team_id: num(r.team_id), played: num(r.played), won: num(r.won), drawn: num(r.drawn), lost: num(r.lost), gd: num(r.gd), pts: num(r.pts), group: str(r.group, 60) });
   }).filter(function (r) { return r.name && r.rank != null; });
 }
 function lineupSide(side) {
@@ -170,8 +173,14 @@ function lineupSide(side) {
 function publicSnapshot(m) {
   if (!validMatch(m)) return null;
   var s = { id: String(m.id), league_key: str(m.league_key, 60), league: str(m.league), date: str(m.date, 16), home: team(m.home), away: team(m.away) };
+  // Journee / phase api-football (« Apertura - 9 », « Regular Season - 5 ») :
+  // fait public (lib/premium-fields.js : non premium), garde pour les pages de journee.
+  var round = str(m.round, 60);
+  if (round) s.round = round;
   var venue = m.stade && str(m.stade.nom);
-  if (venue) s.stade = { nom: venue };
+  // ville : ville verifiee (stade rattache a la base api-football), "" si
+  // inconnue ; absente sur les donnees anterieures au 19/09/2026 (lib/venue.js).
+  if (venue) s.stade = typeof m.stade.ville === "string" ? { nom: venue, ville: m.stade.ville.trim().slice(0, 80) } : { nom: venue };
   var fh = formEntries(m.form_home), fa = formEntries(m.form_away);
   if (fh.length) s.form_home = fh;
   if (fa.length) s.form_away = fa;
@@ -309,6 +318,17 @@ function updateRegistry(reg, runMatchs, now, ctx) {
   });
   Object.keys(reg.matches).forEach(function (id) {
     var e = reg.matches[id];
+    // Perimetre modifie (config/leagues.json#seoMatchDirs) pour un match deja
+    // sorti du run : ses pages conservees suivent le nouveau perimetre (version
+    // ajoutee : page conservee ecrite ; version retiree : 301, retired_dirs).
+    // Jamais pour une entree deja redirigee (plus d'instantane, plus de page).
+    if (!seen[id] && e && e.status !== "redirected" && e.league_key && C.leagueByKey(e.league_key)) {
+      var scopeNow = matchDirsFor(e.league_key), before = Array.isArray(e.dirs) ? e.dirs : [];
+      if (scopeNow.join() !== before.join()) {
+        e.dirs = scopeNow;
+        retireDirs(e, before, today);
+      }
+    }
     pruneRetiredDirs(e, t);
     if (!seen[id]) {
       if (e.in_run !== false) {
@@ -356,8 +376,12 @@ function archivedState(e, now) {
 
 // ---------------------------------------------------------------------------
 // Redirections 301.
+// Hub ligue de la version ; version redirigee (config/leagues.json#seoRedirectDirs,
+// Liga MX /es/ -> /mx/) : directement le hub cible (jamais de chaine 301).
 function redirectTarget(e, dir) {
-  return e.league_key && C.leagueByKey(e.league_key) ? C.leagueHubPath(dir, e.league_key) : C.homePath(dir);
+  if (!(e.league_key && C.leagueByKey(e.league_key))) return C.homePath(dir);
+  var to = C.leagueRedirectDirs(e.league_key)[dir];
+  return C.leagueHubPath(to || dir, e.league_key);
 }
 // Versions retirees du perimetre (config/leagues.json#seoMatchDirs reduit,
 // cf. commit 07fc2b081 : 145 pages /<dir>/match/<id>.html supprimees alors
@@ -387,11 +411,25 @@ function pruneRetiredDirs(e, now) {
   });
   if (!Object.keys(e.retired_dirs).length) delete e.retired_dirs;
 }
-// Cible d'une version retiree : hub ligue de la version s'il est dans le
-// perimetre (indexable) ; sinon version FR du match, toujours generee ; une
-// fois celle-ci retiree (J+30), directement son hub FR (jamais de chaine 301).
+// Cible d'une version retiree :
+//   1. hub ligue de la version s'il est dans le perimetre (indexable) ;
+//   2. version designee par config/leagues.json#seoRedirectDirs (Liga MX :
+//      /es/ -> /mx/, meme langue) : sa page match tant qu'elle existe, son hub
+//      une fois la page retiree (J+30) ;
+//   3. version la plus proche de meme langue encore generee (gb/za -> en) ;
+//   4. sinon version FR du match, toujours generee ; une fois celle-ci retiree
+//      (J+30), directement son hub FR (jamais de chaine 301).
+// Jamais une version d'une autre langue quand une version de la meme langue existe.
 function retiredDirTarget(e, dir, id) {
-  if (e.league_key && C.leagueByKey(e.league_key) && matchDirsFor(e.league_key).indexOf(dir) !== -1) return C.leagueHubPath(dir, e.league_key);
+  var known = e.league_key && C.leagueByKey(e.league_key);
+  if (known && matchDirsFor(e.league_key).indexOf(dir) !== -1) return C.leagueHubPath(dir, e.league_key);
+  var dirs = Array.isArray(e.dirs) ? e.dirs : [];
+  var target = known ? C.leagueRedirectDirs(e.league_key)[dir] : null;
+  if (!target && known && C.DIRS[dir]) {
+    var base = C.DIRS[dir].locale.split("-")[0];
+    target = dirs.filter(function (d) { return d !== dir && d !== C.X_DEFAULT_DIR && C.DIRS[d] && C.DIRS[d].locale.split("-")[0] === base; })[0] || null;
+  }
+  if (target && dirs.indexOf(target) !== -1) return e.status === "redirected" ? C.leagueHubPath(target, e.league_key) : C.matchPath(target, id);
   return e.status === "redirected" ? redirectTarget(e, C.X_DEFAULT_DIR) : C.matchPath(C.X_DEFAULT_DIR, id);
 }
 function redirectRules(reg) {

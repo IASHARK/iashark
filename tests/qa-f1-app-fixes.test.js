@@ -68,9 +68,15 @@ test("free-match : jour LOCAL du visiteur, mode historique (Paris) inchange", ()
 test("accueil / outils : les cartes de match restent dans le repertoire (match.html?id=)", () => {
   const home = read("index.html");
   assert.doesNotMatch(home, /lien\('match\/'/, "plus aucun lien vers la page statique FR /match/<id>.html");
-  assert.equal((home.match(/lien\('match\.html\?id='\+encodeURIComponent\(/g) || []).length, 2);
-  // Lignes de la liste des matchs (home-list.js) : lien() d'index.html, page match du repertoire.
-  assert.match(read("home-list.js"), /H\.lien\('match\.html\?id='\+encodeURIComponent\(m\.id\)\)/);
+  // 19/09/2026 (audit SEO) : page match statique DE LA VERSION quand elle existe
+  // (lib/league-names.js#staticMatchPath), sinon match.html?id= du repertoire.
+  assert.equal((home.match(/lien\('match\.html\?id='\+encodeURIComponent\(/g) || []).length, 1);
+  assert.match(home, /function lienMatch\(m\)\{[^\n]*LN\.staticMatchPath\(m\.id,[^\n]*,d\)[^\n]*return p\|\|lien\('match\.html\?id='/);
+  assert.match(home, /href="'\+esc\(lienMatch\(m\)\)\+'"/, "vitrine");
+  assert.match(home, /ctaHero\.setAttribute\('href',lienMatch\(featured\)\)/, "bouton principal");
+  assert.match(home, /matchHref:lienMatch/);
+  // Lignes de la liste des matchs (home-list.js) : meme regle, repli lien() du repertoire.
+  assert.match(read("home-list.js"), /H\.matchHref\?H\.matchHref\(m,H\):H\.lien\('match\.html\?id='\+encodeURIComponent\(m\.id\)\)/);
   assert.doesNotMatch(read("home-list.js"), /lien\('match\/'/);
   assert.doesNotMatch(read("tools-page.js"), /lien\('match\/'/);
   ["gb", "za", "mx", "en", "fr"].forEach((d) => {
@@ -219,10 +225,13 @@ test("pipeline : SAFE_PICK coherent (market_id, marche, ligne premium) et pages 
   const out = ctx.f('<a href="/">a</a><a href="/pro.html">b</a><a href="/blog.html">c</a><link href="/assets/x.css">');
   assert.equal(out, '<a href="/fr/">a</a><a href="/fr/pro.html">b</a><a href="/blog.html">c</a><link href="/assets/x.css">');
   assert.match(src, /var tpl=liensVersionFr\(fs\.readFileSync\('match\.html','utf8'\)\);/);
-  // Resume SEO : date localisee + mention du fuseau + nom de ligue unique.
-  assert.match(src, /<time data-seo-date datetime="'\+escHtml\(TODAY\)\+'">/);
-  assert.match(src, /home_app\.seo_times_paris/);
-  assert.match(src, /escHtml\(seoLeagueName\(m\)\)/);
+  // Resume SEO (scripts/home-summary.js, 19/09/2026) : jour du run, fuseau de la
+  // version en clair, nom de ligue unique.
+  assert.match(src, /HOME_SUMMARY\.homeSummaryHtml\(matchsData,dir\|\|'fr',\{today:TODAY/);
+  const hs = read("scripts/home-summary.js");
+  assert.match(hs, /<time data-seo-date datetime="' \+ esc\(today\) \+ '">/);
+  assert.match(hs, /summary_tz/);
+  assert.match(hs, /LEAGUE_NAMES\.displayName\(m\.league_key, m\.league\)/);
   // Le mapping canonique -> market_id est bien l'inverse du mapping legacy.
   const { LEGACY_TO_CANONICAL_SCORE_MARKET: map } = require("../lib/run-output/build-legacy-score-candidates.js");
   assert.equal(Object.keys(map).find((k) => map[k].market === "FT_TEAM_TOTAL_AWAY_1.5_UNDER"), "away-team-under-15");

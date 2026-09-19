@@ -180,10 +180,11 @@ async function runSubscriptionPage(dir, availability, reopened) {
 test("abonnement-page.js : une duree = prix seul sans « meme acces », plusieurs = choix, aucune = ni bouton ni consentement", async () => {
   // Configuration du 19/09/2026 (decisions du proprietaire), fonction de
   // paiement a jour (mode "availability", toutes les durees disponibles cote
-  // serveur) : FR et MX 3 durees, ZA semaine + mois, GB mois seul (semaine et
+  // serveur) : FR semaine + mois, MX 3 durees, ZA semaine + mois, GB mois seul (semaine et
   // annee jamais affichees, meme si le serveur les annoncait).
   const ALL = { week: true, month: true, year: true };
-  const EXPECT = { fr: ["week", "month", "year"], mx: ["week", "month", "year"], za: ["week", "month"], gb: ["month"], en: ["month"] };
+  // FR : annuel ferme (checkoutOpen, L215-1) - jamais affiche, meme annonce par le serveur.
+  const EXPECT = { fr: ["week", "month"], mx: ["week", "month", "year"], za: ["week", "month"], gb: ["month"], en: ["month"] };
   for (const [dir, ivs] of Object.entries(EXPECT)) {
     const r = await runSubscriptionPage(dir, ALL);
     const html = r.els.proPlanPicker.innerHTML;

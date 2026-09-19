@@ -2,6 +2,13 @@
   "_readme": "SEO copy for /es/ (español de España). Vocabulario: 'pronósticos', 'fútbol', 'cuotas', 'ambos marcan'. See i18n/seo/gb.json#_readme.",
   "tz": "Europe/Madrid",
   "tz_label": "hora peninsular",
+  "intlLocale": "es-ES",
+  "clock_options": {
+    "hour": "2-digit",
+    "minute": "2-digit"
+  },
+  "clock_zone": "{time} ({tz})",
+  "clock_list": "{time}",
   "sport": "Fútbol",
   "org_description": "IASHARK analiza partidos de fútbol con modelos estadísticos y compara las probabilidades estimadas con las cuotas del mercado. No es una casa de apuestas.",
   "meta": {
@@ -34,7 +41,7 @@
     "eyebrow": "CÓMO FUNCIONA",
     "title": "Pronósticos de fútbol basados en probabilidades, no en corazonadas",
     "paragraphs": [
-      "IASHARK elabora sus pronósticos de fútbol con un modelo estadístico de marcadores que nunca usa las cuotas. En cada partido de LaLiga, la Premier League, la Champions League y las demás competiciones que cubrimos, el modelo estima la probabilidad de cada resultado, del número de goles y de que ambos equipos marquen, y la compara con la probabilidad implícita en las cuotas.",
+      "El modelo estadístico de IASHARK estima las opciones de cada equipo a partir de los datos de los partidos: resultados, goles, forma y rendimiento como local y como visitante. En cada partido de LaLiga, la Premier League, la Champions League y las demás competiciones que cubrimos, estima la probabilidad de cada resultado, del número de goles y de que ambos equipos marquen. Las cuotas de las casas de apuestas, sin su margen, sirven para comparar esas estimaciones y elegir entre los mercados que realmente se ofrecen.",
       "Son estimaciones estadísticas: el fútbol es incierto, ningún resultado está garantizado e IASHARK no es una casa de apuestas. La calidad de los datos varía según la liga, por eso cada análisis muestra su nivel de fiabilidad. Solo para mayores de 18 años."
     ],
     "leagues_title": "Pronósticos por competición",
@@ -48,7 +55,8 @@
       "ligue1",
       "el",
       "primeira"
-    ]
+    ],
+    "summary_tz": "hora peninsular"
   },
   "breadcrumb": {
     "home": "Inicio",
@@ -202,7 +210,8 @@
     "h2h_title": "Enfrentamientos directos",
     "h2h_row": "{date}: {home} {score} {away}",
     "lineups_title": "Alineaciones iniciales",
-    "lineup_row": "{team} ({formation}): {players}"
+    "lineup_row": "{team} ({formation}): {players}",
+    "h1": "{home} vs {away}"
   },
   "nav": {
     "aria": "Navegación del sitio",

@@ -24,11 +24,13 @@
   // config/markets.json#_dirs (coherence verifiee par tests/geo-dirs.test.js).
   // Ordre = ordre du selecteur. Un marche (gb/za/mx) pointe vers UN
   // dictionnaire existant (en / es-mx) : jamais de fork de dictionnaire.
+  // intl de /en/ : en-US (audit SEO US du 19/09/2026 : « Sep 19 », « 7:30 PM »,
+  // comme le HTML statique, i18n/seo/en.json#intlLocale).
   var DIRS = [
     {dir:"fr", locale:"fr",    htmlLang:"fr",    intl:"fr-FR", market:"fr", blog:"",   label:"Français"},
     {dir:"gb", locale:"en",    htmlLang:"en-GB", intl:"en-GB", market:"gb", blog:"en", label:"English (UK)"},
     {dir:"za", locale:"en",    htmlLang:"en-ZA", intl:"en-ZA", market:"za", blog:"en", label:"English (South Africa)"},
-    {dir:"en", locale:"en",    htmlLang:"en",    intl:"en-GB", market:"us", blog:"en", label:"English (International)"},
+    {dir:"en", locale:"en",    htmlLang:"en",    intl:"en-US", market:"us", blog:"en", label:"English (International)"},
     {dir:"mx", locale:"es-mx", htmlLang:"es-MX", intl:"es-MX", market:"mx", blog:"mx", label:"Español (México)"},
     {dir:"es", locale:"es",    htmlLang:"es",    intl:"es-ES", market:"fr", blog:"es", label:"Español"},
     {dir:"de", locale:"de",    htmlLang:"de",    intl:"de-DE", market:"fr", blog:"de", label:"Deutsch"},

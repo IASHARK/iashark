@@ -40,7 +40,10 @@ const MATCH = {
 
 test("i18n/seo : un fichier par repertoire public, memes cles, meta des pages du sitemap", () => {
   const pages = require("../scripts/i18n-manifest.js").filter((p) => !p.noSitemap).map((p) => p.file.replace(/\.html$/, ""));
-  const shape = (o, prefix) => Object.keys(o).filter((k) => k !== "overrides" && k !== "_readme").sort().flatMap((k) =>
+  // overrides (par competition), match.league_labels (libelles courts par
+  // competition, ex. /en/ « MLS soccer ») et clock_options (options Intl de
+  // l'heure, ex. /mx/ 24 h) : cartes facultatives par version.
+  const shape = (o, prefix) => Object.keys(o).filter((k) => k !== "overrides" && k !== "_readme" && k !== "league_labels" && k !== "clock_options").sort().flatMap((k) =>
     o[k] && typeof o[k] === "object" && !Array.isArray(o[k]) ? shape(o[k], prefix + k + ".") : [prefix + k]);
   let ref = null;
   for (const d of DIRS) {
@@ -73,8 +76,10 @@ test("page match localisee : langue, canonical, hreflang des versions generees, 
   assert.ok(alts.some((a) => a.hl === "x-default" && a.href === "https://iashark.com/en/match/424242.html"));
   const ld = ldBlocks(html);
   const ev = ld.find((b) => b["@type"] === "SportsEvent");
-  // 21:00 heure de Paris (heure d'ete, UTC+2) = 19:00 UTC.
-  assert.equal(ev.startDate, "2026-09-19T19:00:00Z");
+  // 21:00 heure de Paris (heure d'ete, UTC+2) = 19:00 UTC, exprime avec le
+  // decalage du fuseau de la version (gb : Europe/London, BST = UTC+1).
+  assert.equal(ev.startDate, "2026-09-19T20:00:00+01:00");
+  assert.equal(Date.parse(ev.startDate), Date.parse("2026-09-19T19:00:00Z"));
   assert.equal(ev.location.name, "Emirates Stadium");
   assert.equal(ev.homeTeam.name, "Arsenal");
   assert.equal(ev.superEvent.name, "Premier League");

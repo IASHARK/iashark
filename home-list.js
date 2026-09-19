@@ -70,7 +70,12 @@ function defaultHelpers(){
     marketIdLabel:function(m){return (m&&m.market_id&&ML)?(ML.marketIdLabel||ML.marketIdLabelFr)(m.market_id,{home:m.home&&m.home.n,away:m.away&&m.away.n}):null;},
     hasReliableModelOutput:function(m){return DD?DD.hasReliableModelOutput(m):true;},
     pickFreeMatch:function(list){return FM?FM.pickFreeMatch(list,null,(root.IASHARK_MARKET&&root.IASHARK_MARKET.code)||null):null;},
-    lien:lien
+    lien:lien,
+    // Page match statique indexable de la version (/<dir>/match/<id>.html,
+    // lib/league-names.js#staticMatchPath) si elle existe, sinon match.html?id=
+    // (audit SEO du 19/09/2026 : les cartes liaient le shell noindex).
+    matchHref:function(m,H){var d=root.I18N&&root.I18N.dir;var p=(LN&&LN.staticMatchPath&&m)?LN.staticMatchPath(m.id,key(m),d):null;return p||((H&&H.lien)||lien)('match.html?id='+encodeURIComponent(m&&m.id));},
+    teamName:function(tm){var TN=root.IasharkTeamNames;return TN?TN.displayName(tm):((tm&&tm.n)||'');}
   };
 }
 // Store vide (tests, ou lib/fav-leagues.js absent) : aucune etoile allumee.
@@ -189,7 +194,7 @@ function teamHtml(tm,H){
   var url=H.teamLogoUrl(tm),ini=esc(initials(tm&&tm.n));
   var logo=url?'<img class="hl-logo" src="'+esc(url)+'" width="18" height="18" alt="" loading="lazy" decoding="async" data-ini="'+ini+'">'
     :'<span class="hl-logo hl-logo-ph" aria-hidden="true">'+ini+'</span>';
-  return '<span class="hl-team">'+logo+'<span class="hl-tname">'+esc(tm&&tm.n||'')+'</span></span>';
+  return '<span class="hl-team">'+logo+'<span class="hl-tname">'+esc((H.teamName?H.teamName(tm):(tm&&tm.n))||'')+'</span></span>';
 }
 function fmtInt(n){return Number(n).toLocaleString(localeTag());}
 function barsHtml(b){
@@ -216,7 +221,7 @@ function renderMatchRow(m,ctx,H,index){
   var a=analysisFor(m,ctx,H),ts=H.matchTimestamp(m),cd=countdown(m,H,ctx.nowTs);
   var home=m.home||{},away=m.away||{},heure=H.heure(m),derby=derbyName(m),q=qualityFor(m),sig=hasSignal(m);
   var cls='hl-row hl-grid is-'+a.state+(a.free?' is-free':'')+(cd?' cd-'+cd.kind:'');
-  var href=(a.state==='locked'&&ctx.lockedHref==='abonnement')?H.lien('abonnement.html'):H.lien('match.html?id='+encodeURIComponent(m.id));
+  var href=(a.state==='locked'&&ctx.lockedHref==='abonnement')?H.lien('abonnement.html'):(H.matchHref?H.matchHref(m,H):H.lien('match.html?id='+encodeURIComponent(m.id)));
 
   // Indicateurs PUBLICS reels uniquement.
   var tags=[];

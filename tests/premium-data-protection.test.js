@@ -67,9 +67,11 @@ test("le pipeline ne retire rien s'il ne peut pas persister ailleurs", () => {
 // l'analyse offerte exige un compte gratuit).
 test("le pari n'est jamais nomme dans le HTML SEO de l'accueil, meme offert", () => {
   const wf = read(".github/workflows/update-data.yml");
-  const resume = wf.slice(wf.indexOf("function seoHomeSummaryHtml("), wf.indexOf("function injectHomeSeoSummary("));
-  assert.match(resume, /var pari='';/, "nommer le pari revenait a le publier dans un HTML indexe");
-  assert.doesNotMatch(resume, /seo_ai_pick|data-market-label|m\.pari_rec|m\.conf/);
+  const pipe = wf.slice(wf.indexOf("function seoHomeSummaryHtml("), wf.indexOf("function injectHomeSeoSummary("));
+  assert.match(pipe, /HOME_SUMMARY\.homeSummaryHtml\(/, "resume rendu par scripts/home-summary.js");
+  assert.doesNotMatch(pipe, /seo_ai_pick|data-market-label|m\.pari_rec|m\.conf/);
+  // Le module partage ne lit que des champs publics (id, date, equipes, competition).
+  assert.doesNotMatch(read("scripts/home-summary.js"), /seo_ai_pick|data-market-label|pari_rec|\.conf\b|model_probability|market_id/, "nommer le pari revenait a le publier dans un HTML indexe");
 });
 
 // Le site, la page match et la fonction Edge doivent designer LE MEME match.

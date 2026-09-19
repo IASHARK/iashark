@@ -106,9 +106,10 @@ test("(a) configuration actuelle : /en/ affiche 19,95 EUR et paie sur le marche 
 
 test("create-checkout-session : ligne us generee (USD 1999 mensuel), CHECKOUT_MARKETS, priceMatches USD, jamais de repli", async () => {
   const builder = require(path.join(ROOT, "scripts/build-locales.js"));
-  const row = { currency: "USD", intervals: { month: { unitAmount: 1999, envKey: "STRIPE_PRICE_ID_US_MONTH", legacyEnvKey: null, priceId: MARKETS.us.stripePriceIds ? MARKETS.us.stripePriceIds.month : null } } };
+  const row = { currency: "USD", intervals: { month: { unitAmount: 1999, envKey: "STRIPE_PRICE_ID_US_MONTH", legacyEnvKey: null, priceId: MARKETS.us.stripePriceIds ? MARKETS.us.stripePriceIds.month : null, open: true } } };
   assert.deepEqual(builder.checkoutPriceTable().us, row);
-  assert.deepEqual(builder.checkoutPriceTable(SWITCHED), builder.checkoutPriceTable(), "table independante de la bascule");
+  // Bascule appliquee le 19/09/2026 : la configuration reelle EST l'etat bascule (us.checkoutOpen = ["month"]).
+  assert.deepEqual(builder.checkoutPriceTable(SWITCHED), builder.checkoutPriceTable(), "configuration reelle = etat bascule");
   assert.ok(read("supabase/functions/create-checkout-session/prices.generated.ts").includes('"us": ' + JSON.stringify(row, null, 2).replace(/\n/g, "\n  ")), "prices.generated.ts : ligne us (relancer node scripts/build-locales.js)");
   const P = await pricing();
   assert.ok(P.CHECKOUT_MARKETS.includes("us"));
@@ -199,7 +200,8 @@ test("(b) bascule appliquee, build complet en memoire : /en/ en USD partout, che
   // d'abonnement, le panneau Pro de la page match et le compte.
   const src = files["lib/market-config.js"];
   const M = loadMarketLib(src, "/en/abonnement.html").IASHARK_MARKET;
-  assert.deepEqual([M.code, M.dir, M.currency, M.checkoutMarket, M.priceIntlLocale, M.intlLocale], ["us", "en", "USD", "us", "en-US", "en-GB"]);
+  // Dates et heures de /en/ au format americain depuis le 19/09/2026 (_dirs.en.intlLocale).
+  assert.deepEqual([M.code, M.dir, M.currency, M.checkoutMarket, M.priceIntlLocale, M.intlLocale], ["us", "en", "USD", "us", "en-US", "en-US"]);
   assert.deepEqual(M.checkoutOpen, ["month"]);
   assert.equal(M.formatPrice("pro"), "$19.99");
   assert.equal(M.formatPrice("pro.month"), "$19.99");

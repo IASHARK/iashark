@@ -181,7 +181,7 @@ test("FR : francais, EUR TTC, 14 jours + demande d'execution immediate, ANJ 18+ 
   }
 });
 
-test("GB : anglais UK, GBP, Consumer Contracts Regulations 14 jours + consentement expres, 18+ BeGambleAware", () => {
+test("GB : anglais UK, GBP, Consumer Contracts Regulations 14 jours + consentement expres, 18+ GamCare (ligne nationale)", () => {
   const r = renderGb();
   assert.equal(r.locale, "en-GB");
   assert.equal(r.currency, "GBP");
@@ -193,7 +193,9 @@ test("GB : anglais UK, GBP, Consumer Contracts Regulations 14 jours + consenteme
     assert.ok(s.includes("Consumer Contracts (Information, Cancellation and Additional Charges) Regulations 2013"));
     assert.ok(s.includes("express consent") && s.includes("regulation 37"));
     assert.ok(s.includes("Model cancellation form"));
-    assert.ok(s.includes("BeGambleAware.org") && s.includes("18+") && s.includes("0808 8020 133"));
+    // Ligne nationale geree par GamCare (config/markets.json#gb.helpline, sources legal/README.md).
+    assert.ok(s.includes("gamcare.org.uk") && s.includes("18+") && s.includes("0808 8020 133"));
+    assert.doesNotMatch(s, /BeGambleAware/i);
     assert.ok(s.includes("Manage my subscription"));
     assert.doesNotMatch(s, /€|MXN|EUR|\$|TTC/);
   }
@@ -244,7 +246,7 @@ test("champs optionnels : montant paye different, resiliation programmee, sans v
 
 const EXTERNAL_ALLOWED = [
   "https://www.joueurs-info-service.fr",
-  "https://www.begambleaware.org",
+  "https://www.gamcare.org.uk",
   "https://www.gob.mx/conasama/articulos/linea-de-la-vida-800-911-2000",
   "https://www.gob.mx/profeco",
   "mailto:contact@iashark.com"

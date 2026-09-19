@@ -39,10 +39,16 @@ const LEAGUE_NAMES = require("../lib/league-names.js");
 const LASTMOD = require("./seo-lastmod.js");
 // Cycle de vie des pages match (registre, perimetre des versions, 301).
 const LIFECYCLE = require("./match-lifecycle.js");
+// Groupes d'un classement (conferences, zones, phases).
+const SG = require("../lib/standings-groups.js");
 // Contenu stable des pages championnat (calendrier 14 jours, resultats, classement, clubs).
 const HUBDATA = require("./league-hub-data.js");
 // Composants partages des pages championnat / club / derby (presentation v2).
 const HUBUI = require("../lib/hub-ui.js");
+// Noms d'affichage des equipes (config/team-display-names.json) et stade/ville
+// verifiee (audit SEO du 19/09/2026).
+const TEAMNAMES = require("../lib/team-names.js");
+const VENUE = require("../lib/venue.js");
 
 const SITE_URL = C.SITE_URL, DIRS = C.DIRS, DIR_CODES = C.DIR_CODES, X_DEFAULT_DIR = C.X_DEFAULT_DIR;
 const esc = C.escHtml;
@@ -74,27 +80,32 @@ function validMatch(m) {
 }
 function kickoff(m) { return MATCH_TIME.parseParis(m && m.date); }
 function isoInstant(d) { return d.toISOString().replace(/\.\d{3}Z$/, "Z"); }
-function fmt(d, dir, opts) {
-  var o = Object.assign({ timeZone: C.seoConf(dir).tz }, opts);
-  try { return new Intl.DateTimeFormat(DIRS[dir].intlLocale, o).format(d); } catch (e) { return isoInstant(d); }
-}
+// Dates et heures dans le fuseau et la locale de la version (scripts/seo-common.js).
+function fmt(d, dir, opts) { return C.fmtIn(d, dir, opts); }
 function longDate(d, dir) { return fmt(d, dir, { weekday: "long", day: "numeric", month: "long", year: "numeric" }); }
 function shortDate(d, dir) { return fmt(d, dir, { day: "numeric", month: "long", year: "numeric" }); }
-function clock(d, dir) { return fmt(d, dir, { hour: "2-digit", minute: "2-digit" }); }
+function clock(d, dir) { return C.clockIn(d, dir); }
 function leagueName(m) { return (LEAGUE_NAMES.displayName(m.league_key, m.league) || "").trim(); }
 function hubKey(m) { return C.leagueByKey(m.league_key) ? m.league_key : null; }
-// "<equipe> (domicile)" = repli du pipeline quand api-football ne donne pas de
-// stade : texte francais, jamais un vrai lieu -> stade inconnu.
-function venue(m) { return m.stade && typeof m.stade.nom === "string" && m.stade.nom.trim() && !/\(domicile\)\s*$/i.test(m.stade.nom) ? m.stade.nom.trim() : null; }
-function teams(m) { return m.home.n + " vs " + m.away.n; }
+// Stade affiche : ville seulement si verifiee (lib/venue.js) ; "<equipe>
+// (domicile)" = repli du pipeline, jamais un lieu -> stade inconnu.
+function venue(m) { return VENUE.venueLabel(m && m.stade); }
+function tn(t) { return TEAMNAMES.displayName(t); }
+function teams(m) { return tn(m.home) + " vs " + tn(m.away); }
 
 function cleanTpl(s) {
   // Competition inconnue : "( )" et ", ," laisses par un {league} vide.
   return s.replace(/\s*\(\s*\)/g, "").replace(/,\s*,/g, ",").replace(/\s+([:,])/g, function (m, p) { return p === ":" ? " :" : p; }).replace(/\s{2,}/g, " ").trim();
 }
+// Libelle court de la competition dans un titre (i18n/seo/<dir>.json#match.league_labels,
+// ex. /en/ : « MLS soccer », « EPL », « UCL »), sinon son nom.
+function leagueLabel(m, dir) {
+  var labels = C.seoConf(dir).match.league_labels || {};
+  return m.league_key && typeof labels[m.league_key] === "string" ? labels[m.league_key] : leagueName(m);
+}
 function matchVars(m, dir) {
   var d = kickoff(m);
-  return { home: m.home.n, away: m.away.n, league: leagueName(m), date: d ? shortDate(d, dir) : "" };
+  return { home: tn(m.home), away: tn(m.away), league: leagueName(m), league_label: leagueLabel(m, dir), date: d ? shortDate(d, dir) : "", time: d ? clock(d, dir) : "", utc: d ? C.utcClock(d) : "" };
 }
 // Titre <= 60 caracteres : gabarit complet + marque, sans la marque (Google
 // affiche deja le nom du site au-dessus du lien), gabarit court, puis minimal
@@ -130,6 +141,12 @@ function matchCrumbs(m, dir) {
 function matchEvent(m, dir, opts) {
   var d = kickoff(m), v = venue(m), ln = leagueName(m), entry = opts && opts.entry;
   var url = SITE_URL + C.matchPath(dir, m.id);
+  function sportsTeam(t) {
+    var o = { "@type": "SportsTeam", name: tn(t) };
+    var feed = TEAMNAMES.feedNameIfDifferent(t);
+    if (feed) o.alternateName = feed;
+    return o;
+  }
   var ev = {
     "@context": "https://schema.org",
     "@type": "SportsEvent",
@@ -139,12 +156,13 @@ function matchEvent(m, dir, opts) {
     url: url,
     inLanguage: DIRS[dir].htmlLang,
     sport: C.seoConf(dir).sport,
-    homeTeam: { "@type": "SportsTeam", name: m.home.n },
-    awayTeam: { "@type": "SportsTeam", name: m.away.n },
+    homeTeam: sportsTeam(m.home),
+    awayTeam: sportsTeam(m.away),
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode"
   };
-  if (d) ev.startDate = isoInstant(d);
+  // Instant exact avec le decalage du fuseau de la version (2026-09-19T21:30:00-04:00).
+  if (d) ev.startDate = C.isoWithOffset(d, C.seoConf(dir).tz);
   // schema.org n'a pas de statut "termine" : un match joue comme prevu garde
   // EventScheduled. Un coup d'envoi deplace entre deux runs (registre
   // data/match-pages-registry.json) est declare EventRescheduled.
@@ -152,7 +170,17 @@ function matchEvent(m, dir, opts) {
     ev.eventStatus = "https://schema.org/EventRescheduled";
     ev.previousStartDate = entry.previous_kickoff;
   }
-  if (v) ev.location = { "@type": "Place", name: v };
+  // Lieu : nom du stade ; adresse seulement avec une ville verifiee (jamais devinee).
+  var vp = VENUE.venueParts(m.stade);
+  if (vp) {
+    ev.location = { "@type": "Place", name: vp.name };
+    if (vp.city) {
+      var parts = vp.city.split(",").map(function (x) { return x.trim(); }).filter(Boolean);
+      ev.location.address = { "@type": "PostalAddress", addressLocality: parts[0] };
+      if (parts.length > 1) ev.location.address.addressRegion = parts.slice(1).join(", ");
+    }
+  }
+  if (m.home && m.home.id != null) ev.image = "https://media.api-sports.io/football/teams/" + m.home.id + ".png";
   if (ln) ev.superEvent = { "@type": "SportsEvent", name: ln };
   return ev;
 }
@@ -164,7 +192,7 @@ function hasMatchVersion(m, dir) { return matchDirs(m).indexOf(dir) !== -1; }
 function matchAlternates(m) {
   var isObj = !!m && typeof m === "object";
   var id = isObj ? m.id : m;
-  return C.alternatesFor(function (d) { return C.matchPath(d, id); }, isObj ? matchDirs(m) : [X_DEFAULT_DIR]);
+  return C.alternatesFor(function (d) { return C.matchPath(d, id); }, isObj ? matchDirs(m) : [X_DEFAULT_DIR], isObj ? C.leagueHreflangAliases(m.league_key) : null);
 }
 
 // Complements du <head> ajoutes apres le bloc meta historique : hreflang des
@@ -197,12 +225,19 @@ function matchMetaBlock(m, dir, opts) {
 // (16/09/2026) : le HTML statique ne contient que des parties publiques - le
 // pari n'y est plus nomme, meme pour le match offert (un visiteur sans compte y
 // voit l'avis ferme).
+// Jour du match = jour du coup d'envoi dans le fuseau de la version (audit du
+// 19/09/2026 : le jour de Paris affichait « 20 de septiembre » sur /mx/ pour un
+// match joue le samedi 19 a Mexico). data-seo-date : reformate par
+// scripts/build-locales.js#bakeMarket dans la meme locale.
 function matchSummaryHtml(m, dir) {
-  var day = (m.date || "").split(" ")[0];
+  dir = dir || X_DEFAULT_DIR;
+  var d = kickoff(m);
+  var day = d ? C.dayKeyIn(d, dir) : (m.date || "").split(" ")[0];
   var modelAvailable = m.model_output_available !== false && Number(m.data_quality_score || 0) > 0;
-  var dateLabel = day ? new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(day + "T12:00:00Z")) : "";
+  var dateLabel = day ? fmt(new Date(day + "T12:00:00Z"), dir, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }) : "";
+  var h1 = C.fill(C.seoConf(dir).match.h1 || "{home} vs {away}", matchVars(m, dir));
   return '<div style="padding:24px 16px;font-family:\'DM Sans\',sans-serif;color:#94a3b8;font-size:13px;line-height:1.6">' +
-    '<h1 style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;letter-spacing:.5px;color:#e2e8f0;margin-bottom:8px">' + esc(m.home.n) + " vs " + esc(m.away.n) + "</h1>" +
+    '<h1 style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;letter-spacing:.5px;color:#e2e8f0;margin-bottom:8px">' + esc(h1) + "</h1>" +
     "<p>" + (leagueName(m) ? esc(leagueName(m)) + " — " : "") + (day ? '<time data-seo-date datetime="' + esc(day) + '">' + esc(dateLabel) + "</time>" : "") + "</p>" +
     (modelAvailable ? '<p data-i18n="match_page.seo_analysis_available">Analyse statistique IASHARK disponible pour ce match.</p>' : '<p data-i18n="match_page.model_unavailable_reason">Les données disponibles ne permettent pas encore une analyse chiffrée fiable.</p>') +
     "</div>";
@@ -243,8 +278,8 @@ function matchFactSections(f, dir) {
   var forms = [[f.home, f.form_home], [f.away, f.form_away]].filter(function (x) { return x[0] && x[1] && x[1].length; });
   if (forms.length) {
     out += "<h3" + H3 + ">" + esc(ms.form_title) + "</h3>" + forms.map(function (x) {
-      return '<p style="margin:6px 0 2px;color:#e2e8f0">' + esc(x[0].n) + "</p>" + listHtml(x[1].map(function (e) {
-        return cleanTpl(C.fill(ms.form_row, { date: e.date_full && isFinite(Date.parse(e.date_full)) ? fmt(new Date(e.date_full), dir, { day: "numeric", month: "short", year: "numeric" }) : dayLabel(e.d, dir), result: e.result ? ms["result_" + e.result] : "", score: e.score, opponent: e.opponent, side: e.home === true ? ms.side_home : e.home === false ? ms.side_away : "" }));
+      return '<p style="margin:6px 0 2px;color:#e2e8f0">' + esc(tn(x[0])) + "</p>" + listHtml(x[1].map(function (e) {
+        return cleanTpl(C.fill(ms.form_row, { date: e.date_full && isFinite(Date.parse(e.date_full)) ? fmt(new Date(e.date_full), dir, { day: "numeric", month: "short", year: "numeric" }) : dayLabel(e.d, dir), result: e.result ? ms["result_" + e.result] : "", score: e.score, opponent: tn(e.opponent), side: e.home === true ? ms.side_home : e.home === false ? ms.side_away : "" }));
       }));
     }).join("");
   }
@@ -252,18 +287,23 @@ function matchFactSections(f, dir) {
     return r && typeof r.name === "string" && ["rank", "pts", "played", "won", "drawn", "lost", "gd"].every(function (k) { return typeof r[k] === "number"; });
   }).sort(function (a, b) { return a.rank - b.rank; }) : [];
   if (rows.length) {
-    out += "<h3" + H3 + ">" + esc(ms.standings_title) + "</h3>" + listHtml(rows.map(function (r) {
-      return C.fill(ms.standings_row, { rank: r.rank, team: r.name, pts: r.pts, played: r.played, won: r.won, drawn: r.drawn, lost: r.lost, gd: signed(r.gd) });
+    // Groupe (conference MLS, « Clausura », zone) : jamais un classement de
+    // groupe presente comme celui de toute la competition. Meme groupe pour
+    // les deux equipes : dans le titre ; groupes differents : sur chaque ligne.
+    var groupsSeen = rows.map(function (r) { return typeof r.group === "string" && r.group.trim() ? r.group.trim() : ""; });
+    var sameGroup = groupsSeen.every(function (g) { return g === groupsSeen[0]; });
+    out += "<h3" + H3 + ">" + esc(ms.standings_title + (sameGroup && groupsSeen[0] ? " · " + groupsSeen[0] : "")) + "</h3>" + listHtml(rows.map(function (r, i) {
+      return C.fill(ms.standings_row, { rank: r.rank, team: tn({ id: r.team_id, n: r.name }), pts: r.pts, played: r.played, won: r.won, drawn: r.drawn, lost: r.lost, gd: signed(r.gd) }) + (!sameGroup && groupsSeen[i] ? " (" + groupsSeen[i] + ")" : "");
     }));
   }
   if (Array.isArray(f.h2h) && f.h2h.length) {
     out += "<h3" + H3 + ">" + esc(ms.h2h_title) + "</h3>" + listHtml(f.h2h.map(function (e) {
-      return cleanTpl(C.fill(ms.h2h_row, { date: dayLabel(e.d, dir), home: e.home, score: e.s, away: e.away }));
+      return cleanTpl(C.fill(ms.h2h_row, { date: dayLabel(e.d, dir), home: tn(e.home), score: e.s, away: tn(e.away) }));
     }));
   }
   if (f.lineups && f.lineups.home && f.lineups.away) {
     out += "<h3" + H3 + ">" + esc(ms.lineups_title) + "</h3>" + [[f.home, f.lineups.home], [f.away, f.lineups.away]].map(function (x) {
-      return '<p style="margin:0 0 6px">' + esc(cleanTpl(C.fill(ms.lineup_row, { team: x[0].n, formation: x[1].formation || "", players: x[1].startXI.join(", ") }))) + "</p>";
+      return '<p style="margin:0 0 6px">' + esc(cleanTpl(C.fill(ms.lineup_row, { team: tn(x[0]), formation: x[1].formation || "", players: x[1].startXI.join(", ") }))) + "</p>";
     }).join("");
   }
   return out;
@@ -277,7 +317,8 @@ function factRowsHtml(m, dir) {
   }
   var rows = "";
   if (ln) rows += row(ms.competition, hub ? '<a href="' + hub + '"' + LINK + ">" + esc(ln) + "</a>" : esc(ln));
-  if (d) rows += row(ms.kickoff, '<time datetime="' + isoInstant(d) + '">' + esc(longDate(d, dir)) + ", " + esc(clock(d, dir)) + " (" + esc(s.tz_label) + ")</time>");
+  // Fuseau explicite : i18n/seo/<dir>.json#clock_zone (/en/ : « 9:30 PM ET (01:30 UTC) »).
+  if (d) rows += row(ms.kickoff, '<time datetime="' + isoInstant(d) + '">' + esc(longDate(d, dir)) + ", " + esc(C.zonedClock(d, dir)) + "</time>");
   if (v) rows += row(ms.venue, esc(v));
   return rows;
 }
@@ -337,7 +378,7 @@ function archivedCardHtml(m, dir, st) {
   var ms = C.seoConf(dir).match, k = hubKey(m), ln = leagueName(m);
   var hub = k ? C.leagueHubPath(dir, k) : C.homePath(dir);
   var status = st.final_score
-    ? '<span style="display:block;font-size:12.5px;color:#91a0b3;text-transform:uppercase;letter-spacing:.06em">' + esc(ms.final_score) + '</span><strong style="font-size:24px;color:#f4f7fb">' + esc(m.home.n) + " " + st.final_score.home + "–" + st.final_score.away + " " + esc(m.away.n) + "</strong>"
+    ? '<span style="display:block;font-size:12.5px;color:#91a0b3;text-transform:uppercase;letter-spacing:.06em">' + esc(ms.final_score) + '</span><strong style="font-size:24px;color:#f4f7fb">' + esc(tn(m.home)) + " " + st.final_score.home + "–" + st.final_score.away + " " + esc(tn(m.away)) + "</strong>"
     : '<strong style="font-size:20px;color:#f4f7fb">' + esc(st.finished ? ms.finished : ms.not_tracked) + "</strong>";
   return '<section class="match-archived" aria-labelledby="match-archived-title" style="max-width:960px;margin:24px auto 0;padding:20px 16px;font-family:\'DM Sans\',system-ui,sans-serif;color:#c3ccd8;font-size:14px;line-height:1.6">' +
     '<h1 id="match-archived-title" style="font-family:\'Bebas Neue\',sans-serif;font-size:30px;letter-spacing:.5px;color:#f4f7fb;margin:0 0 10px">' + esc(teams(m)) + "</h1>" +
@@ -419,7 +460,7 @@ function hubAbout(key, dir) {
   var L = C.seoConf(dir).league, ov = (L.overrides && L.overrides[key]) || {};
   return C.fill(ov.intro || L.about[C.leagueKind(key)], hubVars(key, dir));
 }
-function teamLabel(t) { return t && (t.n || t.name) ? String(t.n || t.name) : ""; }
+function teamLabel(t) { return t && (t.n || t.name) ? tn(t) : ""; }
 function hubUi(dir, L, dict) {
   var cl = function (k, fb) { var x = C.get(dict, "clubs." + k); return x != null ? x : fb; };
   return {
@@ -430,7 +471,8 @@ function hubUi(dir, L, dict) {
 function hubDay(d, dir) { return fmt(d, dir, { weekday: "short", day: "numeric", month: "short" }); }
 function hubFixture(e, dir) {
   var d = new Date(e.t);
-  return { iso: isoInstant(d), day: hubDay(d, dir), clock: clock(d, dir), home: { id: e.home && e.home.id, name: teamLabel(e.home) }, away: { id: e.away && e.away.id, name: teamLabel(e.away) }, meta: e.venue || "", href: e.href || null };
+  // Heure avec fuseau explicite (i18n/seo/<dir>.json#clock_list, /en/ : « 9:30 PM ET (01:30 UTC) »).
+  return { iso: isoInstant(d), day: hubDay(d, dir), clock: C.zonedClock(d, dir, "list"), home: { id: e.home && e.home.id, name: teamLabel(e.home) }, away: { id: e.away && e.away.id, name: teamLabel(e.away) }, meta: e.venue || "", href: e.href || null };
 }
 function hubResult(e, dir, ms) {
   var d = new Date(e.t);
@@ -449,25 +491,34 @@ function hubStandingsHtml(key, dir, st, L, dict, name, UI) {
       var form = HUBUI.formSeq(r.form);
       if (form.length) anyForm = true;
       return {
-        rank: r.rank, id: r.team_id, name: r.name, href: club ? club.path : null, played: r.played != null ? r.played : "",
+        rank: r.rank, id: r.team_id, name: tn({ id: r.team_id, n: r.name }), href: club ? club.path : null, played: r.played != null ? r.played : "",
         wdl: [r.won, r.drawn, r.lost].map(function (x) { return x != null ? x : "?"; }).join("-"), gd: r.gd != null ? signed(r.gd) : "", pts: r.pts,
         form: form, zone: HUBUI.zoneOf(r.zone)
       };
     });
+    // Chaque groupe garde son nom api-football (« Eastern Conference »,
+    // « Clausura - Group A », « Clausura ») ; nom de la competition seulement
+    // pour un classement unique (lib/standings-groups.js#groupLabel).
+    var lgc = C.leagueByKey(key) || {};
+    var label = SG.groupLabel(g.name, st.league_name || lgc.apiNameHint || name, st.groups.length);
     return HUBUI.standingsTable({
-      caption: [g.name || name, st.season ? String(st.season) : null].filter(Boolean).join(" · "),
+      caption: [label || name, st.season ? String(st.season) : null].filter(Boolean).join(" · "),
       ths: [lab("col_rank", "#"), lab("col_team", "Club"), lab("col_played", "P"), lab("col_wdl", "W-D-L"), lab("col_gd", "GD"), lab("col_pts", "Pts")], rows: rows
     }, UI);
   }).join("\n");
-  var asOf = st.as_of ? shortDate(new Date(st.as_of + "T12:00:00Z"), dir) : "";
-  return tables + '\n<p class="note">' + esc(C.fill(L.standings_asof, { date: asOf })) + (st.source === "matchs" ? " " + esc(L.standings_partial) : "") + "</p>" +
+  var asOf = st.as_of ? fmt(new Date(st.as_of + "T12:00:00Z"), dir, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }) : "";
+  return tables + '\n<p class="note">' + esc(C.fill(L.standings_asof, { date: asOf })) + "</p>" +
     (anyForm ? '<p class="note">' + esc(L.form_note) + "</p>" : "");
 }
 // Saison : uniquement ce que donne le classement (annee api-football, phase du
-// groupe « Liga MX: Apertura ») ; rien sans classement.
+// groupe « Liga MX: Apertura » ou « Clausura - Group A ») ; rien sans classement.
 function hubSeason(st, L) {
   if (!st || !st.groups || !st.groups.length) return null;
   var g = st.groups[0].name || "", phase = g.indexOf(": ") !== -1 ? g.split(": ").slice(1).join(": ") : null;
+  if (!phase && st.groups.length > 1 && / - /.test(g)) {
+    var head = g.split(" - ")[0];
+    if (st.groups.every(function (x) { return String(x.name || "").split(" - ")[0] === head; })) phase = head;
+  }
   if (st.season) return phase ? phase + " " + st.season : L.season + " " + st.season;
   return phase;
 }
@@ -484,6 +535,7 @@ function renderLeagueHub(key, dir, matches, opts) {
   // allemand) : noindex,follow, sans hreflang, liens vers la version la plus
   // proche reellement generee (meme langue, puis en, puis fr).
   var scope = LIFECYCLE.matchDirsFor(key), inScope = scope.indexOf(dir) !== -1;
+  var aliases = C.leagueHreflangAliases(key);
   var linkDir = inScope ? dir : C.nearestDir(dir, scope);
   var data = Object.assign(HUBDATA.collect(key, dir, { root: opts.root, now: opts.now, runMatches: matches || [], registry: opts.registry, store: opts.store, linkDir: linkDir }), opts.data || {});
   var standingRows = data.standings && data.standings.groups ? data.standings.groups.reduce(function (n, g) { return n + g.rows.length; }, 0) : 0;
@@ -498,7 +550,9 @@ function renderLeagueHub(key, dir, matches, opts) {
   var rgPath = fs.existsSync(path.join(C.ROOT, "legal", dir, "jeu-responsable.html")) ? "/" + dir + "/jeu-responsable.html" : null;
   var country = (L.countries || {})[key] || "", season = standingRows ? hubSeason(data.standings, L) : null;
   var groups = standingRows ? data.standings.groups : [];
-  var leader = groups.length === 1 && groups[0].rows[0] ? groups[0].rows[0] : null;
+  // « En tete » : classement unique et complet seulement (jamais une conference
+  // presentee comme toute la ligue, jamais un extrait sans le 1er).
+  var leader = groups.length === 1 && groups[0].rows[0] && groups[0].rows[0].rank === 1 ? groups[0].rows[0] : null;
   var next = data.upcoming[0] ? new Date(data.upcoming[0].t) : null;
   var hero = '<div class="hero"><div class="hero-top">' + HUBUI.leagueLogo(lg.apiFootballId) +
     '<div class="chips">' + (country ? HUBUI.chip(country) : "") + (season ? HUBUI.chip(season) : "") + HUBUI.chip("18+", rgPath, "chip-18") + "</div></div>\n" +
@@ -518,12 +572,13 @@ function renderLeagueHub(key, dir, matches, opts) {
   var results = data.results.length
     ? HUBUI.section("results", L.results_title, '<ul class="res">' + data.results.map(function (e) { return HUBUI.resultRow(hubResult(e, dir, s.match), UI); }).join("") + "</ul>")
     : "";
-  var standings = standingRows ? HUBUI.section("table", C.fill(L.standings_title, { league: name }), hubStandingsHtml(key, dir, data.standings, L, dict, name, UI)) : "";
+  var ovr = (L.overrides && L.overrides[key]) || {};
+  var standings = standingRows ? HUBUI.section("table", C.fill(ovr.standings_title || L.standings_title, { league: name }), hubStandingsHtml(key, dir, data.standings, L, dict, name, UI)) : "";
   var clubs = data.clubs.length
     ? HUBUI.section("clubs", L.clubs_title, HUBUI.clubGrid(data.clubs.map(function (c) { return { href: c.path, name: c.name, kind: c.kind, ids: c.teamIds || [] }; }), UI))
     : "";
-  var others = C.leaguesInScope(dir).filter(function (l) { return l.key !== key; }).map(function (l) {
-    return '<a href="' + C.leagueHubPath(dir, l.key) + '">' + esc(l.displayName) + "</a>";
+  var others = C.orderedLeagueKeys(dir).filter(function (k) { return k !== key; }).map(function (k) {
+    return '<a href="' + C.leagueHubPath(dir, k) + '">' + esc(C.leagueByKey(k).displayName) + "</a>";
   }).join("");
   var clubsHub = C.clubsHubPath(dir, opts.root);
   var guides = HUB_GUIDES.map(function (g) {
@@ -534,7 +589,11 @@ function renderLeagueHub(key, dir, matches, opts) {
     var label = labelKey ? C.get(dict, labelKey) : null;
     return '<a href="/' + dir + "/" + f + '">' + esc(typeof label === "string" ? label : f) + "</a>";
   }).join(" · ");
-  var helpHtml = help ? "<p>" + esc(L.help) + ' <a href="' + esc(help.url) + '" rel="noopener" data-market-helpline="name">' + esc(help.name) + "</a>" + (help.phone ? ' · <span data-market-helpline="phone">' + esc(help.phone) + "</span>" : "") + "</p>" : "";
+  // Ressource supplementaire de la version (config/markets.json#_dirs.<dir>.helplineExtra,
+  // /en/ : ligne nationale americaine a cote de Gambling Therapy).
+  var help2 = B().helplineExtraFor(dir);
+  var helpHtml = help ? "<p>" + esc(L.help) + ' <a href="' + esc(help.url) + '" rel="noopener" data-market-helpline="name">' + esc(help.name) + "</a>" + (help.phone ? ' · <span data-market-helpline="phone">' + esc(help.phone) + "</span>" : "") +
+    (help2 ? ' · <a href="' + esc(help2.url) + '" rel="noopener">' + esc(help2.name) + "</a>" + (help2.phone ? " " + esc(help2.phone) : "") : "") + "</p>" : "";
   var jump = [["fixtures", L.jump.fixtures]];
   if (standings) jump.push(["table", L.jump.table]);
   if (results) jump.push(["results", L.jump.results]);
@@ -568,7 +627,7 @@ function renderLeagueHub(key, dir, matches, opts) {
     '<meta name="description" content="' + esc(desc) + '">\n' +
     (indexable ? "" : '<meta name="robots" content="noindex,follow">\n') +
     '<link rel="canonical" href="' + canonical + '">\n' +
-    (inScope ? C.hreflangLinks(C.alternatesFor(function (d) { return C.leagueHubPath(d, key); }, scope)).replace(/></g, ">\n<") + "\n" : "") +
+    (inScope ? C.hreflangLinks(C.alternatesFor(function (d) { return C.leagueHubPath(d, key); }, scope, aliases)).replace(/></g, ">\n<") + "\n" : "") +
     '<meta property="og:type" content="website">\n<meta property="og:site_name" content="IASHARK">\n' +
     '<meta property="og:locale" content="' + C.ogLocale(dir) + '">\n' +
     '<meta property="og:title" content="' + esc(title) + '">\n<meta property="og:description" content="' + esc(desc) + '">\n' +
@@ -661,15 +720,19 @@ function writeSeoPages(matchs, opts) {
     });
   });
 
-  // Classements conserves d'un run a l'autre (data/league-hubs-registry.json).
+  // Classements conserves d'un run a l'autre (data/league-hubs-registry.json) ;
+  // opts.standings = reponses /standings completes lues par le pipeline.
   var store = HUBDATA.loadStore(root);
-  HUBDATA.updateStore(store, list, now, { root: root });
+  HUBDATA.updateStore(store, list, now, { root: root, standings: opts.standings || null });
   var hubDirs = opts.hubDirs || DIR_CODES;
   hubDirs.forEach(function (dir) {
     var out = path.join(root, dir, "leagues");
     fs.mkdirSync(out, { recursive: true });
     var keep = {};
     C.LEAGUES.forEach(function (l) {
+      // Version redirigee pour cette competition (config/leagues.json#seoRedirectDirs,
+      // Liga MX /es/ -> /mx/) : aucune page, la 301 de _redirects s'applique.
+      if (C.leagueRedirectDirs(l.key)[dir]) return;
       var r = renderLeagueHub(l.key, dir, list.filter(function (m) { return m.league_key === l.key; }), { root: root, now: now, registry: reg, store: store });
       var f = C.leagueSlug(l.key) + ".html";
       writeIfChanged(path.join(out, f), r.html);

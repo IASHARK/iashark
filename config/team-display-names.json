@@ -1,0 +1,58 @@
+{
+  "_readme": [
+    "Noms d'AFFICHAGE des equipes, par identifiant api-football (audit SEO /mx/ du 19/09/2026 : titres et H1 affichaient les noms bruts du flux, ex. 'Club America vs Guadalajara Chivas', 'U.N.A.M. - Pumas', 'Leon', 'FC Juarez').",
+    "Regles : (1) uniquement un nom que le club porte reellement et que ses supporters cherchent, verifiable a la source indiquee ; (2) jamais un club renomme en autre chose ; (3) dans le doute, AUCUNE entree (le nom du flux reste affiche) ; (4) feedName = nom exact du flux api-football, garde pour controle (et pour les lignes sans identifiant : forme, confrontations).",
+    "Les donnees (data.json, match/<id>.json, registres) ne sont jamais modifiees : seul l'affichage change (titres, H1, JSON-LD SportsEvent avec alternateName = nom du flux, pages championnat, vue match de l'application).",
+    "Copie runtime : lib/team-names.js (bloc IASHARK_TEAM_NAMES_DATA), recopiee par scripts/build-locales.js. Apres modification : node scripts/build-locales.js.",
+    "Premier League : noms du flux verifies le 19/09/2026 (Arsenal, Aston Villa, Bournemouth, Brentford, Brighton, Chelsea, Coventry, Crystal Palace, Everton, Fulham, Hull City, Ipswich, Leeds, Liverpool, Manchester City, Manchester United, Newcastle, Nottingham Forest, Sunderland, Tottenham) : noms courts d'usage, aucun n'est faux, aucune entree.",
+    "Statut : REVIEW (a relire par le proprietaire)."
+  ],
+  "sources": {
+    "mls": "https://www.mlssoccer.com/clubs/ (lu le 19/09/2026). New York Red Bulls non modifie : le site affiche 'Red Bull New York', le flux garde l'ancien nom encore tres utilise (doute -> nom du flux).",
+    "liga_mx": "https://en.wikipedia.org/wiki/Liga_MX, tableau des clubs (lu le 19/09/2026) ; 'Chivas' = marque et surnom officiel du Club Deportivo Guadalajara.",
+    "argentina_liga_profesional": "https://en.wikipedia.org/wiki/2026_Argentine_Primera_Divisi%C3%B3n, tableau des clubs (lu le 19/09/2026).",
+    "accents": "Corrections d'accents seules (Medellín, Bogotá, Cúcuta, Atlético, Ñublense, Concepción) : orthographe des noms de ville et de club, sans autre changement."
+  },
+  "teams": {
+    "1605": { "name": "LA Galaxy", "feedName": "Los Angeles Galaxy", "league": "mls" },
+    "1614": { "name": "CF Montréal", "feedName": "CF Montreal", "league": "mls" },
+    "1615": { "name": "D.C. United", "feedName": "DC United", "league": "mls" },
+    "16489": { "name": "Austin FC", "feedName": "Austin", "league": "mls" },
+    "18310": { "name": "Charlotte FC", "feedName": "Charlotte", "league": "mls" },
+    "20787": { "name": "St. Louis City SC", "feedName": "St. Louis City", "league": "mls" },
+    "25484": { "name": "San Diego FC", "feedName": "San Diego", "league": "mls" },
+
+    "2287": { "name": "América", "feedName": "Club America", "league": "liga_mx" },
+    "2278": { "name": "Chivas", "feedName": "Guadalajara Chivas", "league": "liga_mx" },
+    "2286": { "name": "Pumas UNAM", "feedName": "U.N.A.M. - Pumas", "league": "liga_mx" },
+    "2289": { "name": "León", "feedName": "Leon", "league": "liga_mx" },
+    "2290": { "name": "Querétaro", "feedName": "Club Queretaro", "league": "liga_mx" },
+    "2298": { "name": "FC Juárez", "feedName": "FC Juarez", "league": "liga_mx" },
+    "2314": { "name": "Atlético San Luis", "feedName": "Atletico San Luis", "league": "liga_mx" },
+
+    "458": { "name": "Argentinos Juniors", "feedName": "Argentinos JRS", "league": "argentina_liga_profesional" },
+    "455": { "name": "Atlético Tucumán", "feedName": "Atletico Tucuman", "league": "argentina_liga_profesional" },
+    "1065": { "name": "Central Córdoba (SdE)", "feedName": "Central Cordoba de Santiago", "league": "argentina_liga_profesional" },
+    "442": { "name": "Defensa y Justicia", "feedName": "Defensa Y Justicia", "league": "argentina_liga_profesional" },
+    "450": { "name": "Estudiantes (LP)", "feedName": "Estudiantes L.P.", "league": "argentina_liga_profesional" },
+    "2424": { "name": "Estudiantes (RC)", "feedName": "Estudiantes de Rio Cuarto", "league": "argentina_liga_profesional" },
+    "434": { "name": "Gimnasia y Esgrima (LP)", "feedName": "Gimnasia L.P.", "league": "argentina_liga_profesional" },
+    "1066": { "name": "Gimnasia y Esgrima (M)", "feedName": "Gimnasia M.", "league": "argentina_liga_profesional" },
+    "445": { "name": "Huracán", "feedName": "Huracan", "league": "argentina_liga_profesional" },
+    "473": { "name": "Independiente Rivadavia", "feedName": "Independ. Rivadavia", "league": "argentina_liga_profesional" },
+    "446": { "name": "Lanús", "feedName": "Lanus", "league": "argentina_liga_profesional" },
+    "457": { "name": "Newell's Old Boys", "feedName": "Newells Old Boys", "league": "argentina_liga_profesional" },
+    "438": { "name": "Vélez Sarsfield", "feedName": "Velez Sarsfield", "league": "argentina_liga_profesional" },
+
+    "1128": { "name": "Independiente Medellín", "feedName": "Independiente Medellin", "league": "colombia_primera_a" },
+    "1134": { "name": "Internacional de Bogotá", "feedName": "Internacional de Bogota", "league": "colombia_primera_a" },
+    "1137": { "name": "Atlético Nacional", "feedName": "Atletico Nacional", "league": "colombia_primera_a" },
+    "1138": { "name": "América de Cali", "feedName": "America de Cali", "league": "colombia_primera_a" },
+    "1470": { "name": "Cúcuta", "feedName": "Cucuta", "league": "colombia_primera_a" },
+
+    "2564": { "name": "Atlético Grau", "feedName": "Atletico Grau", "league": "peru_primera" },
+
+    "2337": { "name": "Ñublense", "feedName": "Nublense", "league": "chile_primera" },
+    "2324": { "name": "Universidad de Concepción", "feedName": "Universidad de Concepcion", "league": "chile_primera" }
+  }
+}

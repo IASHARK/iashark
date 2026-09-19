@@ -198,7 +198,13 @@ test("campagnes par langue : sujet, prix de la version, consentement absent, ech
   const by = (c) => fr.find((x) => x.campaign === c).r;
   assert.equal(by("free_match").subject, "Le match offert du jour : Barcelona – Racing Santander");
   const j5 = by("pro_features").text.replace(/[  ]/g, " ");
-  assert.ok(j5.includes("6,99 € par semaine, 19,95 € par mois ou 199,00 € par an"), "J5 : les 3 durees et leurs prix");
+  // FR : annuel ferme au paiement (config/markets.json#fr.checkoutOpen, L215-1) -> semaine et mois seulement.
+  assert.ok(j5.includes("6,99 € par semaine ou 19,95 € par mois"), "J5 : durees payables et leurs prix");
+  assert.doesNotMatch(j5, /199,00 €|par an\b/, "J5 : jamais l'annuel ferme");
+  for (const dir of ["en", "es", "de", "it", "pt"]) {
+    const t = (await renderAll()).find((x) => x.dir === dir && x.campaign === "pro_features").r.text;
+    assert.doesNotMatch(t, /199[.,]00|per year|al año|pro Jahr|all'anno|por ano/, dir + " : jamais l'annuel ferme");
+  }
   assert.ok(by("pro_features").text.includes("Français"));
   assert.ok(by("inactive_7d").text.includes("Paris SG – Marseille") && by("inactive_7d").text.includes("Arsenal – Chelsea"));
   assert.ok(!by("inactive_7d").text.includes("Monaco"), "match hors week-end");

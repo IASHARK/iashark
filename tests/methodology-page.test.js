@@ -180,7 +180,7 @@ test("mention 18+ et ressource d'aide presentes dans chaque version", () => {
   DIRS.forEach(function (d) {
     const txt = visibleText(read(d + "/methodologie.html"));
     assert.match(txt, /18\s?\+|18 ans|18 years|18 años|18 anos|18 anni|18 Jahren|majeurs/i, d + " : mention 18+ absente");
-    assert.match(txt, /gamblingtherapy\.org|joueurs-info-service\.fr|begambleaware|gambleaware|responsiblegambling\.org\.za|911 2000/i, d + " : aucune ressource d'aide");
+    assert.match(txt, /gamblingtherapy\.org|joueurs-info-service\.fr|gamcare|begambleaware|gambleaware|responsiblegambling\.org\.za|911 2000/i, d + " : aucune ressource d'aide");
   });
 });
 

@@ -100,10 +100,13 @@ test("resumes SEO des accueils : jamais de note sur 10 ni de pari, meme pour le 
 
 test("pipeline et accueil : la note n'est rendue que si elle existe, jamais d'apres l'ecart", () => {
   const wf = read(".github/workflows/update-data.yml");
-  const resume = wf.slice(wf.indexOf("function seoHomeSummaryHtml("), wf.indexOf("function injectHomeSeoSummary("));
+  // 19/09/2026 : le resume est rendu par scripts/home-summary.js (pipeline et build-locales).
+  const pipe = wf.slice(wf.indexOf("function seoHomeSummaryHtml("), wf.indexOf("function injectHomeSeoSummary("));
+  assert.match(pipe, /HOME_SUMMARY\.homeSummaryHtml\(/);
+  const resume = read("scripts/home-summary.js");
   // 16/09/2026 : le resume statique ne nomme plus aucun pari, meme offert, ni aucune note.
-  assert.match(resume, /var pari='';/);
-  assert.equal((resume.match(/m\.conf|m\.pari_rec/g) || []).length, 0, "ni conf ni pari lus dans le resume");
+  assert.equal((pipe.match(/m\.conf|m\.pari_rec/g) || []).length, 0, "ni conf ni pari lus dans le resume (pipeline)");
+  assert.equal((resume.match(/\.conf\b|pari_rec|model_probability|market_id|prob_band/g) || []).length, 0, "ni conf ni pari lus dans le resume");
   const home = read("index.html");
   assert.doesNotMatch(home, /ovrConf|normEdge|parseEdge/, "couleur/palier/tri jamais d'apres l'ecart");
   assert.match(home, /function probConf\(m\)\{var c=normConf\(m&&m\.conf\);return c==null\?null:/);

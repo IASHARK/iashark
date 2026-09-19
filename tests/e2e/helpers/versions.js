@@ -16,7 +16,7 @@ const EN_USD = MARKETS._dirs.en.market === 'us';
 
 const BASE_VERSIONS = [
   { dir: 'fr', htmlLang: 'fr', locale: 'fr', regime: 'eu', currency: 'EUR', checkoutMarket: null, blogHub: '/blog.html', helpline: 'joueurs-info-service.fr', timezone: 'Europe/Paris' },
-  { dir: 'gb', htmlLang: 'en-GB', locale: 'en', regime: 'uk', currency: 'GBP', checkoutMarket: 'gb', blogHub: '/en/blog/', helpline: 'begambleaware.org', timezone: 'Europe/London' },
+  { dir: 'gb', htmlLang: 'en-GB', locale: 'en', regime: 'uk', currency: 'GBP', checkoutMarket: 'gb', blogHub: '/en/blog/', helpline: 'gamcare.org.uk', timezone: 'Europe/London' },
   { dir: 'za', htmlLang: 'en-ZA', locale: 'en', regime: 'za', currency: 'ZAR', checkoutMarket: 'za', blogHub: '/en/blog/', helpline: 'responsiblegambling.org.za', timezone: 'Africa/Johannesburg' },
   { dir: 'en', htmlLang: 'en', locale: 'en', regime: 'eu', currency: EN_USD ? 'USD' : 'EUR', checkoutMarket: EN_USD ? 'us' : null, blogHub: '/en/blog/', helpline: 'gamblingtherapy.org', timezone: 'Europe/Berlin' },
   { dir: 'mx', htmlLang: 'es-MX', locale: 'es-mx', regime: 'mx', currency: 'MXN', checkoutMarket: 'mx', blogHub: '/mx/blog/', helpline: 'gob.mx', timezone: 'America/Mexico_City' },

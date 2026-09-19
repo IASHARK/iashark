@@ -54,7 +54,9 @@ const ALL_VERSIONS = BASE_VERSIONS.map((v) => {
 });
 
 // Nombre de cases de consentement obligatoires par regime (lib/checkout-consent.js).
-const CONSENT_BOXES = { eu: 2, uk: 2, za: 2, mx: 1 };
+// Une seule case depuis le 19/09/2026 (CGV + demande de debut immediat dans la
+// meme case pour eu/uk/za ; lib/checkout-consent.js#buildHtml).
+const CONSENT_BOXES = { eu: 1, uk: 1, za: 1, mx: 1 };
 
 // Pages legales generees dans chaque repertoire (config/markets.json#_legalFiles).
 const LEGAL_FILES = ['mentions-legales.html', 'cgv.html', 'confidentialite.html', 'cookies.html', 'jeu-responsable.html'];

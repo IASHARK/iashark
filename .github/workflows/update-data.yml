@@ -1696,6 +1696,31 @@ jobs:
           function todaysCountSafe(matchsData){
             return (matchsData||[]).filter(function(m){return (m.date||'').split(' ')[0]===TODAY;}).length;
           }
+          // BUTEURS DU JOUR (19/09/2026) : fichier PUBLIC buteurs-du-jour.json,
+          // les 3 joueurs les plus susceptibles de marquer aujourd'hui et demain
+          // (jours de Paris), tous championnats confondus. Calcul unique :
+          // lib/buteurs-du-jour.js, qui passe chaque match par le modele de la
+          // carte « Marches joueurs » (lib/insights.js#scorerModel, memes entrees
+          // que la page match). Le fichier ne porte QUE l'identite des joueurs et
+          // de leur match (PUBLIC_FIELDS) : aucune probabilite, aucun champ
+          // premium. estOuvert(match) : garde coup d'envoi (match commence ou
+          // imminent exclu). Jamais bloquant : une erreur garde le fichier
+          // precedent (ou en cree un vide, pour que le git add reste valide).
+          function ecrireButeursDuJour(matchsData, estOuvert){
+            var FICHIER_BUTEURS='buteurs-du-jour.json';
+            try{
+              var BUTEURS_LIB=require('./lib/buteurs-du-jour.js');
+              var fichierButeurs=BUTEURS_LIB.buildDailyFile(matchsData||[],{now:Date.now(),isEligible:estOuvert||null});
+              fs.writeFileSync(FICHIER_BUTEURS,JSON.stringify(fichierButeurs,null,2));
+              var joursButeurs=Object.keys(fichierButeurs.days);
+              console.log('  [BUTEURS] buteurs-du-jour.json : '+joursButeurs.map(function(j){ return j+' = '+fichierButeurs.days[j].length+' joueur(s)'; }).join(', ')+' ('+(matchsData||[]).length+' match(s) examine(s))');
+            }catch(e){
+              console.log('  [BUTEURS] ERREUR, fichier precedent conserve : '+(e&&e.message));
+              try{
+                if(!fs.existsSync(FICHIER_BUTEURS)) fs.writeFileSync(FICHIER_BUTEURS,JSON.stringify({generated_at:new Date().toISOString(),days:{}},null,2));
+              }catch(e2){ console.log('  [BUTEURS] ecriture impossible : '+(e2&&e2.message)); }
+            }
+          }
           // sitemap-fr.xml ne liste plus que les pages match statiques (audit
           // QA 14/09/2026). Les pages /fr/ (accueil, outils, a-propos, exemple
           // d'analyse) et tout le blog (/blog.html, /blog/, guides) sont declares
@@ -2243,6 +2268,7 @@ jobs:
               generateMatchPages([]);
               generateSitemaps([]);
               injectHomeSeoSummary([]);
+              ecrireButeursDuJour([], null);
               console.log('\n=== JOUR SANS MATCHS - Resolution historique ===');
               var histoPathEarly='historique.json';
               var histoEarly={predictions:[],stats:{winrate:0,roi:0,total:0,streak:0,wins:0,losses:0},monthly:[],backtesting:{}};
@@ -3454,6 +3480,13 @@ jobs:
                 console.log('  [ACCES] analyse offerte du '+k+(m.is_canonical_pick?' (SAFE_PICK canonique)':'')+' : '+m.id+' ('+(m.home&&m.home.n)+' vs '+(m.away&&m.away.n)+') '+(m.league||''));
               });
             })();
+            // Buteurs du jour : APRES la garde coup d'envoi (second passage) et
+            // AVANT le retrait des champs premium (lambda du moteur requis, comme
+            // sur la page match d'un abonne). Seule l'identite des joueurs sort.
+            var BUTEURS_MS=Date.now();
+            ecrireButeursDuJour(allMatchsData, function(m){
+              return kickoffGate(FIXTURE_BY_ID[String(m.id)],BUTEURS_MS,{marginMinutes:KICKOFF_MARGIN_MINUTES}).open;
+            });
             // Copie assainie pour le fichier public. allMatchsData reste complet :
             // l'historique, les pages match et les lignes premium en ont besoin.
             // prob_band : niveau GROSSIER (high/good/moderate) de la probabilite du
@@ -3603,7 +3636,7 @@ jobs:
         # quel, les donnees du jour sont celles qui viennent d'etre calculees.
         run: |
           set -euo pipefail
-          OUTPUTS="data.json data-home.json historique.json transferts.json actus.json sitemap.xml match index.html league-coverage-report.json seo-lastmod.json"
+          OUTPUTS="data.json data-home.json historique.json transferts.json actus.json sitemap.xml match index.html league-coverage-report.json seo-lastmod.json buteurs-du-jour.json"
           # Registre du cycle de vie des pages match (scripts/match-lifecycle.js) :
           # chemin imbrique, sauvegarde et restauration AVEC son chemin.
           # Classements conserves des pages championnat (scripts/league-hub-data.js) :

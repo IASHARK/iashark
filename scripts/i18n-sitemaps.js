@@ -104,6 +104,15 @@ function blogFiles(base) {
   var prefix = base ? base + "/" : "";
   var files = base ? [] : ["blog.html"];
   files.push(prefix + "blog/index.html");
+  // Articles d'actualite a la racine du blog (/blog/<slug>.html,
+  // /<langue>/blog/<slug>.html) : memes regles que les guides (non noindex,
+  // canonical auto-referent, hreflang lus dans le <head>).
+  var blogDir = path.join(ROOT, prefix + "blog");
+  if (fs.existsSync(blogDir)) {
+    fs.readdirSync(blogDir).filter(function (f) { return /\.html$/.test(f) && f !== "index.html"; }).sort().forEach(function (f) {
+      files.push(prefix + "blog/" + f);
+    });
+  }
   var guidesDir = path.join(ROOT, prefix + "blog/guides");
   if (fs.existsSync(guidesDir)) {
     fs.readdirSync(guidesDir).filter(function (f) { return /\.html$/.test(f); }).sort().forEach(function (f) {

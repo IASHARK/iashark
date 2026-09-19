@@ -200,11 +200,12 @@ test("_redirects : pays puis langue puis /fr/ sur la racine, anciennes URLs, his
     .filter(function (l) { return l.trim() && l.trim().charAt(0) !== "#"; })
     .map(function (l) { return l.trim().split(/\s+/); });
   var rootRules = rules.filter(function (r) { return r[0] === "/"; });
-  assert.deepEqual(rootRules.map(function (r) { return r.slice(1).join(" "); }), [
-    "/gb/ 302! Country=gb", "/za/ 302! Country=za", "/mx/ 302! Country=mx", "/en/ 302! Country=us,ca,au,ie,nz",
-    "/en/ 302! Language=en", "/es/ 302! Language=es", "/de/ 302! Language=de", "/it/ 302! Language=it", "/pt/ 302! Language=pt",
-    "/fr/ 302!"
-  ]);
+  // Aiguillage pays/langue de la racine : table lib/lang-routing.js (detail et
+  // simulation pays par pays : tests/lang-routing.test.js), /fr/ en dernier.
+  var routing = require(path.join(ROOT, "lib/lang-routing.js"));
+  assert.deepEqual(rootRules.map(function (r) { return r.slice(1).join(" "); }),
+    routing.rootRedirectRules("fr").map(function (r) { return ("/" + r.to + "/ 302! " + r.cond).trim(); }));
+  assert.equal(rootRules[rootRules.length - 1].slice(1).join(" "), "/fr/ 302!");
   assert.deepEqual(rules.slice(0, rootRules.length), rootRules, "les regles de la racine doivent venir en premier");
   function has(from, to, status) { return rules.some(function (r) { return r[0] === from && r[1] === to && r[2] === status; }); }
   assert.ok(has("/index.html", "/fr/", "301!"));

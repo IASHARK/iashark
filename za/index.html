@@ -488,6 +488,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 </style>
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
 <link rel="stylesheet" href="/assets/home-list.css">
+<link rel="stylesheet" href="/assets/home-scorers.css">
 <meta property="og:site_name" content="IASHARK">
 <meta property="og:locale" content="en_ZA">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://iashark.com/#organization","name":"IASHARK","url":"https://iashark.com/","logo":{"@type":"ImageObject","url":"https://iashark.com/icon-512.png","width":512,"height":512},"description":"IASHARK analyses soccer matches with statistical models and compares the estimated probabilities with bookmaker odds. It is not a bookmaker."},{"@type":"WebSite","@id":"https://iashark.com/#website","name":"IASHARK","url":"https://iashark.com/","publisher":{"@id":"https://iashark.com/#organization"},"inLanguage":["fr","en-GB","en-ZA","en","es-MX","es","de","it","pt"]},{"@type":"WebPage","@id":"https://iashark.com/za/#webpage","url":"https://iashark.com/za/","name":"Soccer Predictions & PSL Stats | IASHARK South Africa","description":"PSL and international soccer predictions from statistical models: win, draw, goals and BTTS probabilities against bookmaker odds. Free daily analysis. 18+","inLanguage":"en-ZA","isPartOf":{"@id":"https://iashark.com/#website"},"about":{"@id":"https://iashark.com/#organization"}}]}</script>
@@ -551,12 +552,33 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
   </div>
 </section>
 
+<!-- Buteurs du jour (home-scorers.js, assets/home-scorers.css, 19/09/2026) :
+     les 3 joueurs les plus susceptibles de marquer ce jour-la, fichier public
+     /buteurs-du-jour.json (aucune probabilite). Squelette aux dimensions des
+     cartes reelles : aucun decalage au chargement. Section masquee s'il n'y a
+     rien a montrer. -->
+<section class="hs" id="buteurs-du-jour" aria-labelledby="hsTitle" data-home-scorers>
+  <div class="hs-head">
+    <h2 class="hs-title" id="hsTitle" data-i18n="home_scorers.title">Scorers of the day</h2>
+    <p class="hs-sub" data-hs-sub>The 3 players most likely to score today, before the line-ups.</p>
+  </div>
+  <div class="hs-board">
+  <ol class="hs-list" data-hs-list aria-busy="true" aria-label="Scorers of the day, from most to least likely" data-i18n-attr="aria-label:home_scorers.list_aria">
+      <li class="hs-card" aria-hidden="true"><div class="hs-link hs-skel"><span class="hs-rank">01</span><span class="hs-photo-wrap"><span class="hs-photo hs-avatar"></span></span><span class="hs-id"><span class="hs-sk hs-sk-n"></span><span class="hs-sk hs-sk-m"></span><span class="hs-sk hs-sk-c"></span></span><span class="hs-zone is-pending"><span class="hs-sk hs-sk-v"></span><span class="hs-gauge is-empty"></span></span></div></li>
+      <li class="hs-card" aria-hidden="true"><div class="hs-link hs-skel"><span class="hs-rank">02</span><span class="hs-photo-wrap"><span class="hs-photo hs-avatar"></span></span><span class="hs-id"><span class="hs-sk hs-sk-n"></span><span class="hs-sk hs-sk-m"></span><span class="hs-sk hs-sk-c"></span></span><span class="hs-zone is-pending"><span class="hs-sk hs-sk-v"></span><span class="hs-gauge is-empty"></span></span></div></li>
+      <li class="hs-card" aria-hidden="true"><div class="hs-link hs-skel"><span class="hs-rank">03</span><span class="hs-photo-wrap"><span class="hs-photo hs-avatar"></span></span><span class="hs-id"><span class="hs-sk hs-sk-n"></span><span class="hs-sk hs-sk-m"></span><span class="hs-sk hs-sk-c"></span></span><span class="hs-zone is-pending"><span class="hs-sk hs-sk-v"></span><span class="hs-gauge is-empty"></span></span></div></li>
+    </ol>
+    <div class="hs-gate" data-hs-gate hidden></div>
+  </div>
+  <div class="hs-foot" data-hs-foot><p class="hs-note">Estimate made before the official line-ups, never a guarantee.</p><a class="hs-cta" href="/za/abonnement.html" data-vente data-track="home_scorers_upsell" data-track-kind="home_scorers_upsell">See the Pro plan <span aria-hidden="true">→</span></a></div>
+</section>
+
 <section class="decisions" id="decisions">
   <!-- Liste des matchs (home-list.js, maquette v2 validee le 15/09/2026) :
        bande de dates, « Mes compétitions » puis A→Z, lignes par competition.
        Le resume SEO et l'etat de chargement ci-dessous sont remplaces au montage. -->
   <div id="homeList">
-  <!--SEO_MATCHES_SUMMARY--><div style="padding:4px 0 12px"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px"><span data-i18n="home_app.seo_summary_title">Today&#39;s AI analyses</span> — <time data-seo-date datetime="2026-09-18">18 September 2026</time> <small style="font-family:'DM Sans',sans-serif;font-size:11px;color:#64748b">(<span data-i18n="home_app.seo_times_paris">Paris time</span>)</small></h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8"><li>02:00 — <strong>Bucaramanga vs Independiente Medellin</strong> (Primera A Colombia)</li><li>20:00 — <strong>Groningen vs PEC Zwolle</strong> (Eredivisie)</li><li>20:30 — <strong>Bayern München vs Union Berlin</strong> (Bundesliga)</li><li>20:45 — <strong>Monza vs Sassuolo</strong> (Serie A)</li><li>20:45 — <strong>Monaco vs Lens</strong> (Ligue 1)</li><li>21:00 — <strong><a href="/za/match/1557408.html" style="color:inherit">Brentford vs Chelsea</a></strong> (Premier League)</li><li>21:00 — <strong>Espanyol vs Elche</strong> (La Liga)</li><li>22:00 — <strong>Alianza Atletico vs Comerciantes Unidos</strong> (Liga 1 Peru)</li><li>23:00 — <strong>Central Cordoba de Santiago vs Defensa Y Justicia</strong> (Liga Profesional Argentina)</li><li>23:00 — <strong>Águilas Doradas vs Deportivo Pereira</strong> (Primera A Colombia)</li></ul></div><!--/SEO_MATCHES_SUMMARY-->
+  <!--SEO_MATCHES_SUMMARY--><div style="padding:4px 0 12px"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px"><span data-i18n="home_app.seo_summary_title">Today's AI analyses</span> — <time data-seo-date datetime="2026-09-18">18 September 2026</time> <small style="font-family:'DM Sans',sans-serif;font-size:11px;color:#64748b">(<span data-i18n="home_app.seo_times_paris">Paris time</span>)</small></h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8"><li>02:00 — <strong>Bucaramanga vs Independiente Medellin</strong> (Primera A Colombia)</li><li>20:00 — <strong>Groningen vs PEC Zwolle</strong> (Eredivisie)</li><li>20:30 — <strong>Bayern München vs Union Berlin</strong> (Bundesliga)</li><li>20:45 — <strong>Monza vs Sassuolo</strong> (Serie A)</li><li>20:45 — <strong>Monaco vs Lens</strong> (Ligue 1)</li><li>21:00 — <strong><a href="/za/match/1557408.html" style="color:inherit">Brentford vs Chelsea</a></strong> (Premier League)</li><li>21:00 — <strong>Espanyol vs Elche</strong> (La Liga)</li><li>22:00 — <strong>Alianza Atletico vs Comerciantes Unidos</strong> (Liga 1 Peru)</li><li>23:00 — <strong>Central Cordoba de Santiago vs Defensa Y Justicia</strong> (Liga Profesional Argentina)</li><li>23:00 — <strong>Águilas Doradas vs Deportivo Pereira</strong> (Primera A Colombia)</li></ul></div><!--/SEO_MATCHES_SUMMARY-->
   <div class="loading-state">
     <div class="loading-spinner"></div>
     <div class="loading-text" data-i18n="home_page.loading_analyses">LOADING ANALYSES...</div>
@@ -755,6 +777,9 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 <script src="/lib/market-labels.js"></script>
 <script src="/lib/fav-leagues.js"></script>
 <script src="/home-list.js"></script>
+<script src="/lib/insights.js"></script>
+<script src="/lib/buteurs-du-jour.js"></script>
+<script src="/home-scorers.js"></script>
 <script src="/app-client.js" defer></script>
 <script>
 var allMatchs=[],currentSport='football';
@@ -1034,6 +1059,18 @@ function monterListe(){
   });
   homeList.setLoading();
 }
+// Buteurs du jour (home-scorers.js) : fichier public sans probabilite ; les
+// chiffres ne sont calcules que pour un abonne Pro confirme par match-data.
+var homeScorers=null;
+function monterButeurs(){
+  if(homeScorers||!window.IasharkHomeScorers)return;
+  var el=document.getElementById('buteurs-du-jour');
+  if(!el)return;
+  homeScorers=IasharkHomeScorers.mount(el,{helpers:{
+    leagueName:function(p){return leagueName({league_key:p&&p.league_key,league:p&&p.league});},
+    lien:lien
+  }});
+}
 
 // A minuit (heure du visiteur) le match du jour et les onglets Aujourd'hui /
 // Demain changent : la page se re-rend d'elle-meme, sans rechargement.
@@ -1046,7 +1083,9 @@ async function loadData(){
     appliquerMarche();
     traduireLibellesMarche();
     monterListe();
+    monterButeurs();
     if(window.IasharkApp){try{authCtx=await IasharkApp.context();}catch(e){}}
+    if(homeScorers)homeScorers.setViewer(authCtx);
     // Meme source que la page match (match-page.js) : un abonne connecte lit
     // la fonction Edge 'match-data', qui renvoie les champs premium
     // (pari_rec/cote_rec/model_probability) non retires. Sans ca, la vitrine

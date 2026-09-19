@@ -1,0 +1,152 @@
+/* =========================================================================
+   IASHARK — « Buteurs du jour » (home-scorers.js), accueil. 19/09/2026.
+   Prefixe .hs- (aucun conflit avec .hl-, .mc, .feature-* d'index.html).
+   Tokens d'index.html uniquement : --page, --surface, --surface-2, --cyan,
+   --cyan2, --amber, --text, --soft, --line. Cyan = donnee et action,
+   ambre = verrou Pro (comme la liste des matchs, assets/home-list.css).
+   Design fin (retour du proprietaire : « pas de grosses cases ») : un seul
+   panneau, une ligne par joueur (rang, photo + blason, nom, match, heure,
+   probabilite a droite). Mobile : lignes empilees ; ordinateur : les trois
+   cote a cote dans la meme bande. Hauteurs et largeurs fixes : le passage
+   squelette -> verrou -> chiffres ne decale rien. Meme contenu partout.
+   ========================================================================= */
+.hs{position:relative;z-index:1;max-width:916px;margin:0 auto;padding:30px 28px 6px;color:var(--text,#f4f7fb);font-family:'Inter',system-ui,sans-serif;}
+.hs[hidden]{display:none;}
+.hs *,.hs *::before,.hs *::after{box-sizing:border-box;}
+
+/* ---------- En-tete ---------- */
+.hs-head{display:flex;align-items:baseline;justify-content:space-between;gap:4px 14px;flex-wrap:wrap;margin-bottom:12px;}
+.hs-title{margin:0;display:flex;align-items:center;gap:9px;font-size:21px;font-weight:800;letter-spacing:-.5px;line-height:1.15;}
+.hs-title::before{content:'';flex:none;width:8px;height:8px;border-radius:50%;background:var(--cyan,#20d5ef);box-shadow:0 0 0 4px rgba(32,213,239,.14),0 0 14px rgba(32,213,239,.6);}
+.hs-sub{margin:0;font-size:12px;line-height:1.45;color:var(--soft,#a6b4c6);}
+
+/* ---------- Panneau : un seul cadre, lignes separees par un filet ---------- */
+.hs-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);
+  border:1px solid var(--line,rgba(141,179,211,.14));border-radius:16px;overflow:hidden;
+  background:linear-gradient(180deg,rgba(13,25,38,.78),rgba(9,18,29,.5));}
+.hs-card{min-width:0;}
+.hs-card+.hs-card{border-top:1px solid var(--line,rgba(141,179,211,.12));}
+.hs-link{position:relative;display:grid;grid-template-columns:22px 40px minmax(0,1fr) 78px;align-items:center;column-gap:12px;
+  min-height:68px;padding:12px 16px;color:inherit;text-decoration:none;transition:background .18s ease;}
+.hs-link:hover{background:rgba(32,213,239,.045);}
+.hs-link:focus-visible{outline:2px solid var(--cyan,#20d5ef);outline-offset:-2px;}
+.hs-card:first-child .hs-link::before{content:'';position:absolute;left:0;top:14px;bottom:14px;width:2px;border-radius:2px;background:var(--cyan,#20d5ef);box-shadow:0 0 10px rgba(32,213,239,.6);}
+
+.hs-rank{font-family:'Space Mono',ui-monospace,monospace;font-size:12px;font-weight:700;letter-spacing:.02em;color:rgba(166,180,198,.7);font-variant-numeric:tabular-nums;}
+.hs-card:first-child .hs-rank{color:var(--cyan,#20d5ef);}
+.hs-photo-wrap{position:relative;width:40px;height:40px;}
+.hs-photo{display:block;width:40px;height:40px;border-radius:50%;object-fit:cover;object-position:top center;background:rgba(141,179,211,.1);border:1px solid rgba(141,179,211,.22);}
+.hs-avatar{display:grid;place-items:center;font-size:12px;font-weight:800;letter-spacing:.02em;color:var(--soft,#a6b4c6);}
+.hs-crest{position:absolute;right:-4px;bottom:-3px;width:18px;height:18px;padding:1px;border-radius:50%;object-fit:contain;background:var(--page,#060b12);box-shadow:0 0 0 1px rgba(141,179,211,.22);}
+
+.hs-id{min-width:0;display:flex;flex-direction:column;gap:2px;}
+.hs-name{margin:0;font-size:14.5px;font-weight:700;line-height:1.2;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hs-meta,.hs-club{display:flex;align-items:baseline;gap:5px;min-width:0;font-size:11.5px;line-height:15px;color:var(--soft,#a6b4c6);}
+.hs-club{font-size:11px;line-height:14px;color:rgba(166,180,198,.8);}
+.hs-vs{min-width:0;flex:0 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:rgba(244,247,251,.86);}
+.hs-teams{min-width:0;flex:0 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hs-league{min-width:0;flex:0 3 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hs-dot{flex:none;opacity:.6;}
+.hs-meta time{flex:none;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--text,#f4f7fb);font-weight:600;}
+.hs-stats{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 5px;min-width:0;font-size:11px;line-height:14px;color:var(--soft,#a6b4c6);}
+.hs-stats>span{white-space:nowrap;}
+.hs-stats b{color:var(--text,#f4f7fb);font-weight:700;font-variant-numeric:tabular-nums;}
+
+/* ---------- Zone chiffree (droite) : meme taille dans les 4 etats ---------- */
+.hs-zone{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:6px;min-height:34px;width:78px;justify-self:end;}
+.hs-prob-val{font-size:18px;line-height:1;font-weight:800;letter-spacing:-.02em;color:var(--cyan,#20d5ef);font-variant-numeric:tabular-nums;}
+.hs-gauge{display:block;width:100%;height:3px;border-radius:2px;background:rgba(141,179,211,.14);overflow:hidden;}
+.hs-gauge.is-empty{background:rgba(141,179,211,.1);}
+.hs-zone.is-locked .hs-gauge{display:none;}
+.hs-gauge i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--cyan2,#06b6d4),var(--cyan,#20d5ef));box-shadow:0 0 8px rgba(32,213,239,.55);
+  transform-origin:left;animation:hsGrow .9s cubic-bezier(.23,1,.32,1) both;}
+@keyframes hsGrow{from{transform:scaleX(0)}}
+.hs-pro-tag{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:999px;border:1px solid rgba(245,158,11,.4);
+  background:rgba(245,158,11,.08);color:var(--amber,#f59e0b);font-size:10px;font-weight:800;letter-spacing:.06em;}
+.hs-pro-tag svg{width:10px;height:10px;}
+.hs-lock.is-pro{font-size:10.5px;line-height:13px;text-align:right;color:var(--soft,#a6b4c6);}
+.hs-sk{display:block;height:9px;border-radius:5px;background:linear-gradient(90deg,rgba(141,179,211,.07) 25%,rgba(141,179,211,.16) 50%,rgba(141,179,211,.07) 75%);background-size:200% 100%;animation:hsShimmer 1.3s linear infinite;}
+.hs-sk-v{width:46px;height:16px;}
+@keyframes hsShimmer{to{background-position:-200% 0}}
+/* Squelette statique d'index.html (memes dimensions que la ligne reelle). */
+.hs-skel .hs-sk-n{width:62%;height:12px;}
+.hs-skel .hs-sk-m{width:88%;}
+.hs-skel .hs-sk-c{width:60%;height:8px;}
+
+/* ---------- Verrou (non-abonne) : lignes floutees + panneau « Débloquer » ----------
+   Tunnel de vente : les lignes ne contiennent AUCUNE donnee du joueur (faux
+   texte floute), seuls rang, heure et competition restent lisibles. */
+.hs-board{position:relative;}
+.hs-ghost{display:grid;place-items:center;color:rgba(141,179,211,.34);overflow:hidden;}
+.hs-ghost svg{width:30px;height:30px;margin-top:8px;}
+.hs-blurred{filter:blur(5px);user-select:none;-webkit-user-select:none;opacity:.85;}
+.hs-prob-fake{font-size:18px;line-height:1;font-weight:800;color:var(--cyan,#20d5ef);}
+.hs.is-locked .hs-zone.is-locked{flex-direction:column;align-items:flex-end;gap:5px;}
+.hs.is-locked .hs-zone.is-locked .hs-pro-tag{display:none;}
+.hs.is-locked .hs-list{min-height:236px;}
+.hs.is-locked .hs-card .hs-link{pointer-events:auto;}
+.hs-gate{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;padding:14px;border-radius:16px;
+  background:radial-gradient(95% 85% at 50% 50%,rgba(6,11,18,.9),rgba(6,11,18,.72) 70%,rgba(6,11,18,.55));}
+/* Lignes derriere le panneau : devinees, jamais lisibles au point de gener le message. */
+.hs.is-locked .hs-list .hs-link{opacity:.5;filter:blur(1.2px);}
+.hs-gate[hidden]{display:none;}
+.hs-gate-card{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;max-width:340px;}
+.hs-gate-lock{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;color:var(--amber,#f59e0b);
+  background:rgba(245,158,11,.1);box-shadow:0 0 0 1px rgba(245,158,11,.45),0 0 22px rgba(245,158,11,.25);}
+.hs-gate-lock svg{width:16px;height:16px;}
+.hs-gate-title{margin:2px 0 0;font-size:17px;font-weight:800;letter-spacing:-.3px;line-height:1.2;color:var(--text,#f4f7fb);}
+.hs-gate-text{margin:0;font-size:12.5px;line-height:1.45;color:var(--soft,#a6b4c6);}
+.hs-gate-cta{margin-top:4px;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 22px;border-radius:999px;
+  background:linear-gradient(135deg,#fbbf24,var(--amber,#f59e0b));color:#1a1203;font-size:14px;font-weight:800;text-decoration:none;
+  box-shadow:0 8px 24px rgba(245,158,11,.28);transition:transform .15s ease,box-shadow .15s ease;}
+.hs-gate-cta:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(245,158,11,.38);}
+.hs-gate-cta:focus-visible{outline:2px solid var(--text,#f4f7fb);outline-offset:3px;}
+.hs-gate-small{margin:0;font-size:11px;color:var(--soft,#a6b4c6);}
+.hs-gate-copy,.hs-gate-action{display:flex;flex-direction:column;align-items:center;gap:6px;}
+@media(min-width:860px){
+  /* Ordinateur : bande horizontale (cadenas + texte a gauche, bouton a droite). */
+  .hs.is-locked .hs-list{min-height:0;}
+  .hs-gate{padding:12px 22px;}
+  .hs-gate-card{flex-direction:row;align-items:center;justify-content:space-between;text-align:left;gap:16px;max-width:none;width:100%;}
+  .hs-gate-copy{flex:1;align-items:flex-start;gap:3px;}
+  .hs-gate-action{flex:none;gap:5px;}
+  .hs-gate-cta{margin-top:0;}
+}
+
+/* ---------- Pied : avertissement + offre (visiteur, compte gratuit) ---------- */
+.hs-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;min-height:40px;margin-top:10px;}
+.hs-note{flex:1 1 240px;margin:0;font-size:11px;line-height:1.45;color:var(--soft,#a6b4c6);}
+.hs-cta{flex:none;display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:999px;
+  border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.07);color:var(--amber,#f59e0b);font-size:12px;font-weight:600;text-decoration:none;transition:background .15s,border-color .15s;}
+.hs-cta svg{flex:none;width:12px;height:12px;}
+.hs-cta b{font-weight:800;white-space:nowrap;}
+.hs-cta:hover{background:rgba(245,158,11,.14);border-color:rgba(245,158,11,.7);}
+.hs-cta:focus-visible{outline:2px solid var(--text,#f4f7fb);outline-offset:3px;}
+
+/* ---------- Ordinateur : les trois joueurs cote a cote, meme bande ---------- */
+@media(min-width:860px){
+  .hs-title{font-size:23px;}
+  .hs-list{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .hs-card+.hs-card{border-top:0;border-left:1px solid var(--line,rgba(141,179,211,.12));}
+  /* Colonnes etroites : la probabilite (ou le verrou) passe en haut a droite,
+     les deux lignes d'infos du match gardent toute la largeur. */
+  .hs-link{grid-template-columns:18px 40px minmax(0,1fr);column-gap:10px;min-height:84px;padding:14px 14px;}
+  .hs-zone{position:absolute;top:13px;right:14px;width:auto;min-height:0;gap:4px;}
+  .hs-zone .hs-gauge{width:44px;}
+  .hs-zone .hs-prob-val{font-size:16px;}
+  .hs-zone .hs-lock.is-pro{max-width:84px;}
+  .hs-name{padding-right:66px;}
+  .hs-card:first-child .hs-link::before{top:auto;bottom:0;left:14px;right:14px;width:auto;height:2px;}
+}
+@media(max-width:900px){
+  .hs{padding:24px 18px 4px;}
+}
+@media(max-width:420px){
+  .hs-link{grid-template-columns:18px 40px minmax(0,1fr) 64px;column-gap:10px;padding:12px 12px;}
+  .hs-zone{width:64px;}
+  .hs-cta{width:100%;justify-content:center;}
+}
+@media(prefers-reduced-motion:reduce){
+  .hs-link{transition:none;}
+  .hs-sk,.hs-gauge i{animation:none!important;}
+}

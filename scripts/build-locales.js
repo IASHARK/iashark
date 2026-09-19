@@ -52,9 +52,9 @@ const RETIRED_FILES = ["historique.html"];
 // Shells modulaires rendus par des scripts partages : aucune substitution
 // inline heritee ne doit s'y appliquer.
 const MODULAR_SHELLS = ["match.html", "pro.html", "compte.html"];
-// Routage de la racine "/" (voir writeRedirects).
-const COUNTRY_ROUTES = [["gb", "gb"], ["za", "za"], ["mx", "mx"], ["us,ca,au,ie,nz", "en"]];
-const LANGUAGE_ROUTES = ["en", "es", "de", "it", "pt"];
+// Routage de la racine "/" par pays puis par langue du navigateur : table et
+// justifications dans lib/lang-routing.js (tests/lang-routing.test.js).
+const LANG_ROUTING = require("../lib/lang-routing.js");
 
 // Echappe une valeur pour un litteral JS entre guillemets simples (textes
 // traduits injectes dans du JS par les regles du manifeste).
@@ -158,13 +158,23 @@ function rewriteInternalLinks(html, dir) {
       var np = mapPath(p, dir);
       return np ? pre + np : m;
     });
-  // 2. URLs absolues du domaine (landing.html, JSON-LD...).
+  // 2. URLs absolues du domaine (landing.html, JSON-LD...). Exception : dans un
+  //    bloc JSON-LD, la racine du site et ses identifiants d'entite
+  //    ("https://iashark.com/", "https://iashark.com/#organization") designent
+  //    l'entite IASHARK commune a toutes les versions (meme @id que l'accueil,
+  //    homeJsonLd) : jamais reecrits en /<dir>/ (audit SEO 19/09/2026 : les
+  //    pages methodologie declaraient une Organization differente par version).
+  var LD_ROOT = "\u0000IASHARK_LD_ROOT\u0000";
+  html = html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g, function (block) {
+    return block.replace(/https:\/\/iashark\.com\/(?=["#])/g, LD_ROOT);
+  });
   html = html.replace(/(["'=(\s])https:\/\/iashark\.com(\/[^"'\\\s<>?#)]*)?(?=([\s\S]?))/g,
     function (m, pre, p, next) {
       if ((pre === '"' || pre === "'") && (next === '"' || next === "'") && next !== pre) return m;
       var np = mapPath(p || "/", dir);
       return np ? pre + SITE_URL + np : m;
     });
+  html = html.split(LD_ROOT).join(SITE_URL + "/");
   // 3. Litteraux JS exacts vers une page publique ('/abonnement.html', '/match.html?id=').
   html = html.replace(/(["'])\/([a-z0-9-]+\.html)((?:[?#][^"'\\\s<>]*)?)\1/g, function (m, q, file, rest) {
     var np = mapPath("/" + file, dir);
@@ -380,6 +390,35 @@ function injectLegalBreadcrumb(html, dir, file) {
   return html.replace(/<\/head>/i, function () { return SEO.ldScript(ld) + "\n</head>"; });
 }
 
+// Pages generees hors accueil (a-propos, abonnement, pro, marches,
+// exemple-analyse ; audit SEO du 19/09/2026 : aucun JSON-LD) : fil d'Ariane
+// JSON-LD Accueil > page, libelle court i18n/seo/<dir>.json#breadcrumb.pages
+// (le h1 de ces pages est un slogan, pas un nom de page). a-propos : AboutPage
+// + Organization (memes @id que l'accueil, homeJsonLd). Rien sur une page
+// noindex ni sans libelle (jamais de nom invente).
+function injectPageLd(html, dir, file, meta) {
+  var head = html.split(/<\/head>/i)[0];
+  if (/<meta\s+name="robots"\s+content="[^"]*noindex/i.test(head)) return html;
+  var key = file.replace(/\.html$/, "");
+  var s = SEO.seoConf(dir), label = s.breadcrumb && s.breadcrumb.pages && s.breadcrumb.pages[key];
+  if (typeof label !== "string" || !label.trim()) return html;
+  var url = dirUrl(dir, file), blocks = [];
+  if (!/"@type":\s*"BreadcrumbList"/.test(html)) {
+    blocks.push(SEO.breadcrumbLd([{ name: s.breadcrumb.home, url: dirUrl(dir, "index.html") }, { name: label, url: url }]));
+  }
+  if (file === "a-propos.html" && !/"@type":\s*"AboutPage"/.test(html)) {
+    var page = { "@context": "https://schema.org", "@type": "AboutPage", "@id": url + "#webpage", url: url, name: label, inLanguage: DIRS[dir].htmlLang,
+      isPartOf: { "@type": "WebSite", "@id": SITE_URL + "/#website", name: "IASHARK", url: SITE_URL + "/" },
+      about: { "@type": "Organization", "@id": SITE_URL + "/#organization", name: "IASHARK", url: SITE_URL + "/", description: s.org_description,
+        logo: { "@type": "ImageObject", url: SITE_URL + "/icon-512.png", width: 512, height: 512 } } };
+    if (meta && meta.title) page.name = meta.title;
+    if (meta && meta.description) page.description = meta.description;
+    blocks.push(page);
+  }
+  if (!blocks.length) return html;
+  return html.replace(/<\/head>/i, function () { return blocks.map(SEO.ldScript).join("\n") + "\n</head>"; });
+}
+
 // Meta marche + scripts runtime (i18n.js pour I18N.href, market-config.js).
 function injectRuntime(html, dir, opts) {
   opts = opts || {};
@@ -549,14 +588,16 @@ function redirectsContent() {
     "# chemin (\"shadowing\" : la racine a un index.html et les anciennes pages",
     "# racine restent les sources du generateur).",
     "",
-    "# --- Racine \"/\" : pays d'abord (Country = code ISO 3166-1 alpha-2 en",
-    "# minuscules, geolocalisation Netlify), puis langue du navigateur",
-    "# (Accept-Language), puis /fr/ par defaut. 302 : aiguillage revisable (le",
-    "# selecteur langue/pays reste disponible), jamais une URL permanente."
+    "# --- Racine \"/\" UNIQUEMENT (jamais une page profonde) : aiguillage par pays",
+    "# (Country = ISO 3166-1 alpha-2, GeoIP Netlify ou cookie nf_country) puis par",
+    "# premiere langue du navigateur (Language = Accept-Language ou cookie nf_lang).",
+    "# Ordre : marches a devise propre (gb, za, mx), pays multilingues (pays +",
+    "# langue), pays -> langue du pays, langue du navigateur, pays sans version",
+    "# -> /en/, enfin /fr/. Table et justifications : lib/lang-routing.js. Le",
+    "# selecteur de langue pose nf_country/nf_lang (i18n/i18n.js) : la racine suit",
+    "# alors le choix du visiteur. 302 : aiguillage revisable, jamais permanent."
   ];
-  COUNTRY_ROUTES.forEach(function (r) { out.push(rule("/", "/" + r[1] + "/", "302!", "Country=" + r[0])); });
-  LANGUAGE_ROUTES.forEach(function (l) { out.push(rule("/", "/" + l + "/", "302!", "Language=" + l)); });
-  out.push(rule("/", "/" + X_DEFAULT_DIR + "/", "302!"));
+  LANG_ROUTING.rootRedirectRules(X_DEFAULT_DIR).forEach(function (r) { out.push(rule("/", "/" + r.to + "/", "302!", r.cond)); });
 
   out.push("", "# --- Anciennes URLs racine -> version generee du repertoire par defaut (301).");
   out.push(rule("/index.html", "/" + X_DEFAULT_DIR + "/", "301!"));
@@ -846,6 +887,7 @@ function build() {
       var meta = metaFor(page, dir);
       html = buildHead(html, dir, page.file, meta, altDirs);
       if (page.file === "index.html") html = rewriteHomeMatchSummary(injectHomeSeo(html, dir, meta), dir);
+      else html = injectPageLd(html, dir, page.file, meta);
       // Pied de page : hubs ligue du perimetre, clubs, articles, blog, marches,
       // methodologie de la version (scripts/seo-common.js#injectFooterNav).
       html = SEO.injectFooterNav(html, dir);
@@ -900,7 +942,8 @@ module.exports = {
   marketRuntimeData: marketRuntimeData, checkoutPriceTable: checkoutPriceTable, redirectsContent: redirectsContent, build: build,
   stripUnavailablePageLinks: stripUnavailablePageLinks,
   buildHead: buildHead, setHtmlLang: setHtmlLang, injectRuntime: injectRuntime, metaFor: metaFor,
-  homeJsonLd: homeJsonLd, homeSeoBlock: homeSeoBlock, rewriteHomeMatchSummary: rewriteHomeMatchSummary
+  homeJsonLd: homeJsonLd, homeSeoBlock: homeSeoBlock, rewriteHomeMatchSummary: rewriteHomeMatchSummary,
+  injectPageLd: injectPageLd
 };
 
 if (require.main === module) build();

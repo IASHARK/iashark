@@ -67,8 +67,12 @@ test("i18n sitemaps: fichiers valides, hreflang complet (dont en-GB/en-ZA/es-MX)
     // Blog : accueil (/blog.html pour le FR racine) et chaque guide ;
     // /blog/guides/ (canonical = accueil du blog) jamais ; /blog/ jamais
     // (Netlify le redirige vers /blog ; blog/index.html est noindex).
-    var blog = prefix == null ? [] : (prefix === "" ? ["/blog.html"] : [prefix + "/blog/"])
-      .concat(GUIDES.map(function (f) { return prefix + "/blog/guides/" + f; }));
+    // Articles d'actualite a la racine du blog (19/09/2026).
+    var rootArticles = prefix == null ? [] : fs.readdirSync(path.join(ROOT, prefix.slice(1), "blog"))
+      .filter(function (f) { return /\.html$/.test(f) && f !== "index.html"; })
+      .map(function (f) { return prefix + "/blog/" + f; });
+    var blog = (prefix == null ? [] : (prefix === "" ? ["/blog.html"] : [prefix + "/blog/"])
+      .concat(GUIDES.map(function (f) { return prefix + "/blog/guides/" + f; }))).concat(rootArticles);
 
     // Une <url> par page promue dans le sitemap, pas une de plus/moins.
     var urlCount = (xml.match(/<url>/g) || []).length;

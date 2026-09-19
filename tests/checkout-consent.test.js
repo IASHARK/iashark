@@ -43,7 +43,9 @@ test("le bloc rend les cases obligatoires, jamais pre-cochees, avec liens CGV et
   const dict = JSON.parse(read("i18n/dict/en.json")).checkout_consent;
   const t = (k) => dict[k];
   const hrefs = { terms: "/gb/cgv.html", privacy: "/gb/confidentialite.html" };
-  for (const [market, boxes] of [["fr", 2], ["gb", 2], ["za", 2], ["mx", 1]]) {
+  // Une seule case partout depuis le 19/09/2026 : CGV + demande de debut
+  // immediat en toutes lettres dans la meme case (eu/uk/za).
+  for (const [market, boxes] of [["fr", 1], ["gb", 1], ["za", 1], ["mx", 1]]) {
     const html = lib.buildHtml(lib.regimeFor(market), t, hrefs, "T");
     assert.equal((html.match(/type="checkbox"/g) || []).length, boxes, market + " : nombre de cases");
     assert.equal((html.match(/ required /g) || []).length, boxes, market + " : cases requises");
@@ -56,6 +58,9 @@ test("le bloc rend les cases obligatoires, jamais pre-cochees, avec liens CGV et
   assert.ok(lib.buildHtml(lib.regimeFor("gb"), t, hrefs).includes(dict.waiver_uk));
   assert.ok(lib.buildHtml(lib.regimeFor("za"), t, hrefs).includes(dict.waiver_za));
   assert.ok(lib.buildHtml(lib.regimeFor("fr"), t, hrefs).includes(dict.waiver_eu));
+  // La case unique porte les deux accords (eu/uk/za), jamais pour mx.
+  for (const market of ["fr", "gb", "za"]) assert.match(lib.buildHtml(lib.regimeFor(market), t, hrefs), /data-consent="terms" data-consent-with="waiver"/, market);
+  assert.doesNotMatch(lib.buildHtml(lib.regimeFor("mx"), t, hrefs), /data-consent-with/);
 });
 
 test("les textes du dictionnaire sont echappes (aucune injection HTML)", () => {

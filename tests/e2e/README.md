@@ -46,7 +46,7 @@ Filtrer : `npx playwright test account.spec.js -g "/gb/" --project=desktop-chrom
 | `auth.spec.js` | validations traduites (connexion, inscription), connexion simulee -> compte de la version, reinitialisation sans jeton -> lien invalide |
 | `checkout.spec.js` | succes avec session Pro simulee -> acces active ; sans session -> connexion ; annulation |
 | `tools.spec.js` | anonyme et gratuit : demo seulement, aucun appel ni nom d'equipe reel ; Pro simule : scanner sur marches reels |
-| `legal-blog.spec.js` | 5 pages legales en 200 avec la bonne langue, accueil du blog |
+| `legal-blog.spec.js` | 6 pages legales (dont methodologie) en 200 avec la bonne langue, accueil du blog |
 | `production.spec.js` | (prod) redirections `/pro`, `/gb/blog/`, `/historique` ; fichiers internes en 404 ; (local + prod) aucun champ premium dans `data-home.json` et un echantillon de `match/<id>.json` |
 
 ## Donnees et etats simules

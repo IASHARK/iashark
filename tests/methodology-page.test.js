@@ -9,6 +9,15 @@
 // de la recette" ci-dessous echoue si l'un de ces elements revient dans la page,
 // dans n'importe laquelle des 9 versions.
 //
+// DECISION DU 19/09/2026 : la page reste, mais COURTE et VAGUE. Ni les sources,
+// ni les calculs, ni les outils (fournisseur de donnees, outil d'IA, prestataires)
+// ne sont nommes ; plus de detail de niveau « reglage » non plus (marge retiree,
+// calibration, fourchette de cotes, selection renforcee, regle du match offert,
+// signaux de fiabilite). Elle doit en revanche toujours dire : qui publie, que
+// les textes sont rediges avec un outil d'IA (sans le nommer), que les
+// probabilites sont des estimations et jamais des garanties, 18+ et une
+// ressource d'aide.
+//
 // Il verifie aussi : exactitude (aucun chiffre de performance ou de track record,
 // les faits cites existent vraiment dans le code), decisions bloquees en
 // commentaire seulement, JSON-LD AboutPage + Organization sans Person, mention
@@ -108,6 +117,20 @@ const INTERDITS = [
   // Parametres operationnels exacts.
   [/06:00 UTC|0 6 \* \* \*/i, "heure exacte du calcul", VITRINE],
   [/5[  .,]?000 (simulations|fois|veces|times|volte|mal|vezes)/i, "nombre de simulations", VITRINE],
+  // Decision du 19/09/2026 (page courte et vague). Pas VITRINE : ces termes ne
+  // sont interdits que sur la page Methodologie (Stripe, par exemple, est
+  // legitimement nomme sur les pages de paiement).
+  [/Stripe/i, "prestataire de paiement nomme"],
+  [/\b(Sonnet|Haiku)\b/, "modele IA nomme"],
+  [/Dixon/i, "modele statistique nomme"],
+  [/sans marge|marge (du bookmaker )?(retir|inclus)|without (the )?(bookmaker'?s? )?margin|margin (removed|included)|sin (el )?margen|margen (retirad|incluid)|ohne (die )?Marge|margenfrei|Marge (entfernt|abgezogen|herausgerechnet)|Abzug der (Buchmacher)?[Mm]arge|senza (il )?margine|margine (rimoss|inclus)|tolto il margine|sem (a )?margem|margem (retirad|inclu[íi]d)|retirada a margem/i, "detail : marge du bookmaker retiree"],
+  [/[ck]alibr/i, "detail : calibration"],
+  [/fourchette de cotes|cote (minimale|maximale)|odds range|(minimum|maximum) (odds|price)|horquilla de cuotas|rango de momios|cuota (m[íi]nima|m[áa]xima)|momio (m[íi]nimo|m[áa]ximo)|Mindestquote|H[öo]chstquote|Quotenspanne|quota (minima|massima)|forchetta di quote|intervallo di quote|odd (m[íi]nima|m[áa]xima)|intervalo de odds/i, "detail : fourchette de cotes"],
+  [/plafond de probabilit|probability cap|tope de probabilidad|Wahrscheinlichkeitsobergrenze|Obergrenze f[üu]r die Wahrscheinlichkeit|tetto (massimo )?(di|della) probabilit|teto de probabilidade|limite m[áa]ximo de probabilidade/i, "detail : plafond de probabilite"],
+  [/s[ée]lection renforc[ée]e|stricter selection|selecci[óo]n reforzada|verst[äa]rkte Auswahl|strengere Auswahl|selezione ra?inforzata|selezione pi[ùu] esigente|sele[çc][ãa]o refor[çc]ada/i, "detail : selection renforcee"],
+  [/valeur estim[ée]e|estimated value|valor estimado|gesch[äa]tzte[nr]? Wert|valore stimato/i, "detail : regle du match offert"],
+  [/part minoritaire|minority share|parte minoritaria|parte minorit[áa]ria|quota minoritaria|Minderheitsanteil|kleineren Anteil/i, "detail : poids du modele"],
+  [/Accord des calculs|agreement between (the )?calculations|acuerdo (de|entre) (los )?c[áa]lculos|[ÜU]bereinstimmung der Berechnungen|Accordo tra i calcoli|Concord[âa]ncia dos c[áa]lculos/i, "detail : signaux de fiabilite"],
 ];
 
 test("aucun terme de la recette : fournisseurs, bookmakers, modeles, formules, parametres", () => {
@@ -217,32 +240,46 @@ test("decisions bloquees et notes internes : en commentaire seulement, retirees 
   });
 });
 
+// Depuis le 19/09/2026, la page ne fait plus que quelques affirmations de
+// principe. On ne verifie ici QUE celles-la (plus de cote minimale, de plafond,
+// de calibration ni de classement de reference : la page n'en parle plus).
 test("ce que la page affirme est vrai dans le code (sans en publier les valeurs)", () => {
   const pipeline = read(".github/workflows/update-data.yml");
-  // « Le calcul est lance automatiquement une fois par jour. »
+  // « Les analyses sont calculees a l'avance, une fois par jour, et ne sont pas
+  // refaites juste avant le coup d'envoi. »
   assert.match(pipeline, /cron: '0 6 \* \* \*'/, "le calcul quotidien annonce n'existe plus");
-  // « une cote minimale » et « un plafond de probabilite » (valeurs non publiees).
-  // « une cote minimale et une cote maximale », « les cotes, marge retiree, et le
-  // modele » (19/09/2026, lib/decision.js#pickMarketFair).
-  assert.match(pipeline, /var fairSelection=pickMarketFair\(allMarkets,\{shin:shinProbs\}\)/, "le choix annonce (cotes sans marge + modele) n'existe plus");
-  assert.match(read("lib/decision.js"), /const SELECTION = Object\.freeze\(\{ minOdds: \d\.\d+, maxOdds: \d\.\d+, modelWeight: 0\.\d+ \}\);/, "la cote minimale/maximale annoncee n'existe plus");
-  assert.match(read("lib/decision.js"), /const PROBABILITE_MAX_RECOMMANDABLE = 97;/, "le plafond de probabilite annonce n'existe plus");
-  // « le classement de reference est affiche mais n'entre pas dans les probabilites ».
-  assert.match(read("lib/engine.js"), /elo_used:false/);
-  // « la probabilite estimee = probabilite du modele / 10 », fixee par le code.
+  // « une option choisie par une regle fixe parmi les marches reellement cotes,
+  // en privilegiant les issues les plus probables ».
+  assert.match(pipeline, /var fairSelection=pickMarketFair\(allMarkets,\{shin:shinProbs\}\)/, "la regle fixe de choix annoncee n'existe plus");
+  const decision = read("lib/decision.js");
+  const pick = decision.slice(decision.indexOf("function pickMarketFair"), decision.indexOf("module.exports"));
+  assert.match(pick, /if \(odds === null \|\|/, "un marche non cote peut etre retenu par la regle fixe");
+  assert.match(pick, /sort\(\(a, b\) => \(b\.prob - a\.prob\)/, "la regle ne privilegie plus l'issue la plus probable");
+  // « Quand aucune cote n'existe pour un match, l'option la plus probable est
+  // publiee sans cote. »
+  assert.match(pipeline, /pickDowngrade='NO_ODDS'/, "le repli sans cote annonce n'existe plus");
+  // « Aucune option n'est mise en avant pour un match deja commence ou lorsque
+  // les donnees sont insuffisantes. »
+  assert.ok(exists("lib/kickoff-guard.js"), "garde du coup d'envoi absente");
+  assert.match(pipeline, /if\(!pickedMarket&&modelDataAvailable\)/, "l'abstention sur donnees insuffisantes n'existe plus");
+  // « Les textes sont traduits automatiquement, par un outil d'IA. »
+  assert.match(pipeline, /async function translateNarratives\(jobs\)/, "la traduction automatique annoncee n'existe plus");
+  // « la probabilite estimee s'affiche aussi sur 10 : 6,4/10 correspond a 64 % ».
   assert.match(pipeline, /conf:pickedMarket\?Math\.round\(\(pickedMarket\.prob\/10\)\*10\)\/10/);
-  // « une correction apprise sur l'historique est appliquee a une partie des marches ».
-  // « une correction apprise sur cet historique est appliquee a une partie des
-  // marches » : les trois marches d'origine (1X2, Over 2.5, BTTS) restent
-  // branches, et depuis le 18/09/2026 les familles derivees de la meme matrice
-  // (totaux par equipe, clean sheet, resultat + total...) le sont aussi quand
-  // le holdout le justifie - le nombre exact est une decision du fit, pas du
-  // test. « Une partie » reste vrai : premiere mi-temps et tirs ne sont pas
-  // calibres (voir ENGINE_RECALIBRATION_REPORT.md).
-  const calib = JSON.parse(read("lib/data/calibration-params.json"));
-  ["1X2", "OVER_2_5", "BTTS_YES"].forEach(function (k) { assert.equal(calib.markets[k] && calib.markets[k].wired, true, k + " : courbe de calibration debranchee"); });
-  assert.ok(JSON.stringify(calib).split('"wired":true').length - 1 >= 3, "moins de trois courbes de calibration branchees");
   assert.match(read("home-list.js"), /tf\('home_list\.aria_prob','Probabilité estimée \{p\} sur 10\.'/);
+});
+
+test("page courte et transparente : outil d'IA annonce (sans le nommer), longueur bornee", () => {
+  DIRS.forEach(function (d) {
+    const html = read(d + "/methodologie.html");
+    const main = visibleText(html.slice(html.indexOf("<main"), html.indexOf('<footer class="legal-foot">')));
+    // Obligation de transparence : les textes sont rediges par un outil d'IA.
+    assert.match(main, /intelligence artificielle|artificial intelligence|inteligencia artificial|künstlichen Intelligenz|intelligenza artificiale|inteligência artificial/i, d + " : usage d'un outil d'IA non annonce");
+    // Decision du 19/09/2026 : environ un tiers de l'ancienne page (2 600 a
+    // 2 900 mots). Borne large, mais qui echoue si le detail revient.
+    const words = main.split(/\s+/).filter(Boolean).length;
+    assert.ok(words <= 1100, d + " : page trop longue (" + words + " mots) - la page doit rester courte et vague");
+  });
 });
 
 test("liens Methodologie : a-propos et pieds de page, dans les 9 versions", () => {
@@ -254,10 +291,8 @@ test("liens Methodologie : a-propos et pieds de page, dans les 9 versions", () =
   const signal = js.slice(js.indexOf("function signalCard(vm)"), js.indexOf("function marketsCard"));
   const gate = js.slice(js.indexOf("function gateCard(vm,opts)"), js.indexOf("function renderAuthWall"));
   assert.ok(signal.includes("methodLink()") && gate.includes("methodLink()"));
-  // NOTE : match-page.js porte encore la liste des 6 repertoires d'origine. Les
-  // pages match de /de/ /it/ /pt/ n'affichent donc pas encore le lien, alors que
-  // la page existe desormais. A completer par le proprietaire de match-page.js.
-  assert.match(js, /METHODOLOGY_DIRS=\['fr','gb','za','en','mx','es'\]/);
+  // Les 9 repertoires ont leur page : chaque page match renvoie vers la sienne.
+  assert.match(js, /METHODOLOGY_DIRS=\['fr','gb','za','en','mx','es','de','it','pt'\]/);
   assert.match(read("scripts/seo-pages.js"), /"methodologie\.html": "footer\.methodology"/);
 });
 

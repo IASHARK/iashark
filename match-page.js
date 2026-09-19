@@ -360,17 +360,18 @@ function riskStat(code){
 }
 
 // Lien vers la page Methodologie du repertoire courant. Pages disponibles :
-// config/markets.json#_legalFiles.methodology, sources legal/<dir>/ (fr, gb, za,
-// en, mx, es) ; les autres repertoires renvoient vers la version anglaise.
-const METHODOLOGY_DIRS=['fr','gb','za','en','mx','es'];
+// config/markets.json#_legalFiles.methodology, sources legal/<dir>/ (les 9
+// repertoires depuis le 19/09/2026) ; un repertoire inconnu renvoie vers
+// la version anglaise.
+const METHODOLOGY_DIRS=['fr','gb','za','en','mx','es','de','it','pt'];
 function methodologyHref(){
   const dir=(window.I18N&&window.I18N.dir)||'';
   if(METHODOLOGY_DIRS.includes(dir))return '/'+dir+'/methodologie.html';
   return dir?'/en/methodologie.html':'/fr/methodologie.html';
 }
 function methodLink(){
-  // Version sans page Methodologie (de, it, pt) : le lien vise la version
-  // anglaise, et le dit (audit du 16/09/2026).
+  // Repertoire sans page Methodologie : le lien vise la version anglaise,
+  // et le dit (audit du 16/09/2026).
   const dir=(window.I18N&&window.I18N.dir)||'';
   const anglais=!!dir&&!METHODOLOGY_DIRS.includes(dir);
   return `<p class="sig-method"><a href="${esc(methodologyHref())}"${anglais?' hreflang="en"':''}>${esc(t('match_page.sig_method_link','Comment ce chiffre est calculé : méthodologie'))}${anglais?esc(t('match_page.sig_method_in_english',' (en anglais)')):''}</a></p>`;

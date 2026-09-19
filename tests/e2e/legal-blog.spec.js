@@ -1,5 +1,5 @@
 'use strict';
-// Pages legales (5 par version) et accueil du blog.
+// Pages legales (6 par version, methodologie comprise) et accueil du blog.
 const { test, expect } = require('./helpers/fixtures');
 const { VERSIONS, LEGAL_FILES } = require('./helpers/versions');
 
@@ -10,7 +10,7 @@ function htmlLang(html) {
 
 for (const v of VERSIONS) {
   test.describe(`legal et blog /${v.dir}/`, () => {
-    test('5 pages legales en 200 avec la bonne langue', async ({ request }) => {
+    test('6 pages legales (dont methodologie) en 200 avec la bonne langue', async ({ request }) => {
       for (const file of LEGAL_FILES) {
         const url = `/${v.dir}/${file}`;
         const r = await request.get(url, { maxRedirects: 0 });

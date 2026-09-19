@@ -247,7 +247,12 @@ function collect(key, dir, opts) {
     if (!e.run && (e.t < now - RESULTS_DAYS * DAY || e.t > now)) return false;
     // Sans score, un match joue n'est liste que s'il a une page (lien a garder).
     return !!e.score || !!e.href;
-  }).sort(function (a, b) { return b.t - a.t || (a.id < b.id ? 1 : -1); }).slice(0, MAX_RESULTS);
+  }).sort(function (a, b) { return b.t - a.t || (a.id < b.id ? 1 : -1); }).filter(function (e, i) {
+    // Au-dela des MAX_RESULTS plus recents, une page match encore indexable
+    // (moins de NOINDEX_AFTER_DAYS) reste listee : une journee europeenne
+    // compte 18 matchs, et une page sans lien entrant serait orpheline.
+    return i < MAX_RESULTS || !!e.href && e.t >= now - LIFECYCLE.NOINDEX_AFTER_DAYS * DAY;
+  });
   var store = opts.store || loadStore(root);
   var st = store.leagues[key] && store.leagues[key].standings || null;
   if (st && now - Date.parse(st.as_of + "T00:00:00Z") > STANDINGS_MAX_AGE_DAYS * DAY) st = null;

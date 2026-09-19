@@ -64,7 +64,7 @@ test("la page match assemble les sections dans l'ordre demande",()=>{
   dansLOrdre(blocDe("function analyseAbonne(vm)","function render(raw)"),["scenarioCard(vm)","outputsCard(vm,","marketsCard(vm)","threatsCard(vm,"],"analyse abonne");
   dansLOrdre(blocDe("function statsBlocs(vm)","}"),["formeFold","classementFold","h2hFold","comparatifFold","compoFold"],"stats");
   const visiteur=blocDe("function renderVisitor(raw,opts)","function renderAuthWall");
-  dansLOrdre(visiteur,["['avis',gateCard","'Les stats du match'","['rappel',","rappelCta(vm,o)","['analyse',","analyseVisiteur(o)","['questions',faqCard"],"visiteur");
+  dansLOrdre(visiteur,["['avis',o.free?gateCard(vm,o):proGate(vm,o)","'Les stats du match'","['rappel',","rappelCta(vm,o)","['analyse',","analyseVisiteur(o)","['questions',faqCard"],"visiteur");
   assert.equal((visiteur.match(/rappelCta\(/g)||[]).length,1,"un seul rappel visiteur");
   // Questions frequentes a la fin, dans les deux vues.
   assert.ok(visiteur.lastIndexOf("['questions',")>visiteur.lastIndexOf("['analyse',"));
@@ -81,10 +81,11 @@ test("les blocs retires a la demande de l'utilisateur ne reviennent pas",()=>{
 });
 
 // Suivi (funnel-track.js) : un identifiant distinct par bouton « Debloquer »
-// (avis, rappel, analyse, FAQ, barre mobile), libelle fixe sans donnee personnelle.
+// (panneau d'analyse, avis, rappel, analyse, FAQ, barre mobile), libelle fixe
+// sans donnee personnelle.
 test("vue visiteur : chaque bouton Debloquer porte son propre identifiant de suivi",()=>{
   assert.match(js,/const suivi=kind=>` data-track="\$\{kind\}" data-track-kind="\$\{kind\}"`;/);
-  for(const k of ["match_avis_unlock","match_recall_unlock","match_analysis_unlock","match_faq_unlock","match_bar_unlock"]){
+  for(const k of ["match_gate_unlock","match_avis_unlock","match_recall_unlock","match_analysis_unlock","match_faq_unlock","match_bar_unlock"]){
     assert.equal((js.match(new RegExp("suivi\\('"+k+"'\\)","g"))||[]).length,1,k);
   }
 });
@@ -166,8 +167,10 @@ test("vue visiteur : blocs fermes sans aucune donnee du modele, copie publique a
   // Copie locale de la liste premium = lib/premium-fields.js, a l'identique.
   const copie=JSON.parse(js.match(/const CHAMPS_PREMIUM=(\[[^\]]*\]);/)[1]);
   assert.deepEqual(copie,require("../lib/premium-fields.js").PREMIUM_FIELDS);
-  // Match payant : mur Pro ; match offert sans compte : meme page, CTA compte gratuit.
-  assert.match(js,/function renderProWall\(raw\)\{\s*renderVisitor\(raw,\{href:lien\('abonnement\.html'\)\}\);/);
+  // Match payant : mur Pro (offre Pro avec retour a ce match) ; match offert
+  // sans compte : meme page, CTA compte gratuit.
+  assert.match(js,/function renderProWall\(raw\)\{\s*renderVisitor\(raw,\{href:offrePro\(raw\)\}\);/);
+  assert.ok(gate.includes("function proGate(vm,o)"),"mur Pro hors de la tranche controlee");
   const auth=js.slice(js.indexOf("function renderAuthWall"),js.indexOf("function renderProWall"));
   assert.match(auth,/renderVisitor\(raw,\{\s*free:true,/);
   assert.match(auth,/lien\('compte\.html'\)/);
@@ -199,8 +202,7 @@ test("en-tete : logos dimensionnes, charges en priorite ; pas de repli data.json
   assert.doesNotMatch(hero,/class="card hero reveal"/,"l'en-tete ne doit pas demarrer en opacite 0");
   assert.match(js,/fetchpriority="high"/);
   assert.doesNotMatch(js,/fetch\('\/data\.json'/);
-  assert.match(js,/function renderIntrouvable\(\)/);
-  assert.match(js,/match_page\.match_ended_or_missing/);
+  assert.match(js,/function renderIntrouvable\(list,id\)/);
 });
 
 // La carte buteur menait avec un tableau plat de quatre lignes, puis avec la
@@ -354,4 +356,83 @@ test("les logos d'equipe sont detoures, pas mis en pastille ronde",()=>{
   assert.match(css,/\.logo-eq\{[^}]*border-radius:0/);
   assert.match(css,/\.logo-eq\{[^}]*object-fit:contain/);
   assert.match(css,/\.logo-eq\{[^}]*background:none/);
+});
+
+// ---------------------------------------------------------------------------
+// MUR PRO UNIQUE (19/09/2026, donnees du proprietaire : 3 visiteurs sur 4
+// n'atteignaient pas l'offre, les petits « Debloquer » disperses ne recevaient
+// aucun clic). Match payant sans Pro : UN panneau la ou l'analyse commence,
+// langage du verrou « Buteurs du jour » de l'accueil.
+// ---------------------------------------------------------------------------
+const LOCALES=["fr","en","es","es-mx","de","it","pt"];
+const CLES_MUR=["pro_gate_title","pro_gate_sr","pro_gate_item_bet","pro_gate_item_scorer","pro_gate_item_scenario","pro_gate_item_scores","pro_gate_cta","pro_gate_small","recovery_title","recovery_text","recovery_free_cta","recovery_home_cta"];
+test("mur Pro : un seul panneau, apercu factice sans aucune donnee, bouton ambre suivi, resiliation",()=>{
+  const mur=js.slice(js.indexOf("const FAUX_TICKET="),js.indexOf("// L'analyse fermee"));
+  assert.ok(mur.length>1500,"mur Pro introuvable");
+  // Apercu : texte factice (« Xxxx », « ??,? % »), aucun chiffre, masque aux lecteurs d'ecran.
+  const faux=js.slice(js.indexOf("const FAUX_TICKET="),js.indexOf("function apercuFactice"));
+  assert.doesNotMatch(faux,/\d/,"l'apercu factice ne doit contenir aucun chiffre");
+  assert.doesNotMatch(faux,/\$\{/,"l'apercu factice ne lit aucune donnee");
+  assert.match(faux,/\?\?,\? %/);
+  assert.match(mur,/<div class="mgate-preview" aria-hidden="true">/);
+  // Panneau : titre (h2), explication pour lecteur d'ecran, contenu, bouton, resiliation.
+  assert.match(mur,/<h2 id="gateTitle" class="mgate-title">\$\{esc\(t\('match_page\.pro_gate_title','Débloque l’analyse complète de ce match'\)\)\}<\/h2>/);
+  assert.match(mur,/<p class="sr-only">\$\{esc\(t\('match_page\.pro_gate_sr',/);
+  assert.match(mur,/<a class="mgate-cta" href="\$\{esc\(o\.href\)\}"\$\{suivi\('match_gate_unlock'\)\}>\$\{esc\(t\('match_page\.pro_gate_cta','Débloquer avec Pro'\)\)\}/);
+  assert.match(mur,/pro_gate_small','Résiliable à tout moment depuis ton compte\.'/);
+  for(const k of ["pro_gate_item_bet","pro_gate_item_scorer","pro_gate_item_scenario","pro_gate_item_scores"])assert.ok(mur.includes(`['${k}',`),k);
+  // « Pas de pari retenu » (public) : ni ticket factice ni promesse de pari.
+  assert.match(mur,/\.filter\(\(x,i\)=>etat!=='none'\|\|i>0\)/);
+  assert.match(mur,/apercuFactice\(etat!=='none'\)/);
+  // Libelles honnetes (18/09/2026) : jamais « pari conseille » dans le mur.
+  assert.doesNotMatch(mur,/pari conseillé|Pari recommandé/);
+  // Match payant seulement : le match offert garde son avis « compte gratuit ».
+  assert.match(js,/\['avis',o\.free\?gateCard\(vm,o\):proGate\(vm,o\),true\]/);
+  // Offre Pro avec retour a ce match (abonnement-page.js#contexteMatch).
+  assert.match(js,/function offrePro\(raw\)\{[\s\S]{0,200}lien\('abonnement\.html\?next='\+encodeURIComponent\(lien\('match\.html\?id='\+id\)\)\)/);
+  // La barre mobile se masque aussi quand le panneau est a l'ecran.
+  assert.match(js,/querySelectorAll\('\.avis--lock,\.mgate,\.cta-recall,\.lock-card--analyse'\)/);
+  // Style : meme langage que .hs-gate* de l'accueil (flou, bouton ambre).
+  const bloc=css.slice(css.indexOf("MUR PRO (visiteur"));
+  assert.match(bloc,/\.mgate-preview\{[^}]*filter:blur\([3-8]px\)/);
+  assert.match(bloc,/\.mgate-card\{[^}]*background:linear-gradient\(180deg,rgba\(15,26,40,\.96\),rgba\(9,16,25,\.98\)\)/,"carte opaque : texte lisible sur le flou");
+  assert.match(bloc,/\.mgate-cta\{[^}]*background:linear-gradient\(135deg,#fbbf24,var\(--amber\)\)/);
+  assert.match(bloc,/\.mgate-stage>\*\{grid-area:1\/1/);
+  assert.match(css,/--amber:#f59e0b/);
+});
+
+// Plus d'impasse « Match introuvable » (19/09/2026).
+test("sans identifiant : retour a l'accueil de la version ; match plus publie : bloc de reprise",()=>{
+  const init=js.slice(js.indexOf("async function init()"));
+  assert.match(init,/if\(!demoMode&&!id\)\{location\.replace\(lien\(''\)\);return;\}/);
+  assert.ok(init.indexOf("location.replace(lien(''))")<init.indexOf("await window.I18N.init()"),"redirection avant tout chargement");
+  assert.doesNotMatch(js,/throw new Error\(t\('match_page\.match_not_found'/);
+  assert.match(init,/renderIntrouvable\(liste&&Array\.isArray\(liste\.matchs\)\?liste\.matchs:null,id\)/);
+  const reprise=js.slice(js.indexOf("function renderIntrouvable(list,id)"),js.indexOf("function traduireShellSeo"));
+  // Match gratuit du jour : meme module et meme marche que l'accueil, jamais ce match-ci.
+  assert.match(reprise,/IasharkFreeMatch\.pickFreeMatchId\(list,null,\(window\.IASHARK_MARKET&&window\.IASHARK_MARKET\.code\)\|\|null\)/);
+  assert.match(reprise,/String\(offert\)===String\(id\)\)\)offert=null/);
+  assert.match(reprise,/lien\('match\.html\?id='\+offert\)/);
+  assert.match(reprise,/lien\(''\)/);
+  for(const k of ["recovery_title","recovery_text","recovery_free_cta","recovery_home_cta"])assert.ok(reprise.includes("match_page."+k),k);
+  assert.doesNotMatch(reprise,/match_ended_or_missing/);
+  // La page reste noindex.
+  assert.match(html,/<meta name="robots" content="noindex,follow">/);
+});
+
+test("mur Pro et reprise : textes dans les 7 langues, dictionnaires et parts identiques, repli FR = dictionnaire FR",()=>{
+  for(const loc of LOCALES){
+    const dict=JSON.parse(read(`i18n/dict/${loc}.json`)).match_page;
+    const part=JSON.parse(read(`i18n/parts/matchpage.${loc}.json`)).match_page;
+    for(const k of CLES_MUR){
+      assert.ok(typeof dict[k]==="string"&&dict[k].trim(),`${loc} : match_page.${k} absent du dictionnaire`);
+      assert.equal(part[k],dict[k],`${loc} : match_page.${k} differe entre parts et dictionnaire`);
+    }
+  }
+  const fr=JSON.parse(read("i18n/dict/fr.json")).match_page;
+  for(const k of CLES_MUR){
+    const m=js.match(new RegExp(`(?:'match_page\\.${k}'|\\['${k}'),'([^']*)'`));
+    assert.ok(m,`repli FR de ${k} introuvable dans match-page.js`);
+    assert.equal(m[1],fr[k],`repli FR de ${k} different du dictionnaire`);
+  }
 });

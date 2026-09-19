@@ -313,13 +313,16 @@ test("rendu SANS 0025 : message « a activer », le reste du tableau de bord fon
 // ---------------------------------------------------------------------------
 // Clics « Debloquer » de la page match par emplacement
 // ---------------------------------------------------------------------------
-const UNLOCK_KINDS = ["match_avis_unlock", "match_recall_unlock", "match_analysis_unlock", "match_faq_unlock", "match_bar_unlock"];
+// 0025 : les 5 boutons d'origine. 0029 (19/09/2026) : le panneau d'analyse
+// (mur Pro de la page match) en tete.
+const UNLOCK_KINDS_0025 = ["match_avis_unlock", "match_recall_unlock", "match_analysis_unlock", "match_faq_unlock", "match_bar_unlock"];
+const UNLOCK_KINDS = ["match_gate_unlock"].concat(UNLOCK_KINDS_0025);
 
-test("unlockRows : 5 emplacements toujours presents, parts, phrase du bouton le plus clique", () => {
+test("unlockRows : 6 emplacements toujours presents, parts, phrase du bouton le plus clique", () => {
   const u = H.unlockRows({ rows: [{ kind: "match_bar_unlock", clicks: 6, visitors: 5 }, { kind: "match_avis_unlock", clicks: 2, visitors: 2 }, { kind: "inconnu", clicks: 99 }] });
   assert.deepEqual(u.rows.map((r) => r.kind), UNLOCK_KINDS);
   assert.equal(u.total, 8, "kind inconnu ignore");
-  assert.equal(u.rows[4].pct, 75);
+  assert.equal(u.rows[5].pct, 75);
   assert.equal(u.sentence, "Le bouton le plus cliqué : « Barre en bas de l'écran » (6 clics sur 8).");
   assert.equal(H.unlockRows(null).sentence, "Aucun clic sur un bouton « Débloquer » de la page match sur cette période.");
   assert.deepEqual(H.UNLOCK_PLACES.map((p) => p[0]), UNLOCK_KINDS);
@@ -331,6 +334,33 @@ test("unlockRows : 5 emplacements toujours presents, parts, phrase du bouton le 
   }
   const journey = H.journeyDays([{ type: "click", at: NOW, kind: "match_faq_unlock", label: "match_faq_unlock" }], {}, NOW);
   assert.equal(journey[0].entries[0].text, "Clic sur « Débloquer » (FAQ)", "libelle technique jamais affiche");
+  const gate = H.journeyDays([{ type: "click", at: NOW, kind: "match_gate_unlock", label: "match_gate_unlock" }], {}, NOW);
+  assert.equal(gate[0].entries[0].text, "Clic sur « Débloquer » (panneau d'analyse)");
+  assert.match(js, /match_gate_unlock: "Débloquer \(panneau d'analyse\)"/, "detail des visites");
+});
+
+test("unlockRows : serveur anterieur a 0029 = panneau d'analyse non compte (jamais un faux zero silencieux)", () => {
+  const avant = H.unlockRows({ rows: UNLOCK_KINDS_0025.map((kind) => ({ kind, clicks: 1, visitors: 1 })) });
+  assert.deepEqual(avant.uncounted, ["match_gate_unlock"]);
+  const apres = H.unlockRows({ rows: UNLOCK_KINDS.map((kind) => ({ kind, clicks: 1, visitors: 1 })) });
+  assert.deepEqual(apres.uncounted, []);
+  assert.deepEqual(H.unlockRows(null).uncounted, []);
+  assert.equal(H.UNLOCK_FILE, "0029_admin_unlock_gate.sql");
+});
+
+test("0029 : admin_unlock_clicks = corps de 0025, panneau d'analyse en tete, droits inchanges", () => {
+  const sql29 = read("supabase/migrations/0029_admin_unlock_gate.sql");
+  const start = sql29.indexOf("create or replace function public.admin_unlock_clicks(");
+  assert.ok(start !== -1, "admin_unlock_clicks redefinie");
+  const block29 = sql29.slice(start, sql29.indexOf("$$;", sql29.indexOf("as $$", start)));
+  const kinds = [...block29.matchAll(/\('(match_\w+_unlock)', (\d)\)/g)];
+  assert.deepEqual(kinds.map((m) => m[1]), UNLOCK_KINDS);
+  assert.deepEqual(kinds.map((m) => Number(m[2])), [1, 2, 3, 4, 5, 6]);
+  // Seule la liste des kinds change.
+  const sansKinds = (b) => b.replace(/values \('match_[\s\S]*?\)\n/, "values <kinds>\n");
+  assert.equal(sansKinds(block29), sansKinds(fnBlock("admin_unlock_clicks")));
+  assert.ok(sql29.includes("revoke all on function public.admin_unlock_clicks(date, date, boolean, timestamptz) from public, anon;"));
+  assert.ok(sql29.includes("grant execute on function public.admin_unlock_clicks(date, date, boolean, timestamptz) to authenticated;"));
 });
 
 test("0025 : admin_unlock_clicks admin seulement, lecture seule, 5 emplacements, trafic interne exclu", () => {
@@ -341,7 +371,7 @@ test("0025 : admin_unlock_clicks admin seulement, lecture seule, 5 emplacements,
   assert.ok(sql.includes("revoke all on function public.admin_unlock_clicks(date, date, boolean, timestamptz) from public, anon;"));
   assert.ok(sql.includes("grant execute on function public.admin_unlock_clicks(date, date, boolean, timestamptz) to authenticated;"));
   const kinds = [...block.matchAll(/\('(match_\w+_unlock)', \d\)/g)].map((m) => m[1]);
-  assert.deepEqual(kinds, UNLOCK_KINDS);
+  assert.deepEqual(kinds, UNLOCK_KINDS_0025);
   assert.match(block, /public\.admin_internal_reason\(e\.metadata\) is not null or e\.session_id ilike 'qa%'/);
   assert.match(block, /public\.admin_internal_account\(u\.email, u\.role\)/);
   assert.ok(!/\b(insert|update|delete|truncate|alter|drop)\b/i.test(block.replace(/--.*$/gm, "")));

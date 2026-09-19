@@ -21,7 +21,7 @@ PUBLISHED=(
   fr en es de it pt gb za mx match blog assets i18n lib netlify
   config/markets.json scripts/build-public.js scripts/netlify-ignore.sh netlify.toml
   _headers _redirects robots.txt
-  data-home.json actus.json transferts.json
+  data-home.json actus.json transferts.json buteurs-du-jour.json
   ':(glob)*.html' ':(glob)*.js' ':(glob)*.css' ':(glob)*.xml' ':(glob)*.png' ':(glob)*.ico'
   ':(glob)*.svg' ':(glob)*.webp' ':(glob)*.txt' ':(glob)*.webmanifest'
 )

@@ -367,6 +367,14 @@ var PAGES = [
       
       
       {find: 'SÉLECTION DU MATCH À SUIVRE…', build: function(d,l){ return HOME_V2[l].featureLoading; }},
+      // Buteurs du jour (home-scorers.js, 19/09/2026) : textes statiques de la
+      // section, traduits au build (aucun flash francais) ; le rendu dynamique
+      // passe par I18N.t (i18n/dict/*.json#home_scorers).
+      {find: 'data-i18n="home_scorers.title">Buteurs du jour</h2>', build: function(d){ return 'data-i18n="home_scorers.title">' + d.home_scorers.title + '</h2>'; }},
+      {find: "<p class=\"hs-sub\" data-hs-sub>Les 3 joueurs les plus susceptibles de marquer aujourd'hui, avant les compositions.</p>", build: function(d){ return '<p class="hs-sub" data-hs-sub>' + d.home_scorers.subtitle + '</p>'; }},
+      {find: 'aria-label="Buteurs du jour, du plus probable au moins probable"', build: function(d){ return 'aria-label="' + String(d.home_scorers.list_aria).replace(/"/g, "&quot;") + '"'; }},
+      {find: '<p class="hs-note">Estimation avant les compositions officielles, jamais une garantie.</p>', build: function(d){ return '<p class="hs-note">' + d.home_scorers.note + '</p>'; }},
+      {find: 'data-track-kind="home_scorers_upsell">Voir l\'offre Pro <span', build: function(d){ return 'data-track-kind="home_scorers_upsell">' + d.home_scorers.cta + ' <span'; }},
       {find:
         '    <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>\n' +
         '    <div>Aide : <a data-market-helpline="url" href="https://www.joueurs-info-service.fr" style="color:#22d3ee;text-decoration:none;">joueurs-info-service.fr</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">09 74 75 13 13</span></span></div>\n' +

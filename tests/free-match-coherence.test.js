@@ -24,6 +24,20 @@ test("le match gratuit vient d'une seule source, partagee par les deux pages", (
   assert.match(accueil, /lib\/free-match\.js/, "l'accueil doit charger le module");
 });
 
+// 19/09/2026 : le mur Pro (match payant) affiche le prix mensuel du marche ;
+// le panneau du match OFFERT (compte gratuit) n'affiche jamais de prix : ce
+// match est gratuit, seul un compte gratuit est demande.
+test("match offert : le panneau « compte gratuit » ne montre aucun prix, le mur Pro seul le montre", () => {
+  const js = read("match-page.js");
+  const avis = js.slice(js.indexOf("function gateCard(vm,opts)"), js.indexOf("// MUR PRO (visiteur"));
+  const mur = js.slice(js.indexOf("function proGate(vm,o)"), js.indexOf("function renderVisitor(raw,opts)"));
+  assert.ok(avis.length > 500 && mur.length > 500);
+  assert.doesNotMatch(avis, /prix|price|proOffer|IASHARK_MARKET|abonnement\.html/, "prix ou offre dans le panneau du match offert");
+  assert.match(mur, /const prix=prixMensuelPro\(\);/);
+  assert.match(js, /\['avis',o\.free\?gateCard\(vm,o\):proGate\(vm,o\),true\]/, "match offert -> gateCard, jamais le mur Pro");
+  assert.match(js, /function renderAuthWall\(raw\)\{\s*renderVisitor\(raw,\{\s*free:true,[\s\S]{0,200}href:lien\('compte\.html'\)/);
+});
+
 const horloge = { day: "2026-09-02", now: "2026-09-02 10:00" };
 const m = (id, date, extra) => Object.assign({ id, date }, extra || {});
 

@@ -351,7 +351,9 @@
           + '<p id="msgFacturation" hidden aria-live="polite"></p>');
     }
 
-    // Gratuit : un seul appel a l'action, et quatre benefices au maximum.
+    // Gratuit : un seul appel a l'action. Ce que Pro donne : la MEME liste que
+    // la page d'abonnement (3 groupes, 19/09/2026), jamais une liste propre au
+    // compte ; acces gratuit decrit avec les textes partages pro_offer.free_*.
     return titreSection(tr('compte_page.subscription_heading', 'Abonnement'), tr('compte_page.subscription_free_subtitle', 'Votre plan actuel et ce que Pro ajoute.'))
       + '<div class="space-y-4">'
       + carte('<div class="flex flex-wrap items-start justify-between gap-4">'
@@ -362,9 +364,9 @@
         + '<p class="mt-2 text-[14px] text-soft">' + esc(prixGratuit()) + '</p></div>'
         + '<span class="inline-flex items-center rounded-full border border-hairline bg-white/[.04] px-2.5 py-1 text-[11px] font-bold tracking-wider text-soft">' + tr('compte_page.badge_free', 'GRATUIT') + '</span></div>'
         + '<ul class="mt-5 space-y-2.5">'
-        + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>' + tr('compte_page.benefit_free_analysis', 'L’analyse complète offerte chaque jour') + '</li>'
+        + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>' + esc(tr('pro_offer.free_matches', '1 match offert par jour, avec un compte gratuit')) + '</li>'
+        + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>' + esc(tr('pro_offer.free_tools', 'Calculateur de mise, cote juste, simulateur de capital')) + '</li>'
         + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>' + tr('compte_page.benefit_free_blog', 'Le blog et les guides') + '</li>'
-        + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>' + tr('compte_page.benefit_free_tools', 'Les outils en découverte') + '</li>'
         + '</ul>'
         + (etat && etat.ton === 'alerte' ? '<div class="mt-5 rounded-xl border px-4 py-3.5 text-[13.5px] leading-relaxed ' + TON[etat.ton] + '"><b class="font-semibold">' + esc(etat.titre) + '</b><span class="mt-0.5 block opacity-90">' + esc(etat.detail) + '</span></div>' : ''))
       + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-cyan">' + tr('compte_page.with_pro_heading', 'Avec Pro') + '</h2>'
@@ -372,18 +374,49 @@
         // Selecteur Semaine / Mois / Annee (lib/pro-plan-picker.js), monte par
         // brancher() ; repli sans module : prix mensuel.
         + '<div id="proPlanPicker"><p class="mt-2.5 text-[22px] font-extrabold leading-none tracking-tight"><span data-market-price="pro.month">' + esc(prixPro()) + '</span> ' + esc(tr('compte_page.per_month', '/ mois')) + '</p></div>'
-        + '<p class="mt-2 text-[13.5px] text-soft">' + tr('compte_page.pro_durations_note', 'Même accès Pro quelle que soit la durée · résiliable à tout moment.') + '</p>'
-        + '<ul class="mt-5 space-y-2.5">'
-        + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_all_matches', 'L’analyse complète sur tous les matchs') + '</li>'
-        + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_six_tools', 'Les six outils branchés sur les probabilités du modèle') + '</li>'
-        + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_decisions_log', 'Le journal des décisions synchronisé') + '</li>'
-        + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_bankroll', 'Le suivi de bankroll lié au compte') + '</li>'
-        + '</ul>'
+        + '<p id="proDureesNote" class="mt-2 text-[13.5px] text-soft">' + tr('compte_page.pro_durations_note', 'Même accès Pro quelle que soit la durée · résiliable à tout moment.') + '</p>'
+        + listePro()
         // Cases CGV + execution immediate (lib/checkout-consent.js), montees
         // par monterConsentement() depuis brancher().
         + '<div id="checkoutConsent"></div>'
         + '<div class="mt-6">' + boutonPrimaire('souscrire', tr('compte_page.discover_pro_cta', 'Découvrir Pro'), 'w-full sm:w-auto') + '</div>'
         + '<p id="msgFacturation" hidden aria-live="polite"></p>')
+      + '</div>';
+  }
+
+  // Tout ce que Pro debloque (19/09/2026) : la liste de la page d'abonnement,
+  // en compact. « Sur chaque match » = les cles du mur Pro de la page match
+  // (match_page.pro_gate_item_*), le reste = pro_offer.* : une seule source.
+  // L'ancienne liste du compte (« six outils branches sur le modele », « suivi
+  // de bankroll lie au compte ») n'est plus affichee : le simulateur de capital
+  // et le calculateur de mise sont gratuits, seul le journal synchronise est Pro.
+  function listePro() {
+    function groupe(titre, items) {
+      return '<p class="mt-4 text-[11px] font-bold uppercase tracking-[0.14em] text-soft">' + esc(titre) + '</p>'
+        + '<ul class="mt-2 space-y-2">' + items.map(function (it) {
+          return '<li class="flex gap-2.5 text-[13.5px] leading-snug"><span aria-hidden="true" class="text-cyan">✓</span><span>' + it + '</span></li>';
+        }).join('') + '</ul>';
+    }
+    var match = [
+      ['pro_gate_item_bet', 'Le marché retenu par le modèle et sa probabilité en %'],
+      ['pro_gate_item_scorer', 'Le buteur le plus probable et les marchés joueurs'],
+      ['pro_gate_item_scenario', 'Le scénario du match par tranche de 15 minutes : quand les buts tombent'],
+      ['pro_gate_item_scores', 'Les scores les plus probables et les buts attendus'],
+      ['pro_gate_item_odds', 'Nos probabilités face aux cotes, marché par marché'],
+      ['pro_gate_item_stats', 'Toutes les stats du match : forme, classement, face-à-face, comparatif'],
+      ['pro_gate_item_faq', 'Les réponses aux questions fréquentes sur ce match']
+    ].map(function (k) { return esc(tr('match_page.' + k[0], k[1])); });
+    return '<div id="proListe">'
+      + groupe(tr('pro_offer.group_match', 'Sur chaque match'), match)
+      + groupe(tr('pro_offer.group_daily', 'Chaque jour'), [
+        esc(tr('pro_offer.daily_all_matches', 'Tous les matchs analysés de nos 19 compétitions, au lieu d’un seul match offert par jour')),
+        esc(tr('pro_offer.daily_scorers', 'Les 3 buteurs du jour')) + ' <span class="ml-1 inline-block rounded-full border border-amber-500/35 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-200">' + esc(tr('pro_offer.badge_new', 'Nouveau')) + '</span>'
+      ])
+      + groupe(tr('pro_offer.group_tools', 'Les outils'), [
+        esc(tr('pro_offer.tool_scanner', 'Détecteur d’écarts du jour, sur les matchs réels')),
+        esc(tr('pro_offer.tool_journal', 'Journal des décisions synchronisé sur ton compte, avec le suivi de tes résultats')),
+        esc(tr('pro_offer.tool_combo', 'Combiné construit sur les analyses réelles'))
+      ])
       + '</div>';
   }
 
@@ -735,7 +768,23 @@
     if ($('enregistrerNotifs')) $('enregistrerNotifs').addEventListener('click', enregistrerNotifications);
     if ($('emailMarketing')) $('emailMarketing').addEventListener('click', enregistrerEmailMarketing);
     if ($('souscrire')) {
-      selecteur = ($('proPlanPicker') && window.IasharkProPlanPicker) ? window.IasharkProPlanPicker.mount($('proPlanPicker'), {}) : null;
+      // Seules les durees payables sont affichees (19/09/2026) : « meme acces
+      // quelle que soit la duree » seulement s'il y a plusieurs durees a choisir.
+      // Aucune duree payable (config/markets.json#checkoutOpen = [] : gb, mx, za
+      // le 19/09/2026) : le selecteur affiche « paiement pas encore ouvert » ;
+      // ni consentement ni bouton « Decouvrir Pro » qui echouerait a chaque fois.
+      selecteur = ($('proPlanPicker') && window.IasharkProPlanPicker) ? window.IasharkProPlanPicker.mount($('proPlanPicker'), {
+        onUpdate: function (visibles) {
+          var n = visibles ? visibles.length : 0;
+          var note = $('proDureesNote'); if (note) note.hidden = n < 2;
+          ['souscrire', 'checkoutConsent', 'msgFacturation'].forEach(function (id) {
+            var el = $(id);
+            if (!el) return;
+            if (n === 0) { el.hidden = true; el.style.display = 'none'; }
+            else { el.style.display = ''; if (id !== 'msgFacturation') el.hidden = false; }
+          });
+        }
+      }) : null;
       if (selecteur) selecteur.loadAvailability();
       monterConsentement();
       $('souscrire').addEventListener('click', function () { facturation('create-checkout-session', $('souscrire')); });

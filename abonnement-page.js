@@ -102,6 +102,24 @@
   // le chargement. Il ne s'active qu'une fois le consentement monte et coche
   // (lib/checkout-consent.js#syncButtons), ou tout de suite pour un Pro.
   function loaded(){button.removeAttribute('data-loading');button.removeAttribute('data-i18n-attr');button.removeAttribute('title');}
+  // Durees affichees par le selecteur (lib/pro-plan-picker.js#onUpdate : seules
+  // les durees PAYABLES, decision du 19/09/2026). « Meme acces Pro, quelle que
+  // soit la duree » n'a de sens qu'avec plusieurs durees a choisir. Aucune
+  // duree payable (pays pas encore ouvert) : ni consentement ni bouton de
+  // paiement, le selecteur affiche a leur place « paiement pas encore ouvert,
+  // aucun montant preleve » ; la comparaison et la liste Pro restent.
+  // Le HTML genere porte deja l'etat de la configuration (data-market-open-if,
+  // scripts/build-locales.js) ; a partir d'ici c'est le selecteur qui decide
+  // (serveur compris) : l'attribut est retire pour que lib/market-config.js ne
+  // le reapplique jamais par-dessus.
+  function montrer(el,visible){if(!el)return;el.removeAttribute('data-market-open-if');el.hidden=!visible;}
+  function majOffre(visibles){
+    var n=visibles&&visibles.length||0,ferme=n===0;
+    var engagement=document.getElementById('proCommitment');
+    if(engagement)engagement.hidden=n<2;
+    ['checkoutConsent','billingMessage','proTrust'].forEach(function(id){montrer(document.getElementById(id),!ferme);});
+    montrer(button,!ferme);
+  }
   function unlock(){button.classList.remove('iash-consent-locked');button.setAttribute('aria-disabled','false');}
   async function init(){
     // Dictionnaire et session sont independants : charges en parallele.
@@ -111,12 +129,12 @@
     var pickerBox=document.getElementById('proPlanPicker');
     // Abonne : aucun second paiement (changer de duree = portail, depuis le compte).
     // Un Pro venu d'un match y retourne : c'est l'analyse qu'il voulait lire.
-    if(ctx.isPro){if(box)box.hidden=true;if(pickerBox)pickerBox.hidden=true;loaded();unlock();button.textContent=t('pricing_page.cta_pro_member','Accéder aux analyses');button.onclick=function(){location.href=contexte?contexte.path:localHref('');};return;}
+    if(ctx.isPro){if(box)box.hidden=true;if(pickerBox)pickerBox.hidden=true;montrer(button,true);loaded();unlock();button.textContent=t('pricing_page.cta_pro_member','Accéder aux analyses');button.onclick=function(){location.href=contexte?contexte.path:localHref('');};return;}
     afficherContexte();
     if(!box){box=document.createElement('div');box.id='checkoutConsent';button.parentNode.insertBefore(box,button);}
     if(pickerBox&&window.IasharkProPlanPicker){
-      picker=window.IasharkProPlanPicker.mount(pickerBox,{onChange:function(){if(output.classList.contains('error'))message('',false);}});
-      // Duree vendue mais Price Stripe absent : "bientot disponible", jamais un autre prix.
+      picker=window.IasharkProPlanPicker.mount(pickerBox,{onChange:function(){if(output.classList.contains('error'))message('',false);},onUpdate:majOffre});
+      // Duree fermee par le serveur (Price Stripe absent) : masquee, jamais un autre prix.
       if(picker)picker.loadAvailability();
     }
     var lib=await consentLib();

@@ -1,7 +1,7 @@
 'use strict';
 // Page abonnement : consentement par regime, bouton de paiement, appel
 // create-checkout-session (simule), redirection Stripe (interceptee).
-const { test, expect } = require('./helpers/fixtures');
+const { test, expect, expectNoHorizontalScroll } = require('./helpers/fixtures');
 const { VERSIONS, CONSENT_BOXES, CURRENCY_SYMBOLS, currencyOfCheckoutMarket } = require('./helpers/versions');
 const { STRIPE_CHECKOUT_URL } = require('./helpers/supabase-mock');
 const { tr } = require('./helpers/site-data');
@@ -23,6 +23,18 @@ function amountPattern(amount) {
   return intPart + (dec ? '[.,]' + dec : '(?![\\d.,]\\d)');
 }
 const normalizeSpaces = (s) => String(s).replace(/[   ]/g, ' ').trim();
+const squash = (s) => normalizeSpaces(s).replace(/\s+/g, ' ');
+// « Ce que Pro donne » (19/09/2026) : memes cles que le mur Pro de la page
+// match (match_page.pro_gate_item_*) et textes pro_offer.* partages.
+const MATCH_KEYS = ['pro_gate_item_bet', 'pro_gate_item_scorer', 'pro_gate_item_scenario', 'pro_gate_item_scores', 'pro_gate_item_odds', 'pro_gate_item_stats', 'pro_gate_item_faq'];
+const LIST_KEYS = MATCH_KEYS.map((k) => 'match_page.' + k).concat(['daily_all_matches', 'daily_scorers', 'tool_scanner', 'tool_journal', 'tool_combo'].map((k) => 'pro_offer.' + k));
+// Durees affichees = durees PAYABLES : vendues sur ce marche et ouvertes par
+// config/markets.json#checkoutOpen (le serveur simule les ouvre toutes).
+const shownOf = (v) => ['week', 'month', 'year'].filter((iv) => typeof v.proAmounts[iv] === 'number' && (!Array.isArray(v.checkoutOpen) || v.checkoutOpen.includes(iv)));
+// Marche ouvert au paiement ? gb, mx, za : checkoutOpen = [] depuis le
+// 19/09/2026 (« cache-le » : aucun Price Stripe) -> ni bouton ni consentement.
+const payable = (v) => shownOf(v).length > 0;
+const CLOSED_SKIP = (v) => `/${v.dir}/ pas encore ouvert au paiement (config/markets.json#checkoutOpen = [])`;
 // Prix dans une devise donnee (symbole colle a un montant pour ZAR et MXN, pour
 // ne pas confondre "R" avec une lettre et "MX$" avec "$").
 const CURRENCY_PATTERNS = {
@@ -34,18 +46,41 @@ const CURRENCY_PATTERNS = {
 
 for (const v of VERSIONS) {
   test.describe(`abonnement /${v.dir}/`, () => {
-    test('prix Pro et devise du marche de la version @mobile', async ({ page, consoleErrors }) => {
+    test('prix Pro et devise du marche de la version @mobile', async ({ page, consoleErrors, dictFor }) => {
       expect(v.configCurrency, `config/markets.json : /${v.dir}/ n'est pas facture en ${v.currency}`).toBe(v.currency);
       expect(typeof v.proAmount, `config/markets.json : aucun prix Pro pour /${v.dir}/`).toBe('number');
       await page.goto(`/${v.dir}/abonnement.html`);
-      // Selecteur de duree : une option par duree VENDUE sur ce marche
+      // Selecteur de duree : une option par duree PAYABLE sur ce marche
       // (config/markets.json ; l'annuel ZA est volontairement ferme, jamais un
-      // prix invente), "Mois" coche par defaut, memes donnees sur mobile et
-      // desktop (@mobile).
+      // prix invente ; une duree pas encore payable n'est pas affichee du tout,
+      // 19/09/2026). Plusieurs : "Mois" coche par defaut et « meme acces Pro » ;
+      // une seule : son prix seul, sans bouton radio. Memes donnees sur mobile
+      // et desktop (@mobile).
       const sold = ['week', 'month', 'year'].filter((iv) => typeof v.proAmounts[iv] === 'number');
+      const shown = shownOf(v);
       const radios = page.locator('#proPlanPicker input[type="radio"]');
-      await expect(radios).toHaveCount(sold.length);
-      await expect(page.locator('#proPlanPicker input[value="month"]')).toBeChecked();
+      await expect(page.locator('#proPlanPicker [data-interval]')).toHaveCount(shown.length);
+      if (shown.length === 0) {
+        // Marche pas encore ouvert : « paiement pas encore ouvert », ni prix,
+        // ni consentement, ni bouton qui echouerait a chaque fois.
+        const dict = await dictFor(v.locale);
+        await expect(page.locator('#proPlanPicker .iash-plans-closed')).toHaveText(tr(dict, 'pro_plans.closed'));
+        await expect(page.locator('#proPlanPicker [data-market-price]')).toHaveCount(0);
+        await expect(page.locator('#subscribeButton')).toBeHidden();
+        await expect(page.locator('#checkoutConsent')).toBeHidden();
+        await expect(page.locator('#proCommitment')).toBeHidden();
+        await expect(page.locator('.pro-list-card li')).toHaveCount(LIST_KEYS.length);
+      } else if (shown.length > 1) {
+        await expect(radios).toHaveCount(shown.length);
+        await expect(page.locator('#proPlanPicker input[value="month"]')).toBeChecked();
+        await expect(page.locator('#proCommitment')).toBeVisible();
+      } else {
+        await expect(page.locator('#proPlanPicker .iash-plans-single')).toHaveAttribute('data-interval', 'month');
+        await expect(radios).toHaveCount(0);
+        await expect(page.locator('#proCommitment')).toBeHidden();
+      }
+      for (const iv of sold.filter((x) => !shown.includes(x))) await expect(page.locator(`#proPlanPicker [data-market-price="pro.${iv}"]`), `${iv} pas encore payable : masque`).toHaveCount(0);
+      await expect(page.locator('#proPlanPicker .is-soon')).toHaveCount(0);
       const market = await page.evaluate(() => {
         const M = window.IASHARK_MARKET;
         const o = M && M.proOffer ? M.proOffer() : null;
@@ -55,7 +90,7 @@ for (const v of VERSIONS) {
       expect(market).toEqual({ dir: v.dir, currency: v.currency, checkoutMarket: v.checkoutMarket, amounts: v.proAmounts });
 
       const others = Object.keys(CURRENCY_PATTERNS).filter((c) => c !== v.currency);
-      for (const iv of sold) {
+      for (const iv of shown) {
         const price = page.locator(`#proPlanPicker [data-market-price="pro.${iv}"]`);
         await expect(price).toBeVisible();
         const t = normalizeSpaces(await price.innerText());
@@ -65,7 +100,7 @@ for (const v of VERSIONS) {
       }
       // Economie de l'annuel : calculee (arrondi inferieur), jamais inventee ;
       // aucune mention d'economie quand l'annuel n'est pas vendu.
-      if (sold.includes('year')) {
+      if (shown.includes('year')) {
         const expectedPct = Math.floor((1 - v.proAmounts.year / (12 * v.proAmounts.month)) * 100 + 1e-9);
         await expect(page.locator('#proPlanPicker .iash-plan-save')).toContainText(String(expectedPct));
       } else {
@@ -81,6 +116,7 @@ for (const v of VERSIONS) {
     });
 
     test('cases de consentement du regime, bouton verrouille tant qu\'elles ne sont pas cochees @mobile', async ({ page, consoleErrors }) => {
+      test.skip(!payable(v), CLOSED_SKIP(v));
       await page.goto(`/${v.dir}/abonnement.html`);
       const box = page.locator('#checkoutConsent');
       await expect(box).toHaveAttribute('data-consent-regime', v.regime);
@@ -113,6 +149,7 @@ for (const v of VERSIONS) {
     });
 
     test('compte gratuit : le paiement envoie market, dir et consent puis ouvre Stripe (simule)', async ({ page, supa }) => {
+      test.skip(!payable(v), CLOSED_SKIP(v));
       await supa.as('free');
       supa.onFunction('create-checkout-session', { status: 200, json: { processed: true, url: STRIPE_CHECKOUT_URL } });
       await page.goto(`/${v.dir}/abonnement.html`);
@@ -146,22 +183,46 @@ for (const v of VERSIONS) {
       expect((await call).body.interval).toBe('year');
     });
 
-    test('duree non configuree cote Stripe : "bientot disponible", aucun paiement', async ({ page, supa, dictFor }) => {
+    // 19/09/2026 : une duree que le serveur declare fermee (Price Stripe absent)
+    // n'est plus affichee « bientot disponible » : elle disparait, et le
+    // paiement n'envoie jamais qu'une duree payable.
+    test('duree fermee par le serveur : masquee, jamais envoyee au paiement', async ({ page, supa }) => {
       test.skip(Array.isArray(v.checkoutOpen) && !v.checkoutOpen.includes('week'), `semaine deja fermee par la configuration sur /${v.dir}/ (test dedie ci-dessous)`);
-      const dict = await dictFor(v.locale);
       await supa.as('free');
       supa.availability({ week: false, month: true, year: true });
-      supa.onFunction('create-checkout-session', { status: 200, json: { processed: false, reason: 'interval_not_configured' } });
+      supa.onFunction('create-checkout-session', { status: 200, json: { processed: true, url: STRIPE_CHECKOUT_URL } });
       await page.goto(`/${v.dir}/abonnement.html`);
-      await expect(page.locator('#proPlanPicker .iash-plan.is-soon')).toHaveCount(1);
-      await page.locator('#proPlanPicker input[value="week"]').check();
+      await expect(page.locator('#proPlanPicker [data-interval="week"]')).toHaveCount(0);
+      await expect(page.locator('#proPlanPicker [data-market-price="pro.week"]')).toHaveCount(0);
+      await expect(page.locator('#proPlanPicker [data-interval="month"]')).toHaveCount(1);
+      await expect(page.locator('#proPlanPicker .is-soon')).toHaveCount(0);
       await tickAll(page);
+      const call = supa.waitForCall('create-checkout-session');
       await page.locator('#subscribeButton').click();
-      await expect(page.locator('#billingMessage')).toHaveText(tr(dict, 'pricing_page.checkout_interval_not_configured'));
+      expect((await call).body.interval).toBe('month');
+    });
+
+    // Fonction de paiement redeployee dans un pays sans Price Stripe : toutes
+    // les durees fermees. Ni selecteur vide, ni bouton mort : une ligne
+    // « paiement pas encore ouvert, aucun montant preleve » ; la comparaison
+    // et la liste Pro restent.
+    test('aucune duree payable : ni bouton ni consentement, ligne « pas encore ouvert », offre toujours detaillee @mobile', async ({ page, supa, dictFor }) => {
+      const dict = await dictFor(v.locale);
+      await supa.as('free');
+      supa.availability({ week: false, month: false, year: false });
+      await page.goto(`/${v.dir}/abonnement.html`);
+      await expect(page.locator('#proPlanPicker .iash-plans-closed')).toHaveText(tr(dict, 'pro_plans.closed'));
+      await expect(page.locator('#proPlanPicker [data-market-price]')).toHaveCount(0);
+      await expect(page.locator('#subscribeButton')).toBeHidden();
+      await expect(page.locator('#checkoutConsent')).toBeHidden();
+      await expect(page.locator('#proCommitment')).toBeHidden();
+      await expect(page.locator('.pro-list-card li')).toHaveCount(LIST_KEYS.length);
+      await expectNoHorizontalScroll(page);
       expect(supa.callsTo('create-checkout-session')).toHaveLength(0);
     });
 
     test('reponses d\'erreur : marche non ouvert et consentement refuse', async ({ page, supa, dictFor }) => {
+      test.skip(!payable(v), CLOSED_SKIP(v));
       const dict = await dictFor(v.locale);
       const serverConsentMessage = tr(dict, 'checkout_consent.error_required');
       await supa.as('free');
@@ -198,30 +259,58 @@ for (const v of VERSIONS) {
       expect(supa.callsTo('create-checkout-session')).toHaveLength(0);
     });
     // Decision du 18/09/2026 : seule une duree payable en ligne peut etre
-    // choisie. Les autres restent affichees, marquees « Bientot disponible »,
-    // non selectionnables, et le paiement n'envoie jamais qu'une duree ouverte.
-    test('durees pas encore payables : affichees « bientot disponible », non selectionnables @mobile', async ({ page, supa, dictFor }) => {
+    // choisie. Decision du 19/09/2026 : les autres ne sont plus affichees
+    // (« Bientot disponible » faisait hesiter) ; elles reapparaitront des que
+    // config/markets.json#checkoutOpen les ouvrira.
+    test('durees pas encore payables : absentes de la page, seule la duree ouverte est proposee et envoyee @mobile', async ({ page, supa }) => {
       test.skip(!Array.isArray(v.checkoutOpen), `toutes les durees ouvertes sur /${v.dir}/`);
-      const dict = await dictFor(v.locale);
+      test.skip(!payable(v), CLOSED_SKIP(v));
       await supa.as('free');
       supa.onFunction('create-checkout-session', { status: 200, json: { processed: true, url: STRIPE_CHECKOUT_URL } });
       await page.goto(`/${v.dir}/abonnement.html`);
       const sold = ['week', 'month', 'year'].filter((iv) => typeof v.proAmounts[iv] === 'number');
       const closed = sold.filter((iv) => !v.checkoutOpen.includes(iv));
-      await expect(page.locator('#proPlanPicker input[type="radio"]')).toHaveCount(sold.length);
+      await expect(page.locator('#proPlanPicker [data-interval]')).toHaveCount(sold.length - closed.length);
       for (const iv of closed) {
-        const label = page.locator(`#proPlanPicker .iash-plan[data-interval="${iv}"]`);
-        await expect(label).toHaveClass(/is-soon/);
-        await expect(label).toContainText(tr(dict, 'pro_plans.unavailable'));
-        await expect(page.locator(`#proPlanPicker input[value="${iv}"]`)).toBeDisabled();
-        await label.click({ force: true });
-        await expect(page.locator(`#proPlanPicker input[value="${iv}"]`)).not.toBeChecked();
+        await expect(page.locator(`#proPlanPicker [data-interval="${iv}"]`)).toHaveCount(0);
+        await expect(page.locator(`#proPlanPicker [data-market-price="pro.${iv}"]`)).toHaveCount(0);
       }
-      await expect(page.locator('#proPlanPicker input[value="month"]')).toBeChecked();
+      await expect(page.locator('#proPlanPicker .is-soon')).toHaveCount(0);
+      if (v.checkoutOpen.length === 1) {
+        await expect(page.locator('#proPlanPicker input[type="radio"]')).toHaveCount(0);
+        await expect(page.locator('#proCommitment'), '« meme acces quelle que soit la duree » sans choix de duree').toBeHidden();
+      }
       await tickAll(page);
       const call = supa.waitForCall('create-checkout-session');
       await page.locator('#subscribeButton').click();
       expect(v.checkoutOpen, 'duree envoyee au paiement').toContain((await call).body.interval);
+    });
+
+    // Ce que Pro donne, concretement (19/09/2026) : la liste complete en 3
+    // groupes, dans la langue de la version ; a cote du prix sur ordinateur,
+    // sous le bouton sur mobile. Plus de tableau « Gratuit ou Pro » (retire a
+    // la demande du proprietaire).
+    test('tout ce que Pro debloque, a cote du prix (ordinateur) ou sous le bouton (mobile), traduit, sans defilement horizontal @mobile', async ({ page, dictFor, consoleErrors }) => {
+      const dict = await dictFor(v.locale);
+      await page.goto(`/${v.dir}/abonnement.html`);
+      await expect(page.locator('.pro-compare, table.cmp')).toHaveCount(0);
+      const card = await page.locator('.pricing-card').boundingBox(), list = await page.locator('.pro-list-card').boundingBox();
+      if (page.viewportSize().width > 760) {
+        expect(list.x, 'liste a droite du prix').toBeGreaterThanOrEqual(card.x + card.width);
+        expect(Math.abs(list.y - card.y), 'cartes alignees en haut').toBeLessThanOrEqual(2);
+      } else {
+        expect(list.y, 'liste sous la carte prix').toBeGreaterThanOrEqual(card.y + card.height);
+      }
+      const items = page.locator('.pro-list-card li');
+      await expect(items).toHaveCount(LIST_KEYS.length);
+      const texts = (await items.allTextContents()).map(squash);
+      LIST_KEYS.forEach((k, i) => expect(texts[i], k).toContain(squash(tr(dict, k))));
+      await expect(page.locator('.pro-list-card .tag-new')).toHaveText(tr(dict, 'pro_offer.badge_new'));
+      await expect(page.locator('.pro-list-card h3')).toHaveText(['group_match', 'group_daily', 'group_tools'].map((k) => tr(dict, 'pro_offer.' + k)));
+      await expect(page.locator('body')).not.toContainText(/pari (conseillé|recommandé)|recommended bet/i);
+      await expectNoHorizontalScroll(page);
+      await page.waitForLoadState('networkidle').catch(() => {});
+      expect(consoleErrors).toEqual([]);
     });
 
     // Tunnel reel (analytics 09/2026) : match -> « Debloquer » -> abonnement.
@@ -235,6 +324,11 @@ for (const v of VERSIONS) {
       await page.goto(`/${v.dir}/abonnement.html?next=${encodeURIComponent(matchPath)}`);
       await expect(page.locator('#proContext')).toBeVisible();
       await expect(page.locator('#proContext b')).toHaveText(`${d.home.n} – ${d.away.n}`);
+      if (!payable(v)) {
+        // Marche pas encore ouvert : le contexte reste, aucun bouton de paiement.
+        await expect(page.locator('#subscribeButton')).toBeHidden();
+        return;
+      }
       await tickAll(page);
       await page.locator('#subscribeButton').click();
       await expect(page).toHaveURL(new RegExp(`/${v.dir}/inscription\\.html\\?next=`));

@@ -47,11 +47,25 @@
   // checks it matches the displayed price, and never falls back to another
   // period, price or currency: a missing Price comes back as processed:false
   // (interval_not_configured / market_not_configured), shown honestly below.
+  // No payable billing period (config/markets.json#za.checkoutOpen = [],
+  // owner decision 19/09/2026: no Stripe Price exists here yet): the picker
+  // shows the pro_plans.closed line ("payment isn't open yet, nothing will be
+  // charged") and this page hides the pay button and the consent boxes - never
+  // a button that always fails. They come back as soon as a period reopens.
+  function offerUpdate(visible) {
+    var closed = !visible || visible.length === 0;
+    ["subscribeProBtn", "checkoutConsent", "proMsg"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.hidden = closed;
+      el.style.display = closed ? "none" : "";
+    });
+  }
   var picker = (window.IasharkProPlanPicker && document.getElementById("proPlanPicker"))
-    ? window.IasharkProPlanPicker.mount(document.getElementById("proPlanPicker"), {})
+    ? window.IasharkProPlanPicker.mount(document.getElementById("proPlanPicker"), { onUpdate: offerUpdate })
     : null;
-  // Duree vendue mais Price Stripe absent cote serveur : marquee "coming soon"
-  // des l'affichage (create-checkout-session, mode availability).
+  // Duree non payable (config/markets.json#checkoutOpen, ou Price Stripe
+  // absent cote serveur) : masquee (decision du 19/09/2026).
   if (picker) picker.loadAvailability();
 
   // ---- Consent before payment -------------------------------------------

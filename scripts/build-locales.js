@@ -737,6 +737,8 @@ function bakeI18n(html, dict, market) {
 //                                            {pro_year_price} ; si l'un manque :
 //                                            data-market-price-tpl-fallback)
 //   [data-market-price-if="<plan>"]       -> hidden si ce prix n'existe pas
+//   [data-market-open-if="pro|pro.<duree>"] -> hidden si pas payable en ligne
+//                                            (checkoutOpen) ; data-market-closed-if : l'inverse
 //   [data-market-helpline="|name|phone|url"] (+ href sur <a>)
 //   [data-market-helpline-if="phone"]     -> hidden sans numero
 //   [data-market-label][data-home][data-away] -> libelle de marche dans la
@@ -797,7 +799,9 @@ function bakeMarket(html, dir) {
   var conf = DIRS[dir];
   var dict = DICTS[conf.locale];
   var help = helplineFor(dir);
-  html = rewriteElements(html, ["data-market-price", "data-market-price-line", "data-market-price-if", "data-market-helpline", "data-market-helpline-if", "data-market-label", "data-seo-date"], function (tag, name) {
+  var mk = MARKETS[conf.market] || {};
+  var payable = function (key) { return marketConfigLib().isPayable(mk.prices || {}, key, mk.checkoutOpen); };
+  html = rewriteElements(html, ["data-market-price", "data-market-price-line", "data-market-price-if", "data-market-open-if", "data-market-closed-if", "data-market-helpline", "data-market-helpline-if", "data-market-label", "data-seo-date"], function (tag, name) {
     var plan = attrValue(tag, "data-market-price");
     if (plan != null) {
       var price = formatPrice(dir, plan);
@@ -814,6 +818,12 @@ function bakeMarket(html, dir) {
     }
     var ifPlan = attrValue(tag, "data-market-price-if");
     if (ifPlan != null) return { tag: setHidden(tag, formatPrice(dir, ifPlan) == null), inner: null };
+    // Offre payable en ligne (config/markets.json#checkoutOpen, 19/09/2026) :
+    // un marche ferme ne publie ni prix ni bouton de paiement dans son HTML.
+    var openIf = attrValue(tag, "data-market-open-if");
+    if (openIf != null) return { tag: setHidden(tag, !payable(openIf)), inner: null };
+    var closedIf = attrValue(tag, "data-market-closed-if");
+    if (closedIf != null) return { tag: setHidden(tag, payable(closedIf)), inner: null };
     var part = attrValue(tag, "data-market-helpline");
     if (part != null) {
       // Ressource absente, ou sans numero : masque ET vide (jamais le numero

@@ -125,19 +125,19 @@ test("apply() : prix par duree, equivalent, economie, element masque si la duree
   assert.match(norm(za[3].textContent), /R ?69/);
 });
 
-test("build-locales : ligne des durees de l'accueil et prix masques cuits dans le HTML genere", () => {
+test("build-locales : prix masques cuits dans le HTML genere ; l'accueil n'annonce plus semaine ni annee", () => {
   const builder = require(path.join(ROOT, "scripts/build-locales.js"));
   assert.doesNotMatch(builder.bakeMarket('<p data-market-price-if="pro.year" hidden>x</p>', "gb"), /\shidden/);
   assert.match(builder.bakeMarket('<p data-market-price-if="pro.year">x</p>', "za"), /\shidden/);
-  const src = read("index.html");
-  assert.match(src, /id="prixProDurees" data-market-price-line="pro\.week" data-market-price-tpl="home_app\.pro_other_durations" data-market-price-tpl-fallback="home_app\.pro_other_durations_week"/);
-  const line = (d) => norm((read(d + "/index.html").match(/id="prixProDurees"[^>]*>([^<]*)</) || [])[1] || "");
-  // 18/09/2026 : semaine et annee ne sont pas encore payables en ligne -> « bientot ».
-  assert.equal(line("fr"), "Bientôt aussi à la semaine (6,99 €) ou à l’année (199 €).");
-  assert.equal(line("gb"), "Coming soon: weekly (£4.99) or annually (£149).");
-  assert.equal(line("mx"), "Próximamente también semanal (MX$69) o anual (MX$1,990).");
-  assert.equal(line("za"), "Coming soon: weekly (R 69).", "ZA : aucune mention d'annuel");
-  for (const d of ["en", "es", "de", "it", "pt"]) assert.match(line(d), /6[.,]99/, d);
+  // 19/09/2026 (decision du proprietaire) : plus de « Bientot aussi a la
+  // semaine ou a l'annee » sur l'accueil - le visiteur ne doit pas attendre
+  // une duree qui n'est pas payable. Ligne et cles retirees.
+  assert.doesNotMatch(read("index.html"), /prixProDurees|pro_other_durations|Bientôt aussi à la semaine/);
+  for (const d of Object.keys(MARKETS._dirs)) {
+    const html = norm(read(d + "/index.html"));
+    assert.doesNotMatch(html, /prixProDurees|Bientôt aussi|Coming soon: weekly|Próximamente también semanal|Demnächst auch wöchentlich|Presto anche settimanale|Em breve também semanal/, d);
+    assert.doesNotMatch(html, /data-market-price="pro\.(week|year)"/, d + " : aucun prix semaine / annee sur l'accueil");
+  }
   // Carte Pro de l'accueil : prix mensuel (duree par defaut) conserve.
   assert.match(norm(read("za/index.html")), /id="prixPro" data-market-price="pro"[^>]*>R ?199</);
 });
@@ -222,7 +222,7 @@ function loadPicker(i18n) {
   return win.IasharkProPlanPicker;
 }
 
-test("selecteur : 3 options (2 en ZA), Mois coche par defaut, equivalent et economie calcules, bientot disponible", () => {
+test("selecteur : 3 options (2 en ZA), Mois coche par defaut, equivalent et economie calcules, duree fermee masquee", () => {
   const P = loadPicker();
   const t = (k) => P.textFor(k, null, {});
   const offerOf = (k) => lib.proOffer(MARKETS[k].prices, MARKETS[k].currency, MARKETS[k].intlLocale);
@@ -246,9 +246,12 @@ test("selecteur : 3 options (2 en ZA), Mois coche par defaut, equivalent et econ
     assert.doesNotMatch(html, /recommand|populaire|meilleur/i, k + " : aucune duree mise en avant");
   }
   assert.equal(P.pickDefault(offerOf("za"), "year"), "month", "ZA : annuel demande -> mois");
+  // 19/09/2026 : une duree declaree fermee par le serveur n'est plus affichee
+  // (« Bientot disponible » faisait hesiter), jamais cochee.
   const soon = P.buildHtml(offerOf("gb"), t, "u", "month", { week: false });
-  assert.equal((soon.match(/class="iash-plan[^"]*is-soon/g) || []).length, 1);
-  assert.match(soon, /Bientôt disponible/);
+  assert.deepEqual(radios(soon).map((r) => r.match(/value="(\w+)"/)[1]), ["month", "year"]);
+  assert.doesNotMatch(soon, /value="week"|pro\.week|is-soon|Bientôt disponible|disabled/);
+  assert.equal(P.pickDefault(offerOf("gb"), "week", { week: false }), "month", "duree fermee demandee -> mois");
   // Textes : labels explicites > dictionnaire (variante marche) > repli francais.
   // Le faux I18N reproduit le VRAI contrat de i18n/i18n.js#t : une cle absente
   // renvoie LA CLE (fallback != null ? fallback : key), jamais null. L'ancien
@@ -263,7 +266,8 @@ test("selecteur : 3 options (2 en ZA), Mois coche par defaut, equivalent et econ
   assert.equal(Pi.textFor("legend", { code: "gb" }), "Choose your billing period");
   assert.equal(Pi.textFor("legend", { code: "za" }), "Choose (ZA)");
   assert.equal(Pi.textFor("legend", { code: "gb" }, { legend: "X" }), "X");
-  assert.equal(Pi.textFor("unavailable", { code: "gb" }), "Bientôt disponible");
+  assert.equal(Pi.textFor("closed", { code: "gb" }), "Le paiement n’est pas encore ouvert pour ce pays. Aucun montant ne sera prélevé.");
+  assert.equal(Pi.textFor("unavailable", { code: "gb" }), undefined, "plus de libelle « Bientot disponible »");
   // Regression : la variante par marche n'existe pas -> la cle generique, jamais la clef brute.
   assert.equal(Pi.textFor("week_label", { code: "fr" }), "1 week");
   assert.equal(Pi.textFor("billed_week", { code: "mx" }), "Billed {price} each week");
@@ -271,35 +275,90 @@ test("selecteur : 3 options (2 en ZA), Mois coche par defaut, equivalent et econ
   assert.doesNotMatch(rendered, /pro_plans\./i, "une cle i18n brute est affichee sur la page d'abonnement");
 });
 
-test("checkoutOpen : seules les durees payables en ligne sont selectionnables, les autres « bientot disponible »", () => {
+// Faux conteneur pour IasharkProPlanPicker.mount (aucun DOM en test unitaire).
+function fakeContainer() {
+  return { innerHTML: "", ownerDocument: { getElementById: () => ({}), readyState: "complete" }, querySelectorAll: () => [], firstChild: { classList: { add() {} } } };
+}
+
+test("checkoutOpen : seules les durees payables en ligne sont affichees, les autres masquees (19/09/2026)", () => {
   // Decision du proprietaire du 18/09/2026 : en production, seul le mensuel est
-  // payable (la fonction de paiement deployee ignore la duree). Une duree vendue
-  // mais fermee reste affichee, jamais cochee ni cochable.
+  // payable. Decision du 19/09/2026 : une duree non payable n'est PLUS affichee
+  // (« Bientot disponible » faisait hesiter) ; elle reapparait des que la
+  // configuration l'ouvre. Une seule duree : son prix seul, rien a choisir.
   assert.deepEqual(MARKETS.fr.checkoutOpen, ["month"], "FR : seul le mensuel est ouvert au paiement");
   const offer = lib.proOffer(MARKETS.fr.prices, "EUR", "fr-FR", MARKETS.fr.checkoutOpen);
   assert.deepEqual(offer.intervals.map((i) => [i.interval, i.open]), [["week", false], ["month", true], ["year", false]]);
   assert.ok(lib.proOffer(MARKETS.gb.prices, "GBP", "en-GB").intervals.every((i) => i.open), "sans liste : toutes ouvertes");
+  // Decision du 19/09/2026 (« cache-le ») : aucun Price Stripe en GB, MX, ZA ->
+  // checkoutOpen = [] : aucune duree affichee, la ligne « paiement pas encore ouvert ».
+  const P0 = loadPicker();
+  for (const k of ["gb", "mx", "za"]) {
+    assert.deepEqual(MARKETS[k].checkoutOpen, [], k + " : aucune duree payable");
+    assert.match(MARKETS[k].checkoutOpen_readme, /POUR ROUVRIR CE MARCHE[\s\S]*secrets[\s\S]*deployer[\s\S]*lister ici les durees/, k + " : comment rouvrir");
+    const closedOffer = lib.proOffer(MARKETS[k].prices, MARKETS[k].currency, MARKETS[k].intlLocale, MARKETS[k].checkoutOpen);
+    assert.deepEqual(P0.visibleIntervals(closedOffer), [], k);
+    assert.match(P0.buildHtml(closedOffer, (x) => P0.textFor(x, null, {}), "z", null, null), /^<p class="iash-plans-closed" role="status">/, k);
+  }
   const P = loadPicker();
   const t = (k) => P.textFor(k, null, {});
+  assert.deepEqual(P.visibleIntervals(offer), ["month"]);
   assert.equal(P.pickDefault(offer, "week"), "month", "duree fermee demandee -> mois");
   assert.equal(P.pickDefault(offer, "year"), "month");
   const html = P.buildHtml(offer, t, "c", P.pickDefault(offer), {});
-  for (const iv of ["week", "year"]) {
-    assert.match(html, new RegExp('<label class="iash-plan is-soon" for="iashPlanc_' + iv + '" data-interval="' + iv + '" aria-disabled="true">'), iv + " : bientot disponible");
-    assert.match(html, new RegExp('value="' + iv + '" disabled>'), iv + " : non selectionnable");
-  }
-  assert.match(html, /value="month" checked>/);
-  assert.equal((html.match(/Bientôt disponible/g) || []).length, 2);
+  assert.match(html, /^<div class="iash-plans iash-plans-single" data-interval="month">/, "une duree : prix seul");
+  assert.match(html, /<b data-market-price="pro\.month">19,95\s€<\/b>/);
+  assert.doesNotMatch(html, /<input|<legend|pro\.week|pro\.year|is-soon|Bientôt disponible/, "ni bouton radio, ni durees fermees");
+  // Reouverture automatique : la meme offre avec semaine et annee ouvertes les affiche.
+  const reopened = lib.proOffer(MARKETS.fr.prices, "EUR", "fr-FR", ["week", "month", "year"]);
+  assert.deepEqual(P.visibleIntervals(reopened), ["week", "month", "year"]);
+  assert.equal((P.buildHtml(reopened, t, "r", "month", {}).match(/<input type="radio"/g) || []).length, 3);
   // Le serveur ne peut pas rouvrir une duree fermee par la configuration.
   const win = { I18N: null, IasharkApp: null };
   new Function("window", read("lib/pro-plan-picker.js"))(win);
-  const el = { innerHTML: "", ownerDocument: { getElementById: () => ({}), readyState: "complete" }, querySelectorAll: () => [], firstChild: { classList: { add() {} } } };
-  const api = win.IasharkProPlanPicker.mount(el, { market: { proOffer: () => offer, code: "fr" } });
+  const updates = [];
+  const api = win.IasharkProPlanPicker.mount(fakeContainer(), { market: { proOffer: () => offer, code: "fr" }, onUpdate: (v) => updates.push(v) });
   api.setAvailability({ week: true, month: true, year: true });
   assert.equal(api.isAvailable("week"), false);
   assert.equal(api.isAvailable("year"), false);
   assert.equal(api.isAvailable("month"), true);
   assert.equal(api.interval(), "month");
+  assert.deepEqual(updates, [["month"], ["month"]], "onUpdate : durees affichees apres chaque rendu");
+});
+
+test("disponibilite serveur : duree fermee masquee, inconnue = configuration, aucune = « paiement pas encore ouvert »", () => {
+  const P = loadPicker();
+  const t = (k) => P.textFor(k, null, {});
+  // Marche GB suppose rouvert (checkoutOpen absent) : le serveur tranche.
+  const gb = lib.proOffer(MARKETS.gb.prices, "GBP", "en-GB", null);
+  // Disponibilite inconnue (fonction deployee sans mode "availability", erreur
+  // reseau) : les durees ouvertes par la configuration restent affichees.
+  assert.deepEqual(P.visibleIntervals(gb, null), ["week", "month", "year"]);
+  assert.deepEqual(P.visibleIntervals(gb, {}), ["week", "month", "year"]);
+  assert.deepEqual(P.visibleIntervals(gb, { week: false, year: false }), ["month"]);
+  // Aucune duree payable : la ligne pro_plans.closed, aucun prix, aucun bouton radio.
+  const none = P.buildHtml(gb, t, "n", null, { week: false, month: false, year: false });
+  assert.equal(none, '<p class="iash-plans-closed" role="status">Le paiement n’est pas encore ouvert pour ce pays. Aucun montant ne sera prélevé.</p>');
+  assert.equal(P.pickDefault(gb, "month", { week: false, month: false, year: false }), null);
+
+  // Duree cochee fermee par le serveur : bascule sur la duree par defaut restante, signalee.
+  const win = { I18N: null, IasharkApp: null };
+  new Function("window", read("lib/pro-plan-picker.js"))(win);
+  const changes = [], updates = [];
+  const api = win.IasharkProPlanPicker.mount(fakeContainer(), { market: { proOffer: () => gb, code: "gb" }, interval: "week", onChange: (iv) => changes.push(iv), onUpdate: (v) => updates.push(v) });
+  assert.equal(api.interval(), "week");
+  api.setAvailability({ week: false, month: true, year: true });
+  assert.equal(api.interval(), "month");
+  assert.deepEqual(changes, ["month"]);
+  assert.deepEqual(api.visible(), ["month", "year"]);
+  // Tout ferme (fonction redeployee, pays sans Price Stripe) : rien de payable.
+  api.setAvailability({ week: false, month: false, year: false });
+  assert.equal(api.interval(), null);
+  assert.equal(api.isAvailable(), false, "aucune duree : jamais d'appel au paiement");
+  assert.equal(api.isAvailable("month"), false);
+  assert.deepEqual(updates[updates.length - 1], []);
+  assert.match(api.el.innerHTML, /iash-plans-closed/);
+  // Marche sans aucun prix : rien a monter (le repli HTML reste affiche).
+  assert.equal(win.IasharkProPlanPicker.mount(fakeContainer(), { market: { proOffer: () => ({ defaultInterval: "month", intervals: [{ interval: "month", amount: null }] }) } }), null, "marche sans aucun prix : rien a monter");
 });
 
 test("front : chaque point d'entree du checkout envoie la duree, marque les durees non ouvertes et ne les facture jamais", () => {
@@ -346,7 +405,7 @@ test("compte : duree, prochaine echeance, changement de duree par le portail, se
 
 test("i18n : textes de l'offre Pro complets dans les 7 langues, sans promesse de gain", () => {
   const dicts = Object.fromEntries(LOCALES.map((l) => [l, JSON.parse(read("i18n/dict/" + l + ".json"))]));
-  const PLAN_KEYS = ["legend", "week_label", "month_label", "year_label", "per_week", "per_month", "per_year", "year_equiv", "year_savings", "billed_week", "billed_month", "billed_year", "unavailable"];
+  const PLAN_KEYS = ["legend", "week_label", "month_label", "year_label", "per_week", "per_month", "per_year", "year_equiv", "year_savings", "billed_week", "billed_month", "billed_year", "closed"];
   const COMPTE = ["sub_interval_label", "interval_week", "interval_month", "interval_year", "interval_unknown", "next_renewal_label", "change_interval_cta", "change_interval_note", "pro_durations_note"];
   const PRICING = ["commitment", "checkout_interval_not_configured", "checkout_already_subscribed", "checkout_price_mismatch"];
   assert.deepEqual(Object.keys(dicts.fr.pro_plans).sort(), PLAN_KEYS.slice().sort());
@@ -359,10 +418,10 @@ test("i18n : textes de l'offre Pro complets dans les 7 langues, sans promesse de
     assert.match(d.pro_plans.billed_year, /\{price\}/, l);
     for (const k of COMPTE) assert.ok(d.compte_page[k], l + " compte_page." + k);
     for (const k of PRICING) assert.ok(d.pricing_page[k], l + " pricing_page." + k);
-    assert.match(d.home_app.pro_other_durations, /\{pro_week_price\}[\s\S]*\{pro_year_price\}/, l);
-    assert.match(d.home_app.pro_other_durations_week, /\{pro_week_price\}/, l);
-    assert.doesNotMatch(d.home_app.pro_other_durations_week, /\{pro_year_price\}/, l);
-    const texts = JSON.stringify([d.pro_plans, PRICING.map((k) => d.pricing_page[k]), COMPTE.map((k) => d.compte_page[k]), d.home_app.pro_other_durations]);
+    assert.ok(!("pro_other_durations" in d.home_app) && !("pro_other_durations_week" in d.home_app), l + " : plus d'annonce semaine / annee sur l'accueil");
+    const app = JSON.parse(read("i18n/parts/app." + l + ".json")).home_app;
+    assert.ok(!("pro_other_durations" in app) && !("pro_other_durations_week" in app), l + " : part app." + l + ".json");
+    const texts = JSON.stringify([d.pro_plans, PRICING.map((k) => d.pricing_page[k]), COMPTE.map((k) => d.compte_page[k])]);
     assert.doesNotMatch(texts, /\b(sûrs?|gagnants?|garanti(e|s|es)?|bonus|guaranteed|garantizad[oa]s?|garantiert|garantit[oa])\b/i, l + " : vocabulaire interdit");
     assert.doesNotMatch(texts, /\bEdge\b/, l);
   }

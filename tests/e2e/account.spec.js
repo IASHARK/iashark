@@ -6,6 +6,14 @@ const { VERSIONS, CONSENT_BOXES } = require('./helpers/versions');
 const { STORAGE_KEY, STRIPE_CHECKOUT_URL, STRIPE_PORTAL_URL } = require('./helpers/supabase-mock');
 const { tr } = require('./helpers/site-data');
 
+// Durees PAYABLES de la version (config/markets.json#checkoutOpen ; gb, mx, za
+// fermes le 19/09/2026) : aucune = ni bouton « Decouvrir Pro » ni consentement.
+const payableOf = (v) => ['week', 'month', 'year'].filter((iv) => typeof v.proAmounts[iv] === 'number' && (!Array.isArray(v.checkoutOpen) || v.checkoutOpen.includes(iv)));
+// Liste Pro du compte = celle de la page d'abonnement (19/09/2026).
+const PRO_LIST_KEYS = ['pro_gate_item_bet', 'pro_gate_item_scorer', 'pro_gate_item_scenario', 'pro_gate_item_scores', 'pro_gate_item_odds', 'pro_gate_item_stats', 'pro_gate_item_faq'].map((k) => 'match_page.' + k)
+  .concat(['daily_all_matches', 'daily_scorers', 'tool_scanner', 'tool_journal', 'tool_combo'].map((k) => 'pro_offer.' + k));
+const squash = (x) => String(x).replace(/[\s\u00a0\u202f\u2009]+/g, ' ').trim();
+
 for (const v of VERSIONS) {
   test.describe(`compte /${v.dir}/`, () => {
     test('anonyme : redirige vers la connexion de la version', async ({ page }) => {
@@ -24,6 +32,24 @@ for (const v of VERSIONS) {
       await expect(page.locator('#panneau')).toContainText(tr(dict, 'compte_page.plan_free_name'));
       await expect(page.locator('#compte')).toContainText(tr(dict, 'compte_page.badge_free'));
       await expect(page.locator('#portail')).toHaveCount(0);
+      // Ce que Pro donne : la liste de la page d'abonnement (plus de « six outils », ni de « suivi de bankroll »).
+      const items = page.locator('#proListe li');
+      await expect(items).toHaveCount(PRO_LIST_KEYS.length);
+      const texts = (await items.allTextContents()).map(squash);
+      PRO_LIST_KEYS.forEach((k, i) => expect(texts[i], k).toContain(squash(tr(dict, k))));
+      await expect(page.locator('#panneau')).toContainText(tr(dict, 'pro_offer.free_matches'));
+      await expect(page.locator('#panneau')).toContainText(tr(dict, 'pro_offer.free_tools'));
+      for (const k of ['benefit_pro_six_tools', 'benefit_pro_bankroll']) await expect(page.locator('#panneau')).not.toContainText(tr(dict, 'compte_page.' + k));
+      if (!payableOf(v).length) {
+        // Marche pas encore ouvert : ligne « pas encore ouvert », aucun bouton mort.
+        await expect(page.locator('#proPlanPicker .iash-plans-closed')).toHaveText(tr(dict, 'pro_plans.closed'));
+        await expect(page.locator('#souscrire')).toBeHidden();
+        await expect(page.locator('#checkoutConsent')).toBeHidden();
+        await expect(page.locator('#proDureesNote')).toBeHidden();
+        expect(supa.callsTo('create-checkout-session')).toHaveLength(0);
+        expect(consoleErrors).toEqual([]);
+        return;
+      }
       const inputs = page.locator('#checkoutConsent input[data-consent]');
       await expect(inputs).toHaveCount(CONSENT_BOXES[v.regime]);
       for (let i = 0; i < CONSENT_BOXES[v.regime]; i++) await inputs.nth(i).check();
@@ -127,9 +153,15 @@ for (const v of VERSIONS) {
     test('mobile : pas de debordement, boutons atteignables au-dessus de la navigation basse @mobile', async ({ page, supa }) => {
       await supa.as('free');
       await page.goto(`/${v.dir}/compte.html#abonnement`);
-      await expect(page.locator('#souscrire')).toBeVisible();
-      await expectNoHorizontalScroll(page);
-      await expectNotHiddenByBottomNav(page, '#souscrire');
+      if (payableOf(v).length) {
+        await expect(page.locator('#souscrire')).toBeVisible();
+        await expectNoHorizontalScroll(page);
+        await expectNotHiddenByBottomNav(page, '#souscrire');
+      } else {
+        await expect(page.locator('#proPlanPicker .iash-plans-closed')).toBeVisible();
+        await expect(page.locator('#souscrire')).toBeHidden();
+        await expectNoHorizontalScroll(page);
+      }
       await page.goto(`/${v.dir}/compte.html#donnees`);
       await expect(page.locator('#ouvrirSuppression')).toBeVisible();
       await expectNoHorizontalScroll(page);

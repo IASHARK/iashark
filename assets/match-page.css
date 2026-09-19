@@ -694,6 +694,9 @@ a{color:inherit}
   box-shadow:0 10px 28px rgba(245,158,11,.3);transition:transform .15s ease,box-shadow .15s ease}
 .mgate-cta:hover{transform:translateY(-1px);box-shadow:0 12px 32px rgba(245,158,11,.4)}
 .mgate-cta:focus-visible{outline:2px solid #fff;outline-offset:3px}
+/* Ce que Pro donne EN PLUS de ce match (pro_offer.match_more), sous la liste :
+   une ligne, pas une carte. Prix mensuel du marche sous le bouton (mgate-small). */
+.mgate-more{max-width:44ch;margin:0;color:var(--accent);font:600 13.5px/1.45 var(--body)}
 .mgate-small{margin:0;color:var(--soft);font-size:12.5px}
 .mgate .sig-legal,.mgate .sig-method{text-align:center}
 @media(min-width:720px){

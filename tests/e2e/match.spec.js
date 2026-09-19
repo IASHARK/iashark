@@ -12,6 +12,15 @@ const { deepPremiumLeaks, tr } = require('./helpers/site-data');
 const PAID = ['.duo', '.pr-row', '.sig-market', '.sig2-cmp', '.sig-why', '.sig-conf', '.scenario-chart', '.score-bars', '.xg-row', '.threat', '.pm-list']
   .map((s) => '#matchRoot ' + s).concat('#sigSticky').join(', ');
 
+// Prix mensuel Pro de la version, lu dans la MEME source que la page
+// d'abonnement (lib/market-config.js#proOffer, config/markets.json).
+const prixMensuel = (page) => page.evaluate(() => {
+  const M = window.IASHARK_MARKET;
+  const it = M && M.proOffer ? M.proOffer().intervals.filter((i) => i.interval === 'month')[0] : null;
+  return it && it.text ? it.text : null;
+});
+const squash = (s) => String(s).replace(/[\s\u00a0\u202f\u2009]+/g, ' ').trim();
+
 // Identifiant du match offert tel que la version l'affiche (depend du marche).
 async function freeMatchIdFromHome(page, dir) {
   await page.goto(`/${dir}/`);
@@ -60,7 +69,21 @@ for (const v of VERSIONS) {
       await expect(cta).toContainText(tr(dict, 'match_page.pro_gate_cta'));
       await expect(cta).toHaveAttribute('data-track', 'match_gate_unlock');
       expect(pathOf(await cta.getAttribute('href'), baseURL)).toBe(proHref(v.dir, siteData.paid.id));
-      await expect(gate.locator('.mgate-small')).toHaveText(tr(dict, 'match_page.pro_gate_small'));
+      // 19/09/2026 : prix mensuel du marche pres du bouton (devise de la
+      // version, jamais ecrit en dur) et ce que Pro donne en plus du match.
+      // Mensuel pas encore payable (gb, mx, za : checkoutOpen = [] depuis le
+      // 19/09/2026) : aucun prix annonce, la ligne de resiliation seule.
+      const monthOpen = typeof v.proAmount === 'number' && (!Array.isArray(v.checkoutOpen) || v.checkoutOpen.includes('month'));
+      if (monthOpen) {
+        const prix = await prixMensuel(page);
+        expect(prix, 'prix mensuel absent de lib/market-config.js').toBeTruthy();
+        expect(squash(prix), `prix ${prix} : montant ${v.proAmount}`).toMatch(new RegExp(String(v.proAmount).replace('.', '[.,]') + '(?![\\d])'));
+        expect(prix).toContain(v.currencySymbol);
+        await expect(gate.locator('.mgate-small')).toHaveText(tr(dict, 'pro_offer.price_month').replace('{price}', prix));
+      } else {
+        await expect(gate.locator('.mgate-small')).toHaveText(tr(dict, 'match_page.pro_gate_small'));
+      }
+      await expect(gate.locator('.mgate-more')).toHaveText(tr(dict, 'pro_offer.match_more'));
       const liste = await gate.locator('.mgate-list').innerText();
       for (const k of ['pro_gate_item_bet', 'pro_gate_item_scorer', 'pro_gate_item_scenario', 'pro_gate_item_scores', 'pro_gate_item_odds']) expect(liste).toContain(tr(dict, 'match_page.' + k));
       await expect(gate.locator('.mgate-preview')).toHaveAttribute('aria-hidden', 'true');
@@ -118,6 +141,10 @@ for (const v of VERSIONS) {
       await expect(gate.locator('h2')).toHaveText(tr(dict, 'match_page.gate_free_title'));
       expect(pathOf(await gate.locator('a.btn-gate').getAttribute('href'), baseURL)).toBe(`/${v.dir}/compte.html`);
       await expect(gate.locator('a.btn-gate')).toHaveText(tr(dict, 'match_page.free_cta'));
+      // Match offert : jamais de prix (seul un compte gratuit est demande).
+      const prix = await prixMensuel(page);
+      expect(squash(await gate.textContent())).not.toContain(squash(prix));
+      await expect(gate.locator('.mgate-small, .mgate-more')).toHaveCount(0);
       await expectPanelOnly(page);
       await expect(page.locator(PAID)).toHaveCount(0);
     });

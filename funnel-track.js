@@ -40,7 +40,22 @@
 //   (memorise pour tout l'onglet en sessionStorage) ;
 // - bot:true : navigateur pilote (navigator.webdriver, HeadlessChrome,
 //   Playwright/Puppeteer/PhantomJS) ou ordinateur annoncant un ecran de
-//   telephone (emulation de viewport des tests mobiles).
+//   telephone (emulation de viewport des tests mobiles) ; depuis le
+//   19/09/2026 aussi : telephone sans ecran tactile (user-agent de telephone
+//   emprunte par un ordinateur), et navigateur regle sur le temps universel
+//   (fuseau UTC / Etc/...) qui annonce un telephone ou un ecran d'ordinateur
+//   de 800 px (fenetre par defaut de Chrome sans interface). Ces visites sans
+//   pays faisaient les « pays inconnu » du tableau de bord (meme regle en SQL :
+//   raison 'headless', migration 0031_admin_conversion_funnel.sql).
+// Tunnel « Ou les visiteurs decrochent » (admin.html, 0031) :
+// - gate_view : un panneau « Debloquer » (mur Pro ou compte gratuit de la
+//   page match, panneau des buteurs du jour) reellement affiche a l'ecran
+//   (moitie visible pendant 1 s), une fois par panneau et par page vue.
+//   Impression seulement, jamais liee a un compte : { gate, pv, match_id } ;
+// - click kind checkout_consent : case des conditions (CGV) cochee
+//   (lib/checkout-consent.js), une fois par page ;
+// - click kind checkout : + ready (bouton de paiement actif, case cochee) et
+//   signed_in (une session est ouverte dans ce navigateur, jamais laquelle).
 // Exception documentee : signup_completed peut porter le user_id du compte
 // qui vient d'etre cree, UNIQUEMENT avec le jeton de ce compte (la politique
 // RLS funnel_events_insert_own refuse tout autre user_id). Sans jeton,
@@ -65,7 +80,7 @@
   }
 
   // Robots d'indexation et apercus de liens : aucun envoi.
-  var isCrawler = /bot|crawl|spider|slurp|lighthouse|pagespeed|preview|facebookexternalhit/i.test(UA);
+  var isCrawler = /bot|crawl|spider|slurp|lighthouse|pagespeed|preview|facebookexternalhit|inspectiontool|googleother|google-read-aloud|mediapartners|apis-google|feedfetcher|ia_archiver|qwantify/i.test(UA);
   var enabled = !!PROD_HOSTS[loc.hostname] && !isCrawler;
 
   // ---------- Marquage du trafic interne / de test (jamais bloquant) ----------
@@ -89,6 +104,9 @@
     }
   }
 
+  // Fuseaux du temps universel (UTC, Etc/GMT...) : jamais celui d'un pays.
+  var SERVER_TZ = /^(Etc\/[A-Za-z0-9+-]{1,16}|UTC|UCT|GMT0?|Universal|Zulu|Greenwich)$/;
+
   function looksAutomated() {
     try {
       if (nav.webdriver === true) return true;
@@ -99,6 +117,16 @@
       // moins de 600 px : signature d'un test mobile emule.
       var w = window.screen && window.screen.width;
       if (w && w < 600 && /Windows NT|Macintosh/.test(UA) && !(nav.maxTouchPoints > 1)) return true;
+      // Telephone annonce, mais aucun ecran tactile : user-agent emprunte.
+      if (/iPhone|iPod|Android.+Mobile/i.test(UA) && nav.maxTouchPoints === 0) return true;
+      // Fuseau du temps universel (serveurs, robots) : un vrai telephone ou
+      // une vraie tablette a toujours le fuseau de son pays, un vrai
+      // ordinateur n'a pas un ecran de 800 px (fenetre par defaut de Chrome
+      // sans interface). Meme regle que la raison 'headless' (SQL, 0031).
+      if (SERVER_TZ.test(String(timeZone()))) {
+        if (/iPhone|iPod|iPad|Android/i.test(UA)) return true;
+        if (w === 800 && /Windows NT|Macintosh|Linux|CrOS/.test(UA)) return true;
+      }
     } catch (e) {}
     return false;
   }
@@ -310,37 +338,96 @@
 
   // Pays ESTIME depuis le fuseau horaire du navigateur (jamais l'IP). Une
   // estimation : un fuseau couvre parfois plusieurs pays, un VPN ou un
-  // voyageur fausse la valeur. Fuseau absent de la table => null (inconnu).
-  var TZ_COUNTRY = {
-    "Europe/Paris": "FR", "Europe/London": "GB", "Europe/Dublin": "IE", "Europe/Brussels": "BE",
-    "Europe/Luxembourg": "LU", "Europe/Zurich": "CH", "Europe/Berlin": "DE", "Europe/Vienna": "AT",
-    "Europe/Madrid": "ES", "Atlantic/Canary": "ES", "Africa/Ceuta": "ES", "Europe/Lisbon": "PT",
-    "Atlantic/Madeira": "PT", "Atlantic/Azores": "PT", "Europe/Rome": "IT", "Europe/Amsterdam": "NL",
-    "Europe/Monaco": "MC", "Europe/Andorra": "AD", "Europe/Malta": "MT", "Europe/Warsaw": "PL",
-    "Europe/Prague": "CZ", "Europe/Bratislava": "SK", "Europe/Budapest": "HU", "Europe/Bucharest": "RO",
-    "Europe/Sofia": "BG", "Europe/Athens": "GR", "Europe/Stockholm": "SE", "Europe/Oslo": "NO",
-    "Europe/Copenhagen": "DK", "Europe/Helsinki": "FI", "Europe/Istanbul": "TR", "Europe/Kyiv": "UA",
-    "Europe/Kiev": "UA", "Europe/Moscow": "RU", "Europe/Belgrade": "RS", "Europe/Zagreb": "HR",
-    "Europe/Ljubljana": "SI", "Africa/Johannesburg": "ZA", "Africa/Casablanca": "MA", "Africa/Algiers": "DZ",
-    "Africa/Tunis": "TN", "Africa/Dakar": "SN", "Africa/Abidjan": "CI", "Africa/Lagos": "NG",
-    "Africa/Douala": "CM", "Africa/Kinshasa": "CD", "Africa/Cairo": "EG", "Africa/Nairobi": "KE",
-    "Indian/Reunion": "RE", "Indian/Mayotte": "YT", "America/Martinique": "MQ", "America/Guadeloupe": "GP",
-    "America/Cayenne": "GF", "Pacific/Noumea": "NC", "Pacific/Tahiti": "PF",
-    "America/Mexico_City": "MX", "America/Cancun": "MX", "America/Merida": "MX", "America/Monterrey": "MX",
-    "America/Matamoros": "MX", "America/Chihuahua": "MX", "America/Hermosillo": "MX", "America/Mazatlan": "MX",
-    "America/Bahia_Banderas": "MX", "America/Tijuana": "MX",
-    "America/New_York": "US", "America/Detroit": "US", "America/Indiana/Indianapolis": "US", "America/Chicago": "US",
-    "America/Denver": "US", "America/Phoenix": "US", "America/Los_Angeles": "US", "America/Anchorage": "US",
-    "Pacific/Honolulu": "US", "America/Toronto": "CA", "America/Montreal": "CA", "America/Winnipeg": "CA",
-    "America/Edmonton": "CA", "America/Vancouver": "CA", "America/Halifax": "CA",
-    "America/Sao_Paulo": "BR", "America/Argentina/Buenos_Aires": "AR", "America/Bogota": "CO", "America/Lima": "PE",
-    "America/Santiago": "CL", "America/Caracas": "VE",
-    "Australia/Sydney": "AU", "Australia/Melbourne": "AU", "Australia/Brisbane": "AU", "Australia/Perth": "AU",
-    "Australia/Adelaide": "AU", "Pacific/Auckland": "NZ",
-    "Asia/Dubai": "AE", "Asia/Qatar": "QA", "Asia/Riyadh": "SA", "Asia/Jerusalem": "IL", "Asia/Beirut": "LB",
-    "Asia/Kolkata": "IN", "Asia/Bangkok": "TH", "Asia/Singapore": "SG", "Asia/Jakarta": "ID", "Asia/Manila": "PH",
-    "Asia/Hong_Kong": "HK", "Asia/Shanghai": "CN", "Asia/Seoul": "KR", "Asia/Tokyo": "JP"
-  };
+  // voyageur fausse la valeur. Table complete (19/09/2026) : tous les fuseaux
+  // de la base IANA (zone.tab, tzdata 2026c) et leurs anciens noms encore
+  // renvoyes par les navigateurs (Asia/Calcutta, Europe/Kiev...), 489 fuseaux.
+  // Avant, une centaine seulement : Africa/Harare, Africa/Accra, Asia/Tehran...
+  // donnaient « pays inconnu ». Fuseau absent (UTC, Etc/...) => null.
+  // Format compact « Region:Ville PAYS,Ville PAYS,... », lu une seule fois.
+  var TZ_TABLE = [
+    "Africa:Abidjan CI,Accra GH,Addis_Ababa ET,Algiers DZ,Asmara ER,Asmera ER,Bamako ML,Bangui CF,Banjul GM," +
+    "Bissau GW,Blantyre MW,Brazzaville CG,Bujumbura BI,Cairo EG,Casablanca MA,Ceuta ES,Conakry GN,Dakar SN," +
+    "Dar_es_Salaam TZ,Djibouti DJ,Douala CM,El_Aaiun EH,Freetown SL,Gaborone BW,Harare ZW,Johannesburg ZA," +
+    "Juba SS,Kampala UG,Khartoum SD,Kigali RW,Kinshasa CD,Lagos NG,Libreville GA,Lome TG,Luanda AO," +
+    "Lubumbashi CD,Lusaka ZM,Malabo GQ,Maputo MZ,Maseru LS,Mbabane SZ,Mogadishu SO,Monrovia LR,Nairobi KE," +
+    "Ndjamena TD,Niamey NE,Nouakchott MR,Ouagadougou BF,Porto-Novo BJ,Sao_Tome ST,Timbuktu ML,Tripoli LY," +
+    "Tunis TN,Windhoek NA",
+    "America:Adak US,Anchorage US,Anguilla AI,Antigua AG,Araguaina BR,Argentina/Buenos_Aires AR," +
+    "Argentina/Catamarca AR,Argentina/ComodRivadavia AR,Argentina/Cordoba AR,Argentina/Jujuy AR," +
+    "Argentina/La_Rioja AR,Argentina/Mendoza AR,Argentina/Rio_Gallegos AR,Argentina/Salta AR," +
+    "Argentina/San_Juan AR,Argentina/San_Luis AR,Argentina/Tucuman AR,Argentina/Ushuaia AR,Aruba AW," +
+    "Asuncion PY,Atikokan CA,Atka US,Bahia BR,Bahia_Banderas MX,Barbados BB,Belem BR,Belize BZ," +
+    "Blanc-Sablon CA,Boa_Vista BR,Bogota CO,Boise US,Buenos_Aires AR,Cambridge_Bay CA,Campo_Grande BR," +
+    "Cancun MX,Caracas VE,Catamarca AR,Cayenne GF,Cayman KY,Chicago US,Chihuahua MX,Ciudad_Juarez MX," +
+    "Coral_Harbour CA,Cordoba AR,Costa_Rica CR,Coyhaique CL,Creston CA,Cuiaba BR,Curacao CW,Danmarkshavn GL," +
+    "Dawson CA,Dawson_Creek CA,Denver US,Detroit US,Dominica DM,Edmonton CA,Eirunepe BR,El_Salvador SV," +
+    "Ensenada MX,Fort_Nelson CA,Fort_Wayne US,Fortaleza BR,Glace_Bay CA,Godthab GL,Goose_Bay CA,Grand_Turk TC," +
+    "Grenada GD,Guadeloupe GP,Guatemala GT,Guayaquil EC,Guyana GY,Halifax CA,Havana CU,Hermosillo MX," +
+    "Indiana/Indianapolis US,Indiana/Knox US,Indiana/Marengo US,Indiana/Petersburg US,Indiana/Tell_City US," +
+    "Indiana/Vevay US,Indiana/Vincennes US,Indiana/Winamac US,Indianapolis US,Inuvik CA,Iqaluit CA,Jamaica JM," +
+    "Jujuy AR,Juneau US,Kentucky/Louisville US,Kentucky/Monticello US,Knox_IN US,Kralendijk BQ,La_Paz BO," +
+    "Lima PE,Los_Angeles US,Louisville US,Lower_Princes SX,Maceio BR,Managua NI,Manaus BR,Marigot MF," +
+    "Martinique MQ,Matamoros MX,Mazatlan MX,Mendoza AR,Menominee US,Merida MX,Metlakatla US,Mexico_City MX," +
+    "Miquelon PM,Moncton CA,Monterrey MX,Montevideo UY,Montreal CA,Montserrat MS,Nassau BS,New_York US," +
+    "Nipigon CA,Nome US,Noronha BR,North_Dakota/Beulah US,North_Dakota/Center US,North_Dakota/New_Salem US," +
+    "Nuuk GL,Ojinaga MX,Panama PA,Pangnirtung CA,Paramaribo SR,Phoenix US,Port-au-Prince HT,Port_of_Spain TT," +
+    "Porto_Acre BR,Porto_Velho BR,Puerto_Rico PR,Punta_Arenas CL,Rainy_River CA,Rankin_Inlet CA,Recife BR," +
+    "Regina CA,Resolute CA,Rio_Branco BR,Rosario AR,Santa_Isabel MX,Santarem BR,Santiago CL,Santo_Domingo DO," +
+    "Sao_Paulo BR,Scoresbysund GL,Shiprock US,Sitka US,St_Barthelemy BL,St_Johns CA,St_Kitts KN,St_Lucia LC," +
+    "St_Thomas VI,St_Vincent VC,Swift_Current CA,Tegucigalpa HN,Thule GL,Thunder_Bay CA,Tijuana MX,Toronto CA," +
+    "Tortola VG,Vancouver CA,Virgin VI,Whitehorse CA,Winnipeg CA,Yakutat US,Yellowknife CA",
+    "Antarctica:Casey AQ,Davis AQ,DumontDUrville AQ,Macquarie AU,Mawson AQ,McMurdo AQ,Palmer AQ,Rothera AQ," +
+    "South_Pole AQ,Syowa AQ,Troll AQ,Vostok AQ",
+    "Arctic:Longyearbyen SJ",
+    "Asia:Aden YE,Almaty KZ,Amman JO,Anadyr RU,Aqtau KZ,Aqtobe KZ,Ashgabat TM,Ashkhabad TM,Atyrau KZ," +
+    "Baghdad IQ,Bahrain BH,Baku AZ,Bangkok TH,Barnaul RU,Beirut LB,Bishkek KG,Brunei BN,Calcutta IN,Chita RU," +
+    "Choibalsan MN,Chongqing CN,Chungking CN,Colombo LK,Dacca BD,Damascus SY,Dhaka BD,Dili TL,Dubai AE," +
+    "Dushanbe TJ,Famagusta CY,Gaza PS,Harbin CN,Hebron PS,Ho_Chi_Minh VN,Hong_Kong HK,Hovd MN,Irkutsk RU," +
+    "Istanbul TR,Jakarta ID,Jayapura ID,Jerusalem IL,Kabul AF,Kamchatka RU,Karachi PK,Kashgar CN,Kathmandu NP," +
+    "Katmandu NP,Khandyga RU,Kolkata IN,Krasnoyarsk RU,Kuala_Lumpur MY,Kuching MY,Kuwait KW,Macao MO,Macau MO," +
+    "Magadan RU,Makassar ID,Manila PH,Muscat OM,Nicosia CY,Novokuznetsk RU,Novosibirsk RU,Omsk RU,Oral KZ," +
+    "Phnom_Penh KH,Pontianak ID,Pyongyang KP,Qatar QA,Qostanay KZ,Qyzylorda KZ,Rangoon MM,Riyadh SA,Saigon VN," +
+    "Sakhalin RU,Samarkand UZ,Seoul KR,Shanghai CN,Singapore SG,Srednekolymsk RU,Taipei TW,Tashkent UZ," +
+    "Tbilisi GE,Tehran IR,Tel_Aviv IL,Thimbu BT,Thimphu BT,Tokyo JP,Tomsk RU,Ujung_Pandang ID,Ulaanbaatar MN," +
+    "Ulan_Bator MN,Urumqi CN,Ust-Nera RU,Vientiane LA,Vladivostok RU,Yakutsk RU,Yangon MM,Yekaterinburg RU," +
+    "Yerevan AM",
+    "Atlantic:Azores PT,Bermuda BM,Canary ES,Cape_Verde CV,Faeroe FO,Faroe FO,Jan_Mayen SJ,Madeira PT," +
+    "Reykjavik IS,South_Georgia GS,St_Helena SH,Stanley FK",
+    "Australia:ACT AU,Adelaide AU,Brisbane AU,Broken_Hill AU,Canberra AU,Currie AU,Darwin AU,Eucla AU," +
+    "Hobart AU,LHI AU,Lindeman AU,Lord_Howe AU,Melbourne AU,NSW AU,North AU,Perth AU,Queensland AU,South AU," +
+    "Sydney AU,Tasmania AU,Victoria AU,West AU,Yancowinna AU",
+    "Europe:Amsterdam NL,Andorra AD,Astrakhan RU,Athens GR,Belfast GB,Belgrade RS,Berlin DE,Bratislava SK," +
+    "Brussels BE,Bucharest RO,Budapest HU,Busingen DE,Chisinau MD,Copenhagen DK,Dublin IE,Gibraltar GI," +
+    "Guernsey GG,Helsinki FI,Isle_of_Man IM,Istanbul TR,Jersey JE,Kaliningrad RU,Kiev UA,Kirov RU,Kyiv UA," +
+    "Lisbon PT,Ljubljana SI,London GB,Luxembourg LU,Madrid ES,Malta MT,Mariehamn AX,Minsk BY,Monaco MC," +
+    "Moscow RU,Nicosia CY,Oslo NO,Paris FR,Podgorica ME,Prague CZ,Riga LV,Rome IT,Samara RU,San_Marino SM," +
+    "Sarajevo BA,Saratov RU,Simferopol UA,Skopje MK,Sofia BG,Stockholm SE,Tallinn EE,Tirane AL,Tiraspol MD," +
+    "Ulyanovsk RU,Uzhgorod UA,Vaduz LI,Vatican VA,Vienna AT,Vilnius LT,Volgograd RU,Warsaw PL,Zagreb HR," +
+    "Zaporozhye UA,Zurich CH",
+    "Indian:Antananarivo MG,Chagos IO,Christmas CX,Cocos CC,Comoro KM,Kerguelen TF,Mahe SC,Maldives MV," +
+    "Mauritius MU,Mayotte YT,Reunion RE",
+    "Pacific:Apia WS,Auckland NZ,Bougainville PG,Chatham NZ,Chuuk FM,Easter CL,Efate VU,Enderbury KI," +
+    "Fakaofo TK,Fiji FJ,Funafuti TV,Galapagos EC,Gambier PF,Guadalcanal SB,Guam GU,Honolulu US,Johnston UM," +
+    "Kanton KI,Kiritimati KI,Kosrae FM,Kwajalein MH,Majuro MH,Marquesas PF,Midway UM,Nauru NR,Niue NU," +
+    "Norfolk NF,Noumea NC,Pago_Pago AS,Palau PW,Pitcairn PN,Pohnpei FM,Ponape FM,Port_Moresby PG,Rarotonga CK," +
+    "Saipan MP,Samoa AS,Tahiti PF,Tarawa KI,Tongatapu TO,Truk FM,Wake UM,Wallis WF,Yap FM"
+  ];
+  var tzCountryMap = null;
+  function tzCountry(tz) {
+    if (typeof tz !== "string" || !tz) return null;
+    if (!tzCountryMap) {
+      tzCountryMap = {};
+      for (var i = 0; i < TZ_TABLE.length; i++) {
+        var block = TZ_TABLE[i], colon = block.indexOf(":"), region = block.slice(0, colon);
+        var pairs = block.slice(colon + 1).split(",");
+        for (var j = 0; j < pairs.length; j++) {
+          var sp = pairs[j].lastIndexOf(" ");
+          tzCountryMap[region + "/" + pairs[j].slice(0, sp)] = pairs[j].slice(sp + 1);
+        }
+      }
+    }
+    return Object.prototype.hasOwnProperty.call(tzCountryMap, tz) ? tzCountryMap[tz] : null;
+  }
 
   function timeZone() {
     try { return Intl.DateTimeFormat().resolvedOptions().timeZone || null; } catch (e) { return null; }
@@ -365,8 +452,14 @@
   // en tache de fond. La page_view attend au plus GEO_WAIT_MS, puis part
   // sans ville ; un depart de la page l'envoie immediatement. Tout echec est
   // silencieux : la page et le suivi continuent normalement.
+  // 19/09/2026 : attente portee de 1,2 s a 4 s. Mesure en base : sur 87
+  // visites, 18 premieres pages (surtout sur mobile, visiteurs restes 10 s a
+  // plus d'une minute) partaient avant la reponse ; le pays n'arrivait
+  // qu'avec la page suivante, et le tableau de bord (qui lit la PREMIERE page
+  // vue) affichait « pays inconnu ». Reponse encore plus tardive : le pays
+  // part avec le page_leave de cette page (une seule fois).
   var GEO_KEY = "iashark_geo_v1";
-  var GEO_WAIT_MS = 1200;
+  var GEO_WAIT_MS = 4000;
 
   function cleanGeo(o) {
     if (!o || typeof o !== "object") return null;
@@ -413,13 +506,16 @@
 
   var pageViewMeta = null;
   var pageViewSent = false;
+  var geoValue = null;
+  var pageViewHadCountry = false;
+  var lateGeo = null;
 
   function sendPageView(geo) {
     if (pageViewSent || !pageViewMeta) return;
     pageViewSent = true;
     try {
       if (geo) {
-        if (geo.country) pageViewMeta.geo_country = geo.country;
+        if (geo.country) { pageViewMeta.geo_country = geo.country; pageViewHadCountry = true; }
         if (geo.region) pageViewMeta.geo_region = geo.region;
         if (geo.city) pageViewMeta.geo_city = geo.city;
       }
@@ -459,7 +555,7 @@
       screen_w: screenW,
       lang: clip(nav.language, 16),
       tz: clip(tz, 48),
-      country_guess: (tz && TZ_COUNTRY[tz]) || null,
+      country_guess: tzCountry(tz),
       match_id: matchIdFromPath(loc.pathname, params),
     };
 
@@ -467,11 +563,17 @@
     // inscrit dont le jeton a expire, son renouvellement par le client.
     var cachedGeo = readGeoCache();
     var geoReady = cachedGeo !== undefined;
-    var geoValue = geoReady ? cachedGeo : null;
+    geoValue = geoReady ? cachedGeo : null;
     var idReady = sessionState() !== "stale";
     var sendWhenReady = function () { if (geoReady && idReady) sendPageView(geoValue); };
     if (!geoReady || !idReady) setTimeout(function () { sendPageView(geoValue); }, GEO_WAIT_MS);
-    if (!geoReady) fetchGeo(function (g) { geoReady = true; geoValue = g; sendWhenReady(); });
+    if (!geoReady) fetchGeo(function (g) {
+      geoReady = true;
+      geoValue = g;
+      // page_view deja partie sans pays : il suivra avec le page_leave.
+      if (pageViewSent && !pageViewHadCountry && g && g.country) lateGeo = g;
+      sendWhenReady();
+    });
     if (!idReady) refreshIdentity(function () { idReady = true; sendWhenReady(); });
     sendWhenReady();
   } catch (e) {
@@ -506,19 +608,27 @@
     window.addEventListener("load", function () { setTimeout(measureScroll, 1500); });
 
     var flushLeave = function () {
-      // Depart avant la reponse de /api/geo : la page_view part d'abord.
-      sendPageView(null);
+      // Depart avant la reponse de /api/geo : la page_view part d'abord (avec
+      // la localisation si elle est deja connue).
+      sendPageView(geoValue);
       if (visibleSince !== null) { engagedMs += Date.now() - visibleSince; visibleSince = null; }
       // pagehide suit souvent visibilitychange : pas de doublon si rien n'a change.
       if (engagedMs === lastSentMs || leaveCount >= 20) return;
       leaveCount++;
       lastSentMs = engagedMs;
       measureScroll();
-      window.iasharkTrack("page_leave", {
+      var leave = {
         pv: PAGE_VIEW_ID,
         sec: Math.min(14400, Math.round(engagedMs / 1000)),
         scroll: maxScroll,
-      });
+      };
+      if (lateGeo) {
+        leave.geo_country = lateGeo.country;
+        if (lateGeo.region) leave.geo_region = lateGeo.region;
+        if (lateGeo.city) leave.geo_city = lateGeo.city;
+        lateGeo = null;
+      }
+      window.iasharkTrack("page_leave", leave);
     };
 
     document.addEventListener("visibilitychange", function () {
@@ -548,7 +658,11 @@
       // d'analyse (mur Pro, 19/09/2026), de l'avis, du rappel apres les stats,
       // de l'analyse fermee, des reponses FAQ fermees et de la barre mobile
       // (tableau de bord : admin_unlock_clicks, 0025 puis 0029).
-      match_gate_unlock: true, match_avis_unlock: true, match_recall_unlock: true, match_analysis_unlock: true, match_faq_unlock: true, match_bar_unlock: true };
+      match_gate_unlock: true, match_avis_unlock: true, match_recall_unlock: true, match_analysis_unlock: true, match_faq_unlock: true, match_bar_unlock: true,
+      // Buteurs du jour de l'accueil (home-scorers.js) : bouton « Debloquer »
+      // du panneau, ligne floutee, carte d'un buteur (avant le 19/09/2026 :
+      // kind cta, label = meme valeur).
+      home_scorers_unlock: true, home_scorers_locked_row: true, home_scorers_card: true };
     var classify = function (target) {
       if (!target || typeof target.closest !== "function") return null;
       var tracked = target.closest("[data-track]");
@@ -579,8 +693,15 @@
       if (button) {
         var id = button.id || "";
         var cls = typeof button.className === "string" ? button.className : "";
-        if (/^subscribe|checkout/i.test(id) || /\b(pricing-cta|plan-btn)\b/.test(cls)) {
-          return { kind: "checkout", label: labelOf(button), target: clip(id, 40) };
+        if (/^subscribe|checkout|^souscrire$/i.test(id) || /\b(pricing-cta|plan-btn)\b/.test(cls)) {
+          // ready : bouton actif (case des conditions cochee, page chargee) ;
+          // signed_in : une session est ouverte dans ce navigateur (sinon le
+          // clic mene a l'inscription, pas au paiement). Jamais laquelle.
+          return {
+            kind: "checkout", label: labelOf(button), target: clip(id, 40),
+            ready: !(button.disabled === true || button.getAttribute("aria-disabled") === "true"),
+            signed_in: !!sessionUser(readStoredSession()),
+          };
         }
         return null;
       }
@@ -617,5 +738,87 @@
         window.iasharkTrack("click", info);
       } catch (e) {}
     }, true);
+
+    // Case des conditions (CGV) cochee (lib/checkout-consent.js :
+    // .iash-consent input[data-consent]) : une fois par page, jamais decochee.
+    var consentSent = false;
+    document.addEventListener("change", function (event) {
+      try {
+        var el = event.target;
+        if (consentSent || !el || el.checked !== true || typeof el.closest !== "function") return;
+        if (!el.getAttribute("data-consent") || !el.closest(".iash-consent")) return;
+        consentSent = true;
+        window.iasharkTrack("click", { kind: "checkout_consent", label: clip(el.getAttribute("data-consent"), 20), pv: PAGE_VIEW_ID });
+      } catch (e) {}
+    }, true);
+  } catch (e) {}
+
+  // ---------- gate_view : panneau « Debloquer » reellement vu ----------
+  // Impression seulement (aucun clic, aucune donnee personnelle, jamais liee
+  // a un compte) : le panneau (.gate de match-page.js, .hs-gate-card de
+  // home-scorers.js) qui porte un bouton « Debloquer » suivi est visible au
+  // moins a moitie (ou couvre la moitie de l'ecran) pendant 1 s. Une fois
+  // par panneau et par page vue. Sans IntersectionObserver : rien.
+  try {
+    var GATE_OF_KIND = { match_gate_unlock: "match_pro", match_avis_unlock: "match_account", home_scorers_unlock: "home_scorers" };
+    var GATE_DWELL_MS = 1000;
+    var gatesSent = {};
+    var gatesWatched = [];
+    var sendGate = function (gate) {
+      if (gatesSent[gate]) return;
+      gatesSent[gate] = true;
+      var md = { gate: gate, pv: PAGE_VIEW_ID };
+      if (pageViewMeta && pageViewMeta.match_id && gate !== "home_scorers") md.match_id = pageViewMeta.match_id;
+      window.iasharkTrack("gate_view", md);
+    };
+    var watchedOf = function (el) {
+      for (var i = 0; i < gatesWatched.length; i++) if (gatesWatched[i].el === el) return gatesWatched[i];
+      return null;
+    };
+    var gateObserver = typeof window.IntersectionObserver === "function" ? new window.IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        var en = entries[i], w = watchedOf(en.target);
+        if (!w || gatesSent[w.gate]) continue;
+        var vh = window.innerHeight || 0;
+        var rectH = en.intersectionRect ? en.intersectionRect.height : 0;
+        w.shown = !!en.isIntersecting && (en.intersectionRatio >= 0.5 || (vh > 0 && rectH >= vh * 0.5));
+        if (w.shown && !w.timer) {
+          w.timer = setTimeout((function (x) { return function () { x.timer = null; if (x.shown) sendGate(x.gate); }; })(w), GATE_DWELL_MS);
+        } else if (!w.shown && w.timer) {
+          clearTimeout(w.timer);
+          w.timer = null;
+        }
+      }
+    }, { threshold: [0, 0.25, 0.5, 0.75, 1] }) : null;
+    var scanGates = function () {
+      if (!gateObserver || typeof document.querySelectorAll !== "function") return;
+      var nodes = document.querySelectorAll("[data-track-kind]");
+      for (var i = 0; i < nodes.length && gatesWatched.length < 20; i++) {
+        var gate = GATE_OF_KIND[nodes[i].getAttribute("data-track-kind")];
+        if (!gate || gatesSent[gate]) continue;
+        var box = (typeof nodes[i].closest === "function" && nodes[i].closest(".gate, .hs-gate-card")) || nodes[i];
+        if (watchedOf(box)) continue;
+        gatesWatched.push({ el: box, gate: gate, timer: null, shown: false });
+        gateObserver.observe(box);
+      }
+    };
+    if (gateObserver) {
+      // Panneaux dessines apres le chargement des donnees (match-page.js,
+      // home-scorers.js) : nouvelle recherche au plus toutes les 400 ms,
+      // pendant la premiere minute de la page.
+      var scanQueued = false;
+      var queueScan = function () {
+        if (scanQueued) return;
+        scanQueued = true;
+        setTimeout(function () { scanQueued = false; scanGates(); }, 400);
+      };
+      if (typeof window.MutationObserver === "function" && document.documentElement) {
+        var gateMutations = new window.MutationObserver(queueScan);
+        gateMutations.observe(document.documentElement, { childList: true, subtree: true });
+        setTimeout(function () { try { gateMutations.disconnect(); } catch (e) {} }, 60000);
+      }
+      queueScan();
+      window.addEventListener("load", queueScan);
+    }
   } catch (e) {}
 })();

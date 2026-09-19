@@ -11,7 +11,9 @@
  * 2) Application navigateur : garde admin, appels RPC Supabase (migration
  *    0019_admin_dashboard_v2.sql, appliquee ; villes et raisons de filtrage
  *    detaillees si 0022_admin_geo_city.sql est appliquee, sinon repli
- *    automatique : pays seulement), rendu, rafraichissement.
+ *    automatique : pays seulement ; « Ou les visiteurs decrochent » si
+ *    0031_admin_conversion_funnel.sql est appliquee, sinon message « a
+ *    appliquer »), rendu, rafraichissement.
  *
  * SECURITE : toute valeur issue de funnel_events (ecrite par la cle anon
  * publique, donc controlee par le visiteur) passe par esc() avant d'entrer
@@ -510,6 +512,7 @@
   // ---------- Humains, robots et tests ----------
   var REASONS = {
     bot: ["Robot ou navigateur automatique", "Programmes qui parcourent le site tout seuls (moteurs, outils de test)."],
+    headless: ["Robot déguisé en navigateur", "Navigateur réglé sur l'heure universelle (UTC) qui se présente comme un téléphone ou avec l'écran par défaut des robots : jamais un vrai visiteur."],
     emulated: ["Écran simulé", "Un ordinateur qui se fait passer pour un téléphone : c'est typique des tests."],
     internal: ["Ton appareil", "Tes propres visites, depuis un appareil exclu des chiffres."],
     qa: ["Test automatique", "Visites de contrôle du site (liens de test)."],
@@ -728,14 +731,17 @@
     signup_started: "A ouvert l'inscription", signup_completed: "Inscription terminée", login_completed: "Connexion",
     landing_view: "A vu l'offre Pro", paywall_view: "A vu un contenu réservé Pro", tool_page_view: "A vu les outils",
     checkout_started: "Paiement commencé", checkout_unavailable: "Paiement indisponible",
-    checkout_success_view: "Paiement réussi", checkout_cancel_view: "Paiement annulé", onboarding_dismissed: "A fermé l'accueil"
+    checkout_success_view: "Paiement réussi", checkout_cancel_view: "Paiement annulé", onboarding_dismissed: "A fermé l'accueil",
+    gate_view: "A vu le panneau « Débloquer »"
   };
   var MEMBER_CLICK_KINDS = {
     inscription: "inscription", connexion: "connexion", abonnement: "abonnement", pro: "offre Pro", compte: "compte", landing: "offre",
     match: "match", checkout: "bouton de paiement", lang_switch: "changement de langue", cta: "bouton",
     match_gate_unlock: "« Débloquer » (panneau d'analyse)",
     match_avis_unlock: "« Débloquer » (avis de l'IA)", match_recall_unlock: "« Débloquer » (rappel après les stats)",
-    match_analysis_unlock: "« Débloquer » (analyse fermée)", match_faq_unlock: "« Débloquer » (FAQ)", match_bar_unlock: "« Débloquer » (barre du bas)"
+    match_analysis_unlock: "« Débloquer » (analyse fermée)", match_faq_unlock: "« Débloquer » (FAQ)", match_bar_unlock: "« Débloquer » (barre du bas)",
+    home_scorers_unlock: "« Débloquer » (buteurs du jour)", home_scorers_locked_row: "un buteur flouté", home_scorers_card: "un buteur du jour",
+    checkout_consent: "la case des conditions de vente"
   };
   function dayTitle(ymd, now) {
     var today = parisToday(now ? new Date(now) : new Date());
@@ -786,7 +792,7 @@
       } else if (it.type === "click") {
         g.clicks += 1;
         e.kind = "click";
-        e.text = "Clic sur " + (MEMBER_CLICK_KINDS[it.kind] || "bouton") + (it.label && it.label !== it.kind ? " : « " + String(it.label).slice(0, 80) + " »" : "");
+        e.text = "Clic sur " + (MEMBER_CLICK_KINDS[it.kind] || "bouton") + (it.label && it.label !== it.kind && !/^(match|home|checkout)_[a-z_]+$/.test(String(it.label)) && it.kind !== "checkout_consent" ? " : « " + String(it.label).slice(0, 80) + " »" : "");
         if (it.kind === "match" && it.match_id) { var nm = matchName(it.match_id, names); if (nm) e.text += " → " + nm; }
       } else {
         e.kind = "event";
@@ -845,7 +851,103 @@
     };
   }
 
+  // ---------- Ou les visiteurs decrochent (admin_conversion_funnel, 0031) ----------
+  // Cles et ordre = etapes renvoyees par la fonction SQL. visitors = a fait
+  // cette etape ET toutes celles d'avant ; reached = a fait cette etape, par
+  // n'importe quel chemin (arrive directement sur l'abonnement...).
+  var DROP_FILE = "0031_admin_conversion_funnel.sql";
+  var DROP_STEPS = [
+    ["arrived", "Arrivée sur le site", "a ouvert au moins une page"],
+    ["match_page", "Page match ouverte", "a ouvert l'analyse d'un match"],
+    ["gate_view", "Panneau Pro vu", "a vu le panneau « Débloquer » (Pro ou compte gratuit)"],
+    ["unlock_click", "Clic « Débloquer »", "a cliqué sur « Débloquer » (page match ou buteurs du jour)"],
+    ["pricing_page", "Offre Pro vue", "a vu la page abonnement (ou l'offre de son compte)"],
+    ["consent", "Case CGV cochée", "a coché la case des conditions de vente"],
+    ["checkout", "Paiement lancé", "a ouvert le paiement sécurisé"],
+    ["subscribed", "Abonné", "paiement confirmé par Stripe"]
+  ];
+  var DROP_SOURCES = { google: "Google", direct: "Direct", social: "Réseaux sociaux", other: "Autre" };
+  var DROP_DEVICES = { mobile: "Mobile (téléphone, tablette)", desktop: "Ordinateur" };
+  function dropSteps(data) {
+    var byKey = {};
+    ((data && data.steps) || []).forEach(function (s) { if (s && s.key) byKey[s.key] = s; });
+    var first = null, prev = null;
+    return DROP_STEPS.map(function (d, i) {
+      var r = byKey[d[0]] || {};
+      var v = num(r.visitors), reached = num(r.reached);
+      if (i === 0) first = v;
+      var step = {
+        key: d[0], label: d[1], help: d[2], value: v, reached: reached,
+        other: v !== null && reached !== null && reached > v ? reached - v : 0,
+        pctOfFirst: v === null ? null : first ? (v / first) * 100 : 0,
+        pctOfPrev: i === 0 || v === null || !(prev > 0) ? null : (v / prev) * 100
+      };
+      prev = v;
+      return step;
+    });
+  }
+  // Plus gros decrochage (en nombre de visiteurs perdus), phrase simple.
+  function dropLeak(steps) {
+    var leak = biggestLeak(steps);
+    if (!leak) return null;
+    leak.sentence = "Le plus gros décrochage : entre « " + leak.from + " » et « " + leak.to + " », "
+      + fmtInt(leak.lost) + " visiteur" + (leak.lost > 1 ? "s" : "") + " sur " + fmtInt(leak.of) + " s'arrête" + (leak.lost > 1 ? "nt" : "") + " (" + fmtPct(leak.pct, 0) + ").";
+    return leak;
+  }
+  // Etapes mesurees depuis peu (gate_view et case CGV, 19/09/2026) : dit
+  // clairement quand le chiffre est deduit de l'etape suivante.
+  function dropNotes(data, range) {
+    var t = (data && data.tracking) || {};
+    var from = range && ymdOk(range.from) ? range.from : null;
+    var out = [];
+    [["gate_view_since", "Panneau Pro vu", "du clic « Débloquer »"], ["consent_since", "Case CGV cochée", "du paiement lancé"]].forEach(function (x) {
+      var since = t[x[0]] ? new Date(t[x[0]]) : null;
+      if (since && isNaN(since)) since = null;
+      if (!since) out.push("« " + x[1] + " » n'est pas encore mesuré : en attendant, cette étape est déduite " + x[2] + ".");
+      else if (from && parisToday(since) > from) out.push("« " + x[1] + " » est mesuré depuis le " + fmtYmd(parisToday(since)) + " ; avant, cette étape est déduite " + x[2] + ".");
+    });
+    return out;
+  }
+  function countryBasisText(b) {
+    if (!b) return "";
+    var geo = num(b.geo) || 0, tz = num(b.tz) || 0, lang = num(b.lang) || 0, unk = num(b.unknown) || 0;
+    if (!(geo + tz + lang + unk)) return "";
+    var parts = ["Pays connu par le réseau pour " + fmtInt(geo) + " visiteur" + (geo > 1 ? "s" : "")];
+    if (tz) parts.push("estimé par le fuseau horaire pour " + fmtInt(tz));
+    if (lang) parts.push("par la langue du navigateur pour " + fmtInt(lang));
+    return parts.join(", ") + (unk ? " ; inconnu pour " + fmtInt(unk) : "") + ".";
+  }
+  function excludedText(e) {
+    if (!e) return "";
+    var i = num(e.internal) || 0, p = num(e.already_pro) || 0;
+    var parts = [];
+    if (i) parts.push(fmtInt(i) + " visite" + (i > 1 ? "s" : "") + " de robots, de tests ou de ton appareil");
+    if (p) parts.push(fmtInt(p) + " visite" + (p > 1 ? "s" : "") + " d'abonnés déjà Pro");
+    return parts.length ? "Non comptées : " + parts.join(" et ") + "." : "";
+  }
+  function signupTimingText(t) {
+    var n = num(t && t.signups) || 0;
+    if (!n) return { value: "—", text: "Aucune inscription sur cette période avec ces filtres." };
+    var sec = num(t.median_sec), pages = num(t.median_pages);
+    return {
+      value: sec === null ? "—" : fmtDur(sec),
+      text: "Temps médian entre l'arrivée sur le site et l'inscription, sur " + fmtInt(n) + " inscription" + (n > 1 ? "s" : "") + "."
+        + (pages === null ? "" : " Pages vues avant de s'inscrire (médiane) : " + new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 }).format(pages) + ".")
+    };
+  }
+  function exitRows(data, names) {
+    var total = num(data && data.exit_total) || 0;
+    return ((data && data.exit_pages) || []).filter(function (r) { return r && num(r.visitors) > 0; }).map(function (r) {
+      var info = pageInfo(r.page, r.match_id, names);
+      var v = num(r.visitors);
+      return { page: r.page, matchId: info.matchId, name: info.name, title: info.title, site: info.site, visitors: v, pct: total ? (v / total) * 100 : 0 };
+    });
+  }
+
   return {
+    DROP_FILE: DROP_FILE, DROP_STEPS: DROP_STEPS, DROP_SOURCES: DROP_SOURCES, DROP_DEVICES: DROP_DEVICES,
+    dropSteps: dropSteps, dropLeak: dropLeak, dropNotes: dropNotes, countryBasisText: countryBasisText,
+    excludedText: excludedText, signupTimingText: signupTimingText, exitRows: exitRows,
     UNLOCK_PLACES: UNLOCK_PLACES, UNLOCK_FILE: UNLOCK_FILE, unlockRows: unlockRows,
     MEMBER_STATUS: MEMBER_STATUS, MEMBER_STATUS_ORDER: MEMBER_STATUS_ORDER, maskEmail: maskEmail, memberLastActivity: memberLastActivity,
     memberStatus: memberStatus, memberCounts: memberCounts, daysAgo: daysAgo, activityBar: activityBar, shortDay: shortDay,
@@ -890,7 +992,8 @@
     home: undefined, names: {}, loading: false, liveLoading: false, liveTimer: null, fullTimer: null,
     openHelp: {}, openVisit: null, visitLimit: 20, signupLimit: 15, lastLiveCount: null,
     members: null, retention: null, membersLoading: false, showEmails: false, openMember: null, journeys: {}, memberLimit: 25,
-    unlocks: null
+    unlocks: null,
+    drop: { country: "", device: "", source: "" }, dropRes: null, dropSeq: 0
   };
 
   function $(id) { return document.getElementById(id); }
@@ -1094,6 +1197,7 @@
     if (S.analytics) { renderPages(); renderMatches(); }
     if (S.sessions) renderVisits();
     if (S.live) renderLive();
+    if (S.dropRes && S.dropRes.data) renderDrop();
   }
 
   // ---------- Petits blocs HTML ----------
@@ -1464,12 +1568,16 @@
     signup_started: "A ouvert l'inscription", signup_completed: "Inscription terminée", login_completed: "Connexion",
     landing_view: "A vu l'offre Pro", paywall_view: "A vu un contenu réservé Pro", tool_page_view: "A vu les outils",
     checkout_started: "Paiement commencé", checkout_unavailable: "Paiement indisponible",
-    checkout_success_view: "Paiement réussi", checkout_cancel_view: "Paiement annulé", onboarding_dismissed: "A fermé l'accueil"
+    checkout_success_view: "Paiement réussi", checkout_cancel_view: "Paiement annulé", onboarding_dismissed: "A fermé l'accueil",
+    gate_view: "A vu le panneau « Débloquer »"
   };
   // Boutons « Debloquer » de la page match. admin_recent_sessions (0022) coupe
   // kind a 20 caracteres : « match_analysis_unloc » est la meme valeur.
   var CLICK_KINDS = { inscription: "inscription", connexion: "connexion", abonnement: "abonnement", pro: "offre Pro", compte: "compte", landing: "offre", match: "match", checkout: "paiement", lang_switch: "changement de langue", cta: "bouton",
-    match_gate_unlock: "Débloquer (panneau d'analyse)", match_avis_unlock: "Débloquer (avis)", match_recall_unlock: "Débloquer (rappel)", match_analysis_unlock: "Débloquer (analyse)", match_analysis_unloc: "Débloquer (analyse)", match_faq_unlock: "Débloquer (FAQ)", match_bar_unlock: "Débloquer (barre du bas)" };
+    match_gate_unlock: "Débloquer (panneau d'analyse)", match_avis_unlock: "Débloquer (avis)", match_recall_unlock: "Débloquer (rappel)", match_analysis_unlock: "Débloquer (analyse)", match_analysis_unloc: "Débloquer (analyse)", match_faq_unlock: "Débloquer (FAQ)", match_bar_unlock: "Débloquer (barre du bas)",
+    // 0031 (19/09/2026) : buteurs du jour, case des conditions de vente (kind coupe a 20 caracteres).
+    home_scorers_unlock: "Débloquer (buteurs du jour)", home_scorers_locked_row: "buteur flouté", home_scorers_locked_: "buteur flouté", home_scorers_card: "buteur du jour",
+    checkout_consent: "case des conditions cochée" };
   function visitKey(s, i) { return String(s.session_id || s.first_at + "|" + i); }
   function visitDetail(s) {
     var items = [];
@@ -1481,7 +1589,7 @@
     (s.events || []).forEach(function (e) {
       var label, cls = "ev";
       if (e.type === "click") {
-        label = "Clic " + (CLICK_KINDS[e.kind] || "") + (e.label && !/^match_\w+_unlock$/.test(String(e.label)) ? " : « " + String(e.label) + " »" : "");
+        label = "Clic " + (CLICK_KINDS[e.kind] || "") + (e.label && !/^(match|home|checkout)_[a-z_]+$/.test(String(e.label)) && e.kind !== "checkout_consent" ? " : « " + String(e.label) + " »" : "");
         if (e.kind === "match" && e.match_id) { var nm = H.matchName(e.match_id, S.names); if (nm) label += " → " + nm; }
       } else {
         label = EVENT_LABELS[e.type] || String(e.type || "Événement");
@@ -1802,6 +1910,105 @@
       + (u.uncounted.indexOf("match_gate_unlock") !== -1 ? '<p class="note">Le panneau d\'analyse (bouton « Débloquer avec Pro » ajouté le 19/09/2026) sera compté ici quand ton développeur aura appliqué la mise à jour ' + esc(H.UNLOCK_FILE) + ".</p>" : "");
   }
 
+  // ---------- Ou les visiteurs decrochent (admin_conversion_funnel, 0031) ----------
+  // Filtres propres a la section (pays, appareil, provenance) ; periode du
+  // haut de page. Sans la migration : « Migration 0031 a appliquer ».
+  function loadDrop() {
+    if (!sb || !S.range) return Promise.resolve();
+    var r = S.range, seq = ++S.dropSeq;
+    return rpc("admin_conversion_funnel", {
+      p_from: r.from, p_to: r.to, p_include_internal: false, p_since: H.LAUNCH_AT,
+      p_country: S.drop.country || null, p_device: S.drop.device || null, p_source: S.drop.source || null
+    }).then(function (x) {
+      if (seq !== S.dropSeq) return;
+      if (x.kind === "denied") { showState("denied"); return; }
+      S.dropRes = x;
+      renderDrop();
+    });
+  }
+  function dropCountryOptions(list) {
+    var cur = S.drop.country;
+    var rows = (Array.isArray(list) ? list : []).filter(function (c) { return c && Number(c.visitors) > 0; });
+    var seen = {};
+    var opts = ['<option value="">Tous les pays</option>'];
+    rows.forEach(function (c) {
+      var code = H.isCountry(c.country) ? c.country : "unknown";
+      if (seen[code]) return;
+      seen[code] = 1;
+      var name = code === "unknown" ? "Pays inconnu" : H.flagEmoji(code) + " " + H.countryName(code);
+      opts.push('<option value="' + esc(code) + '"' + (code === cur ? " selected" : "") + ">" + esc(name + " (" + H.fmtInt(c.visitors) + ")") + "</option>");
+    });
+    if (cur && !seen[cur]) opts.push('<option value="' + esc(cur) + '" selected>' + esc(cur === "unknown" ? "Pays inconnu" : H.countryName(cur)) + "</option>");
+    return opts.join("");
+  }
+  function dropNotesHtml(notes) {
+    return notes.length ? '<ul class="drop-notes">' + notes.map(function (n) { return "<li>" + esc(n) + "</li>"; }).join("") + "</ul>" : "";
+  }
+  function renderDrop() {
+    var el = $("dropFunnel"), x = S.dropRes;
+    if (!el || !x) return;
+    if (x.kind === "missing") {
+      $("dropFilters").hidden = true;
+      $("dropExtra").hidden = true;
+      el.innerHTML = '<p class="soft-msg"><b>Migration 0031 à appliquer dans Supabase</b>Cette partie s\'affichera quand ton développeur aura appliqué la mise à jour de la base ' + esc(H.DROP_FILE)
+        + " (à coller dans le SQL Editor de Supabase). Le reste du tableau de bord fonctionne normalement.</p>";
+      return;
+    }
+    $("dropFilters").hidden = false;
+    if (!x.data) { $("dropExtra").hidden = true; blockError(el, x, "Où les visiteurs décrochent"); return; }
+    var d = x.data;
+    $("dropCountry").innerHTML = dropCountryOptions(d.countries);
+    $("dropCountry").value = S.drop.country;
+    $("dropDevice").value = S.drop.device;
+    $("dropSource").value = S.drop.source;
+    var steps = H.dropSteps(d);
+    var filtered = !!(S.drop.country || S.drop.device || S.drop.source);
+    var notes = [H.excludedText(d.excluded), H.countryBasisText(d.country_basis)].concat(H.dropNotes(d, S.range)).filter(Boolean);
+    if (!steps[0].value) {
+      $("dropExtra").hidden = true;
+      el.innerHTML = emptyHtml(filtered ? "Aucun visiteur avec ces filtres" : "Aucun visiteur sur cette période", filtered ? "Change ou retire un filtre pour voir le parcours." : "Le parcours s'affichera dès les premières visites.")
+        + dropNotesHtml(notes);
+      return;
+    }
+    var leak = H.dropLeak(steps);
+    var html = (filtered ? '<p class="drop-filter-note">' + esc("Filtre : " + [
+      S.drop.country ? (S.drop.country === "unknown" ? "pays inconnu" : H.countryName(S.drop.country)) : null,
+      S.drop.device ? H.DROP_DEVICES[S.drop.device] : null,
+      S.drop.source ? "provenance " + H.DROP_SOURCES[S.drop.source] : null
+    ].filter(Boolean).join(" · ")) + "</p>" : "") + '<ol class="steps drop-steps">';
+    steps.forEach(function (s, i) {
+      if (i > 0) {
+        var isLeak = leak && leak.index === i;
+        var gap = s.pctOfPrev === null ? "" : H.fmtPct(Math.min(s.pctOfPrev, 100), 0) + " de l'étape précédente";
+        if (gap || isLeak) html += '<li class="step-gap' + (isLeak ? " leak" : "") + '">' + (gap ? "↓ " + esc(gap) : "") + (isLeak ? " · plus gros décrochage" : "") + "</li>";
+      }
+      var w = s.pctOfFirst === null ? 0 : Math.max(0, Math.min(100, s.pctOfFirst));
+      var pct = i === 0 ? "100 % des arrivées" : H.fmtPct(s.pctOfFirst, s.pctOfFirst < 10 ? 1 : 0) + " des arrivées";
+      html += '<li class="step' + (leak && leak.index === i ? " step-leak" : "") + '"><span class="step-name">' + esc((i + 1) + ". " + s.label) + "<small>" + esc(s.help) + "</small>"
+        + (s.other ? '<small class="step-alt">' + esc("+ " + H.fmtInt(s.other) + " par un autre chemin (" + H.fmtInt(s.reached) + " au total)") + "</small>" : "")
+        + '</span><span class="step-num"><b class="tnum">' + esc(H.fmtInt(s.value)) + '</b><span class="tnum">' + esc(pct) + "</span></span>"
+        + '<span class="step-bar" aria-hidden="true"><i style="width:' + w.toFixed(2) + '%"></i></span></li>';
+    });
+    html += "</ol>";
+    html += leak ? '<p class="leak-box">' + esc(leak.sentence) + "</p>" : '<p class="note">Personne ne décroche entre les étapes sur cette période.</p>';
+    html += dropNotesHtml(notes);
+    el.innerHTML = html;
+
+    $("dropExtra").hidden = false;
+    var exits = H.exitRows(d, S.names);
+    $("dropExits").innerHTML = exits.length ? barsHtml(exits.map(function (r) {
+      var href = H.safeHref(r.page, r.matchId);
+      var tag = r.site && H.SITES[r.site] ? H.SITES[r.site].short : "";
+      var name = href ? '<a href="' + esc(href) + '" target="_blank" rel="noopener noreferrer">' + esc(r.name) + "</a>" : esc(r.name);
+      return { nameHtml: name + (tag ? "<small>" + esc(tag) + "</small>" : ""), title: r.title, value: r.visitors, extra: H.fmtPct(r.pct, 0), cls: "warm" };
+    })) + '<p class="note">' + esc("Sur " + H.fmtInt(d.exit_total) + " visiteur" + (Number(d.exit_total) > 1 ? "s" : "") + " sans compte ni inscription.") + "</p>"
+      : emptyHtml("Aucune page de sortie", "Tous les visiteurs de cette sélection se sont inscrits ou avaient déjà un compte.");
+    var t = H.signupTimingText(d.signup_timing);
+    $("dropSignup").innerHTML = '<div class="bots-big"><b class="tnum">' + esc(t.value) + "</b><span>médiane</span></div>" + '<p class="bots-text">' + esc(t.text) + "</p>";
+    var ids = exits.map(function (r) { return r.matchId; }).filter(Boolean);
+    if (ids.some(function (id) { return !S.names[id]; })) loadMissingNames(ids).then(function (changed) { if (changed) renderDrop(); });
+  }
+
   // ---------- Bandeaux ----------
   function renderNotices() {
     var bits = [];
@@ -1916,6 +2123,7 @@
       refreshNames();
       loadMembers();
       loadUnlocks();
+      loadDrop();
       if (!opts.silent) return loadLive().then(startTimers);
     }).catch(function (e) {
       setBusy(false);
@@ -2024,6 +2232,9 @@
       $(x[0]).addEventListener("change", function (ev) { S[x[1]] = ev.target.value; loadAll({ silent: true }); loadLive(); });
     });
     $("noticeFiltersReset").addEventListener("click", function () { resetFilters(); loadLive(); });
+    [["dropCountry", "country"], ["dropDevice", "device"], ["dropSource", "source"]].forEach(function (x) {
+      $(x[0]).addEventListener("change", function (ev) { S.drop[x[1]] = ev.target.value; loadDrop(); });
+    });
     $("deviceBtn").addEventListener("click", toggleDevice);
     $("noticeDeviceClose").addEventListener("click", function () {
       $("noticeDevice").hidden = true;

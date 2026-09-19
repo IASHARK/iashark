@@ -136,6 +136,49 @@
       </section>
     </div>
 
+    <!-- 4 bis. Ou les visiteurs decrochent (migration 0031_admin_conversion_funnel.sql ; sans elle : « a appliquer ») -->
+    <section class="card section" id="decrochage" aria-labelledby="dropTitle">
+      <div class="card-head">
+        <div><h2 class="card-title" id="dropTitle">Où les visiteurs décrochent</h2><p class="card-sub" id="dropSub">Étape par étape, jusqu'au paiement · période choisie en haut</p></div>
+        <button type="button" class="info" aria-expanded="false" aria-controls="helpDrop" aria-label="Aide : où les visiteurs décrochent">i</button>
+      </div>
+      <p class="help" id="helpDrop" hidden>Un visiteur = un onglet ouvert sur le site pendant la période. Chaque étape ne compte que ceux qui ont aussi fait toutes les étapes d'avant : c'est le chemin « page match → panneau Pro → Débloquer → paiement ». « Par un autre chemin » = ceux qui ont fait l'étape sans passer par la précédente (par exemple arrivés directement sur la page abonnement). « Panneau Pro vu » = le panneau « Débloquer » est resté affiché au moins une seconde. « Paiement lancé » = clic sur le bouton de paiement actif, en étant connecté. « Abonné » = paiement confirmé par Stripe. Robots, tests, ton appareil et les abonnés déjà Pro ne sont pas comptés. Ces filtres ne s'appliquent qu'à cette partie.</p>
+      <div class="filters drop-filters" id="dropFilters">
+        <label class="field"><span>Pays</span>
+          <select id="dropCountry"><option value="">Tous les pays</option></select>
+        </label>
+        <label class="field"><span>Appareil</span>
+          <select id="dropDevice">
+            <option value="">Tous les appareils</option>
+            <option value="mobile">Mobile (téléphone, tablette)</option>
+            <option value="desktop">Ordinateur</option>
+          </select>
+        </label>
+        <label class="field"><span>Provenance</span>
+          <select id="dropSource">
+            <option value="">Toutes les provenances</option>
+            <option value="google">Google</option>
+            <option value="direct">Direct</option>
+            <option value="social">Réseaux sociaux</option>
+            <option value="other">Autre</option>
+          </select>
+        </label>
+      </div>
+      <div id="dropFunnel"><div class="skel skel-block"></div></div>
+      <div class="grid g2 drop-extra" id="dropExtra" hidden>
+        <div>
+          <h3 class="micro">Pages de sortie</h3>
+          <p class="drop-cap">Dernière page vue par les visiteurs qui ne se sont pas inscrits</p>
+          <div id="dropExits"></div>
+        </div>
+        <div>
+          <h3 class="micro">Temps avant inscription</h3>
+          <p class="drop-cap">Pour ceux qui ont créé un compte pendant leur visite</p>
+          <div id="dropSignup"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- 5. Sources + pays / villes -->
     <div class="grid g2 section">
       <section class="card" aria-labelledby="sourcesTitle">

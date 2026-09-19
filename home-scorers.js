@@ -5,14 +5,18 @@
    par le pipeline (lib/buteurs-du-jour.js#buildDailyFile).
 
    REGLES :
-   - Le fichier public ne contient AUCUNE probabilite : identite des 3 joueurs
-     et de leur match (lib/buteurs-du-jour.js#PUBLIC_FIELDS). Visiteur et
-     compte gratuit voient un verrou « Probabilité réservée aux abonnés Pro ».
+   - Tunnel de vente (decision du proprietaire, 19/09/2026) : un non-abonne,
+     meme inscrit, ne voit NI les joueurs NI les chiffres. Le fichier public
+     ne porte que match, competition, heure et rang du joueur dans son match
+     (lib/buteurs-du-jour.js#PUBLIC_FIELDS) : aucun nom a flouter, rien a
+     lire dans le code de la page. Visiteur et compte gratuit voient trois
+     lignes floutees (fausses, sans donnee) et un panneau « Débloquer ».
    - Abonne Pro : les donnees premium des 3 matchs sont demandees a la
-     fonction match-data (meme appel que la page match) ; les chiffres ne sont
-     affiches que si le SERVEUR confirme le plan (reponse isPro === true), et
-     sont recalcules par lib/buteurs-du-jour.js#scorerNumbersFor, le meme
-     calcul que la carte « Marchés joueurs » de la page match. Echec : verrou.
+     fonction match-data (meme appel que la page match) ; joueurs et chiffres
+     ne sont affiches que si le SERVEUR confirme le plan (reponse isPro ===
+     true), retrouves par lib/buteurs-du-jour.js#resolvePick, le meme calcul
+     que la carte « Marchés joueurs » de la page match. Echec : renvoi vers
+     la page du match, jamais un joueur devine.
    - Jamais « 0 % » : une probabilite absente ou nulle n'est pas affichee.
    - Jour : le jour de Paris (cle du fichier), puis le suivant present dans le
      fichier ; bascule seul a minuit. Rien a montrer : section masquee.
@@ -73,37 +77,39 @@ function defaultHelpers(){
     matchHref:function(p){return lien('match.html?id='+encodeURIComponent(p.match_id));},
     proHref:function(){return lien('abonnement.html');},
     teamLogo:function(p){var id=num(p&&p.team_id);return id!==null?'https://media.api-sports.io/football/teams/'+id+'.png':'';},
-    // Chiffres d'un joueur sur les donnees premium de son match.
-    numbersFor:function(raw,playerId){var B=root.IasharkButeursDuJour;return B&&B.scorerNumbersFor?B.scorerNumbersFor(raw,playerId):null;}
+    // Joueur (identite + chiffres) designe par {match_id, match_rank}, sur les
+    // donnees premium de son match.
+    resolve:function(raw,rank){var B=root.IasharkButeursDuJour;return B&&B.resolvePick?B.resolvePick(raw,rank):null;}
   };
 }
 
 /* ---------- Donnees ---------- */
-// Entree publique exploitable : joueur, nom, match. Tout autre champ est ignore.
-function cleanPlayer(p){
+// Entree publique exploitable : match + rang du joueur dans ce match. Aucun
+// nom, aucune photo, aucune equipe (voir l'en-tete). Tout autre champ est ignore.
+function cleanEntry(p){
   if(!p||typeof p!=='object')return null;
-  var id=num(p.player_id),name=text(p.name),mid=p.match_id!=null&&String(p.match_id).trim()?String(p.match_id).trim():null;
-  if(id===null||!name||!mid||!/^\d{1,12}$/.test(mid))return null;
-  return {player_id:id,name:name,photo:text(p.photo),team:text(p.team)||'',team_id:num(p.team_id),opponent:text(p.opponent)||'',
-    match_id:mid,league:text(p.league),league_key:text(p.league_key),league_id:num(p.league_id),kickoff:text(p.kickoff),is_home:p.is_home===true};
+  var mid=p.match_id!=null&&String(p.match_id).trim()?String(p.match_id).trim():null;
+  var rank=num(p.match_rank);
+  if(!mid||!/^\d{1,12}$/.test(mid)||rank===null||rank<0||Math.floor(rank)!==rank)return null;
+  return {match_id:mid,match_rank:rank,league:text(p.league),league_key:text(p.league_key),league_id:num(p.league_id),kickoff:text(p.kickoff)};
 }
-// Jour a montrer : aujourd'hui (Paris) s'il a des joueurs, sinon le premier
+// Jour a montrer : aujourd'hui (Paris) s'il a des entrees, sinon le premier
 // jour suivant present dans le fichier. null : rien a montrer.
 function pickDay(file,today){
   var days=file&&file.days&&typeof file.days==='object'?file.days:null;
   if(!days)return null;
   var keys=Object.keys(days).filter(function(k){return /^\d{4}-\d{2}-\d{2}$/.test(k)&&k>=String(today||'');}).sort();
   for(var i=0;i<keys.length;i++){
-    var players=(Array.isArray(days[keys[i]])?days[keys[i]]:[]).map(cleanPlayer).filter(Boolean).slice(0,LIMIT);
-    if(players.length)return {day:keys[i],players:players};
+    var entries=(Array.isArray(days[keys[i]])?days[keys[i]]:[]).map(cleanEntry).filter(Boolean).slice(0,LIMIT);
+    if(entries.length)return {day:keys[i],players:entries};
   }
   return null;
 }
-function numbersKey(day,p){return day+'|'+p.match_id+'|'+p.player_id;}
-// Chiffres affichables : probabilite > 0 obligatoire (jamais « 0 % »).
+function numbersKey(day,e){return day+'|'+e.match_id+'|'+e.match_rank;}
+// Joueur Pro affichable : nom et probabilite > 0 obligatoires (jamais « 0 % »).
 function usableNumbers(n){
   var p=n?num(n.displayProbability):null;
-  return p!==null&&p>0?n:null;
+  return p!==null&&p>0&&text(n.name)?n:null;
 }
 
 /* ---------- Rendu ---------- */
@@ -207,12 +213,63 @@ function renderCard(p,index,zone,numbers,H,clock){
     +'</a></li>';
 }
 
+var GHOST='<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false"><circle cx="20" cy="15" r="7" fill="currentColor"/><path d="M6 36c1.8-7.4 7.2-11 14-11s12.2 3.6 14 11" fill="currentColor"/></svg>';
+// Ligne sans joueur : 'pending' (droits ou donnees en cours), 'locked'
+// (non-abonne : faux contenu floute, AUCUNE donnee reelle du joueur, clic ->
+// offre Pro), 'unavailable' (Pro, joueur introuvable : renvoi vers le match).
+function renderTeaser(e,index,state,H,clock){
+  var league=H.leagueName(e)||'';
+  var when=kickoffLabel(e,H,clock);
+  var iso=H.kickoffIso(e);
+  var timeHtml=when?'<time'+(iso?' datetime="'+esc(iso)+'"':'')+'>'+esc(when)+'</time>':'';
+  var rank='<span class="hs-rank" aria-hidden="true">'+pad(index+1)+'</span>';
+  if(state==='unavailable'){
+    return '<li class="hs-card"><a class="hs-link" href="'+esc(H.matchHref(e))+'" data-track="home_scorers_card" data-track-kind="home_scorers_card">'
+      +rank+'<span class="hs-photo-wrap"><span class="hs-photo hs-ghost" aria-hidden="true">'+GHOST+'</span></span>'
+      +'<span class="hs-id"><span class="hs-name">'+esc(t('home_scorers.pro_unavailable','Probabilité à voir sur la page du match'))+'</span>'
+      +'<span class="hs-meta">'+timeHtml+'</span>'+(league?'<span class="hs-club"><span class="hs-league">'+esc(league)+'</span></span>':'')+'</span>'
+      +'<span class="hs-zone is-locked"><span class="hs-lock is-pro">'+esc(t('home_scorers.view_match','Voir le match'))+' →</span></span>'
+      +'</a></li>';
+  }
+  var locked=state==='locked';
+  var inner=rank
+    +'<span class="hs-photo-wrap"><span class="hs-photo hs-ghost" aria-hidden="true">'+GHOST+'</span></span>'
+    +'<span class="hs-id">'
+      +(locked
+        ?'<span class="hs-name hs-blurred" aria-hidden="true">'+(index===0?'Xxxxxxx':index===1?'Xx. Xxxxxx':'Xxxxxx Xx')+'</span>'
+          +'<span class="sr-only">'+esc(t('home_scorers.hidden_player','Joueur réservé aux abonnés Pro'))+'</span>'
+          +'<span class="hs-meta"><span class="hs-vs hs-blurred" aria-hidden="true">xxxxxx Xxxxxxx</span>'+(timeHtml?'<span class="hs-dot" aria-hidden="true">·</span>'+timeHtml:'')+'</span>'
+        :'<span class="hs-sk hs-sk-n" aria-hidden="true"></span>'
+          +'<span class="hs-meta">'+timeHtml+'</span>')
+      +(league?'<span class="hs-club"><span class="hs-league">'+esc(league)+'</span></span>':'')
+    +'</span>'
+    +(locked
+      ?'<span class="hs-zone is-locked"><span class="hs-prob-fake hs-blurred" aria-hidden="true">??,? %</span><span class="hs-pro-tag" aria-hidden="true">'+LOCK+'Pro</span>'
+        +'<span class="hs-gauge is-empty" aria-hidden="true"></span>'
+        +'<span class="hs-lock sr-only">'+esc(t('home_scorers.locked','Probabilité réservée aux abonnés Pro'))+'</span></span>'
+      :renderZone('pending',null));
+  if(locked){
+    return '<li class="hs-card is-locked"><a class="hs-link" href="'+esc(H.proHref())+'" data-vente data-track="home_scorers_locked_row" data-track-kind="home_scorers_locked_row">'+inner+'</a></li>';
+  }
+  return '<li class="hs-card" aria-hidden="true"><div class="hs-link">'+inner+'</div></li>';
+}
+
+// Panneau « Débloquer » pose sur les lignes floutees (non-abonne).
+function renderGate(){
+  return '<div class="hs-gate-card">'
+    +'<span class="hs-gate-lock" aria-hidden="true">'+LOCK+'</span>'
+    +'<div class="hs-gate-copy"><p class="hs-gate-title">'+esc(t('home_scorers.gate_title','Débloque les 3 buteurs du jour'))+'</p>'
+    +'<p class="hs-gate-text">'+esc(t('home_scorers.gate_text','Noms, probabilité de marquer et temps de jeu attendu : réservés aux abonnés Pro.'))+'</p></div>'
+    +'<div class="hs-gate-action"><a class="hs-gate-cta" href="'+esc(lien('abonnement.html'))+'" data-vente data-track="home_scorers_unlock" data-track-kind="home_scorers_unlock">'
+      +esc(t('home_scorers.gate_cta','Débloquer avec Pro'))+' <span aria-hidden="true">→</span></a>'
+    +'<p class="hs-gate-small">'+esc(t('home_scorers.gate_small','Résiliable à tout moment depuis ton compte.'))+'</p></div>'
+    +'</div>';
+}
+
 function renderFoot(viewer){
   var pro=!!(viewer&&viewer.isPro);
   var note='<p class="hs-note">'+esc(pro?t('home_scorers.note_pro','Estimation avant les compositions officielles, jamais une garantie. Même calcul que la carte « Marchés joueurs » de chaque match.'):t('home_scorers.note','Estimation avant les compositions officielles, jamais une garantie.'))+'</p>';
-  if(pro)return note;
-  return note+'<a class="hs-cta" href="'+esc(lien('abonnement.html'))+'" data-vente data-track="home_scorers_upsell" data-track-kind="home_scorers_upsell">'
-    +LOCK+'<span>'+esc(t('home_scorers.locked','Probabilité réservée aux abonnés Pro'))+'</span><b>'+esc(t('home_scorers.cta','Voir l’offre Pro'))+' <span aria-hidden="true">→</span></b></a>';
+  return note;
 }
 
 function subtitleFor(day,today,H){
@@ -221,30 +278,23 @@ function subtitleFor(day,today,H){
   return tf('home_scorers.subtitle_date','Les 3 joueurs les plus susceptibles de marquer le {date}, avant les compositions.',{date:H.formatDay(day)});
 }
 
-// Etat de la zone chiffree d'une carte.
-function zoneState(viewer,premium,numbers){
-  if(!viewer)return 'pending';
-  if(!viewer.isPro)return 'locked';
-  if(premium==='loading')return 'pending';
-  return usableNumbers(numbers)?'numbers':'unavailable';
-}
-
-// Ordre d'affichage : celui du fichier ; pour un Pro dont les 3 chiffres sont
-// connus, du plus probable au moins probable (meme donnees que la page match).
-function orderPlayers(players,viewer,numbersOf){
-  if(!viewer||!viewer.isPro)return players.slice();
-  var all=players.every(function(p){return usableNumbers(numbersOf(p));});
-  if(!all)return players.slice();
-  return players.map(function(p,i){return {p:p,i:i};}).sort(function(a,b){
-    var d=Number(numbersOf(b.p).displayProbability)-Number(numbersOf(a.p).displayProbability);
+// Ordre d'affichage : celui du fichier ; pour un Pro dont les 3 joueurs sont
+// retrouves, du plus probable au moins probable (memes chiffres que la page match).
+function orderResolved(rows){
+  if(!rows.every(function(r){return r.player;}))return rows;
+  return rows.map(function(r,i){return {r:r,i:i};}).sort(function(a,b){
+    var d=Number(b.r.player.displayProbability)-Number(a.r.player.displayProbability);
     return d||a.i-b.i;
-  }).map(function(x){return x.p;});
+  }).map(function(x){return x.r;});
 }
 
-function renderList(players,viewer,premium,numbersOf,H,clock){
-  return orderPlayers(players,viewer,numbersOf).map(function(p,i){
-    var n=numbersOf(p);
-    return renderCard(p,i,zoneState(viewer,premium,n),n,H,clock);
+function renderList(entries,viewer,premium,resolvedOf,H,clock){
+  if(!viewer)return entries.map(function(e,i){return renderTeaser(e,i,'pending',H,clock);}).join('');
+  if(!viewer.isPro)return entries.map(function(e,i){return renderTeaser(e,i,'locked',H,clock);}).join('');
+  if(premium!=='done')return entries.map(function(e,i){return renderTeaser(e,i,'pending',H,clock);}).join('');
+  var rows=orderResolved(entries.map(function(e){return {e:e,player:usableNumbers(resolvedOf(e))};}));
+  return rows.map(function(r,i){
+    return r.player?renderCard(r.player,i,'numbers',r.player,H,clock):renderTeaser(r.e,i,'unavailable',H,clock);
   }).join('');
 }
 
@@ -270,7 +320,7 @@ function mount(el,options){
   var H=Object.assign(defaultHelpers(),options.helpers||{});
   var fetchJson=options.fetchJson||defaultFetchJson;
   var fetchPremium=options.fetchPremium||defaultFetchPremium;
-  var listEl=el.querySelector('[data-hs-list]'),subEl=el.querySelector('[data-hs-sub]'),footEl=el.querySelector('[data-hs-foot]');
+  var listEl=el.querySelector('[data-hs-list]'),subEl=el.querySelector('[data-hs-sub]'),footEl=el.querySelector('[data-hs-foot]'),gateEl=el.querySelector('[data-hs-gate]');
   var state={file:null,loaded:false,viewer:null,numbers:{},premiumDay:null,premium:null,today:null};
   function numbersOf(day){return function(p){return state.numbers[numbersKey(day,p)]||null;};}
 
@@ -288,6 +338,9 @@ function mount(el,options){
     }
     if(subEl)subEl.textContent=subtitleFor(pick.day,today,H);
     if(footEl)footEl.innerHTML=renderFoot(state.viewer);
+    var locked=!!(state.viewer&&!state.viewer.isPro);
+    el.classList.toggle('is-locked',locked);
+    if(gateEl){gateEl.hidden=!locked;gateEl.innerHTML=locked?renderGate():'';}
     return pick;
   }
 
@@ -307,7 +360,7 @@ function mount(el,options){
       pick.players.forEach(function(p){
         var raw=raws[ids.indexOf(p.match_id)];
         var n=null;
-        if(raw&&String(raw.id)===String(p.match_id)){try{n=usableNumbers(H.numbersFor(raw,p.player_id));}catch(e){n=null;}}
+        if(raw&&String(raw.id)===String(p.match_id)){try{n=usableNumbers(H.resolve(raw,p.match_rank));}catch(e){n=null;}}
         state.numbers[numbersKey(day,p)]=n;
       });
       state.premium='done';
@@ -364,13 +417,13 @@ return {
   FILE_URL:FILE_URL,
   mount:mount,
   pickDay:pickDay,
-  cleanPlayer:cleanPlayer,
+  cleanEntry:cleanEntry,
   renderCard:renderCard,
   renderZone:renderZone,
+  renderTeaser:renderTeaser,
+  renderGate:renderGate,
   renderList:renderList,
   renderFoot:renderFoot,
-  zoneState:zoneState,
-  orderPlayers:orderPlayers,
   subtitleFor:subtitleFor,
   defaultHelpers:defaultHelpers,
   usableNumbers:usableNumbers,

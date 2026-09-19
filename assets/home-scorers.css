@@ -73,6 +73,46 @@
 .hs-skel .hs-sk-m{width:88%;}
 .hs-skel .hs-sk-c{width:60%;height:8px;}
 
+/* ---------- Verrou (non-abonne) : lignes floutees + panneau « Débloquer » ----------
+   Tunnel de vente : les lignes ne contiennent AUCUNE donnee du joueur (faux
+   texte floute), seuls rang, heure et competition restent lisibles. */
+.hs-board{position:relative;}
+.hs-ghost{display:grid;place-items:center;color:rgba(141,179,211,.34);overflow:hidden;}
+.hs-ghost svg{width:30px;height:30px;margin-top:8px;}
+.hs-blurred{filter:blur(5px);user-select:none;-webkit-user-select:none;opacity:.85;}
+.hs-prob-fake{font-size:18px;line-height:1;font-weight:800;color:var(--cyan,#20d5ef);}
+.hs.is-locked .hs-zone.is-locked{flex-direction:column;align-items:flex-end;gap:5px;}
+.hs.is-locked .hs-zone.is-locked .hs-pro-tag{display:none;}
+.hs.is-locked .hs-list{min-height:236px;}
+.hs.is-locked .hs-card .hs-link{pointer-events:auto;}
+.hs-gate{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;padding:14px;border-radius:16px;
+  background:radial-gradient(95% 85% at 50% 50%,rgba(6,11,18,.9),rgba(6,11,18,.72) 70%,rgba(6,11,18,.55));}
+/* Lignes derriere le panneau : devinees, jamais lisibles au point de gener le message. */
+.hs.is-locked .hs-list .hs-link{opacity:.5;filter:blur(1.2px);}
+.hs-gate[hidden]{display:none;}
+.hs-gate-card{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;max-width:340px;}
+.hs-gate-lock{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;color:var(--amber,#f59e0b);
+  background:rgba(245,158,11,.1);box-shadow:0 0 0 1px rgba(245,158,11,.45),0 0 22px rgba(245,158,11,.25);}
+.hs-gate-lock svg{width:16px;height:16px;}
+.hs-gate-title{margin:2px 0 0;font-size:17px;font-weight:800;letter-spacing:-.3px;line-height:1.2;color:var(--text,#f4f7fb);}
+.hs-gate-text{margin:0;font-size:12.5px;line-height:1.45;color:var(--soft,#a6b4c6);}
+.hs-gate-cta{margin-top:4px;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 22px;border-radius:999px;
+  background:linear-gradient(135deg,#fbbf24,var(--amber,#f59e0b));color:#1a1203;font-size:14px;font-weight:800;text-decoration:none;
+  box-shadow:0 8px 24px rgba(245,158,11,.28);transition:transform .15s ease,box-shadow .15s ease;}
+.hs-gate-cta:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(245,158,11,.38);}
+.hs-gate-cta:focus-visible{outline:2px solid var(--text,#f4f7fb);outline-offset:3px;}
+.hs-gate-small{margin:0;font-size:11px;color:var(--soft,#a6b4c6);}
+.hs-gate-copy,.hs-gate-action{display:flex;flex-direction:column;align-items:center;gap:6px;}
+@media(min-width:860px){
+  /* Ordinateur : bande horizontale (cadenas + texte a gauche, bouton a droite). */
+  .hs.is-locked .hs-list{min-height:0;}
+  .hs-gate{padding:12px 22px;}
+  .hs-gate-card{flex-direction:row;align-items:center;justify-content:space-between;text-align:left;gap:16px;max-width:none;width:100%;}
+  .hs-gate-copy{flex:1;align-items:flex-start;gap:3px;}
+  .hs-gate-action{flex:none;gap:5px;}
+  .hs-gate-cta{margin-top:0;}
+}
+
 /* ---------- Pied : avertissement + offre (visiteur, compte gratuit) ---------- */
 .hs-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;min-height:40px;margin-top:10px;}
 .hs-note{flex:1 1 240px;margin:0;font-size:11px;line-height:1.45;color:var(--soft,#a6b4c6);}

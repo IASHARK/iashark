@@ -7,19 +7,35 @@
 # chemin ("shadowing" : la racine a un index.html et les anciennes pages
 # racine restent les sources du generateur).
 
-# --- Racine "/" : pays d'abord (Country = code ISO 3166-1 alpha-2 en
-# minuscules, geolocalisation Netlify), puis langue du navigateur
-# (Accept-Language), puis /fr/ par defaut. 302 : aiguillage revisable (le
-# selecteur langue/pays reste disponible), jamais une URL permanente.
+# --- Racine "/" UNIQUEMENT (jamais une page profonde) : aiguillage par pays
+# (Country = ISO 3166-1 alpha-2, GeoIP Netlify ou cookie nf_country) puis par
+# premiere langue du navigateur (Language = Accept-Language ou cookie nf_lang).
+# Ordre : marches a devise propre (gb, za, mx), pays multilingues (pays +
+# langue), pays -> langue du pays, langue du navigateur, pays sans version
+# -> /en/, enfin /fr/. Table et justifications : lib/lang-routing.js. Le
+# selecteur de langue pose nf_country/nf_lang (i18n/i18n.js) : la racine suit
+# alors le choix du visiteur. 302 : aiguillage revisable, jamais permanent.
 /                                 /gb/                          302!  Country=gb
 /                                 /za/                          302!  Country=za
 /                                 /mx/                          302!  Country=mx
-/                                 /en/                          302!  Country=us,ca,au,ie,nz
+/                                 /fr/                          302!  Country=ch,ca,rw,sc,ad Language=fr
+/                                 /it/                          302!  Country=ch Language=it
+/                                 /en/                          302!  Country=ch,be,lu,cm,mu,pr Language=en
+/                                 /de/                          302!  Country=be,lu Language=de
+/                                 /en/                          302!  Country=be Language=nl
+/                                 /fr/                          302!  Country=fr,mc,be,lu,gp,mq,gf,re,yt,pm,bl,mf,wf,pf,nc,sn,ci,ml,bf,ne,gn,bj,tg,cm,ga,cg,cd,cf,td,dj,km,mg,bi,mu,ma,dz,tn,mr,ht
+/                                 /es/                          302!  Country=es,ad,gq,ar,bo,cl,co,cr,cu,do,ec,sv,gt,hn,ni,pa,py,pe,pr,uy,ve
+/                                 /pt/                          302!  Country=pt,br,ao,mz,cv,gw,st,tl
+/                                 /de/                          302!  Country=de,at,ch,li
+/                                 /it/                          302!  Country=it,sm,va
+/                                 /en/                          302!  Country=us,ca,au,nz,ie,ng,gh,ke,ug,tz,zm,zw,bw,na,ls,sz,mw,sl,lr,gm,ss,rw,sc,in,pk,bd,lk,sg,my,ph,hk,jm,tt,bb,bs,bz,gy,mt,cy,im,je,gg,gi,fj,pg
+/                                 /fr/                          302!  Language=fr
 /                                 /en/                          302!  Language=en
 /                                 /es/                          302!  Language=es
+/                                 /pt/                          302!  Language=pt
 /                                 /de/                          302!  Language=de
 /                                 /it/                          302!  Language=it
-/                                 /pt/                          302!  Language=pt
+/                                 /en/                          302!  Country=nl,se,no,dk,fi,is,pl,cz,sk,hu,ro,bg,gr,hr,si,rs,ba,me,mk,al,xk,ee,lv,lt,ua,md,by,ru,ge,am,az,tr,il,jp,kr,cn,tw,mo,vn,th,id,kh,mm,mn,kz,uz,np,ae,sa,qa,kw,bh,om,jo,lb,eg,iq,ly,et,so,sd
 /                                 /fr/                          302!
 
 # --- Anciennes URLs racine -> version generee du repertoire par defaut (301).

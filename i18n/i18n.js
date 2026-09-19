@@ -103,6 +103,31 @@
   }
   var FORCED_LOCALE = CURRENT_DIR ? null : forcedLocale();
 
+  // Choix EXPLICITE du visiteur (selecteur, bandeau de suggestion) - distinct
+  // de iashark_dir, qui memorise seulement le dernier repertoire consulte.
+  var CHOSEN_KEY = "iashark_dir_chosen";
+  // Racine "/" (_redirects, lib/lang-routing.js) : Netlify lit les cookies
+  // nf_country / nf_lang A LA PLACE du pays GeoIP et de l'Accept-Language.
+  // Un pays representatif par repertoire, route vers ce repertoire sans
+  // condition de langue (verifie par tests/lang-routing.test.js) : apres un
+  // choix, "/" renvoie toujours vers la version choisie.
+  var CHOICE_COOKIES = {fr:["fr","fr"], gb:["gb","en"], za:["za","en"], en:["us","en"],
+    mx:["mx","es"], es:["es","es"], de:["de","de"], it:["it","it"], pt:["pt","pt"]};
+  function setChoiceCookies(dir){
+    var c = CHOICE_COOKIES[dir];
+    if (!c) return;
+    try{
+      var doc = global.document;
+      if (!doc) return;
+      var loc = currentLocation();
+      // 13 mois maximum (recommandation CNIL) ; cookie fonctionnel pose a la
+      // demande du visiteur (choix de langue), sans donnee personnelle.
+      var tail = "; Path=/; Max-Age=31536000; SameSite=Lax" + (loc.protocol === "https:" ? "; Secure" : "");
+      doc.cookie = "nf_country=" + c[0] + tail;
+      doc.cookie = "nf_lang=" + c[1] + tail;
+    }catch(e){}
+  }
+
   function detectLocale(){
     if (CURRENT_DIR) return DIR_BY_CODE[CURRENT_DIR].locale;
     // Page sans prefixe (ex: /match/12345.html, /blog/...). Ordre (audit QA
@@ -215,6 +240,44 @@
 
   var LOCALE = detectLocale();
 
+  // Suggestion de langue sur les pages profondes (19/09/2026) : petit bandeau
+  // discret, jamais de redirection (lib/lang-suggest.js). Ici seulement un
+  // pre-filtre gratuit pour ne telecharger ce script que si la PREMIERE
+  // langue du navigateur est une autre langue du site que celle de la page.
+  var HINT_LANGS = {fr:1, en:1, es:1, de:1, it:1, pt:1};
+  function hintPageDir(){
+    if (CURRENT_DIR) return CURRENT_DIR;
+    // Pages match FR statiques sans prefixe (/match/<id>.html, <html lang="fr">).
+    var p = currentLocation().pathname || "";
+    return /^\/match\/[^\/]+\.html$/.test(p) && declaredLocale() === "fr" ? "fr" : "";
+  }
+  function langHintWanted(){
+    try{
+      var nav = global.navigator;
+      if (!nav || nav.webdriver) return false;
+      if (!hintPageDir()) return false;
+      // Version deja choisie (selecteur ou bandeau) : rien a proposer.
+      if (global.localStorage.getItem(CHOSEN_KEY)) return false;
+      if (/(?:^|;\s*)nf_(?:country|lang)=/.test(String((global.document && global.document.cookie) || ""))) return false;
+      var first = String((nav.languages && nav.languages[0]) || nav.language || "").toLowerCase().split(/[-_]/)[0];
+      return hasOwn.call(HINT_LANGS, first) && first !== String(LOCALE).split("-")[0];
+    }catch(e){ return false; }
+  }
+  function loadLangHint(){
+    if (global.__iasharkLangHint || !langHintWanted()) return;
+    global.__iasharkLangHint = true;
+    try{
+      var doc = global.document;
+      var s = doc.createElement("script");
+      s.src = "/lib/lang-suggest.js";
+      s.async = true;
+      s.onload = function(){
+        try{ if (global.IasharkLangSuggest) global.IasharkLangSuggest.run(global.I18N, global); }catch(e){}
+      };
+      (doc.head || doc.documentElement).appendChild(s);
+    }catch(e){}
+  }
+
   var I18N = {
     locale: LOCALE,
     supported: SUPPORTED,
@@ -259,14 +322,29 @@
     },
 
     // A appeler au clic sur une option du selecteur (memorise le choix pour
-    // les pages sans prefixe).
+    // les pages sans prefixe, et pour la racine "/" via nf_country/nf_lang).
     rememberChoice: function(dir){
       if (!isDir(dir)) return;
       try{
         global.localStorage.setItem("iashark_dir", dir);
         global.localStorage.setItem("iashark_lang", DIR_BY_CODE[dir].locale);
+        global.localStorage.setItem(CHOSEN_KEY, dir);
       }catch(e){}
+      setChoiceCookies(dir);
     },
+    // Repertoire choisi explicitement ("" si aucun choix) et cookies associes
+    // (tests/lang-routing.test.js).
+    chosenDir: function(){
+      try{
+        var d = global.localStorage.getItem(CHOSEN_KEY);
+        return d && isDir(d) ? d : "";
+      }catch(e){ return ""; }
+    },
+    choiceCookies: CHOICE_COOKIES,
+    // Bandeau de suggestion de langue : repertoire de la page ("" = jamais de
+    // bandeau) et pre-filtre gratuit (langHintWanted, plus haut).
+    hintPageDir: function(){ return hintPageDir(); },
+    langHintWanted: function(){ return langHintWanted(); },
 
     t: function(key, fallback){
       var v = this.dict ? get(this.dict, key) : null;
@@ -367,4 +445,17 @@
   };
 
   global.I18N = I18N;
+
+  // Bandeau de suggestion : apres le chargement complet de la page (+1,2 s),
+  // jamais pendant le premier affichage. Une seule planification meme si ce
+  // script est execute deux fois sur la page.
+  try{
+    if (!global.__iasharkLangHintScheduled && global.document &&
+        typeof global.addEventListener === "function" && typeof global.setTimeout === "function") {
+      global.__iasharkLangHintScheduled = true;
+      var later = function(){ global.setTimeout(loadLangHint, 1200); };
+      if (global.document.readyState === "complete") later();
+      else global.addEventListener("load", later);
+    }
+  }catch(e){}
 })(typeof window !== "undefined" ? window : this);

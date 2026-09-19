@@ -56,13 +56,20 @@
       <div class="toolbar">
         <div class="seg" role="group" aria-label="Période des chiffres" id="periodSeg">
           <button type="button" data-period="today" aria-pressed="true">Aujourd'hui</button>
+          <button type="button" data-period="yesterday" aria-pressed="false">Hier</button>
           <button type="button" data-period="7" aria-pressed="false">7 jours</button>
+          <button type="button" data-period="15" aria-pressed="false">15 jours</button>
           <button type="button" data-period="30" aria-pressed="false">30 jours</button>
         </div>
         <button type="button" class="btn btn-ghost" id="refreshBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
       </div>
     </div>
     <p class="updated" id="updatedAt" aria-live="polite"></p>
+    <div class="day-nav" id="dayNav" hidden>
+      <button type="button" class="btn btn-ghost btn-sm" id="dayPrev" aria-label="Jour d'avant">‹ Jour d'avant</button>
+      <span class="day-nav-label" id="dayNavLabel" aria-live="polite"></span>
+      <button type="button" class="btn btn-ghost btn-sm" id="dayNext" aria-label="Jour d'après">Jour d'après ›</button>
+    </div>
 
     <div class="notices">
       <div class="notice warn" id="noticeFilters" hidden>
@@ -96,6 +103,15 @@
       <div class="cards" id="cards">
         <div class="skel skel-card"></div><div class="skel skel-card"></div><div class="skel skel-card"></div><div class="skel skel-card"></div><div class="skel skel-card"></div>
       </div>
+    </section>
+
+    <!-- 2 bis. Jour par jour (periodes de plusieurs jours) -->
+    <section class="section" id="dailySection" aria-labelledby="dailyTitle" hidden>
+      <div class="section-head">
+        <h2 class="section-title" id="dailyTitle">Jour par jour</h2>
+        <p class="section-sub">Clique sur un jour pour voir tous ses chiffres.</p>
+      </div>
+      <div class="card"><div id="daily"></div></div>
     </section>
 
     <!-- 3. Sante + 4. Parcours -->

@@ -16,6 +16,7 @@ const sql = read("supabase/migrations/0019_admin_dashboard_v2.sql");
 const sql22 = read("supabase/migrations/0022_admin_geo_city.sql");
 const html = read("admin.html");
 const js = read("admin-dashboard.js");
+const PREFS_KEY_TEST = "iashark_admin_prefs_v3";
 const NAMES = { "1557402": { home: "Leeds", away: "Newcastle", league: "Premier League" }, "42": { home: "PSG", away: "OM", league: "Ligue 1" } };
 const nb = (s) => s.replace(/[  ]/g, " ");
 
@@ -278,7 +279,17 @@ function scenario(kind) {
   return function (name, args) {
     if (kind === "error" && name === "admin_analytics") return { error: { message: "Failed to fetch" } };
     switch (name) {
-      case "admin_analytics": return { data: JSON.parse(JSON.stringify(a)) };
+      case "admin_analytics": {
+        const out = JSON.parse(JSON.stringify(a));
+        // Plusieurs jours demandes : serie journaliere (buckets 'day' comme 0022).
+        if (args && args.p_from && args.p_to && args.p_from !== args.p_to && !empty) {
+          out.series = [];
+          for (let d = new Date(args.p_from + "T12:00:00Z"); d.toISOString().slice(0, 10) <= args.p_to; d = new Date(d.getTime() + 864e5)) {
+            out.series.push({ t: d.toISOString().slice(0, 10) + "T00:00:00", visitors: 3, page_views: 7 });
+          }
+        }
+        return { data: out };
+      }
       case "admin_business": return { data: business };
       case "admin_recent_sessions": return { data: args && args.p_include_internal ? internalSample : sessions };
       case "admin_recent_signups": return { data: empty ? [] : [{ email: "client@exemple.fr", created_at: nowMinus(60), plan: "free", is_internal: false }, { email: "moi@admin.fr", created_at: nowMinus(90), plan: "pro", role: "admin", is_internal: true }] };
@@ -290,7 +301,8 @@ function scenario(kind) {
   };
 }
 
-async function renderDashboard(kind) {
+async function renderDashboard(kind, opts) {
+  opts = opts || {};
   const els = {};
   const calls = [];
   const handler = scenario(kind);
@@ -306,8 +318,10 @@ async function renderDashboard(kind) {
     from: () => ({ select: () => ({ eq: () => ({ maybeSingle: () => Promise.resolve({ data: { role: "admin" } }) }) }) }),
     rpc: (name, args) => { calls.push([name, args]); return Promise.resolve(handler(name, args)); },
   };
+  const ls = storage();
+  if (opts.period) ls.setItem(PREFS_KEY_TEST, JSON.stringify({ period: opts.period }));
   const ctx = {
-    document, localStorage: storage(), setTimeout, clearTimeout, setInterval: () => 0, clearInterval() {},
+    document, localStorage: ls, setTimeout, clearTimeout, setInterval: () => 0, clearInterval() {},
     fetch: (url) => Promise.resolve(url === "/data-home.json"
       ? { ok: true, json: () => Promise.resolve({ generated_at: new Date().toISOString(), matchs: [{ id: 42, home: "PSG", away: "OM", league: "Ligue 1" }] }) }
       : { ok: false, json: () => Promise.resolve(null) }),
@@ -462,7 +476,9 @@ test("admin.html : sections dans l'ordre, periodes, aide i reliee, Exclure cet a
     assert.ok(at > last, "section " + id + " presente et dans l'ordre");
     last = at;
   }
-  assert.deepEqual([...html.matchAll(/data-period="(\w+)"/g)].map((m) => m[1]), ["today", "7", "30"]);
+  assert.deepEqual([...html.matchAll(/data-period="(\w+)"/g)].map((m) => m[1]), ["today", "yesterday", "7", "15", "30"]);
+  // Suivi jour par jour (19/09/2026) : fleches et tableau.
+  ["dayNav", "dayPrev", "dayNext", "dayNavLabel", "dailySection", "daily"].forEach((id) => assert.match(html, new RegExp('id="' + id + '"'), id));
   assert.match(html, /<details class="details section" id="details">/, "Details replies par defaut");
   assert.ok(!/<details[^>]* open/.test(html));
   for (const m of html.matchAll(/class="info" aria-expanded="false" aria-controls="(\w+)"/g)) {
@@ -490,4 +506,59 @@ test("admin.html : noindex, script dedie, pas de Google Analytics, CSP, ids exis
   const ids = new Set([...js.matchAll(/\$\("([A-Za-z][\w-]*)"\)/g)].map((m) => m[1]));
   assert.ok(ids.size > 20);
   for (const id of ids) assert.ok(html.includes('id="' + id + '"'), "id manquant dans admin.html : " + id);
+});
+
+test("suivi jour par jour : hier, 15 jours, un jour precis, lignes « Jour par jour »", () => {
+  const today = "2026-09-19";
+  const y = H.periodRange("yesterday", today);
+  assert.deepEqual([y.from, y.to, y.days, y.label], ["2026-09-18", "2026-09-18", 1, "hier"]);
+  const q = H.periodRange("15", today);
+  assert.deepEqual([q.from, q.to, q.days], ["2026-09-05", "2026-09-19", 15]);
+  const d = H.periodRange("day", today, { from: "2026-09-12" });
+  assert.deepEqual([d.from, d.to, d.days, d.key], ["2026-09-12", "2026-09-12", 1, "day"]);
+  assert.match(d.label, /^le samedi 12 septembre$/);
+  assert.equal(H.periodRange("day", today, { from: "2026-09-17" }).label, "avant-hier");
+  assert.equal(H.periodRange("day", today, { from: "2026-09-18" }).key, "yesterday");
+  assert.equal(H.periodRange("day", today, { from: "2026-09-19" }).key, "today", "aujourd'hui ou futur : repli sur aujourd'hui");
+  assert.equal(H.periodRange("day", today, { from: "2026-12-01" }).key, "today");
+  assert.equal(H.periodRange("day", today, { from: "n'importe quoi" }).key, "today");
+  // Lignes : du plus recent au plus ancien, bornees a la periode, jour en cours signale.
+  const series = [
+    { t: "2026-09-12T00:00:00", visitors: 4, page_views: 9 },
+    { t: "2026-09-13T00:00:00", visitors: 0, page_views: 0 },
+    { t: "2026-09-18T00:00:00", visitors: 7, page_views: 20 },
+    { t: "2026-09-19T00:00:00", visitors: 2, page_views: 3 },
+    { t: "2026-09-01T00:00:00", visitors: 99, page_views: 99 }
+  ];
+  const rows = H.dailyRows(series, H.periodRange("7", today), today);
+  assert.deepEqual(rows.map((r) => r.day), ["2026-09-19", "2026-09-18", "2026-09-13"]);
+  assert.equal(rows[0].title, "Aujourd'hui");
+  assert.equal(rows[0].partial, true);
+  assert.equal(rows[1].title, "Hier");
+  assert.equal(rows[1].visitors, 7);
+  assert.equal(rows[1].pageViews, 20);
+  // Un seul jour (serie horaire) ou donnees absentes : aucune ligne, jamais d'erreur.
+  assert.deepEqual(H.dailyRows(series, H.periodRange("today", today), today), []);
+  assert.deepEqual(H.dailyRows([{ t: "2026-09-18T10:00:00", visitors: 1 }, { t: "2026-09-18T11:00:00", visitors: 1 }], H.periodRange("7", today), today), []);
+  assert.deepEqual(H.dailyRows(null, H.periodRange("7", today), today), []);
+  assert.deepEqual(H.dailyRows(series, null, today), []);
+});
+
+test("rendu : 7 jours -> tableau « Jour par jour » cliquable, pas de fleches ; un jour -> fleches, pas de tableau", async () => {
+  const w = await renderDashboard("nogeo", { period: "7" });
+  assert.equal(w.els.dailySection.hidden, false);
+  const daily = w.text("daily");
+  assert.equal((daily.match(/class="day-link"/g) || []).length, 7, "une ligne par jour");
+  assert.match(daily, /data-day="\d{4}-\d{2}-\d{2}">Aujourd&#39;hui<\/button><small>en cours<\/small>/);
+  assert.match(daily, />Hier</);
+  assert.match(daily, />3<small>visiteurs · 7 pages vues<\/small>/);
+  assert.equal(w.els.dayNav.hidden, true);
+  const t = await renderDashboard("nogeo");
+  assert.equal(t.els.dailySection.hidden, true);
+  assert.equal(t.els.dayNav.hidden, false);
+  assert.equal(t.els.dayNavLabel.textContent, "Aujourd'hui");
+  assert.equal(t.els.dayNext.disabled, true, "pas de jour d'apres aujourd'hui");
+  const y = await renderDashboard("nogeo", { period: "yesterday" });
+  assert.equal(y.els.dayNavLabel.textContent, "Hier");
+  assert.equal(y.els.dayNext.disabled, false);
 });

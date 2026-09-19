@@ -287,7 +287,15 @@
   function periodRange(key, today, custom) {
     var from, to, label, compare;
     if (key === "today") { from = to = today; label = "aujourd'hui"; compare = "par rapport à hier à la même heure"; }
-    else if (key === "7" || key === "30") {
+    else if (key === "yesterday") { from = to = addDays(today, -1); label = "hier"; compare = "par rapport à avant-hier"; }
+    else if (key === "day" && custom && ymdOk(custom.from) && custom.from < today) {
+      // Un jour precis (fleches « jour d'avant / jour d'apres », clic dans « Jour par jour »).
+      if (custom.from === addDays(today, -1)) return periodRange("yesterday", today);
+      from = to = custom.from < addDays(today, -394) ? addDays(today, -394) : custom.from;
+      label = from === addDays(today, -2) ? "avant-hier" : "le " + dayTitle(from).toLowerCase();
+      compare = "par rapport au jour d'avant";
+    }
+    else if (key === "7" || key === "15" || key === "30") {
       var n = Number(key);
       from = addDays(today, -(n - 1)); to = today;
       label = n + " derniers jours"; compare = "par rapport aux " + n + " jours d'avant";
@@ -735,6 +743,25 @@
     var s = new Date(Date.parse(ymd + "T12:00:00Z")).toLocaleDateString("fr-FR", { timeZone: "UTC", weekday: "long", day: "numeric", month: "long" });
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
+  // « Jour par jour » : une ligne par jour de la periode, du plus recent au plus
+  // ancien, depuis la serie journaliere de admin_analytics (buckets 'day').
+  // Rien si la serie est horaire (periode d'un seul jour).
+  function dailyRows(series, range, today) {
+    if (!range || !(range.days > 1)) return [];
+    var byDay = {};
+    (Array.isArray(series) ? series : []).forEach(function (b) {
+      var day = String(b && b.t || "").slice(0, 10);
+      if (!ymdOk(day) || day < range.from || day > range.to) return;
+      var o = byDay[day] || (byDay[day] = { day: day, visitors: 0, pageViews: 0, buckets: 0 });
+      o.visitors += num(b.visitors) || 0; o.pageViews += num(b.page_views) || 0; o.buckets++;
+    });
+    var days = Object.keys(byDay);
+    if (days.some(function (d) { return byDay[d].buckets > 1; })) return [];
+    return days.sort().reverse().map(function (d) {
+      var o = byDay[d];
+      return { day: d, title: dayTitle(d), visitors: o.visitors, pageViews: o.pageViews, partial: d === today };
+    });
+  }
   // Parcours d'un inscrit (admin_member_journey.items) regroupe par jour de
   // Paris, jour le plus recent en premier, actions dans l'ordre de la journee.
   function journeyDays(items, names, now) {
@@ -812,13 +839,13 @@
     UNLOCK_PLACES: UNLOCK_PLACES, unlockRows: unlockRows,
     MEMBER_STATUS: MEMBER_STATUS, MEMBER_STATUS_ORDER: MEMBER_STATUS_ORDER, maskEmail: maskEmail, memberLastActivity: memberLastActivity,
     memberStatus: memberStatus, memberCounts: memberCounts, daysAgo: daysAgo, activityBar: activityBar, shortDay: shortDay,
-    retentionCell: retentionCell, retentionRate: retentionRate, retentionSentence: retentionSentence, journeyDays: journeyDays,
+    retentionCell: retentionCell, retentionRate: retentionRate, retentionSentence: retentionSentence, journeyDays: journeyDays, dayTitleOf: dayTitle,
     TZ: TZ, LAUNCH_AT: LAUNCH_AT, SITES: SITES, SOURCE_RULES: SOURCE_RULES, SOURCE_LABELS: SOURCE_LABELS, REASONS: REASONS,
     esc: esc, num: num, fmtInt: fmtInt, fmtPct: fmtPct, fmtDur: fmtDur, fmtMoney: fmtMoney, fmtDelta: fmtDelta,
     isCountry: isCountry, flagEmoji: flagEmoji, siteLabel: siteLabel, countryName: countryName, inCountry: inCountry, deviceLabel: deviceLabel,
     sourceGroup: sourceGroup, sourceLabel: sourceLabel,
     prettySlug: prettySlug, normalizePath: normalizePath, matchName: matchName, pageInfo: pageInfo, safeHref: safeHref,
-    ymdOk: ymdOk, addDays: addDays, daysBetween: daysBetween, parisToday: parisToday, fmtYmd: fmtYmd, periodRange: periodRange,
+    ymdOk: ymdOk, addDays: addDays, daysBetween: daysBetween, parisToday: parisToday, fmtYmd: fmtYmd, periodRange: periodRange, dailyRows: dailyRows,
     visitClock: visitClock, ago: ago, onSiteFor: onSiteFor,
     todaySentence: todaySentence, dailyAverage: dailyAverage, compareToday: compareToday,
     journeySteps: journeySteps, biggestLeak: biggestLeak,
@@ -847,7 +874,7 @@
 
   var sb = null;
   var S = {
-    period: "today", custom: { from: null, to: null }, site: "", device: "", source: "",
+    period: "today", custom: { from: null, to: null }, day: null, site: "", device: "", source: "",
     range: null, today: null, week: null, analytics: null, bizToday: null, business: null, bizError: null, stats: null,
     sessions: null, sessionsError: null, botSample: null, signups: null, health: null, healthError: false, live: null, liveError: null,
     home: undefined, names: {}, loading: false, liveLoading: false, liveTimer: null, fullTimer: null,
@@ -862,11 +889,11 @@
   function loadPrefs() {
     try {
       var p = JSON.parse(localStorage.getItem(PREFS_KEY) || "null");
-      if (p && ["today", "7", "30"].indexOf(p.period) !== -1) S.period = p.period;
+      if (p && ["today", "yesterday", "7", "15", "30"].indexOf(p.period) !== -1) S.period = p.period;
     } catch (e) {}
   }
   function savePrefs() {
-    try { if (S.period !== "custom") localStorage.setItem(PREFS_KEY, JSON.stringify({ period: S.period })); } catch (e) {}
+    try { if (S.period !== "custom" && S.period !== "day") localStorage.setItem(PREFS_KEY, JSON.stringify({ period: S.period })); } catch (e) {}
   }
 
   // ---------- Formats locaux ----------
@@ -1330,6 +1357,33 @@
       return { nameHtml: name + (tag ? "<small>" + esc(tag) + "</small>" : ""), title: info.title, value: Number(r.views) || 0, extra: "vue" + (Number(r.views) > 1 ? "s" : "") };
     }));
   }
+  // « Jour par jour » (periodes de plusieurs jours) : visiteurs et pages vues
+  // de chaque jour, un clic ouvre tous les chiffres de ce jour.
+  function renderDaily() {
+    var sec = $("dailySection"), el = $("daily"), r = S.range;
+    var multi = !!(r && r.days > 1);
+    sec.hidden = !multi;
+    if (!multi) return;
+    var a = S.analytics;
+    if (!a) { blockError(el, S.analyticsError, "Jour par jour"); return; }
+    var rows = H.dailyRows(a.series, r, H.parisToday(new Date()));
+    if (!rows.length) { el.innerHTML = emptyHtml("Pas de détail jour par jour pour cette période", "Il apparaîtra dès les premières visites."); return; }
+    el.innerHTML = barsHtml(rows.map(function (d) {
+      return {
+        nameHtml: '<button type="button" class="day-link" data-day="' + esc(d.day) + '">' + esc(d.title) + "</button>" + (d.partial ? "<small>en cours</small>" : ""),
+        title: d.title, value: d.visitors,
+        extra: plural(d.visitors, "visiteur", "visiteurs") + " · " + H.fmtInt(d.pageViews) + " " + plural(d.pageViews, "page vue", "pages vues")
+      };
+    }));
+  }
+  function openDay(day) {
+    var today = H.parisToday(new Date());
+    if (!H.ymdOk(day) || day > today) return;
+    S.day = day;
+    S.period = day === today ? "today" : day === H.addDays(today, -1) ? "yesterday" : "day";
+    savePrefs();
+    loadAll({ silent: true });
+  }
   function renderMatches() {
     var el = $("matches"), a = S.analytics;
     if (!a) { blockError(el, S.analyticsError, "Matchs les plus regardés"); return; }
@@ -1751,6 +1805,7 @@
     renderNotices();
     renderHero();
     renderCards();
+    renderDaily();
     renderHealth();
     renderFunnel();
     renderSources();
@@ -1775,6 +1830,13 @@
   function syncControls() {
     Array.prototype.forEach.call(document.querySelectorAll("#periodSeg button"), function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-period") === S.period)); });
     var today = H.parisToday(new Date());
+    var single = !!(S.range && S.range.days === 1);
+    $("dayNav").hidden = !single;
+    if (single) {
+      $("dayNavLabel").textContent = S.range.from === today ? "Aujourd'hui" : H.dayTitleOf(S.range.from);
+      $("dayNext").disabled = S.range.to >= today;
+      $("dayPrev").disabled = S.range.from <= H.addDays(today, -394);
+    }
     $("fromDate").max = today;
     $("toDate").max = today;
     $("fromDate").value = S.period === "custom" && S.custom.from ? S.custom.from : "";
@@ -1789,7 +1851,7 @@
     if (S.loading || !sb) return Promise.resolve();
     setBusy(true);
     var today = H.parisToday(new Date());
-    S.range = H.periodRange(S.period, today, S.custom);
+    S.range = H.periodRange(S.period, today, S.period === "day" ? { from: S.day } : S.custom);
     syncControls();
     var r = S.range, isToday = r.from === today && r.to === today;
     var calls = [
@@ -1933,6 +1995,12 @@
       S.period = p;
       savePrefs();
       loadAll({ silent: true });
+    });
+    $("dayPrev").addEventListener("click", function () { if (S.range) openDay(H.addDays(S.range.from, -1)); });
+    $("dayNext").addEventListener("click", function () { if (S.range) openDay(H.addDays(S.range.from, 1)); });
+    $("daily").addEventListener("click", function (ev) {
+      var b = ev.target.closest("button[data-day]");
+      if (b) { openDay(b.getAttribute("data-day")); window.scrollTo({ top: 0, behavior: "smooth" }); }
     });
     $("applyRange").addEventListener("click", function () {
       var f = $("fromDate").value, t = $("toDate").value;

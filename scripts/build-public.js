@@ -213,7 +213,10 @@ function optimizeDist(outDir, published) {
     if (/<script\b[^>]*src="https:\/\/cdn\.jsdelivr\.net\//.test(html) && !/rel="preconnect" href="https:\/\/cdn\.jsdelivr\.net"/.test(head)) {
       hints.push('<link rel="preconnect" href="https://cdn.jsdelivr.net">');
     }
-    if (/id="matchRoot"/.test(html) && !/rel="preconnect" href="https:\/\/media\.api-sports\.io"/.test(head)) {
+    // Pages match (logos de l'en-tete) et pages championnat / club / derby dont
+    // l'image principale (fetchpriority="high") est un logo api-sports : LCP.
+    const apiSportsHero = /<img\b[^>]*\ssrc="https:\/\/media\.api-sports\.io\/[^"]*"[^>]*\sfetchpriority="high"/.test(html);
+    if ((/id="matchRoot"/.test(html) || apiSportsHero) && !/rel="preconnect" href="https:\/\/media\.api-sports\.io"/.test(head)) {
       hints.push('<link rel="preconnect" href="https://media.api-sports.io">');
     }
     if (!hints.length) return html;

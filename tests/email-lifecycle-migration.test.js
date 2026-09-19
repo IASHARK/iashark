@@ -110,7 +110,10 @@ test("regles de selection SQL alignees sur decideCampaign (lib/lifecycle-email.j
   assert.ok(c.includes("to_char(f.last_activity_at at time zone 'UTC', 'YYYY-MM-DD') as episode"));
   assert.ok(c.includes("greatest(b.created_at, coalesce(b.last_sign_in_at, b.created_at), coalesce(b.last_funnel_at, b.created_at))"));
   for (const [market, tz] of Object.entries(L.MARKET_TIMEZONES)) {
-    if (market === "fr") assert.ok(c.includes("else '" + tz + "' end"), tz);
+    // Branche else (Europe/Paris) : marche fr et tout marche servi par un
+    // repertoire de langue au meme fuseau (us = /en/, email_preferences.market
+    // vaut le repertoire "en").
+    if (market === "fr" || tz === L.MARKET_TIMEZONES.fr) assert.ok(c.includes("else '" + tz + "' end"), tz);
     else assert.ok(c.includes("when '" + market + "' then '" + tz + "'"), tz);
   }
   assert.ok(c.includes("status in ('bounced', 'complained')"));

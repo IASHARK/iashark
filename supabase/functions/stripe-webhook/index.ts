@@ -138,7 +138,10 @@ function periodEndIso(sub: Stripe.Subscription): string | null {
 // Copie identique dans stripe-webhook et sync-subscription
 // (tests/billing-interval-sync.test.js).
 const BILLING_INTERVALS = new Set(["week", "month", "year"]);
-const BILLING_MARKETS = new Set(["fr", "gb", "mx", "za"]);
+// Cles de marche de config/markets.json (tests/billing-interval-sync.test.js) ;
+// "us" = offre USD de /en/ : la colonne subscriptions.market l'accepte apres
+// la migration 0030.
+const BILLING_MARKETS = new Set(["fr", "gb", "mx", "za", "us"]);
 function billingFields(sub: Stripe.Subscription): { billing_interval: string | null; billing_interval_count: number | null; market: string | null } {
   const recurring = sub.items?.data?.[0]?.price?.recurring;
   const interval = recurring?.interval ?? null;

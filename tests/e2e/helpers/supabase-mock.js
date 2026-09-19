@@ -62,6 +62,7 @@ class SupabaseMock {
     this.unmocked = [];
     this.fnHandlers = {};
     this.availabilityMap = null;  // durees ouvertes au paiement (create-checkout-session, mode availability)
+    this.legacyCheckout = false;  // create-checkout-session deployee plus ancienne que le site (sans mode availability)
     this.userMetadata = {};       // user_metadata par persona (auth.updateUser)
     this._waiters = [];
   }
@@ -97,6 +98,10 @@ class SupabaseMock {
 
   // Durees ouvertes au paiement renvoyees au selecteur (defaut : toutes).
   availability(map) { this.availabilityMap = Object.assign({}, map); }
+  // Fonction de paiement deployee AVANT le 16/09/2026 (ordre de deploiement
+  // site / fonction) : elle ignore le mode "availability" et repond comme a
+  // une demande de paiement (marche inconnu refuse, sinon consentement exige).
+  legacyCheckoutFunction() { this.legacyCheckout = true; }
 
   callsTo(name) { return this.calls.filter((c) => c.kind === 'function' && c.name === name); }
 
@@ -217,6 +222,11 @@ class SupabaseMock {
       // jamais comptee comme une tentative de paiement ni consommee dans la
       // file de reponses du test.
       if (name === 'create-checkout-session' && body && body.mode === 'availability') {
+        if (this.legacyCheckout) {
+          return body.market
+            ? json(200, { ok: true, processed: false, market: body.market, reason: 'market_not_configured' })
+            : json(400, { ok: false, code: 'consent_required', missing: ['terms', 'waiver'] });
+        }
         return json(200, { ok: true, processed: false, mode: 'availability', intervals: Object.assign({ week: true, month: true, year: true }, this.availabilityMap || {}) });
       }
       const fnCall = Object.assign({ kind: 'function', name }, call);

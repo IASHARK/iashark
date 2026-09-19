@@ -856,7 +856,10 @@ function appliquerMarche(){
     if(pp)pp.textContent=prix;
   }
   var pg=document.getElementById('prixGratuit');
-  if(pg&&mk.currency){try{pg.textContent=(0).toLocaleString(localeTag(),{style:'currency',currency:mk.currency,maximumFractionDigits:0});}catch(e){}}
+  // Same formatting as the market prices (lib/market-config.js: USD on /en/ reads "$0", never "US$0").
+  var gratuit=typeof mk.formatPrice==='function'?mk.formatPrice('free'):null;
+  if(pg&&gratuit)pg.textContent=gratuit;
+  else if(pg&&mk.currency){try{pg.textContent=(0).toLocaleString(localeTag(),{style:'currency',currency:mk.currency,maximumFractionDigits:0});}catch(e){}}
 }
 // Static SEO summary written by update-data.yml: market labels rendered in the active language.
 function traduireLibellesMarche(){

@@ -109,7 +109,9 @@ function formatPrice(dir, planKey) {
   var market = MARKETS[conf.market];
   var amount = market ? marketConfigLib().priceFor(market.prices || {}, planKey) : null;
   if (amount == null) return null;
-  return marketConfigLib().formatAmount(amount, market.currency, conf.intlLocale);
+  // Locale des prix du marche (priceIntlLocale, ex. USD de /en/ en en-US),
+  // sinon celle du repertoire : meme regle que lib/market-config.js#build.
+  return marketConfigLib().formatAmount(amount, market.currency, market.priceIntlLocale || conf.intlLocale);
 }
 // Ressource d'aide d'un repertoire (surcharge _dirs.<dir>.helpline, sinon marche).
 function helplineFor(dir) {
@@ -482,12 +484,17 @@ function applyReplacements(html, locale, rules, report, file) {
 
 // ---------------------------------------------------------------------------
 // lib/market-config.js : bloc de donnees recopie depuis config/markets.json.
-function marketRuntimeData() {
+// cfg (facultatif) : autre configuration de meme forme, pour les tests qui
+// rejouent une bascule (config/markets.json#_usdSwitch) sans toucher au fichier.
+function marketRuntimeData(cfg) {
+  var MK = cfg || MARKETS, DS = MK._dirs;
   var markets = {};
-  Object.keys(MARKETS).filter(function (k) { return k.charAt(0) !== "_"; }).forEach(function (k) {
-    var m = MARKETS[k];
+  Object.keys(MK).filter(function (k) { return k.charAt(0) !== "_"; }).forEach(function (k) {
+    var m = MK[k];
     markets[k] = {
       currency: m.currency, locale: m.locale, htmlLang: m.htmlLang, intlLocale: m.intlLocale,
+      // Locale des prix propre au marche (USD : en-US), sinon celle du repertoire.
+      priceIntlLocale: m.priceIntlLocale || null,
       status: m.status, minAge: m.minAge, checkoutMarket: m.checkoutMarket || null,
       // Durees payables en ligne (config/markets.json#<marche>.checkoutOpen) ;
       // null = toutes les durees vendues (le serveur tranche).
@@ -496,15 +503,15 @@ function marketRuntimeData() {
     };
   });
   var dirs = {};
-  DIR_CODES.forEach(function (d) {
-    var c = DIRS[d];
+  Object.keys(DS).forEach(function (d) {
+    var c = DS[d];
     dirs[d] = { market: c.market, locale: c.locale, htmlLang: c.htmlLang, intlLocale: c.intlLocale, blogDir: c.blogDir || "", label: c.label, helpline: c.helpline || null };
   });
   return {
-    defaultMarket: MARKETS._defaultMarket || "fr", defaultDir: X_DEFAULT_DIR,
-    planKeys: MARKETS._planKeys || [], proIntervals: MARKETS._proIntervals || ["week", "month", "year"],
-    proDefaultInterval: MARKETS._proDefaultInterval || "month", legalFiles: LEGAL_FILES, dirs: dirs, markets: markets,
-    helplines: MARKETS._helplines || {}
+    defaultMarket: MK._defaultMarket || "fr", defaultDir: MK._xDefaultDir || "fr",
+    planKeys: MK._planKeys || [], proIntervals: MK._proIntervals || ["week", "month", "year"],
+    proDefaultInterval: MK._proDefaultInterval || "month", legalFiles: MK._legalFiles || {}, dirs: dirs, markets: markets,
+    helplines: MK._helplines || {}
   };
 }
 
@@ -525,16 +532,25 @@ function syncMarketConfig() {
 // recopiee depuis config/markets.json. La fonction s'en sert pour refuser un
 // Price Stripe dont devise / periodicite / montant ne correspondent pas au
 // prix affiche (jamais de facturation d'un autre prix que celui montre).
-function checkoutPriceTable() {
+// Independante de la bascule _usdSwitch (checkoutOpen et _dirs n'y entrent
+// pas) : la ligne "us" y figure des maintenant, inerte tant que le secret
+// STRIPE_PRICE_ID_US_MONTH n'existe pas et que le front n'envoie pas market "us".
+function checkoutPriceTable(cfg) {
+  var MK = cfg || MARKETS;
   var out = {};
-  Object.keys(MARKETS).filter(function (k) { return k.charAt(0) !== "_"; }).forEach(function (k) {
-    var m = MARKETS[k], lib = marketConfigLib(), row = { currency: m.currency, intervals: {} };
-    (MARKETS._proIntervals || ["week", "month", "year"]).forEach(function (iv) {
+  Object.keys(MK).filter(function (k) { return k.charAt(0) !== "_"; }).forEach(function (k) {
+    var m = MK[k], lib = marketConfigLib(), row = { currency: m.currency, intervals: {} };
+    (MK._proIntervals || ["week", "month", "year"]).forEach(function (iv) {
       var amount = lib.proAmount(m.prices || {}, iv);
       var env = m.stripeEnvKeys && m.stripeEnvKeys[iv];
       if (amount == null || !env) return;
+      // priceId : id du Price Stripe ecrit dans la configuration
+      // (config/markets.json#<marche>.stripePriceIds.<duree>, pas un secret :
+      // inutilisable sans la cle Stripe). Dernier recours de la resolution,
+      // apres le secret envKey puis legacyEnvKey (pricing.ts).
       row.intervals[iv] = { unitAmount: Math.round(amount * 100), envKey: env,
-        legacyEnvKey: iv === "month" ? (m.stripeEnvKeyLegacyMonth || null) : null };
+        legacyEnvKey: iv === "month" ? (m.stripeEnvKeyLegacyMonth || null) : null,
+        priceId: (m.stripePriceIds && typeof m.stripePriceIds[iv] === "string" && m.stripePriceIds[iv].trim()) || null };
     });
     out[k] = row;
   });
@@ -544,7 +560,7 @@ function syncCheckoutPriceTable() {
   var file = path.join(ROOT, "supabase/functions/create-checkout-session/prices.generated.ts");
   var body = "// GENERE par scripts/build-locales.js depuis config/markets.json - ne pas modifier a la main.\n" +
     "export type IntervalKey = \"week\" | \"month\" | \"year\";\n" +
-    "export type PriceRow = { unitAmount: number; envKey: string; legacyEnvKey: string | null };\n" +
+    "export type PriceRow = { unitAmount: number; envKey: string; legacyEnvKey: string | null; priceId: string | null };\n" +
     "export const PRO_INTERVALS: IntervalKey[] = " + JSON.stringify(MARKETS._proIntervals || ["week", "month", "year"]) + ";\n" +
     "export const PRO_DEFAULT_INTERVAL: IntervalKey = " + JSON.stringify(MARKETS._proDefaultInterval || "month") + ";\n" +
     "export const PRO_PRICES: Record<string, { currency: string; intervals: Partial<Record<IntervalKey, PriceRow>> }> = " +
@@ -568,6 +584,25 @@ function syncLeagueNames() {
   if (!re.test(src)) throw new Error("lib/league-names.js : marqueurs IASHARK_LEAGUES_DATA_START/END introuvables");
   var block = "/*IASHARK_LEAGUES_DATA_START*/\nvar LEAGUES = " + JSON.stringify(leagueNamesData(), null, 2) + ";\n/*IASHARK_LEAGUES_DATA_END*/";
   writeIfChanged(file, src.replace(re, function () { return block; }));
+}
+
+// i18n/i18n.js : table DIRS maintenue a la main (tests/geo-dirs.test.js), sauf
+// le champ market de chaque repertoire, recopie ici depuis
+// config/markets.json#_dirs.<dir>.market. La bascule de /en/ sur le marche
+// "us" (config/markets.json#_usdSwitch) reste ainsi une modification de
+// configuration seule (lib/lang-suggest.js lit ces marches).
+function syncI18nDirMarkets(src, dirs) {
+  dirs = dirs || DIRS;
+  Object.keys(dirs).forEach(function (d) {
+    var re = new RegExp('(\\{dir:"' + d + '",[^}\\n]*?\\bmarket:")[a-z]+(")');
+    if (!re.test(src)) throw new Error("i18n/i18n.js : ligne DIRS du repertoire " + d + " introuvable");
+    src = src.replace(re, function (m, a, b) { return a + dirs[d].market + b; });
+  });
+  return src;
+}
+function syncI18nDirs() {
+  var file = path.join(ROOT, "i18n/i18n.js");
+  writeIfChanged(file, syncI18nDirMarkets(fs.readFileSync(file, "utf8")));
 }
 
 // ---------------------------------------------------------------------------
@@ -880,6 +915,7 @@ function build() {
   syncMarketConfig();
   syncCheckoutPriceTable();
   syncLeagueNames();
+  syncI18nDirs();
   var report = { stale: {}, pages: 0, legal: 0, missingLegal: [], removed: [] };
 
   PAGES.forEach(function (page) {
@@ -950,6 +986,7 @@ module.exports = {
   mapPath: mapPath, rewriteInternalLinks: rewriteInternalLinks, bakeI18n: bakeI18n, formatPrice: formatPrice,
   bakeMarket: bakeMarket, helplineFor: helplineFor, leagueNamesData: leagueNamesData,
   marketRuntimeData: marketRuntimeData, checkoutPriceTable: checkoutPriceTable, redirectsContent: redirectsContent, build: build,
+  syncI18nDirMarkets: syncI18nDirMarkets,
   stripUnavailablePageLinks: stripUnavailablePageLinks,
   buildHead: buildHead, setHtmlLang: setHtmlLang, injectRuntime: injectRuntime, metaFor: metaFor,
   homeJsonLd: homeJsonLd, homeSeoBlock: homeSeoBlock, rewriteHomeMatchSummary: rewriteHomeMatchSummary,

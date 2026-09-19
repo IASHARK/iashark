@@ -125,14 +125,16 @@ test("offres pays (GBP, ZAR, MXN) : jamais proposees ni quittees sans pays connu
   assert.equal(decide(Object.assign(pageEnv("gb"), { languages: ["fr-FR"], geoCountry: "GB" })).reason, "other-market");
   assert.equal(decide(Object.assign(pageEnv("gb"), { languages: ["de-DE"], geoCountry: "DE" })).target, "de");
   assert.equal(decide(Object.assign(pageEnv("mx"), { languages: ["en-US"], geoCountry: "MX" })).reason, "other-market");
-  // Propriete : une suggestion qui change d'offre correspond toujours au pays du visiteur.
+  // Propriete : une suggestion vers ou hors d'une offre PAYS (gb, za, mx)
+  // correspond toujours au pays du visiteur. Entre versions de langue (dont
+  // /en/, meme en USD apres config/markets.json#_usdSwitch) : libre.
   const countries = [null, "FR", "GB", "ZA", "MX", "US", "DE", "ES", "BR", "JP"];
   const languages = ["fr-FR", "en-US", "en-GB", "en-ZA", "es-ES", "es-MX", "de-DE", "it-IT", "pt-BR"];
   DIRS.forEach((page) => countries.forEach((geo) => languages.forEach((lang) => {
     const d = decide(Object.assign(pageEnv(page.dir), { languages: [lang], geoCountry: geo }));
     if (!d.show) return;
     const target = DIRS.find((x) => x.dir === d.target);
-    if (target.market !== page.market) {
+    if (target.market !== page.market && (S.isCountryOffer(target) || S.isCountryOffer(page))) {
       assert.ok(geo, page.dir + " -> " + d.target + " sans pays connu");
       assert.equal(target.market, S.countryMarket(geo, DIRS), page.dir + " -> " + d.target + " pour " + geo);
     }
@@ -141,6 +143,17 @@ test("offres pays (GBP, ZAR, MXN) : jamais proposees ni quittees sans pays connu
   assert.equal(S.countryMarket("fr", DIRS), "fr");
   assert.equal(S.countryMarket("US", DIRS), "fr");
   assert.equal(S.countryMarket("", DIRS), "");
+  // Bascule USD de /en/ (config/markets.json#_usdSwitch) : /en/ reste une version
+  // de langue, suggeree comme avant, jamais une offre pays reservee aux Etats-Unis.
+  const USD = DIRS.map((d) => (d.dir === "en" ? Object.assign({}, d, { market: "us" }) : d));
+  assert.deepEqual(DIRS.filter((d) => S.isCountryOffer(d)).map((d) => d.dir).sort(), ["gb", "mx", "za"]);
+  assert.equal(S.isCountryOffer(USD.find((d) => d.dir === "en")), false);
+  assert.equal(S.countryMarket("US", USD), "fr");
+  assert.equal(decide({ dirs: USD, languages: ["en-US"] }).target, "en", "anglais sur /fr/ -> /en/, pays inconnu");
+  assert.equal(decide({ dirs: USD, languages: ["en-US"], geoCountry: "IE" }).target, "en");
+  assert.equal(decide({ dirs: USD, languages: ["en-GB"], geoCountry: "GB" }).target, "gb", "offre pays inchangee");
+  assert.equal(decide(Object.assign(pageEnv("en"), { dirs: USD, languages: ["fr-FR"] })).target, "fr");
+  assert.equal(decide(Object.assign(pageEnv("gb"), { dirs: USD, languages: ["fr-FR"], geoCountry: "US" })).target, "fr", "hors d'une offre pays : pays connu, offre internationale");
 });
 
 test("textes : une entree par version, dans la langue proposee (fr, en, es, es-mx, de, it, pt)", () => {

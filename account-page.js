@@ -901,6 +901,8 @@
         return;
       }
       consentementPaiement = consentement.payload();
+      // Disponibilites du serveur connues avant de payer (lib/pro-plan-picker.js#whenReady).
+      if (selecteur && selecteur.whenReady) await selecteur.whenReady();
       if (selecteur && !selecteur.isAvailable()) {
         retour('msgFacturation', tr('pricing_page.checkout_interval_not_configured', 'Cette durée n’est pas encore ouverte au paiement. Choisis une autre durée ou reviens bientôt. Aucun montant n’a été prélevé.'), 'error');
         return;
@@ -911,8 +913,11 @@
     try {
       var s = await sb.auth.getSession();
       var token = s.data.session && s.data.session.access_token;
-      // Paiement : marche (gb/mx/za, sinon absent = marche FR historique) et
-      // repertoire de site (retour sur /<dir>/checkout-succes.html). Le portail
+      // Paiement : marche (IASHARK_MARKET.checkoutMarket : gb/mx/za, us pour
+      // /en/ apres config/markets.json#_usdSwitch ; null = marche FR historique,
+      // champ absent) et repertoire de site (retour sur
+      // /<dir>/checkout-succes.html). Jamais une liste de marches ecrite ici :
+      // un marche oublie serait facture au tarif EUR par defaut. Le portail
       // de facturation recoit le repertoire (retour sur /<dir>/compte.html) et,
       // pour « Changer de duree », le flux de changement d'offre.
       var corps = {};
@@ -923,8 +928,10 @@
       }
       if (fonction === 'create-checkout-session') {
         corps.interval = selecteur ? selecteur.interval() : 'month';
-        var code = String((marche() && (marche().checkoutMarket || marche().code)) || dir || '').toLowerCase();
-        if (code === 'gb' || code === 'mx' || code === 'za') corps.market = code;
+        var mk = marche();
+        // Sans lib/market-config.js (repli) : le repertoire pays seul.
+        var code = mk ? (mk.checkoutMarket || '') : (dir === 'gb' || dir === 'mx' || dir === 'za' ? dir : '');
+        if (code) corps.market = String(code).toLowerCase();
         if (dir) corps.dir = dir;
         corps.consent = consentementPaiement;
       }

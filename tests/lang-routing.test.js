@@ -26,8 +26,12 @@ function allRules(text) {
 }
 
 test("marches pays : seuls les pays des marches a devise propre de config/markets.json", () => {
-  const expected = Object.keys(MARKETS)
-    .filter((k) => k[0] !== "_" && k !== MARKETS._defaultMarket)
+  const keys = Object.keys(MARKETS).filter((k) => k[0] !== "_" && k !== MARKETS._defaultMarket);
+  // Marche pays = marche qui a SON repertoire (/gb/ /za/ /mx/). Un marche servi
+  // par un repertoire de langue (us : offre USD de /en/, config/markets.json
+  // #_usdSwitch) n'en est pas un : son pays est route par pays vers ce
+  // repertoire (bloc COUNTRY_DIRS), jamais comme marche pays.
+  const expected = keys.filter((k) => MARKETS._dirs[k])
     .map((k) => {
       // lib/lang-suggest.js (countryMarket) suppose cle de marche = code pays.
       assert.equal(k, MARKETS[k].country.toLowerCase(), "cle de marche " + k + " != pays " + MARKETS[k].country);
@@ -36,6 +40,16 @@ test("marches pays : seuls les pays des marches a devise propre de config/market
     });
   const sort = (a) => a.slice().sort((x, y) => x[0].localeCompare(y[0]));
   assert.deepEqual(sort(R.MARKET_COUNTRIES), sort(expected));
+  const languageMarkets = keys.filter((k) => !MARKETS._dirs[k]);
+  assert.deepEqual(languageMarkets, ["us"]);
+  for (const k of languageMarkets) {
+    const country = MARKETS[k].country;
+    assert.equal(k, country.toLowerCase(), "cle de marche " + k + " != pays " + country);
+    assert.deepEqual(MARKETS[k].dirs, ["en"], k + " : repertoire de langue prevu");
+    assert.ok(!R.MARKET_COUNTRIES.some((m) => m[0] === MARKETS[k].dirs[0]), k + " : /en/ n'est pas un repertoire de marche pays");
+    assert.equal(route(country, "en-US"), "en", country + " -> /en/");
+    assert.equal(routeFile(country, ""), "en", country + " -> /en/ (_redirects)");
+  }
 });
 
 test("tables : repertoires existants, codes ISO, aucun pays en double, jamais un marche pays par la langue", () => {

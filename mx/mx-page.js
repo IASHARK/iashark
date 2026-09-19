@@ -143,6 +143,8 @@
         return;
       }
 
+      // Server availability known before paying (lib/pro-plan-picker.js#whenReady).
+      if (picker && picker.whenReady) await picker.whenReady();
       var interval = picker ? picker.interval() : "month";
       if (picker && !picker.isAvailable()) {
         show("Este plazo todavía no está disponible para pagar. Elige otro plazo o vuelve pronto. No se hizo ningún cargo.", true);

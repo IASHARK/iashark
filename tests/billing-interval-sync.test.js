@@ -51,6 +51,25 @@ test("billingFields : duree du Price Stripe, marche des metadata, valeurs inconn
   assert.deepEqual(billingFields(sub("week", 1, "MX")), { billing_interval: "week", billing_interval_count: 1, market: "mx" });
   assert.deepEqual(billingFields(sub("month", 1)), { billing_interval: "month", billing_interval_count: 1, market: "fr" }, "flux historique sans metadata = fr");
   assert.deepEqual(billingFields(sub("day", 1, "xx")), { billing_interval: null, billing_interval_count: 1, market: null });
+  // Offre USD de /en/ (config/markets.json#_usdSwitch) : marche us enregistre.
+  assert.deepEqual(billingFields(sub("month", 1, "us")), { billing_interval: "month", billing_interval_count: 1, market: "us" });
+});
+
+test("marches acceptes par stripe-webhook / sync-subscription = cles de config/markets.json ; migration 0030 (us)", () => {
+  const cfg = JSON.parse(read("config/markets.json"));
+  const keys = Object.keys(cfg).filter((k) => k[0] !== "_").sort();
+  for (const [name, src] of [["webhook", HOOK], ["sync", SYNC]]) {
+    const m = src.match(/const BILLING_MARKETS = new Set\((\[[^\]]*\])\);/);
+    assert.ok(m, name);
+    assert.deepEqual(JSON.parse(m[1]).sort(), keys, name + " : marche de config/markets.json oublie (sa colonne market resterait NULL)");
+  }
+  const sql = read("supabase/migrations/0030_subscriptions_market_us.sql");
+  assert.match(sql, /add column if not exists market text/);
+  assert.match(sql, /drop constraint if exists subscriptions_market_check/);
+  const list = (sql.match(/market in \(([^)]*)\)/) || [])[1] || "";
+  assert.deepEqual(list.split(",").map((x) => x.trim().replace(/'/g, "")).sort(), keys, "contrainte = cles de marche");
+  assert.doesNotMatch(sql, /alter table public\.users\b|\bdrop column\b|\bdelete\b|\bupdate\b/i, "additive : aucune donnee ni droit modifie");
+  assert.match(sql, /NON APPLIQUEE/);
 });
 
 test("tolerance d'impaye : 1 jour pour l'hebdomadaire, 4 jours pour le mensuel, l'annuel et une duree inconnue", () => {

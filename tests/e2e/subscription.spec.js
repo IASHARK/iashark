@@ -5,6 +5,7 @@ const { test, expect, expectNoHorizontalScroll } = require('./helpers/fixtures')
 const { VERSIONS, CONSENT_BOXES, CURRENCY_SYMBOLS, currencyOfCheckoutMarket } = require('./helpers/versions');
 const { STRIPE_CHECKOUT_URL } = require('./helpers/supabase-mock');
 const { tr } = require('./helpers/site-data');
+const { useUsdSwitch, switchedEnMonthly } = require('./helpers/usd-switch');
 
 // Attend le bloc de consentement monte (le bouton est verrouille jusque-la),
 // coche toutes les cases puis attend le deverrouillage du bouton.
@@ -42,6 +43,8 @@ const CURRENCY_PATTERNS = {
   GBP: /£|\bGBP\b/,
   ZAR: /(^|[^A-Za-z])R ?\d|\bZAR\b/,
   MXN: /MX\$ ?\d|\bMXN\b/,
+  // "$19.99" (USD de /en/ apres config/markets.json#_usdSwitch), jamais "MX$" ni "US$".
+  USD: /(^|[^A-Za-z])\$ ?\d|\bUSD\b/,
 };
 
 for (const v of VERSIONS) {
@@ -354,3 +357,108 @@ for (const v of VERSIONS) {
     });
   });
 }
+
+// Offre USD de /en/ (decision du proprietaire du 19/09/2026) : bascule
+// config/markets.json#_usdSwitch REJOUEE sans etre publiee
+// (tests/e2e/helpers/usd-switch.js). Les tests par version ci-dessus prouvent
+// l'etat actuel (/en/ en EUR, aucun champ market) ; ceux-ci prouvent l'etat
+// apres la bascule : $19.99 par mois, mensuel seul, paiement sur le marche us.
+test.describe('bascule USD de /en/ (config de test _usdSwitch)', () => {
+  function availabilityBodies(page) {
+    const bodies = [];
+    page.on('request', (r) => {
+      if (r.method() !== 'POST' || !/\/functions\/v1\/create-checkout-session/.test(r.url())) return;
+      try { const b = JSON.parse(r.postData() || '{}'); if (b.mode === 'availability') bodies.push(b); } catch (e) { /* corps non JSON */ }
+    });
+    return bodies;
+  }
+
+  test('abonnement : $19.99 / mois seul, paiement envoye sur le marche us @mobile', async ({ page, supa, consoleErrors }) => {
+    expect(switchedEnMonthly(), 'formatage en-US du prix de la config').toBe('$19.99');
+    await useUsdSwitch(page);
+    const avail = availabilityBodies(page);
+    await supa.as('free');
+    supa.onFunction('create-checkout-session', { status: 200, json: { processed: true, url: STRIPE_CHECKOUT_URL } });
+    await page.goto('/en/abonnement.html');
+    const market = await page.evaluate(() => {
+      const M = window.IASHARK_MARKET;
+      return { code: M.code, dir: M.dir, currency: M.currency, checkoutMarket: M.checkoutMarket, priceIntlLocale: M.priceIntlLocale, i18nMarket: window.I18N && window.I18N.market };
+    });
+    expect(market).toEqual({ code: 'us', dir: 'en', currency: 'USD', checkoutMarket: 'us', priceIntlLocale: 'en-US', i18nMarket: 'us' });
+    await expect(page.locator('#proPlanPicker .iash-plans-single')).toHaveAttribute('data-interval', 'month');
+    await expect(page.locator('#proPlanPicker input[type="radio"]')).toHaveCount(0);
+    await expect(page.locator('#proPlanPicker [data-market-price="pro.month"]')).toHaveText('$19.99');
+    await expect(page.locator('#proPlanPicker [data-market-price="pro.week"], #proPlanPicker [data-market-price="pro.year"]')).toHaveCount(0);
+    await expect(page.locator('#proCommitment')).toBeHidden();
+    const card = squash(await page.locator('.pricing-card').innerText());
+    expect(card).toContain('$19.99');
+    expect(card, 'aucun prix EUR ni "US$" dans la carte prix').not.toMatch(/€|19[.,]95|US\$/);
+    await expect.poll(() => avail.length, { message: 'disponibilites demandees pour le marche us' }).toBeGreaterThan(0);
+    expect(avail[0]).toEqual({ mode: 'availability', market: 'us' });
+
+    const box = page.locator('#checkoutConsent');
+    await expect(box).toHaveAttribute('data-consent-regime', 'eu');
+    await tickAll(page);
+    const call = supa.waitForCall('create-checkout-session');
+    await page.locator('#subscribeButton').click();
+    const c = await call;
+    expect(c.body.market, 'jamais le tarif EUR par defaut').toBe('us');
+    expect(c.body.dir).toBe('en');
+    expect(c.body.interval).toBe('month');
+    expect(currencyOfCheckoutMarket(c.body.market), 'devise facturee').toBe('USD');
+    expect(c.body.consent).toMatchObject({ terms: true, waiver: true, dir: 'en', locale: 'en' });
+    await page.waitForURL(STRIPE_CHECKOUT_URL);
+    expect(consoleErrors).toEqual([]);
+  });
+
+  // Ordre de deploiement : site publie AVANT la nouvelle fonction de paiement.
+  // L'ancienne fonction ne connait ni le marche us ni le mode "availability" :
+  // /en/ n'envoie alors aucune demande de paiement ("paiement pas encore
+  // ouvert"), jamais un paiement USD traite par une fonction qui l'ignore.
+  test('ancienne fonction de paiement encore deployee : aucun paiement USD propose sur /en/ @mobile', async ({ page, supa, dictFor }) => {
+    const dict = await dictFor('en');
+    await useUsdSwitch(page);
+    await supa.as('free');
+    supa.legacyCheckoutFunction();
+    supa.onFunction('create-checkout-session', { status: 200, json: { processed: true, url: STRIPE_CHECKOUT_URL } });
+    await page.goto('/en/abonnement.html');
+    await expect(page.locator('#proPlanPicker .iash-plans-closed')).toHaveText(tr(dict, 'pro_plans.closed'));
+    await expect(page.locator('#proPlanPicker [data-market-price]')).toHaveCount(0);
+    await expect(page.locator('#subscribeButton')).toBeHidden();
+    await page.waitForLoadState('networkidle').catch(() => {});
+    expect(supa.callsTo('create-checkout-session')).toHaveLength(0);
+  });
+
+  test('accueil et landing /en/ : $19.99 et $0, aucun prix EUR @mobile', async ({ page, dictFor }) => {
+    const dict = await dictFor('en');
+    await useUsdSwitch(page);
+    await page.goto('/en/');
+    await expect(page.locator('#prixPro')).toHaveText('$19.99');
+    await expect(page.locator('#prixGratuit')).toHaveText('$0');
+    await expect(page.locator('#heroPrice')).toHaveText(tr(dict, 'home_app.hero_price_line').replace('{price}', '$19.99'));
+    await page.goto('/en/landing.html');
+    await expect(page.locator('[data-market-price="pro"]').first()).toHaveText('$19.99');
+    await expect(page.locator('[data-market-price="free"]').first()).toHaveText('$0');
+  });
+});
+
+// Ordre de deploiement, flux historique : avec l'ancienne fonction de paiement
+// encore deployee, /fr/ garde le paiement mensuel sans champ market (seul flux
+// que toutes les versions facturent au bon prix) ; aucune autre duree proposee.
+test.describe('ancienne fonction de paiement encore deployee (ordre de deploiement)', () => {
+  test('/fr/ : mensuel seul, sans champ market @mobile', async ({ page, supa }) => {
+    await supa.as('free');
+    supa.legacyCheckoutFunction();
+    supa.onFunction('create-checkout-session', { status: 200, json: { processed: true, url: STRIPE_CHECKOUT_URL } });
+    await page.goto('/fr/abonnement.html');
+    await expect(page.locator('#proPlanPicker [data-interval]')).toHaveCount(1);
+    await expect(page.locator('#proPlanPicker [data-interval="month"]')).toHaveCount(1);
+    await tickAll(page);
+    const call = supa.waitForCall('create-checkout-session');
+    await page.locator('#subscribeButton').click();
+    const c = await call;
+    expect(c.body.interval).toBe('month');
+    expect(c.body, 'flux historique : aucun champ market').not.toHaveProperty('market');
+    await page.waitForURL(STRIPE_CHECKOUT_URL);
+  });
+});

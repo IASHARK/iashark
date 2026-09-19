@@ -186,13 +186,14 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
   </section>
 
   <section class="section">
+    <!-- Prices written by scripts/build-locales.js from config/markets.json (market of /en/: _dirs.en.market). A period the market does not sell is hidden (data-market-price-if), never priced by hand. LEGAL REVIEW / BLOCKED_DECISION before config/markets.json#_usdSwitch is applied: USD monthly-only offer (articles 5, 7 and 8 still describe weekly / annual periods; "VAT included" wording for customers outside the EU; new TERMS_VERSIONS.en in lib/checkout-consent.js if the text changes). -->
     <h2>Article 6 — Prices and billing periods</h2>
     <div class="highlight">
-      <p><strong>Weekly: €6.99 per week, VAT included.</strong> Charged when you subscribe, then every week on the same day. Renews automatically every week until cancelled, no minimum term.</p>
-      <p><strong>Monthly: €19.95 per month, VAT included.</strong> Charged when you subscribe, then every month on the same date. Renews automatically every month until cancelled, no minimum term.</p>
-      <p><strong>Annual: €199 per year, VAT included.</strong> Charged once when you subscribe, then on each anniversary date. Paid for twelve months and renewed automatically for one year unless cancelled before the renewal date (Article 9).</p>
+      <p data-market-price-if="pro.week"><strong>Weekly: <span data-market-price="pro.week">€6.99</span> per week, VAT included.</strong> Charged when you subscribe, then every week on the same day. Renews automatically every week until cancelled, no minimum term.</p>
+      <p><strong>Monthly: <span data-market-price="pro.month">€19.95</span> per month, VAT included.</strong> Charged when you subscribe, then every month on the same date. Renews automatically every month until cancelled, no minimum term.</p>
+      <p data-market-price-if="pro.year"><strong>Annual: <span data-market-price="pro.year">€199</span> per year, VAT included.</strong> Charged once when you subscribe, then on each anniversary date. Paid for twelve months and renewed automatically for one year unless cancelled before the renewal date (Article 9).</p>
     </div>
-    <p>For information, €199 a year works out at €16.59 a month, which is 16% less than twelve months at the monthly price (€239.40).</p>
+    <p data-market-price-if="pro.year">For information, €199 a year works out at €16.59 a month, which is 16% less than twelve months at the monthly price (€239.40).</p>
     <p>The applicable price is the one displayed on the Subscription page for the chosen period and summarised on the payment page before you confirm your order. Any price change will be notified to you before it takes effect; it will only apply from the next billing period and you may cancel your subscription before that date.</p>
   </section>
 

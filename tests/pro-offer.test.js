@@ -194,12 +194,24 @@ test("abonnement-page.js : une duree = prix seul sans « meme acces », plusieur
     assert.equal(cfg.els.subscribeButton.hidden, true, dir + " : pas de bouton qui echoue");
     assert.equal(cfg.els.checkoutConsent.hidden, true, dir);
   }
-  // Marche rouvert, fonction deployee sans mode "availability" -> disponibilite inconnue, configuration conservee.
+  // Marche rouvert, fonction deployee sans mode "availability" (plus ancienne
+  // que le site : ordre de deploiement, 19/09/2026) -> disponibilites inconnues :
+  // aucun paiement de marche pays (l'ancienne fonction ignore la duree et,
+  // selon sa version, refuse le marche ou le facture au prix FR).
   const gb = await runSubscriptionPage("gb", null, true);
   assert.equal(gb.calls.length, 1);
   assert.deepEqual(gb.calls[0], { mode: "availability", market: "gb" });
-  assert.equal((gb.els.proPlanPicker.innerHTML.match(/<input type="radio"/g) || []).length, 3);
-  assert.equal(gb.els.proCommitment.hidden, false, "plusieurs durees : « meme acces » affiche");
+  assert.match(gb.els.proPlanPicker.innerHTML, /^<p class="iash-plans-closed" role="status">/);
+  assert.equal(gb.els.subscribeButton.hidden, true, "ancienne fonction : pas de paiement GBP");
+  // Marche FR rouvert (3 durees), meme fonction : le mensuel seul, sans champ market.
+  const frOld = await runSubscriptionPage("fr", null, true);
+  assert.deepEqual(frOld.calls[0], { mode: "availability" });
+  assert.match(frOld.els.proPlanPicker.innerHTML, /^<div class="iash-plans iash-plans-single" data-interval="month">/);
+  assert.equal(frOld.els.subscribeButton.hidden, false);
+  // Fonction a jour, toutes les durees ouvertes : 3 choix et « meme acces ».
+  const gbAll = await runSubscriptionPage("gb", { week: true, month: true, year: true }, true);
+  assert.equal((gbAll.els.proPlanPicker.innerHTML.match(/<input type="radio"/g) || []).length, 3);
+  assert.equal(gbAll.els.proCommitment.hidden, false, "plusieurs durees : « meme acces » affiche");
   // Serveur : semaine fermee -> masquee.
   const gb2 = await runSubscriptionPage("gb", { week: false, month: true, year: true }, true);
   assert.doesNotMatch(gb2.els.proPlanPicker.innerHTML, /value="week"/);

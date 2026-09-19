@@ -41,13 +41,17 @@ const SITE_URL = Deno.env.get("SITE_URL") || "https://iashark.com";
 // Regles (jamais de repli silencieux vers un autre prix, une autre duree ou
 // une autre devise) :
 // - market absent = marche EUR "fr" (flux historique) ; market gb/mx/za =
-//   marche pays ; toute autre valeur = market_not_configured ;
+//   marche pays ; market us = offre USD de /en/ (19,99 USD/mois, secret
+//   STRIPE_PRICE_ID_US_MONTH ; envoye par le front seulement apres
+//   config/markets.json#_usdSwitch) ; toute autre valeur = market_not_configured ;
 // - interval absent = PRO_DEFAULT_INTERVAL ("month", retro-compatibilite des
 //   pages deja en cache) ; interval invalide = 400 invalid_interval ;
 // - secret de la duree absent = processed:false, reason
 //   "interval_not_configured" (ou "market_not_configured" si aucune duree du
 //   marche n'est configuree) -> le front affiche "bientot disponible" ;
-// - seul repli admis : STRIPE_PRICE_ID (ancien secret) pour le MENSUEL FR ;
+// - id du Price : secret de la duree, puis ancien secret STRIPE_PRICE_ID (MENSUEL
+//   FR seulement), puis id ecrit dans config/markets.json#<marche>.stripePriceIds
+//   (pricing.ts) - toujours pour ce marche et cette duree ;
 // - avant toute session, le Price Stripe est relu et doit correspondre
 //   exactement (devise, periodicite x1, montant TTC) au prix affiche, sinon
 //   processed:false, reason "price_mismatch".

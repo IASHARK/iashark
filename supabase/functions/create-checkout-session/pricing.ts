@@ -5,10 +5,19 @@
 //
 // Offre unique Pro, 3 durees (decision du proprietaire du 16/09/2026).
 // ZA : pas de duree annuelle au lancement (aucune ligne year dans la table). Regles : voir en-tete de index.ts. Jamais de repli vers un
-// autre prix, une autre duree ou une autre devise ; seul repli admis :
-// l'ancien secret STRIPE_PRICE_ID pour le MENSUEL FR (legacyEnvKey).
+// autre prix, une autre duree ou une autre devise.
+//
+// Id du Price Stripe d'un marche et d'une duree, dans cet ordre (19/09/2026) :
+//   1. secret Supabase envKey (ex. STRIPE_PRICE_ID_GB_MONTH) ;
+//   2. ancien secret legacyEnvKey (STRIPE_PRICE_ID, mensuel FR seulement) ;
+//   3. priceId de la configuration (config/markets.json#<marche>.stripePriceIds,
+//      recopie dans prices.generated.ts) : un id de Price n'est pas un secret.
+// Toujours pour CE marche et CETTE duree ; le Price obtenu est ensuite relu chez
+// Stripe et doit correspondre exactement au prix affiche (priceMatches).
 import { PRO_DEFAULT_INTERVAL, PRO_INTERVALS, PRO_PRICES } from "./prices.generated.ts";
-import type { IntervalKey } from "./prices.generated.ts";
+import type { IntervalKey, PriceRow } from "./prices.generated.ts";
+
+type PriceTable = Record<string, { currency: string; intervals: Partial<Record<IntervalKey, PriceRow>> }>;
 
 export type GetEnv = (name: string) => string | undefined | null;
 
@@ -16,17 +25,20 @@ export type PriceResolution =
   | { ok: true; priceId: string; usedMarket: string; interval: IntervalKey; currency: string; unitAmount: number }
   | { ok: false; requestedMarket: string; interval: IntervalKey | null; reason: "invalid_interval" | "market_not_configured" | "interval_not_configured" };
 
-// Marches envoyes explicitement par le front (gb/mx/za). Le marche EUR "fr"
-// est le marche par defaut : champ market absent.
+// Marches envoyes explicitement par le front (gb/mx/za ; us = USD de /en/ une
+// fois config/markets.json#_usdSwitch applique). Le marche EUR "fr" est le
+// marche par defaut : champ market absent.
 export const CHECKOUT_MARKETS = Object.keys(PRO_PRICES).filter((k) => k !== "fr");
 
-function marketKey(market: unknown): { raw: string; key: string } {
+// prices : table des prix (par defaut celle generee depuis config/markets.json ;
+// les tests passent une table construite par scripts/build-locales.js).
+function marketKey(market: unknown, prices: PriceTable): { raw: string; key: string } {
   const raw = typeof market === "string" ? market.toLowerCase() : "";
-  return { raw, key: raw ? (CHECKOUT_MARKETS.includes(raw) ? raw : "") : "fr" };
+  return { raw, key: raw ? (raw !== "fr" && Object.prototype.hasOwnProperty.call(prices, raw) ? raw : "") : "fr" };
 }
 
-function envPriceId(getEnv: GetEnv, market: string, interval: IntervalKey): string | null {
-  const row = PRO_PRICES[market]?.intervals[interval];
+function configuredPriceId(getEnv: GetEnv, prices: PriceTable, market: string, interval: IntervalKey): string | null {
+  const row = prices[market]?.intervals[interval];
   if (!row) return null;
   const main = getEnv(row.envKey);
   if (typeof main === "string" && main.trim()) return main.trim();
@@ -34,11 +46,12 @@ function envPriceId(getEnv: GetEnv, market: string, interval: IntervalKey): stri
     const legacy = getEnv(row.legacyEnvKey);
     if (typeof legacy === "string" && legacy.trim()) return legacy.trim();
   }
+  if (typeof row.priceId === "string" && row.priceId.trim()) return row.priceId.trim();
   return null;
 }
 
-export function resolvePriceId(getEnv: GetEnv, market: unknown, interval: unknown): PriceResolution {
-  const { raw, key } = marketKey(market);
+export function resolvePriceId(getEnv: GetEnv, market: unknown, interval: unknown, prices: PriceTable = PRO_PRICES): PriceResolution {
+  const { raw, key } = marketKey(market, prices);
   let iv: IntervalKey = PRO_DEFAULT_INTERVAL;
   if (interval !== undefined && interval !== null && interval !== "") {
     const s = typeof interval === "string" ? interval.toLowerCase() : "";
@@ -46,20 +59,21 @@ export function resolvePriceId(getEnv: GetEnv, market: unknown, interval: unknow
     iv = s as IntervalKey;
   }
   if (!key) return { ok: false, requestedMarket: raw, interval: iv, reason: "market_not_configured" };
-  const priceId = envPriceId(getEnv, key, iv);
+  const priceId = configuredPriceId(getEnv, prices, key, iv);
   if (!priceId) {
-    const anyConfigured = PRO_INTERVALS.some((i) => !!envPriceId(getEnv, key, i));
+    const anyConfigured = PRO_INTERVALS.some((i) => !!configuredPriceId(getEnv, prices, key, i));
     return { ok: false, requestedMarket: key, interval: iv, reason: anyConfigured ? "interval_not_configured" : "market_not_configured" };
   }
-  const row = PRO_PRICES[key].intervals[iv]!;
-  return { ok: true, priceId, usedMarket: key, interval: iv, currency: PRO_PRICES[key].currency, unitAmount: row.unitAmount };
+  const row = prices[key].intervals[iv]!;
+  return { ok: true, priceId, usedMarket: key, interval: iv, currency: prices[key].currency, unitAmount: row.unitAmount };
 }
 
-// Durees ouvertes au paiement (booleens seulement, aucun id de Price expose).
-export function availability(getEnv: GetEnv, market: unknown): Record<IntervalKey, boolean> {
-  const { key } = marketKey(market);
+// Durees ouvertes au paiement (booleens seulement, aucun id de Price expose) :
+// meme resolution que resolvePriceId (secret, ancien secret, puis configuration).
+export function availability(getEnv: GetEnv, market: unknown, prices: PriceTable = PRO_PRICES): Record<IntervalKey, boolean> {
+  const { key } = marketKey(market, prices);
   const out = {} as Record<IntervalKey, boolean>;
-  for (const iv of PRO_INTERVALS) out[iv] = !!(key && envPriceId(getEnv, key, iv));
+  for (const iv of PRO_INTERVALS) out[iv] = !!(key && configuredPriceId(getEnv, prices, key, iv));
   return out;
 }
 

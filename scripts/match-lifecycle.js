@@ -78,12 +78,14 @@ function versionMatchHref(id, leagueKey, dir, root) {
 
 // Lien d'un match dans le resume « Analyses IA du jour » de l'accueil d'une
 // version (pipeline injectHomeSeoSummary, scripts/build-locales.js
-// rewriteHomeMatchSummary). Versions pays gb, za, mx (marche propre,
-// config/markets.json#_dirs.<dir>.market != "fr") : page match de la version si
+// rewriteHomeMatchSummary). Versions pays gb, za, mx (repertoire de leur propre
+// marche : config/markets.json#_dirs.<dir>.market == <dir>, jamais "fr" ; /en/
+// reste une version de langue meme sur le marche "us" de
+// config/markets.json#_usdSwitch) : page match de la version si
 // elle existe, sinon page championnat DE LA VERSION (jamais la page francaise ni
 // une autre version, audit du 16/09/2026) ; sinon nom sans lien. Autres
 // versions : versionMatchHref (version la plus proche).
-function countryDir(dir) { return !!(C.DIRS[dir] && C.DIRS[dir].market && C.DIRS[dir].market !== "fr"); }
+function countryDir(dir) { return !!(C.DIRS[dir] && C.DIRS[dir].market && C.DIRS[dir].market !== "fr" && C.DIRS[dir].market === dir); }
 function leagueKeyOf(id, root) {
   try { var e = loadRegistry(root).matches[String(id)]; if (e && e.league_key) return e.league_key; } catch (err) {}
   try { return JSON.parse(fs.readFileSync(path.join(root, "match", id + ".json"), "utf8")).league_key || null; } catch (err) {}

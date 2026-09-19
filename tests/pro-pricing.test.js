@@ -21,8 +21,12 @@ const EXPECTED = {
   fr: { currency: "EUR", week: 6.99, month: 19.95, year: 199 },
   gb: { currency: "GBP", week: 4.99, month: 14.99, year: 149 },
   mx: { currency: "MXN", week: 69, month: 199, year: 1990 },
-  za: { currency: "ZAR", week: 69, month: 199, year: null }
+  za: { currency: "ZAR", week: 69, month: 199, year: null },
+  // Offre USD de /en/ (decision du 19/09/2026) : mensuel seul, inerte tant que
+  // config/markets.json#_usdSwitch n'est pas applique (tests/usd-switch.test.js).
+  us: { currency: "USD", week: null, month: 19.99, year: null }
 };
+const USD_SWITCHED = MARKETS._dirs.en.market === "us";
 const norm = (s) => String(s).replace(/[  ]/g, " ");
 
 function loadMarketLib() {
@@ -36,7 +40,7 @@ test("config : une seule offre payante (pro), prix valides par marche et par dur
   assert.deepEqual(MARKETS._planKeys, ["free", "pro"]);
   assert.deepEqual(MARKETS._proIntervals, INTERVALS);
   assert.equal(MARKETS._proDefaultInterval, "month");
-  assert.deepEqual(MARKET_KEYS.slice().sort(), ["fr", "gb", "mx", "za"]);
+  assert.deepEqual(MARKET_KEYS.slice().sort(), ["fr", "gb", "mx", "us", "za"]);
   for (const k of MARKET_KEYS) {
     const m = MARKETS[k];
     assert.equal(m.currency, EXPECTED[k].currency, k);
@@ -50,10 +54,16 @@ test("config : une seule offre payante (pro), prix valides par marche et par dur
     assert.deepEqual(Object.keys(m.stripeEnvKeys).sort(), sold.slice().sort(), k + " : secrets Stripe");
     for (const iv of sold) assert.equal(m.stripeEnvKeys[iv], "STRIPE_PRICE_ID_" + k.toUpperCase() + "_" + iv.toUpperCase());
     assert.ok(!("stripeEnvKey" in m), k + " : ancien secret unique retire");
+    // Ids de Price Stripe de la configuration (facultatifs, dernier recours de
+    // create-checkout-session) : jamais pour une duree non vendue.
+    for (const iv of Object.keys(m.stripePriceIds || {})) {
+      assert.ok(sold.includes(iv), k + "." + iv + " : id de Price pour une duree non vendue");
+      assert.match(m.stripePriceIds[iv], /^price_[A-Za-z0-9]+$/, k + "." + iv);
+    }
   }
   assert.ok(!("year" in MARKETS.za.stripeEnvKeys), "aucun STRIPE_PRICE_ID_ZA_YEAR lu");
   assert.equal(MARKETS.fr.stripeEnvKeyLegacyMonth, "STRIPE_PRICE_ID", "seul repli admis : mensuel FR");
-  for (const k of ["gb", "mx", "za"]) assert.equal(MARKETS[k].stripeEnvKeyLegacyMonth, null, k);
+  for (const k of ["gb", "mx", "za", "us"]) assert.equal(MARKETS[k].stripeEnvKeyLegacyMonth, null, k);
   assert.doesNotMatch(read("config/markets.json"), /\bedge\b|annual_edge/i, "aucune reference a l'offre Edge");
 });
 
@@ -169,7 +179,9 @@ test("create-checkout-session (pricing.ts) : duree validee, secret absent = bien
   assert.equal(pricing.resolvePriceId(env(all), undefined, "quarter").reason, "invalid_interval");
   assert.equal(pricing.resolvePriceId(env(all), "gb", 12).reason, "invalid_interval");
   assert.equal(pricing.resolvePriceId(env(all), "fr", "month").reason, "market_not_configured", "fr explicite : comportement historique");
-  assert.equal(pricing.resolvePriceId(env(all), "us", "month").reason, "market_not_configured");
+  assert.equal(pricing.resolvePriceId(env(all), "ca", "month").reason, "market_not_configured", "marche inconnu");
+  assert.equal(pricing.resolvePriceId(env(all), "us", "month").unitAmount, 1999, "us : USD mensuel");
+  assert.equal(pricing.resolvePriceId(env(all), "us", "year").reason, "interval_not_configured", "us : annuel non vendu");
   // ZA : annuel non vendu -> jamais facture, meme si un secret existait.
   assert.equal(pricing.resolvePriceId(env(Object.assign({ STRIPE_PRICE_ID_ZA_YEAR: "price_cree_par_erreur" }, all)), "za", "year").reason, "interval_not_configured");
   // Duree dont le secret manque : jamais le prix d'une autre duree.
@@ -186,7 +198,8 @@ test("create-checkout-session (pricing.ts) : duree validee, secret absent = bien
 
   assert.deepEqual({ ...pricing.availability(env({ STRIPE_PRICE_ID_MX_YEAR: "p" }), "mx") }, { week: false, month: false, year: true });
   assert.deepEqual({ ...pricing.availability(env(all), "za") }, { week: true, month: true, year: false });
-  assert.deepEqual({ ...pricing.availability(env(all), "us") }, { week: false, month: false, year: false });
+  assert.deepEqual({ ...pricing.availability(env(all), "ca") }, { week: false, month: false, year: false });
+  assert.deepEqual({ ...pricing.availability(env(all), "us") }, { week: false, month: true, year: false });
 
   const good = { active: true, type: "recurring", currency: "gbp", unit_amount: 14900, tax_behavior: "inclusive", recurring: { interval: "year", interval_count: 1 } };
   const exp = { currency: "GBP", unitAmount: 14900, interval: "year" };
@@ -195,6 +208,50 @@ test("create-checkout-session (pricing.ts) : duree validee, secret absent = bien
   for (const bad of [{ currency: "eur" }, { unit_amount: 14999 }, { recurring: { interval: "month", interval_count: 1 } }, { recurring: { interval: "year", interval_count: 2 } }, { active: false }, { tax_behavior: "exclusive" }, { type: "one_time" }]) {
     assert.equal(pricing.priceMatches({ ...good, ...bad }, exp), false, JSON.stringify(bad));
   }
+});
+
+test("create-checkout-session : id de Price de la configuration en dernier recours (secret, ancien secret, puis configuration), jamais d'un autre marche ou d'une autre duree", async () => {
+  const builder = require(path.join(ROOT, "scripts/build-locales.js"));
+  const pricing = await import(pathToFileURL(path.join(ROOT, "supabase/functions/create-checkout-session/pricing.ts")).href);
+  const env = (o) => (k) => o[k];
+  // FR mensuel comme aujourd'hui : le secret historique STRIPE_PRICE_ID, table generee reelle.
+  const today = pricing.resolvePriceId(env({ STRIPE_PRICE_ID: "price_1UB7tpCz0CerLuxwNxsTsMRM" }), undefined, "month");
+  assert.deepEqual({ ...today }, { ok: true, priceId: "price_1UB7tpCz0CerLuxwNxsTsMRM", usedMarket: "fr", interval: "month", currency: "EUR", unitAmount: 1995 });
+  assert.deepEqual({ ...pricing.availability(env({ STRIPE_PRICE_ID: "p" }), undefined) }, { week: false, month: true, year: false }, "flux actuel : mensuel FR seul");
+
+  const cfg = JSON.parse(JSON.stringify(MARKETS));
+  cfg.fr.stripePriceIds = { week: "price_cfgFrWeek", month: "price_cfgFrMonth", year: "price_cfgFrYear" };
+  cfg.gb.stripePriceIds = { month: "price_cfgGbMonth" };
+  cfg.us.stripePriceIds = { month: "price_cfgUsMonth" };
+  cfg.za.stripePriceIds = { year: "price_cfgZaYear" };
+  const T = builder.checkoutPriceTable(cfg);
+  assert.equal(T.fr.intervals.month.priceId, "price_cfgFrMonth");
+  assert.equal(T.gb.intervals.week.priceId, null, "duree vendue sans id : null");
+  assert.ok(!("year" in T.za.intervals), "ZA : annuel non vendu, id de configuration ignore");
+  const R = (e, m, iv) => pricing.resolvePriceId(env(e), m, iv, T);
+  // Ordre : secret du marche/duree, ancien secret (mensuel FR), configuration.
+  assert.equal(R({ STRIPE_PRICE_ID_FR_MONTH: "price_env", STRIPE_PRICE_ID: "price_legacy" }, undefined, "month").priceId, "price_env");
+  assert.equal(R({ STRIPE_PRICE_ID: "price_legacy" }, undefined, "month").priceId, "price_legacy", "FR mensuel : secret historique avant la configuration");
+  assert.equal(R({}, undefined, "month").priceId, "price_cfgFrMonth");
+  assert.equal(R({}, undefined, "week").priceId, "price_cfgFrWeek");
+  assert.equal(R({ STRIPE_PRICE_ID: "price_legacy" }, undefined, "year").priceId, "price_cfgFrYear", "ancien secret : mensuel seulement");
+  const gb = R({}, "gb", "month");
+  assert.deepEqual([gb.ok, gb.priceId, gb.currency, gb.unitAmount], [true, "price_cfgGbMonth", "GBP", 1499]);
+  assert.equal(R({ STRIPE_PRICE_ID_GB_MONTH: "price_envGb" }, "gb", "month").priceId, "price_envGb", "secret prioritaire");
+  assert.equal(R({}, "gb", "week").reason, "interval_not_configured", "GB semaine : aucun id, jamais le mensuel");
+  assert.equal(R({}, "gb", "year").reason, "interval_not_configured");
+  assert.equal(R({}, "mx", "month").reason, "market_not_configured", "jamais l'id d'un autre marche");
+  assert.equal(R({}, "za", "year").reason, "market_not_configured", "ZA annuel non vendu : id de configuration jamais lu");
+  assert.equal(R({}, "za", "month").reason, "market_not_configured", "id d'une duree non vendue jamais utilise");
+  const us = R({}, "us", "month");
+  assert.deepEqual([us.ok, us.priceId, us.currency, us.unitAmount], [true, "price_cfgUsMonth", "USD", 1999]);
+  assert.deepEqual({ ...pricing.availability(env({}), undefined, T) }, { week: true, month: true, year: true });
+  assert.deepEqual({ ...pricing.availability(env({}), "gb", T) }, { week: false, month: true, year: false });
+  assert.deepEqual({ ...pricing.availability(env({}), "mx", T) }, { week: false, month: false, year: false });
+  // Le Price resolu reste relu chez Stripe et compare au prix affiche.
+  const src = read("supabase/functions/create-checkout-session/index.ts");
+  assert.ok(src.indexOf("resolvePriceId(getEnv, requestedMarket, requestedInterval)") < src.indexOf("priceMatches("));
+  assert.match(read("supabase/functions/create-checkout-session/pricing.ts"), /if \(typeof row\.priceId === "string" && row\.priceId\.trim\(\)\) return row\.priceId\.trim\(\);\n  return null;/);
 });
 
 test("create-checkout-session (source) : disponibilites sans auth, controles avant la session Stripe, aucun second abonnement", () => {
@@ -232,9 +289,15 @@ test("selecteur : 3 options (2 en ZA), Mois coche par defaut, equivalent et econ
     assert.equal(P.pickDefault(offer), "month", k + " : Mois par defaut");
     const html = P.buildHtml(offer, t, "t", P.pickDefault(offer), {});
     const sold = INTERVALS.filter((iv) => EXPECTED[k][iv] != null);
-    assert.deepEqual(radios(html).map((r) => r.match(/value="(\w+)"/)[1]), sold, k);
-    assert.equal(radios(html).filter((r) => / checked/.test(r)).length, 1, k);
-    assert.match(radios(html).find((r) => / checked/.test(r)), /value="month"/, k);
+    if (sold.length === 1) {
+      // us : mensuel seul -> son prix seul, rien a choisir.
+      assert.match(html, /^<div class="iash-plans iash-plans-single" data-interval="month">/, k);
+      assert.equal(radios(html).length, 0, k);
+    } else {
+      assert.deepEqual(radios(html).map((r) => r.match(/value="(\w+)"/)[1]), sold, k);
+      assert.equal(radios(html).filter((r) => / checked/.test(r)).length, 1, k);
+      assert.match(radios(html).find((r) => / checked/.test(r)), /value="month"/, k);
+    }
     for (const iv of sold) assert.match(html, new RegExp('data-market-price="pro\\.' + iv + '">'), k + " " + iv);
     if (EXPECTED[k].year != null) {
       const y = offer.intervals[2];
@@ -299,6 +362,13 @@ test("checkoutOpen : seules les durees payables en ligne sont affichees, les aut
     assert.deepEqual(P0.visibleIntervals(closedOffer), [], k);
     assert.match(P0.buildHtml(closedOffer, (x) => P0.textFor(x, null, {}), "z", null, null), /^<p class="iash-plans-closed" role="status">/, k);
   }
+  // us (offre USD de /en/) : ferme tant que config/markets.json#_usdSwitch
+  // n'est pas applique ; la bascule ouvre le mensuel seul.
+  if (!USD_SWITCHED) assert.deepEqual(MARKETS.us.checkoutOpen, [], "us : aucune duree payable avant la bascule");
+  assert.match(MARKETS.us.checkoutOpen_readme, /POUR OUVRIR CE MARCHE[\s\S]*secrets[\s\S]*deployer[\s\S]*lister ici les durees[\s\S]*_dirs\.en\.market/);
+  const usOpen = lib.proOffer(MARKETS.us.prices, "USD", "en-US", ["month"]);
+  assert.deepEqual(P0.visibleIntervals(usOpen), ["month"]);
+  assert.match(P0.buildHtml(usOpen, (x) => P0.textFor(x, null, {}), "u", "month", {}), /<b data-market-price="pro\.month">\$19\.99<\/b>/);
   const P = loadPicker();
   const t = (k) => P.textFor(k, null, {});
   assert.deepEqual(P.visibleIntervals(offer), ["month"]);
@@ -359,6 +429,42 @@ test("disponibilite serveur : duree fermee masquee, inconnue = configuration, au
   assert.match(api.el.innerHTML, /iash-plans-closed/);
   // Marche sans aucun prix : rien a monter (le repli HTML reste affiche).
   assert.equal(win.IasharkProPlanPicker.mount(fakeContainer(), { market: { proOffer: () => ({ defaultInterval: "month", intervals: [{ interval: "month", amount: null }] }) } }), null, "marche sans aucun prix : rien a monter");
+});
+
+test("ordre de deploiement : fonction de paiement plus ancienne que le site -> seul le mensuel du marche par defaut reste payable", async () => {
+  // Anciennes versions de create-checkout-session (avant le 16/09/2026) : pas de
+  // mode "availability", duree ignoree (mensuel facture), marche inconnu refuse
+  // ou (12/09) facture au prix FR. Le selecteur ne propose alors que le flux
+  // historique : mensuel, sans champ market.
+  const offer = lib.proOffer(MARKETS.fr.prices, "EUR", "fr-FR", ["week", "month", "year"]);
+  const usOffer = lib.proOffer(MARKETS.us.prices, "USD", "en-US", ["month"]);
+  async function mountWith(response, market) {
+    const bodies = [];
+    const win = { I18N: null, IasharkApp: { url: "https://x.supabase.co", key: "anon" },
+      fetch: async (url, init) => { bodies.push(JSON.parse(init.body)); return { json: async () => response }; } };
+    new Function("window", read("lib/pro-plan-picker.js"))(win);
+    const api = win.IasharkProPlanPicker.mount(fakeContainer(), { market });
+    await api.loadAvailability();
+    await api.whenReady();
+    return { api, bodies };
+  }
+  const oldFr = await mountWith({ ok: false, code: "consent_required", missing: ["terms", "waiver"] }, { proOffer: () => offer, code: "fr", checkoutMarket: null });
+  assert.deepEqual(oldFr.bodies, [{ mode: "availability" }]);
+  assert.deepEqual(oldFr.api.visible(), ["month"], "ancienne fonction : mensuel FR seul");
+  assert.equal(oldFr.api.isAvailable("week"), false);
+  assert.equal(oldFr.api.isAvailable("year"), false);
+  const oldUs = await mountWith({ ok: true, processed: false, market: "us", reason: "market_not_configured" }, { proOffer: () => usOffer, code: "us", checkoutMarket: "us" });
+  assert.deepEqual(oldUs.bodies, [{ mode: "availability", market: "us" }]);
+  assert.deepEqual(oldUs.api.visible(), [], "ancienne fonction : aucun paiement USD propose (« paiement pas encore ouvert »)");
+  assert.equal(oldUs.api.isAvailable(), false);
+  const off = await mountWith({ ok: true, payment_provider: "disabled", processed: false }, { proOffer: () => offer, code: "fr", checkoutMarket: null });
+  assert.deepEqual(off.api.visible(), ["month"], "paiement desactive : flux historique seul");
+  const fresh = await mountWith({ ok: true, processed: false, mode: "availability", intervals: { week: true, month: true, year: false } }, { proOffer: () => offer, code: "fr", checkoutMarket: null });
+  assert.deepEqual(fresh.api.visible(), ["week", "month"], "fonction a jour : disponibilites du serveur");
+  for (const f of ["abonnement-page.js", "account-page.js", "gb/gb-page.js", "mx/mx-page.js", "za/za-page.js"]) {
+    const js = read(f);
+    assert.ok(/whenReady\(\)/.test(js) && js.indexOf("whenReady()") < js.indexOf(".isAvailable()"), f + " : disponibilites attendues avant le paiement");
+  }
 });
 
 test("front : chaque point d'entree du checkout envoie la duree, marque les durees non ouvertes et ne les facture jamais", () => {

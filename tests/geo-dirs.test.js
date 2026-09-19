@@ -15,6 +15,9 @@ const DIR_CODES = Object.keys(DIRS);
 const PAGES = require(path.join(ROOT, "scripts/i18n-manifest.js"));
 const LEGAL = Object.keys(MARKETS._legalFiles).map(function (k) { return MARKETS._legalFiles[k]; });
 const builder = require(path.join(ROOT, "scripts/build-locales.js"));
+// /en/ : marche EUR "fr" tant que config/markets.json#_usdSwitch n'est pas
+// applique, marche "us" (USD) ensuite (tests/usd-switch.test.js).
+const EN_USD = DIRS.en.market === "us";
 
 function plain(v) { return JSON.parse(JSON.stringify(v)); }
 function read(rel) { return fs.readFileSync(path.join(ROOT, rel), "utf8"); }
@@ -59,7 +62,8 @@ test("config : repertoires publics et prix des marches conformes aux docs 06/07/
   assert.deepEqual(DIR_CODES, ["fr", "gb", "za", "en", "mx", "es", "de", "it", "pt"]);
   assert.deepEqual([DIRS.gb.htmlLang, DIRS.za.htmlLang, DIRS.mx.htmlLang], ["en-GB", "en-ZA", "es-MX"]);
   assert.deepEqual([DIRS.gb.locale, DIRS.za.locale, DIRS.mx.locale], ["en", "en", "es-mx"]);
-  ["en", "es", "de", "it", "pt", "fr"].forEach(function (d) { assert.equal(DIRS[d].market, "fr", d + " = marche EUR par defaut"); });
+  ["es", "de", "it", "pt", "fr"].forEach(function (d) { assert.equal(DIRS[d].market, "fr", d + " = marche EUR par defaut"); });
+  assert.equal(DIRS.en.market, EN_USD ? "us" : "fr", "/en/ : marche EUR, ou USD apres _usdSwitch");
   // Offre Pro unique, 3 durees (tests/pro-pricing.test.js detaille les montants).
   function amounts(m) { var p = MARKETS[m].prices; return [p.free.amount, p.pro.week.amount, p.pro.month.amount, p.pro.year ? p.pro.year.amount : null]; }
   assert.deepEqual(amounts("gb"), [0, 4.99, 14.99, 149]);
@@ -154,7 +158,7 @@ test("lib/market-config.js : donnees synchronisees depuis config/markets.json, p
   assert.match(za.formatPrice("pro.week"), /69/);
 
   var en = loadMarket("/en/").IASHARK_MARKET;
-  assert.deepEqual([en.code, en.currency, en.checkoutMarket], ["fr", "EUR", null]);
+  assert.deepEqual([en.code, en.currency, en.checkoutMarket], EN_USD ? ["us", "USD", "us"] : ["fr", "EUR", null]);
   assert.equal(en.formatPrice("pro.quarter"), null, "duree inconnue : aucun prix invente");
   assert.equal(en.formatPrice("edge"), null, "offre Edge abandonnee : aucun prix");
   assert.equal(en.legal.pages.privacy, "/en/confidentialite.html");
@@ -168,8 +172,8 @@ test("lib/market-config.js : donnees synchronisees depuis config/markets.json, p
   en.apply(fakeRoot([price, pro, cur, help, legal]));
   assert.equal(price.textContent, "orig");
   assert.ok(Object.prototype.hasOwnProperty.call(price.attrs, "data-market-price-unavailable"));
-  assert.match(pro.textContent, /19[.,]95/);
-  assert.equal(cur.textContent, "EUR");
+  assert.match(pro.textContent, EN_USD ? /^\$19\.99$/ : /19[.,]95/);
+  assert.equal(cur.textContent, EN_USD ? "USD" : "EUR");
   // /en/ /es/ /de/ /it/ /pt/ : ressource internationale (config/markets.json
   // #_helplines.international), sans numero ; /fr/ : Joueurs Info Service.
   assert.equal(help.textContent, "Gambling Therapy");

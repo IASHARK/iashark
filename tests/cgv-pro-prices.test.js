@@ -28,6 +28,8 @@ function money(amount, dir, currency) {
   if (currency === "GBP") return "£" + fixed;
   if (currency === "MXN") return "MX$" + Number(fixed).toLocaleString("en-US", { minimumFractionDigits: fixed.includes(".") ? 2 : 0 });
   if (currency === "ZAR") return "R" + fixed;
+  // USD de /en/ apres config/markets.json#_usdSwitch (prix ecrits par data-market-price).
+  if (currency === "USD") return "$" + fixed;
   throw new Error(currency);
 }
 
@@ -35,7 +37,10 @@ test("CGV : prix de chaque duree vendue, equivalent mensuel et economie de l'ann
   assert.match(TERMS_VERSION || "", /^\d{4}-\d{2}-\d{2}$/);
   for (const d of DIRS) {
     const conf = MARKETS._dirs[d], m = MARKETS[conf.market], pro = m.prices.pro;
-    const text = visible(read("legal/" + d + "/cgv.html"));
+    // CGV dont les prix sont ecrits par le build (data-market-price, /en/ depuis
+    // l'offre USD du 19/09/2026) : texte de la page generee.
+    const src = read("legal/" + d + "/cgv.html");
+    const text = visible(/data-market-price=/.test(src) ? read(d + "/cgv.html") : src);
     for (const iv of ["week", "month", "year"]) {
       if (!pro[iv]) continue;
       // CGV FR (18/09/2026) : seules les durees ouvertes au paiement y figurent.

@@ -937,8 +937,11 @@ const require = function () { return Render; };
 
   // Fuseau de reference de chaque marche (heure locale du marche : jamais
   // d'email marketing la nuit). Les repertoires de langue en/es/de/it/pt
-  // relevent du marche fr (config/markets.json#_dirs).
-  var MARKET_TIMEZONES = { fr: "Europe/Paris", gb: "Europe/London", za: "Africa/Johannesburg", mx: "America/Mexico_City" };
+  // relevent du marche fr (config/markets.json#_dirs), /en/ du marche "us"
+  // (offre USD) une fois config/markets.json#_usdSwitch applique : /en/ reste
+  // la version internationale, meme fuseau qu'avant la bascule et que la
+  // fenetre d'envoi SQL (migration 0024 : repertoire en -> Europe/Paris).
+  var MARKET_TIMEZONES = { fr: "Europe/Paris", gb: "Europe/London", za: "Africa/Johannesburg", mx: "America/Mexico_City", us: "Europe/Paris" };
 
   var CAMPAIGNS = {
     welcome: { marketing: false, needs: null },
@@ -1018,6 +1021,8 @@ const require = function () { return Render; };
       locale: d.locale,
       htmlLang: d.htmlLang,
       intlLocale: d.intlLocale,
+      // Prix : locale propre au marche (USD de /en/ : en-US, "$19.99"), sinon celle du repertoire.
+      priceIntlLocale: m.priceIntlLocale || d.intlLocale,
       label: d.label,
       market: d.market,
       currency: m.currency,
@@ -1392,7 +1397,11 @@ const require = function () { return Render; };
     var need = CAMPAIGNS[campaign].needs;
     if (need === "free_match" && !data.freeMatch) fail("missing_free_match", "Aucun match offert publie");
     if (need === "weekend_matches" && !(data.weekendMatches && data.weekendMatches.length)) fail("missing_weekend_matches", "Aucun match du week-end publie");
-    if (need === "pro_price" && (ctx.proPriceMinor == null || ctx.proPricesMinor.week == null)) fail("price_unavailable", "Prix Pro (semaine et mois) absent de config/markets.json pour " + ctx.market);
+    // Prix Pro : le mensuel toujours ; textes prevus pour semaine + mois (+ an)
+    // ou pour le mois seul (us : offre USD de /en/, config/markets.json
+    // #_usdSwitch). Mois + an sans semaine : aucun texte, jamais un prix invente.
+    var hasWeek = ctx.proPricesMinor.week != null, hasYear = ctx.proPricesMinor.year != null;
+    if (need === "pro_price" && (ctx.proPriceMinor == null || (!hasWeek && hasYear))) fail("price_unavailable", "Prix Pro (mois, et semaine si l'annee est vendue) absent de config/markets.json pour " + ctx.market);
 
     var company = options.company || {};
     var view = {
@@ -1404,11 +1413,12 @@ const require = function () { return Render; };
       notOptedIn: data.marketingOptIn !== true,
       hasFreeMatch: !!data.freeMatch,
       // Email J5 « Ce que debloque Pro » : les durees vendues dans le marche.
-      proPrice: ctx.proPriceMinor != null ? R.formatMoney(ctx.proPriceMinor, ctx.currency, ctx.intlLocale) : null,
-      proWeekPrice: ctx.proPricesMinor && ctx.proPricesMinor.week != null ? R.formatMoney(ctx.proPricesMinor.week, ctx.currency, ctx.intlLocale) : null,
-      proYearPrice: ctx.proPricesMinor && ctx.proPricesMinor.year != null ? R.formatMoney(ctx.proPricesMinor.year, ctx.currency, ctx.intlLocale) : null,
-      hasProYear: !!(ctx.proPricesMinor && ctx.proPricesMinor.year != null),
-      hasNoProYear: !(ctx.proPricesMinor && ctx.proPricesMinor.year != null),
+      proPrice: ctx.proPriceMinor != null ? R.formatMoney(ctx.proPriceMinor, ctx.currency, ctx.priceIntlLocale) : null,
+      proWeekPrice: ctx.proPricesMinor && ctx.proPricesMinor.week != null ? R.formatMoney(ctx.proPricesMinor.week, ctx.currency, ctx.priceIntlLocale) : null,
+      proYearPrice: ctx.proPricesMinor && ctx.proPricesMinor.year != null ? R.formatMoney(ctx.proPricesMinor.year, ctx.currency, ctx.priceIntlLocale) : null,
+      hasProYear: hasWeek && hasYear,
+      hasNoProYear: hasWeek && !hasYear,
+      hasOnlyProMonth: !hasWeek && !hasYear,
       freeMatchHome: data.freeMatch ? data.freeMatch.home : null,
       freeMatchAway: data.freeMatch ? data.freeMatch.away : null,
       companyOperatorName: typeof company.operatorName === "string" && company.operatorName.trim() ? company.operatorName.trim() : "[BLOCKED_DECISION: COMPANY_OPERATOR_NAME]",
@@ -1621,6 +1631,11 @@ export const BUNDLE = {
             },
             {
               "type": "p",
+              "if": "hasOnlyProMonth",
+              "text": "Prix sur la version {{siteVersion}} du site : {{proPrice}} par mois, résiliable à tout moment depuis Mon compte."
+            },
+            {
+              "type": "p",
               "text": "Pro donne accès à davantage d'analyses et d'outils ; il ne rend aucun match plus prévisible."
             },
             {
@@ -1818,6 +1833,11 @@ export const BUNDLE = {
               "type": "p",
               "if": "hasNoProYear",
               "text": "Prices on the {{siteVersion}} version of the site: {{proWeekPrice}} per week or {{proPrice}} per month. The same Pro access whichever period you choose, cancel at any time from My account."
+            },
+            {
+              "type": "p",
+              "if": "hasOnlyProMonth",
+              "text": "Price on the {{siteVersion}} version of the site: {{proPrice}} per month, cancel at any time from My account."
             },
             {
               "type": "p",
@@ -2021,6 +2041,11 @@ export const BUNDLE = {
             },
             {
               "type": "p",
+              "if": "hasOnlyProMonth",
+              "text": "Precio en la versión {{siteVersion}} del sitio: {{proPrice}} al mes, cancelable en cualquier momento desde Mi cuenta."
+            },
+            {
+              "type": "p",
               "text": "Pro da acceso a más análisis y herramientas; no hace que ningún partido sea más previsible."
             },
             {
@@ -2218,6 +2243,11 @@ export const BUNDLE = {
               "type": "p",
               "if": "hasNoProYear",
               "text": "Precios en la versión {{siteVersion}} del sitio: {{proWeekPrice}} a la semana o {{proPrice}} al mes. El mismo acceso Pro con cualquier plazo, puedes cancelar cuando quieras desde Mi cuenta."
+            },
+            {
+              "type": "p",
+              "if": "hasOnlyProMonth",
+              "text": "Precio en la versión {{siteVersion}} del sitio: {{proPrice}} al mes; puedes cancelar cuando quieras desde Mi cuenta."
             },
             {
               "type": "p",
@@ -2421,6 +2451,11 @@ export const BUNDLE = {
             },
             {
               "type": "p",
+              "if": "hasOnlyProMonth",
+              "text": "Preis auf der Version {{siteVersion}} der Website: {{proPrice}} pro Monat, jederzeit in Mein Konto kündbar."
+            },
+            {
+              "type": "p",
               "text": "Pro bietet mehr Analysen und Tools; es macht kein Spiel vorhersehbarer."
             },
             {
@@ -2618,6 +2653,11 @@ export const BUNDLE = {
               "type": "p",
               "if": "hasNoProYear",
               "text": "Prezzi sulla versione {{siteVersion}} del sito: {{proWeekPrice}} a settimana o {{proPrice}} al mese. Lo stesso accesso Pro per ogni durata, disdicibile in qualsiasi momento da Il mio account."
+            },
+            {
+              "type": "p",
+              "if": "hasOnlyProMonth",
+              "text": "Prezzo sulla versione {{siteVersion}} del sito: {{proPrice}} al mese, disdicibile in qualsiasi momento da Il mio account."
             },
             {
               "type": "p",
@@ -2821,6 +2861,11 @@ export const BUNDLE = {
             },
             {
               "type": "p",
+              "if": "hasOnlyProMonth",
+              "text": "Preço na versão {{siteVersion}} do site: {{proPrice}} por mês, cancelável a qualquer momento em A minha conta."
+            },
+            {
+              "type": "p",
               "text": "O Pro dá acesso a mais análises e ferramentas; não torna nenhum jogo mais previsível."
             },
             {
@@ -2987,6 +3032,7 @@ export const BUNDLE = {
     "fr": {
       "currency": "EUR",
       "intlLocale": "fr-FR",
+      "priceIntlLocale": null,
       "helpline": {
         "name": "Joueurs Info Service",
         "phone": "09 74 75 13 13",
@@ -3011,6 +3057,7 @@ export const BUNDLE = {
     "gb": {
       "currency": "GBP",
       "intlLocale": "en-GB",
+      "priceIntlLocale": null,
       "helpline": {
         "name": "National Gambling Helpline (GamCare / BeGambleAware)",
         "phone": "0808 8020 133",
@@ -3035,6 +3082,7 @@ export const BUNDLE = {
     "za": {
       "currency": "ZAR",
       "intlLocale": "en-ZA",
+      "priceIntlLocale": null,
       "helpline": {
         "name": "National Responsible Gambling Programme (NRGP)",
         "phone": "0800 006 008",
@@ -3057,6 +3105,7 @@ export const BUNDLE = {
     "mx": {
       "currency": "MXN",
       "intlLocale": "es-MX",
+      "priceIntlLocale": null,
       "helpline": {
         "name": "Línea de la Vida (CONASAMA)",
         "phone": "800 911 2000",

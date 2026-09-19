@@ -149,6 +149,8 @@
       if(!consent){message(t('checkout_consent.error_load','Les conditions de paiement n’ont pas pu être chargées. Rechargez la page.'),true);return;}
       // Le bloc de consentement affiche deja son message d'erreur : un seul message a l'ecran.
       if(!consent.check()){message('',false);return;}
+      // Disponibilites du serveur connues avant de payer (lib/pro-plan-picker.js#whenReady).
+      if(picker&&picker.whenReady)await picker.whenReady();
       if(picker&&!picker.isAvailable()){message(t('pricing_page.checkout_interval_not_configured','Cette durée n’est pas encore ouverte au paiement. Choisis une autre durée ou reviens bientôt. Aucun montant n’a été prélevé.'),true);return;}
       var current=await IasharkApp.context();
       // Sans compte : inscription directe (le visiteur qui clique « Devenir

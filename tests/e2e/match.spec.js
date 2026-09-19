@@ -7,6 +7,7 @@
 const { test, expect, pathOf } = require('./helpers/fixtures');
 const { VERSIONS } = require('./helpers/versions');
 const { deepPremiumLeaks, tr } = require('./helpers/site-data');
+const { useUsdSwitch } = require('./helpers/usd-switch');
 
 // Elements qui n'existent que dans l'analyse servie (abonne ou match offert connecte).
 const PAID = ['.duo', '.pr-row', '.sig-market', '.sig2-cmp', '.sig-why', '.sig-conf', '.scenario-chart', '.score-bars', '.xg-row', '.threat', '.pm-list']
@@ -238,3 +239,21 @@ for (const v of VERSIONS) {
     });
   });
 }
+
+// Offre USD de /en/ : bascule config/markets.json#_usdSwitch rejouee sans etre
+// publiee (tests/e2e/helpers/usd-switch.js). Ligne de prix du panneau Pro
+// (match-page.js#prixMensuelPro -> IASHARK_MARKET.proOffer()) en USD.
+test.describe('page match /en/ apres la bascule USD (config de test _usdSwitch)', () => {
+  test('anonyme : panneau Pro « $19.99 / mois », aucun prix EUR @mobile', async ({ page, siteData, dictFor }) => {
+    test.skip(!siteData.paid, 'Aucun match payant dans les donnees');
+    const dict = await dictFor('en');
+    await useUsdSwitch(page);
+    await page.goto(`/en/match.html?id=${siteData.paid.id}`);
+    const gate = page.locator('#matchRoot .gate.mgate');
+    await expect(gate).toBeVisible();
+    expect(await prixMensuel(page)).toBe('$19.99');
+    await expect(gate.locator('.mgate-small')).toHaveText(tr(dict, 'pro_offer.price_month').replace('{price}', '$19.99'));
+    expect(squash(await gate.innerText()), 'aucun prix EUR ni "US$"').not.toMatch(/€|19[.,]95|US\$/);
+    await expectPanelOnly(page);
+  });
+});

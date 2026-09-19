@@ -5,7 +5,7 @@
   "_hreflangXDefault_readme": "Cible hreflang x-default (audit SEO 15/09/2026) : premiere version de cette liste presente dans le groupe d'equivalents de la page. /en/ (anglais international) sert mieux qu'un /fr/ les visiteurs dont la langue n'a pas de version (nl, sv, ja...), et c'est deja la page que la racine / (302 geolocalisee) renvoie a Googlebot (Country=us). _xDefaultDir reste 'fr' : il ne designe PAS le x-default mais le repertoire historique servi a la racine (/match/<id>.html, /blog/, 301 des anciennes URLs racine) ; le changer deplacerait toutes les pages match FR indexees. Groupe sans /en/ (ex. Liga MX : fr, mx, es) : x-default vers /fr/.",
   "_hreflangXDefault": ["en", "fr"],
   "_planKeys": ["free", "pro"],
-  "_proIntervals_readme": "Offre unique Pro vendue sous 3 durees (decision du proprietaire du 16/09/2026 ; l'ancienne offre a deux niveaux est abandonnee). prices.pro.<week|month|year>.amount = prix TTC du marche. Duree absente ou null = non vendue dans ce marche : option non affichee, jamais de prix invente. Duree vendue mais non payable (checkoutOpen, ou secret Stripe absent cote serveur) = option MASQUEE (decision du proprietaire du 19/09/2026 : « Bientot disponible » faisait hesiter), jamais facturee a un autre prix ; aucune duree payable = ligne « paiement pas encore ouvert » a la place du bouton (lib/pro-plan-picker.js). Duree par defaut du selecteur : _proDefaultInterval. data-market-price=\"pro\" reste un alias du prix mensuel (retro-compatibilite). stripeEnvKeys.<duree> = nom du secret Supabase contenant l'id du Price Stripe ; stripeEnvKeyLegacyMonth = ancien secret accepte uniquement comme repli du mensuel de CE marche.",
+  "_proIntervals_readme": "Offre unique Pro vendue sous 3 durees (decision du proprietaire du 16/09/2026 ; l'ancienne offre a deux niveaux est abandonnee). prices.pro.<week|month|year>.amount = prix TTC du marche. Duree absente ou null = non vendue dans ce marche : option non affichee, jamais de prix invente. Duree vendue mais non payable (checkoutOpen, ou secret Stripe absent cote serveur) = option MASQUEE (decision du proprietaire du 19/09/2026 : « Bientot disponible » faisait hesiter), jamais facturee a un autre prix ; aucune duree payable = ligne « paiement pas encore ouvert » a la place du bouton (lib/pro-plan-picker.js). Duree par defaut du selecteur : _proDefaultInterval. data-market-price=\"pro\" reste un alias du prix mensuel (retro-compatibilite). stripeEnvKeys.<duree> = nom du secret Supabase contenant l'id du Price Stripe ; stripeEnvKeyLegacyMonth = ancien secret accepte uniquement comme repli du mensuel de CE marche ; stripePriceIds.<duree> (facultatif) = id du Price Stripe ecrit ici (pas un secret : inutilisable sans la cle Stripe), dernier recours de create-checkout-session apres le secret puis l'ancien secret (pricing.ts), toujours pour CE marche et CETTE duree, Price relu chez Stripe et compare au prix affiche avant toute session. Un id ne rend pas une duree payable : checkoutOpen decide de l'affichage.",
   "_proIntervals": ["week", "month", "year"],
   "_proDefaultInterval": "month",
   "_legalFiles": {
@@ -32,6 +32,8 @@
     "it": {"market": "fr", "locale": "it", "htmlLang": "it", "hreflang": "it", "intlLocale": "it-IT", "blogDir": "it", "label": "Italiano", "helpline": "international"},
     "pt": {"market": "fr", "locale": "pt", "htmlLang": "pt", "hreflang": "pt", "intlLocale": "pt-PT", "blogDir": "pt", "label": "Português", "helpline": "international"}
   },
+  "_usdSwitch_readme": "OFFRE USD DE /en/ (decision du proprietaire du 19/09/2026 : les visiteurs des Etats-Unis arrivent sur /en/ ; 19,99 USD par mois TTC, mensuel seul). Tant que la bascule n'est PAS faite, /en/ reste sur le marche EUR 'fr' (19,95 EUR, paiement FR qui fonctionne aujourd'hui) et le marche 'us' ci-dessous est inerte (aucune page ne l'utilise, create-checkout-session le refuse tant que le secret STRIPE_PRICE_ID_US_MONTH n'existe pas). LA BASCULE = appliquer exactement _usdSwitch : _dirs.en.market 'fr' -> 'us' ET us.checkoutOpen [] -> ['month'], puis node scripts/build-locales.js && node scripts/build-public.js (le build recopie aussi le marche de /en/ dans i18n/i18n.js et lib/market-config.js) et node lib/lifecycle-email-build.js. PRE-REQUIS, dans cet ordre : 1) Stripe : Price recurrent mensuel 19,99 USD (unit_amount 1999, currency usd, interval month x1, tax_behavior inclusive) ; 2) secret Supabase STRIPE_PRICE_ID_US_MONTH = id de ce Price ; 3) SQL supabase/migrations/0030_subscriptions_market_us.sql (apres 0026) ; 4) deployer create-checkout-session, stripe-webhook et sync-subscription depuis le depot ; 5) seulement alors la bascule ci-dessus, puis deploiement du site et de send-lifecycle-emails / email-unsubscribe (bundle regenere). tests/usd-switch.test.js et les specs E2E subscription/account/match rejouent /en/ avec _usdSwitch applique (config de test) : ils prouvent l'etat bascule avant qu'il soit publie. Toute la version /en/ passe en USD (Etats-Unis, mais aussi Irlande, Canada, pays nordiques... routes vers /en/ par lib/lang-routing.js) ; /es/ /de/ /it/ /pt/ /fr/ restent en EUR, /gb/ /za/ /mx/ gardent leur marche.",
+  "_usdSwitch": {"_dirs.en.market": "us", "us.checkoutOpen": ["month"]},
   "fr": {
     "country": "FR",
     "locale": "fr",
@@ -162,6 +164,43 @@
       "responsibleGamblingHelpline": "National Responsible Gambling Programme (NRGP) - 0800 006 008 - responsiblegambling.org.za",
       "legalPagesLocalized": true,
       "note": "Pages legales /za/ en BROUILLON (legal/za/, non validees par un juriste). A CONFIRMER par validation juridique avant publication (cf. 04_IAShark_Compliance_Approval_Pack + 08_IAShark_South_Africa_Launch_Kit). Pas d'affiliation bookmaker sans approbation prealable."
+    }
+  },
+  "us": {
+    "country": "US",
+    "locale": "en",
+    "htmlLang": "en",
+    "intlLocale": "en-US",
+    "priceIntlLocale": "en-US",
+    "priceIntlLocale_readme": "Locale Intl des PRIX de ce marche, prioritaire sur l'intlLocale du repertoire (lib/market-config.js, scripts/build-locales.js) : /en/ garde en-GB pour les dates, mais ses prix USD s'ecrivent \"$19.99\" (en-US) et non \"US$19.99\" (en-GB).",
+    "currency": "USD",
+    "urlPrefix": "/en/",
+    "dirs": ["en"],
+    "dirs_readme": "Repertoire PREVU pour ce marche. Le marche effectivement servi par un repertoire est _dirs.<dir>.market (seule source) : 'fr' tant que _usdSwitch n'est pas applique. Pas de repertoire /us/ : /en/ reste la version anglaise internationale, les Etats-Unis y sont routes par pays (lib/lang-routing.js, bloc COUNTRY_DIRS), pas comme marche pays (/gb/ /za/ /mx/).",
+    "stripeEnvKeys": {"month": "STRIPE_PRICE_ID_US_MONTH"},
+    "stripeEnvKeyLegacyMonth": null,
+    "checkoutMarket": "us",
+    "checkoutOpen": [],
+    "checkoutOpen_readme": "AUCUNE duree payable tant que la bascule _usdSwitch n'est pas faite (voir _usdSwitch_readme) : aucun Price Stripe USD n'existe encore en production. POUR OUVRIR CE MARCHE : 1) creer le Price Stripe (19,99 USD par mois, tax inclusive) ; 2) poser les secrets Supabase (STRIPE_PRICE_ID_US_MONTH, voir stripeEnvKeys) ; 3) appliquer la migration 0030 puis deployer la version du depot de create-checkout-session, stripe-webhook et sync-subscription ; 4) lister ici les durees reellement payables ([\"month\"]) ET passer _dirs.en.market a \"us\" (les deux champs de _usdSwitch), puis relancer node scripts/build-locales.js et node scripts/build-public.js.",
+    "paidAdsEnabled": false,
+    "adsGamblingCertRequired": true,
+    "status": "DRAFT_PENDING_LEGAL_REVIEW",
+    "minAge": 18,
+    "prices": {
+      "free": {"amount": 0, "interval": "month"},
+      "pro": {
+        "week": null,
+        "month": {"amount": 19.99},
+        "year": null
+      }
+    },
+    "pricesSource": "Decision du proprietaire du 19/09/2026 : 19,99 USD par mois, TTC (Price Stripe tax inclusive), pour la version /en/. Mensuel seul pour l'instant : week et year null = non vendus (aucune option affichee, aucun secret STRIPE_PRICE_ID_US_WEEK / _YEAR lu).",
+    "helpline": null,
+    "helpline_readme": "null = aucune ressource propre au marche : /en/ affiche _helplines.international (surcharge _dirs.en.helpline), comme avant la bascule. Jamais de numero invente.",
+    "compliance": {
+      "responsibleGamblingHelpline": "Ressource internationale Gambling Therapy (_helplines.international) via _dirs.en.helpline.",
+      "legalPagesLocalized": false,
+      "note": "Pas de pages legales propres : /en/ garde legal/en/ (CGV en REVIEW, prix de l'article 6 lus dans ce fichier via data-market-price). BLOCKED_DECISION (juriste / proprietaire) avant la bascule : CGV /en/ pour une offre USD mensuelle seule (articles 5, 7 et 8 decrivent encore semaine / annee ; mention 'VAT included' pour des clients hors UE ; nouvelle TERMS_VERSIONS.en dans lib/checkout-consent.js si le texte change). Consentement : regime 'eu' conserve (meme case qu'aujourd'hui sur /en/, qui sert aussi des visiteurs de l'UE)."
     }
   }
 }

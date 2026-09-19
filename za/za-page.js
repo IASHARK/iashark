@@ -131,6 +131,8 @@
         return;
       }
 
+      // Server availability known before paying (lib/pro-plan-picker.js#whenReady).
+      if (picker && picker.whenReady) await picker.whenReady();
       var interval = picker ? picker.interval() : "month";
       if (picker && !picker.isAvailable()) {
         show("This billing period isn't open for payment yet. Choose another period or come back soon. Nothing has been charged.", true);

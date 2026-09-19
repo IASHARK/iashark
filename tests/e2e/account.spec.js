@@ -5,6 +5,7 @@ const { test, expect, expectNoHorizontalScroll, expectNotHiddenByBottomNav } = r
 const { VERSIONS, CONSENT_BOXES } = require('./helpers/versions');
 const { STORAGE_KEY, STRIPE_CHECKOUT_URL, STRIPE_PORTAL_URL } = require('./helpers/supabase-mock');
 const { tr } = require('./helpers/site-data');
+const { useUsdSwitch } = require('./helpers/usd-switch');
 
 // Durees PAYABLES de la version (config/markets.json#checkoutOpen ; gb, mx, za
 // fermes le 19/09/2026) : aucune = ni bouton « Decouvrir Pro » ni consentement.
@@ -205,3 +206,30 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb', 'mx'].includes(x.dir))) {
     });
   });
 }
+
+// Offre USD de /en/ : bascule config/markets.json#_usdSwitch rejouee sans etre
+// publiee (tests/e2e/helpers/usd-switch.js). Le paiement depuis le compte
+// envoie le marche us (account-page.js : IASHARK_MARKET.checkoutMarket, plus
+// de liste gb/mx/za en dur qui aurait facture l'offre USD au tarif EUR).
+test.describe('compte /en/ apres la bascule USD (config de test _usdSwitch)', () => {
+  test('compte gratuit : $19.99 / mois, paiement envoye sur le marche us @mobile', async ({ page, supa, consoleErrors }) => {
+    await useUsdSwitch(page);
+    await supa.as('free');
+    supa.onFunction('create-checkout-session', { status: 200, json: { processed: true, url: STRIPE_CHECKOUT_URL } });
+    await page.goto('/en/compte.html#abonnement');
+    await expect(page.locator('#compte')).toBeVisible();
+    await expect(page.locator('#proPlanPicker [data-market-price="pro.month"]')).toHaveText('$19.99');
+    await expect(page.locator('#proPlanPicker input[type="radio"]')).toHaveCount(0);
+    expect(squash(await page.locator('#panneau').innerText()), 'aucun prix EUR ni "US$"').not.toMatch(/€|19[.,]95|US\$/);
+    const inputs = page.locator('#checkoutConsent input[data-consent]');
+    await expect(inputs).toHaveCount(CONSENT_BOXES.eu);
+    for (let i = 0; i < CONSENT_BOXES.eu; i++) await inputs.nth(i).check();
+    const call = supa.waitForCall('create-checkout-session');
+    await page.locator('#souscrire').click();
+    const c = await call;
+    expect(c.body).toMatchObject({ market: 'us', dir: 'en', interval: 'month' });
+    expect(c.body.consent).toMatchObject({ terms: true, waiver: true, dir: 'en' });
+    await page.waitForURL(STRIPE_CHECKOUT_URL);
+    expect(consoleErrors).toEqual([]);
+  });
+});

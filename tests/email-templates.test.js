@@ -448,7 +448,7 @@ test("utilitaires : safeEqual, maskEmail, cleanIdempotencyKey", () => {
 
 const CONFIG_MARKETS = JSON.parse(fs.readFileSync(path.join(ROOT, "config", "markets.json"), "utf8"));
 const Lifecycle = require("../lib/lifecycle-email.js");
-const ANNUAL = { fr: ["EUR", 19900], en: ["EUR", 19900], es: ["EUR", 19900], de: ["EUR", 19900], it: ["EUR", 19900], pt: ["EUR", 19900], gb: ["GBP", 14900], mx: ["MXN", 199000] };
+const ANNUAL = { fr: ["EUR", 19900], es: ["EUR", 19900], de: ["EUR", 19900], it: ["EUR", 19900], pt: ["EUR", 19900], gb: ["GBP", 14900], mx: ["MXN", 199000] };
 const renderAnnual = (dir, over, opts) => lib.renderEmail(TEMPLATES, "annual_renewal_reminder", dir,
   Object.assign({ planName: "IASHARK Pro", amountMinor: ANNUAL[dir] ? ANNUAL[dir][1] : 19900, currency: ANNUAL[dir] ? ANNUAL[dir][0] : "EUR", renewalDate: "2026-10-29T10:00:00Z", customerEmail: "client@example.com", reference: "sub_Y1" }, over || {}),
   Object.assign({ now: NOW }, opts || {}));
@@ -488,10 +488,10 @@ test("rappel annuel : un repertoire par version vendant l'annuel (ZA exclu), tex
   assert.equal(lib.reminderKindFor("gb", "week"), null);
 });
 
-test("rappel annuel : 8 versions, montant et date du marche, mentions obligatoires, aucun trou, aucune promesse de gain", () => {
+test("rappel annuel : 7 versions, montant et date du marche, mentions obligatoires, aucun trou, aucune promesse de gain", () => {
+  // /en/ retire le 19/09/2026 : marche us (USD, mensuel seul), aucun annuel.
   const EXPECT = {
     fr: { start: "Votre abonnement annuel", amount: "199,00 €", legal: "L215-1" },
-    en: { start: "Your annual", amount: "€199.00", legal: "L215-1" },
     es: { start: "Tu suscripción anual", amount: "199,00 €", legal: "L215-1" },
     de: { start: "Ihr Jahresabonnement", amount: "199,00 €", legal: "L215-1" },
     it: { start: "Il tuo abbonamento annuale", amount: "199,00 €", legal: "L215-1" },
@@ -544,6 +544,7 @@ test("rappel annuel : 8 versions, montant et date du marche, mentions obligatoir
   assert.deepEqual(renderAnnual("fr", {}, { company: FULL_COMPANY }).blockedDecisions, []);
   const code = (c) => (e) => e instanceof lib.EmailRenderError && e.code === c;
   assert.throws(() => renderAnnual("za"), code("unsupported_market"));
+  assert.throws(() => renderAnnual("en"), code("unsupported_market"), "/en/ : offre USD mensuelle, aucun rappel annuel");
   assert.throws(() => renderAnnual("nl"), code("unsupported_market"));
   assert.throws(() => renderAnnual("gb", { currency: "EUR" }), code("currency_mismatch"));
   assert.throws(() => renderAnnual("fr", { renewalDate: "2026-09-01T00:00:00Z" }), code("renewal_in_past"));

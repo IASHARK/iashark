@@ -121,7 +121,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
 </style>
 <link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
 <body>
-<!-- LEGAL REVIEW: (1) the current checkout (Stripe Checkout) does not collect the consumer's express consent to immediate performance nor the acknowledgement of loss of the right of withdrawal (French Consumer Code art. L221-28 13°): until this is implemented, the 14-day right of withdrawal applies in full; (2) no terms-acceptance checkbox exists at checkout; (3) no consumer mediator appointed (art. L612-1 / L616-1); (4) VAT status to be confirmed ('VAT included' carried over from the original French terms); (5) classification of the service (digital content vs digital service) to be confirmed. Offer updated from abonnement.html and supabase/functions/create-checkout-session (single monthly subscription, no free trial). -->
+<!-- LEGAL REVIEW: (1) the current checkout (Stripe Checkout) does not collect the consumer's express consent to immediate performance nor the acknowledgement of loss of the right of withdrawal (French Consumer Code art. L221-28 13°): until this is implemented, the 14-day right of withdrawal applies in full; (2) no terms-acceptance checkbox exists at checkout; (3) no consumer mediator appointed (art. L612-1 / L616-1); (4) VAT: French VAT franchise confirmed by the owner on 19/09/2026 ('TVA non applicable, article 293 B du CGI', stated in every version, replaces 'VAT included'); (5) classification of the service (digital content vs digital service) to be confirmed. Offer updated from abonnement.html and supabase/functions/create-checkout-session (single monthly subscription, no free trial). -->
 <header class="hdr">
   <button class="hdr-back" type="button" onclick="history.back()">&larr; VOLTAR</button>
   <a class="brand-logo" href="./" aria-label="IASHARK"><img src="/assets/iashark-logo.png" alt="IASHARK" width="154" height="41"></a>
@@ -136,7 +136,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Jogo responsável</a>
   </nav>
   <h1 class="page-title">Condições gerais de venda</h1>
-  <div class="page-date">Última atualização: 16 de setembro de 2026</div>
+  <div class="page-date">Última atualização: 19 de setembro de 2026</div>
+  <!-- LEGAL REVIEW: 19/09/2026 - owner decisions: weekly, monthly and annual plans payable on the EUR market (config/markets.json#fr.checkoutOpen, Stripe Prices in fr.stripePriceIds); 'VAT included' replaced in article 6 by the French VAT franchise mention (art. 293 B CGI). Prices, billing periods, renewal, withdrawal and cancellation rules unchanged from the 16/09/2026 text and aligned with the French terms of 19/09/2026 (legal/fr/cgv.html). Previous version archived in legal/pt/archives/cgv-2026-09-16.html. Status: REVIEW. -->
 
   <div class="warn-box">
     <p>⚠️ A IASHARK NÃO É UM SITE DE APOSTAS: NÃO SÃO ACEITES APOSTAS NESTE SITE. AS NOSSAS ANÁLISES SÃO ESTIMATIVAS ESTATÍSTICAS, SEM QUALQUER GARANTIA DE RESULTADO.<br>O JOGO ENVOLVE RISCOS: ENDIVIDAMENTO E DEPENDÊNCIA. PRECISA DE AJUDA? CONTACTE UM SERVIÇO DE APOIO NO SEU PAÍS OU A GAMBLING THERAPY (GRATUITO, ONLINE): <a href="https://www.gamblingtherapy.org" target="_blank" rel="noopener">GAMBLINGTHERAPY.ORG</a>.<br>EXCLUSIVAMENTE PARA MAIORES DE 18 ANOS.</p>
@@ -188,9 +189,10 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
   <section class="section">
     <h2>Artigo 6.º — Preços e durações</h2>
     <div class="highlight">
-      <p><strong>Semanal: 6,99 € por semana, IVA incluído.</strong> Cobrado na subscrição e depois todas as semanas no mesmo dia. Renovação automática todas as semanas até ao cancelamento, sem período mínimo.</p>
-      <p><strong>Mensal: 19,95 € por mês, IVA incluído.</strong> Cobrado na subscrição e depois todos os meses na mesma data. Renovação automática todos os meses até ao cancelamento, sem período mínimo.</p>
-      <p><strong>Anual: 199 € por ano, IVA incluído.</strong> Cobrado uma única vez na subscrição e depois em cada data de aniversário. Período pago por doze meses e renovado automaticamente por um ano salvo cancelamento antes do vencimento (artigo 9.º).</p>
+      <p><strong>Semanal: 6,99 € por semana.</strong> Cobrado na subscrição e depois todas as semanas no mesmo dia. Renovação automática todas as semanas até ao cancelamento, sem período mínimo.</p>
+      <p><strong>Mensal: 19,95 € por mês.</strong> Cobrado na subscrição e depois todos os meses na mesma data. Renovação automática todos os meses até ao cancelamento, sem período mínimo.</p>
+      <p><strong>Anual: 199 € por ano.</strong> Cobrado uma única vez na subscrição e depois em cada data de aniversário. Período pago por doze meses e renovado automaticamente por um ano salvo cancelamento antes do vencimento (artigo 9.º).</p>
+      <p>IVA não aplicável, artigo 293 B do Código Geral dos Impostos francês (CGI).</p>
     </div>
     <p>A título informativo, 199 € por ano correspondem a 16,59 € por mês, ou seja, menos 16% do que doze meses ao preço mensal (239,40 €).</p>
     <p>O preço aplicável é o apresentado na página Subscrição para o período escolhido e resumido na página de pagamento antes da confirmação da encomenda. Qualquer alteração de preço ser-lhe-á notificada antes da sua entrada em vigor; só se aplicará a partir do período de faturação seguinte e poderá cancelar a sua subscrição antes dessa data.</p>
@@ -199,6 +201,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
   <section class="section">
     <h2>Artigo 7.º — Pagamento e renovação</h2>
     <p>O pagamento é seguro e gerido pela Stripe (<a href="https://stripe.com" target="_blank" rel="noopener">stripe.com</a>). A IASHARK não conserva quaisquer dados de cartão bancário. O primeiro pagamento é cobrado no momento da subscrição. A subscrição renova-se depois automaticamente no fim de cada período, por um período da mesma duração e ao preço então em vigor.</p>
+    <!-- LEGAL REVIEW: 19/09/2026 - (a) annual renewal information: template ready (annual_renewal_reminder, D-45 by default, 90 to 30 day window), sending to be enabled (Resend + scheduled job) before the first annual renewal, otherwise the annual-plan paragraph of article 9 applies; (b) changing billing period: check that the Stripe customer portal configuration (STRIPE_PORTAL_CONFIGURATION_ID or default configuration) applies the rule below (longer period immediate with proration, shorter period at the end of the paid period) - otherwise correct this paragraph and compte_page.change_interval_note. -->
     <p><strong>Plano anual: informação antes da renovação.</strong> Informamo-lo por email, no máximo três meses e no mínimo um mês antes do vencimento, da possibilidade de não renovar a sua subscrição anual. O email indica a data de vencimento, o montante que será cobrado e como cancelar online.</p>
     <p><strong>Mudança de duração.</strong> Pode mudar de duração a partir de «A minha conta», na área de faturação do nosso prestador de serviços de pagamento. A passagem para uma duração mais longa (por exemplo, de mensal para anual) produz efeitos imediatamente: o novo período é cobrado de imediato, deduzida proporcionalmente a parte não utilizada do período em curso. A passagem para uma duração mais curta (por exemplo, de anual para mensal) produz efeitos no fim do período já pago, sem reembolso nem cobrança adicional até lá. O montante e a data de efeito são apresentados antes da sua confirmação. Uma subscrição ativa não pode ser subscrita uma segunda vez.</p>
     <p>Em caso de falha no pagamento de uma renovação, o nosso prestador de serviços de pagamento pode efetuar novas tentativas. O acesso Pro é mantido durante 1 dia após o fim do período pago no plano semanal e durante 4 dias nos planos mensal e anual; na falta de regularização, a conta volta ao acesso gratuito.</p>
@@ -224,6 +227,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <h2>Artigo 9.º — Cancelamento</h2>
     <p>Pode cancelar a sua subscrição a qualquer momento, gratuitamente e online, a partir da página «A minha conta», que dá acesso à área de faturação segura do nosso prestador de serviços de pagamento. Pode também pedir o cancelamento por email para <a href="mailto:contact@iashark.com">contact@iashark.com</a>.</p>
     <p>O cancelamento produz efeitos no final do período de faturação em curso (semana, mês ou ano): mantém o acesso Pro até essa data e não é efetuada nenhuma nova cobrança. Salvo exercício do direito de livre resolução nos termos do artigo 8.º, o período de faturação já iniciado não é reembolsado.</p>
+    <!-- BLOCKED_DECISION: annual plan - pro-rata refund of the unused part when cancelling during the year (outside withdrawal and outside the case in the next paragraph): current rule kept (no refund, cancellation effective at the annual renewal date). To be confirmed by the owner (and by a lawyer: unfair terms). -->
     <p>Plano anual: se não lhe tiver sido enviada a informação prevista no artigo 7.º, pode pôr termo gratuitamente à subscrição a qualquer momento a partir da data de renovação; os montantes pagos relativos ao período posterior ao cancelamento são-lhe reembolsados no prazo de trinta dias (artigo L215-1 do Código do Consumo francês).</p>
     <p>A eliminação da sua conta a partir de «A minha conta» implica o cancelamento prévio de qualquer subscrição ativa.</p>
   </section>

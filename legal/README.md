@@ -108,9 +108,11 @@ Chaque dossier contient les 5 mêmes fichiers autonomes. Le tableau indique le `
 
 ## 4. Points à faire confirmer par un juriste, et décisions bloquées
 
+Versions des CGV (19/09/2026) : version en vigueur `2026-09-19` pour les 9 dossiers (`lib/checkout-consent.js#TERMS_VERSION`, envoyée avec le consentement) ; versions précédentes dans `legal/<dir>/archives/cgv-<date>.html` (non publiées : `legal/` est exclu de `dist/`).
+
 ### Tous marchés
 1. **BLOCKED_DECISION : identité légale incomplète.**
-   - Manquent : nom de l'exploitant, SIREN/SIRET, adresse complète, téléphone, régime de TVA.
+   - Manquent : nom de l'exploitant, SIREN/SIRET, adresse complète, téléphone. Régime de TVA indiqué par le propriétaire le 19/09/2026 : franchise en base, « TVA non applicable, article 293 B du CGI » (mention reprise dans les CGV des 9 versions).
    - Textes en cause : mentions légales FR, ECT Act s43 (ZA), Electronic Commerce Regulations 2002 reg. 6 (UK), LFPC art. 76 BIS (MX).
 2. **BLOCKED_DECISION : médiateur de la consommation à désigner** (articles L612-1 et L616-1 du Code de la consommation).
 3. **Parcours de paiement non conforme en l'état.** Il ne recueille pas :
@@ -128,7 +130,7 @@ Chaque dossier contient les 5 mêmes fichiers autonomes. Le tableau indique le `
    - Les tables `funnel_events` et `rate_limit_buckets` (qui contient des IP) ne sont jamais purgées.
    - La durée « fin d'abonnement + 1 an » annoncée n'est appliquée par aucune tâche automatique.
 7. **Transferts vers les États-Unis.** Vérifier la certification DPF de chaque prestataire. Le pourvoi Latombe (C-703/25 P) est toujours pendant.
-8. **TVA et fiscalité** : franchise en base en France, TVA britannique sur les services numériques, TVA sud-africaine sur les e-services, IVA mexicaine sur les services numériques fournis depuis l'étranger.
+8. **TVA et fiscalité** : franchise en base en France (confirmée par le propriétaire le 19/09/2026, mention « art. 293 B du CGI » dans toutes les CGV) ; restent à vérifier la TVA britannique sur les services numériques, la TVA sud-africaine sur les e-services, l'IVA mexicaine sur les services numériques fournis depuis l'étranger et les taxes de vente américaines (offre USD de /en/).
 9. **Loi applicable.** Vérifier la validité de la clause « droit français » face aux protections impératives des consommateurs de chaque pays.
 10. **Qualification de l'activité (le point le plus important).** Il faut un avis juridique par pays confirmant qu'un abonnement d'information sur les paris n'exige aucune licence :
     - Royaume-Uni : guidance « betting intermediary » de la UKGC ;
@@ -146,7 +148,7 @@ Chaque dossier contient les 5 mêmes fichiers autonomes. Le tableau indique le `
 13. **Régime des abonnements du DMCC Act 2024**, attendu au printemps 2027 : il imposera des rappels de renouvellement, une sortie facile et un cooling-off à chaque renouvellement.
 14. **Informations sur les modes alternatifs de règlement des litiges (ADR)** à confirmer. Vérifier aussi la règle « aucun remboursement au prorata sur l'annuel » au regard des clauses abusives (CRA 2015, Part 2).
 15. **Couverture de l'Irlande du Nord.** La National Gambling Helpline et GAMSTOP visent la Grande-Bretagne ; il faut identifier une ressource propre à l'Irlande du Nord.
-16. **Prix en GBP** non configurés dans Stripe (`STRIPE_PRICE_ID_GB_WEEK`, `_MONTH`, `_YEAR`).
+16. **Prix en GBP** : seul le mensuel existe dans Stripe (`config/markets.json#gb.stripePriceIds.month`, 19/09/2026) ; semaine et année non vendues, absentes des CGV /gb/.
 
 ### Afrique du Sud
 17. **Information Officer** : son nom n'est pas renseigné et il n'est pas enregistré auprès de l'Information Regulator. Confirmer aussi que POPIA s'applique à un responsable établi hors d'Afrique du Sud (POPIA s3), et documenter la base s72 de chaque transfert.
@@ -155,7 +157,7 @@ Chaque dossier contient les 5 mêmes fichiers autonomes. Le tableau indique le `
     - Il faut implémenter la notice d'échéance (entre 80 et 40 jours ouvrables avant la fin du terme).
     - Il faut décider de la politique de pénalité ou de remboursement en cas de résiliation anticipée.
 19. **Plaintes ECT s49** : confirmer l'organe compétent actuel (« Consumer Affairs Committee »). Confirmer aussi que CPA s16 ne s'applique qu'en cas de démarchage direct.
-20. **Prix en ZAR** non configurés dans Stripe (`STRIPE_PRICE_ID_ZA_WEEK`, `_MONTH`, `_YEAR`) ; TVA sur les e-services à vérifier.
+20. **Prix en ZAR** : semaine et mois créés dans Stripe (`config/markets.json#za.stripePriceIds`, 19/09/2026), aucun annuel ; TVA sur les e-services à vérifier.
 
 ### Mexique
 21. **Règlement de la nouvelle LFPDPPP** : vérifier s'il a été publié.
@@ -166,6 +168,6 @@ Chaque dossier contient les 5 mêmes fichiers autonomes. Le tableau indique le `
     - Vérifier si le droit de révocation de 5 jours ouvrables (LFPC art. 51 à 56) s'applique aux abonnements numériques ; il est rédigé au conditionnel.
     - Vérifier si le contrat d'adhésion doit être enregistré auprès de la PROFECO.
     - Vérifier la clause « droit français » face à l'art. 1 LFPC (dispositions irrenunciables).
-23. **Validation juridique locale** du modèle « service d'information sur les paris » avant tout paiement réel (exigence du doc 07). Le prix en MXN n'est pas configuré dans Stripe.
+23. **Validation juridique locale** du modèle « service d'information sur les paris » avant tout paiement réel (exigence du doc 07). Les prix en MXN (semaine, mois, année) existent dans Stripe et ont été ouverts au paiement par le propriétaire le 19/09/2026 (`config/markets.json#mx`) : cette validation et l'envoi des avis de renouvellement promis par les CGV restent à faire.
 24. **Ressource d'aide.** La Línea de la Vida (800 911 2000) est confirmée sur gob.mx comme ligne officielle de santé mentale et d'addictions. Son orientation sur le trouble lié aux jeux d'argent ressort de communications de la CONASAMA d'août 2026 relayées par la presse ; à confirmer directement auprès de la CONASAMA.
     - `config/markets.json` (`mx.compliance.responsibleGamblingHelpline: null`) n'a pas été modifié, car ce fichier sort du périmètre de `legal/`.

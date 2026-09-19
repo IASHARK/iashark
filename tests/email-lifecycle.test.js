@@ -84,7 +84,9 @@ test("contexte de site derive de config/markets.json (devise, prix Pro, aide jeu
     assert.equal(ctx.helpline.url, help.url, dir + " aide");
     const pro = CONFIG[d.market].prices.pro;
     assert.equal(ctx.proPriceMinor, Math.round(pro.month.amount * 100), dir + " prix Pro mensuel");
-    for (const iv of ["week", "month", "year"]) assert.equal(ctx.proPricesMinor[iv], pro[iv] ? Math.round(pro[iv].amount * 100) : null, dir + " prix Pro " + iv);
+    // Duree vendue mais non payable (config/markets.json#checkoutOpen, ex. /gb/ semaine et annee au 19/09/2026) : jamais annoncee.
+    const open = CONFIG[d.market].checkoutOpen;
+    for (const iv of ["week", "month", "year"]) assert.equal(ctx.proPricesMinor[iv], pro[iv] && (!Array.isArray(open) || open.includes(iv)) ? Math.round(pro[iv].amount * 100) : null, dir + " prix Pro " + iv);
     assert.ok(L.MARKET_TIMEZONES[d.market], dir + " fuseau");
   }
   assert.deepEqual(Object.keys(CONFIG._dirs).sort(), L.DIRS.slice().sort());
@@ -201,7 +203,9 @@ test("campagnes par langue : sujet, prix de la version, consentement absent, ech
   assert.ok(by("inactive_7d").text.includes("Paris SG – Marseille") && by("inactive_7d").text.includes("Arsenal – Chelsea"));
   assert.ok(!by("inactive_7d").text.includes("Monaco"), "match hors week-end");
   const gb = (await renderAll()).find((x) => x.dir === "gb" && x.campaign === "pro_features").r;
-  assert.ok(gb.text.includes("£4.99 per week, £14.99 per month or £149.00 per year") && gb.text.includes("English (UK)"));
+  // /gb/ : mensuel seul payable (19/09/2026) -> ligne « mois seul », jamais la semaine ni l'annee.
+  assert.ok(gb.text.includes("Price on the English (UK) version of the site: £14.99 per month") && gb.text.includes("English (UK)"));
+  assert.doesNotMatch(gb.text + gb.html, /£4\.99|£149|per week|per year/, "GB : aucune duree non payable annoncee");
   const mx = (await renderAll()).find((x) => x.dir === "mx" && x.campaign === "pro_features").r;
   assert.ok(mx.text.includes("$69.00 MXN a la semana, $199.00 MXN al mes o $1,990.00 MXN al año"));
   const za = (await renderAll()).find((x) => x.dir === "za" && x.campaign === "pro_features").r;

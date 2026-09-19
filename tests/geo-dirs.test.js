@@ -331,7 +331,13 @@ test("landings pays gb/za/mx : aucun historique ni 'public record', liens dans l
       assert.ok(h.indexOf("/" + d + "/") === 0 || /^\/(en|es|mx)\/blog\//.test(h), d + "/landing.html : lien hors repertoire " + h);
     });
     assert.match(html, /<script src="\/lib\/market-config\.js"><\/script>/, d);
-    ["free", "pro.week", "pro.month"].concat(d === "za" ? [] : ["pro.year"]).forEach(function (k) { assert.match(html, new RegExp('data-market-price="' + k.replace(".", "\\.") + '"'), d + " " + k); });
+    // Prix des durees PAYABLES du marche seulement (config/markets.json#checkoutOpen,
+    // 19/09/2026 : /gb/ mensuel seul, /za/ sans annuel) ; aucune autre duree.
+    var open = MARKETS[d].checkoutOpen;
+    ["week", "month", "year"].forEach(function (iv) {
+      assert.equal(new RegExp('data-market-price="pro\\.' + iv + '"').test(html), open.indexOf(iv) !== -1, d + " pro." + iv);
+    });
+    assert.match(html, /data-market-price="free"/, d + " free");
     if (d === "za") assert.doesNotMatch(html, /data-market-price="pro\.year"/, "ZA : aucune option annuelle");
     // Offre Edge abandonnee (decision du proprietaire du 16/09/2026) : ni texte, ni
     // prix, ni bouton, ni commentaire ; un seul bouton Pro qui envoie la duree.

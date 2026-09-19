@@ -77,11 +77,13 @@ test("sans les cases, le paiement est bloque ; le payload suit le regime", () =>
   assert.deepEqual([...lib.missing({ terms: true }, mx)], []);
   const p = lib.buildPayload({ terms: true, waiver: true }, eu, { locale: "en", dir: "", ts: "2026-09-13T00:00:00.000Z" });
   assert.deepEqual({ ...p }, { terms: true, waiver: true, terms_version: lib.termsVersionFor(""), locale: "en", dir: "", ts: "2026-09-13T00:00:00.000Z" });
-  // 18/09/2026 : CGV FR (et pages racine, francaises) en version propre ; les autres repertoires gardent la version commune.
-  assert.equal(lib.termsVersionFor("fr"), "2026-09-18");
-  assert.equal(lib.termsVersionFor(""), "2026-09-18");
-  assert.equal(lib.termsVersionFor("gb"), lib.TERMS_VERSION);
-  assert.equal(lib.buildPayload({ terms: true, waiver: true }, eu, { dir: "fr" }).terms_version, "2026-09-18");
+  // 19/09/2026 : les CGV des 9 versions (et des pages racine, francaises) changent
+  // ensemble -> une seule version, sans surcharge par repertoire.
+  assert.equal(lib.TERMS_VERSION, "2026-09-19");
+  assert.deepEqual({ ...lib.TERMS_VERSIONS }, {});
+  for (const d of ["", "fr", "en", "es", "de", "it", "pt", "gb", "za", "mx"]) assert.equal(lib.termsVersionFor(d), "2026-09-19", d || "racine");
+  assert.equal(lib.buildPayload({ terms: true, waiver: true }, eu, { dir: "fr" }).terms_version, "2026-09-19");
+  assert.equal(lib.buildPayload({ terms: true, waiver: true }, lib.regimeFor("us"), { dir: "en" }).terms_version, "2026-09-19", "/en/ (marche us) : meme version");
   assert.equal(lib.buildPayload({ terms: true, waiver: true }, mx, {}).waiver, null, "mx : aucune renonciation envoyee");
   assert.match(lib.TERMS_VERSION, /^\d{4}-\d{2}-\d{2}$/);
 });
@@ -191,6 +193,15 @@ test("serveur : refuse sans CGV, refuse sans 2e case hors MX, accepte MX sans re
   assert.equal(gb.metadata.consent_server_ts, ts);
   for (const v of Object.values(gb.metadata)) assert.ok(typeof v === "string" && v.length <= 500, "metadata Stripe invalide");
   assert.ok(Object.keys(gb.metadata).every((k) => k.length <= 40), "cle metadata Stripe > 40 caracteres");
+  // CGV du 19/09/2026 : le consentement construit par le navigateur (version
+  // courante, case unique) est accepte tel quel pour chaque marche payable, la
+  // version est tracee sans modification (consent.ts ne filtre aucune version).
+  for (const [market, dir] of [[undefined, ""], [undefined, "fr"], ["us", "en"], ["gb", "gb"], ["za", "za"], ["mx", "mx"]]) {
+    const payload = lib.buildPayload({ terms: true, waiver: true }, lib.regimeFor(market || "fr"), { dir, locale: "fr", ts });
+    const r = srv.validateConsent(JSON.parse(JSON.stringify(payload)), market, ts);
+    assert.equal(r.ok, true, (market || "defaut") + " : consentement de la version 2026-09-19 refuse");
+    assert.equal(r.metadata.consent_terms_version, "2026-09-19", market || "defaut");
+  }
 });
 
 test("create-checkout-session : 400 consent_required traduit, consentement stocke dans Stripe", () => {

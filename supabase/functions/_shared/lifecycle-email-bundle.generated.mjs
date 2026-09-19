@@ -98,13 +98,17 @@ const module = { exports: {} };
   // MX : aviso J-30 et J-7). ZA : aucun annuel vendu au lancement, aucun gabarit.
   // Un gabarit commun (emails/templates/annual-renewal-reminder.*) et les textes
   // ci-dessous (7 langues, STATUT : REVIEW, relecture juriste + native).
-  // Repertoires : miroir de config/markets.json#_dirs et _helplines
-  // (tests/email-templates.test.js fait echouer toute derive).
+  // Repertoires : miroir de config/markets.json#_dirs et _helplines, limite aux
+  // versions dont le marche vend l'annuel (tests/email-templates.test.js fait
+  // echouer toute derive). /en/ retire le 19/09/2026 : marche "us" (USD,
+  // mensuel seul, config/markets.json#_usdSwitch applique). Un abonnement
+  // annuel du marche fr dont consent_dir vaut "en" (aucun attendu : l'annuel
+  // n'etait pas payable avant la bascule) recoit le rappel du repertoire
+  // principal du marche (fr, reminderDirFor).
   var ANNUAL_KIND = "annual_renewal_reminder";
   var INTERNATIONAL_HELPLINE = { name: "Gambling Therapy", phone: null, url: "https://www.gamblingtherapy.org", display: "gamblingtherapy.org" };
   var REMINDER_DIRS = {
     fr: { market: "fr", locale: "fr", htmlLang: "fr", intlLocale: "fr-FR" },
-    en: { market: "fr", locale: "en", htmlLang: "en", intlLocale: "en-GB", helpline: INTERNATIONAL_HELPLINE },
     es: { market: "fr", locale: "es", htmlLang: "es", intlLocale: "es-ES", helpline: INTERNATIONAL_HELPLINE },
     de: { market: "fr", locale: "de", htmlLang: "de", intlLocale: "de-DE", helpline: INTERNATIONAL_HELPLINE },
     it: { market: "fr", locale: "it", htmlLang: "it", intlLocale: "it-IT", helpline: INTERNATIONAL_HELPLINE },
@@ -1010,9 +1014,13 @@ const require = function () { return Render; };
     // (forme historique {amount, interval:"month"} acceptee). Duree absente ou
     // null = non vendue dans ce marche (ZA : pas d'annuel au lancement) : jamais
     // inventee, jamais affichee.
+    // Duree vendue mais non payable en ligne (config/markets.json#checkoutOpen,
+    // ex. semaine et annee de /gb/ au 19/09/2026) : traitee comme non vendue,
+    // jamais annoncee dans un email. checkoutOpen absent = toutes ouvertes.
+    var open = Array.isArray(m.checkoutOpen) ? m.checkoutOpen : null;
     var proMinor = function (iv) {
       var pro = m.prices && m.prices.pro;
-      if (!pro) return null;
+      if (!pro || (open && open.indexOf(iv) === -1)) return null;
       var e = typeof pro.amount === "number" ? (iv === (pro.interval || "month") ? pro : null) : pro[iv];
       return e && typeof e.amount === "number" && isFinite(e.amount) && e.amount > 0 ? Math.round(e.amount * 100) : null;
     };
@@ -2972,7 +2980,7 @@ export const BUNDLE = {
         "label": "English (South Africa)"
       },
       "en": {
-        "market": "fr",
+        "market": "us",
         "locale": "en",
         "htmlLang": "en",
         "intlLocale": "en-GB",
@@ -3052,7 +3060,12 @@ export const BUNDLE = {
             "amount": 199
           }
         }
-      }
+      },
+      "checkoutOpen": [
+        "week",
+        "month",
+        "year"
+      ]
     },
     "gb": {
       "currency": "GBP",
@@ -3077,7 +3090,10 @@ export const BUNDLE = {
             "amount": 149
           }
         }
-      }
+      },
+      "checkoutOpen": [
+        "month"
+      ]
     },
     "za": {
       "currency": "ZAR",
@@ -3100,7 +3116,29 @@ export const BUNDLE = {
           },
           "year": null
         }
-      }
+      },
+      "checkoutOpen": [
+        "week",
+        "month"
+      ]
+    },
+    "us": {
+      "currency": "USD",
+      "intlLocale": "en-US",
+      "priceIntlLocale": "en-US",
+      "helpline": null,
+      "prices": {
+        "pro": {
+          "week": null,
+          "month": {
+            "amount": 19.99
+          },
+          "year": null
+        }
+      },
+      "checkoutOpen": [
+        "month"
+      ]
     },
     "mx": {
       "currency": "MXN",
@@ -3126,7 +3164,12 @@ export const BUNDLE = {
             "amount": 1990
           }
         }
-      }
+      },
+      "checkoutOpen": [
+        "week",
+        "month",
+        "year"
+      ]
     }
   }
 };

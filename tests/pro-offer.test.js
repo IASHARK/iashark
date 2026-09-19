@@ -178,17 +178,39 @@ async function runSubscriptionPage(dir, availability, reopened) {
 }
 
 test("abonnement-page.js : une duree = prix seul sans « meme acces », plusieurs = choix, aucune = ni bouton ni consentement", async () => {
-  // FR : seul le mensuel est payable (checkoutOpen) ; semaine et annee absentes de la page.
-  const fr = await runSubscriptionPage("fr", null);
-  assert.match(fr.els.proPlanPicker.innerHTML, /^<div class="iash-plans iash-plans-single" data-interval="month">/);
-  assert.doesNotMatch(fr.els.proPlanPicker.innerHTML, /pro\.week|pro\.year|<input/);
-  assert.equal(fr.els.proCommitment.hidden, true, "une seule duree : pas de « meme acces, quelle que soit la duree »");
-  assert.equal(fr.els.subscribeButton.hidden, false);
-  assert.equal(fr.els.checkoutConsent.hidden, false);
-  // GB, MX, ZA (19/09/2026, « cache-le ») : aucune duree payable par la
-  // configuration -> ligne « pas encore ouvert », ni bouton ni consentement,
-  // meme sans reponse du serveur.
-  for (const dir of ["gb", "mx", "za"]) {
+  // Configuration du 19/09/2026 (decisions du proprietaire), fonction de
+  // paiement a jour (mode "availability", toutes les durees disponibles cote
+  // serveur) : FR et MX 3 durees, ZA semaine + mois, GB mois seul (semaine et
+  // annee jamais affichees, meme si le serveur les annoncait).
+  const ALL = { week: true, month: true, year: true };
+  const EXPECT = { fr: ["week", "month", "year"], mx: ["week", "month", "year"], za: ["week", "month"], gb: ["month"], en: ["month"] };
+  for (const [dir, ivs] of Object.entries(EXPECT)) {
+    const r = await runSubscriptionPage(dir, ALL);
+    const html = r.els.proPlanPicker.innerHTML;
+    assert.equal(r.els.subscribeButton.hidden, false, dir + " : bouton de paiement");
+    assert.equal(r.els.checkoutConsent.hidden, false, dir + " : consentement");
+    if (ivs.length === 1) {
+      assert.match(html, /^<div class="iash-plans iash-plans-single" data-interval="month">/, dir);
+      assert.doesNotMatch(html, /pro\.week|pro\.year|<input/, dir + " : aucune duree non payable");
+      assert.equal(r.els.proCommitment.hidden, true, dir + " : une seule duree, pas de « meme acces, quelle que soit la duree »");
+    } else {
+      assert.deepEqual([...html.matchAll(/<input type="radio"[^>]*value="(\w+)"/g)].map((m) => m[1]), ivs, dir);
+      assert.equal(r.els.proCommitment.hidden, false, dir + " : plusieurs durees, « meme acces » affiche");
+    }
+    assert.equal(r.calls.length, 1, dir);
+    assert.deepEqual(r.calls[0], MARKETS[MARKETS._dirs[dir].market].checkoutMarket ? { mode: "availability", market: MARKETS[MARKETS._dirs[dir].market].checkoutMarket } : { mode: "availability" }, dir + " : disponibilites du bon marche");
+  }
+  // Fonction deployee plus ancienne que le site (sans mode "availability") :
+  // FR = mensuel seul (flux historique, sans champ market) ; marches pays
+  // (gb, mx, za, us) = aucun paiement (l'ancienne fonction ignore la duree et,
+  // selon sa version, refuse le marche ou le facture au prix FR).
+  const frOldFn = await runSubscriptionPage("fr", null);
+  assert.match(frOldFn.els.proPlanPicker.innerHTML, /^<div class="iash-plans iash-plans-single" data-interval="month">/);
+  assert.doesNotMatch(frOldFn.els.proPlanPicker.innerHTML, /pro\.week|pro\.year|<input/);
+  assert.equal(frOldFn.els.proCommitment.hidden, true, "une seule duree : pas de « meme acces, quelle que soit la duree »");
+  assert.equal(frOldFn.els.subscribeButton.hidden, false);
+  assert.equal(frOldFn.els.checkoutConsent.hidden, false);
+  for (const dir of ["gb", "mx", "za", "en"]) {
     const cfg = await runSubscriptionPage(dir, null);
     assert.match(cfg.els.proPlanPicker.innerHTML, /^<p class="iash-plans-closed" role="status">/, dir);
     assert.equal(cfg.els.subscribeButton.hidden, true, dir + " : pas de bouton qui echoue");

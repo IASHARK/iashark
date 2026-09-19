@@ -122,7 +122,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
 </style>
 <link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
 <body>
-<!-- LEGAL REVIEW: (1) aplicabilidad del derecho de revocación de 5 días hábiles (LFPC arts. 51 a 56) a suscripciones digitales contratadas en línea - redactado de forma condicional, a confirmar; (2) precio en MXN aún no configurado en Stripe - los planes de /mx todavía no pueden contratarse; (3) IVA sobre servicios digitales prestados por residentes en el extranjero a consumidores en México - a confirmar con asesor fiscal; (4) validez de la elección de la ley francesa frente a consumidores mexicanos y competencia de tribunales - a confirmar; (5) registro de contrato de adhesión ante PROFECO: verificar si es obligatorio para este tipo de servicio; (6) validación jurídica local del modelo 'servicio de información sobre apuestas' exigida por el 07_IAShark_Mexico_Launch_Kit antes de cualquier cobro real. -->
+<!-- LEGAL REVIEW: (1) aplicabilidad del derecho de revocación de 5 días hábiles (LFPC arts. 51 a 56) a suscripciones digitales contratadas en línea - redactado de forma condicional, a confirmar; (2) precios en MXN creados en Stripe (config/markets.json#mx.stripePriceIds: semanal, mensual y anual) - planes contratables por decisión del propietario del 19/09/2026; (3) IVA sobre servicios digitales prestados por residentes en el extranjero a consumidores en México - a confirmar con asesor fiscal (decisión del propietario del 19/09/2026: se indica la franquicia francesa 'IVA no aplicable, artículo 293 B del CGI' en la sección 5, como en todas las versiones); (4) validez de la elección de la ley francesa frente a consumidores mexicanos y competencia de tribunales - a confirmar; (5) registro de contrato de adhesión ante PROFECO: verificar si es obligatorio para este tipo de servicio; (6) validación jurídica local del modelo 'servicio de información sobre apuestas' exigida por el 07_IAShark_Mexico_Launch_Kit antes de cualquier cobro real. -->
 <header class="hdr">
   <button class="hdr-back" type="button" onclick="history.back()">&larr; REGRESAR</button>
   <a class="brand-logo" href="./" aria-label="IASHARK"><img src="/assets/iashark-logo.png" alt="IASHARK" width="154" height="41"></a>
@@ -137,7 +137,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Juego responsable</a>
   </nav>
   <h1 class="page-title">Términos y condiciones</h1>
-  <div class="page-date">Última actualización: 16 de septiembre de 2026</div>
+  <div class="page-date">Última actualización: 19 de septiembre de 2026</div>
+  <!-- LEGAL REVIEW: 19/09/2026 - owner decision: weekly, monthly and annual plans payable in Mexico (config/markets.json#mx.checkoutOpen, Stripe Prices in mx.stripePriceIds). Prices, billing periods, renewal, notices and cancellation rules unchanged from the 16/09/2026 text; "con los impuestos aplicables incluidos" replaced by the French VAT franchise mention. Previous version archived in legal/mx/archives/cgv-2026-09-16.html. Status: REVIEW. -->
 
   <div class="warn-box">
     <p>⚠️ IASHARK NO ES UNA CASA DE APUESTAS: NO RECIBIMOS NI COLOCAMOS APUESTAS. NUESTROS ANÁLISIS SON ESTIMACIONES ESTADÍSTICAS, SIN GARANTÍA DE RESULTADOS NI DE GANANCIAS.<br>LAS APUESTAS PUEDEN GENERAR ADICCIÓN. ORIENTACIÓN GRATUITA LAS 24 HORAS: LÍNEA DE LA VIDA <a href="tel:8009112000">800 911 2000</a>.<br>PROHIBIDO PARA MENORES DE 18 AÑOS.</p>
@@ -172,7 +173,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <h2>5. Suscripción Pro y plazos</h2>
     <ul>
       <li><strong>Características</strong> — IASHARK Pro es un plan único que da acceso a todos los análisis y herramientas descritos en nuestra página de precios al momento de contratar. <strong>Las funciones son exactamente las mismas con cualquier plazo</strong>; solo cambian el monto y la frecuencia del cobro.</li>
-      <li><strong>Precio</strong> — precios totales en pesos mexicanos (MXN), con los impuestos aplicables incluidos: <strong>MX$69 por semana</strong>, <strong>MX$199 por mes</strong> o <strong>MX$1,990 por año</strong>. A modo informativo, MX$1,990 al año equivalen a MX$165.84 al mes, un 16 % menos que pagar 12 meses con el precio mensual (MX$2,388). El precio del plazo elegido se muestra en la página de precios y en la página de pago antes de que confirmes.</li>
+      <li><strong>Precio</strong> — precios totales en pesos mexicanos (MXN): <strong>MX$69 por semana</strong>, <strong>MX$199 por mes</strong> o <strong>MX$1,990 por año</strong>. IVA no aplicable, artículo 293 B del Código General de Impuestos francés (CGI). A modo informativo, MX$1,990 al año equivalen a MX$165.84 al mes, un 16 % menos que pagar 12 meses con el precio mensual (MX$2,388). El precio del plazo elegido se muestra en la página de precios y en la página de pago antes de que confirmes.</li>
       <li><strong>Periodicidad</strong> — cobro automático cada semana o cada mes hasta que canceles; el plan anual se cobra una vez al año y se renueva por otro año salvo que canceles antes.</li>
       <li><strong>Revisión de tu pedido</strong> — antes de pagar puedes revisar el plazo y el precio, corregir errores o salir sin contratar.</li>
       <li><strong>Acceso</strong> — las funciones de pago se activan en cuanto se confirma tu pago.</li>
@@ -186,6 +187,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <ul>
       <li>Pagas al inicio de cada periodo de facturación (semana, mes o año, según el plazo elegido).</li>
       <li><strong>Tu suscripción se renueva automáticamente</strong> al final de cada periodo, por un periodo igual, hasta que la canceles.</li>
+      <!-- LEGAL REVIEW: 19/09/2026 - MX prices opened by the owner: the notices below (renewal_reminder / annual_renewal_reminder) must actually be sent from the first renewal (Resend + scheduled jobs enabled) - check before publishing. Changing billing period: check that the Stripe customer portal configuration applies the rule below (longer period immediate with proration, shorter period at the end of the paid period). -->
+      <!-- BLOCKED_DECISION: weekly plan notice 2 days before each charge (current rule kept) vs LFPC art. 76 Bis fracc. IX (DOF 12/12/2025) as read in the LEGAL REVIEW note of section 7 (notice at least 5 calendar days before an automatic renewal): decide between a notice sent 5 days before each weekly charge, keeping D-2 after Mexican counsel's review, or not selling the weekly plan in Mexico. -->
       <li><strong>Aviso antes del cobro.</strong> Te enviaremos un correo antes de cada renovación con la fecha del cobro, el monto exacto y cómo cancelar en línea: plan anual, 30 días y 7 días antes; plan mensual, 7 días antes; plan semanal, 2 días antes.</li>
       <li><strong>Cambio de plazo.</strong> Puedes cambiar entre semanal, mensual y anual desde "Mi cuenta". El cambio a un plazo más largo aplica de inmediato: el nuevo periodo se cobra en ese momento, descontando de forma proporcional la parte no usada del periodo en curso. El cambio a un plazo más corto aplica al final del periodo que ya pagaste, sin reembolso ni cargo adicional mientras tanto. Antes de confirmar verás el nuevo monto y la fecha en que aplica. Una suscripción activa no se puede contratar dos veces.</li>
       <li>Si cambiamos el precio, te avisaremos con anticipación. El nuevo precio solo se aplicará a partir de tu siguiente renovación y podrás cancelar antes de que entre en vigor.</li>
@@ -207,6 +210,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <ul>
       <li>Puedes cancelar en cualquier momento y sin costo desde la página "Mi cuenta" (que abre el área de facturación segura de nuestro proveedor de pagos) o escribiéndonos por correo.</li>
       <li>La cancelación surte efecto al final del periodo de facturación en curso (semana, mes o año): conservas el acceso de pago hasta esa fecha y no se te volverá a cobrar.</li>
+      <!-- BLOCKED_DECISION: annual plan - pro-rata refund of the unused part when cancelling during the year: current rule kept (no refund, cancellation effective at the end of the paid year). To be confirmed by the owner (and by Mexican counsel: LFPC). -->
       <li>Salvo lo previsto en el apartado 7 y en los demás casos en que la ley te dé derecho a un reembolso, no se reembolsa el periodo ya iniciado.</li>
       <li>Si eliminas tu cuenta desde "Mi cuenta", primero se cancela cualquier suscripción activa.</li>
     </ul>

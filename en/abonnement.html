@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="iashark-market" content="fr">
+<meta name="iashark-market" content="us">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IASHARK Pro Subscription: Every Match Analysis</title>
 <link rel="canonical" href="https://iashark.com/en/abonnement.html">
@@ -16,7 +16,7 @@
 <link rel="alternate" hreflang="it" href="https://iashark.com/it/abonnement.html">
 <link rel="alternate" hreflang="pt" href="https://iashark.com/pt/abonnement.html">
 <link rel="alternate" hreflang="x-default" href="https://iashark.com/en/abonnement.html">
-<meta name="description" content="IASHARK Pro at €19.95 per month: every match analysis and the tracking tools, cancel anytime. Statistical estimates only, no guaranteed results. 18+">
+<meta name="description" content="IASHARK Pro at $19.99 per month: every match analysis and the tracking tools, cancel anytime. Statistical estimates only, no guaranteed results. 18+">
 <link rel="icon" href="/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,7 +45,7 @@
 <meta property="og:site_name" content="IASHARK">
 <meta property="og:locale" content="en">
 <meta property="og:title" content="IASHARK Pro Subscription: Every Match Analysis">
-<meta property="og:description" content="IASHARK Pro at €19.95 per month: every match analysis and the tracking tools, cancel anytime. Statistical estimates only, no guaranteed results. 18+">
+<meta property="og:description" content="IASHARK Pro at $19.99 per month: every match analysis and the tracking tools, cancel anytime. Statistical estimates only, no guaranteed results. 18+">
 <meta property="og:url" content="https://iashark.com/en/abonnement.html">
 <meta property="og:image" content="https://iashark.com/icon-512.png">
 <meta name="twitter:card" content="summary">
@@ -62,7 +62,7 @@
       <p id="proContext" class="pro-context" hidden></p>
       <!-- Offre Pro unique : lib/pro-plan-picker.js remplace ce bloc et n'affiche que les durees PAYABLES (repli sans JS = prix mensuel). -->
       <!-- Marche ferme au paiement (config/markets.json#checkoutOpen = [], gb/mx/za le 19/09/2026) : ni prix ni bouton dans le HTML genere, la ligne « pas encore ouvert » (data-market-open-if / data-market-closed-if, scripts/build-locales.js). -->
-      <div id="proPlanPicker"><div class="price" data-market-open-if="pro.month"><b data-market-price="pro.month" style="font-weight:inherit">€19.95</b> <span data-i18n="pricing_page.per_month">/ month</span></div><p class="iash-plans-closed" data-market-closed-if="pro" data-i18n="pro_plans.closed" hidden>Payment isn't available yet in this country. No amount will be charged.</p></div>
+      <div id="proPlanPicker"><div class="price" data-market-open-if="pro.month"><b data-market-price="pro.month" style="font-weight:inherit">$19.99</b> <span data-i18n="pricing_page.per_month">/ month</span></div><p class="iash-plans-closed" data-market-closed-if="pro" data-i18n="pro_plans.closed" hidden>Payment isn't available yet in this country. No amount will be charged.</p></div>
       <!-- Seulement quand plusieurs durees sont proposees (abonnement-page.js#majOffre). -->
       <div class="commitment" id="proCommitment" data-i18n="pricing_page.commitment" hidden>The same Pro access for every period · Cancel anytime</div>
       <div id="checkoutConsent" data-market-open-if="pro"></div><button class="pricing-cta iash-consent-locked" id="subscribeButton" data-market-open-if="pro" type="button" aria-disabled="true" data-loading="true" title="LOADING..." data-i18n-attr="title:common.loading" data-i18n="pricing_page.cta_subscribe">Go Pro</button><div id="billingMessage" class="billing-message" aria-live="polite"></div>

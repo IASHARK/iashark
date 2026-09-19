@@ -59,7 +59,8 @@ const ALL_VERSIONS = BASE_VERSIONS.map((v) => {
 const CONSENT_BOXES = { eu: 1, uk: 1, za: 1, mx: 1 };
 
 // Pages legales generees dans chaque repertoire (config/markets.json#_legalFiles).
-const LEGAL_FILES = ['mentions-legales.html', 'cgv.html', 'confidentialite.html', 'cookies.html', 'jeu-responsable.html'];
+// methodologie.html existe dans les 9 repertoires depuis le 19/09/2026.
+const LEGAL_FILES = ['mentions-legales.html', 'cgv.html', 'confidentialite.html', 'cookies.html', 'jeu-responsable.html', 'methodologie.html'];
 
 const ALL_DIRS = ALL_VERSIONS.map((v) => v.dir);
 

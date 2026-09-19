@@ -14,7 +14,7 @@
    Contraste : --muted et --dim releves (audit axe, 4,5:1 minimum sur les
    cartes).
    ========================================================================== */
-:root{--bg:#080c12;--card:#0d1520;--card2:#0f1a28;--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.16);--accent:#22d3ee;--cyan:#22d3ee;--cyan2:#06b6d4;--accent-bg:rgba(34,211,238,.08);--accent-border:rgba(34,211,238,.22);--green:#34d399;--red:#f87171;--orange:#fbbf24;--text:#e2e8f0;--soft:#c3d1de;--muted:#8fa1b5;--dim:#8796a8;--mono:"Space Mono",monospace;--body:"DM Sans",system-ui,sans-serif;--display:"Bebas Neue",sans-serif;--radius:14px;--container:880px}
+:root{--bg:#080c12;--card:#0d1520;--card2:#0f1a28;--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.16);--accent:#22d3ee;--cyan:#22d3ee;--cyan2:#06b6d4;--accent-bg:rgba(34,211,238,.08);--accent-border:rgba(34,211,238,.22);--green:#34d399;--red:#f87171;--orange:#fbbf24;--amber:#f59e0b;--text:#e2e8f0;--soft:#c3d1de;--muted:#8fa1b5;--dim:#8796a8;--mono:"Space Mono",monospace;--body:"DM Sans",system-ui,sans-serif;--display:"Bebas Neue",sans-serif;--radius:14px;--container:880px}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);min-height:100%}
 body{padding-bottom:96px;position:relative}
@@ -631,3 +631,105 @@ a{color:inherit}
   .rep-panel,.rep-btn i,.mnav-chip,.lock-cta,.cta-recall-btn,.cta-bar{transition:none}
   .duo-track i{animation:none}
 }
+
+/* ==========================================================================
+   MUR PRO (visiteur ou compte gratuit, match payant ; 19/09/2026)
+   Un seul mur, la ou l'analyse commence (match-page.js#proGate). Meme langage
+   que le verrou « Buteurs du jour » de l'accueil (assets/home-scorers.css,
+   .hs-gate*) : apercu FACTICE floute (aucune donnee : « Xxxx », « ??,? % »),
+   panneau centre par-dessus, cadenas et bouton ambre (ambre = verrou Pro,
+   cyan = donnee). Apercu et panneau partagent la meme cellule de grille : la
+   hauteur suit le plus grand des deux, rien ne deborde, rien ne bouge.
+   Meme contenu sur mobile et ordinateur, seule la disposition change.
+   ========================================================================== */
+.mgate-stage{position:relative;display:grid;margin-top:16px;overflow:hidden;border:1px solid var(--line);border-radius:16px;background:rgba(3,10,17,.5)}
+.mgate-stage>*{grid-area:1/1;min-width:0}
+/* Apercu : ses rangees s'etirent sur toute la hauteur du cadre (jamais de vide). */
+.mgate-preview{display:grid;gap:12px;padding:14px;filter:blur(4px);opacity:.88;pointer-events:none;user-select:none;-webkit-user-select:none}
+.mgp-slip{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--accent-border);border-radius:12px;background:rgba(3,10,17,.55)}
+.mgp-slip-main{display:flex;flex-direction:column;gap:5px;min-width:0}
+.mgp-k,.mgp-fix{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden}
+.mgp-market{color:#fff;font:700 26px/1.1 var(--body);letter-spacing:-.02em;white-space:nowrap;overflow:hidden}
+.mgp-odds{display:grid;place-items:center;min-width:84px;min-height:64px;border-radius:12px;background:var(--accent);color:#04222b;font:700 26px var(--body)}
+.mgp-duo,.mgp-scorer,.mgp-scores{padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025)}
+.mgp-duo{display:grid;align-content:center;gap:12px}
+.mgp-line{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:6px 12px}
+.mgp-line>span{color:var(--soft);font-size:13.5px;white-space:nowrap;overflow:hidden}
+.mgp-line>b{color:var(--accent);font:700 22px/1 var(--body);white-space:nowrap}
+.mgp-line.is-market>b{color:var(--soft);font-size:18px}
+.mgp-bar{grid-column:1/-1;position:relative;display:block;height:9px;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.08)}
+.mgp-bar:before{content:"";position:absolute;top:0;bottom:0;left:0;border-radius:inherit;background:linear-gradient(90deg,var(--cyan2),var(--accent))}
+.is-market .mgp-bar:before{background:rgba(195,209,222,.5)}
+.mgp-bar.wa:before{width:72%}.mgp-bar.wb:before{width:55%}.mgp-bar.wc:before{width:46%}
+.mgp-bar.wd:before{width:88%}.mgp-bar.we:before{width:70%}.mgp-bar.wf:before{width:52%}
+.mgp-scorer{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-content:center;align-items:center;gap:10px 12px}
+.mgp-avatar{width:44px;height:44px;border-radius:50%;background:rgba(141,179,211,.28);box-shadow:0 0 0 4px rgba(34,211,238,.12)}
+.mgp-who{display:flex;flex-direction:column;gap:3px;min-width:0}
+.mgp-who b{color:var(--text);font:600 16px var(--body);white-space:nowrap;overflow:hidden}
+.mgp-who small{color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden}
+.mgp-prob{color:var(--accent);font:700 20px var(--body);white-space:nowrap}
+.mgp-scores{display:grid;align-content:center;gap:10px}
+.mgp-score{display:grid;grid-template-columns:minmax(0,140px) minmax(0,1fr) 40px;align-items:center;gap:10px}
+.mgp-score b{color:var(--text);font:600 13.5px var(--body);white-space:nowrap;overflow:hidden}
+.mgp-score .mgp-bar{grid-column:auto;height:8px}
+.mgp-score small{color:var(--soft);font-size:12.5px;text-align:right;white-space:nowrap}
+/* Panneau : carte opaque posee sur l'apercu (texte toujours lisible) ; en
+   haut, l'apercu reste visible (ticket floute) pour montrer qu'il y a du contenu. */
+.mgate-panel{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;padding:70px 10px 10px;
+  background:linear-gradient(180deg,rgba(8,13,20,0),rgba(8,13,20,.3) 45%,rgba(8,13,20,.5))}
+.mgate-card{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;max-width:500px;padding:22px 16px 18px;text-align:center;
+  border:1px solid rgba(245,158,11,.24);border-radius:16px;background:linear-gradient(180deg,rgba(15,26,40,.96),rgba(9,16,25,.98));
+  box-shadow:0 26px 54px -22px #000,0 0 44px -20px rgba(245,158,11,.4)}
+.mgate-lock{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;color:var(--amber);background:rgba(245,158,11,.1);box-shadow:0 0 0 1px rgba(245,158,11,.45),0 0 22px rgba(245,158,11,.25)}
+.mgate-lock .card-icon{width:18px;height:18px}
+.mgate-title{max-width:20ch;margin:2px 0 0;color:#fff;font:700 clamp(21px,3.4vw,26px)/1.2 var(--body);letter-spacing:-.02em;text-wrap:balance}
+.mgate-note{max-width:40ch;margin:0;color:var(--soft);font-size:14px;line-height:1.5}
+.mgate-band{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 10px;color:var(--soft);font-size:13px}
+.mgate-band .band{padding:4px 11px 4px 9px;font-size:12.5px}
+.mgate-list{display:grid;gap:8px;margin:4px 0 2px;padding:0;list-style:none;text-align:left}
+.mgate-list li{position:relative;padding-left:24px;color:#e6edf3;font:500 14.5px/1.4 var(--body)}
+.mgate-list li:before{content:"";position:absolute;left:4px;top:.32em;width:9px;height:5px;border-left:2px solid var(--accent);border-bottom:2px solid var(--accent);transform:rotate(-45deg)}
+.mgate-cta{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;max-width:340px;min-height:52px;margin-top:6px;padding:0 24px;border-radius:999px;
+  background:linear-gradient(135deg,#fbbf24,var(--amber));color:#1a1203;font:700 16px var(--body);text-decoration:none;
+  box-shadow:0 10px 28px rgba(245,158,11,.3);transition:transform .15s ease,box-shadow .15s ease}
+.mgate-cta:hover{transform:translateY(-1px);box-shadow:0 12px 32px rgba(245,158,11,.4)}
+.mgate-cta:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.mgate-small{margin:0;color:var(--soft);font-size:12.5px}
+.mgate .sig-legal,.mgate .sig-method{text-align:center}
+@media(min-width:720px){
+  /* Ordinateur : apercu sur deux colonnes (ticket en largeur), carte centree ;
+     l'apercu reste visible autour d'elle. */
+  .mgate-preview{grid-template-columns:repeat(2,minmax(0,1fr));padding:16px}
+  .mgp-slip,.mgp-scores{grid-column:1/-1}
+  .mgate-panel{padding:44px 28px;background:radial-gradient(60% 70% at 50% 55%,rgba(8,13,20,.55),rgba(8,13,20,.1))}
+  .mgate-card{padding:28px 30px 24px}
+}
+@media(max-width:640px){
+  .mgate-stage{margin-top:14px;border-radius:14px}
+  .mgate-preview{padding:12px;gap:10px}
+  .mgp-market{font-size:22px}
+  .mgp-odds{min-width:70px;min-height:58px;font-size:22px}
+  .mgate-card{padding:20px 14px 16px}
+  .mgate-list li{font-size:14px}
+}
+@media(prefers-reduced-motion:reduce){.mgate-cta{transition:none}.mgate-cta:hover{transform:none}}
+
+/* ==========================================================================
+   REPRISE « match plus disponible » (match-page.js#renderIntrouvable) :
+   plus d'impasse. Message court, match gratuit du jour, matchs du jour.
+   ========================================================================== */
+.match-recovery{display:flex;flex-direction:column;align-items:center;gap:12px;max-width:540px;margin:40px auto 24px;padding:32px 22px 26px;border:1px solid var(--line);border-radius:18px;text-align:center;
+  background:radial-gradient(110% 80% at 50% 0%,rgba(34,211,238,.09),transparent 60%),var(--card)}
+.mrec-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;color:var(--accent);background:var(--accent-bg);box-shadow:0 0 0 1px var(--accent-border)}
+.mrec-icon .card-icon{width:22px;height:22px}
+.mrec-title{margin:4px 0 0;color:#fff;font:700 clamp(22px,4vw,27px)/1.2 var(--body);letter-spacing:-.015em;text-wrap:balance}
+.mrec-text{max-width:42ch;margin:0;color:var(--soft);font-size:15px;line-height:1.55}
+.mrec-actions{display:flex;flex-direction:column;gap:10px;width:100%;max-width:340px;margin-top:8px}
+.mrec-btn{display:flex;align-items:center;justify-content:center;min-height:50px;padding:0 20px;border:1px solid var(--line2);border-radius:12px;background:rgba(255,255,255,.03);color:var(--text);font:700 15px var(--body);text-decoration:none;transition:border-color .15s,opacity .15s}
+.mrec-btn:hover{border-color:var(--accent-border)}
+.mrec-btn.is-primary{border-color:var(--accent);background:var(--accent);color:#04222b}
+.mrec-btn.is-primary:hover{opacity:.9}
+.mrec-btn:focus-visible,.mrec-link:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.mrec-link{margin-top:4px;color:var(--accent);font-size:13.5px;text-underline-offset:3px}
+@media(max-width:640px){.match-recovery{margin:20px auto 16px;padding:26px 16px 22px}}
+@media(prefers-reduced-motion:reduce){.mrec-btn{transition:none}}

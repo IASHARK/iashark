@@ -17,6 +17,8 @@ async function freeMatchIdFromHome(page, dir) {
   const href = await page.locator('#heroFeature a.feature-card').getAttribute('href');
   return new URL(href, 'http://x').searchParams.get('id');
 }
+// Offre Pro avec retour a ce match apres paiement (abonnement-page.js#contexteMatch).
+const proHref = (dir, id) => `/${dir}/abonnement.html?next=${encodeURIComponent(`/${dir}/match.html?id=${id}`)}`;
 const sectionOrder = (page) => page.locator('#matchRoot .sec[data-sec]').evaluateAll((els) => els.map((e) => e.dataset.sec));
 
 function expectReadingOrder(order, visitor) {
@@ -43,11 +45,25 @@ for (const v of VERSIONS) {
         try { served.push({ url: u.pathname, body: await r.json() }); } catch (e) { /* non JSON (404 HTML) */ }
       });
       await page.goto(`/${v.dir}/match.html?id=${siteData.paid.id}`);
-      const gate = page.locator('#matchRoot .gate');
+      // Mur Pro unique (19/09/2026) : apercu factice floute + panneau + bouton ambre.
+      const gate = page.locator('#matchRoot .gate.mgate');
       await expect(gate).toBeVisible();
-      await expect(gate.locator('h2')).toHaveText(tr(dict, 'match_page.avis_lock_title'));
+      await expect(gate.locator('h2')).toHaveText(tr(dict, 'match_page.pro_gate_title'));
       await expect(gate.locator('.avis-ready')).toHaveText(tr(dict, 'match_page.avis_ready'));
-      expect(pathOf(await gate.locator('a.btn-gate').getAttribute('href'), baseURL)).toBe(`/${v.dir}/abonnement.html`);
+      const cta = gate.locator('a.mgate-cta');
+      await expect(cta).toContainText(tr(dict, 'match_page.pro_gate_cta'));
+      await expect(cta).toHaveAttribute('data-track', 'match_gate_unlock');
+      expect(pathOf(await cta.getAttribute('href'), baseURL)).toBe(proHref(v.dir, siteData.paid.id));
+      await expect(gate.locator('.mgate-small')).toHaveText(tr(dict, 'match_page.pro_gate_small'));
+      await expect(gate.locator('.mgate-list li')).toHaveCount(4);
+      await expect(gate.locator('.mgate-preview')).toHaveAttribute('aria-hidden', 'true');
+      expect(await gate.locator('.mgate-preview').textContent(), 'apercu factice : aucun chiffre').not.toMatch(/\d/);
+      await expect(gate.locator('.sr-only')).toHaveText(tr(dict, 'match_page.pro_gate_sr'));
+      await expect(page.locator('#matchRoot .avis-cta, #matchRoot [data-track="match_avis_unlock"]')).toHaveCount(0);
+      // Tous les boutons « Debloquer » menent a l'offre avec retour a ce match.
+      for (const href of await page.locator('#matchRoot .cta-recall-btn, #matchRoot .lock-cta, #matchRoot .faq-lock a, #ctaBar a').evaluateAll((els) => els.map((e) => e.getAttribute('href')))) {
+        expect(pathOf(href, baseURL)).toBe(proHref(v.dir, siteData.paid.id));
+      }
       expectReadingOrder(await sectionOrder(page), true);
       // Stats brutes ouvertes, analyse fermee en un seul bloc, reponses du modele fermees.
       await expect(page.locator('#sec-stats .fold').first()).toBeVisible();
@@ -124,7 +140,8 @@ for (const v of VERSIONS) {
 
       test.skip(!siteData.paid, 'Aucun match payant dans les donnees');
       await page.goto(`/${v.dir}/match.html?id=${siteData.paid.id}`);
-      await expect(page.locator('#matchRoot .gate h2')).toHaveText(tr(dict, 'match_page.avis_lock_title'));
+      await expect(page.locator('#matchRoot .gate h2')).toHaveText(tr(dict, 'match_page.pro_gate_title'));
+      await expect(page.locator('#matchRoot a.mgate-cta')).toHaveCount(1);
       await expect(page.locator('#sigSticky')).toHaveCount(0);
       await expect(page.locator(PAID)).toHaveCount(0);
     });
@@ -161,6 +178,30 @@ for (const v of VERSIONS) {
       await expect(page.locator('#matchRoot .signal-card').first()).toBeVisible();
       await expect(page.locator('#ctaBar')).toHaveCount(0);
       await expect(page.locator('#matchRoot .faq-lock')).toHaveCount(0);
+    });
+
+    // Plus d'impasse « Match introuvable » (19/09/2026).
+    test('sans identifiant : retour a l\'accueil de la version, sans ecran d\'erreur @mobile', async ({ page }) => {
+      await page.goto(`/${v.dir}/match.html`);
+      await page.waitForURL((u) => u.pathname === `/${v.dir}/`, { timeout: 15000 });
+      await expect(page.locator('.match-error')).toHaveCount(0);
+    });
+
+    test('identifiant inconnu : bloc de reprise (match gratuit du jour, matchs du jour), page noindex @mobile', async ({ page, dictFor, baseURL }) => {
+      const dict = await dictFor(v.locale);
+      const freeId = await freeMatchIdFromHome(page, v.dir);
+      await page.goto(`/${v.dir}/match.html?id=999999999`);
+      const rec = page.locator('#matchRoot .match-recovery');
+      await expect(rec).toBeVisible();
+      await expect(rec.locator('#recoveryTitle')).toHaveText(tr(dict, 'match_page.recovery_title'));
+      await expect(rec.locator('.mrec-text')).toHaveText(tr(dict, 'match_page.recovery_text'));
+      const home = rec.locator('a.mrec-btn', { hasText: tr(dict, 'match_page.recovery_home_cta') });
+      expect(pathOf(await home.getAttribute('href'), baseURL)).toBe(`/${v.dir}/`);
+      const free = rec.locator('a.mrec-btn', { hasText: tr(dict, 'match_page.recovery_free_cta') });
+      if (freeId) expect(pathOf(await free.getAttribute('href'), baseURL)).toBe(`/${v.dir}/match.html?id=${freeId}`);
+      else await expect(free).toHaveCount(0);
+      await expect(page.locator('.match-error')).toHaveCount(0);
+      await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
     });
 
     test('mobile visiteur : sommaire collant, barre d\'appel masquee en haut, pied de page non recouvert @mobile', async ({ page, siteData }, testInfo) => {

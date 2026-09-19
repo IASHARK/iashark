@@ -968,7 +968,8 @@ const require = function () { return Render; };
   // Pages absentes du depot pour certains repertoires (lien de repli vers la
   // version anglaise). tests/email-lifecycle.test.js verifie cette liste
   // contre les fichiers reels : ajouter la page oblige a mettre a jour ici.
-  var METHODOLOGY_MISSING_DIRS = ["de", "it", "pt"];
+  // 19/09/2026 : /de/ /it/ /pt/methodologie.html existent, plus aucun repli.
+  var METHODOLOGY_MISSING_DIRS = [];
 
   // Vocabulaire interdit (aucune promesse de gain) par langue : sur, gagnant,
   // garanti, bonus et leurs equivalents.

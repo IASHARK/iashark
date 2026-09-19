@@ -544,10 +544,11 @@
     };
 
     var TRACK_KINDS = { home_banner_ready: true, home_row_lock: true, home_list_upsell: true, home_fav_add: true,
-      // Page match (match-page.js, visiteur) : boutons « Debloquer » de l'avis,
-      // du rappel apres les stats, de l'analyse fermee, des reponses FAQ fermees
-      // et de la barre mobile (tableau de bord : admin_unlock_clicks, 0025).
-      match_avis_unlock: true, match_recall_unlock: true, match_analysis_unlock: true, match_faq_unlock: true, match_bar_unlock: true };
+      // Page match (match-page.js, visiteur) : boutons « Debloquer » du panneau
+      // d'analyse (mur Pro, 19/09/2026), de l'avis, du rappel apres les stats,
+      // de l'analyse fermee, des reponses FAQ fermees et de la barre mobile
+      // (tableau de bord : admin_unlock_clicks, 0025 puis 0029).
+      match_gate_unlock: true, match_avis_unlock: true, match_recall_unlock: true, match_analysis_unlock: true, match_faq_unlock: true, match_bar_unlock: true };
     var classify = function (target) {
       if (!target || typeof target.closest !== "function") return null;
       var tracked = target.closest("[data-track]");

@@ -146,31 +146,31 @@ footer .foot-links a{color:#22d3ee;}
   <div class="sec">
     <div class="sec-lbl" data-i18n="about_page.method_label">METHODOLOGY</div>
     <h2 data-i18n="about_page.method_title">How the model works</h2>
-    <p data-i18n="about_page.method_text">For each match, the system starts from both teams' real statistics over the current and previous seasons: goals scored and conceded, plus the quality of the chances created and conceded when recent data allows. From these it estimates each team's expected goals, then the probability of every score. For the 1X2, over/under 2.5 goals and both-teams-to-score markets, these probabilities are corrected by a calibration learnt from past seasons. Odds never enter this calculation.</p>
+    <p data-i18n="about_page.method_text">Every analysis is produced automatically, in four steps, from gathering the data to writing the text.</p>
 
     <div class="model-grid">
       <div class="model-card">
-        <div class="mtitle" data-i18n="about_page.card_history_title">CURRENT AND PREVIOUS SEASON</div>
-        <div class="mdesc" data-i18n="about_page.card_history_text">The calculation uses the current season and the previous one. Early in the season, the previous season and a reference average carry more weight, then less and less as matches are played.</div>
+        <div class="mtitle" data-i18n="about_page.card_history_title">DATA</div>
+        <div class="mdesc" data-i18n="about_page.card_history_text">Team and player statistics, match history and the odds offered by bookmakers.</div>
       </div>
       <div class="model-card">
-        <div class="mtitle" data-i18n="about_page.card_crossed_title">ONE SCORE MODEL</div>
-        <div class="mdesc" data-i18n="about_page.card_crossed_text">Probabilities come from a single score model, calibrated on three markets. It is not a vote between models: the parallel calculations and the simulation are only used to measure the agreement shown in the reliability indicator.</div>
+        <div class="mtitle" data-i18n="about_page.card_crossed_title">STATISTICAL MODEL</div>
+        <div class="mdesc" data-i18n="about_page.card_crossed_text">A model uses this data to estimate the chances of the main outcomes of each match.</div>
       </div>
       <div class="model-card">
-        <div class="mtitle" data-i18n="about_page.card_simulations_title">SIMULATIONS</div>
-        <div class="mdesc" data-i18n="about_page.card_simulations_text">Each match is replayed a large number of times to show the most likely scores. These simulations are not used to choose the bet.</div>
+        <div class="mtitle" data-i18n="about_page.card_simulations_title">FIXED RULE</div>
+        <div class="mdesc" data-i18n="about_page.card_simulations_text">The highlighted option is chosen automatically among the markets actually priced, favouring the most likely outcomes.</div>
       </div>
       <div class="model-card">
-        <div class="mtitle" data-i18n="about_page.card_reliability_title">RELIABILITY SCORE</div>
-        <div class="mdesc" data-i18n="about_page.card_reliability_text">A separate indicator combines agreement between the calculations, the quality of the available data and the number of matches played, for that specific match — it never changes the probability.</div>
+        <div class="mtitle" data-i18n="about_page.card_reliability_title">AI-WRITTEN TEXT</div>
+        <div class="mdesc" data-i18n="about_page.card_reliability_text">An artificial intelligence tool writes the explanation from figures already calculated and cannot change them.</div>
       </div>
     </div>
 
-    <p data-i18n-html="about_page.method_selection">The highlighted market is chosen automatically by a fixed rule: among the markets the model calculates and a bookmaker actually prices, the one with the highest <b>estimated probability</b>, preferably among those reaching a minimum price, and below a probability cap. A match that has already started, or is about to start when the calculation runs, gets no bet. The probability shown is the model's own, never adjusted afterwards. A language model then writes the explanatory text, but it does not calculate, choose or change any figure.</p>
-    <p data-i18n-html="about_page.method_value"><b>The gap with the market</b>: the model then compares its probability with the one implied by the odds, once the bookmaker's margin is removed. This gap is shown for information: it is not used to choose the market and guarantees no winnings.</p>
-    <p data-i18n-html="about_page.method_undisclosed"><b>What we do not detail</b>: neither the formulas, the weightings, the thresholds, the exact list of variables, nor the names of the tools that run the calculation. What we do publish: the principle behind each step, what does and does not enter the calculation, and the cases where the system declines to make a call.</p>
-    <p data-requires-page="methodologie.html" style="margin-top:6px"><a href="/en/methodologie.html" data-href="methodologie.html" style="color:var(--cyan);text-decoration:underline" data-i18n="about_page.method_link">Read the full methodology: data, calculations, limits</a></p>
+    <p data-i18n-html="about_page.method_selection">A match that has already started gets no option, and no option is highlighted when the data is insufficient. The probability shown is a statistical estimate, never a promise.</p>
+    <p data-i18n-html="about_page.method_value"><b>How to read the figures</b>: 60% means the outcome should happen about 6 times out of 10 over a large number of comparable matches, and not happen about 4 times out of 10. No winnings are guaranteed.</p>
+    <p data-i18n-html="about_page.method_undisclosed"><b>What we do not detail</b>: the exact sources, the formulas, the settings or the tools used. What we do publish: the principle, how to read the figures and the limits of the system.</p>
+    <p data-requires-page="methodologie.html" style="margin-top:6px"><a href="/en/methodologie.html" data-href="methodologie.html" style="color:var(--cyan);text-decoration:underline" data-i18n="about_page.method_link">Read the methodology: principle, figures, limits</a></p>
   </div>
 
   <!-- ═══ SIMPLE VS COMBINE ═══ -->

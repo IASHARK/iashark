@@ -50,7 +50,8 @@ const ICONS={
   faq:'<circle cx="12" cy="12" r="9"/><path d="M9.2 9.3a2.8 2.8 0 0 1 5.5.8c0 1.9-2.7 2.2-2.7 4"/><circle cx="12" cy="17.4" r=".9" fill="currentColor" stroke="none"/>',
   lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
   table:'<path d="M4 5h16v14H4zM4 10h16M4 15h16M10 5v14"/>',
-  pin:'<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/>'
+  pin:'<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/>',
+  calendar:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M10 14.5l4 3M14 14.5l-4 3"/>'
 };
 const cardIcon=key=>ICONS[key]?`<svg viewBox="0 0 24 24" class="card-icon" aria-hidden="true" focusable="false">${ICONS[key]}</svg>`:'';
 // Carte. opts.fold : la meme carte en version repliable (le titre est le
@@ -359,17 +360,18 @@ function riskStat(code){
 }
 
 // Lien vers la page Methodologie du repertoire courant. Pages disponibles :
-// config/markets.json#_legalFiles.methodology, sources legal/<dir>/ (fr, gb, za,
-// en, mx, es) ; les autres repertoires renvoient vers la version anglaise.
-const METHODOLOGY_DIRS=['fr','gb','za','en','mx','es'];
+// config/markets.json#_legalFiles.methodology, sources legal/<dir>/ (les 9
+// repertoires depuis le 19/09/2026) ; un repertoire inconnu renvoie vers
+// la version anglaise.
+const METHODOLOGY_DIRS=['fr','gb','za','en','mx','es','de','it','pt'];
 function methodologyHref(){
   const dir=(window.I18N&&window.I18N.dir)||'';
   if(METHODOLOGY_DIRS.includes(dir))return '/'+dir+'/methodologie.html';
   return dir?'/en/methodologie.html':'/fr/methodologie.html';
 }
 function methodLink(){
-  // Version sans page Methodologie (de, it, pt) : le lien vise la version
-  // anglaise, et le dit (audit du 16/09/2026).
+  // Repertoire sans page Methodologie : le lien vise la version anglaise,
+  // et le dit (audit du 16/09/2026).
   const dir=(window.I18N&&window.I18N.dir)||'';
   const anglais=!!dir&&!METHODOLOGY_DIRS.includes(dir);
   return `<p class="sig-method"><a href="${esc(methodologyHref())}"${anglais?' hreflang="en"':''}>${esc(t('match_page.sig_method_link','Comment ce chiffre est calculé : méthodologie'))}${anglais?esc(t('match_page.sig_method_in_english',' (en anglais)')):''}</a></p>`;
@@ -1037,7 +1039,7 @@ function bindCtaBar(){
     es.forEach(e=>{if(e.isIntersecting)vus.add(e.target);else vus.delete(e.target);});
     bar.classList.toggle('is-hidden',vus.size>0);
   },{threshold:0.2});
-  root.querySelectorAll('.avis--lock,.cta-recall,.lock-card--analyse').forEach(c=>io.observe(c));
+  root.querySelectorAll('.avis--lock,.mgate,.cta-recall,.lock-card--analyse').forEach(c=>io.observe(c));
 }
 let uiLie=false;
 function bindUi(){
@@ -1189,6 +1191,52 @@ function gateCard(vm,opts){
     ${methodLink()}
   </section>`;
 }
+// MUR PRO (visiteur ou compte gratuit, match payant ; 19/09/2026). Constat du
+// proprietaire : 3 visiteurs sur 4 n'atteignaient jamais l'offre Pro et les
+// petits « Debloquer » disperses ne recevaient aucun clic. UN mur net, la ou
+// l'analyse commence, dans le langage du verrou « Buteurs du jour » de
+// l'accueil (home-scorers.js#renderGate) : apercu FACTICE floute (forme d'un
+// ticket, d'une jauge, d'une ligne buteur ; texte « Xxxx » et « ??,? % »,
+// aucune donnee, aria-hidden) et panneau par-dessus : cadenas, titre, ce que
+// Pro ouvre (seulement ce que la vue abonne affiche), bouton ambre, resiliation.
+// Champs publics seulement (etat de l'analyse, niveau prob_band).
+const FAUX_TICKET=`<div class="mgp-slip"><span class="mgp-slip-main"><span class="mgp-k">Xxxxxx xxxxxx xxx xx xxxxxx</span><span class="mgp-market">Xxxxxxx xx Xxxxx</span><span class="mgp-fix">Xxxxxxxx – Xxxxxxx</span></span><span class="mgp-odds">?,??</span></div>
+  <div class="mgp-duo"><span class="mgp-line is-model"><span>Xxxxx xxxxxxxxxx</span><b>??,? %</b><i class="mgp-bar wa"></i></span><span class="mgp-line is-market"><span>Xx xxx xxx xx xxxx</span><b>??,? %</b><i class="mgp-bar wb"></i></span></div>`;
+const FAUX_BUTEUR=`<div class="mgp-scorer"><span class="mgp-avatar"></span><span class="mgp-who"><b>Xx. Xxxxxxxx xxxxxx</b><small>Xxxxxxxx · Xxxxxxxx</small></span><b class="mgp-prob">??,? %</b><i class="mgp-bar wc"></i></div>`;
+const FAUX_SCORES=`<div class="mgp-scores"><span class="mgp-score"><b>Xxxxx xxxxx : ?-?</b><i class="mgp-bar wd"></i><small>?? %</small></span><span class="mgp-score"><b>Xxxxx xxxxx : ?-?</b><i class="mgp-bar we"></i><small>?? %</small></span><span class="mgp-score"><b>Xxxxx xxxxx : ?-?</b><i class="mgp-bar wf"></i><small>?? %</small></span></div>`;
+function apercuFactice(avecPari){
+  return `<div class="mgate-preview" aria-hidden="true">${avecPari?FAUX_TICKET:''}${FAUX_BUTEUR}${FAUX_SCORES}</div>`;
+}
+function proGate(vm,o){
+  const raw=vm._raw||{},etat=etatAnalyse(raw),bande=etat==='ready'?bandeDe(raw):null;
+  const contenu=[
+    ['pro_gate_item_bet','Le marché retenu par le modèle et sa probabilité en %'],
+    ['pro_gate_item_scorer','Le buteur le plus probable'],
+    ['pro_gate_item_scenario','Le scénario probable du match'],
+    ['pro_gate_item_scores','Les scores les plus probables']
+  ].filter((x,i)=>etat!=='none'||i>0);
+  return `<section class="signal-card is-locked gate mgate avis avis--lock reveal" aria-labelledby="gateTitle">
+    <div class="sig-head">
+      <span class="sig-eyebrow">${cardIcon('target')}${esc(t('match_page.avis_title','L’avis IASHARK'))}</span>
+      ${etat==='ready'?`<span class="avis-ready"><i aria-hidden="true"></i>${esc(t('match_page.avis_ready','Analyse prête'))}</span>`:''}
+    </div>
+    <div class="mgate-stage">
+      ${apercuFactice(etat!=='none')}
+      <div class="mgate-panel"><div class="mgate-card">
+        <span class="mgate-lock" aria-hidden="true">${cardIcon('lock')}</span>
+        <h2 id="gateTitle" class="mgate-title">${esc(t('match_page.pro_gate_title','Débloque l’analyse complète de ce match'))}</h2>
+        <p class="sr-only">${esc(t('match_page.pro_gate_sr','Aperçu flouté et factice : il ne contient aucune donnée de l’analyse. L’analyse complète de ce match est réservée aux abonnés Pro.'))}</p>
+        ${etat==='none'?`<p class="mgate-note">${esc(t('match_page.avis_no_signal','Pas de pari retenu par le modèle sur ce match'))}</p>`:''}
+        ${bande?`<div class="mgate-band"><span>${esc(t('match_page.avis_band_label','Niveau du marché retenu'))}</span>${bandBadge(bande)}</div>`:''}
+        <ul class="mgate-list">${contenu.map(([k,fb])=>`<li>${esc(t('match_page.'+k,fb))}</li>`).join('')}</ul>
+        <a class="mgate-cta" href="${esc(o.href)}"${suivi('match_gate_unlock')}>${esc(t('match_page.pro_gate_cta','Débloquer avec Pro'))} <span aria-hidden="true">→</span></a>
+        <p class="mgate-small">${esc(t('match_page.pro_gate_small','Résiliable à tout moment depuis ton compte.'))}</p>
+      </div></div>
+    </div>
+    <p class="sig-legal">${esc(t('match_page.avis_legal','Estimation, pas une garantie · 18+ · Jouez responsable.'))}</p>
+    ${methodLink()}
+  </section>`;
+}
 // L'analyse fermee : UN bloc qui liste les 4 contenus, apercu flou abstrait
 // (formes CSS, aucune valeur, aucun texte).
 const FANTOME=`<div class="lk-g">${[1,2,3].map(i=>`<div class="lk-pair"><span class="lk-t w${i}"></span><span class="lk-b a${i}"></span><span class="lk-b b${i}"></span></div>`).join('')}</div>`;
@@ -1241,8 +1289,10 @@ function renderVisitor(raw,opts){
   const vm=viewModel(publicCopy(raw));
   const stats=statsBlocs(vm);
   const pill=o.free?t('match_page.lock_pill_free','Gratuit'):t('match_page.lock_pill','Pro');
+  // Match offert sans compte : avis ferme « compte gratuit » (gateCard) ;
+  // match payant : le mur Pro unique (proGate).
   paint(vm,[
-    ['avis',gateCard(vm,o),true],
+    ['avis',o.free?gateCard(vm,o):proGate(vm,o),true],
     ['stats',stats?groupe({title:t('match_page.stats_group_title','Les stats du match'),sub:t('match_page.stats_group_sub_open','Données brutes des deux équipes, ouvertes à tous.'),body:stats}):''],
     ['rappel',stats?rappelCta(vm,o):''],
     ['analyse',groupe({title:t('match_page.analysis_group_title','L’analyse IASHARK'),sub:t('match_page.analysis_group_sub','Ce que calcule notre modèle pour ce match.'),body:analyseVisiteur(o),pill}),true],
@@ -1258,8 +1308,16 @@ function renderAuthWall(raw){
     ctaShort:t('match_page.free_cta_short','Créer un compte gratuit')
   });
 }
+// Offre Pro avec retour a CE match apres paiement : ?next= interne vers
+// match.html?id= (abonnement-page.js#contexteMatch le garde en sessionStorage
+// iashark.checkout.return pour checkout-succes / checkout-annule). Explicite :
+// le referrer ne suffit pas depuis une page statique /match/<id>.html.
+function offrePro(raw){
+  const id=raw&&raw.id!=null?String(raw.id):'';
+  return /^\d+$/.test(id)?lien('abonnement.html?next='+encodeURIComponent(lien('match.html?id='+id))):lien('abonnement.html');
+}
 function renderProWall(raw){
-  renderVisitor(raw,{href:lien('abonnement.html')});
+  renderVisitor(raw,{href:offrePro(raw)});
 }
 
 // Apercu : en-tete du match (donnees publiques, aucune sortie du modele) et
@@ -1270,13 +1328,33 @@ function renderApercu(raw){
   }catch(e){}
 }
 
-// Detail du match absent : message + lien vers la page championnat de la
-// version (fil d'Ariane du bloc d'informations statique), sinon l'accueil.
-function renderIntrouvable(){
+// Detail du match absent (identifiant inconnu, match termine ou plus publie) :
+// plus d'impasse « Match introuvable ». Bloc de reprise : message court, le
+// match gratuit du jour (meme source que l'accueil, lib/free-match.js, lu dans
+// data-home.json ; seulement s'il existe et n'est pas ce match-ci) et les
+// matchs du jour (accueil de la version). Lien discret vers la competition
+// quand la page statique en donne une. La page reste noindex (match.html).
+// list : matchs de data-home.json (null si indisponible) ; id : identifiant demande.
+function renderIntrouvable(list,id){
   const hub=document.querySelector('.match-facts a[href*="/leagues/"]');
-  const href=hub?hub.getAttribute('href'):lien('');
-  const libelle=hub?t('match_page.league_matches_link','Voir les matchs de la compétition'):t('match_page.back_to_home','Retour à l\'accueil');
-  root.innerHTML=`<div class="match-error"><b>${esc(t('match_page.match_ended_or_missing','Match terminé ou introuvable'))}</b><a href="${esc(href)}">${esc(libelle)}</a></div>`;
+  let offert=null;
+  try{
+    offert=Array.isArray(list)&&list.length&&window.IasharkFreeMatch
+      ?IasharkFreeMatch.pickFreeMatchId(list,null,(window.IASHARK_MARKET&&window.IASHARK_MARKET.code)||null):null;
+  }catch(e){offert=null;}
+  if(offert!=null&&(!/^\d+$/.test(String(offert))||String(offert)===String(id)))offert=null;
+  // Page statique : le resume SEO garde le seul h1.
+  const niveau=resumeSeoStatique()?'h2':'h1';
+  root.innerHTML=`<section class="match-recovery" aria-labelledby="recoveryTitle">
+    <span class="mrec-icon" aria-hidden="true">${cardIcon('calendar')}</span>
+    <${niveau} id="recoveryTitle" class="mrec-title">${esc(t('match_page.recovery_title','Ce match n’est plus disponible'))}</${niveau}>
+    <p class="mrec-text">${esc(t('match_page.recovery_text','Il est terminé, ou ce lien n’est plus valide.'))}</p>
+    <div class="mrec-actions">
+      ${offert!=null?`<a class="mrec-btn is-primary" href="${esc(lien('match.html?id='+offert))}">${esc(t('match_page.recovery_free_cta','Voir le match gratuit du jour'))}</a>`:''}
+      <a class="mrec-btn${offert!=null?'':' is-primary'}" href="${esc(lien(''))}">${esc(t('match_page.recovery_home_cta','Voir les matchs du jour'))}</a>
+    </div>
+    ${hub?`<a class="mrec-link" href="${esc(hub.getAttribute('href'))}">${esc(t('match_page.league_matches_link','Voir les matchs de la compétition'))}</a>`:''}
+  </section>`;
 }
 
 // Bloc SEO statique : libelles de marche poses bruts dans data-market-label,
@@ -1305,10 +1383,12 @@ async function init(){
   try{
     const demoMode=typeof IASHARK_DEMO!=='undefined'&&IASHARK_DEMO&&typeof PRELOADED_MATCH!=='undefined';
     let raw=typeof PRELOADED_MATCH!=='undefined'?PRELOADED_MATCH:null;
-    // match.html ouvert sans ?id= (ou id vide/"null") : aucune requete vers
-    // /match/null.json ni match-data, message "Match introuvable" directement.
+    // match.html ouvert sans ?id= (ou id vide/"null", ex. /fr/match) : aucune
+    // requete vers /match/null.json ni match-data, et plus d'ecran d'erreur :
+    // retour immediat a l'accueil de la version (sans entree d'historique).
     const idBrut=typeof FIXED_MATCH_ID!=='undefined'&&FIXED_MATCH_ID!=null?String(FIXED_MATCH_ID):new URLSearchParams(location.search).get('id');
     const id=idBrut&&!/^(null|undefined)$/.test(idBrut.trim())?idBrut.trim():(raw&&raw.id!=null?String(raw.id):null);
+    if(!demoMode&&!id){location.replace(lien(''));return;}
     // Donnees PUBLIQUES (liste legere + detail du match) demandees tout de
     // suite, en parallele du dictionnaire et sans attendre supabase-js (charge
     // en defer) : l'en-tete s'affiche des que les deux sont la (element LCP,
@@ -1329,7 +1409,6 @@ async function init(){
       render(PRELOADED_MATCH);
       return;
     }
-    if(!id)throw new Error(t('match_page.match_not_found','Match introuvable'));
     const [liste,detail]=await publiques;
     if(detail&&String(detail.id)===String(id))raw=fusion(detail,raw);
     // prob_band (niveau public high/good/moderate, jamais un chiffre) : porte par
@@ -1369,8 +1448,8 @@ async function init(){
     if(!list&&liste&&Array.isArray(liste.matchs))list=liste.matchs;
     // Plus AUCUN repli sur /data.json (~25 Mo, audit perf 15/09/2026) : sans
     // detail publie (match/<id>.json retire apres le match, ou identifiant
-    // inconnu), la page le dit et renvoie vers la competition.
-    if(!raw||raw.detail_omitted){renderIntrouvable();return;}
+    // inconnu), la page le dit et propose le match gratuit et les matchs du jour.
+    if(!raw||raw.detail_omitted){renderIntrouvable(liste&&Array.isArray(liste.matchs)?liste.matchs:null,id);return;}
     // Liste du jour indisponible : aucun match n'est suppose offert (mur Pro
     // pour un non-abonne), jamais l'inverse.
     list=list||[];

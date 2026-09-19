@@ -733,6 +733,7 @@
   var MEMBER_CLICK_KINDS = {
     inscription: "inscription", connexion: "connexion", abonnement: "abonnement", pro: "offre Pro", compte: "compte", landing: "offre",
     match: "match", checkout: "bouton de paiement", lang_switch: "changement de langue", cta: "bouton",
+    match_gate_unlock: "« Débloquer » (panneau d'analyse)",
     match_avis_unlock: "« Débloquer » (avis de l'IA)", match_recall_unlock: "« Débloquer » (rappel après les stats)",
     match_analysis_unlock: "« Débloquer » (analyse fermée)", match_faq_unlock: "« Débloquer » (FAQ)", match_bar_unlock: "« Débloquer » (barre du bas)"
   };
@@ -808,10 +809,15 @@
     });
   }
 
-  // ---------- Clics « Debloquer » de la page match (admin_unlock_clicks, 0025) ----------
+  // ---------- Clics « Debloquer » de la page match (admin_unlock_clicks, 0025 puis 0029) ----------
   // Cles = kinds emis par match-page.js et acceptes par funnel-track.js.
+  // 19/09/2026 : sur un match payant, l'avis ferme est remplace par le panneau
+  // d'analyse (match_gate_unlock, compte par 0029_admin_unlock_gate.sql) ;
+  // match_avis_unlock ne reste que sur le match gratuit du jour sans compte.
+  var UNLOCK_FILE = "0029_admin_unlock_gate.sql";
   var UNLOCK_PLACES = [
-    ["match_avis_unlock", "Avis de l'IA", "bouton sous l'avis, en haut de la page match"],
+    ["match_gate_unlock", "Panneau d'analyse", "grand bouton « Débloquer avec Pro » posé sur l'analyse floutée, en haut de la page match"],
+    ["match_avis_unlock", "Avis de l'IA", "bouton sous l'avis fermé, en haut de la page match (depuis le 19/09/2026 : match gratuit du jour seulement)"],
     ["match_recall_unlock", "Rappel après les stats", "bouton du rappel placé après les statistiques"],
     ["match_analysis_unlock", "Analyse fermée", "bouton posé sur l'analyse complète verrouillée"],
     ["match_faq_unlock", "Réponses de la FAQ", "lien « Débloquer » d'une réponse réservée aux abonnés"],
@@ -820,6 +826,9 @@
   function unlockRows(data) {
     var byKind = {};
     ((data && data.rows) || []).forEach(function (r) { if (r && r.kind) byKind[r.kind] = r; });
+    // Emplacement absent de la reponse du serveur : fonction anterieure a sa
+    // migration (0029 pour le panneau d'analyse), pas « zero clic ».
+    var served = data && Array.isArray(data.rows) && data.rows.length > 0;
     var rows = UNLOCK_PLACES.map(function (p) {
       var r = byKind[p[0]] || {};
       return { kind: p[0], label: p[1], help: p[2], clicks: num(r.clicks) || 0, visitors: num(r.visitors) || 0 };
@@ -830,13 +839,14 @@
     rows.forEach(function (r) { if (r.clicks > 0 && (!best || r.clicks > best.clicks)) best = r; });
     return {
       rows: rows, total: total,
+      uncounted: served ? UNLOCK_PLACES.filter(function (p) { return !byKind[p[0]]; }).map(function (p) { return p[0]; }) : [],
       sentence: !best ? "Aucun clic sur un bouton « Débloquer » de la page match sur cette période."
         : "Le bouton le plus cliqué : « " + best.label + " » (" + fmtInt(best.clicks) + " clic" + (best.clicks > 1 ? "s" : "") + " sur " + fmtInt(total) + ")."
     };
   }
 
   return {
-    UNLOCK_PLACES: UNLOCK_PLACES, unlockRows: unlockRows,
+    UNLOCK_PLACES: UNLOCK_PLACES, UNLOCK_FILE: UNLOCK_FILE, unlockRows: unlockRows,
     MEMBER_STATUS: MEMBER_STATUS, MEMBER_STATUS_ORDER: MEMBER_STATUS_ORDER, maskEmail: maskEmail, memberLastActivity: memberLastActivity,
     memberStatus: memberStatus, memberCounts: memberCounts, daysAgo: daysAgo, activityBar: activityBar, shortDay: shortDay,
     retentionCell: retentionCell, retentionRate: retentionRate, retentionSentence: retentionSentence, journeyDays: journeyDays, dayTitleOf: dayTitle,
@@ -1459,7 +1469,7 @@
   // Boutons « Debloquer » de la page match. admin_recent_sessions (0022) coupe
   // kind a 20 caracteres : « match_analysis_unloc » est la meme valeur.
   var CLICK_KINDS = { inscription: "inscription", connexion: "connexion", abonnement: "abonnement", pro: "offre Pro", compte: "compte", landing: "offre", match: "match", checkout: "paiement", lang_switch: "changement de langue", cta: "bouton",
-    match_avis_unlock: "Débloquer (avis)", match_recall_unlock: "Débloquer (rappel)", match_analysis_unlock: "Débloquer (analyse)", match_analysis_unloc: "Débloquer (analyse)", match_faq_unlock: "Débloquer (FAQ)", match_bar_unlock: "Débloquer (barre du bas)" };
+    match_gate_unlock: "Débloquer (panneau d'analyse)", match_avis_unlock: "Débloquer (avis)", match_recall_unlock: "Débloquer (rappel)", match_analysis_unlock: "Débloquer (analyse)", match_analysis_unloc: "Débloquer (analyse)", match_faq_unlock: "Débloquer (FAQ)", match_bar_unlock: "Débloquer (barre du bas)" };
   function visitKey(s, i) { return String(s.session_id || s.first_at + "|" + i); }
   function visitDetail(s) {
     var items = [];
@@ -1788,7 +1798,8 @@
       + (u.total ? barsHtml(u.rows.map(function (row) {
         return { nameHtml: esc(row.label) + '<span class="reason-help">' + esc(row.help) + "</span>", value: row.clicks, extra: H.fmtPct(row.pct, 0), cls: "warm" };
       })) : "")
-      + '<p class="note">' + esc(u.sentence) + " Comptés sur la période choisie, robots, tests et ton appareil exclus.</p>";
+      + '<p class="note">' + esc(u.sentence) + " Comptés sur la période choisie, robots, tests et ton appareil exclus.</p>"
+      + (u.uncounted.indexOf("match_gate_unlock") !== -1 ? '<p class="note">Le panneau d\'analyse (bouton « Débloquer avec Pro » ajouté le 19/09/2026) sera compté ici quand ton développeur aura appliqué la mise à jour ' + esc(H.UNLOCK_FILE) + ".</p>" : "");
   }
 
   // ---------- Bandeaux ----------

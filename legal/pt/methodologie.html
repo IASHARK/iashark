@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Metodologia IAShark: dados, modelo, limites</title>
+<meta name="description" content="Quem publica a IAShark, que dados utiliza, o princípio das análises, o que significam as probabilidades, os seus limites e o jogo responsável. 18+.">
+<meta property="og:title" content="Metodologia IAShark: dados, modelo, limites">
+<meta property="og:description" content="Quem publica a IAShark, que dados utiliza, o princípio das análises, o que significam as probabilidades, os seus limites e o jogo responsável. 18+.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_PT">
+<link rel="canonical" href="https://iashark.com/pt/methodologie.html">
+<meta property="og:url" content="https://iashark.com/pt/methodologie.html">
+<meta property="og:image" content="https://iashark.com/icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* IASHARK legal pages - shared style block (identical in every legal/<dir>/*.html). */
+:root{--page:#060b12;--surface:#0a1420;--surface-2:#0d1926;--cyan:#20d5ef;--amber:#f59e0b;--text:#f4f7fb;--body:#c3ccd8;--soft:#91a0b3;--muted:#6d7d90;--line:rgba(141,179,211,.14);--line-cyan:rgba(32,213,239,.28);}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:96px;}
+body{background:var(--page);color:var(--text);font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;min-height:100vh;padding-bottom:90px;-webkit-font-smoothing:antialiased;}
+body::before{content:'';position:fixed;top:-200px;left:0;right:0;height:640px;background:radial-gradient(ellipse 60% 100% at 50% 0,rgba(18,123,171,.14),transparent 70%);pointer-events:none;z-index:0;}
+a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:6px;}
+.hdr{position:sticky;top:0;z-index:99;height:72px;display:flex;align-items:center;gap:18px;padding:0 max(28px,calc((100vw - 1180px)/2));background:rgba(6,11,18,.9);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);}
+.brand-logo{display:flex;align-items:center;flex:none;width:154px;height:48px;text-decoration:none;overflow:hidden;}
+.brand-logo img{display:block;width:154px;height:auto;mix-blend-mode:lighten;}
+.hdr-title{min-width:0;padding-left:18px;border-left:1px solid var(--line);font-family:'Space Mono',ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hdr-back{order:3;margin-left:auto;flex:none;height:38px;padding:0 16px;border:1px solid rgba(32,213,239,.5);border-radius:8px;background:transparent;color:var(--cyan);font-family:'Inter',system-ui,sans-serif;font-size:12px;font-weight:700;letter-spacing:.02em;cursor:pointer;transition:background .2s,border-color .2s;}
+.hdr-back:hover{background:rgba(32,213,239,.08);border-color:var(--cyan);}
+.container{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:52px 28px 40px;display:grid;grid-template-columns:232px minmax(0,1fr);column-gap:64px;align-content:start;}
+.container>*{grid-column:2;min-width:0;max-width:780px;}
+.legal-nav{grid-column:1;grid-row:1/span 80;align-self:start;position:sticky;top:104px;display:flex;flex-direction:column;gap:2px;padding:10px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,rgba(13,25,38,.92),rgba(10,20,32,.92));box-shadow:0 18px 50px rgba(0,0,0,.25);}
+.legal-nav a{display:block;padding:10px 14px;border-radius:10px;color:var(--soft);font-size:13.5px;font-weight:500;line-height:1.35;text-decoration:none;transition:color .2s,background .2s;}
+.legal-nav a:hover{color:var(--text);background:rgba(255,255,255,.04);}
+.legal-nav a[aria-current="page"]{color:var(--cyan);font-weight:600;background:rgba(32,213,239,.08);box-shadow:inset 3px 0 0 var(--cyan);}
+.page-title{font-size:clamp(32px,4.2vw,50px);font-weight:800;line-height:1.06;letter-spacing:-.035em;color:var(--text);margin-bottom:16px;overflow-wrap:break-word;hyphens:auto;}
+.page-date{justify-self:start;display:inline-flex;align-items:center;gap:9px;margin-bottom:30px;padding:6px 13px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.03);font-family:'Space Mono',ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);}
+.page-date::before{content:'';flex:none;width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px rgba(32,213,239,.7);}
+.warn-box{margin-bottom:12px;padding:18px 20px 18px 22px;border:1px solid rgba(245,158,11,.3);border-radius:14px;background:linear-gradient(145deg,rgba(245,158,11,.1),rgba(245,158,11,.03));box-shadow:inset 3px 0 0 var(--amber);}
+.warn-box p{font-size:12.5px;line-height:1.75;font-weight:600;letter-spacing:.02em;color:#f3c77a;overflow-wrap:break-word;}
+.warn-box a{color:#fde3a7;text-decoration:underline;text-decoration-color:rgba(253,227,167,.45);text-underline-offset:3px;white-space:nowrap;}
+.section{padding:32px 0 30px;border-bottom:1px solid var(--line);}
+.section h2{display:flex;gap:12px;margin-bottom:16px;font-size:20px;font-weight:700;line-height:1.35;letter-spacing:-.015em;color:var(--text);}
+.section h2::before{content:'';flex:none;width:3px;height:1.05em;margin-top:.17em;border-radius:3px;background:var(--cyan);}
+.section h3{margin:22px 0 10px;font-size:16px;font-weight:600;line-height:1.4;color:var(--text);}
+.section p,.section li{font-size:15.5px;line-height:1.78;color:var(--body);overflow-wrap:break-word;}
+.section p{margin-bottom:14px;}
+.section li{margin-bottom:9px;padding-left:4px;}
+.section li::marker{color:var(--cyan);}
+.section ul,.section ol{margin:4px 0 16px;padding-left:22px;}
+.section>:last-child,.section li:last-child,.highlight>:last-child{margin-bottom:0;}
+.section strong{color:var(--text);font-weight:600;}
+.section a,.legal-foot a{overflow-wrap:anywhere;}
+.section a{color:var(--cyan);text-decoration:underline;text-decoration-color:rgba(32,213,239,.35);text-underline-offset:3px;transition:text-decoration-color .2s;}
+.section a:hover{text-decoration-color:var(--cyan);}
+.section code{padding:1px 6px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.05);font-family:'Space Mono',ui-monospace,Menlo,monospace;font-size:.8em;color:var(--text);overflow-wrap:anywhere;}
+.highlight{margin:18px 0 20px;padding:18px 20px 18px 22px;border:1px solid var(--line-cyan);border-radius:14px;background:linear-gradient(145deg,rgba(14,29,44,.97),rgba(7,16,26,.98));box-shadow:inset 3px 0 0 var(--cyan),0 18px 44px rgba(0,0,0,.22);}
+.highlight p{font-size:14.5px;line-height:1.75;color:#dce3eb;margin-bottom:8px;}
+.section [data-analytics-optout]{display:inline-flex!important;align-items:center;min-height:44px;margin:6px 0!important;padding:0 18px!important;border:1px solid rgba(32,213,239,.6)!important;border-radius:8px!important;background:rgba(32,213,239,.08)!important;color:var(--cyan)!important;font-family:'Inter',system-ui,sans-serif!important;font-size:13px!important;font-weight:700;letter-spacing:.01em!important;line-height:1.3;text-decoration:none!important;}
+.section [data-analytics-optout]:hover{background:rgba(32,213,239,.14)!important;}
+.tbl-wrap{margin:18px 0 22px;overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:rgba(10,20,32,.7);}
+.tbl-wrap table{width:100%;border-collapse:collapse;}
+.tbl-wrap th{padding:12px 16px;background:var(--surface-2);border-bottom:1px solid var(--line);font-family:'Space Mono',ui-monospace,Menlo,monospace;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);text-align:left;vertical-align:bottom;}
+.tbl-wrap td{padding:13px 16px;border-bottom:1px solid var(--line);font-size:14px;line-height:1.65;color:var(--body);vertical-align:top;overflow-wrap:break-word;}
+.tbl-wrap tr:last-child td{border-bottom:0;}
+.tbl-wrap tr:hover td{background:rgba(255,255,255,.02);}
+.tbl-wrap td:first-child{color:var(--text);font-weight:500;}
+.legal-foot{margin-top:44px;padding:26px 24px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,rgba(13,25,38,.9),rgba(7,16,26,.95));text-align:center;}
+.legal-foot>div:first-child{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;}
+.legal-foot>div:first-child a{padding:8px 14px;border:1px solid var(--line);border-radius:999px;color:var(--body);font-size:13px;font-weight:600;text-decoration:none;transition:color .2s,border-color .2s;}
+.legal-foot>div:first-child a:hover{color:var(--cyan);border-color:rgba(32,213,239,.4);}
+.legal-foot>div+div{margin-top:18px;font-family:'Space Mono',ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.08em;line-height:1.9;color:var(--muted);}
+.legal-foot>div+div a{color:var(--soft);text-decoration:none;}
+.legal-foot>div+div a:hover{color:var(--cyan);}
+@media(max-width:900px){
+  .hdr{height:62px;padding:0 18px;gap:14px;}
+  .brand-logo{width:118px;height:40px;}.brand-logo img{width:118px;}
+  .hdr-title{padding-left:14px;}
+  .container{display:block;padding:26px 18px 32px;}
+  .container>*{max-width:none;}
+  .legal-nav{position:static;flex-direction:row;gap:8px;margin:0 -18px 26px;padding:2px 18px 6px;overflow-x:auto;border:0;border-radius:0;background:none;box-shadow:none;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  .legal-nav::-webkit-scrollbar{display:none;}
+  .legal-nav a{flex:none;display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.02);font-size:13px;white-space:nowrap;}
+  .legal-nav a[aria-current="page"]{box-shadow:none;border-color:rgba(32,213,239,.55);}
+  .page-title{font-size:clamp(28px,8vw,38px);}
+  .page-date{margin-bottom:22px;}
+}
+@media(max-width:640px){
+  .hdr-back{height:44px;padding:0 12px;font-size:11px;}
+  .brand-logo{height:44px;}
+  .legal-foot>div:first-child a{display:inline-flex;align-items:center;min-height:44px;}
+  .legal-foot>div+div a{display:inline-block;padding:14px 2px;margin:-14px 0;}
+  .warn-box{padding:15px 16px 15px 18px;}
+  .warn-box p{font-size:12px;}
+  .section{padding:26px 0 24px;}
+  .section h2{font-size:18px;gap:10px;}
+  .section p,.section li{font-size:15px;line-height:1.72;}
+  .highlight{padding:15px 16px 15px 18px;}
+  .highlight p{font-size:14px;}
+  .tbl-wrap{overflow:visible;border:0;border-radius:0;background:none;}
+  .tbl-wrap table,.tbl-wrap tbody,.tbl-wrap tr,.tbl-wrap td{display:block;width:100%;}
+  .tbl-wrap tr.tbl-head{display:none;}
+  .tbl-wrap tr{margin-bottom:10px;padding:4px 16px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(145deg,rgba(13,25,38,.9),rgba(10,20,32,.9));}
+  .tbl-wrap tr:last-child{margin-bottom:0;}
+  .tbl-wrap td,.tbl-wrap tr:last-child td{padding:10px 0;border-bottom:1px solid var(--line);}
+  .tbl-wrap td:last-child,.tbl-wrap tr:last-child td:last-child{border-bottom:0;}
+  .tbl-wrap tr:hover td{background:none;}
+  .tbl-wrap td[data-label]::before{content:attr(data-label);display:block;margin-bottom:3px;font-family:'Space Mono',ui-monospace,Menlo,monospace;font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+  .legal-foot{padding:22px 16px;}
+}
+@media(max-width:460px){.hdr-title{display:none;}}
+@media print{
+  body{background:#fff;color:#000;padding:0;}
+  body::before,.hdr,.legal-nav,.site-bottom-nav{display:none!important;}
+  .container{display:block;padding:0;max-width:none;}
+  .page-title,.section h2,.section h3,.section strong{color:#000;}
+  .section p,.section li,.tbl-wrap td,.highlight p,.warn-box p{color:#222;}
+  .warn-box,.highlight,.tbl-wrap,.legal-foot{background:none;box-shadow:none;border-color:#999;}
+}
+</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://iashark.com/#organization","name":"IAShark","alternateName":"IASHARK","url":"https://iashark.com/","logo":{"@type":"ImageObject","url":"https://iashark.com/icon-512.png","width":512,"height":512},"email":"contact@iashark.com","contactPoint":{"@type":"ContactPoint","contactType":"customer support","email":"contact@iashark.com"}},{"@type":"AboutPage","@id":"https://iashark.com/pt/methodologie.html#page","url":"https://iashark.com/pt/methodologie.html","name":"Metodologia IAShark: dados, modelo, limites","description":"Quem publica a IAShark, que dados utiliza, o princípio das análises, o que significam as probabilidades, os seus limites e o jogo responsável. 18+.","inLanguage":"pt","about":{"@id":"https://iashark.com/#organization"},"publisher":{"@id":"https://iashark.com/#organization"},"author":{"@id":"https://iashark.com/#organization"},"dateModified":"2026-09-19"}]}</script>
+<link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
+<body>
+<!-- BLOCKED_DECISION: IDENTITE_LEGALE. Raison sociale, forme, SIREN/SIRET, adresse et TVA de l'éditeur non publiées (legal/README.md). Affiché en attendant : « IAShark » et l'adresse de contact existante. Pas de legalName dans le JSON-LD. -->
+<!-- BLOCKED_DECISION: NOM_RESPONSABLE_EDITORIAL. Nom du responsable éditorial non décidé. Aucun nœud Person dans le JSON-LD tant que la décision n'est pas prise. -->
+<!-- NOTE INTERNE: NIVEAU_DE_DIVULGATION. Décision du propriétaire du 19/09/2026 (après celle du 16/09/2026 : le principe, jamais la recette) : cette page reste volontairement COURTE et VAGUE. Ne jamais y republier les noms des fournisseurs de données, des bookmakers sources, de l'outil d'IA ou d'autres prestataires, les noms de modèles ou de méthodes statistiques, les formules, pondérations, seuils, fourchettes de cotes, tailles de fenêtre, détails de calibration, la règle de sélection renforcée ou celle du match offert, ni les signaux de fiabilité. Elle doit en revanche toujours dire : qui publie ; que les textes sont rédigés et traduits avec un outil d'IA ; que les probabilités sont des estimations, jamais des garanties ; 18+ et ressource d'aide. Implémentation réelle : lib/decision.js, lib/engine.js, .github/workflows/update-data.yml. Garde-fou automatique : tests/methodology-page.test.js. -->
+<!-- LEGAL REVIEW: contenu en REVIEW, non APPROVED. Points à valider : mention de l'outil d'IA sans nom de prestataire et phrase « pas relus un par un avant publication » (transparence, AI Act) ; messages de prévention par marché. Aucune section de résultats ni chiffre de performance (décision propriétaire : pas de bilan public). -->
+<header class="hdr">
+  <button class="hdr-back" type="button" onclick="history.back()">&larr; VOLTAR</button>
+  <a class="brand-logo" href="./" aria-label="IASHARK"><img src="/assets/iashark-logo.png" alt="IASHARK" width="154" height="41"></a>
+  <div class="hdr-title">METODOLOGIA</div>
+</header>
+<main class="container">
+  <nav class="legal-nav" aria-label="Páginas legais">
+    <a href="mentions-legales.html">Aviso legal</a>
+    <a href="cgv.html">Condições de venda</a>
+    <a href="confidentialite.html">Privacidade</a>
+    <a href="cookies.html">Cookies</a>
+    <a href="jeu-responsable.html">Jogo responsável</a>
+    <a href="methodologie.html" aria-current="page">Metodologia</a>
+  </nav>
+  <h1 class="page-title">Metodologia</h1>
+  <div class="page-date">Última atualização: 19 de setembro de 2026</div>
+
+  <div class="warn-box">
+    <p>⚠️ A IASHARK NÃO É UM SITE DE APOSTAS: NÃO SÃO ACEITES APOSTAS NESTE SITE. AS NOSSAS ANÁLISES SÃO ESTIMATIVAS ESTATÍSTICAS, SEM QUALQUER GARANTIA DE RESULTADO.<br>O JOGO ENVOLVE RISCOS: ENDIVIDAMENTO E DEPENDÊNCIA. PRECISA DE AJUDA? CONTACTE UM SERVIÇO DE APOIO NO SEU PAÍS OU A GAMBLING THERAPY (GRATUITO, ONLINE): <a href="https://www.gamblingtherapy.org" target="_blank" rel="noopener">GAMBLINGTHERAPY.ORG</a>.<br>EXCLUSIVAMENTE PARA MAIORES DE 18 ANOS.</p>
+  </div>
+
+  <section class="section">
+    <p>A IAShark publica análises estatísticas de jogos de futebol produzidas automaticamente. Esta página apresenta o seu princípio: quem as publica, com que dados, como ler os números e quais são os seus limites. O detalhe das fontes, dos cálculos e das configurações não é publicado.</p>
+    <p><strong>Conteúdo informativo.</strong> Serviço reservado a pessoas com 18 ou mais anos. Apostar envolve riscos financeiros e de dependência.</p>
+  </section>
+  <section class="section">
+    <h2>1. Quem publica a IAShark</h2>
+    <ul><li><strong>Site:</strong> iashark.com</li><li><strong>Editor:</strong> IAShark</li><li><strong>Contacto:</strong> <a href="mailto:contact@iashark.com">contact@iashark.com</a></li><li><strong>Informações legais:</strong> <a href="mentions-legales.html">Aviso legal</a></li></ul>
+    <p>A IAShark não é um operador de apostas nem uma casa de apostas. O site não aceita apostas, não gere contas de jogador e não paga quaisquer prémios. A IAShark não detém qualquer licença nem autorização de jogo (em França, não dispõe de autorização da Autorité nationale des jeux). As análises são estimativas estatísticas publicadas a título informativo. Não constituem aconselhamento financeiro nem incitamento a apostar.</p>
+  </section>
+  <section class="section">
+    <h2>2. Os dados utilizados</h2>
+    <p>As análises baseiam-se nas estatísticas das equipas e dos jogadores, no histórico dos jogos e nas odds propostas pelas casas de apostas. A quantidade de dados disponível varia consoante a competição.</p>
+  </section>
+  <section class="section">
+    <h2>3. Como funciona</h2>
+    <p>Para cada jogo, um modelo estatístico estima, a partir destes dados, as probabilidades dos principais resultados. A análise destaca depois uma opção escolhida por uma regra fixa entre os mercados realmente cotados pelas casas de apostas, dando prioridade aos resultados mais prováveis. Quando não existe qualquer odd para um jogo, a opção mais provável é publicada sem odd.</p>
+    <p>Por fim, uma ferramenta de inteligência artificial redige o texto explicativo a partir dos números já calculados: não escolhe nada e não pode alterar nenhum número. Os textos são traduzidos automaticamente, por uma ferramenta de IA, para as outras línguas do site.</p>
+  </section>
+  <section class="section">
+    <h2>4. O que significam os números</h2>
+    <p>Uma probabilidade é uma estimativa, nunca uma promessa. 60 % significa que, num grande número de jogos comparáveis, o resultado deverá acontecer cerca de 6 vezes em 10 e, portanto, não acontecer cerca de 4 vezes em 10. No site, a probabilidade estimada também é apresentada numa escala de 10: 6,4/10 corresponde a 64 %.</p>
+    <p>A IAShark não publica qualquer histórico de resultados nem números de rentabilidade, e não promete qualquer ganho.</p>
+  </section>
+  <section class="section">
+    <h2>5. Limites</h2>
+    <ul><li><strong>Imprevistos.</strong> As análises são calculadas com antecedência, uma vez por dia, e não são refeitas pouco antes do apito inicial. Uma lesão de última hora, um onze inesperado ou qualquer outro imprevisto não são tidos em conta. Confirme sempre os onzes oficiais.</li><li><strong>Amostras pequenas.</strong> No início da época, ou para uma equipa acabada de subir de divisão, há poucos jogos disponíveis: as estimativas são então mais incertas.</li><li><strong>Abstenção.</strong> Nenhuma opção é destacada para um jogo já iniciado ou quando os dados são insuficientes.</li><li><strong>Textos redigidos por IA.</strong> Não são revistos um a um antes da publicação e podem conter erros de interpretação. Em caso de diferença, prevalecem os números apresentados.</li><li><strong>Acaso.</strong> O futebol continua a ser muito imprevisível: as séries negativas acontecem mesmo quando as estimativas estão corretas. Nunca aposte dinheiro de que precisa.</li><li><strong>Sem apostas neste site.</strong> A IAShark publica análises: o site não aceita apostas.</li></ul>
+  </section>
+  <section class="section">
+    <h2>6. Jogo responsável</h2>
+    <p>As apostas desportivas são proibidas a menores. Envolvem riscos: endividamento, isolamento, dependência. Fixe limites de tempo e de dinheiro, não procure «recuperar» o que perdeu e pare se o jogo deixar de ser um passatempo.</p>
+    <p><strong>Portugal e outros países (18+)</strong>: Gambling Therapy, <a href="https://www.gamblingtherapy.org" target="_blank" rel="noopener">gamblingtherapy.org</a> (gratuito, internacional).</p>
+    <p><strong>França (18+)</strong>: Joueurs Info Service, <a href="tel:+33974751313">+33 9 74 75 13 13</a> (das 8h às 2h, todos os dias), <a href="https://www.joueurs-info-service.fr" target="_blank" rel="noopener">joueurs-info-service.fr</a>. Autoexclusão voluntária junto da ANJ.</p>
+    <p><strong>Reino Unido (18+)</strong>: National Gambling Helpline, <a href="tel:+448088020133">0808 8020 133</a> (gratuito, 24 horas por dia, 7 dias por semana, gerido pela GamCare). Informações em <a href="https://www.gambleaware.org" target="_blank" rel="noopener">gambleaware.org</a>. Autoexclusão com o GAMSTOP.</p>
+    <p><strong>África do Sul (18+)</strong>: National Responsible Gambling Programme, <a href="tel:0800006008">0800 006 008</a> (24 horas por dia), <a href="https://responsiblegambling.org.za" target="_blank" rel="noopener">responsiblegambling.org.za</a>.</p>
+    <p><strong>México (18+)</strong>: prohibido a menores de edad. Línea de la Vida, <a href="tel:8009112000">800 911 2000</a> (gratuito, 24 horas por dia).</p>
+    <p>Todos os recursos: <a href="jeu-responsable.html">Jogo responsável</a>. Para uma pergunta ou para assinalar um erro: <a href="mailto:contact@iashark.com">contact@iashark.com</a>. Informações sobre o editor: <a href="mentions-legales.html">Aviso legal</a>.</p>
+  </section>
+
+  <footer class="legal-foot">
+    <div><a href="mentions-legales.html">Aviso legal</a> <a href="cgv.html">Condições de venda</a> <a href="confidentialite.html">Privacidade</a> <a href="cookies.html">Cookies</a> <a href="jeu-responsable.html">Jogo responsável</a> <a href="methodologie.html">Metodologia</a></div>
+    <div>&copy; 2026 IASHARK &middot; <a href="mailto:contact@iashark.com">contact@iashark.com</a> &middot; <a href="./">Início</a></div>
+    <div><span data-i18n="rg_footer.age_line">18+ · Proibido a menores · Jogue com responsabilidade</span><br><span data-i18n="match_page.shell_help_label">Ajuda:</span> <a data-market-helpline="url" href="https://www.gamblingtherapy.org">gamblingtherapy.org</a><span data-market-helpline-if="phone" hidden> · <span data-market-helpline="phone"></span></span></div>
+  </footer>
+</main>
+<script src="/i18n/i18n.js"></script>
+<script src="/lib/market-config.js"></script>
+<script src="/site-prefs.js"></script>
+<script src="/bottom-navigation.js"></script>
+</body>
+</html>

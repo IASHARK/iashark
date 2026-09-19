@@ -64,14 +64,15 @@ test("la page match assemble les sections dans l'ordre demande",()=>{
   dansLOrdre(blocDe("function analyseAbonne(vm)","function render(raw)"),["scenarioCard(vm)","outputsCard(vm,","marketsCard(vm)","threatsCard(vm,"],"analyse abonne");
   dansLOrdre(blocDe("function statsBlocs(vm)","}"),["formeFold","classementFold","h2hFold","comparatifFold","compoFold"],"stats");
   const visiteur=blocDe("function renderVisitor(raw,opts)","function renderAuthWall");
-  dansLOrdre(visiteur,["['avis',o.free?gateCard(vm,o):proGate(vm,o)","'Les stats du match'","['rappel',","rappelCta(vm,o)","['analyse',","analyseVisiteur(o)","['questions',faqCard"],"visiteur");
-  assert.equal((visiteur.match(/rappelCta\(/g)||[]).length,1,"un seul rappel visiteur");
-  // Questions frequentes a la fin, dans les deux vues.
-  assert.ok(visiteur.lastIndexOf("['questions',")>visiteur.lastIndexOf("['analyse',"));
-  // Sommaire collant et barre mobile visiteur.
+  // Vue visiteur (decision du proprietaire, 19/09/2026) : l'en-tete sans
+  // stats et UN panneau, rien d'autre (ni stats, ni FAQ, ni rappel, ni
+  // analyse fermee, ni barre mobile).
+  assert.match(visiteur,/paint\(vm,\[\['avis',o\.free\?gateCard\(vm,o\):proGate\(vm,o\),true\]\],'','',\{sansStats:true\}\);/);
+  assert.doesNotMatch(visiteur,/\['stats',|\['questions',|\['rappel',|\['analyse',|faqCard\(/);
+  assert.match(js,/hero\(viewModel\(raw\),\{sansStats:true\}\)/,"apercu de chargement sans stats non plus");
+  for(const parti of ["rappelCta","analyseVisiteur","ctaBar","bindCtaBar"])assert.doesNotMatch(js,new RegExp("function\\s+"+parti+"\\s*\\("),parti+" reintroduit");
+  // Sommaire collant.
   assert.match(js,/nav_avis','Avis IASHARK'[\s\S]*nav_stats','Stats'[\s\S]*nav_analysis','Analyse'[\s\S]*nav_questions','Questions'/);
-  assert.match(visiteur,/ctaBar\(vm,o\)/);
-  assert.doesNotMatch(blocDe("function render(raw)","function bindMotion"),/ctaBar\(/);
 });
 
 test("les blocs retires a la demande de l'utilisateur ne reviennent pas",()=>{
@@ -80,13 +81,17 @@ test("les blocs retires a la demande de l'utilisateur ne reviennent pas",()=>{
   }
 });
 
-// Suivi (funnel-track.js) : un identifiant distinct par bouton « Debloquer »
-// (panneau d'analyse, avis, rappel, analyse, FAQ, barre mobile), libelle fixe
-// sans donnee personnelle.
-test("vue visiteur : chaque bouton Debloquer porte son propre identifiant de suivi",()=>{
+// Suivi (funnel-track.js) : un identifiant par bouton « Debloquer », libelle
+// fixe sans donnee personnelle. Depuis le 19/09/2026, un seul bouton par vue :
+// panneau Pro (match payant) ou avis « compte gratuit » (match offert). Les
+// anciens emplacements (rappel, analyse, FAQ, barre mobile) ont disparu.
+test("vue visiteur : un seul bouton Debloquer par vue, avec son identifiant de suivi",()=>{
   assert.match(js,/const suivi=kind=>` data-track="\$\{kind\}" data-track-kind="\$\{kind\}"`;/);
-  for(const k of ["match_gate_unlock","match_avis_unlock","match_recall_unlock","match_analysis_unlock","match_faq_unlock","match_bar_unlock"]){
+  for(const k of ["match_gate_unlock","match_avis_unlock"]){
     assert.equal((js.match(new RegExp("suivi\\('"+k+"'\\)","g"))||[]).length,1,k);
+  }
+  for(const k of ["match_recall_unlock","match_analysis_unlock","match_faq_unlock","match_bar_unlock"]){
+    assert.ok(!js.includes(k),k+" : emplacement retire le 19/09/2026");
   }
 });
 
@@ -151,7 +156,7 @@ test("l'avis IASHARK montre pari, cote, deux barres, ecart, fiabilite, raisons, 
 test("vue visiteur : blocs fermes sans aucune donnee du modele, copie publique avant tout calcul",()=>{
   const gate=js.slice(js.indexOf("function gateCard(vm,opts)"),js.indexOf("function renderAuthWall"));
   assert.ok(gate.length>2000,"vue visiteur introuvable");
-  for(const fn of ["function gateCard","function analyseVisiteur","function rappelCta","function ctaBar","function renderVisitor"])assert.ok(gate.includes(fn),fn+" hors de la tranche controlee");
+  for(const fn of ["function gateCard","function proGate","function renderVisitor"])assert.ok(gate.includes(fn),fn+" hors de la tranche controlee");
   for(const interdit of ["recommendation","probabilities","marketTable","recommendedOdds","recommendedEdge","recommendedImplied","scoringProbability","signalReasons","expectedGoals","goalTiming","simulationCount","pari_rec","cote_rec","model_probability","market_id","riskCode","odds(","pct(","pts(","confMeter","signalCard(","marketsCard(","outputsCard(","threatsCard(","scenarioCard(","analyseAbonne(","signalSticky("]){
     assert.ok(!gate.includes(interdit),`la vue visiteur lit ${interdit}`);
   }
@@ -159,7 +164,7 @@ test("vue visiteur : blocs fermes sans aucune donnee du modele, copie publique a
   assert.match(gate,/sig-ghost/);
   assert.match(gate,/methodLink\(\)/);
   assert.match(gate,/const vm=viewModel\(publicCopy\(raw\)\);/);
-  assert.match(gate,/faqCard\(vm,\{locked:true,/);
+  assert.doesNotMatch(gate,/faqCard\(/,"aucune FAQ pour le visiteur");
   // Champs publics seulement : etat de l'analyse et niveau prob_band.
   assert.match(gate,/etatAnalyse\(raw\)/);
   assert.match(gate,/bandeDe\(raw\)/);
@@ -175,7 +180,7 @@ test("vue visiteur : blocs fermes sans aucune donnee du modele, copie publique a
   assert.match(auth,/renderVisitor\(raw,\{\s*free:true,/);
   assert.match(auth,/lien\('compte\.html'\)/);
   assert.match(auth,/Créer un compte gratuit \/ Se connecter/);
-  const hero=js.slice(js.indexOf("function hero(vm)"),js.indexOf("const REL_NIVEAUX"));
+  const hero=js.slice(js.indexOf("function hero(vm,o)"),js.indexOf("const REL_NIVEAUX"));
   assert.ok(!/probabilities|probBar|recommendation/.test(hero),"l'en-tete ne doit montrer aucune probabilite du modele");
   assert.doesNotMatch(js,/function probBar\(/);
 });
@@ -196,8 +201,10 @@ test("le resume SEO n'est pas masque, n'est plus supprime et la page garde un se
 // PERF (audit 15/09/2026) : logos de l'en-tete sans lazy, dimensionnes et
 // prioritaires (element LCP) ; aucun repli sur /data.json (~25 Mo).
 test("en-tete : logos dimensionnes, charges en priorite ; pas de repli data.json",()=>{
-  const hero=js.slice(js.indexOf("function hero(vm)"),js.indexOf("const REL_NIVEAUX"));
+  const hero=js.slice(js.indexOf("function hero(vm,o)"),js.indexOf("const REL_NIVEAUX"));
   assert.match(hero,/img\(i\.home\.logo,'',60,60,\{eager:true,priority:true\}\)/);
+  // Visiteur (19/09/2026) : ni classement ni forme dans l'en-tete.
+  assert.match(hero,/\$\{o\.sansStats\?'':`<div class="hero-meta">/);
   assert.match(hero,/img\(i\.away\.logo,'',60,60,\{eager:true,priority:true\}\)/);
   assert.doesNotMatch(hero,/class="card hero reveal"/,"l'en-tete ne doit pas demarrer en opacite 0");
   assert.match(js,/fetchpriority="high"/);
@@ -336,16 +343,14 @@ test("la FAQ ne repose pas les questions deja traitees dans la page",()=>{
 // Questions frequentes : faits publics ouverts ; reponses du modele (pronostic,
 // 15 premieres minutes, chances de chaque equipe, sur quoi repose l'analyse)
 // FERMEES au visiteur, texte jamais construit.
-test("FAQ visiteur : les reponses du modele sont fermees et jamais construites",()=>{
+test("FAQ : vue abonne seulement, jamais de question verrouillee",()=>{
   const faq=js.slice(js.indexOf("function faqCard(vm,o)"),js.indexOf("\n}\n",js.indexOf("function faqCard(vm,o)")));
-  const ferme=faq.slice(faq.indexOf("if(ferme){"),faq.indexOf("}else{",faq.indexOf("if(ferme){")));
-  assert.ok(ferme.length>200,"branche fermee introuvable");
-  for(const q of ["faq_q_pick","faq_q_first15","faq_q_outcomes","faq_q_basis"])assert.ok(ferme.includes(q),q+" absente de la branche fermee");
-  for(const interdit of ["vm.model","tf(","pct(","odds(","faq_pick_answer","faq_first15_answer","faq_outcomes_answer","faq_basis_answer","simulationCount","sources"]){
-    assert.ok(!ferme.includes(interdit),`FAQ fermee : ${interdit}`);
-  }
-  assert.equal((ferme.match(/,null\]/g)||[]).length,4,"4 reponses du modele fermees (null)");
-  assert.match(faq,/a===null\?verrou:/);
+  assert.ok(faq.length>1000,"faqCard introuvable");
+  // 19/09/2026 : le visiteur ne voit plus la FAQ (panneau seul) ; plus de
+  // branche fermee, de question « Pro » verrouillee ni de lien « Debloquer ».
+  assert.doesNotMatch(faq,/if\(ferme\)|verrou|faq-lock|faq-pro|match_faq_unlock|,null\]/);
+  const visiteur=js.slice(js.indexOf("function renderVisitor(raw,opts)"),js.indexOf("function renderAuthWall"));
+  assert.doesNotMatch(visiteur,/faqCard\(/);
   assert.match(faq,/faq_section_title','Questions fréquentes'/);
 });
 
@@ -365,9 +370,9 @@ test("les logos d'equipe sont detoures, pas mis en pastille ronde",()=>{
 // langage du verrou « Buteurs du jour » de l'accueil.
 // ---------------------------------------------------------------------------
 const LOCALES=["fr","en","es","es-mx","de","it","pt"];
-const CLES_MUR=["pro_gate_title","pro_gate_sr","pro_gate_item_bet","pro_gate_item_scorer","pro_gate_item_scenario","pro_gate_item_scores","pro_gate_cta","pro_gate_small","recovery_title","recovery_text","recovery_free_cta","recovery_home_cta"];
+const CLES_MUR=["pro_gate_title","pro_gate_sr","pro_gate_item_bet","pro_gate_item_scorer","pro_gate_item_scenario","pro_gate_item_scores","pro_gate_item_odds","pro_gate_item_stats","pro_gate_item_faq","pro_gate_cta","pro_gate_small","recovery_title","recovery_text","recovery_free_cta","recovery_home_cta"];
 test("mur Pro : un seul panneau, apercu factice sans aucune donnee, bouton ambre suivi, resiliation",()=>{
-  const mur=js.slice(js.indexOf("const FAUX_TICKET="),js.indexOf("// L'analyse fermee"));
+  const mur=js.slice(js.indexOf("const FAUX_TICKET="),js.indexOf("function renderVisitor(raw,opts)"));
   assert.ok(mur.length>1500,"mur Pro introuvable");
   // Apercu : texte factice (« Xxxx », « ??,? % »), aucun chiffre, masque aux lecteurs d'ecran.
   const faux=js.slice(js.indexOf("const FAUX_TICKET="),js.indexOf("function apercuFactice"));
@@ -380,9 +385,10 @@ test("mur Pro : un seul panneau, apercu factice sans aucune donnee, bouton ambre
   assert.match(mur,/<p class="sr-only">\$\{esc\(t\('match_page\.pro_gate_sr',/);
   assert.match(mur,/<a class="mgate-cta" href="\$\{esc\(o\.href\)\}"\$\{suivi\('match_gate_unlock'\)\}>\$\{esc\(t\('match_page\.pro_gate_cta','Débloquer avec Pro'\)\)\}/);
   assert.match(mur,/pro_gate_small','Résiliable à tout moment depuis ton compte\.'/);
-  for(const k of ["pro_gate_item_bet","pro_gate_item_scorer","pro_gate_item_scenario","pro_gate_item_scores"])assert.ok(mur.includes(`['${k}',`),k);
-  // « Pas de pari retenu » (public) : ni ticket factice ni promesse de pari.
-  assert.match(mur,/\.filter\(\(x,i\)=>etat!=='none'\|\|i>0\)/);
+  for(const k of ["pro_gate_item_bet","pro_gate_item_scorer","pro_gate_item_scenario","pro_gate_item_scores","pro_gate_item_odds","pro_gate_item_stats","pro_gate_item_faq"])assert.ok(mur.includes(`['${k}',`),k);
+  // « Pas de pari retenu » (public) : ni ticket factice ni promesse de pari ;
+  // stats et FAQ listees seulement si le match en a.
+  assert.match(mur,/\.filter\(\(\[k\],i\)=>\(etat!=='none'\|\|i>0\)&&\(o\.stats\|\|/);
   assert.match(mur,/apercuFactice\(etat!=='none'\)/);
   // Libelles honnetes (18/09/2026) : jamais « pari conseille » dans le mur.
   assert.doesNotMatch(mur,/pari conseillé|Pari recommandé/);
@@ -390,8 +396,6 @@ test("mur Pro : un seul panneau, apercu factice sans aucune donnee, bouton ambre
   assert.match(js,/\['avis',o\.free\?gateCard\(vm,o\):proGate\(vm,o\),true\]/);
   // Offre Pro avec retour a ce match (abonnement-page.js#contexteMatch).
   assert.match(js,/function offrePro\(raw\)\{[\s\S]{0,200}lien\('abonnement\.html\?next='\+encodeURIComponent\(lien\('match\.html\?id='\+id\)\)\)/);
-  // La barre mobile se masque aussi quand le panneau est a l'ecran.
-  assert.match(js,/querySelectorAll\('\.avis--lock,\.mgate,\.cta-recall,\.lock-card--analyse'\)/);
   // Style : meme langage que .hs-gate* de l'accueil (flou, bouton ambre).
   const bloc=css.slice(css.indexOf("MUR PRO (visiteur"));
   assert.match(bloc,/\.mgate-preview\{[^}]*filter:blur\([3-8]px\)/);

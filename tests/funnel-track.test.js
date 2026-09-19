@@ -269,7 +269,9 @@ test("click : kinds dedies de la page match (boutons Debloquer), liste fermee", 
   assert.deepEqual(clicks.map((c) => c.kind), kinds.concat(["cta"]), "kind hors liste => cta");
   assert.ok(clicks.slice(0, kinds.length).every((c) => c.target === "/gb/abonnement.html" && c.label === c.kind));
   const js = fs.readFileSync(path.join(root, "match-page.js"), "utf8");
-  for (const k of kinds) assert.match(js, new RegExp("suivi\\('" + k + "'\\)"), k + " absent de match-page.js");
+  // 19/09/2026 : un seul bouton par vue (panneau Pro, avis « compte gratuit ») ;
+  // les autres kinds restent acceptes pour l'historique des clics.
+  for (const k of ["match_gate_unlock", "match_avis_unlock"]) assert.match(js, new RegExp("suivi\\('" + k + "'\\)"), k + " absent de match-page.js");
 });
 
 test("user_id transmis uniquement avec le jeton du compte, jamais sur les evenements de navigation", () => {

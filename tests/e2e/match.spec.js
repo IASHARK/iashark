@@ -1,8 +1,9 @@
 'use strict';
 // Page match V8 (16/09/2026, maquette validee par le proprietaire).
-// Regle : tout ce que l'IA donne est FERME pour le visiteur ; toutes les stats
-// brutes sont OUVERTES. Scenarios : visiteur sur match payant, match offert
-// sans compte, compte gratuit, Pro simule, mobile (sommaire, barre d'appel).
+// Regle du 19/09/2026 (remplace « stats ouvertes ») : le visiteur ne voit que
+// l'en-tete du match (sans classement ni forme) et UN panneau avec UN bouton ;
+// stats, FAQ et analyse sont derriere. Scenarios : visiteur sur match payant,
+// match offert sans compte, compte gratuit, Pro simule, mobile.
 const { test, expect, pathOf } = require('./helpers/fixtures');
 const { VERSIONS } = require('./helpers/versions');
 const { deepPremiumLeaks, tr } = require('./helpers/site-data');
@@ -21,20 +22,25 @@ async function freeMatchIdFromHome(page, dir) {
 const proHref = (dir, id) => `/${dir}/abonnement.html?next=${encodeURIComponent(`/${dir}/match.html?id=${id}`)}`;
 const sectionOrder = (page) => page.locator('#matchRoot .sec[data-sec]').evaluateAll((els) => els.map((e) => e.dataset.sec));
 
-function expectReadingOrder(order, visitor) {
+function expectReadingOrder(order) {
   expect(order[0]).toBe('avis');
   expect(order[order.length - 1], 'questions frequentes a la fin').toBe('questions');
   expect(order).toContain('analyse');
   if (order.includes('stats')) expect(order.indexOf('stats')).toBeLessThan(order.indexOf('analyse'));
-  if (visitor && order.includes('stats')) expect(order.slice(order.indexOf('stats') + 1, order.indexOf('analyse'))).toEqual(['rappel']);
-  expect(order.filter((k) => k === 'rappel').length).toBeLessThanOrEqual(1);
+}
+// Vue visiteur : le panneau seul, un seul bouton « Debloquer », ni stats
+// (ni dans l'en-tete), ni FAQ, ni sommaire, ni barre d'appel.
+async function expectPanelOnly(page) {
+  expect(await sectionOrder(page)).toEqual(['avis']);
+  await expect(page.locator('#matchRoot a[data-track$="_unlock"]')).toHaveCount(1);
+  await expect(page.locator('#matchRoot .hero-meta, #matchRoot .fold, #matchRoot .faq-card, #matchNav, #ctaBar')).toHaveCount(0);
 }
 
 for (const v of VERSIONS) {
   test.describe(`page match /${v.dir}/`, () => {
     test.use({ timezoneId: v.timezone });
 
-    test('anonyme : match payant = stats ouvertes, IA fermee, aucune donnee premium', async ({ page, supa, siteData, dictFor, baseURL }) => {
+    test('anonyme : match payant = panneau seul, aucune donnee premium', async ({ page, supa, siteData, dictFor, baseURL }) => {
       test.skip(!siteData.paid, 'Aucun match payant dans les donnees');
       const dict = await dictFor(v.locale);
       const served = [];
@@ -55,20 +61,13 @@ for (const v of VERSIONS) {
       await expect(cta).toHaveAttribute('data-track', 'match_gate_unlock');
       expect(pathOf(await cta.getAttribute('href'), baseURL)).toBe(proHref(v.dir, siteData.paid.id));
       await expect(gate.locator('.mgate-small')).toHaveText(tr(dict, 'match_page.pro_gate_small'));
-      await expect(gate.locator('.mgate-list li')).toHaveCount(4);
+      const liste = await gate.locator('.mgate-list').innerText();
+      for (const k of ['pro_gate_item_bet', 'pro_gate_item_scorer', 'pro_gate_item_scenario', 'pro_gate_item_scores', 'pro_gate_item_odds']) expect(liste).toContain(tr(dict, 'match_page.' + k));
       await expect(gate.locator('.mgate-preview')).toHaveAttribute('aria-hidden', 'true');
       expect(await gate.locator('.mgate-preview').textContent(), 'apercu factice : aucun chiffre').not.toMatch(/\d/);
       await expect(gate.locator('.sr-only')).toHaveText(tr(dict, 'match_page.pro_gate_sr'));
       await expect(page.locator('#matchRoot .avis-cta, #matchRoot [data-track="match_avis_unlock"]')).toHaveCount(0);
-      // Tous les boutons « Debloquer » menent a l'offre avec retour a ce match.
-      for (const href of await page.locator('#matchRoot .cta-recall-btn, #matchRoot .lock-cta, #matchRoot .faq-lock a, #ctaBar a').evaluateAll((els) => els.map((e) => e.getAttribute('href')))) {
-        expect(pathOf(href, baseURL)).toBe(proHref(v.dir, siteData.paid.id));
-      }
-      expectReadingOrder(await sectionOrder(page), true);
-      // Stats brutes ouvertes, analyse fermee en un seul bloc, reponses du modele fermees.
-      await expect(page.locator('#sec-stats .fold').first()).toBeVisible();
-      await expect(page.locator('#matchRoot .lock-card--analyse')).toHaveCount(1);
-      expect(await page.locator('#matchRoot .faq-lock').count()).toBeGreaterThan(0);
+      await expectPanelOnly(page);
       await expect(page.locator(PAID)).toHaveCount(0);
       await expect(page.locator('#matchRoot .absences-card')).toHaveCount(0);
       await page.waitForLoadState('networkidle').catch(() => {});
@@ -79,9 +78,6 @@ for (const v of VERSIONS) {
       expect(leaks, 'champs premium servis a un visiteur anonyme').toEqual([]);
       const visible = await page.locator('main, #matchRoot').first().innerText();
       if (siteData.template.pari_rec) expect(visible).not.toContain(String(siteData.template.pari_rec));
-      // Aucun chiffre dans les reponses fermees, le rappel et la barre mobile.
-      const texte = await page.locator('#matchRoot .faq-lock, #matchRoot .cta-recall, #ctaBar').evaluateAll((els) => els.map((e) => e.textContent).join(' '));
-      expect(texte).not.toMatch(/\d/);
     });
 
     // Defense en profondeur : meme si une reponse publique portait par erreur
@@ -96,7 +92,7 @@ for (const v of VERSIONS) {
       await page.route(/\/data-home\.json(\?.*)?$/, (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(Object.assign({}, siteData.home, { matchs: siteData.home.matchs.map((m) => (String(m.id) === id ? siteData.withPremium(m) : m)) })) }));
       await page.goto(`/${v.dir}/match.html?id=${id}`);
       await expect(page.locator('#matchRoot .gate')).toBeVisible();
-      await expect(page.locator('#matchRoot .sec[data-sec="questions"]')).toHaveCount(1);
+      await expectPanelOnly(page);
       await expect(page.locator(PAID)).toHaveCount(0);
       const found = await page.evaluate(({ tpl, home, away, labels }) => {
         const loc = window.I18N.localeTag();
@@ -122,11 +118,8 @@ for (const v of VERSIONS) {
       await expect(gate.locator('h2')).toHaveText(tr(dict, 'match_page.gate_free_title'));
       expect(pathOf(await gate.locator('a.btn-gate').getAttribute('href'), baseURL)).toBe(`/${v.dir}/compte.html`);
       await expect(gate.locator('a.btn-gate')).toHaveText(tr(dict, 'match_page.free_cta'));
-      await expect(page.locator('#matchRoot .lock-card--analyse')).toHaveCount(1);
+      await expectPanelOnly(page);
       await expect(page.locator(PAID)).toHaveCount(0);
-      for (const href of await page.locator('#matchRoot .cta-recall-btn, #matchRoot .lock-cta, #matchRoot .faq-lock a, #ctaBar a').evaluateAll((els) => els.map((e) => e.getAttribute('href')))) {
-        expect(pathOf(href, baseURL)).toBe(`/${v.dir}/compte.html`);
-      }
     });
 
     test('compte gratuit : match offert = analyse ; match payant = page visiteur', async ({ page, supa, siteData, dictFor }) => {
@@ -142,6 +135,7 @@ for (const v of VERSIONS) {
       await page.goto(`/${v.dir}/match.html?id=${siteData.paid.id}`);
       await expect(page.locator('#matchRoot .gate h2')).toHaveText(tr(dict, 'match_page.pro_gate_title'));
       await expect(page.locator('#matchRoot a.mgate-cta')).toHaveCount(1);
+      await expectPanelOnly(page);
       await expect(page.locator('#sigSticky')).toHaveCount(0);
       await expect(page.locator(PAID)).toHaveCount(0);
     });
@@ -153,7 +147,8 @@ for (const v of VERSIONS) {
       await expect(page.locator('#matchRoot .secs .sec').first()).toBeVisible();
       await expect(page.locator('#matchRoot .gate')).toHaveCount(0);
       expect(await page.locator('#matchRoot .secs .sec').count()).toBeGreaterThanOrEqual(3);
-      expectReadingOrder(await sectionOrder(page), false);
+      expectReadingOrder(await sectionOrder(page));
+      await expect(page.locator('#matchRoot .hero-meta')).toHaveCount(1);
       // Marche recommande (champ premium) reellement affiche, deux barres, aucun verrou.
       await expect(page.locator('#sigSticky .ss-market')).not.toBeEmpty();
       await expect(page.locator('#matchRoot .sig2-cmp .duo')).toHaveCount(1);
@@ -204,26 +199,15 @@ for (const v of VERSIONS) {
       await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
     });
 
-    test('mobile visiteur : sommaire collant, barre d\'appel masquee en haut, pied de page non recouvert @mobile', async ({ page, siteData }, testInfo) => {
+    test('mobile visiteur : panneau seul, bouton visible, ni sommaire ni barre d\'appel @mobile', async ({ page, siteData }, testInfo) => {
       test.skip(!siteData.paid, 'Aucun match payant dans les donnees');
-      test.skip(testInfo.project.name !== 'mobile', 'barre d\'appel mobile (<= 640 px) : projet mobile seulement');
+      test.skip(testInfo.project.name !== 'mobile', 'projet mobile seulement');
       await page.goto(`/${v.dir}/match.html?id=${siteData.paid.id}`);
       await expect(page.locator('#matchRoot .gate')).toBeVisible();
-      const bar = page.locator('#ctaBar');
-      await expect(bar).toHaveCount(1);
-      await expect(bar).toHaveClass(/is-hidden/);
-      await expect(page.locator('#matchNav .mnav-chip')).toHaveCount(4);
-      await page.locator('.mnav-chip[data-nav="questions"]').click();
-      await expect(page.locator('.mnav-chip[data-nav="questions"]')).toHaveAttribute('aria-current', 'true');
-      await expect(bar).not.toHaveClass(/is-hidden/);
-      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-      await page.waitForTimeout(500);
-      const m = await page.evaluate(() => {
-        const f = document.querySelector('.legal-footer').getBoundingClientRect();
-        const b = document.getElementById('ctaBar');
-        return { footerBottom: Math.round(f.bottom), barTop: b.classList.contains('is-hidden') ? 100000 : Math.round(b.getBoundingClientRect().top) };
-      });
-      expect(m.footerBottom, 'la barre d\'appel recouvre le pied de page').toBeLessThanOrEqual(m.barTop + 1);
+      await expectPanelOnly(page);
+      await page.locator('#matchRoot a.mgate-cta').scrollIntoViewIfNeeded();
+      await expect(page.locator('#matchRoot a.mgate-cta')).toBeInViewport();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth), 'defilement horizontal').toBeLessThanOrEqual(0);
     });
   });
 }

@@ -330,8 +330,10 @@ test("unlockRows : 6 emplacements toujours presents, parts, phrase du bouton le 
   const matchPage = read("match-page.js");
   for (const k of UNLOCK_KINDS) {
     assert.match(tracker, new RegExp("\\b" + k + ": true"), k + " accepte par funnel-track.js");
-    assert.match(matchPage, new RegExp("suivi\\('" + k + "'\\)"), k + " emis par match-page.js");
   }
+  // 19/09/2026 : la page match n'emet plus que le panneau Pro et l'avis
+  // « compte gratuit » ; les 4 autres lignes restent pour l'historique.
+  for (const k of ["match_gate_unlock", "match_avis_unlock"]) assert.match(matchPage, new RegExp("suivi\\('" + k + "'\\)"), k + " emis par match-page.js");
   const journey = H.journeyDays([{ type: "click", at: NOW, kind: "match_faq_unlock", label: "match_faq_unlock" }], {}, NOW);
   assert.equal(journey[0].entries[0].text, "Clic sur « Débloquer » (FAQ)", "libelle technique jamais affiche");
   const gate = H.journeyDays([{ type: "click", at: NOW, kind: "match_gate_unlock", label: "match_gate_unlock" }], {}, NOW);

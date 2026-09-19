@@ -245,7 +245,8 @@ function meteo(desc){
 // EN-TETE. Le h1 unique de la page : les deux equipes. Competition, heure
 // locale avec fuseau, stade, meteo, rang et forme. AUCUNE probabilite du
 // modele : l'en-tete est aussi celui des murs d'acces (match payant sans Pro).
-function hero(vm){
+function hero(vm,o){
+  o=o||{};
   const i=vm.identity,s=i.standings||{},dh=dateHeure(vm),ln=nomLigue(i,vm),f=vm.form||{};
   const c=vm.conditions;
   const lieu=c.venue||c.weather?`<div class="hero-venue">${c.venue?`<span>${cardIcon('pin')}${esc(c.venue)}</span>`:''}${c.weather?`<span>${cardIcon('cloud')}${esc(temperature(c.weather.temperature))}${meteo(c.weather.description)?' · '+esc(meteo(c.weather.description)):''}</span>`:''}</div>`:'';
@@ -267,7 +268,7 @@ function hero(vm){
       <span class="hero-vs">${esc(t('match_page.vs_label','vs'))}</span>
       <span class="hero-team">${img(i.away.logo,'',60,60,{eager:true,priority:true})}<span class="hero-name">${esc(i.away.name)}</span></span>
     ${titreFermant}
-    <div class="hero-meta"><div>${teamMeta(s.home,f.home)}</div><div>${teamMeta(s.away,f.away)}</div></div>
+    ${o.sansStats?'':`<div class="hero-meta"><div>${teamMeta(s.home,f.home)}</div><div>${teamMeta(s.away,f.away)}</div></div>`}
     ${lieu}
   </header>`;
 }
@@ -859,7 +860,7 @@ function scenarioCard(vm){
 // o : { locked, href, lockText, linkText, pill }
 function faqCard(vm,o){
   o=o||{};
-  const ferme=!!o.locked,raw=vm._raw||{},etat=etatAnalyse(raw);
+  const raw=vm._raw||{},etat=etatAnalyse(raw);
   const id=vm.identity,f=vm.editorial.exclusiveFacts||{},g=vm.editorial.goalTiming;
   const dom=id.home.name,ext=id.away.name;
   const plusGrand=p=>p.home>=p.away?dom:ext,plusPetit=p=>p.home<=p.away?dom:ext;
@@ -907,17 +908,9 @@ function faqCard(vm,o){
   if(f.passes&&Math.abs(f.passes.home-f.passes.away)>=2){
     stats.push([t('match_page.faq_q_passing','Laquelle joue le plus proprement ?'),tf('match_page.faq_passing_answer','{team} réussit {best} % de ses passes, contre {other} % en face. Une différence de cet ordre se traduit souvent par plus de possession et moins de contres subis.',{team:esc(plusGrand(f.passes)),best:fmt(Math.max(f.passes.home,f.passes.away),0),other:fmt(Math.min(f.passes.home,f.passes.away),0)})]);
   }
-  // 3. Reponses du modele : jamais construites pour le visiteur (null).
-  // « Pas de pari retenu » (no_signal) est une information publique.
-  if(ferme){
-    if(etat==='none')faits.push([t('match_page.faq_q_pick','Quel est le pronostic IASHARK pour ce match ?'),esc(t('match_page.faq_pick_none','Le modèle n’a retenu aucun pari sur ce match.'))]);
-    else if(etat==='ready')modele.push([t('match_page.faq_q_pick','Quel est le pronostic IASHARK pour ce match ?'),null]);
-    if(g&&g.slots.length)modele.push([t('match_page.faq_q_first15','Que peut-il se passer dans les 15 premières minutes ?'),null]);
-    if(etat!=='unknown'){
-      modele.push([t('match_page.faq_q_outcomes','Quelles chances le modèle donne-t-il à chaque équipe ?'),null]);
-      fin.push([t('match_page.faq_q_basis','Sur quoi repose cette analyse ?'),null]);
-    }
-  }else{
+  // 3. Reponses du modele. Vue abonne seulement : depuis le 19/09/2026 le
+  // visiteur ne voit plus la FAQ (panneau seul, renderVisitor).
+  {
     const r=vm.model.recommendation,pr=vm.model.probabilities;
     if(r||etat==='none')modele.push([t('match_page.faq_q_pick','Quel est le pronostic IASHARK pour ce match ?'),r
       ?tf('match_page.faq_pick_answer','Pari conseillé : {market}, cote {odds}, probabilité estimée {prob}. Estimation statistique, pas une garantie.',{market:esc(marcheFr(vm,r.market)),odds:esc(odds(vm.model.recommendedOdds)),prob:esc(pct(r.probability,0))})
@@ -938,10 +931,8 @@ function faqCard(vm,o){
   }
   const toutes=[...faits.map(x=>[...x,false]),...modele.map(x=>[...x,true]),...stats.map(x=>[...x,false]),...fin.map(x=>[...x,true])];
   if(toutes.length<2)return '';
-  const verrou=`<p class="faq-lock">${cardIcon('lock')}<span>${esc(o.lockText||t('match_page.faq_locked','Réponse réservée aux abonnés.'))}</span><a href="${esc(o.href||'#')}"${suivi('match_faq_unlock')}>${esc(o.linkText||t('match_page.faq_unlock','Débloquer'))}</a></p>`;
-  const pastille=`<span class="faq-pro">${cardIcon('lock')}${esc(o.pill||t('match_page.lock_pill','Pro'))}</span>`;
   return card(t('match_page.faq_section_title','Questions fréquentes'),
-    `<div class="faq-list">${toutes.map(([q,a,ia])=>`<details${ia?' class="faq-ia"':''}><summary><span>${esc(q)}${ia&&a===null?pastille:''}</span></summary>${a===null?verrou:`<p>${a}</p>`}</details>`).join('')}</div>`,
+    `<div class="faq-list">${toutes.map(([q,a,ia])=>`<details${ia?' class="faq-ia"':''}><summary><span>${esc(q)}</span></summary><p>${a}</p></details>`).join('')}</div>`,
     'faq-card','faq');
 }
 
@@ -1028,19 +1019,6 @@ function bindNav(){
   }));
   maj();
 }
-// Barre mobile (visiteur) : masquee tant qu'un appel a l'action est deja a
-// l'ecran (avis, rappel, bloc analyse). Le corps reserve sa hauteur en bas.
-function bindCtaBar(){
-  const bar=document.getElementById('ctaBar');
-  if(!bar)return;
-  if(!('IntersectionObserver' in window)){bar.classList.remove('is-hidden');return;}
-  const vus=new Set();
-  const io=new IntersectionObserver(es=>{
-    es.forEach(e=>{if(e.isIntersecting)vus.add(e.target);else vus.delete(e.target);});
-    bar.classList.toggle('is-hidden',vus.size>0);
-  },{threshold:0.2});
-  root.querySelectorAll('.avis--lock,.mgate,.cta-recall,.lock-card--analyse').forEach(c=>io.observe(c));
-}
 let uiLie=false;
 function bindUi(){
   if(uiLie)return;
@@ -1076,17 +1054,16 @@ function bindUi(){
 
 // Assemble la page : sections [cle, html, verrouillee] ; seules les sections
 // non vides sont rendues (sections.filter(x=>x&&x[1])).
-function paint(vm,sections,apresNav,apresPage){
+function paint(vm,sections,apresNav,apresPage,opts){
   const S=sections.filter(x=>x&&x[1]);
   const presents=S.map(x=>x[0]),verrouilles=S.filter(x=>x[2]).map(x=>x[0]);
   const corps=S.map(([k,html,lock])=>`<div class="sec" id="sec-${k}" data-sec="${k}"${lock?' data-locked="true"':''}>${html}</div>`).join('');
   document.body.classList.toggle('has-cta-bar',!!apresPage);
-  root.innerHTML=`<div class="page">${hero(vm)}${navChips(presents,verrouilles,apresNav)}<div class="secs">${corps}</div></div>${apresPage||''}`;
+  root.innerHTML=`<div class="page">${hero(vm,opts)}${navChips(presents,verrouilles,apresNav)}<div class="secs">${corps}</div></div>${apresPage||''}`;
   bindMotion();
   bindUi();
   bindNav();
   bindSticky();
-  bindCtaBar();
 }
 
 // Bloc SEO statique des pages /match/<id>.html (h1 + resume). Il RESTE en
@@ -1162,7 +1139,7 @@ function bindMotion(){
 // Regle du proprietaire : tout ce que l'IA donne est FERME, les stats brutes
 // sont OUVERTES. Les blocs fermes ne lisent que des champs PUBLICS
 // (has_signal, no_signal, prob_band) : aucun chiffre, aucune sortie du modele.
-// opts : { free, title, href, cta, ctaShort }
+// opts : { free, title, href, cta }
 function gateCard(vm,opts){
   const o=opts,raw=vm._raw||{},etat=etatAnalyse(raw),bande=etat==='ready'?bandeDe(raw):null;
   const contenu=[
@@ -1170,8 +1147,10 @@ function gateCard(vm,opts){
     ['avis_item_prob','La probabilité estimée par le modèle'],
     ['avis_item_scenario','Le scénario des 15 premières minutes'],
     ['avis_item_model','L’avis du modèle sur le match'],
-    ['avis_item_players','Les marchés joueurs et buteurs']
-  ].filter((x,i)=>etat!=='none'||i>1);
+    ['avis_item_players','Les marchés joueurs et buteurs'],
+    ['pro_gate_item_stats','Toutes les stats du match : forme, classement, face-à-face, comparatif'],
+    ['pro_gate_item_faq','Les réponses aux questions fréquentes sur ce match']
+  ].filter(([k],i)=>(etat!=='none'||i>1)&&(o.stats||(k!=='pro_gate_item_stats'&&k!=='pro_gate_item_faq')));
   const titre=etat==='none'?t('match_page.avis_no_signal','Pas de pari retenu par le modèle sur ce match'):o.title;
   return `<section class="signal-card is-locked gate avis avis--lock reveal" aria-labelledby="gateTitle">
     <div class="sig-head">
@@ -1209,12 +1188,17 @@ function apercuFactice(avecPari){
 }
 function proGate(vm,o){
   const raw=vm._raw||{},etat=etatAnalyse(raw),bande=etat==='ready'?bandeDe(raw):null;
+  // Tout ce que la vue abonne affiche (render + analyseAbonne), rien de plus.
+  // Stats et FAQ : seulement si le match en a (o.stats).
   const contenu=[
     ['pro_gate_item_bet','Le marché retenu par le modèle et sa probabilité en %'],
-    ['pro_gate_item_scorer','Le buteur le plus probable'],
-    ['pro_gate_item_scenario','Le scénario probable du match'],
-    ['pro_gate_item_scores','Les scores les plus probables']
-  ].filter((x,i)=>etat!=='none'||i>0);
+    ['pro_gate_item_scorer','Le buteur le plus probable et les marchés joueurs'],
+    ['pro_gate_item_scenario','Le scénario du match par tranche de 15 minutes : quand les buts tombent'],
+    ['pro_gate_item_scores','Les scores les plus probables et les buts attendus'],
+    ['pro_gate_item_odds','Nos probabilités face aux cotes, marché par marché'],
+    ['pro_gate_item_stats','Toutes les stats du match : forme, classement, face-à-face, comparatif'],
+    ['pro_gate_item_faq','Les réponses aux questions fréquentes sur ce match']
+  ].filter(([k],i)=>(etat!=='none'||i>0)&&(o.stats||(k!=='pro_gate_item_stats'&&k!=='pro_gate_item_faq')));
   return `<section class="signal-card is-locked gate mgate avis avis--lock reveal" aria-labelledby="gateTitle">
     <div class="sig-head">
       <span class="sig-eyebrow">${cardIcon('target')}${esc(t('match_page.avis_title','L’avis IASHARK'))}</span>
@@ -1237,75 +1221,30 @@ function proGate(vm,o){
     ${methodLink()}
   </section>`;
 }
-// L'analyse fermee : UN bloc qui liste les 4 contenus, apercu flou abstrait
-// (formes CSS, aucune valeur, aucun texte).
-const FANTOME=`<div class="lk-g">${[1,2,3].map(i=>`<div class="lk-pair"><span class="lk-t w${i}"></span><span class="lk-b a${i}"></span><span class="lk-b b${i}"></span></div>`).join('')}</div>`;
-function analyseVisiteur(o){
-  const items=[
-    ['chart','scenario_title','Scénario probable du match','lock_scenario_text','Ce qui peut se passer dans les 15 premières minutes'],
-    ['chart','outputs_title','Ce que dit le modèle','lock_model_text','Les scores les plus probables selon notre modèle'],
-    ['table','markets_title','Probabilités et cotes','lock_probas_text','Nos chances face à la cote, pari par pari, écart expliqué en mots'],
-    ['target2','player_markets_title','Marchés joueurs','lock_players_text','Les joueurs les plus susceptibles de marquer']
-  ];
-  const titre=o.free?t('match_page.lock_free_title','Offert avec un compte gratuit'):t('match_page.lock_analysis_title','Réservé aux abonnés');
-  return `<section class="card lock-card lock-card--analyse reveal" aria-labelledby="lkAnalyse">
-    <h3 id="lkAnalyse" class="lock-h">${cardIcon('lock')}${esc(titre)}</h3>
-    <ul class="lock-list">${items.map(([ic,k,fb,k2,fb2])=>`<li>${cardIcon(ic)}<div><b>${esc(t('match_page.'+k,fb))}</b><span>${esc(t('match_page.'+k2,fb2))}</span></div></li>`).join('')}</ul>
-    <div class="lock-wrap">
-      <div class="lock-ghost" aria-hidden="true">${FANTOME}</div>
-      <div class="lock-over"><p>${esc(t('match_page.lock_analysis_text','Tout ce que calcule notre modèle pour ce match.'))}</p><a class="lock-cta" href="${esc(o.href)}"${suivi('match_analysis_unlock')}>${esc(o.cta)}</a></div>
-    </div>
-  </section>`;
-}
-// Rappel visiteur, une seule fois, apres les stats.
-function rappelCta(vm,o){
-  const raw=vm._raw||{},etat=etatAnalyse(raw),bande=etat==='ready'?bandeDe(raw):null;
-  const phrase=o.free?t('match_page.cta_recall_free','Vous avez vu les stats. L’analyse complète de ce match est offerte avec un compte gratuit.')
-    :etat==='none'?t('match_page.cta_recall_none','Vous avez vu les stats. Le modèle n’a pas retenu de pari, mais son analyse du match reste disponible.')
-    :bande?t('match_page.cta_recall_band','Vous avez vu les stats. L’avis du modèle sur ce match :')
-    :t('match_page.cta_recall_ready','Vous avez vu les stats. L’avis du modèle sur ce match est prêt.');
-  return `<aside class="cta-recall reveal" aria-label="${esc(t('match_page.cta_recall_aria','Avis du modèle sur ce match'))}">
-    <p>${esc(phrase)}${bande?` ${bandBadge(bande)}`:''}</p>
-    <a class="cta-recall-btn" href="${esc(o.href)}"${suivi('match_recall_unlock')}>${esc(o.ctaShort)}</a>
-  </aside>`;
-}
-// Barre mobile collante « Analyse prête · niveau · Débloquer ».
-function ctaBar(vm,o){
-  const etat=etatAnalyse(vm._raw),bande=etat==='ready'?bandeDe(vm._raw):null;
-  const libelle=o.free?t('match_page.cta_bar_free','Analyse offerte'):etat==='ready'?t('match_page.avis_ready','Analyse prête'):t('match_page.cta_bar_analysis','Analyse du match');
-  return `<div class="cta-bar is-hidden" id="ctaBar">
-    <div class="cta-bar-in"><span class="cta-bar-txt"><b>${esc(libelle)}</b>${bande?bandBadge(bande,true):''}</span><a class="cta-bar-btn" href="${esc(o.href)}"${suivi('match_bar_unlock')}>${cardIcon('lock')}${esc(o.ctaShort)}</a></div>
-  </div>`;
-}
 function renderVisitor(raw,opts){
   const o=Object.assign({
     free:false,
     title:t('match_page.avis_lock_title','Notre modèle a analysé ce match'),
     href:lien('abonnement.html'),
-    cta:t('match_page.avis_unlock','Débloquer l’analyse'),
-    ctaShort:t('match_page.cta_unlock_short','Débloquer')
+    cta:t('match_page.avis_unlock','Débloquer l’analyse')
   },opts||{});
   // Defense en profondeur : copie sans aucun champ premium AVANT tout calcul.
   const vm=viewModel(publicCopy(raw));
-  const stats=statsBlocs(vm);
-  const pill=o.free?t('match_page.lock_pill_free','Gratuit'):t('match_page.lock_pill','Pro');
-  // Match offert sans compte : avis ferme « compte gratuit » (gateCard) ;
-  // match payant : le mur Pro unique (proGate).
-  paint(vm,[
-    ['avis',o.free?gateCard(vm,o):proGate(vm,o),true],
-    ['stats',stats?groupe({title:t('match_page.stats_group_title','Les stats du match'),sub:t('match_page.stats_group_sub_open','Données brutes des deux équipes, ouvertes à tous.'),body:stats}):''],
-    ['rappel',stats?rappelCta(vm,o):''],
-    ['analyse',groupe({title:t('match_page.analysis_group_title','L’analyse IASHARK'),sub:t('match_page.analysis_group_sub','Ce que calcule notre modèle pour ce match.'),body:analyseVisiteur(o),pill}),true],
-    ['questions',faqCard(vm,{locked:true,href:o.href,linkText:o.ctaShort,pill,lockText:o.free?t('match_page.faq_locked_free','Réponse offerte avec un compte gratuit.'):t('match_page.faq_locked','Réponse réservée aux abonnés.')})]
-  ],'',ctaBar(vm,o));
+  // DECISION DU PROPRIETAIRE (19/09/2026, remplace la regle « stats ouvertes »
+  // du 16/09) : le visiteur ne voit QUE l'en-tete du match et UN panneau —
+  // avis ferme « compte gratuit » (gateCard) sur le match offert, mur Pro
+  // (proGate) sur un match payant. Stats (y compris classement et forme de
+  // l'en-tete), FAQ, analyse : tout est derriere ce panneau, qui les liste.
+  // Un seul bouton « Debloquer » par page.
+  o.stats=!!statsBlocs(vm);
+  paint(vm,[['avis',o.free?gateCard(vm,o):proGate(vm,o),true]],'','',{sansStats:true});
 }
 function renderAuthWall(raw){
   renderVisitor(raw,{
     free:true,
     title:t('match_page.gate_free_title','Match gratuit du jour'),
     href:lien('compte.html'),
-    cta:t('match_page.free_cta','Créer un compte gratuit / Se connecter'),
-    ctaShort:t('match_page.free_cta_short','Créer un compte gratuit')
+    cta:t('match_page.free_cta','Créer un compte gratuit / Se connecter')
   });
 }
 // Offre Pro avec retour a CE match apres paiement : ?next= interne vers
@@ -1324,7 +1263,7 @@ function renderProWall(raw){
 // place reservee du signal / mur d'acces, le temps de lire la session.
 function renderApercu(raw){
   try{
-    root.innerHTML=`<div class="page">${hero(viewModel(raw))}<div class="loading-card sig-pending"><span></span><p>${esc(t('match_page.loading_analysis','Chargement de l’analyse…'))}</p></div></div>`;
+    root.innerHTML=`<div class="page">${hero(viewModel(raw),{sansStats:true})}<div class="loading-card sig-pending"><span></span><p>${esc(t('match_page.loading_analysis','Chargement de l’analyse…'))}</p></div></div>`;
   }catch(e){}
 }
 

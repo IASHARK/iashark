@@ -19,7 +19,10 @@ async function expectLockedRowsClean(page) {
   })));
   for (const r of report) {
     expect(r.zone, 'chiffre dans la zone droite verrouillee').not.toMatch(/\d/);
-    expect(r.html, 'donnee chiffree sur une ligne verrouillee').not.toMatch(/\/10|hl-gauge|hl-market|hl-prob\b|data-conf|NaN/);
+    // « /10 » = une note sur 10 (« 6,4/10 »), jamais un morceau d'URL : le logo
+    // d'une equipe dont l'identifiant commence par 10 (teams/1065.png) n'est
+    // pas une donnee chiffree (faux positif du 19/09/2026).
+    expect(r.html, 'donnee chiffree sur une ligne verrouillee').not.toMatch(/\d\s*\/\s*10(?!\d)|hl-gauge|hl-market|hl-prob\b|data-conf|NaN/);
   }
   return report.length;
 }

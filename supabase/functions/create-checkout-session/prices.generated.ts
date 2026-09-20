@@ -37,7 +37,7 @@ export const PRO_PRICES: Record<string, { currency: string; intervals: Partial<R
         "unitAmount": 499,
         "envKey": "STRIPE_PRICE_ID_GB_WEEK",
         "legacyEnvKey": null,
-        "priceId": null,
+        "priceId": "price_1UHYSsCz0CerLuxwuImqlweo",
         "open": false
       },
       "month": {
@@ -51,7 +51,7 @@ export const PRO_PRICES: Record<string, { currency: string; intervals: Partial<R
         "unitAmount": 14900,
         "envKey": "STRIPE_PRICE_ID_GB_YEAR",
         "legacyEnvKey": null,
-        "priceId": null,
+        "priceId": "price_1UHYSyCz0CerLuxwW1az9jJP",
         "open": false
       }
     }

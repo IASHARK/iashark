@@ -243,7 +243,10 @@ test("create-checkout-session : id de Price de la configuration en dernier recou
   const OPEN_NOW = { fr: ["week", "month"], gb: ["month"], mx: ["week", "month", "year"], za: ["week", "month"], us: ["month"] };
   const PRICE_IDS = {
     fr: { week: "price_1UHPKzCz0CerLuxwrFe5hklH", month: "price_1UB7tpCz0CerLuxwNxsTsMRM", year: "price_1UHPL0Cz0CerLuxw26Kh72BF" },
-    gb: { month: "price_1UHPIRCz0CerLuxwwMv0zpmY" },
+    // GB : les trois Price existent depuis le 20/09/2026, mais seul le mensuel
+    // est ouvert au paiement tant que les CGV /gb/ ne couvrent pas les autres
+    // durees (config/markets.json#gb.checkoutOpen_readme).
+    gb: { week: "price_1UHYSsCz0CerLuxwuImqlweo", month: "price_1UHPIRCz0CerLuxwwMv0zpmY", year: "price_1UHYSyCz0CerLuxwW1az9jJP" },
     mx: { week: "price_1UHPKuCz0CerLuxwIFBrhhxf", month: "price_1UHPKtCz0CerLuxwQHegdC33", year: "price_1UHPKvCz0CerLuxwMfX8KdmC" },
     za: { week: "price_1UHPKyCz0CerLuxwOHUtjn4i", month: "price_1UHPKxCz0CerLuxw9cieICvO" },
     us: { month: "price_1UHPIGCz0CerLuxwjBlGekGk" }
@@ -260,8 +263,8 @@ test("create-checkout-session : id de Price de la configuration en dernier recou
       assert.deepEqual([r.ok, r.priceId, r.usedMarket, r.currency, r.unitAmount], [true, PRICE_IDS[k][iv], k, MARKETS[k].currency, Math.round(EXPECTED[k][iv] * 100)], k + "." + iv);
     }
   }
-  assert.equal(pricing.resolvePriceId(env({}), "gb", "week").reason, "interval_not_configured", "GB semaine : aucun Price, jamais le mensuel");
-  assert.equal(pricing.resolvePriceId(env({}), "gb", "year").reason, "interval_not_configured", "GB annee : aucun Price");
+  assert.equal(pricing.resolvePriceId(env({}), "gb", "week").reason, "interval_not_configured", "GB semaine : duree fermee, son Price n'est jamais utilise, jamais le mensuel non plus");
+  assert.equal(pricing.resolvePriceId(env({}), "gb", "year").reason, "interval_not_configured", "GB annee : duree fermee, son Price n'est jamais utilise");
 
   // Configuration de test : ids synthetiques seulement (les ids reels sont verifies
   // plus haut), toutes durees vendues ouvertes (ordre de resolution seul).

@@ -333,11 +333,19 @@ function renderMatchRow(m,ctx,H,index){
   var track=a.state==='locked'?' data-track="home_row_lock" data-track-kind="home_row_lock"':'';
   var star=matchStarHtml(m,ctx);
 
-  return '<li class="hl-item'+(star?' has-star':'')+'"><a class="'+cls+'" href="'+esc(href)+'" aria-label="'+esc(aria)+'"'+track+' style="--i:'+Math.min(index||0,14)+'">'
+  // Journee passee : la ligne n'est PAS un lien. La fiche d'un match joue n'est
+  // gardee qu'un jour (poids des fichiers publics) ; un lien mènerait souvent
+  // vers « ce match n'est plus disponible ». Mieux vaut pas de lien qu'un lien
+  // mort (20/09/2026).
+  var ouvrante=a.state==='past'
+    ? '<div class="'+cls+' is-past" aria-label="'+esc(aria)+'" style="--i:'+Math.min(index||0,14)+'">'
+    : '<a class="'+cls+'" href="'+esc(href)+'" aria-label="'+esc(aria)+'"'+track+' style="--i:'+Math.min(index||0,14)+'">';
+  var fermante=a.state==='past'?'</div>':'</a>';
+  return '<li class="hl-item'+(star?' has-star':'')+'">'+ouvrante
     +'<span class="hl-time"><span class="hl-kick">'+esc(heure)+'</span></span>'
     +'<span class="hl-teams">'+teamHtml(home,H)+teamHtml(away,H)+'</span>'
     +'<span class="hl-meta">'+tags.join('')+'</span>'
-    +zone+'</a>'+star+'</li>';
+    +zone+fermante+star+'</li>';
 }
 
 /* ---------- Rendu competition ---------- */

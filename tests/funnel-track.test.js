@@ -563,3 +563,55 @@ test("gate_view : sans IntersectionObserver ou sans panneau, rien n'est envoye e
   assert.match(matchPage, /<section class="signal-card is-locked gate mgate/);
   assert.match(fs.readFileSync(path.join(root, "home-scorers.js"), "utf8"), /'<div class="hs-gate-card">'/);
 });
+
+// ---------- Premiere source d'acquisition (« first touch », 20/09/2026) ----------
+
+test("first touch : memorise a la premiere visite (UTM), jamais ecrase ensuite", () => {
+  const b = run({ pathname: "/fr/", search: "?utm_source=tiktok&utm_medium=social&utm_campaign=sept", referrer: "https://www.tiktok.com/" });
+  const ft = JSON.parse(b.ctx.localStorage.getItem("iashark_first_touch"));
+  assert.equal(ft.src, "tiktok");
+  assert.equal(ft.med, "social");
+  assert.equal(ft.cmp, "sept");
+  assert.equal(ft.ref, "www.tiktok.com");
+  assert.equal(ft.lp, "/fr/");
+  assert.match(ft.d, /^\d{4}-\d{2}-\d{2}$/);
+  // Une visite suivante depuis Google n'ecrase pas la premiere source.
+  const b2 = run({ pathname: "/fr/match.html", search: "?id=1", referrer: "https://www.google.com/", local: { iashark_first_touch: JSON.stringify(ft) } });
+  assert.equal(JSON.parse(b2.ctx.localStorage.getItem("iashark_first_touch")).src, "tiktok");
+});
+
+test("first touch : referent externe sans UTM => src = hote referent, sans rien => direct", () => {
+  const g = run({ pathname: "/fr/", referrer: "https://www.google.com/" });
+  assert.equal(JSON.parse(g.ctx.localStorage.getItem("iashark_first_touch")).src, "www.google.com");
+  assert.equal(JSON.parse(g.ctx.localStorage.getItem("iashark_first_touch")).med, "referral");
+  const d = run({ pathname: "/fr/" });
+  assert.equal(JSON.parse(d.ctx.localStorage.getItem("iashark_first_touch")).src, "direct");
+  assert.equal(JSON.parse(d.ctx.localStorage.getItem("iashark_first_touch")).med, undefined);
+});
+
+test("first touch : joint a signup_completed et au clic checkout, jamais a la navigation", () => {
+  const ft = JSON.stringify({ src: "tiktok", med: "social", cmp: "sept", ref: "www.tiktok.com", lp: "/fr/", d: "2026-09-18" });
+  const b = run({ pathname: "/fr/inscription.html", local: { iashark_first_touch: ft } });
+  b.ctx.iasharkTrack("signup_completed", {}, "11111111-1111-1111-1111-111111111111", "jwt-token");
+  const signup = b.events().filter((e) => e.event_type === "signup_completed").pop();
+  assert.equal(signup.metadata.ft_src, "tiktok");
+  assert.equal(signup.metadata.ft_med, "social");
+  assert.equal(signup.metadata.ft_cmp, "sept");
+  assert.equal(signup.metadata.ft_ref, "www.tiktok.com");
+  assert.equal(signup.metadata.ft_lp, "/fr/");
+  assert.equal(signup.metadata.ft_d, "2026-09-18");
+  b.ctx.iasharkTrack("click", { kind: "checkout", ready: true });
+  const checkout = b.events().filter((e) => e.event_type === "click").pop();
+  assert.equal(checkout.metadata.ft_src, "tiktok");
+  b.ctx.iasharkTrack("click", { kind: "cta" });
+  const cta = b.events().filter((e) => e.event_type === "click").pop();
+  assert.equal(cta.metadata.ft_src, undefined, "clic ordinaire : pas de premiere source");
+  const pv = b.events().find((e) => e.event_type === "page_view");
+  assert.equal(pv.metadata.ft_src, undefined, "page_view : jamais de premiere source");
+});
+
+test("first touch : localStorage inaccessible => rien ne casse, evenements toujours envoyes", () => {
+  const broken = { getItem: () => { throw new Error("blocked"); }, setItem: () => { throw new Error("blocked"); }, removeItem: () => {} };
+  const b = run({ pathname: "/fr/", extraGlobals: { localStorage: broken } });
+  assert.ok(b.events().some((e) => e.event_type === "page_view"));
+});

@@ -152,6 +152,66 @@
   // un identifiant de visite non persistant.
   try { localStorage.removeItem("iashark_funnel_sid"); } catch (e) {}
 
+  // ---------- Premiere source d'acquisition (« first touch ») ----------
+  // D'ou vient ce navigateur la TOUTE PREMIERE fois : source/medium/campagne
+  // UTM, site referent, page d'arrivee, date (jour). Memorisee en
+  // localStorage (20/09/2026) pour etre rattachee a l'inscription meme si
+  // elle a lieu lors d'une visite ulterieure en acces direct (les
+  // navigateurs integres TikTok/Instagram ne transmettent aucun referent au
+  // retour). Ce n'est PAS un identifiant : aucune valeur aleatoire, aucune
+  // empreinte, seulement le canal d'arrivee - les visites restent comptees
+  // sans aucun identifiant persistant, comme avant. Jamais ecrasee ; jointe
+  // uniquement a signup_completed et au clic checkout (prefixe ft_).
+  var FIRST_TOUCH_KEY = "iashark_first_touch";
+  function readFirstTouch() {
+    try {
+      var raw = localStorage.getItem(FIRST_TOUCH_KEY);
+      if (!raw) return null;
+      var ft = JSON.parse(raw);
+      return ft && typeof ft === "object" ? ft : null;
+    } catch (e) { return null; }
+  }
+  function clipStr(value, max) {
+    if (value === null || value === undefined) return null;
+    var s = String(value).trim();
+    return s ? s.slice(0, max) : null;
+  }
+  function captureFirstTouch() {
+    try {
+      if (readFirstTouch()) return;
+      var refHostFt = "";
+      try { refHostFt = document.referrer ? new URL(document.referrer).hostname : ""; } catch (e) {}
+      var extRef = refHostFt && !PROD_HOSTS[refHostFt] ? refHostFt : null;
+      var ft = { src: clipStr(param("utm_source"), 80) || clipStr(extRef, 80) || "direct" };
+      var med = clipStr(param("utm_medium"), 80) || (extRef ? "referral" : null);
+      if (med) ft.med = med;
+      var cmp = clipStr(param("utm_campaign"), 80);
+      if (cmp) ft.cmp = cmp;
+      if (extRef) ft.ref = clipStr(extRef, 80);
+      var lp = clipStr(loc.pathname, 300);
+      if (lp) ft.lp = lp;
+      ft.d = new Date().toISOString().slice(0, 10);
+      localStorage.setItem(FIRST_TOUCH_KEY, JSON.stringify(ft));
+    } catch (e) {}
+  }
+  // Evenements auxquels la premiere source est jointe : l'inscription (pour
+  // savoir quel canal amene les comptes) et le clic vers le paiement (pour
+  // savoir quel canal amene les abonnes). Jamais sur la navigation courante.
+  function withFirstTouch(eventType, md) {
+    var wants = eventType === "signup_completed" || (eventType === "click" && md && md.kind === "checkout");
+    if (!wants) return md;
+    var ft = readFirstTouch();
+    if (!ft) return md;
+    var out = md && typeof md === "object" ? md : {};
+    if (ft.src) out.ft_src = clipStr(ft.src, 80);
+    if (ft.med) out.ft_med = clipStr(ft.med, 80);
+    if (ft.cmp) out.ft_cmp = clipStr(ft.cmp, 80);
+    if (ft.ref) out.ft_ref = clipStr(ft.ref, 80);
+    if (ft.lp) out.ft_lp = clipStr(ft.lp, 300);
+    if (ft.d) out.ft_d = clipStr(ft.d, 10);
+    return out;
+  }
+
   function randomId(prefix) {
     return prefix + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 10);
   }
@@ -292,11 +352,13 @@
       locale: currentSite(),
       session_id: getSessionId(),
       user_id: uid,
-      metadata: withFlags(metadata),
+      metadata: withFlags(withFirstTouch(eventType, metadata)),
     }, token);
   };
 
   if (!autoTrack) return;
+
+  captureFirstTouch();
 
   function clip(value, max) {
     if (value === null || value === undefined) return null;

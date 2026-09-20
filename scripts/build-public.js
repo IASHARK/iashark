@@ -29,7 +29,7 @@ const CHECK_ONLY = args.includes("--check");
 const PUBLIC_DIRS = ["fr", "en", "es", "de", "it", "pt", "gb", "za", "mx", "match", "blog", "assets", "i18n/dict", "results"];
 // Fichiers racine publics.
 const PUBLIC_ROOT_FILES = [
-  "index.html", "404.html", "admin.html", "blog.html",
+  "index.html", "404.html", "admin.html", "admin-v2.html", "blog.html",
   "robots.txt", "_redirects", "_headers",
   "favicon.ico", "favicon-32x32.png", "favicon-512.png", "icon-192.png", "icon-512.png", "apple-touch-icon.png",
   // data.json (~13 Mo) n'est plus publie (16/09/2026, quota Netlify depasse le

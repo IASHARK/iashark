@@ -166,6 +166,12 @@ function analysisFor(m,ctx,H){
   // son liseré. Aucun champ payant n'est lu, meme pour un abonne.
   if(m&&m.past===true)return {state:'past',free:false};
   var free=isFree(m,ctx);
+  // Match ferme au coup d'envoi SANS pari publie avant (garde
+  // lib/kickoff-guard.js) : jamais « Pas de signal clair », qui laisserait
+  // croire que le modele avait choisi de ne pas parier (20/09/2026). Un match
+  // ferme AVEC pari publie garde son analyse (lib/pick-freeze.js
+  // FROZEN_CLOSED) et ne passe pas par cet etat.
+  if(!hasSignal(m)&&/^(KICKOFF_|FIXTURE_NOT_UPCOMING)/.test(String(m.no_signal_reason||'')))return {state:'closed',free:false};
   if(!hasSignal(m))return {state:'none',free:free,label:m.no_signal_label||t('home_app.no_signal_label','Aucun signal clair sur ce match')};
   // Match offert sans compte : la page match exige un compte gratuit ; ici non
   // plus, aucun champ payant n'est lu.
@@ -315,6 +321,9 @@ function renderMatchRow(m,ctx,H,index){
       +'<span class="hl-freepill">'+esc(t('home_list.free_gated_cta','Compte gratuit'))+'</span></span>';
   }else if(a.state==='pending'){
     zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'+esc(t('home_app.analysis_in_progress','Analyse en cours'))+'</span></span>';
+  }else if(a.state==='closed'){
+    zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'+esc(t('home_list.closed_short','Pronostic fermé'))+'</span>'
+      +'<span class="hl-none-s">'+esc(t('home_list.closed_sub','L’analyse n’est plus proposée après le coup d’envoi'))+'</span></span>';
   }else{
     zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'+esc(t('home_list.no_signal_short','Pas de signal clair'))+'</span>'
       +'<span class="hl-none-s">'+esc(t('home_list.no_signal_sub','Aucun pari forcé'))+'</span></span>';
@@ -326,7 +335,8 @@ function renderMatchRow(m,ctx,H,index){
     :a.state==='open'?(a.prob!=null?tf('home_list.aria_prob','Probabilité estimée {p} sur 10.',{p:a.prob}):t('home_list.aria_open','Analyse disponible.'))
       +(a.free?' '+t('home_list.aria_free','Analyse offerte.'):'')
     :a.state==='gated'?t('home_list.aria_free_gated','Analyse offerte avec un compte gratuit.')
-    :a.state==='pending'?t('home_app.analysis_in_progress','Analyse en cours')+'.':a.label+'.';
+    :a.state==='pending'?t('home_app.analysis_in_progress','Analyse en cours')+'.'
+    :a.state==='closed'?t('home_list.closed_short','Pronostic fermé')+'. '+t('home_list.closed_sub','L’analyse n’est plus proposée après le coup d’envoi')+'.':a.label+'.';
   var extra=[derby?tf('home_list.aria_derby','Derby : {name}',{name:derby}):'',cd?cd.text+(cd.estimated?' ('+t('home_list.estimated','estimé')+')':''):'',q?q.text:''].filter(Boolean).join(', ');
   var aria=tf('home_list.row_aria','{home} contre {away}, {time}. {extra}. {analysis}',{home:home.n||'',away:away.n||'',time:heure,extra:extra,analysis:anaAria}).replace(/\.\s\./g,'.');
   // Suivi du tunnel (funnel-track.js) : ligne verrouillee = kind dedie, sans donnee personnelle.

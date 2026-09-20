@@ -203,9 +203,17 @@ jobs:
 
             // 5) Priorite : aujourd'hui (matchs qui viennent de finir), puis la
             //    journee la plus ancienne encore en retard.
+            // Rang : aujourd'hui (matchs qui viennent de finir), puis HIER, puis
+            // la journee la plus ancienne encore en retard. Hier est prioritaire
+            // parce que c'est la seule journee affichee sur l'accueil (onglet
+            // « Hier ») : sans ce rang, le budget de 2 appels partait sur la plus
+            // vieille journee en retard et l'onglet restait vide (20/09/2026).
+            const hier = MR.jourDecale ? MR.jourDecale(aujourdHui, -1)
+              : new Date(Date.parse(aujourdHui + 'T12:00:00Z') - 86400000).toISOString().slice(0, 10);
+            function rang(j) { return j === aujourdHui ? 0 : j === hier ? 1 : 2; }
             const ordre = aFaire.slice().sort(function (a, b) {
-              if (a.jour === aujourdHui) return -1;
-              if (b.jour === aujourdHui) return 1;
+              const ra = rang(a.jour), rb = rang(b.jour);
+              if (ra !== rb) return ra - rb;
               return a.jour < b.jour ? -1 : 1;
             });
 

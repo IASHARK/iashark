@@ -77,19 +77,16 @@ test("pastille de niveau : 3 libelles, 3 barres (3/3, 2/3, 1/3), note « pas une
   assert.equal(HL.probBandOf({ prob_band: 0.8 }), null);
 });
 
-test("Pro confirme ou match offert : Proba. x/10, jauge ET pari retenu ; sans signal : pas de pari force", () => {
+test("Pro confirme ou match offert : Proba. x/10 et jauge, jamais le marche ; sans signal : pas de pari force", () => {
   const pro = HL.renderMatchRow(Object.assign(base({ prob_band: "high" }), SECRET), ctx({ isPro: true }), helpers(), 0);
   assert.match(pro, /is-open/);
   assert.match(pro, /<b>7,7<\/b><small>\/10<\/small>/);
   assert.match(pro, /hl-gauge/);
-  // 20/09/2026, demande du proprietaire : le pari retenu revient SOUS la
-  // probabilite, pour que l'abonne le voie sans ouvrir la fiche. Il avait ete
-  // retire de la liste le 16/09/2026 ; cette decision est annulee. Il n'est
-  // affiche que sur une analyse deja ouverte pour ce visiteur (abonne confirme
-  // ou analyse offerte) : une ligne verrouillee n'y touche jamais (test suivant).
-  assert.match(pro, /hl-openpick/, "le pari retenu doit etre visible pour un abonne");
-  assert.match(pro, /Plus de 2,5 buts/, "le pari retenu doit etre lisible a l'ecran");
-  assert.match(pro, /Pari retenu : Plus de 2,5 buts \(Over 2\.5\)\./, "le pari retenu doit etre dans l'aria-label");
+  // Le marche retenu a quitte la liste le 16/09/2026 : il se lit sur la fiche
+  // du match. Ni a l'ecran, ni dans l'aria-label — sinon le pari repart par le
+  // lecteur d'ecran.
+  assert.doesNotMatch(pro, /Plus de 2,5 buts/, "le marche retenu est revenu dans la liste");
+  assert.doesNotMatch(pro, /Marché/, "le marche retenu est revenu dans la liste");
   assert.doesNotMatch(pro, /hl-band|hl-lockpill/, "le Pro garde la note exacte, pas la pastille");
   const free = HL.renderMatchRow(Object.assign(base({ is_free: true }), SECRET), ctx({ freeMatchId: 1570383, hasAccount: true }), helpers(), 0);
   assert.match(free, /is-open is-free/);
@@ -121,24 +118,17 @@ test("derby : puce depuis le champ public derby", () => {
   assert.doesNotMatch(HL.renderMatchRow(base(), ctx(), helpers(), 0), /hl-tag-derby/);
 });
 
-// 20/09/2026 : « Apres-demain » (toujours vide) remplace par « Hier », qui ne
-// compte QUE le flux de resultats (docs/SPEC_RESULTATS_HIER.md).
-test("jours : Hier / Aujourd'hui / Demain, onglet sans match desactive « aucun match »", () => {
+test("jours : Aujourd'hui / Demain / Apres-demain, onglet sans match desactive « aucun match »", () => {
   const H = Object.assign(helpers(), { matchDay: (m) => m.date.slice(0, 10) });
   const clock = { day: "2026-09-16", tomorrow: "2026-09-17" };
-  const list = [base({ date: "2026-09-16 20:00" }), base({ id: 2, date: "2026-09-16 21:00" }), base({ id: 3, date: "2026-09-18 18:00" }), base({ id: 4, date: "2026-09-15 18:00" })];
-  const days = HL.buildDays(list, H, clock, { "2026-09-15": [{}] });
-  assert.deepEqual(days.map((d) => [d.day, d.count]), [["2026-09-15", 1], ["2026-09-16", 2], ["2026-09-17", 0]]);
-  // Sans flux de resultats, l'onglet Hier reste vide meme si data-home.json
-  // porte encore des matchs de la veille : la preuve ne vient que du flux.
-  assert.equal(HL.buildDays(list, H, clock)[0].count, 0);
+  const days = HL.buildDays([base({ date: "2026-09-16 20:00" }), base({ id: 2, date: "2026-09-16 21:00" }), base({ id: 3, date: "2026-09-18 18:00" }), base({ id: 4, date: "2026-09-20 18:00" })], H, clock);
+  assert.deepEqual(days.map((d) => [d.day, d.count]), [["2026-09-16", 2], ["2026-09-17", 0], ["2026-09-18", 1]]);
   const strip = HL.renderDateStrip(days, "2026-09-16");
   assert.equal((strip.match(/role="tab"/g) || []).length, 3);
   assert.match(strip, /<span class="hl-day-name">Aujourd’hui<\/span><span class="hl-day-sub">2 matchs<\/span>/);
   assert.match(strip, /data-hl-day="2026-09-17"[^>]*disabled aria-disabled="true"[^>]*><span class="hl-day-name">Demain<\/span><span class="hl-day-sub">aucun match<\/span>/);
-  assert.match(strip, /<span class="hl-day-name">Hier<\/span><span class="hl-day-sub">1 match<\/span>/);
-  assert.ok(strip.indexOf('data-hl-day="2026-09-15"') < strip.indexOf('data-hl-day="2026-09-16"'), "Hier s'affiche avant Aujourd’hui");
-  assert.doesNotMatch(strip, /Après-demain|Auj\.|Dem\.|\bJE\b|hl-dates-nav/);
+  assert.match(strip, /<span class="hl-day-name">Après-demain<\/span><span class="hl-day-sub">1 match<\/span>/);
+  assert.doesNotMatch(strip, /Auj\.|Dem\.|\bJE\b|hl-dates-nav/);
 });
 
 test("accueil simplifie : ni banniere, ni recherche, ni filtres, ni bloc « Mes compétitions » separe", () => {

@@ -2,9 +2,7 @@
 // CGV des 9 versions (legal/<dir>/cgv.html, recopiees dans /<dir>/cgv.html) :
 // prix et valeurs calculees de l'offre Pro identiques a config/markets.json
 // (source unique des prix), UNIQUEMENT pour les durees payables en ligne
-// (checkoutOpen, decision du proprietaire du 19/09/2026 : fr semaine + mois
-// (annuel ferme, L215-1), gb mois, mx semaine + mois + annee, za semaine + mois,
-// us mois), ZA sans annuel, marche ferme = « paiement pas encore ouvert »,
+// (checkoutOpen, decisions du proprietaire du 19/09/2026), ZA sans annuel,
 // date de mise a jour = version des CGV envoyee avec le consentement
 // (lib/checkout-consent.js), texte en REVIEW (commentaire LEGAL REVIEW, a
 // faire relire), franchise en base de TVA (art. 293 B du CGI) dans chaque
@@ -43,11 +41,9 @@ function money(amount, dir, currency) {
 
 // Franchise en base de TVA (decision du proprietaire du 19/09/2026), dans la
 // langue de chaque version ; plus aucune mention « TTC / VAT included ».
-// Un marche ferme au paiement (null ci-dessous) n'affiche ni TVA ni prix.
 const VAT = {
   fr: /TVA non applicable, article 293 B du CGI\./,
-  // /en/ (USD) : total facture, neutre sur la sales tax americaine.
-  en: /The price shown is the total price charged, in US dollars \(USD\)\. The publisher is a French business: VAT not applicable, Article 293 B of the French General Tax Code \(CGI\)\./,
+  en: /VAT not applicable, Article 293 B of the French General Tax Code \(CGI\)\./,
   gb: /VAT not applicable, Article 293 B of the French General Tax Code \(CGI\)\./,
   za: /VAT not applicable, Article 293 B of the French General Tax Code \(CGI\)\./,
   es: /IVA no aplicable, artículo 293 B del Código General de Impuestos francés \(CGI\)\./,
@@ -56,12 +52,7 @@ const VAT = {
   it: /IVA non applicabile, articolo 293 B del Codice generale delle imposte francese \(CGI\)\./,
   pt: /IVA não aplicável, artigo 293 B do Código Geral dos Impostos francês \(CGI\)\./,
 };
-const TAX_INCLUDED = /\bTTC\b|VAT included|including any applicable taxes|IVA incluid[oa]|impuestos aplicables incluidos|inkl\. MwSt|IVA inclusa|IVA incluído|sales tax (is )?(included|excluded)|plus (applicable )?(sales )?tax/i;
-// Marche ferme au paiement (checkoutOpen = []) : phrase « pas encore ouvert » de
-// la version (aucun marche ferme le 19/09/2026 ; ajouter la phrase ici en cas de
-// fermeture, CGV a reecrire - modele : versions gb/mx fermees, non publiees).
-const CLOSED = {};
-const isClosed = (m) => Array.isArray(m.checkoutOpen) && m.checkoutOpen.length === 0;
+const TAX_INCLUDED = /\bTTC\b|VAT included|including any applicable taxes|IVA incluid[oa]|impuestos aplicables incluidos|inkl\. MwSt|IVA inclusa|IVA incluído/i;
 
 test("CGV : prix de chaque duree PAYABLE, equivalent mensuel et economie de l'annuel repris de config/markets.json ; duree non payable absente", () => {
   assert.match(TERMS_VERSION || "", /^\d{4}-\d{2}-\d{2}$/);
@@ -74,7 +65,7 @@ test("CGV : prix de chaque duree PAYABLE, equivalent mensuel et economie de l'an
     for (const iv of ["week", "month", "year"]) {
       if (!pro[iv]) continue;
       // 19/09/2026 : seules les durees payables en ligne figurent dans les CGV
-      // (annuel EUR ferme ; /gb/ : mois seul).
+      // (ex. /gb/ : mensuel seul, semaine et annee sans Price Stripe).
       if (!isOpen(m, iv)) { assert.ok(!text.includes(money(pro[iv].amount, d, m.currency)), d + " : prix " + iv + " non payable absent des CGV"); continue; }
       assert.ok(text.includes(money(pro[iv].amount, d, m.currency)), d + " : prix " + iv + " " + money(pro[iv].amount, d, m.currency));
     }
@@ -87,23 +78,15 @@ test("CGV : prix de chaque duree PAYABLE, equivalent mensuel et economie de l'an
     } else {
       assert.doesNotMatch(text, /\b1[67] ?%/, d + " : aucune economie annuelle sans annuel payable");
     }
-    const monthRe = new RegExp(money(pro.month.amount, d, m.currency).replace(/[$.]/g, "\\$&"));
-    if (isOpen(m, "month")) assert.match(read(d + "/cgv.html"), monthRe, d + "/cgv.html : page generee a jour");
-    else assert.doesNotMatch(visible(read(d + "/cgv.html")), monthRe, d + "/cgv.html : page generee a jour (aucun prix)");
-    // TVA : franchise en base, aucune mention « TTC / VAT included » ; marche ferme : ni TVA ni prix.
-    if (VAT[d]) assert.match(text, VAT[d], d + " : mention de franchise en base de TVA");
-    else assert.doesNotMatch(text, /293 B|VAT|\bIVA\b|CGI/, d + " : aucune mention de TVA sur un marche ferme");
+    assert.match(read(d + "/cgv.html"), new RegExp(money(pro.month.amount, d, m.currency).replace(/[$.]/g, "\\$&")), d + "/cgv.html : page generee a jour");
+    // TVA : franchise en base, aucune mention « TTC / VAT included ».
+    assert.match(text, VAT[d], d + " : mention de franchise en base de TVA");
     assert.doesNotMatch(text, TAX_INCLUDED, d + " : plus de « TTC / VAT included »");
-    assert.equal(isClosed(m), !!CLOSED[d], d + " : marche ferme sans CGV « paiement pas encore ouvert »");
-    if (isClosed(m)) {
-      assert.match(text, CLOSED[d], d + " : « paiement pas encore ouvert »");
-      assert.doesNotMatch(text, /[£€]|MX\$|\$\d|\bR ?\d/, d + " : aucun prix promis");
-    }
   }
   // /en/ : texte ecrit pour l'offre USD (devise nommee) ; toute bascule inverse
   // de config/markets.json#_dirs.en.market doit passer par une reecriture des CGV.
   assert.equal(MARKETS[MARKETS._dirs.en.market].currency, "USD", "CGV /en/ ecrites pour l'offre USD : les reecrire si /en/ change de marche");
-  assert.match(visible(read("en/cgv.html")), /Monthly: \$19\.99 per month\. .* The price shown is the total price charged, in US dollars \(USD\)\./);
+  assert.match(visible(read("en/cgv.html")), /Monthly: \$19\.99 per month\. .* Price in US dollars \(USD\)\./);
 });
 
 test("CGV ZA : ni prix ni option annuelle au lancement ; tolerance d'impaye par duree dans chaque version", () => {
@@ -111,14 +94,9 @@ test("CGV ZA : ni prix ni option annuelle au lancement ; tolerance d'impaye par 
   assert.doesNotMatch(za, /R ?1[ ,]?999|Annual \(fixed-term\) plans|12-month term/);
   assert.match(za, /No annual plan is offered at present/);
   assert.match(read("legal/za/cgv.html"), /BLOCKED_DECISION: annual plan not offered in South Africa at launch/);
-  // Mensuel seul (/en/ USD, /gb/) : 4 jours, jamais de regle hebdomadaire ;
-  // versions EUR : 1 jour (semaine) / 4 jours (mois), plus de formule annuelle.
-  const GRACE = { fr: /1 jour après la fin de la période payée pour la formule hebdomadaire, et pendant 4 jours pour la formule mensuelle ;/, en: /maintained for 4 days after the end of the paid period;/, za: /1 day[\s\S]*4 days/, es: /1 día tras el final del periodo pagado en el plan semanal y durante 4 días en el plan mensual;/, de: /beim Wochenabonnement 1 Tag und beim Monatsabonnement 4 Tage lang/, it: /per 1 giorno dopo la fine del periodo pagato per l'abbonamento settimanale e per 4 giorni per l'abbonamento mensile;/, pt: /durante 1 dia após o fim do período pago no plano semanal e durante 4 dias no plano mensal;/, gb: /continues for 4 days after the end of the paid period;/, mx: /1 día[\s\S]*4 días/ };
-  for (const d of DIRS) {
-    const text = visible(read("legal/" + d + "/cgv.html"));
-    if (GRACE[d]) assert.match(text, GRACE[d], d + " : tolerance d'impaye");
-    else assert.doesNotMatch(text, /\b[14] (days?|días)\b/, d + " : marche ferme, aucune tolerance d'impaye");
-  }
+  // Mensuel seul (/en/ USD, /gb/) : 4 jours, jamais de regle hebdomadaire.
+  const GRACE = { fr: /1 jour après la fin de la période payée pour la formule hebdomadaire, et pendant 4 jours/, en: /maintained for 4 days after the end of the paid period;/, gb: /continues for 4 days after the end of the paid period;/, za: /1 day[\s\S]*4 days/, es: /1 día[\s\S]*4 días/, mx: /1 día[\s\S]*4 días/, de: /1 Tag[\s\S]*4 Tage/, it: /1 giorno[\s\S]*4 giorni/, pt: /1 dia[\s\S]*4 dias/ };
+  for (const d of DIRS) assert.match(visible(read("legal/" + d + "/cgv.html")), GRACE[d], d + " : tolerance d'impaye");
   for (const d of ["en", "gb"]) assert.doesNotMatch(visible(read("legal/" + d + "/cgv.html")), /1 day|weekly plan/, d + " : aucune regle hebdomadaire");
 });
 
@@ -137,26 +115,18 @@ test("CGV : date de mise a jour = version du consentement, texte en REVIEW, dure
   assert.equal(TERMS_VERSION, "2026-09-19");
   for (const d of DIRS.concat([""])) assert.equal(versionFor(d), "2026-09-19", (d || "racine") + " : version des CGV envoyee avec le consentement");
 
-  // Versions EUR : semaine et mois payables, annuel annonce comme non ouvert
-  // (L215-1 : rappels avant reconduction pas encore envoyes), aucune clause annuelle.
+  // FR (et versions EUR) : trois durees payables, conditions de l'annuel et du changement de duree.
   const fr = visible(read("legal/fr/cgv.html"));
-  assert.match(fr, /se souscrit au choix pour une période hebdomadaire ou mensuelle/);
-  assert.match(fr, /Une formule annuelle pourra être proposée ultérieurement ; elle n'est pas ouverte à la souscription à ce jour/);
-  assert.match(fr, /Changement de durée\. .*de la semaine au mois.*du mois à la semaine/);
+  assert.match(fr, /se souscrit au choix pour une période hebdomadaire, mensuelle ou annuelle/);
+  assert.match(fr, /au plus tôt trois mois et au plus tard un mois avant l'échéance/);
+  assert.match(fr, /Changement de durée\./);
   assert.match(fr, /Un abonnement en cours ne peut pas être souscrit une seconde fois/);
   assert.match(fr, /la version acceptée, la langue, la date et la période choisie sont enregistrées/);
-  const ANNUAL_CLOSED = { es: /a día de hoy no está abierto a la contratación/, de: /es kann derzeit nicht abgeschlossen werden/, it: /ad oggi non è aperto alla sottoscrizione/, pt: /à data de hoje não está aberto à subscrição/ };
-  for (const d of ["fr", "es", "de", "it", "pt"]) {
-    const text = visible(read("legal/" + d + "/cgv.html"));
-    if (ANNUAL_CLOSED[d]) assert.match(text, ANNUAL_CLOSED[d], d + " : annuel non ouvert");
-    assert.doesNotMatch(text, /199 €|16,59|239,40|L215-1|au plus tôt trois mois|drei Monate|tres meses|tre mesi|três meses/, d + " : aucune clause propre a l'annuel");
-    assert.match(read("legal/" + d + "/cgv.html"), /<!-- BLOCKED_DECISION: (formule annuelle|annual plan) FERMEE? le 19\/09\/2026|<!-- BLOCKED_DECISION: annual plan CLOSED on 19\/09\/2026/, d + " : reouverture de l'annuel a trancher");
+  assert.doesNotMatch(fr, /ne sont pas ouvertes à la souscription/);
+  for (const d of ["fr", "es", "de", "it", "pt", "mx"]) {
+    assert.match(read("legal/" + d + "/cgv.html"), /<!-- BLOCKED_DECISION: (formule annuelle|annual plan) - /, d + " : remboursement de l'annuel en cours d'annee a trancher");
   }
-  // /mx/ : annuel ouvert (remboursement en cours d'annee a trancher), avis avant
-  // chaque cobro dont le J-2 hebdomadaire (BLOCKED_DECISION : 5 jours LFPC/PROFECO).
-  assert.match(read("legal/mx/cgv.html"), /<!-- BLOCKED_DECISION: annual plan - pro-rata refund/);
   assert.match(read("legal/mx/cgv.html"), /<!-- BLOCKED_DECISION: weekly plan notice 2 days before each charge/);
-  assert.match(visible(read("legal/mx/cgv.html")), /plan anual, 30 días y 7 días antes; plan mensual, 7 días antes; plan semanal, 2 días antes/);
   // /gb/ et /en/ : mensuel seul, aucune clause propre a la semaine ou a l'annee.
   const gb = visible(read("legal/gb/cgv.html"));
   assert.match(gb, /Pro is paid monthly ; no weekly or annual plan is offered at present\./);
@@ -164,20 +134,17 @@ test("CGV : date de mise a jour = version du consentement, texte en REVIEW, dure
   const en = visible(read("legal/en/cgv.html"));
   assert.match(en, /No weekly or annual plan is offered on this version of the site\./);
   assert.doesNotMatch(en, /Annual plan|Changing billing period|week, month or year|weekly \/ monthly \/ annual|L215-1/);
+  assert.match(visible(read("legal/mx/cgv.html")), /plan anual, 30 días y 7 días antes; plan mensual, 7 días antes; plan semanal, 2 días antes/);
 });
 
 test("CGV : versions precedentes archivees (non publiees), chacune a la date de son nom", () => {
   const ARCHIVES = { fr: ["2026-09-16", "2026-09-18"] };
-  // Archive = texte verbatim, date au format de son epoque : /en/ est passe de
-  // en-GB a en-US (config/markets.json#_dirs.en.intlLocale) le 19/09/2026.
-  const ARCHIVE_LOCALE = { en: { "2026-09-16": "en-GB" } };
   for (const d of DIRS) {
     for (const date of ARCHIVES[d] || ["2026-09-16"]) {
       const f = "legal/" + d + "/archives/cgv-" + date + ".html";
       assert.ok(fs.existsSync(path.join(ROOT, f)), f + " absente");
       const html = read(f);
-      const locale = (ARCHIVE_LOCALE[d] || {})[date] || MARKETS._dirs[d].intlLocale;
-      assert.ok(dateOf(html).includes(longDate(date, locale)), f + " : date " + dateOf(html));
+      assert.ok(dateOf(html).includes(longDate(date, MARKETS._dirs[d].intlLocale)), f + " : date " + dateOf(html));
       assert.notEqual(html, read("legal/" + d + "/cgv.html"), f + " : identique a la version en vigueur");
     }
   }

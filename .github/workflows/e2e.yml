@@ -13,9 +13,8 @@ name: e2e
 # GitHub sur push). tests.yml (tests unitaires) reste le gate independant.
 
 on:
-  # 19/09/2026 (depot passe en prive : minutes GitHub Actions facturees) :
-  # plus a chaque push sur main (dont le commit quotidien de donnees) ;
-  # pull requests + passage hebdomadaire en production ci-dessous.
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
   schedule:

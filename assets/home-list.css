@@ -1,8 +1,7 @@
 /* =========================================================================
    IASHARK — Liste des matchs de l'accueil (home-list.js). Maquette v2 validee
    le 15/09/2026, integree le 16/09 (+ pastille de niveau prob_band), simplifiee le 16/09
-   (3 onglets de jour, etoile par match, « Mes matchs »), onglet « Hier »
-   le 20/09 (preuve des resultats, docs/SPEC_RESULTATS_HIER.md).
+   (3 onglets de jour, etoile par match, « Mes matchs »).
    Tout est prefixe .hl- (aucun conflit avec .mc, .day-tab, .filters d'index.html).
    Tokens : ceux d'index.html uniquement (--page, --surface, --surface-2,
    --cyan, --cyan2, --amber, --green, --red, --text, --soft, --line).
@@ -20,7 +19,7 @@
 .hl-title{margin:0;font-size:24px;font-weight:800;letter-spacing:-.7px;line-height:1.15;}
 .hl-sub{margin:4px 0 0;font-size:12.5px;color:var(--soft,#a6b4c6);}
 
-/* ---------- Jours : Hier / Aujourd'hui / Demain (20/09/2026) ---------- */
+/* ---------- Jours : Aujourd'hui / Demain / Apres-demain ---------- */
 .hl-days{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0 0 12px;}
 .hl-day{min-width:0;min-height:52px;padding:6px 4px;border-radius:11px;border:1px solid var(--line,rgba(141,179,211,.14));background:rgba(10,20,32,.6);
   color:var(--soft,#a6b4c6);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;cursor:pointer;transition:color .15s,background .15s,border-color .15s;}
@@ -174,50 +173,6 @@
 .hl-row.is-free{box-shadow:inset 3px 0 0 var(--cyan,#20d5ef);background:linear-gradient(90deg,rgba(32,213,239,.07),transparent 65%);}
 .hl-d{display:none;}
 
-/* ---------- Onglet Hier : preuve des resultats (20/09/2026) ----------
-   Bandeau du jour, puis le corps habituel de la liste : l'onglet Hier reutilise
-   le rendu commun (competitions, en-tetes, etoiles, lignes, tailles, ordre).
-   Seuls s'ajoutent sur la ligne le score final, le marche retenu avec sa cote
-   et le verdict (demande du proprietaire, 20/09/2026).
-   Verdict : JAMAIS la couleur seule (daltonisme, WCAG 1.4.1) — bordure gauche
-   3px (box-shadow inset, comme .is-free : aucun decalage), fond teinte a 10 %,
-   libelle texte ET icone. Couleurs : celles du tableau de bord
-   (assets/admin.css, --green #34d399 / --red #fb8a8a et leurs -wash), posees
-   ici en jetons dedies parce que le --green d'index.html (#10b981) est plus
-   sombre et passe mal sur le fond de l'accueil. */
-.hl{--hl-win:#34d399;--hl-win-wash:rgba(52,211,153,.10);--hl-loss:#fb8a8a;--hl-loss-wash:rgba(251,138,138,.10);
-  --hl-neutral:rgba(141,179,211,.4);}
-.hl-rbanner{margin:0 0 12px;padding:13px 15px;border-radius:14px;border:1px solid var(--line,rgba(141,179,211,.14));
-  background:rgba(10,20,32,.6);display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;}
-.hl-rbanner-h{flex:1 1 240px;margin:0;font-size:14.5px;font-weight:750;line-height:1.3;letter-spacing:-.01em;}
-.hl-rbanner-x,.hl-rbanner-note{flex:1 1 100%;margin:0;font-size:11.5px;line-height:1.45;color:var(--soft,#a6b4c6);}
-/* Ordre : le constat, les exclusions, la mention obligatoire, puis le lien. */
-.hl-rbanner-note{order:3;}
-.hl-rbanner-cta{order:4;}
-.hl-rbanner-cta{flex:none;min-height:38px;padding:0 14px;border-radius:10px;display:inline-flex;align-items:center;gap:6px;
-  border:1px solid rgba(32,213,239,.42);background:rgba(32,213,239,.07);color:var(--cyan,#20d5ef);
-  font-size:12.5px;font-weight:750;text-decoration:none;transition:background .15s;}
-.hl-rbanner-cta:hover{background:rgba(32,213,239,.14);}
-.hl-rbanner-cta:focus-visible{outline:2px solid var(--cyan,#20d5ef);outline-offset:3px;}
-.hl-rrow.is-win{box-shadow:inset 3px 0 0 var(--hl-win);background:var(--hl-win-wash);}
-.hl-rrow.is-loss{box-shadow:inset 3px 0 0 var(--hl-loss);background:var(--hl-loss-wash);}
-.hl-rrow.is-void,.hl-rrow.is-pending{box-shadow:inset 3px 0 0 var(--hl-neutral);background:rgba(141,179,211,.05);}
-.hl-rrow.is-win:hover{background:rgba(52,211,153,.15);}
-.hl-rrow.is-loss:hover{background:rgba(251,138,138,.15);}
-.hl-rzone{align-items:flex-end;}
-.hl-rscore{margin-left:auto;padding-left:8px;font-size:14px;font-weight:800;line-height:inherit;font-variant-numeric:tabular-nums;color:var(--text,#f4f7fb);}
-/* Le marche retenu ne se tronque jamais : il passe a la ligne (c'est LA
-   donnee de la preuve). */
-.hl-rpick{max-width:100%;font-size:11.5px;font-weight:650;line-height:14px;color:var(--text,#f4f7fb);}
-.hl-rodds{font-size:11px;line-height:13px;color:var(--soft,#a6b4c6);font-variant-numeric:tabular-nums;}
-.hl-rodds small{font-size:9.5px;opacity:.85;}
-.hl-verdict{display:inline-flex;align-items:center;gap:4px;height:19px;padding:0 7px;border-radius:999px;
-  border:1px solid currentColor;font-size:10px;font-weight:800;letter-spacing:.02em;line-height:1;white-space:nowrap;}
-.hl-verdict .hl-v-ico{flex:none;width:10px;height:10px;}
-.hl-verdict.is-win{color:var(--hl-win);background:rgba(52,211,153,.12);}
-.hl-verdict.is-loss{color:var(--hl-loss);background:rgba(251,138,138,.12);}
-.hl-verdict.is-void,.hl-verdict.is-pending{color:var(--soft,#a6b4c6);background:rgba(141,179,211,.08);border-color:rgba(141,179,211,.3);}
-
 /* ---------- Apparition en cascade (depuis un etat visible) ---------- */
 .hl-enter .hl-row{animation:hlRise .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0) * 32ms);}
 @keyframes hlRise{from{transform:translateY(7px);opacity:.45}to{transform:none;opacity:1}}
@@ -277,15 +232,6 @@
   .hl-none-s{font-size:11px;}
   .hl-prob-lbl{font-size:10px;}
   .hl-prob b{font-size:17px;}
-  .hl-rbanner{padding:15px 18px;}
-  .hl-rbanner-h{font-size:16px;}
-  .hl-rbanner-x,.hl-rbanner-note{font-size:12px;}
-  .hl-rpick{font-size:12.5px;line-height:16px;}
-  .hl-rodds{font-size:12px;line-height:15px;}
-  .hl-rodds small{font-size:10.5px;}
-  .hl-verdict{height:22px;padding:0 9px;gap:5px;font-size:11px;}
-  .hl-verdict .hl-v-ico{width:11px;height:11px;}
-  .hl-rscore{font-size:15px;}
   .hl-gauge{max-width:250px;height:4px;}
   .hl-d{display:inline;}
   .hl-m{display:none;}
@@ -295,15 +241,3 @@
   .hl-league-panel,.hl-chev,.hl-lockpill-cta,.hl-ghost,.hl-lockpill-pro,.hl-lock-ico{transition:none;}
   .hl-dot,.hl-tag-time.is-live::before,.hl-gauge i,.hl-sk,.hl-enter .hl-row,.hl-star.is-pop svg,.hl-mstar.is-pop svg,.hl-lockpill::after{animation:none!important;}
 }
-
-/* Resultats de la veille (20/09/2026) : recommandation publiee puis mesure
-   reelle du marche. Plus de cote affichee (demande du proprietaire). */
-.hl-rzone{gap:6px}
-.hl-rlabel{display:block;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--hl-muted,#5d7a92);font-weight:700}
-.hl-rpick{display:block;font-size:13.5px;font-weight:700;color:var(--hl-text,#f4f7fa);line-height:1.35}
-.hl-robs{display:block;font-size:12.5px;color:var(--hl-soft,#9baec0);line-height:1.35}
-.hl-rarrow{margin-right:5px;color:var(--hl-muted,#5d7a92)}
-/* Pari retenu sous la probabilite, pour les abonnes : lecture au coup d'oeil. */
-.hl-openpick{display:block;margin-top:5px;padding-top:5px;border-top:1px solid rgba(255,255,255,.07)}
-.hl-openpick-l{display:block;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--hl-muted,#5d7a92);font-weight:700}
-.hl-openpick-v{display:block;font-size:13px;font-weight:700;color:var(--hl-text,#f4f7fa);line-height:1.3}

@@ -49,10 +49,6 @@ jobs:
           // Liste UNIQUE des champs premium (audit fuite 14/09/2026) : data.json,
           // pages match, table protegee (premium_fields) et historique.json.
           var PREMIUM_FIELDS_LIB=require('./lib/premium-fields.js');
-          // RESULTATS PUBLIES (onglet « Hier », docs/SPEC_RESULTATS_HIER.md, lot R1) :
-          // construction des fichiers publics results/<date>.json. Module pur, teste
-          // par tests/match-results.test.js - aucune regle de marche reecrite ici.
-          var MATCH_RESULTS=require('./lib/match-results.js');
           const I18N_LOCALES = require('./i18n/locales.json');
           const I18N_PAGES = require('./scripts/i18n-manifest.js');
           const { generateLocalizedSitemaps, writeSitemapIndex } = require('./scripts/i18n-sitemaps.js');
@@ -88,22 +84,6 @@ jobs:
           // pages conservees, noindex a J+7, 301 vers le hub a J+30) et perimetre
           // des versions (config/leagues.json#seoMatchDirs) : scripts/match-lifecycle.js.
           var MATCH_LIFECYCLE=require('./scripts/match-lifecycle.js');
-          // AUDIT SEO DU 19/09/2026 (donnees vues par les abonnes) :
-          //  - lib/standings-groups.js : groupes d'un classement (conferences MLS,
-          //    zones argentines, phases Apertura/Clausura) ; le classement publie
-          //    avec un match vient du groupe de chaque equipe dans la phase en
-          //    cours, avec son nom (jamais standings[0] titre du nom de la ligue) ;
-          //  - lib/venue.js : ville d'un stade seulement si le stade est rattache a
-          //    la base api-football (venue.id > 0), jamais une ville traduite
-          //    automatiquement (« Allianz Field - Sao Paulo ») ; meteo idem ;
-          //  - scripts/home-summary.js : resume de l'accueil par version (fuseau,
-          //    jour et competitions de la version).
-          var STANDINGS_GROUPS=require('./lib/standings-groups.js');
-          var VENUE=require('./lib/venue.js');
-          var HOME_SUMMARY=require('./scripts/home-summary.js');
-          // Reponses /standings completes du run (tous les groupes), par id de
-          // ligue : pages championnat (scripts/league-hub-data.js#updateStore).
-          var STANDINGS_COMPLETS={};
           const RUN_OUTPUT_ENGINE_VERSION = 'run-output-engine-v1';
           var LEAGUE_COVERAGE_REPORT = null;
           try { LEAGUE_COVERAGE_REPORT = JSON.parse(fs.readFileSync('./league-coverage-report.json', 'utf8')); }
@@ -1523,12 +1503,16 @@ jobs:
           function seoJsonLdFor(m,entree){
             return SEO_PAGES.matchJsonLd(m,'fr',{entry:entree||null});
           }
-          // Resume (h1, competition, jour du match dans le fuseau de la version,
-          // annonce publique) : meme gabarit que les autres versions
-          // (scripts/seo-pages.js#matchSummaryHtml). Page match V8 (16/09/2026) :
-          // HTML statique = parties publiques seulement ; jamais le pari.
           function seoSummaryHtmlFor(m){
-            return SEO_PAGES.matchSummaryHtml(m,'fr');
+            var d=(m.date||'').split(' ')[0];
+            var modelAvailable=m.model_output_available!==false&&Number(m.data_quality_score||0)>0;
+            // Page match V8 (16/09/2026) : HTML statique = parties publiques
+            // seulement ; le pari n'est plus nomme, meme pour le match offert.
+            return '<div style="padding:24px 16px;font-family:\'DM Sans\',sans-serif;color:#94a3b8;font-size:13px;line-height:1.6">'
+              +'<h1 style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;letter-spacing:.5px;color:#e2e8f0;margin-bottom:8px">'+escHtml(m.home.n)+' vs '+escHtml(m.away.n)+'</h1>'
+              +'<p>'+(m.league?escHtml(seoLeagueName(m))+' — ':'')+(d?'<time datetime="'+escHtml(d)+'">'+escHtml(seoDateLabel(d,'fr'))+'</time>':'')+'</p>'
+              +(modelAvailable?'<p data-i18n="match_page.seo_analysis_available">Analyse statistique IASHARK disponible pour ce match.</p>':'<p data-i18n="match_page.model_unavailable_reason">Les données disponibles ne permettent pas encore une analyse chiffrée fiable.</p>')
+              +'</div>';
           }
           // Liens de navigation des pages statiques /match/<id>.html (audit QA
           // 14/09/2026) : jamais un lien racine ("/", "/pro.html"...), les pages
@@ -1604,47 +1588,6 @@ jobs:
             try{
               SEO_PAGES.writeArchivedMatchPages(registreLc,{root:'.',dirs:['fr'],tpl:tplBrut,now:maintenantLc,skipIds:idsRunLc}).forEach(function(rel){ keepFiles[rel.split('/').pop()]=true; });
             }catch(e){ console.log('  Erreur pages match conservees :',e.message); }
-            // DETAIL DES MATCHS DEJA JOUES : CONSERVE (lot R1, dependance remontee
-            // par le lot R4, 20/09/2026).
-            //
-            // Jusqu'ici, match/<id>.json n'etait garde que pour les matchs du run en
-            // cours. Un match sorti du run perdait son detail : l'onglet « Hier » et
-            // les pages /resultats/ renvoient pourtant vers ces matchs, dont
-            // l'analyse est desormais ouverte a tous une fois le match termine. Sans
-            // le fichier, la page affiche « Ce match n'est plus disponible » - la
-            // preuve tombe.
-            //
-            // COMBIEN DE JOURS : 1 (J-1), pas 7. Mesure du 20/09/2026 : un
-            // match/<id>.json pese 249 Ko en moyenne, et le site publie 40 a 75
-            // matchs par jour. Conserver 7 jours ajouterait ~350 fichiers, soit
-            // ~87 Mo a dist/ ; J-1 ajoute ~50 fichiers, soit ~12 Mo. Le compte
-            // Netlify a ete coupe pour depassement le 15/09/2026 (data.json, 13 Mo,
-            // a justement ete retire de dist/ le 16/09 pour cette raison) : 87 Mo
-            // n'est pas finançable. J-1 couvre l'onglet « Hier », qui est le besoin
-            // de la specification ; les journees plus anciennes gardent leur page
-            // match conservee, rendue depuis l'instantane public du registre
-            // (writeArchivedMatchPages ci-dessus). Augmenter cette constante est la
-            // seule chose a faire si le quota le permet un jour.
-            var DETAIL_KEEP_DAYS=1;
-            // Uniquement des matchs DEJA JOUES : coup d'envoi passe depuis plus de
-            // 4 h (duree maximale d'une rencontre, prolongation et retards compris).
-            // On ne cree aucun fichier ici, on se contente de ne pas supprimer un
-            // detail deja ecrit par writePublicSplit - c'est la copie ASSAINIE du
-            // match (aucun champ premium), exactement celle qui etait deja publique.
-            var DETAIL_MATCH_FINI_MS=4*3600000;
-            var gardesPasses=0;
-            try{
-              Object.keys(registreLc.matches||{}).forEach(function(id){
-                if(keepFiles[id+'.json']) return;
-                var ko=Date.parse(String((registreLc.matches[id]||{}).kickoff||''));
-                if(!Number.isFinite(ko)) return;
-                var age=maintenantLc.getTime()-ko;
-                if(age<DETAIL_MATCH_FINI_MS||age>DETAIL_KEEP_DAYS*86400000+DETAIL_MATCH_FINI_MS) return;
-                if(!fs.existsSync('match/'+id+'.json')) return;
-                keepFiles[id+'.json']=true; gardesPasses++;
-              });
-            }catch(e){ console.log('  Conservation des details passes impossible : '+(e&&e.message)); }
-            if(gardesPasses) console.log('  Details conserves (matchs joues il y a moins de '+DETAIL_KEEP_DAYS+' jour(s)) : '+gardesPasses+' fichier(s) match/<id>.json');
             try{
               var existing=fs.readdirSync('match');
               existing.forEach(function(f){
@@ -1656,7 +1599,7 @@ jobs:
             // (memes matchs assainis, meme PRELOADED_MATCH leger) et leurs
             // sitemaps. Une erreur ici ne bloque jamais les donnees du jour.
             try{
-              var seoRep=SEO_PAGES.writeSeoPages(matchsData,{root:'.',today:TODAY,tpl:tplBrut,registry:registreLc,now:maintenantLc,standings:STANDINGS_COMPLETS});
+              var seoRep=SEO_PAGES.writeSeoPages(matchsData,{root:'.',today:TODAY,tpl:tplBrut,registry:registreLc,now:maintenantLc});
               console.log('  Pages SEO localisees : '+seoRep.matchPages+' pages match, '+seoRep.archivedPages+' conservees, '+seoRep.hubs+' pages championnat ('+seoRep.indexableHubs+' indexables), '+seoRep.removed+' perimees supprimees');
             }catch(e){ console.log('  Erreur pages SEO localisees :',e.message); }
             // Registre versionne + bloc 301 des pages retirees dans _redirects
@@ -1689,6 +1632,14 @@ jobs:
             var lib=seoLeagueName.lib;
             return lib?lib.displayName(m.league_key,m.league):m.league;
           }
+          // Date longue dans la langue du resume ("14 septembre 2026") au lieu
+          // du brut "2026-09-14" ; scripts/build-locales.js la reformate aussi
+          // par repertoire (<time data-seo-date>).
+          var SEO_INTL={fr:'fr-FR',en:'en-GB',es:'es-ES','es-mx':'es-MX',de:'de-DE',it:'it-IT',pt:'pt-PT'};
+          function seoDateLabel(day,loc){
+            try{ return new Intl.DateTimeFormat(SEO_INTL[loc]||'fr-FR',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(day+'T12:00:00Z')); }
+            catch(e){ return day; }
+          }
           function seoMarketLabel(m,loc){
             if(seoMarketLabel.lib===undefined){
               try{ seoMarketLabel.lib=require('./lib/market-labels.js'); }catch(e){ seoMarketLabel.lib=null; console.log('  market-labels indisponible pour le SEO:',e.message); }
@@ -1697,17 +1648,36 @@ jobs:
             if(!lib||!lib.marketLabel) return m.pari_rec;
             return lib.marketLabel(m.pari_rec,{home:m.home.n,away:m.away.n},{locale:loc,dict:seoDict(loc)});
           }
-          // Resume SEO de l'accueil d'une version (audit du 19/09/2026) :
-          // scripts/home-summary.js, la meme fonction que
-          // scripts/build-locales.js#rewriteHomeMatchSummary (un rebuild local
-          // donne exactement le meme bloc). Matchs du jour du run DANS LE FUSEAU
-          // de la version, heure de ce fuseau avec libelle explicite,
-          // competitions de la version d'abord, lien vers la page match de la
-          // version si elle existe (scripts/match-lifecycle.js#homeSummaryHref).
-          // Le pari n'est JAMAIS nomme, ni note sur 10 (HTML lu sans compte).
+          // Resume SEO de l'accueil, redige dans la langue du repertoire
+          // cible. Chaque libelle porte aussi data-i18n / data-market-label :
+          // si un repertoire est regenere depuis la racine (FR) avant le
+          // prochain passage du pipeline, il est retraduit au chargement.
           function seoHomeSummaryHtml(matchsData,loc,dir){
             loc=loc||'fr';
-            return HOME_SUMMARY.homeSummaryHtml(matchsData,dir||'fr',{today:TODAY,root:'.',title:seoText(loc,'home_app.seo_summary_title','Analyses IA du jour')});
+            var todays=(matchsData||[]).filter(function(m){return (m.date||'').split(' ')[0]===TODAY;});
+            if(!todays.length) return '';
+            var items=todays.map(function(m){
+              var heure=(m.date||'').split(' ')[1]||'';
+              // Le pari n'est JAMAIS nomme, meme pour l'analyse offerte du jour
+              // (audit du 16/09/2026) : le HTML statique de l'accueil est lu sans
+              // compte, alors que l'analyse offerte exige un compte gratuit. Ni
+              // pari, ni note sur 10 (conf, champ premium) dans ce resume.
+              var pari='';
+              // Lien vers la page match statique : celle du repertoire si elle
+              // existe, sinon la version la plus proche reellement generee dans
+              // le perimetre de la competition (meme langue, puis en, puis fr) ;
+              // aucune page : nom sans lien. Meme fonction que
+              // scripts/build-locales.js (rewriteHomeMatchSummary) : un rebuild
+              // local donne exactement le meme bloc que le pipeline.
+              var lienMatch=MATCH_LIFECYCLE.homeSummaryHref(m.id,m.league_key,dir||'fr','.');
+              var nomMatch=escHtml(m.home.n)+' vs '+escHtml(m.away.n);
+              return '<li>'+escHtml(heure)+' — <strong>'+(lienMatch?'<a href="'+lienMatch+'" style="color:inherit">'+nomMatch+'</a>':nomMatch)+'</strong>'+(m.league?' ('+escHtml(seoLeagueName(m))+')':'')+pari+'</li>';
+            }).join('');
+            // Titre : date longue localisee (<time data-seo-date>, reformatee par
+            // repertoire au build) et mention explicite du fuseau des heures
+            // listees (heure de Paris) - le JS de l'accueil remplace ce bloc par
+            // les cartes en heure locale du visiteur.
+            return '<div style="padding:4px 0 12px"><h2 style="font-family:\'Bebas Neue\',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px"><span data-i18n="home_app.seo_summary_title">'+escHtml(seoText(loc,'home_app.seo_summary_title','Analyses IA du jour'))+'</span> — <time data-seo-date datetime="'+escHtml(TODAY)+'">'+escHtml(seoDateLabel(TODAY,loc))+'</time> <small style="font-family:\'DM Sans\',sans-serif;font-size:11px;color:#64748b">(<span data-i18n="home_app.seo_times_paris">'+escHtml(seoText(loc,'home_app.seo_times_paris','heure de Paris'))+'</span>)</small></h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8">'+items+'</ul></div>';
           }
           // Repertoire du site -> dictionnaire (marches gb/za -> en, mx -> es-mx).
           // Seuls les index.html presents ET porteurs du marqueur sont ecrits.
@@ -1848,19 +1818,10 @@ jobs:
                 await sleep(150);
               }
               async function buildSettlementContext(fix,prediction){
-                // AUCUNE CLE NULLE (corrige le 20/09/2026, lot R1). lib/resolvers.js
-                // teste Number.isFinite(Number(context.X)) et Number(null) vaut 0 :
-                // passer null faisait regler un marche avec la valeur 0 au lieu de le
-                // laisser en attente. Concretement, un match dont l'API n'a pas donne
-                // le score a la pause reglait « Premiere mi-temps moins de 1.5 but »
-                // comme un 0-0 (gagne a tort), et un match sans statistiques reglait
-                // « Tirs du match over 23.5 » avec 0 tir (PERDU a tort). Une donnee
-                // absente doit laisser le pari en attente (regle non negociable :
-                // jamais de donnee inventee, docs/SPEC_RESULTATS_HIER.md §5).
-                var ctx={};
-                var ht=fix.score&&fix.score.halftime;
-                if(ht&&ht.home!=null)ctx.halftimeHome=ht.home;
-                if(ht&&ht.away!=null)ctx.halftimeAway=ht.away;
+                var ctx={
+                  halftimeHome:fix.score&&fix.score.halftime?fix.score.halftime.home:null,
+                  halftimeAway:fix.score&&fix.score.halftime?fix.score.halftime.away:null
+                };
                 if(!/tirs( cadres)? du match/i.test(prediction||''))return ctx;
                 var sr=await get('https://v3.football.api-sports.io/fixtures/statistics?fixture='+(fix.fixture&&fix.fixture.id),APS);
                 var blocks=(sr&&sr.response)||[];
@@ -1874,11 +1835,8 @@ jobs:
                   },0);
                   return found===2?total:null;
                 }
-                // Meme regle : une statistique absente n'est PAS ajoutee au
-                // contexte (sinon 0 tir -> « over 23.5 » compte perdu a tort).
-                var ts=statTotal('Total Shots'), tsot=statTotal('Shots on Goal');
-                if(ts!=null)ctx.totalShots=ts;
-                if(tsot!=null)ctx.totalShotsOnTarget=tsot;
+                ctx.totalShots=statTotal('Total Shots');
+                ctx.totalShotsOnTarget=statTotal('Shots on Goal');
                 return ctx;
               }
               for(var yr=0;yr<yResults.length;yr++){
@@ -2032,118 +1990,6 @@ jobs:
             });
             fs.writeFileSync(histoPath,JSON.stringify(historiquePublic(histo,matchsData),null,2));
             console.log('  Historique: '+total+' paris | Winrate: '+winrate.toFixed(0)+'% | ROI: '+roi.toFixed(1)+'%');
-            // RESULTATS PUBLIES : ecrits depuis histo.predictions EN MEMOIRE (version
-            // complete, avant le masquage du fichier public juste au-dessus).
-            // Fichier de donnees de l'onglet « Hier » (results/<jour>.json).
-            // AUCUNE page par date n'est generee : le proprietaire n'en veut pas
-            // (20/09/2026). Seule la veille est affichee, sur l'accueil.
-            await ecrireFichiersResultats(histo.predictions,matchsData);
-          }
-          // RESULTATS PUBLIES (onglet « Hier », docs/SPEC_RESULTATS_HIER.md, lot R1).
-          //
-          // Ecrit results/<YYYY-MM-DD>.json pour les 60 dernieres journees qui ont
-          // eu au moins un marche retenu, plus results/index.json (liste des jours
-          // avec leurs totaux). Sert de source aux pages SEO /resultats/ et de repli
-          // au navigateur, qui lit sinon la table match_results.
-          //
-          // AUCUN appel API-Football supplementaire : tout vient de ce que ce run a
-          // deja en main (predictions reglees ci-dessus), des lignes deja ecrites par
-          // .github/workflows/results-refresh.yml (match_results) et de
-          // predictions_archive. Les fichiers sont ensuite commites avec les autres
-          // sorties du run (variable OUTPUTS de l'etape « Commit and push »).
-          //
-          // GARANTIE : lib/match-results.js n'ecrit ni pari, ni cote, ni source de
-          // cote, ni score pour un match qui n'a pas recu de statut final de l'API
-          // (tests/match-results.test.js). Un fichier results/<date>.json ne peut
-          // donc pas publier le pari d'un match non termine.
-          var RESULTS_DIR='results', RESULTS_JOURS=60;
-          async function ecrireFichiersResultats(predictions,matchsDuRun){
-            try{
-              var jours=[];
-              for(var d=1; d<=RESULTS_JOURS; d++) jours.push(MATCH_RESULTS.ajouterJours(TODAY,-d));
-              var depuis=jours[jours.length-1];
-              // Version complete des paris (le depot public masque les paris en
-              // attente) et verdicts deja etablis par le job de resolution.
-              var archive=[], resultats=[];
-              if(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY){
-                var entetes={'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY};
-                var base=SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/';
-                var colonnes='fixture_id,match_label,home,away,'+PREMIUM_FIELDS_LIB.PENDING_REDACTED_FIELDS.join(',')+',league,league_key,has_pinnacle,date,result,type,score';
-                // predictions_archive.date est la date de PUBLICATION, pas celle du
-                // match (le pipeline publie jusqu'a 2 jours a l'avance) : la fenetre
-                // lue est elargie de 4 jours, sinon les journees les plus anciennes
-                // du fichier results/ perdraient leurs paris.
-                var depuisArchive=MATCH_RESULTS.ajouterJours(TODAY,-(RESULTS_JOURS+4));
-                var repA=await rawHttpGetJson(base+'predictions_archive?select='+colonnes+'&type=eq.single&date=gte.'+depuisArchive+'&limit=20000',entetes);
-                if(Array.isArray(repA)) archive=repA;
-                else console.log('::warning title=Resultats::predictions_archive illisible : les paris masques non relus resteront en attente dans results/.');
-                // SOURCE DE VERITE DU PARI PUBLIE (20/09/2026, constat du
-                // proprietaire sur Le Mans - Lorient) : predictions_archive peut
-                // porter un pari RECALCULE apres coup, alors que
-                // match_premium_data porte celui qui a ete PUBLIE et gele
-                // (lib/pick-freeze.js) - c'est celui que les abonnes ont vu.
-                // Il prime donc sur l'archive, jamais l'inverse.
-                var repP=await rawHttpGetJson(base+'match_premium_data?select=fixture_id,pari_rec,cote_rec,market_id&pari_rec=not.is.null&limit=20000',entetes);
-                if(Array.isArray(repP)){
-                  var publies={};
-                  repP.forEach(function(r){ if(r&&r.fixture_id!=null&&r.pari_rec) publies[String(r.fixture_id)]=r; });
-                  var remplaces=0;
-                  archive=archive.map(function(a){
-                    var pub=a&&a.fixture_id!=null?publies[String(a.fixture_id)]:null;
-                    if(!pub) return a;
-                    if(a.prediction&&String(a.prediction)!==String(pub.pari_rec)) remplaces++;
-                    return Object.assign({},a,{prediction:pub.pari_rec,cote:pub.cote_rec,market:pub.market_id});
-                  });
-                  var connus={};
-                  archive.forEach(function(a){ if(a&&a.fixture_id!=null) connus[String(a.fixture_id)]=true; });
-                  Object.keys(publies).forEach(function(id){
-                    if(connus[id]) return;
-                    var r=publies[id];
-                    archive.push({fixture_id:Number(id),prediction:r.pari_rec,cote:r.cote_rec,market:r.market_id});
-                  });
-                  if(remplaces) console.log('  [resultats] '+remplaces+' pari(s) de l archive remplace(s) par le pari PUBLIE (gele).');
-                } else console.log('::warning title=Resultats::match_premium_data illisible : les paris publies ne peuvent pas primer sur l archive ce run.');
-                var repR=await rawHttpGetJson(base+'match_results?select=fixture_id,day,kickoff,score,result,scorer_player,scorer_goals,scorer_result&day=gte.'+depuis+'&limit=20000',entetes);
-                if(Array.isArray(repR)) resultats=repR;
-                else console.log('::warning title=Resultats::match_results illisible : les fichiers results/ ne refletent que ce que le pipeline a regle.');
-              }
-              var registre=null;
-              try{ registre=JSON.parse(fs.readFileSync('data/match-pages-registry.json','utf8')); }catch(e){}
-              if(!fs.existsSync(RESULTS_DIR)) fs.mkdirSync(RESULTS_DIR,{recursive:true});
-              var genere=new Date().toISOString(), index=[], ecrits=0;
-              jours.forEach(function(jour){
-                var out=MATCH_RESULTS.buildDayFile({
-                  day:jour, predictions:predictions, archiveRows:archive, results:resultats,
-                  registry:registre, generatedAt:genere,
-                  // Matchs deja commences quand le pipeline a tourne : le site a
-                  // affiche « aucun pronostic » pour eux, personne n'a pu les
-                  // suivre. Ils sortent de la liste ET du compte (20/09/2026).
-                  noSignal:(matchsDuRun||[]).filter(function(m){ return m&&m.no_signal===true; }).map(function(m){ return m.id; }),
-                  // Buteurs de la journee : uniquement ceux que le job de resolution
-                  // a su nommer APRES la fin du match. Jamais reconstitues ici.
-                  scorers:resultats.filter(function(r){ return r&&r.day===jour&&r.scorer_player; }).map(function(r){
-                    return { match_id:r.fixture_id, match:null, player:r.scorer_player, goals:r.scorer_goals, result:r.scorer_result };
-                  }),
-                });
-                if(!out.report.total) return; // journee sans marche retenu : aucun fichier
-                fs.writeFileSync(RESULTS_DIR+'/'+jour+'.json',JSON.stringify(out.file,null,2));
-                index.push(out.file); ecrits++;
-                MATCH_RESULTS.formatUnsettledLog(out.report).forEach(function(l){ console.log(l); });
-                var alerte=MATCH_RESULTS.unsettledWarning(out.report,{nowMs:Date.now()});
-                if(alerte) console.log(alerte);
-              });
-              fs.writeFileSync(RESULTS_DIR+'/index.json',JSON.stringify(MATCH_RESULTS.buildIndexFile(index,genere),null,2));
-              // Fenetre glissante : les journees sorties des 60 jours sont retirees
-              // du depot (rien d'autre ne vit dans results/).
-              fs.readdirSync(RESULTS_DIR).forEach(function(f){
-                var m=/^(\d{4}-\d{2}-\d{2})\.json$/.exec(f);
-                if(m&&m[1]<depuis) fs.unlinkSync(RESULTS_DIR+'/'+f);
-              });
-              console.log('  [resultats] '+ecrits+' fichier(s) results/<date>.json ecrit(s) (fenetre '+depuis+' -> '+jours[0]+') + results/index.json');
-            }catch(e){
-              // Jamais bloquant : les fichiers precedents restent en place.
-              console.log('::warning title=Resultats::fichiers results/ non ecrits ce run : '+(e&&e.message));
-            }
           }
           var TRANSFER_CACHE_DAYS = 5;
           async function updateTransferts(fixtures) {
@@ -2519,13 +2365,10 @@ jobs:
                     found.result='void';found.score=null;found.fixture_id=fid;found.resolved_date=TODAY;
                     return;
                   }
-                  // Aucune cle nulle : Number(null) vaut 0 et reglerait un marche
-                  // « premiere mi-temps » comme un 0-0 faute de donnee (voir la
-                  // note detaillee dans buildSettlementContext).
-                  var ctxE={}, htE=fix.score&&fix.score.halftime;
-                  if(htE&&htE.home!=null)ctxE.halftimeHome=htE.home;
-                  if(htE&&htE.away!=null)ctxE.halftimeAway=htE.away;
-                  var isWin=resolveMarketWin(found.prediction, gh, ga, ctxE);
+                  var isWin=resolveMarketWin(found.prediction, gh, ga, {
+                    halftimeHome:fix.score&&fix.score.halftime?fix.score.halftime.home:null,
+                    halftimeAway:fix.score&&fix.score.halftime?fix.score.halftime.away:null
+                  });
                   if(isWin===null){ return; }
                   if(isWin==='void'){
                     found.result='void';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
@@ -2563,8 +2406,6 @@ jobs:
               // propager, pas seulement rester dans le cache JSON local.
               await writePredictionsArchive(histoEarly.predictions);
               fs.writeFileSync(histoPathEarly,JSON.stringify(historiquePublic(histoEarly,[]),null,2));
-              // RESULTATS PUBLIES : meme rafraichissement qu'en branche principale.
-              await ecrireFichiersResultats(histoEarly.predictions,[]);
               return;
             }
             var xgConcededCache={};
@@ -2628,10 +2469,7 @@ jobs:
               if(!standingsCache[lg.id]){
                 var stSeason=seasonForLeague(lg.id, SEASON);
                 var stResp=await get('https://v3.football.api-sports.io/standings?league='+lg.id+'&season='+stSeason,APS);
-                // Moteur : standings[0] (entree du modele, inchangee). Affichage : la
-                // reponse complete (tous les groupes) est gardee a part.
                 standingsCache[lg.id]=(stResp.response&&stResp.response[0]&&stResp.response[0].league&&stResp.response[0].league.standings&&stResp.response[0].league.standings[0])||[];
-                STANDINGS_COMPLETS[lg.id]={league:(stResp.response&&stResp.response[0]&&stResp.response[0].league)||null,fetched_at:new Date().toISOString()};
                 await sleep(250);
               }
               var standings=standingsCache[lg.id];
@@ -2648,7 +2486,7 @@ jobs:
                 getLast10(home.id,previousSeason,lg.id),getLast10(away.id,previousSeason,lg.id)
               ]);
               await sleep(400);
-              var batch2=await Promise.all([getOdds(f.id),getInjuries(f.id),getH2H(home.id,away.id),getWeather(VENUE.verifiedApiCity(f.venue)||'',f.date),getNews(home.name),getNews(away.name),getPredictions(f.id),getLineups(f.id),getRefereeStats(f.referee||null),getPinnacleOdds(home.name,away.name,lgKey(lg.id))]);
+              var batch2=await Promise.all([getOdds(f.id),getInjuries(f.id),getH2H(home.id,away.id),getWeather(f.venue&&f.venue.city?f.venue.city:'',f.date),getNews(home.name),getNews(away.name),getPredictions(f.id),getLineups(f.id),getRefereeStats(f.referee||null),getPinnacleOdds(home.name,away.name,lgKey(lg.id))]);
               await sleep(400);
               var sH=batch1[0],sA=batch1[1],raw10H=batch1[2],raw10A=batch1[3],sHPrev=batch1[4],sAPrev=batch1[5],rawPrevH=batch1[6],rawPrevA=batch1[7];
               function isEmptySH(s){
@@ -3215,28 +3053,12 @@ jobs:
               // pickedMarket/kellyVal/edgeVal/riskLabelCode/noSignal deja calcules
               // AVANT l'appel LLM (voir plus haut) - an ne contient plus que du texte
               // narratif, plus aucune re-selection de marche ni recalcul ici.
-              // Classement PUBLIE (affichage : page match, application, pages SEO) :
-              // groupe de chaque equipe dans la phase en cours
-              // (lib/standings-groups.js), avec son nom. Avant le 19/09/2026 :
-              // standings[0] titre « Major League Soccer » (Western Conference
-              // seule, rien pour un club de l'Est) ou Apertura TERMINEE en
-              // Argentine et en Colombie. Les entrees du modele (rkH, rkA,
-              // motivation) restent sur standings[0], inchangees.
               var classementObj=null;
-              var groupesSt=(STANDINGS_COMPLETS[lg.id]&&STANDINGS_COMPLETS[lg.id].league&&STANDINGS_COMPLETS[lg.id].league.standings)||[];
-              var grpH=STANDINGS_GROUPS.groupOfTeam(groupesSt,home.id), grpA=STANDINGS_GROUPS.groupOfTeam(groupesSt,away.id);
-              if(grpH||grpA){
-                var nbGroupesSt=STANDINGS_GROUPS.currentPhaseGroups(groupesSt).length;
-                var libelleGrp=function(g){ return g?STANDINGS_GROUPS.groupLabel(g.name,lg.name,nbGroupesSt):null; };
-                var ligneEquipe=function(g,tid){ return g?(g.rows.find(function(s){return s.team&&s.team.id===tid;})||null):null; };
-                var stH=ligneEquipe(grpH,home.id), stA=ligneEquipe(grpA,away.id);
-                var versLigne=function(s,g){ var o={rank:s.rank,name:s.team.name,team_id:s.team.id,played:s.all.played,won:s.all.win,drawn:s.all.draw,lost:s.all.lose,gd:s.goalsDiff,pts:s.points,form:s.form||''}; var lb=libelleGrp(g); if(lb) o.group=lb; return o; };
-                var fenetreSt=function(g,rangs){ var mn=Math.max(1,Math.min.apply(null,rangs)-2), mx=Math.min(Math.max.apply(null,rangs)+2,g.rows.length); return g.rows.filter(function(s){return s.rank>=mn&&s.rank<=mx;}).map(function(s){return versLigne(s,g);}); };
-                var lignesSt=[];
-                if(grpH&&grpH===grpA) lignesSt=fenetreSt(grpH,[stH.rank,stA.rank]);
-                else { if(grpH) lignesSt=lignesSt.concat(fenetreSt(grpH,[stH.rank])); if(grpA) lignesSt=lignesSt.concat(fenetreSt(grpA,[stA.rank])); }
-                var resumeEquipe=function(s,g){ if(!s) return null; var o={rank:s.rank,pts:s.points,played:s.all.played,won:s.all.win,lost:s.all.lose,gd:s.goalsDiff,form:s.form||''}; var lb=libelleGrp(g); if(lb) o.group=lb; return o; };
-                classementObj={league_name:lg.name,group:libelleGrp(grpH||grpA),standings:lignesSt,home:resumeEquipe(stH,grpH),away:resumeEquipe(stA,grpA)};
+              if(entryH||entryA){
+                var rankH=rkH||99,rankA=rkA||99;
+                var minRank=Math.max(1,Math.min(rankH,rankA)-2);
+                var maxRank=Math.min(Math.max(rankH,rankA)+2,standings.length);
+                classementObj={league_name:lg.name,standings:standings.filter(function(s){return s.rank>=minRank&&s.rank<=maxRank;}).map(function(s){return{rank:s.rank,name:s.team.name,team_id:s.team.id,played:s.all.played,won:s.all.win,drawn:s.all.draw,lost:s.all.lose,gd:s.goalsDiff,pts:s.points,form:s.form||''};}),home:entryH?{rank:entryH.rank,pts:entryH.points,played:entryH.all.played,won:entryH.all.win,lost:entryH.all.lose,gd:entryH.goalsDiff,form:entryH.form||''}:null,away:entryA?{rank:entryA.rank,pts:entryA.points,played:entryA.all.played,won:entryA.all.win,lost:entryA.all.lose,gd:entryA.goalsDiff,form:entryA.form||''}:null};
               }
               var parisDateObj=new Date(new Date(f.date||TODAY).toLocaleString('en-US',{timeZone:'Europe/Paris'}));
               var dateVraieParis=parisDateObj.getFullYear()+'-'+String(parisDateObj.getMonth()+1).padStart(2,'0')+'-'+String(parisDateObj.getDate()).padStart(2,'0');
@@ -3285,9 +3107,6 @@ jobs:
                 analysis_tier:fixtureAnalysisTier,
                 home:{n:home.name,id:home.id},away:{n:away.name,id:away.id},
                 league:lg.name,ligue_icon:lgIcon(lg.name),league_key:lgKey(lg.id),
-                // Journee / phase api-football (« Apertura - 9 », « Regular Season - 5 ») :
-                // fait public (pas un champ premium), pour les futures pages de journee.
-                round:lg.round||null,
                 date:(dateVraieParis+' '+heure).trim(),cat:['all'],
                 // Statut API-Football au moment du run (NS, 1H, HT, 2H, FT, PST...) :
                 // donnee publique, lue par la liste de l'accueil (home-list.js).
@@ -3395,9 +3214,7 @@ jobs:
                 simulation_count:pureProbs.montecarlo?pureProbs.montecarlo.simulations:null,
                 paris_safe:{bet:pickedMarket?pickedMarket.market:'',cote:pickedMarket?parseFloat(pickedMarket.cote):null,proba:pickedMarket?Math.round(pickedMarket.prob)+'%':''},
                 paris_risque:{bet:'',cote:'',proba:''},
-                // Ville seulement si le stade est rattache a la base api-football
-                // (lib/venue.js) : ville = "" sinon, et nom = stade seul.
-                stade:{nom:f.venue&&f.venue.name?(f.venue.name+(VENUE.verifiedApiCity(f.venue)?' - '+VENUE.verifiedApiCity(f.venue):'')):home.name+' (domicile)',ville:VENUE.verifiedApiCity(f.venue)||'',cap:'',meteo:wx?wx.emoji:'',temp:wx?wx.temp:'',desc:wx?wx.desc:'',wind:wx?wx.wind:'',weather_source:wx?wx.source:'',weather_forecast_at:wx?wx.forecast_at:''},
+                stade:{nom:f.venue&&f.venue.name?(f.venue.name+(f.venue.city?' - '+f.venue.city:'')):home.name+' (domicile)',cap:'',meteo:wx?wx.emoji:'',temp:wx?wx.temp:'',desc:wx?wx.desc:'',wind:wx?wx.wind:'',weather_source:wx?wx.source:'',weather_forecast_at:wx?wx.forecast_at:''},
                 crit_home:critH,crit_away:critA,
                 form_home:last10H.slice(0,5),form_away:last10A.slice(0,5),
                 forme_h:(sH&&sH.form)||'',forme_a:(sA&&sA.form)||'',
@@ -3937,10 +3754,7 @@ jobs:
         # quel, les donnees du jour sont celles qui viennent d'etre calculees.
         run: |
           set -euo pipefail
-          # results/ : fichiers publics des resultats passes (onglet « Hier »,
-          # lot R1). Regeneres integralement a chaque run comme les autres
-          # sorties, jamais edites a la main.
-          OUTPUTS="data.json data-home.json historique.json transferts.json actus.json sitemap.xml match results index.html league-coverage-report.json seo-lastmod.json buteurs-du-jour.json"
+          OUTPUTS="data.json data-home.json historique.json transferts.json actus.json sitemap.xml match index.html league-coverage-report.json seo-lastmod.json buteurs-du-jour.json"
           # Registre du cycle de vie des pages match (scripts/match-lifecycle.js) :
           # chemin imbrique, sauvegarde et restauration AVEC son chemin.
           # Classements conserves des pages championnat (scripts/league-hub-data.js) :

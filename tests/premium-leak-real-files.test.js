@@ -35,24 +35,6 @@ function assertNoLeak(value, label) {
   const leaks = PREMIUM.deepPremiumLeaks(value);
   assert.deepEqual(leaks.slice(0, 10), [], label + " : " + leaks.length + " champ(s) premium sur un match non offert");
 }
-// results/<jour>.json : preuve publique des matchs TERMINES (20/09/2026,
-// docs/SPEC_RESULTATS_HIER.md). Une ligne REGLEE porte volontairement le marche
-// retenu, sa cote et le score : le match est fini, ce n'est plus le produit
-// payant. Plutot qu'exempter ces fichiers du controle de fuite, on verifie
-// l'invariant qui compte vraiment : une ligne NON reglee ne porte RIEN.
-function assertResultsFile(data, label) {
-  const REGLE = new Set(["win", "loss", "void"]);
-  for (const ligne of (data && data.matches) || []) {
-    if (REGLE.has(ligne.result)) continue;
-    for (const k of ["pick", "market_id", "cote", "odds_source", "score"]) {
-      assert.ok(ligne[k] === undefined || ligne[k] === null, label + " : match non regle (" + ligne.result + ") portant " + k);
-    }
-  }
-  for (const b of (data && data.scorers) || []) {
-    if (!REGLE.has(b.result)) assert.ok(b.player === undefined || b.player === null, label + " : buteur d'un match non regle nomme");
-  }
-}
-
 function listFiles(dirRel, re) {
   const abs = path.join(root, dirRel);
   if (!fs.existsSync(abs)) return [];
@@ -169,7 +151,6 @@ test("dist/ (ce que Netlify publie) : aucun champ premium dans les JSON et PRELO
     if (/\/exemple-analyse\.html$/.test(f)) continue; // demo figee d'un match passe (IASHARK_DEMO)
     const txt = read(f);
     if (f.endsWith(".json")) {
-      if (/^dist\/results\//.test(f)) { assertResultsFile(JSON.parse(txt), f); controles++; continue; }
       if (!/"home"/.test(txt)) continue;
       assertNoLeak(JSON.parse(txt), f);
       controles++;

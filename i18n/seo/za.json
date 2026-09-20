@@ -2,13 +2,6 @@
   "_readme": "SEO copy for /za/ (en-ZA). South African search vocabulary: 'soccer', 'PSL', 'Betway Premiership' (sponsor name of the Premier Soccer League top flight; the competition identifier stays 'Premier Soccer League' from config/leagues.json). See i18n/seo/gb.json#_readme.",
   "tz": "Africa/Johannesburg",
   "tz_label": "SAST",
-  "intlLocale": "en-ZA",
-  "clock_options": {
-    "hour": "2-digit",
-    "minute": "2-digit"
-  },
-  "clock_zone": "{time} ({tz})",
-  "clock_list": "{time}",
   "sport": "Soccer",
   "org_description": "IASHARK analyses soccer matches with statistical models and compares the estimated probabilities with bookmaker odds. It is not a bookmaker.",
   "meta": {
@@ -41,7 +34,7 @@
     "eyebrow": "HOW IT WORKS",
     "title": "Soccer predictions built on probabilities, not hunches",
     "paragraphs": [
-      "IASHARK's statistical model estimates each team's chances from match data: results, goals, form and home and away performances. For Betway Premiership (PSL) fixtures, the Premier League, the Champions League and the other competitions we cover, it estimates the probability of each result, the number of goals and both teams to score. Bookmaker odds, with the margin removed, are used to compare against those estimates and to choose among the markets actually on offer.",
+      "IASHARK produces soccer predictions from a statistical score model that never uses the odds. For Betway Premiership (PSL) fixtures, the Premier League, the Champions League and the other competitions we cover, the model estimates the probability of each result, the number of goals and both teams to score, then compares it with the probability implied by bookmaker odds.",
       "These are statistical estimates: soccer is uncertain, no outcome is guaranteed and IASHARK is not a bookmaker. PSL coverage is recent and data quality varies by league, so every analysis shows its data-quality rating. 18+ only."
     ],
     "leagues_title": "Predictions by league",
@@ -55,8 +48,7 @@
       "bundesliga",
       "el",
       "ligue1"
-    ],
-    "summary_tz": "SAST"
+    ]
   },
   "breadcrumb": {
     "home": "Home",
@@ -214,8 +206,7 @@
     "h2h_title": "Head to head",
     "h2h_row": "{date}: {home} {score} {away}",
     "lineups_title": "Starting line-ups",
-    "lineup_row": "{team} ({formation}): {players}",
-    "h1": "{home} vs {away}"
+    "lineup_row": "{team} ({formation}): {players}"
   },
   "nav": {
     "aria": "Site navigation",
@@ -226,20 +217,5 @@
     "blog": "Blog and guides",
     "markets": "Markets analysed",
     "methodology": "Methodology"
-  },
-  "results": {
-    "hub_title": "Soccer Prediction Results, Day by Day | IASHARK SA",
-    "hub_title_short": "Soccer Prediction Results | IASHARK SA",
-    "hub_description": "Every market IASHARK published for the PSL and international soccer, won or lost: final score, odds and source, day by day. 18+",
-    "hub_description_short": "PSL and international markets published by IASHARK, winners and losers alike. 18+",
-    "hub_h1": "Prediction results, day by day",
-    "hub_intro": "Each published day keeps the market picked before kick-off, with the final score and the odds: losing markets are listed just like winning ones.",
-    "day_title": "Soccer Prediction Results, {date} | IASHARK SA",
-    "day_title_short": "Results for {date} | IASHARK SA",
-    "day_description": "Markets picked on {date}: {count}. Final score, odds and source in SAST, winners and losers alike. 18+",
-    "day_description_short": "Markets picked on {date} in SAST: {count}. Winners and losers, final score and odds.",
-    "day_h1": "Results for {date}",
-    "day_intro": "Every market picked before kick-off that day, winners and losers, with the final score and the published odds.",
-    "breadcrumb": "Results"
   }
 }

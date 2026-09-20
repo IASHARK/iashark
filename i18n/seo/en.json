@@ -1,28 +1,21 @@
 {
-  "_readme": "SEO copy for /en/: international English version that explicitly targets the United States since 19/09/2026 (US audit): US Eastern Time with UTC in brackets, en-US dates, 'soccer' where US searchers use it, 'Kickoff'. i18n/dict/en.json is shared with /gb/ and /za/, so US wording lives only here. Never 'picks' or 'tips'. Prices only through {pro_price}-style placeholders, never written here. See i18n/seo/gb.json#_readme.",
-  "tz": "America/New_York",
-  "tz_label": "ET",
-  "intlLocale": "en-US",
-  "clock_options": {
-    "hour": "numeric",
-    "minute": "2-digit"
-  },
-  "clock_zone": "{time} ET ({utc} UTC)",
-  "clock_list": "{time} ET ({utc} UTC)",
-  "sport": "Soccer",
-  "org_description": "IASHARK analyzes soccer matches with statistical models and compares the estimated probabilities with bookmaker odds. It is not a bookmaker.",
+  "_readme": "SEO copy for /en/ (international English; EUR market, USD once config/markets.json#_usdSwitch is applied). Prices only through {pro_price}-style placeholders, never written here. See i18n/seo/gb.json#_readme.",
+  "tz": "UTC",
+  "tz_label": "UTC",
+  "sport": "Football",
+  "org_description": "IASHARK analyses football matches with statistical models and compares the estimated probabilities with bookmaker odds. It is not a bookmaker.",
   "meta": {
     "index": {
-      "title": "Soccer & Football Predictions by Statistical Model | IASHARK",
-      "description": "Soccer predictions from a statistical model: MLS, Premier League, Liga MX and Champions League probabilities vs the odds. One free analysis daily. 18+"
+      "title": "Football Predictions from Statistical Models | IASHARK",
+      "description": "Football (soccer) predictions from statistical models: result, goals and BTTS probabilities compared with bookmaker odds. One free analysis daily. 18+"
     },
     "marches": {
-      "title": "Soccer Markets: Model Probability vs Odds | IASHARK",
+      "title": "Football Markets: Model Probability vs Odds | IASHARK",
       "description": "Every market IASHARK analyses, from match result to goals and BTTS: model probability, margin-free market probability, the gap and data quality."
     },
     "a-propos": {
       "title": "About IASHARK: Methodology, Data Sources and Limits",
-      "description": "How IASHARK analyzes soccer: where the data comes from, how the model calculates, its known limits and legal information."
+      "description": "How IASHARK analyses football: where the data comes from, how the model calculates, its known limits and legal information."
     },
     "abonnement": {
       "title": "IASHARK Pro Subscription: Every Match Analysis",
@@ -39,17 +32,15 @@
   },
   "home": {
     "eyebrow": "HOW IT WORKS",
-    "title": "Soccer predictions built on probabilities, not hunches",
+    "title": "Football predictions built on probabilities, not hunches",
     "paragraphs": [
-      "IASHARK's statistical model estimates each team's chances from match data: results, goals, form and home or away performance. For MLS, the Premier League (EPL), Liga MX, the Champions League and the other competitions we cover, it estimates the probability of each result, the number of goals and both teams to score. Bookmaker odds, with their margin removed, are used to compare against those estimates and to choose among the markets actually on offer.",
-      "These are statistical estimates: soccer is uncertain, no outcome is guaranteed and IASHARK is not a bookmaker. Data coverage varies by league, so every analysis shows its data-quality rating. 18+ only (21+ where required by state law)."
+      "IASHARK produces football predictions from a statistical score model that never uses the odds. For the Premier League, La Liga, Serie A, the Bundesliga, Ligue 1, the Champions League and the other competitions we cover, the model estimates the probability of each result, the number of goals and both teams to score, then compares it with the probability implied by bookmaker odds.",
+      "These are statistical estimates: football is uncertain, no outcome is guaranteed and IASHARK is not a bookmaker. Data coverage varies by league, so every analysis shows its data-quality rating. 18+ only."
     ],
     "leagues_title": "Predictions by league",
     "guides_title": "Understand the method",
     "priority_leagues": [
-      "mls",
       "premier",
-      "liga_mx",
       "ldc",
       "laliga",
       "seriea",
@@ -57,8 +48,7 @@
       "ligue1",
       "el",
       "ecl"
-    ],
-    "summary_tz": "US Eastern Time (ET), UTC in brackets"
+    ]
   },
   "breadcrumb": {
     "home": "Home",
@@ -74,15 +64,15 @@
   "league": {
     "title": "{league} Predictions, Fixtures and Table | IASHARK",
     "title_short": "{league} predictions and table",
-    "description": "{league} predictions from statistical models: fixtures for the next 14 days with ET kickoff times, recent results and the latest table. 18+",
-    "description_short": "{league}: fixtures for the next 14 days in ET, recent results and the table, with statistical match analysis. 18+",
+    "description": "{league} predictions from statistical models: fixtures for the next 14 days, recent results and the latest table, with IASHARK match analysis. 18+",
+    "description_short": "{league}: fixtures for the next 14 days, recent results and the table, with statistical match analysis. 18+",
     "h1": "{league} predictions: fixtures, results and table",
     "about": {
-      "national": "{league}: the top division of {adjective} soccer. IASHARK analyzes its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
-      "ucl": "{league}: the leading club competition organized by UEFA. IASHARK analyzes its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
-      "uel": "{league}: UEFA's second-tier European club competition, below the Champions League. IASHARK analyzes its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
-      "uecl": "{league}: UEFA's third-tier European club competition. IASHARK analyzes its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
-      "mls": "{league} (Major League Soccer): the top professional league in the United States and Canada. IASHARK analyzes its fixtures with statistical models and compares the estimated probabilities with bookmaker odds."
+      "national": "{league}: the top division of {adjective} football. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
+      "ucl": "{league}: the leading club competition organised by UEFA. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
+      "uel": "{league}: UEFA's second-tier European club competition, below the Champions League. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
+      "uecl": "{league}: UEFA's third-tier European club competition. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
+      "mls": "{league} (Major League Soccer): the top professional league in the United States and Canada. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds."
     },
     "adjectives": {
       "premier": "English",
@@ -101,12 +91,12 @@
       "peru_primera": "Peruvian",
       "chile_primera": "Chilean"
     },
-    "scope": "This page brings together the next 14 days of fixtures, recent results and the table, drawn from public data and refreshed daily. Kickoff times are shown in US Eastern Time ({tz}), with UTC in brackets.",
+    "scope": "This page brings together the next 14 days of fixtures, recent results and the table, drawn from public data and refreshed daily. Times are shown in {tz}.",
     "fixtures_title": "Fixtures in the next 14 days",
     "none": "No {league} fixture is scheduled in the next 14 days in the data available.",
-    "kickoff_note": "Kickoff times in US Eastern Time (ET), with UTC in brackets.",
+    "kickoff_note": "Kick-off times are shown in UTC.",
     "results_title": "Latest results",
-    "standings_title": "{league} standings",
+    "standings_title": "{league} table",
     "standings_asof": "Table as of {date}, from public data.",
     "standings_partial": "Extract published with the latest analysed matches.",
     "clubs_title": "Clubs and derbies",
@@ -114,7 +104,7 @@
     "method": "A probability is an estimate, not a promise: an outcome given a 60% chance still fails four times in ten. Every IASHARK analysis also rates its data quality, so a thin sample is flagged rather than hidden.",
     "free_link": "Today's free match analysis",
     "others_title": "Other competitions",
-    "disclaimer": "Statistical information only, not a guarantee of results. IASHARK is not a bookmaker. 18+ (21+ where required by state law)",
+    "disclaimer": "Statistical information only, not a guarantee of results. IASHARK is not a bookmaker. 18+",
     "help": "Help:",
     "countries": {
       "premier": "England",
@@ -139,29 +129,12 @@
     },
     "overrides": {
       "premier": {
-        "intro": "The Premier League is the top division of English football: 20 clubs, 38 matchdays from August to May. IASHARK analyzes its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
-        "title": "Premier League (EPL) Predictions, Fixtures & Table | IASHARK",
-        "description": "EPL predictions from a statistical model: Premier League fixtures for the next 14 days with ET kickoff times, the table, recent results and form. 18+",
-        "h1": "Premier League (EPL) predictions: fixtures, results and table",
-        "standings_title": "Premier League table"
+        "intro": "The Premier League is the top division of English football: 20 clubs, 38 matchdays from August to May. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds."
       },
       "mls": {
-        "title": "MLS Soccer Predictions, Fixtures & Standings | IASHARK",
-        "description": "MLS soccer predictions from a statistical model: this week's games with ET kickoff times, the standings, recent results and form. 18+",
-        "h1": "MLS soccer predictions: fixtures, results and standings",
-        "standings_title": "MLS standings"
-      },
-      "liga_mx": {
-        "title": "Liga MX Predictions, Fixtures & Table | IASHARK",
-        "description": "Liga MX soccer predictions in English: fixtures for the next 14 days with ET kickoff times, the current table, recent results and form. 18+",
-        "h1": "Liga MX soccer predictions: fixtures, results and table",
-        "intro": "Liga MX is the top division of Mexican soccer, played as two short tournaments a season, the Apertura and the Clausura. IASHARK analyzes its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
-        "standings_title": "Liga MX table"
-      },
-      "ldc": {
-        "title": "UCL Predictions: Champions League Fixtures & Table | IASHARK",
-        "description": "Champions League (UCL) predictions from statistical models: fixtures for the next 14 days with ET kickoff times, recent results and the table. 18+",
-        "h1": "Champions League (UCL) predictions: fixtures, results and table"
+        "title": "MLS Soccer Predictions, Fixtures and Standings | IASHARK",
+        "description": "MLS soccer predictions: fixtures for the next 14 days, recent results and the standings, with IASHARK statistical match analysis. 18+",
+        "h1": "MLS soccer predictions: fixtures, results and standings"
       }
     },
     "analysis_available": "Analysis available",
@@ -199,20 +172,20 @@
     "derby_label": "Derby"
   },
   "match": {
-    "title": "{home} vs {away} prediction & stats – {league_label}",
-    "title_short": "{home} vs {away}: prediction & stats",
+    "title": "{home} vs {away} prediction and stats ({league})",
+    "title_short": "{home} vs {away}: prediction and stats",
     "title_min": "{home} vs {away} prediction",
-    "description": "{home} vs {away} ({league}) on {date}, {time} ET: venue, recent form, standings and IASHARK's statistical analysis. 18+",
-    "description_short": "{home} vs {away} ({league}), {date}, {time} ET: kickoff, venue and IASHARK's statistical analysis. 18+",
+    "description": "{league} match on {date}: {home} vs {away}. Kick-off time, venue, recent form, table and IASHARK's statistical analysis. 18+",
+    "description_short": "{home} vs {away} ({league}), {date}: kick-off, venue and IASHARK's statistical analysis. 18+",
     "facts_title": "Match information",
     "competition": "Competition",
-    "kickoff": "Kickoff",
+    "kickoff": "Kick-off",
     "venue": "Venue",
-    "about": "IASHARK analyzes this fixture with statistical models (result, goals, both teams to score) and compares the estimates with bookmaker odds. One match analysis is free every day; the others are part of IASHARK Pro.",
+    "about": "IASHARK analyses this fixture with statistical models (result, goals, both teams to score) and compares the estimates with bookmaker odds. One match analysis is free every day; the others are part of IASHARK Pro.",
     "free_link": "Today's free analysis",
     "hub_link": "All analysed {league} fixtures",
     "guide_link": "How to read a match probability",
-    "disclaimer": "Statistical information only, not a guarantee of results. IASHARK is not a bookmaker. 18+ (21+ where required by state law)",
+    "disclaimer": "Statistical information only, not a guarantee of results. IASHARK is not a bookmaker. 18+",
     "breadcrumb_aria": "Breadcrumb",
     "status": "Status",
     "final_score": "Final score",
@@ -221,25 +194,18 @@
     "archived_note": "The analysis for this match is no longer offered. Upcoming fixtures in this competition are listed on the {league} page.",
     "hub_cta": "Upcoming fixtures: {league}",
     "form_title": "Recent form",
-    "form_row": "{date}: {result} {score} vs {opponent} ({side})",
+    "form_row": "{date}: {result} {score} v {opponent} ({side})",
     "result_W": "won",
     "result_D": "drew",
     "result_L": "lost",
     "side_home": "home",
     "side_away": "away",
-    "standings_title": "Standings",
+    "standings_title": "League table",
     "standings_row": "{rank}. {team}: {pts} pts from {played} matches ({won} W, {drawn} D, {lost} L), goal difference {gd}",
     "h2h_title": "Head to head",
     "h2h_row": "{date}: {home} {score} {away}",
     "lineups_title": "Starting line-ups",
-    "lineup_row": "{team} ({formation}): {players}",
-    "league_labels": {
-      "mls": "MLS soccer",
-      "liga_mx": "Liga MX soccer",
-      "premier": "EPL",
-      "ldc": "UCL"
-    },
-    "h1": "{home} vs {away}: prediction and stats"
+    "lineup_row": "{team} ({formation}): {players}"
   },
   "nav": {
     "aria": "Site navigation",
@@ -250,20 +216,5 @@
     "blog": "Blog and guides",
     "markets": "Markets analysed",
     "methodology": "Methodology"
-  },
-  "results": {
-    "hub_title": "Soccer Prediction Results, Day by Day | IASHARK",
-    "hub_title_short": "Soccer Prediction Results | IASHARK",
-    "hub_description": "Every market IASHARK published for MLS, Liga MX and Europe, won or lost: final score, odds and source, day by day. 18+",
-    "hub_description_short": "MLS, Liga MX and European markets published by IASHARK, winners and losers alike. 18+",
-    "hub_h1": "Prediction results, day by day",
-    "hub_intro": "Each published day keeps the market picked before kick-off, with the final score and the odds: losing markets are listed just like winning ones.",
-    "day_title": "Soccer Prediction Results, {date} | IASHARK",
-    "day_title_short": "Results for {date} | IASHARK",
-    "day_description": "Markets picked on {date}: {count}. Final score, odds and source in ET, winners and losers alike. 18+",
-    "day_description_short": "Markets picked on {date} in ET: {count}. Winners and losers, final score and odds.",
-    "day_h1": "Results for {date}",
-    "day_intro": "Every market picked before kick-off that day, winners and losers, with the final score and the published odds.",
-    "breadcrumb": "Results"
   }
 }

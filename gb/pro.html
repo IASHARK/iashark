@@ -65,7 +65,7 @@
         <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14Z"/><path d="m16.5 16.5 4 4"/></svg>
         <span class="min-w-0">
           <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_scan">DETECT</span>
-          <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.scan_title">Odds Gap Finder</span>
+          <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.scan_title">Edge Detector</span>
           <span data-i18n="tools_page.static_desc_scan" class="mt-0.5 block text-[12px] leading-snug text-soft">Where the market strays furthest from our probabilities.</span>
         </span>
       </button>
@@ -84,7 +84,7 @@
         <span class="min-w-0">
           <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_stake">SIZE</span>
           <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.stake_title">Stake Calculator</span>
-          <span data-i18n="tools_page.static_desc_stake" class="mt-0.5 block text-[12px] leading-snug text-soft">A stake as a share of your budget, from your own figures (illustration only).</span>
+          <span data-i18n="tools_page.static_desc_stake" class="mt-0.5 block text-[12px] leading-snug text-soft">How much to stake based on your bankroll and the odds.</span>
         </span>
       </button>
       <button type="button" role="tab" id="tab-bankroll" aria-controls="panel-bankroll" aria-selected="false" data-tool="bankroll"
@@ -121,7 +121,7 @@
     <div class="-mx-4 overflow-x-auto px-4 lg:hidden">
       <div class="flex gap-2 pb-1" role="tablist" aria-label="Tools" data-i18n-attr="aria-label:site_header.nav_tools" aria-orientation="horizontal">
       <button type="button" role="tab" id="mtab-scanner" aria-controls="panel-scanner" aria-selected="true" data-tool="scanner" data-active="1"
-        class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan" data-i18n="tools_page.scan_title">Odds Gap Finder</button>
+        class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan" data-i18n="tools_page.scan_title">Edge Detector</button>
       <button type="button" role="tab" id="mtab-fair" aria-controls="panel-fair" aria-selected="false" data-tool="fair"
         class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan" data-i18n="tools_page.fair_title">Fair Odds</button>
       <button type="button" role="tab" id="mtab-stake" aria-controls="panel-stake" aria-selected="false" data-tool="stake"
@@ -150,7 +150,7 @@
      calculateur de mise compris). Ligne d'aide du repertoire via
      lib/market-config.js (ecrite aussi dans le HTML par build-locales). -->
 <footer class="mx-auto w-full max-w-[1440px] border-t border-hairline px-4 pb-28 pt-6 sm:px-6">
-  <p class="max-w-[80ch] text-[12.5px] leading-relaxed text-soft"><span data-i18n="player_page.footer_disclaimer">Statistical information, never a guaranteed result. Sports betting carries a risk of financial loss and addiction. Over-18s only.</span> <span data-helpline-row><span data-i18n="match_page.shell_help_label">Help:</span> <a data-market-helpline="url" href="https://www.gamcare.org.uk" class="text-cyan hover:underline">gamcare.org.uk</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">0808 8020 133</span></span></span></p>
+  <p class="max-w-[80ch] text-[12.5px] leading-relaxed text-soft"><span data-i18n="player_page.footer_disclaimer">Statistical information, never a guaranteed result. Sports betting carries a risk of financial loss and addiction. Over-18s only.</span> <span data-helpline-row><span data-i18n="match_page.shell_help_label">Help:</span> <a data-market-helpline="url" href="https://www.begambleaware.org" class="text-cyan hover:underline">begambleaware.org</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">0808 8020 133</span></span></span></p>
 </footer>
 <!--SEO_FOOTER_NAV--><nav class="seo-foot-nav" aria-label="Site navigation" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#91a0b3;text-align:center"><p style="margin:0 0 4px"><span style="color:#c3ccd8">Leagues:</span> <a href="/gb/leagues/premier-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Premier League</a> · <a href="/gb/leagues/champions-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Champions League</a> · <a href="/gb/leagues/europa-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Europa League</a> · <a href="/gb/leagues/conference-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Conference League</a> · <a href="/gb/leagues/mls.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">MLS</a></p><p style="margin:0"><a href="/gb/clubs/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Clubs and derbies</a> · <a href="/gb/articles/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">UK articles</a> · <a href="/en/blog/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Blog and guides</a> · <a href="/gb/marches.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Markets analysed</a> · <a href="/gb/methodologie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Methodology</a></p></nav><!--/SEO_FOOTER_NAV-->
 

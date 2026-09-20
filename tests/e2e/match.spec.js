@@ -26,9 +26,7 @@ const squash = (s) => String(s).replace(/[\s\u00a0\u202f\u2009]+/g, ' ').trim();
 async function freeMatchIdFromHome(page, dir) {
   await page.goto(`/${dir}/`);
   const href = await page.locator('#heroFeature a.feature-card').getAttribute('href');
-  // Page statique de la version (/<dir>/match/<id>.html) ou shell match.html?id= (19/09/2026).
-  const u = new URL(href, 'http://x');
-  return u.searchParams.get('id') || (u.pathname.match(/\/match\/(\d+)\.html$/) || [])[1] || null;
+  return new URL(href, 'http://x').searchParams.get('id');
 }
 // Offre Pro avec retour a ce match apres paiement (abonnement-page.js#contexteMatch).
 const proHref = (dir, id) => `/${dir}/abonnement.html?next=${encodeURIComponent(`/${dir}/match.html?id=${id}`)}`;
@@ -138,7 +136,7 @@ for (const v of VERSIONS) {
       const dict = await dictFor(v.locale);
       await page.goto(`/${v.dir}/`);
       await page.locator('#heroFeature a.feature-card').click();
-      await expect(page).toHaveURL(new RegExp(`(/${v.dir}/match/\\d+\\.html|/${v.dir}/match\\.html\\?id=\\d+${v.dir === 'fr' ? '|/match/\\d+\\.html' : ''})$`));
+      await expect(page).toHaveURL(new RegExp(`/${v.dir}/match\\.html\\?id=\\d+$`));
       const gate = page.locator('#matchRoot .gate');
       await expect(gate).toBeVisible();
       await expect(gate.locator('h2')).toHaveText(tr(dict, 'match_page.gate_free_title'));

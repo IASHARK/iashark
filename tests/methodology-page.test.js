@@ -180,7 +180,7 @@ test("mention 18+ et ressource d'aide presentes dans chaque version", () => {
   DIRS.forEach(function (d) {
     const txt = visibleText(read(d + "/methodologie.html"));
     assert.match(txt, /18\s?\+|18 ans|18 years|18 años|18 anos|18 anni|18 Jahren|majeurs/i, d + " : mention 18+ absente");
-    assert.match(txt, /gamblingtherapy\.org|joueurs-info-service\.fr|gamcare|begambleaware|gambleaware|responsiblegambling\.org\.za|911 2000/i, d + " : aucune ressource d'aide");
+    assert.match(txt, /gamblingtherapy\.org|joueurs-info-service\.fr|begambleaware|gambleaware|responsiblegambling\.org\.za|911 2000/i, d + " : aucune ressource d'aide");
   });
 });
 
@@ -287,15 +287,11 @@ test("liens Methodologie : a-propos et pieds de page, dans les 9 versions", () =
     assert.match(read(d + "/a-propos.html"), new RegExp('href="/' + d + '/methodologie\\.html"'), d + "/a-propos");
     assert.match(read(d + "/index.html"), new RegExp('href="/' + d + '/methodologie\\.html"'), d + "/index (pied de page)");
   });
-  // 20/09/2026, demande du proprietaire : le lien « methodologie » a ete retire
-  // des cartes de la page match (il alourdissait la lecture). La page existe
-  // toujours et reste accessible depuis « A propos » et le pied de page de
-  // chaque version, verifie juste au-dessus.
   const js = read("match-page.js");
   const signal = js.slice(js.indexOf("function signalCard(vm)"), js.indexOf("function marketsCard"));
   const gate = js.slice(js.indexOf("function gateCard(vm,opts)"), js.indexOf("function renderAuthWall"));
-  assert.ok(!signal.includes("methodLink()") && !gate.includes("methodLink()"), "le lien methodologie est revenu dans les cartes");
-  // Les 9 repertoires ont leur page : la cible reste juste si on le remet un jour.
+  assert.ok(signal.includes("methodLink()") && gate.includes("methodLink()"));
+  // Les 9 repertoires ont leur page : chaque page match renvoie vers la sienne.
   assert.match(js, /METHODOLOGY_DIRS=\['fr','gb','za','en','mx','es','de','it','pt'\]/);
   assert.match(read("scripts/seo-pages.js"), /"methodologie\.html": "footer\.methodology"/);
 });

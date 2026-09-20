@@ -52,9 +52,7 @@ const module = { exports: {} };
     },
     gb: {
       market: "gb", dir: "gb", htmlLang: "en-GB", intlLocale: "en-GB", currency: "GBP", timeZone: "Europe/London",
-      // Ligne nationale geree par GamCare (sources : legal/README.md ; begambleaware.org ne fait que
-      // rediriger vers gambleaware.org). Meme ligne que config/markets.json#gb.helpline (19/09/2026).
-      helpline: { name: "National Gambling Helpline (GamCare)", phone: "0808 8020 133", url: "https://www.gamcare.org.uk", display: "gamcare.org.uk" }
+      helpline: { name: "National Gambling Helpline", phone: "0808 8020 133", url: "https://www.begambleaware.org", display: "BeGambleAware.org" }
     },
     mx: {
       market: "mx", dir: "mx", htmlLang: "es-MX", intlLocale: "es-MX", currency: "MXN", timeZone: "America/Mexico_City",
@@ -1411,11 +1409,7 @@ const require = function () { return Render; };
     // ou pour le mois seul (us : offre USD de /en/, config/markets.json
     // #_usdSwitch). Mois + an sans semaine : aucun texte, jamais un prix invente.
     var hasWeek = ctx.proPricesMinor.week != null, hasYear = ctx.proPricesMinor.year != null;
-    // Marche ferme au paiement (checkoutOpen = []) :
-    // aucun prix payable -> price_unavailable, l'email n'est pas envoye
-    // (send-lifecycle-emails : skipped "render_price_unavailable"), jamais un
-    // prix qu'on ne peut pas payer.
-    if (need === "pro_price" && (ctx.proPriceMinor == null || (!hasWeek && hasYear))) fail("price_unavailable", "Prix Pro payable (mois, et semaine si l'annee est vendue) absent de config/markets.json (prices + checkoutOpen) pour " + ctx.market);
+    if (need === "pro_price" && (ctx.proPriceMinor == null || (!hasWeek && hasYear))) fail("price_unavailable", "Prix Pro (mois, et semaine si l'annee est vendue) absent de config/markets.json pour " + ctx.market);
 
     var company = options.company || {};
     var view = {
@@ -2989,7 +2983,7 @@ export const BUNDLE = {
         "market": "us",
         "locale": "en",
         "htmlLang": "en",
-        "intlLocale": "en-US",
+        "intlLocale": "en-GB",
         "label": "English (International)",
         "helpline": "international"
       },
@@ -3041,14 +3035,6 @@ export const BUNDLE = {
         "url": "https://www.gamblingtherapy.org",
         "display": "gamblingtherapy.org",
         "hours": "free, international (chat, forum)"
-      },
-      "us_ncpg": {
-        "name": "National Problem Gambling Helpline (US)",
-        "phone": "1-800-MY-RESET",
-        "tel": "18006973738",
-        "url": "https://www.ncpgambling.org/help-treatment/",
-        "display": "ncpgambling.org",
-        "hours": "free, confidential, 24/7 (call, text or chat)"
       }
     },
     "fr": {
@@ -3077,7 +3063,8 @@ export const BUNDLE = {
       },
       "checkoutOpen": [
         "week",
-        "month"
+        "month",
+        "year"
       ]
     },
     "gb": {
@@ -3085,11 +3072,11 @@ export const BUNDLE = {
       "intlLocale": "en-GB",
       "priceIntlLocale": null,
       "helpline": {
-        "name": "National Gambling Helpline (GamCare)",
+        "name": "National Gambling Helpline (GamCare / BeGambleAware)",
         "phone": "0808 8020 133",
         "tel": "08088020133",
-        "url": "https://www.gamcare.org.uk",
-        "display": "gamcare.org.uk"
+        "url": "https://www.begambleaware.org",
+        "display": "begambleaware.org"
       },
       "prices": {
         "pro": {

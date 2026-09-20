@@ -12,15 +12,10 @@
 //   - derniers resultats (30 jours) : score final du registre (tire des
 //     donnees publiques, scripts/match-lifecycle.js#findFinalScore) et
 //     derniers matchs termines du cache ;
-//   - classement : dernier classement COMPLET connu, conserve dans
+//   - classement : dernier classement connu, conserve dans
 //     data/league-hubs-registry.json (jamais publie : data/ est refuse par
-//     scripts/build-public.js) depuis la reponse /standings api-football
-//     (celle que le pipeline lit pour ses matchs du jour, ou le cache des pages
-//     club) ; retire apres 45 jours. Audit du 19/09/2026 : l'extrait publie
-//     avec un match (rangs voisins des deux equipes) n'est JAMAIS un classement
-//     de championnat (Premier League : 17 lignes des rangs 2 a 18, Arsenal 1er
-//     absent, « En tete : Manchester City ») ; groupes et phases suivent
-//     lib/standings-groups.js (MLS : deux conferences, jamais fusionnees) ;
+//     scripts/build-public.js) depuis le classement api-football en cache ou
+//     celui publie avec les matchs analyses ; retire apres 45 jours ;
 //   - pages club et derby de la competition dans la version.
 // Aucun champ premium, ni conf, ni cote, ni pari : equipes, dates, stades,
 // scores, classement, forme et zones de classement uniquement.
@@ -28,8 +23,6 @@ const fs = require("fs");
 const path = require("path");
 const C = require("./seo-common.js");
 const MATCH_TIME = require("../lib/match-time.js");
-const SG = require("../lib/standings-groups.js");
-const VENUE = require("../lib/venue.js");
 
 const STORE_FILE = "data/league-hubs-registry.json";
 const CACHE_DIR = "data/club-hubs/cache";
@@ -45,17 +38,16 @@ const MAX_UPCOMING = 20, MAX_RESULTS = 10;
 const README = [
   "Classements des pages championnat (scripts/league-hub-data.js), ecrit par scripts/seo-pages.js#writeSeoPages",
   "(pipeline : generateMatchPages ; local : node scripts/seo-pages.js). Jamais publie.",
-  "leagues.<cle>.standings = dernier classement COMPLET connu, source 'api-football' : reponse /standings lue par le pipeline",
-  "(opts.standings) ou cache data/club-hubs/cache. Tous les groupes (conferences, zones, phases) sont gardes avec leur nom.",
-  "Un extrait publie avec un match (source 'matchs') n'est plus jamais retenu (audit du 19/09/2026).",
+  "leagues.<cle>.standings = dernier classement public connu : source 'api-football' (cache data/club-hubs/cache,",
+  "classement complet) ou 'matchs' (classement publie avec les matchs analyses, extrait possible).",
   "as_of = date des donnees ; retire apres " + STANDINGS_MAX_AGE_DAYS + " jours sans mise a jour."
 ];
 
 function num(v) { return typeof v === "number" && isFinite(v) ? v : (typeof v === "string" && v.trim() !== "" && isFinite(Number(v)) ? Number(v) : null); }
 function str(v, max) { return typeof v === "string" && v.trim() ? v.trim().slice(0, max || 80) : null; }
 function isoDay(t) { return new Date(t).toISOString().slice(0, 10); }
-// Stade affiche : lib/venue.js (ville seulement si verifiee, jamais "(domicile)").
-function venueName(stade) { return VENUE.venueLabel(stade); }
+// Stade : "<equipe> (domicile)" est le repli du pipeline sans stade connu -> inconnu.
+function venueName(stade) { var v = stade && str(stade.nom); return v && !/\(domicile\)\s*$/i.test(v) ? v : null; }
 
 // ---------------------------------------------------------------------------
 // Registre des classements.
@@ -93,10 +85,6 @@ function row(r) {
   if (form) o.form = form;
   var zone = str(r.zone != null ? r.zone : r.description, 80);
   if (zone) o.zone = zone;
-  // Buts marques / encaisses (all.goals api-football) : faits publics des pages
-  // apercu (vague 2 SEO) ; absents des classements enregistres avant le 19/09/2026.
-  var gf = num(r.gf), ga = num(r.ga);
-  if (gf != null && ga != null) { o.gf = gf; o.ga = ga; }
   return o.name && o.rank != null && o.pts != null ? o : null;
 }
 
@@ -119,48 +107,49 @@ function cacheEntries(root) {
 }
 function clearCache() { cacheMemo = {}; }
 
-// Reponse api-football /standings (response[0].league) -> classement du
-// registre : TOUS les groupes, chacun avec son nom api-football.
-function fromApiLeague(lg, fetchedAt) {
-  if (!lg || !Array.isArray(lg.standings)) return null;
-  var groups = lg.standings.filter(function (g) { return Array.isArray(g) && g.length; }).map(function (g) {
-    return { name: str(g[0].group), rows: g.map(function (r) { var a = r.all || {}, gl = a.goals || {}; return row({ rank: r.rank, team_id: r.team && r.team.id, name: r.team && r.team.name, played: a.played, win: a.win, draw: a.draw, lose: a.lose, gd: r.goalsDiff, points: r.points, form: r.form, description: r.description, gf: gl.for, ga: gl.against }); }).filter(Boolean) };
-  }).filter(function (g) { return g.rows.length; });
-  if (!groups.length) return null;
-  var at = str(fetchedAt, 30);
-  return { as_of: at ? at.slice(0, 10) : null, source: "api-football", season: num(lg.season), league_name: str(lg.name), groups: groups };
-}
 function cacheStandings(root, apiId) {
   var best = null;
   cacheEntries(root).standings.forEach(function (j) {
     var lg = j.response[0] && j.response[0].league;
-    if (!lg || Number(lg.id != null ? lg.id : j.params && j.params.league) !== apiId) return;
-    var st = fromApiLeague(lg, j.fetched_at);
-    if (st && st.as_of && (!best || Date.parse(st.as_of) > Date.parse(best.as_of))) best = st;
+    if (!lg || Number(lg.id != null ? lg.id : j.params && j.params.league) !== apiId || !Array.isArray(lg.standings)) return;
+    var groups = lg.standings.filter(function (g) { return Array.isArray(g) && g.length; }).map(function (g) {
+      return { name: str(g[0].group), rows: g.map(function (r) { var a = r.all || {}; return row({ rank: r.rank, team_id: r.team && r.team.id, name: r.team && r.team.name, played: a.played, win: a.win, draw: a.draw, lose: a.lose, gd: r.goalsDiff, points: r.points, form: r.form, description: r.description }); }).filter(Boolean) };
+    }).filter(function (g) { return g.rows.length; });
+    if (!groups.length) return;
+    var at = str(j.fetched_at, 30);
+    if (!best || Date.parse(at) > Date.parse(best.as_of)) best = { as_of: at ? at.slice(0, 10) : null, source: "api-football", season: num(lg.season), groups: groups };
   });
   return best;
 }
 
-// Met a jour le registre EN PLACE. Sources, toutes COMPLETES (reponse
-// /standings api-football) : opts.standings = {<apiFootballId>: {league,
-// fetched_at}} (lu par le pipeline pour ses matchs du jour), cache des pages
-// club, registre precedent. Le plus recent gagne ; a date egale, le registre
-// precedent cede. Un extrait publie avec un match (m.classement) n'est plus
-// jamais utilise (runMatches garde pour la compatibilite d'appel).
+// Met a jour le registre EN PLACE depuis le cache et les matchs du run.
 function updateStore(store, runMatches, now, opts) {
   opts = opts || {};
-  var t = (now || new Date()).getTime();
-  var fresh = opts.standings && typeof opts.standings === "object" ? opts.standings : {};
+  var t = (now || new Date()).getTime(), today = isoDay(t);
   C.LEAGUES.forEach(function (l) {
     var cur = store.leagues[l.key] && store.leagues[l.key].standings || null;
     var candidates = [];
-    var run = fresh[l.apiFootballId] || fresh[String(l.apiFootballId)] || null;
-    var fromRun = run ? fromApiLeague(run.league, run.fetched_at || new Date(t).toISOString()) : null;
-    if (fromRun) candidates.push(fromRun);
+    // Cache d'abord : a date egale (tri stable), le classement relu du cache
+    // (avec forme et zones) remplace celui du registre.
     var cached = cacheStandings(opts.root, l.apiFootballId);
     if (cached) candidates.push(cached);
-    if (cur && cur.as_of && cur.source === "api-football") candidates.push(cur);
-    candidates.sort(function (a, b) { return Date.parse(b.as_of + "T00:00:00Z") - Date.parse(a.as_of + "T00:00:00Z"); });
+    if (cur && cur.as_of) candidates.push(cur);
+    // Classement publie avec les matchs analyses du run (le plus long).
+    var fromRun = null;
+    (runMatches || []).forEach(function (m) {
+      if (!m || m.league_key !== l.key || !m.classement || !Array.isArray(m.classement.standings)) return;
+      var rows = m.classement.standings.map(row).filter(Boolean).sort(function (a, b) { return a.rank - b.rank; });
+      if (rows.length >= 4 && (!fromRun || rows.length > fromRun.groups[0].rows.length)) fromRun = { as_of: today, source: "matchs", season: null, groups: [{ name: str(m.classement.league_name), rows: rows }] };
+    });
+    if (fromRun) candidates.push(fromRun);
+    // Le plus recent ; a 3 jours pres, un classement complet api-football passe
+    // devant un classement publie avec un match (extrait possible).
+    candidates.sort(function (a, b) {
+      var da = Date.parse(a.as_of + "T00:00:00Z"), db = Date.parse(b.as_of + "T00:00:00Z");
+      var fa = a.source === "api-football", fb = b.source === "api-football";
+      if (Math.abs(da - db) <= 3 * DAY && fa !== fb) return fa ? -1 : 1;
+      return db - da;
+    });
     var pick = candidates[0] || null;
     if (pick && t - Date.parse(pick.as_of + "T00:00:00Z") > STANDINGS_MAX_AGE_DAYS * DAY) pick = null;
     if (pick) store.leagues[l.key] = { standings: pick };
@@ -170,13 +159,14 @@ function updateStore(store, runMatches, now, opts) {
   return store;
 }
 
-// Groupes affiches : phase en cours (lib/standings-groups.js) - conferences
-// MLS, zones A/B de l'Argentine, Clausura seule en Colombie et au Perou - ;
-// chaque groupe garde son nom, jamais fusionne. Un extrait publie avec un
-// match (source 'matchs', anciens registres) n'est jamais affiche.
+// Groupes affiches : phase la plus recente (api-football liste les phases dans
+// l'ordre : Apertura A/B puis Clausura A/B), 3 groupes au plus.
 function displayGroups(st) {
-  if (!st || st.source !== "api-football" || !Array.isArray(st.groups) || !st.groups.length) return [];
-  return SG.currentPhaseGroups(st.groups).map(function (g) { return { name: g.name, rows: g.rows }; });
+  if (!st || !Array.isArray(st.groups) || !st.groups.length) return [];
+  var last = st.groups[st.groups.length - 1];
+  var phase = function (g) { return String(g.name || "").split(" - ")[0]; };
+  var groups = st.groups.filter(function (g) { return phase(g) === phase(last); });
+  return groups.slice(-3);
 }
 
 // ---------------------------------------------------------------------------
@@ -266,75 +256,11 @@ function collect(key, dir, opts) {
   var store = opts.store || loadStore(root);
   var st = store.leagues[key] && store.leagues[key].standings || null;
   if (st && now - Date.parse(st.as_of + "T00:00:00Z") > STANDINGS_MAX_AGE_DAYS * DAY) st = null;
-  var groups = st ? displayGroups(st) : [];
-  return { upcoming: upcoming, results: results, standings: groups.length ? Object.assign({}, st, { groups: groups }) : null, clubs: C.leagueClubPages(key, dir, root) };
-}
-
-// ---------------------------------------------------------------------------
-// Faits publics d'une rencontre a venir hors run (pages apercu, vague 2 SEO) :
-// classement COMPLET le plus recent (registre ou cache, <= 45 jours) et
-// confrontations directes deja en cache (/fixtures/headtohead des pages club).
-// Aucun appel reseau.
-function latestStandings(key, opts) {
-  opts = opts || {};
-  var root = opts.root || C.ROOT, now = (opts.now || new Date()).getTime();
-  var lg = C.leagueByKey(key);
-  if (!lg) return null;
-  var store = opts.store || loadStore(root);
-  var cands = [];
-  var cur = store.leagues[key] && store.leagues[key].standings;
-  if (cur && cur.as_of && cur.source === "api-football") cands.push(cur);
-  var cached = cacheStandings(root, lg.apiFootballId);
-  if (cached) cands.push(cached);
-  cands.sort(function (a, b) { return Date.parse(b.as_of + "T00:00:00Z") - Date.parse(a.as_of + "T00:00:00Z"); });
-  var st = cands[0] || null;
-  if (!st || now - Date.parse(st.as_of + "T00:00:00Z") > STANDINGS_MAX_AGE_DAYS * DAY) return null;
-  var groups = displayGroups(st);
-  return groups.length ? Object.assign({}, st, { groups: groups }) : null;
-}
-// Lignes des deux equipes (liste blanche de row()), avec le nom du groupe quand
-// le classement en a plusieurs (conferences MLS, zones) ; { as_of, rows } ou null.
-function teamStandingRows(key, homeId, awayId, opts) {
-  var st = latestStandings(key, opts);
-  if (!st) return null;
-  var ids = [Number(homeId), Number(awayId)];
-  var rows = [];
-  st.groups.forEach(function (g) {
-    g.rows.forEach(function (r) {
-      if (r.team_id == null || ids.indexOf(Number(r.team_id)) === -1) return;
-      var o = Object.assign({}, r);
-      delete o.zone;
-      if (st.groups.length > 1 && g.name) o.group = g.name;
-      rows.push(o);
-    });
-  });
-  return rows.length ? { as_of: st.as_of, rows: rows.slice(0, 2) } : null;
-}
-// Confrontations directes terminees (score a 90 min ou final), les plus
-// recentes d'abord, avant beforeMs ; noms du flux (meme forme que m.h2h du run).
-function cachedH2H(root, homeId, awayId, beforeMs, max) {
-  var a = Number(homeId), b = Number(awayId);
-  if (!a || !b) return [];
-  var byId = {};
-  cacheEntries(root || C.ROOT).fixtures.forEach(function (j) {
-    if (j.endpoint !== "/fixtures/headtohead") return;
-    var p = String(j.params && j.params.h2h || "");
-    if (p !== a + "-" + b && p !== b + "-" + a) return;
-    j.response.forEach(function (f) {
-      var x = fixtureFromCache(f);
-      if (!x || !x.finished || !x.score) return;
-      if (beforeMs && x.t >= beforeMs) return;
-      byId[x.id] = { d: isoDay(x.t), home: teamName(x.home), away: teamName(x.away), s: x.score.home + "-" + x.score.away, t: x.t };
-    });
-  });
-  return Object.keys(byId).map(function (k) { return byId[k]; }).sort(function (x, y) { return y.t - x.t; }).slice(0, max || 5).map(function (e) {
-    return { d: e.d, home: e.home, away: e.away, s: e.s };
-  });
+  return { upcoming: upcoming, results: results, standings: st ? Object.assign({}, st, { groups: displayGroups(st) }) : null, clubs: C.leagueClubPages(key, dir, root) };
 }
 
 module.exports = {
   STORE_FILE: STORE_FILE, UPCOMING_DAYS: UPCOMING_DAYS, RESULTS_DAYS: RESULTS_DAYS, STANDINGS_MAX_AGE_DAYS: STANDINGS_MAX_AGE_DAYS,
   emptyStore: emptyStore, loadStore: loadStore, saveStore: saveStore, serializeStore: serializeStore, updateStore: updateStore,
-  fromApiLeague: fromApiLeague, cacheStandings: cacheStandings, clearCache: clearCache, displayGroups: displayGroups, collect: collect,
-  latestStandings: latestStandings, teamStandingRows: teamStandingRows, cachedH2H: cachedH2H
+  cacheStandings: cacheStandings, clearCache: clearCache, displayGroups: displayGroups, collect: collect
 };

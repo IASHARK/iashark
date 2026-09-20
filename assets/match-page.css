@@ -26,7 +26,7 @@ a{color:inherit}
 /* ---------- chrome commun (header/footer/nav) ---------- */
 .site-header{position:relative;height:84px;display:flex;align-items:center;width:min(var(--container) + 160px,calc(100% - 48px));margin:auto}
 .site-header:before{content:"";position:absolute;top:0;bottom:0;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;background:var(--bg);z-index:-1}
-.brand img{width:152px;height:56px;object-fit:contain;object-position:left center;display:block}
+.brand img{width:185px;height:68px;object-fit:contain}
 .back-link{display:none}
 #authHeaderSlot{margin-left:auto}
 .site-header .lang-switch-slot{margin-left:auto;margin-right:10px}
@@ -316,7 +316,7 @@ a{color:inherit}
 @media(max-width:640px){
   body{padding-bottom:72px}
   .site-header{height:58px;width:calc(100% - 20px)}
-  .brand img{width:116px;height:42px}
+  .brand img{width:128px;height:50px}
   .btn-login{padding:8px 11px;font-size:9.5px}
   .match-shell{width:calc(100% - 16px)}
   #matchRoot>.loading-card{min-height:840px}

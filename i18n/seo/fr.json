@@ -2,13 +2,6 @@
   "_readme": "Textes SEO du repertoire /fr/ (et des pages statiques /match/<id>.html, version x-default). Lu par scripts/build-locales.js (meta, intro de l'accueil, JSON-LD) et scripts/seo-pages.js (pages championnat, pages match statiques). Un fichier par REPERTOIRE public, pas par dictionnaire : gb, za et en partagent le dictionnaire 'en' mais visent des marches de recherche differents. Vocabulaire honnete uniquement : estimations statistiques, 18+, IASHARK n'est pas un bookmaker.",
   "tz": "Europe/Paris",
   "tz_label": "heure de Paris",
-  "intlLocale": "fr-FR",
-  "clock_options": {
-    "hour": "2-digit",
-    "minute": "2-digit"
-  },
-  "clock_zone": "{time} ({tz})",
-  "clock_list": "{time}",
   "sport": "Football",
   "org_description": "IASHARK analyse les matchs de football avec des modèles statistiques et compare les probabilités estimées aux cotes du marché. IASHARK n'est pas un bookmaker.",
   "meta": {
@@ -41,7 +34,7 @@
     "eyebrow": "LA MÉTHODE EN BREF",
     "title": "Des pronostics foot fondés sur des probabilités, pas sur des intuitions",
     "paragraphs": [
-      "Le modèle statistique d'IASHARK estime les chances de chaque équipe à partir des données de match : résultats, buts, forme, performances à domicile et à l'extérieur. Pour chaque match de Ligue 1, de Premier League, de Liga, de Ligue des champions et des autres compétitions couvertes, il estime la probabilité de chaque résultat, du nombre de buts et que les deux équipes marquent. Les cotes des bookmakers, marge retirée, servent à comparer ces estimations et à choisir parmi les marchés réellement proposés.",
+      "IASHARK calcule ses pronostics de football avec un modèle statistique de score, sans jamais utiliser les cotes. Pour chaque match de Ligue 1, de Premier League, de Liga, de Ligue des champions et des autres compétitions couvertes, le modèle estime la probabilité de chaque résultat, du nombre de buts et que les deux équipes marquent, puis la compare à la probabilité implicite des cotes du marché.",
       "Ce sont des estimations statistiques : le football reste incertain, aucun résultat n'est garanti et IASHARK n'est pas un opérateur de paris. La qualité des données varie selon les championnats, c'est pourquoi chaque analyse affiche son niveau de fiabilité. Réservé aux plus de 18 ans."
     ],
     "leagues_title": "Pronostics par championnat",
@@ -55,8 +48,7 @@
       "bundesliga",
       "el",
       "ecl"
-    ],
-    "summary_tz": "heure de Paris"
+    ]
   },
   "breadcrumb": {
     "home": "Accueil",
@@ -210,8 +202,7 @@
     "h2h_title": "Confrontations directes",
     "h2h_row": "{date} : {home} {score} {away}",
     "lineups_title": "Compositions de départ",
-    "lineup_row": "{team} ({formation}) : {players}",
-    "h1": "{home} vs {away}"
+    "lineup_row": "{team} ({formation}) : {players}"
   },
   "nav": {
     "aria": "Navigation du site",
@@ -222,20 +213,5 @@
     "blog": "Blog et guides",
     "markets": "Marchés analysés",
     "methodology": "Méthodologie"
-  },
-  "results": {
-    "hub_title": "Résultats des pronostics football, jour par jour | IASHARK",
-    "hub_title_short": "Résultats des pronostics football | IASHARK",
-    "hub_description": "Le marché retenu chaque jour par IASHARK, réalisé ou non : score final, cote et source, journée par journée. 18+",
-    "hub_description_short": "Les journées de pronostics publiées par IASHARK, marchés réalisés comme manqués. 18+",
-    "hub_h1": "Résultats jour par jour",
-    "hub_intro": "Chaque journée publiée garde le marché retenu avant le coup d'envoi, avec le score final et la cote : les marchés perdus y figurent comme les gagnés.",
-    "day_title": "Résultats des pronostics du {date} | IASHARK",
-    "day_title_short": "Résultats du {date} | IASHARK",
-    "day_description": "Les marchés retenus le {date} : {count}. Score final, cote et source, marchés réalisés comme manqués. 18+",
-    "day_description_short": "Marchés retenus le {date} : {count}. Gagnants et perdants, score final et cote.",
-    "day_h1": "Résultats du {date}",
-    "day_intro": "Tous les marchés retenus avant le coup d'envoi ce jour-là, gagnants et perdants, avec le score final et la cote publiée.",
-    "breadcrumb": "Résultats"
   }
 }

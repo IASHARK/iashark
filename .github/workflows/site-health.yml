@@ -22,9 +22,14 @@ name: site-health
 # est sur la branche par defaut (main).
 
 on:
-  # 19/09/2026 (depot prive : minutes facturees) : plus de declenchement apres
-  # chaque releve de cotes (jusqu'a 70 executions par jour) ; toutes les 6 h
-  # suffit, health-monitor surveille deja le calcul quotidien.
+  workflow_run:
+    workflows:
+      - "closing-odds"
+      - "forward-odds-broad"
+      - "forward-odds-near-kickoff"
+      - "tests"
+    types: [completed]
+    branches: [main]
   schedule:
     # Toutes les 6 h (16/09/2026 : quota Netlify depasse le 15/09 ; etait 2 h).
     - cron: '15 */6 * * *'

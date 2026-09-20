@@ -512,15 +512,8 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
     <p class="animate-fade-in d3 max-w-xl text-[17px] leading-relaxed text-soft">IASHARK transforme les statistiques des deux équipes en une probabilité claire, expliquée et comparée à la cote.</p>
     <div class="animate-fade-in d4 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
       <a href="#decisions" class="hero-cta group inline-flex items-center justify-center gap-2.5 rounded-xl bg-cyan px-7 py-4 text-[14px] font-extrabold tracking-[0.02em] text-page shadow-[0_16px_40px_-16px_rgba(32,213,239,.8)] transition hover:brightness-110 active:scale-[.985]">Voir l'analyse gratuite du jour<span aria-hidden="true" class="transition-transform group-hover:translate-x-1">→</span></a>
-      <!-- 20/09/2026 (docs/SPEC_RESULTATS_HIER.md) : le second bouton mene a la
-           preuve, l'onglet Hier de la liste des matchs. Le lien reste l'ancre
-           #decisions (jamais un lien mort) ; le clic ouvre l'onglet Hier. -->
-      <a href="#decisions" data-hl-yesterday class="inline-flex items-center justify-center gap-2 rounded-xl border border-hairline px-6 py-4 text-[14px] font-semibold text-ink transition hover:border-cyan/40 hover:bg-white/[0.04]" data-i18n="home_list.res_cta_home">Voir les résultats d'hier</a>
+      <a href="/exemple-analyse.html" class="inline-flex items-center justify-center gap-2 rounded-xl border border-hairline px-6 py-4 text-[14px] font-semibold text-ink transition hover:border-cyan/40 hover:bg-white/[0.04]">Voir un exemple d'analyse</a>
     </div>
-    <!-- 20/09/2026 : le second bouton mene desormais aux resultats de la veille.
-         L'exemple d'analyse garde un lien depuis l'accueil, sinon la page n'a
-         plus aucun lien entrant (tests/internal-links.test.js). -->
-    <p class="animate-fade-in d5 mt-3 text-[13px]"><a href="/exemple-analyse.html" style="color:#8fa3b8;text-decoration:underline;text-underline-offset:3px">Voir un exemple d'analyse</a></p>
     <p data-vente id="heroPrice" data-market-price-line="pro" data-market-price-tpl="home_app.hero_price_line" class="animate-fade-in d5 text-[13px] text-soft/75">Essayer gratuitement · Pro à 19,95 € par mois, sans engagement</p>
   </div>
 
@@ -735,7 +728,6 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
       <a href="/confidentialite.html" style="color:#22d3ee;text-decoration:underline;margin:0 8px;">Confidentialité</a>
       <a href="/methodologie.html" data-requires-page="methodologie.html" style="color:#22d3ee;text-decoration:underline;margin:0 8px;">Méthodologie</a>
     </div>
-    <div style="margin-top:6px;" data-market-helpline-extra-if hidden><span data-market-helpline-extra="name"></span> · <a data-market-helpline-extra="url" href="#" style="color:#22d3ee;text-decoration:none;"></a><span data-market-helpline-extra-if="phone"> · <span data-market-helpline-extra="phone"></span></span></div>
   </div>
 </footer>
 
@@ -764,7 +756,6 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 <script src="/lib/display-data.js"></script>
 <script src="/lib/match-time.js"></script>
 <script src="/lib/league-names.js"></script>
-<script src="/lib/team-names.js"></script>
 <script src="/lib/free-match.js"></script>
 <script src="/lib/market-labels.js"></script>
 <script src="/lib/fav-leagues.js"></script>
@@ -826,12 +817,6 @@ function estFr(){return !(window.I18N&&window.I18N.locale)||window.I18N.locale==
 function localeTag(){return (window.I18N&&window.I18N.localeTag)?window.I18N.localeTag():'fr-FR';}
 // Internal link kept inside the current language/market directory (/gb/, /mx/...).
 function lien(p){return (window.I18N&&window.I18N.href)?window.I18N.href(p):'/'+p;}
-// Lien d'un match : page statique indexable de la version (/<dir>/match/<id>.html,
-// lib/league-names.js#staticMatchPath) quand elle existe, sinon le shell
-// match.html?id= (audit SEO du 19/09/2026 : les cartes liaient le shell noindex).
-function lienMatch(m){var LN=window.IasharkLeagueNames,d=window.I18N&&window.I18N.dir;var p=(LN&&LN.staticMatchPath&&m)?LN.staticMatchPath(m.id,String(m.league_key||'').toLowerCase(),d):null;return p||lien('match.html?id='+encodeURIComponent(m&&m.id));}
-// Nom d'affichage d'une equipe (lib/team-names.js : « América », « Pumas UNAM »).
-function nomEquipe(tm){return window.IasharkTeamNames?IasharkTeamNames.displayName(tm):((tm&&tm.n)||'');}
 // Prices of the current GEO market (lib/market-config.js). Without a GEO
 // market (historic FR/EUR site) the static prices of the page stay as they are.
 function prixProMarche(){
@@ -886,12 +871,9 @@ function isTomorrow(m){return matchDayStr(m)===getTomorrowStr();}
 // comparateur ne renvoyait jamais 0 et l'ordre changait entre deux onglets.
 function compareMatchs(a,b){var mt=MT();if(mt)return mt.compareMatches(a,b);var da=a.date||'',db=b.date||'';if(da!==db)return da<db?-1:1;return String(a.id)<String(b.id)?-1:String(a.id)>String(b.id)?1:0;}
 
-// Onglet « Hier » (20/09/2026, docs/SPEC_RESULTATS_HIER.md) : la preuve est
-// de nouveau publiee, mais SANS aucune promesse — un constat date, pertes
-// comprises (« 47 marches sur 52 realises hier »), jamais un ROI ni un taux de
-// reussite moyen mis en avant. Elle ne vient QUE du flux de resultats
-// (results/<jour>.json, repli Supabase match_results), lu par home-list.js :
-// des matchs termines et regles, jamais un pari de match a venir.
+// The "yesterday" tab (won/lost picks and hit rate) was removed: no track
+// record or performance history is published on the public site. Only the
+// COUNT of published analyses is kept (a volume, never a result).
 // historique.json n'est plus publie (scripts/build-public.js) : il contient
 // l'historique des paris. L'accueil ne le demande donc plus (evite un 404 et
 // une erreur console a chaque visite) ; le KPI garde sa valeur statique.
@@ -996,7 +978,7 @@ function dayLabel(m){
   return d.length===3?d[2]+'/'+d[1]:'';
 }
 function buildHeroFeature(m){
-  var heure=esc(heureLocale(m)),hn=m.home&&nomEquipe(m.home)||'',an=m.away&&nomEquipe(m.away)||'';
+  var heure=esc(heureLocale(m)),hn=m.home&&m.home.n||'',an=m.away&&m.away.n||'';
   // Pas de gate fiableHero ici : la confiance est deja affichee sans lui
   // juste en dessous (feature-signal), et ce bandeau met en avant le SEUL
   // match entierement gratuit de la page - le garder bloque sur
@@ -1015,7 +997,7 @@ function buildHeroFeature(m){
     :'<div class="feature-signal feature-gate"><div class="signal-label">'+esc(t('home_app.free_gate_label','Analyse offerte'))+'</div><div class="signal-market signal-gate">'+esc(t('home_app.free_gate_text','Créer un compte gratuit pour voir l’analyse offerte'))+'</div>'
       +'<span class="feature-cta">'+esc(t('home_app.free_gate_cta','Créer un compte gratuit'))+'<i aria-hidden="true">→</i></span></div>';
   function heroLogo(tm,name){var u=tm&&(tm.photo||tm.logo||(tm.id?'https://media.api-sports.io/football/teams/'+tm.id+'.png':''));return u?'<img src="'+u+'" width="72" height="72" alt="'+esc(tf('home_app.logo_alt','Logo {team}',{team:name}))+'">':'<div class="mc-team-logo-placeholder">'+esc(name.slice(0,2).toUpperCase())+'</div>';}
-  return'<a class="feature-card" href="'+esc(lienMatch(m))+'" aria-label="'+tf('home_app.card_aria_view','Voir l\'analyse {home} contre {away}',{home:esc(hn),away:esc(an)})+'">'
+  return'<a class="feature-card" href="'+esc(lien('match.html?id='+encodeURIComponent(m.id)))+'" aria-label="'+tf('home_app.card_aria_view','Voir l\'analyse {home} contre {away}',{home:esc(hn),away:esc(an)})+'">'
     +'<div class="feature-meta"><div class="feature-league">'+leagueHeader(m)+'</div><div class="feature-meta-right"><span class="feature-free">Analyse gratuite</span><span>'+dayLabel(m)+' · '+heure+'</span></div></div>'
     +'<div class="feature-teams"><div class="feature-team">'+heroLogo(m.home,hn)+esc(hn)+'</div><div class="feature-vs">VS</div><div class="feature-team">'+heroLogo(m.away,an)+esc(an)+'</div></div>'
     +signal+'</a>';
@@ -1039,7 +1021,7 @@ function renderMatchs(){
   // l'ouvre vraiment. Tant que le match n'est pas resolu, le lien reste
   // l'ancre #decisions : jamais de lien mort.
   var ctaHero=document.querySelector('.hero-cta');
-  if(ctaHero&&featured)ctaHero.setAttribute('href',lienMatch(featured));
+  if(ctaHero&&featured)ctaHero.setAttribute('href',lien('match.html?id='+encodeURIComponent(featured.id)));
   // Liste des matchs : le match offert RESTE dans sa competition, avec la puce
   // « Offert » (decision validee le 15/09/2026). Meme identifiant que la vitrine.
   // Sans compte : la ligne du match offert ne montre pas l'analyse (compte gratuit exige, comme la page match).
@@ -1054,18 +1036,10 @@ function monterListe(){
   homeFavMatches=window.IasharkFavLeagues?IasharkFavLeagues.createStore({kind:'matches'}):null;
   homeList=IasharkHomeList.mount(document.getElementById('homeList'),{
     isPro:false,favorites:homeFavorites,favMatches:homeFavMatches,simulations:simulationsParMatch(),
-    // Onglet Hier ouvert : « Buteurs du jour » montre les buteurs de la veille
-    // deja regles (noms visibles, matchs termines). Retour a Aujourd'hui ou
-    // Demain : le comportement habituel (flou + panneau « Débloquer »).
-    onDay:function(jour,info){
-      if(!homeScorers||!homeScorers.setResults)return;
-      var res=info&&info.results;
-      homeScorers.setResults(res?jour:null,res&&homeList?homeList.scorersOf(jour):null);
-    },
     helpers:{
       heure:heureLocale,matchDay:matchDayStr,compareMatches:compareMatchs,
       leagueName:leagueName,leagueFlag:leagueFlag,leagueLogoUrl:leagueLogoUrl,leagueCountry:leagueCountry,
-      translateMarket:translateMarket,marketIdLabel:marketIdLabel,lien:lien,matchHref:lienMatch,
+      translateMarket:translateMarket,marketIdLabel:marketIdLabel,lien:lien,
       pickFreeMatch:function(list){return IasharkFreeMatch.pickFreeMatch(list,null,(window.IASHARK_MARKET&&window.IASHARK_MARKET.code)||null);}
     }
   });
@@ -1084,19 +1058,8 @@ function monterButeurs(){
   }});
 }
 
-// Second bouton du bloc d'appel du haut (résultats de la veille) : l'ancre #decisions
-// amene a la liste des matchs, le clic ouvre l'onglet Hier. Sans resultat
-// encore publie, l'onglet reste desactive et le visiteur arrive simplement sur
-// la liste : jamais un lien mort.
-document.addEventListener('click',function(e){
-  var cible=e.target&&e.target.closest?e.target.closest('[data-hl-yesterday]'):null;
-  if(!cible||!homeList||!homeList.showResults)return;
-  homeList.showResults();
-});
-
-// A minuit (heure du visiteur) le match du jour et les onglets Hier /
-// Aujourd'hui / Demain changent : la page se re-rend d'elle-meme, sans
-// rechargement.
+// A minuit (heure du visiteur) le match du jour et les onglets Aujourd'hui /
+// Demain changent : la page se re-rend d'elle-meme, sans rechargement.
 (function(){var jourAffiche=getTodayStr();setInterval(function(){var j=getTodayStr();if(j===jourAffiche)return;jourAffiche=j;try{if(typeof allMatchs!=='undefined'&&allMatchs&&allMatchs.length)renderMatchs();}catch(e){}},60000);})();
 
 async function loadData(){

@@ -2,13 +2,6 @@
   "_readme": "SEO copy for /de/. Suchbegriffe: 'Fußball Prognose', 'Bundesliga Prognose', 'Wahrscheinlichkeiten', 'Quoten', 'beide Teams treffen'. See i18n/seo/gb.json#_readme.",
   "tz": "Europe/Berlin",
   "tz_label": "deutsche Zeit",
-  "intlLocale": "de-DE",
-  "clock_options": {
-    "hour": "2-digit",
-    "minute": "2-digit"
-  },
-  "clock_zone": "{time} ({tz})",
-  "clock_list": "{time}",
   "sport": "Fußball",
   "org_description": "IASHARK analysiert Fußballspiele mit statistischen Modellen und vergleicht die geschätzten Wahrscheinlichkeiten mit den Buchmacherquoten. IASHARK ist kein Buchmacher.",
   "meta": {
@@ -41,7 +34,7 @@
     "eyebrow": "SO FUNKTIONIERT ES",
     "title": "Fußball-Prognosen aus Wahrscheinlichkeiten statt Bauchgefühl",
     "paragraphs": [
-      "Das statistische Modell von IASHARK schätzt die Chancen jedes Teams aus Spieldaten: Ergebnisse, Tore, Form sowie Heim- und Auswärtsleistungen. Für jedes abgedeckte Spiel der Bundesliga, der Premier League, der Champions League und weiterer Wettbewerbe schätzt es die Wahrscheinlichkeit jedes Ausgangs, der Anzahl der Tore und dafür, dass beide Teams treffen. Die Buchmacherquoten, ohne Marge, dienen dem Vergleich mit diesen Schätzungen und der Auswahl unter den tatsächlich angebotenen Märkten.",
+      "IASHARK erstellt Fußball-Prognosen mit einem statistischen Ergebnismodell, das nie die Quoten verwendet. Für jedes abgedeckte Spiel der Bundesliga, der Premier League, der Champions League und weiterer Wettbewerbe schätzt das Modell die Wahrscheinlichkeit jedes Ausgangs, der Anzahl der Tore und dafür, dass beide Teams treffen, und vergleicht sie mit den aus den Buchmacherquoten abgeleiteten Wahrscheinlichkeiten.",
       "Es handelt sich um statistische Schätzungen: Fußball bleibt unvorhersehbar, kein Ergebnis ist garantiert, und IASHARK ist kein Buchmacher. Die Datenlage unterscheidet sich je nach Liga, deshalb zeigt jede Analyse ihre Datenqualität an. Nur ab 18 Jahren."
     ],
     "leagues_title": "Prognosen nach Wettbewerb",
@@ -55,8 +48,7 @@
       "ligue1",
       "el",
       "eredivisie"
-    ],
-    "summary_tz": "deutsche Zeit"
+    ]
   },
   "breadcrumb": {
     "home": "Startseite",
@@ -210,8 +202,7 @@
     "h2h_title": "Direkter Vergleich",
     "h2h_row": "{date}: {home} {score} {away}",
     "lineups_title": "Startaufstellungen",
-    "lineup_row": "{team} ({formation}): {players}",
-    "h1": "{home} vs {away}"
+    "lineup_row": "{team} ({formation}): {players}"
   },
   "nav": {
     "aria": "Seitennavigation",
@@ -222,20 +213,5 @@
     "blog": "Blog und Ratgeber",
     "markets": "Analysierte Märkte",
     "methodology": "Methodik"
-  },
-  "results": {
-    "hub_title": "Ergebnisse der Prognosen, Tag für Tag | IASHARK",
-    "hub_title_short": "Ergebnisse der Prognosen | IASHARK",
-    "hub_description": "Der Markt, den IASHARK jeden Tag veröffentlicht hat, gewonnen oder verloren: Endstand, Quote und Quelle, Tag für Tag. Ab 18.",
-    "hub_description_short": "Die von IASHARK veröffentlichten Prognosetage, gewonnene wie verlorene. Ab 18.",
-    "hub_h1": "Ergebnisse, Tag für Tag",
-    "hub_intro": "Jeder veröffentlichte Tag behält den vor dem Anpfiff gewählten Markt, mit Endstand und Quote: verlorene Märkte stehen dort genauso wie gewonnene.",
-    "day_title": "Prognose-Ergebnisse vom {date} | IASHARK",
-    "day_title_short": "Ergebnisse vom {date} | IASHARK",
-    "day_description": "Die am {date} gewählten Märkte: {count}. Endstand, Quote und Quelle, gewonnene wie verlorene. Ab 18.",
-    "day_description_short": "Gewählte Märkte am {date}: {count}. Gewonnene und verlorene, Endstand und Quote.",
-    "day_h1": "Ergebnisse vom {date}",
-    "day_intro": "Alle an diesem Tag vor dem Anpfiff gewählten Märkte, gewonnene wie verlorene, mit Endstand und veröffentlichter Quote.",
-    "breadcrumb": "Ergebnisse"
   }
 }

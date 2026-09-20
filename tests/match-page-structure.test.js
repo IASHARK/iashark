@@ -140,10 +140,7 @@ test("l'avis IASHARK montre pari, cote, deux barres, ecart, fiabilite, raisons, 
   }
   assert.match(js,/function confMeter\(conf\)[\s\S]*role="meter"[\s\S]*aria-valuemax="10"/);
   assert.match(js,/t\('match_page\.sig_conf_label','Probabilité estimée'\)/);
-  // Retire le 20/09/2026 (demande du proprietaire) : plus de lien methodologie
-  // ni de « Detail des chiffres » dans l'avis.
-  assert.ok(!bloc.includes("methodLink()"),"le lien methodologie est revenu dans l'avis");
-  assert.ok(!bloc.includes("${detail}"),"le bloc « Detail des chiffres » est revenu");
+  assert.ok(bloc.includes("methodLink()"),"lien Methodologie absent de l'avis");
   // Analyse annoncee mais champs premium absents : jamais "aucun marche".
   assert.match(bloc,/raw\.has_signal===true&&raw\.no_signal!==true/);
   // Deux barres par pari dans « Probabilites et cotes », marche absent = non disponible.
@@ -165,7 +162,7 @@ test("vue visiteur : blocs fermes sans aucune donnee du modele, copie publique a
   }
   assert.doesNotMatch(gate,/\.conf\b/);
   assert.match(gate,/sig-ghost/);
-  assert.doesNotMatch(gate,/methodLink\(\)/);
+  assert.match(gate,/methodLink\(\)/);
   assert.match(gate,/const vm=viewModel\(publicCopy\(raw\)\);/);
   assert.doesNotMatch(gate,/faqCard\(/,"aucune FAQ pour le visiteur");
   // Champs publics seulement : etat de l'analyse et niveau prob_band.

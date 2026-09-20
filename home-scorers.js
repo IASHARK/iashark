@@ -22,14 +22,6 @@
      fichier ; bascule seul a minuit. Rien a montrer : section masquee.
    - Meme contenu et memes droits sur mobile et sur ordinateur : seule la
      mise en page change (assets/home-scorers.css).
-   - 20/09/2026 (docs/SPEC_RESULTATS_HIER.md) : quand l'onglet « Hier » de la
-     liste des matchs est ouvert, la section montre les 3 buteurs de la VEILLE
-     tels que le flux de resultats les a regles (setResults, appele par
-     index.html) : nom visible — le match est termine, plus rien n'est payant —
-     et « a marqué » / « n'a pas marqué » avec bordure, fond teinte, libelle et
-     icone, jamais la couleur seule. Un buteur dont le resultat n'est pas connu
-     n'est pas colore. Aujourd'hui et demain ne changent pas : flou et panneau
-     « Débloquer ».
    ========================================================================= */
 (function(root,factory){
   var api=factory(root||{});
@@ -50,10 +42,6 @@ function localeTag(){return (root.I18N&&root.I18N.localeTag)?root.I18N.localeTag
 function lien(p){return (root.I18N&&root.I18N.href)?root.I18N.href(p):'/'+p;}
 
 var LOCK='<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="3" y="7" width="10" height="7" rx="1.6" fill="currentColor"/><path d="M5.2 7V5.2a2.8 2.8 0 015.6 0V7" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>';
-// Verdicts de la veille : l'icone double toujours le libelle (WCAG 1.4.1).
-var ICON_OK='<svg class="hs-v-ico" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.4 8.6l3 3 6.2-7.2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-var ICON_KO='<svg class="hs-v-ico" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4.2 4.2l7.6 7.6M11.8 4.2l-7.6 7.6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>';
-var ICON_WAIT='<svg class="hs-v-ico" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="5.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 4.8v3.4l2.2 1.3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 function text(v){return typeof v==='string'&&v.trim()?v.trim():null;}
 function num(v){return v==null||v===''||!isFinite(Number(v))?null:Number(v);}
@@ -278,58 +266,6 @@ function renderGate(){
     +'</div>';
 }
 
-/* ---------- Buteurs de la veille (flux de resultats) ----------
-   Entrees {match_id, match, player, goals, result} de results/<jour>.json,
-   transmises par la liste des matchs (home-list.js) quand l'onglet Hier est
-   ouvert. Le match est termine : plus rien n'est payant, le nom s'affiche pour
-   tout le monde. Un buteur dont le resultat n'est pas connu reste neutre. */
-var SCORER_RESULTS=['win','loss','void','pending'];
-function cleanScorer(s){
-  var mid=s&&s.match_id!=null&&/^\d{1,12}$/.test(String(s.match_id))?String(s.match_id):null;
-  var name=s?text(s.player)||text(s.name):null;
-  if(!mid||!name)return null;
-  var r=String(s.result||'').toLowerCase();
-  return {match_id:mid,match:text(s.match)||'',player:name,goals:num(s.goals),
-    result:SCORER_RESULTS.indexOf(r)!==-1?r:'pending'};
-}
-function cleanScorers(list){
-  var out=[];
-  (Array.isArray(list)?list:[]).forEach(function(s){var c=cleanScorer(s);if(c)out.push(c);});
-  return out.slice(0,LIMIT);
-}
-var SCORER_VERDICT={win:['home_scorers.res_scored','A marqué',ICON_OK],
-  loss:['home_scorers.res_missed','N’a pas marqué',ICON_KO],
-  'void':['home_scorers.res_void','Match annulé',ICON_WAIT],
-  pending:['home_scorers.res_wait','En attente',ICON_WAIT]};
-function scorerVerdict(r){return SCORER_VERDICT[r]?r:'pending';}
-// Jamais la couleur seule : bordure, fond teinte, libelle ET icone.
-function renderScorerVerdict(r){
-  var v=SCORER_VERDICT[r];
-  return '<span class="hs-zone hs-vzone"><span class="hs-verdict is-'+r+'">'+v[2]
-    +'<span class="hs-verdict-t">'+esc(t(v[0],v[1]))+'</span></span></span>';
-}
-function goalsHtml(s){
-  var g=num(s.goals);
-  if(s.result!=='win'||g===null||g<=0)return '';
-  return '<span class="hs-stats"><span>'+esc(g===1?t('home_scorers.goals_one','1 but'):tf('home_scorers.goals_many','{n} buts',{n:g}))+'</span></span>';
-}
-function renderResultCard(s,index,H){
-  var r=scorerVerdict(s.result);
-  return '<li class="hs-card hs-rcard is-'+r+'" data-hs-match="'+esc(s.match_id)+'">'
-    +'<a class="hs-link" href="'+esc(H.matchHref(s))+'" data-track="home_scorers_result" data-track-kind="home_scorers_result">'
-    +'<span class="hs-rank" aria-hidden="true">'+pad(index+1)+'</span>'
-    +'<span class="hs-photo-wrap"><span class="hs-photo hs-avatar" aria-hidden="true">'+esc(initials(s.player))+'</span></span>'
-    +'<span class="hs-id"><h3 class="hs-name">'+esc(s.player)+'</h3>'
-    +(s.match?'<span class="hs-meta"><span class="hs-vs">'+esc(s.match)+'</span></span>':'')
-    +goalsHtml(s)+'</span>'
-    +renderScorerVerdict(r)
-    +'<span class="sr-only">'+esc(t('home_scorers.view_match','Voir le match'))+'</span>'
-    +'</a></li>';
-}
-function renderResultList(list,H){
-  return cleanScorers(list).map(function(s,i){return renderResultCard(s,i,H);}).join('');
-}
-
 function renderFoot(viewer){
   var pro=!!(viewer&&viewer.isPro);
   var note='<p class="hs-note">'+esc(pro?t('home_scorers.note_pro','Estimation avant les compositions officielles, jamais une garantie. Même calcul que la carte « Marchés joueurs » de chaque match.'):t('home_scorers.note','Estimation avant les compositions officielles, jamais une garantie.'))+'</p>';
@@ -385,34 +321,10 @@ function mount(el,options){
   var fetchJson=options.fetchJson||defaultFetchJson;
   var fetchPremium=options.fetchPremium||defaultFetchPremium;
   var listEl=el.querySelector('[data-hs-list]'),subEl=el.querySelector('[data-hs-sub]'),footEl=el.querySelector('[data-hs-foot]'),gateEl=el.querySelector('[data-hs-gate]');
-  // Libelle de la liste du jour (« du plus probable au moins probable ») :
-  // faux pour la veille, donc remplace puis remis.
-  var listAria=listEl?listEl.getAttribute('aria-label'):null;
-  var state={file:null,loaded:false,viewer:null,numbers:{},premiumDay:null,premium:null,today:null,
-    resultsDay:null,results:[]};
+  var state={file:null,loaded:false,viewer:null,numbers:{},premiumDay:null,premium:null,today:null};
   function numbersOf(day){return function(p){return state.numbers[numbersKey(day,p)]||null;};}
 
   function render(){
-    // Onglet Hier ouvert et buteurs regles connus : la section montre la
-    // veille. Sans buteur regle, rien n'est invente : elle garde son contenu
-    // du jour.
-    if(state.resultsDay&&state.results.length){
-      el.hidden=false;
-      el.classList.remove('is-locked');
-      el.classList.add('is-results');
-      if(listEl){
-        listEl.innerHTML=renderResultList(state.results,H);
-        listEl.setAttribute('aria-busy','false');
-        // « du plus probable au moins probable » ne veut plus rien dire ici.
-        listEl.setAttribute('aria-label',t('home_scorers.list_aria_results','Buteurs suivis la veille et ce qu’ils ont fait'));
-      }
-      if(subEl)subEl.textContent=t('home_scorers.subtitle_yesterday','Les 3 joueurs suivis hier, et ce qu’ils ont fait.');
-      if(footEl)footEl.innerHTML='<p class="hs-note">'+esc(t('home_scorers.note_results','Résultats de la veille, publiés tels quels. Les résultats passés ne préjugent pas des résultats futurs.'))+'</p>';
-      if(gateEl){gateEl.hidden=true;gateEl.innerHTML='';}
-      return {day:state.resultsDay,players:state.results};
-    }
-    el.classList.remove('is-results');
-    if(listEl&&listAria)listEl.setAttribute('aria-label',listAria);
     if(!state.loaded)return;
     var today=H.parisToday();
     state.today=today;
@@ -492,20 +404,9 @@ function mount(el,options){
     if(H.parisToday()!==state.today){render();loadPremium();}
   },60000);
 
-  // Buteurs regles d'un jour passe (flux de resultats, transmis par
-  // index.html quand l'onglet Hier de la liste des matchs est ouvert).
-  // setResults(null) revient au jour courant.
-  function setResults(day,list){
-    var clean=cleanScorers(list);
-    state.results=clean;
-    state.resultsDay=(day&&clean.length)?day:null;
-    return render();
-  }
-
   return {
     ready:ready,
     setViewer:setViewer,
-    setResults:setResults,
     render:render,
     state:state,
     destroy:function(){clearTimeout(viewerTimer);clearInterval(dayTimer);}
@@ -523,10 +424,6 @@ return {
   renderGate:renderGate,
   renderList:renderList,
   renderFoot:renderFoot,
-  cleanScorer:cleanScorer,
-  cleanScorers:cleanScorers,
-  renderResultCard:renderResultCard,
-  renderResultList:renderResultList,
   subtitleFor:subtitleFor,
   defaultHelpers:defaultHelpers,
   usableNumbers:usableNumbers,

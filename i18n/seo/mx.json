@@ -2,14 +2,6 @@
   "_readme": "SEO copy for /mx/ (es-MX). Vocabulario mexicano: 'pronósticos', 'futbol' (sin acento), 'momios' (nunca 'cuotas'), 'ambos anotan'. See i18n/seo/gb.json#_readme.",
   "tz": "America/Mexico_City",
   "tz_label": "tiempo del centro de México",
-  "intlLocale": "es-MX",
-  "clock_options": {
-    "hour": "2-digit",
-    "minute": "2-digit",
-    "hourCycle": "h23"
-  },
-  "clock_zone": "{time} h ({tz})",
-  "clock_list": "{time} h",
   "sport": "Fútbol",
   "org_description": "IASHARK analiza partidos de futbol con modelos estadísticos y compara las probabilidades estimadas con los momios del mercado. No es una casa de apuestas.",
   "meta": {
@@ -42,7 +34,7 @@
     "eyebrow": "CÓMO FUNCIONA",
     "title": "Pronósticos de futbol basados en probabilidades, no en corazonadas",
     "paragraphs": [
-      "El modelo estadístico de IASHARK estima las probabilidades de cada equipo a partir de los datos de los partidos: resultados, goles, racha y desempeño como local y como visitante. En cada partido de la Liga MX, la MLS, la Champions League y las demás competencias que cubrimos, estima la probabilidad de cada resultado, del número de goles y de que ambos equipos anoten. Los momios, sin el margen de la casa, sirven para comparar esas estimaciones y elegir entre los mercados que realmente se ofrecen.",
+      "IASHARK genera sus pronósticos de futbol con un modelo estadístico de marcadores que nunca usa los momios. En cada partido de la Liga MX, la MLS, la Champions League y las demás competencias que cubrimos, el modelo estima la probabilidad de cada resultado, del número de goles y de que ambos equipos anoten, y la compara con la probabilidad implícita en los momios.",
       "Son estimaciones estadísticas: el futbol es incierto, ningún resultado está garantizado e IASHARK no es una casa de apuestas. La calidad de los datos varía según la liga, por eso cada análisis muestra su nivel de confiabilidad. Solo para mayores de 18 años."
     ],
     "leagues_title": "Pronósticos por liga",
@@ -56,8 +48,7 @@
       "seriea",
       "bundesliga",
       "ligue1"
-    ],
-    "summary_tz": "tiempo del centro de México"
+    ]
   },
   "breadcrumb": {
     "home": "Inicio",
@@ -212,8 +203,7 @@
     "h2h_title": "Enfrentamientos directos",
     "h2h_row": "{date}: {home} {score} {away}",
     "lineups_title": "Alineaciones iniciales",
-    "lineup_row": "{team} ({formation}): {players}",
-    "h1": "{home} vs {away}"
+    "lineup_row": "{team} ({formation}): {players}"
   },
   "nav": {
     "aria": "Navegación del sitio",
@@ -224,20 +214,5 @@
     "blog": "Blog y guías",
     "markets": "Mercados analizados",
     "methodology": "Metodología"
-  },
-  "results": {
-    "hub_title": "Resultados de los pronósticos, día a día | IASHARK México",
-    "hub_title_short": "Resultados de los pronósticos | IASHARK México",
-    "hub_description": "El mercado que IASHARK publicó cada día, ganado o perdido: marcador final, momio y fuente, día por día. Solo +18.",
-    "hub_description_short": "Las jornadas de pronósticos publicadas por IASHARK, ganadas y perdidas. Solo +18.",
-    "hub_h1": "Resultados día a día",
-    "hub_intro": "Cada jornada publicada conserva el mercado elegido antes del silbatazo inicial, con el marcador final y el momio: los mercados perdidos aparecen igual que los ganados.",
-    "day_title": "Resultados de los pronósticos del {date} | IASHARK México",
-    "day_title_short": "Resultados del {date} | IASHARK México",
-    "day_description": "Los mercados elegidos el {date}: {count}. Marcador final, momio y fuente, ganados y perdidos. Solo +18.",
-    "day_description_short": "Mercados elegidos el {date}: {count}. Ganados y perdidos, marcador final y momio.",
-    "day_h1": "Resultados del {date}",
-    "day_intro": "Todos los mercados elegidos antes del silbatazo inicial ese día, ganados y perdidos, con el marcador final y el momio publicado.",
-    "breadcrumb": "Resultados"
   }
 }

@@ -157,69 +157,6 @@ function legalEntries(dir, dirs, xDefault) {
   return entries;
 }
 
-// ---------------------------------------------------------------------------
-// Pages de resultats (scripts/results-pages.js, lot R3) : /<dir>/resultats/ et
-// /<dir>/resultats/<AAAA-MM-JJ>.html dans les 9 repertoires. Sitemap dedie
-// (sitemap-resultats.xml) : les sitemaps par repertoire ci-dessus listent les
-// pages du manifeste i18n, les pages legales et le blog - ils ne bougent pas.
-// Comme pour le blog, une page n'entre ici que si elle existe sur le disque,
-// n'est pas noindex (une journee sans marche regle n'a pas de page du tout) et
-// a un canonical auto-referent ; les hreflang sont ceux declares dans son
-// <head>, limites aux versions reellement ecrites.
-const RESULTS_FOLDER = "resultats";
-const RESULTS_SITEMAP = "sitemap-resultats.xml";
-
-function isFileIn(root, rel) {
-  try { return fs.statSync(path.join(root, rel)).isFile(); } catch (e) { return false; }
-}
-function readFileIn(root, rel) {
-  try { return fs.readFileSync(path.join(root, rel), "utf8"); } catch (e) { return null; }
-}
-// Entrees resultats d'un repertoire, dans l'ordre des URL (index d'abord, puis
-// les journees de la plus recente a la plus ancienne).
-function resultsEntries(dir, root) {
-  root = root || ROOT;
-  var folder = path.join(root, dir, RESULTS_FOLDER);
-  var entries = [];
-  if (!isFileIn(root, path.join(dir, RESULTS_FOLDER, "index.html"))) return entries;
-  var files = ["index.html"].concat(fs.readdirSync(folder)
-    .filter(function (f) { return /^\d{4}-\d{2}-\d{2}\.html$/.test(f); }).sort().reverse());
-  files.forEach(function (f) {
-    var rel = dir + "/" + RESULTS_FOLDER + "/" + f;
-    var html = readFileIn(root, rel);
-    if (!html) return;
-    var seo = pageSeo(html);
-    var loc = SITE_URL + "/" + rel.replace(/(^|\/)index\.html$/, "$1");
-    if (seo.noindex || seo.canonical !== loc) return;
-    var alternates = seo.alternates.filter(function (a) {
-      var target = urlToFile(a.href);
-      return !!target && isFileIn(root, target);
-    });
-    entries.push({ loc: loc, alternates: alternates, priority: f === "index.html" ? "0.6" : "0.5", changefreq: "daily", file: rel });
-  });
-  return entries;
-}
-// sitemap-resultats.xml. Renvoie le nom du fichier ecrit, ou null s'il n'y a
-// aucune page indexable (aucun sitemap vide publie).
-function generateResultsSitemap(today, outDir, srcRoot) {
-  outDir = outDir || ROOT;
-  srcRoot = srcRoot || ROOT;
-  var entries = [];
-  Object.keys(DIRS).forEach(function (dir) { entries = entries.concat(resultsEntries(dir, srcRoot)); });
-  var file = path.join(outDir, RESULTS_SITEMAP);
-  if (!entries.length) {
-    if (fs.existsSync(file)) fs.unlinkSync(file);
-    return null;
-  }
-  var tracker = LASTMOD.tracker(outDir, "resultats", today);
-  entries.forEach(function (e) { e.lastmod = tracker.lastmod(e.loc, readFileIn(srcRoot, e.file) || e.loc); });
-  tracker.save();
-  fs.writeFileSync(file,
-    '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n' +
-      entries.map(function (e) { return urlXml(e, today); }).join("\n") + "\n</urlset>\n");
-  return RESULTS_SITEMAP;
-}
-
 // Date de modification declaree par un article (JSON-LD dateModified, sinon
 // article:modified_time / article:published_time) : premiere valeur du
 // registre lastmod pour les guides.
@@ -303,9 +240,6 @@ function generateLocalizedSitemaps(locales, pages, today, outDir) {
 
 module.exports = {
   generateLocalizedSitemaps: generateLocalizedSitemaps,
-  generateResultsSitemap: generateResultsSitemap,
-  resultsEntries: resultsEntries,
-  RESULTS_SITEMAP: RESULTS_SITEMAP,
   writeSitemapIndex: writeSitemapIndex,
   articleModified: articleModified,
   sitemapDirs: sitemapDirs,
@@ -321,10 +255,6 @@ if (require.main === module) {
   var I18N_PAGES = require(path.join(ROOT, "scripts/i18n-manifest.js"));
   var TODAY = new Date().toISOString().split("T")[0];
   var files = generateLocalizedSitemaps(I18N_LOCALES, I18N_PAGES, TODAY, ROOT);
-  // Pages de resultats deja ecrites par scripts/results-pages.js (rien a faire
-  // si elles n'existent pas encore : aucun sitemap vide).
-  var resultsFile = generateResultsSitemap(TODAY, ROOT, ROOT);
-  if (resultsFile) files.push(resultsFile);
 
   // sitemap-fr.xml (ecrit par le pipeline) ne contient plus que les pages match
   // statiques (.github/workflows/update-data.yml#generateSitemaps). Une copie

@@ -51,9 +51,7 @@ const module = { exports: {} };
     },
     gb: {
       market: "gb", dir: "gb", htmlLang: "en-GB", intlLocale: "en-GB", currency: "GBP", timeZone: "Europe/London",
-      // Ligne nationale geree par GamCare (sources : legal/README.md ; begambleaware.org ne fait que
-      // rediriger vers gambleaware.org). Meme ligne que config/markets.json#gb.helpline (19/09/2026).
-      helpline: { name: "National Gambling Helpline (GamCare)", phone: "0808 8020 133", url: "https://www.gamcare.org.uk", display: "gamcare.org.uk" }
+      helpline: { name: "National Gambling Helpline", phone: "0808 8020 133", url: "https://www.begambleaware.org", display: "BeGambleAware.org" }
     },
     mx: {
       market: "mx", dir: "mx", htmlLang: "es-MX", intlLocale: "es-MX", currency: "MXN", timeZone: "America/Mexico_City",

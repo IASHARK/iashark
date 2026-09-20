@@ -45,8 +45,6 @@ const PAGES = require("./i18n-manifest.js");
 const SEO = require("./seo-common.js");
 // Pages match retirees a J+30 : regles 301 tirees du registre versionne.
 const MATCH_LIFECYCLE = require("./match-lifecycle.js");
-// Resume « Analyses IA du jour » de chaque accueil (meme fonction que le pipeline).
-const HOME_SUMMARY = require("./home-summary.js");
 const PAGE_FILES = PAGES.map(function (p) { return p.file; });
 // Pages retirees du site public : jamais generees, supprimees des repertoires
 // generes, redirigees vers l'accueil du repertoire (_redirects).
@@ -114,18 +112,6 @@ function formatPrice(dir, planKey) {
   // Locale des prix du marche (priceIntlLocale, ex. USD de /en/ en en-US),
   // sinon celle du repertoire : meme regle que lib/market-config.js#build.
   return marketConfigLib().formatAmount(amount, market.currency, market.priceIntlLocale || conf.intlLocale);
-}
-// Ressource d'aide SUPPLEMENTAIRE d'un repertoire, affichee a cote de la
-// principale : config/markets.json#_dirs.<dir>.helplineExtra = cle de _helplines
-// (ex. /en/ : ligne nationale americaine NCPG 1-800-MY-RESET a cote de Gambling
-// Therapy, audit SEO US du 19/09/2026). null sans configuration : rien n'est
-// affiche, jamais un numero invente. cfg (facultatif) : autre configuration
-// de meme forme (tests).
-function helplineExtraFor(dir, cfg) {
-  var MK = cfg || MARKETS, conf = MK._dirs && MK._dirs[dir];
-  var helplines = MK._helplines || {};
-  var key = conf && conf.helplineExtra;
-  return key && Object.prototype.hasOwnProperty.call(helplines, key) ? helplines[key] : null;
 }
 // Ressource d'aide d'un repertoire (surcharge _dirs.<dir>.helpline, sinon marche).
 function helplineFor(dir) {
@@ -373,30 +359,18 @@ function homeSeoBlock(dir) {
     "</div></section>";
 }
 // Resume des matchs du jour (<!--SEO_MATCHES_SUMMARY-->, ecrit par le pipeline
-// dans index.html racine) : REECRIT pour chaque version par
-// scripts/home-summary.js (meme fonction que injectHomeSeoSummary du pipeline)
-// depuis les matchs publics du run (match/<id>.json) et le jour du run porte
-// par le bloc racine : fuseau et jour de la version, competitions de la
-// version d'abord, lien vers la page match de la version si elle existe
-// (scripts/match-lifecycle.js#homeSummaryHref). Audit du 19/09/2026 : le bloc
-// racine (heure et jour de Paris) etait recopie tel quel dans les 9 versions.
-function publicRunMatches(root) {
-  var dir = path.join(root, "match"), out = [];
-  if (!fs.existsSync(dir)) return out;
-  fs.readdirSync(dir).filter(function (f) { return /^\d{1,12}\.json$/.test(f); }).sort().forEach(function (f) {
-    try {
-      var m = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8"));
-      if (m && m.id != null) out.push({ id: m.id, date: m.date, home: m.home, away: m.away, league: m.league, league_key: m.league_key });
-    } catch (e) { /* fichier illisible : ignore */ }
-  });
-  return out;
-}
+// dans index.html racine avec des liens FR /match/<id>.html) : chaque lien vise
+// la page de la version si elle existe, sinon la version la plus proche
+// reellement generee dans le perimetre de la competition
+// (scripts/match-lifecycle.js#versionMatchHref, meme fonction que
+// injectHomeSeoSummary du pipeline) ; aucune page : nom sans lien.
 function rewriteHomeMatchSummary(html, dir, root) {
-  if (html.indexOf("<!--SEO_MATCHES_SUMMARY-->") === -1) return html;
-  var day = HOME_SUMMARY.summaryDay(html);
-  if (!day) return html;
-  var summary = HOME_SUMMARY.homeSummaryHtml(publicRunMatches(root || ROOT), dir, { today: day, root: root || ROOT });
-  return HOME_SUMMARY.replaceSummary(html, summary);
+  return html.replace(/<!--SEO_MATCHES_SUMMARY-->[\s\S]*?<!--\/SEO_MATCHES_SUMMARY-->/, function (block) {
+    return block.replace(/<a href="(?:\/[a-z]{2})?\/match\/(\d{1,12})\.html"([^>]*)>([\s\S]*?)<\/a>/g, function (m, id, attrs, inner) {
+      var href = MATCH_LIFECYCLE.homeSummaryHref(id, null, dir, root || ROOT);
+      return href ? '<a href="' + href + '"' + attrs + ">" + inner + "</a>" : inner;
+    });
+  });
 }
 
 function injectHomeSeo(html, dir, meta) {
@@ -558,11 +532,9 @@ function syncMarketConfig() {
 // recopiee depuis config/markets.json. La fonction s'en sert pour refuser un
 // Price Stripe dont devise / periodicite / montant ne correspondent pas au
 // prix affiche (jamais de facturation d'un autre prix que celui montre).
-// Toutes les durees VENDUES y figurent (_dirs n'y entre pas) ; open = duree
-// listee dans checkoutOpen (liste absente = toutes ouvertes). 19/09/2026 :
-// create-checkout-session (pricing.ts) refuse une duree open:false, meme avec
-// un secret ou un id de Price (duree fermee :
-// annuel FR au 19/09/2026) - l'affichage seul ne suffisait pas contre un appel direct.
+// Independante de la bascule _usdSwitch (checkoutOpen et _dirs n'y entrent
+// pas) : la ligne "us" y figure des maintenant, inerte tant que le secret
+// STRIPE_PRICE_ID_US_MONTH n'existe pas et que le front n'envoie pas market "us".
 function checkoutPriceTable(cfg) {
   var MK = cfg || MARKETS;
   var out = {};
@@ -578,8 +550,7 @@ function checkoutPriceTable(cfg) {
       // apres le secret envKey puis legacyEnvKey (pricing.ts).
       row.intervals[iv] = { unitAmount: Math.round(amount * 100), envKey: env,
         legacyEnvKey: iv === "month" ? (m.stripeEnvKeyLegacyMonth || null) : null,
-        priceId: (m.stripePriceIds && typeof m.stripePriceIds[iv] === "string" && m.stripePriceIds[iv].trim()) || null,
-        open: !Array.isArray(m.checkoutOpen) || m.checkoutOpen.indexOf(iv) !== -1 };
+        priceId: (m.stripePriceIds && typeof m.stripePriceIds[iv] === "string" && m.stripePriceIds[iv].trim()) || null };
     });
     out[k] = row;
   });
@@ -589,7 +560,7 @@ function syncCheckoutPriceTable() {
   var file = path.join(ROOT, "supabase/functions/create-checkout-session/prices.generated.ts");
   var body = "// GENERE par scripts/build-locales.js depuis config/markets.json - ne pas modifier a la main.\n" +
     "export type IntervalKey = \"week\" | \"month\" | \"year\";\n" +
-    "export type PriceRow = { unitAmount: number; envKey: string; legacyEnvKey: string | null; priceId: string | null; open: boolean };\n" +
+    "export type PriceRow = { unitAmount: number; envKey: string; legacyEnvKey: string | null; priceId: string | null };\n" +
     "export const PRO_INTERVALS: IntervalKey[] = " + JSON.stringify(MARKETS._proIntervals || ["week", "month", "year"]) + ";\n" +
     "export const PRO_DEFAULT_INTERVAL: IntervalKey = " + JSON.stringify(MARKETS._proDefaultInterval || "month") + ";\n" +
     "export const PRO_PRICES: Record<string, { currency: string; intervals: Partial<Record<IntervalKey, PriceRow>> }> = " +
@@ -599,37 +570,12 @@ function syncCheckoutPriceTable() {
 
 // lib/league-names.js : un nom d'affichage par competition, recopie depuis
 // config/leagues.json (displayName) - seule source des noms de competitions.
-// dirs : versions ou une page match statique est generee pour la competition
-// (fr + config/leagues.json#seoMatchDirs) : la liste de l'accueil
-// (home-list.js) lie une carte a /<dir>/match/<id>.html plutot qu'au shell
-// noindex match.html?id= quand la version en a une (audit SEO du 19/09/2026).
 function leagueNamesData() {
   var out = {};
   readJson("config/leagues.json").leagues.forEach(function (l) {
-    out[l.key] = { name: l.displayName, id: l.apiFootballId, dirs: SEO.leagueDirs(l.key) };
+    out[l.key] = { name: l.displayName, id: l.apiFootballId };
   });
   return out;
-}
-// lib/team-names.js : noms d'affichage des equipes, recopies depuis
-// config/team-display-names.json (id api-football -> {name, feedName}).
-function teamNamesData() {
-  var cfg = readJson("config/team-display-names.json"), out = {};
-  Object.keys(cfg.teams || {}).sort(function (a, b) { return Number(a) - Number(b); }).forEach(function (id) {
-    var t = cfg.teams[id];
-    if (!/^\d{1,9}$/.test(id) || !t || typeof t.name !== "string" || !t.name.trim()) throw new Error("config/team-display-names.json : entree invalide " + id);
-    out[id] = { name: t.name.trim(), feedName: typeof t.feedName === "string" ? t.feedName : null };
-  });
-  return out;
-}
-function teamNamesBlock() {
-  return "/*IASHARK_TEAM_NAMES_DATA_START*/\nvar TEAMS = " + JSON.stringify(teamNamesData(), null, 2) + ";\n/*IASHARK_TEAM_NAMES_DATA_END*/";
-}
-function syncTeamNames() {
-  var file = path.join(ROOT, "lib/team-names.js");
-  var src = fs.readFileSync(file, "utf8");
-  var re = /\/\*IASHARK_TEAM_NAMES_DATA_START\*\/[\s\S]*?\/\*IASHARK_TEAM_NAMES_DATA_END\*\//;
-  if (!re.test(src)) throw new Error("lib/team-names.js : marqueurs IASHARK_TEAM_NAMES_DATA_START/END introuvables");
-  writeIfChanged(file, src.replace(re, function () { return teamNamesBlock(); }));
 }
 function syncLeagueNames() {
   var file = path.join(ROOT, "lib/league-names.js");
@@ -657,28 +603,6 @@ function syncI18nDirMarkets(src, dirs) {
 function syncI18nDirs() {
   var file = path.join(ROOT, "i18n/i18n.js");
   writeIfChanged(file, syncI18nDirMarkets(fs.readFileSync(file, "utf8")));
-}
-
-// ---------------------------------------------------------------------------
-// Anciennes URLs (config/legacy-redirects.json) -> [[from, to], ...]. Une cible
-// doit exister sur disque (page ou repertoire avec index.html) ; une URL
-// source qui existe de nouveau n'est jamais redirigee.
-function legacyRedirectRules(cfg, root) {
-  root = root || ROOT;
-  var c = cfg;
-  if (!c) { try { c = readJson("config/legacy-redirects.json"); } catch (e) { return []; } }
-  function exists(p) { var rel = p.replace(/^\/+/, ""); return fs.existsSync(path.join(root, /\/$/.test(p) || rel === "" ? rel + "index.html" : rel)); }
-  function safe(p) { return typeof p === "string" && /^\/[a-z0-9\/._-]*$/i.test(p); }
-  var out = [];
-  (c.prefixes || []).forEach(function (x) {
-    if (!safe(x.from) || !safe(x.to) || !exists(x.to)) return;
-    out.push([x.from.replace(/\/$/, "") === x.from ? x.from : x.from + "*", x.to]);
-  });
-  (c.rules || []).forEach(function (x) {
-    if (!safe(x.from) || !safe(x.to) || !exists(x.to) || exists(x.from)) return;
-    out.push([x.from, x.to]);
-  });
-  return out;
 }
 
 // ---------------------------------------------------------------------------
@@ -751,29 +675,6 @@ function redirectsContent() {
     out.push(rule("/" + d + "/blog/", hub, "301!"));
     out.push(rule("/" + d + "/blog/*", (b ? "/" + b + "/blog/" : "/blog/") + ":splat", "301!"));
   });
-
-  // Versions redirigees d'une competition (config/leagues.json#seoRedirectDirs,
-  // audit /mx/ du 19/09/2026 : Liga MX /es/ -> /mx/). Forcee : un ancien
-  // fichier encore publie ne doit jamais masquer la redirection.
-  var leagueRedirects = [];
-  SEO.LEAGUES.forEach(function (l) {
-    var r = SEO.leagueRedirectDirs(l.key);
-    Object.keys(r).forEach(function (from) { leagueRedirects.push(rule(SEO.leagueHubPath(from, l.key), SEO.leagueHubPath(r[from], l.key), "301!")); });
-  });
-  if (leagueRedirects.length) {
-    out.push("", "# --- Pages championnat d'une version redirigee vers la version de meme langue",
-      "# (config/leagues.json#seoRedirectDirs). Pages match : bloc des pages retirees.");
-    leagueRedirects.forEach(function (l) { out.push(l); });
-  }
-
-  // Anciennes URLs supprimees encore demandees (config/legacy-redirects.json,
-  // 404 de l'audit SEO du 19/09/2026). Non forcees ; cible absente : ignoree.
-  var legacy = legacyRedirectRules();
-  if (legacy.length) {
-    out.push("", "# --- Anciennes URLs supprimees (commit a9d2f03ce du 21/07/2026) : 301 vers la page la",
-      "# plus proche qui existe (config/legacy-redirects.json). Non forcees.");
-    legacy.forEach(function (r) { out.push(rule(r[0], r[1], "301")); });
-  }
 
   // Pages match retirees a J+30 (scripts/match-lifecycle.js) : le bloc suit
   // data/match-pages-registry.json et survit donc a chaque regeneration.
@@ -935,8 +836,7 @@ function bakeMarket(html, dir) {
   var help = helplineFor(dir);
   var mk = MARKETS[conf.market] || {};
   var payable = function (key) { return marketConfigLib().isPayable(mk.prices || {}, key, mk.checkoutOpen); };
-  var extra = helplineExtraFor(dir);
-  html = rewriteElements(html, ["data-market-price", "data-market-price-line", "data-market-price-if", "data-market-open-if", "data-market-closed-if", "data-market-helpline", "data-market-helpline-if", "data-market-helpline-extra", "data-market-helpline-extra-if", "data-market-label", "data-seo-date"], function (tag, name) {
+  html = rewriteElements(html, ["data-market-price", "data-market-price-line", "data-market-price-if", "data-market-open-if", "data-market-closed-if", "data-market-helpline", "data-market-helpline-if", "data-market-label", "data-seo-date"], function (tag, name) {
     var plan = attrValue(tag, "data-market-price");
     if (plan != null) {
       var price = formatPrice(dir, plan);
@@ -973,21 +873,6 @@ function bakeMarket(html, dir) {
     }
     var cond = attrValue(tag, "data-market-helpline-if");
     if (cond != null) return { tag: setHidden(tag, !(help && help[cond])), inner: null };
-    // Ressource supplementaire (helplineExtraFor) : texte statique seulement,
-    // le runtime (lib/market-config.js) ne touche pas ces elements.
-    var xpart = attrValue(tag, "data-market-helpline-extra");
-    if (xpart != null) {
-      if (!extra || (xpart === "phone" && !extra.phone)) return { tag: setHidden(tag, true), inner: "" };
-      var xt = setHidden(tag, false), xinner;
-      if (xpart === "phone") { xinner = extra.phone; if (name === "a" && extra.tel) xt = setAttr(xt, "href", "tel:" + extra.tel); }
-      else if (xpart === "url") { xinner = extra.display || extra.url; if (name === "a") xt = setAttr(xt, "href", extra.url); }
-      else xinner = extra.name;
-      return { tag: xt, inner: escText(xinner) };
-    }
-    if (attrValue(tag, "data-market-helpline-extra-if") != null || hasAttr(tag, "data-market-helpline-extra-if")) {
-      var xcond = attrValue(tag, "data-market-helpline-extra-if");
-      return { tag: setHidden(tag, !(extra && (!xcond || extra[xcond]))), inner: null };
-    }
     var raw = attrValue(tag, "data-market-label");
     if (raw != null) {
       if (conf.locale === "fr") return null; // la source racine est deja en francais
@@ -1000,8 +885,7 @@ function bakeMarket(html, dir) {
       var iso = attrValue(tag, "datetime");
       if (!/^\d{4}-\d{2}-\d{2}$/.test(iso || "")) return null;
       var d = new Date(iso + "T12:00:00Z");
-      // Locale des dates statiques de la version (i18n/seo/<dir>.json#intlLocale, /en/ : en-US).
-      return { tag: tag, inner: escText(new Intl.DateTimeFormat(SEO.intlLocaleFor(dir), { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(d)) };
+      return { tag: tag, inner: escText(new Intl.DateTimeFormat(conf.intlLocale, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(d)) };
     }
     return null;
   });
@@ -1031,7 +915,6 @@ function build() {
   syncMarketConfig();
   syncCheckoutPriceTable();
   syncLeagueNames();
-  syncTeamNames();
   syncI18nDirs();
   var report = { stale: {}, pages: 0, legal: 0, missingLegal: [], removed: [] };
 
@@ -1101,8 +984,7 @@ function build() {
 module.exports = {
   DIRS: DIRS, DIR_CODES: DIR_CODES, PAGE_FILES: PAGE_FILES, LEGAL_FILE_LIST: LEGAL_FILE_LIST,
   mapPath: mapPath, rewriteInternalLinks: rewriteInternalLinks, bakeI18n: bakeI18n, formatPrice: formatPrice,
-  teamNamesData: teamNamesData, teamNamesBlock: teamNamesBlock, legacyRedirectRules: legacyRedirectRules, publicRunMatches: publicRunMatches,
-  bakeMarket: bakeMarket, helplineFor: helplineFor, helplineExtraFor: helplineExtraFor, leagueNamesData: leagueNamesData,
+  bakeMarket: bakeMarket, helplineFor: helplineFor, leagueNamesData: leagueNamesData,
   marketRuntimeData: marketRuntimeData, checkoutPriceTable: checkoutPriceTable, redirectsContent: redirectsContent, build: build,
   syncI18nDirMarkets: syncI18nDirMarkets,
   stripUnavailablePageLinks: stripUnavailablePageLinks,

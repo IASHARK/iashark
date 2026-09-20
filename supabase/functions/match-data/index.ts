@@ -111,116 +111,6 @@ function retirerPremium(m: Record<string, unknown>): Record<string, unknown> {
   return copy;
 }
 
-// ---------------------------------------------------------------------------
-// OUVERTURE DES ANALYSES DE MATCHS TERMINES (decision du proprietaire,
-// 20/09/2026 ; docs/SPEC_RESULTATS_HIER.md, lot R4).
-//
-// Une analyse dont le match est TERMINE n'a plus aucune valeur de pari : elle
-// devient la preuve publique du travail et s'ouvre a tout le monde, sans
-// compte et sans abonnement, exactement comme l'analyse offerte du jour
-// (is_free). Une analyse d'un match A VENIR ou EN COURS reste strictement
-// payante : rien ne change pour elle.
-//
-// LE DECLENCHEUR EST VERIFIE ICI, COTE SERVEUR, et uniquement a partir de
-// donnees que le navigateur ne peut pas forger : l'heure de coup d'envoi et le
-// statut ecrits par le pipeline dans NOS fichiers publics, telecharges par
-// cette fonction elle-meme (chargerDonnees). Aucun parametre de la requete
-// n'entre dans cette decision - le client ne peut demander qu'un identifiant.
-//
-// Copie fonctionnelle de lib/match-view-model.js#openedState (Deno ne charge
-// pas le module CommonJS du site) : tests/match-page-results.test.js execute
-// les deux et verifie qu'elles decident exactement la meme chose. Ne jamais
-// modifier l'une sans l'autre.
-
-// Copie minimale de lib/match-time.js#parseParis : les dates des fichiers
-// publics sont ecrites en heure de Paris ("2026-09-19 21:30"), changements
-// d'heure compris (le decalage est calcule POUR la date, jamais suppose).
-// Date absente ou illisible : null, et le match reste ferme.
-const FUSEAU_SOURCE = "Europe/Paris";
-const RE_DATE_PARIS = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/;
-function decalageParisMinutes(instant: number): number {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: FUSEAU_SOURCE, year: "numeric", month: "2-digit", day: "2-digit",
-    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
-  }).formatToParts(new Date(instant));
-  const v: Record<string, number> = {};
-  for (const p of parts) if (p.type !== "literal") v[p.type] = Number(p.value);
-  const mur = Date.UTC(v.year, v.month - 1, v.day, v.hour % 24, v.minute, v.second);
-  return Math.round((mur - Math.floor(instant / 1000) * 1000) / 60000);
-}
-function coupDEnvoiMs(valeur: unknown): number | null {
-  const m = RE_DATE_PARIS.exec(String(valeur == null ? "" : valeur).trim());
-  if (!m) return null;
-  const mois = Number(m[2]), jour = Number(m[3]);
-  const heure = m[4] == null ? 0 : Number(m[4]), minute = m[5] == null ? 0 : Number(m[5]);
-  // Date hors calendrier ("2026-13-45") : illisible, donc heure inconnue.
-  // Date.UTC la reporterait silencieusement sur un autre mois.
-  if (mois < 1 || mois > 12 || jour < 1 || jour > 31 || heure > 23 || minute > 59) return null;
-  const devine = Date.UTC(Number(m[1]), mois - 1, jour, heure, minute);
-  if (!Number.isFinite(devine)) return null;
-  const off = decalageParisMinutes(devine);
-  let t = devine - off * 60000;
-  // Deuxieme passe : le decalage a l'instant corrige peut differer du premier
-  // (nuit du changement d'heure).
-  const off2 = decalageParisMinutes(t);
-  if (off2 !== off) t = devine - off2 * 60000;
-  return t;
-}
-
-type EtatOuverture = { open: boolean; reason: string };
-// --- DEBUT ETAT OUVERTURE (copie de lib/match-view-model.js#openedState) ---
-// Critere volontairement conservateur :
-//   1. statut de report, d'annulation, de suspension, de match arrete ou
-//      d'horaire a definir -> FERME, meme longtemps apres l'heure prevue : le
-//      match peut encore se jouer, le pari garde toute sa valeur ;
-//   2. sans heure de coup d'envoi exploitable -> FERME (jamais d'ouverture au
-//      jugement) ;
-//   3. sinon, ouverture 3 h 30 apres le coup d'envoi seulement. Un match dure
-//      au plus ~2 h 05 (2 h 30 avec de longs arrets) : la marge couvre les
-//      prolongations, les tirs au but et un coup d'envoi retarde ;
-//   4. un statut de fin reel (FT/AET/PEN) est enregistre comme raison mais ne
-//      dispense JAMAIS de la marge : les fichiers publics ne sont reecrits
-//      qu'aux passages du pipeline, un statut peut donc etre en retard, jamais
-//      en avance.
-const SETTLED_MARGIN_MS = 3.5 * 60 * 60 * 1000;
-const FINISHED_STATUSES = ["FT", "AET", "PEN"];
-const BLOCKING_STATUSES = ["PST", "CANC", "SUSP", "INT", "ABD", "AWD", "WO", "TBD"];
-function openedState(status: unknown, kickoffMs: unknown, nowMs: unknown): EtatOuverture {
-  const s = String(status == null ? "" : status).trim().toUpperCase();
-  if (BLOCKING_STATUSES.indexOf(s) !== -1) return { open: false, reason: "postponed" };
-  // Heure absente = heure INCONNUE, jamais 1970 : Number(null) vaut 0, et un
-  // 0 accepte ici ouvrirait tous les matchs sans date.
-  const kickoff = kickoffMs === null || kickoffMs === undefined || kickoffMs === "" ? NaN : Number(kickoffMs);
-  if (!Number.isFinite(kickoff)) return { open: false, reason: "unknown_kickoff" };
-  const now = Number(nowMs);
-  if (!Number.isFinite(now) || now - kickoff < SETTLED_MARGIN_MS) return { open: false, reason: "too_early" };
-  return { open: true, reason: FINISHED_STATUSES.indexOf(s) !== -1 ? "finished_status" : "kickoff_margin" };
-}
-// --- FIN ETAT OUVERTURE ---
-
-// Etat d'ouverture de chaque match servi, calcule sur les donnees du serveur.
-function etatsOuverture(matchs: Record<string, unknown>[], maintenant: number): Record<string, EtatOuverture> {
-  const out: Record<string, EtatOuverture> = {};
-  for (const m of matchs) {
-    if (!m || m.id == null) continue;
-    out[String(m.id)] = openedState(m.status, coupDEnvoiMs(m.date), maintenant);
-  }
-  return out;
-}
-// Drapeaux explicites pour la page : pourquoi ce match est ouvert.
-// opened_reason : "settled" (offert car termine), "free" (offert car match du
-// jour) ou "pro" (abonne). Un match ferme ne porte aucun drapeau.
-function marquerOuverture(m: Record<string, unknown>, etat: EtatOuverture | undefined, isPro: boolean): Record<string, unknown> {
-  const termine = !!(etat && etat.open);
-  if (!termine && !estGratuit(m) && !isPro) return m;
-  return {
-    ...m,
-    is_settled: termine,
-    settled_reason: termine && etat ? etat.reason : null,
-    opened_reason: isPro ? "pro" : estGratuit(m) ? "free" : termine ? "settled" : null,
-  };
-}
-
 // run_output public (miroir de lib/public-run-output.js) : garde-fou si un
 // data.json ancien portait encore la SAFE_PICK d'un match payant, les joueurs
 // du top buteurs ou les jambes des combines.
@@ -254,73 +144,6 @@ const CORS_HEADERS = {
 
 const PREMIUM_COLUMNS = "fixture_id,kelly,edge,verdict_shark,facteur_x,dropping_odds,player_markets,pari_rec,cote_rec,model_probability,markets_compared,raw_response,market_id,marche";
 
-// deno-lint-ignore no-explicit-any
-type Supabase = any;
-
-// Lignes premium REELLES depuis la table protegee, jamais depuis quoi que ce
-// soit qui viendrait du navigateur. Une erreur de lecture est journalisee et
-// ne renvoie rien : le match reste servi sans son detail premium.
-async function lirePremium(supabase: Supabase, fixtureIds: unknown[]): Promise<Record<string, Record<string, unknown>>> {
-  if (!fixtureIds.length) return {};
-  // Type explicite : les deux select() n'ont pas le meme type infere.
-  let q: { data: unknown; error: { message: string } | null } =
-    await supabase.from("match_premium_data").select(PREMIUM_COLUMNS + ",premium_fields").in("fixture_id", fixtureIds);
-  if (q.error) {
-    // Migration 0020 pas encore appliquee : premium_fields est alors lu
-    // dans raw_response.premium_fields (repli du pipeline).
-    console.warn("premium_fields indisponible, lecture sans la colonne :", q.error.message);
-    q = await supabase.from("match_premium_data").select(PREMIUM_COLUMNS).in("fixture_id", fixtureIds);
-  }
-  if (q.error) {
-    console.error("match_premium_data query failed:", q.error.message);
-    return {};
-  }
-  return Object.fromEntries(((q.data ?? []) as Record<string, unknown>[]).map((r) => [String(r.fixture_id), r]));
-}
-
-// Match complete avec ses champs premium reels. Sans ligne premium, le match
-// est rendu tel quel (jamais un pari invente pour combler un vide).
-function enrichirMatch(m: Record<string, unknown>, premium: Record<string, unknown> | undefined, detailFields: Set<string>): Record<string, unknown> {
-  if (!premium) return m;
-  const raw = premium.raw_response as { narrative_i18n?: Record<string, unknown>; premium_fields?: Record<string, unknown> } | null;
-  const etendus = (premium.premium_fields ?? raw?.premium_fields ?? null) as Record<string, unknown> | null;
-  const enrichi: Record<string, unknown> = { ...m };
-  if (etendus && typeof etendus === "object") {
-    for (const f of PREMIUM_FIELDS) {
-      if (!(f in etendus)) continue;
-      // Match de liste (detail_omitted) : on ne regonfle pas les champs de detail.
-      if (m.detail_omitted === true && detailFields.has(f)) continue;
-      enrichi[f] = etendus[f];
-    }
-  }
-  // conf (note sur 10 = model_probability / 10, premium depuis le 15/09/2026) :
-  // lignes ecrites avant ce changement sans conf dans premium_fields. Meme
-  // formule que le pipeline ; sans probabilite (pas de pari), pas de note.
-  if (enrichi.conf == null && premium.model_probability != null && Number.isFinite(Number(premium.model_probability))) {
-    enrichi.conf = Math.round(Number(premium.model_probability)) / 10;
-  }
-  return {
-    ...enrichi,
-    kelly: premium.kelly ?? null,
-    edge: premium.edge ?? null,
-    verdict_shark: premium.verdict_shark ?? null,
-    facteur_x: premium.facteur_x ?? null,
-    facteur_x_i18n: raw?.narrative_i18n?.facteur_x_i18n ?? null,
-    verdict_shark_i18n: raw?.narrative_i18n?.verdict_shark_i18n ?? null,
-    dropping_odds: premium.dropping_odds ?? null,
-    player_markets: premium.player_markets ?? null,
-    // Le pari recommande revient ici, depuis la table protegee, pour un
-    // abonne confirme (ou sur un match termine, ouvert a tous). On ne fait
-    // jamais confiance a ce qui pourrait trainer dans data.json.
-    pari_rec: premium.pari_rec ?? m.pari_rec ?? null,
-    cote_rec: premium.cote_rec ?? m.cote_rec ?? null,
-    model_probability: premium.model_probability ?? m.model_probability ?? null,
-    markets_compared: premium.markets_compared ?? m.markets_compared ?? null,
-    market_id: premium.market_id ?? m.market_id ?? null,
-    marche: premium.marche ?? m.marche ?? null,
-  };
-}
-
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: CORS_HEADERS });
@@ -350,10 +173,9 @@ Deno.serve(async (req: Request) => {
   // des donnees premium. isPro doit refleter la realite (plan lu cote serveur,
   // colonne non modifiable par le client : migration 0001).
 
-  const portee = await lirePortee(req);
   let data: Record<string, unknown>;
   try {
-    data = await chargerDonnees(portee);
+    data = await chargerDonnees(await lirePortee(req));
   } catch (e) {
     return new Response(
       JSON.stringify({ error: "Impossible de charger les donnees", details: String(e) }),
@@ -362,45 +184,16 @@ Deno.serve(async (req: Request) => {
   }
 
   const matchs = Array.isArray(data.matchs) ? (data.matchs as Record<string, unknown>[]) : [];
-  const detailFields = new Set(Array.isArray(data.detail_fields) ? (data.detail_fields as string[]) : []);
-
-  // Ouverture calculee COTE SERVEUR, sur l'heure de coup d'envoi et le statut
-  // de NOS fichiers publics (voir openedState plus haut). Le client n'a aucune
-  // prise dessus : il ne choisit que l'identifiant demande.
-  const ouverture = etatsOuverture(matchs, Date.now());
-  const demande = portee.id ? matchs.find((m) => String(m.id) === portee.id) : undefined;
-  const etatDemande = portee.id ? ouverture[portee.id] : undefined;
-  const termineDemande = !!(etatDemande && etatDemande.open);
-  if (portee.id) {
-    console.log("match-data", portee.id, "isPro=" + isPro,
-      "ouverture=" + (etatDemande ? (etatDemande.open ? "ouverte/" : "fermee/") + etatDemande.reason : "match absent"));
-  }
 
   // Non-abonne (anonyme ou compte gratuit) : aucun champ premium, jamais,
   // meme s'il trainait dans un fichier public (ancien commit, transition).
-  // Deux exceptions, et deux seulement : l'analyse offerte du jour (is_free)
-  // et le match TERMINE explicitement demande, dont l'analyse est rendue a
-  // tout le monde depuis la table protegee (elle n'a plus de valeur de pari).
-  //
-  // Seul le match demande est re-enrichi : la liste d'accueil n'a besoin
-  // d'aucun champ premium, et on n'envoie jamais plus que ce que la page
-  // affiche.
   if (!isPro) {
-    let premiumById: Record<string, Record<string, unknown>> = {};
-    if (termineDemande && demande && demande.id != null) premiumById = await lirePremium(supabase, [demande.id]);
     data.matchs = matchs.map((m) => {
       if (estGratuit(m)) return m;              // analyse offerte du jour
-      // Match termine demande : analyse ouverte a tous, servie depuis la
-      // table protegee. Sans ligne premium, le match reste sans analyse -
-      // jamais un pari reconstitue a partir d'un fichier public.
-      if (termineDemande && String(m.id) === portee.id) return enrichirMatch(retirerPremium(m), premiumById[String(m.id)], detailFields);
       return retirerPremium(m);
-    }).map((m) => marquerOuverture(m, ouverture[String(m.id)], false));
+    });
     if (data.run_output) data.run_output = runOutputPublic(data.run_output, matchs);
-    // openedReason du match demande : "settled" (offert car termine),
-    // "free" (offert car analyse du jour) ou null (ferme, mur d'abonnement).
-    const raisonDemande = termineDemande ? "settled" : demande && estGratuit(demande) ? "free" : null;
-    return new Response(JSON.stringify({ ...data, isPro, isSettled: termineDemande, openedReason: raisonDemande }), {
+    return new Response(JSON.stringify({ ...data, isPro }), {
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
   }
@@ -409,13 +202,69 @@ Deno.serve(async (req: Request) => {
   // match_premium_data, plutot que de faire confiance a quoi que ce soit qui
   // viendrait du navigateur.
   const fixtureIds = matchs.map((m) => m.id).filter((id) => id != null);
-  const premiumById = await lirePremium(supabase, fixtureIds);
+  let premiumById: Record<string, Record<string, unknown>> = {};
+  if (fixtureIds.length) {
+    // Type explicite : les deux select() n'ont pas le meme type infere.
+    let q: { data: unknown; error: { message: string } | null } =
+      await supabase.from("match_premium_data").select(PREMIUM_COLUMNS + ",premium_fields").in("fixture_id", fixtureIds);
+    if (q.error) {
+      // Migration 0020 pas encore appliquee : premium_fields est alors lu
+      // dans raw_response.premium_fields (repli du pipeline).
+      console.warn("premium_fields indisponible, lecture sans la colonne :", q.error.message);
+      q = await supabase.from("match_premium_data").select(PREMIUM_COLUMNS).in("fixture_id", fixtureIds);
+    }
+    if (q.error) {
+      console.error("match_premium_data query failed:", q.error.message);
+    } else {
+      premiumById = Object.fromEntries(((q.data ?? []) as Record<string, unknown>[]).map((r) => [String(r.fixture_id), r]));
+    }
+  }
 
-  data.matchs = matchs
-    .map((m) => enrichirMatch(m, premiumById[String(m.id)], detailFields))
-    .map((m) => marquerOuverture(m, ouverture[String(m.id)], true));
+  const detailFields = new Set(Array.isArray(data.detail_fields) ? (data.detail_fields as string[]) : []);
 
-  return new Response(JSON.stringify({ ...data, isPro, isSettled: termineDemande, openedReason: portee.id ? "pro" : null }), {
+  data.matchs = matchs.map((m) => {
+    const premium = premiumById[String(m.id)];
+    if (!premium) return m;
+    const raw = premium.raw_response as { narrative_i18n?: Record<string, unknown>; premium_fields?: Record<string, unknown> } | null;
+    const etendus = (premium.premium_fields ?? raw?.premium_fields ?? null) as Record<string, unknown> | null;
+    const enrichi: Record<string, unknown> = { ...m };
+    if (etendus && typeof etendus === "object") {
+      for (const f of PREMIUM_FIELDS) {
+        if (!(f in etendus)) continue;
+        // Match de liste (detail_omitted) : on ne regonfle pas les champs de detail.
+        if (m.detail_omitted === true && detailFields.has(f)) continue;
+        enrichi[f] = etendus[f];
+      }
+    }
+    // conf (note sur 10 = model_probability / 10, premium depuis le 15/09/2026) :
+    // lignes ecrites avant ce changement sans conf dans premium_fields. Meme
+    // formule que le pipeline ; sans probabilite (pas de pari), pas de note.
+    if (enrichi.conf == null && premium.model_probability != null && Number.isFinite(Number(premium.model_probability))) {
+      enrichi.conf = Math.round(Number(premium.model_probability)) / 10;
+    }
+    return {
+      ...enrichi,
+      kelly: premium.kelly ?? null,
+      edge: premium.edge ?? null,
+      verdict_shark: premium.verdict_shark ?? null,
+      facteur_x: premium.facteur_x ?? null,
+      facteur_x_i18n: raw?.narrative_i18n?.facteur_x_i18n ?? null,
+      verdict_shark_i18n: raw?.narrative_i18n?.verdict_shark_i18n ?? null,
+      dropping_odds: premium.dropping_odds ?? null,
+      player_markets: premium.player_markets ?? null,
+      // Le pari recommande revient ici, depuis la table protegee, pour un
+      // abonne confirme. On ne fait jamais confiance a ce qui pourrait
+      // trainer dans data.json.
+      pari_rec: premium.pari_rec ?? m.pari_rec ?? null,
+      cote_rec: premium.cote_rec ?? m.cote_rec ?? null,
+      model_probability: premium.model_probability ?? m.model_probability ?? null,
+      markets_compared: premium.markets_compared ?? m.markets_compared ?? null,
+      market_id: premium.market_id ?? m.market_id ?? null,
+      marche: premium.marche ?? m.marche ?? null,
+    };
+  });
+
+  return new Response(JSON.stringify({ ...data, isPro }), {
     headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
   });
 });

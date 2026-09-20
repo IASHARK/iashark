@@ -27,12 +27,6 @@ async function expectLockedRowsClean(page) {
   return report.length;
 }
 
-// Lien d'une carte de match (audit SEO du 19/09/2026) : page statique indexable de
-// la version quand elle existe (/<dir>/match/<id>.html ; version fr = /match/<id>.html),
-// sinon le shell de la version match.html?id=. Jamais une autre version.
-const matchLinkRe = (dir) => new RegExp(`^(/${dir}/match/\\d+\\.html|/${dir}/match\\.html\\?id=\\d+${dir === 'fr' ? '|/match/\\d+\\.html' : ''})$`);
-const idOfMatchHref = (h) => (String(h).match(/(?:[?&]id=|\/match\/)(\d+)/) || [])[1];
-
 for (const v of VERSIONS) {
   test.describe(`accueil /${v.dir}/`, () => {
     test(`anonyme : page, match offert, liste des matchs, langues, navigation, aide @mobile`, async ({ page, consoleErrors, baseURL, dictFor }) => {
@@ -47,9 +41,9 @@ for (const v of VERSIONS) {
       await test.step('match offert : vitrine presente, lien dans la version', async () => {
         const hero = page.locator('#heroFeature a.feature-card');
         await expect(hero).toBeVisible();
-        expect(pathOf(await hero.getAttribute('href'), baseURL)).toMatch(matchLinkRe(v.dir));
+        expect(pathOf(await hero.getAttribute('href'), baseURL)).toMatch(new RegExp(`^/${v.dir}/match\\.html\\?id=\\d+$`));
         const cta = page.locator('a.hero-cta').first();
-        await expect(cta).toHaveAttribute('href', matchLinkRe(v.dir));
+        await expect(cta).toHaveAttribute('href', new RegExp(`^/${v.dir}/match\\.html\\?id=\\d+$`));
       });
 
       await test.step('liste des matchs : titre traduit, lignes rendues, liens dans la version', async () => {
@@ -57,7 +51,7 @@ for (const v of VERSIONS) {
         const rows = page.locator('#homeList a.hl-row');
         await expect(rows.first()).toBeVisible();
         const hrefs = await rows.evaluateAll((els) => els.map((a) => a.getAttribute('href')));
-        for (const h of hrefs) expect(pathOf(h, baseURL), 'lien de ligne hors version').toMatch(matchLinkRe(v.dir));
+        for (const h of hrefs) expect(pathOf(h, baseURL), 'lien de ligne hors version').toMatch(new RegExp(`^/${v.dir}/match\\.html\\?id=\\d+$`));
         await expectLockedRowsClean(page);
         // conf et tout champ premium : absents des donnees chargees par la page (match non offert).
         const leaked = await page.evaluate(() => (window.allMatchs || []).filter((m) => m && m.is_free !== true && ('conf' in m || 'pari_rec' in m || 'model_probability' in m)).map((m) => m.id));
@@ -123,10 +117,7 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb', 'mx'].includes(x.dir))) {
       await expect(row.locator('.hl-lockpill')).toBeAttached();
       expect(await row.getAttribute('aria-label'), 'etat verrouille annonce au lecteur d\'ecran').toContain(tr(dict, 'home_list.aria_locked'));
       await expect(row).toHaveAttribute('data-track-kind', 'home_row_lock');
-      // Page statique indexable de la version si elle existe, sinon le shell
-      // match.html?id= (audit SEO du 19/09/2026) ; mur Pro verifie en fin de test.
-      const lockedHref = pathOf(await row.getAttribute('href'), baseURL);
-      expect(lockedHref, 'ligne verrouillee -> page match (mur Pro)').toMatch(matchLinkRe(v.dir));
+      expect(pathOf(await row.getAttribute('href'), baseURL), 'ligne verrouillee -> page match (mur Pro)').toMatch(new RegExp(`^/${v.dir}/match\\.html\\?id=\\d+$`));
       // Accueil simplifie : ni banniere « X analyses pretes », ni recherche, ni filtres, ni bloc favoris separe.
       await expect(page.locator('#homeList .hl-banner, #homeList .hl-search, #homeList .hl-chips, #homeList .hl-block')).toHaveCount(0);
       // Etoile sur chaque competition et sur chaque match.
@@ -140,7 +131,7 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb', 'mx'].includes(x.dir))) {
       // de la page match) : « Analyse offerte · Compte gratuit », ni pari ni note, et
       // la vitrine invite a creer un compte gratuit.
       const freeId = await page.evaluate(() => window.freeMatchId);
-      const freeRow = page.locator(`#homeList a.hl-row[href$="match.html?id=${freeId}"], #homeList a.hl-row[href$="/match/${freeId}.html"]`);
+      const freeRow = page.locator(`#homeList a.hl-row[href$="match.html?id=${freeId}"]`);
       if (await freeRow.count()) {
         await expect(freeRow.first()).toHaveClass(/is-free/);
         await expect(freeRow.first()).toHaveClass(/is-gated/);
@@ -152,12 +143,6 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb', 'mx'].includes(x.dir))) {
         await expect(page.locator('#heroFeature .feature-gate .signal-gate')).toHaveText(tr(dict, 'home_app.free_gate_text'));
         await expect(page.locator('#heroFeature .signal-stat')).toHaveCount(0);
       }
-      // La page ouverte par la ligne verrouillee (statique ou shell) montre le mur
-      // Pro au visiteur, sans aucun element de l'analyse payante.
-      await page.goto(lockedHref);
-      await expect(page.locator('#matchRoot .gate.mgate')).toBeVisible();
-      await expect(page.locator('#matchRoot .gate.mgate h2')).toHaveText(tr(dict, 'match_page.pro_gate_title'));
-      await expect(page.locator(['.duo', '.pr-row', '.sig-market', '.scenario-chart', '.score-bars', '.threat', '.pm-list'].map((x) => '#matchRoot ' + x).join(', '))).toHaveCount(0);
     });
 
     test('jours : Aujourd\'hui / Demain / Apres-demain, changer de jour met a jour la liste @mobile', async ({ page, dictFor }) => {
@@ -182,7 +167,7 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb', 'mx'].includes(x.dir))) {
       await expect(page.locator(`#homeList .hl-day[data-hl-day="${day}"]`)).toHaveAttribute('aria-selected', 'true');
       expect(day).not.toBe(before);
       await expect(page.locator('#homeList a.hl-row').first()).toBeVisible();
-      const ids = await page.locator('#homeList a.hl-row').evaluateAll((els) => els.map((a) => (a.getAttribute('href').match(/(?:[?&]id=|\/match\/)(\d+)/) || [])[1]));
+      const ids = await page.locator('#homeList a.hl-row').evaluateAll((els) => els.map((a) => (a.getAttribute('href').match(/id=(\d+)/) || [])[1]));
       const dayOf = await page.evaluate((list) => list.map((id) => { const m = window.allMatchs.find((x) => String(x.id) === id); return m ? window.IasharkMatchTime.matchDay(m) : null; }), ids);
       for (const d of dayOf) expect(d).toBe(day);
     });

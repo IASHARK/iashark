@@ -148,8 +148,7 @@ test("aucun texte francais dans une version non francaise", () => {
 
 test("jeu responsable adapte au pays sur chaque page (18+ et ressource locale)", () => {
   const rules = {
-    // Ligne nationale geree par GamCare (config/markets.json#gb.helpline, 19/09/2026).
-    gb: [/GamCare/, /gamcare\.org\.uk/, /0808 8020 133/, /18\+|aged 18/],
+    gb: [/BeGambleAware/, /0808 8020 133/, /18\+|aged 18/],
     za: [/National Responsible Gambling Programme/, /0800 006 008/, /18\+/],
     mx: [/800 911 2000/, /mayores de 18/],
     fr: [/ANJ|Autorité nationale des jeux/, /09 74 75 13 13/, /mineurs/],

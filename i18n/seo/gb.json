@@ -2,13 +2,6 @@
   "_readme": "SEO copy for /gb/ (en-GB). Read by scripts/build-locales.js (meta, home intro, JSON-LD) and scripts/seo-pages.js (league hubs, static match pages). Per public directory, not per dictionary locale: gb, za and en share the 'en' dictionary but target different search markets. Honest wording only: statistical estimates, 18+, IASHARK is not a bookmaker.",
   "tz": "Europe/London",
   "tz_label": "UK time",
-  "intlLocale": "en-GB",
-  "clock_options": {
-    "hour": "2-digit",
-    "minute": "2-digit"
-  },
-  "clock_zone": "{time} ({tz})",
-  "clock_list": "{time}",
   "sport": "Football",
   "org_description": "IASHARK analyses football matches with statistical models and compares the estimated probabilities with bookmaker odds. It is not a bookmaker.",
   "meta": {
@@ -41,7 +34,7 @@
     "eyebrow": "HOW IT WORKS",
     "title": "Football predictions built on probabilities, not hunches",
     "paragraphs": [
-      "IASHARK's statistical model estimates each team's chances from match data: results, goals, form and home and away performances. For every Premier League, Champions League and European fixture we cover, it estimates the probability of each result, the number of goals and both teams to score. Bookmaker odds, with the margin removed, are used to compare against those estimates and to choose among the markets actually on offer.",
+      "IASHARK produces football predictions from a statistical score model that never uses the odds. For every Premier League, Champions League and European fixture we cover, the model estimates the probability of each result, the number of goals and both teams to score, then sets it against the probability implied by bookmaker odds.",
       "These are statistical estimates: football is uncertain, no outcome is guaranteed and IASHARK is not a bookmaker. Data coverage varies by league, so every analysis shows its data-quality rating. 18+ only."
     ],
     "leagues_title": "Predictions by league",
@@ -55,8 +48,7 @@
       "seriea",
       "bundesliga",
       "ligue1"
-    ],
-    "summary_tz": "UK time"
+    ]
   },
   "breadcrumb": {
     "home": "Home",
@@ -211,8 +203,7 @@
     "h2h_title": "Head to head",
     "h2h_row": "{date}: {home} {score} {away}",
     "lineups_title": "Starting line-ups",
-    "lineup_row": "{team} ({formation}): {players}",
-    "h1": "{home} vs {away}"
+    "lineup_row": "{team} ({formation}): {players}"
   },
   "nav": {
     "aria": "Site navigation",
@@ -223,20 +214,5 @@
     "blog": "Blog and guides",
     "markets": "Markets analysed",
     "methodology": "Methodology"
-  },
-  "results": {
-    "hub_title": "Football Prediction Results, Day by Day | IASHARK UK",
-    "hub_title_short": "Football Prediction Results | IASHARK UK",
-    "hub_description": "Every market IASHARK published for the Premier League and beyond, won or lost: final score, odds and source, day by day. 18+",
-    "hub_description_short": "Premier League and international markets published by IASHARK, winners and losers alike. 18+",
-    "hub_h1": "Prediction results, day by day",
-    "hub_intro": "Each published day keeps the market picked before kick-off, with the final score and the odds: losing markets are listed just like winning ones.",
-    "day_title": "Football Prediction Results, {date} | IASHARK UK",
-    "day_title_short": "Results for {date} | IASHARK UK",
-    "day_description": "Markets picked on {date}: {count}. Final score, odds and source in UK time, winners and losers alike. 18+",
-    "day_description_short": "Markets picked on {date} in UK time: {count}. Winners and losers, final score and odds.",
-    "day_h1": "Results for {date}",
-    "day_intro": "Every market picked before kick-off that day, winners and losers, with the final score and the published odds.",
-    "breadcrumb": "Results"
   }
 }

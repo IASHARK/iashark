@@ -14,10 +14,6 @@
 //      recopie dans prices.generated.ts) : un id de Price n'est pas un secret.
 // Toujours pour CE marche et CETTE duree ; le Price obtenu est ensuite relu chez
 // Stripe et doit correspondre exactement au prix affiche (priceMatches).
-// Duree fermee au paiement (open:false = absente de
-// config/markets.json#<marche>.checkoutOpen, 19/09/2026 : annuel FR) :
-// jamais resolue, ni par secret ni par id de configuration. Champ absent (table
-// generee avant le 19/09/2026) = ouverte, comportement historique.
 import { PRO_DEFAULT_INTERVAL, PRO_INTERVALS, PRO_PRICES } from "./prices.generated.ts";
 import type { IntervalKey, PriceRow } from "./prices.generated.ts";
 
@@ -43,7 +39,7 @@ function marketKey(market: unknown, prices: PriceTable): { raw: string; key: str
 
 function configuredPriceId(getEnv: GetEnv, prices: PriceTable, market: string, interval: IntervalKey): string | null {
   const row = prices[market]?.intervals[interval];
-  if (!row || (row as PriceRow & { open?: boolean }).open === false) return null;
+  if (!row) return null;
   const main = getEnv(row.envKey);
   if (typeof main === "string" && main.trim()) return main.trim();
   if (row.legacyEnvKey) {

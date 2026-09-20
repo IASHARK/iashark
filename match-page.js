@@ -1413,6 +1413,8 @@ async function init(){
       // ET, depuis le 20/09/2026, pour TOUT LE MONDE sur un match deja termine,
       // dont l'analyse est ouverte. Sans session et sur un match a venir, la
       // requete serait inutile : elle ne renverrait rien de plus.
+      // C'est ce qui permet a un visiteur venu de l'onglet « Hier » d'ouvrir un
+      // match joue et de voir l'analyse qu'il portait : la preuve, sans compte.
       if(ctx.session||matchTermine(raw)){
         const result=await window.IasharkApp.supabase.functions.invoke('match-data',{body:{id:String(id)}});
         if(result.data&&!result.error){

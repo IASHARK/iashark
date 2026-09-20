@@ -396,8 +396,16 @@ jobs:
             var cacheKey = 'tournoi_'+teamId;
             if(WC_TEAM_STATS_CACHE[cacheKey]!==undefined) return WC_TEAM_STATS_CACHE[cacheKey];
             try {
+              // Matchs officiels recents de la selection : Coupe du monde 2026
+              // (league=1) + Nations League 2026-27 (league=5, ajoutee le
+              // 20/09/2026 - vide a la 1re journee, s'enrichit ensuite).
               var r = await get('https://v3.football.api-sports.io/fixtures?league=1&season=2026&team='+teamId, APS);
               var fixturesRaw = r.response||[];
+              try {
+                await sleep(150);
+                var rNL = await get('https://v3.football.api-sports.io/fixtures?league=5&season=2026&team='+teamId, APS);
+                if(rNL.response&&rNL.response.length) fixturesRaw = fixturesRaw.concat(rNL.response);
+              } catch(eNL) {}
               var played = fixturesRaw.filter(function(f){
                 var st=(f.fixture.status&&f.fixture.status.short)||'';
                 return st==='FT'||st==='AET'||st==='PEN';
@@ -591,6 +599,20 @@ jobs:
                 await sleep(300);
               }
             } catch(e) { console.log('WC fetch error:', e.message); }
+            await sleep(300);
+            // UEFA NATIONS LEAGUE (league=5, edition 2026-27 : phase de groupes
+            // sept./oct./nov. 2026). Ajoutee le 20/09/2026 : memes fenetres que
+            // la Coupe du monde, meme machinerie selections (stats qualifs +
+            // tournoi, lambdas internationaux), couverture cotes verifiee sur
+            // /leagues?id=5 (odds:true pour la saison 2026).
+            try {
+              for(var nd=0; nd<dates.length; nd++){
+                var nlResp = await get('https://v3.football.api-sports.io/fixtures?league=5&season=2026&date='+dates[nd]+'&timezone=Europe%2FParis', APS);
+                console.log('Nations League '+dates[nd]+':', (nlResp.response||[]).length+' matchs');
+                if(nlResp.response&&nlResp.response.length) all = all.concat(nlResp.response);
+                await sleep(300);
+              }
+            } catch(e) { console.log('Nations League fetch error:', e.message); }
             await sleep(300);
             if(!TEST_WC_ONLY){
               for(var d=0; d<dates.length; d++){
@@ -1289,7 +1311,16 @@ jobs:
               d.h2h.forEach(function(g){var gfH=g.goals.home||0,gfA=g.goals.away||0;var isH=g.teams.home.id===d.homeId;if(gfH>gfA)isH?w1++:w2++;else if(gfH<gfA)isH?w2++:w1++;else wN++;});
               h2hStr=d.home+' '+w1+'V / '+wN+'N / '+w2+'D | Moy buts: '+d.h2hAvgButs;
             }
+            var isNationsLeague=(d.leagueId===5);
             var wcHeader = '';
+            if(isNationsLeague){
+              wcHeader = '=== UEFA NATIONS LEAGUE 2026-27 ===\n'
+                +'Phase de groupes entre selections nationales europeennes, pendant une fenetre internationale.\n'
+                +'Note selections: peu de matchs recents ensemble, effectifs qui tournent - les statistiques\n'
+                +'ci-dessous viennent des derniers matchs OFFICIELS de chaque selection (Coupe du monde 2026,\n'
+                +'qualifications, Nations League). Reste factuel et prudent, jamais d\'extrapolation de forme de club.\n'
+                +'Ce match se joue chez la selection recevante (vrai avantage du terrain, contrairement a la CDM).\n\n';
+            }
             if(isWorldCup){
               wcHeader = '=== COUPE DU MONDE 2026 ===\n'
                 +'Phase: '+(d.isKnockout?'ELIMINATION DIRECTE - match a enjeu maximal, chaque erreur elimine':'PHASE DE GROUPES')+'\n'
@@ -1858,8 +1889,9 @@ jobs:
                 var rDate=resolveDates[rdi];
                 var fClassic=await get('https://v3.football.api-sports.io/fixtures?date='+rDate+'&timezone=Europe/Paris',APS);
                 var fWC=await get('https://v3.football.api-sports.io/fixtures?league=1&season=2026&date='+rDate+'&timezone=Europe/Paris',APS);
-                yResults=yResults.concat(fClassic.response||[], fWC.response||[]);
-                console.log('  Resultats '+rDate+': '+(fClassic.response||[]).length+' classique + '+(fWC.response||[]).length+' World Cup');
+                var fNL=await get('https://v3.football.api-sports.io/fixtures?league=5&season=2026&date='+rDate+'&timezone=Europe/Paris',APS);
+                yResults=yResults.concat(fClassic.response||[], fWC.response||[], fNL.response||[]);
+                console.log('  Resultats '+rDate+': '+(fClassic.response||[]).length+' classique + '+(fWC.response||[]).length+' World Cup + '+(fNL.response||[]).length+' Nations League');
                 await sleep(150);
               }
               async function buildSettlementContext(fix,prediction){
@@ -2630,6 +2662,12 @@ jobs:
               var kickoffGateFix=kickoffGate(fix,Date.now(),{marginMinutes:KICKOFF_MARGIN_MINUTES});
               if(!kickoffGateFix.open) console.log('  [KICKOFF] '+home.name+' vs '+away.name+' : '+kickoffGateFix.reason+' (statut '+(kickoffGateFix.status||'?')+', coup d\'envoi '+(f.date||'?')+') - aucun pari, aucune analyse publiee.');
               var isWorldCupMatch=(lg.id===1);
+              // Nations League (league=5, 20/09/2026) : meme traitement
+              // selections que la Coupe du monde (stats qualifs/tournoi,
+              // lambdas internationaux), mais matchs a domicile REEL (pas de
+              // terrain neutre) et phase de groupes.
+              var isNationsLeagueMatch=(lg.id===5);
+              var isInternationalMatch=isWorldCupMatch||isNationsLeagueMatch;
               var wcRound=(lg.round||'').toLowerCase();
               var isKnockout=isWorldCupMatch&&(
                 wcRound.includes('round of')||wcRound.includes('quarter')||wcRound.includes('semi')||
@@ -2639,7 +2677,7 @@ jobs:
                 wcRound.includes('third place')||wcRound.includes('3rd place')
               );
               if(isKnockout) console.log('  [WC KNOCKOUT] '+home.name+' vs '+away.name+' - '+lg.round);
-              console.log('\n-> '+home.name+' vs '+away.name+' ('+lg.name+')'+(isWorldCupMatch?' [WC]':''));
+              console.log('\n-> '+home.name+' vs '+away.name+' ('+lg.name+')'+(isWorldCupMatch?' [WC]':isNationsLeagueMatch?' [UNL]':''));
               if(!standingsCache[lg.id]){
                 var stSeason=seasonForLeague(lg.id, SEASON);
                 var stResp=await get('https://v3.football.api-sports.io/standings?league='+lg.id+'&season='+stSeason,APS);
@@ -2865,7 +2903,7 @@ jobs:
               var shotQualA=enoughModelMatchStats?calcShotQualityFactor(xgA.shots_on_avg, xgA.shots_total_avg):1;
               lambdas.lambdaH=parseFloat((lambdas.lambdaH*shotQualH).toFixed(3));
               lambdas.lambdaA=parseFloat((lambdas.lambdaA*shotQualA).toFixed(3));
-              if(isWorldCupMatch){
+              if(isInternationalMatch){
                 var wcStatsH=await getTeamWCStats(home.id, home.name);
                 var wcStatsA=await getTeamWCStats(away.id, away.name);
                 if(wcStatsH&&wcStatsA&&wcStatsH.xg_for!=null&&wcStatsA.xg_for!=null){
@@ -2873,9 +2911,9 @@ jobs:
                   var lambdaA_wc=(wcStatsA.xg_for+(wcStatsH.xg_against||wcStatsH.xg_for))/2;
                   lambdas.lambdaH=parseFloat(Math.max(0.90,(lambdas.lambdaH*0.3+lambdaH_wc*0.7)).toFixed(3));
                   lambdas.lambdaA=parseFloat(Math.max(0.80,(lambdas.lambdaA*0.3+lambdaA_wc*0.7)).toFixed(3));
-                  console.log('  [WC lambdas qualifs] '+home.name+' vs '+away.name+' (source: '+wcStatsH.source+'/'+wcStatsA.source+')');
+                  console.log('  ['+(isWorldCupMatch?'WC':'UNL')+' lambdas qualifs] '+home.name+' vs '+away.name+' (source: '+wcStatsH.source+'/'+wcStatsA.source+')');
                 } else {
-                  console.log('  [WC lambdas] Pas de stats qualifs disponibles pour '+home.name+' ou '+away.name+' - repli sur stats tournoi/floor');
+                  console.log('  ['+(isWorldCupMatch?'WC':'UNL')+' lambdas] Pas de stats qualifs disponibles pour '+home.name+' ou '+away.name+' - repli sur stats tournoi/floor');
                 }
               }
               // Effectif actuel passe au selecteur : un joueur transfere garde son
@@ -3400,12 +3438,12 @@ jobs:
                 fatigue_home:{val:fatigueH.val,info:fatigueH.info},fatigue_away:{val:fatigueA.val,info:fatigueA.info},
                 tendances,classement:classementObj,actu:(nH||[]).concat(nA||[]),
                 arbitre:refStats?{nom:refStats.name,cartons:refStats.cards_per_game,penaltys:refStats.pens_per_game,matchs:refStats.games}:null,
-                events_home:isWorldCupMatch?(function(){
+                events_home:isInternationalMatch?(function(){
                   var ts=WC_TEAM_STATS_CACHE['tournoi_'+home.id];
                   if(ts&&ts.slots) return {slots:ts.slots,slots_against:ts.slots_against||null,goals_avg:ts.xg_for||null,conceded_avg:ts.xg_against||null,games:ts.games||0};
                   return null;
                 })():(evPatH||null),
-                events_away:isWorldCupMatch?(function(){
+                events_away:isInternationalMatch?(function(){
                   var ts=WC_TEAM_STATS_CACHE['tournoi_'+away.id];
                   if(ts&&ts.slots) return {slots:ts.slots,slots_against:ts.slots_against||null,goals_avg:ts.xg_for||null,conceded_avg:ts.xg_against||null,games:ts.games||0};
                   return null;
@@ -3607,7 +3645,10 @@ jobs:
               allMatchsData[iGel]=gel.match;
               iLignes.forEach(function(ir){ premiumRows[ir]=gel.premiumRow; });
               GEL_COMPTES[gel.status]=(GEL_COMPTES[gel.status]||0)+1;
-              if(gel.status==='FROZEN') GEL_FIGES[cleGel]=true;
+              // FROZEN_CLOSED (20/09/2026) : match commence/joue dont l'analyse
+              // publiee est restauree figee - meme traitement aval que FROZEN
+              // (jamais SAFE_PICK, jamais un nouveau snapshot 'prediction').
+              if(gel.status==='FROZEN'||gel.status==='FROZEN_CLOSED') GEL_FIGES[cleGel]=true;
             });
             // Journaux publics : des compteurs seulement, jamais le pari.
             console.log('  [GEL] '+Object.keys(GEL_COMPTES).sort().map(function(k){ return k+'='+GEL_COMPTES[k]; }).join(' ')+' (FROZEN = analyse deja publiee conservee a l identique).');

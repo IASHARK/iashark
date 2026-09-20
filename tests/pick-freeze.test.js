@@ -347,15 +347,34 @@ test("ligne d'un autre match : jamais figee sur celui-ci", () => {
   assert.equal(res.match.pari_rec, "Victoire Domicile");
 });
 
-test("garde coup d'envoi fermee : jamais de pari restaure (commence, imminent, reporte, annule, fixture inconnue)", () => {
+test("match commence/joue avec analyse publiee : restauree figee (FROZEN_CLOSED), jamais effacee (20/09/2026)", () => {
   const fri = publishedFriday();
   const ferme = computed("samedi", { pari_rec: "", cote_rec: "", no_signal: true, no_signal_reason: "KICKOFF_PASSED" });
   const cas = [
     [apiFixture(1001, KICKOFF, "1H"), "FIXTURE_NOT_UPCOMING"],
-    [apiFixture(1001, KICKOFF, "PST"), "FIXTURE_NOT_UPCOMING"],
-    [apiFixture(1001, KICKOFF, "CANC"), "FIXTURE_NOT_UPCOMING"],
+    [apiFixture(1001, KICKOFF, "FT"), "FIXTURE_NOT_UPCOMING"],
     [apiFixture(1001, new Date(RUN - 5 * 60000).toISOString()), "KICKOFF_PASSED"],
     [apiFixture(1001, new Date(RUN + 10 * 60000).toISOString()), "KICKOFF_IMMINENT"],
+  ];
+  cas.forEach(function (c) {
+    const res = F.freezeAnalysis(ferme, fri.row, { nowMs: RUN, fixture: c[0], premiumRow: premiumRowOf(ferme) });
+    assert.equal(res.status, "FROZEN_CLOSED", c[1]);
+    assert.equal(res.reason, c[1]);
+    assert.equal(res.match.pari_rec, "Over 2.5", "l'analyse publiee vendredi reste servie");
+    assert.equal(res.match.no_signal, false);
+    assert.equal(res.match.pick_closed, true, "marque ferme : plus jamais offert ni candidat");
+    assert.equal(res.match.is_free, false);
+    assert.equal(res.premiumRow.pari_rec, "Over 2.5", "la ligne premium videe est restauree, jamais ecrasee");
+  });
+});
+
+test("garde fermee sans restauration : reporte, annule, fixture inconnue, ou aucun pari publie avant", () => {
+  const fri = publishedFriday();
+  const ferme = computed("samedi", { pari_rec: "", cote_rec: "", no_signal: true, no_signal_reason: "KICKOFF_PASSED" });
+  // Reporte / annule / fixture inconnue : les bookmakers annulent ces paris.
+  const cas = [
+    [apiFixture(1001, KICKOFF, "PST"), "FIXTURE_NOT_UPCOMING"],
+    [apiFixture(1001, KICKOFF, "CANC"), "FIXTURE_NOT_UPCOMING"],
     [undefined, "FIXTURE_NOT_UPCOMING"],
   ];
   cas.forEach(function (c) {
@@ -363,6 +382,12 @@ test("garde coup d'envoi fermee : jamais de pari restaure (commence, imminent, r
     assert.equal(res.status, "KICKOFF_CLOSED");
     assert.equal(res.reason, c[1]);
     assert.equal(res.match, ferme, "match ferme rendu tel quel");
+    assert.equal(res.match.pari_rec, "");
+  });
+  // Match commence mais aucune publication precedente avec pari : rien a restaurer.
+  [null, { fixture_id: 1001, pari_rec: "", cote_rec: null }].forEach(function (prev) {
+    const res = F.freezeAnalysis(ferme, prev, { nowMs: RUN, fixture: apiFixture(1001, KICKOFF, "1H") });
+    assert.equal(res.status, "KICKOFF_CLOSED");
     assert.equal(res.match.pari_rec, "");
   });
 });

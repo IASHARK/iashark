@@ -624,6 +624,14 @@
     var cur = Object.keys(revenue).filter(function (c) { return revenue[c] > 0; });
     return cur.length ? cur.map(function (c) { return fmtMoney(revenue[c], c); }).join(" + ") : fmtMoney(0, "eur");
   }
+  // MRR : ce que rapportent les abonnements EN COURS chaque mois si rien ne
+  // change (fonction Edge admin-revenue : Stripe en direct, hebdo x 52/12,
+  // annuel / 12, resiliations programmees exclues). r.mrr = { EUR: 19.95 }.
+  function mrrText(r) {
+    var map = r && r.mrr && typeof r.mrr === "object" ? r.mrr : {};
+    var cur = Object.keys(map).filter(function (c) { return Number(map[c]) > 0; });
+    return cur.length ? cur.map(function (c) { return fmtMoney(Math.round(Number(map[c]) * 100), c.toLowerCase()); }).join(" + ") : fmtMoney(0, "eur");
+  }
 
   // ---------- Mes inscrits (migration 0025_admin_members.sql) ----------
   // MEMES seuils et meme ordre que le statut calcule par admin_members (SQL).
@@ -680,6 +688,15 @@
     var c = { total: 0, pro: 0, "new": 0, active: 0, to_nudge: 0, gone: 0 };
     (members || []).forEach(function (m) { if (!m) return; c.total += 1; c[memberStatus(m, now).key] += 1; });
     return c;
+  }
+  // « Forte intention » : inscrit gratuit qui a presque paye (checkout
+  // commence, clic sur le bouton de paiement, ou panneau « Debloquer » vu au
+  // moins deux fois). La liste de relance la plus rentable : ces comptes
+  // etaient a un clic de payer.
+  function memberIntent(m) {
+    m = m || {};
+    if (m.plan === "pro") return false;
+    return !!m.checkout_started || !!m.clicked_pay || Number(m.paywall_view) >= 2;
   }
   // Jours calendaires de Paris : « aujourd'hui », « hier », « il y a 2 jours ».
   function daysAgo(iso, now) {
@@ -967,7 +984,7 @@
     pipelineStatus: pipelineStatus, healthLights: healthLights,
     reasonLabel: reasonLabel, reasonHelp: reasonHelp, visitorKind: visitorKind, reasonBreakdown: reasonBreakdown,
     placeLabel: placeLabel, geoState: geoState, shareRows: shareRows,
-    sessionSentence: sessionSentence, revenueText: revenueText
+    sessionSentence: sessionSentence, revenueText: revenueText, mrrText: mrrText, memberIntent: memberIntent
   };
 });
 
@@ -1312,6 +1329,23 @@
       mean: !b ? "Chiffre indisponible pour le moment." : firstCount + renewCount === 0 ? "Aucun paiement reçu sur cette période."
         : H.fmtInt(firstCount) + " premier" + (firstCount > 1 ? "s" : "") + " paiement" + (firstCount > 1 ? "s" : "") + " et " + H.fmtInt(renewCount) + " renouvellement" + (renewCount > 1 ? "s" : "") + " sur la période.",
       help: "Montants réellement reçus par Stripe sur la période (TTC, avant les frais Stripe) : premiers paiements et renouvellements mensuels."
+    });
+
+    // MRR (Stripe en direct via la fonction admin-revenue, chargee apres le
+    // premier rendu : la carte affiche « — » puis se remplit d'elle-meme).
+    var rev = S.revenue;
+    var failed30 = rev ? H.num(rev.last30d && rev.last30d.failed) || 0 : null;
+    var cancelPending = rev ? H.num(rev.counts && rev.counts.cancel_at_period_end) || 0 : null;
+    var mrrMean = !rev ? "Chiffre indisponible pour le moment."
+      : "Ce que rapportent les abonnements en cours chaque mois si rien ne change.";
+    if (rev && failed30 > 0) mrrMean += " Attention : " + H.fmtInt(failed30) + " paiement" + (failed30 > 1 ? "s" : "") + " en échec sur 30 jours.";
+    if (rev && cancelPending > 0) mrrMean += " " + H.fmtInt(cancelPending) + " résiliation" + (cancelPending > 1 ? "s" : "") + " programmée" + (cancelPending > 1 ? "s" : "") + ".";
+    var mrr = rev ? H.mrrText(rev) : "—";
+    cards.push({
+      id: "mrr", label: "Revenu mensuel (MRR)", icon: ICONS.money, cls: "violet", value: mrr, long: mrr.length > 10,
+      delta: '<span class="delta-cap">abonnements en cours, Stripe</span>',
+      mean: mrrMean,
+      help: "Revenu mensuel récurrent : la somme des abonnements en cours ramenée au mois (hebdo × 52/12, annuel ÷ 12), lue en direct dans Stripe. Les abonnements dont la résiliation est programmée ne sont pas comptés."
     });
 
     var now = liveHumans();
@@ -1743,6 +1777,7 @@
   function statusBadge(st) {
     return '<span class="mstatus st-' + esc(st.cls) + '" title="' + esc(st.help) + '">' + esc(st.label) + '<span class="sr-only"> : ' + esc(st.help) + "</span></span>";
   }
+  var INTENT_BADGE = { label: "Forte intention", cls: "intent", help: "A presque payé : paiement commencé, clic sur le bouton de paiement, ou panneau « Débloquer » vu au moins deux fois. Un message personnel simple est ta relance la plus rentable." };
   function renderMemberList(m) {
     var el = $("members"), btn = $("membersEmails");
     if (!m) { blockError(el, S.members, "Liste des inscrits"); btn.hidden = true; return; }
@@ -1752,9 +1787,12 @@
     btn.setAttribute("aria-pressed", String(!!S.showEmails));
     if (!list.length) { el.innerHTML = emptyHtml("Aucun inscrit pour le moment", "Les comptes créés sur le site apparaîtront ici, avec leur activité."); return; }
     var now = Date.now(), counts = H.memberCounts(list, now);
+    var intentCount = list.filter(H.memberIntent).length;
     var summary = H.MEMBER_STATUS_ORDER.filter(function (k) { return counts[k] > 0; }).map(function (k) {
       return "<span>" + statusBadge(H.MEMBER_STATUS[k]) + " " + esc(H.fmtInt(counts[k])) + "</span>";
     }).join("");
+    // « Forte intention » (20/09/2026) : compte gratuit qui a presque paye.
+    if (intentCount > 0) summary += "<span>" + statusBadge(INTENT_BADGE) + " " + esc(H.fmtInt(intentCount)) + "</span>";
     var shown = list.slice(0, S.memberLimit);
     el.innerHTML = '<p class="m-summary"><b>' + esc(H.fmtInt(counts.total) + " inscrit" + (counts.total > 1 ? "s" : "")) + "</b>" + summary + "</p>"
       + '<ul class="members">' + shown.map(function (u, i) {
@@ -1776,7 +1814,7 @@
           u.tracking_opt_out ? "a refusé le suivi de ses visites" : null
         ].filter(Boolean).join(" · ");
         return '<li class="member"><button type="button" class="m-row" data-m="' + i + '" aria-expanded="' + open + '" aria-controls="md' + i + '">'
-          + '<span class="m-main"><span class="m-top"><span class="m-mail">' + esc(mail) + "</span>" + statusBadge(st) + "</span>"
+          + '<span class="m-main"><span class="m-top"><span class="m-mail">' + esc(mail) + "</span>" + statusBadge(st) + (H.memberIntent(u) ? statusBadge(INTENT_BADGE) : "") + "</span>"
           + '<span class="m-meta">' + esc(meta) + "</span></span>"
           + '<span class="m-act"><span class="m-bar" role="img" aria-label="' + esc("Venu " + n7 + " jour" + (n7 > 1 ? "s" : "") + " sur les 7 derniers") + '">'
           + bar.map(function (b) { return '<i class="' + (b.active ? "on" : "") + '" title="' + esc(H.fmtYmd(b.day)) + '"></i>'; }).join("")
@@ -2127,6 +2165,7 @@
       loadMembers();
       loadUnlocks();
       loadDrop();
+      loadRevenue();
       if (!opts.silent) return loadLive().then(startTimers);
     }).catch(function (e) {
       setBusy(false);
@@ -2136,6 +2175,18 @@
       $("noticeErrorText").textContent = errorText(S.analyticsError.kind, e, "Statistiques");
       if (!opts.silent) startTimers();
     });
+  }
+
+  // MRR et etat Stripe (fonction Edge admin-revenue). Jamais bloquant : la
+  // carte affiche « — » tant que la reponse n'est pas arrivee, et le reste
+  // du tableau de bord vit sa vie.
+  function loadRevenue() {
+    if (!sb || !sb.functions || typeof sb.functions.invoke !== "function" || S.revenueLoading) return;
+    S.revenueLoading = true;
+    sb.functions.invoke("admin-revenue", { body: {} }).then(function (r) {
+      S.revenueLoading = false;
+      if (r && r.data && r.data.ok) { S.revenue = r.data; renderCards(); }
+    }, function () { S.revenueLoading = false; });
   }
 
   function loadLive() {

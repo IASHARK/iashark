@@ -334,17 +334,17 @@ async function renderDashboard(kind, opts) {
   return { els, calls, text: (id) => els[id] ? els[id].innerHTML + els[id].textContent : "" };
 }
 
-test("rendu : resume, 5 cartes, feu, parcours, sources, humain/robot, sans villes (0019 seule)", async () => {
+test("rendu : resume, 6 cartes, feu, parcours, sources, humain/robot, sans villes (0019 seule)", async () => {
   const d = await renderDashboard("nogeo");
   assert.equal(d.els.stateDenied.hidden, true);
   assert.equal(d.els.dash.hidden, false);
   assert.equal(d.els.heroText.textContent, "12 personnes sont venues aujourd'hui, 1 s'est inscrite, aucun nouvel abonné.");
   assert.match(d.text("heroCompare"), /4 visiteurs de plus qu&#39;hier à la même heure/);
   const cards = d.text("cards");
-  assert.equal((cards.match(/class="kcard /g) || []).length, 5);
-  for (const label of ["Visiteurs", "Inscriptions", "Abonnés Pro actifs", "Argent encaissé", "En ce moment"]) assert.ok(cards.includes(">" + label + "<"), label);
-  assert.equal((cards.match(/Ce que ça veut dire/g) || []).length, 5);
-  assert.equal((cards.match(/class="info"/g) || []).length, 5, "un bouton i par carte");
+  assert.equal((cards.match(/class="kcard /g) || []).length, 6);
+  for (const label of ["Visiteurs", "Inscriptions", "Abonnés Pro actifs", "Argent encaissé", "Revenu mensuel (MRR)", "En ce moment"]) assert.ok(cards.includes(">" + label + "<"), label);
+  assert.equal((cards.match(/Ce que ça veut dire/g) || []).length, 6);
+  assert.equal((cards.match(/class="info"/g) || []).length, 6, "un bouton i par carte");
   assert.match(cards, /1 personne navigue sur le site en ce moment/, "le robot n'est pas compte");
   assert.match(d.text("health"), /Tout va bien/);
   assert.match(d.text("funnel"), /C&#39;est ici que tu perds le plus de monde/);

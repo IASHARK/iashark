@@ -18,7 +18,7 @@
 #   - tests/netlify-usage.test.js verifie que chaque fichier de dist/ est couvert.
 set -u
 PUBLISHED=(
-  fr en es de it pt gb za mx match blog assets i18n lib netlify
+  fr en es de it pt gb za mx match blog assets i18n lib netlify results
   config/markets.json scripts/build-public.js scripts/netlify-ignore.sh netlify.toml
   _headers _redirects robots.txt
   data-home.json actus.json transferts.json buteurs-du-jour.json

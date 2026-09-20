@@ -241,3 +241,21 @@
   .hl-league-panel,.hl-chev,.hl-lockpill-cta,.hl-ghost,.hl-lockpill-pro,.hl-lock-ico{transition:none;}
   .hl-dot,.hl-tag-time.is-live::before,.hl-gauge i,.hl-sk,.hl-enter .hl-row,.hl-star.is-pop svg,.hl-mstar.is-pop svg,.hl-lockpill::after{animation:none!important;}
 }
+
+/* Onglet « Hier » (20/09/2026) : la ligne garde exactement la meme forme que
+   les autres jours ; seul un liseré de couleur dit si la recommandation est
+   passee. Jamais la couleur seule pour porter l'information : le lecteur
+   d'ecran recoit « Recommandation passée / non passée » dans l'aria-label. */
+:root{--hl-win:#34d399;--hl-win-wash:rgba(52,211,153,.10);--hl-loss:#fb8a8a;--hl-loss-wash:rgba(251,138,138,.10)}
+.hl-row.hl-win{box-shadow:inset 3px 0 0 var(--hl-win);background:var(--hl-win-wash)}
+.hl-row.hl-loss{box-shadow:inset 3px 0 0 var(--hl-loss);background:var(--hl-loss-wash)}
+.hl-row.is-past{cursor:default}
+
+/* Appel discret vers la preuve de la veille. */
+.hl-proof{display:flex;align-items:center;gap:9px;width:100%;margin:9px 0 0;padding:9px 13px;border-radius:12px;
+  border:1px solid rgba(52,211,153,.32);background:rgba(52,211,153,.07);color:inherit;font:inherit;cursor:pointer;text-align:left}
+.hl-proof:hover{border-color:rgba(52,211,153,.55);background:rgba(52,211,153,.11)}
+.hl-proof:focus-visible{outline:2px solid var(--hl-win);outline-offset:2px}
+.hl-proof-dot{width:8px;height:8px;border-radius:50%;background:var(--hl-win);flex:none}
+.hl-proof-t{flex:1;font-size:13.5px;font-weight:700;line-height:1.3}
+.hl-proof-go{color:var(--hl-win);font-weight:800}

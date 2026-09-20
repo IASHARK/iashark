@@ -24,7 +24,9 @@ const OUT = path.resolve(ROOT, args.includes("--out") ? args[args.indexOf("--out
 const CHECK_ONLY = args.includes("--check");
 
 // Repertoires publics copies en entier.
-const PUBLIC_DIRS = ["fr", "en", "es", "de", "it", "pt", "gb", "za", "mx", "match", "blog", "assets", "i18n/dict"];
+// results/ : le verdict de chaque recommandation de la veille (onglet « Hier »),
+// ecrit par le calcul quotidien. Fichiers legers, une journee par fichier.
+const PUBLIC_DIRS = ["fr", "en", "es", "de", "it", "pt", "gb", "za", "mx", "match", "blog", "assets", "i18n/dict", "results"];
 // Fichiers racine publics.
 const PUBLIC_ROOT_FILES = [
   "index.html", "404.html", "admin.html", "blog.html",

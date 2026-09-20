@@ -77,11 +77,19 @@ function defaultHelpers(){
 var NO_FAVS={has:function(){return false;},list:function(){return [];},toggle:function(){return false;},prune:function(){return false;},subscribe:function(){return function(){};}};
 
 /* ---------- Dates : Aujourd'hui / Demain / Apres-demain ---------- */
-var DAY_NAMES=[['home_list.day_today','Aujourd’hui'],['home_list.day_tomorrow','Demain'],['home_list.day_after','Après-demain']];
-function buildDays(matches,H,clock){
-  var ds=[clock.day,clock.tomorrow||addDays(clock.day,1),addDays(clock.day,2)],counts={};
+// Onglets (20/09/2026, demande du proprietaire) : « Apres-demain » etait
+// toujours vide ; il laisse la place a « Hier », qui montre les memes lignes
+// que les autres jours avec, en plus, un liseré vert si la recommandation est
+// passee, rouge sinon. Rien d'autre n'est ajoute : ni score, ni pari, ni cote.
+var DAY_NAMES=[['home_list.day_yesterday','Hier'],['home_list.day_today','Aujourd’hui'],['home_list.day_tomorrow','Demain']];
+function buildDays(matches,H,clock,veille){
+  var hier=addDays(clock.day,-1);
+  var ds=[hier,clock.day,clock.tomorrow||addDays(clock.day,1)],counts={};
   (matches||[]).forEach(function(m){var d=H.matchDay(m);if(ds.indexOf(d)!==-1)counts[d]=(counts[d]||0)+1;});
-  return ds.map(function(d,i){return {day:d,count:counts[d]||0,rel:i};});
+  // La veille ne vient pas de la liste du jour (le calcul quotidien ne publie
+  // que le jour meme et les suivants) mais du fichier de resultats.
+  counts[hier]=(veille&&veille.length)||0;
+  return ds.map(function(d,i){return {day:d,count:counts[d]||0,rel:i,yesterday:d===hier};});
 }
 function dayName(d){return t(DAY_NAMES[d.rel][0],DAY_NAMES[d.rel][1]);}
 function fullDate(day){
@@ -103,7 +111,12 @@ function renderDateStrip(days,activeDay){
 
 /* ---------- Donnees match (publiques sauf analysisFor ouvert) ---------- */
 // has_signal (public) d'abord : pour un match verrouille, pari_rec n'est jamais lu.
-function hasSignal(m){return !!(m&&(m.has_signal||m.pari_rec||m.market_id))&&!m.no_signal;}
+// Ligne d'une journee passee (onglet « Hier ») : elle n'a pas de champ
+// d'analyse et on n'en lit aucun, meme pour un abonne (tests/home-list-yesterday).
+function hasSignal(m){
+  if(m&&m.past===true)return false;
+  return !!(m&&(m.has_signal||m.pari_rec||m.market_id))&&!m.no_signal;
+}
 function isFree(m,ctx){return ctx.freeMatchId!=null&&String(m.id)===String(ctx.freeMatchId);}
 function fmtProb(v){v=Math.min(Math.max(v,0),10);return (Math.round(v*10)/10).toLocaleString(localeTag(),{minimumFractionDigits:1,maximumFractionDigits:1});}
 function normConf(c){c=parseFloat(c);if(isNaN(c)||c<0)return null;return c<=1?c*10:c;}
@@ -149,6 +162,9 @@ function bandLabel(b){return t(BAND_LABEL[b][0],BAND_LABEL[b][1]);}
 function bandNote(){return t('home_list.band_note','Estimation du modèle, pas une garantie. Détail et pari réservés aux abonnés Pro.');}
 
 function analysisFor(m,ctx,H){
+  // Journee passee (onglet « Hier ») : la ligne ne porte aucune analyse, juste
+  // son liseré. Aucun champ payant n'est lu, meme pour un abonne.
+  if(m&&m.past===true)return {state:'past',free:false};
   var free=isFree(m,ctx);
   if(!hasSignal(m))return {state:'none',free:free,label:m.no_signal_label||t('home_app.no_signal_label','Aucun signal clair sur ce match')};
   // Match offert sans compte : la page match exige un compte gratuit ; ici non
@@ -183,6 +199,51 @@ function groupByLeague(list,H,favLeagues,favMatches){
   }).sort(function(a,b){return ((a.fav?0:1)-(b.fav?0:1))||String(a.name).localeCompare(String(b.name),lt,{sensitivity:'base'});});
 }
 
+/* ---------- Resultats de la veille : la couleur, rien d'autre ----------
+   Source : /results/<jour>.json, ecrit chaque jour par le calcul quotidien
+   (lib/match-results.js). On n'en lit QUE le verdict et de quoi afficher la
+   ligne comme les autres jours : equipes, ecussons, competition, heure.
+   Aucun pari, aucune cote, aucun score : la ligne d'hier ressemble a celle
+   d'aujourd'hui, avec un liseré vert ou rouge en plus.
+   Match non regle : aucune couleur, jamais une couleur au hasard. */
+function rtxt(v){return typeof v==='string'&&v.trim()?v.trim():null;}
+function rid(v){return v!=null&&/^\d{1,12}$/.test(String(v))?Number(v):null;}
+function veilleEntree(e){
+  if(!e||typeof e!=='object')return null;
+  var id=rid(e.id!=null?e.id:e.fixture_id);
+  if(id==null)return null;
+  var verdict=String(e.result||'').toLowerCase();
+  return {
+    id:String(id),
+    home:{n:rtxt(e.home)||'',id:rid(e.home_id)},
+    away:{n:rtxt(e.away)||'',id:rid(e.away_id)},
+    league:rtxt(e.league)||'',league_key:String(e.league_key||'').toLowerCase(),
+    date:rtxt(e.kickoff)||'',status:'FT',
+    // Le verdict n'existe que s'il a vraiment ete etabli.
+    verdict:verdict==='win'||verdict==='loss'?verdict:null,
+    past:true
+  };
+}
+function veilleListe(fichier){
+  var out=[];
+  ((fichier&&fichier.matches)||[]).forEach(function(e){var c=veilleEntree(e);if(c&&c.home.n&&c.away.n)out.push(c);});
+  return out;
+}
+
+// Petit appel a aller voir la preuve (20/09/2026) : une pastille sous les
+// onglets, visible seulement quand on n'est PAS deja sur « Hier ». Elle dit le
+// compte du jour ecoule, rien de cumule.
+function veilleAppel(liste,actif,jourHier){
+  if(!liste||!liste.length||actif===jourHier)return '';
+  var passees=0,reglees=0;
+  liste.forEach(function(m){ if(m.verdict==='win'){passees++;reglees++;} else if(m.verdict==='loss')reglees++; });
+  if(!reglees)return '';
+  return '<button type="button" class="hl-proof" data-hl-proof>'
+    +'<span class="hl-proof-dot" aria-hidden="true"></span>'
+    +'<span class="hl-proof-t">'+esc(tf('home_list.proof_cta','Hier : {won} recommandations passées sur {total}',{won:passees,total:reglees}))+'</span>'
+    +'<span class="hl-proof-go" aria-hidden="true">→</span></button>';
+}
+
 /* ---------- Rendu ligne ---------- */
 function initials(n){return String(n||'?').replace(/[^A-Za-zÀ-ÿ0-9 ]/g,'').split(' ').filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase()||'?';}
 function teamHtml(tm,H){
@@ -215,7 +276,10 @@ function matchStarHtml(m,ctx){
 function renderMatchRow(m,ctx,H,index){
   var a=analysisFor(m,ctx,H),ts=H.matchTimestamp(m),cd=countdown(m,H,ctx.nowTs);
   var home=m.home||{},away=m.away||{},heure=H.heure(m),derby=derbyName(m),q=qualityFor(m),sig=hasSignal(m);
-  var cls='hl-row hl-grid is-'+a.state+(a.free?' is-free':'')+(cd?' cd-'+cd.kind:'');
+  // Liseré de verdict : vert si la recommandation est passee, rouge sinon.
+  // Rien si le match n'a pas encore ete regle.
+  var verdict=m&&m.verdict==='win'?' hl-win':m&&m.verdict==='loss'?' hl-loss':'';
+  var cls='hl-row hl-grid is-'+a.state+(a.free?' is-free':'')+(cd?' cd-'+cd.kind:'')+verdict;
   var href=(a.state==='locked'&&ctx.lockedHref==='abonnement')?H.lien('abonnement.html'):H.lien('match.html?id='+encodeURIComponent(m.id));
 
   // Indicateurs PUBLICS reels uniquement.
@@ -227,7 +291,9 @@ function renderMatchRow(m,ctx,H,index){
   if(sig)tags.push('<span class="hl-tag hl-tag-sim">'+esc(tf('home_list.sims','{n} simulations',{n:fmtInt(ctx.simulations)}))+'</span>');
 
   var zone;
-  if(a.state==='locked'){
+  if(a.state==='past'){
+    zone='';
+  }else if(a.state==='locked'){
     // Aucune donnee de pari : badge, niveau public et pilule abstraite (barres CSS, pas de chiffre).
     zone='<span class="hl-zone">'
       +(a.band?'<span class="hl-zone-top">'+bandHtml(a.band)+'</span>':'')
@@ -254,7 +320,9 @@ function renderMatchRow(m,ctx,H,index){
       +'<span class="hl-none-s">'+esc(t('home_list.no_signal_sub','Aucun pari forcé'))+'</span></span>';
   }
 
-  var anaAria=a.state==='locked'?t('home_list.aria_locked','Analyse prête, réservée aux abonnés Pro.')+(a.band?' '+bandLabel(a.band)+'. '+bandNote():'')
+  var anaAria=a.state==='past'?(m.verdict==='win'?t('home_list.aria_won','Recommandation passée.')
+      :m.verdict==='loss'?t('home_list.aria_lost','Recommandation non passée.'):t('home_list.aria_pending','Résultat non encore établi.'))
+    :a.state==='locked'?t('home_list.aria_locked','Analyse prête, réservée aux abonnés Pro.')+(a.band?' '+bandLabel(a.band)+'. '+bandNote():'')
     :a.state==='open'?(a.prob!=null?tf('home_list.aria_prob','Probabilité estimée {p} sur 10.',{p:a.prob}):t('home_list.aria_open','Analyse disponible.'))
       +(a.free?' '+t('home_list.aria_free','Analyse offerte.'):'')
     :a.state==='gated'?t('home_list.aria_free_gated','Analyse offerte avec un compte gratuit.')
@@ -348,7 +416,7 @@ function mount(rootEl,options){
   var ctx={isPro:!!options.isPro,hasAccount:!!options.hasAccount,freeMatchId:null,lockedHref:options.lockedHref||DEFAULTS.lockedHref,
     upsellAfter:options.upsellAfter||DEFAULTS.upsellAfter,simulations:options.simulations||DEFAULTS.simulations,
     favorites:favorites,favMatches:favMatches,collapsed:collapsed,nowTs:Date.now()};
-  var state={status:'loading',matches:[],days:[],day:null,clock:H.localClock(),onRetry:null};
+  var state={status:'loading',matches:[],days:[],day:null,clock:H.localClock(),onRetry:null,veille:[],veilleJour:null};
 
   rootEl.classList.add('hl');
   rootEl.innerHTML='<div class="hl-head"><h2 class="hl-title" id="hlTitle">'+esc(t('home_list.title','Matchs du jour'))+'</h2>'
@@ -359,10 +427,36 @@ function mount(rootEl,options){
   var $dates=rootEl.querySelector('[data-hl-dates]'),$body=rootEl.querySelector('[data-hl-body]'),$live=rootEl.querySelector('[data-hl-live]');
 
   function announce(msg){$live.textContent='';setTimeout(function(){$live.textContent=msg;},30);}
-  function dayMatches(){return state.matches.filter(function(m){return H.matchDay(m)===state.day;});}
+  function hierJour(){return addDays(state.clock.day,-1);}
+  function dayMatches(){
+    if(state.day===hierJour())return state.veille;
+    return state.matches.filter(function(m){return H.matchDay(m)===state.day;});
+  }
+  // Fichier de la veille : une seule requete, au chargement et a chaque
+  // changement de jour. Absent (404, reseau) : l'onglet reste vide, rien ne
+  // casse et aucun autre jour n'est affecte.
+  function chargerVeille(){
+    var jour=hierJour();
+    if(state.veilleJour===jour||typeof root.fetch!=='function')return;
+    state.veilleJour=jour;
+    root.fetch('/results/'+jour+'.json',{cache:'no-cache'}).then(function(r){
+      return r&&r.ok?r.json():null;
+    }).then(function(f){
+      if(!f||state.veilleJour!==jour)return;
+      state.veille=veilleListe(f);
+      if(state.status==='ready'){
+        state.days=buildDays(state.matches,H,state.clock,state.veille);
+        renderDates();
+        if(state.day===jour)renderBody(false);
+      }
+    }).catch(function(){});
+  }
   function findMatch(id){var f=null;state.matches.some(function(x){if(x&&String(x.id)===String(id)){f=x;return true;}return false;});return f;}
 
-  function renderDates(){$dates.innerHTML=state.status==='ready'&&state.days.length?renderDateStrip(state.days,state.day):'';}
+  function renderDates(){
+    $dates.innerHTML=state.status==='ready'&&state.days.length
+      ?renderDateStrip(state.days,state.day)+veilleAppel(state.veille,state.day,hierJour()):'';
+  }
 
   function renderBody(animate){
     if(state.status==='loading'){$body.setAttribute('aria-busy','true');$body.innerHTML=renderSkeleton()+'<p class="sr-only">'+esc(t('home_list.loading','Chargement des matchs…'))+'</p>';return;}
@@ -414,6 +508,7 @@ function mount(rootEl,options){
     var el=e.target.closest('button');
     if(!el||!rootEl.contains(el))return;
     if(el.hasAttribute('data-hl-day'))return selectDay(el.getAttribute('data-hl-day'));
+    if(el.hasAttribute('data-hl-proof'))return selectDay(hierJour(),true);
     if(el.hasAttribute('data-hl-toggle'))return toggleLeague(el);
     if(el.hasAttribute('data-hl-fav')){
       var k=el.getAttribute('data-hl-fav'),name=(el.closest('.hl-league').querySelector('.hl-league-name')||{}).textContent||k;
@@ -474,8 +569,12 @@ function mount(rootEl,options){
     var ok=function(d){return state.days.some(function(x){return x.day===d&&x.count>0;});};
     if(preferred&&ok(preferred))return preferred;
     if(state.day&&ok(state.day))return state.day;
-    var first=state.days.filter(function(x){return x.count>0;})[0];
-    return first?first.day:state.days[0].day;
+    // Toujours ouvrir sur AUJOURD'HUI, puis demain. « Hier » ne s'ouvre jamais
+    // tout seul : c'est une preuve qu'on consulte, pas le jour a jouer.
+    var ordre=state.days.filter(function(x){return !x.yesterday&&x.count>0;});
+    if(ordre.length)return ordre[0].day;
+    var veille=state.days.filter(function(x){return x.count>0;})[0];
+    return veille?veille.day:state.days[1]?state.days[1].day:state.days[0].day;
   }
   // Matchs favoris termines (statut public ou heure du coup d'envoi) : retires de la liste.
   function pruneFavMatches(matches,now){
@@ -496,10 +595,11 @@ function mount(rootEl,options){
       matches=Array.isArray(matches)?matches:[];
       pruneFavMatches(matches,Date.now());
       state.status='ready';state.matches=matches;state.clock=H.localClock();
-      state.days=buildDays(state.matches,H,state.clock);
+      state.days=buildDays(state.matches,H,state.clock,state.veille);
       ctx.freeMatchId=opts.freeMatchId!==undefined?opts.freeMatchId:(function(){var f=H.pickFreeMatch(state.matches);return f?f.id:null;})();
       state.day=pickDay(opts.day);
       renderAll(true);
+      chargerVeille();
     },
     setContext:function(patch){Object.assign(ctx,patch||{});if(state.status==='ready')renderBody(false);},
     getState:function(){return {day:state.day,days:state.days.slice(),freeMatchId:ctx.freeMatchId,isPro:ctx.isPro,hasAccount:ctx.hasAccount};},
@@ -507,7 +607,7 @@ function mount(rootEl,options){
   };
 }
 
-return {mount:mount,renderDateStrip:renderDateStrip,groupByLeague:groupByLeague,renderLeagueBlock:renderLeagueBlock,renderMatchRow:renderMatchRow,
+return {mount:mount,veilleListe:veilleListe,veilleAppel:veilleAppel,renderDateStrip:renderDateStrip,groupByLeague:groupByLeague,renderLeagueBlock:renderLeagueBlock,renderMatchRow:renderMatchRow,
   renderMine:renderMine,renderDayBody:renderDayBody,matchStarHtml:matchStarHtml,
   analysisFor:analysisFor,hasSignal:hasSignal,buildDays:buildDays,countdown:countdown,matchStatus:matchStatus,derbyName:derbyName,
   probBandOf:probBandOf,PROB_BANDS:PROB_BANDS,defaultHelpers:defaultHelpers};

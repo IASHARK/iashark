@@ -230,6 +230,22 @@ function veilleListe(fichier){
   return out;
 }
 
+/* Verdicts du jour EN COURS (20/09/2026) : meme fichier, meme regle. La ligne
+   d'aujourd'hui ne change en RIEN - memes competitions, memes etoiles, meme
+   zone d'analyse - elle recoit seulement le liseré vert ou rouge quand le match
+   est termine et que le pari a ete regle. On ne lit que `result` : aucun pari,
+   aucune cote, aucun score ne transite par ici. Match non termine : pas de
+   couleur, jamais une couleur au hasard. */
+function verdictsDuFichier(fichier){
+  var out={};
+  ((fichier&&fichier.matches)||[]).forEach(function(e){
+    var id=rid(e&&(e.id!=null?e.id:e.fixture_id));
+    var v=String((e&&e.result)||'').toLowerCase();
+    if(id!=null&&(v==='win'||v==='loss'))out[String(id)]=v;
+  });
+  return out;
+}
+
 // Petit appel a aller voir la preuve (20/09/2026) : une pastille sous les
 // onglets, visible seulement quand on n'est PAS deja sur « Hier ». Elle dit le
 // compte du jour ecoule, rien de cumule.
@@ -277,8 +293,11 @@ function renderMatchRow(m,ctx,H,index){
   var a=analysisFor(m,ctx,H),ts=H.matchTimestamp(m),cd=countdown(m,H,ctx.nowTs);
   var home=m.home||{},away=m.away||{},heure=H.heure(m),derby=derbyName(m),q=qualityFor(m),sig=hasSignal(m);
   // Liseré de verdict : vert si la recommandation est passee, rouge sinon.
-  // Rien si le match n'a pas encore ete regle.
-  var verdict=m&&m.verdict==='win'?' hl-win':m&&m.verdict==='loss'?' hl-loss':'';
+  // Rien si le match n'a pas encore ete regle. Le verdict vient soit de la
+  // ligne elle-meme (onglet « Hier »), soit du fichier du jour en cours
+  // (ctx.verdicts) : un match d'aujourd'hui deja termine se colore pareil.
+  var vd=(m&&m.verdict)||((ctx.verdicts&&m&&m.id!=null)?ctx.verdicts[String(m.id)]:null)||null;
+  var verdict=vd==='win'?' hl-win':vd==='loss'?' hl-loss':'';
   var cls='hl-row hl-grid is-'+a.state+(a.free?' is-free':'')+(cd?' cd-'+cd.kind:'')+verdict;
   var href=(a.state==='locked'&&ctx.lockedHref==='abonnement')?H.lien('abonnement.html'):H.lien('match.html?id='+encodeURIComponent(m.id));
 
@@ -327,7 +346,10 @@ function renderMatchRow(m,ctx,H,index){
       +(a.free?' '+t('home_list.aria_free','Analyse offerte.'):'')
     :a.state==='gated'?t('home_list.aria_free_gated','Analyse offerte avec un compte gratuit.')
     :a.state==='pending'?t('home_app.analysis_in_progress','Analyse en cours')+'.':a.label+'.';
-  var extra=[derby?tf('home_list.aria_derby','Derby : {name}',{name:derby}):'',cd?cd.text+(cd.estimated?' ('+t('home_list.estimated','estimé')+')':''):'',q?q.text:''].filter(Boolean).join(', ');
+  // Un liseré de couleur ne se lit pas a voix haute : la ligne du jour deja
+  // reglee dit son verdict comme le fait deja une ligne de l'onglet « Hier ».
+  var vdAria=a.state!=='past'&&vd?(vd==='win'?t('home_list.aria_won','Recommandation passée.'):t('home_list.aria_lost','Recommandation non passée.')):'';
+  var extra=[derby?tf('home_list.aria_derby','Derby : {name}',{name:derby}):'',cd?cd.text+(cd.estimated?' ('+t('home_list.estimated','estimé')+')':''):'',q?q.text:'',vdAria].filter(Boolean).join(', ');
   var aria=tf('home_list.row_aria','{home} contre {away}, {time}. {extra}. {analysis}',{home:home.n||'',away:away.n||'',time:heure,extra:extra,analysis:anaAria}).replace(/\.\s\./g,'.');
   // Suivi du tunnel (funnel-track.js) : ligne verrouillee = kind dedie, sans donnee personnelle.
   var track=a.state==='locked'?' data-track="home_row_lock" data-track-kind="home_row_lock"':'';
@@ -421,7 +443,7 @@ function mount(rootEl,options){
   var ctx={isPro:!!options.isPro,hasAccount:!!options.hasAccount,freeMatchId:null,lockedHref:options.lockedHref||DEFAULTS.lockedHref,
     upsellAfter:options.upsellAfter||DEFAULTS.upsellAfter,simulations:options.simulations||DEFAULTS.simulations,
     favorites:favorites,favMatches:favMatches,collapsed:collapsed,nowTs:Date.now()};
-  var state={status:'loading',matches:[],days:[],day:null,clock:H.localClock(),onRetry:null,veille:[],veilleJour:null};
+  var state={status:'loading',matches:[],days:[],day:null,clock:H.localClock(),onRetry:null,veille:[],veilleJour:null,verdictsJour:null};
 
   rootEl.classList.add('hl');
   rootEl.innerHTML='<div class="hl-head"><h2 class="hl-title" id="hlTitle">'+esc(t('home_list.title','Matchs du jour'))+'</h2>'
@@ -462,6 +484,20 @@ function mount(rootEl,options){
         }
         if(state.day===jour)renderBody(false);
       }
+    }).catch(function(){});
+  }
+  // Fichier du jour en cours : une seule requete, comme celui de la veille.
+  // Absent (404, journee pas encore reglee) : aucune couleur, rien ne casse.
+  function chargerVerdictsDuJour(){
+    var jour=state.clock.day;
+    if(state.verdictsJour===jour||typeof root.fetch!=='function')return;
+    state.verdictsJour=jour;
+    root.fetch('/results/'+jour+'.json',{cache:'no-cache'}).then(function(r){
+      return r&&r.ok?r.json():null;
+    }).then(function(f){
+      if(!f||state.verdictsJour!==jour)return;
+      ctx.verdicts=verdictsDuFichier(f);
+      if(state.status==='ready'&&state.day===jour)renderBody(false);
     }).catch(function(){});
   }
   function findMatch(id){var f=null;state.matches.some(function(x){if(x&&String(x.id)===String(id)){f=x;return true;}return false;});return f;}
@@ -620,6 +656,7 @@ function mount(rootEl,options){
       state.day=pickDay(opts.day);
       renderAll(true);
       chargerVeille();
+      chargerVerdictsDuJour();
     },
     setContext:function(patch){Object.assign(ctx,patch||{});if(state.status==='ready')renderBody(false);},
     getState:function(){return {day:state.day,days:state.days.slice(),freeMatchId:ctx.freeMatchId,isPro:ctx.isPro,hasAccount:ctx.hasAccount};},
@@ -627,7 +664,7 @@ function mount(rootEl,options){
   };
 }
 
-return {mount:mount,veilleListe:veilleListe,veilleAppel:veilleAppel,renderDateStrip:renderDateStrip,groupByLeague:groupByLeague,renderLeagueBlock:renderLeagueBlock,renderMatchRow:renderMatchRow,
+return {mount:mount,veilleListe:veilleListe,verdictsDuFichier:verdictsDuFichier,veilleAppel:veilleAppel,renderDateStrip:renderDateStrip,groupByLeague:groupByLeague,renderLeagueBlock:renderLeagueBlock,renderMatchRow:renderMatchRow,
   renderMine:renderMine,renderDayBody:renderDayBody,matchStarHtml:matchStarHtml,
   analysisFor:analysisFor,hasSignal:hasSignal,buildDays:buildDays,countdown:countdown,matchStatus:matchStatus,derbyName:derbyName,
   probBandOf:probBandOf,PROB_BANDS:PROB_BANDS,defaultHelpers:defaultHelpers};

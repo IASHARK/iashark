@@ -24,13 +24,10 @@ name: Resultats - resolution continue
 # dans le script (lib/match-results.js#parisDay).
 
 on:
-  # FONCTIONNALITE « HIER » LEVEE le 20/09/2026 a la demande du proprietaire :
-  # plus aucun passage automatique. Le job reste lançable a la main. Pour le
-  # reprendre : retirer les commentaires des trois crons ci-dessous.
-  # schedule:
-  #   - cron: '0,30 16-23 * * *'
-  #   - cron: '0 0 * * *'
-  #   - cron: '30 0 * * *'
+  schedule:
+    - cron: '0,30 16-23 * * *'
+    - cron: '0 0 * * *'
+    - cron: '30 0 * * *'
   workflow_dispatch: {}
 
 concurrency:

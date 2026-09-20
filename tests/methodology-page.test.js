@@ -287,11 +287,15 @@ test("liens Methodologie : a-propos et pieds de page, dans les 9 versions", () =
     assert.match(read(d + "/a-propos.html"), new RegExp('href="/' + d + '/methodologie\\.html"'), d + "/a-propos");
     assert.match(read(d + "/index.html"), new RegExp('href="/' + d + '/methodologie\\.html"'), d + "/index (pied de page)");
   });
+  // 20/09/2026, demande du proprietaire : le lien « methodologie » a ete retire
+  // des cartes de la page match (il alourdissait la lecture). La page existe
+  // toujours et reste accessible depuis « A propos » et le pied de page de
+  // chaque version, verifie juste au-dessus.
   const js = read("match-page.js");
   const signal = js.slice(js.indexOf("function signalCard(vm)"), js.indexOf("function marketsCard"));
   const gate = js.slice(js.indexOf("function gateCard(vm,opts)"), js.indexOf("function renderAuthWall"));
-  assert.ok(signal.includes("methodLink()") && gate.includes("methodLink()"));
-  // Les 9 repertoires ont leur page : chaque page match renvoie vers la sienne.
+  assert.ok(!signal.includes("methodLink()") && !gate.includes("methodLink()"), "le lien methodologie est revenu dans les cartes");
+  // Les 9 repertoires ont leur page : la cible reste juste si on le remet un jour.
   assert.match(js, /METHODOLOGY_DIRS=\['fr','gb','za','en','mx','es','de','it','pt'\]/);
   assert.match(read("scripts/seo-pages.js"), /"methodologie\.html": "footer\.methodology"/);
 });

@@ -2034,11 +2034,10 @@ jobs:
             console.log('  Historique: '+total+' paris | Winrate: '+winrate.toFixed(0)+'% | ROI: '+roi.toFixed(1)+'%');
             // RESULTATS PUBLIES : ecrits depuis histo.predictions EN MEMOIRE (version
             // complete, avant le masquage du fichier public juste au-dessus).
-            // FONCTIONNALITE « HIER » LEVEE le 20/09/2026 a la demande du
-            // proprietaire : plus aucun fichier results/ n'est ecrit ni publie.
-            // Le reglement des paris (historique.json) continue normalement.
-            // Pour la reprendre : retirer les deux commentaires ci-dessous.
-            // await ecrireFichiersResultats(histo.predictions);
+            // Fichier de donnees de l'onglet « Hier » (results/<jour>.json).
+            // AUCUNE page par date n'est generee : le proprietaire n'en veut pas
+            // (20/09/2026). Seule la veille est affichee, sur l'accueil.
+            await ecrireFichiersResultats(histo.predictions,matchsData);
           }
           // RESULTATS PUBLIES (onglet « Hier », docs/SPEC_RESULTATS_HIER.md, lot R1).
           //
@@ -2058,7 +2057,7 @@ jobs:
           // (tests/match-results.test.js). Un fichier results/<date>.json ne peut
           // donc pas publier le pari d'un match non termine.
           var RESULTS_DIR='results', RESULTS_JOURS=60;
-          async function ecrireFichiersResultats(predictions){
+          async function ecrireFichiersResultats(predictions,matchsDuRun){
             try{
               var jours=[];
               for(var d=1; d<=RESULTS_JOURS; d++) jours.push(MATCH_RESULTS.ajouterJours(TODAY,-d));
@@ -2078,6 +2077,32 @@ jobs:
                 var repA=await rawHttpGetJson(base+'predictions_archive?select='+colonnes+'&type=eq.single&date=gte.'+depuisArchive+'&limit=20000',entetes);
                 if(Array.isArray(repA)) archive=repA;
                 else console.log('::warning title=Resultats::predictions_archive illisible : les paris masques non relus resteront en attente dans results/.');
+                // SOURCE DE VERITE DU PARI PUBLIE (20/09/2026, constat du
+                // proprietaire sur Le Mans - Lorient) : predictions_archive peut
+                // porter un pari RECALCULE apres coup, alors que
+                // match_premium_data porte celui qui a ete PUBLIE et gele
+                // (lib/pick-freeze.js) - c'est celui que les abonnes ont vu.
+                // Il prime donc sur l'archive, jamais l'inverse.
+                var repP=await rawHttpGetJson(base+'match_premium_data?select=fixture_id,pari_rec,cote_rec,market_id&pari_rec=not.is.null&limit=20000',entetes);
+                if(Array.isArray(repP)){
+                  var publies={};
+                  repP.forEach(function(r){ if(r&&r.fixture_id!=null&&r.pari_rec) publies[String(r.fixture_id)]=r; });
+                  var remplaces=0;
+                  archive=archive.map(function(a){
+                    var pub=a&&a.fixture_id!=null?publies[String(a.fixture_id)]:null;
+                    if(!pub) return a;
+                    if(a.prediction&&String(a.prediction)!==String(pub.pari_rec)) remplaces++;
+                    return Object.assign({},a,{prediction:pub.pari_rec,cote:pub.cote_rec,market:pub.market_id});
+                  });
+                  var connus={};
+                  archive.forEach(function(a){ if(a&&a.fixture_id!=null) connus[String(a.fixture_id)]=true; });
+                  Object.keys(publies).forEach(function(id){
+                    if(connus[id]) return;
+                    var r=publies[id];
+                    archive.push({fixture_id:Number(id),prediction:r.pari_rec,cote:r.cote_rec,market:r.market_id});
+                  });
+                  if(remplaces) console.log('  [resultats] '+remplaces+' pari(s) de l archive remplace(s) par le pari PUBLIE (gele).');
+                } else console.log('::warning title=Resultats::match_premium_data illisible : les paris publies ne peuvent pas primer sur l archive ce run.');
                 var repR=await rawHttpGetJson(base+'match_results?select=fixture_id,day,kickoff,score,result,scorer_player,scorer_goals,scorer_result&day=gte.'+depuis+'&limit=20000',entetes);
                 if(Array.isArray(repR)) resultats=repR;
                 else console.log('::warning title=Resultats::match_results illisible : les fichiers results/ ne refletent que ce que le pipeline a regle.');
@@ -2090,6 +2115,10 @@ jobs:
                 var out=MATCH_RESULTS.buildDayFile({
                   day:jour, predictions:predictions, archiveRows:archive, results:resultats,
                   registry:registre, generatedAt:genere,
+                  // Matchs deja commences quand le pipeline a tourne : le site a
+                  // affiche « aucun pronostic » pour eux, personne n'a pu les
+                  // suivre. Ils sortent de la liste ET du compte (20/09/2026).
+                  noSignal:(matchsDuRun||[]).filter(function(m){ return m&&m.no_signal===true; }).map(function(m){ return m.id; }),
                   // Buteurs de la journee : uniquement ceux que le job de resolution
                   // a su nommer APRES la fin du match. Jamais reconstitues ici.
                   scorers:resultats.filter(function(r){ return r&&r.day===jour&&r.scorer_player; }).map(function(r){
@@ -2535,8 +2564,7 @@ jobs:
               await writePredictionsArchive(histoEarly.predictions);
               fs.writeFileSync(histoPathEarly,JSON.stringify(historiquePublic(histoEarly,[]),null,2));
               // RESULTATS PUBLIES : meme rafraichissement qu'en branche principale.
-              // FONCTIONNALITE « HIER » LEVEE (voir plus haut).
-              // await ecrireFichiersResultats(histoEarly.predictions);
+              await ecrireFichiersResultats(histoEarly.predictions,[]);
               return;
             }
             var xgConcededCache={};

@@ -33,7 +33,7 @@ test("match offert : le panneau « compte gratuit » ne montre aucun prix, le mu
   const mur = js.slice(js.indexOf("function proGate(vm,o)"), js.indexOf("function renderVisitor(raw,opts)"));
   assert.ok(avis.length > 500 && mur.length > 500);
   assert.doesNotMatch(avis, /prix|price|proOffer|IASHARK_MARKET|abonnement\.html/, "prix ou offre dans le panneau du match offert");
-  assert.match(mur, /const prix=prixMensuelPro\(\);/);
+  assert.match(mur, /const lignePrix=lignePrixPro\(\);/);
   assert.match(js, /\['avis',o\.free\?gateCard\(vm,o\):proGate\(vm,o\),true\]/, "match offert -> gateCard, jamais le mur Pro");
   assert.match(js, /function renderAuthWall\(raw\)\{\s*renderVisitor\(raw,\{\s*free:true,[\s\S]{0,200}href:lien\('compte\.html'\)/);
 });

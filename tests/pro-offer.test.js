@@ -26,7 +26,7 @@ const LEAGUES = JSON.parse(read("config/leagues.json")).leagues;
 const DICTS = Object.fromEntries(LOCALES.map((l) => [l, JSON.parse(read("i18n/dict/" + l + ".json"))]));
 const MATCH_KEYS = ["pro_gate_item_bet", "pro_gate_item_scorer", "pro_gate_item_scenario", "pro_gate_item_scores", "pro_gate_item_odds", "pro_gate_item_stats", "pro_gate_item_faq"];
 const OFFER_KEYS = ["list_title", "group_match", "group_daily", "group_tools", "daily_all_matches", "daily_scorers", "badge_new", "tool_scanner", "tool_journal", "tool_combo",
-  "free_matches", "free_tools", "match_more", "price_month"];
+  "free_matches", "free_tools", "match_more", "price_month", "price_week_month"];
 const escHtml = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 test("i18n : pro_offer.* complet et identique dans les 7 dictionnaires et leurs parts, sans promesse ni « pari conseille »", () => {
@@ -40,6 +40,8 @@ test("i18n : pro_offer.* complet et identique dans les 7 dictionnaires et leurs 
     for (const k of OFFER_KEYS) assert.ok(typeof d[k] === "string" && d[k].trim(), l + " pro_offer." + k);
     for (const k of MATCH_KEYS) assert.ok(DICTS[l].match_page[k], l + " match_page." + k);
     assert.equal((d.price_month.match(/\{price\}/g) || []).length, 1, l + " : {price} une fois");
+    assert.equal((d.price_week_month.match(/\{week\}/g) || []).length, 1, l + " : {week} une fois");
+    assert.equal((d.price_week_month.match(/\{month\}/g) || []).length, 1, l + " : {month} une fois");
     // Nombre de competitions = config/leagues.json (jamais un chiffre invente).
     for (const k of ["daily_all_matches"]) {
       assert.deepEqual(d[k].match(/\d+/g), [String(LEAGUES.length)], l + " pro_offer." + k + " : " + LEAGUES.length + " competitions");

@@ -390,16 +390,21 @@ test("mur Pro : un seul panneau, apercu factice sans aucune donnee, bouton ambre
   // (lib/market-config.js#proOffer) ; sans prix, la ligne de resiliation seule.
   assert.match(mur,/<p class="mgate-more">\$\{esc\(t\('pro_offer\.match_more','\+ tous les matchs du jour, les 3 buteurs du jour et les outils Pro'\)\)\}<\/p>/);
   assert.ok(mur.indexOf('class="mgate-list"')<mur.indexOf('class="mgate-more"')&&mur.indexOf('class="mgate-more"')<mur.indexOf('class="mgate-cta"'),"ligne « en plus » entre la liste et le bouton");
-  assert.match(mur,/<p class="mgate-small">\$\{esc\(prix\?tf\('pro_offer\.price_month','\{price\}\/mois · résiliable à tout moment',\{price:prix\}\):t\('match_page\.pro_gate_small',/);
-  const prixFn=js.slice(js.indexOf("function prixMensuelPro()"),js.indexOf("function proGate(vm,o)"));
+  assert.match(mur,/<p class="mgate-small">\$\{esc\(lignePrix\)\}<\/p>/);
+  const prixFn=js.slice(js.indexOf("function prixPro(interval)"),js.indexOf("function proGate(vm,o)"));
   assert.match(prixFn,/const M=window\.IASHARK_MARKET;/);
-  assert.match(prixFn,/M\.proOffer\(\)\.intervals\.filter\(i=>i\.interval==='month'\)\[0\]/);
-  assert.match(prixFn,/return it&&it\.amount!=null&&it\.open!==false&&it\.text\?it\.text:null;/,"prix absent ou mensuel pas encore payable = pas de prix, jamais devine");
+  assert.match(prixFn,/M\.proOffer\(\)\.intervals\.filter\(i=>i\.interval===interval\)\[0\]/);
+  assert.match(prixFn,/return it&&it\.amount!=null&&it\.open!==false&&it\.text\?it\.text:null;/,"prix absent ou duree pas encore payable = pas de prix, jamais devine");
+  // 20/09/2026 : hebdo + mensuel quand les deux sont payables, mensuel seul
+  // sinon, mention generique sans aucune duree payable.
+  assert.match(prixFn,/if\(mois&&semaine\)return tf\('pro_offer\.price_week_month'/);
+  assert.match(prixFn,/if\(mois\)return tf\('pro_offer\.price_month'/);
+  assert.match(prixFn,/return t\('match_page\.pro_gate_small'/);
   assert.doesNotMatch(prixFn+mur,/\d+[,.]\d\d\s?€|€\s?\d|£|MX\$|\bR\s?\d/,"aucun prix ecrit en dur");
   // Match offert (compte gratuit) : aucun prix.
   const avis=js.slice(js.indexOf("function gateCard(vm,opts)"),js.indexOf("// MUR PRO (visiteur"));
   assert.ok(avis.length>500,"gateCard introuvable");
-  assert.doesNotMatch(avis,/prixMensuelPro|price_month|proOffer|IASHARK_MARKET/,"le panneau du match offert n'affiche jamais de prix");
+  assert.doesNotMatch(avis,/prixPro|lignePrix|price_month|price_week_month|proOffer|IASHARK_MARKET/,"le panneau du match offert n'affiche jamais de prix");
   for(const k of ["pro_gate_item_bet","pro_gate_item_scorer","pro_gate_item_scenario","pro_gate_item_scores","pro_gate_item_odds","pro_gate_item_stats","pro_gate_item_faq"])assert.ok(mur.includes(`['${k}',`),k);
   // « Pas de pari retenu » (public) : ni ticket factice ni promesse de pari ;
   // stats et FAQ listees seulement si le match en a.

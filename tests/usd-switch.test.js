@@ -207,7 +207,7 @@ test("(b) bascule appliquee, build complet en memoire : /en/ en USD partout, che
   assert.equal(M.formatPrice("pro.week"), null);
   assert.equal(M.formatPrice("pro.year"), null);
   const month = M.proOffer().intervals.find((i) => i.interval === "month");
-  assert.deepEqual([month.amount, month.text, month.open], [19.99, "$19.99", true], "ligne de prix du panneau Pro (match-page.js#prixMensuelPro)");
+  assert.deepEqual([month.amount, month.text, month.open], [19.99, "$19.99", true], "ligne de prix du panneau Pro (match-page.js#prixPro)");
   assert.deepEqual(M.proOffer().intervals.filter((i) => i.amount != null).map((i) => i.interval), ["month"]);
   assert.equal(M.isPayable("pro"), true);
   assert.equal(M.helpline.name, "Gambling Therapy");

@@ -1203,20 +1203,29 @@ const FAUX_SCORES=`<div class="mgp-scores"><span class="mgp-score"><b>Xxxxx xxxx
 function apercuFactice(avecPari){
   return `<div class="mgate-preview" aria-hidden="true">${avecPari?FAUX_TICKET:''}${FAUX_BUTEUR}${FAUX_SCORES}</div>`;
 }
-// Prix mensuel Pro de la version (19/09/2026) : MEME source que la page
+// Prix Pro de la version (19/09/2026) : MEME source que la page
 // d'abonnement (lib/market-config.js#proOffer, depuis config/markets.json),
 // donc devise et montant du marche du repertoire (GBP sur gb, MXN sur mx,
-// ZAR sur za). Jamais ecrit en dur. Mensuel absent ou pas encore payable
-// (config/markets.json#checkoutOpen : gb, mx, za fermes le 19/09/2026) ou
-// config absente = null : aucun prix annonce pour une offre qu'on ne peut pas
-// acheter, le mur garde sa ligne « Resiliable a tout moment ».
-function prixMensuelPro(){
+// ZAR sur za). Jamais ecrit en dur. Seules les durees PAYABLES
+// (config/markets.json#checkoutOpen) sont annoncees ; aucune duree payable
+// ou config absente = null, le mur garde sa ligne « Resiliable a tout
+// moment ». 20/09/2026 : l'hebdo est annonce a cote du mensuel quand les
+// deux sont payables (prix d'entree visible des la page match).
+function prixPro(interval){
   const M=window.IASHARK_MARKET;
   if(!M||typeof M.proOffer!=='function')return null;
   try{
-    const it=M.proOffer().intervals.filter(i=>i.interval==='month')[0];
+    const it=M.proOffer().intervals.filter(i=>i.interval===interval)[0];
     return it&&it.amount!=null&&it.open!==false&&it.text?it.text:null;
   }catch(e){return null;}
+}
+// Ligne de prix sous le bouton « Debloquer avec Pro » : hebdo + mensuel,
+// mensuel seul, ou la mention generique quand rien n'est payable.
+function lignePrixPro(){
+  const mois=prixPro('month'),semaine=prixPro('week');
+  if(mois&&semaine)return tf('pro_offer.price_week_month','{week}/semaine ou {month}/mois · résiliable à tout moment',{week:semaine,month:mois});
+  if(mois)return tf('pro_offer.price_month','{price}/mois · résiliable à tout moment',{price:mois});
+  return t('match_page.pro_gate_small','Résiliable à tout moment depuis ton compte.');
 }
 function proGate(vm,o){
   const raw=vm._raw||{},etat=etatAnalyse(raw),bande=etat==='ready'?bandeDe(raw):null;
@@ -1231,7 +1240,7 @@ function proGate(vm,o){
     ['pro_gate_item_stats','Toutes les stats du match : forme, classement, face-à-face, comparatif'],
     ['pro_gate_item_faq','Les réponses aux questions fréquentes sur ce match']
   ].filter(([k],i)=>(etat!=='none'||i>0)&&(o.stats||(k!=='pro_gate_item_stats'&&k!=='pro_gate_item_faq')));
-  const prix=prixMensuelPro();
+  const lignePrix=lignePrixPro();
   return `<section class="signal-card is-locked gate mgate avis avis--lock reveal" aria-labelledby="gateTitle">
     <div class="sig-head">
       <span class="sig-eyebrow">${cardIcon('target')}${esc(t('match_page.avis_title','L’avis IASHARK'))}</span>
@@ -1248,7 +1257,7 @@ function proGate(vm,o){
         <ul class="mgate-list">${contenu.map(([k,fb])=>`<li>${esc(t('match_page.'+k,fb))}</li>`).join('')}</ul>
         <p class="mgate-more">${esc(t('pro_offer.match_more','+ tous les matchs du jour, les 3 buteurs du jour et les outils Pro'))}</p>
         <a class="mgate-cta" href="${esc(o.href)}"${suivi('match_gate_unlock')}>${esc(t('match_page.pro_gate_cta','Débloquer avec Pro'))} <span aria-hidden="true">→</span></a>
-        <p class="mgate-small">${esc(prix?tf('pro_offer.price_month','{price}/mois · résiliable à tout moment',{price:prix}):t('match_page.pro_gate_small','Résiliable à tout moment depuis ton compte.'))}</p>
+        <p class="mgate-small">${esc(lignePrix)}</p>
       </div></div>
     </div>
     <p class="sig-legal">${esc(t('match_page.avis_legal','Estimation, pas une garantie · 18+ · Jouez responsable.'))}</p>

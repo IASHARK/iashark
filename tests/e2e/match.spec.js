@@ -15,11 +15,12 @@ const PAID = ['.duo', '.pr-row', '.sig-market', '.sig2-cmp', '.sig-why', '.sig-c
 
 // Prix mensuel Pro de la version, lu dans la MEME source que la page
 // d'abonnement (lib/market-config.js#proOffer, config/markets.json).
-const prixMensuel = (page) => page.evaluate(() => {
+const prixPro = (page, interval) => page.evaluate((iv) => {
   const M = window.IASHARK_MARKET;
-  const it = M && M.proOffer ? M.proOffer().intervals.filter((i) => i.interval === 'month')[0] : null;
+  const it = M && M.proOffer ? M.proOffer().intervals.filter((i) => i.interval === iv)[0] : null;
   return it && it.text ? it.text : null;
-});
+}, interval);
+const prixMensuel = (page) => prixPro(page, 'month');
 const squash = (s) => String(s).replace(/[\s\u00a0\u202f\u2009]+/g, ' ').trim();
 
 // Identifiant du match offert tel que la version l'affiche (depend du marche).
@@ -75,12 +76,20 @@ for (const v of VERSIONS) {
       // Mensuel pas encore payable (gb, mx, za : checkoutOpen = [] depuis le
       // 19/09/2026) : aucun prix annonce, la ligne de resiliation seule.
       const monthOpen = typeof v.proAmount === 'number' && (!Array.isArray(v.checkoutOpen) || v.checkoutOpen.includes('month'));
+      const weekOpen = typeof v.proAmounts.week === 'number' && (!Array.isArray(v.checkoutOpen) || v.checkoutOpen.includes('week'));
       if (monthOpen) {
         const prix = await prixMensuel(page);
         expect(prix, 'prix mensuel absent de lib/market-config.js').toBeTruthy();
         expect(squash(prix), `prix ${prix} : montant ${v.proAmount}`).toMatch(new RegExp(String(v.proAmount).replace('.', '[.,]') + '(?![\\d])'));
         expect(prix).toContain(v.currencySymbol);
-        await expect(gate.locator('.mgate-small')).toHaveText(tr(dict, 'pro_offer.price_month').replace('{price}', prix));
+        // 20/09/2026 : hebdo annonce a cote du mensuel quand il est payable.
+        if (weekOpen) {
+          const semaine = await prixPro(page, 'week');
+          expect(semaine, 'prix hebdo absent de lib/market-config.js').toBeTruthy();
+          await expect(gate.locator('.mgate-small')).toHaveText(tr(dict, 'pro_offer.price_week_month').replace('{week}', semaine).replace('{month}', prix));
+        } else {
+          await expect(gate.locator('.mgate-small')).toHaveText(tr(dict, 'pro_offer.price_month').replace('{price}', prix));
+        }
       } else {
         await expect(gate.locator('.mgate-small')).toHaveText(tr(dict, 'match_page.pro_gate_small'));
       }
@@ -242,7 +251,8 @@ for (const v of VERSIONS) {
 
 // Offre USD de /en/ : bascule config/markets.json#_usdSwitch rejouee sans etre
 // publiee (tests/e2e/helpers/usd-switch.js). Ligne de prix du panneau Pro
-// (match-page.js#prixMensuelPro -> IASHARK_MARKET.proOffer()) en USD.
+// (match-page.js#prixPro -> IASHARK_MARKET.proOffer()) en USD ; l'hebdo US
+// n'est pas payable (checkoutOpen = ['month']) : ligne mensuelle seule.
 test.describe('page match /en/ apres la bascule USD (config de test _usdSwitch)', () => {
   test('anonyme : panneau Pro « $19.99 / mois », aucun prix EUR @mobile', async ({ page, siteData, dictFor }) => {
     test.skip(!siteData.paid, 'Aucun match payant dans les donnees');

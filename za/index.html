@@ -1041,7 +1041,18 @@ function renderMatchs(){
   // Liste des matchs : le match offert RESTE dans sa competition, avec la puce
   // « Offert » (decision validee le 15/09/2026). Meme identifiant que la vitrine.
   // Sans compte : la ligne du match offert ne montre pas l'analyse (compte gratuit exige, comme la page match).
-  if(homeList)homeList.setData(getSportMatchs(),{freeMatchId:freeMatchId,isPro:proConfirme,hasAccount:!!(authCtx&&authCtx.session)});
+  // Lien direct vers la preuve de la veille : /fr/?jour=hier (utilise dans les
+  // emails de relance) ouvre l'onglet « Hier » au lieu d'aujourd'hui.
+  var jourDemande=null;
+  try{
+    var p=new URLSearchParams(window.location.search).get('jour')||'';
+    if(/^hier$/i.test(p.trim())){
+      var v=new Date(Date.now()-86400000);
+      var f=new Intl.DateTimeFormat('fr-CA',{year:'numeric',month:'2-digit',day:'2-digit'}).format(v);
+      jourDemande=f;
+    }
+  }catch(e){}
+  if(homeList)homeList.setData(getSportMatchs(),{freeMatchId:freeMatchId,isPro:proConfirme,hasAccount:!!(authCtx&&authCtx.session),day:jourDemande||undefined});
 }
 
 // « 5 000 simulations » : meme source que le chiffre cle de la methode (#kpiModeles).

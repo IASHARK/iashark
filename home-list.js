@@ -446,6 +446,11 @@ function mount(rootEl,options){
       state.veille=veilleListe(f);
       if(state.status==='ready'){
         state.days=buildDays(state.matches,H,state.clock,state.veille);
+        if(state.jourDemande===jour&&state.veille.length&&state.day!==jour){
+          state.jourDemande=null;
+          selectDay(jour,true);
+          return;
+        }
         renderDates();
         if(state.day===jour)renderBody(false);
       }
@@ -600,6 +605,10 @@ function mount(rootEl,options){
       state.status='ready';state.matches=matches;state.clock=H.localClock();
       state.days=buildDays(state.matches,H,state.clock,state.veille);
       ctx.freeMatchId=opts.freeMatchId!==undefined?opts.freeMatchId:(function(){var f=H.pickFreeMatch(state.matches);return f?f.id:null;})();
+      // Jour demande (lien /fr/?jour=hier d'un email) : l'onglet « Hier » n'a
+      // pas encore son fichier quand setData tourne ; on garde la demande et on
+      // l'applique des que le fichier arrive.
+      state.jourDemande=opts.day||null;
       state.day=pickDay(opts.day);
       renderAll(true);
       chargerVeille();

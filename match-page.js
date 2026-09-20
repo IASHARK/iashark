@@ -1408,7 +1408,12 @@ async function init(){
     let ctx={session:null,isPro:false};
     if(window.IasharkApp){
       ctx=await window.IasharkApp.context();
-      if(ctx.session){
+      // On interroge match-data des qu'il peut avoir quelque chose a rendre :
+      // pour un visiteur connecte (abonne, compte gratuit sur le match offert)
+      // ET, depuis le 20/09/2026, pour TOUT LE MONDE sur un match deja termine,
+      // dont l'analyse est ouverte. Sans session et sur un match a venir, la
+      // requete serait inutile : elle ne renverrait rien de plus.
+      if(ctx.session||matchTermine(raw)){
         const result=await window.IasharkApp.supabase.functions.invoke('match-data',{body:{id:String(id)}});
         if(result.data&&!result.error){
           list=result.data.matchs||[];

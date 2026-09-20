@@ -459,6 +459,9 @@ function mount(rootEl,options){
   }
 
   function renderBody(animate){
+    // Onglet « Hier » : aucune etoile de favori (demande du proprietaire,
+    // 20/09/2026). Une journee passee se constate, elle ne se suit pas.
+    ctx.isResultsDay=state.day===hierJour();
     if(state.status==='loading'){$body.setAttribute('aria-busy','true');$body.innerHTML=renderSkeleton()+'<p class="sr-only">'+esc(t('home_list.loading','Chargement des matchs…'))+'</p>';return;}
     $body.removeAttribute('aria-busy');
     if(state.status==='error'){

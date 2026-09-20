@@ -163,7 +163,9 @@ Deno.serve(async (req: Request) => {
           .select("plan,role")
           .eq("id", userData.user.id)
           .maybeSingle();
-        isPro = row?.plan === "pro" || row?.role === "admin";
+        // plan « famille » (migration 0032) : acces complet offert a des
+        // proches. Memes droits qu'un abonne, jamais compte comme un client.
+        isPro = row?.plan === "pro" || row?.plan === "famille" || row?.role === "admin";
       }
     } catch (_e) {
       isPro = false;

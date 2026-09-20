@@ -454,12 +454,15 @@ function mount(rootEl,options){
       state.veille=veilleListe(f);
       if(state.status==='ready'){
         state.days=buildDays(state.matches,H,state.clock,state.veille);
+        // La bande d'onglets doit TOUJOURS etre redessinee : sans cela elle
+        // gardait « aucun match » sur Hier alors que les lignes etaient la
+        // (constate en production le 20/09/2026).
+        renderDates();
         if(state.jourDemande===jour&&state.veille.length&&state.day!==jour){
           state.jourDemande=null;
           selectDay(jour,true);
           return;
         }
-        renderDates();
         if(state.day===jour)renderBody(false);
       }
     }).catch(function(){});

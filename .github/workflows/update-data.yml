@@ -2130,6 +2130,25 @@ jobs:
                 // match_premium_data porte celui qui a ete PUBLIE et gele
                 // (lib/pick-freeze.js) - c'est celui que les abonnes ont vu.
                 // Il prime donc sur l'archive, jamais l'inverse.
+                // PARIS RETIRES DE L'AFFICHAGE (21/09/2026, decision du
+                // proprietaire) : une ligne premium videe au coup d'envoi
+                // (pari_rec vide + raw_response.explanation_status SKIPPED_*)
+                // signifie que le site n'affichait PLUS ce pari le jour du
+                // match. Un abonne qui a vu « aucun signal » toute la journee
+                // ne doit pas decouvrir un verdict le lendemain : ces matchs
+                // sortent de la liste ET du compte de results/, au meme titre
+                // que les matchs no_signal du run courant. Applique aux
+                // journees a partir du 20/09/2026 (le fichier du 19/09, deja
+                // publie et verifie, ne bouge pas). L'effacement au coup
+                // d'envoi etant corrige (lib/pick-freeze.js FROZEN_CLOSED),
+                // cette exclusion ne concerne plus aucun match futur.
+                var RETRAIT_AFFICHAGE_DEPUIS='2026-09-20';
+                var retiresAffichage=[];
+                var repSk=await rawHttpGetJson(base+'match_premium_data?select=fixture_id,pari_rec,statut:raw_response->>explanation_status&pari_rec=eq.&limit=20000',entetes);
+                if(Array.isArray(repSk)){
+                  repSk.forEach(function(r){ if(r&&r.fixture_id!=null&&typeof r.statut==='string'&&r.statut.indexOf('SKIPPED')===0) retiresAffichage.push(r.fixture_id); });
+                  if(retiresAffichage.length) console.log('  [resultats] '+retiresAffichage.length+' pari(s) retire(s) de l affichage au coup d envoi : exclus des journees >= '+RETRAIT_AFFICHAGE_DEPUIS+'.');
+                } else console.log('::warning title=Resultats::lignes premium videes illisibles : aucune exclusion d affichage appliquee ce run.');
                 var repP=await rawHttpGetJson(base+'match_premium_data?select=fixture_id,pari_rec,cote_rec,market_id&pari_rec=not.is.null&limit=20000',entetes);
                 if(Array.isArray(repP)){
                   var publies={};
@@ -2165,7 +2184,11 @@ jobs:
                   // Matchs deja commences quand le pipeline a tourne : le site a
                   // affiche « aucun pronostic » pour eux, personne n'a pu les
                   // suivre. Ils sortent de la liste ET du compte (20/09/2026).
-                  noSignal:(matchsDuRun||[]).filter(function(m){ return m&&m.no_signal===true; }).map(function(m){ return m.id; }),
+                  // + paris retires de l'affichage au coup d'envoi par un run
+                  // precedent (lignes premium videes SKIPPED, voir plus haut),
+                  // pour les journees a partir du 20/09/2026.
+                  noSignal:(matchsDuRun||[]).filter(function(m){ return m&&m.no_signal===true; }).map(function(m){ return m.id; })
+                    .concat(jour>=RETRAIT_AFFICHAGE_DEPUIS?(retiresAffichage||[]):[]),
                   // Buteurs de la journee : uniquement ceux que le job de resolution
                   // a su nommer APRES la fin du match. Jamais reconstitues ici.
                   scorers:resultats.filter(function(r){ return r&&r.day===jour&&r.scorer_player; }).map(function(r){

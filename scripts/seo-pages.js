@@ -581,10 +581,6 @@ function renderLeagueHub(key, dir, matches, opts) {
     return '<a href="' + C.leagueHubPath(dir, k) + '">' + esc(C.leagueByKey(k).displayName) + "</a>";
   }).join("");
   var clubsHub = C.clubsHubPath(dir, opts.root);
-  // Hub des resultats (20/09/2026, docs/SPEC_RESULTATS_HIER.md) : sans ce lien,
-  // <dir>/resultats/ n'a aucun lien entrant et sort du parcours a 3 clics
-  // (tests/internal-links.test.js). Affiche seulement si la page existe.
-  var resultsHub = fs.existsSync(path.join(opts.root || C.ROOT, dir, "resultats", "index.html")) ? "/" + dir + "/resultats/" : null;
   var guides = HUB_GUIDES.map(function (g) {
     return '<li><a href="' + C.guidePath(dir, g) + '">' + esc(C.guideLabel(dir, g)) + "</a></li>";
   }).join("");
@@ -643,7 +639,7 @@ function renderLeagueHub(key, dir, matches, opts) {
     '<link rel="stylesheet" href="/assets/bottom-navigation.css">\n' +
     "</head>\n<body>\n" +
     '<header class="hdr"><a href="' + C.homePath(dir) + '" aria-label="IASHARK"><img src="/assets/iashark-logo.webp" width="1648" height="440" alt="IASHARK"></a>' +
-    '<nav><a href="' + C.homePath(dir) + '">' + nav("nav.home", "Home") + "</a>" + (clubsHub ? '<a href="' + clubsHub + '">' + esc(s.nav.clubs) + "</a>" : "") + (resultsHub ? '<a href="' + resultsHub + '">' + esc(((s.results || {}).breadcrumb) || "Resultats") + "</a>" : "") + '<a href="' + C.blogHubPath(dir) + '">' + nav("nav.guides", "Blog") + "</a></nav></header>\n" +
+    '<nav><a href="' + C.homePath(dir) + '">' + nav("nav.home", "Home") + "</a>" + (clubsHub ? '<a href="' + clubsHub + '">' + esc(s.nav.clubs) + "</a>" : "") + '<a href="' + C.blogHubPath(dir) + '">' + nav("nav.guides", "Blog") + "</a></nav></header>\n" +
     "<main>\n" +
     '<nav class="crumbs" aria-label="' + esc(s.match.breadcrumb_aria) + '"><a href="' + C.homePath(dir) + '">' + esc(s.breadcrumb.home) + '</a> <span aria-hidden="true">›</span> <span aria-current="page">' + esc(name) + "</span></nav>\n" +
     hero + HUBUI.jumpNav(jump, L.jump_aria) +

@@ -77,7 +77,10 @@ const esc = C.escHtml;
 const FOLDER = "resultats";
 const RESULTS_DIR = "results";
 // Journees listees sur la page d'index (specification : « les 30 derniers jours »).
-const DAYS_ON_INDEX = 30;
+// UNE SEULE JOURNEE : celle de la veille (decision du proprietaire, 20/09/2026,
+// apres avoir vu 23 journees generees). « On met juste les resultats de la
+// veille » : pas d'historique jour par jour, pas d'archive consultable.
+const DAYS_ON_INDEX = 1;
 const TITLE_SOFT_MAX = 60;
 const DESCRIPTION_MAX = 155;
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -605,7 +608,9 @@ function writeResultsPages(opts) {
   var root = opts.root || C.ROOT;
   var now = opts.now || new Date();
   var today = opts.today || C.dayKeyIn(now, C.X_DEFAULT_DIR);
-  var days = opts.days || loadDays({ root: root, limit: DAYS_ON_INDEX });
+  // opts.limit : seulement pour les tests de mecanique (pagination, nettoyage).
+  // La production garde DAYS_ON_INDEX (la veille seule).
+  var days = opts.days || loadDays({ root: root, limit: opts.limit != null ? opts.limit : DAYS_ON_INDEX });
   var report = { days: days.length, pages: 0, removed: 0, sitemap: null };
   // Voisins : du plus ancien au plus recent (days est trie du plus recent au
   // plus ancien). Seules les journees publiees entrent dans la chaine.

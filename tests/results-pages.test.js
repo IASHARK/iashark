@@ -81,7 +81,7 @@ function build() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "iashark-resultats-"));
   fs.mkdirSync(path.join(dir, "results"), { recursive: true });
   for (const d of fixtureDays()) fs.writeFileSync(path.join(dir, "results", d.day + ".json"), JSON.stringify(d));
-  const report = RP.writeResultsPages({ root: dir, today: TODAY, now: new Date(TODAY + "T06:00:00Z") });
+  const report = RP.writeResultsPages({ root: dir, limit: 30, today: TODAY, now: new Date(TODAY + "T06:00:00Z") });
   const read = (rel) => fs.readFileSync(path.join(dir, rel), "utf8");
   site = { dir: dir, report: report, read: read, days: [REAL[0].day, REAL[1].day] };
   return site;
@@ -218,7 +218,7 @@ test("aucune donnee premium d'un match non termine, et rien de premium sur un ma
 
 test("compte du jour : gagnes sur regles, void et pending exclus, et aucun cumul multi-journees", () => {
   const s = build();
-  const days = RP.loadDays({ root: s.dir });
+  const days = RP.loadDays({ root: s.dir, limit: 30 });
   assert.equal(days.length, 2, "seules les journees reglees sont publiees");
   const totalWon = days.reduce((n, d) => n + d.counts.won, 0);
   const totalSettled = days.reduce((n, d) => n + d.counts.settled, 0);
@@ -242,7 +242,7 @@ test("compte du jour : gagnes sur regles, void et pending exclus, et aucun cumul
 
 test("verdicts : bordure + fond + libelle + icone (jamais la couleur seule), source de la cote exacte", () => {
   const s = build();
-  const day = RP.loadDays({ root: s.dir }).find((d) => d.day === s.days[1]);
+  const day = RP.loadDays({ root: s.dir, limit: 30 }).find((d) => d.day === s.days[1]);
   const html = s.read("fr/resultats/" + day.day + ".html");
   const t = C.get(C.dictFor("fr"), "results_page");
   assert.match(html, /<li class="rr win">/, "une ligne gagnante");
@@ -293,7 +293,7 @@ test("JSON-LD : BreadcrumbList + ItemList honnete, aucun balisage Review/Rating"
       assert.ok(!/"@type":"(Review|Rating|AggregateRating|Product|Offer)"/.test(html), ctx + " : balisage faux");
     }
     // ItemList d'une journee = les matchs affiches, dans le meme ordre.
-    const day = RP.loadDays({ root: s.dir })[0];
+    const day = RP.loadDays({ root: s.dir, limit: 30 })[0];
     const ld = ldBlocks(s.read(dir + "/resultats/" + day.day + ".html"))[1];
     assert.equal(ld.mainEntity.numberOfItems, day.matches.length, dir + " : ItemList decalee de la page");
   }
@@ -338,7 +338,7 @@ test("sitemap-resultats.xml : les pages ecrites, lastmod reel, aucune journee vi
   assert.match(xml, /xmlns:xhtml="http:\/\/www\.w3\.org\/1999\/xhtml"/, "hreflang du sitemap");
   assert.equal((xml.match(/<url>/g) || []).length, (xml.match(/<\/url>/g) || []).length);
   // lastmod stable tant que la page ne change pas (registre seo-lastmod.json).
-  const again = RP.writeResultsPages({ root: s.dir, today: "2026-09-25", now: new Date("2026-09-25T06:00:00Z") });
+  const again = RP.writeResultsPages({ root: s.dir, limit: 30, today: "2026-09-25", now: new Date("2026-09-25T06:00:00Z") });
   assert.equal(again.sitemap, "sitemap-resultats.xml");
   assert.deepEqual(urlsOf(s.read("sitemap-resultats.xml")).sort(), urls.slice().sort());
   assert.equal(s.read("sitemap-resultats.xml"), xml, "lastmod change sans changement de page");
@@ -395,11 +395,25 @@ test("textes : 9 versions completes dans i18n/seo, 7 locales completes dans i18n
 
 test("nettoyage : une journee qui sort de la fenetre perd ses pages et ses URL", () => {
   const s = build();
-  const days = RP.loadDays({ root: s.dir }).filter((d) => d.day === s.days[1]);
+  const days = RP.loadDays({ root: s.dir, limit: 30 }).filter((d) => d.day === s.days[1]);
   const rep = RP.writeResultsPages({ root: s.dir, days: days, today: TODAY, now: new Date(TODAY + "T06:00:00Z") });
   assert.equal(rep.removed, DIRS.length, "une page par version a retirer");
   for (const dir of DIRS) assert.ok(!fs.existsSync(path.join(s.dir, dir, "resultats", s.days[0] + ".html")), dir);
   assert.ok(!s.read("sitemap-resultats.xml").includes(s.days[0]), "URL perimee encore dans le sitemap");
   fs.rmSync(s.dir, { recursive: true, force: true });
   site = null;
+});
+
+// Regle produit (proprietaire, 20/09/2026) : le site ne publie QUE la journee
+// de la veille. Pas d'historique jour par jour, pas d'archive consultable.
+test("par defaut : une seule journee publiee, celle de la veille", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "iashark-resultats-veille-"));
+  fs.mkdirSync(path.join(dir, "results"), { recursive: true });
+  for (const d of fixtureDays()) fs.writeFileSync(path.join(dir, "results", d.day + ".json"), JSON.stringify(d));
+  assert.equal(RP.loadDays({ root: dir }).length, 1, "plus d'une journee publiee par defaut");
+  const report = RP.writeResultsPages({ root: dir, today: TODAY, now: new Date(TODAY + "T06:00:00Z") });
+  assert.equal(report.days, 1);
+  const pages = fs.readdirSync(path.join(dir, "fr", "resultats")).filter((f) => /^\d{4}-\d{2}-\d{2}\.html$/.test(f));
+  assert.equal(pages.length, 1, "fr/resultats : " + pages.join(", "));
+  fs.rmSync(dir, { recursive: true, force: true });
 });

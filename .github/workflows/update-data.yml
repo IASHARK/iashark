@@ -2034,7 +2034,11 @@ jobs:
             console.log('  Historique: '+total+' paris | Winrate: '+winrate.toFixed(0)+'% | ROI: '+roi.toFixed(1)+'%');
             // RESULTATS PUBLIES : ecrits depuis histo.predictions EN MEMOIRE (version
             // complete, avant le masquage du fichier public juste au-dessus).
-            await ecrireFichiersResultats(histo.predictions);
+            // FONCTIONNALITE « HIER » LEVEE le 20/09/2026 a la demande du
+            // proprietaire : plus aucun fichier results/ n'est ecrit ni publie.
+            // Le reglement des paris (historique.json) continue normalement.
+            // Pour la reprendre : retirer les deux commentaires ci-dessous.
+            // await ecrireFichiersResultats(histo.predictions);
           }
           // RESULTATS PUBLIES (onglet « Hier », docs/SPEC_RESULTATS_HIER.md, lot R1).
           //
@@ -2531,7 +2535,8 @@ jobs:
               await writePredictionsArchive(histoEarly.predictions);
               fs.writeFileSync(histoPathEarly,JSON.stringify(historiquePublic(histoEarly,[]),null,2));
               // RESULTATS PUBLIES : meme rafraichissement qu'en branche principale.
-              await ecrireFichiersResultats(histoEarly.predictions);
+              // FONCTIONNALITE « HIER » LEVEE (voir plus haut).
+              // await ecrireFichiersResultats(histoEarly.predictions);
               return;
             }
             var xgConcededCache={};

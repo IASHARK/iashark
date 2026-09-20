@@ -766,7 +766,10 @@
     if (days.some(function (d) { return byDay[d].buckets > 1; })) return [];
     return days.sort().reverse().map(function (d) {
       var o = byDay[d];
-      return { day: d, title: dayTitle(d), visitors: o.visitors, pageViews: o.pageViews, partial: d === today };
+      // Libelle et drapeau « jour en cours » tires du MEME jour de reference :
+      // sans cela le titre suivait l'horloge reelle et la ligne du jour affiche
+      // s'appelait « Hier » des le lendemain (constate le 20/09/2026).
+      return { day: d, title: dayTitle(d, today ? today + "T12:00:00Z" : undefined), visitors: o.visitors, pageViews: o.pageViews, partial: d === today };
     });
   }
   // Parcours d'un inscrit (admin_member_journey.items) regroupe par jour de

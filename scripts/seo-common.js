@@ -94,7 +94,65 @@ function leagueByKey(key) {
   for (var i = 0; i < LEAGUES.length; i++) if (LEAGUES[i].key === key) return LEAGUES[i];
   return null;
 }
+// Slug d'URL : toujours depuis config/leagues.json#displayName (jamais depuis un
+// nom localise : /fr/leagues/champions-league.html reste l'URL publiee).
 function leagueSlug(key) { var l = leagueByKey(key); return l ? slugify(l.displayName) : null; }
+// Nom AFFICHE d'une competition dans une version (vague 2 SEO, 19/09/2026) :
+// i18n/seo/<dir>.json#league_names (ex. /fr/ : « Ligue des champions »,
+// « Ligue Europa », « Ligue Conference », « Liga » ; /pt/ : « Liga dos
+// Campeoes »), sinon config/leagues.json#displayName, sinon fallback (nom du
+// flux pour une competition inconnue). Titres, H1, fils d'Ariane, JSON-LD et
+// listes des pages generees ; jamais les URL.
+function leagueNameIn(key, dir, fallback) {
+  var names = dir && DIRS[dir] ? seoConf(dir).league_names : null;
+  if (key && names && typeof names[key] === "string" && names[key].trim()) return names[key].trim();
+  var l = key ? leagueByKey(key) : null;
+  return l ? l.displayName : String(fallback || "").trim();
+}
+// Alias court d'une equipe pour les TITRES et H1 d'une version seulement
+// (« PSG », « OM », « OL » sur /fr/) : i18n/seo/<dir>.json#match.team_aliases
+// (id api-football -> alias), sinon config/team-display-names.json#titleAliases.<dir>.
+// Jamais dans le corps de page ni dans le JSON-LD (nom d'affichage complet).
+var teamCfgCache = null;
+function teamTitleAlias(team, dir) {
+  if (!team || team.id == null || !DIRS[dir]) return null;
+  var id = String(team.id);
+  var own = (seoConf(dir).match || {}).team_aliases;
+  if (own && typeof own[id] === "string" && own[id].trim()) return own[id].trim();
+  if (teamCfgCache === null) {
+    try { teamCfgCache = JSON.parse(fs.readFileSync(path.join(ROOT, "config/team-display-names.json"), "utf8")); } catch (e) { teamCfgCache = {}; }
+  }
+  var a = teamCfgCache.titleAliases && teamCfgCache.titleAliases[dir];
+  return a && typeof a[id] === "string" && a[id].trim() ? a[id].trim() : null;
+}
+
+// ---------------------------------------------------------------------------
+// Pages « pronostics » (scripts/seo-hubs.js) : URL stables par version,
+// config/seo-hubs.json. Aujourd'hui / demain / week-end, et journee en cours
+// de chaque competition du perimetre de la version.
+var hubsCfgCache = null;
+function hubsConfig() {
+  if (hubsCfgCache === null) {
+    try { hubsCfgCache = JSON.parse(fs.readFileSync(path.join(ROOT, "config/seo-hubs.json"), "utf8")); } catch (e) { hubsCfgCache = { dirs: {} }; }
+  }
+  return hubsCfgCache;
+}
+const DATE_HUB_KINDS = ["today", "tomorrow", "weekend"];
+function hubDirConf(dir) { var d = hubsConfig().dirs || {}; return DIRS[dir] && d[dir] && d[dir].folder ? d[dir] : null; }
+function hubFolderPath(dir) { var h = hubDirConf(dir); return h ? "/" + dir + "/" + h.folder + "/" : null; }
+function dateHubPath(dir, kind) {
+  var h = hubDirConf(dir);
+  return h && DATE_HUB_KINDS.indexOf(kind) !== -1 && h[kind] ? "/" + dir + "/" + h.folder + "/" + h[kind] + ".html" : null;
+}
+function matchdayHubPath(dir, key) {
+  var h = hubDirConf(dir), s = leagueSlug(key);
+  return h && s && h.matchday ? "/" + dir + "/" + h.folder + "/" + s + "-" + h.matchday + ".html" : null;
+}
+// Competitions qui ont une page « journee » dans une version : son perimetre
+// (config/leagues.json#seoMatchDirs), hors versions redirigees (Liga MX /es/).
+function matchdayLeagueKeys(dir) {
+  return orderedLeagueKeys(dir).filter(function (k) { return !leagueRedirectDirs(k)[dir]; });
+}
 
 // Chemins publics (URL canonique = forme .html, repertoire = "/<dir>/").
 function homePath(dir) { return "/" + dir + "/"; }
@@ -304,10 +362,28 @@ function orderedLeagueKeys(dir) {
   var scope = leaguesInScope(dir).map(function (l) { return l.key; });
   return prio.filter(function (k) { return scope.indexOf(k) !== -1; }).concat(scope.filter(function (k) { return prio.indexOf(k) === -1; }));
 }
+// Pages « pronostics » de la version presentes sur disque : aujourd'hui,
+// demain, week-end, puis la journee en cours des premieres competitions de la
+// version (config/seo-hubs.json#navMatchdayLeagues). Libelles :
+// i18n/seo/<dir>.json#hubs.nav.
+function hubNav(dir, root) {
+  var s = seoConf(dir), hn = (s.hubs && s.hubs.nav) || {};
+  var out = [];
+  DATE_HUB_KINDS.forEach(function (k) {
+    var p = dateHubPath(dir, k);
+    if (p && hn[k] && exists(p, root)) out.push({ href: p, label: hn[k] });
+  });
+  var max = hubsConfig().navMatchdayLeagues != null ? hubsConfig().navMatchdayLeagues : 2;
+  matchdayLeagueKeys(dir).slice(0, max).forEach(function (k) {
+    var p = matchdayHubPath(dir, k);
+    if (p && hn.matchday && exists(p, root)) out.push({ href: p, label: fill(hn.matchday, { league: leagueNameIn(k, dir) }) });
+  });
+  return out;
+}
 function versionNav(dir, root) {
   var s = seoConf(dir), n = s.nav;
   var keys = orderedLeagueKeys(dir);
-  var leagues = keys.map(function (k) { return { href: leagueHubPath(dir, k), label: leagueByKey(k).displayName }; })
+  var leagues = keys.map(function (k) { return { href: leagueHubPath(dir, k), label: leagueNameIn(k, dir) }; })
     .filter(function (x) { return exists(x.href, root); });
   var sections = [];
   var clubs = clubsHubPath(dir, root), arts = articlesHubPath(dir, root), meth = methodologyPath(dir, root);
@@ -316,13 +392,14 @@ function versionNav(dir, root) {
   sections.push({ href: blogHubPath(dir), label: n.blog });
   if (exists("/" + dir + "/marches.html", root) || fs.existsSync(path.join(ROOT, "marches.html"))) sections.push({ href: "/" + dir + "/marches.html", label: n.markets });
   if (meth) sections.push({ href: meth, label: n.methodology });
-  return { leagues: leagues, sections: sections, labels: n };
+  return { leagues: leagues, sections: sections, hubs: hubNav(dir, root), labels: n };
 }
 const FOOTER_NAV_OPEN = "<!--SEO_FOOTER_NAV-->", FOOTER_NAV_CLOSE = "<!--/SEO_FOOTER_NAV-->";
 function footerNavHtml(dir, root) {
   var nav = versionNav(dir, root), n = nav.labels;
   var a = function (x) { return '<a href="' + x.href + '" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">' + escHtml(x.label) + "</a>"; };
   return FOOTER_NAV_OPEN + '<nav class="seo-foot-nav" aria-label="' + escHtml(n.aria) + '" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,\'Segoe UI\',Roboto,sans-serif;color:#91a0b3;text-align:center">' +
+    (nav.hubs.length ? '<p style="margin:0 0 4px"><span style="color:#c3ccd8">' + escHtml(n.predictions || "") + "</span> " + nav.hubs.map(a).join(" · ") + "</p>" : "") +
     (nav.leagues.length ? '<p style="margin:0 0 4px"><span style="color:#c3ccd8">' + escHtml(n.leagues) + "</span> " + nav.leagues.map(a).join(" · ") + "</p>" : "") +
     '<p style="margin:0">' + nav.sections.map(a).join(" · ") + "</p></nav>" + FOOTER_NAV_CLOSE;
 }
@@ -355,7 +432,10 @@ module.exports = {
   ROOT: ROOT, SITE_URL: SITE_URL, MARKETS: MARKETS, DIRS: DIRS, DIR_CODES: DIR_CODES, X_DEFAULT_DIR: X_DEFAULT_DIR, LEAGUES: LEAGUES,
   seoConf: seoConf, dictFor: dictFor, get: get, intlLocaleFor: intlLocaleFor, escHtml: escHtml, fill: fill, slugify: slugify,
   fmtIn: fmtIn, clockIn: clockIn, utcClock: utcClock, zonedClock: zonedClock, dayKeyIn: dayKeyIn, isoWithOffset: isoWithOffset,
-  leagueByKey: leagueByKey, leagueSlug: leagueSlug, homePath: homePath, leagueHubPath: leagueHubPath, matchPath: matchPath,
+  leagueByKey: leagueByKey, leagueSlug: leagueSlug, leagueNameIn: leagueNameIn, teamTitleAlias: teamTitleAlias,
+  hubsConfig: hubsConfig, DATE_HUB_KINDS: DATE_HUB_KINDS, hubDirConf: hubDirConf, hubFolderPath: hubFolderPath, dateHubPath: dateHubPath,
+  matchdayHubPath: matchdayHubPath, matchdayLeagueKeys: matchdayLeagueKeys, hubNav: hubNav,
+  homePath: homePath, leagueHubPath: leagueHubPath, matchPath: matchPath,
   blogHubPath: blogHubPath, guidePath: guidePath, guideLabel: guideLabel, GUIDE_TITLE_KEYS: GUIDE_TITLE_KEYS,
   ogLocale: ogLocale, ldScript: ldScript, breadcrumbLd: breadcrumbLd, hreflangLinks: hreflangLinks, alternatesFor: alternatesFor,
   leagueHreflangAliases: leagueHreflangAliases, leagueRedirectDirs: leagueRedirectDirs,

@@ -49,6 +49,10 @@ jobs:
           // Liste UNIQUE des champs premium (audit fuite 14/09/2026) : data.json,
           // pages match, table protegee (premium_fields) et historique.json.
           var PREMIUM_FIELDS_LIB=require('./lib/premium-fields.js');
+          // RESULTATS PUBLIES (onglet « Hier », docs/SPEC_RESULTATS_HIER.md, lot R1) :
+          // construction des fichiers publics results/<date>.json. Module pur, teste
+          // par tests/match-results.test.js - aucune regle de marche reecrite ici.
+          var MATCH_RESULTS=require('./lib/match-results.js');
           const I18N_LOCALES = require('./i18n/locales.json');
           const I18N_PAGES = require('./scripts/i18n-manifest.js');
           const { generateLocalizedSitemaps, writeSitemapIndex } = require('./scripts/i18n-sitemaps.js');
@@ -1600,6 +1604,47 @@ jobs:
             try{
               SEO_PAGES.writeArchivedMatchPages(registreLc,{root:'.',dirs:['fr'],tpl:tplBrut,now:maintenantLc,skipIds:idsRunLc}).forEach(function(rel){ keepFiles[rel.split('/').pop()]=true; });
             }catch(e){ console.log('  Erreur pages match conservees :',e.message); }
+            // DETAIL DES MATCHS DEJA JOUES : CONSERVE (lot R1, dependance remontee
+            // par le lot R4, 20/09/2026).
+            //
+            // Jusqu'ici, match/<id>.json n'etait garde que pour les matchs du run en
+            // cours. Un match sorti du run perdait son detail : l'onglet « Hier » et
+            // les pages /resultats/ renvoient pourtant vers ces matchs, dont
+            // l'analyse est desormais ouverte a tous une fois le match termine. Sans
+            // le fichier, la page affiche « Ce match n'est plus disponible » - la
+            // preuve tombe.
+            //
+            // COMBIEN DE JOURS : 1 (J-1), pas 7. Mesure du 20/09/2026 : un
+            // match/<id>.json pese 249 Ko en moyenne, et le site publie 40 a 75
+            // matchs par jour. Conserver 7 jours ajouterait ~350 fichiers, soit
+            // ~87 Mo a dist/ ; J-1 ajoute ~50 fichiers, soit ~12 Mo. Le compte
+            // Netlify a ete coupe pour depassement le 15/09/2026 (data.json, 13 Mo,
+            // a justement ete retire de dist/ le 16/09 pour cette raison) : 87 Mo
+            // n'est pas finançable. J-1 couvre l'onglet « Hier », qui est le besoin
+            // de la specification ; les journees plus anciennes gardent leur page
+            // match conservee, rendue depuis l'instantane public du registre
+            // (writeArchivedMatchPages ci-dessus). Augmenter cette constante est la
+            // seule chose a faire si le quota le permet un jour.
+            var DETAIL_KEEP_DAYS=1;
+            // Uniquement des matchs DEJA JOUES : coup d'envoi passe depuis plus de
+            // 4 h (duree maximale d'une rencontre, prolongation et retards compris).
+            // On ne cree aucun fichier ici, on se contente de ne pas supprimer un
+            // detail deja ecrit par writePublicSplit - c'est la copie ASSAINIE du
+            // match (aucun champ premium), exactement celle qui etait deja publique.
+            var DETAIL_MATCH_FINI_MS=4*3600000;
+            var gardesPasses=0;
+            try{
+              Object.keys(registreLc.matches||{}).forEach(function(id){
+                if(keepFiles[id+'.json']) return;
+                var ko=Date.parse(String((registreLc.matches[id]||{}).kickoff||''));
+                if(!Number.isFinite(ko)) return;
+                var age=maintenantLc.getTime()-ko;
+                if(age<DETAIL_MATCH_FINI_MS||age>DETAIL_KEEP_DAYS*86400000+DETAIL_MATCH_FINI_MS) return;
+                if(!fs.existsSync('match/'+id+'.json')) return;
+                keepFiles[id+'.json']=true; gardesPasses++;
+              });
+            }catch(e){ console.log('  Conservation des details passes impossible : '+(e&&e.message)); }
+            if(gardesPasses) console.log('  Details conserves (matchs joues il y a moins de '+DETAIL_KEEP_DAYS+' jour(s)) : '+gardesPasses+' fichier(s) match/<id>.json');
             try{
               var existing=fs.readdirSync('match');
               existing.forEach(function(f){
@@ -1803,10 +1848,19 @@ jobs:
                 await sleep(150);
               }
               async function buildSettlementContext(fix,prediction){
-                var ctx={
-                  halftimeHome:fix.score&&fix.score.halftime?fix.score.halftime.home:null,
-                  halftimeAway:fix.score&&fix.score.halftime?fix.score.halftime.away:null
-                };
+                // AUCUNE CLE NULLE (corrige le 20/09/2026, lot R1). lib/resolvers.js
+                // teste Number.isFinite(Number(context.X)) et Number(null) vaut 0 :
+                // passer null faisait regler un marche avec la valeur 0 au lieu de le
+                // laisser en attente. Concretement, un match dont l'API n'a pas donne
+                // le score a la pause reglait « Premiere mi-temps moins de 1.5 but »
+                // comme un 0-0 (gagne a tort), et un match sans statistiques reglait
+                // « Tirs du match over 23.5 » avec 0 tir (PERDU a tort). Une donnee
+                // absente doit laisser le pari en attente (regle non negociable :
+                // jamais de donnee inventee, docs/SPEC_RESULTATS_HIER.md §5).
+                var ctx={};
+                var ht=fix.score&&fix.score.halftime;
+                if(ht&&ht.home!=null)ctx.halftimeHome=ht.home;
+                if(ht&&ht.away!=null)ctx.halftimeAway=ht.away;
                 if(!/tirs( cadres)? du match/i.test(prediction||''))return ctx;
                 var sr=await get('https://v3.football.api-sports.io/fixtures/statistics?fixture='+(fix.fixture&&fix.fixture.id),APS);
                 var blocks=(sr&&sr.response)||[];
@@ -1820,8 +1874,11 @@ jobs:
                   },0);
                   return found===2?total:null;
                 }
-                ctx.totalShots=statTotal('Total Shots');
-                ctx.totalShotsOnTarget=statTotal('Shots on Goal');
+                // Meme regle : une statistique absente n'est PAS ajoutee au
+                // contexte (sinon 0 tir -> « over 23.5 » compte perdu a tort).
+                var ts=statTotal('Total Shots'), tsot=statTotal('Shots on Goal');
+                if(ts!=null)ctx.totalShots=ts;
+                if(tsot!=null)ctx.totalShotsOnTarget=tsot;
                 return ctx;
               }
               for(var yr=0;yr<yResults.length;yr++){
@@ -1975,6 +2032,85 @@ jobs:
             });
             fs.writeFileSync(histoPath,JSON.stringify(historiquePublic(histo,matchsData),null,2));
             console.log('  Historique: '+total+' paris | Winrate: '+winrate.toFixed(0)+'% | ROI: '+roi.toFixed(1)+'%');
+            // RESULTATS PUBLIES : ecrits depuis histo.predictions EN MEMOIRE (version
+            // complete, avant le masquage du fichier public juste au-dessus).
+            await ecrireFichiersResultats(histo.predictions);
+          }
+          // RESULTATS PUBLIES (onglet « Hier », docs/SPEC_RESULTATS_HIER.md, lot R1).
+          //
+          // Ecrit results/<YYYY-MM-DD>.json pour les 60 dernieres journees qui ont
+          // eu au moins un marche retenu, plus results/index.json (liste des jours
+          // avec leurs totaux). Sert de source aux pages SEO /resultats/ et de repli
+          // au navigateur, qui lit sinon la table match_results.
+          //
+          // AUCUN appel API-Football supplementaire : tout vient de ce que ce run a
+          // deja en main (predictions reglees ci-dessus), des lignes deja ecrites par
+          // .github/workflows/results-refresh.yml (match_results) et de
+          // predictions_archive. Les fichiers sont ensuite commites avec les autres
+          // sorties du run (variable OUTPUTS de l'etape « Commit and push »).
+          //
+          // GARANTIE : lib/match-results.js n'ecrit ni pari, ni cote, ni source de
+          // cote, ni score pour un match qui n'a pas recu de statut final de l'API
+          // (tests/match-results.test.js). Un fichier results/<date>.json ne peut
+          // donc pas publier le pari d'un match non termine.
+          var RESULTS_DIR='results', RESULTS_JOURS=60;
+          async function ecrireFichiersResultats(predictions){
+            try{
+              var jours=[];
+              for(var d=1; d<=RESULTS_JOURS; d++) jours.push(MATCH_RESULTS.ajouterJours(TODAY,-d));
+              var depuis=jours[jours.length-1];
+              // Version complete des paris (le depot public masque les paris en
+              // attente) et verdicts deja etablis par le job de resolution.
+              var archive=[], resultats=[];
+              if(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY){
+                var entetes={'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY};
+                var base=SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/';
+                var colonnes='fixture_id,match_label,home,away,'+PREMIUM_FIELDS_LIB.PENDING_REDACTED_FIELDS.join(',')+',league,league_key,has_pinnacle,date,result,type,score';
+                // predictions_archive.date est la date de PUBLICATION, pas celle du
+                // match (le pipeline publie jusqu'a 2 jours a l'avance) : la fenetre
+                // lue est elargie de 4 jours, sinon les journees les plus anciennes
+                // du fichier results/ perdraient leurs paris.
+                var depuisArchive=MATCH_RESULTS.ajouterJours(TODAY,-(RESULTS_JOURS+4));
+                var repA=await rawHttpGetJson(base+'predictions_archive?select='+colonnes+'&type=eq.single&date=gte.'+depuisArchive+'&limit=20000',entetes);
+                if(Array.isArray(repA)) archive=repA;
+                else console.log('::warning title=Resultats::predictions_archive illisible : les paris masques non relus resteront en attente dans results/.');
+                var repR=await rawHttpGetJson(base+'match_results?select=fixture_id,day,kickoff,score,result,scorer_player,scorer_goals,scorer_result&day=gte.'+depuis+'&limit=20000',entetes);
+                if(Array.isArray(repR)) resultats=repR;
+                else console.log('::warning title=Resultats::match_results illisible : les fichiers results/ ne refletent que ce que le pipeline a regle.');
+              }
+              var registre=null;
+              try{ registre=JSON.parse(fs.readFileSync('data/match-pages-registry.json','utf8')); }catch(e){}
+              if(!fs.existsSync(RESULTS_DIR)) fs.mkdirSync(RESULTS_DIR,{recursive:true});
+              var genere=new Date().toISOString(), index=[], ecrits=0;
+              jours.forEach(function(jour){
+                var out=MATCH_RESULTS.buildDayFile({
+                  day:jour, predictions:predictions, archiveRows:archive, results:resultats,
+                  registry:registre, generatedAt:genere,
+                  // Buteurs de la journee : uniquement ceux que le job de resolution
+                  // a su nommer APRES la fin du match. Jamais reconstitues ici.
+                  scorers:resultats.filter(function(r){ return r&&r.day===jour&&r.scorer_player; }).map(function(r){
+                    return { match_id:r.fixture_id, match:null, player:r.scorer_player, goals:r.scorer_goals, result:r.scorer_result };
+                  }),
+                });
+                if(!out.report.total) return; // journee sans marche retenu : aucun fichier
+                fs.writeFileSync(RESULTS_DIR+'/'+jour+'.json',JSON.stringify(out.file,null,2));
+                index.push(out.file); ecrits++;
+                MATCH_RESULTS.formatUnsettledLog(out.report).forEach(function(l){ console.log(l); });
+                var alerte=MATCH_RESULTS.unsettledWarning(out.report,{nowMs:Date.now()});
+                if(alerte) console.log(alerte);
+              });
+              fs.writeFileSync(RESULTS_DIR+'/index.json',JSON.stringify(MATCH_RESULTS.buildIndexFile(index,genere),null,2));
+              // Fenetre glissante : les journees sorties des 60 jours sont retirees
+              // du depot (rien d'autre ne vit dans results/).
+              fs.readdirSync(RESULTS_DIR).forEach(function(f){
+                var m=/^(\d{4}-\d{2}-\d{2})\.json$/.exec(f);
+                if(m&&m[1]<depuis) fs.unlinkSync(RESULTS_DIR+'/'+f);
+              });
+              console.log('  [resultats] '+ecrits+' fichier(s) results/<date>.json ecrit(s) (fenetre '+depuis+' -> '+jours[0]+') + results/index.json');
+            }catch(e){
+              // Jamais bloquant : les fichiers precedents restent en place.
+              console.log('::warning title=Resultats::fichiers results/ non ecrits ce run : '+(e&&e.message));
+            }
           }
           var TRANSFER_CACHE_DAYS = 5;
           async function updateTransferts(fixtures) {
@@ -2350,10 +2486,13 @@ jobs:
                     found.result='void';found.score=null;found.fixture_id=fid;found.resolved_date=TODAY;
                     return;
                   }
-                  var isWin=resolveMarketWin(found.prediction, gh, ga, {
-                    halftimeHome:fix.score&&fix.score.halftime?fix.score.halftime.home:null,
-                    halftimeAway:fix.score&&fix.score.halftime?fix.score.halftime.away:null
-                  });
+                  // Aucune cle nulle : Number(null) vaut 0 et reglerait un marche
+                  // « premiere mi-temps » comme un 0-0 faute de donnee (voir la
+                  // note detaillee dans buildSettlementContext).
+                  var ctxE={}, htE=fix.score&&fix.score.halftime;
+                  if(htE&&htE.home!=null)ctxE.halftimeHome=htE.home;
+                  if(htE&&htE.away!=null)ctxE.halftimeAway=htE.away;
+                  var isWin=resolveMarketWin(found.prediction, gh, ga, ctxE);
                   if(isWin===null){ return; }
                   if(isWin==='void'){
                     found.result='void';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
@@ -2391,6 +2530,8 @@ jobs:
               // propager, pas seulement rester dans le cache JSON local.
               await writePredictionsArchive(histoEarly.predictions);
               fs.writeFileSync(histoPathEarly,JSON.stringify(historiquePublic(histoEarly,[]),null,2));
+              // RESULTATS PUBLIES : meme rafraichissement qu'en branche principale.
+              await ecrireFichiersResultats(histoEarly.predictions);
               return;
             }
             var xgConcededCache={};
@@ -3763,7 +3904,10 @@ jobs:
         # quel, les donnees du jour sont celles qui viennent d'etre calculees.
         run: |
           set -euo pipefail
-          OUTPUTS="data.json data-home.json historique.json transferts.json actus.json sitemap.xml match index.html league-coverage-report.json seo-lastmod.json buteurs-du-jour.json"
+          # results/ : fichiers publics des resultats passes (onglet « Hier »,
+          # lot R1). Regeneres integralement a chaque run comme les autres
+          # sorties, jamais edites a la main.
+          OUTPUTS="data.json data-home.json historique.json transferts.json actus.json sitemap.xml match results index.html league-coverage-report.json seo-lastmod.json buteurs-du-jour.json"
           # Registre du cycle de vie des pages match (scripts/match-lifecycle.js) :
           # chemin imbrique, sauvegarde et restauration AVEC son chemin.
           # Classements conserves des pages championnat (scripts/league-hub-data.js) :

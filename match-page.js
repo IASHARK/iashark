@@ -51,7 +51,13 @@ const ICONS={
   lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
   table:'<path d="M4 5h16v14H4zM4 10h16M4 15h16M10 5v14"/>',
   pin:'<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/>',
-  calendar:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M10 14.5l4 3M14 14.5l-4 3"/>'
+  calendar:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M10 14.5l4 3M14 14.5l-4 3"/>',
+  // Bandeau de resultat d'un match termine (lot R4) : le verdict porte une
+  // icone en plus du libelle et de la couleur.
+  flag:'<path d="M6 21V4M6 4h11l-2 3.5L17 11H6"/>',
+  check:'<path d="M5 12.5 9.5 17 19 7"/>',
+  cross:'<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
+  dash:'<path d="M6 12h12"/>'
 };
 const cardIcon=key=>ICONS[key]?`<svg viewBox="0 0 24 24" class="card-icon" aria-hidden="true" focusable="false">${ICONS[key]}</svg>`:'';
 // Carte. opts.fold : la meme carte en version repliable (le titre est le
@@ -941,6 +947,104 @@ function faqCard(vm,o){
     'faq-card','faq');
 }
 
+// ---------------------------------------------------------------------------
+// MATCH TERMINE : ANALYSE OUVERTE A TOUS ET BANDEAU DE RESULTAT
+// (decision du proprietaire, 20/09/2026 ; docs/SPEC_RESULTATS_HIER.md, lot R4).
+//
+// Une analyse dont le match est termine n'a plus aucune valeur de pari : elle
+// devient la preuve publique du travail. Un match A VENIR ou EN COURS ne
+// change en rien : memes droits, meme mur d'abonnement, meme panneau unique.
+//
+// L'OUVERTURE EST DECIDEE PAR LE SERVEUR (fonction match-data : is_settled /
+// isSettled, calcules sur l'heure de coup d'envoi et le statut de nos propres
+// fichiers). Ici, sembleTermine() sert UNIQUEMENT a savoir s'il vaut la peine
+// d'aller poser la question au serveur pour un visiteur sans session : jamais
+// a ouvrir quoi que ce soit. Sans reponse du serveur, la page reste fermee.
+function sembleTermine(raw){
+  const vmLib=window.IasharkMatchViewModel,mt=window.IasharkMatchTime;
+  if(!raw||!vmLib||!vmLib.openedState||!mt)return false;
+  const d=mt.matchDate(raw);
+  return vmLib.openedState(raw.status,d?d.getTime():null,Date.now()).open;
+}
+// Reglement du match : fichier public results/<jour>.json (produit par le lot
+// R1) d'abord, puis la table match_results en lecture anonyme. Aucune des deux
+// sources n'est obligatoire : absente, illisible, ou concernant un autre match
+// -> aucun bandeau. On n'invente jamais un score ni un verdict.
+async function chargerReglement(raw){
+  const vmLib=window.IasharkMatchViewModel;
+  if(!raw||!vmLib||!vmLib.matchResultView)return null;
+  const jour=String(raw.date||'').slice(0,10);
+  if(/^\d{4}-\d{2}-\d{2}$/.test(jour)){
+    try{
+      const rep=await fetch('/results/'+jour+'.json',{cache:'no-cache'});
+      if(rep.ok){
+        const fichier=await rep.json();
+        const lignes=fichier&&Array.isArray(fichier.matches)?fichier.matches:[];
+        const vue=vmLib.matchResultView(lignes.find(x=>x&&String(x.id)===String(raw.id)),raw.id,raw);
+        if(vue)return vue;
+      }
+    }catch(e){}
+  }
+  try{
+    const sb=window.IasharkApp&&window.IasharkApp.supabase;
+    if(sb){
+      const q=await sb.from('match_results').select('*').eq('fixture_id',raw.id).maybeSingle();
+      if(!q.error&&q.data)return vmLib.matchResultView(q.data,raw.id,raw);
+    }
+  }catch(e){}
+  return null;
+}
+// Verdict : bordure ET fond teinte ET libelle ET icone, jamais la couleur
+// seule (daltonisme, WCAG 1.4.1). Tokens de assets/admin.css.
+const VERDICTS={
+  win:['match_page.result_verdict_win','Gagné','check'],
+  loss:['match_page.result_verdict_loss','Perdu','cross'],
+  void:['match_page.result_verdict_void','Match annulé','dash']
+};
+// Marche retenu tel qu'il a ete PUBLIE : l'identifiant moteur quand il est
+// connu (plus fiable), sinon le libelle de la ligne de reglement.
+function libelleReglement(vm,res){
+  const ml=window.IasharkMarketLabels,eq={home:vm.identity.home.name,away:vm.identity.away.name};
+  if(res.marketId&&ml&&ml.marketIdLabel){const s=ml.marketIdLabel(res.marketId,eq);if(s&&s!==res.marketId)return s;}
+  return res.pick?marcheFr(vm,res.pick):'';
+}
+// Bandeau de resultat, en tete de page. Rendu UNIQUEMENT sur un reglement
+// reel (win/loss/void) : un match non regle n'a pas de bandeau du tout,
+// jamais un « en attente » maquille en resultat. La cote porte sa source
+// entre parentheses, en tout petit, et seulement si elle est connue :
+// « (Pinnacle) » quand la cote vient vraiment de Pinnacle, sinon
+// « (cotes moyennes) ».
+function resultBanner(vm,res){
+  if(!res||!VERDICTS[res.outcome])return '';
+  const v=VERDICTS[res.outcome],i=vm.identity;
+  const libelle=libelleReglement(vm,res);
+  const source=res.oddsSource==='pinnacle'?t('match_page.result_source_pinnacle','Pinnacle')
+    :res.oddsSource==='average'?t('match_page.result_source_average','cotes moyennes'):'';
+  const cote=n(res.odds)!==null
+    ?`<span class="res-fact"><span>${esc(t('match_page.result_odds_label','Cote suivie'))}</span><b>${esc(odds(res.odds))}</b>${source?`<small>(${esc(source)})</small>`:''}</span>`:'';
+  const score=res.score
+    ?`<span class="res-fact res-score"><span>${esc(t('match_page.result_score_label','Score final'))}</span><b>${esc(i.home.name)} ${esc(res.score.split('-').join(' – '))} ${esc(i.away.name)}</b></span>`:'';
+  return `<section class="res-banner is-${esc(res.outcome)} reveal" aria-labelledby="resTitle">
+    <div class="res-head">
+      <span class="res-eyebrow">${cardIcon('flag')}${esc(t('match_page.result_eyebrow','Match terminé · analyse ouverte à tous'))}</span>
+      <span class="res-verdict">${cardIcon(v[2])}<b>${esc(t(v[0],v[1]))}</b></span>
+    </div>
+    <h2 id="resTitle" class="res-market"><span class="res-kicker">${esc(t('match_page.result_market_label','Marché retenu'))}</span>${esc(libelle||t('match_page.result_market_unknown','Marché non communiqué'))}</h2>
+    ${cote||score?`<p class="res-facts">${cote}${score}</p>`:''}
+    <p class="res-note">${esc(t('match_page.result_note','Résultat publié après la fin du match, gagnant comme perdant. Les résultats passés ne préjugent pas des résultats futurs.'))}</p>
+  </section>`;
+}
+// Appel a l'action sobre, en bas d'un match termine : ce qui reste reserve
+// aux abonnes, sans aucune promesse de gain ni taux de reussite.
+function ctaAbonnement(raw){
+  return `<section class="res-cta reveal">
+    <h2 class="res-cta-t">${esc(t('match_page.result_cta_title','Les analyses d’aujourd’hui sont réservées aux abonnés'))}</h2>
+    <p class="res-cta-p">${esc(t('match_page.result_cta_text','Ce match est terminé : son analyse est ouverte à tout le monde. Les matchs du jour et à venir restent réservés aux abonnés Pro.'))}</p>
+    <a class="res-cta-btn" href="${esc(offrePro(raw))}">${esc(t('match_page.result_cta_button','Voir l’abonnement'))}</a>
+    <p class="res-cta-legal">${esc(t('match_page.avis_legal','Estimation, pas une garantie · 18+ · Jouez responsable.'))}</p>
+  </section>`;
+}
+
 // Barre collante : garde le pari et sa cote sous les yeux une fois le signal
 // sorti de l'ecran par le haut. Elle recopie le signal, ne calcule rien.
 function signalSticky(vm){
@@ -1105,17 +1209,25 @@ function analyseAbonne(vm){
   return blocs.filter(Boolean).join('');
 }
 
-function render(raw){
+// ouverture (lot R4, 20/09/2026) : { settled, result, isPro } quand le SERVEUR
+// a ouvert l'analyse parce que le match est termine. Absent partout ailleurs :
+// la vue abonne ne change pas d'un pouce.
+function render(raw,ouverture){
+  const o=ouverture||{};
   const vm=viewModel(raw);
   // ORDRE DE LECTURE (16/09/2026, maquette V8 validee par le proprietaire) :
   // en-tete, l'avis IASHARK, les stats du match (ouvertes), l'analyse
   // IASHARK, les questions frequentes a la fin. Section Absences retiree.
+  // Match termine : le bandeau de resultat passe en tete, l'appel a
+  // l'abonnement ferme la page (jamais pour un abonne, il l'a deja).
   const stats=statsBlocs(vm),analyse=analyseAbonne(vm);
   const sections=[
+    ['resultat',o.settled?resultBanner(vm,o.result):''],
     ['avis',signalCard(vm)],
     ['stats',stats?groupe({title:t('match_page.stats_group_title','Les stats du match'),sub:t('match_page.stats_group_sub','Données brutes des deux équipes.'),body:stats}):''],
     ['analyse',analyse?groupe({title:t('match_page.analysis_group_title','L’analyse IASHARK'),sub:t('match_page.analysis_group_sub','Ce que calcule notre modèle pour ce match.'),body:analyse}):''],
-    ['questions',faqCard(vm,{locked:false})]
+    ['questions',faqCard(vm,{locked:false})],
+    ['abonnement',o.settled&&!o.isPro?ctaAbonnement(raw):'']
   ];
   paint(vm,sections,signalSticky(vm),'');
 }
@@ -1399,13 +1511,20 @@ async function init(){
     });
     let list=null;
     let ctx={session:null,isPro:false};
+    // Ouverture d'un match termine : decidee par le SERVEUR, jamais ici.
+    let termine=false;
     if(window.IasharkApp){
       ctx=await window.IasharkApp.context();
-      if(ctx.session){
+      // Sans session, on n'appelait jamais match-data. On l'appelle desormais
+      // aussi quand le match SEMBLE termine (coup d'envoi + marge), pour que
+      // le serveur tranche : lui seul ouvre l'analyse.
+      if(ctx.session||sembleTermine(raw)){
         const result=await window.IasharkApp.supabase.functions.invoke('match-data',{body:{id:String(id)}});
         if(result.data&&!result.error){
           list=result.data.matchs||[];
-          raw=avecBande(list.find(x=>String(x.id)===String(id))||raw);
+          const servi=list.find(x=>String(x.id)===String(id));
+          termine=result.data.isSettled===true||!!(servi&&servi.is_settled===true);
+          raw=avecBande(servi||raw);
         }
       }
     }
@@ -1419,6 +1538,13 @@ async function init(){
     // Liste du jour indisponible : aucun match n'est suppose offert (mur Pro
     // pour un non-abonne), jamais l'inverse.
     list=list||[];
+    // Match termine (ouverture confirmee par le serveur) : analyse complete
+    // pour tout le monde, sans compte et sans abonnement, avec le resultat du
+    // marche retenu en tete quand il est regle. Passe AVANT les murs d'acces.
+    if(termine){
+      render(raw,{settled:true,result:await chargerReglement(raw),isPro:ctx.isPro});
+      return;
+    }
     const isFree=String(raw.id)===String(IasharkFreeMatch.pickFreeMatchId(list,null,(window.IASHARK_MARKET&&window.IASHARK_MARKET.code)||null));
     if(isFree&&!ctx.session){renderAuthWall(raw);return;}
     if(!isFree&&!ctx.isPro){renderProWall(raw);return;}

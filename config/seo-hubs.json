@@ -1,0 +1,25 @@
+{
+  "_readme": [
+    "Pages « pronostics » par version (vague 2 SEO, 19/09/2026) : generees par scripts/seo-hubs.js (pipeline quotidien via scripts/seo-pages.js#writeSeoPages, node scripts/seo-pages.js, node scripts/build-locales.js).",
+    "URL STABLES, jamais une URL par jour ni par journee : /<dir>/<folder>/<today|tomorrow|weekend>.html (matchs de la periode dans le fuseau de la version) et /<dir>/<folder>/<slug du championnat>-<matchday>.html (journee EN COURS du championnat, meme URL d'une journee a l'autre et d'une saison a l'autre).",
+    "Slugs en minuscules ASCII avec tirets, localises par version. Changer un slug = changer une URL publiee : ajouter une 301 (scripts/build-locales.js#redirectsContent) avant.",
+    "Textes (titres, H1, intro, FAQ, libelles) : i18n/seo/<dir>.json#hubs. Aucune donnee du modele : equipes, heures, stades, classement, forme, niveau public prob_band et qualite des donnees seulement.",
+    "weekend : du vendredi (startWeekday 5) au lundi (4 jours) ; du mardi au jeudi, la page annonce le week-end suivant.",
+    "minFixtures : en dessous, la page reste servie (liens stables) mais en noindex,follow, hors sitemap et hors hreflang."
+  ],
+  "dirs": {
+    "fr": { "folder": "pronostics", "today": "aujourd-hui", "tomorrow": "demain", "weekend": "week-end", "matchday": "journee" },
+    "en": { "folder": "predictions", "today": "today", "tomorrow": "tomorrow", "weekend": "weekend", "matchday": "matchday" },
+    "gb": { "folder": "predictions", "today": "today", "tomorrow": "tomorrow", "weekend": "weekend", "matchday": "gameweek" },
+    "za": { "folder": "predictions", "today": "today", "tomorrow": "tomorrow", "weekend": "weekend", "matchday": "round" },
+    "es": { "folder": "pronosticos", "today": "hoy", "tomorrow": "manana", "weekend": "fin-de-semana", "matchday": "jornada" },
+    "mx": { "folder": "pronosticos", "today": "hoy", "tomorrow": "manana", "weekend": "fin-de-semana", "matchday": "jornada" },
+    "de": { "folder": "prognosen", "today": "heute", "tomorrow": "morgen", "weekend": "wochenende", "matchday": "spieltag" },
+    "it": { "folder": "pronostici", "today": "oggi", "tomorrow": "domani", "weekend": "weekend", "matchday": "giornata" },
+    "pt": { "folder": "prognosticos", "today": "hoje", "tomorrow": "amanha", "weekend": "fim-de-semana", "matchday": "jornada" }
+  },
+  "weekend": { "startWeekday": 5, "days": 4 },
+  "tonightFromHour": 18,
+  "minFixtures": { "date": 3, "matchday": 5 },
+  "navMatchdayLeagues": 2
+}

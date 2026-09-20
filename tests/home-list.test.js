@@ -118,17 +118,24 @@ test("derby : puce depuis le champ public derby", () => {
   assert.doesNotMatch(HL.renderMatchRow(base(), ctx(), helpers(), 0), /hl-tag-derby/);
 });
 
-test("jours : Aujourd'hui / Demain / Apres-demain, onglet sans match desactive « aucun match »", () => {
+// 20/09/2026 : « Apres-demain » (toujours vide) remplace par « Hier », qui ne
+// compte QUE le flux de resultats (docs/SPEC_RESULTATS_HIER.md).
+test("jours : Hier / Aujourd'hui / Demain, onglet sans match desactive « aucun match »", () => {
   const H = Object.assign(helpers(), { matchDay: (m) => m.date.slice(0, 10) });
   const clock = { day: "2026-09-16", tomorrow: "2026-09-17" };
-  const days = HL.buildDays([base({ date: "2026-09-16 20:00" }), base({ id: 2, date: "2026-09-16 21:00" }), base({ id: 3, date: "2026-09-18 18:00" }), base({ id: 4, date: "2026-09-20 18:00" })], H, clock);
-  assert.deepEqual(days.map((d) => [d.day, d.count]), [["2026-09-16", 2], ["2026-09-17", 0], ["2026-09-18", 1]]);
+  const list = [base({ date: "2026-09-16 20:00" }), base({ id: 2, date: "2026-09-16 21:00" }), base({ id: 3, date: "2026-09-18 18:00" }), base({ id: 4, date: "2026-09-15 18:00" })];
+  const days = HL.buildDays(list, H, clock, { "2026-09-15": [{}] });
+  assert.deepEqual(days.map((d) => [d.day, d.count]), [["2026-09-15", 1], ["2026-09-16", 2], ["2026-09-17", 0]]);
+  // Sans flux de resultats, l'onglet Hier reste vide meme si data-home.json
+  // porte encore des matchs de la veille : la preuve ne vient que du flux.
+  assert.equal(HL.buildDays(list, H, clock)[0].count, 0);
   const strip = HL.renderDateStrip(days, "2026-09-16");
   assert.equal((strip.match(/role="tab"/g) || []).length, 3);
   assert.match(strip, /<span class="hl-day-name">Aujourd’hui<\/span><span class="hl-day-sub">2 matchs<\/span>/);
   assert.match(strip, /data-hl-day="2026-09-17"[^>]*disabled aria-disabled="true"[^>]*><span class="hl-day-name">Demain<\/span><span class="hl-day-sub">aucun match<\/span>/);
-  assert.match(strip, /<span class="hl-day-name">Après-demain<\/span><span class="hl-day-sub">1 match<\/span>/);
-  assert.doesNotMatch(strip, /Auj\.|Dem\.|\bJE\b|hl-dates-nav/);
+  assert.match(strip, /<span class="hl-day-name">Hier<\/span><span class="hl-day-sub">1 match<\/span>/);
+  assert.ok(strip.indexOf('data-hl-day="2026-09-15"') < strip.indexOf('data-hl-day="2026-09-16"'), "Hier s'affiche avant Aujourd’hui");
+  assert.doesNotMatch(strip, /Après-demain|Auj\.|Dem\.|\bJE\b|hl-dates-nav/);
 });
 
 test("accueil simplifie : ni banniere, ni recherche, ni filtres, ni bloc « Mes compétitions » separe", () => {

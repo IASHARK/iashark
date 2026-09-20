@@ -93,6 +93,10 @@ function row(r) {
   if (form) o.form = form;
   var zone = str(r.zone != null ? r.zone : r.description, 80);
   if (zone) o.zone = zone;
+  // Buts marques / encaisses (all.goals api-football) : faits publics des pages
+  // apercu (vague 2 SEO) ; absents des classements enregistres avant le 19/09/2026.
+  var gf = num(r.gf), ga = num(r.ga);
+  if (gf != null && ga != null) { o.gf = gf; o.ga = ga; }
   return o.name && o.rank != null && o.pts != null ? o : null;
 }
 
@@ -120,7 +124,7 @@ function clearCache() { cacheMemo = {}; }
 function fromApiLeague(lg, fetchedAt) {
   if (!lg || !Array.isArray(lg.standings)) return null;
   var groups = lg.standings.filter(function (g) { return Array.isArray(g) && g.length; }).map(function (g) {
-    return { name: str(g[0].group), rows: g.map(function (r) { var a = r.all || {}; return row({ rank: r.rank, team_id: r.team && r.team.id, name: r.team && r.team.name, played: a.played, win: a.win, draw: a.draw, lose: a.lose, gd: r.goalsDiff, points: r.points, form: r.form, description: r.description }); }).filter(Boolean) };
+    return { name: str(g[0].group), rows: g.map(function (r) { var a = r.all || {}, gl = a.goals || {}; return row({ rank: r.rank, team_id: r.team && r.team.id, name: r.team && r.team.name, played: a.played, win: a.win, draw: a.draw, lose: a.lose, gd: r.goalsDiff, points: r.points, form: r.form, description: r.description, gf: gl.for, ga: gl.against }); }).filter(Boolean) };
   }).filter(function (g) { return g.rows.length; });
   if (!groups.length) return null;
   var at = str(fetchedAt, 30);
@@ -266,8 +270,71 @@ function collect(key, dir, opts) {
   return { upcoming: upcoming, results: results, standings: groups.length ? Object.assign({}, st, { groups: groups }) : null, clubs: C.leagueClubPages(key, dir, root) };
 }
 
+// ---------------------------------------------------------------------------
+// Faits publics d'une rencontre a venir hors run (pages apercu, vague 2 SEO) :
+// classement COMPLET le plus recent (registre ou cache, <= 45 jours) et
+// confrontations directes deja en cache (/fixtures/headtohead des pages club).
+// Aucun appel reseau.
+function latestStandings(key, opts) {
+  opts = opts || {};
+  var root = opts.root || C.ROOT, now = (opts.now || new Date()).getTime();
+  var lg = C.leagueByKey(key);
+  if (!lg) return null;
+  var store = opts.store || loadStore(root);
+  var cands = [];
+  var cur = store.leagues[key] && store.leagues[key].standings;
+  if (cur && cur.as_of && cur.source === "api-football") cands.push(cur);
+  var cached = cacheStandings(root, lg.apiFootballId);
+  if (cached) cands.push(cached);
+  cands.sort(function (a, b) { return Date.parse(b.as_of + "T00:00:00Z") - Date.parse(a.as_of + "T00:00:00Z"); });
+  var st = cands[0] || null;
+  if (!st || now - Date.parse(st.as_of + "T00:00:00Z") > STANDINGS_MAX_AGE_DAYS * DAY) return null;
+  var groups = displayGroups(st);
+  return groups.length ? Object.assign({}, st, { groups: groups }) : null;
+}
+// Lignes des deux equipes (liste blanche de row()), avec le nom du groupe quand
+// le classement en a plusieurs (conferences MLS, zones) ; { as_of, rows } ou null.
+function teamStandingRows(key, homeId, awayId, opts) {
+  var st = latestStandings(key, opts);
+  if (!st) return null;
+  var ids = [Number(homeId), Number(awayId)];
+  var rows = [];
+  st.groups.forEach(function (g) {
+    g.rows.forEach(function (r) {
+      if (r.team_id == null || ids.indexOf(Number(r.team_id)) === -1) return;
+      var o = Object.assign({}, r);
+      delete o.zone;
+      if (st.groups.length > 1 && g.name) o.group = g.name;
+      rows.push(o);
+    });
+  });
+  return rows.length ? { as_of: st.as_of, rows: rows.slice(0, 2) } : null;
+}
+// Confrontations directes terminees (score a 90 min ou final), les plus
+// recentes d'abord, avant beforeMs ; noms du flux (meme forme que m.h2h du run).
+function cachedH2H(root, homeId, awayId, beforeMs, max) {
+  var a = Number(homeId), b = Number(awayId);
+  if (!a || !b) return [];
+  var byId = {};
+  cacheEntries(root || C.ROOT).fixtures.forEach(function (j) {
+    if (j.endpoint !== "/fixtures/headtohead") return;
+    var p = String(j.params && j.params.h2h || "");
+    if (p !== a + "-" + b && p !== b + "-" + a) return;
+    j.response.forEach(function (f) {
+      var x = fixtureFromCache(f);
+      if (!x || !x.finished || !x.score) return;
+      if (beforeMs && x.t >= beforeMs) return;
+      byId[x.id] = { d: isoDay(x.t), home: teamName(x.home), away: teamName(x.away), s: x.score.home + "-" + x.score.away, t: x.t };
+    });
+  });
+  return Object.keys(byId).map(function (k) { return byId[k]; }).sort(function (x, y) { return y.t - x.t; }).slice(0, max || 5).map(function (e) {
+    return { d: e.d, home: e.home, away: e.away, s: e.s };
+  });
+}
+
 module.exports = {
   STORE_FILE: STORE_FILE, UPCOMING_DAYS: UPCOMING_DAYS, RESULTS_DAYS: RESULTS_DAYS, STANDINGS_MAX_AGE_DAYS: STANDINGS_MAX_AGE_DAYS,
   emptyStore: emptyStore, loadStore: loadStore, saveStore: saveStore, serializeStore: serializeStore, updateStore: updateStore,
-  fromApiLeague: fromApiLeague, cacheStandings: cacheStandings, clearCache: clearCache, displayGroups: displayGroups, collect: collect
+  fromApiLeague: fromApiLeague, cacheStandings: cacheStandings, clearCache: clearCache, displayGroups: displayGroups, collect: collect,
+  latestStandings: latestStandings, teamStandingRows: teamStandingRows, cachedH2H: cachedH2H
 };

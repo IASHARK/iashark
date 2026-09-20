@@ -59,8 +59,11 @@ function dansLOrdre(bloc,attendu,nom){
   }
 }
 test("la page match assemble les sections dans l'ordre demande",()=>{
-  dansLOrdre(blocDe("const sections=[","];"),["['avis',signalCard","'Les stats du match'","['analyse',","['questions',faqCard"],"abonne");
-  assert.match(blocDe("function render(raw)","const sections=["),/analyse=analyseAbonne\(vm\)/);
+  dansLOrdre(blocDe("const sections=[","];"),["['resultat',","['avis',signalCard","'Les stats du match'","['analyse',","['questions',faqCard","['abonnement',"],"abonne");
+  // 20/09/2026 (lot R4) : render(raw,ouverture) - ouverture ne porte QUE
+  // l'ouverture decidee par le serveur sur un match termine (bandeau de
+  // resultat en tete, appel a l'abonnement en bas). Vue abonne inchangee.
+  assert.match(blocDe("function render(raw,ouverture)","const sections=["),/analyse=analyseAbonne\(vm\)/);
   dansLOrdre(blocDe("function analyseAbonne(vm)","function render(raw)"),["scenarioCard(vm)","outputsCard(vm,","marketsCard(vm)","threatsCard(vm,"],"analyse abonne");
   dansLOrdre(blocDe("function statsBlocs(vm)","}"),["formeFold","classementFold","h2hFold","comparatifFold","compoFold"],"stats");
   const visiteur=blocDe("function renderVisitor(raw,opts)","function renderAuthWall");

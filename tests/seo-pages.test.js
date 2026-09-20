@@ -26,8 +26,29 @@ function alternates(html) {
   return [...head(html).matchAll(/<link rel="alternate" hreflang="([^"]+)" href="([^"]+)">/g)].map((m) => ({ hl: m[1], href: m[2] }));
 }
 
+// Instant reel d'une heure locale de Paris, sans dependre de l'heure d'ete en
+// cours (le meme test tourne en mars et en novembre).
+function instantParis(jour, hhmm) {
+  for (const off of ["+01:00", "+02:00"]) {
+    const d = new Date(jour + "T" + hhmm + ":00" + off);
+    const local = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit", hour12: false }).format(d);
+    if (local.replace("h", ":") === hhmm) return d.getTime();
+  }
+  throw new Error("heure de Paris introuvable pour " + jour + " " + hhmm);
+}
+// Decalage d'un fuseau a un instant donne, au format "+01:00".
+function decalageIso(timeZone, instant) {
+  const p = new Intl.DateTimeFormat("en-US", { timeZone, timeZoneName: "longOffset" }).formatToParts(new Date(instant));
+  const name = (p.find((x) => x.type === "timeZoneName") || {}).value || "GMT+00:00";
+  const m = name.match(/GMT([+-]\d{2}:\d{2})/);
+  return m ? m[1] : "+00:00";
+}
+// Coup d'envoi calcule a l'execution : une date ecrite en dur (19/09/2026)
+// sortait de la fenetre "a venir" des le lendemain et faisait echouer la page
+// championnat un jour sur deux (constate le 20/09/2026).
+const KICKOFF_DEMAIN = new Date(Date.now() + 36 * 3600 * 1000).toISOString().slice(0, 10) + " 21:00";
 const MATCH = {
-  id: 424242, league_key: "premier", league: "Premier League", date: "2026-09-19 21:00",
+  id: 424242, league_key: "premier", league: "Premier League", date: KICKOFF_DEMAIN,
   home: { n: "Arsenal", id: 42 }, away: { n: "Chelsea", id: 49 },
   stade: { nom: "Emirates Stadium" }, model_output_available: true, data_quality_score: 80, conf: 7,
   p1: 51, pn: 25, p2: 24, is_free: false,
@@ -76,10 +97,14 @@ test("page match localisee : langue, canonical, hreflang des versions generees, 
   assert.ok(alts.some((a) => a.hl === "x-default" && a.href === "https://iashark.com/en/match/424242.html"));
   const ld = ldBlocks(html);
   const ev = ld.find((b) => b["@type"] === "SportsEvent");
-  // 21:00 heure de Paris (heure d'ete, UTC+2) = 19:00 UTC, exprime avec le
-  // decalage du fuseau de la version (gb : Europe/London, BST = UTC+1).
-  assert.equal(ev.startDate, "2026-09-19T20:00:00+01:00");
-  assert.equal(Date.parse(ev.startDate), Date.parse("2026-09-19T19:00:00Z"));
+  // 21:00 heure de Paris = le meme instant, exprime avec le decalage du fuseau
+  // de la version (gb : Europe/London). Calcule au lieu d'etre ecrit en dur :
+  // la date du match suit l'horloge (voir KICKOFF_DEMAIN) et le decalage change
+  // deux fois par an.
+  const jourKickoff = KICKOFF_DEMAIN.slice(0, 10);
+  assert.equal(Date.parse(ev.startDate), instantParis(jourKickoff, "21:00"), "startDate : instant du coup d'envoi");
+  assert.equal(ev.startDate.slice(-6), decalageIso("Europe/London", instantParis(jourKickoff, "21:00")), "startDate : decalage du fuseau de la version");
+  assert.match(ev.startDate, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/);
   assert.equal(ev.location.name, "Emirates Stadium");
   assert.equal(ev.homeTeam.name, "Arsenal");
   assert.equal(ev.superEvent.name, "Premier League");

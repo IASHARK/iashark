@@ -19,6 +19,10 @@
 set -u
 PUBLISHED=(
   fr en es de it pt gb za mx match blog assets i18n lib netlify
+  # results : resultats passes publies (onglet « Hier », lot R1). Ajoute ici
+  # en meme temps que dans PUBLIC_DIRS de scripts/build-public.js, sinon une
+  # journee de resultats modifiee seule ne declencherait aucune mise en ligne.
+  results
   config/markets.json scripts/build-public.js scripts/netlify-ignore.sh netlify.toml
   _headers _redirects robots.txt
   data-home.json actus.json transferts.json buteurs-du-jour.json

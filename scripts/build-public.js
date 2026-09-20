@@ -24,7 +24,11 @@ const OUT = path.resolve(ROOT, args.includes("--out") ? args[args.indexOf("--out
 const CHECK_ONLY = args.includes("--check");
 
 // Repertoires publics copies en entier.
-const PUBLIC_DIRS = ["fr", "en", "es", "de", "it", "pt", "gb", "za", "mx", "match", "blog", "assets", "i18n/dict"];
+// "results" : resultats passes publies (onglet « Hier », docs/SPEC_RESULTATS_HIER.md).
+// results/<YYYY-MM-DD>.json + results/index.json, ecrits par le pipeline quotidien.
+// Ils ne contiennent que des matchs dont l'API a donne un statut final : aucun pari
+// de match a venir n'y figure (lib/match-results.js, tests/match-results.test.js).
+const PUBLIC_DIRS = ["fr", "en", "es", "de", "it", "pt", "gb", "za", "mx", "match", "results", "blog", "assets", "i18n/dict"];
 // Fichiers racine publics.
 const PUBLIC_ROOT_FILES = [
   "index.html", "404.html", "admin.html", "blog.html",

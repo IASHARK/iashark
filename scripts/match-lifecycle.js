@@ -14,6 +14,11 @@
 // jamais depuis le detail premium.
 //
 // Calendrier, compte depuis le coup d'envoi :
+//   - J-10 a J-3, hors run        : page « apercu » ("preview", vague 2 SEO du
+//                                   19/09/2026, lib/match-preview.js) : faits
+//                                   publics, date d'ouverture de l'analyse,
+//                                   AUCUNE sortie du modele ; meme URL que la
+//                                   future page d'analyse ;
 //   - dans le run                 : page d'analyse normale ("active") ;
 //   - sorti du run                : page conservee, score final si connu
 //                                   (sinon "Match termine"), lien vers le hub ;
@@ -27,6 +32,7 @@ const fs = require("fs");
 const path = require("path");
 const C = require("./seo-common.js");
 const MATCH_TIME = require("../lib/match-time.js");
+const PREVIEW = require("../lib/match-preview.js");
 
 const REGISTRY_FILE = "data/match-pages-registry.json";
 const HOUR = 3600 * 1000;
@@ -161,7 +167,12 @@ function standingRows(classement, m) {
   return rows.filter(function (r) {
     return r && ((r.team_id != null && ids.indexOf(num(r.team_id)) !== -1) || names.indexOf(r.name) !== -1);
   }).slice(0, 2).map(function (r) {
-    return compact({ rank: num(r.rank), name: str(r.name), team_id: num(r.team_id), played: num(r.played), won: num(r.won), drawn: num(r.drawn), lost: num(r.lost), gd: num(r.gd), pts: num(r.pts), group: str(r.group, 60) });
+    // form (api-football, plus recent d'abord, W/D/L) et buts gf/ga : faits
+    // publics du classement (vague 2 SEO : pages apercu et pages conservees).
+    var form = typeof r.form === "string" ? r.form.toUpperCase().replace(/[^WDL]/g, "").slice(0, 5) : "";
+    var gf = num(r.gf), ga = num(r.ga);
+    return compact({ rank: num(r.rank), name: str(r.name), team_id: num(r.team_id), played: num(r.played), won: num(r.won), drawn: num(r.drawn), lost: num(r.lost), gd: num(r.gd), pts: num(r.pts), group: str(r.group, 60),
+      form: form || null, gf: gf != null && ga != null ? gf : null, ga: gf != null && ga != null ? ga : null });
   }).filter(function (r) { return r.name && r.rank != null; });
 }
 function lineupSide(side) {
@@ -187,10 +198,36 @@ function publicSnapshot(m) {
   var h = h2hEntries(m.h2h);
   if (h.length) s.h2h = h;
   var rows = standingRows(m.classement, m);
-  if (rows.length) s.classement = { standings: rows };
+  if (rows.length) {
+    s.classement = { standings: rows };
+    // Date du classement (pages apercu : classement complet enregistre).
+    var asOf = m.classement && str(m.classement.as_of, 10);
+    if (asOf && /^\d{4}-\d{2}-\d{2}$/.test(asOf)) s.classement.as_of = asOf;
+  }
   var lh = m.lineups && lineupSide(m.lineups.home), la = m.lineups && lineupSide(m.lineups.away);
   if (lh && la) s.lineups = { home: lh, away: la };
   return compact(s);
+}
+// Instantane d'une rencontre d'apercu (fiche lib/match-preview.js#normalizeFixture) :
+// memes regles que publicSnapshot, completees par les faits publics connus SANS
+// appel reseau : classement complet le plus recent (data/league-hubs-registry.json
+// ou cache des pages club) et confrontations directes en cache.
+// ctx : { root, store, now }.
+function previewSnapshot(fx, ctx) {
+  ctx = ctx || {};
+  var HUBDATA = require("./league-hub-data.js");
+  var m = Object.assign({}, fx);
+  delete m.classement; delete m.h2h; delete m.form_home; delete m.form_away; delete m.lineups;
+  var k = MATCH_TIME.parseParis(fx && fx.date);
+  try {
+    var st = HUBDATA.teamStandingRows(fx.league_key, fx.home.id, fx.away.id, { root: ctx.root, store: ctx.store, now: ctx.now });
+    if (st) m.classement = { standings: st.rows, as_of: st.as_of };
+  } catch (e) { /* classement indisponible : omis */ }
+  try {
+    var h = HUBDATA.cachedH2H(ctx.root, fx.home.id, fx.away.id, k ? k.getTime() : null, 5);
+    if (h.length) m.h2h = h;
+  } catch (e) { /* cache illisible : omis */ }
+  return publicSnapshot(m);
 }
 
 // ---------------------------------------------------------------------------
@@ -259,8 +296,9 @@ function findFinalScore(entry, ctx) {
 var README = [
   "Registre du cycle de vie des pages match statiques (scripts/match-lifecycle.js). Ecrit par le pipeline",
   "(.github/workflows/update-data.yml#generateMatchPages) et par node scripts/seo-pages.js. Jamais publie.",
-  "status : active (dans le run) | archived (page conservee) | archived_noindex (J+7, noindex,follow) |",
-  "redirected (J+30 : pages supprimees, 301 vers le hub ligue de chaque version, cf. _redirects).",
+  "status : preview (J-10 a J-3, hors run : page apercu, aucune sortie du modele) | active (dans le run) | archived (page conservee) |",
+  "archived_noindex (J+7, noindex,follow) | redirected (J+30 : pages supprimees, 301 vers le hub ligue de chaque version, cf. _redirects).",
+  "preview = rencontre lue par l'appel quotidien /fixtures?from&to (lib/match-preview.js) ; preview_only = page d'apercu jamais entree dans le run.",
   "snapshot = faits publics uniquement (liste blanche de publicSnapshot : jamais de champ premium, de conf ni de cote).",
   "retired_dirs = {dir: date} des versions sorties du perimetre (seoMatchDirs reduit) : 301 vers le hub ligue de la version s'il est dans le perimetre, sinon vers la version FR du match, pendant 90 jours."
 ];
@@ -290,15 +328,24 @@ function saveRegistry(root, reg) {
   return true;
 }
 
+// Jour de Paris (AAAA-MM-JJ) d'un instant ISO.
+function parisDayOf(iso) { var t = Date.parse(iso); return isFinite(t) ? MATCH_TIME.dayKey(new Date(t), "Europe/Paris") : null; }
+
 // Met a jour le registre EN PLACE. runMatchs = matchs du run (copie publique) ;
-// ctx.historique = historique.json (score regle). Renvoie un resume.
+// ctx.historique = historique.json (score regle) ; ctx.previews (pipeline
+// seulement) = { fixtures: [fiches lib/match-preview.js#normalizeFixture],
+// leagues: {cle: "OK" | "RATE_LIMIT" | "API_ERROR"}, window: {from, to} } ;
+// ctx.store / ctx.root : faits publics des apercus (league-hub-data.js).
+// Sans ctx.previews (node scripts/seo-pages.js), les apercus existants sont
+// gardes tels quels jusqu'au coup d'envoi. Renvoie un resume.
 function updateRegistry(reg, runMatchs, now, ctx) {
   now = now || new Date();
+  ctx = ctx || {};
   var t = now.getTime(), today = isoDay(now);
   var seen = {};
   var matchs = (runMatchs || []).filter(validMatch);
-  var lookup = { historique: ctx && ctx.historique, matchs: matchs };
-  var summary = { active: 0, archived: 0, archived_noindex: 0, redirected: 0, purged: 0, scores: 0 };
+  var lookup = { historique: ctx.historique, matchs: matchs };
+  var summary = { preview: 0, active: 0, archived: 0, archived_noindex: 0, redirected: 0, purged: 0, scores: 0 };
   matchs.forEach(function (m) {
     var id = String(m.id);
     seen[id] = true;
@@ -312,12 +359,67 @@ function updateRegistry(reg, runMatchs, now, ctx) {
     retireDirs(e, previousDirs, today);
     e.last_seen = today;
     e.in_run = true;
+    // Apercu devenu page d'analyse : meme URL, first_seen garde (date de
+    // naissance de la page, mesure « indexee avant le coup d'envoi »).
+    delete e.preview; delete e.preview_seen; delete e.preview_only;
     delete e.left_run_at; delete e.left_run_before_kickoff; delete e.removed_at;
     e.snapshot = publicSnapshot(m);
     reg.matches[id] = e;
   });
+  // Apercus du jour (J+3 a J+10) : jamais un match du run, jamais un match commence.
+  var pv = ctx.previews && Array.isArray(ctx.previews.fixtures) ? ctx.previews : null;
+  var seenPreview = {};
+  if (pv) {
+    pv.fixtures.forEach(function (fx) {
+      if (!validMatch(fx) || seen[String(fx.id)] || !fx.league_key || !C.leagueByKey(fx.league_key)) return;
+      var k = kickoffIso(fx);
+      if (!k || Date.parse(k) <= t) return;
+      var id = String(fx.id);
+      var e = reg.matches[id] || { id: id, first_seen: today };
+      if (e.status === "redirected") return;
+      if (e.kickoff && e.kickoff !== k) e.previous_kickoff = e.kickoff;
+      e.kickoff = k;
+      e.league_key = fx.league_key;
+      var previousDirs = Array.isArray(e.dirs) ? e.dirs : [];
+      e.dirs = matchDirsFor(fx.league_key);
+      retireDirs(e, previousDirs, today);
+      e.in_run = false;
+      e.preview = true;
+      e.preview_seen = today;
+      delete e.preview_only; delete e.left_run_at; delete e.left_run_before_kickoff; delete e.removed_at; delete e.final_score;
+      e.snapshot = previewSnapshot(fx, { root: ctx.root, store: ctx.store, now: now });
+      reg.matches[id] = e;
+      seenPreview[id] = true;
+    });
+  }
   Object.keys(reg.matches).forEach(function (id) {
     var e = reg.matches[id];
+    // Apercu hors run non relu aujourd'hui : coup d'envoi passe -> page
+    // conservee ; competition relue sans ce match (reporte, heure a definir,
+    // deplace hors fenetre) ou match entre dans la fenetre d'analyse sans etre
+    // analyse -> page conservee « plus suivie ». Competition non relue (quota,
+    // erreur API) ou run local sans apercus : l'apercu reste tel quel.
+    if (e && e.preview && !seen[id] && !seenPreview[id]) {
+      var kp = e.kickoff ? Date.parse(e.kickoff) : NaN;
+      var dayP = e.kickoff ? parisDayOf(e.kickoff) : null;
+      var fetched = !!(pv && pv.leagues && pv.leagues[e.league_key] === "OK");
+      var inAnalysisWindow = !!(pv && pv.window && dayP && dayP < pv.window.from);
+      if (!(isFinite(kp) && t < kp)) {
+        delete e.preview; delete e.preview_seen;
+        e.preview_only = true;
+        e.left_run_at = e.left_run_at || today;
+      } else if (pv && (fetched || inAnalysisWindow)) {
+        delete e.preview; delete e.preview_seen;
+        e.preview_only = true;
+        e.left_run_at = today;
+        e.left_run_before_kickoff = true;
+      } else if (!pv && ctx.store && e.snapshot && e.snapshot.home && e.snapshot.away) {
+        // Run local : faits du classement rafraichis depuis le registre des hubs.
+        var fx0 = { id: e.snapshot.id, league_key: e.snapshot.league_key, league: e.snapshot.league, date: e.snapshot.date, round: e.snapshot.round, home: e.snapshot.home, away: e.snapshot.away, stade: e.snapshot.stade };
+        var snap = previewSnapshot(fx0, { root: ctx.root, store: ctx.store, now: now });
+        if (snap) e.snapshot = snap;
+      }
+    }
     // Perimetre modifie (config/leagues.json#seoMatchDirs) pour un match deja
     // sorti du run : ses pages conservees suivent le nouveau perimetre (version
     // ajoutee : page conservee ecrite ; version retiree : 301, retired_dirs).

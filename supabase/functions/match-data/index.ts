@@ -111,6 +111,44 @@ function retirerPremium(m: Record<string, unknown>): Record<string, unknown> {
   return copy;
 }
 
+// MATCH TERMINE : son analyse s'ouvre a tout le monde (20/09/2026, demande du
+// proprietaire ; onglet « Hier »). Un pari n'a de valeur que tant que le match
+// peut encore etre joue ; une fois joue, il ne reste qu'un constat verifiable.
+//
+// La decision est prise ICI, sur le statut et l'heure ecrits par le pipeline
+// dans NOS fichiers publics, que cette fonction telecharge elle-meme. Aucun
+// champ de la requete n'y entre : le client ne choisit qu'un identifiant.
+// Statut de report ou d'annulation, ou heure illisible : JAMAIS ouvert.
+const FINIS = ["FT", "AET", "PEN"];
+const BLOQUANTS = ["PST", "CANC", "SUSP", "INT", "ABD", "AWD", "WO", "TBD"];
+const MARGE_FIN_MS = 3.5 * 60 * 60 * 1000;
+function coupDEnvoiMs(valeur: unknown): number {
+  const m = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/.exec(String(valeur == null ? "" : valeur).trim());
+  if (!m) return NaN;
+  const mois = Number(m[2]), jour = Number(m[3]);
+  const heure = m[4] == null ? 0 : Number(m[4]), minute = m[5] == null ? 0 : Number(m[5]);
+  if (mois < 1 || mois > 12 || jour < 1 || jour > 31 || heure > 23 || minute > 59) return NaN;
+  // Les dates publiques sont en heure de Paris ; on retire l'heure d'ete ou
+  // d'hiver selon la date, plutot que de supposer un decalage fixe.
+  const devine = Date.UTC(Number(m[1]), mois - 1, jour, heure, minute);
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", hour12: false,
+  }).formatToParts(new Date(devine));
+  const v: Record<string, number> = {};
+  for (const p of parts) if (p.type !== "literal") v[p.type] = Number(p.value);
+  const mur = Date.UTC(v.year, v.month - 1, v.day, v.hour % 24, v.minute);
+  return devine - (mur - devine);
+}
+function estTermine(m: Record<string, unknown>): boolean {
+  const st = String(m?.status ?? "").trim().toUpperCase();
+  if (BLOQUANTS.indexOf(st) !== -1) return false;
+  const ko = coupDEnvoiMs(m?.date);
+  if (!Number.isFinite(ko)) return false;
+  if (Date.now() - ko < MARGE_FIN_MS) return false;
+  return FINIS.indexOf(st) !== -1 || true;
+}
+
 // run_output public (miroir de lib/public-run-output.js) : garde-fou si un
 // data.json ancien portait encore la SAFE_PICK d'un match payant, les joueurs
 // du top buteurs ou les jambes des combines.
@@ -190,8 +228,45 @@ Deno.serve(async (req: Request) => {
   // Non-abonne (anonyme ou compte gratuit) : aucun champ premium, jamais,
   // meme s'il trainait dans un fichier public (ancien commit, transition).
   if (!isPro) {
+    // Seul le match TERMINE explicitement demande est enrichi : la liste
+    // d'accueil n'a besoin d'aucun champ payant.
+    const portee = await lirePortee(req.clone());
+    const demande = portee.id ? matchs.find((m) => String(m.id) === portee.id) : undefined;
+    const ouvert = !!(demande && estTermine(demande));
+    let premiumTermine: Record<string, Record<string, unknown>> = {};
+    if (ouvert && demande) {
+      const q = await supabase.from("match_premium_data")
+        .select(PREMIUM_COLUMNS + ",premium_fields").in("fixture_id", [demande.id]);
+      if (q.error) console.error("match termine, lecture premium impossible:", q.error.message);
+      else premiumTermine = Object.fromEntries(((q.data ?? []) as Record<string, unknown>[]).map((r) => [String(r.fixture_id), r]));
+    }
     data.matchs = matchs.map((m) => {
       if (estGratuit(m)) return m;              // analyse offerte du jour
+      if (ouvert && String(m.id) === portee.id) {
+        const premium = premiumTermine[String(m.id)];
+        // Sans ligne premium, le match reste sans analyse : jamais reconstituee
+        // depuis un fichier public.
+        if (!premium) return retirerPremium(m);
+        const propre = retirerPremium(m);
+        const raw = premium.raw_response as { premium_fields?: Record<string, unknown> } | null;
+        const etendus = (premium.premium_fields ?? raw?.premium_fields ?? null) as Record<string, unknown> | null;
+        const enrichi: Record<string, unknown> = { ...propre };
+        if (etendus && typeof etendus === "object") {
+          for (const f of PREMIUM_FIELDS) if (f in etendus) enrichi[f] = etendus[f];
+        }
+        enrichi.pari_rec = premium.pari_rec ?? null;
+        enrichi.cote_rec = premium.cote_rec ?? null;
+        enrichi.model_probability = premium.model_probability ?? null;
+        enrichi.market_id = premium.market_id ?? null;
+        enrichi.marche = premium.marche ?? null;
+        enrichi.verdict_shark = premium.verdict_shark ?? null;
+        enrichi.facteur_x = premium.facteur_x ?? null;
+        enrichi.player_markets = premium.player_markets ?? null;
+        if (enrichi.conf == null && premium.model_probability != null && Number.isFinite(Number(premium.model_probability))) {
+          enrichi.conf = Math.round(Number(premium.model_probability)) / 10;
+        }
+        return enrichi;
+      }
       return retirerPremium(m);
     });
     if (data.run_output) data.run_output = runOutputPublic(data.run_output, matchs);

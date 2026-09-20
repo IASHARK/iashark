@@ -36,12 +36,11 @@ const ctx = () => ({
 test("liseré : vert si la recommandation est passée, rouge sinon, rien si non réglée", () => {
   const H = helpers();
   const gagne = HL.renderMatchRow(HL.veilleListe(fichier([ligne()]))[0], ctx(), H, 0);
-  assert.match(gagne, /class="hl-row hl-grid is-past[^"]*hl-win is-past"/);
-  // Pas un lien : la fiche d'un match joue n'est gardee qu'un jour.
-  assert.doesNotMatch(gagne, /<a class="hl-row/, "la ligne d'hier ne doit pas etre cliquable");
-  assert.match(gagne, /<div class="hl-row/);
+  assert.match(gagne, /class="hl-row hl-grid is-past[^"]*hl-win"/);
+  // Cliquable : l'analyse d'un match termine est ouverte a tous.
+  assert.match(gagne, /<a class="hl-row[^"]*" href="\/match\.html\?id=1575507"/);
   const perdu = HL.renderMatchRow(HL.veilleListe(fichier([ligne({ result: "loss" })]))[0], ctx(), H, 0);
-  assert.match(perdu, /hl-loss is-past"/);
+  assert.match(perdu, /hl-loss"/);
   for (const r of ["pending", "void", "", undefined]) {
     const neutre = HL.renderMatchRow(HL.veilleListe(fichier([ligne({ result: r })]))[0], ctx(), H, 0);
     assert.doesNotMatch(neutre, /hl-win|hl-loss/, "couleur posée sans verdict (" + r + ")");

@@ -113,7 +113,9 @@ test("plusieurs matchs designes : prend celui du jour, puis le prochain a venir"
 test("l'accueil laisse le match offert dans sa competition (puce Offert) et se re-rend a minuit", () => {
   const accueil = read("index.html");
   assert.doesNotMatch(accueil, /list=list\.filter\(function\(m\)\{return String\(m\.id\)!==String\(freeMatchId\);\}\)/);
-  assert.match(accueil, /homeList\.setData\(getSportMatchs\(\),\{freeMatchId:freeMatchId,isPro:proConfirme,hasAccount:!!\(authCtx&&authCtx\.session\)\}\)/);
+  // day : jour demande par l'URL (/fr/?jour=hier, lien des emails) ; le reste
+  // est inchange — le match offert vient toujours de la meme source.
+  assert.match(accueil, /homeList\.setData\(getSportMatchs\(\),\{freeMatchId:freeMatchId,isPro:proConfirme,hasAccount:!!\(authCtx&&authCtx\.session\),day:jourDemande\|\|undefined\}\)/);
   assert.doesNotMatch(accueil, /ordonnee\.unshift\(/);
   assert.match(accueil, /setInterval\(function\(\)\{var j=getTodayStr\(\)/);
   assert.match(read("home-list.js"), /if\(a\.free\)tags\.push\('<span class="hl-tag hl-tag-free">'/);

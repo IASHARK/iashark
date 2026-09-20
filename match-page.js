@@ -365,6 +365,23 @@ function riskStat(code){
 // repertoires depuis le 19/09/2026) ; un repertoire inconnu renvoie vers
 // la version anglaise.
 const METHODOLOGY_DIRS=['fr','gb','za','en','mx','es','de','it','pt'];
+// Un match est TERMINE quand l'API le dit (FT/AET/PEN) ou, a defaut, plus de
+// 3 h 30 apres le coup d'envoi — large, pour couvrir prolongations, tirs au but
+// et coup d'envoi retarde. Un match reporte, annule ou sans heure fiable n'est
+// JAMAIS considere comme termine : son pari garde toute sa valeur.
+var STATUTS_FINIS=['FT','AET','PEN'];
+var STATUTS_BLOQUANTS=['PST','CANC','SUSP','INT','ABD','AWD','WO','TBD'];
+function matchTermine(m){
+  if(!m)return false;
+  var st=String(m.status||'').trim().toUpperCase();
+  if(STATUTS_BLOQUANTS.indexOf(st)!==-1)return false;
+  if(STATUTS_FINIS.indexOf(st)!==-1)return true;
+  var MT=window.IasharkMatchTime;
+  var ts=MT&&MT.matchTimestamp?MT.matchTimestamp(m):NaN;
+  if(!isFinite(ts))return false;
+  return Date.now()-ts>3.5*60*60*1000;
+}
+
 function methodologyHref(){
   const dir=(window.I18N&&window.I18N.dir)||'';
   if(METHODOLOGY_DIRS.includes(dir))return '/'+dir+'/methodologie.html';
@@ -1410,8 +1427,15 @@ async function init(){
     // pour un non-abonne), jamais l'inverse.
     list=list||[];
     const isFree=String(raw.id)===String(IasharkFreeMatch.pickFreeMatchId(list,null,(window.IASHARK_MARKET&&window.IASHARK_MARKET.code)||null));
+    // MATCH TERMINE (20/09/2026, demande du proprietaire) : l'analyse d'un match
+    // deja joue n'a plus aucune valeur de pari, elle devient la preuve du
+    // travail et s'ouvre a tout le monde depuis l'onglet « Hier ». C'est le
+    // SERVEUR qui decide ce qu'il envoie (match-data applique la meme regle) :
+    // si la fonction n'a rien renvoye de premium, la page n'affichera rien de
+    // plus, elle ne peut pas fabriquer une analyse.
+    const termine=matchTermine(raw);
     if(isFree&&!ctx.session){renderAuthWall(raw);return;}
-    if(!isFree&&!ctx.isPro){renderProWall(raw);return;}
+    if(!isFree&&!termine&&!ctx.isPro){renderProWall(raw);return;}
     render(raw);
   }catch(e){
     root.innerHTML=`<div class="match-error"><b>${esc(e.message||t('match_page.generic_load_error','Erreur de chargement'))}</b><a href="${esc(lien(''))}">${esc(t('match_page.back_to_home','Retour à l\'accueil'))}</a></div>`;

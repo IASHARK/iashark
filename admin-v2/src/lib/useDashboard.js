@@ -35,7 +35,7 @@ export function useDashboard(periodId, filters, enabled = true) {
       p_device: filters?.device || null,
       p_source: filters?.source || null,
     };
-    const [analytics, business, funnel, health, revenue, signups] = await Promise.all([
+    const [analytics, business, funnel, health, revenue, signups, unlocks, home] = await Promise.all([
       rpc("admin_analytics", { p_days: r.days, p_from: r.from, p_to: r.to, ...common }),
       rpc("admin_business", { p_days: r.days, p_from: r.from, p_to: r.to }),
       rpc("admin_conversion_funnel", {
@@ -50,6 +50,11 @@ export function useDashboard(periodId, filters, enabled = true) {
       rpc("admin_health"),
       fetchRevenue(),
       rpc("admin_recent_signups", { p_limit: 60 }),
+      rpc("admin_unlock_clicks", { p_from: r.from, p_to: r.to, p_include_internal: false, p_since: LAUNCH_AT }),
+      // Pronostics publies : generated_at lu comme le fait admin.html.
+      fetch("/data-home.json", { cache: "no-store" })
+        .then((res) => (res.ok ? res.json().then((j) => ({ ok: true, generated_at: j.generated_at })) : { ok: false }))
+        .catch(() => null),
     ]);
     const denied = [analytics, business, funnel, health].some((x) => x.kind === "denied") || revenue.kind === "denied";
     setState({
@@ -65,6 +70,8 @@ export function useDashboard(periodId, filters, enabled = true) {
       revenue: revenue.data || null,
       revenueError: revenue.data ? null : revenue,
       signups: signups.data || null,
+      unlocks: unlocks.data || null,
+      home,
     });
   }, [periodId, filters?.site, filters?.device, filters?.source, filters?.country, enabled]);
 
@@ -73,6 +80,56 @@ export function useDashboard(periodId, filters, enabled = true) {
   }, [load]);
 
   return { ...state, reload: load };
+}
+
+// « Qui est la maintenant » : admin_live_view, rafraichi toutes les 30 s
+// tant que l'onglet est visible.
+export function useLive(enabled = true) {
+  const [live, setLive] = useState(null);
+  useEffect(() => {
+    if (!enabled) return;
+    let alive = true;
+    const tick = async () => {
+      if (document.hidden) return;
+      const r = await rpc("admin_live_view", { p_include_internal: true });
+      if (alive && r.data) setLive(r.data);
+    };
+    tick();
+    const t = setInterval(tick, 30000);
+    return () => {
+      alive = false;
+      clearInterval(t);
+    };
+  }, [enabled]);
+  return live;
+}
+
+// Dernieres visites avec leur parcours page par page.
+export function useSessions(periodId, filters, enabled = true) {
+  const [state, setState] = useState({ loading: true });
+  useEffect(() => {
+    if (!enabled) return;
+    let alive = true;
+    const r = periodRange(periodId);
+    setState({ loading: true });
+    rpc("admin_recent_sessions", {
+      p_limit: 50,
+      p_include_internal: false,
+      p_from: r.from,
+      p_to: r.to,
+      p_since: LAUNCH_AT,
+      p_site: filters?.site || null,
+      p_device: filters?.device || null,
+      p_source: filters?.source || null,
+    }).then((res) => {
+      if (!alive) return;
+      setState({ loading: false, sessions: res.data || null, error: res.data ? null : res });
+    });
+    return () => {
+      alive = false;
+    };
+  }, [periodId, filters?.site, filters?.device, filters?.source, enabled]);
+  return state;
 }
 
 export function useMembers() {

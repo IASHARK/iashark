@@ -112,6 +112,37 @@ export default function Members() {
         )}
       </Card>
 
+      {(() => {
+        const ret = state.retention;
+        const overall = ret?.overall;
+        const cohorts = ret?.cohorts || [];
+        if (!overall && !cohorts.length) return null;
+        const pct = (num, den) => (Number(den) > 0 ? fmtInt((Number(num) / Number(den)) * 100) + " %" : "trop tôt");
+        return (
+          <Card title="Est-ce qu'ils reviennent ?" subtitle="Par semaine d'inscription. Une case « trop tôt » se remplira d'elle-même.">
+            {overall && (
+              <p className="mb-3 text-sm text-ink">
+                Sur tous les inscrits suivis : <b>{pct(overall.returned_d1, overall.eligible_d1)}</b> reviennent dès le lendemain,{" "}
+                <b>{pct(overall.returned_d7, overall.eligible_d7)}</b> après 7 jours, <b>{pct(overall.returned_d30, overall.eligible_d30)}</b> après 30 jours.
+              </p>
+            )}
+            {cohorts.length > 0 && (
+              <DataTable
+                keyOf={(c) => c.week_start || c.week}
+                columns={[
+                  { key: "week", label: "Semaine", render: (c) => "Semaine du " + fmtDate(c.week_start || c.week) },
+                  { key: "signups", label: "Inscrits", align: "right", render: (c) => fmtInt(c.signups) },
+                  { key: "d1", label: "J+1", align: "right", render: (c) => pct(c.returned_d1, c.eligible_d1 ?? c.signups) },
+                  { key: "d7", label: "J+7", align: "right", render: (c) => pct(c.returned_d7, c.eligible_d7) },
+                  { key: "d30", label: "J+30", align: "right", render: (c) => pct(c.returned_d30, c.eligible_d30) },
+                ]}
+                rows={cohorts}
+              />
+            )}
+          </Card>
+        );
+      })()}
+
       {segment === "intent" && rows.length > 0 && (
         <Card title="Quoi faire de cette liste">
           <p className="text-sm leading-relaxed text-ink">

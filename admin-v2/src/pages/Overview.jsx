@@ -5,6 +5,8 @@
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { Card, Kpi, Badge, Spinner, ErrorBox, Empty } from "../components/ui.jsx";
 import { fmtInt, fmtPct, fmtMoneyMap, deltaPct, fmtDate } from "../lib/format.js";
+import { buildHealth } from "../lib/health.js";
+import { useLive } from "../lib/useDashboard.js";
 import { FunnelSteps, funnelStepsOf } from "./Conversion.jsx";
 
 // Phrase automatique du jour, honnete : uniquement des faits calcules.
@@ -23,13 +25,14 @@ function sentence({ k, prev, business, revenue, leak }) {
 }
 
 // « A surveiller » : seulement ce qui merite une action, jamais 200 alertes.
-function buildAlerts({ business, revenue, health, k, prev }) {
+function buildAlerts({ business, revenue, home, health, k, prev }) {
   const alerts = [];
   const failed = Number(revenue?.last30d?.failed || 0) + Number(business?.subscriptions?.past_due || 0);
   if (failed > 0) alerts.push({ tone: "amber", text: `${failed} paiement${failed > 1 ? "s" : ""} en échec — à vérifier dans Stripe.` });
   const cancelPending = Number(revenue?.counts?.cancel_at_period_end || 0);
   if (cancelPending > 0) alerts.push({ tone: "amber", text: `${cancelPending} abonné${cancelPending > 1 ? "s ont" : " a"} programmé sa résiliation.` });
-  (health?.checks || []).forEach((c) => {
+  const lights = buildHealth({ home, health, activePro: business?.subscriptions?.active });
+  lights.checks.forEach((c) => {
     if (c.level === "bad" || c.level === "warn") alerts.push({ tone: c.level === "bad" ? "down" : "amber", text: c.text || c.title });
   });
   const d = deltaPct(k?.signup_rate, prev?.signup_rate);
@@ -39,7 +42,8 @@ function buildAlerts({ business, revenue, health, k, prev }) {
   return alerts;
 }
 
-export default function Overview({ dash }) {
+export default function Overview({ dash, onGoTo }) {
+  const live = useLive(!dash.denied);
   if (dash.loading) return <Spinner label="Calcul des chiffres…" />;
   const a = dash.analytics;
   if (!a) return <ErrorBox {...(dash.analyticsError || {})} what="Les statistiques" />;
@@ -66,7 +70,8 @@ export default function Overview({ dash }) {
     const cur = (p.currency || "eur").toUpperCase();
     paid[cur] = (paid[cur] || 0) + Number(p.amount_paid ?? p.amount_total ?? 0) / (p.amount_paid > 500 || p.amount_total > 500 ? 100 : 1);
   });
-  const alerts = buildAlerts({ business: b, revenue: rev, health: dash.health, k, prev });
+  const alerts = buildAlerts({ business: b, revenue: rev, home: dash.home, health: dash.health, k, prev });
+  const liveCount = live ? Number(live.active_visitors) || 0 : null;
 
   return (
     <div className="grid gap-4">
@@ -82,9 +87,15 @@ export default function Overview({ dash }) {
         <Kpi label="MRR (Stripe)" value={rev ? fmtMoneyMap(rev.mrr) : "—"} delta={null} hint={rev ? "" : "fonction revenus indisponible"} />
       </div>
 
-      {/* Phrase du jour */}
+      {/* Phrase du jour + en ce moment */}
       <Card>
-        <p className="text-sm leading-relaxed text-ink">{sentence({ k, prev, business: b, revenue: rev, leak: leakText })}</p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <p className="min-w-0 flex-1 text-sm leading-relaxed text-ink">{sentence({ k, prev, business: b, revenue: rev, leak: leakText })}</p>
+          <span className="flex items-center gap-2 rounded-full border border-edge px-3 py-1.5 text-xs text-soft">
+            <span className={"h-2 w-2 rounded-full " + (liveCount ? "animate-pulse bg-cyan" : "bg-soft/40")} aria-hidden="true" />
+            {liveCount === null ? "en direct…" : liveCount === 0 ? "personne en ce moment" : fmtInt(liveCount) + " sur le site maintenant"}
+          </span>
+        </div>
       </Card>
 
       {/* A surveiller */}
@@ -135,6 +146,22 @@ export default function Overview({ dash }) {
           {steps.length ? <FunnelSteps steps={steps} compact /> : <Empty>Pas encore de données de tunnel sur cette période.</Empty>}
         </Card>
       </div>
+
+      {/* Jour par jour */}
+      {Array.isArray(a.series) && a.series.length > 1 && (
+        <Card title="Jour par jour" subtitle="Visiteurs et pages vues, du plus récent au plus ancien.">
+          <ul className="grid gap-1.5">
+            {[...a.series].reverse().map((d) => (
+              <li key={d.t} className="flex items-baseline justify-between gap-3 text-sm">
+                <span className="text-ink">{fmtDate(d.t)}</span>
+                <span className="tabular-nums text-soft">
+                  <b className="text-ink">{fmtInt(d.visitors)}</b> visiteur{Number(d.visitors) > 1 ? "s" : ""} · {fmtInt(d.page_views)} pages vues
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       {/* Derniers inscrits */}
       <Card title="Derniers inscrits" subtitle="Comptes admin et de test masqués.">

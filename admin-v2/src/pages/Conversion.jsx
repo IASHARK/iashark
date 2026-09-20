@@ -1,7 +1,19 @@
 // Conversion : le tunnel complet de admin_conversion_funnel (0031),
 // etape par etape, avec la perte absolue et le plus gros decrochage.
-import { Card, Spinner, ErrorBox, Empty } from "../components/ui.jsx";
+import { Card, Spinner, ErrorBox, Empty, DataTable } from "../components/ui.jsx";
 import { fmtInt, fmtPct } from "../lib/format.js";
+
+// Emplacements des boutons « Debloquer » de la page match (0029).
+const GATE_LABELS = {
+  match_gate_unlock: "Panneau d'analyse (mur Pro)",
+  match_avis_unlock: "Avis de l'IA",
+  match_recall_unlock: "Rappel après les stats",
+  match_analysis_unlock: "Analyse fermée",
+  match_faq_unlock: "Réponses de la FAQ",
+  match_bar_unlock: "Barre en bas de l'écran",
+  home_scorers_unlock: "Buteurs du jour (accueil)",
+  home_list_upsell: "Liste des matchs (accueil)",
+};
 
 const STEP_LABELS = {
   arrived: "Arrivée sur le site",
@@ -96,6 +108,34 @@ export default function Conversion({ dash }) {
             {worst.lost > 1 ? "nt" : ""} ({fmtPct((worst.lost / worst.from.visitors) * 100)}).
           </p>
         )}
+      </Card>
+
+      <Card
+        title="Clics « Débloquer » par emplacement"
+        subtitle="Quel bouton transforme l'usage en intention de payer. Comptés sur la période, robots exclus."
+      >
+        {(() => {
+          const u = dash.unlocks;
+          const rows = (u?.rows || []).map((r) => ({ ...r, label: GATE_LABELS[r.kind] || r.kind }));
+          const total = Number(u?.total_clicks) || rows.reduce((s, r) => s + Number(r.clicks || 0), 0);
+          if (!rows.length || !total) return <Empty>Aucun clic « Débloquer » sur cette période.</Empty>;
+          return (
+            <DataTable
+              keyOf={(r) => r.kind}
+              columns={[
+                { key: "label", label: "Emplacement" },
+                { key: "clicks", label: "Clics", align: "right", render: (r) => fmtInt(r.clicks) },
+                {
+                  key: "share",
+                  label: "Part",
+                  align: "right",
+                  render: (r) => (total ? fmtPct((Number(r.clicks) / total) * 100) : "—"),
+                },
+              ]}
+              rows={rows.sort((a, b) => Number(b.clicks) - Number(a.clicks))}
+            />
+          );
+        })()}
       </Card>
 
       <div className="grid gap-4 lg:grid-cols-2">

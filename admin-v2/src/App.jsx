@@ -8,15 +8,21 @@ import { Spinner } from "./components/ui.jsx";
 import Overview from "./pages/Overview.jsx";
 import Acquisition from "./pages/Acquisition.jsx";
 import Conversion from "./pages/Conversion.jsx";
+import Content from "./pages/Content.jsx";
 import Revenue from "./pages/Revenue.jsx";
 import Members from "./pages/Members.jsx";
+import Visits from "./pages/Visits.jsx";
+import Health from "./pages/Health.jsx";
 
 const PAGES = [
   { id: "overview", label: "Vue d'ensemble", icon: "◧" },
   { id: "acquisition", label: "Acquisition", icon: "⇢" },
   { id: "conversion", label: "Conversion", icon: "⌁" },
+  { id: "content", label: "Contenu", icon: "⚽" },
   { id: "revenue", label: "Revenus", icon: "◍" },
   { id: "members", label: "Inscrits", icon: "◔" },
+  { id: "visits", label: "Visites", icon: "☰" },
+  { id: "health", label: "Santé", icon: "♥" },
 ];
 
 const SITES = [
@@ -142,7 +148,16 @@ export default function App() {
     );
   }
 
-  const Page = { overview: Overview, acquisition: Acquisition, conversion: Conversion, revenue: Revenue, members: Members }[page];
+  const Page = {
+    overview: Overview,
+    acquisition: Acquisition,
+    conversion: Conversion,
+    content: Content,
+    revenue: Revenue,
+    members: Members,
+    visits: Visits,
+    health: Health,
+  }[page];
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -216,7 +231,10 @@ export default function App() {
             </button>
           </div>
 
-          <Page dash={dash} />
+          <Page dash={dash} periodId={period} filters={stableFilters} />
+          <p className="mt-6 text-[11px] text-soft">
+            Suivi des visites démarré le 13 septembre 2026 · robots, tests et ton appareil exclus partout · données gardées 13 mois.
+          </p>
         </main>
       </div>
     </div>

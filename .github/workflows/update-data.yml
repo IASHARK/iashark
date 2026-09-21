@@ -2175,6 +2175,19 @@ jobs:
               }
               var registre=null;
               try{ registre=JSON.parse(fs.readFileSync('data/match-pages-registry.json','utf8')); }catch(e){}
+              // RETRAITS DECIDES PAR LE PROPRIETAIRE (config/results-exclusions.json).
+              // Jamais une regle du calcul : des championnats explicitement retires
+              // d'une journee publiee. Le fichier de configuration est la seule
+              // source ; le vider fait revenir les matchs au run suivant.
+              var EXCLUSIONS_JOUR={};
+              try{
+                var exclCfg=JSON.parse(fs.readFileSync('config/results-exclusions.json','utf8'));
+                EXCLUSIONS_JOUR=(exclCfg&&exclCfg.days)||{};
+              }catch(e){ console.log('  [resultats] config/results-exclusions.json absente ou illisible : aucun retrait manuel.'); }
+              function ligueExclue(jour,cle){
+                var e=EXCLUSIONS_JOUR[jour];
+                return !!(e&&Array.isArray(e.league_keys)&&cle&&e.league_keys.indexOf(cle)!==-1);
+              }
               if(!fs.existsSync(RESULTS_DIR)) fs.mkdirSync(RESULTS_DIR,{recursive:true});
               var genere=new Date().toISOString(), index=[], ecrits=0;
               jours.forEach(function(jour){
@@ -2196,6 +2209,26 @@ jobs:
                   }),
                 });
                 if(!out.report.total) return; // journee sans marche retenu : aucun fichier
+                // Retraits du proprietaire : les matchs des championnats listes
+                // pour CETTE journee sortent de la liste ET du compte.
+                if(EXCLUSIONS_JOUR[jour]){
+                  var avant=(out.file.matches||[]).length;
+                  out.file.matches=(out.file.matches||[]).filter(function(m){ return !ligueExclue(jour,m&&m.league_key); });
+                  var gardes={settled:0,won:0,lost:0,void:0,pending:0};
+                  out.file.matches.forEach(function(m){
+                    if(!m||!m.result) return;
+                    if(m.result==='pending'){ gardes.pending++; return; }
+                    gardes.settled++;
+                    if(m.result==='win') gardes.won++;
+                    else if(m.result==='loss') gardes.lost++;
+                    else if(m.result==='void') gardes['void']++;
+                  });
+                  out.file.totals=gardes;
+                  if(Array.isArray(out.file.scorers)) out.file.scorers=out.file.scorers.filter(function(s){
+                    return (out.file.matches||[]).some(function(m){ return m&&String(m.id)===String(s&&s.match_id); });
+                  });
+                  console.log('  [resultats] '+jour+' : '+(avant-out.file.matches.length)+' match(s) retire(s) par config/results-exclusions.json ('+(EXCLUSIONS_JOUR[jour].league_keys||[]).join(', ')+').');
+                }
                 fs.writeFileSync(RESULTS_DIR+'/'+jour+'.json',JSON.stringify(out.file,null,2));
                 index.push(out.file); ecrits++;
                 MATCH_RESULTS.formatUnsettledLog(out.report).forEach(function(l){ console.log(l); });

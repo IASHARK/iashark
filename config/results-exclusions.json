@@ -1,0 +1,10 @@
+{
+  "_readme": "Matchs retires des fichiers publics results/<jour>.json (onglet « Hier »). Decision du proprietaire, jamais du calcul : ce fichier est la SEULE source de ces retraits, et il est lu a chaque run par .github/workflows/update-data.yml (ecrireFichiersResultats). Un retrait sort le match de la liste ET du compte de la journee. Retirer une entree ici suffit a faire revenir les matchs au run suivant : rien n'est efface.",
+  "_format": "days.<AAAA-MM-JJ>.league_keys = cles de config/leagues.json a retirer pour CETTE journee. 'reason' est une note interne, jamais publiee.",
+  "days": {
+    "2026-09-20": {
+      "league_keys": ["argentina_liga_profesional", "colombia_primera_a", "peru_primera"],
+      "reason": "Decision du proprietaire (21/09/2026) : qualite des donnees jugee insuffisante sur ces trois championnats sud-americains. A revoir - soit on cesse d'y publier des paris a l'avenir (config/leagues.json), soit on remonte le seuil de fiabilite exige, plutot que de retirer apres coup."
+    }
+  }
+}

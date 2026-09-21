@@ -5,7 +5,8 @@
   "rules : page championnat de la competition dans la meme langue quand elle existe, sinon l'accueil de la langue. prefixes : Coupe du monde 2026 -> guide Coupe du monde de la langue ; 22 langues supprimees en entier -> /en/.",
   "Regles 301 NON forcees (Netlify : seulement si aucun fichier n'existe au chemin), ecrites par scripts/build-locales.js#legacyRedirectRules ; une cible absente du disque est ignoree, une source qui existe de nouveau n'est jamais redirigee.",
   "Retablies le 21/09/2026 apres leur suppression accidentelle par le retour arriere 3fa03d606.",
-  "Lot du 21/09/2026 (2 746 URLs) : releve complet des adresses connues (sitemaps passes, historique git, rapports Search Console) testees une par une en ligne. Competition trouvee par l'identifiant du match (table predictions_archive) ou par les noms d'equipes du nom de fichier ; deux clubs de championnats differents = Ligue des champions ; competition sans page (tennis, selections, K League, Bresil...) = accueil de la langue ; /xx/resultats/* = accueil de la langue ; /combis.html = /fr/pro.html. Pages a la racine (/match/, /blog/) = version francaise."
+  "Lot du 21/09/2026 (2 746 URLs) : releve complet des adresses connues (sitemaps passes, historique git, rapports Search Console) testees une par une en ligne. Competition trouvee par l'identifiant du match (table predictions_archive) ou par les noms d'equipes du nom de fichier ; deux clubs de championnats differents = Ligue des champions ; competition sans page (tennis, selections, K League, Bresil...) = accueil de la langue ; /xx/resultats/* = accueil de la langue ; /combis.html = /fr/pro.html. Pages a la racine (/match/, /blog/) = version francaise.",
+  "Complement du 21/09/2026 soir (608 URLs) : toutes les pages publiees ayant existe dans l'historique git et sans redirection (pages match supprimees par le pipeline entre le 03/08 et le 15/09, anciens fichiers de la racine), plus les adresses qui n'avaient pas repondu au premier releve. Fichiers de la racine : accueil, sauf compte -> /fr/compte.html, combis -> /fr/pro.html."
  ],
  "source_commits": [
   "a9d2f03ce",
@@ -231,7 +232,43 @@
  ],
  "rules": [
   {
+   "from": "/INDEX_RACINE_site-principal-3.html",
+   "to": "/"
+  },
+  {
+   "from": "/INDEX_RACINE_site-principal-5.html",
+   "to": "/"
+  },
+  {
+   "from": "/INDEX_RACINE_site-principal.html",
+   "to": "/"
+  },
+  {
+   "from": "/actus.html",
+   "to": "/"
+  },
+  {
+   "from": "/blog/1899-hoffenheim-vs-vfl-wolfsburg-2026-03-14.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/al-fateh-vs-al-hilal-saudi-fc-2026-03-14.html",
+   "to": "/fr/"
+  },
+  {
    "from": "/blog/al-fayha-vs-al-ettifaq-2026-03-13.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/al-hazm-vs-al-kholood-2026-03-12.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/al-khaleej-saihat-vs-al-nassr-2026-03-14.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/al-najma-vs-damac-2026-03-12.html",
    "to": "/fr/"
   },
   {
@@ -240,6 +277,10 @@
   },
   {
    "from": "/blog/al-riyadh-vs-al-ittihad-fc-2026-03-13.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/al-shabab-vs-al-okhdood-2026-03-14.html",
    "to": "/fr/"
   },
   {
@@ -255,6 +296,10 @@
    "to": "/fr/leagues/ligue-1.html"
   },
   {
+   "from": "/blog/angers-vs-nice-2026-03-14.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
    "from": "/blog/annecy-vs-estac-troyes-2026-03-16.html",
    "to": "/fr/leagues/ligue-1.html"
   },
@@ -267,6 +312,10 @@
    "to": "/fr/leagues/champions-league.html"
   },
   {
+   "from": "/blog/arsenal-vs-everton-2026-03-14.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
    "from": "/blog/as-roma-vs-bologna-2026-03-19.html",
    "to": "/fr/leagues/serie-a.html"
   },
@@ -277,6 +326,10 @@
   {
    "from": "/blog/atalanta-vs-bayern-munchen-2026-03-10.html",
    "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/blog/atletico-madrid-vs-getafe-2026-03-14.html",
+   "to": "/fr/leagues/la-liga.html"
   },
   {
    "from": "/blog/atletico-madrid-vs-tottenham-2026-03-10.html",
@@ -327,6 +380,10 @@
    "to": "/fr/leagues/champions-league.html"
   },
   {
+   "from": "/blog/bayer-leverkusen-vs-bayern-munchen-2026-03-14.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
    "from": "/blog/bayern-munchen-vs-atalanta-2026-03-18.html",
    "to": "/fr/leagues/champions-league.html"
   },
@@ -339,12 +396,48 @@
    "to": "/fr/"
   },
   {
+   "from": "/blog/birmingham-vs-sheffield-utd-2026-03-14.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/blog-index-4.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/blog-index-5.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/blog-index-6.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/blog-index-final-2.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/blog-index-final.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/blog-index.html",
+   "to": "/fr/"
+  },
+  {
    "from": "/blog/bodo-glimt-vs-sporting-cp-2026-03-11.html",
    "to": "/fr/leagues/liga-portugal.html"
   },
   {
    "from": "/blog/bohemians-vs-dundalk-2026-03-20.html",
    "to": "/fr/"
+  },
+  {
+   "from": "/blog/bologna-vs-as-roma-2026-03-12.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/borussia-dortmund-vs-fc-augsburg-2026-03-14.html",
+   "to": "/fr/leagues/bundesliga.html"
   },
   {
    "from": "/blog/borussia-monchengladbach-vs-fc-st-pauli-2026-03-13.html",
@@ -371,8 +464,16 @@
    "to": "/fr/"
   },
   {
+   "from": "/blog/burnley-vs-bournemouth-2026-03-14.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
    "from": "/blog/cagliari-vs-napoli-2026-03-20.html",
    "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/celta-vigo-vs-lyon-2026-03-12.html",
+   "to": "/fr/leagues/champions-league.html"
   },
   {
    "from": "/blog/central-cordoba-de-santiago-vs-deportivo-riestra-2026-03-17.html",
@@ -399,6 +500,10 @@
    "to": "/fr/"
   },
   {
+   "from": "/blog/chelsea-vs-newcastle-2026-03-14.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
    "from": "/blog/chelsea-vs-paris-saint-germain-2026-03-16.html",
    "to": "/fr/leagues/champions-league.html"
   },
@@ -419,6 +524,10 @@
    "to": "/fr/leagues/premier-league.html"
   },
   {
+   "from": "/blog/coventry-vs-southampton-2026-03-14.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
    "from": "/blog/cremonese-vs-fiorentina-2026-03-16.html",
    "to": "/fr/leagues/serie-a.html"
   },
@@ -429,6 +538,14 @@
   {
    "from": "/blog/derry-city-vs-drogheda-united-2026-03-20.html",
    "to": "/fr/"
+  },
+  {
+   "from": "/blog/eintracht-frankfurt-vs-1-fc-heidenheim-2026-03-14.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/espanyol-vs-oviedo-2026-03-09.html",
+   "to": "/fr/leagues/la-liga.html"
   },
   {
    "from": "/blog/estrela-vs-casa-pia-2026-03-20.html",
@@ -455,12 +572,20 @@
    "to": "/fr/"
   },
   {
+   "from": "/blog/ferencvarosi-tc-vs-sc-braga-2026-03-12.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
    "from": "/blog/flamengo-vs-remo-2026-03-20.html",
    "to": "/fr/"
   },
   {
    "from": "/blog/galatasaray-vs-liverpool-2026-03-10.html",
    "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/genk-vs-sc-freiburg-2026-03-12.html",
+   "to": "/fr/leagues/bundesliga.html"
   },
   {
    "from": "/blog/genoa-vs-udinese-2026-03-20.html",
@@ -479,12 +604,24 @@
    "to": "/fr/leagues/liga-profesional-argentina.html"
   },
   {
+   "from": "/blog/girona-vs-athletic-club-2026-03-14.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
    "from": "/blog/goztepe-vs-galatasaray-2026-03-18.html",
    "to": "/fr/"
   },
   {
    "from": "/blog/gremio-vs-vitoria-2026-03-19.html",
    "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/blog/guides/INDEX_BLOG_guides.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/hamburger-sv-vs-1-fc-koln-2026-03-14.html",
+   "to": "/fr/leagues/bundesliga.html"
   },
   {
    "from": "/blog/hellas-verona-vs-genoa-2026-03-15.html",
@@ -505,6 +642,10 @@
   {
    "from": "/blog/instituto-cordoba-vs-independiente-2026-03-17.html",
    "to": "/fr/leagues/liga-profesional-argentina.html"
+  },
+  {
+   "from": "/blog/inter-vs-atalanta-2026-03-14.html",
+   "to": "/fr/leagues/serie-a.html"
   },
   {
    "from": "/blog/jef-united-chiba-vs-fc-tokyo-2026-03-17.html",
@@ -551,6 +692,10 @@
    "to": "/fr/leagues/serie-a.html"
   },
   {
+   "from": "/blog/lazio-vs-sassuolo-2026-03-09.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
    "from": "/blog/le-havre-vs-lyon-2026-03-15.html",
    "to": "/fr/leagues/ligue-1.html"
   },
@@ -559,8 +704,16 @@
    "to": "/fr/leagues/premier-league.html"
   },
   {
+   "from": "/blog/leicester-vs-qpr-2026-03-14.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
    "from": "/blog/lens-vs-angers-2026-03-20.html",
    "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/lille-vs-aston-villa-2026-03-12.html",
+   "to": "/fr/leagues/champions-league.html"
   },
   {
    "from": "/blog/liverpool-vs-galatasaray-2026-03-18.html",
@@ -569,6 +722,10 @@
   {
    "from": "/blog/liverpool-vs-tottenham-2026-03-15.html",
    "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/lorient-vs-lens-2026-03-14.html",
+   "to": "/fr/leagues/ligue-1.html"
   },
   {
    "from": "/blog/lyon-vs-celta-vigo-2026-03-19.html",
@@ -607,7 +764,15 @@
    "to": "/fr/leagues/ligue-1.html"
   },
   {
+   "from": "/blog/middlesbrough-vs-bristol-city-2026-03-14.html",
+   "to": "/fr/"
+  },
+  {
    "from": "/blog/middlesbrough-vs-charlton-2026-03-11.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/millwall-vs-blackburn-2026-03-14.html",
    "to": "/fr/"
   },
   {
@@ -627,6 +792,10 @@
    "to": "/fr/leagues/j1-league.html"
   },
   {
+   "from": "/blog/monaco-vs-stade-brestois-29-2026-03-14.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
    "from": "/blog/nagoya-grampus-vs-sanfrecce-hiroshima-2026-03-17.html",
    "to": "/fr/leagues/j1-league.html"
   },
@@ -635,19 +804,43 @@
    "to": "/fr/leagues/j1-league.html"
   },
   {
+   "from": "/blog/napoli-vs-lecce-2026-03-14.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/neom-vs-al-taawon-2026-03-12.html",
+   "to": "/fr/"
+  },
+  {
    "from": "/blog/newcastle-vs-barcelona-2026-03-10.html",
    "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/blog/norwich-vs-preston-2026-03-14.html",
+   "to": "/fr/"
   },
   {
    "from": "/blog/norwich-vs-sheffield-utd-2026-03-11.html",
    "to": "/fr/"
   },
   {
+   "from": "/blog/nottingham-forest-vs-fc-midtjylland-2026-03-12.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
    "from": "/blog/nottingham-forest-vs-fulham-2026-03-15.html",
    "to": "/fr/leagues/premier-league.html"
   },
   {
+   "from": "/blog/oviedo-vs-valencia-2026-03-14.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
    "from": "/blog/oxford-united-vs-blackburn-2026-03-11.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/oxford-united-vs-charlton-2026-03-14.html",
    "to": "/fr/"
   },
   {
@@ -657,6 +850,10 @@
   {
    "from": "/blog/palmeiras-vs-botafogo-2026-03-18.html",
    "to": "/fr/"
+  },
+  {
+   "from": "/blog/panathinaikos-vs-real-betis-2026-03-12.html",
+   "to": "/fr/leagues/la-liga.html"
   },
   {
    "from": "/blog/paris-saint-germain-vs-chelsea-2026-03-11.html",
@@ -695,6 +892,586 @@
    "to": "/fr/"
   },
   {
+   "from": "/blog/preview-1-fc-heidenheim-vs-bayer-leverkusen-2026-03-21.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-1-fc-koln-vs-borussia-monchengladbach-2026-03-21.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-1899-hoffenheim-vs-vfl-wolfsburg-2026-03-14.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-ac-milan-vs-torino-2026-03-21.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-alaves-vs-villarreal-2026-03-13.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-angers-vs-nice-2026-03-14.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-arsenal-vs-bayer-leverkusen-2026-03-17.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-arsenal-vs-everton-2026-03-14.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-as-roma-vs-bologna-2026-03-19.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-as-roma-vs-lecce-2026-03-22.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-aston-villa-vs-lille-2026-03-19.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-aston-villa-vs-west-ham-2026-03-22.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-atalanta-vs-hellas-verona-2026-03-22.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-athletic-club-vs-real-betis-2026-03-22.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-atletico-madrid-vs-getafe-2026-03-14.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-auxerre-vs-stade-brestois-29-2026-03-21.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-barcelona-vs-newcastle-2026-03-18.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-barcelona-vs-rayo-vallecano-2026-03-22.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-barcelona-vs-sevilla-2026-03-15.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-bayer-leverkusen-vs-bayern-munchen-2026-03-14.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-bayern-munchen-vs-atalanta-2026-03-18.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-bayern-munchen-vs-union-berlin-2026-03-21.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-birmingham-vs-sheffield-utd-2026-03-14.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-blackburn-vs-middlesbrough-2026-03-21.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-bologna-vs-as-roma-2026-03-12.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-bologna-vs-lazio-2026-03-22.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-borussia-dortmund-vs-fc-augsburg-2026-03-14.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-borussia-dortmund-vs-hamburger-sv-2026-03-21.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-borussia-monchengladbach-vs-fc-st-pauli-2026-03-13.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-bournemouth-vs-manchester-united-2026-03-20.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-brentford-vs-wolves-2026-03-16.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-brighton-vs-liverpool-2026-03-21.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-bristol-city-vs-west-brom-2026-03-21.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-burnley-vs-bournemouth-2026-03-14.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-cagliari-vs-napoli-2026-03-20.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-celta-vigo-vs-alaves-2026-03-22.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-celta-vigo-vs-lyon-2026-03-12.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-charlton-vs-norwich-2026-03-21.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-chelsea-vs-newcastle-2026-03-14.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-chelsea-vs-paris-saint-germain-2026-03-17.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-como-vs-as-roma-2026-03-15.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-como-vs-pisa-2026-03-22.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-coventry-vs-southampton-2026-03-14.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-cremonese-vs-fiorentina-2026-03-16.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-crystal-palace-vs-leeds-2026-03-15.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-derby-vs-birmingham-2026-03-21.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-eintracht-frankfurt-vs-1-fc-heidenheim-2026-03-14.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-elche-vs-mallorca-2026-03-21.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-espanyol-vs-getafe-2026-03-21.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-everton-vs-chelsea-2026-03-21.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-fc-augsburg-vs-vfb-stuttgart-2026-03-22.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-fc-midtjylland-vs-nottingham-forest-2026-03-19.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-fc-porto-vs-vfb-stuttgart-2026-03-19.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-fc-st-pauli-vs-sc-freiburg-2026-03-22.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-ferencvarosi-tc-vs-sc-braga-2026-03-12.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/blog/preview-fiorentina-vs-inter-2026-03-22.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-fsv-mainz-05-vs-eintracht-frankfurt-2026-03-22.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-fulham-vs-burnley-2026-03-21.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-genk-vs-sc-freiburg-2026-03-12.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-genoa-vs-udinese-2026-03-20.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-girona-vs-athletic-club-2026-03-14.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-hamburger-sv-vs-1-fc-koln-2026-03-14.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-hellas-verona-vs-genoa-2026-03-15.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-hull-city-vs-sheffield-wednesday-2026-03-21.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-inter-vs-atalanta-2026-03-14.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-ipswich-vs-millwall-2026-03-21.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-juventus-vs-sassuolo-2026-03-21.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-lazio-vs-ac-milan-2026-03-15.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-le-havre-vs-lyon-2026-03-15.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-leeds-vs-brentford-2026-03-21.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-leicester-vs-qpr-2026-03-14.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-lens-vs-angers-2026-03-20.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-levante-vs-oviedo-2026-03-21.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-lille-vs-aston-villa-2026-03-12.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-liverpool-vs-galatasaray-2026-03-18.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-liverpool-vs-tottenham-2026-03-15.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-lorient-vs-lens-2026-03-14.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-lyon-vs-celta-vigo-2026-03-19.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-lyon-vs-monaco-2026-03-22.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-mallorca-vs-espanyol-2026-03-15.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-manchester-city-vs-crystal-palace-2026-03-21.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-manchester-city-vs-real-madrid-2026-03-17.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-manchester-united-vs-aston-villa-2026-03-15.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-marseille-vs-auxerre-2026-03-13.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-marseille-vs-lille-2026-03-22.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-metz-vs-toulouse-2026-03-15.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-middlesbrough-vs-bristol-city-2026-03-14.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-millwall-vs-blackburn-2026-03-14.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-monaco-vs-stade-brestois-29-2026-03-14.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-nantes-vs-strasbourg-2026-03-22.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-napoli-vs-lecce-2026-03-14.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-newcastle-vs-sunderland-2026-03-22.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-nice-vs-paris-saint-germain-2026-03-21.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-norwich-vs-preston-2026-03-14.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-nottingham-forest-vs-fc-midtjylland-2026-03-12.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-nottingham-forest-vs-fulham-2026-03-15.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-osasuna-vs-girona-2026-03-21.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-oviedo-vs-valencia-2026-03-14.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-oxford-united-vs-charlton-2026-03-14.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-panathinaikos-vs-real-betis-2026-03-12.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-paris-fc-vs-le-havre-2026-03-22.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-paris-saint-germain-vs-nantes-2026-03-15.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-parma-vs-cremonese-2026-03-21.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-pisa-vs-cagliari-2026-03-15.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-portsmouth-vs-derby-2026-03-16.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-preston-vs-stoke-city-2026-03-20.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-qpr-vs-portsmouth-2026-03-21.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-rayo-vallecano-vs-levante-2026-03-16.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-rb-leipzig-vs-1899-hoffenheim-2026-03-20.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-real-betis-vs-celta-vigo-2026-03-15.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-real-betis-vs-panathinaikos-2026-03-19.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-real-madrid-vs-atletico-madrid-2026-03-22.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-real-madrid-vs-elche-2026-03-14.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-real-sociedad-vs-osasuna-2026-03-15.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-rennes-vs-lille-2026-03-15.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-rennes-vs-metz-2026-03-22.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-sassuolo-vs-bologna-2026-03-15.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-sc-braga-vs-ferencvarosi-tc-2026-03-18.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-sc-freiburg-vs-genk-2026-03-19.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-sc-freiburg-vs-union-berlin-2026-03-15.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-sevilla-vs-valencia-2026-03-21.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-sheffield-utd-vs-wrexham-2026-03-21.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-sheffield-wednesday-vs-ipswich-2026-03-14.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-southampton-vs-norwich-2026-03-18.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-southampton-vs-oxford-united-2026-03-21.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-sporting-cp-vs-bodo-glimt-2026-03-17.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-stoke-city-vs-watford-2026-03-14.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-strasbourg-vs-paris-fc-2026-03-15.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-sunderland-vs-brighton-2026-03-14.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-swansea-vs-coventry-2026-03-21.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-torino-vs-parma-2026-03-13.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-tottenham-vs-atletico-madrid-2026-03-18.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-tottenham-vs-nottingham-forest-2026-03-22.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-toulouse-vs-lorient-2026-03-21.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/preview-udinese-vs-juventus-2026-03-14.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/blog/preview-vfb-stuttgart-vs-fc-porto-2026-03-12.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/blog/preview-vfb-stuttgart-vs-rb-leipzig-2026-03-15.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-vfl-wolfsburg-vs-werder-bremen-2026-03-21.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-villarreal-vs-real-sociedad-2026-03-20.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/preview-watford-vs-leicester-2026-03-21.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-watford-vs-wrexham-2026-03-17.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/preview-werder-bremen-vs-fsv-mainz-05-2026-03-15.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/blog/preview-west-brom-vs-hull-city-2026-03-14.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-west-ham-vs-manchester-city-2026-03-14.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/preview-wrexham-vs-swansea-2026-03-13.html",
+   "to": "/fr/"
+  },
+  {
    "from": "/blog/racing-club-vs-estudiantes-de-rio-cuarto-2026-03-17.html",
    "to": "/fr/leagues/liga-profesional-argentina.html"
   },
@@ -712,6 +1489,10 @@
   },
   {
    "from": "/blog/real-betis-vs-panathinaikos-2026-03-19.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/blog/real-madrid-vs-elche-2026-03-14.html",
    "to": "/fr/leagues/la-liga.html"
   },
   {
@@ -759,6 +1540,10 @@
    "to": "/fr/"
   },
   {
+   "from": "/blog/sheffield-wednesday-vs-ipswich-2026-03-14.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
    "from": "/blog/sheffield-wednesday-vs-watford-2026-03-10.html",
    "to": "/fr/"
   },
@@ -783,8 +1568,16 @@
    "to": "/fr/leagues/premier-league.html"
   },
   {
+   "from": "/blog/stoke-city-vs-watford-2026-03-14.html",
+   "to": "/fr/"
+  },
+  {
    "from": "/blog/strasbourg-vs-paris-fc-2026-03-15.html",
    "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/blog/sunderland-vs-brighton-2026-03-14.html",
+   "to": "/fr/leagues/premier-league.html"
   },
   {
    "from": "/blog/tokyo-verdy-vs-kawasaki-frontale-2026-03-17.html",
@@ -801,6 +1594,10 @@
   {
    "from": "/blog/tottenham-vs-atletico-madrid-2026-03-18.html",
    "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/blog/udinese-vs-juventus-2026-03-14.html",
+   "to": "/fr/leagues/serie-a.html"
   },
   {
    "from": "/blog/urawa-vs-kashiwa-reysol-2026-03-17.html",
@@ -825,6 +1622,10 @@
   {
    "from": "/blog/vejle-vs-odense-2026-03-20.html",
    "to": "/fr/"
+  },
+  {
+   "from": "/blog/vfb-stuttgart-vs-fc-porto-2026-03-12.html",
+   "to": "/fr/leagues/champions-league.html"
   },
   {
    "from": "/blog/vfb-stuttgart-vs-rb-leipzig-2026-03-15.html",
@@ -859,7 +1660,15 @@
    "to": "/fr/leagues/bundesliga.html"
   },
   {
+   "from": "/blog/west-brom-vs-hull-city-2026-03-14.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
    "from": "/blog/west-brom-vs-southampton-2026-03-11.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/blog/west-ham-vs-manchester-city-2026-03-14.html",
    "to": "/fr/leagues/premier-league.html"
   },
   {
@@ -871,8 +1680,36 @@
    "to": "/fr/"
   },
   {
+   "from": "/combis-3.html",
+   "to": "/fr/pro.html"
+  },
+  {
+   "from": "/combis-5.html",
+   "to": "/fr/pro.html"
+  },
+  {
    "from": "/combis.html",
    "to": "/fr/pro.html"
+  },
+  {
+   "from": "/compte-3.html",
+   "to": "/fr/compte.html"
+  },
+  {
+   "from": "/compte-4.html",
+   "to": "/fr/compte.html"
+  },
+  {
+   "from": "/compte-5.html",
+   "to": "/fr/compte.html"
+  },
+  {
+   "from": "/compte-6.html",
+   "to": "/fr/compte.html"
+  },
+  {
+   "from": "/compte-8.html",
+   "to": "/fr/compte.html"
   },
   {
    "from": "/de/blog/al-fayha-vs-al-ettifaq-2026-03-13.html",
@@ -9209,6 +10046,410 @@
    "to": "/gb/"
   },
   {
+   "from": "/historique-2.html",
+   "to": "/"
+  },
+  {
+   "from": "/historique-3.html",
+   "to": "/"
+  },
+  {
+   "from": "/historique-4.html",
+   "to": "/"
+  },
+  {
+   "from": "/historique-final-v2.html",
+   "to": "/"
+  },
+  {
+   "from": "/historique-final.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-10.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-15.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-17.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-20.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-21.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-22.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-23.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-26.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-27.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-28.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-29.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-30.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-31.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-32.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-33.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-34.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-35.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-36.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-37.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-38.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-39.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-40.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-41.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-42.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-43.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-44.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-45.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-46.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-47-3.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-47-4.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-47.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-48.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-50.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-51.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-52.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-54.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-55.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-56.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-58.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-59.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-6.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-60.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-62.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-65.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-68.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-7.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-70.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-71.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-73.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-74.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-75-2.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-75.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-77.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-79.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-8.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-80.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-83.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-84.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-85.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-87.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-89.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-91.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-93.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-95.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-96.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-avec-actus.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-final.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-inscriptions.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-modifie-4.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-modifie.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-10.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-11.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-12.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-13.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-16.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-18.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-19.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-2.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-20.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-21.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-22.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-24.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-25-3.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-25.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-27.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-3.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-30-4.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-4.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-6.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-7.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-8.html",
+   "to": "/"
+  },
+  {
+   "from": "/index-v2-9.html",
+   "to": "/"
+  },
+  {
+   "from": "/index_2.html",
+   "to": "/"
+  },
+  {
+   "from": "/index_3.html",
+   "to": "/"
+  },
+  {
+   "from": "/index_patched-3.html",
+   "to": "/"
+  },
+  {
+   "from": "/index_patched.html",
+   "to": "/"
+  },
+  {
    "from": "/it/blog/al-fayha-vs-al-ettifaq-2026-03-13.html",
    "to": "/it/"
   },
@@ -10417,6 +11658,122 @@
    "to": "/it/"
   },
   {
+   "from": "/match-10.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-12.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-13.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-15.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-17.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-19.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-2.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-22.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-23.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-25.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-27.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-29.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-30.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-31.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-32.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-34.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-36.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-37.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-38.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-4.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-5.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-7-supabase.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-7.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-8-3.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-8-4.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-8.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-9-fixed-11.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-9-fixed-3.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match-9.html",
+   "to": "/fr/"
+  },
+  {
    "from": "/match/1-fc-heidenheim-vs-bayer-leverkusen-2026-03-21.html",
    "to": "/fr/leagues/bundesliga.html"
   },
@@ -11189,6 +12546,10 @@
    "to": "/fr/"
   },
   {
+   "from": "/match/1519427.html",
+   "to": "/fr/"
+  },
+  {
    "from": "/match/1519432.html",
    "to": "/fr/"
   },
@@ -11281,7 +12642,15 @@
    "to": "/fr/"
   },
   {
+   "from": "/match/1523226.html",
+   "to": "/fr/"
+  },
+  {
    "from": "/match/1523227.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/1523228.html",
    "to": "/fr/"
   },
   {
@@ -11294,6 +12663,10 @@
   },
   {
    "from": "/match/1523231.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/1523232.html",
    "to": "/fr/"
   },
   {
@@ -11317,6 +12690,10 @@
    "to": "/fr/"
   },
   {
+   "from": "/match/1547600.html",
+   "to": "/fr/"
+  },
+  {
    "from": "/match/1547601.html",
    "to": "/fr/"
   },
@@ -11326,6 +12703,10 @@
   },
   {
    "from": "/match/1547603.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/1547604.html",
    "to": "/fr/"
   },
   {
@@ -11349,6 +12730,10 @@
    "to": "/fr/leagues/serie-a.html"
   },
   {
+   "from": "/match/1550099.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
    "from": "/match/1550102.html",
    "to": "/fr/leagues/serie-a.html"
   },
@@ -11362,6 +12747,14 @@
   },
   {
    "from": "/match/1550107.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/match/1550108.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/match/1550109.html",
    "to": "/fr/leagues/serie-a.html"
   },
   {
@@ -11397,7 +12790,15 @@
    "to": "/fr/leagues/serie-a.html"
   },
   {
+   "from": "/match/1550119.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
    "from": "/match/1550121.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/match/1550122.html",
    "to": "/fr/leagues/serie-a.html"
   },
   {
@@ -11405,8 +12806,1008 @@
    "to": "/fr/leagues/serie-a.html"
   },
   {
+   "from": "/match/1550124.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
    "from": "/match/1550126.html",
    "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/match/1552136.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552142.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552148.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552149.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552150.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552151.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552152.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552153.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552154.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552155.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552156.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552157.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552158.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552159.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552160.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552161.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552162.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552163.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552164.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552165.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552166.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552167.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552168.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552169.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552170.html",
+   "to": "/fr/leagues/eredivisie.html"
+  },
+  {
+   "from": "/match/1552742.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1552743.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1552744.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1552747.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1552748.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1552749.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1552750.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1552751.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1552752.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1552753.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1552754.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1552755.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1552756.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1552757.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1552758.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1552759.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1552760.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1552761.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1552762.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1552763.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1552764.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/1556041.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556042.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556043.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556044.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556045.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556046.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556047.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556048.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556049.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556050.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556051.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556052.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556053.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556054.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556055.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556056.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556057.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556058.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556059.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556060.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556061.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556062.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556063.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556064.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556065.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556066.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556067.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556068.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556069.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1556070.html",
+   "to": "/fr/leagues/j1-league.html"
+  },
+  {
+   "from": "/match/1557377.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557379.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557382.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557384.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557385.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557387.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557388.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557389.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557390.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557391.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557392.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557393.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557394.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557395.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557396.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557397.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557398.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557399.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557400.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557401.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557403.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557404.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557405.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1557406.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/1570354.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570355.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570356.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570358.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570360.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570363.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570364.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570365.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570366.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570367.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570368.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570369.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570370.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570371.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570372.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570373.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570374.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570375.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570376.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570377.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570378.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570379.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570380.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570381.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1570392.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/1575141.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/match/1575145.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/match/1575149.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/match/1575150.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/match/1575151.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/match/1575152.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/match/1575153.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/match/1575154.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/match/1575155.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/match/1575156.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/match/1575157.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/match/1575158.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/match/1575159.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/match/1575160.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/match/1575161.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/match/1575162.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/match/1575163.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/match/1575164.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/match/1575165.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/match/1575166.html",
+   "to": "/fr/leagues/bundesliga.html"
+  },
+  {
+   "from": "/match/1575465.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575469.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575476.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575477.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575478.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575479.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575480.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575482.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575483.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575484.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575485.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575486.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575487.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575488.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575489.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575490.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575491.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575492.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575493.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575495.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575496.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1575498.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/1635609.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/1635628.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/1635632.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/1635643.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/1635648.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/1635652.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/1635654.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/1635659.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/1635683.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/1635686.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/1635697.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/1635698.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/1635705.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/1635708.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/1635714.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/1635729.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/1635736.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/1635741.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/aarhus-vs-brondby-2026-03-22.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/abedallah-shelbayh-vs-marc-polmans-2026-06-21.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/ac-milan-vs-torino-2026-03-21.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/match/ac-oulu-vs-gnistan-2026-07-18.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/ac-oulu-vs-lahti-2026-06-27.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/adam-walton-vs-federico-bondioli-2026-06-20.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/adrian-mannarino-vs-alex-de-minaur-2026-06-13.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/adrian-mannarino-vs-arthur-rinderknech-2026-06-11.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/aik-stockholm-vs-gais-2026-07-18.html",
+   "to": "/fr/leagues/allsvenskan.html"
+  },
+  {
+   "from": "/match/ajla-tomljanovic-vs-dayana-yastremska-2026-06-11.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/ajla-tomljanovic-vs-dayana-yastremska-2026-06-12.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/ajla-tomljanovic-vs-veronika-erjavec-2026-06-21.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/al-fayha-vs-al-ettifaq-2026-03-13.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/al-qadisiyah-fc-vs-al-ahli-jeddah-2026-03-13.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/al-riyadh-vs-al-ittihad-fc-2026-03-13.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/alanyaspor-vs-kocaelispor-2026-03-18.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/alaves-vs-villarreal-2026-03-13.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/aleksandar-kovacevic-vs-michael-mmoh-2026-06-13.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/alex-de-minaur-vs-benjamin-bonzi-2026-06-12.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/alex-de-minaur-vs-brandon-nakashima-2026-06-19.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/alex-molcan-vs-ziga-sesko-2026-06-20.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/alexander-bublik-vs-giovanni-mpetshi-perricard-2026-06-12.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/alexander-bublik-vs-jan-lennard-struff-2026-06-10.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/alexander-bublik-vs-taylor-fritz-2026-06-13.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/alexander-rozin-vs-oliver-bonding-2026-06-10.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/alexander-shevchenko-vs-abedallah-shelbayh-2026-06-20.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/alexander-shevchenko-vs-hynek-barton-2026-06-11.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/alexander-zverev-vs-raphael-collignon-2026-06-19.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/alexander-zverev-vs-taylor-fritz-2026-06-20.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/alexandra-eala-vs-elise-mertens-2026-06-22.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/algeria-vs-austria-2026-06-28.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/alicia-dudeney-mingge-xu-vs-emily-appleton-elena-pridankina-2026-06-10.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/alicia-dudeney-vs-jessica-bouzas-maneiro-2026-06-22.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/alicia-dudeney-vs-yulia-putintseva-2026-06-13.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/alina-shcherbinina-vs-capucine-jauffret-2026-06-10.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/almeria-vs-malaga-2026-06-20.html",
+   "to": "/fr/leagues/la-liga.html"
+  },
+  {
+   "from": "/match/alverca-vs-sporting-cp-2026-03-22.html",
+   "to": "/fr/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/match/amiens-vs-le-mans-2026-03-20.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/anastasia-potapova-vs-zeynep-sonmez-2026-06-11.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/anastasia-zakharova-vs-lilli-tagger-2026-06-20.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/anastasiia-sobolieva-vs-julie-pastikova-2026-06-11.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/anderlecht-vs-cercle-brugge-2026-03-22.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/ann-li-vs-ekaterina-alexandrova-2026-06-21.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/ann-li-vs-ekaterina-alexandrova-2026-06-22.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/ann-li-vs-viktorija-golubic-2026-06-19.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/anna-blinkova-vs-yulia-putintseva-2026-06-20.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/annecy-vs-estac-troyes-2026-03-16.html",
+   "to": "/fr/leagues/ligue-1.html"
+  },
+  {
+   "from": "/match/antoine-ghibaudo-vs-petr-bar-biryukov-2026-06-20.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/antonia-ruzic-vs-kaja-juvan-2026-06-13.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/argentina-vs-algeria-2026-06-17.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/argentina-vs-austria-2026-06-22.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/argentina-vs-cape-verde-islands-2026-07-04.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/argentina-vs-egypt-2026-07-07.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/argentina-vs-switzerland-2026-07-12.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/arsenal-vs-bayer-leverkusen-2026-03-16.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/arsenal-vs-bayer-leverkusen-2026-03-17.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/arthur-fery-vs-francisco-cerundolo-2026-06-19.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/aryna-sabalenka-vs-jessica-pegula-2026-06-20.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/aryna-sabalenka-vs-nikola-bartunkova-2026-06-19.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match/as-roma-vs-bologna-2026-03-19.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/match/as-roma-vs-lecce-2026-03-22.html",
+   "to": "/fr/leagues/serie-a.html"
+  },
+  {
+   "from": "/match/aston-villa-vs-lille-2026-03-19.html",
+   "to": "/fr/leagues/champions-league.html"
+  },
+  {
+   "from": "/match/aston-villa-vs-west-ham-2026-03-22.html",
+   "to": "/fr/leagues/premier-league.html"
+  },
+  {
+   "from": "/match/atalanta-vs-bayern-munchen-2026-03-10.html",
+   "to": "/fr/leagues/champions-league.html"
   },
   {
    "from": "/match/atalanta-vs-hellas-verona-2026-03-22.html",
@@ -14621,6 +17022,26 @@
    "to": "/fr/"
   },
   {
+   "from": "/match_final-10.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match_final-2.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match_final-5.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match_final-8.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/match_final.html",
+   "to": "/fr/"
+  },
+  {
    "from": "/mx/match/1490466.html",
    "to": "/mx/leagues/mls.html"
   },
@@ -14911,6 +17332,14 @@
   {
    "from": "/mx/resultats/2026-09-19.html",
    "to": "/mx/"
+  },
+  {
+   "from": "/pro-final.html",
+   "to": "/"
+  },
+  {
+   "from": "/pro_patched.html",
+   "to": "/"
   },
   {
    "from": "/pt/blog/al-fayha-vs-al-ettifaq-2026-03-13.html",
@@ -16119,6 +18548,10 @@
   {
    "from": "/pt/resultats/2026-09-19.html",
    "to": "/pt/"
+  },
+  {
+   "from": "/tennis-match.html",
+   "to": "/"
   },
   {
    "from": "/za/match/1490466.html",

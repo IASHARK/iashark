@@ -41,6 +41,9 @@ function walk(dir, rel, out) {
     var abs = path.join(dir, name), r = rel ? rel + "/" + name : name;
     var st = fs.statSync(abs);
     if (st.isDirectory()) walk(abs, r, out);
+    // Fichier de validation Google Search Console (google<16 hex>.html) :
+    // une preuve de propriete, pas une page du site.
+    else if (/^google[0-9a-f]{16}\.html$/.test(name)) return;
     else if (/\.html$/.test(name)) out.push(r);
   });
   return out;

@@ -15,7 +15,9 @@ const root=path.resolve(__dirname,'..');
 // suivent la meme regle que la page racine.
 const excluded=new Set([
   'admin.html','maintenance.html',
-  'connexion.html','inscription.html','mot-de-passe-oublie.html','reinitialiser-mot-de-passe.html'
+  'connexion.html','inscription.html','mot-de-passe-oublie.html','reinitialiser-mot-de-passe.html',
+  // Preuve de propriete Google Search Console : pas une page du site.
+  'google3ed1ac764f4bc741.html'
 ]);
 
 // content/ : fragments de corps d'article (content/local-articles/**, assembles

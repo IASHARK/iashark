@@ -606,6 +606,29 @@ function syncI18nDirs() {
 }
 
 // ---------------------------------------------------------------------------
+// Anciennes URLs (config/legacy-redirects.json) -> [[from, to], ...]. Une cible
+// doit exister sur disque (page ou repertoire avec index.html) ; une URL
+// source qui existe de nouveau n'est jamais redirigee. Retabli le 21/09/2026
+// (supprime par erreur avec la vague SEO par le retour arriere 3fa03d606).
+function legacyRedirectRules(cfg, root) {
+  root = root || ROOT;
+  var c = cfg;
+  if (!c) { try { c = readJson("config/legacy-redirects.json"); } catch (e) { return []; } }
+  function exists(p) { var rel = p.replace(/^\/+/, ""); return fs.existsSync(path.join(root, /\/$/.test(p) || rel === "" ? rel + "index.html" : rel)); }
+  function safe(p) { return typeof p === "string" && /^\/[a-z0-9\/._-]*$/i.test(p); }
+  var out = [];
+  (c.prefixes || []).forEach(function (x) {
+    if (!safe(x.from) || !safe(x.to) || !exists(x.to)) return;
+    out.push([x.from.replace(/\/$/, "") === x.from ? x.from : x.from + "*", x.to]);
+  });
+  (c.rules || []).forEach(function (x) {
+    if (!safe(x.from) || !safe(x.to) || !exists(x.to) || exists(x.from)) return;
+    out.push([x.from, x.to]);
+  });
+  return out;
+}
+
+// ---------------------------------------------------------------------------
 // _redirects (Netlify) : entierement regenere.
 function rule(from, to, status, cond) {
   function pad(s, n) { return s.length >= n ? s + "  " : s + new Array(n - s.length + 1).join(" "); }
@@ -675,6 +698,15 @@ function redirectsContent() {
     out.push(rule("/" + d + "/blog/", hub, "301!"));
     out.push(rule("/" + d + "/blog/*", (b ? "/" + b + "/blog/" : "/blog/") + ":splat", "301!"));
   });
+
+  // Anciennes URLs supprimees encore demandees par Google (config/legacy-redirects.json,
+  // 404 de la Search Console du 21/09/2026). Non forcees ; cible absente : ignoree.
+  var legacy = legacyRedirectRules();
+  if (legacy.length) {
+    out.push("", "# --- Anciennes URLs supprimees (commit a9d2f03ce du 21/07/2026) : 301 vers la page la",
+      "# plus proche qui existe (config/legacy-redirects.json). Non forcees.");
+    legacy.forEach(function (r) { out.push(rule(r[0], r[1], "301")); });
+  }
 
   // Pages match retirees a J+30 (scripts/match-lifecycle.js) : le bloc suit
   // data/match-pages-registry.json et survit donc a chaque regeneration.
@@ -985,7 +1017,7 @@ module.exports = {
   DIRS: DIRS, DIR_CODES: DIR_CODES, PAGE_FILES: PAGE_FILES, LEGAL_FILE_LIST: LEGAL_FILE_LIST,
   mapPath: mapPath, rewriteInternalLinks: rewriteInternalLinks, bakeI18n: bakeI18n, formatPrice: formatPrice,
   bakeMarket: bakeMarket, helplineFor: helplineFor, leagueNamesData: leagueNamesData,
-  marketRuntimeData: marketRuntimeData, checkoutPriceTable: checkoutPriceTable, redirectsContent: redirectsContent, build: build,
+  marketRuntimeData: marketRuntimeData, checkoutPriceTable: checkoutPriceTable, legacyRedirectRules: legacyRedirectRules, redirectsContent: redirectsContent, build: build,
   syncI18nDirMarkets: syncI18nDirMarkets,
   stripUnavailablePageLinks: stripUnavailablePageLinks,
   buildHead: buildHead, setHtmlLang: setHtmlLang, injectRuntime: injectRuntime, metaFor: metaFor,

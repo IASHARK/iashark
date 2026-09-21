@@ -615,3 +615,59 @@ test("first touch : localStorage inaccessible => rien ne casse, evenements toujo
   const b = run({ pathname: "/fr/", extraGlobals: { localStorage: broken } });
   assert.ok(b.events().some((e) => e.event_type === "page_view"));
 });
+
+// ---------- Parrainage / affiliation (?ref=CODE, 21/09/2026) ----------
+
+test("parrainage : ?ref= memorise premier ET dernier code, normalise en majuscules", () => {
+  const b = run({ pathname: "/fr/", search: "?ref=kevin23" });
+  const a = JSON.parse(b.ctx.localStorage.getItem("iashark_affiliate"));
+  assert.equal(a.first, "KEVIN23");
+  assert.equal(a.last, "KEVIN23");
+  assert.match(a.first_d, /^\d{4}-\d{2}-\d{2}$/);
+  // Un autre affilie plus tard : le premier est conserve, le dernier change.
+  const b2 = run({ pathname: "/fr/", search: "?ref=SARAH", local: { iashark_affiliate: JSON.stringify(a) } });
+  const a2 = JSON.parse(b2.ctx.localStorage.getItem("iashark_affiliate"));
+  assert.equal(a2.first, "KEVIN23", "le premier code qui a amene le visiteur est conserve");
+  assert.equal(a2.last, "SARAH", "le dernier clic est connu aussi");
+});
+
+test("parrainage : capture meme quand la premiere source existe deja (visiteur qui revient)", () => {
+  const ft = JSON.stringify({ src: "www.google.com", med: "referral", lp: "/fr/", d: "2026-09-14" });
+  const b = run({ pathname: "/fr/", search: "?ref=KEVIN23", local: { iashark_first_touch: ft } });
+  assert.equal(JSON.parse(b.ctx.localStorage.getItem("iashark_first_touch")).src, "www.google.com", "premiere source inchangee");
+  assert.equal(JSON.parse(b.ctx.localStorage.getItem("iashark_affiliate")).first, "KEVIN23", "l'affilie est quand meme credite");
+});
+
+test("parrainage : code invalide ignore, rien n'est stocke", () => {
+  for (const bad of ["", "a", "code avec espace", "<script>", "x".repeat(33), "coDe/../.."]) {
+    const b = run({ pathname: "/fr/", search: "?ref=" + encodeURIComponent(bad) });
+    assert.equal(b.ctx.localStorage.getItem("iashark_affiliate"), null, JSON.stringify(bad));
+  }
+});
+
+test("parrainage : joint a signup_completed et au clic checkout, jamais a la navigation", () => {
+  const aff = JSON.stringify({ first: "KEVIN23", first_d: "2026-09-18", last: "SARAH", last_d: "2026-09-21" });
+  const b = run({ pathname: "/fr/inscription.html", local: { iashark_affiliate: aff } });
+  b.ctx.iasharkTrack("signup_completed", {}, "11111111-1111-1111-1111-111111111111", "jwt-token");
+  const signup = b.events().filter((e) => e.event_type === "signup_completed").pop();
+  assert.equal(signup.metadata.aff_first, "KEVIN23");
+  assert.equal(signup.metadata.aff_first_d, "2026-09-18");
+  assert.equal(signup.metadata.aff_last, "SARAH");
+  b.ctx.iasharkTrack("click", { kind: "checkout", ready: true });
+  assert.equal(b.events().filter((e) => e.event_type === "click").pop().metadata.aff_first, "KEVIN23");
+  const pv = b.events().find((e) => e.event_type === "page_view");
+  assert.equal(pv.metadata.aff_first, undefined, "page_view : jamais de code de parrainage");
+});
+
+test("parrainage : window.iasharkAffiliate() lisible par les pages, sans effet de bord", () => {
+  const aff = JSON.stringify({ first: "kevin23", first_d: "2026-09-18", last: "sarah", last_d: "2026-09-21" });
+  const b = run({ pathname: "/fr/abonnement.html", local: { iashark_affiliate: aff } });
+  // Objet cree dans le faux navigateur (vm) : comparaison champ par champ.
+  const lu = b.ctx.iasharkAffiliate();
+  assert.equal(lu.first, "KEVIN23");
+  assert.equal(lu.first_d, "2026-09-18");
+  assert.equal(lu.last, "SARAH");
+  assert.equal(lu.last_d, "2026-09-21");
+  const vide = run({ pathname: "/fr/" });
+  assert.equal(vide.ctx.iasharkAffiliate(), null);
+});

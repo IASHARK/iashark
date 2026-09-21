@@ -194,23 +194,96 @@
       localStorage.setItem(FIRST_TOUCH_KEY, JSON.stringify(ft));
     } catch (e) {}
   }
+  // ---------- Parrainage / affiliation (?ref=CODE, 21/09/2026) ----------
+  // Un affilie amene un visiteur avec iashark.com/?ref=SONCODE. Le code
+  // identifie l'AFFILIE, jamais le visiteur : c'est la meme nature qu'un
+  // utm_campaign, aucun identifiant personnel n'est cree ici.
+  //
+  // On memorise DEUX valeurs, et c'est volontaire : le PREMIER code vu
+  // (celui qui a fait decouvrir le site) et le DERNIER (celui du clic le plus
+  // recent). La regle d'attribution definitive - premier ou dernier clic -
+  // est une decision metier encore ouverte ; garder les deux permet de la
+  // trancher plus tard sans avoir perdu l'information.
+  //
+  // Capture INDEPENDANTE de la premiere source : quelqu'un venu de Google la
+  // semaine derniere qui clique aujourd'hui le lien d'un affilie doit etre
+  // attribue a cet affilie, alors que sa premiere source reste "google".
+  var AFFILIATE_KEY = "iashark_affiliate";
+  // Codes acceptes : lettres, chiffres, tiret et souligne, 2 a 32 caracteres.
+  // Tout le reste est ignore (jamais stocke, jamais envoye).
+  var AFFILIATE_CODE_RE = /^[A-Za-z0-9_-]{2,32}$/;
+  // Le code est valide ou refuse, JAMAIS tronque : couper un code trop long
+  // en fabriquerait un autre, potentiellement celui d'un vrai affilie.
+  function normalizeAffiliateCode(value) {
+    if (value === null || value === undefined) return null;
+    var s = String(value).trim();
+    return AFFILIATE_CODE_RE.test(s) ? s.toUpperCase() : null;
+  }
+  function readAffiliate() {
+    try {
+      var raw = localStorage.getItem(AFFILIATE_KEY);
+      if (!raw) return null;
+      var a = JSON.parse(raw);
+      return a && typeof a === "object" ? a : null;
+    } catch (e) { return null; }
+  }
+  function captureAffiliate() {
+    try {
+      var code = normalizeAffiliateCode(param("ref"));
+      if (!code) return;
+      var day = new Date().toISOString().slice(0, 10);
+      var cur = readAffiliate() || {};
+      var next = {
+        first: cur.first || code,
+        first_d: cur.first_d || day,
+        last: code,
+        last_d: day,
+      };
+      localStorage.setItem(AFFILIATE_KEY, JSON.stringify(next));
+    } catch (e) {}
+  }
+
   // Evenements auxquels la premiere source est jointe : l'inscription (pour
   // savoir quel canal amene les comptes) et le clic vers le paiement (pour
   // savoir quel canal amene les abonnes). Jamais sur la navigation courante.
+  // Le parrainage (aff_*) suit exactement les memes evenements : c'est a
+  // l'inscription et au paiement qu'une commission peut naitre.
   function withFirstTouch(eventType, md) {
     var wants = eventType === "signup_completed" || (eventType === "click" && md && md.kind === "checkout");
     if (!wants) return md;
     var ft = readFirstTouch();
-    if (!ft) return md;
+    var aff = readAffiliate();
+    if (!ft && !aff) return md;
     var out = md && typeof md === "object" ? md : {};
-    if (ft.src) out.ft_src = clipStr(ft.src, 80);
-    if (ft.med) out.ft_med = clipStr(ft.med, 80);
-    if (ft.cmp) out.ft_cmp = clipStr(ft.cmp, 80);
-    if (ft.ref) out.ft_ref = clipStr(ft.ref, 80);
-    if (ft.lp) out.ft_lp = clipStr(ft.lp, 300);
-    if (ft.d) out.ft_d = clipStr(ft.d, 10);
+    if (ft) {
+      if (ft.src) out.ft_src = clipStr(ft.src, 80);
+      if (ft.med) out.ft_med = clipStr(ft.med, 80);
+      if (ft.cmp) out.ft_cmp = clipStr(ft.cmp, 80);
+      if (ft.ref) out.ft_ref = clipStr(ft.ref, 80);
+      if (ft.lp) out.ft_lp = clipStr(ft.lp, 300);
+      if (ft.d) out.ft_d = clipStr(ft.d, 10);
+    }
+    if (aff) {
+      if (aff.first) out.aff_first = normalizeAffiliateCode(aff.first);
+      if (aff.first_d) out.aff_first_d = clipStr(aff.first_d, 10);
+      if (aff.last) out.aff_last = normalizeAffiliateCode(aff.last);
+      if (aff.last_d) out.aff_last_d = clipStr(aff.last_d, 10);
+    }
     return out;
   }
+  // Code de parrainage retenu pour CE navigateur, lisible par les pages
+  // (inscription, paiement) : window.iasharkAffiliate() -> { first, last } ou
+  // null. Aucune ecriture, aucun effet de bord.
+  window.iasharkAffiliate = function () {
+    var a = readAffiliate();
+    if (!a) return null;
+    return {
+      first: normalizeAffiliateCode(a.first),
+      first_d: clipStr(a.first_d, 10),
+      last: normalizeAffiliateCode(a.last),
+      last_d: clipStr(a.last_d, 10),
+    };
+  };
 
   function randomId(prefix) {
     return prefix + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 10);
@@ -359,6 +432,7 @@
   if (!autoTrack) return;
 
   captureFirstTouch();
+  captureAffiliate();
 
   function clip(value, max) {
     if (value === null || value === undefined) return null;

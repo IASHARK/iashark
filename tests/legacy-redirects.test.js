@@ -28,7 +28,8 @@ test("langues supprimees : jamais un repertoire encore publie", () => {
   const live = ["fr", "en", "es", "de", "it", "pt", "gb", "za", "mx", "match", "blog", "assets", "i18n", "results"];
   for (const p of CFG.prefixes) {
     const top = p.from.split("/")[1];
-    if (/world-cup-2026/.test(p.from)) continue;
+    // Sous-dossiers retires d'une langue vivante : jamais le dossier de langue lui-meme.
+    if (/world-cup-2026|\/resultats\/$/.test(p.from)) { assert.notEqual(p.from.split("/").length, 2); continue; }
     assert.ok(!live.includes(top), "prefixe sur un repertoire vivant : " + p.from);
     assert.ok(!fs.existsSync(path.join(ROOT, top)), "repertoire de nouveau present : " + top);
   }

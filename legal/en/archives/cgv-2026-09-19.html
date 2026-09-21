@@ -136,7 +136,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Responsible gambling</a>
   </nav>
   <h1 class="page-title">Terms of sale</h1>
-  <div class="page-date">Last updated: 21 September 2026</div>
+  <div class="page-date">Last updated: 19 September 2026</div>
   <!-- LEGAL REVIEW: 19/09/2026 - owner decision: the /en/ version now sells Pro in US dollars, monthly only (config/markets.json#_usdSwitch applied: _dirs.en.market = "us", us.checkoutOpen = ["month"], Stripe Price in us.stripePriceIds.month). Articles 5 to 9 rewritten for a single monthly period, as in the French terms of 18/09/2026 (weekly and annual prices, annual renewal information, change of billing period and weekly grace period removed); 'VAT included' replaced by the French VAT franchise mention. Open points: French law and EU consumer rights kept for a USD offer also served outside the EU (United States, Canada...); US sales taxes not assessed. Previous version (EUR, weekly / monthly / annual) archived in legal/en/archives/cgv-2026-09-16.html. Status: REVIEW. -->
 
   <div class="warn-box">
@@ -182,7 +182,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
       <li>a decision journal synchronised with your account;</li>
       <li>bankroll tracking linked to your account.</li>
     </ul>
-    <p>You can subscribe for a weekly or monthly period. <strong>The content and features are the same whichever period you choose</strong>: only the amount and the frequency of payment change. No annual plan is offered on this version of the site.</p>
+    <p>The subscription is taken out for a monthly period. No weekly or annual plan is offered on this version of the site.</p>
     <p>The list of competitions covered and the details of the features may change, but the service will never be substantially reduced during a period that has already been paid for.</p>
   </section>
 
@@ -190,7 +190,6 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <!-- Price written by scripts/build-locales.js from config/markets.json (market of /en/: _dirs.en.market, "us" since 19/09/2026), never priced by hand. Currency sentence below: tests/cgv-pro-prices.test.js fails if the market of /en/ is no longer in USD. -->
     <h2>Article 6 — Price</h2>
     <div class="highlight">
-      <p data-market-price-if="pro.week"><strong>Weekly: <span data-market-price="pro.week">$4.99</span> per week.</strong> Charged when you subscribe, then every week on the same day. Renews automatically every week until cancelled, no minimum term.</p>
       <p><strong>Monthly: <span data-market-price="pro.month">$19.99</span> per month.</strong> Charged when you subscribe, then every month on the same date. Renews automatically every month until cancelled, no minimum term.</p>
       <p>Price in US dollars (USD). VAT not applicable, Article 293 B of the French General Tax Code (CGI).</p>
     </div>
@@ -201,7 +200,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <h2>Article 7 — Payment and renewal</h2>
     <p>Payment is secured and handled by Stripe (<a href="https://stripe.com" target="_blank" rel="noopener">stripe.com</a>). IASHARK does not store any bank card data. The first payment is taken when you subscribe. The subscription then renews automatically at the end of each period, for a period of the same length and at the price then in force.</p>
     <p>An active subscription cannot be taken out a second time.</p>
-    <p>If a renewal payment fails, our payment provider may retry it. Pro access is maintained for 1 day after the end of the paid period on the weekly plan, and for 4 days on the monthly plan; if payment is not made, the account returns to free access.</p>
+    <p>If a renewal payment fails, our payment provider may retry it. Pro access is maintained for 4 days after the end of the paid period; if payment is not made, the account returns to free access.</p>
   </section>
 
   <section class="section">
@@ -215,7 +214,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <div class="highlight">
       <p><strong>Model withdrawal form</strong><br>
       To IASHARK, contact@iashark.com:<br>
-      I hereby give notice that I withdraw from the contract for the IASHARK Pro subscription (billing period: [weekly / monthly]) taken out on [date], in the name of [name], account email address: [email].<br>
+      I hereby give notice that I withdraw from the contract for the IASHARK Pro subscription (monthly plan) taken out on [date], in the name of [name], account email address: [email].<br>
       Date and signature (if sent on paper).</p>
     </div>
   </section>
@@ -223,7 +222,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
   <section class="section">
     <h2>Article 9 — Cancellation</h2>
     <p>You can cancel your subscription at any time, free of charge and online, from the "My account" page, which gives access to our payment provider's secure billing area. You can also request cancellation by email at <a href="mailto:contact@iashark.com">contact@iashark.com</a>.</p>
-    <p>Cancellation takes effect at the end of the current billing period (week or month, depending on the plan chosen): you keep Pro access until that date and no further payment is taken. Except where the right of withdrawal is exercised under Article 8, the billing period already started is not refunded.</p>
+    <p>Cancellation takes effect at the end of the current monthly billing period: you keep Pro access until that date and no further payment is taken. Except where the right of withdrawal is exercised under Article 8, the billing period already started is not refunded.</p>
     <p>Deleting your account from "My account" first cancels any active subscription.</p>
   </section>
 

@@ -93,6 +93,12 @@ export const PRO_PRICES: Record<string, { currency: string; intervals: Partial<R
   "us": {
     "currency": "USD",
     "intervals": {
+      "week": {
+        "unitAmount": 499,
+        "envKey": "STRIPE_PRICE_ID_US_WEEK",
+        "legacyEnvKey": null,
+        "priceId": "price_1UHvRtCz0CerLuxwTshGPr8P"
+      },
       "month": {
         "unitAmount": 1999,
         "envKey": "STRIPE_PRICE_ID_US_MONTH",

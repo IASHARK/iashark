@@ -125,13 +125,19 @@ test("le tableau des marches ne duplique pas le pari du signal",()=>{
 });
 
 // L'AVIS IASHARK (abonne / match offert) : tout ce que le proprietaire a
-// demande est rendu, et la mention 18+ / estimation statistique figure DANS le
-// bloc. V8 : « Nos chances face a la cote » en deux barres, detail replie.
-test("l'avis IASHARK montre pari, cote, deux barres, ecart, fiabilite, raisons, risques et 18+",()=>{
+// demande est rendu, et la mention « estimation statistique » figure DANS le
+// bloc. V8 : « Nos chances face a la cote » en deux barres.
+// 21/09/2026 (demande du proprietaire) : « Detail des chiffres », lien
+// Methodologie et mentions 18+ / jeu responsable retires de la page match -
+// outil d'analyse, pas un bookmaker. La mention 18+ reste au pied de page.
+test("l'avis IASHARK montre pari, cote, deux barres, ecart, fiabilite, raisons et risques",()=>{
   const bloc=js.slice(js.indexOf("function signalCard(vm)"),js.indexOf("function marketsCard"));
-  for(const attendu of ["sig-market","Cote utilisée","duoBars(","sig2-cmp","Nos chances face à la cote","Détail des chiffres","relBadge(info)","Pourquoi ce pari","À surveiller",
-    "18+ · Estimation statistique, pas une garantie."]){
+  for(const attendu of ["sig-market","Cote utilisée","duoBars(","sig2-cmp","Nos chances face à la cote","relBadge(info)","Pourquoi ce pari","À surveiller",
+    "Estimation statistique, pas une garantie."]){
     assert.ok(bloc.includes(attendu),`element de l'avis manquant : ${attendu}`);
+  }
+  for(const absent of ["Détail des chiffres","methodLink(","18+","Jouez responsable"]){
+    assert.ok(!bloc.includes(absent),`retire le 21/09/2026, toujours present : ${absent}`);
   }
   // Une probabilite nulle ou absente n'est jamais affichee "0 %".
   assert.match(bloc,/r\.probability>0/);
@@ -140,7 +146,6 @@ test("l'avis IASHARK montre pari, cote, deux barres, ecart, fiabilite, raisons, 
   }
   assert.match(js,/function confMeter\(conf\)[\s\S]*role="meter"[\s\S]*aria-valuemax="10"/);
   assert.match(js,/t\('match_page\.sig_conf_label','Probabilité estimée'\)/);
-  assert.ok(bloc.includes("methodLink()"),"lien Methodologie absent de l'avis");
   // Analyse annoncee mais champs premium absents : jamais "aucun marche".
   assert.match(bloc,/raw\.has_signal===true&&raw\.no_signal!==true/);
   // Deux barres par pari dans « Probabilites et cotes », marche absent = non disponible.
@@ -162,7 +167,6 @@ test("vue visiteur : blocs fermes sans aucune donnee du modele, copie publique a
   }
   assert.doesNotMatch(gate,/\.conf\b/);
   assert.match(gate,/sig-ghost/);
-  assert.match(gate,/methodLink\(\)/);
   assert.match(gate,/const vm=viewModel\(publicCopy\(raw\)\);/);
   assert.doesNotMatch(gate,/faqCard\(/,"aucune FAQ pour le visiteur");
   // Champs publics seulement : etat de l'analyse et niveau prob_band.

@@ -58,23 +58,24 @@ test("config : marche us inerte, bascule documentee = deux champs, autres versio
   assert.equal(us.currency, "USD");
   assert.equal(us.priceIntlLocale, "en-US", "prix USD ecrits $19.99, jamais US$19.99");
   assert.equal(us.checkoutMarket, "us");
-  assert.deepEqual(us.prices.pro, { week: null, month: { amount: 19.99 }, year: null }, "mensuel seul");
-  assert.deepEqual(us.stripeEnvKeys, { month: "STRIPE_PRICE_ID_US_MONTH" });
+  // 21/09/2026 : hebdomadaire a 4,99 USD ouvert comme porte d'entree ; annuel toujours non vendu.
+  assert.deepEqual(us.prices.pro, { week: { amount: 4.99 }, month: { amount: 19.99 }, year: null }, "hebdomadaire + mensuel, jamais d'annuel");
+  assert.deepEqual(us.stripeEnvKeys, { month: "STRIPE_PRICE_ID_US_MONTH", week: "STRIPE_PRICE_ID_US_WEEK" });
   assert.equal(us.stripeEnvKeyLegacyMonth, null, "jamais le secret FR historique");
   assert.equal(us.helpline, null, "aucune ressource inventee : /en/ garde la ressource internationale");
-  assert.deepEqual(MARKETS._usdSwitch, { "_dirs.en.market": "us", "us.checkoutOpen": ["month"] });
+  assert.deepEqual(MARKETS._usdSwitch, { "_dirs.en.market": "us", "us.checkoutOpen": ["week", "month"] });
   if (!ALREADY_SWITCHED) {
     assert.equal(MARKETS._dirs.en.market, "fr", "/en/ reste sur le marche EUR tant que Stripe + deploiement ne sont pas faits");
     assert.deepEqual(us.checkoutOpen, [], "marche us ferme au paiement avant la bascule");
   } else {
-    assert.deepEqual(us.checkoutOpen, ["month"]);
+    assert.deepEqual(us.checkoutOpen, ["week", "month"], "hebdomadaire ouvert le 21/09/2026");
   }
   const readme = MARKETS._usdSwitch_readme;
   for (const s of ["STRIPE_PRICE_ID_US_MONTH", "unit_amount 1999", "0030_subscriptions_market_us.sql", "create-checkout-session", "stripe-webhook", "sync-subscription", "build-locales.js", "lifecycle-email-build.js"]) {
     assert.ok(readme.includes(s), "_usdSwitch_readme : " + s);
   }
   assert.equal(SWITCHED._dirs.en.market, "us");
-  assert.deepEqual(SWITCHED.us.checkoutOpen, ["month"]);
+  assert.deepEqual(SWITCHED.us.checkoutOpen, ["week", "month"]);
   for (const d of Object.keys(MARKETS._dirs)) {
     if (d !== "en") assert.equal(SWITCHED._dirs[d].market, MARKETS._dirs[d].market, d + " : marche inchange par la bascule");
   }
@@ -106,7 +107,9 @@ test("(a) configuration actuelle : /en/ affiche 19,95 EUR et paie sur le marche 
 
 test("create-checkout-session : ligne us generee (USD 1999 mensuel), CHECKOUT_MARKETS, priceMatches USD, jamais de repli", async () => {
   const builder = require(path.join(ROOT, "scripts/build-locales.js"));
-  const row = { currency: "USD", intervals: { month: { unitAmount: 1999, envKey: "STRIPE_PRICE_ID_US_MONTH", legacyEnvKey: null, priceId: MARKETS.us.stripePriceIds ? MARKETS.us.stripePriceIds.month : null } } };
+  const row = { currency: "USD", intervals: {
+    week: { unitAmount: 499, envKey: "STRIPE_PRICE_ID_US_WEEK", legacyEnvKey: null, priceId: MARKETS.us.stripePriceIds ? MARKETS.us.stripePriceIds.week : null },
+    month: { unitAmount: 1999, envKey: "STRIPE_PRICE_ID_US_MONTH", legacyEnvKey: null, priceId: MARKETS.us.stripePriceIds ? MARKETS.us.stripePriceIds.month : null } } };
   assert.deepEqual(builder.checkoutPriceTable().us, row);
   assert.deepEqual(builder.checkoutPriceTable(SWITCHED), builder.checkoutPriceTable(), "table independante de la bascule");
   assert.ok(read("supabase/functions/create-checkout-session/prices.generated.ts").includes('"us": ' + JSON.stringify(row, null, 2).replace(/\n/g, "\n  ")), "prices.generated.ts : ligne us (relancer node scripts/build-locales.js)");
@@ -123,11 +126,13 @@ test("create-checkout-session : ligne us generee (USD 1999 mensuel), CHECKOUT_MA
   assert.equal(R({ STRIPE_PRICE_ID_US_MONTH: "price_us" }, "US", undefined).usedMarket, "us", "duree par defaut = mois");
   // Aucun Price USD (ni secret ni configuration) : refus explicite, jamais le prix EUR.
   assert.equal(R({ STRIPE_PRICE_ID: "legacy", STRIPE_PRICE_ID_FR_MONTH: "fr" }, "us", "month").reason, "market_not_configured");
-  for (const iv of ["week", "year"]) {
-    const r = R({ STRIPE_PRICE_ID_US_MONTH: "p", STRIPE_PRICE_ID_US_WEEK: "w", STRIPE_PRICE_ID_US_YEAR: "y" }, "us", iv);
-    assert.deepEqual([r.ok, r.reason], [false, "interval_not_configured"], iv + " : non vendu, secret jamais lu");
+  // Annuel toujours non vendu ; hebdomadaire ouvert le 21/09/2026.
+  {
+    const r = R({ STRIPE_PRICE_ID_US_MONTH: "p", STRIPE_PRICE_ID_US_WEEK: "w", STRIPE_PRICE_ID_US_YEAR: "y" }, "us", "year");
+    assert.deepEqual([r.ok, r.reason], [false, "interval_not_configured"], "year : non vendu, secret jamais lu");
   }
-  assert.deepEqual({ ...P.availability(env({ STRIPE_PRICE_ID_US_MONTH: "p" }), "us", T) }, { week: false, month: true, year: false });
+  assert.equal(R({ STRIPE_PRICE_ID_US_WEEK: "w" }, "us", "week").ok, true, "week : vendu depuis le 21/09/2026");
+  assert.deepEqual({ ...P.availability(env({ STRIPE_PRICE_ID_US_MONTH: "p", STRIPE_PRICE_ID_US_WEEK: "w" }), "us", T) }, { week: true, month: true, year: false });
   assert.deepEqual({ ...P.availability(env({ STRIPE_PRICE_ID: "legacy" }), "us", T) }, { week: false, month: false, year: false });
   const good = { active: true, type: "recurring", currency: "usd", unit_amount: 1999, tax_behavior: "inclusive", recurring: { interval: "month", interval_count: 1 } };
   const exp = { currency: ok.currency, unitAmount: ok.unitAmount, interval: ok.interval };
@@ -187,7 +192,8 @@ test("(b) bascule appliquee, build complet en memoire : /en/ en USD partout, che
   assert.match(files["en/landing.html"], /data-market-price="pro"[^>]*>\$19\.99</);
   const cgv = visible(files["en/cgv.html"]);
   assert.match(cgv, /Monthly: \$19\.99 per month/);
-  assert.doesNotMatch(cgv, /Weekly:|Annual: |For information, /, "CGV : durees non vendues masquees");
+  assert.match(cgv, /Weekly: \$4\.99 per week/, "CGV : hebdomadaire vendu depuis le 21/09/2026");
+  assert.doesNotMatch(cgv, /Annual: |For information, /, "CGV : annuel non vendu, masque");
   // Autres versions : prix de leur marche, inchanges.
   assert.match(files["fr/abonnement.html"], />19,95\s€</);
   for (const d of ["es", "de"]) assert.match(files[d + "/abonnement.html"], /19,95\s€/, d);
@@ -200,15 +206,15 @@ test("(b) bascule appliquee, build complet en memoire : /en/ en USD partout, che
   const src = files["lib/market-config.js"];
   const M = loadMarketLib(src, "/en/abonnement.html").IASHARK_MARKET;
   assert.deepEqual([M.code, M.dir, M.currency, M.checkoutMarket, M.priceIntlLocale, M.intlLocale], ["us", "en", "USD", "us", "en-US", "en-GB"]);
-  assert.deepEqual(M.checkoutOpen, ["month"]);
+  assert.deepEqual(M.checkoutOpen, ["week", "month"]);
   assert.equal(M.formatPrice("pro"), "$19.99");
   assert.equal(M.formatPrice("pro.month"), "$19.99");
   assert.equal(M.formatPrice("free"), "$0");
-  assert.equal(M.formatPrice("pro.week"), null);
+  assert.equal(M.formatPrice("pro.week"), "$4.99");
   assert.equal(M.formatPrice("pro.year"), null);
   const month = M.proOffer().intervals.find((i) => i.interval === "month");
   assert.deepEqual([month.amount, month.text, month.open], [19.99, "$19.99", true], "ligne de prix du panneau Pro (match-page.js#prixPro)");
-  assert.deepEqual(M.proOffer().intervals.filter((i) => i.amount != null).map((i) => i.interval), ["month"]);
+  assert.deepEqual(M.proOffer().intervals.filter((i) => i.amount != null).map((i) => i.interval), ["week", "month"]);
   assert.equal(M.isPayable("pro"), true);
   assert.equal(M.helpline.name, "Gambling Therapy");
   assert.equal(norm(loadMarketLib(src, "/es/").IASHARK_MARKET.formatPrice("pro")), "19,95 €");
@@ -242,13 +248,13 @@ test("e-mails de cycle de vie apres la bascule : fuseau connu, devise USD, jamai
   const L = require(path.join(ROOT, "lib/lifecycle-email.js"));
   const ctx = L.siteContext(marketsSubset(SWITCHED), "en");
   assert.deepEqual([ctx.market, ctx.currency, ctx.proPriceMinor, ctx.timeZone, ctx.helpline.name], ["us", "USD", 1999, "Europe/Paris", "Gambling Therapy"]);
-  assert.deepEqual(ctx.proPricesMinor, { week: null, month: 1999, year: null });
-  // Email « Ce que debloque Pro » : offre mensuelle seule -> ligne « mois seul »
-  // (hasOnlyProMonth), prix ecrit "$19.99" (locale des prix du marche), jamais
-  // un prix a la semaine ou a l'annee invente.
+  assert.deepEqual(ctx.proPricesMinor, { week: 499, month: 1999, year: null });
+  // Email « Ce que debloque Pro » : hebdomadaire + mensuel depuis le
+  // 21/09/2026 -> les deux prix, ecrits "$4.99" et "$19.99" (locale des prix du
+  // marche), jamais un prix a l'annee invente.
   const bundle = require(path.join(ROOT, "lib/lifecycle-email-build.js")).loadBundle();
   bundle.markets = marketsSubset(SWITCHED);
   const mail = L.renderLifecycleEmail(bundle, "pro_features", "en", {}, { unsubscribeUrl: "https://iashark.com/en/desinscription-email.html#t=x", now: new Date("2026-09-19T10:00:00Z") });
-  assert.match(mail.text, /Price on the English \(International\) version of the site: \$19\.99 per month, cancel at any time/);
-  assert.doesNotMatch(mail.text + mail.html, /€|US\$|per week|per year|null|undefined/);
+  assert.match(mail.text, /Prices on the English \(International\) version of the site: \$4\.99 per week or \$19\.99 per month\./);
+  assert.doesNotMatch(mail.text + mail.html, /€|US\$|per year|null|undefined/);
 });

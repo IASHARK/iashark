@@ -3,10 +3,20 @@
   "_defaultMarket": "fr",
   "_xDefaultDir": "fr",
   "_hreflangXDefault_readme": "Cible hreflang x-default (audit SEO 15/09/2026) : premiere version de cette liste presente dans le groupe d'equivalents de la page. /en/ (anglais international) sert mieux qu'un /fr/ les visiteurs dont la langue n'a pas de version (nl, sv, ja...), et c'est deja la page que la racine / (302 geolocalisee) renvoie a Googlebot (Country=us). _xDefaultDir reste 'fr' : il ne designe PAS le x-default mais le repertoire historique servi a la racine (/match/<id>.html, /blog/, 301 des anciennes URLs racine) ; le changer deplacerait toutes les pages match FR indexees. Groupe sans /en/ (ex. Liga MX : fr, mx, es) : x-default vers /fr/.",
-  "_hreflangXDefault": ["en", "fr"],
-  "_planKeys": ["free", "pro"],
+  "_hreflangXDefault": [
+    "en",
+    "fr"
+  ],
+  "_planKeys": [
+    "free",
+    "pro"
+  ],
   "_proIntervals_readme": "Offre unique Pro vendue sous 3 durees (decision du proprietaire du 16/09/2026 ; l'ancienne offre a deux niveaux est abandonnee). prices.pro.<week|month|year>.amount = prix TTC du marche. Duree absente ou null = non vendue dans ce marche : option non affichee, jamais de prix invente. Duree vendue mais non payable (checkoutOpen, ou secret Stripe absent cote serveur) = option MASQUEE (decision du proprietaire du 19/09/2026 : « Bientot disponible » faisait hesiter), jamais facturee a un autre prix ; aucune duree payable = ligne « paiement pas encore ouvert » a la place du bouton (lib/pro-plan-picker.js). Duree par defaut du selecteur : _proDefaultInterval. data-market-price=\"pro\" reste un alias du prix mensuel (retro-compatibilite). stripeEnvKeys.<duree> = nom du secret Supabase contenant l'id du Price Stripe ; stripeEnvKeyLegacyMonth = ancien secret accepte uniquement comme repli du mensuel de CE marche ; stripePriceIds.<duree> (facultatif) = id du Price Stripe ecrit ici (pas un secret : inutilisable sans la cle Stripe), dernier recours de create-checkout-session apres le secret puis l'ancien secret (pricing.ts), toujours pour CE marche et CETTE duree, Price relu chez Stripe et compare au prix affiche avant toute session. Un id ne rend pas une duree payable : checkoutOpen decide de l'affichage.",
-  "_proIntervals": ["week", "month", "year"],
+  "_proIntervals": [
+    "week",
+    "month",
+    "year"
+  ],
   "_proDefaultInterval": "month",
   "_legalFiles": {
     "legal_notice": "mentions-legales.html",
@@ -18,22 +28,115 @@
   },
   "_helplines_readme": "Ressources d'aide au jeu responsable partagees par plusieurs repertoires. Un repertoire de _dirs peut porter \"helpline\": \"<cle>\" pour afficher cette ressource a la place de celle de son marche (lib/market-config.js, scripts/build-locales.js). Utilise par /en/ /es/ /de/ /it/ /pt/ : versions internationales EUR, dont les visiteurs ne sont pas en France - la ligne francaise Joueurs Info Service n'y a pas de sens (audit QA 14/09/2026). phone null = pas de numero : la ligne telephone est masquee, jamais inventee.",
   "_helplines": {
-    "international": {"name": "Gambling Therapy", "phone": null, "tel": null, "url": "https://www.gamblingtherapy.org", "display": "gamblingtherapy.org", "hours": "free, international (chat, forum)"}
+    "international": {
+      "name": "Gambling Therapy",
+      "phone": null,
+      "tel": null,
+      "url": "https://www.gamblingtherapy.org",
+      "display": "gamblingtherapy.org",
+      "hours": "free, international (chat, forum)"
+    }
   },
   "_dirs_readme": "Un repertoire public = une copie complete du site. market = cle de marche ci-dessous (devise/prix/aide/legal), locale = dictionnaire i18n/dict/<locale>.json, htmlLang = <html lang>, hreflang = valeur hreflang, intlLocale = locale Intl pour les prix/dates, blogDir = repertoire du blog traduit (null = blog FR racine), label = libelle du selecteur (ordre des cles = ordre du selecteur), customLanding = landing.html de ce repertoire maintenue a la main (jamais ecrasee par le generateur).",
   "_dirs": {
-    "fr": {"market": "fr", "locale": "fr", "htmlLang": "fr", "hreflang": "fr", "intlLocale": "fr-FR", "blogDir": null, "label": "Français"},
-    "gb": {"market": "gb", "locale": "en", "htmlLang": "en-GB", "hreflang": "en-GB", "intlLocale": "en-GB", "blogDir": "en", "label": "English (UK)", "customLanding": true},
-    "za": {"market": "za", "locale": "en", "htmlLang": "en-ZA", "hreflang": "en-ZA", "intlLocale": "en-ZA", "blogDir": "en", "label": "English (South Africa)", "customLanding": true},
-    "en": {"market": "us", "locale": "en", "htmlLang": "en", "hreflang": "en", "intlLocale": "en-GB", "blogDir": "en", "label": "English (International)", "helpline": "international"},
-    "mx": {"market": "mx", "locale": "es-mx", "htmlLang": "es-MX", "hreflang": "es-MX", "intlLocale": "es-MX", "blogDir": "mx", "label": "Español (México)", "customLanding": true},
-    "es": {"market": "fr", "locale": "es", "htmlLang": "es", "hreflang": "es", "intlLocale": "es-ES", "blogDir": "es", "label": "Español", "helpline": "international"},
-    "de": {"market": "fr", "locale": "de", "htmlLang": "de", "hreflang": "de", "intlLocale": "de-DE", "blogDir": "de", "label": "Deutsch", "helpline": "international"},
-    "it": {"market": "fr", "locale": "it", "htmlLang": "it", "hreflang": "it", "intlLocale": "it-IT", "blogDir": "it", "label": "Italiano", "helpline": "international"},
-    "pt": {"market": "fr", "locale": "pt", "htmlLang": "pt", "hreflang": "pt", "intlLocale": "pt-PT", "blogDir": "pt", "label": "Português", "helpline": "international"}
+    "fr": {
+      "market": "fr",
+      "locale": "fr",
+      "htmlLang": "fr",
+      "hreflang": "fr",
+      "intlLocale": "fr-FR",
+      "blogDir": null,
+      "label": "Français"
+    },
+    "gb": {
+      "market": "gb",
+      "locale": "en",
+      "htmlLang": "en-GB",
+      "hreflang": "en-GB",
+      "intlLocale": "en-GB",
+      "blogDir": "en",
+      "label": "English (UK)",
+      "customLanding": true
+    },
+    "za": {
+      "market": "za",
+      "locale": "en",
+      "htmlLang": "en-ZA",
+      "hreflang": "en-ZA",
+      "intlLocale": "en-ZA",
+      "blogDir": "en",
+      "label": "English (South Africa)",
+      "customLanding": true
+    },
+    "en": {
+      "market": "us",
+      "locale": "en",
+      "htmlLang": "en",
+      "hreflang": "en",
+      "intlLocale": "en-GB",
+      "blogDir": "en",
+      "label": "English (International)",
+      "helpline": "international"
+    },
+    "mx": {
+      "market": "mx",
+      "locale": "es-mx",
+      "htmlLang": "es-MX",
+      "hreflang": "es-MX",
+      "intlLocale": "es-MX",
+      "blogDir": "mx",
+      "label": "Español (México)",
+      "customLanding": true
+    },
+    "es": {
+      "market": "fr",
+      "locale": "es",
+      "htmlLang": "es",
+      "hreflang": "es",
+      "intlLocale": "es-ES",
+      "blogDir": "es",
+      "label": "Español",
+      "helpline": "international"
+    },
+    "de": {
+      "market": "fr",
+      "locale": "de",
+      "htmlLang": "de",
+      "hreflang": "de",
+      "intlLocale": "de-DE",
+      "blogDir": "de",
+      "label": "Deutsch",
+      "helpline": "international"
+    },
+    "it": {
+      "market": "fr",
+      "locale": "it",
+      "htmlLang": "it",
+      "hreflang": "it",
+      "intlLocale": "it-IT",
+      "blogDir": "it",
+      "label": "Italiano",
+      "helpline": "international"
+    },
+    "pt": {
+      "market": "fr",
+      "locale": "pt",
+      "htmlLang": "pt",
+      "hreflang": "pt",
+      "intlLocale": "pt-PT",
+      "blogDir": "pt",
+      "label": "Português",
+      "helpline": "international"
+    }
   },
   "_usdSwitch_readme": "OFFRE USD DE /en/ (decision du proprietaire du 19/09/2026 : les visiteurs des Etats-Unis arrivent sur /en/ ; 19,99 USD par mois TTC, mensuel seul). BASCULE APPLIQUEE LE 19/09/2026 (decision du proprietaire) : _dirs.en.market = 'us' et us.checkoutOpen = ['month'], Price Stripe mensuel USD dans us.stripePriceIds.month ; CGV /en/ reecrites pour l'offre USD mensuelle (legal/en/cgv.html, version 2026-09-19 de lib/checkout-consent.js). Le texte ci-dessous decrit la procedure et ses pre-requis (a verifier avant de publier ce commit). Tant que la bascule n'est PAS faite, /en/ reste sur le marche EUR 'fr' (19,95 EUR, paiement FR qui fonctionne aujourd'hui) et le marche 'us' ci-dessous est inerte (aucune page ne l'utilise, create-checkout-session le refuse tant que le secret STRIPE_PRICE_ID_US_MONTH n'existe pas). LA BASCULE = appliquer exactement _usdSwitch : _dirs.en.market 'fr' -> 'us' ET us.checkoutOpen [] -> ['month'], puis node scripts/build-locales.js && node scripts/build-public.js (le build recopie aussi le marche de /en/ dans i18n/i18n.js et lib/market-config.js) et node lib/lifecycle-email-build.js. PRE-REQUIS, dans cet ordre : 1) Stripe : Price recurrent mensuel 19,99 USD (unit_amount 1999, currency usd, interval month x1, tax_behavior inclusive) ; 2) secret Supabase STRIPE_PRICE_ID_US_MONTH = id de ce Price ; 3) SQL supabase/migrations/0030_subscriptions_market_us.sql (apres 0026) ; 4) deployer create-checkout-session, stripe-webhook et sync-subscription depuis le depot ; 5) seulement alors la bascule ci-dessus, puis deploiement du site et de send-lifecycle-emails / email-unsubscribe (bundle regenere). tests/usd-switch.test.js et les specs E2E subscription/account/match rejouent /en/ avec _usdSwitch applique (config de test) : ils prouvent l'etat bascule avant qu'il soit publie. Toute la version /en/ passe en USD (Etats-Unis, mais aussi Irlande, Canada, pays nordiques... routes vers /en/ par lib/lang-routing.js) ; /es/ /de/ /it/ /pt/ /fr/ restent en EUR, /gb/ /za/ /mx/ gardent leur marche.",
-  "_usdSwitch": {"_dirs.en.market": "us", "us.checkoutOpen": ["month"]},
+  "_usdSwitch": {
+    "_dirs.en.market": "us",
+    "us.checkoutOpen": [
+      "week",
+      "month"
+    ]
+  },
   "fr": {
     "country": "FR",
     "locale": "fr",
@@ -41,27 +144,61 @@
     "intlLocale": "fr-FR",
     "currency": "EUR",
     "urlPrefix": "/fr/",
-    "dirs": ["fr", "en", "es", "de", "it", "pt"],
-    "stripeEnvKeys": {"week": "STRIPE_PRICE_ID_FR_WEEK", "month": "STRIPE_PRICE_ID_FR_MONTH", "year": "STRIPE_PRICE_ID_FR_YEAR"},
+    "dirs": [
+      "fr",
+      "en",
+      "es",
+      "de",
+      "it",
+      "pt"
+    ],
+    "stripeEnvKeys": {
+      "week": "STRIPE_PRICE_ID_FR_WEEK",
+      "month": "STRIPE_PRICE_ID_FR_MONTH",
+      "year": "STRIPE_PRICE_ID_FR_YEAR"
+    },
     "stripeEnvKeyLegacyMonth": "STRIPE_PRICE_ID",
-    "stripePriceIds": {"week": "price_1UHPKzCz0CerLuxwrFe5hklH", "month": "price_1UB7tpCz0CerLuxwNxsTsMRM", "year": "price_1UHPL0Cz0CerLuxw26Kh72BF"},
+    "stripePriceIds": {
+      "week": "price_1UHPKzCz0CerLuxwrFe5hklH",
+      "month": "price_1UB7tpCz0CerLuxwNxsTsMRM",
+      "year": "price_1UHPL0Cz0CerLuxw26Kh72BF"
+    },
     "checkoutMarket": null,
-    "checkoutOpen": ["week", "month", "year"],
+    "checkoutOpen": [
+      "week",
+      "month",
+      "year"
+    ],
     "checkoutOpen_readme": "Durees REELLEMENT payables en production. Decision du proprietaire du 19/09/2026 : semaine, mois et annee ouvertes (Price Stripe dans stripePriceIds ; CGV FR et versions EUR du 19/09/2026). PRE-REQUIS : la version du depot de create-checkout-session doit etre deployee (l'ancienne ignore la duree et facture le mensuel ; lib/pro-plan-picker.js ne propose alors que le mensuel, faute de mode \"availability\"). Ajouter une duree ici UNIQUEMENT quand elle est payable en ligne. Champ absent = toutes les durees vendues sont considerees ouvertes (le serveur tranche).",
     "paidAdsEnabled": false,
     "adsGamblingCertRequired": false,
     "status": "LIVE",
     "minAge": 18,
     "prices": {
-      "free": {"amount": 0, "interval": "month"},
+      "free": {
+        "amount": 0,
+        "interval": "month"
+      },
       "pro": {
-        "week": {"amount": 6.99},
-        "month": {"amount": 19.95},
-        "year": {"amount": 199}
+        "week": {
+          "amount": 6.99
+        },
+        "month": {
+          "amount": 19.95
+        },
+        "year": {
+          "amount": 199
+        }
       }
     },
     "pricesSource": "Decision du proprietaire du 16/09/2026 : 6,99 EUR/semaine, 19,95 EUR/mois (prix deja affiche), 199 EUR/an. Ancienne offre a deux niveaux abandonnee.",
-    "helpline": {"name": "Joueurs Info Service", "phone": "09 74 75 13 13", "tel": "0974751313", "url": "https://www.joueurs-info-service.fr", "display": "joueurs-info-service.fr"},
+    "helpline": {
+      "name": "Joueurs Info Service",
+      "phone": "09 74 75 13 13",
+      "tel": "0974751313",
+      "url": "https://www.joueurs-info-service.fr",
+      "display": "joueurs-info-service.fr"
+    },
     "compliance": {
       "responsibleGamblingHelpline": "Joueurs Info Service - 09 74 75 13 13 - joueurs-info-service.fr",
       "legalPagesLocalized": true,
@@ -75,27 +212,52 @@
     "intlLocale": "en-GB",
     "currency": "GBP",
     "urlPrefix": "/gb/",
-    "dirs": ["gb"],
-    "stripeEnvKeys": {"week": "STRIPE_PRICE_ID_GB_WEEK", "month": "STRIPE_PRICE_ID_GB_MONTH", "year": "STRIPE_PRICE_ID_GB_YEAR"},
+    "dirs": [
+      "gb"
+    ],
+    "stripeEnvKeys": {
+      "week": "STRIPE_PRICE_ID_GB_WEEK",
+      "month": "STRIPE_PRICE_ID_GB_MONTH",
+      "year": "STRIPE_PRICE_ID_GB_YEAR"
+    },
     "stripeEnvKeyLegacyMonth": null,
-    "stripePriceIds": {"month": "price_1UHPIRCz0CerLuxwwMv0zpmY"},
+    "stripePriceIds": {
+      "month": "price_1UHPIRCz0CerLuxwwMv0zpmY"
+    },
     "checkoutMarket": "gb",
-    "checkoutOpen": ["month"],
+    "checkoutOpen": [
+      "month"
+    ],
     "checkoutOpen_readme": "Decision du proprietaire du 19/09/2026 : mensuel seul payable (GBP 14.99, Price Stripe dans stripePriceIds.month) ; semaine et annee gardent leur prix ci-dessous mais aucun Price Stripe n'existe pour elles : masquees sur les pages, absentes des CGV /gb/ (version du 19/09/2026) et des emails. PRE-REQUIS : version du depot de create-checkout-session deployee (l'ancienne refuse ou facture mal un marche pays). POUR OUVRIR SEMAINE OU ANNEE : 1) creer le Price Stripe (prix TTC ci-dessous) ; 2) l'ajouter a stripePriceIds (ou secret Supabase, voir stripeEnvKeys) ; 3) reecrire les CGV /gb/ (durees, rappel annuel, changement de duree) et gb/landing.html ; 4) lister la duree ici puis relancer node scripts/build-locales.js et node scripts/build-public.js.",
     "paidAdsEnabled": false,
     "adsGamblingCertRequired": true,
     "status": "DRAFT_PENDING_LEGAL_REVIEW",
     "minAge": 18,
     "prices": {
-      "free": {"amount": 0, "interval": "month"},
+      "free": {
+        "amount": 0,
+        "interval": "month"
+      },
       "pro": {
-        "week": {"amount": 4.99},
-        "month": {"amount": 14.99},
-        "year": {"amount": 149}
+        "week": {
+          "amount": 4.99
+        },
+        "month": {
+          "amount": 14.99
+        },
+        "year": {
+          "amount": 149
+        }
       }
     },
     "pricesSource": "Decision du proprietaire du 16/09/2026 : GBP 4.99/week, 14.99/month (06_IAShark_UK_Launch_Kit), 149/year. Ancienne offre a 24.99/mois et 199/an abandonnee.",
-    "helpline": {"name": "National Gambling Helpline (GamCare / BeGambleAware)", "phone": "0808 8020 133", "tel": "08088020133", "url": "https://www.begambleaware.org", "display": "begambleaware.org"},
+    "helpline": {
+      "name": "National Gambling Helpline (GamCare / BeGambleAware)",
+      "phone": "0808 8020 133",
+      "tel": "08088020133",
+      "url": "https://www.begambleaware.org",
+      "display": "begambleaware.org"
+    },
     "compliance": {
       "responsibleGamblingHelpline": "GamCare / BeGambleAware - National Gambling Helpline 0808 8020 133 - begambleaware.org",
       "legalPagesLocalized": true,
@@ -109,27 +271,57 @@
     "intlLocale": "es-MX",
     "currency": "MXN",
     "urlPrefix": "/mx/",
-    "dirs": ["mx"],
-    "stripeEnvKeys": {"week": "STRIPE_PRICE_ID_MX_WEEK", "month": "STRIPE_PRICE_ID_MX_MONTH", "year": "STRIPE_PRICE_ID_MX_YEAR"},
+    "dirs": [
+      "mx"
+    ],
+    "stripeEnvKeys": {
+      "week": "STRIPE_PRICE_ID_MX_WEEK",
+      "month": "STRIPE_PRICE_ID_MX_MONTH",
+      "year": "STRIPE_PRICE_ID_MX_YEAR"
+    },
     "stripeEnvKeyLegacyMonth": null,
-    "stripePriceIds": {"week": "price_1UHPKuCz0CerLuxwIFBrhhxf", "month": "price_1UHPKtCz0CerLuxwQHegdC33", "year": "price_1UHPKvCz0CerLuxwMfX8KdmC"},
+    "stripePriceIds": {
+      "week": "price_1UHPKuCz0CerLuxwIFBrhhxf",
+      "month": "price_1UHPKtCz0CerLuxwQHegdC33",
+      "year": "price_1UHPKvCz0CerLuxwMfX8KdmC"
+    },
     "checkoutMarket": "mx",
-    "checkoutOpen": ["week", "month", "year"],
+    "checkoutOpen": [
+      "week",
+      "month",
+      "year"
+    ],
     "checkoutOpen_readme": "Decision du proprietaire du 19/09/2026 : semaine, mois et annee payables (Price Stripe dans stripePriceIds ; CGV /mx/ du 19/09/2026). PRE-REQUIS : version du depot de create-checkout-session deployee (l'ancienne refuse ou facture mal un marche pays). Les CGV /mx/ promettent un aviso par email avant chaque cobro (anual J-30 et J-7, mensual J-7, semanal J-2 ; LFPC art. 76 Bis) : envoi a activer (Resend + taches planifiees) en meme temps que l'ouverture. Ajouter une duree ici UNIQUEMENT quand elle est payable en ligne, puis relancer node scripts/build-locales.js et node scripts/build-public.js.",
     "paidAdsEnabled": false,
     "adsGamblingCertRequired": true,
     "status": "DRAFT_PENDING_LEGAL_REVIEW",
     "minAge": 18,
     "prices": {
-      "free": {"amount": 0, "interval": "month"},
+      "free": {
+        "amount": 0,
+        "interval": "month"
+      },
       "pro": {
-        "week": {"amount": 69},
-        "month": {"amount": 199},
-        "year": {"amount": 1990}
+        "week": {
+          "amount": 69
+        },
+        "month": {
+          "amount": 199
+        },
+        "year": {
+          "amount": 1990
+        }
       }
     },
     "pricesSource": "Decision du proprietaire du 16/09/2026 : MX$69/semana, MX$199/mes (07_IAShark_Mexico_Launch_Kit), MX$1 990/ano. Ancienne offre a MX$299/mes abandonnee.",
-    "helpline": {"name": "Línea de la Vida (CONASAMA)", "phone": "800 911 2000", "tel": "8009112000", "url": "https://www.gob.mx/conasama/articulos/linea-de-la-vida-800-911-2000", "display": "gob.mx/conasama", "hours": "gratuita, 24/7"},
+    "helpline": {
+      "name": "Línea de la Vida (CONASAMA)",
+      "phone": "800 911 2000",
+      "tel": "8009112000",
+      "url": "https://www.gob.mx/conasama/articulos/linea-de-la-vida-800-911-2000",
+      "display": "gob.mx/conasama",
+      "hours": "gratuita, 24/7"
+    },
     "compliance": {
       "responsibleGamblingHelpline": "Línea de la Vida (CONASAMA / Secretaría de Salud) - 800 911 2000 - gratuita, 24 h/24, 365 j/an - gob.mx/conasama",
       "legalPagesLocalized": true,
@@ -143,27 +335,51 @@
     "intlLocale": "en-ZA",
     "currency": "ZAR",
     "urlPrefix": "/za/",
-    "dirs": ["za"],
-    "stripeEnvKeys": {"week": "STRIPE_PRICE_ID_ZA_WEEK", "month": "STRIPE_PRICE_ID_ZA_MONTH"},
+    "dirs": [
+      "za"
+    ],
+    "stripeEnvKeys": {
+      "week": "STRIPE_PRICE_ID_ZA_WEEK",
+      "month": "STRIPE_PRICE_ID_ZA_MONTH"
+    },
     "stripeEnvKeyLegacyMonth": null,
-    "stripePriceIds": {"week": "price_1UHPKyCz0CerLuxwOHUtjn4i", "month": "price_1UHPKxCz0CerLuxw9cieICvO"},
+    "stripePriceIds": {
+      "week": "price_1UHPKyCz0CerLuxwOHUtjn4i",
+      "month": "price_1UHPKxCz0CerLuxw9cieICvO"
+    },
     "checkoutMarket": "za",
-    "checkoutOpen": ["week", "month"],
+    "checkoutOpen": [
+      "week",
+      "month"
+    ],
     "checkoutOpen_readme": "Decision du proprietaire du 19/09/2026 : semaine et mois payables (Price Stripe dans stripePriceIds ; CGV /za/ du 19/09/2026) ; aucun annuel (year null, CPA s14). PRE-REQUIS : version du depot de create-checkout-session deployee (l'ancienne refuse ou facture mal un marche pays). Ajouter une duree ici UNIQUEMENT quand elle est payable en ligne, puis relancer node scripts/build-locales.js et node scripts/build-public.js.",
     "paidAdsEnabled": false,
     "adsGamblingCertRequired": true,
     "status": "DRAFT_PENDING_LEGAL_REVIEW",
     "minAge": 18,
     "prices": {
-      "free": {"amount": 0, "interval": "month"},
+      "free": {
+        "amount": 0,
+        "interval": "month"
+      },
       "pro": {
-        "week": {"amount": 69},
-        "month": {"amount": 199},
+        "week": {
+          "amount": 69
+        },
+        "month": {
+          "amount": 199
+        },
         "year": null
       }
     },
     "pricesSource": "Decision du proprietaire du 16/09/2026 : R69/week, R199/month (08_IAShark_South_Africa_Launch_Kit). Ancienne offre a R299/mois abandonnee. Annuel (R1 999/an) NON OUVERT au lancement : contrat a duree determinee CPA s14 (legal/README.md point 18) -> year null, aucune option Annee affichee (ni prix, ni 'bientot disponible'), aucun secret STRIPE_PRICE_ID_ZA_YEAR lu. Pour l'ouvrir plus tard : prix ici + stripeEnvKeys.year + CGV ZA + notice s14.",
-    "helpline": {"name": "National Responsible Gambling Programme (NRGP)", "phone": "0800 006 008", "tel": "0800006008", "url": "https://www.responsiblegambling.org.za", "display": "responsiblegambling.org.za"},
+    "helpline": {
+      "name": "National Responsible Gambling Programme (NRGP)",
+      "phone": "0800 006 008",
+      "tel": "0800006008",
+      "url": "https://www.responsiblegambling.org.za",
+      "display": "responsiblegambling.org.za"
+    },
     "compliance": {
       "responsibleGamblingHelpline": "National Responsible Gambling Programme (NRGP) - 0800 006 008 - responsiblegambling.org.za",
       "legalPagesLocalized": true,
@@ -179,27 +395,45 @@
     "priceIntlLocale_readme": "Locale Intl des PRIX de ce marche, prioritaire sur l'intlLocale du repertoire (lib/market-config.js, scripts/build-locales.js) : /en/ garde en-GB pour les dates, mais ses prix USD s'ecrivent \"$19.99\" (en-US) et non \"US$19.99\" (en-GB).",
     "currency": "USD",
     "urlPrefix": "/en/",
-    "dirs": ["en"],
+    "dirs": [
+      "en"
+    ],
     "dirs_readme": "Repertoire PREVU pour ce marche. Le marche effectivement servi par un repertoire est _dirs.<dir>.market (seule source) : 'fr' tant que _usdSwitch n'est pas applique. Pas de repertoire /us/ : /en/ reste la version anglaise internationale, les Etats-Unis y sont routes par pays (lib/lang-routing.js, bloc COUNTRY_DIRS), pas comme marche pays (/gb/ /za/ /mx/).",
-    "stripeEnvKeys": {"month": "STRIPE_PRICE_ID_US_MONTH"},
+    "stripeEnvKeys": {
+      "week": "STRIPE_PRICE_ID_US_WEEK",
+      "month": "STRIPE_PRICE_ID_US_MONTH"
+    },
     "stripeEnvKeyLegacyMonth": null,
-    "stripePriceIds": {"month": "price_1UHPIGCz0CerLuxwjBlGekGk"},
+    "stripePriceIds": {
+      "week": "price_1UHvRtCz0CerLuxwTshGPr8P",
+      "month": "price_1UHPIGCz0CerLuxwjBlGekGk"
+    },
     "checkoutMarket": "us",
-    "checkoutOpen": ["month"],
+    "checkoutOpen": [
+      "week",
+      "month"
+    ],
     "checkoutOpen_readme": "Bascule _usdSwitch appliquee le 19/09/2026 (decision du proprietaire) : mensuel USD payable, Price Stripe dans stripePriceIds.month (a defaut du secret STRIPE_PRICE_ID_US_MONTH). Avant la bascule : AUCUNE duree payable (voir _usdSwitch_readme). POUR OUVRIR CE MARCHE (procedure suivie, pre-requis a verifier avant publication) : 1) creer le Price Stripe (19,99 USD par mois, tax inclusive) ; 2) poser les secrets Supabase (STRIPE_PRICE_ID_US_MONTH, voir stripeEnvKeys) ; 3) appliquer la migration 0030 puis deployer la version du depot de create-checkout-session, stripe-webhook et sync-subscription ; 4) lister ici les durees reellement payables ([\"month\"]) ET passer _dirs.en.market a \"us\" (les deux champs de _usdSwitch), puis relancer node scripts/build-locales.js et node scripts/build-public.js.",
     "paidAdsEnabled": false,
     "adsGamblingCertRequired": true,
     "status": "DRAFT_PENDING_LEGAL_REVIEW",
     "minAge": 18,
     "prices": {
-      "free": {"amount": 0, "interval": "month"},
+      "free": {
+        "amount": 0,
+        "interval": "month"
+      },
       "pro": {
-        "week": null,
-        "month": {"amount": 19.99},
+        "week": {
+          "amount": 4.99
+        },
+        "month": {
+          "amount": 19.99
+        },
         "year": null
       }
     },
-    "pricesSource": "Decision du proprietaire du 19/09/2026 : 19,99 USD par mois, TTC (Price Stripe tax inclusive), pour la version /en/. Mensuel seul pour l'instant : week et year null = non vendus (aucune option affichee, aucun secret STRIPE_PRICE_ID_US_WEEK / _YEAR lu).",
+    "pricesSource": "Decision du proprietaire du 19/09/2026 : 19,99 USD par mois, TTC (Price Stripe tax inclusive), pour la version /en/. 21/09/2026 : ajout de l'hebdomadaire a 4,99 USD (Price Stripe iashark_pro_us_week) comme porte d'entree - seul le mensuel etait propose, et un visiteur pour qui 19,99 USD est hors de portee n'avait aucune option (constat sur une inscription venue d'Egypte le 21/09). Annuel toujours null = non vendu (aucune option affichee, aucun secret STRIPE_PRICE_ID_US_YEAR lu).",
     "helpline": null,
     "helpline_readme": "null = aucune ressource propre au marche : /en/ affiche _helplines.international (surcharge _dirs.en.helpline), comme avant la bascule. Jamais de numero invente.",
     "compliance": {

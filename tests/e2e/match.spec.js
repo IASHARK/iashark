@@ -251,10 +251,10 @@ for (const v of VERSIONS) {
 
 // Offre USD de /en/ : bascule config/markets.json#_usdSwitch rejouee sans etre
 // publiee (tests/e2e/helpers/usd-switch.js). Ligne de prix du panneau Pro
-// (match-page.js#prixPro -> IASHARK_MARKET.proOffer()) en USD ; l'hebdo US
-// n'est pas payable (checkoutOpen = ['month']) : ligne mensuelle seule.
+// (match-page.js#prixPro -> IASHARK_MARKET.proOffer()) en USD. Hebdomadaire
+// ouvert le 21/09/2026 : la ligne annonce les deux durees.
 test.describe('page match /en/ apres la bascule USD (config de test _usdSwitch)', () => {
-  test('anonyme : panneau Pro « $19.99 / mois », aucun prix EUR @mobile', async ({ page, siteData, dictFor }) => {
+  test('anonyme : panneau Pro « $4.99 / semaine ou $19.99 / mois », aucun prix EUR @mobile', async ({ page, siteData, dictFor }) => {
     test.skip(!siteData.paid, 'Aucun match payant dans les donnees');
     const dict = await dictFor('en');
     await useUsdSwitch(page);
@@ -262,7 +262,8 @@ test.describe('page match /en/ apres la bascule USD (config de test _usdSwitch)'
     const gate = page.locator('#matchRoot .gate.mgate');
     await expect(gate).toBeVisible();
     expect(await prixMensuel(page)).toBe('$19.99');
-    await expect(gate.locator('.mgate-small')).toHaveText(tr(dict, 'pro_offer.price_month').replace('{price}', '$19.99'));
+    expect(await prixPro(page, 'week')).toBe('$4.99');
+    await expect(gate.locator('.mgate-small')).toHaveText(tr(dict, 'pro_offer.price_week_month').replace('{week}', '$4.99').replace('{month}', '$19.99'));
     expect(squash(await gate.innerText()), 'aucun prix EUR ni "US$"').not.toMatch(/€|19[.,]95|US\$/);
     await expectPanelOnly(page);
   });

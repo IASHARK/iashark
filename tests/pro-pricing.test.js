@@ -22,9 +22,9 @@ const EXPECTED = {
   gb: { currency: "GBP", week: 4.99, month: 14.99, year: 149 },
   mx: { currency: "MXN", week: 69, month: 199, year: 1990 },
   za: { currency: "ZAR", week: 69, month: 199, year: null },
-  // Offre USD de /en/ (decision du 19/09/2026) : mensuel seul, inerte tant que
-  // config/markets.json#_usdSwitch n'est pas applique (tests/usd-switch.test.js).
-  us: { currency: "USD", week: null, month: 19.99, year: null }
+  // Offre USD de /en/ (decision du 19/09/2026 ; hebdomadaire ajoute le
+  // 21/09/2026 comme porte d'entree). Annuel toujours non vendu.
+  us: { currency: "USD", week: 4.99, month: 19.99, year: null }
 };
 const USD_SWITCHED = MARKETS._dirs.en.market === "us";
 const norm = (s) => String(s).replace(/[  ]/g, " ");
@@ -207,7 +207,7 @@ test("create-checkout-session (pricing.ts) : duree validee, secret absent = bien
   assert.deepEqual({ ...pricing.availability(env({ STRIPE_PRICE_ID_MX_YEAR: "p" }), "mx", T0) }, { week: false, month: false, year: true });
   assert.deepEqual({ ...pricing.availability(env(all), "za") }, { week: true, month: true, year: false });
   assert.deepEqual({ ...pricing.availability(env(all), "ca") }, { week: false, month: false, year: false });
-  assert.deepEqual({ ...pricing.availability(env(all), "us") }, { week: false, month: true, year: false });
+  assert.deepEqual({ ...pricing.availability(env(all), "us") }, { week: true, month: true, year: false });
 
   const good = { active: true, type: "recurring", currency: "gbp", unit_amount: 14900, tax_behavior: "inclusive", recurring: { interval: "year", interval_count: 1 } };
   const exp = { currency: "GBP", unitAmount: 14900, interval: "year" };
@@ -233,7 +233,7 @@ test("create-checkout-session : id de Price de la configuration en dernier recou
     gb: { month: "price_1UHPIRCz0CerLuxwwMv0zpmY" },
     mx: { week: "price_1UHPKuCz0CerLuxwIFBrhhxf", month: "price_1UHPKtCz0CerLuxwQHegdC33", year: "price_1UHPKvCz0CerLuxwMfX8KdmC" },
     za: { week: "price_1UHPKyCz0CerLuxwOHUtjn4i", month: "price_1UHPKxCz0CerLuxw9cieICvO" },
-    us: { month: "price_1UHPIGCz0CerLuxwjBlGekGk" }
+    us: { week: "price_1UHvRtCz0CerLuxwTshGPr8P", month: "price_1UHPIGCz0CerLuxwjBlGekGk" }
   };
   for (const k of MARKET_KEYS) {
     assert.deepEqual(MARKETS[k].stripePriceIds, PAYABLE_IDS[k], k + " : ids de Price");
@@ -379,7 +379,7 @@ test("checkoutOpen : seules les durees payables en ligne sont affichees, les aut
   // affichee (« Bientot disponible » faisait hesiter) ; durees payables le
   // 19/09/2026 : FR et MX semaine / mois / annee, ZA semaine / mois, GB et US
   // (offre USD de /en/) mois seul. Une seule duree : son prix seul, rien a choisir.
-  const OPEN = { fr: ["week", "month", "year"], gb: ["month"], mx: ["week", "month", "year"], za: ["week", "month"], us: ["month"] };
+  const OPEN = { fr: ["week", "month", "year"], gb: ["month"], mx: ["week", "month", "year"], za: ["week", "month"], us: ["week", "month"] };
   const P = loadPicker();
   const t = (k) => P.textFor(k, null, {});
   for (const k of MARKET_KEYS) {

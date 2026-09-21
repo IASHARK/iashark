@@ -279,7 +279,10 @@ function hero(vm,o){
 // la fiabilite en une ligne, la probabilite du modele sur une jauge ou le
 // marche est pose en repere, la cote utilisee et sa probabilite implicite,
 // l'ecart dit simplement, deux ou trois raisons tirees des donnees reelles,
-// les points a surveiller, et la mention 18+.
+// les points a surveiller, et la mention « estimation, pas une garantie »
+// (21/09/2026 : detail des chiffres, lien methodologie et mentions 18+ /
+// jeu responsable retires de la page match - outil d'analyse, pas un
+// bookmaker ; la mention 18+ reste au pied de page et dans les CGV).
 // L'ecart est affiche HONNETEMENT, y compris quand il est defavorable.
 // ---------------------------------------------------------------------------
 const REL_NIVEAUX={high:['match_page.sig_rel_high','Fiabilité élevée'],medium:['match_page.sig_rel_medium','Fiabilité moyenne'],low:['match_page.sig_rel_low','Fiabilité faible']};
@@ -364,7 +367,6 @@ function riskStat(code){
 // config/markets.json#_legalFiles.methodology, sources legal/<dir>/ (les 9
 // repertoires depuis le 19/09/2026) ; un repertoire inconnu renvoie vers
 // la version anglaise.
-const METHODOLOGY_DIRS=['fr','gb','za','en','mx','es','de','it','pt'];
 // Un match est TERMINE quand l'API le dit (FT/AET/PEN) ou, a defaut, plus de
 // 3 h 30 apres le coup d'envoi — large, pour couvrir prolongations, tirs au but
 // et coup d'envoi retarde. Un match reporte, annule ou sans heure fiable n'est
@@ -382,18 +384,6 @@ function matchTermine(m){
   return Date.now()-ts>3.5*60*60*1000;
 }
 
-function methodologyHref(){
-  const dir=(window.I18N&&window.I18N.dir)||'';
-  if(METHODOLOGY_DIRS.includes(dir))return '/'+dir+'/methodologie.html';
-  return dir?'/en/methodologie.html':'/fr/methodologie.html';
-}
-function methodLink(){
-  // Repertoire sans page Methodologie : le lien vise la version anglaise,
-  // et le dit (audit du 16/09/2026).
-  const dir=(window.I18N&&window.I18N.dir)||'';
-  const anglais=!!dir&&!METHODOLOGY_DIRS.includes(dir);
-  return `<p class="sig-method"><a href="${esc(methodologyHref())}"${anglais?' hreflang="en"':''}>${esc(t('match_page.sig_method_link','Comment ce chiffre est calculé : méthodologie'))}${anglais?esc(t('match_page.sig_method_in_english',' (en anglais)')):''}</a></p>`;
-}
 
 // L'AVIS IASHARK (abonne Pro ou match offert connecte) : le pari et sa cote,
 // « Nos chances face a la cote » en deux barres avec l'ecart dit en mots, sur
@@ -439,14 +429,6 @@ function signalCard(vm){
       ${duoBars({model:prob,market:implied,odds:cote,edge,kind:'odds'})}
       ${plain?`<p class="sig2-plain">${esc(plain)} <span>${esc(t('match_page.sig2_not_guarantee','Estimation statistique, pas une garantie.'))}</span></p>`:''}
     </div>`;
-  const detail=repliable({
-    label:t('match_page.sig2_details_show','Détail des chiffres'),labelOpen:t('match_page.sig2_details_hide','Masquer le détail'),cls:'sig2-detail',
-    body:`${confMeter(r.confidence)}<dl class="sig-figures sig2-figures">
-      <div><dt>${esc(t('match_page.sig2_model_exact','Notre estimation (précise)'))}</dt><dd>${pct(prob)}</dd></div>
-      <div><dt>${esc(t('match_page.sig2_implied_exact','Probabilité selon la cote (implicite)'))}</dt><dd>${pct(implied)}</dd></div>
-      <div><dt>${esc(t('match_page.sig2_edge_exact','Écart exact'))}</dt><dd class="sig-edge">${pts(edge)}</dd></div>
-    </dl>`
-  });
   const risque=riskStat(vm.editorial.riskCode);
   return `<section class="signal-card avis sig2 reveal" aria-labelledby="sigMarket">
     <div class="sig-head"><span class="sig-eyebrow">${cardIcon('target')}${esc(titre)}</span>${relBadge(info)}</div>
@@ -461,10 +443,9 @@ function signalCard(vm){
     ${compare}
     ${puces.length?`<div class="sig-why"><h3>${esc(t('match_page.sig_why_title','Pourquoi ce pari'))}</h3><ul>${puces.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
     <p class="sig-watch"><b>${esc(t('match_page.sig_watch_title','À surveiller'))}</b> ${esc(aSurveiller)}</p>
+    ${confMeter(r.confidence)}
     ${risque||info?`<div class="sig2-meta">${risque}${info?`<p class="sig-rel-note">${esc(relLigne(info))}</p>`:''}</div>`:''}
-    ${detail}
-    ${methodLink()}
-    <p class="sig-legal">${esc(t('match_page.sig_legal','18+ · Estimation statistique, pas une garantie. Jouez responsable.'))}</p>
+    <p class="sig-legal">${esc(t('match_page.sig_legal','Estimation statistique, pas une garantie.'))}</p>
   </section>`;
 }
 
@@ -1183,8 +1164,7 @@ function gateCard(vm,opts){
     </div>`:''}
     <div class="avis-inc"><p>${esc(t('match_page.avis_includes','Ce que contient l’analyse'))}</p><ul class="gate-facts">${contenu.map(([k,fb])=>`<li>${esc(t('match_page.'+k,fb))}</li>`).join('')}</ul></div>
     <a class="btn-gate avis-cta" href="${esc(o.href)}"${suivi('match_avis_unlock')}>${cardIcon('lock')}<span>${esc(o.cta)}</span></a>
-    <p class="sig-legal">${esc(t('match_page.avis_legal','Estimation, pas une garantie · 18+ · Jouez responsable.'))}</p>
-    ${methodLink()}
+    <p class="sig-legal">${esc(t('match_page.avis_legal','Estimation, pas une garantie.'))}</p>
   </section>`;
 }
 // MUR PRO (visiteur ou compte gratuit, match payant ; 19/09/2026). Constat du
@@ -1260,8 +1240,7 @@ function proGate(vm,o){
         <p class="mgate-small">${esc(lignePrix)}</p>
       </div></div>
     </div>
-    <p class="sig-legal">${esc(t('match_page.avis_legal','Estimation, pas une garantie · 18+ · Jouez responsable.'))}</p>
-    ${methodLink()}
+    <p class="sig-legal">${esc(t('match_page.avis_legal','Estimation, pas une garantie.'))}</p>
   </section>`;
 }
 function renderVisitor(raw,opts){

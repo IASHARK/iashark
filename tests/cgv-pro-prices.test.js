@@ -95,9 +95,13 @@ test("CGV ZA : ni prix ni option annuelle au lancement ; tolerance d'impaye par 
   assert.match(za, /No annual plan is offered at present/);
   assert.match(read("legal/za/cgv.html"), /BLOCKED_DECISION: annual plan not offered in South Africa at launch/);
   // Mensuel seul (/en/ USD, /gb/) : 4 jours, jamais de regle hebdomadaire.
-  const GRACE = { fr: /1 jour après la fin de la période payée pour la formule hebdomadaire, et pendant 4 jours/, en: /maintained for 4 days after the end of the paid period;/, gb: /continues for 4 days after the end of the paid period;/, za: /1 day[\s\S]*4 days/, es: /1 día[\s\S]*4 días/, mx: /1 día[\s\S]*4 días/, de: /1 Tag[\s\S]*4 Tage/, it: /1 giorno[\s\S]*4 giorni/, pt: /1 dia[\s\S]*4 dias/ };
+  // en : hebdomadaire ouvert le 21/09/2026 (4,99 USD) - tolerance par duree,
+  // comme les versions qui vendent plusieurs durees.
+  const GRACE = { fr: /1 jour après la fin de la période payée pour la formule hebdomadaire, et pendant 4 jours/, en: /maintained for 1 day after the end of the paid period on the weekly plan, and for 4 days on the monthly plan;/, gb: /continues for 4 days after the end of the paid period;/, za: /1 day[\s\S]*4 days/, es: /1 día[\s\S]*4 días/, mx: /1 día[\s\S]*4 días/, de: /1 Tag[\s\S]*4 Tage/, it: /1 giorno[\s\S]*4 giorni/, pt: /1 dia[\s\S]*4 dias/ };
   for (const d of DIRS) assert.match(visible(read("legal/" + d + "/cgv.html")), GRACE[d], d + " : tolerance d'impaye");
-  for (const d of ["en", "gb"]) assert.doesNotMatch(visible(read("legal/" + d + "/cgv.html")), /1 day|weekly plan/, d + " : aucune regle hebdomadaire");
+  // /gb/ ne vend que le mensuel : aucune clause hebdomadaire. /en/ vend
+  // l'hebdomadaire depuis le 21/09/2026 : la sienne est verifiee par GRACE.
+  assert.doesNotMatch(visible(read("legal/gb/cgv.html")), /1 day|weekly plan/, "gb : aucune regle hebdomadaire");
 });
 
 test("CGV : date de mise a jour = version du consentement, texte en REVIEW, durees et reconduction decrites par version, aucune offre Edge", () => {
@@ -113,7 +117,11 @@ test("CGV : date de mise a jour = version du consentement, texte en REVIEW, dure
   }
   // Une seule version des CGV le 19/09/2026 (9 versions, pages racine comprises).
   assert.equal(TERMS_VERSION, "2026-09-19");
-  for (const d of DIRS.concat([""])) assert.equal(versionFor(d), "2026-09-19", (d || "racine") + " : version des CGV envoyee avec le consentement");
+  // /en/ seul a change le 21/09/2026 (ouverture de l'hebdomadaire a 4,99 USD).
+  const VERSION_ATTENDUE = { en: "2026-09-21" };
+  for (const d of DIRS.concat([""])) {
+    assert.equal(versionFor(d), VERSION_ATTENDUE[d] || "2026-09-19", (d || "racine") + " : version des CGV envoyee avec le consentement");
+  }
 
   // FR (et versions EUR) : trois durees payables, conditions de l'annuel et du changement de duree.
   const fr = visible(read("legal/fr/cgv.html"));
@@ -131,9 +139,12 @@ test("CGV : date de mise a jour = version du consentement, texte en REVIEW, dure
   const gb = visible(read("legal/gb/cgv.html"));
   assert.match(gb, /Pro is paid monthly ; no weekly or annual plan is offered at present\./);
   assert.doesNotMatch(gb, /At least 30 days before your annual subscription renews|Changing billing period|£4\.99|£149|week, month or year/);
+  // /en/ : hebdomadaire + mensuel depuis le 21/09/2026, toujours pas d'annuel.
   const en = visible(read("legal/en/cgv.html"));
-  assert.match(en, /No weekly or annual plan is offered on this version of the site\./);
-  assert.doesNotMatch(en, /Annual plan|Changing billing period|week, month or year|weekly \/ monthly \/ annual|L215-1/);
+  assert.match(en, /You can subscribe for a weekly or monthly period\./);
+  assert.match(en, /No annual plan is offered on this version of the site\./);
+  assert.match(en, /Weekly: \$4\.99 per week\./, "prix hebdomadaire ecrit depuis config/markets.json");
+  assert.doesNotMatch(en, /Annual plan|Changing billing period|week, month or year|L215-1/);
   assert.match(visible(read("legal/mx/cgv.html")), /plan anual, 30 días y 7 días antes; plan mensual, 7 días antes; plan semanal, 2 días antes/);
 });
 

@@ -77,19 +77,18 @@ function defaultHelpers(){
 var NO_FAVS={has:function(){return false;},list:function(){return [];},toggle:function(){return false;},prune:function(){return false;},subscribe:function(){return function(){};}};
 
 /* ---------- Dates : Aujourd'hui / Demain / Apres-demain ---------- */
-// Onglets (20/09/2026, demande du proprietaire) : « Apres-demain » etait
-// toujours vide ; il laisse la place a « Hier », qui montre les memes lignes
-// que les autres jours avec, en plus, un liseré vert si la recommandation est
-// passee, rouge sinon. Rien d'autre n'est ajoute : ni score, ni pari, ni cote.
-var DAY_NAMES=[['home_list.day_yesterday','Hier'],['home_list.day_today','Aujourd’hui'],['home_list.day_tomorrow','Demain']];
-function buildDays(matches,H,clock,veille){
-  var hier=addDays(clock.day,-1);
-  var ds=[hier,clock.day,clock.tomorrow||addDays(clock.day,1)],counts={};
+// Onglets : AUJOURD'HUI et DEMAIN seulement (21/09/2026, demande du
+// proprietaire). L'onglet « Hier », ajoute la veille, est retire : il montrait
+// une journee passee alors que le site est un outil de decision sur les matchs
+// a venir. Rien n'est supprime par ailleurs - les fichiers results/<jour>.json
+// continuent d'etre ecrits par le pipeline, et la machinerie de la veille
+// (veilleListe, veilleAppel, lignes `past`) reste en place : remettre l'onglet
+// ne demande que de rajouter le jour ici.
+var DAY_NAMES=[['home_list.day_today','Aujourd’hui'],['home_list.day_tomorrow','Demain']];
+function buildDays(matches,H,clock){
+  var ds=[clock.day,clock.tomorrow||addDays(clock.day,1)],counts={};
   (matches||[]).forEach(function(m){var d=H.matchDay(m);if(ds.indexOf(d)!==-1)counts[d]=(counts[d]||0)+1;});
-  // La veille ne vient pas de la liste du jour (le calcul quotidien ne publie
-  // que le jour meme et les suivants) mais du fichier de resultats.
-  counts[hier]=(veille&&veille.length)||0;
-  return ds.map(function(d,i){return {day:d,count:counts[d]||0,rel:i,yesterday:d===hier};});
+  return ds.map(function(d,i){return {day:d,count:counts[d]||0,rel:i,yesterday:false};});
 }
 function dayName(d){return t(DAY_NAMES[d.rel][0],DAY_NAMES[d.rel][1]);}
 function fullDate(day){
@@ -97,7 +96,7 @@ function fullDate(day){
 }
 function countLabel(n){return n===1?t('home_list.match_one','1 match'):tf('home_list.match_many','{n} matchs',{n:n});}
 
-// Trois onglets de largeur egale. Un jour sans match : onglet desactive « aucun match ».
+// Onglets de largeur egale (aujourd'hui, demain). Un jour sans match : onglet desactive « aucun match ».
 function renderDateStrip(days,activeDay){
   return '<div class="hl-days" role="tablist" aria-label="'+esc(t('home_list.days_label','Choisir le jour'))+'">'+days.map(function(d){
     var on=d.day===activeDay,empty=!d.count,date=fullDate(d.day);
@@ -451,6 +450,10 @@ function mount(rootEl,options){
   // changement de jour. Absent (404, reseau) : l'onglet reste vide, rien ne
   // casse et aucun autre jour n'est affecte.
   function chargerVeille(){
+    // Onglet « Hier » retire (21/09/2026) : plus aucune requete vers
+    // results/<jour>.json depuis l'accueil. La fonction reste en place, prete
+    // a resservir si l'onglet revient un jour.
+    if(!DAY_NAMES.some(function(n){ return n[0]==='home_list.day_yesterday'; }))return;
     var jour=hierJour();
     if(state.veilleJour===jour||typeof root.fetch!=='function')return;
     state.veilleJour=jour;
@@ -460,7 +463,7 @@ function mount(rootEl,options){
       if(!f||state.veilleJour!==jour)return;
       state.veille=veilleListe(f);
       if(state.status==='ready'){
-        state.days=buildDays(state.matches,H,state.clock,state.veille);
+        state.days=buildDays(state.matches,H,state.clock);
         // La bande d'onglets doit TOUJOURS etre redessinee : sans cela elle
         // gardait « aucun match » sur Hier alors que les lignes etaient la
         // (constate en production le 20/09/2026).
@@ -621,7 +624,7 @@ function mount(rootEl,options){
       matches=Array.isArray(matches)?matches:[];
       pruneFavMatches(matches,Date.now());
       state.status='ready';state.matches=matches;state.clock=H.localClock();
-      state.days=buildDays(state.matches,H,state.clock,state.veille);
+      state.days=buildDays(state.matches,H,state.clock);
       ctx.freeMatchId=opts.freeMatchId!==undefined?opts.freeMatchId:(function(){var f=H.pickFreeMatch(state.matches);return f?f.id:null;})();
       // Jour demande (lien /fr/?jour=hier d'un email) : l'onglet « Hier » n'a
       // pas encore son fichier quand setData tourne ; on garde la demande et on

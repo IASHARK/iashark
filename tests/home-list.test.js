@@ -118,21 +118,27 @@ test("derby : puce depuis le champ public derby", () => {
   assert.doesNotMatch(HL.renderMatchRow(base(), ctx(), helpers(), 0), /hl-tag-derby/);
 });
 
-test("jours : Hier / Aujourd'hui / Demain, onglet sans match desactive « aucun match »", () => {
+test("jours : Aujourd'hui / Demain seulement, onglet sans match desactive « aucun match »", () => {
   const H = Object.assign(helpers(), { matchDay: (m) => m.date.slice(0, 10) });
   const clock = { day: "2026-09-16", tomorrow: "2026-09-17" };
-  // La veille ne vient pas de la liste du jour mais du fichier de resultats
-  // (4e argument) : le calcul quotidien ne publie plus les jours passes.
-  const veille = [{ id: "9", verdict: "win" }, { id: "10", verdict: "loss" }];
-  const days = HL.buildDays([base({ date: "2026-09-16 20:00" }), base({ id: 2, date: "2026-09-16 21:00" }), base({ id: 3, date: "2026-09-18 18:00" })], H, clock, veille);
-  assert.deepEqual(days.map((d) => [d.day, d.count]), [["2026-09-15", 2], ["2026-09-16", 2], ["2026-09-17", 0]]);
-  assert.deepEqual(days.map((d) => !!d.yesterday), [true, false, false]);
+  // Onglet « Hier » retire le 21/09/2026 (demande du proprietaire) : la
+  // veille n'est plus ni comptee ni affichee, et les jours passes de la liste
+  // n'apparaissent dans aucun onglet.
+  const days = HL.buildDays([base({ date: "2026-09-15 20:00" }), base({ date: "2026-09-16 20:00" }), base({ id: 2, date: "2026-09-16 21:00" }), base({ id: 3, date: "2026-09-18 18:00" })], H, clock);
+  assert.deepEqual(days.map((d) => [d.day, d.count]), [["2026-09-16", 2], ["2026-09-17", 0]]);
+  assert.deepEqual(days.map((d) => !!d.yesterday), [false, false]);
   const strip = HL.renderDateStrip(days, "2026-09-16");
-  assert.equal((strip.match(/role="tab"/g) || []).length, 3);
-  assert.match(strip, /<span class="hl-day-name">Hier<\/span><span class="hl-day-sub">2 matchs<\/span>/);
+  assert.equal((strip.match(/role="tab"/g) || []).length, 2);
   assert.match(strip, /<span class="hl-day-name">Aujourd’hui<\/span><span class="hl-day-sub">2 matchs<\/span>/);
   assert.match(strip, /data-hl-day="2026-09-17"[^>]*disabled aria-disabled="true"[^>]*><span class="hl-day-name">Demain<\/span><span class="hl-day-sub">aucun match<\/span>/);
-  assert.doesNotMatch(strip, /Après-demain|Auj\.|Dem\.|\bJE\b|hl-dates-nav/);
+  assert.doesNotMatch(strip, /Hier|Après-demain|Auj\.|Dem\.|\bJE\b|hl-dates-nav/);
+});
+
+test("accueil : plus aucune requete vers results/<jour>.json (onglet « Hier » retire)", () => {
+  const src = fs.readFileSync(path.join(root, "home-list.js"), "utf8");
+  const garde = src.slice(src.indexOf("function chargerVeille()"), src.indexOf("function chargerVeille()") + 600);
+  assert.match(garde, /DAY_NAMES\.some[\s\S]*day_yesterday[\s\S]*\)return;/, "sortie immediate tant que l'onglet n'existe pas");
+  assert.ok(src.indexOf("day_yesterday") === -1 || !/var DAY_NAMES=\[[^\]]*day_yesterday/.test(src), "« Hier » absent des onglets");
 });
 
 test("accueil simplifie : ni banniere, ni recherche, ni filtres, ni bloc « Mes compétitions » separe", () => {

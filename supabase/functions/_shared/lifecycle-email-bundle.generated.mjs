@@ -3129,7 +3129,9 @@ export const BUNDLE = {
       "helpline": null,
       "prices": {
         "pro": {
-          "week": null,
+          "week": {
+            "amount": 4.99
+          },
           "month": {
             "amount": 19.99
           },
@@ -3137,6 +3139,7 @@ export const BUNDLE = {
         }
       },
       "checkoutOpen": [
+        "week",
         "month"
       ]
     },

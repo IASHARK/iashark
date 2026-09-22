@@ -64,8 +64,7 @@ var GUIDE_TITLE_KEYS = {
   "prediction-ia-football-guide-2026.html": "blog_hub.art_prediction_title",
   "value-bet-guide-complet-2026.html": "blog_hub.art_valuebet_title",
   "guide-paris-sportifs-debutant-complet.html": "blog_hub.art_beginner_title",
-  "meilleurs-bookmakers-monde-2026.html": "blog_hub.art_bookmakers_title",
-  "coupe-du-monde-2026-guide-complet.html": "blog_hub.art_worldcup_title"
+  "meilleurs-bookmakers-monde-2026.html": "blog_hub.art_bookmakers_title"
 };
 function guideLabel(dir, file) {
   var v = GUIDE_TITLE_KEYS[file] ? get(dictFor(dir), GUIDE_TITLE_KEYS[file]) : null;

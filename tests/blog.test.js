@@ -18,8 +18,9 @@ const sitemapsI18n = lire("scripts/i18n-sitemaps.js");
 const ARTICLES = fs.readdirSync(path.join(RACINE, "blog", "guides"))
   .filter((f) => f.endsWith(".html") && f !== "index.html");
 
-test("les sept articles publies sont dans le HTML servi, pas construits en JavaScript", () => {
-  assert.ok(ARTICLES.length >= 7, "moins d'articles que prevu sur le disque");
+// Six depuis le 22/09/2026 : guide Coupe du monde retire (tournoi termine).
+test("les six articles publies sont dans le HTML servi, pas construits en JavaScript", () => {
+  assert.ok(ARTICLES.length >= 6, "moins d'articles que prevu sur le disque");
   for (const f of ARTICLES) {
     assert.ok(blog.includes("/blog/guides/" + f), `${f} n'est pas lie depuis le blog`);
   }

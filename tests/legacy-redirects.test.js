@@ -45,5 +45,5 @@ test("_redirects : le bloc des anciennes URLs est genere, en 301 non force", () 
     assert.deepEqual(line.trim().split(/\s+/).slice(1), [to, "301"], from);
   }
   assert.match(REDIRECTS, /^\/tr\/\*\s+\/en\/\s+301$/m);
-  assert.match(REDIRECTS, /^\/en\/world-cup-2026\/\*\s+\/en\/blog\/guides\/coupe-du-monde-2026-guide-complet\.html\s+301$/m);
+  assert.match(REDIRECTS, /^\/en\/world-cup-2026\/\*\s+\/en\/\s+301$/m);
 });

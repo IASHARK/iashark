@@ -899,7 +899,9 @@ function leagueKey(m){return(m.league_key||'').toLowerCase();}
 function isWorldCup(m){
   var lk=leagueKey(m);
   var ln=(m.league||'').toLowerCase();
-  return lk==='wc'||ln.includes('world cup')||ln.includes('coupe du monde');
+  // La Coupe du monde 2026 est terminee (19/07/2026) : seul le code 'wc' la designe.
+  // Un nom contenant « World Cup » (qualifications 2030...) n'est PAS le Mondial 2026.
+  return lk==='wc'&&!ln.includes('qualif');
 }
 
 var LEAGUE_LABELS={
@@ -914,7 +916,7 @@ var LEAGUE_LABELS={
   'ldc':{flag:'🏆',name:'Champions League',country:null},
   'el':{flag:'🏆',name:'Europa League',country:null},
   'wc':{flag:'🌍',name:'World Cup',country:null},
-  'other':{flag:'🏆',name:'Weltmeisterschaft',country:null},
+  'other':{flag:'🏆',name:'Länderspiele',country:null},
   'atp':{flag:'🎾',name:'ATP',country:null},
   'wta':{flag:'🎾',name:'WTA',country:null},
   'chine':{flag:'🇨🇳',name:'Super League',country:'China'},
@@ -951,6 +953,9 @@ var LEAGUE_FLAGS_EXTRA={jleague:'🇯🇵',ecl:'🏆',liga_mx:'🇲🇽',south_a
 function leagueName(m){
   var k=leagueKey(m),l=LEAGUE_LABELS[k];
   var officiel=window.IasharkLeagueNames?IasharkLeagueNames.displayName(k):null;
+  // 'other' = matchs de selections (Ligue des nations, amicaux...) : le vrai nom de
+  // la competition, jamais « Coupe du Monde » par defaut (22/09/2026).
+  if(k==='other'&&m.league)return m.league;
   return officiel||(l?l.name:(m.league||k));
 }
 function leagueFlag(k){var l=LEAGUE_LABELS[k];return l?l.flag:(LEAGUE_FLAGS_EXTRA[k]||'🏆');}

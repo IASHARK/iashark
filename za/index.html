@@ -578,7 +578,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
        bande de dates, « Mes compétitions » puis A→Z, lignes par competition.
        Le resume SEO et l'etat de chargement ci-dessous sont remplaces au montage. -->
   <div id="homeList">
-  <!--SEO_MATCHES_SUMMARY--><div style="padding:4px 0 12px"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px"><span data-i18n="home_app.seo_summary_title">Today&#39;s AI analyses</span> — <time data-seo-date datetime="2026-09-21">21 September 2026</time> <small style="font-family:'DM Sans',sans-serif;font-size:11px;color:#64748b">(<span data-i18n="home_app.seo_times_paris">Paris time</span>)</small></h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8"><li>00:15 — <strong>Belgrano Cordoba vs Estudiantes de Rio Cuarto</strong> (Liga Profesional Argentina)</li><li>01:00 — <strong>Inter Miami vs San Diego</strong> (MLS)</li><li>01:10 — <strong>Deportes Tolima vs America de Cali</strong> (Primera A Colombia)</li><li>02:00 — <strong>Toluca vs Santos Laguna</strong> (Liga MX)</li><li>02:00 — <strong>CF Pachuca vs Club Tijuana</strong> (Liga MX)</li><li>02:30 — <strong>Velez Sarsfield vs Tigre</strong> (Liga Profesional Argentina)</li><li>03:15 — <strong>Llaneros vs Atletico Nacional</strong> (Primera A Colombia)</li><li>04:10 — <strong>Club Queretaro vs Leon</strong> (Liga MX)</li><li>19:30 — <strong>Aldosivi vs Atletico Tucuman</strong> (Liga Profesional Argentina)</li></ul></div><!--/SEO_MATCHES_SUMMARY-->
+  <!--SEO_MATCHES_SUMMARY--><div style="padding:4px 0 12px"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px"><span data-i18n="home_app.seo_summary_title">Today's AI analyses</span> — <time data-seo-date datetime="2026-09-21">21 September 2026</time> <small style="font-family:'DM Sans',sans-serif;font-size:11px;color:#64748b">(<span data-i18n="home_app.seo_times_paris">Paris time</span>)</small></h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8"><li>00:15 — <strong>Belgrano Cordoba vs Estudiantes de Rio Cuarto</strong> (Liga Profesional Argentina)</li><li>01:00 — <strong>Inter Miami vs San Diego</strong> (MLS)</li><li>01:10 — <strong>Deportes Tolima vs America de Cali</strong> (Primera A Colombia)</li><li>02:00 — <strong>Toluca vs Santos Laguna</strong> (Liga MX)</li><li>02:00 — <strong>CF Pachuca vs Club Tijuana</strong> (Liga MX)</li><li>02:30 — <strong>Velez Sarsfield vs Tigre</strong> (Liga Profesional Argentina)</li><li>03:15 — <strong>Llaneros vs Atletico Nacional</strong> (Primera A Colombia)</li><li>04:10 — <strong>Club Queretaro vs Leon</strong> (Liga MX)</li><li>19:30 — <strong>Aldosivi vs Atletico Tucuman</strong> (Liga Profesional Argentina)</li></ul></div><!--/SEO_MATCHES_SUMMARY-->
   <div class="loading-state">
     <div class="loading-spinner"></div>
     <div class="loading-text" data-i18n="home_page.loading_analyses">LOADING ANALYSES...</div>
@@ -899,7 +899,9 @@ function leagueKey(m){return(m.league_key||'').toLowerCase();}
 function isWorldCup(m){
   var lk=leagueKey(m);
   var ln=(m.league||'').toLowerCase();
-  return lk==='wc'||ln.includes('world cup')||ln.includes('coupe du monde');
+  // La Coupe du monde 2026 est terminee (19/07/2026) : seul le code 'wc' la designe.
+  // Un nom contenant « World Cup » (qualifications 2030...) n'est PAS le Mondial 2026.
+  return lk==='wc'&&!ln.includes('qualif');
 }
 
 var LEAGUE_LABELS={
@@ -914,7 +916,7 @@ var LEAGUE_LABELS={
   'ldc':{flag:'🏆',name:'Champions League',country:null},
   'el':{flag:'🏆',name:'Europa League',country:null},
   'wc':{flag:'🌍',name:'World Cup',country:null},
-  'other':{flag:'🏆',name:'World Cup',country:null},
+  'other':{flag:'🏆',name:'International',country:null},
   'atp':{flag:'🎾',name:'ATP',country:null},
   'wta':{flag:'🎾',name:'WTA',country:null},
   'chine':{flag:'🇨🇳',name:'Super League',country:'China'},
@@ -951,6 +953,9 @@ var LEAGUE_FLAGS_EXTRA={jleague:'🇯🇵',ecl:'🏆',liga_mx:'🇲🇽',south_a
 function leagueName(m){
   var k=leagueKey(m),l=LEAGUE_LABELS[k];
   var officiel=window.IasharkLeagueNames?IasharkLeagueNames.displayName(k):null;
+  // 'other' = matchs de selections (Ligue des nations, amicaux...) : le vrai nom de
+  // la competition, jamais « Coupe du Monde » par defaut (22/09/2026).
+  if(k==='other'&&m.league)return m.league;
   return officiel||(l?l.name:(m.league||k));
 }
 function leagueFlag(k){var l=LEAGUE_LABELS[k];return l?l.flag:(LEAGUE_FLAGS_EXTRA[k]||'🏆');}

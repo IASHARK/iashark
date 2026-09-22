@@ -6,7 +6,8 @@
   "Regles 301 NON forcees (Netlify : seulement si aucun fichier n'existe au chemin), ecrites par scripts/build-locales.js#legacyRedirectRules ; une cible absente du disque est ignoree, une source qui existe de nouveau n'est jamais redirigee.",
   "Retablies le 21/09/2026 apres leur suppression accidentelle par le retour arriere 3fa03d606.",
   "Lot du 21/09/2026 (2 746 URLs) : releve complet des adresses connues (sitemaps passes, historique git, rapports Search Console) testees une par une en ligne. Competition trouvee par l'identifiant du match (table predictions_archive) ou par les noms d'equipes du nom de fichier ; deux clubs de championnats differents = Ligue des champions ; competition sans page (tennis, selections, K League, Bresil...) = accueil de la langue ; /xx/resultats/* = accueil de la langue ; /combis.html = /fr/pro.html. Pages a la racine (/match/, /blog/) = version francaise.",
-  "Complement du 21/09/2026 soir (608 URLs) : toutes les pages publiees ayant existe dans l'historique git et sans redirection (pages match supprimees par le pipeline entre le 03/08 et le 15/09, anciens fichiers de la racine), plus les adresses qui n'avaient pas repondu au premier releve. Fichiers de la racine : accueil, sauf compte -> /fr/compte.html, combis -> /fr/pro.html."
+  "Complement du 21/09/2026 soir (608 URLs) : toutes les pages publiees ayant existe dans l'historique git et sans redirection (pages match supprimees par le pipeline entre le 03/08 et le 15/09, anciens fichiers de la racine), plus les adresses qui n'avaient pas repondu au premier releve. Fichiers de la racine : accueil, sauf compte -> /fr/compte.html, combis -> /fr/pro.html.",
+  "22/09/2026 : la Coupe du monde 2026 est terminee depuis le 19/07. Le guide Coupe du monde est retire du site (demande du proprietaire) ; ses URLs et les anciennes /xx/world-cup-2026/ vont vers l'accueil de la langue (analyses du jour)."
  ],
  "source_commits": [
   "a9d2f03ce",
@@ -15,43 +16,43 @@
  "prefixes": [
   {
    "from": "/en/world-cup-2026/",
-   "to": "/en/blog/guides/coupe-du-monde-2026-guide-complet.html"
+   "to": "/en/"
   },
   {
    "from": "/en/world-cup-2026",
-   "to": "/en/blog/guides/coupe-du-monde-2026-guide-complet.html"
+   "to": "/en/"
   },
   {
    "from": "/de/world-cup-2026/",
-   "to": "/de/blog/guides/coupe-du-monde-2026-guide-complet.html"
+   "to": "/de/"
   },
   {
    "from": "/de/world-cup-2026",
-   "to": "/de/blog/guides/coupe-du-monde-2026-guide-complet.html"
+   "to": "/de/"
   },
   {
    "from": "/es/world-cup-2026/",
-   "to": "/es/blog/guides/coupe-du-monde-2026-guide-complet.html"
+   "to": "/es/"
   },
   {
    "from": "/es/world-cup-2026",
-   "to": "/es/blog/guides/coupe-du-monde-2026-guide-complet.html"
+   "to": "/es/"
   },
   {
    "from": "/it/world-cup-2026/",
-   "to": "/it/blog/guides/coupe-du-monde-2026-guide-complet.html"
+   "to": "/it/"
   },
   {
    "from": "/it/world-cup-2026",
-   "to": "/it/blog/guides/coupe-du-monde-2026-guide-complet.html"
+   "to": "/it/"
   },
   {
    "from": "/pt/world-cup-2026/",
-   "to": "/pt/blog/guides/coupe-du-monde-2026-guide-complet.html"
+   "to": "/pt/"
   },
   {
    "from": "/pt/world-cup-2026",
-   "to": "/pt/blog/guides/coupe-du-monde-2026-guide-complet.html"
+   "to": "/pt/"
   },
   {
    "from": "/ar/",
@@ -653,6 +654,10 @@
   },
   {
    "from": "/blog/guides/INDEX_BLOG_guides.html",
+   "to": "/fr/"
+  },
+  {
+   "from": "/blog/guides/coupe-du-monde-2026-guide-complet.html",
    "to": "/fr/"
   },
   {
@@ -1822,6 +1827,10 @@
   {
    "from": "/de/blog/genk-vs-sc-freiburg-2026-03-12.html",
    "to": "/de/leagues/europa-league.html"
+  },
+  {
+   "from": "/de/blog/guides/coupe-du-monde-2026-guide-complet.html",
+   "to": "/de/"
   },
   {
    "from": "/de/blog/lazio-vs-sassuolo-2026-03-09.html",
@@ -3335,6 +3344,10 @@
   {
    "from": "/en/blog/gremio-vs-vitoria-2026-03-19.html",
    "to": "/en/leagues/liga-portugal.html"
+  },
+  {
+   "from": "/en/blog/guides/coupe-du-monde-2026-guide-complet.html",
+   "to": "/en/"
   },
   {
    "from": "/en/blog/hamburger-sv-vs-1-fc-koln-2026-03-14.html",
@@ -8606,6 +8619,10 @@
    "to": "/es/leagues/europa-league.html"
   },
   {
+   "from": "/es/blog/guides/coupe-du-monde-2026-guide-complet.html",
+   "to": "/es/"
+  },
+  {
    "from": "/es/blog/lazio-vs-sassuolo-2026-03-09.html",
    "to": "/es/leagues/serie-a.html"
   },
@@ -10568,6 +10585,10 @@
   {
    "from": "/it/blog/genk-vs-sc-freiburg-2026-03-12.html",
    "to": "/it/leagues/europa-league.html"
+  },
+  {
+   "from": "/it/blog/guides/coupe-du-monde-2026-guide-complet.html",
+   "to": "/it/"
   },
   {
    "from": "/it/blog/lazio-vs-sassuolo-2026-03-09.html",
@@ -17086,6 +17107,10 @@
    "to": "/fr/"
   },
   {
+   "from": "/mx/blog/guides/coupe-du-monde-2026-guide-complet.html",
+   "to": "/mx/"
+  },
+  {
    "from": "/mx/match/1490466.html",
    "to": "/mx/leagues/mls.html"
   },
@@ -17460,6 +17485,10 @@
   {
    "from": "/pt/blog/genk-vs-sc-freiburg-2026-03-12.html",
    "to": "/pt/leagues/europa-league.html"
+  },
+  {
+   "from": "/pt/blog/guides/coupe-du-monde-2026-guide-complet.html",
+   "to": "/pt/"
   },
   {
    "from": "/pt/blog/lazio-vs-sassuolo-2026-03-09.html",

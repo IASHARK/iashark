@@ -15,7 +15,7 @@ const GUIDES = fs.readdirSync(path.join(ROOT, "blog", "guides"))
 const MX_FILES = ["mx/blog/index.html", "mx/blog/guides/index.html"].concat(GUIDES.map((g) => "mx/blog/guides/" + g));
 
 test("chaque guide publie a sa version /mx/blog/", () => {
-  assert.ok(GUIDES.length >= 7);
+  assert.ok(GUIDES.length >= 6); // guide Coupe du monde retire le 22/09/2026
   MX_FILES.forEach((f) => assert.ok(fs.existsSync(path.join(ROOT, f)), f + " manquant"));
 });
 

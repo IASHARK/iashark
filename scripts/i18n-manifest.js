@@ -230,7 +230,7 @@ var PAGES = [
   {
     file: "index.html",
     metas: {
-      fr: {title: "IASHARK — Pronostics IA · Football", description: "Pronostics football alimentés par l'intelligence artificielle. Analyses statistiques, edge IA et value bets quotidiens."},
+      fr: {title: "Pronostics foot : probabilités et stats par modèle | IASHARK", description: "Pronostics football calculés par des modèles statistiques : probabilités 1X2, buts et BTTS comparées aux cotes du marché. Une analyse offerte par jour. 18+"},
       en: {title: "IASHARK — AI Football Predictions", description: "Football predictions powered by artificial intelligence. Statistical analysis, AI edge and daily value bets."},
       es: {title: "IASHARK — Pronósticos de Fútbol con IA", description: "Pronósticos de fútbol impulsados por inteligencia artificial. Análisis estadístico, ventaja de IA y value bets diarios."},
       de: {title: "IASHARK — KI-Fußballvorhersagen", description: "Fußballvorhersagen, angetrieben von künstlicher Intelligenz. Statistische Analysen, KI-Edge und tägliche Value Bets."},

@@ -238,12 +238,8 @@ var PAGES = [
       pt: {title: "IASHARK — Previsões de Futebol com IA", description: "Previsões de futebol baseadas em inteligência artificial. Análises estatísticas, edge de IA e value bets diários."}
     },
     replacements: [
-      {find: '"description":"Pronostics football alimentés par l\'intelligence artificielle."', build: function(d){
-        // Contexte JSON (JSON-LD), pas JS : \' n'est pas un echappement JSON
-        // valide et casserait JSON.parse cote navigateur - seuls " et \
-        // doivent etre echappes ici, jamais l'apostrophe.
-        return '"description":"' + String(d.home_page.org_description).replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
-      }},
+      // (22/09/2026) Regle du JSON-LD Organization retiree : l'accueil racine porte
+      // desormais le @graph commun, remplace par homeJsonLd() dans chaque version.
       {find: 'class="btn-login">CONNEXION<', build: function(d){ return 'class="btn-login">' + d.cta.login + '<'; }},
       {find: '<a href="#decisions">Matchs</a>', build: function(d,l){ return '<a href="#decisions">' + HOME_V2[l].matches + '</a>'; }},
       {find: '<a href="/a-propos.html">Méthode</a>', build: function(d,l){ return '<a href="/a-propos.html">' + HOME_V2[l].method + '</a>'; }},

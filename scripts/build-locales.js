@@ -252,7 +252,9 @@ function buildHead(html, dir, file, meta, altDirs) {
   });
   // x-default : config/markets.json#_hreflangXDefault (en, puis fr).
   var xd = altDirs.length > 1 ? SEO.xDefaultDir(altDirs) : null;
-  if (xd) links.push('<link rel="alternate" hreflang="x-default" href="' + dirUrl(xd, file) + '">');
+  // Accueil : x-default = https://iashark.com/, l'aiguillage par pays (22/09/2026).
+  // Google y voit UNE page d'accueil principale au lieu de neuf concurrentes.
+  if (xd) links.push('<link rel="alternate" hreflang="x-default" href="' + (file === "index.html" ? "https://iashark.com/" : dirUrl(xd, file)) + '">');
   var block = '<link rel="canonical" href="' + canonicalUrl + '">' + (links.length ? "\n" + links.join("\n") : "");
   var canonicalRe = /<link rel="canonical" href="[^"]*"\s*\/?>/;
   if (canonicalRe.test(html)) {
@@ -322,6 +324,8 @@ function homeJsonLd(dir, meta) {
     "@graph": [
       { "@type": "Organization", "@id": org, name: "IASHARK", url: SITE_URL + "/",
         logo: { "@type": "ImageObject", url: SITE_URL + "/icon-512.png", width: 512, height: 512 },
+        // Comptes officiels : relient la marque a ses profils (22/09/2026).
+        sameAs: ["https://www.tiktok.com/@iashark_data", "https://t.me/iasharkdata"],
         description: s.org_description },
       { "@type": "WebSite", "@id": site, name: "IASHARK", url: SITE_URL + "/", publisher: { "@id": org },
         inLanguage: DIR_CODES.map(function (d) { return DIRS[d].htmlLang; }) },

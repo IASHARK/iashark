@@ -218,7 +218,8 @@ function generateLocalizedSitemaps(locales, pages, today, outDir) {
       var slug = page.file === "index.html" ? "" : page.file;
       var alternates = alt.map(function (d) { return { hreflang: DIRS[d].hreflang, href: SITE_URL + "/" + d + "/" + slug }; });
       var xd = alt.length > 1 ? SEO_COMMON.xDefaultDir(alt) : null;
-      if (xd) alternates.push({ hreflang: "x-default", href: SITE_URL + "/" + xd + "/" + slug });
+      // Accueil : x-default = la racine (aiguillage par pays), voir build-locales.js.
+      if (xd) alternates.push({ hreflang: "x-default", href: slug === "" ? SITE_URL + "/" : SITE_URL + "/" + xd + "/" + slug });
       entries.push({ loc: SITE_URL + "/" + dir + "/" + slug, alternates: alternates, priority: slug === "" ? "0.8" : "0.5", changefreq: "weekly", file: dir + "/" + page.file });
     });
     entries = entries.concat(legalEntries(dir, dirs, xDefault), blogEntries(dir));

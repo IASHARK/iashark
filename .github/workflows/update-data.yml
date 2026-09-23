@@ -59,6 +59,7 @@ jobs:
           const LEAGUES_CONFIG = require('./config/leagues.json');
           const { oddsSportKeyFor, usesApiFootballPinnacleFallback, pinnacleOddsFromApiFootball } = require('./lib/pinnacle-odds.js');
           const { calcFinalProbs, calcLambdas, calcCriteres, calcFatigue } = require('./lib/engine.js');
+          const INTL_STATS = require('./lib/international-team-stats.js');
           const { classifyApiResponse, decideSeasonFallback, decideCurrentSeasonGate, createThrottledFetcher } = require('./lib/api-fetch-policy.js');
           // RUN OUTPUT ENGINE (item unique de ce jalon) : CONSOMMATEUR pur des
           // marches deja calcules ci-dessous (allMarkets) et du registry
@@ -698,6 +699,20 @@ jobs:
               return r2.response||[];
             }
             return [];
+          }
+          // SELECTIONS NATIONALES : les N derniers matchs de l'equipe, toutes
+          // competitions confondues (amical, qualifications, Coupe du monde,
+          // Ligue des nations). Ni filtre de ligue ni filtre de saison : une
+          // edition qui demarre n'a aucun match joue, et c'est precisement le
+          // cas ou il faut regarder ce que la selection a fait avant.
+          async function getDerniersMatchsSelection(teamId) {
+            var r = await get('https://v3.football.api-sports.io/fixtures?team='+teamId+'&last=20', APS);
+            var status = r.__ia_status || classifyApiResponse(r);
+            if(status!=='OK' || !Array.isArray(r.response)) {
+              console.log('  [SELECTION] derniers matchs indisponibles (team='+teamId+', '+status+') - aucune statistique fabriquee');
+              return [];
+            }
+            return r.response;
           }
           async function getOdds(fixtureId) {
             var r = await get('https://v3.football.api-sports.io/odds?fixture='+fixtureId, APS);
@@ -2790,6 +2805,25 @@ jobs:
                 pinnacleOdds=pinnacleOddsFromApiFootball(oddsRaw);
                 if(pinnacleOdds) console.log('  [COTES] Pinnacle via api-football /odds (repli '+lgKey(lg.id)+')');
               }
+              // Selections : statistiques calculees sur les 10 derniers matchs reels
+              // (toutes competitions), a la place de statistiques de championnat qui
+              // n'existent pas pour une equipe nationale. Meme format, donc le reste
+              // du calcul (criteres, lambdas, qualite des donnees) est inchange.
+              var intlStatsH=null,intlStatsA=null;
+              if(isInternationalMatch){
+                if(isEmptySH(sH)){
+                  intlStatsH=INTL_STATS.statsFromRecentFixtures(await getDerniersMatchsSelection(home.id), home.id);
+                  await sleep(200);
+                  if(intlStatsH){ sH=intlStatsH; if(!raw10H||!raw10H.length) raw10H=intlStatsH.fixtures_used; }
+                  console.log('  [SELECTION] '+home.name+' : '+INTL_STATS.resumeSource(intlStatsH));
+                }
+                if(isEmptySH(sA)){
+                  intlStatsA=INTL_STATS.statsFromRecentFixtures(await getDerniersMatchsSelection(away.id), away.id);
+                  await sleep(200);
+                  if(intlStatsA){ sA=intlStatsA; if(!raw10A||!raw10A.length) raw10A=intlStatsA.fixtures_used; }
+                  console.log('  [SELECTION] '+away.name+' : '+INTL_STATS.resumeSource(intlStatsA));
+                }
+              }
               var modelFixturesH=(raw10H||[]).concat(rawPrevH||[]).slice(0,20);
               var modelFixturesA=(raw10A||[]).concat(rawPrevA||[]).slice(0,20);
               var last20IdsH=modelFixturesH.map(function(fx){return fx.fixture.id;});
@@ -3425,7 +3459,7 @@ jobs:
                 conf:pickedMarket?Math.round((pickedMarket.prob/10)*10)/10:Math.round((dataQuality.score/10)*10)/10,
                 data_quality_score:dataQuality.score,data_quality_label:dataQuality.label,
                 model_agreement:modelAgreement.label,
-                model_output_available:isInternationalMatch?intlModelOk:(!isEmptySH(sH)&&!isEmptySH(sA)),
+                model_output_available:(!isEmptySH(sH)&&!isEmptySH(sA))||(isInternationalMatch&&intlModelOk),
                 // p1/pn/p2 : PURE_IASHARK_PROBABILITY (jamais market_aware -
                 // c'etait le bug corrige ce jalon pour 1X2/DC specifiquement).
                 // lambda_h/lambda_a : buts attendus reels (parametre du modele

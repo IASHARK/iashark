@@ -234,6 +234,37 @@ test("gel stable run apres run : meme pari, meme horodatage, jusqu'au coup d'env
   });
 });
 
+test("analyse jamais affichee (« donnees insuffisantes ») : recalculee, jamais figee", () => {
+  // La page n'affiche le pari que si model_output_available !== false
+  // (lib/display-data.js#hasReliableModelOutput). Une publication dans cet etat
+  // n'a ete vue par personne : elle ne doit pas figer un pari et rendre une
+  // correction du calcul invisible jusqu'au coup d'envoi (Ligue des nations,
+  // 23/09/2026).
+  const cache = computed("vendredi", { model_output_available: false, data_quality_score: 30 });
+  const first = F.freezeAnalysis(cache, null, { nowMs: RUN - 24 * H, fixture: apiFixture(1001, KICKOFF), premiumRow: premiumRowOf(cache) });
+  const row = storedRow(first.match, first.premiumRow, "2026-09-18T10:20:00+00:00");
+  const frais = computed("samedi", { pari_rec: "Over 2.5", cote_rec: "1.80", model_output_available: true, data_quality_score: 60 });
+  const res = F.freezeAnalysis(frais, row, {
+    nowMs: RUN, fixture: apiFixture(1001, KICKOFF), premiumRow: premiumRowOf(frais),
+    previousPublic: { model_output_available: false, data_quality_score: 30 },
+  });
+  assert.equal(res.status, "FIRST_PUBLICATION");
+  assert.equal(res.reason, "PREVIOUS_NOT_DISPLAYED");
+  assert.equal(res.match.pari_rec, "Over 2.5", "le pari du jour est publie");
+  assert.equal(res.match.model_output_available, true, "l'analyse devient affichable");
+});
+
+test("analyse deja affichee : toujours figee, meme si le calcul du jour change", () => {
+  const fri = publishedFriday();
+  const frais = computed("samedi", { pari_rec: "BTTS Oui", cote_rec: "2.10" });
+  const res = F.freezeAnalysis(frais, fri.row, {
+    nowMs: RUN, fixture: apiFixture(1001, KICKOFF), premiumRow: premiumRowOf(frais),
+    previousPublic: { model_output_available: true, data_quality_score: 70 },
+  });
+  assert.equal(res.status, "FROZEN");
+  assert.equal(res.match.pari_rec, fri.match.pari_rec);
+});
+
 test("ligne ecrite avant le gel (sans metadonnees) : figee, horodatage = derniere ecriture, amorces du data.json precedent", () => {
   const fri = computed("vendredi");
   const row = storedRow(fri, premiumRowOf(fri), "2026-09-18T10:20:00+00:00");

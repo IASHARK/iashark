@@ -2959,10 +2959,18 @@ jobs:
               var shotQualA=enoughModelMatchStats?calcShotQualityFactor(xgA.shots_on_avg, xgA.shots_total_avg):1;
               lambdas.lambdaH=parseFloat((lambdas.lambdaH*shotQualH).toFixed(3));
               lambdas.lambdaA=parseFloat((lambdas.lambdaA*shotQualA).toFixed(3));
+              // Selections : la sortie du modele repose sur les stats
+              // internationales (qualifs/tournoi), pas sur les stats de saison
+              // d'un championnat - elles sont vides le temps d'une edition qui
+              // demarre. 23/09/2026 : sans ce drapeau, les 16 matchs de Ligue
+              // des nations du 24-25/09 affichaient « donnees insuffisantes »
+              // alors que le pari etait calcule et enregistre.
+              var intlModelOk=false;
               if(isInternationalMatch){
                 var wcStatsH=await getTeamWCStats(home.id, home.name);
                 var wcStatsA=await getTeamWCStats(away.id, away.name);
                 if(wcStatsH&&wcStatsA&&wcStatsH.xg_for!=null&&wcStatsA.xg_for!=null){
+                  intlModelOk=true;
                   var lambdaH_wc=(wcStatsH.xg_for+(wcStatsA.xg_against||wcStatsA.xg_for))/2;
                   var lambdaA_wc=(wcStatsA.xg_for+(wcStatsH.xg_against||wcStatsH.xg_for))/2;
                   lambdas.lambdaH=parseFloat(Math.max(0.90,(lambdas.lambdaH*0.3+lambdaH_wc*0.7)).toFixed(3));
@@ -3417,7 +3425,7 @@ jobs:
                 conf:pickedMarket?Math.round((pickedMarket.prob/10)*10)/10:Math.round((dataQuality.score/10)*10)/10,
                 data_quality_score:dataQuality.score,data_quality_label:dataQuality.label,
                 model_agreement:modelAgreement.label,
-                model_output_available:!isEmptySH(sH)&&!isEmptySH(sA),
+                model_output_available:isInternationalMatch?intlModelOk:(!isEmptySH(sH)&&!isEmptySH(sA)),
                 // p1/pn/p2 : PURE_IASHARK_PROBABILITY (jamais market_aware -
                 // c'etait le bug corrige ce jalon pour 1X2/DC specifiquement).
                 // lambda_h/lambda_a : buts attendus reels (parametre du modele

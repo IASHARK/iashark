@@ -60,6 +60,7 @@ jobs:
           const { oddsSportKeyFor, usesApiFootballPinnacleFallback, pinnacleOddsFromApiFootball } = require('./lib/pinnacle-odds.js');
           const { calcFinalProbs, calcLambdas, calcCriteres, calcFatigue } = require('./lib/engine.js');
           const INTL_STATS = require('./lib/international-team-stats.js');
+          const SHEET_FALLBACK = require('./lib/fixture-sheet-fallback.js');
           const { classifyApiResponse, decideSeasonFallback, decideCurrentSeasonGate, createThrottledFetcher } = require('./lib/api-fetch-policy.js');
           // RUN OUTPUT ENGINE (item unique de ce jalon) : CONSOMMATEUR pur des
           // marches deja calcules ci-dessous (allMarkets) et du registry
@@ -924,9 +925,23 @@ jobs:
           // null explicitement) : suppression de l'appel, zero changement de
           // comportement observable, un appel API en moins par match.
           function getRefereeStats(refName) { return null; }
+          var FIXTURE_EVENTS_CACHE={};
           async function getFixtureEvents(fixtureId) {
+            if(Object.prototype.hasOwnProperty.call(FIXTURE_EVENTS_CACHE,fixtureId))return FIXTURE_EVENTS_CACHE[fixtureId];
             var r = await get('https://v3.football.api-sports.io/fixtures/events?fixture='+fixtureId, APS);
-            return (r&&r.response)||[];
+            var ev=(r&&r.response)||[];
+            // Reponse vide non gardee : un echec passager ne doit pas priver le
+            // reste du run des evenements de ce match.
+            if(ev.length) FIXTURE_EVENTS_CACHE[fixtureId]=ev;
+            return ev;
+          }
+          var FIXTURE_LINEUPS_RAW_CACHE={};
+          async function getFixtureLineupsRaw(fixtureId){
+            if(Object.prototype.hasOwnProperty.call(FIXTURE_LINEUPS_RAW_CACHE,fixtureId))return FIXTURE_LINEUPS_RAW_CACHE[fixtureId];
+            var r=await get('https://v3.football.api-sports.io/fixtures/lineups?fixture='+fixtureId,APS);
+            var lu=Array.isArray(r.response)?r.response:[];
+            if(lu.length) FIXTURE_LINEUPS_RAW_CACHE[fixtureId]=lu;
+            return lu;
           }
           var FIXTURE_PLAYERS_CACHE={};
           async function getFixturePlayers(fixtureId){
@@ -945,12 +960,24 @@ jobs:
           // melanger silencieusement a la saison precedente meme si elle
           // sert de repli ailleurs (echantillon insuffisant en debut de
           // saison).
-          async function getRecentPlayerHistory(fixtures,teamId,currentSeason){
+          // opts.sheetFallback (selections, 24/09/2026) : sans feuille joueurs
+          // api-football (cas de la plupart des amicaux), feuille minimale
+          // reconstruite depuis la composition et les evenements du match
+          // (lib/fixture-sheet-fallback.js) : titulaire, minutes, buts. Les tirs
+          // restent null. Reserve aux selections : ailleurs, ces appels en plus
+          // couteraient du quota pour des ligues sans composition non plus.
+          async function getRecentPlayerHistory(fixtures,teamId,currentSeason,opts){
+            opts=opts||{};
             var rows=[];
             for(var i=0;i<Math.min((fixtures||[]).length,10);i++){
               var fx=fixtures[i],fixtureId=fx.fixture.id;
               var blocks=await getFixturePlayers(fixtureId);
               var block=blocks.find(function(item){return item.team&&item.team.id===teamId;});
+              var sheetSource='api-sports-fixture-players';
+              if(!block&&opts.sheetFallback){
+                block=SHEET_FALLBACK.feuilleDepuisCompoEtEvenements(await getFixtureLineupsRaw(fixtureId),await getFixtureEvents(fixtureId),teamId);
+                if(block) sheetSource=block.source;
+              }
               var isHome=fx.teams&&fx.teams.home&&fx.teams.home.id===teamId;
               var opponent=isHome?(fx.teams.away&&fx.teams.away.name):(fx.teams.home&&fx.teams.home.name);
               var teamGoals=fx.goals?(isHome?fx.goals.home:fx.goals.away):null;
@@ -961,6 +988,7 @@ jobs:
                 round:(fx.league&&fx.league.round)||null,
                 season:(fx.league&&fx.league.season)!=null?Number(fx.league.season):null,
                 is_current_season:currentSeason!=null&&fx.league&&Number(fx.league.season)===Number(currentSeason),
+                sheet_source:sheetSource,
                 opponent:opponent||null,is_home:!!isHome,
                 team_goals:teamGoals==null?null:Number(teamGoals),opponent_goals:opponentGoals==null?null:Number(opponentGoals)
               };
@@ -2810,22 +2838,31 @@ jobs:
               // n'existent pas pour une equipe nationale. Meme format, donc le reste
               // du calcul (criteres, lambdas, qualite des donnees) est inchange.
               var intlStatsH=null,intlStatsA=null;
+              // Selections (24/09/2026) : les 20 derniers matchs joues, toutes
+              // competitions, servent aussi au scenario, aux buteurs en forme et a
+              // l'historique des joueurs. Avant, seuls les matchs de la competition
+              // du jour comptaient : la Ligue des nations ne se joue qu'une annee
+              // sur deux, le scenario restait vide sur la plupart des selections.
+              var selMatchsH=[],selMatchsA=[];
               if(isInternationalMatch){
+                var brutSelH=await getDerniersMatchsSelection(home.id); await sleep(200);
+                var brutSelA=await getDerniersMatchsSelection(away.id); await sleep(200);
+                selMatchsH=INTL_STATS.derniersMatchsJoues(brutSelH,home.id);
+                selMatchsA=INTL_STATS.derniersMatchsJoues(brutSelA,away.id);
+                console.log('  [SELECTION] scenario : '+home.name+' '+selMatchsH.length+' matchs, '+away.name+' '+selMatchsA.length+' matchs (toutes competitions)');
                 if(isEmptySH(sH)){
-                  intlStatsH=INTL_STATS.statsFromRecentFixtures(await getDerniersMatchsSelection(home.id), home.id);
-                  await sleep(200);
+                  intlStatsH=INTL_STATS.statsFromRecentFixtures(brutSelH, home.id);
                   if(intlStatsH){ sH=intlStatsH; if(!raw10H||!raw10H.length) raw10H=intlStatsH.fixtures_used; }
                   console.log('  [SELECTION] '+home.name+' : '+INTL_STATS.resumeSource(intlStatsH));
                 }
                 if(isEmptySH(sA)){
-                  intlStatsA=INTL_STATS.statsFromRecentFixtures(await getDerniersMatchsSelection(away.id), away.id);
-                  await sleep(200);
+                  intlStatsA=INTL_STATS.statsFromRecentFixtures(brutSelA, away.id);
                   if(intlStatsA){ sA=intlStatsA; if(!raw10A||!raw10A.length) raw10A=intlStatsA.fixtures_used; }
                   console.log('  [SELECTION] '+away.name+' : '+INTL_STATS.resumeSource(intlStatsA));
                 }
               }
-              var modelFixturesH=(raw10H||[]).concat(rawPrevH||[]).slice(0,20);
-              var modelFixturesA=(raw10A||[]).concat(rawPrevA||[]).slice(0,20);
+              var modelFixturesH=selMatchsH.length?selMatchsH:(raw10H||[]).concat(rawPrevH||[]).slice(0,20);
+              var modelFixturesA=selMatchsA.length?selMatchsA:(raw10A||[]).concat(rawPrevA||[]).slice(0,20);
               var last20IdsH=modelFixturesH.map(function(fx){return fx.fixture.id;});
               var last20IdsA=modelFixturesA.map(function(fx){return fx.fixture.id;});
               var topScorersH=null;
@@ -2847,7 +2884,8 @@ jobs:
                 return{goals_avg:avg(allGoals.length),conceded_avg:avg(concGoals.length),
                   slots:[{t:'0-15',n:goalsIn(0,15,allGoals)},{t:'15-30',n:goalsIn(15,30,allGoals)},{t:'30-45',n:goalsIn(30,45,allGoals)},{t:'45-60',n:goalsIn(45,60,allGoals)},{t:'60-75',n:goalsIn(60,75,allGoals)},{t:'75-90',n:goalsIn(75,91,allGoals)}],
                   slots_against:[{t:'0-15',n:goalsIn(0,15,concGoals)},{t:'15-30',n:goalsIn(15,30,concGoals)},{t:'30-45',n:goalsIn(30,45,concGoals)},{t:'45-60',n:goalsIn(45,60,concGoals)},{t:'60-75',n:goalsIn(60,75,concGoals)},{t:'75-90',n:goalsIn(75,91,concGoals)}],
-                  red_cards:redCards,yellow_per_game:(yellowCards/games).toFixed(1),games,source:'api-sports-fixture-events'};
+                  red_cards:redCards,yellow_per_game:(yellowCards/games).toFixed(1),games,source:'api-sports-fixture-events',
+                  scope:isInternationalMatch?'all_competitions':'competition'};
               }
               var evPatH=calcEventsPattern(eventsH_raw,home.id);
               var evPatA=calcEventsPattern(eventsA_raw,away.id);
@@ -2896,7 +2934,7 @@ jobs:
               var xgH=await getWeightedXGStats(home.id,last10IdsH_xg,modelFixturesH,xgConcededCache);
               var xgA=await getWeightedXGStats(away.id,last10IdsA_xg,modelFixturesA,xgConcededCache);
               var playerDataBatch=await Promise.all([
-                getRecentPlayerHistory(modelFixturesH.slice(0,10),home.id,currentSeason),getRecentPlayerHistory(modelFixturesA.slice(0,10),away.id,currentSeason),
+                getRecentPlayerHistory(modelFixturesH.slice(0,10),home.id,currentSeason,{sheetFallback:isInternationalMatch}),getRecentPlayerHistory(modelFixturesA.slice(0,10),away.id,currentSeason,{sheetFallback:isInternationalMatch}),
                 getCurrentSquad(home.id),getCurrentSquad(away.id)
               ]);
               var playerHistoryH=playerDataBatch[0],playerHistoryA=playerDataBatch[1],currentSquadH=playerDataBatch[2],currentSquadA=playerDataBatch[3];
@@ -3536,12 +3574,12 @@ jobs:
                 fatigue_home:{val:fatigueH.val,info:fatigueH.info},fatigue_away:{val:fatigueA.val,info:fatigueA.info},
                 tendances,classement:classementObj,actu:(nH||[]).concat(nA||[]),
                 arbitre:refStats?{nom:refStats.name,cartons:refStats.cards_per_game,penaltys:refStats.pens_per_game,matchs:refStats.games}:null,
-                events_home:isInternationalMatch?(function(){
+                events_home:(isInternationalMatch&&!selMatchsH.length)?(function(){
                   var ts=WC_TEAM_STATS_CACHE['tournoi_'+home.id];
                   if(ts&&ts.slots) return {slots:ts.slots,slots_against:ts.slots_against||null,goals_avg:ts.xg_for||null,conceded_avg:ts.xg_against||null,games:ts.games||0};
                   return null;
                 })():(evPatH||null),
-                events_away:isInternationalMatch?(function(){
+                events_away:(isInternationalMatch&&!selMatchsA.length)?(function(){
                   var ts=WC_TEAM_STATS_CACHE['tournoi_'+away.id];
                   if(ts&&ts.slots) return {slots:ts.slots,slots_against:ts.slots_against||null,goals_avg:ts.xg_for||null,conceded_avg:ts.xg_against||null,games:ts.games||0};
                   return null;

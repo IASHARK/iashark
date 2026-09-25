@@ -90,3 +90,200 @@
     if(++tries<=66)setTimeout(waitI18n,150);
   })();
 })();
+
+/* Offre Pro du 25/09/2026 (campagne Turquie–France) - A RETIRER ENSUITE.
+   Ici plutot que dans auth-header.js : bottom-navigation.js est charge sur
+   toutes les pages publiques (landing et Compte comprises), sauf les pages
+   d'authentification et l'admin.
+   Source unique de l'offre pour tout le site (window.IasharkPromo) : jusqu'a
+   20h45 Paris, chaque prix Pro mensuel affiche ([data-market-price="pro"],
+   [data-market-price="pro.month"], ligne [data-market-price-line="pro"])
+   devient « prix barre + 9,95 » ; a l'heure limite tout est remis au prix
+   normal sans recharger. Les pages qui paient (abonnement-page.js,
+   account-page.js) envoient IasharkPromo.code() a create-checkout-session,
+   qui applique le code Stripe d'office (liste blanche BLEUS / CAIRO5).
+   ?promo=CAIRO5 dans l'URL choisit ce code pour la visite. Hors mx/za. */
+(function(){
+  var FIN = Date.UTC(2026, 8, 25, 18, 45, 0);
+  var seg = (location.pathname.split('/')[1] || '').toLowerCase();
+  var DIRS = ['fr','en','gb','es','de','it','pt','mx','za'];
+  var dir = DIRS.indexOf(seg) === -1 ? 'fr' : seg;
+  var EUR = ['19,95 €','9,95 €','5 €'];
+  var PRIX = { fr:EUR, es:EUR, de:EUR, it:EUR, pt:EUR, en:['$19.99','$9.95','$5'], gb:['£14.99','£9.95','£5'] };
+  var LIGNE = {
+    fr:'Pro à {new} le premier mois au lieu de {old} avec le code {code}, jusqu’à 20h45',
+    es:'Pro a {new} el primer mes en lugar de {old} con el código {code}, hasta las 20:45',
+    de:'Pro für {new} im ersten Monat statt {old} mit dem Code {code}, bis 20:45 Uhr',
+    it:'Pro a {new} il primo mese invece di {old} con il codice {code}, fino alle 20:45',
+    pt:'Pro por {new} no primeiro mês em vez de {old} com o código {code}, até às 20h45',
+    en:'Pro for {new} your first month instead of {old} with code {code}, until 20:45 (Paris time)'
+  };
+  var NOTE = {
+    fr:{n:'Code {code} appliqué automatiquement : {new} le premier mois au lieu de {old}, puis {old}/mois. Offre valable jusqu’à 20h45.',w:'L’offre à {new} s’applique à la formule au mois.',m:'Tu pourras saisir ton code sur la page de paiement.',a:'J’ai un autre code',b:'Utiliser le code {code}'},
+    es:{n:'Código {code} aplicado automáticamente: {new} el primer mes en lugar de {old}, luego {old}/mes. Válido hasta las 20:45 (hora de París).',w:'La oferta de {new} se aplica al plan mensual.',m:'Podrás introducir tu código en la página de pago.',a:'Tengo otro código',b:'Usar el código {code}'},
+    de:{n:'Code {code} automatisch angewendet: {new} im ersten Monat statt {old}, danach {old}/Monat. Gültig bis 20:45 Uhr (Pariser Zeit).',w:'Das Angebot für {new} gilt für das Monatsabo.',m:'Du kannst deinen Code auf der Zahlungsseite eingeben.',a:'Ich habe einen anderen Code',b:'Code {code} verwenden'},
+    it:{n:'Codice {code} applicato automaticamente: {new} il primo mese invece di {old}, poi {old}/mese. Valido fino alle 20:45 (ora di Parigi).',w:'L’offerta a {new} vale per il piano mensile.',m:'Potrai inserire il codice nella pagina di pagamento.',a:'Ho un altro codice',b:'Usa il codice {code}'},
+    pt:{n:'Código {code} aplicado automaticamente: {new} no primeiro mês em vez de {old}, depois {old}/mês. Válido até às 20h45 (hora de Paris).',w:'A oferta de {new} aplica-se ao plano mensal.',m:'Poderás introduzir o teu código na página de pagamento.',a:'Tenho outro código',b:'Usar o código {code}'},
+    en:{n:'Code {code} applied automatically: {new} for your first month instead of {old}, then {old}/month. Valid until 20:45 (Paris time).',w:'The {new} offer applies to the monthly plan.',m:'You can enter your code on the payment page.',a:'I have another code',b:'Use code {code}'}
+  };
+  LIGNE.gb = LIGNE.en; NOTE.gb = NOTE.en;
+  var code = (function(){
+    var q = '';
+    try { q = (new URLSearchParams(location.search).get('promo') || '').toUpperCase(); } catch (_e) {}
+    if (q === 'BLEUS' || q === 'CAIRO5') { try { sessionStorage.setItem('ias-promo-code', q); } catch (_e) {} return q; }
+    try { var v = sessionStorage.getItem('ias-promo-code'); if (v === 'BLEUS' || v === 'CAIRO5') return v; } catch (_e) {}
+    return 'BLEUS';
+  })();
+  var manuel = false;
+  function actif(){ return Date.now() < FIN && !!PRIX[dir]; }
+  function prix(){ var p = PRIX[dir] || EUR; return { old:p[0], nw: code === 'CAIRO5' ? p[2] : p[1] }; }
+  function remplir(t){ var p = prix(); return t.split('{code}').join(code).split('{new}').join(p.nw).split('{old}').join(p.old); }
+  // La page d'abonnement gere son propre bloc (abonnement-page.js).
+  var pageAbo = /abonnement\.html$/.test(location.pathname);
+  function gere(el){ return pageAbo && el.closest && el.closest('#proPlanPicker'); }
+  var enCours = false;
+  function appliquer(){
+    if (enCours || !document.body) return;
+    enCours = true;
+    try {
+      var on = actif() && !manuel, p = prix();
+      document.querySelectorAll('[data-market-price="pro"],[data-market-price="pro.month"]').forEach(function(el){
+        if (gere(el)) return;
+        var fait = !!el.querySelector('s[data-promo]');
+        if (on && !fait) el.innerHTML = '<s data-promo style="opacity:.45;font-size:.55em;margin-right:.25em;font-weight:inherit">' + p.old + '</s>' + p.nw;
+        else if (!on && fait) el.textContent = p.old;
+      });
+      var ligne = remplir(LIGNE[dir] || LIGNE.fr);
+      document.querySelectorAll('[data-market-price-line="pro"]').forEach(function(el){
+        var orig = el.getAttribute('data-promo-orig');
+        // lib/market-config.js peut reecrire la ligne apres nous : on garde
+        // son dernier texte comme original et on repose l'offre.
+        if (on && el.textContent !== ligne) { el.setAttribute('data-promo-orig', el.textContent); el.textContent = ligne; }
+        else if (!on && orig !== null) { el.textContent = orig; el.removeAttribute('data-promo-orig'); }
+      });
+      // Encart sous le selecteur de duree hors page d'abonnement (Compte).
+      var box = document.getElementById('proPlanPicker');
+      var note = document.getElementById('promoNoteSite');
+      if (box && !pageAbo && actif()) {
+        if (!note) {
+          note = document.createElement('div'); note.id = 'promoNoteSite';
+          note.style.cssText = 'margin:12px 0 4px;padding:11px 13px;border:1px solid rgba(34,211,238,.28);border-left:3px solid #22d3ee;border-radius:10px;background:rgba(34,211,238,.06);font-size:13px;line-height:1.5;color:#dce8ee';
+          box.parentNode.insertBefore(note, box.nextSibling);
+        }
+        var T = NOTE[dir] || NOTE.fr;
+        var radio = box.querySelector('input[type=radio]:checked');
+        var ivl = radio ? ((radio.closest('[data-interval]') || {}).getAttribute ? radio.closest('[data-interval]').getAttribute('data-interval') : 'month') : 'month';
+        var texte = manuel ? T.m : (ivl === 'month' ? T.n : T.w);
+        var lien = manuel ? T.b : T.a;
+        var voulu = remplir(texte) + '|' + remplir(lien);
+        if (note.getAttribute('data-v') !== voulu) {
+          note.setAttribute('data-v', voulu);
+          note.textContent = remplir(texte) + ' ';
+          var a = document.createElement('a'); a.href = '#';
+          a.style.cssText = 'color:#22d3ee;text-decoration:underline;text-underline-offset:3px;white-space:nowrap';
+          a.textContent = remplir(lien);
+          a.onclick = function(e){ e.preventDefault(); manuel = !manuel; appliquer(); };
+          note.appendChild(a);
+        }
+      } else if (note) { note.remove(); }
+    } finally { enCours = false; }
+  }
+  window.IasharkPromo = {
+    actif: actif,
+    auto: function(){ return actif() && !manuel; },
+    code: function(){ return code; },
+    prix: prix,
+    appliquer: appliquer
+  };
+  if (!actif()) return;
+  var prevu = false;
+  function planifier(){ if (prevu) return; prevu = true; (window.requestAnimationFrame || setTimeout)(function(){ prevu = false; appliquer(); }); }
+  function demarrer(){
+    appliquer();
+    if (window.MutationObserver) new MutationObserver(function(){ if (!enCours) planifier(); }).observe(document.body, { childList:true, subtree:true, characterData:true });
+    document.addEventListener('change', function(e){ if (e.target && e.target.closest && e.target.closest('#proPlanPicker')) planifier(); });
+    setTimeout(appliquer, Math.max(0, FIN - Date.now() + 500));
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer); else demarrer();
+})();
+
+/* Bandeau d'offre Pro 9,95 (25/09/2026, campagne Turquie–France). Reprise du composant 21st.dev
+   « Promo Banner » (shadcndesign/banner-1 : barre fine, texte, lien, fermer),
+   avec un compte a rebours discret. Code promo BLEUS (Stripe) : 1er mois Pro a
+   9,95 (EUR / USD / GBP), formule mensuelle, jusqu'au coup d'envoi 20h45 Paris.
+   Disparait seul a l'heure limite ; jamais affiche aux comptes Pro, ni sur
+   mx/za (MXN/ZAR non couverts par le code) ni sur les pages d'authentification
+   et de paiement. A RETIRER apres la campagne. */
+(function(){
+  var FIN = Date.UTC(2026, 8, 25, 18, 45, 0);
+  if (Date.now() >= FIN) return;
+  var seg = (location.pathname.split('/')[1] || '').toLowerCase();
+  // Les versions es/de/it/pt sont en euros (marche fr, 19,95 EUR) ; en = USD,
+  // gb = GBP. BLEUS retire 10 EUR / 10,04 USD / 5,04 GBP : 9,95 partout.
+  var L = {
+    fr: { b:'Pro à <strong>9,95 €</strong> le premier mois avec le code <strong>BLEUS</strong>', f:'Fin dans', c:'En profiter', x:'Fermer', r:'Offre Pro' },
+    es: { b:'Pro a <strong>9,95 €</strong> el primer mes con el código <strong>BLEUS</strong>', f:'Termina en', c:'Aprovechar', x:'Cerrar', r:'Oferta Pro' },
+    de: { b:'Pro für <strong>9,95 €</strong> im ersten Monat mit dem Code <strong>BLEUS</strong>', f:'Endet in', c:'Jetzt sichern', x:'Schließen', r:'Pro-Angebot' },
+    it: { b:'Pro a <strong>9,95 €</strong> il primo mese con il codice <strong>BLEUS</strong>', f:'Termina tra', c:'Approfitta', x:'Chiudi', r:'Offerta Pro' },
+    pt: { b:'Pro por <strong>9,95 €</strong> no primeiro mês com o código <strong>BLEUS</strong>', f:'Termina em', c:'Aproveitar', x:'Fechar', r:'Oferta Pro' },
+    en: { b:'Pro for <strong>$9.95</strong> your first month with code <strong>BLEUS</strong>', f:'Ends in', c:'Get the offer', x:'Close', r:'Pro offer' },
+    gb: { b:'Pro for <strong>£9.95</strong> your first month with code <strong>BLEUS</strong>', f:'Ends in', c:'Get the offer', x:'Close', r:'Pro offer' }
+  };
+  var dirs = ['fr','en','gb','es','de','it','pt','mx','za'];
+  var dir = dirs.indexOf(seg) === -1 ? 'fr' : seg;
+  var txt = L[dir];
+  if (!txt) return;
+  txt.u = '/' + dir + '/abonnement.html';
+  if (/checkout-(succes|annule)|connexion|inscription|mot-de-passe|reinitialiser/.test(location.pathname)) return;
+  try { if (sessionStorage.getItem('ias-promo-bleus') === '0') return; } catch (_e) {}
+
+  function montrer(){
+    if (document.getElementById('ias-promo')) return;
+    var css = document.createElement('style');
+    css.textContent =
+      '#ias-promo{position:relative;z-index:60;background:#08141c;border-bottom:1px solid rgba(148,173,186,.14);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}' +
+      '#ias-promo .ip{max-width:1180px;margin:0 auto;min-height:40px;display:flex;align-items:center;justify-content:center;gap:10px;padding:8px 44px;position:relative;font-size:13.5px;line-height:1.45;color:#b4c6cf;text-align:center}' +
+      '#ias-promo strong{color:#fff;font-weight:600;letter-spacing:.02em}' +
+      '#ias-promo .ip-sep{color:#4d6573}' +
+      '#ias-promo .ip-t{color:#8ea7b4;font-variant-numeric:tabular-nums;white-space:nowrap}' +
+      '#ias-promo .ip-c{color:#22d3ee;font-weight:600;text-decoration:none;white-space:nowrap;border-bottom:1px solid rgba(34,211,238,.35);padding-bottom:1px;transition:border-color .15s}' +
+      '#ias-promo .ip-c:hover{border-bottom-color:#22d3ee}' +
+      '#ias-promo .ip-x{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:none;border:0;border-radius:6px;color:#6f8793;cursor:pointer}' +
+      '#ias-promo .ip-x:hover{color:#dce8ee;background:rgba(148,173,186,.08)}' +
+      '@media (max-width:760px){#ias-promo .ip{flex-wrap:wrap;gap:2px 8px;padding:8px 40px 8px 14px;font-size:12.5px;justify-content:flex-start;text-align:left}#ias-promo .ip-sep.s2{display:none}#ias-promo .ip-x{right:6px}}';
+    document.head.appendChild(css);
+    var b = document.createElement('div');
+    b.id = 'ias-promo';
+    b.setAttribute('role', 'region');
+    b.setAttribute('aria-label', txt.r);
+    b.innerHTML = '<div class="ip">' +
+      '<span>' + txt.b + '</span><span class="ip-sep s2"> · </span>' +
+      '<span class="ip-t">' + txt.f + ' <span data-cd>--:--:--</span></span>' +
+      '<a class="ip-c" href="' + txt.u + '">' + txt.c + ' →</a>' +
+      '<button class="ip-x" type="button" aria-label="' + txt.x + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>';
+    document.body.insertBefore(b, document.body.firstChild);
+    b.querySelector('.ip-x').onclick = function(){
+      b.remove();
+      try { sessionStorage.setItem('ias-promo-bleus', '0'); } catch (_e) {}
+    };
+    var cd = b.querySelector('[data-cd]');
+    var deux = function(n){ return (n < 10 ? '0' : '') + n; };
+    (function tic(){
+      var r = FIN - Date.now();
+      if (r <= 0) { b.remove(); return; }
+      var t = Math.floor(r / 1000);
+      cd.textContent = deux(Math.floor(t / 3600)) + ':' + deux(Math.floor(t % 3600 / 60)) + ':' + deux(t % 60);
+      setTimeout(tic, 1000);
+    })();
+  }
+
+  function lancer(){
+    var app = window.IasharkApp;
+    if (app && typeof app.context === 'function') {
+      app.context().then(function(c){ if (!c || !c.isPro) montrer(); }).catch(montrer);
+    } else {
+      montrer();
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', lancer); else lancer();
+})();

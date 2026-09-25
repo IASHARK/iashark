@@ -934,6 +934,8 @@
         if (code) corps.market = String(code).toLowerCase();
         if (dir) corps.dir = dir;
         corps.consent = consentementPaiement;
+        // Offre du 25/09/2026 (auth-header.js#IasharkPromo) : code applique d'office.
+        if (window.IasharkPromo && window.IasharkPromo.auto() && corps.interval === 'month') corps.promo = window.IasharkPromo.code();
       }
       var r = await fetch(window.IasharkApp.url + '/functions/v1/' + fonction, {
         method: 'POST',

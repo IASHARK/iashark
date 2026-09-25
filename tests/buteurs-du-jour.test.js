@@ -804,7 +804,7 @@ test("accueil (index.html) : section, plateau (liste + panneau), squelette sans 
   const sec = (html.match(/<section class="hs" id="buteurs-du-jour"[\s\S]*?<\/section>/) || [])[0];
   assert.ok(sec, "section Buteurs du jour");
   assert.ok(html.indexOf('id="buteurs-du-jour"') < html.indexOf('id="decisions"'), "avant la liste des matchs");
-  assert.ok(html.indexOf('id="heroFeature"') < html.indexOf('id="buteurs-du-jour"'), "apres le match offert");
+  assert.ok(html.indexOf('id="heroStade"') < html.indexOf('id="buteurs-du-jour"'), "apres le haut de page");
   assert.match(sec, /<h2 class="hs-title" id="hsTitle" data-i18n="home_scorers\.title">Buteurs du jour<\/h2>/);
   assert.match(sec, /aria-labelledby="hsTitle"/);
   // Plateau : la liste puis le panneau « Débloquer » (cache), dans le meme cadre.

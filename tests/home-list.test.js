@@ -285,3 +285,19 @@ test("match offert sans compte : « Analyse offerte · Compte gratuit », aucun 
   const open = HL.renderMatchRow(Object.assign(base({ is_free: true }), SECRET), ctx({ freeMatchId: 1570383, hasAccount: true }), helpers(), 0);
   assert.match(open, /is-open is-free/);
 });
+
+test("match offert epingle en tete tant que le visiteur n'est pas Pro (26/09/2026), sans toucher « Mes matchs »", () => {
+  const list = [base({ id: 2, league_key: "el", league: "Europa League" }), base({ is_free: true })];
+  const anon = HL.renderDayBody(list, ctx({ freeMatchId: 1570383, hasAccount: false }), helpers());
+  const offer = anon.match(/<section class="hl-offer"[\s\S]*?<\/section>/);
+  assert.ok(offer, "bloc du match offert present sans compte");
+  assert.ok(anon.indexOf("hl-offer") < anon.indexOf("hl-leagues"), "en tete de la liste");
+  assert.match(offer[0], /id=1570383/);
+  assert.doesNotMatch(offer[0], /id=2"/, "seul le match offert est epingle");
+  assert.match(offer[0], /is-gated is-free/, "sans compte : toujours ferme");
+  assert.doesNotMatch(anon, /hl-mine/, "« Mes matchs » reste reserve aux vrais favoris");
+  const free = HL.renderDayBody(list, ctx({ freeMatchId: 1570383, hasAccount: true }), helpers());
+  assert.doesNotMatch(free.match(/<section class="hl-offer"[\s\S]*?<\/section>/)[0], /is-gated/, "compte gratuit : plus de mur « compte gratuit »");
+  const pro = HL.renderDayBody(list, ctx({ freeMatchId: 1570383, isPro: true, hasAccount: true }), helpers());
+  assert.doesNotMatch(pro, /hl-offer/, "Pro : plus rien d'epingle");
+});

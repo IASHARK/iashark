@@ -67,7 +67,8 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb'].includes(x.dir))) {
     test('Débloquer -> connexion -> inscription -> retour sur le match (next conserve de bout en bout)', async ({ page, supa }) => {
       // 1. Le visiteur ouvre le match offert depuis l'accueil.
       await page.goto(`/${v.dir}/`);
-      const carte = page.locator('.feature-card');
+      // Grande carte retiree le 26/09/2026 : le match offert est epingle en tete de la liste.
+      const carte = page.locator('#homeList .hl-offer a.hl-row').first();
       await expect(carte).toBeVisible();
       await carte.click();
       await page.waitForURL(new RegExp(`/${v.dir}/match\\.html\\?id=\\d+`));

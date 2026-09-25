@@ -26,7 +26,7 @@ const squash = (s) => String(s).replace(/[\s\u00a0\u202f\u2009]+/g, ' ').trim();
 // Identifiant du match offert tel que la version l'affiche (depend du marche).
 async function freeMatchIdFromHome(page, dir) {
   await page.goto(`/${dir}/`);
-  const href = await page.locator('#heroFeature a.feature-card').getAttribute('href');
+  const href = await page.locator('#homeList .hl-offer a.hl-row').first().getAttribute('href');
   return new URL(href, 'http://x').searchParams.get('id');
 }
 // Offre Pro avec retour a ce match apres paiement (abonnement-page.js#contexteMatch).
@@ -144,7 +144,7 @@ for (const v of VERSIONS) {
     test('anonyme : le match offert de l\'accueil mene a la page visiteur avec compte gratuit @mobile', async ({ page, dictFor, baseURL }) => {
       const dict = await dictFor(v.locale);
       await page.goto(`/${v.dir}/`);
-      await page.locator('#heroFeature a.feature-card').click();
+      await page.locator('#homeList .hl-offer a.hl-row').first().click();
       await expect(page).toHaveURL(new RegExp(`/${v.dir}/match\\.html\\?id=\\d+$`));
       const gate = page.locator('#matchRoot .gate');
       await expect(gate).toBeVisible();

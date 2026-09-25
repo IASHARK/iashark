@@ -385,6 +385,17 @@ function renderMine(list,ctx,H,startIndex){
     +'<ul class="hl-rows hl-mine-rows">'+list.map(function(m,i){return renderMatchRow(m,ctx,H,(startIndex||0)+i);}).join('')+'</ul></section>';
 }
 
+// Match offert du jour, epingle en tete de la liste tant que le visiteur n'est
+// pas Pro (demande du proprietaire, 26/09/2026 : remplace la grande carte de
+// l'accueil). Meme ligne que dans sa competition : memes droits (compte gratuit
+// exige pour l'ouvrir), aucune donnee payante en plus.
+function renderOffer(list,ctx,H,startIndex){
+  if(!list||!list.length)return '';
+  return '<section class="hl-offer" aria-labelledby="hl-offer-h">'
+    +'<h3 class="hl-block-title" id="hl-offer-h">'+ICON.star+'<span>'+esc(t('home_list.free_gated','Analyse offerte'))+'</span></h3>'
+    +'<ul class="hl-rows hl-offer-rows">'+list.map(function(m,i){return renderMatchRow(m,ctx,H,(startIndex||0)+i);}).join('')+'</ul></section>';
+}
+
 function renderUpsell(n,H){
   return '<aside class="hl-upsell" data-vente aria-label="'+esc(t('home_list.upsell_aria','Offre Pro'))+'">'
     +'<span class="hl-upsell-ico">'+ICON.lock+'</span>'
@@ -405,6 +416,8 @@ function renderDayBody(all,ctx,H){
   var favs=ctx.favorites||NO_FAVS,fm=ctx.favMatches||NO_FAVS;
   var lockedAll=ctx.isPro?[]:all.filter(function(m){return hasSignal(m)&&!isFree(m,ctx);});
   var html='',idx=0;
+  var offer=ctx.isPro?[]:all.filter(function(m){return isFree(m,ctx);});
+  if(offer.length){html+=renderOffer(offer,ctx,H,idx);idx+=offer.length;}
   var mine=all.filter(function(m){return fm.has(m.id);}).sort(H.compareMatches);
   if(mine.length){html+=renderMine(mine,ctx,H,idx);idx+=mine.length;}
   if(lockedAll.some(probBandOf))html+='<p class="hl-band-note"><span class="hl-band-i" aria-hidden="true">i</span>'+esc(bandNote())+'</p>';

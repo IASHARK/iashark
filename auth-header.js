@@ -248,3 +248,84 @@
     quickLogin: quickLogin
   };
 })();
+
+/* Bandeau d'offre Pro 9,95 (25/09/2026, campagne Turquie–France). Reprise du composant 21st.dev
+   « Promo Banner » (shadcndesign/banner-1 : barre fine, texte, lien, fermer),
+   avec un compte a rebours discret. Code promo BLEUS (Stripe) : 1er mois Pro a
+   9,95 (EUR / USD / GBP), formule mensuelle, jusqu'au coup d'envoi 20h45 Paris.
+   Disparait seul a l'heure limite ; jamais affiche aux comptes Pro, ni sur
+   mx/za (MXN/ZAR non couverts par le code) ni sur les pages d'authentification
+   et de paiement. A RETIRER apres la campagne. */
+(function(){
+  var FIN = Date.UTC(2026, 8, 25, 18, 45, 0);
+  if (Date.now() >= FIN) return;
+  var seg = (location.pathname.split('/')[1] || '').toLowerCase();
+  // Les versions es/de/it/pt sont en euros (marche fr, 19,95 EUR) ; en = USD,
+  // gb = GBP. BLEUS retire 10 EUR / 10,04 USD / 5,04 GBP : 9,95 partout.
+  var L = {
+    fr: { b:'Pro à <strong>9,95 €</strong> le premier mois avec le code <strong>BLEUS</strong>', f:'Fin dans', c:'En profiter', x:'Fermer', r:'Offre Pro' },
+    es: { b:'Pro a <strong>9,95 €</strong> el primer mes con el código <strong>BLEUS</strong>', f:'Termina en', c:'Aprovechar', x:'Cerrar', r:'Oferta Pro' },
+    de: { b:'Pro für <strong>9,95 €</strong> im ersten Monat mit dem Code <strong>BLEUS</strong>', f:'Endet in', c:'Jetzt sichern', x:'Schließen', r:'Pro-Angebot' },
+    it: { b:'Pro a <strong>9,95 €</strong> il primo mese con il codice <strong>BLEUS</strong>', f:'Termina tra', c:'Approfitta', x:'Chiudi', r:'Offerta Pro' },
+    pt: { b:'Pro por <strong>9,95 €</strong> no primeiro mês com o código <strong>BLEUS</strong>', f:'Termina em', c:'Aproveitar', x:'Fechar', r:'Oferta Pro' },
+    en: { b:'Pro for <strong>$9.95</strong> your first month with code <strong>BLEUS</strong>', f:'Ends in', c:'Get the offer', x:'Close', r:'Pro offer' },
+    gb: { b:'Pro for <strong>£9.95</strong> your first month with code <strong>BLEUS</strong>', f:'Ends in', c:'Get the offer', x:'Close', r:'Pro offer' }
+  };
+  var dirs = ['fr','en','gb','es','de','it','pt','mx','za'];
+  var dir = dirs.indexOf(seg) === -1 ? 'fr' : seg;
+  var txt = L[dir];
+  if (!txt) return;
+  txt.u = '/' + dir + '/abonnement.html';
+  if (/checkout-(succes|annule)|connexion|inscription|mot-de-passe|reinitialiser/.test(location.pathname)) return;
+  try { if (sessionStorage.getItem('ias-promo-bleus') === '0') return; } catch (_e) {}
+
+  function montrer(){
+    if (document.getElementById('ias-promo')) return;
+    var css = document.createElement('style');
+    css.textContent =
+      '#ias-promo{position:relative;z-index:60;background:#08141c;border-bottom:1px solid rgba(148,173,186,.14);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}' +
+      '#ias-promo .ip{max-width:1180px;margin:0 auto;min-height:40px;display:flex;align-items:center;justify-content:center;gap:10px;padding:8px 44px;position:relative;font-size:13.5px;line-height:1.45;color:#b4c6cf;text-align:center}' +
+      '#ias-promo strong{color:#fff;font-weight:600;letter-spacing:.02em}' +
+      '#ias-promo .ip-sep{color:#4d6573}' +
+      '#ias-promo .ip-t{color:#8ea7b4;font-variant-numeric:tabular-nums;white-space:nowrap}' +
+      '#ias-promo .ip-c{color:#22d3ee;font-weight:600;text-decoration:none;white-space:nowrap;border-bottom:1px solid rgba(34,211,238,.35);padding-bottom:1px;transition:border-color .15s}' +
+      '#ias-promo .ip-c:hover{border-bottom-color:#22d3ee}' +
+      '#ias-promo .ip-x{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:none;border:0;border-radius:6px;color:#6f8793;cursor:pointer}' +
+      '#ias-promo .ip-x:hover{color:#dce8ee;background:rgba(148,173,186,.08)}' +
+      '@media (max-width:760px){#ias-promo .ip{flex-wrap:wrap;gap:2px 8px;padding:8px 40px 8px 14px;font-size:12.5px;justify-content:flex-start;text-align:left}#ias-promo .ip-sep.s2{display:none}#ias-promo .ip-x{right:6px}}';
+    document.head.appendChild(css);
+    var b = document.createElement('div');
+    b.id = 'ias-promo';
+    b.setAttribute('role', 'region');
+    b.setAttribute('aria-label', txt.r);
+    b.innerHTML = '<div class="ip">' +
+      '<span>' + txt.b + '</span><span class="ip-sep s2"> · </span>' +
+      '<span class="ip-t">' + txt.f + ' <span data-cd>--:--:--</span></span>' +
+      '<a class="ip-c" href="' + txt.u + '">' + txt.c + ' →</a>' +
+      '<button class="ip-x" type="button" aria-label="' + txt.x + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>';
+    document.body.insertBefore(b, document.body.firstChild);
+    b.querySelector('.ip-x').onclick = function(){
+      b.remove();
+      try { sessionStorage.setItem('ias-promo-bleus', '0'); } catch (_e) {}
+    };
+    var cd = b.querySelector('[data-cd]');
+    var deux = function(n){ return (n < 10 ? '0' : '') + n; };
+    (function tic(){
+      var r = FIN - Date.now();
+      if (r <= 0) { b.remove(); return; }
+      var t = Math.floor(r / 1000);
+      cd.textContent = deux(Math.floor(t / 3600)) + ':' + deux(Math.floor(t % 3600 / 60)) + ':' + deux(t % 60);
+      setTimeout(tic, 1000);
+    })();
+  }
+
+  function lancer(){
+    var app = window.IasharkApp;
+    if (app && typeof app.context === 'function') {
+      app.context().then(function(c){ if (!c || !c.isPro) montrer(); }).catch(montrer);
+    } else {
+      montrer();
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', lancer); else lancer();
+})();

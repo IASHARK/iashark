@@ -25,6 +25,62 @@
   // Duree choisie (lib/pro-plan-picker.js, "month" coche par defaut). Sans
   // selecteur : "month", valeur par defaut acceptee par create-checkout-session.
   var picker=null;
+  // --- Offre du 25/09/2026 (campagne Turquie–France) - A RETIRER ENSUITE ---
+  // Jusqu'a 20h45 (Paris), le code promo Stripe est applique AUTOMATIQUEMENT au
+  // paiement de la formule au mois (create-checkout-session : champ `promo`,
+  // liste blanche BLEUS / CAIRO5, controle par Stripe). La carte affiche le
+  // prix barre ; « J'ai un autre code » rend le champ code de la page Stripe.
+  // ?promo=CAIRO5 dans l'URL choisit ce code (garde pour la visite).
+  var PROMO_FIN=Date.UTC(2026,8,25,18,45,0);
+  var EUR=['19,95 €','9,95 €','5 €'];
+  var PROMO_PRIX={fr:EUR,es:EUR,de:EUR,it:EUR,pt:EUR,en:['$19.99','$9.95','$5'],gb:['£14.99','£9.95','£5']};
+  var PROMO_TXT={
+    fr:{n:'Code {code} appliqué automatiquement : {new} le premier mois au lieu de {old}, puis {old}/mois. Offre valable jusqu’à 20h45.',w:'L’offre à {new} s’applique à la formule au mois.',m:'Tu pourras saisir ton code sur la page de paiement.',a:'J’ai un autre code',b:'Utiliser le code {code}'},
+    es:{n:'Código {code} aplicado automáticamente: {new} el primer mes en lugar de {old}, luego {old}/mes. Válido hasta las 20:45 (hora de París).',w:'La oferta de {new} se aplica al plan mensual.',m:'Podrás introducir tu código en la página de pago.',a:'Tengo otro código',b:'Usar el código {code}'},
+    de:{n:'Code {code} automatisch angewendet: {new} im ersten Monat statt {old}, danach {old}/Monat. Gültig bis 20:45 Uhr (Pariser Zeit).',w:'Das Angebot für {new} gilt für das Monatsabo.',m:'Du kannst deinen Code auf der Zahlungsseite eingeben.',a:'Ich habe einen anderen Code',b:'Code {code} verwenden'},
+    it:{n:'Codice {code} applicato automaticamente: {new} il primo mese invece di {old}, poi {old}/mese. Valido fino alle 20:45 (ora di Parigi).',w:'L’offerta a {new} vale per il piano mensile.',m:'Potrai inserire il codice nella pagina di pagamento.',a:'Ho un altro codice',b:'Usa il codice {code}'},
+    pt:{n:'Código {code} aplicado automaticamente: {new} no primeiro mês em vez de {old}, depois {old}/mês. Válido até às 20h45 (hora de Paris).',w:'A oferta de {new} aplica-se ao plano mensal.',m:'Poderás introduzir o teu código na página de pagamento.',a:'Tenho outro código',b:'Usar o código {code}'},
+    en:{n:'Code {code} applied automatically: {new} for your first month instead of {old}, then {old}/month. Valid until 20:45 (Paris time).',w:'The {new} offer applies to the monthly plan.',m:'You can enter your code on the payment page.',a:'I have another code',b:'Use code {code}'}
+  };
+  PROMO_TXT.gb=PROMO_TXT.en;
+  var promoDir=DIRS.indexOf(seg)!==-1?seg:'fr';
+  var promoCode=(function(){
+    var q=(new URLSearchParams(location.search).get('promo')||'').toUpperCase();
+    if(q==='BLEUS'||q==='CAIRO5'){try{sessionStorage.setItem('ias-promo-code',q);}catch(e){}return q;}
+    try{var v=sessionStorage.getItem('ias-promo-code');if(v==='BLEUS'||v==='CAIRO5')return v;}catch(e){}
+    return 'BLEUS';
+  })();
+  var promoManuel=false;
+  function promoEnCours(){return Date.now()<PROMO_FIN&&!!PROMO_PRIX[promoDir];}
+  function promoAuto(){return promoEnCours()&&!promoManuel;}
+  function promoPrix(){var p=PROMO_PRIX[promoDir];return {old:p[0],nw:promoCode==='CAIRO5'?p[2]:p[1]};}
+  function remplir(s){var p=promoPrix();return s.split('{code}').join(promoCode).split('{new}').join(p.nw).split('{old}').join(p.old);}
+  function promoRendu(){
+    if(!promoEnCours())return;
+    var box=document.getElementById('proPlanPicker');if(!box)return;
+    var p=promoPrix();
+    box.querySelectorAll('[data-market-price="pro.month"]').forEach(function(el){
+      var voulu=promoAuto();
+      var deja=!!el.querySelector('s[data-promo]');
+      if(voulu&&!deja){el.innerHTML='<s data-promo style="opacity:.45;font-size:.55em;margin-right:.25em">'+p.old+'</s>'+p.nw;}
+      else if(!voulu&&deja){el.textContent=p.old;}
+    });
+    var note=document.getElementById('promoNote');
+    if(!note){
+      note=document.createElement('div');note.id='promoNote';
+      note.style.cssText='margin:14px 0 4px;padding:11px 13px;border:1px solid rgba(34,211,238,.28);border-left:3px solid #22d3ee;border-radius:10px;background:rgba(34,211,238,.06);font-size:13px;line-height:1.5;color:#dce8ee';
+      box.parentNode.insertBefore(note,box.nextSibling);
+    }
+    var T=PROMO_TXT[promoDir];
+    var mensuel=!picker||picker.interval()==='month';
+    var texte=promoManuel?T.m:(mensuel?T.n:T.w);
+    note.textContent='';
+    note.appendChild(document.createTextNode(remplir(texte)+' '));
+    var a=document.createElement('a');a.href='#';a.style.cssText='color:#22d3ee;text-decoration:underline;text-underline-offset:3px;white-space:nowrap';
+    a.textContent=remplir(promoManuel?T.b:T.a);
+    a.onclick=function(e){e.preventDefault();promoManuel=!promoManuel;promoRendu();};
+    note.appendChild(a);
+  }
   function payload(){
     var body={interval:picker?picker.interval():'month'},M=window.IASHARK_MARKET;
     if(M&&typeof M.dir==='string'){
@@ -36,6 +92,11 @@
     }
     if(DIRS.indexOf(seg)!==-1)body.dir=seg;
     if(MARKETS.indexOf(seg)!==-1)body.market=seg;
+    return body;
+  }
+  function payloadPromo(){
+    var body=payload();
+    if(promoAuto()&&body.interval==='month')body.promo=promoCode;
     return body;
   }
   // --- Le match d'ou vient le visiteur ---------------------------------------
@@ -133,10 +194,15 @@
     afficherContexte();
     if(!box){box=document.createElement('div');box.id='checkoutConsent';button.parentNode.insertBefore(box,button);}
     if(pickerBox&&window.IasharkProPlanPicker){
-      picker=window.IasharkProPlanPicker.mount(pickerBox,{onChange:function(){if(output.classList.contains('error'))message('',false);},onUpdate:majOffre});
+      picker=window.IasharkProPlanPicker.mount(pickerBox,{onChange:function(){if(output.classList.contains('error'))message('',false);promoRendu();},onUpdate:function(v){majOffre(v);promoRendu();}});
       // Duree fermee par le serveur (Price Stripe absent) : masquee, jamais un autre prix.
       if(picker)picker.loadAvailability();
     }
+    // Offre du 25/09 : le selecteur et lib/market-config.js reecrivent les prix,
+    // le prix barre est donc reapplique a chaque changement du bloc.
+    promoRendu();
+    if(pickerBox&&window.MutationObserver&&promoEnCours())new MutationObserver(function(){promoRendu();}).observe(pickerBox,{childList:true,subtree:true,characterData:true});
+    if(promoEnCours())setTimeout(function(){location.reload();},Math.max(1000,PROMO_FIN-Date.now()+1000));
     var lib=await consentLib();
     var consent=lib?lib.mount(box,{buttons:[button]}):null;
     loaded();
@@ -166,7 +232,7 @@
       try{
         var session=await IasharkApp.supabase.auth.getSession();
         var token=session.data.session&&session.data.session.access_token;
-        var body=payload();body.consent=consent.payload();
+        var body=payloadPromo();body.consent=consent.payload();
         var response=await fetch(IasharkApp.url+'/functions/v1/create-checkout-session',{method:'POST',headers:{apikey:IasharkApp.key,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(body)});
         var data=await response.json();
         if(data.url){memoriserRetour();location.href=data.url;return;}

@@ -140,11 +140,13 @@ Deno.serve(async (req: Request) => {
   let requestedLocale: unknown = undefined;
   let requestedInterval: unknown = undefined;
   let requestedMode: unknown = undefined;
+  let requestedPromo: unknown = undefined;
   try {
     const body = await req.clone().json();
     requestedMarket = body?.market;
     requestedInterval = body?.interval;
     requestedMode = body?.mode;
+    requestedPromo = body?.promo;
     requestedDir = body?.dir;
     requestedConsent = body?.consent;
     requestedLocale = body?.consent?.locale || body?.locale || body?.dir;
@@ -258,8 +260,8 @@ Deno.serve(async (req: Request) => {
       ? dirKey
       : (usedMarket !== "fr" && ALLOWED_DIRS.includes(usedMarket) ? usedMarket : "");
     const returnBase = SITE_URL + (returnDir ? "/" + returnDir : "");
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
+    const baseSession = {
+      mode: "subscription" as const,
       line_items: [{ price: STRIPE_PRICE_ID_RESOLVED, quantity: 1 }],
       client_reference_id: user.id,
       ...(mapping?.stripe_customer_id ? { customer: mapping.stripe_customer_id } : { customer_email: user.email }),
@@ -270,7 +272,34 @@ Deno.serve(async (req: Request) => {
       // ET sur l'abonnement Stripe, qui survit a la session.
       metadata: { market: usedMarket, plan: "pro", interval: usedInterval, ...consent.metadata },
       subscription_data: { metadata: { market: usedMarket, plan: "pro", interval: usedInterval, ...consent.metadata } },
-    });
+    };
+    // Codes promo (campagne email du 25/09/2026), formule au mois uniquement :
+    // les reductions en montant fixe ne doivent jamais rendre une semaine
+    // gratuite. Par defaut, champ « code promo » sur la page Stripe. Si la page
+    // d'abonnement envoie un code de la liste blanche, il est applique
+    // d'office (Stripe controle validite, expiration, 1er abonnement) ; refuse
+    // par Stripe = repli sur le champ code, jamais d'echec du paiement.
+    const CAMPAIGN_CODES = ["BLEUS", "CAIRO5"];
+    const promoCode = typeof requestedPromo === "string" ? requestedPromo.trim().toUpperCase() : "";
+    let promotionCodeId = "";
+    if (usedInterval === "month" && CAMPAIGN_CODES.includes(promoCode)) {
+      try {
+        const found = await stripe.promotionCodes.list({ code: promoCode, active: true, limit: 1 });
+        promotionCodeId = found.data[0]?.id || "";
+      } catch (e) {
+        console.error("[create-checkout-session] lecture du code promo " + promoCode + " impossible:", (e as Error).message);
+      }
+    }
+    const fieldOnly = usedInterval === "month" ? { allow_promotion_codes: true } : {};
+    let session;
+    if (promotionCodeId) {
+      try {
+        session = await stripe.checkout.sessions.create({ ...baseSession, discounts: [{ promotion_code: promotionCodeId }] });
+      } catch (e) {
+        console.log("[create-checkout-session] code " + promoCode + " refuse par Stripe (" + (e as Error).message + ") - champ code a la place.");
+      }
+    }
+    if (!session) session = await stripe.checkout.sessions.create({ ...baseSession, ...fieldOnly });
     return new Response(JSON.stringify({ ok: true, processed: true, url: session.url }), {
       status: 200,
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },

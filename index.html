@@ -23,7 +23,7 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://iashark.com/#organization","name":"IASHARK","url":"https://iashark.com/","logo":{"@type":"ImageObject","url":"https://iashark.com/icon-512.png","width":512,"height":512},"sameAs":["https://www.tiktok.com/@iashark_data","https://t.me/iasharkdata"],"description":"IASHARK analyse les matchs de football avec des modèles statistiques et compare les probabilités estimées aux cotes du marché. IASHARK n'est pas un bookmaker."},{"@type":"WebSite","@id":"https://iashark.com/#website","name":"IASHARK","url":"https://iashark.com/","publisher":{"@id":"https://iashark.com/#organization"},"inLanguage":["fr","en-GB","en-ZA","en","es-MX","es","de","it","pt"]}]}</script>
 <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
 <link rel="apple-touch-icon" href="/icon-512.png">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/tailwind.css">
 <style>
 :root{--bg:#080c12;--card:#0d1520;--card2:#0f1a28;--cyan:#22d3ee;--cyan2:#06b6d4;--amber:#f59e0b;--green:#10b981;--red:#ef4444;--text:#e2e8f0;--muted:#4a6580;--border:rgba(255,255,255,0.06);--border-cyan:rgba(34,211,238,0.18);}
@@ -480,6 +480,20 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 .lang-switch-check{color:var(--cyan);font-family:'Space Mono',monospace;font-size:10px;}
 .btn-login{height:38px;padding:0 16px;border:0;background:transparent;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#d7dee8;}
 .btn-login:hover{color:var(--cyan);background:transparent;}
+
+/* Accueil « stade » (25/09/2026) */
+.hero-stade{position:relative;overflow:hidden;isolation:isolate}
+.hero-stade-bg{position:absolute;inset:0;z-index:0;pointer-events:none}
+.hero-stade-layer{position:absolute;left:0;right:0;top:-10%;height:120%;display:block;will-change:transform}
+.hero-stade-layer img{width:100%;height:100%;object-fit:cover;object-position:center 40%;display:block}
+.hero-stade-stands img{-webkit-mask-image:linear-gradient(to bottom,transparent 46%,#000 62%);mask-image:linear-gradient(to bottom,transparent 46%,#000 62%)}
+.hero-stade-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,11,18,.72) 0%,rgba(6,11,18,.35) 55%,rgba(6,11,18,.15) 100%)}
+.hero-stade-fade{position:absolute;left:0;right:0;bottom:0;height:34%;z-index:1;background:linear-gradient(to bottom,rgba(6,11,18,0),#060b12)}
+.hero-stade-h1{margin:0;display:flex;flex-direction:column}
+.hero-stade-brand{font-family:'Anton',Impact,'Arial Narrow Bold',sans-serif;font-weight:400;font-size:clamp(84px,10.5vw,150px);line-height:.86;letter-spacing:.005em;text-transform:uppercase;color:#f4f7fb;text-shadow:0 10px 40px rgba(0,0,0,.55)}
+.hero-stade-tagline{margin-top:clamp(22px,4vh,40px);font-family:'Inter',sans-serif;font-weight:700;font-size:clamp(13px,1.4vw,16px);letter-spacing:.18em;text-transform:uppercase;color:#dfe6ee}
+@media (max-width:1023px){.hero-stade-title{text-align:center;align-items:center;min-height:calc(100svh - 150px)}.hero-stade-bg::after{background:linear-gradient(180deg,rgba(6,11,18,.25) 0%,rgba(6,11,18,.45) 60%,rgba(6,11,18,.85) 100%)}}
+@media (prefers-reduced-motion:reduce){.hero-stade-layer{transform:none!important}}
 </style>
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
 <link rel="stylesheet" href="/assets/home-list.css">
@@ -501,21 +515,18 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 </header>
 
 <main>
-<section class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 grid grid-cols-1 items-center gap-12 pb-14 pt-12 lg:min-h-[86vh] lg:grid-cols-12 lg:gap-12 lg:pb-16 lg:pt-16">
-  <div class="flex flex-col justify-center gap-6 lg:col-span-6">
-    <div class="animate-fade-in d1">
-      <span class="inline-flex items-center gap-2.5 rounded-full border border-hairline bg-white/[0.03] px-3.5 py-1.5">
-        <span class="relative flex h-1.5 w-1.5 shrink-0">
-          <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan opacity-60"></span>
-          <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan"></span>
-        </span>
-        <span class="text-[12px] leading-snug text-soft"><b class="font-semibold text-ink">19 compétitions</b> · analyse publiée avant le coup d'envoi</span>
-      </span>
-    </div>
-    <h1 class="animate-fade-in d2 text-[clamp(38px,5vw,60px)] font-extrabold leading-[1.03] tracking-[-0.04em] text-ink">
-      Comprenez le match.<br>Identifiez le marché <span class="text-cyan">juste.</span>
-    </h1>
-    <p class="animate-fade-in d3 max-w-xl text-[17px] leading-relaxed text-soft">IASHARK transforme les statistiques des deux équipes en une probabilité claire, expliquée et comparée à la cote.</p>
+<section class="hero-stade" id="heroStade">
+  <!-- Accueil « stade » (25/09/2026, choix du proprietaire) : photo de stade
+       generique en deux couches qui defilent a des vitesses differentes
+       (parallax leger, sans bibliotheque, sans bloquer le defilement). -->
+  <div class="hero-stade-bg" aria-hidden="true">
+    <picture class="hero-stade-layer" data-depth="0.30"><source media="(orientation: portrait)" srcset="/assets/hero/stade-nuit-portrait.webp"><img src="/assets/hero/stade-nuit.webp" alt="" fetchpriority="high" decoding="async"></picture>
+    <picture class="hero-stade-layer hero-stade-stands" data-depth="0.16"><source media="(orientation: portrait)" srcset="/assets/hero/stade-nuit-portrait.webp"><img src="/assets/hero/stade-nuit.webp" alt="" decoding="async"></picture>
+    <div class="hero-stade-fade"></div>
+  </div>
+<div class="relative z-10 mx-auto w-full max-w-[1200px] px-5 sm:px-8 grid grid-cols-1 items-center gap-12 pb-14 pt-12 lg:min-h-[86vh] lg:grid-cols-12 lg:gap-12 lg:pb-16 lg:pt-16">
+  <div class="hero-stade-title flex flex-col justify-center gap-6 lg:col-span-6">
+    <h1 class="animate-fade-in d2 hero-stade-h1"><span class="hero-stade-brand">IA<span class="text-cyan">SHARK</span></span><span class="hero-stade-tagline">Le football, en probabilités</span></h1>
     <div class="animate-fade-in d4 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
       <a href="#decisions" class="hero-cta group inline-flex items-center justify-center gap-2.5 rounded-xl bg-cyan px-7 py-4 text-[14px] font-extrabold tracking-[0.02em] text-page shadow-[0_16px_40px_-16px_rgba(32,213,239,.8)] transition hover:brightness-110 active:scale-[.985]">Voir l'analyse gratuite du jour<span aria-hidden="true" class="transition-transform group-hover:translate-x-1">→</span></a>
       <a href="/exemple-analyse.html" class="inline-flex items-center justify-center gap-2 rounded-xl border border-hairline px-6 py-4 text-[14px] font-semibold text-ink transition hover:border-cyan/40 hover:bg-white/[0.04]">Voir un exemple d'analyse</a>
@@ -531,6 +542,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
       </div>
     </div>
   </div>
+</div>
 </section>
 
 <section class="relative border-y border-hairline bg-surface/40 py-7">
@@ -1162,5 +1174,26 @@ document.addEventListener('DOMContentLoaded',loadData);
 <script src="/lang-switcher.js"></script>
 <script>IasharkLangSwitcher.mount('#langSwitchSlot');IasharkLangSwitcher.applyRememberedChoiceOnce();</script>
 <script src="/site-prefs.js"></script>
-<script src="/bottom-navigation.js"></script></body>
+<script src="/bottom-navigation.js"></script><script>
+/* Parallax de l'accueil « stade » (25/09/2026) : chaque couche descend a sa
+   vitesse (data-depth) pendant que l'accueil defile ; rien ne bloque le
+   defilement, rien ne bouge si l'utilisateur a demande moins d'animations. */
+(function(){
+  var hero=document.getElementById('heroStade');
+  if(!hero||!window.requestAnimationFrame) return;
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var layers=[].slice.call(hero.querySelectorAll('.hero-stade-layer'));
+  var title=hero.querySelector('.hero-stade-title');
+  var ticking=false;
+  function update(){
+    ticking=false;
+    var h=hero.offsetHeight||1, y=Math.min(Math.max(window.scrollY||0,0),h);
+    layers.forEach(function(el){ el.style.transform='translate3d(0,'+(y*parseFloat(el.getAttribute('data-depth')||0))+'px,0)'; });
+    if(title){ title.style.transform='translate3d(0,'+(y*0.12)+'px,0)'; }
+  }
+  window.addEventListener('scroll',function(){ if(!ticking){ ticking=true; requestAnimationFrame(update); } },{passive:true});
+  update();
+})();
+</script>
+</body>
 </html>

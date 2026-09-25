@@ -184,7 +184,8 @@ test("affichage Pro sans detail premium : etat neutre sur l'accueil et la page m
 // historique.json n'est pas publie par scripts/build-public.js : l'accueil le
 // demandait quand meme (404 + erreur console en production, 14/09/2026).
 test("accueils : ne demandent plus historique.json", () => {
-  for (const f of ["index.html", "fr/index.html", "gb/index.html", "mx/index.html", "za/index.html", "en/index.html", "es/index.html", "de/index.html", "it/index.html", "pt/index.html"]) {
+  // 25/09/2026 : repertoires publics seulement (de/it/pt retires, 301 vers /en/).
+  for (const f of ["index.html"].concat(require("./helpers/public-dirs.js").PUBLIC_DIRS.map((d) => d + "/index.html"))) {
     assert.doesNotMatch(read(f), /fetch\(['"]\/historique\.json/, f);
   }
   assert.doesNotMatch(read("scripts/build-public.js"), /"historique\.json"/, "historique.json reste hors de dist/");

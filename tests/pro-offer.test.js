@@ -21,7 +21,8 @@ const ROOT = path.join(__dirname, "..");
 const read = (f) => fs.readFileSync(path.join(ROOT, f), "utf8");
 const LOCALES = ["fr", "en", "es", "es-mx", "de", "it", "pt"];
 const MARKETS = JSON.parse(read("config/markets.json"));
-const DIRS = Object.keys(MARKETS._dirs);
+// 25/09/2026 : pages generees des repertoires publics (de/it/pt retires, 301 vers /en/).
+const DIRS = require("./helpers/public-dirs.js").PUBLIC_DIRS;
 const LEAGUES = JSON.parse(read("config/leagues.json")).leagues;
 const DICTS = Object.fromEntries(LOCALES.map((l) => [l, JSON.parse(read("i18n/dict/" + l + ".json"))]));
 const MATCH_KEYS = ["pro_gate_item_bet", "pro_gate_item_scorer", "pro_gate_item_scenario", "pro_gate_item_scores", "pro_gate_item_odds", "pro_gate_item_stats", "pro_gate_item_faq"];
@@ -98,7 +99,7 @@ test("page d'abonnement : prix et liste Pro en 3 groupes cote a cote, sans table
   // Mobile : la comparaison passe en 2 colonnes (libelle au-dessus), jamais de defilement horizontal.
 });
 
-test("pages generees : liste Pro traduite dans les 9 versions, prix ou « pas encore ouvert » cuit dans le HTML", () => {
+test("pages generees : liste Pro traduite dans les versions publiques, prix ou « pas encore ouvert » cuit dans le HTML", () => {
   const src = read("abonnement.html");
   const keys = [...src.matchAll(/data-i18n="((?:pro_offer|match_page)\.\w+)"/g)].map((m) => m[1]);
   // Titre, 3 groupes, 7 lignes « match », 5 autres lignes, « Nouveau » + « Aide : » (pied de page).

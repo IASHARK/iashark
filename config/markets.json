@@ -2,7 +2,7 @@
   "_readme": "Source de verite GEO (pays/devise/prix/conformite/repertoires publics). Ne PAS confondre avec i18n/locales.json (langue d'interface) : un marche pointe vers UNE locale existante, ce fichier ne duplique jamais un dictionnaire de traduction. 'status' et les champs de conformite restent DRAFT_PENDING_LEGAL_REVIEW tant qu'aucune validation juridique reelle n'a eu lieu (cf. 04_IAShark_Compliance_Approval_Pack) - ne jamais faire passer un marche a LIVE sans checklist QA + validation business. Consommateurs : scripts/build-locales.js (genere toutes les pages publiques dans chaque repertoire de _dirs, recopie le bloc de donnees de lib/market-config.js, regenere _redirects) et scripts/i18n-sitemaps.js (sitemaps + hreflang). Apres toute modification ici : node scripts/build-locales.js.",
   "_defaultMarket": "fr",
   "_xDefaultDir": "fr",
-  "_hreflangXDefault_readme": "Cible hreflang x-default (audit SEO 15/09/2026) : premiere version de cette liste presente dans le groupe d'equivalents de la page. /en/ (anglais international) sert mieux qu'un /fr/ les visiteurs dont la langue n'a pas de version (nl, sv, ja...), et c'est deja la page que la racine / (302 geolocalisee) renvoie a Googlebot (Country=us). _xDefaultDir reste 'fr' : il ne designe PAS le x-default mais le repertoire historique servi a la racine (/match/<id>.html, /blog/, 301 des anciennes URLs racine) ; le changer deplacerait toutes les pages match FR indexees. Groupe sans /en/ (ex. Liga MX : fr, mx, es) : x-default vers /fr/.",
+  "_hreflangXDefault_readme": "Cible hreflang x-default : premiere version de cette liste presente dans le groupe d'equivalents de la page (/en/ puis /fr/). Pour l'accueil, x-default = https://iashark.com/ : depuis le 25/09/2026 la racine sert l'accueil francais en 200 (reecriture vers /fr/index.html, canonical /fr/) a tout visiteur sans langue reconnue, robots compris ; les navigateurs en/es/de/it/pt sont rediriges en 302 (lib/lang-routing.js). _xDefaultDir reste 'fr' : repertoire historique servi a la racine (/match/<id>.html, /blog/, 301 des anciennes URLs racine).",
   "_hreflangXDefault": [
     "en",
     "fr"
@@ -38,6 +38,12 @@
     }
   },
   "_dirs_readme": "Un repertoire public = une copie complete du site. market = cle de marche ci-dessous (devise/prix/aide/legal), locale = dictionnaire i18n/dict/<locale>.json, htmlLang = <html lang>, hreflang = valeur hreflang, intlLocale = locale Intl pour les prix/dates, blogDir = repertoire du blog traduit (null = blog FR racine), label = libelle du selecteur (ordre des cles = ordre du selecteur), customLanding = landing.html de ce repertoire maintenue a la main (jamais ecrasee par le generateur).",
+  "_retiredDirs_readme": "Versions linguistiques retirees du site public le 25/09/2026 (decision proprietaire, option B : francais + anglais + espagnol ; Search Console : ~10 clics en 3 mois pour ces langues). Leur configuration reste dans _dirs (e-mails des comptes existants, reouverture possible) mais aucune page n'est generee, publiee, liee ni declaree en hreflang/sitemap : chaque URL /<dir>/<page> est redirigee en 301 vers /<repli>/<page> (scripts/build-locales.js). Pour rouvrir une langue : la retirer d'ici puis relancer node scripts/build-locales.js.",
+  "_retiredDirs": {
+    "de": "en",
+    "it": "en",
+    "pt": "en"
+  },
   "_dirs": {
     "fr": {
       "market": "fr",

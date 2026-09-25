@@ -156,7 +156,8 @@ test("abonnement : bouton verrouille des le rendu, chargements paralleles, dicti
   assert.match(btn, /data-i18n-attr="title:common\.loading"/, "infobulle de chargement localisee");
   assert.ok(html.indexOf('id="checkoutConsent"') !== -1 && html.indexOf('id="checkoutConsent"') < html.indexOf('id="subscribeButton"'), "emplacement du consentement reserve avant le bouton");
   assert.match(html, /#checkoutConsent:not\(\.iash-consent\)\{[^}]*min-height:/, "hauteur du bloc de consentement non reservee");
-  for (const d of ["fr", "gb", "za", "en", "mx", "es", "de", "it", "pt"]) {
+  // 25/09/2026 : repertoires publics seulement (de/it/pt retires, 301 vers /en/).
+  for (const d of require("./helpers/public-dirs.js").PUBLIC_DIRS) {
     const page = read(d + "/abonnement.html");
     assert.match((page.match(/<button[^>]*id="subscribeButton"[^>]*>/) || [""])[0], /aria-disabled="true"/, d + "/abonnement.html non regenere");
   }

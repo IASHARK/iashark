@@ -48,15 +48,18 @@ test("pages mx : liens internes dans /mx/, vocabulaire et aide mexicains", () =>
   });
 });
 
+// 25/09/2026 : versions de/it/pt retirees (config/markets.json#_retiredDirs) :
+// plus de copie du blog, et aucun hreflang ne doit pointer vers elles.
 test("hreflang es-MX present sur toutes les copies du blog", () => {
   GUIDES.forEach((g) => {
-    ["blog/guides/", "en/blog/guides/", "es/blog/guides/", "de/blog/guides/", "it/blog/guides/", "pt/blog/guides/", "mx/blog/guides/"].forEach((d) => {
+    ["blog/guides/", "en/blog/guides/", "es/blog/guides/", "mx/blog/guides/"].forEach((d) => {
       const html = read(d + g);
       assert.ok(html.includes('<link rel="alternate" hreflang="es-MX" href="' + SITE + "/mx/blog/guides/" + g + '">'), d + g);
-      ["fr", "en", "es", "de", "it", "pt", "x-default"].forEach((h) => assert.ok(html.includes('hreflang="' + h + '"'), d + g + " " + h));
+      ["fr", "en", "es", "x-default"].forEach((h) => assert.ok(html.includes('hreflang="' + h + '"'), d + g + " " + h));
+      ["de", "it", "pt"].forEach((h) => assert.ok(!html.includes('hreflang="' + h + '"'), d + g + " : hreflang " + h + " vers une version retiree"));
     });
   });
-  ["blog.html", "en/blog/index.html", "es/blog/index.html", "de/blog/index.html", "it/blog/index.html", "pt/blog/index.html", "mx/blog/index.html"].forEach((f) => {
+  ["blog.html", "en/blog/index.html", "es/blog/index.html", "mx/blog/index.html"].forEach((f) => {
     assert.ok(read(f).includes('<link rel="alternate" hreflang="es-MX" href="' + SITE + '/mx/blog/">'), f);
   });
 });

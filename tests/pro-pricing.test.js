@@ -143,7 +143,8 @@ test("build-locales : prix masques cuits dans le HTML genere ; l'accueil n'annon
   // semaine ou a l'annee » sur l'accueil - le visiteur ne doit pas attendre
   // une duree qui n'est pas payable. Ligne et cles retirees.
   assert.doesNotMatch(read("index.html"), /prixProDurees|pro_other_durations|Bientôt aussi à la semaine/);
-  for (const d of Object.keys(MARKETS._dirs)) {
+  // 25/09/2026 : repertoires publics seulement (de/it/pt retires, 301 vers /en/).
+  for (const d of require("./helpers/public-dirs.js").PUBLIC_DIRS) {
     const html = norm(read(d + "/index.html"));
     assert.doesNotMatch(html, /prixProDurees|Bientôt aussi|Coming soon: weekly|Próximamente también semanal|Demnächst auch wöchentlich|Presto anche settimanale|Em breve também semanal/, d);
     assert.doesNotMatch(html, /data-market-price="pro\.(week|year)"/, d + " : aucun prix semaine / annee sur l'accueil");

@@ -33,7 +33,9 @@ const LASTMOD = require("./seo-lastmod.js");
 // x-default : config/markets.json#_hreflangXDefault (seo-common.js#xDefaultDir).
 const SEO_COMMON = require("./seo-common.js");
 const MARKETS = JSON.parse(fs.readFileSync(path.join(ROOT, "config/markets.json"), "utf8"));
-const DIRS = MARKETS._dirs;
+// Versions retirees (config/markets.json#_retiredDirs) : aucun sitemap.
+const DIRS = {};
+Object.keys(MARKETS._dirs).forEach(function (d) { if (!(MARKETS._retiredDirs || {}).hasOwnProperty(d)) DIRS[d] = MARKETS._dirs[d]; });
 const LEGAL_FILES = MARKETS._legalFiles || {};
 const LEGAL_FILE_LIST = Object.keys(LEGAL_FILES).map(function (k) { return LEGAL_FILES[k]; });
 

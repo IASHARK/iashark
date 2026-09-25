@@ -117,9 +117,11 @@ test("perimetre des versions : table explicite dans config/leagues.json, fr touj
   assert.deepEqual(sorted(L.matchDirsFor("premier")), sorted(["fr", "gb", "en", "za"]));
   assert.deepEqual(sorted(L.matchDirsFor("ligue1")), sorted(["fr", "en"]));
   assert.deepEqual(sorted(L.matchDirsFor("laliga")), sorted(["fr", "es", "mx", "en"]));
-  assert.deepEqual(sorted(L.matchDirsFor("seriea")), sorted(["fr", "it", "en"]));
-  assert.deepEqual(sorted(L.matchDirsFor("bundesliga")), sorted(["fr", "de", "en"]));
-  assert.deepEqual(sorted(L.matchDirsFor("primeira")), sorted(["fr", "pt", "en"]));
+  // 25/09/2026 : versions de/it/pt retirees (config/markets.json#_retiredDirs).
+  assert.deepEqual(sorted(L.matchDirsFor("seriea")), sorted(["fr", "en"]));
+  assert.deepEqual(sorted(L.matchDirsFor("bundesliga")), sorted(["fr", "en"]));
+  assert.deepEqual(sorted(L.matchDirsFor("primeira")), sorted(["fr", "en"]));
+  for (const l of leagues) for (const d of l.seoMatchDirs) assert.ok(C.DIR_CODES.includes(d), l.key + " : version retiree " + d);
   for (const k of ["argentina_liga_profesional", "colombia_primera_a", "peru_primera", "chile_primera"]) assert.deepEqual(sorted(L.matchDirsFor(k)), sorted(["fr", "es", "en"]), k);
   for (const k of ["ldc", "el", "ecl"]) assert.deepEqual(sorted(L.matchDirsFor(k)), sorted(C.DIR_CODES), k);
   assert.deepEqual(L.matchDirsFor("competition_inconnue"), ["fr"]);
@@ -301,19 +303,20 @@ test("J+30 : pages supprimees, 301 vers le hub ligue de la version, qui survit a
 test("versions sorties du perimetre : 301 vers le hub de la version ou la version FR, survit au build, expire a 90 jours", () => {
   const root = tmpRoot();
   try {
-    // Registre d'avant la reduction du perimetre : Liga MX generee aussi en gb et de.
+    // Registre d'avant la reduction du perimetre : Liga MX generee aussi en gb et za.
+    // (25/09/2026 : za remplace de, version retiree du site, redirigee en bloc.)
     const old = L.emptyRegistry();
-    old.matches["777001"] = { id: "777001", first_seen: "2026-09-17", kickoff: "2026-09-19T19:00:00Z", league_key: "liga_mx", dirs: ["fr", "gb", "mx", "es", "de"], in_run: true };
+    old.matches["777001"] = { id: "777001", first_seen: "2026-09-17", kickoff: "2026-09-19T19:00:00Z", league_key: "liga_mx", dirs: ["fr", "gb", "mx", "es", "za"], in_run: true };
     L.saveRegistry(root, old);
     const day = new Date(at(-DAY)).toISOString().slice(0, 10);
     let { reg } = cycle(root, [RICH], at(-DAY));
     const e = reg.matches["777001"];
     assert.deepEqual(e.dirs, ["fr", "mx", "es"]);
-    assert.deepEqual(e.retired_dirs, { gb: day, de: day }, "versions retirees datees, ordre stable");
+    assert.deepEqual(e.retired_dirs, { gb: day, za: day }, "versions retirees datees, ordre stable");
     const rulesOf = (text) => text.split("\n").filter((l) => l.trim() && l[0] !== "#").map((l) => l.trim().split(/\s+/));
     let rules = rulesOf(readT(root, "_redirects"));
     const first404 = rules.findIndex((r) => r[2] === "404");
-    for (const from of ["/gb/match/777001.html", "/de/match/777001.html"]) {
+    for (const from of ["/gb/match/777001.html", "/za/match/777001.html"]) {
       const i = rules.findIndex((r) => r[0] === from && r[1] === "/match/777001.html" && r[2] === "301");
       assert.ok(i !== -1 && i < first404, from + " -> version FR (hub de la version hors perimetre)");
     }
@@ -321,24 +324,24 @@ test("versions sorties du perimetre : 301 vers le hub de la version ou la versio
     assert.equal(rules.filter((r) => /777001/.test(r[0])).length, 2, "aucune regle pour une version du perimetre");
     // Un nouveau run ne repousse pas la date et ne duplique rien ; bloc identique a build-locales.
     ({ reg } = cycle(root, [RICH], at(2 * DAY)));
-    assert.deepEqual(reg.matches["777001"].retired_dirs, { gb: day, de: day });
+    assert.deepEqual(reg.matches["777001"].retired_dirs, { gb: day, za: day });
     const text = readT(root, "_redirects");
     assert.equal(L.applyRedirectsBlock(L.applyRedirectsBlock(text, L.emptyRegistry()), reg), text);
 
     // Hub de la version dans le perimetre -> hub ; page FR retiree -> hub FR (pas de chaine).
-    const probe = { id: "777001", league_key: "liga_mx", dirs: ["fr"], status: "archived", retired_dirs: { mx: day, de: day } };
+    const probe = { id: "777001", league_key: "liga_mx", dirs: ["fr"], status: "archived", retired_dirs: { mx: day, za: day } };
     assert.equal(L.retiredDirTarget(probe, "mx", "777001"), "/mx/leagues/liga-mx.html");
-    assert.equal(L.retiredDirTarget(probe, "de", "777001"), "/match/777001.html");
-    assert.equal(L.retiredDirTarget(Object.assign({}, probe, { status: "redirected" }), "de", "777001"), "/fr/leagues/liga-mx.html");
+    assert.equal(L.retiredDirTarget(probe, "za", "777001"), "/match/777001.html");
+    assert.equal(L.retiredDirTarget(Object.assign({}, probe, { status: "redirected" }), "za", "777001"), "/fr/leagues/liga-mx.html");
     // Version revenue dans le perimetre : plus retiree.
-    assert.deepEqual(L.retireDirs({ dirs: ["fr", "de"], retired_dirs: { gb: day, de: day } }, [], day).retired_dirs, { gb: day });
+    assert.deepEqual(L.retireDirs({ dirs: ["fr", "za"], retired_dirs: { gb: day, za: day } }, [], day).retired_dirs, { gb: day });
     assert.equal(L.retireDirs({ dirs: ["fr", "gb"], retired_dirs: { gb: day } }, [], day).retired_dirs, undefined);
 
     // J+30 : page FR retiree, les versions retirees visent directement le hub FR.
     cycle(root, [], at(29 * DAY));
     ({ reg } = cycle(root, [], at(30 * DAY)));
     rules = rulesOf(readT(root, "_redirects"));
-    for (const from of ["/gb/match/777001.html", "/de/match/777001.html"]) {
+    for (const from of ["/gb/match/777001.html", "/za/match/777001.html"]) {
       assert.ok(rules.some((r) => r[0] === from && r[1] === "/fr/leagues/liga-mx.html" && r[2] === "301"), from + " -> hub FR");
     }
     assert.equal(rules.filter((r) => /777001/.test(r[0])).length, 5);
@@ -358,6 +361,9 @@ test("registre commite : chaque version retiree a sa 301 dans _redirects (meme b
     const e = reg.matches[id];
     for (const dir of Object.keys(e.retired_dirs || {})) {
       assert.ok(C.DIRS[dir] && dir !== C.X_DEFAULT_DIR, id + " : version retiree invalide " + dir);
+      // 25/09/2026 : version retiree du SITE (de/it/pt) : couverte par la 301
+      // en bloc "/<dir>/*  /<repli>/:splat  301!" (tests/lang-routing.test.js).
+      if (!C.DIR_CODES.includes(dir)) { assert.ok(new RegExp("^/" + dir + "/\\*\\s+/[a-z]{2}/:splat\\s+301!$", "m").test(text), id + " : /" + dir + "/* sans 301"); continue; }
       assert.ok(!(e.dirs || []).includes(dir), id + " : " + dir + " a la fois generee et retiree");
       assert.ok(text.includes(C.matchPath(dir, id)), id + " : aucune 301 pour " + C.matchPath(dir, id));
     }

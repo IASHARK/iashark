@@ -17,6 +17,9 @@ const ROOT = path.join(__dirname, "..");
 const read = (f) => fs.readFileSync(path.join(ROOT, f), "utf8");
 const MARKETS = JSON.parse(read("config/markets.json"));
 const DIRS = Object.keys(MARKETS._dirs);
+// 25/09/2026 : versions retirees (config/markets.json#_retiredDirs) : sources
+// legal/<dir>/ conservees mais aucune page /<dir>/cgv.html generee.
+const { PUBLIC_DIRS } = require("./helpers/public-dirs.js");
 const TERMS_VERSION = (read("lib/checkout-consent.js").match(/var TERMS_VERSION = "(\d{4}-\d{2}-\d{2})";/) || [])[1];
 // Version propre a un repertoire (lib/checkout-consent.js#TERMS_VERSIONS), sinon la version commune.
 const consentLib = (() => { const w = {}; new Function("window", read("lib/checkout-consent.js"))(w); return w.IasharkCheckoutConsent; })();
@@ -56,7 +59,7 @@ const TAX_INCLUDED = /\bTTC\b|VAT included|including any applicable taxes|IVA in
 
 test("CGV : prix de chaque duree PAYABLE, equivalent mensuel et economie de l'annuel repris de config/markets.json ; duree non payable absente", () => {
   assert.match(TERMS_VERSION || "", /^\d{4}-\d{2}-\d{2}$/);
-  for (const d of DIRS) {
+  for (const d of PUBLIC_DIRS) {
     const conf = MARKETS._dirs[d], m = MARKETS[conf.market], pro = m.prices.pro;
     // CGV dont les prix sont ecrits par le build (data-market-price, /en/ depuis
     // l'offre USD du 19/09/2026) : texte de la page generee.

@@ -93,9 +93,14 @@ test("contexte de site derive de config/markets.json (devise, prix Pro, aide jeu
   assert.equal(L.siteContext(BUNDLE.markets, "en").helpline.name, "Gambling Therapy", "/en/ : ressource internationale");
 });
 
+// 25/09/2026 : les repertoires retires (config/markets.json#_retiredDirs,
+// de/it/pt) gardent leurs e-mails ; leurs liens /de/... menent en 301 vers la
+// meme page de /en/ (tests/helpers/public-dirs.js#servedPath).
+const { servedPath } = require("./helpers/public-dirs.js");
+
 test("pages de methodologie absentes : liste a jour avec le depot", () => {
   for (const dir of L.DIRS) {
-    const exists = fs.existsSync(path.join(ROOT, dir, "methodologie.html"));
+    const exists = fs.existsSync(path.join(ROOT, servedPath(dir + "/methodologie.html")));
     assert.equal(!exists, L.METHODOLOGY_MISSING_DIRS.includes(dir), dir + "/methodologie.html");
   }
 });
@@ -112,7 +117,8 @@ test("chaque email (6 campagnes x 9 versions du site, 7 langues) : liens absolus
       const rel = url.slice("https://iashark.com/".length).split(/[?#]/)[0];
       if (rel === "en/methodologie.html" && dir !== "en") { assert.ok(L.METHODOLOGY_MISSING_DIRS.includes(dir), dir + " : repli anglais injustifie"); continue; }
       assert.ok(rel.startsWith(dir + "/"), dir + "/" + campaign + " lien d'un autre repertoire : " + url);
-      assert.ok(fs.existsSync(path.join(ROOT, rel.endsWith("/") ? rel + "index.html" : rel)), "page inexistante : " + url);
+      const served = servedPath(rel);
+      assert.ok(fs.existsSync(path.join(ROOT, served.endsWith("/") ? served + "index.html" : served)), "page inexistante : " + url);
     }
   }
 });

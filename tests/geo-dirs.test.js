@@ -11,7 +11,10 @@ const vm = require("vm");
 const ROOT = path.join(__dirname, "..");
 const MARKETS = JSON.parse(fs.readFileSync(path.join(ROOT, "config/markets.json"), "utf8"));
 const DIRS = MARKETS._dirs;
-const DIR_CODES = Object.keys(DIRS);
+// 25/09/2026 : repertoires publics = _dirs moins _retiredDirs (de/it/pt
+// retires, configuration conservee pour les e-mails, 301 en bloc vers /en/).
+const ALL_DIR_CODES = Object.keys(DIRS);
+const { PUBLIC_DIRS: DIR_CODES, RETIRED_DIRS } = require("./helpers/public-dirs.js");
 const PAGES = require(path.join(ROOT, "scripts/i18n-manifest.js"));
 const LEGAL = Object.keys(MARKETS._legalFiles).map(function (k) { return MARKETS._legalFiles[k]; });
 const builder = require(path.join(ROOT, "scripts/build-locales.js"));
@@ -59,7 +62,13 @@ function fakeRoot(els) {
 }
 
 test("config : repertoires publics et prix des marches conformes aux docs 06/07/08", () => {
-  assert.deepEqual(DIR_CODES, ["fr", "gb", "za", "en", "mx", "es", "de", "it", "pt"]);
+  assert.deepEqual(ALL_DIR_CODES, ["fr", "gb", "za", "en", "mx", "es", "de", "it", "pt"]);
+  assert.deepEqual(DIR_CODES, ["fr", "gb", "za", "en", "mx", "es"]);
+  assert.deepEqual(RETIRED_DIRS, { de: "en", it: "en", pt: "en" });
+  Object.keys(RETIRED_DIRS).forEach(function (d) {
+    assert.ok(DIR_CODES.includes(RETIRED_DIRS[d]), d + " : repli non public");
+    assert.ok(!fs.existsSync(path.join(ROOT, d)), d + "/ encore present");
+  });
   assert.deepEqual([DIRS.gb.htmlLang, DIRS.za.htmlLang, DIRS.mx.htmlLang], ["en-GB", "en-ZA", "es-MX"]);
   assert.deepEqual([DIRS.gb.locale, DIRS.za.locale, DIRS.mx.locale], ["en", "en", "es-mx"]);
   ["es", "de", "it", "pt", "fr"].forEach(function (d) { assert.equal(DIRS[d].market, "fr", d + " = marche EUR par defaut"); });
@@ -83,7 +92,7 @@ test("i18n.js : table des repertoires identique a config/markets.json#_dirs", ()
   });
   assert.deepEqual(dirs.map(function (d) { return d.label; }), [
     "Français", "English (UK)", "English (South Africa)", "English (International)",
-    "Español (México)", "Español", "Deutsch", "Italiano", "Português"
+    "Español (México)", "Español"
   ]);
 });
 
@@ -109,7 +118,9 @@ test("I18N.href : chaque page publique reste dans le repertoire courant", () => 
   assert.equal(mx.href("blog/guides/x.html"), "/mx/blog/guides/x.html");
   assert.equal(loadI18n("/za/cgv.html").href("blog/guides/x.html"), "/en/blog/guides/x.html");
   assert.equal(loadI18n("/za/").htmlLang, "en-ZA");
-  assert.equal(loadI18n("/de/pro.html").href("blog.html"), "/de/blog/");
+  assert.equal(loadI18n("/es/pro.html").href("blog.html"), "/es/blog/");
+  // Version retiree : jamais un lien vers /de/.
+  assert.doesNotMatch(loadI18n("/de/pro.html").href("pro.html"), /^\/de\//);
   assert.equal(loadI18n("/fr/").href("blog.html"), "/blog.html");
 
   var root = loadI18n("/blog/guides/x.html");
@@ -120,10 +131,10 @@ test("I18N.href : chaque page publique reste dans le repertoire courant", () => 
   assert.equal(loadI18n("/match/123.html", "", { iashark_dir: "gb" }).href("pro.html"), "/gb/pro.html");
 });
 
-test("selecteur langue/pays : 9 options, meme page dans le repertoire cible", () => {
+test("selecteur langue/pays : 6 options, meme page dans le repertoire cible", () => {
   var I = loadI18n("/gb/match.html", "?id=7");
   var opts = plain(I.switcherOptions());
-  assert.deepEqual(opts.map(function (o) { return o.dir; }), ["fr", "gb", "za", "en", "mx", "es", "de", "it", "pt"]);
+  assert.deepEqual(opts.map(function (o) { return o.dir; }), DIR_CODES);
   var byDir = {};
   opts.forEach(function (o) { byDir[o.dir] = o; });
   assert.equal(byDir.mx.href, "/mx/match.html?id=7");
@@ -199,7 +210,7 @@ test("lib/market-config.js : donnees synchronisees depuis config/markets.json, p
   assert.equal(mxHelp.hidden, false);
 });
 
-test("_redirects : pays puis langue puis /fr/ sur la racine, anciennes URLs, historique, 404 en dernier", () => {
+test("_redirects : langue puis accueil /fr/ en 200 sur la racine, versions retirees, anciennes URLs, historique, 404 en dernier", () => {
   var rules = read("_redirects").split("\n")
     .filter(function (l) { return l.trim() && l.trim().charAt(0) !== "#"; })
     .map(function (l) { return l.trim().split(/\s+/); });
@@ -207,9 +218,10 @@ test("_redirects : pays puis langue puis /fr/ sur la racine, anciennes URLs, his
   // Aiguillage pays/langue de la racine : table lib/lang-routing.js (detail et
   // simulation pays par pays : tests/lang-routing.test.js), /fr/ en dernier.
   var routing = require(path.join(ROOT, "lib/lang-routing.js"));
+  // 25/09/2026 : langue seule (302!), puis accueil francais en 200 (reecriture).
   assert.deepEqual(rootRules.map(function (r) { return r.slice(1).join(" "); }),
-    routing.rootRedirectRules("fr").map(function (r) { return ("/" + r.to + "/ 302! " + r.cond).trim(); }));
-  assert.equal(rootRules[rootRules.length - 1].slice(1).join(" "), "/fr/ 302!");
+    routing.rootRedirectRules("fr").map(function (r) { return r.rewrite ? "/" + r.to + "/index.html 200!" : ("/" + r.to + "/ 302! " + r.cond).trim(); }));
+  assert.equal(rootRules[rootRules.length - 1].slice(1).join(" "), "/fr/index.html 200!");
   assert.deepEqual(rules.slice(0, rootRules.length), rootRules, "les regles de la racine doivent venir en premier");
   function has(from, to, status) { return rules.some(function (r) { return r[0] === from && r[1] === to && r[2] === status; }); }
   assert.ok(has("/index.html", "/fr/", "301!"));
@@ -220,6 +232,10 @@ test("_redirects : pays puis langue puis /fr/ sur la racine, anciennes URLs, his
   assert.ok(has("/historique.html", "/fr/", "301!"));
   DIR_CODES.forEach(function (d) { assert.ok(has("/" + d + "/historique.html", "/" + d + "/", "301!"), d); });
   assert.ok(has("/legal/*", "/:splat", "301!"));
+  Object.keys(RETIRED_DIRS).forEach(function (d) {
+    assert.ok(has("/" + d, "/" + RETIRED_DIRS[d] + "/", "301!"), "/" + d);
+    assert.ok(has("/" + d + "/*", "/" + RETIRED_DIRS[d] + "/:splat", "301!"), "/" + d + "/*");
+  });
   var tail = rules.slice(-DIR_CODES.length);
   assert.deepEqual(tail.map(function (r) { return r[0] + " " + r[1] + " " + r[2]; }),
     DIR_CODES.map(function (d) { return "/" + d + "/* /" + d + "/404.html 404"; }));

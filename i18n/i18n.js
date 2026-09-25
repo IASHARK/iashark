@@ -30,10 +30,9 @@
     {dir:"za", locale:"en",    htmlLang:"en-ZA", intl:"en-ZA", market:"za", blog:"en", label:"English (South Africa)"},
     {dir:"en", locale:"en",    htmlLang:"en",    intl:"en-GB", market:"us", blog:"en", label:"English (International)"},
     {dir:"mx", locale:"es-mx", htmlLang:"es-MX", intl:"es-MX", market:"mx", blog:"mx", label:"Español (México)"},
-    {dir:"es", locale:"es",    htmlLang:"es",    intl:"es-ES", market:"fr", blog:"es", label:"Español"},
-    {dir:"de", locale:"de",    htmlLang:"de",    intl:"de-DE", market:"fr", blog:"de", label:"Deutsch"},
-    {dir:"it", locale:"it",    htmlLang:"it",    intl:"it-IT", market:"fr", blog:"it", label:"Italiano"},
-    {dir:"pt", locale:"pt",    htmlLang:"pt",    intl:"pt-PT", market:"fr", blog:"pt", label:"Português"}
+    {dir:"es", locale:"es",    htmlLang:"es",    intl:"es-ES", market:"fr", blog:"es", label:"Español"}
+    // de / it / pt retires le 25/09/2026 (config/markets.json#_retiredDirs) :
+    // /de/*, /it/*, /pt/* sont rediriges en 301 vers /en/.
   ];
   var DIR_BY_CODE = {};
   DIRS.forEach(function(d){ DIR_BY_CODE[d.dir] = d; });
@@ -43,7 +42,7 @@
   // Compat : ancienne table marche -> dictionnaire (toujours valable).
   var MARKET_LOCALE = {gb:"en", mx:"es-mx", za:"en"};
   // Locale de dictionnaire -> repertoire de langue correspondant.
-  var LOCALE_DIR = {fr:"fr", en:"en", es:"es", "es-mx":"mx", de:"de", it:"it", pt:"pt"};
+  var LOCALE_DIR = {fr:"fr", en:"en", es:"es", "es-mx":"mx", de:"en", it:"en", pt:"en"};
   var LOCALE_INTL = {fr:"fr-FR", en:"en-GB", es:"es-ES", "es-mx":"es-MX", de:"de-DE", it:"it-IT", pt:"pt-PT"};
 
   // Pages presentes dans CHAQUE repertoire (scripts/i18n-manifest.js + pages
@@ -112,7 +111,7 @@
   // condition de langue (verifie par tests/lang-routing.test.js) : apres un
   // choix, "/" renvoie toujours vers la version choisie.
   var CHOICE_COOKIES = {fr:["fr","fr"], gb:["gb","en"], za:["za","en"], en:["us","en"],
-    mx:["mx","es"], es:["es","es"], de:["de","de"], it:["it","it"], pt:["pt","pt"]};
+    mx:["mx","es"], es:["es","es"]};
   function setChoiceCookies(dir){
     var c = CHOICE_COOKIES[dir];
     if (!c) return;
@@ -244,7 +243,7 @@
   // discret, jamais de redirection (lib/lang-suggest.js). Ici seulement un
   // pre-filtre gratuit pour ne telecharger ce script que si la PREMIERE
   // langue du navigateur est une autre langue du site que celle de la page.
-  var HINT_LANGS = {fr:1, en:1, es:1, de:1, it:1, pt:1};
+  var HINT_LANGS = {fr:1, en:1, es:1, de:1, it:1, pt:1}; // de/it/pt : suggestion de la version anglaise
   function hintPageDir(){
     if (CURRENT_DIR) return CURRENT_DIR;
     // Pages match FR statiques sans prefixe (/match/<id>.html, <html lang="fr">).

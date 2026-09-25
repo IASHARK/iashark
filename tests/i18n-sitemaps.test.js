@@ -10,7 +10,9 @@ const ROOT = path.join(__dirname, "..");
 const LOCALES = JSON.parse(fs.readFileSync(path.join(ROOT, "i18n/locales.json"), "utf8"));
 const MARKETS = JSON.parse(fs.readFileSync(path.join(ROOT, "config/markets.json"), "utf8"));
 const PAGES = require(path.join(ROOT, "scripts/i18n-manifest.js"));
-const DIRS = Object.keys(MARKETS._dirs);
+// 25/09/2026 : versions retirees (config/markets.json#_retiredDirs, de/it/pt) :
+// ni sitemap, ni hreflang ; leurs dictionnaires restent dans locales.json.
+const { PUBLIC_DIRS: DIRS, RETIRED_DIRS } = require("./helpers/public-dirs.js");
 // Une page noSitemap:true (page noindex : compte, connexion, match...) est
 // generee normalement mais ne doit jamais apparaitre dans un sitemap.
 const SITEMAP_PAGES = PAGES.filter(function (p) { return !p.noSitemap; });
@@ -44,8 +46,13 @@ function blogPrefix(dir) {
 
 test("i18n sitemaps: un sitemap par repertoire public (langues, puis marches pays gb/za/mx)", () => {
   var dirs = sitemapDirs(LOCALES);
-  assert.deepEqual(dirs.slice(0, LOCALES.supported.length), LOCALES.supported);
+  var langs = LOCALES.supported.filter(function (l) { return DIRS.indexOf(l) !== -1; });
+  assert.deepEqual(dirs.slice(0, langs.length), langs);
   assert.deepEqual(dirs.slice().sort(), DIRS.slice().sort());
+  Object.keys(RETIRED_DIRS).forEach(function (d) {
+    assert.ok(dirs.indexOf(d) === -1, d + " : version retiree dans les sitemaps");
+    assert.ok(!fs.existsSync(path.join(ROOT, "sitemap-" + d + "-i18n.xml")), "sitemap-" + d + "-i18n.xml encore present");
+  });
   ["gb", "za", "mx"].forEach(function (d) { assert.ok(dirs.indexOf(d) !== -1, d + " absent des sitemaps"); });
   assert.ok(!PAGES.some(function (p) { return p.file === "historique.html"; }), "historique.html ne doit plus etre une page publique");
 });
@@ -101,6 +108,9 @@ test("i18n sitemaps: fichiers valides, hreflang complet (dont en-GB/en-ZA/es-MX)
       assert.match(xml, new RegExp('hreflang="' + hl + '" href="https://iashark\\.com/' + d2 + '/'), fname + " : hreflang " + hl + " manquant");
     });
     assert.match(xml, /hreflang="x-default" href="https:\/\/iashark\.com\/en\//, fname + " : hreflang x-default manquant");
+    Object.keys(RETIRED_DIRS).forEach(function (r) {
+      assert.doesNotMatch(xml, new RegExp('hreflang="' + MARKETS._dirs[r].hreflang + '"|iashark\\.com/' + r + '/'), fname + " : version retiree " + r);
+    });
 
     ["url", "urlset"].forEach(function (tag) {
       var opens = (xml.match(new RegExp("<" + tag + "(?:\\s|>)", "g")) || []).length;

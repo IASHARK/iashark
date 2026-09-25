@@ -526,7 +526,8 @@ test("rappel annuel : 7 versions, montant et date du marche, mentions obligatoir
     for (const url of hrefs.concat(textUrls)) {
       if (url === helplineUrl || EXTERNAL_ALLOWED.includes(url)) continue;
       assert.ok(url.startsWith("https://iashark.com/" + dir + "/"), dir + " lien hors repertoire : " + url);
-      const rel = url.slice("https://iashark.com/".length);
+      // 25/09/2026 : de/it/pt retires, leurs liens menent en 301 vers /en/ (servedPath).
+      const rel = require("./helpers/public-dirs.js").servedPath(url.slice("https://iashark.com/".length));
       assert.ok(fs.existsSync(path.join(ROOT, rel.endsWith("/") ? rel + "index.html" : rel)), dir + " page inexistante : " + url);
     }
     assert.ok(hrefs.includes("https://iashark.com/" + dir + "/compte.html"), dir + " lien Mon compte");

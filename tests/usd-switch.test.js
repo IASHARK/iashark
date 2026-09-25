@@ -196,7 +196,9 @@ test("(b) bascule appliquee, build complet en memoire : /en/ en USD partout, che
   assert.doesNotMatch(cgv, /Annual: |For information, /, "CGV : annuel non vendu, masque");
   // Autres versions : prix de leur marche, inchanges.
   assert.match(files["fr/abonnement.html"], />19,95\s€</);
-  for (const d of ["es", "de"]) assert.match(files[d + "/abonnement.html"], /19,95\s€/, d);
+  // 25/09/2026 : /de/ retire (301 vers /en/), plus de page generee.
+  for (const d of ["es"]) assert.match(files[d + "/abonnement.html"], /19,95\s€/, d);
+  assert.equal(files["de/abonnement.html"], null, "version retiree jamais regeneree");
   assert.match(files["gb/abonnement.html"], /£14\.99/);
   assert.match(files["za/abonnement.html"], /<meta name="iashark-market" content="za">/);
   assert.match(files["mx/abonnement.html"], /MX\$199/);

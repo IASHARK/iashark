@@ -32,7 +32,10 @@ function readJson(rel) { return JSON.parse(fs.readFileSync(path.join(ROOT, rel),
 
 const MARKETS = readJson("config/markets.json");
 const DIRS = MARKETS._dirs;
-const DIR_CODES = Object.keys(DIRS);
+// Versions retirees (config/markets.json#_retiredDirs, 25/09/2026) : config
+// conservee dans _dirs mais jamais generee, liee, ni declaree en hreflang.
+const RETIRED_DIRS = MARKETS._retiredDirs || {};
+const DIR_CODES = Object.keys(DIRS).filter(function (d) { return !Object.prototype.hasOwnProperty.call(RETIRED_DIRS, d); });
 const X_DEFAULT_DIR = MARKETS._xDefaultDir || "fr";
 const LEGAL_FILES = MARKETS._legalFiles || {};
 const LEGAL_FILE_LIST = Object.keys(LEGAL_FILES).map(function (k) { return LEGAL_FILES[k]; });
@@ -596,8 +599,9 @@ function syncLeagueNames() {
 // "us" (config/markets.json#_usdSwitch) reste ainsi une modification de
 // configuration seule (lib/lang-suggest.js lit ces marches).
 function syncI18nDirMarkets(src, dirs) {
+  var codes = dirs ? Object.keys(dirs) : DIR_CODES; // versions retirees : absentes de i18n.js
   dirs = dirs || DIRS;
-  Object.keys(dirs).forEach(function (d) {
+  codes.forEach(function (d) {
     var re = new RegExp('(\\{dir:"' + d + '",[^}\\n]*?\\bmarket:")[a-z]+(")');
     if (!re.test(src)) throw new Error("i18n/i18n.js : ligne DIRS du repertoire " + d + " introuvable");
     src = src.replace(re, function (m, a, b) { return a + dirs[d].market + b; });
@@ -632,6 +636,13 @@ function legacyRedirectRules(cfg, root) {
   return out;
 }
 
+// Prefixes d'anciennes langues a declarer 410 Gone (config/legacy-redirects.json#gone).
+function legacyGonePrefixes(cfg) {
+  var c = cfg;
+  if (!c) { try { c = readJson("config/legacy-redirects.json"); } catch (e) { return []; } }
+  return (c.gone || []).filter(function (p) { return typeof p === "string" && /^\/[a-z]{2,3}$/.test(p) && DIR_CODES.indexOf(p.slice(1)) === -1; });
+}
+
 // ---------------------------------------------------------------------------
 // _redirects (Netlify) : entierement regenere.
 function rule(from, to, status, cond) {
@@ -650,16 +661,43 @@ function redirectsContent() {
     "# chemin (\"shadowing\" : la racine a un index.html et les anciennes pages",
     "# racine restent les sources du generateur).",
     "",
-    "# --- Racine \"/\" UNIQUEMENT (jamais une page profonde) : aiguillage par pays",
-    "# (Country = ISO 3166-1 alpha-2, GeoIP Netlify ou cookie nf_country) puis par",
-    "# premiere langue du navigateur (Language = Accept-Language ou cookie nf_lang).",
-    "# Ordre : marches a devise propre (gb, za, mx), pays multilingues (pays +",
-    "# langue), pays -> langue du pays, langue du navigateur, pays sans version",
-    "# -> /en/, enfin /fr/. Table et justifications : lib/lang-routing.js. Le",
-    "# selecteur de langue pose nf_country/nf_lang (i18n/i18n.js) : la racine suit",
-    "# alors le choix du visiteur. 302 : aiguillage revisable, jamais permanent."
+    "# --- Racine \"/\" UNIQUEMENT (jamais une page profonde) : aiguillage par la",
+    "# SEULE langue du navigateur (Language = Accept-Language ou cookie nf_lang),",
+    "# plus jamais par pays. Sans langue reconnue (navigateur francais, robots",
+    "# comme Googlebot) : accueil francais servi en 200 sur \"/\" (reecriture).",
+    "# Table et justifications : lib/lang-routing.js (decision du 25/09/2026)."
   ];
-  LANG_ROUTING.rootRedirectRules(X_DEFAULT_DIR).forEach(function (r) { out.push(rule("/", "/" + r.to + "/", "302!", r.cond)); });
+  LANG_ROUTING.rootRedirectRules(X_DEFAULT_DIR).forEach(function (r) {
+    // Derniere regle : accueil francais servi EN 200 sur "/" (reecriture, pas
+    // de redirection) pour tout visiteur sans langue reconnue, robots compris.
+    if (r.rewrite) out.push(rule("/", "/" + r.to + "/index.html", "200!"));
+    else out.push(rule("/", "/" + r.to + "/", "302!", r.cond));
+  });
+
+  // Versions linguistiques retirees (config/markets.json#_retiredDirs) : meme
+  // page dans le repertoire de repli, en 301 permanent.
+  var retired = RETIRED_DIRS;
+  var retiredCodes = Object.keys(retired);
+  if (retiredCodes.length) {
+    out.push("", "# --- Versions retirees le 25/09/2026 (config/markets.json#_retiredDirs) :",
+      "# 301 vers la meme page du repertoire de repli.");
+    retiredCodes.forEach(function (d) {
+      out.push(rule("/" + d, "/" + retired[d] + "/", "301!"));
+      out.push(rule("/" + d + "/*", "/" + retired[d] + "/:splat", "301!"));
+    });
+  }
+
+  // Anciennes langues supprimees depuis longtemps (config/legacy-redirects.json#gone) :
+  // 410 Gone, pour que Google les retire de son index au lieu de les garder
+  // comme redirections vers l'accueil anglais.
+  var gone = legacyGonePrefixes();
+  if (gone.length) {
+    out.push("", "# --- Anciennes langues supprimees (config/legacy-redirects.json#gone) : 410 Gone.");
+    gone.forEach(function (g) {
+      out.push(rule(g, "/" + X_DEFAULT_DIR + "/404.html", "410!"));
+      out.push(rule(g + "/*", "/" + X_DEFAULT_DIR + "/404.html", "410!"));
+    });
+  }
 
   out.push("", "# --- Anciennes URLs racine -> version generee du repertoire par defaut (301).");
   out.push(rule("/index.html", "/" + X_DEFAULT_DIR + "/", "301!"));

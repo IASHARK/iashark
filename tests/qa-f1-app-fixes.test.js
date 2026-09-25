@@ -150,7 +150,8 @@ test("ligne d'aide : ressource du repertoire, jamais la ligne francaise hors /fr
     assert.equal(help(d).name, "Gambling Therapy", d);
     assert.equal(help(d).phone, null, d);
   });
-  ["gb", "za", "mx", "en", "es", "de", "it", "pt"].forEach((d) => {
+  // 25/09/2026 : pages des repertoires publics (de/it/pt retires, 301 vers /en/).
+  require("./helpers/public-dirs.js").PUBLIC_DIRS.filter((d) => d !== "fr").forEach((d) => {
     ["index.html", "marches.html", "match.html", "joueur.html", "pro.html"].forEach((f) => {
       const html = read(d + "/" + f);
       assert.doesNotMatch(html.replace(/<script[\s\S]*?<\/script>/g, ""), /09 74 75 13 13|joueurs-info-service/, d + "/" + f);
@@ -174,7 +175,7 @@ test("prix : MX$ pour le peso, prix du marche ecrit dans le HTML genere", () => 
 });
 
 test("accueil : 19 competitions partout, analyse gratuite honnete (compte gratuit)", () => {
-  ["fr", "gb", "za", "en", "mx", "es", "de", "it", "pt"].forEach((d) => {
+  require("./helpers/public-dirs.js").PUBLIC_DIRS.forEach((d) => {
     const visible = read(d + "/index.html").replace(/<script[\s\S]*?<\/script>/g, "").replace(/<style[\s\S]*?<\/style>/g, "");
     assert.doesNotMatch(visible, /\b13\b[^<]{0,3}(championnats|compet|Wettbewerbe|competizioni|competições|competiciones)|Treize|Thirteen|Trece|Dreizehn|Tredici/i, d);
     assert.match(visible, /tabular-nums">19<\/b>/, d);

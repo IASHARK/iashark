@@ -9,8 +9,7 @@
   var FALLBACK = [
     { dir: "fr", label: "Français" }, { dir: "gb", label: "English (UK)" },
     { dir: "za", label: "English (South Africa)" }, { dir: "en", label: "English (International)" },
-    { dir: "mx", label: "Español (México)" }, { dir: "es", label: "Español" },
-    { dir: "de", label: "Deutsch" }, { dir: "it", label: "Italiano" }, { dir: "pt", label: "Português" }
+    { dir: "mx", label: "Español (México)" }, { dir: "es", label: "Español" }
   ];
   var SHORT = { fr: "FR", gb: "UK", za: "ZA", en: "EN", mx: "MX", es: "ES", de: "DE", it: "IT", pt: "PT" };
 

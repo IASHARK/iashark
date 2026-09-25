@@ -71,9 +71,17 @@ test("textes i18n (i18n/parts/emails.*.json) : 7 langues, memes cles, aucune val
 });
 
 test("pages de desinscription : une par repertoire, langue du repertoire, sans connexion, noindex, navigation partagee", () => {
+  const { isRetired, servedPath } = require("./helpers/public-dirs.js");
   for (const dir of Object.keys(CONFIG._dirs)) {
     const d = CONFIG._dirs[dir];
     const file = dir + "/desinscription-email.html";
+    // 25/09/2026 : repertoire retire (de/it/pt) : pas de page propre, le lien
+    // des e-mails deja envoyes mene en 301 vers la page du repli (/en/).
+    if (isRetired(dir)) {
+      assert.notEqual(servedPath(file), file, file + " : aucune 301 vers le repli");
+      assert.ok(fs.existsSync(path.join(ROOT, servedPath(file))), servedPath(file));
+      continue;
+    }
     assert.ok(fs.existsSync(path.join(ROOT, file)), file);
     const html = read(file);
     assert.match(html, new RegExp('<html lang="' + d.htmlLang + '">'), file);

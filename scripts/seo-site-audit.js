@@ -21,7 +21,7 @@ const path = require("path");
 const ROOT = path.join(__dirname, "..");
 const SITE_URL = "https://iashark.com";
 const MARKETS = JSON.parse(fs.readFileSync(path.join(ROOT, "config/markets.json"), "utf8"));
-const DIR_CODES = Object.keys(MARKETS._dirs);
+const DIR_CODES = Object.keys(MARKETS._dirs).filter(function (d) { return !(MARKETS._retiredDirs || {}).hasOwnProperty(d); });
 const X_DEFAULT_DIR = MARKETS._xDefaultDir || "fr";
 const TITLE_MAX = 60;
 const DESCRIPTION_MAX = 155;
@@ -50,8 +50,12 @@ function walk(dir, rel, out) {
 }
 
 // ---------------------------------------------------------------------------
-// _redirects : regles sans condition (les regles pays/langue de "/" sont
+// _redirects : regles sans condition (les regles de langue de "/" sont
 // conditionnelles ; la derniere, sans condition, masque index.html racine).
+// 25/09/2026 : cette derniere regle est une reecriture forcee 200! vers
+// /fr/index.html (la racine sert l'accueil francais, canonical /fr/). Pour
+// l'audit, une reecriture forcee sans condition se traite comme une
+// redirection : "/" n'est pas une page a part, c'est l'accueil /fr/.
 function parseRedirects(root) {
   var file = path.join(root, "_redirects");
   if (!fs.existsSync(file)) return [];
@@ -61,7 +65,7 @@ function parseRedirects(root) {
       var p = l.split(/\s+/);
       return { from: p[0], to: p[1], status: parseInt(p[2], 10), force: /!$/.test(p[2] || ""), cond: p.length > 3 };
     })
-    .filter(function (r) { return !r.cond && (r.status === 301 || r.status === 302); });
+    .filter(function (r) { return !r.cond && (r.status === 301 || r.status === 302 || (r.status === 200 && r.force)); });
 }
 function ruleMatch(rule, p) {
   if (/\/\*$/.test(rule.from)) {

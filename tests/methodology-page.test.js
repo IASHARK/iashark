@@ -34,7 +34,12 @@ const exists = (rel) => fs.existsSync(path.join(ROOT, rel));
 const MARKETS = JSON.parse(read("config/markets.json"));
 // 9 versions = tous les repertoires de config/markets.json#_dirs. de/it/pt ont
 // ete ajoutes le 16/09/2026 : la page existe desormais dans les 7 locales.
-const DIRS = ["fr", "en", "gb", "za", "es", "mx", "de", "it", "pt"];
+const ALL_DIRS = ["fr", "en", "gb", "za", "es", "mx", "de", "it", "pt"];
+// 25/09/2026 : de/it/pt retires du site public (config/markets.json#_retiredDirs,
+// 301 vers /en/) : sources legal/<dir>/ conservees, pages generees pour les
+// seuls repertoires publics.
+const { PUBLIC_DIRS, RETIRED_DIRS } = require("./helpers/public-dirs.js");
+const DIRS = ALL_DIRS.filter(function (d) { return PUBLIC_DIRS.includes(d); });
 const FAMILY = { fr: "fr", en: "en", gb: "en", za: "en", es: "es", mx: "es" };
 const TITLES = {
   fr: "Méthodologie IAShark : données, modèle, limites",
@@ -59,12 +64,11 @@ test("config : methodologie.html declaree dans _legalFiles, localisee par i18n.j
   assert.match(read("i18n/i18n.js"), /"methodologie\.html"/);
 });
 
-test("sources et pages generees : les 9 repertoires de _dirs", () => {
-  assert.deepEqual(Object.keys(MARKETS._dirs).sort(), DIRS.slice().sort(), "_dirs a change : mettre a jour DIRS");
-  DIRS.forEach(function (d) {
-    assert.ok(exists("legal/" + d + "/methodologie.html"), "source " + d);
-    assert.ok(exists(d + "/methodologie.html"), "page generee " + d);
-  });
+test("sources et pages generees : sources des 9 repertoires de _dirs, pages des repertoires publics", () => {
+  assert.deepEqual(Object.keys(MARKETS._dirs).sort(), ALL_DIRS.slice().sort(), "_dirs a change : mettre a jour ALL_DIRS");
+  ALL_DIRS.forEach(function (d) { assert.ok(exists("legal/" + d + "/methodologie.html"), "source " + d); });
+  DIRS.forEach(function (d) { assert.ok(exists(d + "/methodologie.html"), "page generee " + d); });
+  Object.keys(RETIRED_DIRS).forEach(function (d) { assert.ok(!exists(d + "/methodologie.html"), "version retiree encore generee " + d); });
 });
 
 // ---------------------------------------------------------------------------
@@ -209,7 +213,7 @@ test("title/meta, canonical du repertoire, JSON-LD AboutPage + Organization sans
   });
 });
 
-test("hreflang complet : les 9 versions + x-default dans chaque page generee", () => {
+test("hreflang complet : les versions publiques + x-default dans chaque page generee, aucune version retiree", () => {
   const HREFLANGS = { fr: "fr", en: "en", gb: "en-GB", za: "en-ZA", es: "es", mx: "es-MX", de: "de", it: "it", pt: "pt" };
   DIRS.forEach(function (d) {
     const html = read(d + "/methodologie.html");
@@ -217,6 +221,7 @@ test("hreflang complet : les 9 versions + x-default dans chaque page generee", (
       const tag = '<link rel="alternate" hreflang="' + HREFLANGS[alt] + '" href="https://iashark.com/' + alt + '/methodologie.html">';
       assert.ok(html.includes(tag), d + " : hreflang manquant vers " + alt);
     });
+    Object.keys(RETIRED_DIRS).forEach(function (r) { assert.ok(!html.includes('hreflang="' + HREFLANGS[r] + '"'), d + " : hreflang vers la version retiree " + r); });
     assert.match(html, /<link rel="alternate" hreflang="x-default" href="https:\/\/iashark\.com\/[a-z]{2}\/methodologie\.html">/, d + " : x-default manquant");
   });
 });
@@ -282,7 +287,7 @@ test("page courte et transparente : outil d'IA annonce (sans le nommer), longueu
   });
 });
 
-test("liens Methodologie : a-propos et pieds de page, dans les 9 versions", () => {
+test("liens Methodologie : a-propos et pieds de page, dans les versions publiques", () => {
   DIRS.forEach(function (d) {
     assert.match(read(d + "/a-propos.html"), new RegExp('href="/' + d + '/methodologie\\.html"'), d + "/a-propos");
     assert.match(read(d + "/index.html"), new RegExp('href="/' + d + '/methodologie\\.html"'), d + "/index (pied de page)");
@@ -384,7 +389,7 @@ test("pages vitrine : aucun nom de modele ni de methode, y compris dans les donn
   });
 });
 
-test("pages vitrine : les 9 versions generees existent bien (sinon les tests ci-dessus ne verifient rien)", () => {
+test("pages vitrine : les versions publiques generees existent bien (sinon les tests ci-dessus ne verifient rien)", () => {
   VITRINE_PATHS.forEach(function (rel) { assert.ok(exists(rel), "page absente : " + rel); });
   assert.equal(VITRINE_PATHS.length, VITRINE_FILES.length * (DIRS.length + 1));
 });
@@ -408,7 +413,7 @@ test("dictionnaires des pages vitrine : aucun nom de modele, dans les 7 locales"
 });
 
 test("textes SEO par repertoire : aucun nom de modele dans les 9 fichiers i18n/seo", () => {
-  DIRS.forEach(function (d) {
+  ALL_DIRS.forEach(function (d) {
     const seo = JSON.parse(read("i18n/seo/" + d + ".json"));
     // _readme est une note d'edition interne, jamais publiee.
     const blob = JSON.stringify({ meta: seo.meta, home: seo.home });

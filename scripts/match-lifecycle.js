@@ -402,7 +402,10 @@ function redirectRules(reg) {
     var dirs = Array.isArray(e.dirs) && e.dirs.length ? e.dirs : [C.X_DEFAULT_DIR];
     if (e.status === "redirected") {
       dirs.forEach(function (dir) {
-        if (!C.DIRS[dir]) return;
+        // 25/09/2026 : version retiree du site (config/markets.json#_retiredDirs,
+        // absente de C.DIR_CODES) : son hub n'existe plus et /<dir>/* est deja
+        // redirige en bloc (301! vers le repli) par scripts/build-locales.js.
+        if (!C.DIRS[dir] || C.DIR_CODES.indexOf(dir) === -1) return;
         rules.push([C.matchPath(dir, id), redirectTarget(e, dir), "301"]);
       });
     }

@@ -8,7 +8,9 @@ const ROOT = path.join(__dirname, "..");
 const SITE_URL = "https://iashark.com";
 const MARKETS = JSON.parse(fs.readFileSync(path.join(ROOT, "config/markets.json"), "utf8"));
 const DIRS = MARKETS._dirs;
-const DIR_CODES = Object.keys(DIRS);
+// Versions retirees (config/markets.json#_retiredDirs) : jamais publiees.
+const RETIRED_DIRS = MARKETS._retiredDirs || {};
+const DIR_CODES = Object.keys(DIRS).filter(function (d) { return !Object.prototype.hasOwnProperty.call(RETIRED_DIRS, d); });
 const X_DEFAULT_DIR = MARKETS._xDefaultDir || "fr";
 const LEAGUES = JSON.parse(fs.readFileSync(path.join(ROOT, "config/leagues.json"), "utf8")).leagues;
 

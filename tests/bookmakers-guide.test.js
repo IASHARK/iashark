@@ -8,7 +8,9 @@
 //                     section Grande-Bretagne (UKGC, GAMSTOP, BeGambleAware) et
 //                     Afrique du Sud (NGB, boards provinciaux, NRGP) ;
 //   - mx            : permisos SEGOB (Direccion General de Juegos y Sorteos) ;
-//   - en/es/de/it/pt: texte neutre "regulateur de votre pays", sans ANJ.
+//   - en/es         : texte neutre "regulateur de votre pays", sans ANJ ;
+//   - de/it/pt      : versions retirees le 25/09/2026 (config/markets.json#
+//                     _retiredDirs), /de/* etc. redirigent en 301 vers /en/*.
 // Aucune version ne parle de bonus / offre de bienvenue ni ne nomme d'operateur.
 const test = require("node:test"), assert = require("node:assert/strict");
 const fs = require("node:fs"), path = require("node:path");
@@ -16,7 +18,7 @@ const fs = require("node:fs"), path = require("node:path");
 const ROOT = path.resolve(__dirname, "..");
 const GUIDE = "blog/guides/meilleurs-bookmakers-monde-2026.html";
 const read = (f) => fs.readFileSync(path.join(ROOT, f), "utf8");
-const PAGES = { fr: GUIDE, en: "en/" + GUIDE, es: "es/" + GUIDE, de: "de/" + GUIDE, it: "it/" + GUIDE, pt: "pt/" + GUIDE, mx: "mx/" + GUIDE };
+const PAGES = { fr: GUIDE, en: "en/" + GUIDE, es: "es/" + GUIDE, mx: "mx/" + GUIDE };
 const html = Object.fromEntries(Object.entries(PAGES).map(([k, f]) => [k, read(f)]));
 
 // gb et za n'ont pas de copie du blog : on suit la redirection declaree.
@@ -85,13 +87,10 @@ test("mx : permisos SEGOB (Direccion General de Juegos y Sorteos), 18+", () => {
   assert.doesNotMatch(html.mx, /UK Gambling Commission|Malta Gaming Authority/);
 });
 
-test("en/es/de/it/pt : texte neutre, renvoi au regulateur et a l'aide du pays", () => {
+test("en/es : texte neutre, renvoi au regulateur et a l'aide du pays", () => {
   const neutre = {
     en: /authorised by your own country's regulator/,
     es: /autorizado por el regulador de tu país/,
-    de: /von der Aufsichtsbehörde Ihres Landes zugelassen/,
-    it: /autorizzato dall'autorità di regolamentazione del tuo paese/,
-    pt: /autorizado pelo regulador do seu país/,
   };
   for (const [k, re] of Object.entries(neutre)) {
     const h = html[k];
@@ -101,7 +100,7 @@ test("en/es/de/it/pt : texte neutre, renvoi au regulateur et a l'aide du pays", 
     assert.ok(fs.existsSync(path.join(ROOT, k, "jeu-responsable.html")), k + "/jeu-responsable.html absent");
   }
   // Les versions langue ne listent pas les regulateurs d'autres pays.
-  for (const k of ["es", "de", "it", "pt"]) {
+  for (const k of ["es"]) {
     assert.doesNotMatch(html[k], /DGOJ|\bGGL\b|\bADM\b|\bSRIJ\b|Gambling Commission|GAMSTOP/, k + " cite un regulateur national");
   }
 });
@@ -113,5 +112,16 @@ test("JSON-LD valide et FAQ structuree identique a la FAQ visible", () => {
     assert.ok(faq, k + " sans FAQPage");
     const visibles = [...h.matchAll(/<div class="faq-q">([\s\S]*?)<\/div>/g)].map((m) => m[1]);
     assert.deepEqual(faq.mainEntity.map((q) => q.name), visibles, k + " : FAQ JSON-LD differente de la FAQ visible");
+  }
+});
+
+// 25/09/2026 : versions de/it/pt retirees : leur guide n'est plus publie et
+// l'URL mene en 301 vers la version anglaise (texte neutre verifie ci-dessus).
+test("de/it/pt retirees : guide non publie, 301 vers /en/", () => {
+  const rules = read("_redirects").split("\n").map((l) => l.trim().split(/\s+/));
+  for (const d of ["de", "it", "pt"]) {
+    assert.ok(!fs.existsSync(path.join(ROOT, d, GUIDE)), d + "/" + GUIDE + " encore present");
+    const r = rules.find((p) => p[0] === "/" + d + "/*");
+    assert.ok(r && r[1] === "/en/:splat" && r[2] === "301!", "/" + d + "/* sans 301 vers /en/");
   }
 });

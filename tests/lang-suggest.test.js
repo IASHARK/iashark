@@ -11,7 +11,9 @@ const vm = require("vm");
 const ROOT = path.join(__dirname, "..");
 const S = require("../lib/lang-suggest.js");
 const MARKETS = JSON.parse(fs.readFileSync(path.join(ROOT, "config/markets.json"), "utf8"));
-const DIRS = Object.keys(MARKETS._dirs).map((d) => ({
+// 25/09/2026 : table servie par i18n/i18n.js = repertoires publics (de/it/pt
+// retires, config/markets.json#_retiredDirs : leur langue est suggeree en anglais).
+const DIRS = require("./helpers/public-dirs.js").PUBLIC_DIRS.map((d) => ({
   dir: d, locale: MARKETS._dirs[d].locale, htmlLang: MARKETS._dirs[d].htmlLang, market: MARKETS._dirs[d].market
 }));
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), "utf8");
@@ -48,9 +50,11 @@ test("cas nominal : navigateur anglais sur une page francaise -> version anglais
   assert.equal(d.target, "en");
   assert.equal(d.href, "/en/pro.html");
   assert.equal(d.text.lang, "en");
-  assert.equal(decide({ languages: ["de-AT"] }).href, "/de/pro.html");
-  assert.equal(decide({ languages: ["pt-BR", "en"] }).target, "pt");
-  assert.equal(decide(Object.assign(pageEnv("de"), { languages: ["fr-CH"] })).href, "/fr/pro.html");
+  // Langues des versions retirees (de/it/pt) : version anglaise, jamais /de/.
+  assert.equal(decide({ languages: ["de-AT"] }).href, "/en/pro.html");
+  assert.equal(decide({ languages: ["pt-BR", "en"] }).target, "en");
+  assert.equal(decide({ languages: ["it-IT"] }).target, "en");
+  assert.equal(decide(Object.assign(pageEnv("es"), { languages: ["fr-CH"] })).href, "/fr/pro.html");
 });
 
 test("meme langue ou langue non proposee : pas de bandeau", () => {
@@ -97,12 +101,12 @@ test("choix explicite, fermeture, plafond d'affichages, stockage indisponible", 
 });
 
 test("page equivalente : liens hreflang d'abord, jamais une page absente ni une 404", () => {
-  // Hub ligue publie seulement en fr/en/de : pas de bandeau espagnol.
-  const leagueAlts = { fr: "/fr/leagues/bundesliga.html", en: "/en/leagues/bundesliga.html", de: "/de/leagues/bundesliga.html" };
+  // Hub ligue publie seulement en fr/en : pas de bandeau espagnol.
+  const leagueAlts = { fr: "/fr/leagues/bundesliga.html", en: "/en/leagues/bundesliga.html" };
   assert.equal(decide({ alternates: leagueAlts, languages: ["es-ES"] }).reason, "no-equivalent");
   assert.equal(decide({ alternates: leagueAlts }).href, "/en/leagues/bundesliga.html");
   // Liens hreflang presents : le repli n'est jamais utilise.
-  assert.equal(decide({ alternates: leagueAlts, languages: ["it"], fallbackHref: () => "/it/" }).reason, "no-equivalent");
+  assert.equal(decide({ alternates: leagueAlts, languages: ["es"], fallbackHref: () => "/es/" }).reason, "no-equivalent");
   // Aucun lien hreflang : helpers de chemins (null = pas d'equivalent connu).
   assert.equal(decide({ alternates: {}, fallbackHref: () => null }).reason, "no-equivalent");
   assert.equal(decide({ alternates: {}, fallbackHref: (d) => "/" + d + "/compte.html" }).href, "/en/compte.html");
@@ -123,7 +127,7 @@ test("offres pays (GBP, ZAR, MXN) : jamais proposees ni quittees sans pays connu
   // Page d'un marche pays : on ne propose d'en sortir que si le visiteur n'en releve pas.
   assert.equal(decide(Object.assign(pageEnv("gb"), { languages: ["fr-FR"] })).reason, "market-unknown-country");
   assert.equal(decide(Object.assign(pageEnv("gb"), { languages: ["fr-FR"], geoCountry: "GB" })).reason, "other-market");
-  assert.equal(decide(Object.assign(pageEnv("gb"), { languages: ["de-DE"], geoCountry: "DE" })).target, "de");
+  assert.equal(decide(Object.assign(pageEnv("gb"), { languages: ["es-ES"], geoCountry: "ES" })).target, "es");
   assert.equal(decide(Object.assign(pageEnv("mx"), { languages: ["en-US"], geoCountry: "MX" })).reason, "other-market");
   // Propriete : une suggestion vers ou hors d'une offre PAYS (gb, za, mx)
   // correspond toujours au pays du visiteur. Entre versions de langue (dont

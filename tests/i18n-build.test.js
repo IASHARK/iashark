@@ -8,8 +8,9 @@ const { execFileSync } = require("child_process");
 const ROOT = path.join(__dirname, "..");
 const LOCALES = JSON.parse(fs.readFileSync(path.join(ROOT, "i18n/locales.json"), "utf8"));
 const MARKETS = JSON.parse(fs.readFileSync(path.join(ROOT, "config/markets.json"), "utf8"));
-// Repertoires publics generes : 6 langues + marches pays gb/za/mx.
-const DIR_CODES = Object.keys(MARKETS._dirs);
+// Repertoires publics generes : langues + marches pays gb/za/mx, MOINS les
+// versions retirees le 25/09/2026 (config/markets.json#_retiredDirs : de/it/pt).
+const { PUBLIC_DIRS: DIR_CODES, RETIRED_DIRS } = require("./helpers/public-dirs.js");
 // Dictionnaires reellement servis : les 6 langues + es-mx (repertoire /mx/).
 const DICT_LOCALES = LOCALES.supported.concat(["es-mx"]);
 
@@ -74,12 +75,15 @@ test("i18n: build-locales.js s'execute sans erreur et produit un JS valide par r
       assert.ok(fs.existsSync(filePath), "fichier genere manquant: " + filePath);
       var html = fs.readFileSync(filePath, "utf8");
 
-      // hreflang complet (9 repertoires : fr en es de it pt en-GB en-ZA es-MX,
-      // + x-default) et canonical dans le repertoire.
+      // hreflang complet (6 repertoires publics : fr en es en-GB en-ZA es-MX,
+      // + x-default), jamais vers une version retiree, et canonical dans le repertoire.
       DIR_CODES.forEach(function (l2) {
         if (page.file === "landing.html" && MARKETS._dirs[l2].customLanding) return;
         var hl = MARKETS._dirs[l2].hreflang;
         assert.match(html, new RegExp('hreflang="' + hl + '"'), "hreflang " + hl + " manquant dans " + filePath);
+      });
+      Object.keys(RETIRED_DIRS).forEach(function (r) {
+        assert.doesNotMatch(html, new RegExp('hreflang="' + MARKETS._dirs[r].hreflang + '"|iashark\\.com/' + r + '/'), "version retiree " + r + " referencee dans " + filePath);
       });
       // x-default -> /en/ (config/markets.json#_hreflangXDefault) ; accueil ->
       // la racine, aiguillage par pays (22/09/2026).

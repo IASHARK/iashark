@@ -1,0 +1,86 @@
+name: Videos IASHARK du jour
+
+# Chaque matin, une fois les analyses publiees (Update IASHARK Daily), fabrique
+# les videos verticales des matchs dans 2 jours (Safe, Match Pulse, Match simule)
+# avec Remotion et les envoie sur Telegram. Rien n'est committe.
+# Secrets necessaires : SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (deja la),
+# TELEGRAM_BOT_TOKEN et TELEGRAM_CHAT_ID (a ajouter).
+
+on:
+  workflow_run:
+    workflows: ["Update IASHARK Daily"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Date des matchs AAAA-MM-JJ (vide = dans 2 jours)"
+        required: false
+
+concurrency:
+  group: daily-videos
+  cancel-in-progress: false
+
+jobs:
+  videos:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: remotion-score-template/package-lock.json
+
+      # Impact / Arial Black utilises par les modeles Match Pulse et Match simule
+      - name: Polices
+        run: |
+          echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | sudo debconf-set-selections
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ttf-mscorefonts-installer fonts-noto-color-emoji
+          fc-cache -f
+
+      - name: Dependances Remotion
+        working-directory: remotion-score-template
+        run: npm ci
+
+      - name: Choix des matchs et donnees des videos
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DATE_MATCHS: ${{ inputs.date }}
+        run: |
+          DATE_MATCHS="${DATE_MATCHS:-$(TZ=Europe/Paris date -d '+2 days' +%F)}"
+          echo "Videos des matchs du $DATE_MATCHS"
+          node scripts/videos/build-daily-videos.mjs --out "$RUNNER_TEMP/daily" --date "$DATE_MATCHS"
+
+      - name: Rendu des videos
+        working-directory: remotion-score-template
+        run: |
+          node -e '
+            const m = require(process.env.RUNNER_TEMP + "/daily/manifest.json");
+            for (const v of m.videos) console.log([v.composition, v.output, v.props].join("\t"));
+          ' | while IFS=$'\t' read -r comp output props; do
+            npx remotion render "$comp" "$output" --props="$props" --concurrency=2 --log=error || echo "::warning::rendu echoue : $comp"
+          done
+
+      - name: Envoi Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node scripts/videos/send-telegram.mjs "$RUNNER_TEMP/daily"
+
+      # Copie de secours dans GitHub (7 jours) si Telegram a un souci
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: videos-${{ github.run_id }}
+          path: ${{ runner.temp }}/daily
+          retention-days: 7

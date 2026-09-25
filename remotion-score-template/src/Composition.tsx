@@ -8,15 +8,36 @@ import {generatedMatchProps as dortmundVillarrealProps} from "./generated-dortmu
 import {uclSeptember9} from "./generated-ucl-2026-09-09";
 import {kLeague1September9} from "./generated-kleague1-2026-09-09";
 import {MontanteOne} from "./MontanteOne";
+import {DailyTicket, DAILY_TICKET_DURATION, type DailyTicketProps} from "./DailyTicket";
 import {IasharkAdConcept} from "./IasharkAdConcept";
 import {IasharkOrganicAd} from "./IasharkOrganicAd/IasharkOrganicAd";
 import {ORGANIC_AD_DURATION} from "./IasharkOrganicAd/theme";
 import {IasharkCityCampaign} from "./IasharkCityCampaign/IasharkCityCampaign";
 import {CITY_CAMPAIGN_DURATION} from "./IasharkCityCampaign/theme";
 import {IasharkModelVsMarketUK, UK_MVM_DURATION} from "./IasharkModelVsMarketUK";
+import {MatchPulseBesiktasMarseille} from "./MatchPulseBesiktasMarseille";
+import {MatchPulseManchesterCityNorwich} from "./MatchPulseManchesterCityNorwich";
+import {MatchPulseBrentfordChelseaInstagram} from "./MatchPulseBrentfordChelseaInstagram";
+import {MarseillePsgPulsePreview} from "./MarseillePsgPulsePreview";
+import {MatchPulseRomaInterInstagram} from "./MatchPulseRomaInterInstagram";
+import {MatchPulseLyonRennesInstagram} from "./MatchPulseLyonRennesInstagram";
+import {MatchPulseCitySunderlandInstagram} from "./MatchPulseCitySunderlandInstagram";
+import {StoryboardTimeline, StoryboardPitch, StoryboardWindows} from "./IasharkConceptStoryboards";
+import {IasharkSimulationReveal} from "./IasharkSimulationReveal/IasharkSimulationReveal";
+import {SIMULATION_REVEAL_DURATION} from "./IasharkSimulationReveal/theme";
+import {PLAYER_SCORER_TOTTENHAM_VILLA_DURATION, PlayerScorerTottenhamVilla} from "./PlayerScorerTottenhamVilla";
+import {MatchPulseTottenhamAstonVilla, TOTTENHAM_VILLA_MATCH_PULSE_DURATION} from "./MatchPulseTottenhamAstonVilla";
+import {IasharkChronoPure} from "./IasharkChronoPure";
+import {MarseillePsgChrono} from "./MarseillePsgChrono";
+import {IasharkViral90Preview} from "./IasharkViral90Preview";
+import {NetherlandsGermany90Preview} from "./NetherlandsGermany90Preview";
+import {NetherlandsGermany90Video, NETHERLANDS_GERMANY_90_VIDEO_DURATION} from "./NetherlandsGermany90Video";
+import {IasharkDuelConcept,IasharkRadarConcept,IasharkHeartbeatConcept} from "./IasharkStrongConcepts";
+import {DefensiveWallConcept,ImpactZoneConcept,KeeperPressureConcept,PlayerDuelConcept} from "./IasharkFootballConcepts";
+import {KeeperUnderPressureVideo} from "./KeeperUnderPressureVideo";
 
 export type GoalEvent = {minute: number; displayMinute?: string; player: string; side: "home" | "away"};
-export type MatchCardProps = {homeTeam: string; awayTeam: string; homeLogo: string; awayLogo: string; goals: GoalEvent[]; accentColor: string};
+export type MatchCardProps = {homeTeam: string; awayTeam: string; homeLogo: string; awayLogo: string; goals: GoalEvent[]; accentColor: string; simulationCount?: number};
 
 const TeamCard = ({team,side,logo}:{team:string;side:"home"|"away";logo:string}) => <Interactive.Div name={`${side} team`} style={{width:315,height:360,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",position:"relative"}}><div style={{width:230,height:230,display:"grid",placeItems:"center"}}><CanvasImage src={logo.startsWith("http")?logo:staticFile(logo)} width={210} height={210} style={{objectFit:"contain",filter:"drop-shadow(0 16px 22px rgba(0,0,0,.82)) drop-shadow(0 0 10px rgba(8,217,255,.18))"}}/></div><div style={{position:"absolute",bottom:-20,width:340,height:67,borderRadius:18,border:"1px solid #087aa4",background:"linear-gradient(180deg,#092536,#04131e)",display:"grid",placeItems:"center",fontSize:team.length>15?26:31,fontWeight:900,textTransform:"uppercase",boxShadow:"0 12px 20px #0008",whiteSpace:"nowrap"}}>{team}</div></Interactive.Div>;
 
@@ -71,13 +92,13 @@ export const MatchCard: React.FC<MatchCardProps> = (props) => {
     <Interactive.Div name="Brand" style={{position:"absolute",top:92,left:0,right:0,textAlign:"center",opacity:interpolate(frame,[0,20],[0,1],{extrapolateLeft:"clamp",extrapolateRight:"clamp"}),translate:interpolate(frame,[0,25],["0px -35px","0px 0px"],{extrapolateLeft:"clamp",extrapolateRight:"clamp",easing:Easing.out(Easing.cubic)})}}><div style={{fontFamily:"Impact,Arial Black",fontSize:77,letterSpacing:-2,textShadow:"0 4px 0 #0a0e13"}}><span style={{color:"#fff"}}>IA</span><span style={{color:props.accentColor}}>SHARK</span></div><div style={{fontSize:17,letterSpacing:13,marginTop:18,color:"#9db6c7"}}>FOOTBALL INSIGHTS</div></Interactive.Div>
     <div style={{position:"absolute",top:390,left:78,right:78,display:"flex",alignItems:"center",justifyContent:"space-between",opacity:entrance,scale:.92+entrance*.08}}><TeamCard team={props.homeTeam} logo={props.homeLogo} side="home"/><div style={{width:190,height:190,position:"relative",display:"grid",placeItems:"center"}}><svg width="190" height="190" viewBox="0 0 190 190" style={{position:"absolute",rotate:"-90deg",filter:"drop-shadow(0 0 10px #02cfee55)"}}><circle cx="95" cy="95" r="82" fill="rgba(1,10,17,.8)" stroke="#143344" strokeWidth="12"/><circle cx="95" cy="95" r="82" fill="none" stroke={props.accentColor} strokeWidth="12" strokeDasharray={circumference} strokeDashoffset={circumference*(1-progress)}/></svg><div style={{textAlign:"center",zIndex:1}}><div style={{fontSize:49,fontWeight:1000}}>{matchMinute}’</div><div style={{fontSize:18,color:"#9db6c7",marginTop:5}}>/ 90’</div></div></div><TeamCard team={props.awayTeam} logo={props.awayLogo} side="away"/></div>
     <Interactive.Div name="Score" style={{position:"absolute",top:830,left:105,right:105,height:260,border:"2px solid #087394",borderRadius:28,background:"linear-gradient(180deg,rgba(8,31,44,.9),rgba(2,14,23,.94))",display:"grid",gridTemplateColumns:"1fr 120px 1fr",alignItems:"center",textAlign:"center",fontSize:190,fontWeight:1000,boxShadow:"inset 0 0 42px #0385ab20,0 14px 35px #0009",scale:activeGoal?interpolate(goalAge,[0,8,18],[1,1.08,1],{extrapolateLeft:"clamp",extrapolateRight:"clamp",easing:Easing.out(Easing.cubic)}):1}}><span>{homeScore}</span><span style={{fontSize:92,color:props.accentColor}}>–</span><span>{awayScore}</span></Interactive.Div>
-    <Interactive.Div name="Simulated shots" style={{position:"absolute",top:1325,left:210,right:210,padding:"22px 28px 24px",borderRadius:18,border:"1px solid #075f7d",background:"linear-gradient(180deg,rgba(5,28,41,.88),rgba(1,12,20,.92))",boxShadow:"0 12px 30px #0008,inset 0 0 24px #008bb21c"}}>
+    <Interactive.Div name="Simulated shots" style={{position:"absolute",top:1140,left:210,right:210,padding:"22px 28px 24px",borderRadius:18,border:"1px solid #075f7d",background:"linear-gradient(180deg,rgba(5,28,41,.88),rgba(1,12,20,.92))",boxShadow:"0 12px 30px #0008,inset 0 0 24px #008bb21c"}}>
       <div style={{display:"grid",gridTemplateColumns:"80px 1fr 80px",alignItems:"center",fontSize:31,fontWeight:1000}}><span>{homeShots}</span><span style={{textAlign:"center",fontSize:20,letterSpacing:6,color:"#9db6c7"}}>TIRS SIMULÉS</span><span style={{textAlign:"right"}}>{awayShots}</span></div>
       <div style={{height:14,display:"flex",marginTop:17,borderRadius:20,overflow:"hidden",background:"#102b39",boxShadow:"0 0 12px #00cfff33"}}><div style={{width:`${homeShotShare*100}%`,height:"100%",background:props.accentColor,boxShadow:`0 0 14px ${props.accentColor}`}}/><div style={{flex:1,height:"100%",background:"#1d5870"}}/></div>
     </Interactive.Div>
-    {activeGoal?<Interactive.Div name="Goal announcement" style={{position:"absolute",top:1535,left:245,right:245,height:175,background:"linear-gradient(110deg,#06304a,#020e17 35%,#051d2e)",border:`3px solid ${props.accentColor}`,borderRadius:"25px 5px 25px 5px",boxShadow:`0 0 ${24*pulse}px ${props.accentColor}88,inset 0 0 30px #0085aa33`,display:"grid",placeItems:"center",opacity:interpolate(goalAge,[0,5,24,32],[0,1,1,0],{extrapolateLeft:"clamp",extrapolateRight:"clamp"}),translate:interpolate(goalAge,[0,8],["-130px 0px","0px 0px"],{extrapolateLeft:"clamp",extrapolateRight:"clamp",easing:Easing.out(Easing.back(1.4))})}}><div style={{fontFamily:"Impact,Arial Black",fontStyle:"italic",fontSize:84,lineHeight:1,color:"white",textShadow:`0 0 24px ${props.accentColor}`}}>BUT !</div></Interactive.Div>:null}
-    {halfTimeAge>=0&&halfTimeAge<halfTimePauseInFrames?<Interactive.Div name="Half time" style={{position:"absolute",top:1145,left:300,right:300,height:125,display:"grid",placeItems:"center",borderTop:`3px solid ${props.accentColor}`,borderBottom:`3px solid ${props.accentColor}`,background:"linear-gradient(90deg,transparent,rgba(2,28,42,.92),transparent)",fontFamily:"Impact,Arial Black",fontSize:64,fontStyle:"italic",letterSpacing:5,textShadow:`0 0 24px ${props.accentColor}`,opacity:interpolate(halfTimeAge,[0,8,halfTimePauseInFrames-8,halfTimePauseInFrames-1],[0,1,1,0],{extrapolateLeft:"clamp",extrapolateRight:"clamp"}),translate:interpolate(halfTimeAge,[0,10],["0px 22px","0px 0px"],{extrapolateLeft:"clamp",extrapolateRight:"clamp",easing:Easing.out(Easing.cubic)})}}>MI-TEMPS</Interactive.Div>:null}
-    <Interactive.Div name="Simulation notice" style={{position:"absolute",bottom:270,left:0,right:0,textAlign:"center",fontSize:16,fontWeight:400,letterSpacing:6,color:"#86a9ba",opacity:.78}}>BASÉ SUR 10 000 SIMULATIONS</Interactive.Div>
+    {activeGoal?<Interactive.Div name="Goal announcement" style={{position:"absolute",top:1330,left:245,right:245,height:175,background:"linear-gradient(110deg,#06304a,#020e17 35%,#051d2e)",border:`3px solid ${props.accentColor}`,borderRadius:"25px 5px 25px 5px",boxShadow:`0 0 ${24*pulse}px ${props.accentColor}88,inset 0 0 30px #0085aa33`,display:"grid",placeItems:"center",opacity:interpolate(goalAge,[0,5,24,32],[0,1,1,0],{extrapolateLeft:"clamp",extrapolateRight:"clamp"}),translate:interpolate(goalAge,[0,8],["-130px 0px","0px 0px"],{extrapolateLeft:"clamp",extrapolateRight:"clamp",easing:Easing.out(Easing.back(1.4))})}}><div style={{fontFamily:"Impact,Arial Black",fontStyle:"italic",fontSize:84,lineHeight:1,color:"white",textShadow:`0 0 24px ${props.accentColor}`}}>BUT !</div></Interactive.Div>:null}
+    {halfTimeAge>=0&&halfTimeAge<halfTimePauseInFrames?<Interactive.Div name="Half time" style={{position:"absolute",top:1355,left:300,right:300,height:125,display:"grid",placeItems:"center",borderTop:`3px solid ${props.accentColor}`,borderBottom:`3px solid ${props.accentColor}`,background:"linear-gradient(90deg,transparent,rgba(2,28,42,.92),transparent)",fontFamily:"Impact,Arial Black",fontSize:64,fontStyle:"italic",letterSpacing:5,textShadow:`0 0 24px ${props.accentColor}`,opacity:interpolate(halfTimeAge,[0,8,halfTimePauseInFrames-8,halfTimePauseInFrames-1],[0,1,1,0],{extrapolateLeft:"clamp",extrapolateRight:"clamp"}),translate:interpolate(halfTimeAge,[0,10],["0px 22px","0px 0px"],{extrapolateLeft:"clamp",extrapolateRight:"clamp",easing:Easing.out(Easing.cubic)})}}>MI-TEMPS</Interactive.Div>:null}
+    <Interactive.Div name="Simulation notice" style={{position:"absolute",bottom:270,left:0,right:0,textAlign:"center",fontSize:16,fontWeight:400,letterSpacing:6,color:"#86a9ba",opacity:.78}}>BASÉ SUR {(props.simulationCount??10000).toLocaleString("fr-FR").replace(/\u202f|\u00a0/g," ")} SIMULATIONS</Interactive.Div>
     <div style={{position:"absolute",bottom:92,left:0,right:0,textAlign:"center",color:"#9bb3c4",fontSize:18,letterSpacing:12}}>ANALYSER&nbsp;&nbsp; | &nbsp;&nbsp;ANTICIPER&nbsp;&nbsp; | &nbsp;&nbsp;GAGNER</div>
     <AbsoluteFill name="Final score" style={{background:"radial-gradient(circle at 50% 48%,#073044 0%,#020b12 35%,#000 78%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",opacity:interpolate(frame,[durationInFrames-75,durationInFrames-62],[0,1],{extrapolateLeft:"clamp",extrapolateRight:"clamp"})}}>
       <div style={{fontFamily:"Impact,Arial Black",fontSize:86,letterSpacing:-2}}><span>IA</span><span style={{color:props.accentColor}}>SHARK</span></div>
@@ -89,7 +110,127 @@ export const MatchCard: React.FC<MatchCardProps> = (props) => {
   </AbsoluteFill>;
 };
 
+const DAILY_TICKET_DEMO: DailyTicketProps = {
+  title: "SAFE",
+  dateLabel: "SÉLECTION DU 26 SEPTEMBRE",
+  legs: [
+    {home: "Slovaquie", away: "Moldavie", pick: "Slovaquie ou match nul", kickoff: "20H45"},
+    {home: "Saint-Marin", away: "Finlande", pick: "Finlande ou match nul", kickoff: "18H00"},
+    {home: "Islande", away: "Estonie", pick: "Islande ou match nul", kickoff: "18H00"},
+  ],
+};
+
 export const MyComposition=()=> <>
+  {/* Videos quotidiennes (scripts/videos/build-daily-videos.mjs + .github/workflows/daily-videos.yml) */}
+  <Composition id="DailySafe" component={DailyTicket} durationInFrames={DAILY_TICKET_DURATION} fps={30} width={1080} height={1920} defaultProps={DAILY_TICKET_DEMO}/>
+  <Composition id="DailyCombo" component={DailyTicket} durationInFrames={DAILY_TICKET_DURATION} fps={30} width={1080} height={1920} defaultProps={{...DAILY_TICKET_DEMO, title: "COMBINÉ"}}/>
+  <Composition id="DailyMatchPulse" component={MatchPulseBrentfordChelseaInstagram} durationInFrames={600} fps={30} width={1080} height={1920}/>
+  <Composition id="DailyMatchSimule" component={MatchCard} durationInFrames={600} fps={30} width={1080} height={1920} defaultProps={realInterProps}/>
+  <Composition id="MarseillePsgChrono" component={MarseillePsgChrono} durationInFrames={600} fps={30} width={1080} height={1920}/>
+  <Composition id="IasharkChronoPure" component={IasharkChronoPure} durationInFrames={450} fps={30} width={1080} height={1920}/>
+  <Composition id="TottenhamAstonVillaMatchPulse" component={MatchPulseTottenhamAstonVilla} durationInFrames={TOTTENHAM_VILLA_MATCH_PULSE_DURATION} fps={30} width={1080} height={1920}/>
+  <Composition id="PlayerScorerTottenhamVilla" component={PlayerScorerTottenhamVilla} durationInFrames={PLAYER_SCORER_TOTTENHAM_VILLA_DURATION} fps={30} width={1080} height={1920}/>
+  <Composition
+    id="IasharkSimulationReveal"
+    component={IasharkSimulationReveal}
+    durationInFrames={SIMULATION_REVEAL_DURATION}
+    fps={30}
+    width={1080}
+    height={1920}
+    defaultProps={{
+      homeTeam: "Real Betis",
+      awayTeam: "Getafe",
+      homeLogo: "logos/team-543.png",
+      awayLogo: "logos/getafe.png",
+      simulationCount: 20000,
+      expectedGoals: "2,5",
+      expectedShotsOnTarget: "9,6",
+      scorer: "R. RIQUELME",
+    }}
+  />
+  <Composition
+    id="IasharkSimulationRevealInstagram"
+    component={IasharkSimulationReveal}
+    durationInFrames={SIMULATION_REVEAL_DURATION}
+    fps={30}
+    width={1080}
+    height={1350}
+    defaultProps={{
+      homeTeam: "Real Betis",
+      awayTeam: "Getafe",
+      homeLogo: "logos/team-543.png",
+      awayLogo: "logos/getafe.png",
+      simulationCount: 20000,
+      expectedGoals: "2,5",
+      expectedShotsOnTarget: "9,6",
+      scorer: "R. RIQUELME",
+    }}
+  />
+  <Composition id="ManchesterCityNorwichMatchPulse" component={MatchPulseManchesterCityNorwich} durationInFrames={600} fps={30} width={1080} height={1920}/>
+  <Composition id="BrentfordChelseaMatchPulseInstagram" component={MatchPulseBrentfordChelseaInstagram} durationInFrames={600} fps={30} width={1080} height={1920}/>
+  <Composition id="MarseillePsgChelseaStyle" component={MatchPulseBrentfordChelseaInstagram} durationInFrames={600} fps={30} width={1080} height={1920} defaultProps={{
+    homeName:"Marseille",
+    awayName:"PSG",
+    homeLogo:"logos/team-81.png",
+    awayLogo:"logos/team-85.png",
+    competition:"LIGUE 1 • 20 SEPT. • 20:45",
+    showVs:false,
+    showCommentary:false,
+    goals:[{minute:14},{minute:59},{minute:86},{minute:90}],
+    homeXg:[0.20,0.37,0.54,0.78,0.96,1.27],
+    awayXg:[0.35,0.59,0.82,1.25,1.51,2.04],
+    phases:[
+      {label:"0–15",share:19,level:"",title:"",note:"",pressure:3,shots:2,rhythm:3,balance:36},
+      {label:"15–30",share:7,level:"",title:"",note:"",pressure:2,shots:2,rhythm:2,balance:38},
+      {label:"30–45",share:12,level:"",title:"",note:"",pressure:3,shots:3,rhythm:3,balance:40},
+      {label:"45–60",share:19,level:"",title:"",note:"",pressure:4,shots:4,rhythm:4,balance:38},
+      {label:"60–75",share:13,level:"",title:"",note:"",pressure:3,shots:4,rhythm:3,balance:39},
+      {label:"75–90",share:29,level:"",title:"",note:"",pressure:5,shots:5,rhythm:5,balance:38},
+    ],
+  }}/>
+  {/* Turquie–France, Ligue des Nations 25/09/2026 - donnees IASHARK du match 1528882 :
+      frequence des buts par tranche (92 buts, 20 derniers matchs des deux equipes),
+      xG 1,6 – 1,8 repartis selon ces frequences, 3 buts = score le plus probable (1-2)
+      places au milieu des 3 tranches les plus fournies. Niveaux 1-5 = frequence normalisee. */}
+  <Composition id="TurquieFranceChelseaStyle" component={MatchPulseBrentfordChelseaInstagram} durationInFrames={600} fps={30} width={1080} height={1920} defaultProps={{
+    homeName:"Turquie",
+    awayName:"France",
+    homeLogo:"logos/team-777.png",
+    awayLogo:"logos/team-2.png",
+    competition:"LIGUE DES NATIONS • 25 SEPT. • 20:45",
+    showVs:false,
+    showCommentary:false,
+    goals:[{minute:52},{minute:67},{minute:82}],
+    homeXg:[0.16,0.30,0.52,0.93,1.27,1.60],
+    awayXg:[0.18,0.34,0.59,1.05,1.43,1.80],
+    phases:[
+      {label:"0–15",share:10,level:"",title:"",note:"",pressure:2,shots:2,rhythm:2,balance:50},
+      {label:"15–30",share:9,level:"",title:"",note:"",pressure:2,shots:2,rhythm:2,balance:50},
+      {label:"30–45",share:14,level:"",title:"",note:"",pressure:3,shots:3,rhythm:3,balance:50},
+      {label:"45–60",share:26,level:"",title:"",note:"",pressure:5,shots:5,rhythm:5,balance:50},
+      {label:"60–75",share:21,level:"",title:"",note:"",pressure:5,shots:5,rhythm:5,balance:50},
+      {label:"75–90",share:21,level:"",title:"",note:"",pressure:5,shots:5,rhythm:5,balance:50},
+    ],
+  }}/>
+  <Composition id="MarseillePsgPulsePreview" component={MarseillePsgPulsePreview} durationInFrames={1} fps={30} width={1080} height={1920}/>
+  <Composition id="IasharkViral90Preview" component={IasharkViral90Preview} durationInFrames={1} fps={30} width={1080} height={1920}/>
+  <Composition id="NetherlandsGermany90Preview" component={NetherlandsGermany90Preview} durationInFrames={1} fps={30} width={1080} height={1920}/>
+  <Composition id="NetherlandsGermany90Video" component={NetherlandsGermany90Video} durationInFrames={NETHERLANDS_GERMANY_90_VIDEO_DURATION} fps={30} width={1080} height={1920}/>
+  <Composition id="IasharkDuelConcept" component={IasharkDuelConcept} durationInFrames={1} fps={30} width={1080} height={1920}/>
+  <Composition id="IasharkRadarConcept" component={IasharkRadarConcept} durationInFrames={1} fps={30} width={1080} height={1920}/>
+  <Composition id="IasharkHeartbeatConcept" component={IasharkHeartbeatConcept} durationInFrames={1} fps={30} width={1080} height={1920}/>
+  <Composition id="DefensiveWallConcept" component={DefensiveWallConcept} durationInFrames={1} fps={30} width={1080} height={1920}/>
+  <Composition id="ImpactZoneConcept" component={ImpactZoneConcept} durationInFrames={1} fps={30} width={1080} height={1920}/>
+  <Composition id="KeeperPressureConcept" component={KeeperPressureConcept} durationInFrames={1} fps={30} width={1080} height={1920}/>
+  <Composition id="PlayerDuelConcept" component={PlayerDuelConcept} durationInFrames={1} fps={30} width={1080} height={1920}/>
+  <Composition id="KeeperUnderPressureVideo" component={KeeperUnderPressureVideo} durationInFrames={600} fps={30} width={1080} height={1920}/>
+  <Composition id="RomaInterMatchPulseInstagram" component={MatchPulseRomaInterInstagram} durationInFrames={600} fps={30} width={1080} height={1920}/>
+  <Composition id="LyonRennesMatchPulseInstagram" component={MatchPulseLyonRennesInstagram} durationInFrames={600} fps={30} width={1080} height={1920}/>
+  <Composition id="CitySunderlandMatchPulseInstagram" component={MatchPulseCitySunderlandInstagram} durationInFrames={600} fps={30} width={1080} height={1920}/>
+  <Composition id="ConceptTimelineStoryboard" component={StoryboardTimeline} durationInFrames={300} fps={30} width={1080} height={1920}/>
+  <Composition id="ConceptPitchStoryboard" component={StoryboardPitch} durationInFrames={300} fps={30} width={1080} height={1920}/>
+  <Composition id="ConceptWindowsStoryboard" component={StoryboardWindows} durationInFrames={300} fps={30} width={1080} height={1920}/>
+  <Composition id="BesiktasMarseilleMatchPulse" component={MatchPulseBesiktasMarseille} durationInFrames={600} fps={30} width={1080} height={1920}/>
   <Composition id="IasharkModelVsMarketUK" component={IasharkModelVsMarketUK} durationInFrames={UK_MVM_DURATION} fps={30} width={1080} height={1920}/>
   <Composition id="IasharkCityCampaign" component={IasharkCityCampaign} durationInFrames={CITY_CAMPAIGN_DURATION} fps={30} width={1080} height={1920}/>
   <Composition id="IasharkOrganicAd" component={IasharkOrganicAd} durationInFrames={ORGANIC_AD_DURATION} fps={30} width={1080} height={1920}/>

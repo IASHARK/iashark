@@ -435,7 +435,8 @@ test.describe('bascule USD de /en/ (config de test _usdSwitch)', () => {
     await page.goto('/en/');
     await expect(page.locator('#prixPro')).toHaveText('$19.99');
     await expect(page.locator('#prixGratuit')).toHaveText('$0');
-    await expect(page.locator('#heroPrice')).toHaveText(tr(dict, 'home_app.hero_price_line').replace('{price}', '$19.99'));
+    // Ligne de prix sous le bouton de l'accueil retiree (26/09/2026) : plus d'abonnement au mois.
+    await expect(page.locator('#heroPrice')).toHaveCount(0);
     await page.goto('/en/landing.html');
     await expect(page.locator('[data-market-price="pro"]').first()).toHaveText('$19.99');
     await expect(page.locator('[data-market-price="free"]').first()).toHaveText('$0');

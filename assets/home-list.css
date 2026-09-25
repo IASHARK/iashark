@@ -34,6 +34,12 @@
 .hl-block-title{display:flex;align-items:center;gap:7px;margin:0 0 8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--soft,#a6b4c6);}
 .hl-block-title svg{width:13px;height:13px;color:var(--amber,#f59e0b);fill:currentColor;}
 .hl-mine{margin:4px 0 14px;}
+.hl-offer{margin:4px 0 14px;}
+.hl-offer-rows{border:1px solid rgba(32,213,239,.35);border-radius:14px;background:rgba(10,20,32,.6);overflow:hidden;box-shadow:0 0 22px -12px rgba(32,213,239,.6);}
+.hl-offer-rows>.hl-item:first-child>.hl-row{border-top:0;}
+/* Etoile allumee dans le bloc du match offert (visuel seulement : le vrai favori reste pilote par le bouton). */
+.hl-offer .hl-mstar{color:var(--amber,#f59e0b);}
+.hl-offer .hl-mstar svg{fill:currentColor;filter:drop-shadow(0 0 5px rgba(245,158,11,.45));}
 .hl-mine-n{min-width:18px;height:16px;padding:0 5px;border-radius:8px;background:rgba(245,158,11,.14);color:var(--amber,#f59e0b);font-size:10px;line-height:16px;letter-spacing:0;text-align:center;}
 .hl-mine-rows{border:1px solid rgba(245,158,11,.28);border-radius:14px;background:rgba(10,20,32,.6);overflow:hidden;}
 .hl-mine-rows>.hl-item:first-child>.hl-row{border-top:0;}

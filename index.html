@@ -483,7 +483,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 
 /* Accueil « stade » (25/09/2026) */
 .hero-stade{position:relative;overflow:hidden;isolation:isolate}
-.hero-stade-bg{position:absolute;inset:0;z-index:0;pointer-events:none}
+.hero-stade-bg{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .hero-stade-layer{position:absolute;left:0;right:0;top:-10%;height:120%;display:block;will-change:transform}
 .hero-stade-layer img{width:100%;height:100%;object-fit:cover;object-position:center 40%;display:block}
 .hero-stade-stands img{-webkit-mask-image:linear-gradient(to bottom,transparent 46%,#000 62%);mask-image:linear-gradient(to bottom,transparent 46%,#000 62%)}
@@ -492,7 +492,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 .hero-stade-h1{margin:0;display:flex;flex-direction:column}
 .hero-stade-brand{font-family:'Anton',Impact,'Arial Narrow Bold',sans-serif;font-weight:400;font-size:clamp(84px,10.5vw,150px);line-height:.86;letter-spacing:.005em;text-transform:uppercase;color:#f4f7fb;text-shadow:0 10px 40px rgba(0,0,0,.55)}
 .hero-stade-tagline{margin-top:clamp(22px,4vh,40px);font-family:'Inter',sans-serif;font-weight:700;font-size:clamp(13px,1.4vw,16px);letter-spacing:.18em;text-transform:uppercase;color:#dfe6ee}
-@media (max-width:1023px){.hero-stade-title{text-align:center;align-items:center;min-height:calc(100svh - 150px)}.hero-stade-bg::after{background:linear-gradient(180deg,rgba(6,11,18,.25) 0%,rgba(6,11,18,.45) 60%,rgba(6,11,18,.85) 100%)}}
+@media (max-width:1023px){.hero-stade-bg{bottom:auto;height:calc(100svh - 110px)}.hero-stade-layer img{object-position:center 55%}.hero-stade-title{text-align:center;align-items:center;min-height:calc(100svh - 150px)}.hero-stade-bg::after{background:linear-gradient(180deg,rgba(6,11,18,.25) 0%,rgba(6,11,18,.45) 60%,rgba(6,11,18,.85) 100%)}}
 @media (prefers-reduced-motion:reduce){.hero-stade-layer{transform:none!important}}
 </style>
 <link rel="stylesheet" href="/assets/bottom-navigation.css">

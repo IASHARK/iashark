@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Prepare les donnees des 4 videos quotidiennes (Safe, Combine, Match simule,
-// Match Pulse) a partir de data.json (public) et de match_premium_data
+// Prepare les donnees des videos quotidiennes : Safe (+ Combine en option) et
+// une video par match analyse (moitie Match simule, moitie Match Pulse) a partir de data.json (public) et de match_premium_data
 // (Supabase, analyses completes). Ecrit un fichier de props par video et un
 // manifest.json que le workflow daily-videos.yml rend puis envoie sur Telegram.
 //
@@ -332,25 +332,34 @@ if (combo) {
   const pct = (combo.prob * 100).toFixed(1).replace(".", ",");
   write("combine", "DailyCombo", props, `COMBINÉ @${COMBO_TARGET} du ${dayLabel.toLowerCase()} — cote totale ${combo.cote.toFixed(2).replace(".", ",")}, environ ${pct} % de chances selon le modèle\n${props.legs.map(legLine).join("\n")}`);
 }
-const big = [...pool].sort((a, b) => leagueRank(a.m) - leagueRank(b.m) || kickoffParis(b.m).localeCompare(kickoffParis(a.m)));
-if (big[0]) {
-  const props = matchPulseProps(big[0]);
-  write("match-pulse", "DailyMatchPulse", props, `Match Pulse : ${props.homeName} – ${props.awayName} (${props.competition})`);
-}
+// ---------- Une video par match analyse ----------
+// Tous les matchs du jour ont leur video. La moitie la plus riche en buts
+// (score simule le plus frequent) passe en « Match simule », le reste en
+// « Match Pulse ». Ex. 15 matchs : 7 Match simule + 8 Match Pulse.
 const goalsOf = ({p}) => {
   const top = (p.premium_fields?.mc_scores || [])[0];
   return top ? top.score.split("-").reduce((a, x) => a + Number(x), 0) : 0;
 };
-const lively = big.filter((e) => e !== big[0] && goalsOf(e) >= 2)
-  .sort((a, b) => (goalsOf(b) >= 3) - (goalsOf(a) >= 3) || leagueRank(a.m) - leagueRank(b.m));
-if (lively[0]) {
-  const e = lively[0];
-  const props = matchCardProps(e);
-  const h = props.goals.filter((g) => g.side === "home").length, a = props.goals.length - h;
-  write("match-simule", "DailyMatchSimule", props, `Match simulé : ${props.homeTeam} ${h}-${a} ${props.awayTeam} (score le plus fréquent sur ${props.simulationCount} simulations)`);
+const byGoals = [...pool].sort((a, b) => goalsOf(b) - goalsOf(a) || leagueRank(a.m) - leagueRank(b.m));
+const simuleSet = new Set(byGoals.slice(0, Math.floor(pool.length / 2)).filter((e) => goalsOf(e) >= 1));
+const byKickoff = [...pool].sort((a, b) => kickoffParis(a.m).localeCompare(kickoffParis(b.m)) || leagueRank(a.m) - leagueRank(b.m));
+for (const e of byKickoff) {
+  if (simuleSet.has(e)) {
+    const props = matchCardProps(e);
+    const h = props.goals.filter((g) => g.side === "home").length, a = props.goals.length - h;
+    write(`simule-${e.m.id}`, "DailyMatchSimule", props, `Match simulé : ${props.homeTeam} ${h}-${a} ${props.awayTeam} (${hourOf(e.m)}, score le plus fréquent sur ${props.simulationCount} simulations)`);
+  } else {
+    const props = matchPulseProps(e);
+    write(`pulse-${e.m.id}`, "DailyMatchPulse", props, `Match Pulse : ${props.homeName} – ${props.awayName} (${props.competition})`);
+  }
 }
 
+// Raison claire quand il n'y a rien a montrer
+const why = !matches.length ? "matchs pas encore chargés (les analyses de ce jour ne sont pas encore publiées)"
+  : !pool.length ? `analyses complètes pas encore prêtes (${matches.length} match(s) trouvé(s))` : null;
 const manifest = {date: TODAY, matchesToday: matches.length, withAnalysis: pool.length, videos,
-  skipped: [!safe && "safe (moins de 3 sélections sûres)", args.combine && !combo && "combiné (impossible d'atteindre la cote 10)", !lively[0] && "match simulé (aucun match avec au moins 2 buts simulés)"].filter(Boolean)};
+  simule: videos.filter((v) => v.composition === "DailyMatchSimule").length,
+  pulse: videos.filter((v) => v.composition === "DailyMatchPulse").length,
+  skipped: why ? [why] : [!safe && "safe (moins de 3 sélections sûres)", args.combine && !combo && "combiné (impossible d'atteindre la cote 10)"].filter(Boolean)};
 fs.writeFileSync(path.join(OUT, "manifest.json"), JSON.stringify(manifest, null, 2));
 console.log(JSON.stringify({date: TODAY, matches: matches.length, analysed: pool.length, videos: videos.map((v) => v.slug), skipped: manifest.skipped}, null, 2));

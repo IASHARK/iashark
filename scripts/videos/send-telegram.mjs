@@ -19,7 +19,8 @@ const text = (t) => call("sendMessage", new URLSearchParams({chat_id: chatId, te
 
 const manifest = JSON.parse(fs.readFileSync(path.join(dir, "manifest.json"), "utf8"));
 const done = manifest.videos.filter((v) => fs.existsSync(v.output));
-await text(`🎬 IASHARK — vidéos du ${manifest.date}\n${done.length} vidéo(s) prête(s) sur ${manifest.videos.length}` +
+const detail = manifest.videos.length ? ` (${manifest.pulse ?? 0} Match Pulse, ${manifest.simule ?? 0} Match simulé)` : "";
+await text(`🎬 IASHARK — vidéos du ${manifest.date}\n${done.length} vidéo(s) prête(s) sur ${manifest.videos.length}${detail}` +
   (manifest.skipped.length ? `\nPas de vidéo aujourd'hui pour : ${manifest.skipped.join(", ")}` : ""));
 
 let failed = 0;
@@ -31,6 +32,7 @@ for (const v of manifest.videos) {
   form.append("supports_streaming", "true");
   form.append("video", new Blob([fs.readFileSync(v.output)], {type: "video/mp4"}), path.basename(v.output));
   await call("sendVideo", form);
+  await new Promise((r) => setTimeout(r, 3500)); // Telegram limite ~20 messages/minute dans un groupe
   console.log(`envoyé : ${v.slug}`);
 }
 if (failed) process.exitCode = 1;

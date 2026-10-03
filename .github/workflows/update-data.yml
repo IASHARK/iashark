@@ -163,7 +163,8 @@ jobs:
           var MOTS_INTERDITS=require('./lib/analyse-mots-interdits.js');
           var RETRAITS=require('./lib/results-exclusions.js');
           var MATCHS_OFFERTS=require('./lib/matchs-offerts.js');
-          // Selections nationales : jamais le match offert (decision de Clement du 30/09/2026).
+          // Selections nationales (30/09/2026) ; depuis le 03/10, Ligue des nations et eliminatoires Europe
+          // peuvent etre une selection et le match offert (lib/pronostic.js, VERIF-SELECTIONS.md).
           var SELECTIONS=require('./lib/selections-nationales.js');
           // UNE SEULE SOURCE DE CHIFFRES (01/10/2026) : chance du pari retenu (chance_iashark)
           // et chance buteur, calculees UNE FOIS ici et lues par la page, l'espace Pro et Telegram.
@@ -4298,6 +4299,16 @@ jobs:
             // (les memes que le Canal Pro : une seule source). Jamais dans les journaux.
             if(MOTEUR_V3.actif){ try{ CHANCES_V3_PRONO=MOTEUR_V3.chancesPourCanal(allMatchsData); }catch(e){ CHANCES_V3_PRONO=null; } }
             // MOTEUR_V3:FIN
+            // SELECTIONS NATIONALES SUR LE SITE (decision de Clement, 03/10/2026 ; chiffres de
+            // VERIF-SELECTIONS.md du 02/10 : 1 684 matchs, 1N2 et double chance passent) : Ligue des
+            // nations et eliminatoires du Mondial zone Europe (fiabilite.selections_cotes_marche)
+            // recoivent une selection par la regle du robot Pro (1N2 / DC, cotes du marche sans
+            // marge, cote 1,40-2,00, la plus probable). Amicaux : jamais. Avant les pronostics, le
+            // match offert, l'historique et la ligne premium (colonnes lues par match-data).
+            try{
+              var nSelNat=PRONOSTIC.poserSelectionsNationales(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG});
+              console.log('  [PRONOSTIC] '+nSelNat+' selection(s) de selections nationales (cotes du marche).');
+            }catch(e){ console.log('::warning title=Pronostic::selections nationales non posees ('+(e&&e.message)+').'); }
             try{
               var rapportProno=PRONOSTIC.poserPronostics(allMatchsData,{configLigues:LEAGUES_CONFIG,chancesV3Par:CHANCES_V3_PRONO});
               console.log('  [PRONOSTIC] '+rapportProno.avec+' match(s) avec pronostic, '+rapportProno.sans+' sans ; '+rapportProno.selections+' selection(s) ; voies : v3='+rapportProno.voies.v3+' cotes_marche='+rapportProno.voies.cotes_marche+' modele='+rapportProno.voies.modele+'.');
@@ -4363,6 +4374,8 @@ jobs:
                 if(SEL_OFFRABLES.indexOf(k)!==-1) return 0;
                 return GRANDES_COMPETITIONS.indexOf(k)!==-1?1:2;
               };
+              // Selection nationale verifiee (cotes du marche, lib/pronostic.js#poserSelectionsNationales).
+              var selectionNationaleCotes=function(m){ return !!(m&&m.pronostic&&m.pronostic.selection===true&&m.pronostic.moteur==='cotes_marche'); };
               var chanceSelection=function(m){ var c=Number(m&&m.pronostic&&m.pronostic.chance); return c>0?c:(Number(m&&m.chance_iashark)||Number(m&&m.model_probability)||0); };
               var valeurDe=function(m){
                 var p=Number(m&&m.model_probability), o=parseFloat(String(m&&m.cote_rec||'').replace(',','.'));
@@ -4412,7 +4425,7 @@ jobs:
               // Verifie en executant ce bloc : tests/match-offert-v3.test.js.
               if(MOTEUR_V3.actif){
                 var analysableTous=analysable;
-                analysable=function(m){ return analysableTous(m) && !!(m.v3_pari&&m.moteur_v3&&m.moteur_v3.source==='v3'); };
+                analysable=function(m){ return analysableTous(m) && (!!(m.v3_pari&&m.moteur_v3&&m.moteur_v3.source==='v3') || selectionNationaleCotes(m)); };
                 // La plus fiable : la plus haute chance affichee (chance IASHARK du pronostic, le
                 // meme chiffre que la page et Telegram), plus la probabilite brute du modele.
                 meilleur=function(liste){
@@ -4433,7 +4446,7 @@ jobs:
                 // un pari « modèle seul » (la page l'affiche alors au plus « Fiabilité moyenne »,
                 // lib/match-view-model.js#fiabiliteAffichee). Une designation deja annoncee
                 // (gardes, ci-dessus) n'est pas remise en cause.
-                var avecCotesV3=function(m){ return !!(m&&m.moteur_v3&&m.moteur_v3.source==='v3'&&m.moteur_v3.origine_probabilite==='modèle + cotes'); };
+                var avecCotesV3=function(m){ return selectionNationaleCotes(m) || !!(m&&m.moteur_v3&&m.moteur_v3.source==='v3'&&m.moteur_v3.origine_probabilite==='modèle + cotes'); };
                 var joursAvecCotes={};
                 allMatchsData.forEach(function(m){ if(analysable(m)&&avecCotesV3(m)) joursAvecCotes[jourDe(m)]=true; });
                 var analysableV3=analysable;

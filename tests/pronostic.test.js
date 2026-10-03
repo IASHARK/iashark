@@ -63,7 +63,9 @@ test("voie cotes du marche : seulement les marches autorises de la competition",
   assert.equal(p.voie, "cotes_marche");
   assert.equal(p.fiabilite, "vérifiée");
   assert.ok(["dc-1x", "dc-x2", "dc-12", "over-25", "under-25"].includes(p.market_id));
-  assert.equal(p.market_id, "dc-1x");
+  // dc-1x (1,05) et dc-12 (1,15) sont sous la cote minimale de 1,20 : la suivante.
+  assert.equal(p.market_id, "over-25");
+  assert.ok(p.cote >= 1.2);
   assert.equal(p.selection, false);
   // Ligue des nations (selections_cotes_marche) : 1N2 et DC.
   const ldn = P.choisirPronostic(match({ league_key: "nations_league", league_id: 5, league: "UEFA Nations League", c1: "2.09", cn: "2.96", c2: "4.05", co25: "1.40", cu25: "2.90" }), { ligues: LIGUES });
@@ -169,4 +171,47 @@ test("donnees reelles (data.json) : un pronostic sur chaque match ouvert, aucune
   ms.filter((m) => m.pronostic && m.pronostic.selection).forEach((m) => assert.ok(m.pari_rec && !m.no_signal));
   const publics = ms.map((m) => PREMIUM.stripPremium(m));
   assert.deepEqual(PREMIUM.deepPremiumLeaks(publics), []);
+});
+
+test("cote minimale 1,20 (decision de Clement) : jamais « Pays-Bas ou nul a 1,02 »", () => {
+  // Pays-Bas - Serbie : 1X a 1,02 (95 %), 12 a 1,20, 1 a 1,32.
+  const m = match({ league_key: "nations_league", league_id: 5, league: "UEFA Nations League", c1: "1.32", cn: "5.20", c2: "9.50", cdc1x: "1.02", cdc2x: "3.40", dc12: "1.20" });
+  const p = P.choisirPronostic(m, { ligues: LIGUES });
+  assert.ok(p.cote >= 1.2, "cote " + p.cote);
+  assert.notEqual(p.market_id, "dc-1x");
+  // Aucune issue a 1,20 ou plus : le 1N2 le plus probable.
+  const q = P.choisirPronostic(match({ league_key: "championship", c1: "1.30", cn: "5.5", c2: "9", co25: "1.15", cu25: "4.5", cdc1x: "1.05", cdc2x: "3.4", dc12: "1.1" }), { ligues: LIGUES });
+  assert.ok(q, "un pronostic quand meme");
+  // Aucune cote connue a 1,20 ou plus (pas de cotes) : le 1N2 le plus probable.
+  const r = P.choisirPronostic(match({ league_key: "copa_del_rey", p1: 70, pn: 18, p2: 12 }), { ligues: LIGUES });
+  assert.equal(r.market_id, "home-win");
+});
+
+test("selections nationales verifiees (VERIF-SELECTIONS.md) : selection du site par la regle du robot, amicaux exclus", () => {
+  assert.deepEqual(P.clesSelectionsCotes(CFG), ["nations_league", "wcq_europe"]);
+  const ldn = match({ id: 10, league_key: "nations_league", league_id: 5, league: "UEFA Nations League", c1: "1.75", cn: "3.70", c2: "4.80", cdc1x: "1.20", cdc2x: "2.05", dc12: "1.30", co25: "1.9", cu25: "1.9" });
+  const ami = match({ id: 11, league_key: "other", league_id: 10, league: "Friendlies", c1: "1.75", cn: "3.70", c2: "4.80", p1: 52, pn: 27, p2: 21 });
+  const hors = match({ id: 12, league_key: "nations_league", league_id: 5, league: "UEFA Nations League", c1: "1.15", cn: "7", c2: "15", cdc1x: "1.02", cdc2x: "4.5", dc12: "1.08" });
+  const fige = match({ id: 13, league_key: "nations_league", league_id: 5, league: "UEFA Nations League", pari_rec: "DC X2", market_id: "dc-x2", no_signal: false, chance_iashark: 70, cote_rec: "1.45", c1: "1.75", cn: "3.70", c2: "4.80" });
+  const rows = [{ fixture_id: 10 }, { fixture_id: 13 }];
+  assert.equal(P.poserSelectionsNationales([ldn, ami, hors, fige], rows, { configLigues: CFG }), 1);
+  assert.equal(ldn.market_id, "home-win", "1N2 / DC dans la fourchette 1,40-2,00, le plus probable");
+  assert.equal(ldn.pari_rec, "Victoire Domicile");
+  assert.equal(ldn.cote_rec, "1.75");
+  assert.equal(ldn.no_signal, false);
+  assert.ok(ldn.chance_iashark > 50 && ldn.chance_iashark < 60);
+  assert.deepEqual(rows[0], { fixture_id: 10, pari_rec: "Victoire Domicile", market_id: "home-win", marche: "Victoire Domicile", cote_rec: "1.75", model_probability: ldn.model_probability });
+  assert.ok(!ami.pari_rec, "amical : jamais");
+  assert.ok(!hors.pari_rec, "aucun marche dans la fourchette : pas de selection");
+  assert.equal(fige.market_id, "dc-x2", "selection deja posee (gel) : intouchee");
+  P.poserPronostics([ldn, ami, hors], { configLigues: CFG });
+  assert.deepEqual([ldn.pronostic.selection, ldn.pronostic.moteur, ldn.pronostic.fiabilite, ldn.pronostic.market_id], [true, "cotes_marche", "vérifiée", "home-win"]);
+  assert.equal(hors.pronostic.selection, false);
+  assert.equal(ami.pronostic.voie, "modele");
+});
+
+test("fourchette des selections nationales = celle des selections simples du robot", async () => {
+  const M = await import("../supabase/functions/_shared/canal-pro-menu.mjs");
+  assert.equal(P.FOURCHETTE_SELECTION.cote_min, M.MENU.simple.cote_min);
+  assert.equal(P.FOURCHETTE_SELECTION.cote_max, M.MENU.simple.cote_max);
 });

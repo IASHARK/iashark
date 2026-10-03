@@ -175,6 +175,15 @@ test("match offert : Ligue des nations / eliminatoires Europe si c'est une selec
   assert.deepEqual(choisir([ancien(1, 90, null, { league_id: 32 }), ancien(2, 60)], { eteint: true }), [2], "selection hors liste (sans cle verifiee) : jamais, moteur v3 eteint aussi");
 });
 
+test("match offert : une selection nationale par les cotes du marche (sans pari v3) peut etre offerte, en premier", () => {
+  const nat = v3(1, 64, null, { league_id: 5, league: "UEFA Nations League", league_key: "nations_league", league_reliability: "en_test", v3_pari: undefined, moteur_v3: { source: "v3", origine_probabilite: "modèle seul" },
+    pronostic: { market_id: "home-win", chance: 64, selection: true, moteur: "cotes_marche" } });
+  assert.deepEqual(choisir([nat, v3(2, 85, null, { league_key: "ligue1", moteur_v3: { source: "v3", origine_probabilite: "modèle + cotes" } })]), [1]);
+  // Amical avec le meme marquage : jamais.
+  const ami = Object.assign({}, nat, { id: 3, league_id: 10, league: "Friendlies", league_key: "other" });
+  assert.deepEqual(choisir([ami]), []);
+});
+
 test("match offert : grands championnats avant les autres, puis la plus haute chance", () => {
   assert.deepEqual(choisir([v3(1, 88, null, { league_key: "league_two" }), v3(2, 72, null, { league_key: "ligue1" })]), [2]);
   assert.deepEqual(choisir([v3(1, 88, null, { league_key: "league_two" }), v3(2, 72, null, { league_key: "spain_segunda" })]), [1]);

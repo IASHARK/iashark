@@ -699,7 +699,8 @@ test("C3 : moteur v3 allume, le match offert est un pari v3, le plus probable, j
   const bloc = WF.slice(debut, WF.indexOf("})();", debut));
   const v3 = bloc.slice(bloc.indexOf("// MOTEUR_V3:DEBUT"), bloc.indexOf("// MOTEUR_V3:FIN"));
   assert.ok(v3.length > 50, "bloc MOTEUR_V3 dans designerMatchGratuit");
-  assert.match(v3, /analysable=function\(m\)\{ return analysableTous\(m\) && !!\(m\.v3_pari&&m\.moteur_v3&&m\.moteur_v3\.source==='v3'\); \};/);
+  // 03/10/2026 : ou une selection nationale verifiee (cotes du marche, lib/pronostic.js).
+  assert.match(v3, /analysable=function\(m\)\{ return analysableTous\(m\) && \(!!\(m\.v3_pari&&m\.moteur_v3&&m\.moteur_v3\.source==='v3'\) \|\| selectionNationaleCotes\(m\)\); \};/);
   assert.match(v3, /meilleur=function\(liste\)/);
   // 03/10/2026 : la plus fiable = la plus haute chance affichee du pronostic (chance IASHARK).
   assert.match(v3, /var pb=chanceSelection\(b\), pm=chanceSelection\(m\);/);

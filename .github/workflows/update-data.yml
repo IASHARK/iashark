@@ -4458,7 +4458,7 @@ jobs:
               try{ gardes=PICK_FREEZE.keptFreeDesignations(Object.keys(prevByFixture).map(function(k){ return prevByFixture[k]; }),allMatchsData,{today:TODAY,nowMs:OFFRE_MS,fixturesById:FIXTURE_BY_ID}); }
               catch(e){ console.log('::warning title=Gel des paris::match offert : designation precedente non relue ('+(e&&e.message)+').'); }
               // Une designation precedente dans une competition « en test » n'est jamais gardee.
-              Object.keys(gardes).forEach(function(j){ if(gardes[j]&&gardes[j].league_reliability==='en_test') delete gardes[j]; });
+              Object.keys(gardes).forEach(function(j){ if(gardes[j]&&!competitionOffrable(gardes[j])) delete gardes[j]; });
               // MOTEUR_V3:DEBUT - match offert (avocat du diable C3 ; mathematicien et decision
               // de Clement du 29/09/2026). REGLE COMPLETE, dans cet ordre, pour chaque jour :
               //  1. seulement les paris PUBLIES par le moteur v3, dont le coup d'envoi n'est

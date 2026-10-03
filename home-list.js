@@ -400,11 +400,11 @@ function renderMatchRow(m,ctx,H,index){
   }else if(a.state==='open'){
     zone='<span class="hl-zone">'
       +(a.prob!=null
-        // 03/10/2026 (Clement) : meme affichage que les autres matchs, « Analyse 57 % » + le pari, jamais une note sur 10.
+        // 03/10/2026 (Clement) : « Analyse 57 % » comme les autres matchs, jamais une note sur 10 ; le pari se lit sur la fiche (16/09).
         ?'<span class="hl-prob-row">'
           +'<span class="hl-prob-lbl"><span class="hl-m">'+esc(t('home_list.prono_short','Analyse'))+'</span><span class="hl-d">'+esc(t('home_list.prono_long','Analyse'))+'</span></span>'
           +'<span class="hl-prob"><b>'+Math.round(a.probNum*10)+'</b><small>%</small></span></span>'
-          +(a.market?'<span class="hl-none-s">'+esc(a.market)+'</span>':'')
+          +'<span class="hl-gauge" aria-hidden="true"><i style="--p:'+Math.round(a.probNum*10)+'%"></i></span>'
         :'<span class="hl-prelim">'+esc(t('home_list.preliminary','Analyse préliminaire'))+'</span>')
       +'</span>';
   }else if(a.state==='gated'){

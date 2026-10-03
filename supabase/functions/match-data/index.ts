@@ -233,8 +233,10 @@ Deno.serve(async (req: Request) => {
   // colonne non modifiable par le client : migration 0001).
 
   let data: Record<string, unknown>;
+  let porteeDemandee: { id: string | null; list: boolean } | null = null;
   try {
-    data = await chargerDonnees(await lirePortee(req));
+    porteeDemandee = await lirePortee(req);
+    data = await chargerDonnees(porteeDemandee);
   } catch (e) {
     return new Response(
       JSON.stringify({ error: "Impossible de charger les donnees", details: String(e) }),
@@ -249,7 +251,8 @@ Deno.serve(async (req: Request) => {
   if (!isPro) {
     // Seul le match TERMINE explicitement demande est enrichi : la liste
     // d'accueil n'a besoin d'aucun champ payant.
-    const portee = await lirePortee(req.clone());
+    // Corps deja lu plus haut : req.clone() apres lecture leve « Body is unusable » (500, 03/10/2026).
+    const portee = porteeDemandee ?? { id: null, list: true };
     const demande = portee.id ? matchs.find((m) => String(m.id) === portee.id) : undefined;
     // Decision de Clement (28/09/2026) : le mur payant s'applique AUSSI aux matchs
     // termines. Un non-abonne ne voit jamais l'analyse d'un match payant, meme apres

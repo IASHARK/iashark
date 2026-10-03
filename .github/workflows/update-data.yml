@@ -134,6 +134,9 @@ jobs:
           // (config/quotas.json, lib/quotas.js, lib/odds-api-econome.js).
           const QUOTAS = require('./lib/quotas.js');
           const ODDS_ECO = require('./lib/odds-api-econome.js');
+          // REPLI COTES SELECTIONS (03/10/2026) : Ligue des nations / eliminatoires Europe sans cote 1N2
+          // apres API-Football (quota du jour) -> The Odds API, 1 credit par competition (lib/cotes-selections-repli.js).
+          const COTES_SEL_REPLI = require('./lib/cotes-selections-repli.js');
           const QUOTA_CFG = QUOTAS.lireConfig();
           var QUOTA_ETAT = QUOTAS.lireEtat();
           var CACHE_HEURES = (QUOTA_CFG.api_football && QUOTA_CFG.api_football.cache_heures) || {};
@@ -3294,6 +3297,17 @@ jobs:
               };
               await sleep(300);
               var odds=parseOdds(oddsRaw);
+              // REPLI COTES SELECTIONS : seulement fiabilite.selections_cotes_marche ET c1/cn/c2 absents.
+              // Memes cotes que d'habitude ensuite (mediane = cote indicative, marge retiree plus bas).
+              if(ODDS_KEY&&COTES_SEL_REPLI.doitCompleter(odds,lgKey(lg.id),LEAGUES_CONFIG)){
+                try{
+                  var repliSel=await COTES_SEL_REPLI.completer({odds:odds,leagueKey:lgKey(lg.id),configLigues:LEAGUES_CONFIG,
+                    sport:oddsSportKeyFor(LEAGUES_CONFIG,lgKey(lg.id)),home:home.name,away:away.name,fixtureId:f.id,
+                    coupEnvoiMs:(f.timestamp?f.timestamp*1000:Date.parse(f.date)),client:oddsClient()});
+                  if(repliSel&&repliSel.odds){ odds=repliSel.odds; console.log('  [COTES SELECTIONS] '+home.name+' - '+away.name+' : The Odds API, '+repliSel.resume); }
+                  else if(repliSel) console.log('  [COTES SELECTIONS] '+home.name+' - '+away.name+' : pas de cote ('+repliSel.resume+')');
+                }catch(e){ console.log('  [COTES SELECTIONS] The Odds API : '+String(e&&e.message||e).replace(/apiKey=[^&\s]+/g,'apiKey=***').slice(0,120)); }
+              }
               var critH=calcCriteres(sH,true,rkH);
               var critA=calcCriteres(sA,false,rkA);
               var fatigueH=calcFatigue(last10H);
@@ -3871,6 +3885,7 @@ jobs:
                 dc1x:odds.dc1x,dc2x:odds.dc2x,dc12:odds.dc12,cdc1x:odds.dc1x,cdc2x:odds.dc2x,
                 ah_dom:odds.ah_dom||'--',ah_ext:odds.ah_ext||'--',co35:odds.co35||'--',
                 cbtts:odds.btts_oui,cbtts_non:odds.btts_non,btts_oui:odds.btts_oui,btts_non:odds.btts_non,
+                cotes_1n2_source:odds.source_1n2||null,cotes_1n2_releve_le:odds.releve_le_1n2||null,
                 marche:pickedMarket?categorizeMarket(pickedMarket.market):'RESULTAT',market_id:pickedMarket?pickedMarket.id:null,
                 risque:riskLabelCode,pari_rec:pickedMarket?pickedMarket.market:'',
                 markets_compared:marketsCompared,

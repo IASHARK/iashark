@@ -37,19 +37,19 @@
   // quand meme grace a FALLBACK, copie exacte des valeurs du dictionnaire
   // (verifiee par tests/bottom-navigation.test.js).
   var FALLBACK={
-    en:{home:'HOME',tools:'PRO',guides:'BLOG',account:'ACCOUNT',aria:'Main navigation'},
-    es:{home:'INICIO',tools:'PRO',guides:'BLOG',account:'CUENTA',aria:'Navegación principal'},
-    'es-mx':{home:'INICIO',tools:'PRO',guides:'BLOG',account:'CUENTA',aria:'Navegación principal'},
-    de:{home:'START',tools:'PRO',guides:'BLOG',account:'KONTO',aria:'Hauptnavigation'},
-    it:{home:'HOME',tools:'PRO',guides:'BLOG',account:'ACCOUNT',aria:'Navigazione principale'},
-    pt:{home:'INÍCIO',tools:'PRO',guides:'BLOG',account:'CONTA',aria:'Navegação principal'}
+    en:{home:'HOME',tools:'TOOLS',guides:'BLOG',account:'ACCOUNT',aria:'Main navigation'},
+    es:{home:'INICIO',tools:'HERRAMIENTAS',guides:'BLOG',account:'CUENTA',aria:'Navegación principal'},
+    'es-mx':{home:'INICIO',tools:'HERRAMIENTAS',guides:'BLOG',account:'CUENTA',aria:'Navegación principal'},
+    de:{home:'START',tools:'TOOLS',guides:'BLOG',account:'KONTO',aria:'Hauptnavigation'},
+    it:{home:'HOME',tools:'STRUMENTI',guides:'BLOG',account:'ACCOUNT',aria:'Navigazione principale'},
+    pt:{home:'INÍCIO',tools:'FERRAMENTAS',guides:'BLOG',account:'CONTA',aria:'Navegação principal'}
   };
   var locale=DIR_LOCALE[dir]||'fr';
   var fb=FALLBACK[locale]||null;
   function t(key,fallback){return (window.I18N && window.I18N.t && window.I18N.dict) ? window.I18N.t(key,fallback) : fallback;}
   var items=[
     {id:'home',href:href('index.html'),key:'nav.home',label:'Accueil',icon:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/>'},
-    {id:'tools',href:href('pro.html'),key:'nav.tools',label:'Pro',icon:'<path d="m12 2 2.9 6.6 7.1.7-5 4.9 1.2 7.8-6.2-3.7L5.8 22 7 14.2 2 9.3l7.1-.7Z"/>'},
+    {id:'tools',href:href('pro.html'),key:'nav.tools',label:'Outils',icon:'<path d="m12 2 2.9 6.6 7.1.7-5 4.9 1.2 7.8-6.2-3.7L5.8 22 7 14.2 2 9.3l7.1-.7Z"/>'},
     {id:'blog',href:href('blog.html'),key:'nav.guides',label:'Blog',icon:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/>'},
     {id:'account',href:href('compte.html'),key:'nav.account',label:'Compte',icon:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>'}
   ];
@@ -286,21 +286,4 @@
     }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', lancer); else lancer();
-})();
-
-/* Pastille Telegram (02/10/2026) : la MEME sur toutes les pages, toutes les
-   langues, connecte ou non (assets/telegram-pill.js : canal gratuit pour un
-   visiteur ou un compte gratuit, « Mes messages Pro » pour un abonne). Posee
-   juste au-dessus de cette barre ; la place est reservee tout de suite
-   (classes ias-nav-on et ias-tg-on, assets/bottom-navigation.css) pour que rien
-   ne bouge ni ne soit cache quand elle arrive. Remplace la bulle du 27/09
-   (francais seulement, absente des pages de paiement, cachee apres un clic). */
-(function(){
-  var html=document.documentElement;
-  html.classList.add('ias-nav-on','ias-tg-on');
-  if(window.IasharkTelegramPill||document.querySelector('script[data-tg-pill]'))return;
-  var s=document.createElement('script');
-  s.src='/assets/telegram-pill.js';
-  s.setAttribute('data-tg-pill','');
-  (document.head||html).appendChild(s);
 })();

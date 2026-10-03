@@ -265,11 +265,3 @@
 .hl-proof-dot{width:8px;height:8px;border-radius:50%;background:var(--hl-win);flex:none}
 .hl-proof-t{flex:1;font-size:13.5px;font-weight:700;line-height:1.3}
 .hl-proof-go{color:var(--hl-win);font-weight:800}
-
-/* Telephone (03/10/2026) : la phrase « L'analyse n'est plus proposee apres le coup d'envoi » chevauchait
-   les noms d'equipes sur un ecran etroit ; elle passe a la ligne, sans jamais deborder. */
-@media (max-width:560px){
-  .hl-zone{max-width:46%;}
-  .hl-none-t{white-space:normal;}
-  .hl-none-s{white-space:normal;font-size:10.5px;line-height:1.3;}
-}

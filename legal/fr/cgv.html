@@ -136,15 +136,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Jeu responsable</a>
   </nav>
   <h1 class="page-title">Conditions générales de vente</h1>
-  <div class="page-date">Dernière mise à jour : 2 octobre 2026</div>
-  <!-- LEGAL REVIEW: 02/10/2026 (soir) - decision du proprietaire : essai sur l'ABONNEMENT MENSUEL uniquement (create-checkout-session/trial.ts#TRIAL_INTERVALS) ; semaine et annee payees a la souscription ; article 6 bis precise dans les 9 versions, version du consentement inchangee (2026-10-02, pas encore publiee). -->
-  <!-- LEGAL REVIEW: 02/10/2026 - essai gratuit de 7 jours remis (decision du proprietaire ; create-checkout-session/trial.ts : TRIAL_DAYS absent = 7) : article 6 bis ajoute (premier abonnement seulement, une fois par personne ; carte demandee, rien preleve pendant l'essai ; email de rappel 2 jours avant la fin, tache trial-reminder 0042 a mettre en route AVANT l'ouverture ; annulation en 1 clic ; premier prelevement le 8e jour au prix de la periode choisie ; premier prelevement refuse = acces Pro arrete a la fin de l'essai) ; article 7 : premier paiement a la fin de l'essai le cas echeant. Points a confirmer : point de depart du delai de retractation (souscription, essai compris) et montant proportionnel en cas de retractation apres l'essai. Version precedente archivee dans legal/fr/archives/cgv-2026-10-01.html. Statut : REVIEW. -->
-  <!-- LEGAL REVIEW: 01/10/2026 - controle des chiffres publics : article 4, accès gratuit = analyse d'un match offert certains jours, simulation réservée à Pro (plus « un match par jour ») ; article 5, liste Pro alignée sur la grille de prix (plus de journal ni de suivi de bankroll), fonctions « bientôt » exclues tant qu'elles ne sont pas ouvertes ; essai gratuit non proposé (TRIAL_DAYS = 0 par défaut) : aucun article sur l'essai, premier paiement à la souscription (article 7 inchangé). Version précédente archivée dans legal/fr/archives/cgv-2026-09-30.html. Statut : REVIEW. -->
-  <!-- LEGAL REVIEW: 30/09/2026 - article 4 : le calculateur de mise est retire de l'acces gratuit (outil supprime du site) ; bandeau et article 2 reformules sans le mot « mise » (sens inchange : aucun pari n'est pris ni place). Version du 19/09/2026 archivee dans legal/fr/archives/cgv-2026-09-19.html. Statut : REVIEW. -->
+  <div class="page-date">Dernière mise à jour : 19 septembre 2026</div>
   <!-- LEGAL REVIEW: 19/09/2026 - decision du proprietaire : formules hebdomadaire et annuelle ouvertes au paiement a cote du mensuel (config/markets.json#fr.checkoutOpen, Price Stripe dans fr.stripePriceIds). Articles 5 a 9 revenus au texte du 16/09/2026 pour les trois durees (prix, information avant reconduction annuelle, changement de duree, tolerance d'impaye hebdomadaire, periode choisie enregistree : la version du depot de create-checkout-session l'ecrit dans les metadata Stripe) ; liste des fonctionnalites Pro du 18/09/2026 conservee ; TVA : franchise en base pour toutes les durees. Version du 18/09/2026 archivee dans legal/fr/archives/cgv-2026-09-18.html, version du 16/09/2026 (acceptee par les premiers abonnes) dans legal/fr/archives/cgv-2026-09-16.html. Statut : REVIEW. -->
 
   <div class="warn-box">
-    <p>⚠️ IASHARK N'EST PAS UN SITE DE PARIS : AUCUN PARI N'EST PRIS SUR CE SITE. LES ANALYSES SONT DES ESTIMATIONS STATISTIQUES, SANS AUCUNE GARANTIE DE RÉSULTAT.<br>LES JEUX D'ARGENT COMPORTENT DES RISQUES : ENDETTEMENT, DÉPENDANCE. BESOIN D'AIDE ? JOUEURS INFO SERVICE : <a href="tel:+33974751313">09 74 75 13 13</a> (APPEL NON SURTAXÉ).<br>SERVICE RÉSERVÉ AUX PERSONNES ÂGÉES DE 18 ANS ET PLUS.</p>
+    <p>⚠️ IASHARK N'EST PAS UN SITE DE PARIS : AUCUNE MISE N'EST PRISE SUR CE SITE. LES ANALYSES SONT DES ESTIMATIONS STATISTIQUES, SANS AUCUNE GARANTIE DE RÉSULTAT.<br>LES JEUX D'ARGENT COMPORTENT DES RISQUES : ENDETTEMENT, DÉPENDANCE. BESOIN D'AIDE ? JOUEURS INFO SERVICE : <a href="tel:+33974751313">09 74 75 13 13</a> (APPEL NON SURTAXÉ).<br>SERVICE RÉSERVÉ AUX PERSONNES ÂGÉES DE 18 ANS ET PLUS.</p>
   </div>
 
   <section class="section">
@@ -159,7 +155,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
 
   <section class="section">
     <h2>Article 3 — Nature du service</h2>
-    <p>IASHARK fournit des analyses statistiques de matchs de football : probabilités estimées par des modèles, comparaison avec les cotes du marché et outils de suivi. IASHARK <strong>n'est pas un bookmaker</strong> : aucun pari n'est pris, aucun argent destiné au jeu n'est collecté et aucun pari n'est placé pour le compte de l'utilisateur.</p>
+    <p>IASHARK fournit des analyses statistiques de matchs de football : probabilités estimées par des modèles, comparaison avec les cotes du marché et outils de suivi. IASHARK <strong>n'est pas un bookmaker</strong> : aucun pari n'est pris, aucune mise n'est collectée et aucun pari n'est placé pour le compte de l'utilisateur.</p>
     <div class="highlight">
       <p>Les contenus sont fournis à titre informatif uniquement. Ils ne garantissent aucun résultat ni aucun gain et ne constituent pas des conseils financiers ou d'investissement. Le service est réservé aux personnes âgées de 18 ans et plus.</p>
     </div>
@@ -169,7 +165,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <h2>Article 4 — Compte et accès gratuit</h2>
     <p>La création d'un compte est gratuite et nécessite une adresse email valide. L'accès gratuit comprend notamment :</p>
     <ul>
-      <li>l'analyse d'un match offert, certains jours ; la simulation reste réservée à Pro ;</li>
+      <li>l'analyse complète d'un match par jour ;</li>
+      <li>le calculateur de mise ;</li>
       <li>le blog.</li>
     </ul>
     <p>Le périmètre de l'accès gratuit peut évoluer. Vous êtes responsable de la confidentialité de vos identifiants.</p>
@@ -180,13 +177,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <h2>Article 5 — Abonnement IASHARK Pro</h2>
     <p>L'abonnement IASHARK Pro est une offre unique. Il donne accès, pendant sa durée, aux fonctionnalités suivantes :</p>
     <ul>
-      <li>l'analyse de tous les matchs du jour, dans chaque compétition suivie ;</li>
-      <li>le pari retenu, avec sa probabilité et ses raisons ;</li>
-      <li>la simulation du match par tranches de 15 minutes, lorsqu'elle est disponible, les scores les plus probables et les buts attendus ;</li>
-      <li>les statistiques du match et les buteurs les plus probables ;</li>
-      <li>dans l'espace Pro : le combiné et le détecteur d’écarts.</li>
+      <li>analyse complète de tous les matchs et championnats disponibles ;</li>
+      <li>détecteur d’écarts du jour sur les matchs réels ;</li>
+      <li>journal des décisions synchronisé avec votre compte ;</li>
+      <li>combiné construit sur les analyses réelles.</li>
     </ul>
-    <p>Les fonctionnalités annoncées « bientôt » sur la page Abonnement, notamment le tableau de bord (journal de vos paris et garde-fou), ne font pas partie de l'abonnement tant qu'elles ne sont pas ouvertes.</p>
     <p>L'abonnement se souscrit au choix pour une période hebdomadaire, mensuelle ou annuelle. <strong>Le contenu et les fonctionnalités sont identiques quelle que soit la période choisie</strong> : seuls le montant et la fréquence des prélèvements changent.</p>
     <p>La liste des compétitions couvertes et le détail des fonctionnalités peuvent évoluer, sans jamais réduire de manière substantielle le service pendant une période déjà payée.</p>
   </section>
@@ -204,21 +199,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
   </section>
 
   <section class="section">
-    <h2>Article 6 bis — Essai gratuit de 7 jours</h2>
-    <p>Lors de votre premier abonnement IASHARK Pro, vous bénéficiez d'un essai gratuit de 7 jours, <strong>sur l'abonnement mensuel uniquement</strong>. Les formules à la semaine et à l'année sont payées dès la souscription, sans essai. Pendant l'essai, vous avez accès à toutes les fonctionnalités Pro.</p>
-    <ul>
-      <li>Votre carte bancaire est demandée à la souscription, mais <strong>aucun montant n'est prélevé pendant l'essai</strong>.</li>
-      <li>Nous vous adressons un email environ 2 jours avant la fin de l'essai, avec la date et le montant du premier prélèvement.</li>
-      <li>Vous pouvez annuler l'essai à tout moment, gratuitement et en ligne, en 1 clic depuis « Mon compte ». Vous conservez alors l'accès Pro jusqu'à la fin de l'essai et rien n'est prélevé.</li>
-      <li>Sans annulation, l'abonnement continue à la fin de l'essai : le premier prélèvement a lieu le 8e jour, au prix de l'abonnement mensuel (article 6), puis l'abonnement se renouvelle dans les conditions de l'article 7. Si ce premier prélèvement échoue, l'accès Pro s'arrête à la fin de l'essai jusqu'à la régularisation du paiement.</li>
-      <li>L'essai est accordé une seule fois par personne : il n'est pas proposé à un compte, ni à une adresse email, ayant déjà bénéficié d'un abonnement ou d'un essai IASHARK Pro. Dans ce cas, le premier paiement a lieu à la souscription.</li>
-    </ul>
-    <p>Le délai de rétractation de l'article 8 court à compter de la souscription, essai compris.</p>
-  </section>
-
-  <section class="section">
     <h2>Article 7 — Paiement et renouvellement</h2>
-    <p>Le paiement est sécurisé et géré par Stripe (<a href="https://stripe.com" target="_blank" rel="noopener">stripe.com</a>). IASHARK ne conserve aucune donnée bancaire. Le premier paiement est effectué lors de la souscription ou, si vous bénéficiez de l'essai gratuit, à la fin de celui-ci (article 6 bis). L'abonnement se renouvelle ensuite automatiquement, à la fin de chaque période, pour une période de même durée et au prix alors en vigueur.</p>
+    <p>Le paiement est sécurisé et géré par Stripe (<a href="https://stripe.com" target="_blank" rel="noopener">stripe.com</a>). IASHARK ne conserve aucune donnée bancaire. Le premier paiement est effectué lors de la souscription. L'abonnement se renouvelle ensuite automatiquement, à la fin de chaque période, pour une période de même durée et au prix alors en vigueur.</p>
     <!-- LEGAL REVIEW: 19/09/2026 - (a) information avant reconduction annuelle : gabarit pret (annual_renewal_reminder, J-45 par defaut, fenetre 90 a 30 jours), envoi a activer (Resend + tache planifiee) avant la premiere echeance annuelle, faute de quoi le dernier alinea de l'article 9 s'applique ; (b) changement de duree : verifier que la configuration du portail client Stripe (STRIPE_PORTAL_CONFIGURATION_ID ou configuration par defaut) applique bien la regle ci-dessous (duree plus longue immediate avec proratisation, duree plus courte a la fin de la periode payee) - sinon corriger ce paragraphe et compte_page.change_interval_note. -->
     <p><strong>Formule annuelle : information avant reconduction.</strong> Nous vous informons par email, au plus tôt trois mois et au plus tard un mois avant l'échéance, de la possibilité de ne pas reconduire votre abonnement annuel. Cet email rappelle la date d'échéance, le montant qui sera prélevé et le moyen de résilier en ligne.</p>
     <p><strong>Changement de durée.</strong> Vous pouvez changer de durée depuis « Mon compte », dans l'espace de facturation sécurisé de notre prestataire de paiement. Le passage à une durée plus longue (par exemple du mois à l'année) prend effet immédiatement : la nouvelle période est facturée tout de suite, déduction faite, au prorata, de la part non utilisée de la période en cours. Le passage à une durée plus courte (par exemple de l'année au mois) prend effet à la fin de la période déjà payée, sans remboursement ni prélèvement supplémentaire d'ici là. Le montant et la date d'effet sont affichés avant votre confirmation. Un abonnement en cours ne peut pas être souscrit une seconde fois.</p>

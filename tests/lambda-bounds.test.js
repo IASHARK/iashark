@@ -55,10 +55,3 @@ test("calcLambdas: arrondi a 3 decimales (toFixed(3)), jamais plus de precision 
   assert.ok(decimalsH <= 3, `lambdaH a plus de 3 decimales: ${r.lambdaH}`);
   assert.ok(decimalsA <= 3, `lambdaA a plus de 3 decimales: ${r.lambdaA}`);
 });
-
-test("calcLambdas: competitions ajoutees le 30/09/2026 (extension) et Ligue des nations gardent les bornes non-top 0.95/0.80", () => {
-  // 40 Championship, 45 FA Cup, 5 Ligue des nations : bornes inchangees par leur ajout a config/leagues.json.
-  [40, 45, 5].forEach((id) => assertWithinBounds(calcLambdas(0, 0, 0, 0, 0, 0, 1.35, 1.10, id), 0.95, 3.4, 0.80, 3.0, "id " + id));
-  const { LEAGUE_IDS } = require("../lib/engine.js");
-  assert.equal(LEAGUE_IDS.length, 19, "isTop : les 19 competitions de clubs d'avant le 30/09 seulement");
-});

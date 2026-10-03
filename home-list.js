@@ -28,10 +28,7 @@
 })(typeof window!=='undefined'?window:null,function(root){
 'use strict';
 
-// Plus de « 5000 simulations » par defaut (contre-controle de l'avocat du diable,
-// 30/09/2026) : un pari du moteur v3 est calcule exactement, sans simulation. Le
-// nombre n'est affiche que si le match porte le champ nb_simulations (nbSimulations).
-var DEFAULTS={upsellAfter:3,lockedHref:'match',liveWindowMin:115,staleLiveMin:150,
+var DEFAULTS={upsellAfter:3,lockedHref:'match',liveWindowMin:115,staleLiveMin:150,simulations:5000,
   collapsedKey:'iashark.hlCollapsed.v1'};
 var PROB_BANDS=['high','good','moderate'];
 
@@ -41,21 +38,6 @@ function tf(key,fb,vars){var s=String(t(key,fb));return vars?s.replace(/\{(\w+)\
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function localeTag(){return (root.I18N&&root.I18N.localeTag)?root.I18N.localeTag():'fr-FR';}
 function lien(p){return (root.I18N&&root.I18N.href)?root.I18N.href(p):'/'+p;}
-// Vraie page d'un match (audit SEO du 29/09/2026, action A1) : /match/<id>.html
-// (francais) ou /<version>/match/<id>.html, SEULEMENT si le pipeline l'a ecrite
-// pour la version du visiteur (champ public page_dirs de data-home.json, pose
-// d'apres les fichiers reellement presents : scripts/match-lifecycle.js
-// #annotateHomePages). Sinon null : l'appelant garde match.html?id= (noindex),
-// jamais un lien vers la page d'une autre version.
-function versionDir(){var I=root.I18N;try{return I?(I.linkDir?I.linkDir():I.dir)||null:null;}catch(e){return null;}}
-function staticMatchPath(m,dir){
-  if(dir===undefined)dir=versionDir();
-  if(!m||m.id==null||!/^\d{1,12}$/.test(String(m.id))||!dir||!/^[a-z]{2}$/.test(dir))return null;
-  if(!Array.isArray(m.page_dirs)||m.page_dirs.indexOf(dir)===-1)return null;
-  return dir==='fr'?'/match/'+m.id+'.html':'/'+dir+'/match/'+m.id+'.html';
-}
-// Lien d'une carte match : vraie page si elle existe, sinon match.html?id= de la version.
-function matchHref(m,H){return staticMatchPath(m)||(H&&H.lien||lien)('match.html?id='+encodeURIComponent(m.id));}
 function reducedMotion(){return !!(root.matchMedia&&root.matchMedia('(prefers-reduced-motion: reduce)').matches);}
 
 /* ---------- Icones ---------- */
@@ -85,7 +67,7 @@ function defaultHelpers(){
     leagueLogoUrl:function(m){var id=m.league_id||(LN?LN.apiFootballId(key(m)):null);return id?'https://media.api-sports.io/football/leagues/'+id+'.png':'';},
     teamLogoUrl:function(tm){return tm&&(tm.photo||tm.logo||(tm.id?'https://media.api-sports.io/football/teams/'+tm.id+'.png':''))||'';},
     translateMarket:function(r){return (r&&ML&&ML.marketLabel)?ML.marketLabel(r):r;},
-    marketIdLabel:function(m){return (m&&m.market_id&&ML)?(ML.marketIdLabel||ML.marketIdLabelFr)(m.market_id,{home:nomEquipe(m.home&&m.home.n||''),away:nomEquipe(m.away&&m.away.n||'')}):null;},
+    marketIdLabel:function(m){return (m&&m.market_id&&ML)?(ML.marketIdLabel||ML.marketIdLabelFr)(m.market_id,{home:m.home&&m.home.n,away:m.away&&m.away.n}):null;},
     hasReliableModelOutput:function(m){return DD?DD.hasReliableModelOutput(m):true;},
     pickFreeMatch:function(list){return FM?FM.pickFreeMatch(list,null,(root.IASHARK_MARKET&&root.IASHARK_MARKET.code)||null):null;},
     lien:lien
@@ -133,18 +115,6 @@ function renderDateStrip(days,activeDay){
 function hasSignal(m){
   if(m&&m.past===true)return false;
   return !!(m&&(m.has_signal||m.pari_rec||m.market_id))&&!m.no_signal;
-}
-// Nombre de simulations REELLEMENT tirees pour ce match (champ public
-// nb_simulations), sinon null : jamais un chiffre par defaut.
-function nbSimulations(m){var n=Number(m&&m.nb_simulations);return Number.isInteger(n)&&n>0?n:null;}
-// Chiffre cle de l'accueil « N simulations par match » : seulement si TOUS les
-// matchs de la liste portent nb_simulations (le plus petit), sinon null.
-function simulationsParMatch(list){
-  list=Array.isArray(list)?list:[];
-  if(!list.length)return null;
-  var min=null;
-  for(var i=0;i<list.length;i++){var n=nbSimulations(list[i]);if(n===null)return null;min=min===null?n:Math.min(min,n);}
-  return min;
 }
 function isFree(m,ctx){return ctx.freeMatchId!=null&&String(m.id)===String(ctx.freeMatchId);}
 function fmtProb(v){v=Math.min(Math.max(v,0),10);return (Math.round(v*10)/10).toLocaleString(localeTag(),{minimumFractionDigits:1,maximumFractionDigits:1});}
@@ -200,14 +170,7 @@ function analysisFor(m,ctx,H){
   // croire que le modele avait choisi de ne pas parier (20/09/2026). Un match
   // ferme AVEC pari publie garde son analyse (lib/pick-freeze.js
   // FROZEN_CLOSED) et ne passe pas par cet etat.
-  // Match reporte (lib/pick-freeze.js POSTPONED_CLOSED, ronde 5) : « Match reporté »,
-  // jamais « apres le coup d'envoi » pour un match qui ne s'est pas encore joue.
-  if(!hasSignal(m)&&String(m.no_signal_reason||'')==='KICKOFF_POSTPONED')return {state:'closed',postponed:true,free:false};
   if(!hasSignal(m)&&/^(KICKOFF_|FIXTURE_NOT_UPCOMING)/.test(String(m.no_signal_reason||'')))return {state:'closed',free:false};
-  // UN PRONOSTIC SUR CHAQUE MATCH (03/10/2026, lib/pronostic.js) : un match sans selection
-  // garde son pronostic. Contenu Pro : verrouille (« Débloquer avec Pro ») hors Pro, sauf le
-  // match offert. pronostic_dispo est l'amorce publique (aucun chiffre, aucun marche).
-  if(!hasSignal(m)&&m.pronostic_dispo===true)return pronosticFor(m,ctx,H,free);
   if(!hasSignal(m))return {state:'none',free:free,label:m.no_signal_label||t('home_app.no_signal_label','Aucun signal clair sur ce match')};
   // Match offert sans compte : la page match exige un compte gratuit ; ici non
   // plus, aucun champ payant n'est lu.
@@ -216,30 +179,10 @@ function analysisFor(m,ctx,H){
   // niveau public prob_band est repris.
   if(!ctx.isPro&&!free)return {state:'locked',band:probBandOf(m)};
   var market=m.pari_rec?H.translateMarket(m.pari_rec):(H.marketIdLabel(m)||null);
-  // Une seule source (01/10/2026) : la note sur 10 est la chance IASHARK du pari
-  // (chance_iashark / 10, la meme que la page match et Telegram) ; conf (probabilite
-  // brute du modele / 10) seulement pour une ancienne analyse sans chance_iashark.
-  var ch=m.chance_iashark!=null&&m.chance_iashark!==''&&isFinite(Number(m.chance_iashark))?Number(m.chance_iashark)/10:null;
-  var c=H.hasReliableModelOutput(m)?(ch!=null?ch:(m.conf!=null&&m.conf!==''?normConf(m.conf):null)):null;
+  var c=(H.hasReliableModelOutput(m)&&m.conf!=null&&m.conf!=='')?normConf(m.conf):null;
   var pn=c==null?null:Math.min(c,10);
   if(!market)return {state:'pending',free:free,prob:pn!=null?fmtProb(pn):null};
   return {state:'open',free:free,probNum:pn,prob:pn!=null?fmtProb(pn):null,market:market};
-}
-
-// Pronostic d'un match sans selection : verrou hors Pro (match offert compris pour un
-// visiteur sans compte), sinon l'issue, sa chance calculee et sa fiabilite.
-function pronosticFor(m,ctx,H,free){
-  if(free&&!ctx.isPro&&!ctx.hasAccount)return {state:'gated',free:true};
-  if(!ctx.isPro&&!free)return {state:'locked',band:null};
-  var p=m.pronostic;
-  if(!p||!p.market_id)return {state:'pending',free:free,prob:null};
-  var market=H.marketIdLabel({market_id:p.market_id,home:m.home,away:m.away})||p.libelle_fr||'';
-  var ch=Number(p.chance),chance=ch>0&&ch<100?Math.round(ch):null;
-  // 03/10/2026 : les 16 competitions sans verification sont retirees du site ; les autres sont
-  // verifiees (moteur ou cotes du marche). Plus jamais « en test » affiche (demande de Clement).
-  var test=false;
-  return {state:'prono',free:free,market:market,chance:chance,test:test,
-    label:tf('home_list.prono_aria','Analyse : {market}',{market:market})+(chance!=null?', '+tf('home_list.prono_chance','chance calculée {p} %',{p:chance}):'')+(test?' ('+t('home_list.prono_test','en test')+')':'')};
 }
 
 // Competitions favorites d'abord, puis A->Z ; dans chaque competition, matchs
@@ -258,26 +201,8 @@ function groupByLeague(list,H,favLeagues,favMatches){
     g.matches.sort(function(a,b){return ((fm.has(a.id)?0:1)-(fm.has(b.id)?0:1))||H.compareMatches(a,b);});
     g.ready=g.matches.filter(hasSignal).length;
     return g;
-  }).sort(function(a,b){return ((a.fav?0:1)-(b.fav?0:1))||(leagueRank(a)-leagueRank(b))||String(a.name).localeCompare(String(b.name),lt,{sensitivity:'base'});});
+  }).sort(function(a,b){return ((a.fav?0:1)-(b.fav?0:1))||String(a.name).localeCompare(String(b.name),lt,{sensitivity:'base'});});
 }
-
-/* Ordre d'importance des competitions (03/10/2026, demande de Clement : plus d'ordre
-   alphabetique) : selections nationales (Ligue des nations, eliminatoires, amicaux : en tete
-   pendant les treves), coupes d'Europe, cinq grands championnats, autres championnats d'Europe,
-   puis le reste du monde. Par identifiant api-football (league_id) ou par cle de competition. */
-var RANG_LIGUE={5:0,32:1,29:1,30:1,31:1,34:1,10:2,2:10,3:11,848:12,61:20,39:21,140:22,135:23,78:24,
-  88:30,94:31,144:32,203:33,179:34,40:35,79:36,141:37,136:38,218:39,207:40,119:41,106:42,113:43,41:44,42:45,180:46,
-  253:50,262:51,71:52,128:53,98:54};
-var RANG_CLE={nations_league:0,wcq_europe:1,other:2,ldc:10,el:11,ecl:12,ligue1:20,premier:21,laliga:22,seriea:23,bundesliga:24};
-function leagueRank(g){
-  if(Object.prototype.hasOwnProperty.call(RANG_CLE,g.key))return RANG_CLE[g.key];
-  var m=g.matches&&g.matches[0],id=m&&Number(m.league_id||m.ligue_id);
-  return Object.prototype.hasOwnProperty.call(RANG_LIGUE,id)?RANG_LIGUE[id]:90;
-}
-// Competitions ouvertes d'office : les favorites et les 3 premieres de la liste ; les autres
-// sont repliees (une ligne dense : logo, nom, nombre de matchs, prochain coup d'envoi).
-// Un clic de la personne l'emporte toujours (ctx.collapsed : 1 = repliee, 0 = ouverte).
-var OUVERTES_D_OFFICE=3;
 
 /* ---------- Resultats de la veille : la couleur, rien d'autre ----------
    Source : /results/<jour>.json, ecrit chaque jour par le calcul quotidien
@@ -301,8 +226,6 @@ function veilleEntree(e){
     date:rtxt(e.kickoff)||'',status:'FT',
     // Le verdict n'existe que s'il a vraiment ete etabli.
     verdict:verdict==='win'||verdict==='loss'?verdict:null,
-    // Pari publie avant la V3 : a presenter « ancien modele » si l'onglet revient.
-    ancien_modele:e.moteur!=='v3',
     past:true
   };
 }
@@ -328,18 +251,11 @@ function veilleAppel(liste,actif,jourHier){
 
 /* ---------- Rendu ligne ---------- */
 function initials(n){return String(n||'?').replace(/[^A-Za-zÀ-ÿ0-9 ]/g,'').split(' ').filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase()||'?';}
-// Nom d'equipe affiche : en francais sur les pages francaises (Finland -> Finlande, Spain ->
-// Espagne ; table config/noms-equipes-fr.json recopiee dans lib/noms-equipes-fr.js, la meme que
-// les pages match statiques). Ailleurs, ou sans la table : le nom de l'API, tel quel.
-function nomEquipe(n){
-  var N=root.IasharkNomsEquipesFr,loc=root.I18N&&root.I18N.locale;
-  return N&&N.nom&&(!loc||loc==='fr')?N.nom(n):String(n==null?'':n);
-}
 function teamHtml(tm,H){
   var url=H.teamLogoUrl(tm),ini=esc(initials(tm&&tm.n));
   var logo=url?'<img class="hl-logo" src="'+esc(url)+'" width="18" height="18" alt="" loading="lazy" decoding="async" data-ini="'+ini+'">'
     :'<span class="hl-logo hl-logo-ph" aria-hidden="true">'+ini+'</span>';
-  return '<span class="hl-team">'+logo+'<span class="hl-tname">'+esc(nomEquipe(tm&&tm.n||''))+'</span></span>';
+  return '<span class="hl-team">'+logo+'<span class="hl-tname">'+esc(tm&&tm.n||'')+'</span></span>';
 }
 function fmtInt(n){return Number(n).toLocaleString(localeTag());}
 function barsHtml(b){
@@ -352,7 +268,7 @@ function bandHtml(b){
     +'<span class="hl-band-txt"><span class="hl-m">'+esc(t(BAND_LABEL[b][0]+'_short',BAND_SHORT[b]))+'</span><span class="hl-d">'+esc(bandLabel(b))+'</span></span>'
     +'<span class="hl-band-i" aria-hidden="true">i</span></span>';
 }
-function matchTitle(m){return nomEquipe(m&&m.home&&m.home.n||'')+' – '+nomEquipe(m&&m.away&&m.away.n||'');}
+function matchTitle(m){return (m&&m.home&&m.home.n||'')+' – '+(m&&m.away&&m.away.n||'');}
 // Etoile du match : bouton frere du lien (jamais un bouton dans un <a>).
 function matchStarHtml(m,ctx){
   var fm=ctx.favMatches;
@@ -362,9 +278,6 @@ function matchStarHtml(m,ctx){
   return '<button type="button" class="hl-mstar'+(on?' is-on':'')+'" data-hl-mfav="'+esc(m.id)+'" aria-pressed="'+on+'" aria-label="'+esc(lbl)+'" title="'+esc(lbl)+'">'+ICON.star+'</button>';
 }
 
-// Ligne fermee : « Pronostic fermé » apres le coup d'envoi, « Match reporté » pour un match reporte.
-function closedShort(a){return a.postponed?t('home_list.postponed_short','Match reporté'):t('home_list.closed_short','Analyse fermée');}
-function closedSub(a){return a.postponed?t('home_list.postponed_sub','Aucun pronostic sur ce match'):t('home_list.closed_sub','L’analyse n’est plus proposée après le coup d’envoi');}
 function renderMatchRow(m,ctx,H,index){
   var a=analysisFor(m,ctx,H),ts=H.matchTimestamp(m),cd=countdown(m,H,ctx.nowTs);
   var home=m.home||{},away=m.away||{},heure=H.heure(m),derby=derbyName(m),q=qualityFor(m),sig=hasSignal(m);
@@ -372,19 +285,15 @@ function renderMatchRow(m,ctx,H,index){
   // Rien si le match n'a pas encore ete regle.
   var verdict=m&&m.verdict==='win'?' hl-win':m&&m.verdict==='loss'?' hl-loss':'';
   var cls='hl-row hl-grid is-'+a.state+(a.free?' is-free':'')+(cd?' cd-'+cd.kind:'')+verdict;
-  var href=(a.state==='locked'&&ctx.lockedHref==='abonnement')?H.lien('abonnement.html'):matchHref(m,H);
+  var href=(a.state==='locked'&&ctx.lockedHref==='abonnement')?H.lien('abonnement.html'):H.lien('match.html?id='+encodeURIComponent(m.id));
 
   // Indicateurs PUBLICS reels uniquement.
   var tags=[];
   if(a.free)tags.push('<span class="hl-tag hl-tag-free">'+esc(t('home_list.free_chip','Offert'))+'</span>');
-  // Selection IASHARK (le sous-ensemble retenu, jamais sous la cote 1,20) : amorce publique
-  // selection_iashark posee par le pipeline (lib/pronostic.js), aucun chiffre.
-  if(m.selection_iashark===true&&a.state!=='past'&&a.state!=='closed')tags.push('<span class="hl-tag hl-tag-sel">'+esc(t('home_list.selection_chip','✓ Sélection IASHARK'))+'</span>');
   if(derby)tags.push('<span class="hl-tag hl-tag-derby" title="'+esc(derby)+'">'+esc(t('home_list.derby_chip','Derby'))+'</span>');
   if(cd)tags.push('<span class="hl-tag hl-tag-time is-'+cd.kind+'" data-hl-ts="'+(isFinite(ts)?ts:'')+'"'+(cd.estimated?' title="'+esc(t('home_list.status_estimated','Statut estimé d’après l’heure du coup d’envoi'))+'"':'')+'>'+esc(cd.text)+'</span>');
   if(q)tags.push('<span class="hl-tag hl-tag-q is-'+q.level+'"><i aria-hidden="true"></i>'+esc(q.text)+'</span>');
-  var nbSim=nbSimulations(m);
-  if(sig&&nbSim)tags.push('<span class="hl-tag hl-tag-sim">'+esc(tf('home_list.sims','{n} simulations',{n:fmtInt(nbSim)}))+'</span>');
+  if(sig)tags.push('<span class="hl-tag hl-tag-sim">'+esc(tf('home_list.sims','{n} simulations',{n:fmtInt(ctx.simulations)}))+'</span>');
 
   var zone;
   if(a.state==='past'){
@@ -400,28 +309,20 @@ function renderMatchRow(m,ctx,H,index){
   }else if(a.state==='open'){
     zone='<span class="hl-zone">'
       +(a.prob!=null
-        // 03/10/2026 (Clement) : « Analyse 57 % » comme les autres matchs, jamais une note sur 10 ; le pari se lit sur la fiche (16/09).
         ?'<span class="hl-prob-row">'
-          +'<span class="hl-prob-lbl"><span class="hl-m">'+esc(t('home_list.prono_short','Analyse'))+'</span><span class="hl-d">'+esc(t('home_list.prono_long','Analyse'))+'</span></span>'
-          +'<span class="hl-prob"><b>'+Math.round(a.probNum*10)+'</b><small>%</small></span></span>'
+          +'<span class="hl-prob-lbl"><span class="hl-m">'+esc(t('home_list.prob_short','Proba.'))+'</span><span class="hl-d">'+esc(t('home_list.prob_long','Probabilité estimée'))+'</span></span>'
+          +'<span class="hl-prob"><b>'+a.prob+'</b><small>/10</small></span></span>'
           +'<span class="hl-gauge" aria-hidden="true"><i style="--p:'+Math.round(a.probNum*10)+'%"></i></span>'
         :'<span class="hl-prelim">'+esc(t('home_list.preliminary','Analyse préliminaire'))+'</span>')
       +'</span>';
   }else if(a.state==='gated'){
     zone='<span class="hl-zone"><span class="hl-ready"><i class="hl-dot" aria-hidden="true"></i>'+esc(t('home_list.free_gated','Analyse offerte'))+'</span>'
       +'<span class="hl-freepill">'+esc(t('home_list.free_gated_cta','Compte gratuit'))+'</span></span>';
-  }else if(a.state==='prono'){
-    // Pronostic (pas une selection) : l'issue, la chance calculee, « en test » si la competition l'est.
-    zone='<span class="hl-zone hl-zone-prono">'
-      +'<span class="hl-prob-row">'
-        +'<span class="hl-prob-lbl"><span class="hl-m">'+esc(t('home_list.prono_short','Analyse'))+'</span><span class="hl-d">'+esc(t('home_list.prono_long','Analyse'))+'</span></span>'
-        +(a.chance!=null?'<span class="hl-prob"><b>'+a.chance+'</b><small>%</small></span>':'')+'</span>'
-      +'<span class="hl-none-s">'+esc(a.market)+(a.test?' · '+esc(t('home_list.prono_test','en test')):'')+'</span></span>';
   }else if(a.state==='pending'){
     zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'+esc(t('home_app.analysis_in_progress','Analyse en cours'))+'</span></span>';
   }else if(a.state==='closed'){
-    zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'+esc(closedShort(a))+'</span>'
-      +'<span class="hl-none-s">'+esc(closedSub(a))+'</span></span>';
+    zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'+esc(t('home_list.closed_short','Pronostic fermé'))+'</span>'
+      +'<span class="hl-none-s">'+esc(t('home_list.closed_sub','L’analyse n’est plus proposée après le coup d’envoi'))+'</span></span>';
   }else{
     zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'+esc(t('home_list.no_signal_short','Pas de signal clair'))+'</span>'
       +'<span class="hl-none-s">'+esc(t('home_list.no_signal_sub','Aucun pari forcé'))+'</span></span>';
@@ -430,13 +331,13 @@ function renderMatchRow(m,ctx,H,index){
   var anaAria=a.state==='past'?(m.verdict==='win'?t('home_list.aria_won','Recommandation passée.')
       :m.verdict==='loss'?t('home_list.aria_lost','Recommandation non passée.'):t('home_list.aria_pending','Résultat non encore établi.'))
     :a.state==='locked'?t('home_list.aria_locked','Analyse prête, réservée aux abonnés Pro.')+(a.band?' '+bandLabel(a.band)+'. '+bandNote():'')
-    :a.state==='open'?(a.prob!=null?tf('home_list.aria_prob_pct','Analyse : chance calculée {p} %.',{p:Math.round(a.probNum*10)}):t('home_list.aria_open','Analyse disponible.'))
+    :a.state==='open'?(a.prob!=null?tf('home_list.aria_prob','Probabilité estimée {p} sur 10.',{p:a.prob}):t('home_list.aria_open','Analyse disponible.'))
       +(a.free?' '+t('home_list.aria_free','Analyse offerte.'):'')
     :a.state==='gated'?t('home_list.aria_free_gated','Analyse offerte avec un compte gratuit.')
     :a.state==='pending'?t('home_app.analysis_in_progress','Analyse en cours')+'.'
-    :a.state==='closed'?closedShort(a)+'. '+closedSub(a)+'.':a.label+'.';
+    :a.state==='closed'?t('home_list.closed_short','Pronostic fermé')+'. '+t('home_list.closed_sub','L’analyse n’est plus proposée après le coup d’envoi')+'.':a.label+'.';
   var extra=[derby?tf('home_list.aria_derby','Derby : {name}',{name:derby}):'',cd?cd.text+(cd.estimated?' ('+t('home_list.estimated','estimé')+')':''):'',q?q.text:''].filter(Boolean).join(', ');
-  var aria=tf('home_list.row_aria','{home} contre {away}, {time}. {extra}. {analysis}',{home:nomEquipe(home.n||''),away:nomEquipe(away.n||''),time:heure,extra:extra,analysis:anaAria}).replace(/\.\s\./g,'.');
+  var aria=tf('home_list.row_aria','{home} contre {away}, {time}. {extra}. {analysis}',{home:home.n||'',away:away.n||'',time:heure,extra:extra,analysis:anaAria}).replace(/\.\s\./g,'.');
   // Suivi du tunnel (funnel-track.js) : ligne verrouillee = kind dedie, sans donnee personnelle.
   var track=a.state==='locked'?' data-track="home_row_lock" data-track-kind="home_row_lock"':'';
   var star=matchStarHtml(m,ctx);
@@ -456,14 +357,10 @@ function renderMatchRow(m,ctx,H,index){
 /* ---------- Rendu competition ---------- */
 function renderLeagueBlock(g,ctx,H,startIndex){
   var favs=ctx.favorites||NO_FAVS;
-  var choix=(ctx.collapsed||{})[g.key];
-  var fav=!!favs.has(g.key),open=choix===1?false:choix===0?true:(fav||!(g.rang>=OUVERTES_D_OFFICE)),k=esc(g.key);
+  var fav=!!favs.has(g.key),open=!(ctx.collapsed||{})[g.key],k=esc(g.key);
   var hid='hl-h-'+k,pid='hl-p-'+k;
   var favLbl=tf(fav?'home_list.fav_remove':'home_list.fav_add',fav?'Retirer {league} de mes compétitions':'Ajouter {league} à mes compétitions',{league:g.name});
-  // Prochain coup d'envoi de la competition (heure du premier match pas encore commence).
-  var now=ctx.nowTs||Date.now(),prochain=null;
-  g.matches.some(function(m){var ts=H.matchTimestamp(m);if(ts&&ts>now){prochain=m;return true;}return false;});
-  var stats=esc(countLabel(g.matches.length))+(prochain?' · '+esc(tf('home_list.next_kickoff','prochain à {time}',{time:H.heure(prochain)})):'');
+  var stats=esc(countLabel(g.matches.length));
   // Ajout aux favoris : kind dedie (cle de competition seulement).
   var track=fav?'':' data-track="'+k+'" data-track-kind="home_fav_add"';
   return '<section class="hl-league'+(fav?' is-fav':'')+(open?'':' is-collapsed')+'" data-league="'+k+'">'
@@ -472,9 +369,7 @@ function renderLeagueBlock(g,ctx,H,startIndex){
     +'<h4 class="hl-league-h"><button type="button" class="hl-league-toggle" id="'+hid+'" data-hl-toggle="'+k+'" aria-expanded="'+open+'" aria-controls="'+pid+'">'
     +(g.logo?'<span class="hl-league-logo"><img src="'+esc(g.logo)+'" width="19" height="19" alt="" loading="lazy" decoding="async"></span>':'')
     +'<span class="hl-league-text"><span class="hl-league-l1"><span class="hl-league-name">'+esc(g.name)+'</span>'
-    // 03/10/2026 (Clement : « ca ne fait pas pro ») : plus d'emoji drapeau ni de nom du pays a cote
-    // de la competition ; seulement son nom (et son logo quand il existe).
-    +'</span>'
+    +'<span class="hl-league-country">'+(g.flag?'<span aria-hidden="true">'+g.flag+'</span> ':'')+esc(g.country||t('home_list.country_intl','International'))+'</span></span>'
     +'<span class="hl-league-stats">'+stats+'</span></span>'
     +ICON.chev+'</button></h4></div>'
     +'<div class="hl-league-panel" id="'+pid+'" role="region" aria-labelledby="'+hid+'"'+(open?'':' inert aria-hidden="true"')+'><div class="hl-league-inner">'
@@ -530,7 +425,6 @@ function renderDayBody(all,ctx,H){
   var locked=lockedAll.length,upsellDone=!locked;
   html+='<div class="hl-leagues">';
   groups.forEach(function(g,i){
-    g.rang=i;
     html+=renderLeagueBlock(g,ctx,H,idx);idx+=g.matches.length;
     if(!upsellDone&&(i+1===ctx.upsellAfter||i===groups.length-1)){html+=renderUpsell(locked,H);upsellDone=true;}
   });
@@ -547,7 +441,7 @@ function mount(rootEl,options){
   var collapsed={};
   try{collapsed=JSON.parse(root.sessionStorage.getItem(DEFAULTS.collapsedKey)||'{}')||{};}catch(e){collapsed={};}
   var ctx={isPro:!!options.isPro,hasAccount:!!options.hasAccount,freeMatchId:null,lockedHref:options.lockedHref||DEFAULTS.lockedHref,
-    upsellAfter:options.upsellAfter||DEFAULTS.upsellAfter,
+    upsellAfter:options.upsellAfter||DEFAULTS.upsellAfter,simulations:options.simulations||DEFAULTS.simulations,
     favorites:favorites,favMatches:favMatches,collapsed:collapsed,nowTs:Date.now()};
   var state={status:'loading',matches:[],days:[],day:null,clock:H.localClock(),onRetry:null,veille:[],veilleJour:null};
 
@@ -646,7 +540,7 @@ function mount(rootEl,options){
     var sec=btn.closest('.hl-league'),k=sec.getAttribute('data-league'),panel=sec.querySelector('.hl-league-panel');
     var open=btn.getAttribute('aria-expanded')!=='true';
     btn.setAttribute('aria-expanded',open);sec.classList.toggle('is-collapsed',!open);
-    if(open){panel.removeAttribute('inert');panel.removeAttribute('aria-hidden');collapsed[k]=0;}
+    if(open){panel.removeAttribute('inert');panel.removeAttribute('aria-hidden');delete collapsed[k];}
     else{panel.setAttribute('inert','');panel.setAttribute('aria-hidden','true');collapsed[k]=1;}
     try{root.sessionStorage.setItem(DEFAULTS.collapsedKey,JSON.stringify(collapsed));}catch(e){}
   }
@@ -762,6 +656,5 @@ function mount(rootEl,options){
 return {mount:mount,veilleListe:veilleListe,veilleAppel:veilleAppel,renderDateStrip:renderDateStrip,groupByLeague:groupByLeague,renderLeagueBlock:renderLeagueBlock,renderMatchRow:renderMatchRow,
   renderMine:renderMine,renderDayBody:renderDayBody,matchStarHtml:matchStarHtml,
   analysisFor:analysisFor,hasSignal:hasSignal,buildDays:buildDays,countdown:countdown,matchStatus:matchStatus,derbyName:derbyName,
-  probBandOf:probBandOf,PROB_BANDS:PROB_BANDS,defaultHelpers:defaultHelpers,nbSimulations:nbSimulations,simulationsParMatch:simulationsParMatch,
-  staticMatchPath:staticMatchPath,matchHref:matchHref};
+  probBandOf:probBandOf,PROB_BANDS:PROB_BANDS,defaultHelpers:defaultHelpers};
 });

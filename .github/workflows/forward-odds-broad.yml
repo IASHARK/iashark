@@ -12,7 +12,7 @@ name: forward-odds-broad
 
 on:
   schedule:
-    - cron: '0 15 * * *'   # MODE ECONOMIE (03/10/2026) : 1 fois par jour (+ le releve de nuit du pipeline = 2 releves par jour) ; avant : toutes les 6 h
+    - cron: '0 */6 * * *'
   workflow_dispatch: {}
 
 concurrency:
@@ -31,5 +31,4 @@ jobs:
           APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        # Nombre de matchs par competition : config/quotas.json (api_football.releve_large).
-        run: node scripts/save-odds-snapshot.js
+        run: node scripts/save-odds-snapshot.js --fixtures-per-league=3

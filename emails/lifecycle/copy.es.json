@@ -27,7 +27,7 @@
       "blocks": [
         { "type": "p", "text": "Tu cuenta gratuita de IASHARK ya está creada. Así puedes usar el sitio en pocos minutos." },
         { "type": "list", "ordered": true, "items": [
-          "Algunos días, el análisis completo de un partido es gratuito: entonces aparece destacado en la página de inicio.",
+          "Cada día, el análisis completo de un partido es gratuito: aparece destacado en la página de inicio.",
           "En la página de un partido, consulta las probabilidades estimadas por el modelo, los factores que tiene en cuenta y sus límites.",
           "La página Metodología explica de dónde salen estas cifras y cómo leerlas."
         ] },
@@ -43,12 +43,10 @@
       "preheader": "El análisis completo de este partido está abierto gratis con tu cuenta.",
       "title": "Tu análisis gratuito del día",
       "blocks": [
-        { "type": "p", "text": "Algunos días, IASHARK abre gratis a todas las cuentas el análisis completo de un partido. Este es el de hoy:" },
+        { "type": "p", "text": "Cada día, IASHARK abre gratis a todas las cuentas el análisis completo de un partido. Este es el de hoy:" },
         { "type": "match" },
         { "type": "p", "text": "Encontrarás las probabilidades estimadas, los factores que usa el modelo y los puntos de atención. Son estimaciones estadísticas: el resultado de un partido sigue siendo incierto." },
-        { "type": "cta", "label": "Ver el análisis gratuito", "link": "freeMatch" },
-        { "type": "p", "if": "hasTrial", "text": "Para ver todos los análisis: prueba Pro gratuita de {{trialDays}} días (suscripción mensual), solo para una primera suscripción, cancelable en 1 clic." },
-        { "type": "link", "if": "hasTrial", "label": "Ver la oferta Pro", "link": "pricing" }
+        { "type": "cta", "label": "Ver el análisis gratuito", "link": "freeMatch" }
       ]
     },
     "pro_features": {
@@ -56,18 +54,17 @@
       "preheader": "La lista de contenidos Pro y su precio, sin rodeos.",
       "title": "Lo que Pro añade a tu cuenta gratuita",
       "blocks": [
-        { "type": "p", "text": "Tu cuenta gratuita da acceso al análisis completo de un partido ofrecido algunos días, al blog y a las herramientas en modo descubrimiento. Esto es lo que añade Pro:" },
+        { "type": "p", "text": "Tu cuenta gratuita da acceso al análisis completo de un partido al día, al blog y a las herramientas en modo descubrimiento. Esto es lo que añade Pro:" },
         { "type": "list", "items": [
           "El análisis completo en todos los partidos",
-          "La apuesta elegida, con su probabilidad y sus razones",
-          "Los resultados más probables y los goles esperados",
-          "Los goleadores más probables, con los 3 goleadores del día"
+          "Las seis herramientas conectadas a las probabilidades del modelo",
+          "El diario de decisiones sincronizado",
+          "El seguimiento de bankroll vinculado a la cuenta"
         ] },
         { "type": "p", "if": "hasProYear", "text": "Precios en la versión {{siteVersion}} del sitio: {{proWeekPrice}} a la semana, {{proPrice}} al mes o {{proYearPrice}} al año. El mismo acceso Pro sea cual sea la duración, cancelable en cualquier momento desde Mi cuenta." },
         { "type": "p", "if": "hasNoProYear", "text": "Precios en la versión {{siteVersion}} del sitio: {{proWeekPrice}} a la semana o {{proPrice}} al mes. El mismo acceso Pro sea cual sea la duración, cancelable en cualquier momento desde Mi cuenta." },
         { "type": "p", "if": "hasOnlyProMonth", "text": "Precio en la versión {{siteVersion}} del sitio: {{proPrice}} al mes, cancelable en cualquier momento desde Mi cuenta." },
         { "type": "p", "text": "Pro da acceso a más análisis y herramientas; no hace que ningún partido sea más previsible." },
-        { "type": "p", "if": "hasTrial", "text": "Prueba gratuita de {{trialDays}} días en la suscripción mensual, para una primera suscripción: se pide tu tarjeta, no se cobra nada durante la prueba, un email te avisa 2 días antes del final y cancelas en 1 clic desde Mi cuenta. La semana y el año se pagan al suscribirse." },
         { "type": "cta", "label": "Ver el detalle de la oferta", "link": "pricing" },
         { "type": "p", "text": "Si la cuenta gratuita te basta, no tienes que hacer nada." }
       ]
@@ -79,21 +76,17 @@
       "blocks": [
         { "type": "p", "text": "Estos son algunos partidos de este fin de semana que cubre IASHARK:" },
         { "type": "matches" },
-        { "type": "p", "text": "Algunos días, el análisis completo de un partido es gratuito con tu cuenta." },
-        { "type": "cta", "label": "Ver todos los partidos", "link": "home" },
-        { "type": "p", "if": "hasTrial", "text": "Para ver todos los análisis: prueba Pro gratuita de {{trialDays}} días (suscripción mensual), solo para una primera suscripción, cancelable en 1 clic." },
-        { "type": "link", "if": "hasTrial", "label": "Ver la oferta Pro", "link": "pricing" }
+        { "type": "p", "text": "El análisis completo de un partido sigue siendo gratuito cada día con tu cuenta." },
+        { "type": "cta", "label": "Ver todos los partidos", "link": "home" }
       ]
     },
     "inactive_30d": {
       "subject": "Tu cuenta IASHARK sigue activa",
-      "preheader": "Tu cuenta gratuita sigue activa.",
+      "preheader": "El análisis gratuito del día sigue disponible con tu cuenta.",
       "title": "Tu cuenta sigue aquí",
       "blocks": [
-        { "type": "p", "text": "Hace tiempo que no vuelves a IASHARK. Tu cuenta gratuita sigue activa y algunos días el análisis completo de un partido es gratuito." },
+        { "type": "p", "text": "Hace tiempo que no vuelves a IASHARK. Tu cuenta gratuita sigue activa y el análisis completo de un partido sigue siendo gratuito cada día." },
         { "type": "cta", "label": "Volver a IASHARK", "link": "home" },
-        { "type": "p", "if": "hasTrial", "text": "Para ver todos los análisis: prueba Pro gratuita de {{trialDays}} días (suscripción mensual), solo para una primera suscripción, cancelable en 1 clic." },
-        { "type": "link", "if": "hasTrial", "label": "Ver la oferta Pro", "link": "pricing" },
         { "type": "p", "text": "Si estos correos ya no te son útiles, date de baja con un clic en el enlace al final de este mensaje. Si no visitas el sitio ni abres nuestros correos, dejaremos de escribirte en 30 días de todos modos." }
       ]
     },

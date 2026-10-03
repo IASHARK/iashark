@@ -2,7 +2,7 @@ import {existsSync} from "node:fs";
 import path from "node:path";
 import {ApiSports} from "./api/apiSports";
 import {collectMatchData} from "./data/collectMatchData";
-import {strengthFromSite} from "./model/teamStrength";
+import {buildStrength} from "./model/teamStrength";
 import {runMonteCarlo} from "./model/monteCarlo";
 import {selectScenario} from "./simulation/selectScenario";
 import {writeReport} from "./output/report";
@@ -11,9 +11,7 @@ for(const candidate of [path.resolve("../.env"),path.resolve(".env")])if(existsS
 const key=process.env.API_SPORTS_KEY||process.env.APISPORTS_KEY;
 if(!key)throw new Error("API_SPORTS_KEY absent.");
 
-// Buts attendus : ceux de la page du match (moteur v3), a renseigner par match
-// (lambdaH / lambdaA) ; sans eux, le match est refuse (S3, 29/09/2026).
-const matches:{query:{date:string;home:string;away:string;leagueId:number};slug:string;lambdaH?:number;lambdaA?:number}[]=[
+const matches=[
   {query:{date:"2026-09-08",home:"aek athens",away:"lask linz",leagueId:2},slug:"aek-lask"},
   {query:{date:"2026-09-08",home:"club brugge",away:"aston villa",leagueId:2},slug:"brugge-villa"},
   {query:{date:"2026-09-08",home:"borussia dortmund",away:"villarreal",leagueId:2},slug:"dortmund-villarreal"},
@@ -33,7 +31,7 @@ function selectVideoScore(samples:{homeGoals:number;awayGoals:number}[],variatio
 
 async function main(){for(const [index,match] of matches.entries()){
   const data=await collectMatchData(new ApiSports(key as string),match.query);
-  const strength=strengthFromSite(Number(match.lambdaH),Number(match.lambdaA));
+  const strength=buildStrength(data);
   const {aggregates,samples}=runMonteCarlo(data,strength,50000);
   const targetScore=selectVideoScore(samples,index)??aggregates.topScores[0].score;
   const scenario=selectScenario(data,samples,targetScore,aggregates.topScorers);

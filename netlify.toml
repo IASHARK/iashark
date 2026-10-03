@@ -2,7 +2,7 @@
 # deploiement (audit QA du 14/09/2026 : la racine du depot etait publique,
 # documents internes, SQL, code des fonctions et donnees brutes compris).
 [build]
-  command = "node scripts/build-public.js && node scripts/build-maintenance.js"
+  command = "node scripts/build-public.js"
   publish = "dist"
   # Saute le deploiement quand le commit ne touche aucun fichier publie ni la
   # configuration du build (docs, tests, workflows, raw_api/...). Toujours un
@@ -17,10 +17,3 @@
 [[edge_functions]]
   path = "/api/geo"
   function = "geo"
-
-# Audit SEO du 29/09/2026 (action A3) : Netlify ne doit jamais reecrire les
-# URL (« jolies URL » : /match/123.html -> /match/123). Les canonical, hreflang
-# et sitemaps pointent vers les fichiers .html : la reecriture creait une
-# deuxieme adresse par page et des redirections inutiles.
-[build.processing.html]
-  pretty_urls = false

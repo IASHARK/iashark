@@ -19,9 +19,8 @@ const ARTICLES = fs.readdirSync(path.join(RACINE, "blog", "guides"))
   .filter((f) => f.endsWith(".html") && f !== "index.html");
 
 // Six depuis le 22/09/2026 : guide Coupe du monde retire (tournoi termine).
-test("les articles publies sont dans le HTML servi, pas construits en JavaScript", () => {
-  // 30/09/2026 : guides « value bet » et « prediction IA » (mise Kelly) retires : 4 guides.
-  assert.ok(ARTICLES.length >= 4, "moins d'articles que prevu sur le disque");
+test("les six articles publies sont dans le HTML servi, pas construits en JavaScript", () => {
+  assert.ok(ARTICLES.length >= 6, "moins d'articles que prevu sur le disque");
   for (const f of ARTICLES) {
     assert.ok(blog.includes("/blog/guides/" + f), `${f} n'est pas lie depuis le blog`);
   }
@@ -141,7 +140,7 @@ test("la hierarchie des titres est correcte", () => {
 
 test("les images ne provoquent pas de saut de mise en page", () => {
   const images = [...blog.matchAll(/<img [^>]*>/g)].map((m) => m[0]);
-  assert.ok(images.length >= 5); // 2 guides retires le 30/09/2026 (mise Kelly)
+  assert.ok(images.length >= 7);
   for (const img of images) {
     assert.match(img, /width="\d+"/, "image sans largeur : " + img.slice(0, 80));
     assert.match(img, /height="\d+"/, "image sans hauteur : " + img.slice(0, 80));

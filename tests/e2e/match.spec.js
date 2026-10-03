@@ -67,46 +67,35 @@ for (const v of VERSIONS) {
       await expect(gate).toBeVisible();
       await expect(gate.locator('h2')).toHaveText(tr(dict, 'match_page.pro_gate_title'));
       await expect(gate.locator('.avis-ready')).toHaveText(tr(dict, 'match_page.avis_ready'));
+      const cta = gate.locator('a.mgate-cta');
+      await expect(cta).toContainText(tr(dict, 'match_page.pro_gate_cta'));
+      await expect(cta).toHaveAttribute('data-track', 'match_gate_unlock');
+      expect(pathOf(await cta.getAttribute('href'), baseURL)).toBe(proHref(v.dir, siteData.paid.id));
       // 19/09/2026 : prix mensuel du marche pres du bouton (devise de la
       // version, jamais ecrit en dur) et ce que Pro donne en plus du match.
       // Mensuel pas encore payable (gb, mx, za : checkoutOpen = [] depuis le
       // 19/09/2026) : aucun prix annonce, la ligne de resiliation seule.
       const monthOpen = typeof v.proAmount === 'number' && (!Array.isArray(v.checkoutOpen) || v.checkoutOpen.includes('month'));
       const weekOpen = typeof v.proAmounts.week === 'number' && (!Array.isArray(v.checkoutOpen) || v.checkoutOpen.includes('week'));
-      const cta = gate.locator('a.mgate-cta');
       if (monthOpen) {
-        await expect(cta).toContainText(tr(dict, 'match_page.pro_gate_cta'));
-        await expect(cta).toHaveAttribute('data-track', 'match_gate_unlock');
-        // Grille de prix compacte (assets/pricing-grid.js, 30/09/2026) : meme
-        // bouton ambre du panneau, meme retour au match, plus la duree affichee.
-        const href = pathOf(await cta.getAttribute('href'), baseURL);
-        expect(href.replace(/&interval=(week|month|year)$/, '')).toBe(proHref(v.dir, siteData.paid.id));
         const prix = await prixMensuel(page);
         expect(prix, 'prix mensuel absent de lib/market-config.js').toBeTruthy();
         expect(squash(prix), `prix ${prix} : montant ${v.proAmount}`).toMatch(new RegExp(String(v.proAmount).replace('.', '[.,]') + '(?![\\d])'));
         expect(prix).toContain(v.currencySymbol);
         // 20/09/2026 : hebdo annonce a cote du mensuel quand il est payable.
-        // Prix mensuel en grand dans la grille compacte, semaine en option quand elle est payable.
-        const ligne = gate.locator('[data-pricing-grid] .pg-root');
-        await expect(ligne.locator('[data-pg-amount]')).toHaveText(prix);
-        await expect(cta).toHaveAttribute('href', /[?&]interval=month$/);
         if (weekOpen) {
           const semaine = await prixPro(page, 'week');
           expect(semaine, 'prix hebdo absent de lib/market-config.js').toBeTruthy();
-          await expect(ligne).toContainText(tr(dict, 'pricing_grid.line_or_week').replace('{price}', semaine));
+          await expect(gate.locator('.mgate-small')).toHaveText(tr(dict, 'pro_offer.price_week_month').replace('{week}', semaine).replace('{month}', prix));
         } else {
-          await expect(ligne).not.toContainText(tr(dict, 'pricing_grid.line_or_week').replace('{price}', ''));
+          await expect(gate.locator('.mgate-small')).toHaveText(tr(dict, 'pro_offer.price_month').replace('{price}', prix));
         }
       } else {
-        // Rien de payable : la ligne « pas encore ouvert », aucun prix, aucun bouton de paiement.
-        await expect(gate.locator('[data-pricing-grid] .pg-root')).toHaveText(tr(dict, 'pricing_grid.closed'));
+        await expect(gate.locator('.mgate-small')).toHaveText(tr(dict, 'match_page.pro_gate_small'));
       }
-      // Meme liste que la carte Pro de la grille de prix (controle des captures du 30/09/2026) ;
-      // plus de ligne « + tous les matchs du jour... » ni de « Nos probabilites face aux cotes ».
-      await expect(gate.locator('.mgate-more')).toHaveCount(0);
-      const liste = squash(await gate.locator('.mgate-list').innerText());
-      for (const k of ['f_all_matches', 'f_scores', 'f_scenario', 'f_scorers']) expect(liste).toContain(squash(tr(dict, 'pricing_grid.' + k)));
-      expect(liste).not.toContain(squash(tr(dict, 'match_page.pro_gate_item_odds')));
+      await expect(gate.locator('.mgate-more')).toHaveText(tr(dict, 'pro_offer.match_more'));
+      const liste = await gate.locator('.mgate-list').innerText();
+      for (const k of ['pro_gate_item_bet', 'pro_gate_item_scorer', 'pro_gate_item_scenario', 'pro_gate_item_scores', 'pro_gate_item_odds']) expect(liste).toContain(tr(dict, 'match_page.' + k));
       await expect(gate.locator('.mgate-preview')).toHaveAttribute('aria-hidden', 'true');
       expect(await gate.locator('.mgate-preview').textContent(), 'apercu factice : aucun chiffre').not.toMatch(/\d/);
       await expect(gate.locator('.sr-only')).toHaveText(tr(dict, 'match_page.pro_gate_sr'));
@@ -274,9 +263,7 @@ test.describe('page match /en/ apres la bascule USD (config de test _usdSwitch)'
     await expect(gate).toBeVisible();
     expect(await prixMensuel(page)).toBe('$19.99');
     expect(await prixPro(page, 'week')).toBe('$4.99');
-    const ligne = gate.locator('[data-pricing-grid] .pg-root');
-    await expect(ligne.locator('[data-pg-amount]')).toHaveText('$19.99');
-    await expect(ligne).toContainText(tr(dict, 'pricing_grid.line_or_week').replace('{price}', '$4.99'));
+    await expect(gate.locator('.mgate-small')).toHaveText(tr(dict, 'pro_offer.price_week_month').replace('{week}', '$4.99').replace('{month}', '$19.99'));
     expect(squash(await gate.innerText()), 'aucun prix EUR ni "US$"').not.toMatch(/€|19[.,]95|US\$/);
     await expectPanelOnly(page);
   });

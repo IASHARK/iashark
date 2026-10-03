@@ -41,8 +41,7 @@ concurrency:
 
 jobs:
   monitor:
-    # 'cancelled' : tentative en trop du calcul du matin (etape « Garde » d'update-data.yml), pas une panne.
-    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion != 'success' && github.event.workflow_run.conclusion != 'cancelled')
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion != 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

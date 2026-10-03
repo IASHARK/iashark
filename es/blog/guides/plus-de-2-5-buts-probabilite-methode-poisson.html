@@ -45,7 +45,7 @@
 {"@type":"Question","name":"¿Cómo se calcula la probabilidad de más de 2,5 goles?","acceptedAnswer":{"@type":"Answer","text":"Primero se estiman los goles esperados de cada equipo a partir de su fuerza ofensiva y de la debilidad defensiva del rival, referidas a las medias de la liga. Se suman estos dos valores para obtener el total esperado (lambda). Después se aplica la distribución de Poisson para obtener la probabilidad de 0, 1 y 2 goles: la probabilidad de más de 2,5 goles es el 100 % menos la suma de esos tres valores."}},
 {"@type":"Question","name":"¿Cuál es la probabilidad media de más de 2,5 goles?","acceptedAnswer":{"@type":"Answer","text":"Depende por completo de la liga y de los equipos. Con un total esperado de 2,6 goles, es de aproximadamente el 48 %. Con 2,8 goles esperados, en torno al 53 %. Con 3,0 goles esperados, en torno al 58 %. Una diferencia de solo 0,2 goles esperados desplaza la probabilidad casi 5 puntos, lo que explica por qué una estimación aproximada no basta."}},
 {"@type":"Question","name":"¿Es fiable la distribución de Poisson para el fútbol?","acceptedAnswer":{"@type":"Answer","text":"Es una buena primera aproximación, pero se basa en hipótesis que en la práctica no se cumplen. Supone que los goles de los dos equipos son independientes, cuando los empates a cero son más frecuentes de lo que predice la distribución. También supone una tasa de anotación constante durante los 90 minutos. Las correcciones de tipo Dixon-Coles existen precisamente para compensar estas desviaciones."}},
-{"@type":"Question","name":"¿Cómo comparar una cuota de más de 2,5 goles con una probabilidad estimada?","acceptedAnswer":{"@type":"Answer","text":"Convierte la cuota en probabilidad implícita dividiendo 100 entre la cuota: una cuota de 1,90 corresponde aproximadamente a un 52,6 %. Compárala con tu estimación. Si tu modelo da un 53 % frente a un 52,6 % implícito, la diferencia es inferior a un punto — menor que tu margen de error, así que no se puede concluir nada."}}]}
+{"@type":"Question","name":"¿Cómo saber si una cuota de más de 2,5 goles es interesante?","acceptedAnswer":{"@type":"Answer","text":"Convierte la cuota en probabilidad implícita dividiendo 100 entre la cuota: una cuota de 1,90 corresponde aproximadamente a un 52,6 %. Compárala con tu estimación. Si tu modelo da un 53 % frente a un 52,6 % implícito, la ventaja es inferior a un punto — menor que tu margen de error y, por tanto, insuficiente para justificar una apuesta."}}]}
 </script>
 </head>
 <body>
@@ -60,7 +60,7 @@
   <div class="meta">
     <span>Publicado el 2 de septiembre de 2026</span>
     <span>·</span>
-    <span>9 min de lectura</span>
+    <span>10 min de lectura</span>
     <span>·</span>
     <span>Calculadora incluida</span>
   </div>
@@ -204,7 +204,7 @@
   <div><b>1,87</b><span>cuota justa</span></div>
 </div>
 
-<p>La <strong>cuota justa</strong> es la inversa de la probabilidad: 1 ÷ 0,535 = 1,87. Es la cuota que refleja exactamente la probabilidad del modelo, sin el margen de la casa de apuestas.</p>
+<p>La <strong>cuota justa</strong> es la inversa de la probabilidad: 1 ÷ 0,535 = 1,87. Con esta cuota, la apuesta tiene un valor esperado nulo a largo plazo. Por debajo de ella, el valor esperado es negativo de media; por encima, es teóricamente positivo — <em>solo si</em> tu estimación es correcta.</p>
 
 <h2 id="cote">6. Paso 3: comparar con la cuota de la casa de apuestas</h2>
 
@@ -212,16 +212,16 @@
 
 <div class="tw">
 <table>
-  <thead><tr><th>Total esperado</th><th>Probabilidad del modelo</th><th>Implícita a 1,90</th><th>Diferencia</th></tr></thead>
+  <thead><tr><th>Total esperado</th><th>Probabilidad del modelo</th><th>Implícita a 1,90</th><th>Valor esperado</th></tr></thead>
   <tbody>
-    <tr><td class="num">2,6</td><td class="num">48,2 %</td><td class="num">52,6 %</td><td class="num" style="color:#ff625f">−4,4 pts</td></tr>
-    <tr class="hi"><td class="num">2,8</td><td class="num">53,1 %</td><td class="num">52,6 %</td><td class="num">+0,5 pt</td></tr>
-    <tr><td class="num">3,0</td><td class="num">57,7 %</td><td class="num">52,6 %</td><td class="num" style="color:#25d6a2">+5,1 pts</td></tr>
+    <tr><td class="num">2,6</td><td class="num">48,2 %</td><td class="num">52,6 %</td><td class="num" style="color:#ff625f">−8,5 %</td></tr>
+    <tr class="hi"><td class="num">2,8</td><td class="num">53,1 %</td><td class="num">52,6 %</td><td class="num">+0,8 %</td></tr>
+    <tr><td class="num">3,0</td><td class="num">57,7 %</td><td class="num">52,6 %</td><td class="num" style="color:#25d6a2">+9,6 %</td></tr>
   </tbody>
 </table>
 </div>
 
-<p>Esta tabla es el núcleo de la cuestión. Muestra que, con la misma cuota, <strong>una diferencia de 0,4 goles esperados hace pasar la probabilidad del modelo del 48 % al 58 %, de claramente por debajo de la cuota a claramente por encima</strong>. La dificultad no está en el cálculo de Poisson — que es mecánico —, sino en la exactitud de la lambda con la que se alimenta.</p>
+<p>Esta tabla es el núcleo de la cuestión. Muestra que, con la misma cuota, <strong>una diferencia de 0,4 goles esperados hace pasar el valor esperado de la apuesta de claramente negativo a claramente positivo</strong>. La dificultad no está en el cálculo de Poisson — que es mecánico —, sino en la exactitud de la lambda con la que se alimenta. El proceso completo de comparación entre probabilidad y cuota se explica en detalle en nuestra <a href="/es/blog/guides/value-bet-guide-complet-2026.html">guía sobre las value bets</a>.</p>
 
 <h2 id="erreur">7. El margen de error que nunca te enseñan</h2>
 
@@ -245,7 +245,7 @@
 
 <div class="box warn">
   <div class="box-t">Lo que esta tabla te dice realmente</div>
-  <p>Un error de <strong>0,2 en la lambda</strong> — algo totalmente habitual cuando se estima a partir de una decena de partidos — desplaza la probabilidad <strong>casi 5 puntos</strong> y la cuota justa de 2,08 a 1,88. Sin embargo, una diferencia de 5 puntos entre una estimación y la cuota ya se considera enorme. Dicho de otro modo: <strong>tu margen de error es del mismo orden de magnitud que la diferencia que quieres medir.</strong></p>
+  <p>Un error de <strong>0,2 en la lambda</strong> — algo totalmente habitual cuando se estima a partir de una decena de partidos — desplaza la probabilidad <strong>casi 5 puntos</strong> y la cuota justa de 2,08 a 1,88. Sin embargo, una ventaja teórica de 5 puntos ya se considera enorme. Dicho de otro modo: <strong>tu margen de error es del mismo orden de magnitud que la ventaja que buscas.</strong></p>
 </div>
 
 <p>La conclusión práctica es incómoda, pero honesta. Una diferencia de menos de 3 a 4 puntos entre tu estimación y la probabilidad implícita de la casa de apuestas <strong>no debería desencadenar una apuesta</strong>: es indistinguible del ruido de tu propio método.</p>
@@ -283,6 +283,7 @@
 
 <div class="related">
   <a href="/es/blog/guides/xg-expected-goals-guide-complet.html"><span>Paso anterior</span><b>xG: lo que la estadística dice realmente y dónde engaña</b></a>
+  <a href="/es/blog/guides/value-bet-guide-complet-2026.html"><span>Paso siguiente</span><b>Value bet: comparar una probabilidad con una cuota sin equivocarse</b></a>
 </div>
 
 <h2 id="faq">10. Preguntas frecuentes</h2>
@@ -292,7 +293,7 @@
   <details><summary>¿Cómo se calcula la probabilidad de más de 2,5 goles?</summary><p>Primero se estiman los goles esperados de cada equipo a partir de su fuerza ofensiva y de la debilidad defensiva del rival, referidas a las medias de la liga. Se suman estos dos valores para obtener el total esperado (lambda). Después se aplica la distribución de Poisson para obtener la probabilidad de 0, 1 y 2 goles: la probabilidad de más de 2,5 goles es el 100 % menos la suma de esos tres valores.</p></details>
   <details><summary>¿Cuál es la probabilidad media de más de 2,5 goles?</summary><p>Depende por completo de la liga y de los equipos. Con un total esperado de 2,6 goles, es de aproximadamente el 48 %. Con 2,8 goles esperados, en torno al 53 %. Con 3,0 goles esperados, en torno al 58 %. Una diferencia de solo 0,2 goles esperados desplaza la probabilidad casi 5 puntos, lo que explica por qué una estimación aproximada no basta.</p></details>
   <details><summary>¿Es fiable la distribución de Poisson para el fútbol?</summary><p>Es una buena primera aproximación, pero se basa en hipótesis que en la práctica no se cumplen. Supone que los goles de los dos equipos son independientes, cuando los empates a cero son más frecuentes de lo que predice la distribución. También supone una tasa de anotación constante durante los 90 minutos. Las correcciones de tipo Dixon-Coles existen precisamente para compensar estas desviaciones.</p></details>
-  <details><summary>¿Cómo comparar una cuota de más de 2,5 goles con una probabilidad estimada?</summary><p>Convierte la cuota en probabilidad implícita dividiendo 100 entre la cuota: una cuota de 1,90 corresponde aproximadamente a un 52,6 %. Compárala con tu estimación. Si tu modelo da un 53 % frente a un 52,6 % implícito, la diferencia es inferior a un punto — menor que tu margen de error, así que no se puede concluir nada.</p></details>
+  <details><summary>¿Cómo saber si una cuota de más de 2,5 goles es interesante?</summary><p>Convierte la cuota en probabilidad implícita dividiendo 100 entre la cuota: una cuota de 1,90 corresponde aproximadamente a un 52,6 %. Compárala con tu estimación. Si tu modelo da un 53 % frente a un 52,6 % implícito, la ventaja es inferior a un punto — menor que tu margen de error y, por tanto, insuficiente para justificar una apuesta.</p></details>
 </div>
 
 <div class="cta">
@@ -303,7 +304,7 @@
 
 </main>
 
-<!--RELATED_GUIDES--><nav aria-labelledby="related-guides-title" style="max-width:760px;margin:32px auto;padding:0 20px"><h2 id="related-guides-title" style="font-size:18px;margin:0 0 8px">Guías relacionadas</h2><ul style="list-style:none;padding:0;margin:0"><li style="margin:6px 0"><a href="/es/blog/guides/guide-paris-sportifs-debutant-complet.html" style="color:#22d3ee">Apuestas deportivas: la guía completa para empezar con método</a></li><li style="margin:6px 0"><a href="/es/blog/guides/meilleurs-bookmakers-monde-2026.html" style="color:#22d3ee">Elegir una casa de apuestas: criterios de seguridad, cuotas y límites</a></li><li style="margin:6px 0"><a href="/es/leagues/la-liga.html" style="color:#22d3ee">Pronósticos de La Liga: partidos analizados</a></li></ul></nav><!--/RELATED_GUIDES-->
+<!--RELATED_GUIDES--><nav aria-labelledby="related-guides-title" style="max-width:760px;margin:32px auto;padding:0 20px"><h2 id="related-guides-title" style="font-size:18px;margin:0 0 8px">Guías relacionadas</h2><ul style="list-style:none;padding:0;margin:0"><li style="margin:6px 0"><a href="/es/blog/guides/prediction-ia-football-guide-2026.html" style="color:#22d3ee">Predicción de fútbol con IA: entender los modelos y sus límites</a></li><li style="margin:6px 0"><a href="/es/blog/guides/guide-paris-sportifs-debutant-complet.html" style="color:#22d3ee">Apuestas deportivas: la guía completa para empezar con método</a></li><li style="margin:6px 0"><a href="/es/blog/guides/meilleurs-bookmakers-monde-2026.html" style="color:#22d3ee">Elegir una casa de apuestas: criterios de seguridad, cuotas y límites</a></li><li style="margin:6px 0"><a href="/es/leagues/la-liga.html" style="color:#22d3ee">Pronósticos de La Liga: partidos analizados</a></li></ul></nav><!--/RELATED_GUIDES-->
 <footer class="art-foot">
   <p>IASHARK — análisis estadísticos de fútbol. Las probabilidades publicadas son orientativas y no garantizan ningún resultado. Las apuestas deportivas conllevan un riesgo de pérdida económica y de adicción: no arriesgues nunca más de lo que puedas permitirte perder. Prohibido a menores de 18 años. ¿Necesitas ayuda? Consulta nuestra <a href="/es/jeu-responsable.html" style="color:inherit;text-decoration:underline">página de juego responsable</a>.</p>
   <p>18+ · Ayuda: <a data-market-helpline="url" href="https://www.gamblingtherapy.org" style="color:inherit;text-decoration:underline">gamblingtherapy.org</a><span data-market-helpline-if="phone" hidden> · <span data-market-helpline="phone"></span></span></p>
@@ -335,14 +336,14 @@
     el.rUnder.textContent=pct(under);
     el.rFair.textContent=over>0?num(1/over,2):'—';
     if(!isFinite(od)||od<=1){ el.rVerdict.textContent='Introduce una cuota superior a 1 para comparar.'; return; }
-    var implied=1/od, edge=over-implied;
+    var implied=1/od, edge=over-implied, ev=over*od-1;
     var verdict;
     if(Math.abs(edge)*100<3){
-      verdict='<b>Diferencia demasiado pequeña para sacar conclusiones.</b> Tu estimación ('+pct(over)+') y la probabilidad implícita de la cuota ('+pct(implied)+') difieren en '+num(Math.abs(edge)*100,1)+' punto(s) — está dentro del margen de error de un modelo de este tipo.';
+      verdict='<b>Diferencia demasiado pequeña para sacar conclusiones.</b> Tu estimación ('+pct(over)+') y la probabilidad implícita de la cuota ('+pct(implied)+') difieren en '+num(Math.abs(edge)*100,1)+' punto(s) — está dentro del margen de error de un modelo de este tipo. Valor esperado teórico: '+num(ev*100,1)+' %.';
     } else if(edge>0){
-      verdict='<b>Ventaja teórica de '+num(edge*100,1)+' puntos</b> a favor de la apuesta (modelo '+pct(over)+' frente a '+pct(implied)+' implícito). Solo debe tenerse en cuenta si confías en tus goles esperados.';
+      verdict='<b>Ventaja teórica de '+num(edge*100,1)+' puntos</b> a favor de la apuesta (modelo '+pct(over)+' frente a '+pct(implied)+' implícito). Valor esperado teórico: +'+num(ev*100,1)+' %. Solo debe tenerse en cuenta si confías en tus goles esperados.';
     } else {
-      verdict='<b>Cuota desfavorable.</b> El mercado estima un '+pct(implied)+' cuando tu modelo da un '+pct(over)+', es decir, '+num(Math.abs(edge)*100,1)+' puntos menos.';
+      verdict='<b>Cuota desfavorable.</b> El mercado estima un '+pct(implied)+' cuando tu modelo da un '+pct(over)+', es decir, '+num(Math.abs(edge)*100,1)+' puntos menos. Valor esperado teórico: '+num(ev*100,1)+' %.';
     }
     el.rVerdict.innerHTML=verdict;
   }

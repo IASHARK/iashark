@@ -145,19 +145,6 @@ async function verifyLeague(league, apsKey) {
   }
 }
 
-function rapportEncoreFrais(leagues, nowMs, report, joursMax) {
-  if (joursMax == null) {
-    try { joursMax = require("../config/quotas.json").api_football.couverture_ligues_jours; } catch (e) { joursMax = 0; }
-  }
-  if (!(joursMax > 0)) return { frais: false };
-  if (report === undefined) { try { report = JSON.parse(fs.readFileSync(REPORT_PATH, "utf8")); } catch (e) { report = null; } }
-  if (!report || !report.generatedAt || !Array.isArray(report.leagues)) return { frais: false };
-  var ageJours = (nowMs - Date.parse(report.generatedAt)) / 86400000;
-  if (!(ageJours >= 0) || ageJours >= joursMax) return { frais: false, ageJours: Math.floor(ageJours) };
-  var complet = leagues.every(function (l) { return report.leagues.some(function (r) { return r.apiFootballId === l.apiFootballId && r.status === "VERIFIED"; }); });
-  return { frais: complet, ageJours: Math.floor(ageJours) };
-}
-
 async function main() {
   var apsKey = process.env.APISPORTS_KEY;
   var config = JSON.parse(fs.readFileSync(LEAGUES_CONFIG_PATH, "utf8"));
@@ -169,12 +156,6 @@ async function main() {
     process.exitCode = 1;
     return;
   }
-
-  // MODE ECONOMIE (03/10/2026) : rapport recent (config/quotas.json#api_football.couverture_ligues_jours)
-  // et complet (chaque competition de la liste verifiee) -> rien a refaire, 0 requete. Une competition
-  // ajoutee, un echec ou un rapport plus vieux relancent la verification complete.
-  var frais = rapportEncoreFrais(leagues, Date.now());
-  if (frais.frais) { console.log("Rapport de couverture recent (" + frais.ageJours + " jour(s)) et complet : verification sautee (mode economie)."); return; }
 
   var results = [];
   for (var i = 0; i < leagues.length; i++) {
@@ -205,7 +186,7 @@ async function main() {
   }
 }
 
-module.exports = { resolveSeason: resolveSeason, computeTier: computeTier, verifyLeague: verifyLeague, rapportEncoreFrais: rapportEncoreFrais };
+module.exports = { resolveSeason: resolveSeason, computeTier: computeTier, verifyLeague: verifyLeague };
 
 if (require.main === module) {
   main();

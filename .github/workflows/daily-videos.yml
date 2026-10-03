@@ -24,10 +24,7 @@ concurrency:
 
 jobs:
   videos:
-    # Calcul du matin en echec (panne du moteur v3, ecriture Supabase...) : les videos
-    # tournent quand meme sur les donnees publiees, et le message Telegram le dit
-    # (avocat du diable, 2e revue : une panne ne doit plus tout faire taire sans prevenir).
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 150
     permissions:
@@ -77,7 +74,6 @@ jobs:
 
       - name: Envoi Telegram
         env:
-          CALCUL_EN_ECHEC: ${{ github.event.workflow_run.conclusion == 'failure' && '1' || '' }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: node scripts/videos/send-telegram.mjs "$RUNNER_TEMP/daily"

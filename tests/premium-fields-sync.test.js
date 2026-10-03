@@ -145,7 +145,7 @@ test("decoupage, script local et pages SEO utilisent la liste unique", () => {
 
 test("fonction Edge : non-abonne sans champ premium ni run_output detaille, abonne servi depuis la table", () => {
   const fn = read("supabase/functions/match-data/index.ts");
-  assert.match(fn, /if \(estGratuit\(m\)\) return sansChampsPro\(m\);/);
+  assert.match(fn, /if \(estGratuit\(m\)\) return m;/);
   assert.match(fn, /return retirerPremium\(m\);/);
   assert.match(fn, /data\.run_output = runOutputPublic\(data\.run_output, matchs\)/);
   assert.match(fn, /select\(PREMIUM_COLUMNS \+ ",premium_fields"\)/);
@@ -172,7 +172,7 @@ test("affichage Pro sans detail premium : etat neutre sur l'accueil et la page m
   assert.match(list, /state==='pending'\)\{\s*zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'\+esc\(t\('home_app\.analysis_in_progress'/);
   const js = read("match-page.js");
   // Page match V8 (16/09/2026) : « L'avis IASHARK », meme etat neutre en tete des cas sans pari.
-  assert.match(js, /if\(!r\)\{[\s\S]{0,700}const msg=(?:selection\?sansPari\(raw\)\s*:)?raw\.has_signal===true&&raw\.no_signal!==true\s*\?t\('match_page\.sig_premium_updating'/);
+  assert.match(js, /if\(!r\)\{[\s\S]{0,400}const msg=raw\.has_signal===true&&raw\.no_signal!==true\s*\?t\('match_page\.sig_premium_updating'/);
   assert.ok(js.indexOf("match_page.sig_premium_updating") < js.indexOf("match_page.signal_unavailable_fallback"), "l'etat neutre passe avant \"aucun marche\"");
   for (const loc of ["fr", "en", "es", "es-mx", "de", "it", "pt"]) {
     const d = JSON.parse(read("i18n/dict/" + loc + ".json"));

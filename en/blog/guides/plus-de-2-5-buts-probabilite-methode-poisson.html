@@ -45,7 +45,7 @@
 {"@type":"Question","name":"How do you calculate the probability of over 2.5 goals?","acceptedAnswer":{"@type":"Answer","text":"First, estimate each team's expected goals from its attacking strength and the opponent's defensive weakness, both measured against the league averages. Add these two values together to obtain the expected total (lambda). Then apply the Poisson distribution to obtain the probability of 0, 1 and 2 goals: the probability of over 2.5 goals is 100% minus the sum of these three values."}},
 {"@type":"Question","name":"What is the average probability of over 2.5 goals?","acceptedAnswer":{"@type":"Answer","text":"It depends entirely on the league and the teams. With an expected total of 2.6 goals, it is around 48%. At 2.8 expected goals, around 53%. At 3.0 expected goals, around 58%. A difference of just 0.2 expected goals shifts the probability by nearly 5 points, which explains why a rough estimate is not enough."}},
 {"@type":"Question","name":"Is the Poisson distribution reliable for football?","acceptedAnswer":{"@type":"Answer","text":"It is a good first approximation, but it rests on assumptions that do not hold in practice. It assumes that the two teams' goals are independent, whereas goalless draws are more frequent than the distribution predicts. It also assumes a constant scoring rate over 90 minutes. Dixon-Coles-type corrections exist precisely to make up for these discrepancies."}},
-{"@type":"Question","name":"How do you compare odds on over 2.5 goals with an estimated probability?","acceptedAnswer":{"@type":"Answer","text":"Convert the odds into an implied probability by dividing 100 by the odds: odds of 1.90 correspond to around 52.6%. Compare this with your estimate. If your model gives 53% against 52.6% implied, the gap is less than one point — smaller than your margin of error, so nothing can be concluded from it."}}]}
+{"@type":"Question","name":"How can you tell whether odds on over 2.5 goals are worthwhile?","acceptedAnswer":{"@type":"Answer","text":"Convert the odds into an implied probability by dividing 100 by the odds: odds of 1.90 correspond to around 52.6%. Compare this with your estimate. If your model gives 53% against 52.6% implied, the edge is less than one point — smaller than your margin of error, and therefore not enough to justify a stake."}}]}
 </script>
 </head>
 <body>
@@ -204,7 +204,7 @@
   <div><b>1.87</b><span>fair odds</span></div>
 </div>
 
-<p>The <strong>fair odds</strong> are the inverse of the probability: 1 ÷ 0.535 = 1.87. They are the odds that exactly reflect the model's probability, without the bookmaker's margin.</p>
+<p>The <strong>fair odds</strong> are the inverse of the probability: 1 ÷ 0.535 = 1.87. At these odds, the bet has an expected value of zero over the long run. Below them, the expected value is negative on average; above them, it is theoretically positive — <em>only if</em> your estimate is accurate.</p>
 
 <h2 id="cote">6. Step 3: comparing with the bookmaker's odds</h2>
 
@@ -212,16 +212,16 @@
 
 <div class="tw">
 <table>
-  <thead><tr><th>Expected total</th><th>Model probability</th><th>Implied at 1.90</th><th>Difference</th></tr></thead>
+  <thead><tr><th>Expected total</th><th>Model probability</th><th>Implied at 1.90</th><th>Expected value</th></tr></thead>
   <tbody>
-    <tr><td class="num">2.6</td><td class="num">48.2%</td><td class="num">52.6%</td><td class="num" style="color:#ff625f">−4.4 pts</td></tr>
-    <tr class="hi"><td class="num">2.8</td><td class="num">53.1%</td><td class="num">52.6%</td><td class="num">+0.5 pt</td></tr>
-    <tr><td class="num">3.0</td><td class="num">57.7%</td><td class="num">52.6%</td><td class="num" style="color:#25d6a2">+5.1 pts</td></tr>
+    <tr><td class="num">2.6</td><td class="num">48.2%</td><td class="num">52.6%</td><td class="num" style="color:#ff625f">−8.5%</td></tr>
+    <tr class="hi"><td class="num">2.8</td><td class="num">53.1%</td><td class="num">52.6%</td><td class="num">+0.8%</td></tr>
+    <tr><td class="num">3.0</td><td class="num">57.7%</td><td class="num">52.6%</td><td class="num" style="color:#25d6a2">+9.6%</td></tr>
   </tbody>
 </table>
 </div>
 
-<p>This table is the heart of the matter. It shows that, at identical odds, <strong>a difference of 0.4 expected goals moves the model's probability from 48% to 58%, from clearly below the odds to clearly above them</strong>. The real difficulty lies not in the Poisson calculation — which is mechanical — but in the accuracy of the lambda you feed into it.</p>
+<p>This table is the heart of the matter. It shows that, at identical odds, <strong>a difference of 0.4 expected goals takes the bet's expected value from clearly negative to clearly positive</strong>. The real difficulty lies not in the Poisson calculation — which is mechanical — but in the accuracy of the lambda you feed into it. The full process of comparing a probability with odds is covered in detail in our <a href="/en/blog/guides/value-bet-guide-complet-2026.html">guide to value betting</a>.</p>
 
 <h2 id="erreur">7. The margin of error you are never shown</h2>
 
@@ -245,7 +245,7 @@
 
 <div class="box warn">
   <div class="box-t">What this table is really telling you</div>
-  <p>An error of <strong>0.2 in lambda</strong> — entirely ordinary when estimating from ten or so matches — shifts the probability by <strong>nearly 5 points</strong> and the fair odds from 2.08 to 1.88. Yet a 5-point gap between an estimate and the odds is already considered huge. In other words: <strong>your margin of error is of the same order of magnitude as the gap you are trying to measure.</strong></p>
+  <p>An error of <strong>0.2 in lambda</strong> — entirely ordinary when estimating from ten or so matches — shifts the probability by <strong>nearly 5 points</strong> and the fair odds from 2.08 to 1.88. Yet a theoretical edge of 5 points is already considered huge. In other words: <strong>your margin of error is of the same order of magnitude as the edge you are looking for.</strong></p>
 </div>
 
 <p>The practical conclusion is uncomfortable but honest. A gap of less than 3 to 4 points between your estimate and the bookmaker's implied probability <strong>should not trigger a bet</strong>: it is indistinguishable from the noise in your own method.</p>
@@ -283,6 +283,7 @@
 
 <div class="related">
   <a href="/en/blog/guides/xg-expected-goals-guide-complet.html"><span>Previous step</span><b>xG: what the statistic really tells you, and where it misleads</b></a>
+  <a href="/en/blog/guides/value-bet-guide-complet-2026.html"><span>Next step</span><b>Value bet: comparing a probability with odds without getting it wrong</b></a>
 </div>
 
 <h2 id="faq">10. Frequently asked questions</h2>
@@ -292,7 +293,7 @@
   <details><summary>How do you calculate the probability of over 2.5 goals?</summary><p>First, estimate each team's expected goals from its attacking strength and the opponent's defensive weakness, both measured against the league averages. Add these two values together to obtain the expected total (lambda). Then apply the Poisson distribution to obtain the probability of 0, 1 and 2 goals: the probability of over 2.5 goals is 100% minus the sum of these three values.</p></details>
   <details><summary>What is the average probability of over 2.5 goals?</summary><p>It depends entirely on the league and the teams. With an expected total of 2.6 goals, it is around 48%. At 2.8 expected goals, around 53%. At 3.0 expected goals, around 58%. A difference of just 0.2 expected goals shifts the probability by nearly 5 points, which explains why a rough estimate is not enough.</p></details>
   <details><summary>Is the Poisson distribution reliable for football?</summary><p>It is a good first approximation, but it rests on assumptions that do not hold in practice. It assumes that the two teams' goals are independent, whereas goalless draws are more frequent than the distribution predicts. It also assumes a constant scoring rate over 90 minutes. Dixon-Coles-type corrections exist precisely to make up for these discrepancies.</p></details>
-  <details><summary>How do you compare odds on over 2.5 goals with an estimated probability?</summary><p>Convert the odds into an implied probability by dividing 100 by the odds: odds of 1.90 correspond to around 52.6%. Compare this with your estimate. If your model gives 53% against 52.6% implied, the gap is less than one point — smaller than your margin of error, so nothing can be concluded from it.</p></details>
+  <details><summary>How can you tell whether odds on over 2.5 goals are worthwhile?</summary><p>Convert the odds into an implied probability by dividing 100 by the odds: odds of 1.90 correspond to around 52.6%. Compare this with your estimate. If your model gives 53% against 52.6% implied, the edge is less than one point — smaller than your margin of error, and therefore not enough to justify a stake.</p></details>
 </div>
 
 <div class="cta">
@@ -303,9 +304,9 @@
 
 </main>
 
-<!--RELATED_GUIDES--><nav aria-labelledby="related-guides-title" style="max-width:760px;margin:32px auto;padding:0 20px"><h2 id="related-guides-title" style="font-size:18px;margin:0 0 8px">Related guides</h2><ul style="list-style:none;padding:0;margin:0"><li style="margin:6px 0"><a href="/en/blog/guides/guide-paris-sportifs-debutant-complet.html" style="color:#22d3ee">Sports betting: the complete beginner&#39;s guide to getting started with a method</a></li><li style="margin:6px 0"><a href="/en/blog/guides/meilleurs-bookmakers-monde-2026.html" style="color:#22d3ee">Choosing a bookmaker: safety criteria, odds and limits</a></li><li style="margin:6px 0"><a href="/en/leagues/premier-league.html" style="color:#22d3ee">Premier League predictions: analysed fixtures</a></li></ul></nav><!--/RELATED_GUIDES-->
+<!--RELATED_GUIDES--><nav aria-labelledby="related-guides-title" style="max-width:760px;margin:32px auto;padding:0 20px"><h2 id="related-guides-title" style="font-size:18px;margin:0 0 8px">Related guides</h2><ul style="list-style:none;padding:0;margin:0"><li style="margin:6px 0"><a href="/en/blog/guides/prediction-ia-football-guide-2026.html" style="color:#22d3ee">AI football prediction: understanding the models and their limits</a></li><li style="margin:6px 0"><a href="/en/blog/guides/guide-paris-sportifs-debutant-complet.html" style="color:#22d3ee">Sports betting: the complete beginner&#39;s guide to getting started with a method</a></li><li style="margin:6px 0"><a href="/en/blog/guides/meilleurs-bookmakers-monde-2026.html" style="color:#22d3ee">Choosing a bookmaker: safety criteria, odds and limits</a></li><li style="margin:6px 0"><a href="/en/leagues/premier-league.html" style="color:#22d3ee">Premier League predictions: analysed fixtures</a></li></ul></nav><!--/RELATED_GUIDES-->
 <footer class="art-foot">
-  <p>IASHARK — statistical football analysis. The probabilities published are for information only and do not guarantee any result. Sports betting carries a risk of financial loss and addiction: never bet more than you can afford to lose. Under-18s are not permitted. Need help? Visit our <a href="/en/jeu-responsable.html" style="color:inherit;text-decoration:underline">responsible gambling page</a>.</p>
+  <p>IASHARK — statistical football analysis. The probabilities published are for information only and do not guarantee any result. Sports betting carries a risk of financial loss and addiction: never stake more than you can afford to lose. Under-18s are not permitted. Need help? Visit our <a href="/en/jeu-responsable.html" style="color:inherit;text-decoration:underline">responsible gambling page</a>.</p>
   <p>18+ · Help: <a data-market-helpline="url" href="https://www.gamblingtherapy.org" style="color:inherit;text-decoration:underline">gamblingtherapy.org</a><span data-market-helpline-if="phone" hidden> · <span data-market-helpline="phone"></span></span></p>
   <p><a href="/en/mentions-legales.html" style="color:inherit">Legal Notice</a> · <a href="/en/cgv.html" style="color:inherit">Terms</a> · <a href="/en/confidentialite.html" style="color:inherit">Privacy</a> · <a href="/en/cookies.html" style="color:inherit">Cookies</a> · <a href="/en/jeu-responsable.html" style="color:inherit">Responsible gambling</a></p>
 </footer>
@@ -335,14 +336,14 @@
     el.rUnder.textContent=pct(under);
     el.rFair.textContent=over>0?num(1/over,2):'—';
     if(!isFinite(od)||od<=1){ el.rVerdict.textContent='Enter odds greater than 1 to compare.'; return; }
-    var implied=1/od, edge=over-implied;
+    var implied=1/od, edge=over-implied, ev=over*od-1;
     var verdict;
     if(Math.abs(edge)*100<3){
-      verdict='<b>Difference too small to draw a conclusion.</b> Your estimate ('+pct(over)+') and the implied probability of the odds ('+pct(implied)+') differ by '+num(Math.abs(edge)*100,1)+' point(s) — that is within the margin of error of a model of this kind.';
+      verdict='<b>Difference too small to draw a conclusion.</b> Your estimate ('+pct(over)+') and the implied probability of the odds ('+pct(implied)+') differ by '+num(Math.abs(edge)*100,1)+' point(s) — that is within the margin of error of a model of this kind. Theoretical expected value: '+num(ev*100,1)+'%.';
     } else if(edge>0){
-      verdict='<b>Theoretical edge of '+num(edge*100,1)+' points</b> in favour of the bet (model '+pct(over)+' against '+pct(implied)+' implied). To be considered only if you are confident in your expected goals.';
+      verdict='<b>Theoretical edge of '+num(edge*100,1)+' points</b> in favour of the bet (model '+pct(over)+' against '+pct(implied)+' implied). Theoretical expected value: +'+num(ev*100,1)+'%. To be considered only if you are confident in your expected goals.';
     } else {
-      verdict='<b>Unfavourable odds.</b> The market estimates '+pct(implied)+' while your model gives '+pct(over)+', i.e. '+num(Math.abs(edge)*100,1)+' points less.';
+      verdict='<b>Unfavourable odds.</b> The market estimates '+pct(implied)+' while your model gives '+pct(over)+', i.e. '+num(Math.abs(edge)*100,1)+' points less. Theoretical expected value: '+num(ev*100,1)+'%.';
     }
     el.rVerdict.innerHTML=verdict;
   }

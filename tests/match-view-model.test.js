@@ -1,12 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { buildMatchViewModel } = require('../lib/match-view-model');
-// UNE SEULE SOURCE (01/10/2026) : la page n'affiche plus que les buteurs du moteur v3
-// (v3_buteurs). Le calcul buteur du SITE (lib/insights.js#scorerModel) ne donne plus aucun
-// chiffre affiche ; ses regles de classement (titulaires, saison en cours, absents) restent
-// verifiees ici, directement sur ce calcul (memes entrees que lib/buteurs-du-jour.js).
-const BDJ = require('../lib/buteurs-du-jour');
-const menacesSite = raw => ((BDJ.rankMatch(raw) || {}).shown || []).map(c => ({ name: c.name, scoringProbability: c.displayProbability, minutes: Math.round(c.minutes), expectedGoals90: c.rate90 }));
 
 function base(overrides = {}) {
   return {
@@ -50,8 +44,6 @@ test('les données fiables alimentent les cartes avancées', () => {
     pari_rec: 'BTTS Oui',
     mc_scores: [{ score: '1-1', pct: 14 }],
     simulation_count: 5000,
-    // Buts attendus du MODELE (lambda) : seuls affiches sous « Ce que dit le modele » (audit I2).
-    lambda_h: 1.4, lambda_a: 1.1,
     crit_home: { source: 'api-sports-team-statistics', sample_size: 8, att: 58, def: 63, fr: 60 },
     crit_away: { source: 'api-sports-team-statistics', sample_size: 9, att: 54, def: 59, fr: 47 },
     events_home: { goals_avg: 1.6, conceded_avg: 1.1 },
@@ -87,14 +79,6 @@ test('Face-a-face : reprend les 5 confrontations reelles deja formatees par le p
     { date: '2026-02-01', home: 'Lecce', away: 'AS Roma', score: '1-1', winner: 'N' },
     { date: '2025-09-14', home: 'AS Roma', away: 'Lecce', score: '2-0', winner: '2' }
   ]);
-});
-
-test('Face-a-face : seulement les 10 dernieres annees avant le match (30/09/2026)', () => {
-  const h2h = d => ({ d, home: 'Lecce', away: 'AS Roma', s: '1-1', w: 'N' });
-  // Match du 2026-08-31 : limite au 2016-08-31 compris.
-  const vm = buildMatchViewModel(base({ h2h: [h2h('2024-01-10'), h2h('2016-08-31'), h2h('2016-08-30'), h2h('2012-03-04')] }));
-  assert.deepEqual(vm.h2h.map(r => r.date), ['2024-01-10', '2016-08-31']);
-  assert.equal(buildMatchViewModel(base({ h2h: [h2h('2015-05-01')] })).h2h, null, 'que des confrontations anciennes -> section absente');
 });
 
 test('Face-a-face : aucune confrontation -> h2h absent, jamais un tableau vide affiche comme "aucun historique"', () => {
@@ -163,17 +147,15 @@ test('Player Impact est calculé depuis les performances réelles, indépendamme
 test('Buteurs potentiels : classe par signal de menace reel (buts/90 + tirs cadres/90), distinct de l\'impact generique', () => {
   const attacker = [1, 2, 3, 4, 5].map(fixtureId => ({ fixture_id: fixtureId, player_id: 10, team_id: 867, name: 'Buteur Reel', position: 'Attacker', minutes: 90, rating: 7, starter: true, shots_total: 3, shots_on: 2, goals: 1, assists: 0, key_passes: 0 }));
   const passer = [1, 2, 3, 4, 5].map(fixtureId => ({ fixture_id: fixtureId, player_id: 11, team_id: 867, name: 'Milieu Passeur', position: 'Midfielder', minutes: 90, rating: 8, starter: true, shots_total: 0, shots_on: 0, goals: 0, assists: 1, key_passes: 5 }));
-  const raw = base({
+  const vm = buildMatchViewModel(base({
     player_history: { home: attacker.concat(passer), away: [] },
     current_squads: { home: [{ player_id: 10, name: 'Buteur Reel' }, { player_id: 11, name: 'Milieu Passeur' }], away: [] }
-  });
-  const menaces = menacesSite(raw);
-  assert.deepEqual(buildMatchViewModel(raw).players.scoringThreat, [], 'sans v3_buteurs : aucune chance de marquer affichee');
-  assert.equal(menaces[0].name, 'Buteur Reel', 'le milieu a un impact generique plus haut (rating+passes cles) mais aucun signal de menace de but reel');
+  }));
+  assert.equal(vm.players.scoringThreat[0].name, 'Buteur Reel', 'le milieu a un impact generique plus haut (rating+passes cles) mais aucun signal de menace de but reel');
   // Depuis le 18/09/2026 (calcul avant compositions, lib/insights.js#scorerModel),
   // un titulaire sans tir garde une probabilite residuelle - jamais devant le buteur.
-  const milieu = menaces.find(p => p.name === 'Milieu Passeur');
-  assert.ok(!milieu || milieu.scoringProbability < menaces[0].scoringProbability / 2, 'aucun tir cadre en 5 matchs : loin derriere le buteur');
+  const milieu = vm.players.scoringThreat.find(p => p.name === 'Milieu Passeur');
+  assert.ok(!milieu || milieu.scoringProbability < vm.players.scoringThreat[0].scoringProbability / 2, 'aucun tir cadre en 5 matchs : loin derriere le buteur');
 });
 
 test('Buteurs potentiels : un remplacant a gros ratio sur peu de minutes ne passe jamais devant un titulaire regulier', () => {
@@ -192,17 +174,17 @@ test('Buteurs potentiels : un remplacant a gros ratio sur peu de minutes ne pass
     position: 'Attacker', minutes: 90, rating: 7, starter: true,
     shots_total: 3, shots_on: 2, goals: fixtureId <= 6 ? 1 : 0
   }));
-  const raw = base({
+  const vm = buildMatchViewModel(base({
     player_history: { home: remplacant.concat(titulaire), away: [] },
     current_squads: { home: [{ player_id: 30, name: 'Remplacant Ephemere' }, { player_id: 31, name: 'Titulaire Regulier' }], away: [] }
-  });
-  const menaces = menacesSite(raw);
-  assert.deepEqual(buildMatchViewModel(raw).players.scoringThreat, [], 'sans v3_buteurs : aucune chance de marquer affichee');
-  assert.equal(menaces[0].name, 'Titulaire Regulier',
+  }));
+  assert.equal(vm.players.scoringThreat[0].name, 'Titulaire Regulier',
     '3 buts/90 mesures sur 30 minutes ne doivent pas battre 0,6 but/90 mesure sur 900 minutes');
-  assert.ok(!menaces.some(p => p.name === 'Remplacant Ephemere'),
+  assert.ok(!vm.players.scoringThreat.some(p => p.name === 'Remplacant Ephemere'),
     '30 minutes de jeu au total : sous le plancher de temps de jeu, jamais publie');
-  assert.equal(menaces[0].minutes, 900,
+  assert.equal(vm.players.scoringThreat[0].thinSample, false,
+    'le titulaire depasse le plancher : aucun avertissement d\'echantillon faible');
+  assert.equal(vm.players.scoringThreat[0].minutes, 900,
     'le temps de jeu reel est expose, pour pouvoir etre affiche a l\'utilisateur');
 });
 
@@ -222,16 +204,14 @@ test('Buteurs potentiels : seule la saison en cours compte, jamais les matchs de
     position: 'Attacker', minutes: 90, rating: 7, starter: true,
     shots_total: 4, shots_on: 2, goals: 0, is_current_season: true
   }));
-  const raw = base({
+  const vm = buildMatchViewModel(base({
     player_history: { home: saisonPassee.concat(saisonEnCours), away: [] },
     current_squads: { home: [{ player_id: 40, name: 'Star Saison Passee' }, { player_id: 41, name: 'Titulaire Actuel' }], away: [] }
-  });
-  const menaces = menacesSite(raw);
-  assert.deepEqual(buildMatchViewModel(raw).players.scoringThreat, [], 'sans v3_buteurs : aucune chance de marquer affichee');
-  assert.ok(!menaces.some(p => p.name === 'Star Saison Passee'),
+  }));
+  assert.ok(!vm.players.scoringThreat.some(p => p.name === 'Star Saison Passee'),
     'un joueur sans une seule minute cette saison ne doit jamais etre propose');
-  assert.equal(menaces[0].name, 'Titulaire Actuel');
-  assert.equal(menaces[0].minutes, 180,
+  assert.equal(vm.players.scoringThreat[0].name, 'Titulaire Actuel');
+  assert.equal(vm.players.scoringThreat[0].minutes, 180,
     'seules les 2 journees de la saison en cours sont comptees, pas les 8 de la saison passee');
 });
 
@@ -250,28 +230,24 @@ test('Buteurs potentiels : un joueur qui cadre beaucoup sans marquer passe devan
     position: 'Attacker', minutes: 90, rating: 7, starter: true,
     shots_total: 1, shots_on: fixtureId === 1 ? 1 : 0, goals: fixtureId === 1 ? 1 : 0, is_current_season: true
   }));
-  const raw = base({
+  const vm = buildMatchViewModel(base({
     player_history: { home: cadreur.concat(chanceux), away: [] },
     current_squads: { home: [{ player_id: 50, name: 'Cadreur Sans But' }, { player_id: 51, name: 'Buteur Chanceux' }], away: [] }
-  });
-  const menaces = menacesSite(raw);
-  assert.deepEqual(buildMatchViewModel(raw).players.scoringThreat, [], 'sans v3_buteurs : aucune chance de marquer affichee');
-  assert.equal(menaces[0].name, 'Cadreur Sans But',
+  }));
+  assert.equal(vm.players.scoringThreat[0].name, 'Cadreur Sans But',
     '4 tirs cadres/90 sans but doit primer sur 1 but marque sur l\'unique tir de la periode');
-  assert.ok(menaces[0].expectedGoals90 > 0,
+  assert.ok(vm.players.scoringThreat[0].expectedGoals90 > 0,
     'les buts attendus derives des tirs cadres sont exposes');
 });
 
 test('Buteurs potentiels : un joueur absent/blesse n\'est jamais publie comme menace de but', () => {
   const history = [1, 2, 3, 4, 5].map(fixtureId => ({ fixture_id: fixtureId, player_id: 12, team_id: 867, name: 'Blesse', minutes: 90, rating: 7, starter: true, shots_total: 3, shots_on: 2, goals: 1 }));
-  const raw = base({
+  const vm = buildMatchViewModel(base({
     player_history: { home: history, away: [] },
     current_squads: { home: [{ player_id: 12, name: 'Blesse' }], away: [] },
     injuries: [{ team: 867, name: 'Blesse', reason: 'Genou', status: 'Absent' }]
-  });
-  const menaces = menacesSite(raw);
-  assert.deepEqual(buildMatchViewModel(raw).players.scoringThreat, [], 'sans v3_buteurs : aucune chance de marquer affichee');
-  assert.deepEqual(menaces, []);
+  }));
+  assert.deepEqual(vm.players.scoringThreat, []);
 });
 
 test('dribbles90 : calcule depuis le vrai champ dribbles par match (deja recupere par le pipeline), jamais fabrique', () => {
@@ -307,18 +283,14 @@ test('formNote/formTrend : derives des vrais resultats recents (form_home/away),
   assert.equal(vm.formNote.home.wins, 3);
 });
 
-test('scoringThreat expose la chance du moteur v3 (v3_buteurs, arrondie une fois par le pipeline), jamais une probabilite inventee', () => {
+test('scoringThreat expose scoringProbability (Poisson reel depuis goals90), jamais une probabilite inventee', () => {
   const history = [1, 2, 3].map(fid => ({ fixture_id: fid, player_id: 30, team_id: 867, name: 'Buteur', minutes: 90, rating: 7, starter: true, shots_total: 3, shots_on: 2, goals: 1 }));
   const vm = buildMatchViewModel(base({
-    model_output_available: true, data_quality_score: 80,
     player_history: { home: history, away: [] },
-    current_squads: { home: [{ player_id: 30, name: 'Buteur' }], away: [] },
-    v3_buteurs: [{ joueur_id: 30, joueur: 'Buteur', cote: 'home', p_marque: 0.387, chance: 35 }]
+    current_squads: { home: [{ player_id: 30, name: 'Buteur' }], away: [] }
   }));
-  assert.equal(vm.players.scoringThreat.length, 1);
-  assert.equal(vm.players.scoringThreat[0].scoringProbability, 35, 'la chance du moteur v3, telle quelle');
-  assert.equal(vm.players.scoringThreat[0].name, 'Buteur');
-  assert.equal(vm.players.scoringThreat[0].startsLast, 3, 'faits du site : titularisations recentes');
+  assert.ok(vm.players.scoringThreat.length);
+  assert.ok(Number.isFinite(vm.players.scoringThreat[0].scoringProbability));
 });
 
 test('un joueur transféré absent de l’effectif courant est exclu des projections', () => {

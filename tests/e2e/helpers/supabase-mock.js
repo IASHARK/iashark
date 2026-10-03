@@ -259,15 +259,6 @@ class SupabaseMock {
         return { status: 200, json: { url: STRIPE_PORTAL_URL } };
       case 'delete-account':
         return { status: 200, json: { ok: true } };
-      case 'cancel-subscription': {
-        // Annulation en 1 clic (V3 du 3/10/2026) : arret programme a la fin de
-        // la periode ; { undo: true } la reprend. Aucun appel Stripe simule.
-        if (!caller) return { status: 401, json: { ok: false, code: 'unauthorized' } };
-        const sub = caller.subscription;
-        if (!sub) return { status: 200, json: { ok: true, processed: false, code: 'no_subscription' } };
-        const undo = !!(body && body.undo === true);
-        return { status: 200, json: { ok: true, processed: true, cancel_at_period_end: !undo, status: sub.status, ends_at: sub.current_period_end || null } };
-      }
       case 'create-checkout-session':
         // Jamais d'URL par defaut : chaque test de paiement choisit sa reponse.
         return { status: 500, json: { error: 'e2e: create-checkout-session non configure pour ce test' } };

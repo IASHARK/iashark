@@ -136,10 +136,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Verantwortungsvolles Spielen</a>
   </nav>
   <h1 class="page-title">Allgemeine Verkaufsbedingungen</h1>
-  <div class="page-date">Zuletzt aktualisiert: 2. Oktober 2026</div>
-  <!-- LEGAL REVIEW: 02/10/2026 - essai gratuit de 7 jours remis (decision du proprietaire ; create-checkout-session/trial.ts : TRIAL_DAYS absent = 7) : article 6 bis ajoute (premier abonnement seulement, une fois par personne ; carte demandee, rien preleve pendant l'essai ; email de rappel 2 jours avant la fin, tache trial-reminder 0042 a mettre en route AVANT l'ouverture ; annulation en 1 clic ; premier prelevement le 8e jour au prix de la periode choisie ; premier prelevement refuse = acces Pro arrete a la fin de l'essai) ; article 7 : premier paiement a la fin de l'essai le cas echeant. Points a confirmer : point de depart du delai de retractation (souscription, essai compris) et montant proportionnel en cas de retractation apres l'essai. Version precedente archivee dans legal/de/archives/cgv-2026-10-01.html. Statut : REVIEW. -->
-  <!-- LEGAL REVIEW: 01/10/2026 - controle des chiffres publics : article 4, accès gratuit = analyse d'un match offert certains jours, simulation réservée à Pro (plus « un match par jour ») ; article 5, liste Pro alignée sur la grille de prix (plus de journal ni de suivi de bankroll), fonctions « bientôt » exclues tant qu'elles ne sont pas ouvertes ; essai gratuit non proposé (TRIAL_DAYS = 0 par défaut) : aucun article sur l'essai, premier paiement à la souscription (article 7 inchangé). Version précédente archivée dans legal/de/archives/cgv-2026-09-30.html. Statut : REVIEW. -->
-  <!-- LEGAL REVIEW: 30/09/2026 - Article 4: stake calculator removed from free access (tool removed from the site). Version of 19/09/2026 archived in legal/de/archives/cgv-2026-09-19.html. Status: REVIEW. -->
+  <div class="page-date">Zuletzt aktualisiert: 19. September 2026</div>
   <!-- LEGAL REVIEW: 19/09/2026 - owner decisions: weekly, monthly and annual plans payable on the EUR market (config/markets.json#fr.checkoutOpen, Stripe Prices in fr.stripePriceIds); 'VAT included' replaced in article 6 by the French VAT franchise mention (art. 293 B CGI). Prices, billing periods, renewal, withdrawal and cancellation rules unchanged from the 16/09/2026 text and aligned with the French terms of 19/09/2026 (legal/fr/cgv.html). Previous version archived in legal/de/archives/cgv-2026-09-16.html. Status: REVIEW. -->
 
   <div class="warn-box">
@@ -168,7 +165,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <h2>Artikel 4 — Konto und kostenloser Zugang</h2>
     <p>Die Erstellung eines Kontos ist kostenlos und erfordert eine gültige E-Mail-Adresse. Der kostenlose Zugang umfasst insbesondere:</p>
     <ul>
-      <li>die Analyse eines kostenlosen Spiels, an manchen Tagen; die Simulation bleibt Pro vorbehalten;</li>
+      <li>die vollständige Analyse eines Spiels pro Tag;</li>
+      <li>den Einsatzrechner;</li>
       <li>den Blog.</li>
     </ul>
     <p>Der Umfang des kostenlosen Zugangs kann sich ändern. Sie sind dafür verantwortlich, Ihre Zugangsdaten vertraulich zu behandeln.</p>
@@ -179,13 +177,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <h2>Artikel 5 — Abonnement IASHARK Pro</h2>
     <p>IASHARK Pro ist ein einheitliches Angebot. Das Abonnement gewährt für seine Laufzeit Zugang zu folgenden Funktionen:</p>
     <ul>
-      <li>die Analyse aller Spiele des Tages in jedem abgedeckten Wettbewerb;</li>
-      <li>die ausgewählte Wette mit ihrer Wahrscheinlichkeit und ihren Gründen;</li>
-      <li>die Simulation des Spiels in 15-Minuten-Abschnitten, sofern verfügbar, die wahrscheinlichsten Ergebnisse und die erwarteten Tore;</li>
-      <li>die Statistiken des Spiels und die wahrscheinlichsten Torschützen;</li>
-      <li>im Pro-Bereich: die Kombiwette und der Abweichungs-Finder.</li>
+      <li>vollständige Analyse aller verfügbaren Spiele und Ligen;</li>
+      <li>erweiterte Filter und detaillierte Zuverlässigkeitsindikatoren;</li>
+      <li>ein mit Ihrem Konto synchronisiertes Entscheidungsjournal;</li>
+      <li>eine mit Ihrem Konto verknüpfte Bankroll-Verfolgung.</li>
     </ul>
-    <p>Auf der Abonnementseite als „bald“ angekündigte Funktionen, insbesondere das Dashboard (Wetttagebuch und Schutzlimits), sind nicht Teil des Abonnements, solange sie nicht freigeschaltet sind.</p>
     <p>Das Abonnement kann wahlweise für einen wöchentlichen, monatlichen oder jährlichen Zeitraum abgeschlossen werden. <strong>Inhalte und Funktionen sind bei jeder Laufzeit identisch</strong>: Nur der Betrag und die Häufigkeit der Abbuchungen ändern sich.</p>
     <p>Die Liste der abgedeckten Wettbewerbe und die Einzelheiten der Funktionen können sich ändern; der Dienst wird jedoch während eines bereits bezahlten Zeitraums niemals wesentlich eingeschränkt.</p>
   </section>
@@ -203,21 +199,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
   </section>
 
   <section class="section">
-    <h2>Artikel 6a — Kostenloser Test über 7 Tage</h2>
-    <p>Bei Ihrem ersten Abonnement IASHARK Pro erhalten Sie einen kostenlosen Test über 7 Tage, <strong>nur beim Monatsabonnement</strong>. Wochen- und Jahresabonnements werden beim Abschluss bezahlt, ohne Test. Während des Tests haben Sie Zugang zu allen Pro-Funktionen.</p>
-    <ul>
-      <li>Ihre Bankkarte wird beim Abschluss abgefragt, aber <strong>während des Tests wird kein Betrag abgebucht</strong>.</li>
-      <li>Etwa 2 Tage vor Ende des Tests senden wir Ihnen eine E-Mail mit dem Datum und dem Betrag der ersten Abbuchung.</li>
-      <li>Sie können den Test jederzeit kostenlos online mit 1 Klick über „Mein Konto“ kündigen. Sie behalten dann den Pro-Zugang bis zum Ende des Tests, und es wird nichts abgebucht.</li>
-      <li>Ohne Kündigung läuft das Abonnement nach dem Test weiter: Die erste Abbuchung erfolgt am 8. Tag zum Preis des Monatsabonnements (Artikel 6); danach verlängert sich das Abonnement gemäß Artikel 7. Schlägt diese erste Abbuchung fehl, endet der Pro-Zugang mit dem Ende des Tests, bis die Zahlung erfolgt ist.</li>
-      <li>Der Test wird jeder Person nur einmal gewährt: Er wird keinem Konto und keiner E-Mail-Adresse angeboten, die bereits ein Abonnement oder einen Test von IASHARK Pro hatte. In diesem Fall erfolgt die erste Zahlung beim Abschluss.</li>
-    </ul>
-    <p>Die Widerrufsfrist nach Artikel 8 beginnt mit dem Abschluss des Abonnements, einschließlich des Tests.</p>
-  </section>
-
-  <section class="section">
     <h2>Artikel 7 — Zahlung und Verlängerung</h2>
-    <p>Die Zahlung erfolgt sicher über Stripe (<a href="https://stripe.com" target="_blank" rel="noopener">stripe.com</a>). IASHARK speichert keine Bankdaten. Die erste Zahlung erfolgt beim Abschluss des Abonnements oder, wenn Sie den kostenlosen Test nutzen, an dessen Ende (Artikel 6a). Danach verlängert sich das Abonnement am Ende jedes Zeitraums automatisch um einen Zeitraum gleicher Dauer zum dann geltenden Preis.</p>
+    <p>Die Zahlung erfolgt sicher über Stripe (<a href="https://stripe.com" target="_blank" rel="noopener">stripe.com</a>). IASHARK speichert keine Bankdaten. Die erste Zahlung erfolgt beim Abschluss des Abonnements. Danach verlängert sich das Abonnement am Ende jedes Zeitraums automatisch um einen Zeitraum gleicher Dauer zum dann geltenden Preis.</p>
     <!-- LEGAL REVIEW: 19/09/2026 - (a) annual renewal information: template ready (annual_renewal_reminder, D-45 by default, 90 to 30 day window), sending to be enabled (Resend + scheduled job) before the first annual renewal, otherwise the annual-plan paragraph of article 9 applies; (b) changing billing period: check that the Stripe customer portal configuration (STRIPE_PORTAL_CONFIGURATION_ID or default configuration) applies the rule below (longer period immediate with proration, shorter period at the end of the paid period) - otherwise correct this paragraph and compte_page.change_interval_note. -->
     <p><strong>Jahresabonnement: Information vor der Verlängerung.</strong> Wir informieren Sie frühestens drei Monate und spätestens einen Monat vor dem Verlängerungsdatum per E-Mail darüber, dass Sie Ihr Jahresabonnement nicht verlängern müssen. Die E-Mail nennt das Verlängerungsdatum, den abzubuchenden Betrag und den Weg zur Online-Kündigung.</p>
     <p><strong>Wechsel der Laufzeit.</strong> Sie können die Laufzeit über „Mein Konto“ im Abrechnungsbereich unseres Zahlungsdienstleisters ändern. Der Wechsel zu einer längeren Laufzeit (zum Beispiel von monatlich zu jährlich) wird sofort wirksam: Der neue Zeitraum wird sofort berechnet, abzüglich einer anteiligen Gutschrift für den nicht genutzten Teil des laufenden Zeitraums. Der Wechsel zu einer kürzeren Laufzeit (zum Beispiel von jährlich zu monatlich) wird zum Ende des bereits bezahlten Zeitraums wirksam, ohne Erstattung und ohne zusätzliche Abbuchung bis dahin. Betrag und Datum des Wirksamwerdens werden vor Ihrer Bestätigung angezeigt. Ein laufendes Abonnement kann nicht ein zweites Mal abgeschlossen werden.</p>

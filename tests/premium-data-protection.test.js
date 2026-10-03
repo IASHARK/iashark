@@ -28,8 +28,7 @@ test("la fonction Edge classe le pari recommande comme premium", () => {
 test("la fonction Edge laisse passer l'analyse offerte du jour", () => {
   const fn = read("supabase/functions/match-data/index.ts");
   assert.match(fn, /is_free === true/, "le match offert doit etre reconnu");
-  // Seule exception depuis le 29/09/2026 : la simulation 15 min, reservee aux Pro (S2).
-  assert.match(fn, /if \(estGratuit\(m\)\) return sansChampsPro\(m\);/, "aucun retrait hors champs Pro seulement");
+  assert.match(fn, /if \(estGratuit\(m\)\) return m;/, "il ne doit subir aucun retrait");
 });
 
 test("le pipeline retire ces champs du fichier public et des pages match", () => {
@@ -56,15 +55,11 @@ test("le pipeline retire ces champs du fichier public et des pages match", () =>
 // les champs du fichier public laisserait les analyses NULLE PART : un abonne
 // payant ne verrait plus aucun pari. Une fuite connue vaut mieux qu'un produit
 // casse pour les clients qui paient.
-// 30/09/2026 (avocat du diable) : SAUF les champs « Pro seulement » (simulation 15 min,
-// Stats IASHARK), retires meme dans ce cas : sinon stats_iashark serait ecrit en clair
-// dans match/<id>.json du depot public, ce qui annulerait le fichier chiffre.
-test("le pipeline ne retire que les champs Pro seulement s'il ne peut pas persister ailleurs", () => {
+test("le pipeline ne retire rien s'il ne peut pas persister ailleurs", () => {
   const wf = read(".github/workflows/update-data.yml");
   assert.match(wf, /var PEUT_PROTEGER=!!\(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY\)/);
-  assert.match(wf, /if\(!m\)return m;[\s\S]{0,400}?if\(!PEUT_PROTEGER\)return PREMIUM_FIELDS_LIB\.sansChampsPro\(m\);/,
-    "sans table protegee accessible, seuls les champs Pro seulement sont retires du fichier public");
-  assert.doesNotMatch(wf, /if\(!m\|\|!PEUT_PROTEGER\)return m;/, "plus jamais le match complet en clair");
+  assert.match(wf, /if\(!m\|\|m\.is_free\|\|!PEUT_PROTEGER\)return m;/,
+    "sans table protegee accessible, le fichier public reste inchange");
 });
 
 // 16/09/2026 (audit du site en ligne) : plus aucun pari nomme dans le resume SEO

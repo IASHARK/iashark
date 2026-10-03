@@ -60,8 +60,10 @@ test("config : clubs d'Amerique du Sud actifs dans /es/ avec fuseau local et com
   var keys = LEAGUES.map(function (l) { return l.key; });
   var expected = {
     "boca-juniors": "America/Argentina/Buenos_Aires", "river-plate": "America/Argentina/Buenos_Aires",
-    "racing-club": "America/Argentina/Buenos_Aires", independiente: "America/Argentina/Buenos_Aires"
-    // Colombie, Perou et Chili : competitions retirees du site le 03/10/2026 (clubs inactifs).
+    "racing-club": "America/Argentina/Buenos_Aires", independiente: "America/Argentina/Buenos_Aires",
+    "atletico-nacional": "America/Bogota", millonarios: "America/Bogota", "america-de-cali": "America/Bogota",
+    "alianza-lima": "America/Lima", universitario: "America/Lima", "sporting-cristal": "America/Lima",
+    "colo-colo": "America/Santiago", "universidad-de-chile": "America/Santiago"
   };
   Object.keys(expected).forEach(function (k) {
     var c = CFG.clubs.filter(function (x) { return x.key === k; })[0];
@@ -192,8 +194,8 @@ test("build : hreflang reciproques entre /en/ et /es/ pour un meme club, rien ve
 test("build : sans aucune donnee vivante, page noindex et absente du sitemap", async () => {
   var tmp = tmpRoot();
   try {
-    var rep = await BUILD.buildClubHubs({ root: ROOT, dataRoot: tmp, outRoot: tmp, config: subsetConfig(["boca-juniors"], []), dirs: ["es"], client: fakeClient({ empty: true }), now: new Date("2098-12-01T00:00:00Z"), today: "2098-12-01", write: true });
-    var page = rep.outputs["/es/equipos/boca-juniors.html"];
+    var rep = await BUILD.buildClubHubs({ root: ROOT, dataRoot: tmp, outRoot: tmp, config: subsetConfig(["colo-colo"], []), dirs: ["es"], client: fakeClient({ empty: true }), now: new Date("2098-12-01T00:00:00Z"), today: "2098-12-01", write: true });
+    var page = rep.outputs["/es/equipos/colo-colo.html"];
     assert.ok(RENDER.isNoindex(page), "noindex");
     assert.ok(RENDER.isNoindex(rep.outputs["/es/equipos/index.html"]), "hub noindex si toutes ses pages le sont");
     var sm = fs.readFileSync(path.join(tmp, "sitemap-clubs.xml"), "utf8");

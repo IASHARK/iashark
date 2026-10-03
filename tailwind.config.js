@@ -6,8 +6,6 @@ module.exports = {
   content: [
     "./index.html", "./match.html", "./exemple-analyse.html", "./match-page.js",
     "./pro.html", "./tools-page.js",
-    // Espace Pro (V3 du 3/10/2026) : tableau de bord et formulaire d'accueil.
-    "./pro-dashboard.js", "./accueil-pro.html", "./pro-onboarding.js",
     // Parcours de compte et d'authentification.
     "./compte.html", "./account-page.js",
     "./connexion.html", "./inscription.html",
@@ -15,10 +13,7 @@ module.exports = {
     // Blog.
     "./blog.html",
     // Fiche joueur.
-    "./joueur.html", "./player-page.js",
-    // Grille de prix (30/09/2026) : toutes ses classes sont dans ce fichier ;
-    // les pages ne portent qu'un emplacement [data-pricing-grid].
-    "./assets/pricing-grid.js"
+    "./joueur.html", "./player-page.js"
   ],
   corePlugins: { preflight: false },
   theme: {

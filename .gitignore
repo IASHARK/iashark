@@ -23,19 +23,3 @@ node_modules/
 # des tests de l'integration continue et RESTENT suivis).
 data/daily-market-scan/
 data/analysis/
-
-# Moteur v3 recupere du depot prive IASHARK/iashark-moteur par les workflows
-# (update-data.yml, moteur-v3-essai-a-blanc.yml) : jamais commite ici.
-.moteur-v3-prive/
-# Copie du raccord raccord-moteur-v3/branchement/ faite par les workflows dans le
-# dossier du moteur (contre-controle du 30/09/2026) : jamais commitee dans moteur-v3/.
-moteur-v3/branchement/
-# Depuis le 02/10/2026 (lancement V3) : le moteur n'est PLUS dans ce depot public, il est
-# lu dans le depot prive IASHARK/iashark-moteur (secret MOTEUR_V3_DEPOT_PRIVE).
-/moteur-v3/
-# Stats IASHARK (30/09/2026) : profils bruts de scripts/stats-book/export_stats_book.py,
-# detail Pro compris. Le depot est PUBLIC : seuls les fichiers chiffres et dates de
-# stats-book/scelles/ sont suivis (scripts/stats-book/sceller.js, lib/stats-book.js),
-# un par calcul, jamais reecrits.
-/stats-book/*
-!/stats-book/scelles/

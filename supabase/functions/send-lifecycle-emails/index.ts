@@ -36,25 +36,7 @@ const db: LifecycleStore | null = supabase
     async listCandidates({ nowIso, limit }) {
       const { data, error } = await supabase.rpc("lifecycle_email_candidates", { p_now: nowIso, p_limit: limit });
       if (error) throw new Error("lifecycle_email_candidates: " + error.message);
-      const rows = data ?? [];
-      // Langue du compte : user_preferences.language, la SEULE source (site, robot, e-mails).
-      // Lecture impossible : repertoire d'inscription (email_preferences.market), comme avant.
-      const ids = rows.map((r: { user_id: string }) => r.user_id).filter(Boolean);
-      if (ids.length) {
-        const prefs = await supabase.from("user_preferences").select("user_id,language").in("user_id", ids);
-        if (!prefs.error) {
-          const lang = new Map((prefs.data || []).map((p: { user_id: string; language: string }) => [p.user_id, p.language]));
-          for (const r of rows) (r as { language?: string | null }).language = lang.get(r.user_id) ?? null;
-        }
-        // Essai Pro gratuit (02/10/2026) : annonce dans les e-mails de vente seulement
-        // a un compte qui n'a JAMAIS eu d'abonnement (toutes lignes, tous statuts :
-        // meme regle que create-checkout-session/trial.ts). Lecture impossible = null
-        // = pas d'annonce. Lecture seule.
-        const subs = await supabase.from("subscriptions").select("user_id").in("user_id", ids);
-        const deja = subs.error ? null : new Set((subs.data || []).map((s: { user_id: string }) => s.user_id));
-        for (const r of rows) (r as { ever_subscribed?: boolean | null }).ever_subscribed = deja ? deja.has(r.user_id) : null;
-      }
-      return rows;
+      return data ?? [];
     },
     async reserveSend({ userId, campaign, key, market }) {
       const { data, error } = await supabase.rpc("email_reserve_send", {

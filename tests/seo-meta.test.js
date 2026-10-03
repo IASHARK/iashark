@@ -69,15 +69,14 @@ test("i18n/seo : gabarits hub ligue et match dans les limites avec les noms les 
       assert.ok(len(t) <= 60, dir + " match title " + len(t) + " : " + t);
       assert.ok(len(d) <= 155, dir + " match description " + len(d) + " : " + d);
       assert.doesNotMatch(t + " " + d, BANNED, dir + " match");
-      // Nom affiche de la version (pages fr : config/noms-equipes-fr.json, action A5 du 30/09/2026).
-      assert.match(t, new RegExp(SEO.teamName(m.home, dir).split(" ")[0]), dir + " : title sans l'equipe a domicile");
+      assert.match(t, new RegExp(m.home.n.split(" ")[0]), dir + " : title sans l'equipe a domicile");
     }
   }
   // Marche : heure UK / Premier League (gb), SAST / PSL (za), Liga MX / centro (mx).
   const hubTxt = (key, dir) => SEO.renderLeagueHub(key, dir, [], { data: { upcoming: [], results: [], standings: null, clubs: [] } }).html;
   assert.match(hubTxt("premier", "gb"), /UK time/);
-  // PSL retiree du site le 03/10/2026 : l'heure SAST reste verifiee sur la Premier League /za/.
-  assert.match(hubTxt("premier", "za"), /SAST/);
+  assert.match(hubTxt("south_africa_premiership", "za"), /SAST/);
+  assert.match(hubTxt("south_africa_premiership", "za"), /PSL/);
   assert.match(hubTxt("liga_mx", "mx"), /centro de México/);
   const premierLong = { id: 2, league_key: "premier", league: "Premier League", date: "2026-09-30 21:00", home: { n: "Arsenal", id: 42 }, away: { n: "Chelsea", id: 49 } };
   assert.match(SEO.matchDescription(premierLong, "gb"), /UK time/);

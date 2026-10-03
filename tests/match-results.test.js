@@ -502,28 +502,3 @@ test("parisDay / ajouterJours : le site raisonne en heure de Paris, le cron en U
   assert.equal(MR.ajouterJours("2026-09-01", -1), "2026-08-31");
   assert.equal(MR.ajouterJours("2026-09-19", 1), "2026-09-20");
 });
-
-// Ronde 5 (30/09/2026). Point encore ouvert de l'avocat du diable : fusionnerPari lisait
-// historique.json (fichier local, reecrit a chaque calcul) AVANT predictions_archive
-// (verrouillee au coup d'envoi, migration 0035). Preuve : le fichier local porte un autre
-// pari (realigne apres coup) et un autre verdict que l'archive verrouillee.
-test("fusionnerSélection : l'archive verrouillee passe avant le fichier local (pari, cote, marche, verdict)", () => {
-  const local = prediction({ prediction: "Over 2.5", cote: "1.90", market: "over25", result: "win", score: "3-1" });
-  const archive = { fixture_id: 1000001, prediction: "Under 2.5", cote: "2.05", market: "under25", result: "loss", score: "3-1", moteur: "v3" };
-  const pari = MR.fusionnerPari(Object.assign(local, { moteur: "ancien" }), archive);
-  assert.equal(pari.prediction, "Under 2.5");
-  assert.equal(pari.cote, 2.05);
-  assert.equal(pari.market_id, "under25");
-  assert.equal(pari.result, "loss");
-  assert.equal(pari.moteur, "v3");
-  // Le reglement juge le pari de l'archive : 3-1 -> « Under 2.5 » perdu (et pas « Over 2.5 » gagne).
-  assert.equal(MR.settleBet(pari, fixture({ gh: 3, ga: 1 })).result, "loss");
-  // Archive encore « en attente » (verdict pas encore ecrit) : le verdict local reste le repli.
-  const attente = MR.fusionnerPari(prediction({ result: "win", score: "2-0" }), { fixture_id: 1000001, prediction: "Over 1.5", result: "scheduled" });
-  assert.equal(attente.result, "win");
-  assert.equal(attente.score, "2-0");
-  // Pas de ligne d'archive : le fichier local, comme avant.
-  const seul = MR.fusionnerPari(prediction({ prediction: "Over 1.5", result: "loss", score: "0-0" }), null);
-  assert.equal(seul.prediction, "Over 1.5");
-  assert.equal(seul.result, "loss");
-});

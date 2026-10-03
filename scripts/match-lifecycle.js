@@ -107,37 +107,6 @@ function homeSummaryHref(id, leagueKey, dir, root) {
   return fs.existsSync(path.join(root, hub.slice(1))) ? hub : null;
 }
 
-// Versions ou la page statique d'un match existe REELLEMENT (fichier present),
-// dans l'ordre de config/markets.json#_dirs. Audit SEO du 29/09/2026 (A1).
-function existingPageDirs(id, root) {
-  root = root || C.ROOT;
-  if (!/^\d{1,12}$/.test(String(id))) return [];
-  return C.DIR_CODES.filter(function (d) { return fs.existsSync(path.join(root, C.matchPath(d, id).slice(1))); });
-}
-// Champ public page_dirs de data-home.json (action A1 de l'audit SEO du
-// 29/09/2026) : versions ou /match/<id>.html (fr) ou /<dir>/match/<id>.html
-// existe. Pose par le pipeline APRES generateMatchPages (pages ecrites), lu par
-// l'accueil (home-list.js#staticMatchPath), le canal Telegram gratuit
-// (lib/telegram-posts.js) et les e-mails (lib/lifecycle-email.js) pour lier la
-// vraie page indexable au lieu de match.html?id= (noindex). Aucune donnee
-// payante : seulement des codes de version. Sans page : champ absent (repli
-// match.html?id= chez le lecteur). Renvoie le nombre de matchs avec une page.
-function annotateHomePages(root, file) {
-  root = root || C.ROOT;
-  var p = path.join(root, file || "data-home.json");
-  var home;
-  try { home = JSON.parse(fs.readFileSync(p, "utf8")); } catch (e) { return 0; }
-  if (!home || !Array.isArray(home.matchs)) return 0;
-  var n = 0;
-  home.matchs.forEach(function (m) {
-    if (!m || typeof m !== "object") return;
-    var dirs = m.id != null ? existingPageDirs(m.id, root) : [];
-    if (dirs.length) { m.page_dirs = dirs; n++; } else delete m.page_dirs;
-  });
-  fs.writeFileSync(p, JSON.stringify(home));
-  return n;
-}
-
 // ---------------------------------------------------------------------------
 function validMatch(m) {
   return !!(m && m.id != null && /^\d{1,12}$/.test(String(m.id)) && m.home && m.away && m.home.n && m.away.n);
@@ -354,10 +323,6 @@ function updateRegistry(reg, runMatchs, now, ctx) {
       if (sc) { e.final_score = sc; summary.scores++; }
     }
     var st = stageFor(kick, t, !!e.in_run);
-    // Competition retiree du site (config/leagues.json#competitions_retirees, 03/10/2026) :
-    // pages supprimees et 301 vers l'accueil de la version tout de suite, sans attendre J+30
-    // (redirectTarget : hub absent de la config -> accueil de la version).
-    if (!e.in_run && C.isRetiredLeague(e.league_key)) st = { status: "redirected", inSitemap: false, noindex: true, removed: true };
     e.status = st.status;
     if (st.status === "redirected") {
       e.removed_at = e.removed_at || today;
@@ -493,8 +458,7 @@ module.exports = {
   REGISTRY_FILE: REGISTRY_FILE, SITEMAP_MAX_AGE_HOURS: SITEMAP_MAX_AGE_HOURS, NOINDEX_AFTER_DAYS: NOINDEX_AFTER_DAYS,
   REMOVE_AFTER_DAYS: REMOVE_AFTER_DAYS, REDIRECT_RETENTION_DAYS: REDIRECT_RETENTION_DAYS, FINISHED_AFTER_MINUTES: FINISHED_AFTER_MINUTES,
   REDIRECTS_BEGIN: REDIRECTS_BEGIN, REDIRECTS_END: REDIRECTS_END,
-  matchDirsFor: matchDirsFor, versionMatchHref: versionMatchHref, homeSummaryHref: homeSummaryHref,
-  existingPageDirs: existingPageDirs, annotateHomePages: annotateHomePages, stageFor: stageFor, kickoffIso: kickoffIso, validMatch: validMatch,
+  matchDirsFor: matchDirsFor, versionMatchHref: versionMatchHref, homeSummaryHref: homeSummaryHref, stageFor: stageFor, kickoffIso: kickoffIso, validMatch: validMatch,
   publicSnapshot: publicSnapshot, parseScore: parseScore, findFinalScore: findFinalScore,
   emptyRegistry: emptyRegistry, loadRegistry: loadRegistry, saveRegistry: saveRegistry, serializeRegistry: serializeRegistry,
   updateRegistry: updateRegistry, archivedEntries: archivedEntries, archivedState: archivedState,

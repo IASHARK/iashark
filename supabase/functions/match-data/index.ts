@@ -102,6 +102,7 @@ const PREMIUM_FIELDS = [
   "stats_iashark",
   "lecture_match",
   "pronostic",
+  "marches_flux",
 ];
 
 // Un match marque is_free par le pipeline est l'offre d'appel du jour : ses

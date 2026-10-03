@@ -4294,6 +4294,41 @@ jobs:
               if(rapportAnj.erreurs.length) console.log('::warning title=Cote ANJ::'+rapportAnj.erreurs.slice(0,3).join(' | ').replace(/apiKey=[^&\s]+/g,'apiKey=***'));
             }catch(e){ console.log('::warning title=Cote ANJ::releve impossible ('+String(e&&e.message||e).replace(/apiKey=[^&\s]+/g,'apiKey=***').slice(0,150)+') : cotes indicatives.'); }
             allMatchsData.forEach(function(m){ CHANCE_IASHARK.poserChance(m); });
+            // ================= TOUS LES MARCHES (03/10/2026) =================
+            // Page match : les marches de la liste blanche du mathematicien (config/marches-valides.json),
+            // chance = cote bet365 sans marge (methode puissance, controle Pinnacle), arrondie par
+            // lib/chance-iashark.js comme le reste du site ; la cote affichee dit d'ou elle vient (bet365).
+            // MEME code que le robot Pro (supabase/functions/_shared/marches-flux.mjs). Champ premium marches_flux.
+            try{
+              var FLUX_MOD=await import(require('url').pathToFileURL(require('path').resolve('supabase/functions/_shared/marches-flux.mjs')).href);
+              var CFG_FLUX=FLUX_MOD.lireConfig(JSON.parse(fs.readFileSync('config/marches-valides.json','utf8')));
+              var nFlux=0;
+              // UNE SEULE SOURCE : le MEME releve que le robot Pro (odds_snapshots, le dernier de moins de 12 h,
+              // lecture legere en deux temps : FLUX_MOD.lireRelevesFlux). Son heure est ecrite (releve_at).
+              var RELEVES_FLUX={};
+              if(CFG_FLUX.marches.size&&SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY){
+                var selectSnap=async function(filtres,colonnes){
+                  var u=SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/odds_snapshots?select='+colonnes+'&'+FLUX_MOD.versQueryPostgrest(filtres).join('&');
+                  var r=await fetch(u,{headers:{apikey:SUPA_SERVICE_KEY,Authorization:'Bearer '+SUPA_SERVICE_KEY}});
+                  if(!r.ok) throw new Error('odds_snapshots '+r.status);
+                  return r.json();
+                };
+                RELEVES_FLUX=await FLUX_MOD.lireRelevesFlux(selectSnap,allMatchsData.filter(function(m){ return m&&m.id!=null&&(!m.status||m.status==='NS'); }).map(function(m){ return m.id; }),{ageMaxH:CFG_FLUX.age_max_releve_h});
+              }
+              allMatchsData.forEach(function(m){
+                delete m.marches_flux;
+                var rel=m&&m.id!=null?RELEVES_FLUX[String(m.id)]:null, raw=rel?rel.raw:null;
+                if(!raw||!CFG_FLUX.marches.size||m.status&&m.status!=='NS') return;
+                var nomEq=function(e){ return (e&&typeof e==='object'?(e.n||e.name):e)||''; };
+                var r=FLUX_MOD.selectionsDuMatch(raw,{config:CFG_FLUX,dom:nomEq(m.home),ext:nomEq(m.away),ligue:lgKey(m.league_id)});
+                var liste=r.selections.map(function(x){
+                  var c=CHANCE_IASHARK.chanceIashark(x.chance*100,null);
+                  return c?{marche:FLUX_MOD.CATALOGUE[x.bet_id].nom,selection:x.libelle,chance:c.chance,cote:x.cote,bookmaker:FLUX_MOD.nomBookmakerFlux(x.bookmaker)}:null;
+                }).filter(Boolean);
+                if(liste.length){ m.marches_flux={source:'cote '+FLUX_MOD.nomBookmakerFlux(CFG_FLUX.reference)+' sans marge',releve_at:new Date(rel.captured_at).toISOString(),liste:liste}; nFlux++; }
+              });
+              console.log('  [MARCHES] '+nFlux+' match(s) avec le bloc « Tous les marchés » ('+CFG_FLUX.marches.size+' marche(s) valide(s)).');
+            }catch(e){ console.log('::warning title=Marches du flux::bloc non pose ('+(e&&e.message)+').'); }
             // MOTEUR_V3:DEBUT - chance IASHARK des marches 1N2 / double chance pour le Canal Pro.
             // Fichier TEMPORAIRE du run (jamais dans le depot ni dans les journaux) : l'etape
             // « Canal Pro - deposer la sortie du moteur v3 » le joint a la sortie deposee.

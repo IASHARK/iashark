@@ -25,6 +25,7 @@
 
 import { textes, estFrancais, surMesure } from "./canal-pro-langues.mjs";
 import { DONNEES_COMPETITIONS } from "./competitions-pro.mjs";
+import * as FLUX from "./marches-flux.mjs";
 // Langues (02/10/2026) : chaque fonction de message accepte une langue ('fr' par defaut). En
 // francais, le texte est EXACTEMENT celui d'avant ; dans une autre langue, seuls les mots changent :
 // les chiffres (chance, cote, bookmaker, heure) viennent du meme pari (une seule source).
@@ -119,12 +120,14 @@ export const REGLES = {
 export const FAMILLES = {
   simple: { nom: "Simple", titre: "SIMPLE", pref: "simple" },
   combine: { nom: "Combiné du jour", titre: "COMBINÉ DU JOUR", pref: "combine" },
+  // « Meme match » tire d'un marche combine du bookmaker (flux API-Football, 03/10/2026) : migration 0054.
+  meme_match: { nom: "Même match", titre: "MÊME MATCH", pref: "buteur" },
   buteur: { nom: "Même match avec buteur", titre: "MÊME MATCH AVEC BUTEUR", pref: "buteur", plaisir: "chance calculée, cote à voir chez ton bookmaker" },
   fun10: { nom: "Ticket autour de 10", titre: "TICKET AUTOUR DE 10", pref: "fun", plaisir: "pour le plaisir" },
   fun25: { nom: "Ticket autour de 25", titre: "TICKET AUTOUR DE 25", pref: "fun", plaisir: "pour le plaisir" },
   reve: { nom: "Ticket 50-100 du mois", titre: "TICKET 50-100 DU MOIS", pref: "fun", plaisir: "pour le plaisir" },
 };
-export const ORDRE_FAMILLES = ["simple", "combine", "buteur", "fun10", "fun25", "reve"];
+export const ORDRE_FAMILLES = ["simple", "combine", "meme_match", "buteur", "fun10", "fun25", "reve"];
 /** Paris a plusieurs selections (matchs differents) : combine du jour et tickets du week-end. */
 export const COMBINES = ["combine", "fun10", "fun25", "reve"];
 export const estCombine = (p) => COMBINES.includes(p?.famille);
@@ -132,6 +135,8 @@ export const estCombine = (p) => COMBINES.includes(p?.famille);
 export const CHOIX_FAMILLES = { simple: "Simples", combine: "Combiné du jour", buteur: "Même match avec buteur", fun: "Tickets pour le plaisir" };
 export const MENTION_MENU = "Chances calculées par IASHARK (moteur v3).";
 /** En-tete d'un programme qui contient un pari de la voie « cotes du marche ». */
+/** En-tete d'un programme qui contient un pari du flux API-Football (cote bet365). */
+export const NOTE_FLUX = "Quand c'est écrit « à partir de la cote bet365 », la chance vient de la cote bet365, marge retirée ; la cote de tes bookmakers est ajoutée quand ils proposent le même pari.";
 export const NOTE_MARCHE = "Quand c'est écrit « à partir des cotes du marché », la chance vient des cotes des bookmakers, marge retirée.";
 /**
  * COMPETITIONS PREFEREES (03/10/2026, decision de Clement) : SEULEMENT pour l'information. Les paris sont
@@ -403,6 +408,9 @@ export function cotesVerifiees(etat, pays = "FR") {
 
 // ------------------------------------------------------------------ programme du jour
 export function selectionTxt(p, lang = "fr") {
+  // Marche du flux API-Football (03/10/2026) : libelle en francais simple (marches-flux.mjs#libelleFlux).
+  const fx = FLUX.lireCode(p.flux?.code || p.marche);
+  if (fx && (estFrancais(lang) || !p.flux?.libelle_traduit)) return p.flux?.libelle || FLUX.libelleFlux(fx.bet_id, fx.value, p.dom, p.ext);
   if (!estFrancais(lang)) {
     const L = textes(lang);
     const ln = p.ligne == null ? "" : (Number(p.ligne) > 0 ? "+" : "") + (L.code === "en" ? String(Number(p.ligne)) : String(Number(p.ligne)).replace(".", ","));
@@ -445,14 +453,26 @@ export function uneSurN(p, lang = "fr") { const n = 1 / p; return n < 10 ? texte
  */
 export const SOURCE_COTES_MARCHE = "chance calculée par IASHARK à partir des cotes du marché";
 export const VOIE_COTES_MARCHE = "cotes_marche";
+/**
+ * VOIE « FLUX API-FOOTBALL » (03/10/2026) : marches de config/marches-valides.json (liste blanche du
+ * mathematicien). Chance = cote sans marge du bookmaker de reference (bet365, controle Pinnacle).
+ */
+export const VOIE_FLUX = "flux";
+export const SOURCE_FLUX = "chance calculée par IASHARK à partir de la cote bet365, marge retirée";
+/** Cote de reference d'un pari (bookmaker du flux, ex. bet365) : { bookmaker, cote, releve_at } ou null. */
+export const refDe = (p) => { const r = p?.ref || p?.composantes?.ref; return r && Number(r.cote) > 1 ? r : null; };
+const estFlux = (j) => !!(j && (j.voie === VOIE_FLUX || refDe(j) || FLUX.lireCode(j.marche)));
 /** D'ou vient la chance d'un pari : « v3 », « marche » (cotes du marche) ou « mixte » (combine des deux). */
 export function voieChance(p) {
   if (!p || p.famille === "buteur") return "v3";
   if (estCombine(p)) {
     const s = p.selections || [];
-    const n = s.filter((j) => j.voie === VOIE_COTES_MARCHE).length;
+    const nf = s.filter((j) => j.voie === VOIE_FLUX).length;
+    if (nf && nf === s.length) return "flux";
+    const n = s.filter((j) => j.voie === VOIE_COTES_MARCHE || j.voie === VOIE_FLUX).length;
     return !n ? "v3" : n === s.length ? "marche" : "mixte";
   }
+  if (p.voie === VOIE_FLUX || String(p.source_proba || "").startsWith(SOURCE_FLUX)) return "flux";
   return p.voie === VOIE_COTES_MARCHE || String(p.source_proba || "").startsWith(SOURCE_COTES_MARCHE) ? "marche" : "v3";
 }
 /** La chance, toujours « calculée par IASHARK » (conditions 2 et 3). Jamais de taux de reussite ni d'esperance. */
@@ -462,12 +482,12 @@ export function chanceTxt(p, lang = "fr") {
     const L = textes(lang);
     if (p.famille === "buteur") return L.chanceButeur(pct1(p.proba, lang), uneSurN(p.proba, lang));
     if (estCombine(p)) return voie === "v3" ? L.chanceCombine(uneSurN(p.proba, lang), pct1(p.proba, lang)) : L.chanceCombineMarche(uneSurN(p.proba, lang), pct1(p.proba, lang), voie === "mixte");
-    return voie === "marche" ? L.chanceMarche(pct(p.proba)) : L.chanceSimple(pct(p.proba));
+    return voie === "marche" || voie === "flux" ? L.chanceMarche(pct(p.proba)) : L.chanceSimple(pct(p.proba));
   }
   if (p.famille === "buteur") return `Chance calculée par IASHARK : environ ${pct1(p.proba)} % (1 chance sur ${uneSurN(p.proba)}), lue dans la grille des scores du match.`;
   // Une seule source (01/10/2026) : produit des chances IASHARK des selections, chacune la meme
   // que sur la page match (le plus bas entre le moteur v3 et la cote sans marge).
-  const quoi = voie === "marche" ? " à partir des cotes du marché" : voie === "mixte" ? " (moteur v3 et cotes du marché)" : "";
+  const quoi = voie === "flux" ? " à partir de la cote bet365, marge retirée" : voie === "marche" ? " à partir des cotes du marché" : voie === "mixte" ? " (moteur v3 et cotes du marché)" : "";
   if (estCombine(p)) return `Chance calculée par IASHARK${quoi} : environ 1 chance sur ${uneSurN(p.proba)} (${pct1(p.proba)} %), toutes les sélections doivent passer.`;
   return `Chance calculée par IASHARK${quoi} : ${pct(p.proba)} %.`;
 }
@@ -490,7 +510,7 @@ const arrondi2 = (x) => Math.round(x * 100) / 100;
  * 30 min, aucune cote chez les bookmakers agrees suivis. Aucune « cote minimum » : la regle a deja
  * choisi le pari sur la cote moyenne du moteur v3 (comme dans le rejeu).
  */
-export function preparerProgramme(candidats, { jour, maintenant, pays = "FR", ageMaxMin = 60, suspendues = [] } = {}) {
+export function preparerProgramme(candidats, { jour, maintenant, pays = "FR", ageMaxMin = 60, ageMaxFluxH = 12, suspendues = [] } = {}) {
   const now = new Date(maintenant).getTime();
   const { debut, fin } = fenetreProgramme(jour);
   const paris = [], ecartes = [];
@@ -513,10 +533,14 @@ export function preparerProgramme(candidats, { jour, maintenant, pays = "FR", ag
     if (!jambes.length || jambes.some((j) => !j.fixture_id)) { ecarte("match non relié aux résultats : il ne pourrait pas être réglé", true); continue; }
     if (ko - now < 30 * 60000) { ecarte("le match commence trop tôt"); continue; }
     let best = null, agrees = {};
+    // Voie « flux API-Football » : la cote de reference (bet365, relevee une fois par jour dans odds_snapshots)
+    // suffit ; une cote chez un agree suivi est montree en plus quand il propose le meme pari.
+    const ref = fam !== "buteur" && jambes.some(estFlux) ? refDe(c) : null;
     if (fam !== "buteur") {
-      if (!c.releve_at || now - Date.parse(c.releve_at) > ageMaxMin * 60000) { ecarte("cote relevée il y a plus d'1 h", true); continue; }
+      const ageMax = ref ? ageMaxFluxH * 3600e3 : ageMaxMin * 60000;
+      if (!c.releve_at || now - Date.parse(ref ? ref.releve_at || c.releve_at : c.releve_at) > ageMax) { ecarte(ref ? `cote bet365 relevée il y a plus de ${ageMaxFluxH} h` : "cote relevée il y a plus d'1 h", true); continue; }
       agrees = Object.fromEntries(Object.entries(cotesAgreees(c.cotes, pays)).filter(([bk]) => suivis.includes(bk)));
-      best = meilleure(agrees);
+      best = meilleure(agrees) || (ref ? { bookmaker: ref.bookmaker, cote: ref.cote } : null);
       if (!best) { ecarte(estCombine(c) ? "aucun bookmaker agréé suivi ne propose toutes les sélections" : "aucune cote chez les bookmakers agréés suivis", true); continue; }
     }
     const cle = `${fam}|${jambes.map((j) => `${j.match_id || j.event_id || label}|${j.marche}`).join("+")}`;
@@ -525,7 +549,8 @@ export function preparerProgramme(candidats, { jour, maintenant, pays = "FR", ag
     const p = { famille: fam, event_id: c.event_id || null, sport_key: c.sport_key || null, fixture_id: c.fixture_id ?? null, ligue: c.ligue || "",
       dom: c.dom, ext: c.ext, coup_envoi: new Date(ko).toISOString(), fin_coup_envoi: new Date(Date.parse(c.fin_coup_envoi || c.coup_envoi)).toISOString(),
       marche: c.marche, ligne: c.ligne ?? null, proba: c.proba, source_proba: c.source_proba || null, cote_min: null,
-      meilleure_cote: best ? best.cote : null, meilleur_bookmaker: best ? best.bookmaker : null, cotes: agrees, composantes: {},
+      meilleure_cote: best ? best.cote : null, meilleur_bookmaker: best ? best.bookmaker : null, cotes: agrees,
+      composantes: ref ? { ref, ...(c.flux ? { flux: c.flux } : {}) } : {},
       selections: c.selections || [], cote_vue_at: fam === "buteur" ? null : c.releve_at, regles: REGLES.version };
     p.selection = pariTxt(p);
     p.explication = explication(p);
@@ -548,6 +573,8 @@ export function controlePublication(p, etat, maintenant, pays = "FR") {
   const n = estCombine(p) ? (p.selections || []).length : 1;
   const etats = estCombine(p) ? etat.jambes || [] : [etat];
   if (etats.length !== n || etats.some((e) => !e)) return { raison: "cote impossible à relever au moment de la publication (une sélection manque)" };
+  const jambesP = estCombine(p) ? p.selections || [] : [p];
+  if (jambesP.some(estFlux)) return controleFlux(p, jambesP, etats, maintenant, pays);
   const verif = [];
   for (const e of etats) {
     if (!ok(e.pinnacle_proba)) return { raison: e.pinnacle_douteuse ? "cote Pinnacle douteuse au dernier contrôle (somme des 1/cote hors de la fourchette normale : erreur de cote probable)" : "plus de cote Pinnacle au dernier contrôle" };
@@ -566,7 +593,51 @@ export function controlePublication(p, etat, maintenant, pays = "FR") {
   maj.explication = explication({ ...p, ...maj });
   return { maj };
 }
-const NOMS_PLURIEL = { simple: ["simple", "simples"], combine: ["combiné du jour", "combinés du jour"], buteur: ["même match avec buteur", "même match avec buteur"],
+/**
+ * Dernier controle d'un pari qui contient une selection du flux : la selection doit etre encore proposee par
+ * bet365 (dernier releve du flux), et sa chance sans marge rester proche de celle de Pinnacle quand il la cote.
+ * Cote du pari : la meilleure chez un agree suivi qui propose toutes les selections, sinon la cote bet365.
+ */
+function controleFlux(p, jambesP, etats, maintenant, pays) {
+  const refs = [], verif = [];
+  for (const [k, j] of jambesP.entries()) {
+    const e = etats[k];
+    if (estFlux(j)) {
+      if (!e.flux) return { raison: "le pari n'est plus proposé par bet365 au dernier contrôle" };
+      if (e.flux.controle_ok === false) return { raison: "cote bet365 trop éloignée de celle de Pinnacle au dernier contrôle (erreur de cote probable)" };
+      if (e.flux.sous_cote_min) return { raison: "cote bet365 tombée sous 1,20 au dernier contrôle" };
+      refs.push(e.flux.cote);
+    } else {
+      if (!ok(e.pinnacle_proba)) return { raison: e.pinnacle_douteuse ? "cote Pinnacle douteuse au dernier contrôle (somme des 1/cote hors de la fourchette normale : erreur de cote probable)" : "plus de cote Pinnacle au dernier contrôle" };
+      refs.push(NaN);
+    }
+    verif.push(e.cotes && ok(e.pinnacle_cote) ? cotesVerifiees(e, pays).cotes : {});
+  }
+  const n = jambesP.length;
+  const bks = Object.keys(verif[0]).filter((bk) => verif.every((c) => ok(c[bk])));
+  const cotes = Object.fromEntries(bks.map((bk) => [bk, n > 1 ? arrondi2(produit(verif.map((c) => c[bk]))) : verif[0][bk]]));
+  const r0 = refDe(p) || { bookmaker: etats.find((e) => e?.flux)?.flux.bookmaker || "bet365" };
+  const ref = refs.every(ok) ? { bookmaker: r0.bookmaker, cote: n > 1 ? arrondi2(produit(refs)) : refs[0], releve_at: etats.map((e) => e?.flux?.releve_at).filter(Boolean).sort()[0] || null } : null;
+  const best = meilleure(cotes) || (ref ? { bookmaker: ref.bookmaker, cote: ref.cote } : null);
+  if (!best) return { raison: "aucun bookmaker ne propose toutes les sélections au dernier contrôle" };
+  const maj = { cotes, meilleure_cote: best.cote, meilleur_bookmaker: best.bookmaker, cote_vue_at: new Date(maintenant).toISOString(),
+    composantes: { ...(p.composantes || {}), ...(ref ? { ref } : {}) } };
+  // La cote bet365 a change depuis la preparation : la chance est recalculee sur la cote AFFICHEE (sans marge,
+  // meme arrondi que lib/chance-iashark.js) ; une chance et une cote toujours du meme releve.
+  const chanceDe = (k, j) => {
+    const e = etats[k];
+    if (!estFlux(j) || !e?.flux) return Number(j.proba);
+    const c = FLUX.chanceAffichee(e.flux.chance);
+    return c ? c / 100 : Number(j.proba);
+  };
+  if (estCombine(p)) {
+    maj.selections = p.selections.map((j, k) => ({ ...j, cote: verif[k][best.bookmaker] ?? refs[k], proba: chanceDe(k, j) }));
+    maj.proba = Math.round(produit(maj.selections.map((j) => j.proba)) * 10000) / 10000;
+  } else maj.proba = chanceDe(0, p);
+  maj.explication = explication({ ...p, ...maj });
+  return { maj };
+}
+const NOMS_PLURIEL = { simple: ["simple", "simples"], combine: ["combiné du jour", "combinés du jour"], meme_match: ["même match", "même match"], buteur: ["même match avec buteur", "même match avec buteur"],
   fun10: ["ticket autour de 10", "tickets autour de 10"], fun25: ["ticket autour de 25", "tickets autour de 25"], reve: ["ticket 50-100 du mois", "tickets 50-100 du mois"] };
 /** « 3 simples, 1 combiné du jour, 1 même match avec buteur ». */
 export function compteFamilles(paris, lang = "fr") {
@@ -610,6 +681,23 @@ export function pariDuPays(p, releves, pays, { jusqua = null } = {}) {
     ...(estCombine(p) && best ? { selections: p.selections.map((j, k) => ({ ...j, cote: parJambe[k][best.bookmaker] })) } : {}),
     ...(estCombine(p) && !best ? { selections: p.selections.map((j) => ({ ...j, cote: null })) } : {}) };
 }
+/**
+ * Cotes d'un pari du flux, d'ou elles viennent EN CLAIR : « Cote bet365 : 1,45 » (cote de reference, celle
+ * de la chance), puis la cote des operateurs agrees suivis du pays qui proposent le meme pari. Aucun lien.
+ */
+export function ligneCotesFlux(p, pays = "FR", n = (x) => fr(x), heure = heureTxt, L = null) {
+  // Decision de Clement (03/10) : on dit TOUJOURS d'ou vient la cote, sans mettre bet365 en avant : la cote de
+  // l'operateur agree d'abord quand elle existe ; puis « Cote de reference (bet365) », sans gras.
+  const r = refDe(p);
+  const nomRef = FLUX.nomBookmakerFlux(r.bookmaker);
+  const quoi = L ? L.cote(estCombine(p) ? (p.famille === "combine" ? "combine" : "ticket") : "simple") : estCombine(p) ? `Cote du ${p.famille === "combine" ? "combiné" : "ticket"}` : "Cote";
+  const quand = r.releve_at ? ` · ${L ? L.relevee(heure(r.releve_at)) : `relevée à ${heure(r.releve_at)}`}` : "";
+  const agrees = Object.entries(p.cotes || {}).filter(([bk, c]) => ok(Number(c)) && Number(c) > 1 && (BOOKMAKERS_AGREES[pays] || []).some((b) => b.cle === bk))
+    .sort((a, b) => b[1] - a[1]);
+  const lignes = agrees.map(([bk, c]) => `${quoi} ${esc(nomBookmaker(bk, pays))} : <b>${n(Number(c))}</b>`);
+  lignes.push(`${quoi} de référence (${esc(nomRef)}) : ${n(Number(r.cote))}${quand}`);
+  return lignes.join("\n");
+}
 /** Le message d'un pari : match, pari, chance calculee par IASHARK, cote. Rien d'autre (decision de Clement). */
 function blocPari(p, { pays = "FR", lang = "fr" } = {}) {
   if (!estFrancais(lang)) return blocPariTraduit(p, pays, lang);
@@ -624,7 +712,8 @@ function blocPari(p, { pays = "FR", lang = "fr" } = {}) {
     t += `${esc(p.ligue)}${p.ligue ? " · " : ""}${esc(p.dom)} – ${esc(p.ext)} · ${heureTxt(p.coup_envoi)}\nSélection : <b>${esc(p.selection || pariTxt(p))}</b>\n`;
   }
   t += `${esc(chanceTxt(p))}\n`;
-  if (p.famille === "buteur") t += SANS_PREUVE_BUTEUR;
+  if (refDe(p) && p.famille !== "buteur") t += ligneCotesFlux(p, pays, (x) => fr(x), heureTxt);
+  else if (p.famille === "buteur") t += SANS_PREUVE_BUTEUR;
   else if (!(Number(p.meilleure_cote) > 1)) t += SANS_COTE_PAYS; // version d'un pays (ex. Espagne) : pas de cote chez ses operateurs
   else if (p._ailleurs) t += `${estCombine(p) ? `Cote du ${p.famille === "combine" ? "combiné" : "ticket"}` : "Cote"} : ${p._ailleurs} · relevée à ${heureTxt(p.cote_vue_at)}`;
   else t += `${estCombine(p) ? `Cote du ${p.famille === "combine" ? "combiné" : "ticket"}` : "Cote"} : <b>${fr(Number(p.meilleure_cote))}</b> chez ${esc(nomBookmaker(p.meilleur_bookmaker, pays))}`
@@ -647,7 +736,8 @@ function blocPariTraduit(p, pays, lang) {
     t += `${esc(p.ligue)}${p.ligue ? " · " : ""}${esc(p.dom)} – ${esc(p.ext)} · ${heureTxt(p.coup_envoi, lang)} ${L.tz}\n${L.pari}: <b>${esc(pariTxt(p, lang))}</b>\n`;
   }
   t += `${esc(chanceTxt(p, lang))}\n`;
-  if (p.famille === "buteur") t += L.sansPreuveButeur;
+  if (refDe(p) && p.famille !== "buteur") t += ligneCotesFlux(p, pays, (x) => L.n(x), (d) => heureTxt(d, lang), L);
+  else if (p.famille === "buteur") t += L.sansPreuveButeur;
   else if (!(Number(p.meilleure_cote) > 1)) t += L.sansCotePays;
   else if (p._ailleurs) t += `${L.cote(estCombine(p) ? (p.famille === "combine" ? "combine" : "ticket") : "simple")}: ${p._ailleurs} · ${L.relevee(heureTxt(p.cote_vue_at, lang))}`;
   else t += `${L.cote(estCombine(p) ? (p.famille === "combine" ? "combine" : "ticket") : "simple")}: <b>${L.n(Number(p.meilleure_cote))}</b> ${L.chez} ${esc(nomBookmaker(p.meilleur_bookmaker, pays))}`
@@ -733,7 +823,9 @@ export function messagesCanal(jour, paris, { pays = "FR", motifVide = "regles", 
   const suivis = bookmakersSuivis(pays).map((b) => nomBookmaker(b, pays)).join(", ");
   const weekend = actifs.some((p) => estCombine(p) && p.famille !== "combine");
   // Voie « cotes du marche » : l'en-tete le dit (chaque pari dit d'ou vient sa chance).
-  const marche = actifs.some((p) => voieChance(p) !== "v3");
+  const marche = actifs.some((p) => ["marche", "mixte"].includes(voieChance(p)));
+  // Paris du flux API-Football : la cote vient de bet365 (et des agrees suivis quand ils proposent le meme pari).
+  const avecFlux = actifs.some((p) => refDe(p));
   if (!estFrancais(lang)) {
     const L = textes(lang);
     const tete = actifs.length
@@ -744,7 +836,9 @@ export function messagesCanal(jour, paris, { pays = "FR", motifVide = "regles", 
   const vide = MOTIFS_VIDE[motifVide] || MOTIFS_VIDE.retires;
   const tete = actifs.length
     ? `<b>Programme du ${nomJour(jour)}</b> · ${compteFamilles(actifs)}${actifs.length === 1 ? `\n${JOURNEE_CALME}` : ""}\n`
-      + `Matchs de 12 h à demain 11 h 59${weekend ? " ; tickets du week-end : matchs de vendredi à dimanche" : ""}. Pour chaque pari : la chance calculée par IASHARK (moteur v3) et la meilleure cote relevée chez les bookmakers agréés que nous suivons (${suivis}).`
+      + `Matchs de 12 h à demain 11 h 59${weekend ? " ; tickets du week-end : matchs de vendredi à dimanche" : ""}. `
+      + (avecFlux ? `Pour chaque pari : la chance calculée par IASHARK et la cote, avec le nom du bookmaker d'où elle vient (bet365, et les bookmakers agréés que nous suivons quand ils proposent le même pari : ${suivis}).`
+        : `Pour chaque pari : la chance calculée par IASHARK (moteur v3) et la meilleure cote relevée chez les bookmakers agréés que nous suivons (${suivis}).`)
       + (marche ? ` ${NOTE_MARCHE}` : "")
     : `<b>Programme du ${nomJour(jour)}</b> · aucun pari\n${vide}`;
   return { tete, paris: actifs.map((p) => ({ id: p.id, numero: p.numero, html: blocPari(p, { pays }) })) };
@@ -868,6 +962,8 @@ function pariAffiche(p, prefs) {
   if (!BOOKMAKERS_AGREES[prefs.pays]) return { ...p, meilleure_cote: null, meilleur_bookmaker: null };
   if (p.famille === "buteur" || !(Number(p.meilleure_cote) > 1)) return p;
   const x = pariPourAbonne(p, prefs);
+  // Pari du flux : la cote bet365 est toujours montree ; en plus, celle de ses bookmakers s'ils le proposent.
+  if (refDe(p)) return { ...p, cotes: x.chez ? { [x.chez.bookmaker]: x.chez.cote } : {} };
   // Combine chez un autre bookmaker que le meilleur : la cote de chaque selection chez lui n'est pas connue ici (pas affichee).
   if (x.chez) return { ...p, meilleure_cote: x.chez.cote, meilleur_bookmaker: x.chez.bookmaker,
     ...(estCombine(p) && x.chez.bookmaker !== p.meilleur_bookmaker ? { selections: (p.selections || []).map((j) => ({ ...j, cote: null })) } : {}) };
@@ -893,12 +989,13 @@ export function messageProgrammeAbonne(jour, paris, prefs, { lang = "fr", prenom
   const tes = prefs.bookmakers.length > 0;
   const bks = sesBookmakers(prefs).map((b) => nomBookmaker(b, prefs.pays)).join(", ");
   const weekend = actifs.some((p) => estCombine(p) && p.famille !== "combine");
-  const marche = actifs.some((p) => voieChance(p) !== "v3");
+  const marche = actifs.some((p) => ["marche", "mixte"].includes(voieChance(p)));
   const compte = compteFamilles(actifs, lang);
   let t = avant || "";
   if (tete) {
     t += ouvert ? S.tete(pre, jourTxt, compte, actifs.length === 1, weekend, esc(bks), tes) : S.teteSansPays(pre, jourTxt, compte);
     if (marche) t += ` ${fra ? NOTE_MARCHE : textes(lang).noteMarche}`;
+    if (fra && actifs.some((p) => refDe(p))) t += ` ${NOTE_FLUX}`;
   }
   for (const p of actifs) {
     const x = pariAffiche(p, prefs);
@@ -1155,7 +1252,11 @@ export function issue(marche, ligne, bd, be) {
   }
   throw new Error(`marche inconnu : ${marche}`);
 }
-export function resultatPari(p, bd, be) {
+export function resultatPari(p, bd, be, faits = null) {
+  // Marche du flux (F<id>:<issue>) : reglement par marches-flux.mjs#reglerFlux ; fait manquant (score a la
+  // pause, corners, cartons) : null, on attend (jamais un resultat devine).
+  // Seulement un match fini en temps reglementaire (statut FT) : prolongation ou tirs au but = reglement a la main.
+  if (FLUX.lireCode(p.marche)) return faits?.statut === "FT" ? FLUX.reglerFlux(p.marche, { ft: [bd, be], ht: faits?.ht ?? null, corners: faits?.corners ?? null, cartons: faits?.cartons ?? null }) : null;
   const [w, l] = issue(p.marche, p.ligne, bd, be);
   if (w === 1) return "gagne"; if (l === 1) return "perdu";
   if (w === 0 && l === 0) return "rembourse";
@@ -1285,7 +1386,7 @@ export function statsFamille(paris) {
   const annonce = somme(comptes.map((p) => POIDS_RESULTAT[p.resultat][0] * Number(p.proba))) / n;
   return { ...base, n, g, annonce, reel: g / n, marge: 1.96 * Math.sqrt(annonce * (1 - annonce) / n) };
 }
-const NOMS_BILAN = { simple: "Simples", combine: "Combinés du jour", buteur: "Même match avec buteur", fun10: "Tickets autour de 10", fun25: "Tickets autour de 25", reve: "Tickets 50-100 du mois" };
+const NOMS_BILAN = { simple: "Simples", combine: "Combinés du jour", meme_match: "Même match", buteur: "Même match avec buteur", fun10: "Tickets autour de 10", fun25: "Tickets autour de 25", reve: "Tickets 50-100 du mois" };
 function lignesBilan(paris, lang = "fr") {
   let t = "";
   for (const f of ORDRE_FAMILLES) {
@@ -1446,14 +1547,16 @@ export function coteTabac(texte) {
   const m = n.match(/(\d{1,2}[.,]\d{1,2})/);
   return m ? Number(m[1].replace(",", ".")) : null;
 }
+/** Bookmaker agree ET suivi dans un pays ouvert (jamais bet365, cote de reference du flux). */
+const agreeSuivi = (bk) => Object.values(BOOKMAKERS_AGREES).some((l) => l.some((b) => b.suivi && b.cle === bk));
 /** Cote vue au tabac : on la met a cote de la meilleure cote relevee chez les agrees. Aucun calcul, aucun avis. */
 export function verdictTabac(p, cote, lang = "fr") {
   if (!estFrancais(lang)) {
     const L = textes(lang);
-    const best = ok(Number(p.meilleure_cote)) ? L.tabacBest(L.n(Number(p.meilleure_cote)), esc(nomBookmaker(p.meilleur_bookmaker)), p.cote_vue_at ? heureTxt(p.cote_vue_at, lang) : "") : "";
+    const best = ok(Number(p.meilleure_cote)) && agreeSuivi(p.meilleur_bookmaker) ? L.tabacBest(L.n(Number(p.meilleure_cote)), esc(nomBookmaker(p.meilleur_bookmaker)), p.cote_vue_at ? heureTxt(p.cote_vue_at, lang) : "") : "";
     return L.tabac(esc(pariTxt(p, lang)), `${esc(p.dom)} – ${esc(p.ext)}`, L.n(cote), best, esc(chanceTxt(p, lang)));
   }
-  const best = ok(Number(p.meilleure_cote)) ? ` Meilleure cote relevée chez les bookmakers agréés : ${fr(Number(p.meilleure_cote))} chez ${esc(nomBookmaker(p.meilleur_bookmaker))}${p.cote_vue_at ? ` (à ${heureTxt(p.cote_vue_at)})` : ""}.` : "";
+  const best = ok(Number(p.meilleure_cote)) && agreeSuivi(p.meilleur_bookmaker) ? ` Meilleure cote relevée chez les bookmakers agréés : ${fr(Number(p.meilleure_cote))} chez ${esc(nomBookmaker(p.meilleur_bookmaker))}${p.cote_vue_at ? ` (à ${heureTxt(p.cote_vue_at)})` : ""}.` : "";
   return `Pour ${esc(p.selection)} (${esc(p.dom)} – ${esc(p.ext)}) : tu vois ${fr(cote)} au tabac.${best} ${esc(chanceTxt(p))} La cote au tabac peut différer de celle d'internet et bouger d'ici le match.`;
 }
 export function messageGardeFou(notes, limite, lang = "fr") {

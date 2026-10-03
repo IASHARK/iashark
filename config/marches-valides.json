@@ -1,0 +1,176 @@
+{
+  "_readme": [
+    "LISTE BLANCHE des marches du flux de cotes API-Football (table odds_snapshots) que le robot Pro et la page match ont le droit d'utiliser. SEUL le mathematicien la remplit, apres verification (chance annoncee contre resultats reels, sur des matchs jamais vus).",
+    "Vide = rien de nouveau : le robot garde ses voies actuelles (moteur v3, cotes du marche : 1N2, double chance, buts 2,5) et la page match n'affiche pas le bloc « Tous les marchés ».",
+    "Une entree : { \"bet_id\": 25, \"bet\": \"Result/Total Goals\", \"lignes\": [2.5], \"ligues\": null }. bet_id = identifiant API-Football (voir supabase/functions/_shared/marches-flux.mjs#CATALOGUE). lignes (facultatif) : seulement ces lignes (ex. [2.5]) ; absent = toutes les demi-lignes. ligues (facultatif) : cles de config/leagues.json ; absent = toutes les competitions deja autorisees au robot.",
+    "Chance d'un pari = cote sans marge de « reference » (bet365, methode puissance) ; controle : si « controle » (Pinnacle) cote le meme pari et que sa chance sans marge s'ecarte de plus de ecart_max_pinnacle (0,08 = 8 points), le pari est ecarte. Aucun modele.",
+    "Marches « meme match » (24 Results/Both Teams Score, 25 Result/Total Goals, 49 Total Goals/Both Teams To Score) : cote du bookmaker pour la combinaison, jamais un produit de deux chances. Le week-end, le robot en propose un (cote entre meme_match.cote_min et meme_match.cote_max). AVANT d'en mettre un ici : appliquer la migration 0054_pro_paris_meme_match.sql (famille « meme_match »).",
+    "age_max_releve_h : une cote du flux plus vieille ne sert pas (le flux est releve une fois par jour, le matin).",
+    "buteur_actif : false tant que le mathematicien n'a pas valide la chance buteur tiree de la cote « Anytime Goal Scorer » (marches-flux.mjs#chanceButeurFlux).",
+    "chance (facultatif) : [min, max] = tranches de chance validees ; hors de ces bornes, le pari n'est jamais propose. Remplissage du 03/10/2026 d'apres la verification du mathematicien (372 matchs, 03/09-02/10/2026, bet365 juge, Pinnacle en controle) : seulement les marches et tranches qui passent. Un seul mois de cotes : a refaire avec 3 mois.",
+    "cote_min : jamais une selection du flux sous cette cote bet365 (1,20), ni sur la page ni dans le robot ; au dernier controle, une cote tombee dessous retire le pari.",
+    "Releve : la page match et le robot lisent le MEME releve de odds_snapshots, le dernier de moins de age_max_releve_h heures (marches-flux.mjs#lireRelevesFlux) ; la page ecrit son heure (marches_flux.releve_at).",
+    "ligues (03/10/2026, mathematicien) : seulement les competitions MESUREES (clubs verifies sur 372 matchs ; Ligue des nations sur 54 matchs, rien ne contredit) ; corners du match exclus pour les selections (44 % reels pour 54 % annonces sur 54 matchs). Les autres competitions s'ajouteront apres mesure."
+  ],
+  "reference": "bet365",
+  "controle": "pinnacle",
+  "ecart_max_pinnacle": 0.08,
+  "cote_min": 1.2,
+  "age_max_releve_h": 12,
+  "buteur_actif": false,
+  "meme_match": {
+    "cote_min": 1.4,
+    "cote_max": 4.0
+  },
+  "marches": [
+    {
+      "bet_id": 20,
+      "bet": "Double Chance - First Half",
+      "chance": [
+        0.5,
+        0.8
+      ],
+      "ligues": [
+        "premier",
+        "laliga",
+        "seriea",
+        "bundesliga",
+        "ligue1",
+        "ldc",
+        "el",
+        "eredivisie",
+        "primeira",
+        "mls",
+        "suede",
+        "jleague",
+        "liga_mx",
+        "argentina_liga_profesional",
+        "nations_league"
+      ]
+    },
+    {
+      "bet_id": 5,
+      "bet": "Goals Over/Under",
+      "chance": [
+        0.5,
+        0.7
+      ],
+      "ligues": [
+        "premier",
+        "laliga",
+        "seriea",
+        "bundesliga",
+        "ligue1",
+        "ldc",
+        "el",
+        "eredivisie",
+        "primeira",
+        "mls",
+        "suede",
+        "jleague",
+        "liga_mx",
+        "argentina_liga_profesional",
+        "nations_league"
+      ]
+    },
+    {
+      "bet_id": 16,
+      "bet": "Total - Home",
+      "chance": [
+        0.6,
+        0.85
+      ],
+      "ligues": [
+        "premier",
+        "laliga",
+        "seriea",
+        "bundesliga",
+        "ligue1",
+        "ldc",
+        "el",
+        "eredivisie",
+        "primeira",
+        "mls",
+        "suede",
+        "jleague",
+        "liga_mx",
+        "argentina_liga_profesional",
+        "nations_league"
+      ]
+    },
+    {
+      "bet_id": 8,
+      "bet": "Both Teams Score",
+      "chance": [
+        0.5,
+        0.6
+      ],
+      "ligues": [
+        "premier",
+        "laliga",
+        "seriea",
+        "bundesliga",
+        "ligue1",
+        "ldc",
+        "el",
+        "eredivisie",
+        "primeira",
+        "mls",
+        "suede",
+        "jleague",
+        "liga_mx",
+        "argentina_liga_profesional",
+        "nations_league"
+      ]
+    },
+    {
+      "bet_id": 45,
+      "bet": "Corners Over Under",
+      "chance": [
+        0.5,
+        0.6
+      ],
+      "ligues": [
+        "premier",
+        "laliga",
+        "seriea",
+        "bundesliga",
+        "ligue1",
+        "ldc",
+        "el",
+        "eredivisie",
+        "primeira",
+        "mls",
+        "suede",
+        "jleague",
+        "liga_mx",
+        "argentina_liga_profesional"
+      ]
+    },
+    {
+      "bet_id": 57,
+      "bet": "Home Corners Over/Under",
+      "chance": [
+        0.5,
+        0.6
+      ],
+      "ligues": [
+        "premier",
+        "laliga",
+        "seriea",
+        "bundesliga",
+        "ligue1",
+        "ldc",
+        "el",
+        "eredivisie",
+        "primeira",
+        "mls",
+        "suede",
+        "jleague",
+        "liga_mx",
+        "argentina_liga_profesional",
+        "nations_league"
+      ]
+    }
+  ]
+}

@@ -736,3 +736,14 @@ a{color:inherit}
 .mrec-link{margin-top:4px;color:var(--accent);font-size:13.5px;text-underline-offset:3px}
 @media(max-width:640px){.match-recovery{margin:20px auto 16px;padding:26px 16px 22px}}
 @media(prefers-reduced-motion:reduce){.mrec-btn{transition:none}}
+
+/* Tous les marches (03/10/2026, marchesFluxCard) : cyan + gris, une liste lisible, pas de cartes identiques. */
+.mf{display:flex;flex-direction:column;gap:16px}
+.mf-nom{margin:0 0 6px;color:var(--soft);font:600 14px/1.3 var(--body)}
+.mf-liste{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.mf-ligne{display:grid;grid-template-columns:1fr auto auto;gap:4px 14px;align-items:baseline;padding:8px 0;border-top:1px solid var(--line)}
+.mf-sel{color:var(--text);font:500 14px/1.4 var(--body)}
+.mf-chance b{color:var(--cyan);font:700 15px/1 var(--body)}
+.mf-cote{color:var(--muted);font:400 13px/1.3 var(--body);white-space:nowrap}
+.mf-note{margin:0;color:var(--dim);font:400 12px/1.5 var(--body)}
+@media (max-width:520px){.mf-ligne{grid-template-columns:1fr auto}.mf-cote{grid-column:1/-1}}

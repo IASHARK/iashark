@@ -116,7 +116,7 @@ test("dernier controle : meilleure cote relevee de nouveau ; la chance (moteur v
 
 // ---------- 2. textes : aucune affirmation fausse, aucune promesse implicite ----------
 test("textes : SIMPLE, match + pari + cote + « chance calculée par IASHARK », jamais mise, cote minimum, calcul ni mot interdit", () => {
-  assert.deepStrictEqual(Object.values(C.FAMILLES).map((f) => f.titre), ["SIMPLE", "COMBINÉ DU JOUR", "MÊME MATCH AVEC BUTEUR", "TICKET AUTOUR DE 10", "TICKET AUTOUR DE 25", "TICKET 50-100 DU MOIS"]);
+  assert.deepStrictEqual(Object.values(C.FAMILLES).map((f) => f.titre), ["SIMPLE", "COMBINÉ DU JOUR", "MÊME MATCH", "MÊME MATCH AVEC BUTEUR", "TICKET AUTOUR DE 10", "TICKET AUTOUR DE 25", "TICKET 50-100 DU MOIS"]);
   const { paris } = C.preparerProgramme(simpleTorino(), { jour: "2026-10-10", maintenant: "2026-10-10T06:30:00Z" });
   const prefs = C.preferencesEffectives({}, {});
   const p = { ...paris[0], id: "x" };

@@ -1107,7 +1107,12 @@ function marchesFluxCard(raw){
   const blocs=[...parMarche.entries()].map(([nom,xs])=>`<div class="mf-bloc"><h3 class="mf-nom">${esc(nom)}</h3><ul class="mf-liste">${
     xs.sort((a,b)=>b.chance-a.chance).map(x=>`<li class="mf-ligne"><span class="mf-sel">${esc(x.selection)}</span><span class="mf-chance"><b>${esc(x.chance)} %</b></span><span class="mf-cote">${esc(tf('match_page.flux_cote','Cote de référence ({bk}) : {cote}',{bk:x.bookmaker||'bet365',cote:cote(x.cote)}))}</span></li>`).join('')
   }</ul></div>`).join('');
-  return `<section class="card mf reveal">${blocs}<p class="mf-note">${esc(t('match_page.flux_note','Chance calculée par IASHARK à partir de la cote de référence (bet365), marge du bookmaker retirée. Même relevé que le robot Pro.'))}</p></section>`;
+  // Heure du relevé utilisé (marches_flux.releve_at, posé par le pipeline) : jamais « même relevé que le robot »,
+  // le robot peut lire un relevé plus récent (avocat-du-diable 03/10).
+  const ra=mf&&mf.releve_at?new Date(mf.releve_at):null;
+  const heure=ra&&!isNaN(ra)?ra.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Paris'}).replace(':',' h '):'';
+  const note=heure?tf('match_page.flux_note_heure','Chance calculée par IASHARK à partir de la cote de référence (bet365), marge du bookmaker retirée. Cote relevée à {heure} (heure de Paris).',{heure}):t('match_page.flux_note_sans_heure','Chance calculée par IASHARK à partir de la cote de référence (bet365), marge du bookmaker retirée.');
+  return `<section class="card mf reveal">${blocs}<p class="mf-note">${esc(note)}</p></section>`;
 }
 function render(raw){
   const vm=viewModel(raw);

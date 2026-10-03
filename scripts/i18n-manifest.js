@@ -986,6 +986,10 @@ var PAGES = [
   {file: "exemple-analyse.html"},
   {file: "checkout-annule.html", noSitemap: true},
   {file: "checkout-succes.html", noSitemap: true},
+  // Programme de partenaires (03/10/2026) : partenaires-page.js, traduit au runtime ;
+  // la page des conditions est legale (noindex).
+  {file: "partenaires.html"},
+  {file: "partenaires-conditions.html", noSitemap: true},
   {file: "404.html", noSitemap: true}
 ];
 

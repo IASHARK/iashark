@@ -818,7 +818,9 @@ test("accueil (index.html) : section, plateau (liste + panneau), squelette sans 
   const html = read("index.html");
   const sec = (html.match(/<section class="hs" id="buteurs-du-jour"[\s\S]*?<\/section>/) || [])[0];
   assert.ok(sec, "section Buteurs du jour");
-  assert.ok(html.indexOf('id="buteurs-du-jour"') < html.indexOf('id="decisions"'), "avant la liste des matchs");
+  // Refonte de l'accueil (03/10/2026, ordre demande par Clement) : heros -> matchs du jour -> « Deviens
+  // partenaire » -> buteurs du jour -> le reste.
+  assert.ok(html.indexOf('id="decisions"') < html.indexOf('class="home-partner"') && html.indexOf('class="home-partner"') < html.indexOf('id="buteurs-du-jour"'), "apres la liste des matchs et le bloc partenaire");
   assert.ok(html.indexOf('id="heroStade"') < html.indexOf('id="buteurs-du-jour"'), "apres le haut de page");
   assert.match(sec, /<h2 class="hs-title" id="hsTitle" data-i18n="home_scorers\.title">Buteurs du jour<\/h2>/);
   assert.match(sec, /aria-labelledby="hsTitle"/);

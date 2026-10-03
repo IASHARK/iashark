@@ -49,3 +49,17 @@ input[type=time]::-webkit-calendar-picker-indicator{filter:invert(.8)}
 
 /* Onglet actif de l'espace Pro, telephone : pastille cyan (comme la page Outils). */
 .ps-tab[data-active="1"]{border-color:rgba(32,213,239,.45);background:rgba(32,213,239,.08);color:#20d5ef}
+
+/* « Ton programme du jour » (03/10/2026) : meme rendu que le bloc « Sélection Pro du jour » de la
+   page match (lib/selection-pro.js, assets/match-page.css .selpro-*), aux couleurs de l'espace Pro. */
+.ps-prog .selpro-item{padding:14px 16px;border:1px solid rgba(32,213,239,.28);border-radius:16px;margin:0 0 10px;background:rgba(6,11,18,.45)}
+.ps-prog .selpro-item p{margin:0 0 6px;font-size:14.5px;line-height:1.5;color:#e7eef6}
+.ps-prog .selpro-item p:last-child{margin-bottom:0}
+.ps-prog .selpro-item .selpro-fam{font-size:12px;font-weight:700;letter-spacing:.02em;color:#20d5ef}
+.ps-prog .selpro-item .selpro-num{font-size:12.5px;color:#91a0b3}
+.ps-prog .selpro-item .selpro-chance{color:#c9d4e0}
+.ps-prog .selpro-item .selpro-cote b,.ps-prog .selpro-item .selpro-sel b{color:#fff}
+.ps-prog .ps-prog-match{font-size:13px;color:#91a0b3}
+.ps-prog .ps-prog-match b{color:#f4f7fb;font-weight:700}
+.ps-prog .selpro-legs{margin:0 0 6px;padding:0;list-style:none;font-size:14px;line-height:1.5;color:#e7eef6}
+.ps-prog .selpro-source{margin:8px 0 0;font-size:12.5px;line-height:1.5;color:#91a0b3}

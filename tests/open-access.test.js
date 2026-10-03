@@ -39,8 +39,11 @@ test("l'espace Pro (ancienne page Outils) expose le tableau de bord, mon combine
     assert.match(source, new RegExp('data-tool="' + outil + '"'), outil + " doit etre atteignable");
     assert.match(source, new RegExp('data-panel="' + outil + '"'), outil + " doit avoir son espace de travail");
   }
+  // 03/10/2026 : 0040/0041 appliquees, le tableau de bord du jour est ouvert (premier onglet).
   for (const d of ["", "fr/", "en/", "es/", "gb/", "mx/", "za/"]) {
-    assert.doesNotMatch(read(d + "pro.html"), /data-tool="tableau"|data-panel="tableau"/, d + "pro.html : tableau de bord cache pour le lancement");
+    assert.match(read(d + "pro.html"), /data-tool="tableau"/, d + "pro.html : onglet tableau de bord");
+    assert.match(read(d + "pro.html"), /data-panel="tableau"/, d + "pro.html : panneau tableau de bord");
+    assert.doesNotMatch(read(d + "pro.html"), /Bientôt : ton tableau de bord|le programme du jour et la qualité/, d + "pro.html : plus de « bientot » trompeur");
   }
   assert.match(script, /var TABLEAU_OUVERT = !!\(window\.IASHARK_OUVERTURE && window\.IASHARK_OUVERTURE\.tableauPro === true\);/);
   // Retires : cote juste, simulateur de capital, journal (devenu « Mes paris »
@@ -93,7 +96,8 @@ test("l'espace Pro n'annonce pas de fonctionnalite dont la donnee n'existe pas",
   // « Bientot » et ne calcule aucun chiffre.
   assert.doesNotMatch(script, /closing_odds|closingOdds/i, "la page d'outils ne calcule aucune qualite de cote");
   assert.doesNotMatch(read("lib/pro-dashboard-model.js"), /closing_odds|qualiteCotes/);
-  assert.match(read("pro-dashboard.js"), /pro_space\.quality_soon/);
+  // 03/10/2026 : plus de bloc « Bientot » (qualite des cotes) ; aucun chiffre de qualite non plus.
+  assert.doesNotMatch(read("pro-dashboard.js"), /quality_soon|qualiteCotes|closing_odds/);
   const sql = read("supabase/migrations/0041_pro_accueil.sql");
   const grantInsert = sql.match(/grant insert \(([^)]*)\)\s+on public\.betting_decisions to authenticated/);
   const grantUpdate = sql.match(/grant update \(([^)]*)\)\s+on public\.betting_decisions to authenticated/);

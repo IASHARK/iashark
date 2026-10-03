@@ -157,7 +157,7 @@ test("regles : aucune mise, aucune promesse de gain, pas de « jouer comporte de
   // Textes ajoutes le 02/10/2026 (i18n/parts/pro_langue.<langue>.json).
   const txt = LOCALES.map((l) => read("i18n/parts/pro_langue." + l + ".json")).join("\n");
   assert.doesNotMatch(txt, /mise\b|stake|apuesta mínima|capital|bankroll|banca|espérance|expected value|garanti|guarantee|gagner à coup sûr|comporte des risques/i);
-  // Tableau de bord et garde-fou restent « Bientot » : interrupteurs inchanges.
+  // Tableau de bord ouvert le 03/10/2026 (0040/0041 appliquees) : toujours pilote par l'interrupteur.
   assert.match(read("tools-page.js"), /var TABLEAU_OUVERT = !!\(window\.IASHARK_OUVERTURE && window\.IASHARK_OUVERTURE\.tableauPro === true\);/);
-  assert.doesNotMatch(read("pro.html"), /data-tool="tableau"/);
+  assert.match(read("pro.html"), /data-tool="tableau"/);
 });

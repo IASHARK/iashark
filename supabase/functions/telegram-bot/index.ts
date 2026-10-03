@@ -872,6 +872,22 @@ async function liensPersonnels(req: Request) {
   return json({ ok: true, robot_url: await lienRobot(userId) });
 }
 
+/**
+ * Etat de la liaison Telegram pour l'espace Pro du site (03/10/2026) : { ok, relie }. LECTURE SEULE :
+ * aucun code de liaison cree (contrairement a vip-link), rien d'ecrit. Abonne Pro actif seulement.
+ */
+async function statutLiaison(req: Request) {
+  const authorization = req.headers.get("Authorization");
+  if (!authorization) return json({ error: "unauthorized" }, 401);
+  const anon = createClient(SUPA_URL, SUPA_ANON_KEY, { global: { headers: { Authorization: authorization } } });
+  const { data: auth, error: authError } = await anon.auth.getUser();
+  if (authError || !auth.user) return json({ error: "unauthorized" }, 401);
+  const { data: profil } = await db.from("users").select("plan, role").eq("id", auth.user.id).maybeSingle();
+  if (!profil || !D.estAbonneActif(profil)) return json({ ok: false, code: "not_pro" }, 403);
+  const { data: ab } = await db.from("telegram_abonnes").select("chat_id, bloque").eq("user_id", auth.user.id).maybeSingle();
+  return json({ ok: true, relie: !!(ab?.chat_id && !ab.bloque) });
+}
+
 async function clic(cq: Any) {
   const d = String(cq.data || "");
   if (d.startsWith("pp:")) return programmeClic(cq);
@@ -920,6 +936,7 @@ Deno.serve(async (req: Request) => {
   try { body = await req.json(); } catch (_e) { /* corps vide */ }
   try {
     if (body.action === "vip-link") return await liensPersonnels(req);
+    if (body.action === "statut") return await statutLiaison(req);
   } catch (e) {
     console.error("[telegram-bot]", body.action, (e as Error).message);
     return json({ error: "telegram_error" }, 500);

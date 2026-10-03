@@ -1,0 +1,43 @@
+/* IASHARK — defile de videos courtes (assets/ugc-reel.js). Charge seulement
+   quand au moins une video est affichee. Charte : sombre, cyan, Inter. */
+.ugc{--ugc-bg:#0a1420;--ugc-line:rgba(141,179,211,.14);--ugc-ink:#f4f7fb;--ugc-soft:#91a0b3;--ugc-cyan:#20d5ef;--ugc-page:#060b12;
+  display:block;max-width:1200px;margin:8px auto 0;padding:20px 0 8px;font-family:Inter,system-ui,sans-serif}
+.ugc[hidden]{display:none}
+.ugc-title{margin:0 16px 12px;font-size:18px;font-weight:800;letter-spacing:-.02em;color:var(--ugc-ink)}
+/* Bords fondus : la rangee semble sortir de l'ecran des deux cotes. */
+.ugc-viewport{position:relative}
+.ugc-viewport::before,.ugc-viewport::after{content:"";position:absolute;top:0;bottom:6px;width:24px;z-index:1;pointer-events:none}
+.ugc-viewport::before{left:0;background:linear-gradient(90deg,var(--ugc-page),transparent)}
+.ugc-viewport::after{right:0;background:linear-gradient(270deg,var(--ugc-page),transparent)}
+.ugc-track{display:flex;gap:10px;margin:0;padding:0 16px 6px;list-style:none;overflow-x:auto;overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none}
+.ugc-track::-webkit-scrollbar{display:none}
+.ugc-card{position:relative;flex:0 0 auto;width:clamp(132px,38vw,184px);aspect-ratio:9/16;border-radius:16px;overflow:hidden;
+  background:var(--ugc-bg);border:1px solid var(--ugc-line);contain:layout paint}
+.ugc-video{display:block;width:100%;height:100%;object-fit:cover;background:var(--ugc-bg);pointer-events:auto}
+/* Petite mention discrete dans un coin (obligation legale) : jamais coupee, elle passe
+   a la ligne plutot que de perdre un mot. */
+.ugc-badge{position:absolute;left:6px;top:6px;max-width:calc(100% - 12px);padding:2px 6px;border-radius:6px;
+  background:rgba(6,11,18,.72);color:rgba(244,247,251,.92);font-size:9px;font-weight:600;line-height:1.35;
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);pointer-events:none}
+.ugc-author{position:absolute;left:8px;bottom:8px;max-width:calc(100% - 16px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:var(--ugc-ink);font-size:12px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.8);pointer-events:none}
+.ugc-foot{display:flex;flex-direction:column;align-items:center;gap:10px;margin:16px 16px 0;text-align:center}
+.ugc-cta{display:inline-flex;align-items:center;gap:6px;padding:12px 20px;border-radius:12px;background:var(--ugc-cyan);color:var(--ugc-page);
+  font-size:14px;font-weight:800;text-decoration:none;box-shadow:0 8px 24px -10px rgba(32,213,239,.55)}
+.ugc-cta:hover{background:#06b6d4}
+.ugc-cta:focus-visible{outline:2px solid var(--ugc-ink);outline-offset:2px}
+@media (min-width:768px){.ugc{padding:28px 0 8px}.ugc-title{margin:0 32px 14px;font-size:20px}.ugc-track{padding:0 32px 6px}}
+/* Badge « note + avatars » : seulement avec de vrais avis (>= 20). Avatars neutres :
+   silhouettes dessinees, aucun visage ni donnee personnelle. */
+.ugc-proof{display:flex;align-items:center;gap:10px;margin:0 16px 10px}
+.ugc-proof[hidden]{display:none}
+.ugc-avs{display:flex;flex:0 0 auto}
+.ugc-av{width:26px;height:26px;border-radius:50%;border:2px solid var(--ugc-page);margin-left:-8px;
+  background:radial-gradient(circle at 50% 38%,rgba(244,247,251,.85) 0 22%,transparent 23%),
+             radial-gradient(ellipse at 50% 100%,rgba(244,247,251,.85) 0 42%,transparent 43%),#1b2a3b}
+.ugc-av0{margin-left:0;background-color:#14394a}.ugc-av1{background-color:#1b2a3b}.ugc-av2{background-color:#0f4652}.ugc-av3{background-color:#253447}
+.ugc-proof-txt{display:flex;flex-direction:column;font-size:12.5px;line-height:1.35;color:var(--ugc-soft)}
+.ugc-proof-l1 b{color:var(--ugc-ink)}
+.ugc-star{color:var(--ugc-cyan)}
+@media (min-width:768px){.ugc-proof{margin:0 32px 12px}}

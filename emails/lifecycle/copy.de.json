@@ -27,7 +27,7 @@
       "blocks": [
         { "type": "p", "text": "Ihr kostenloses IASHARK-Konto ist eingerichtet. So nutzen Sie die Website in wenigen Minuten." },
         { "type": "list", "ordered": true, "items": [
-          "Jeden Tag ist die vollständige Analyse eines Spiels kostenlos: Sie ist auf der Startseite hervorgehoben.",
+          "An manchen Tagen ist die vollständige Analyse eines Spiels kostenlos: Sie ist dann auf der Startseite hervorgehoben.",
           "Auf der Seite eines Spiels lesen Sie die vom Modell geschätzten Wahrscheinlichkeiten, die berücksichtigten Faktoren und ihre Grenzen.",
           "Die Methodik-Seite erklärt, woher diese Zahlen kommen und wie man sie liest."
         ] },
@@ -43,10 +43,12 @@
       "preheader": "Die vollständige Analyse dieses Spiels ist mit Ihrem Konto kostenlos freigeschaltet.",
       "title": "Ihre kostenlose Analyse des Tages",
       "blocks": [
-        { "type": "p", "text": "Jeden Tag schaltet IASHARK die vollständige Analyse eines Spiels für alle Konten kostenlos frei. Das ist die heutige:" },
+        { "type": "p", "text": "An manchen Tagen schaltet IASHARK die vollständige Analyse eines Spiels für alle Konten kostenlos frei. Das ist die heutige:" },
         { "type": "match" },
         { "type": "p", "text": "Sie finden dort die geschätzten Wahrscheinlichkeiten, die Faktoren des Modells und die Punkte, auf die zu achten ist. Es sind statistische Schätzungen: Der Ausgang eines Spiels bleibt ungewiss." },
-        { "type": "cta", "label": "Kostenlose Analyse ansehen", "link": "freeMatch" }
+        { "type": "cta", "label": "Kostenlose Analyse ansehen", "link": "freeMatch" },
+        { "type": "p", "if": "hasTrial", "text": "Alle Analysen sehen: Pro {{trialDays}} Tage kostenlos testen (Monatsabo), nur für ein erstes Abo, mit 1 Klick kündbar." },
+        { "type": "link", "if": "hasTrial", "label": "Pro-Angebot ansehen", "link": "pricing" }
       ]
     },
     "pro_features": {
@@ -54,17 +56,18 @@
       "preheader": "Die Pro-Inhalte und ihr Preis, ohne Umschweife.",
       "title": "Was Pro Ihrem kostenlosen Konto hinzufügt",
       "blocks": [
-        { "type": "p", "text": "Ihr kostenloses Konto bietet die vollständige Analyse eines Spiels pro Tag, den Blog und die Tools zum Kennenlernen. Das fügt Pro hinzu:" },
+        { "type": "p", "text": "Ihr kostenloses Konto bietet die vollständige Analyse eines an manchen Tagen kostenlosen Spiels, den Blog und die Tools zum Kennenlernen. Das fügt Pro hinzu:" },
         { "type": "list", "items": [
           "Die vollständige Analyse zu allen Spielen",
-          "Die sechs Tools, verbunden mit den Wahrscheinlichkeiten des Modells",
-          "Das synchronisierte Entscheidungsjournal",
-          "Die Bankroll-Verfolgung, verknüpft mit dem Konto"
+          "Die ausgewählte Wette, mit ihrer Wahrscheinlichkeit und ihren Gründen",
+          "Die wahrscheinlichsten Ergebnisse und die erwarteten Tore",
+          "Die wahrscheinlichsten Torschützen, darunter die 3 Torschützen des Tages"
         ] },
         { "type": "p", "if": "hasProYear", "text": "Preise auf der Version {{siteVersion}} der Website: {{proWeekPrice}} pro Woche, {{proPrice}} pro Monat oder {{proYearPrice}} pro Jahr. Derselbe Pro-Zugang bei jeder Laufzeit, jederzeit in Mein Konto kündbar." },
         { "type": "p", "if": "hasNoProYear", "text": "Preise auf der Version {{siteVersion}} der Website: {{proWeekPrice}} pro Woche oder {{proPrice}} pro Monat. Derselbe Pro-Zugang bei jeder Laufzeit, jederzeit in Mein Konto kündbar." },
         { "type": "p", "if": "hasOnlyProMonth", "text": "Preis auf der Version {{siteVersion}} der Website: {{proPrice}} pro Monat, jederzeit in Mein Konto kündbar." },
         { "type": "p", "text": "Pro bietet mehr Analysen und Tools; es macht kein Spiel vorhersehbarer." },
+        { "type": "p", "if": "hasTrial", "text": "Kostenloser Test über {{trialDays}} Tage beim Monatsabo, für ein erstes Abo: Ihre Karte wird abgefragt, während des Tests wird nichts abgebucht, eine E-Mail erinnert Sie 2 Tage vor dem Ende und Sie kündigen mit 1 Klick in Mein Konto. Woche und Jahr werden bei Abschluss bezahlt." },
         { "type": "cta", "label": "Details zum Angebot", "link": "pricing" },
         { "type": "p", "text": "Wenn Ihnen das kostenlose Konto genügt, müssen Sie nichts tun." }
       ]
@@ -76,17 +79,21 @@
       "blocks": [
         { "type": "p", "text": "Hier einige Begegnungen dieses Wochenendes, die IASHARK abdeckt:" },
         { "type": "matches" },
-        { "type": "p", "text": "Die vollständige Analyse eines Spiels bleibt mit Ihrem Konto jeden Tag kostenlos." },
-        { "type": "cta", "label": "Alle Spiele ansehen", "link": "home" }
+        { "type": "p", "text": "An manchen Tagen ist die vollständige Analyse eines Spiels mit Ihrem Konto kostenlos." },
+        { "type": "cta", "label": "Alle Spiele ansehen", "link": "home" },
+        { "type": "p", "if": "hasTrial", "text": "Alle Analysen sehen: Pro {{trialDays}} Tage kostenlos testen (Monatsabo), nur für ein erstes Abo, mit 1 Klick kündbar." },
+        { "type": "link", "if": "hasTrial", "label": "Pro-Angebot ansehen", "link": "pricing" }
       ]
     },
     "inactive_30d": {
       "subject": "Ihr IASHARK-Konto ist weiterhin aktiv",
-      "preheader": "Die kostenlose Analyse des Tages ist mit Ihrem Konto weiterhin verfügbar.",
+      "preheader": "Ihr kostenloses Konto ist weiterhin aktiv.",
       "title": "Ihr Konto ist noch da",
       "blocks": [
-        { "type": "p", "text": "Sie waren eine Weile nicht mehr bei IASHARK. Ihr kostenloses Konto ist weiterhin aktiv, und die vollständige Analyse eines Spiels bleibt jeden Tag kostenlos." },
+        { "type": "p", "text": "Sie waren eine Weile nicht mehr bei IASHARK. Ihr kostenloses Konto ist weiterhin aktiv, und an manchen Tagen ist die vollständige Analyse eines Spiels kostenlos." },
         { "type": "cta", "label": "Zurück zu IASHARK", "link": "home" },
+        { "type": "p", "if": "hasTrial", "text": "Alle Analysen sehen: Pro {{trialDays}} Tage kostenlos testen (Monatsabo), nur für ein erstes Abo, mit 1 Klick kündbar." },
+        { "type": "link", "if": "hasTrial", "label": "Pro-Angebot ansehen", "link": "pricing" },
         { "type": "p", "text": "Wenn Ihnen diese E-Mails nicht mehr nützen, melden Sie sich mit dem Link am Ende dieser Nachricht mit einem Klick ab. Ohne Besuch oder Öffnen unserer E-Mails schreiben wir Ihnen ohnehin in 30 Tagen nicht mehr." }
       ]
     },

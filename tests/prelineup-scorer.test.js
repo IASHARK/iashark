@@ -165,35 +165,34 @@ function raw(overrides) {
   };
 }
 
-test('carte Marches joueurs : titulaires probables, probabilites > 0, titularisations recentes exposees', () => {
-  const vm = buildMatchViewModel(raw({ data_quality_score: 80, lambda_h: 1.6, lambda_a: 1.3 }));
+// UNE SEULE SOURCE (01/10/2026) : la carte « Marchés joueurs » de la page n'affiche plus que les
+// buteurs du MOTEUR V3 (v3_buteurs, chance arrondie une fois par le pipeline : vers le bas a 5
+// points, 45 % au plus, rien sous 10 %). Le calcul ci-dessus (lib/insights.js#scorerModel) ne sert
+// plus qu'aux faits (titularisations recentes).
+const V3_BUTEURS = [
+  { joueur_id: 1, joueur: 'Avant-centre Titulaire', cote: 'home', p_marque: 0.412, chance: 40 },
+  { joueur_id: 60, joueur: 'Buteur Villa', cote: 'away', p_marque: 0.301, chance: 30 },
+  { joueur_id: 2, joueur: 'Ailier Titulaire', cote: 'home', p_marque: 0.2, chance: 20 },
+];
+test('carte Marches joueurs : les buteurs du moteur v3, leur chance telle quelle, titularisations recentes exposees', () => {
+  const vm = buildMatchViewModel(raw({ data_quality_score: 80, lambda_h: 1.6, lambda_a: 1.3, v3_buteurs: V3_BUTEURS }));
   const list = vm.players.scoringThreat;
-  assert.ok(list.length >= 2 && list.length <= 4);
-  assert.ok(!list.some(p => p.name === 'Remplacant Chanceux'));
+  assert.deepEqual(list.map(p => [p.name, p.scoringProbability, p.team]), [['Avant-centre Titulaire', 40, 'Tottenham'], ['Buteur Villa', 30, 'Aston Villa'], ['Ailier Titulaire', 20, 'Tottenham']]);
   list.forEach(p => {
-    assert.ok(Number.isFinite(p.scoringProbability) && p.scoringProbability > 0 && p.scoringProbability <= 45, p.name);
-    assert.ok(p.startsLast >= 1 && p.teamMatchesLast >= p.startsLast);
+    assert.ok(p.startsLast >= 1 && p.teamMatchesLast >= p.startsLast, p.name);
     assert.ok(!('startProbability' in p), 'aucune probabilite de titularisation publiee (decision du 04/09/2026)');
-    assert.ok(['Tottenham', 'Aston Villa'].includes(p.team));
   });
-  for (let i = 1; i < list.length; i++) assert.ok(list[i - 1].scoringProbability >= list[i].scoringProbability);
 });
 
-test('carte Marches joueurs : lambda du moteur utilise seulement quand sa sortie est fiable', () => {
-  const fiable = buildMatchViewModel(raw({ data_quality_score: 80, lambda_h: 3, lambda_a: 0.5 })).players.scoringThreat;
-  const nonFiable = buildMatchViewModel(raw({ data_quality_score: 0, lambda_h: 3, lambda_a: 0.5 })).players.scoringThreat;
-  const spurs = l => l.find(p => p.team === 'Tottenham');
-  assert.ok(spurs(fiable).scoringProbability > spurs(nonFiable).scoringProbability, 'lambda 3 retenu seulement si le modele est fiable');
+test('carte Marches joueurs : sans v3_buteurs, aucune chance de marquer (plus de calcul buteur du site)', () => {
+  assert.deepEqual(buildMatchViewModel(raw({ data_quality_score: 80, lambda_h: 1.6, lambda_a: 1.3 })).players.scoringThreat, []);
+  assert.deepEqual(buildMatchViewModel(raw({ data_quality_score: 0, v3_buteurs: V3_BUTEURS })).players.scoringThreat, [], 'modele non fiable : rien');
 });
 
-test('carte Marches joueurs : un blesse annonce n\'apparait jamais', () => {
-  const vm = buildMatchViewModel(raw({ injuries: [{ team: TEAM, name: 'Avant-centre Titulaire', reason: 'Genou', status: 'Missing Fixture' }] }));
-  assert.ok(!vm.players.scoringThreat.some(p => p.name === 'Avant-centre Titulaire'));
-});
-
-test('carte Marches joueurs : sans historique joueur (visiteur non abonne), liste vide sans erreur', () => {
-  const vm = buildMatchViewModel(raw({ player_history: undefined }));
-  assert.deepEqual(vm.players.scoringThreat, []);
+test('carte Marches joueurs : sans historique joueur (visiteur non abonne), les faits manquent mais la chance du moteur reste', () => {
+  const vm = buildMatchViewModel(raw({ player_history: undefined, data_quality_score: 80, v3_buteurs: V3_BUTEURS }));
+  assert.equal(vm.players.scoringThreat[0].scoringProbability, 40);
+  assert.equal(vm.players.scoringThreat[0].startsLast, null);
 });
 
 test('page match : la carte affiche les titularisations recentes, traduites dans les 7 langues', () => {

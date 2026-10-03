@@ -150,7 +150,9 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Juego responsable</a>
   </nav>
   <h1 class="page-title">Términos y condiciones</h1>
-  <div class="page-date">Última actualización: 19 de septiembre de 2026</div>
+  <div class="page-date">Última actualización: 2 de octubre de 2026</div>
+  <!-- LEGAL REVIEW: 02/10/2026 - 7-day free trial restored (owner decision; create-checkout-session/trial.ts: TRIAL_DAYS unset = 7): section 6A added (first subscription only, once per person; card required, nothing charged during the trial; reminder email 2 days before the end, trial-reminder job 0042 to be enabled BEFORE opening; cancel in 1 click; first charge on day 8 at the price of the chosen period; first charge declined = Pro access stops at the end of the trial); section 6: first payment at the end of the trial where applicable. To confirm with local counsel: start of the cancellation/cooling-off period (subscription date, trial included). Previous version archived in legal/mx/archives/cgv-2026-10-01.html. Status: REVIEW. -->
+  <!-- LEGAL REVIEW: 01/10/2026 - controle des chiffres publics : article 4, accès gratuit = analyse d'un match offert certains jours, simulation réservée à Pro (plus « un match par jour ») ; essai gratuit non proposé (TRIAL_DAYS = 0 par défaut) : aucun article sur l'essai, premier paiement à la souscription (article 7 inchangé). Version précédente archivée dans legal/mx/archives/cgv-2026-09-19.html. Statut : REVIEW. -->
   <!-- LEGAL REVIEW: 19/09/2026 - owner decision: weekly, monthly and annual plans payable in Mexico (config/markets.json#mx.checkoutOpen, Stripe Prices in mx.stripePriceIds). Prices, billing periods, renewal, notices and cancellation rules unchanged from the 16/09/2026 text; "con los impuestos aplicables incluidos" replaced by the French VAT franchise mention. Previous version archived in legal/mx/archives/cgv-2026-09-16.html. Status: REVIEW. -->
 
   <div class="warn-box">
@@ -178,7 +180,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
 
   <section class="section">
     <h2>4. Cuenta gratuita</h2>
-    <p>Crear una cuenta es gratis y solo requiere un correo electrónico válido. La cuenta gratuita incluye un análisis completo de un partido al día y el resto del contenido gratuito descrito en nuestra página de precios. El contenido de la cuenta gratuita puede cambiar.</p>
+    <p>Crear una cuenta es gratis y solo requiere un correo electrónico válido. La cuenta gratuita incluye el análisis de un partido gratis, algunos días (la simulación es exclusiva de Pro), y el resto del contenido gratuito descrito en nuestra página de precios. El contenido de la cuenta gratuita puede cambiar.</p>
   </section>
 
   <!-- LEGAL REVIEW: sections 5, 6, 7 (first sentence) and 8 rewritten on 16/09/2026 for the single Pro plan sold weekly, monthly or annually - REVIEW status, to be reviewed by Mexican counsel before the Stripe prices are opened. Open points: (J1) LFPC art. 76 Bis notice before each recurring charge - delays below (annual D-30 and D-7, monthly D-7, weekly D-2) to be confirmed, weekly D-2 = BLOCKED_LEGAL; (J2) art. 56 revocation for digital subscriptions; (J3) PROFECO registration of the adhesion contract. The renewal notices are ready in the email system (renewal_reminder / annual_renewal_reminder, scan by market and billing period) but sending stays inactive until Resend and the scheduled jobs are enabled: do not open the MX prices before that. Prices and computed values taken from config/markets.json (tests/cgv-pro-prices.test.js). -->
@@ -189,7 +191,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
       <li><strong>Precio</strong> — precios totales en pesos mexicanos (MXN): <strong>MX$69 por semana</strong>, <strong>MX$199 por mes</strong> o <strong>MX$1,990 por año</strong>. IVA no aplicable, artículo 293 B del Código General de Impuestos francés (CGI). A modo informativo, MX$1,990 al año equivalen a MX$165.84 al mes, un 16 % menos que pagar 12 meses con el precio mensual (MX$2,388). El precio del plazo elegido se muestra en la página de precios y en la página de pago antes de que confirmes.</li>
       <li><strong>Periodicidad</strong> — cobro automático cada semana o cada mes hasta que canceles; el plan anual se cobra una vez al año y se renueva por otro año salvo que canceles antes.</li>
       <li><strong>Revisión de tu pedido</strong> — antes de pagar puedes revisar el plazo y el precio, corregir errores o salir sin contratar.</li>
-      <li><strong>Acceso</strong> — las funciones de pago se activan en cuanto se confirma tu pago.</li>
+      <li><strong>Acceso</strong> — las funciones de pago se activan en cuanto se confirma tu pago o, con la prueba gratis (sección 6 bis), en cuanto se registra tu tarjeta.</li>
       <li><strong>Comprobante</strong> — puedes consultar los datos de tu suscripción y de tus pagos en el área de facturación segura que se abre desde la página "Mi cuenta".</li>
     </ul>
   </section>
@@ -198,7 +200,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <h2>6. Pago y renovación automática</h2>
     <p>Los pagos se procesan de forma segura a través de Stripe. IASHARK no ve ni almacena los datos completos de tu tarjeta.</p>
     <ul>
-      <li>Pagas al inicio de cada periodo de facturación (semana, mes o año, según el plazo elegido).</li>
+      <li>Pagas al inicio de cada periodo de facturación (semana, mes o año, según el plazo elegido). Con la prueba gratis (sección 6 bis), el primer pago se hace al terminar la prueba.</li>
       <li><strong>Tu suscripción se renueva automáticamente</strong> al final de cada periodo, por un periodo igual, hasta que la canceles.</li>
       <!-- LEGAL REVIEW: 19/09/2026 - MX prices opened by the owner: the notices below (renewal_reminder / annual_renewal_reminder) must actually be sent from the first renewal (Resend + scheduled jobs enabled) - check before publishing. Changing billing period: check that the Stripe customer portal configuration applies the rule below (longer period immediate with proration, shorter period at the end of the paid period). -->
       <!-- BLOCKED_DECISION: weekly plan notice 2 days before each charge (current rule kept) vs LFPC art. 76 Bis fracc. IX (DOF 12/12/2025) as read in the LEGAL REVIEW note of section 7 (notice at least 5 calendar days before an automatic renewal): decide between a notice sent 5 days before each weekly charge, keeping D-2 after Mexican counsel's review, or not selling the weekly plan in Mexico. -->
@@ -207,6 +209,19 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
       <li>Si cambiamos el precio, te avisaremos con anticipación. El nuevo precio solo se aplicará a partir de tu siguiente renovación y podrás cancelar antes de que entre en vigor.</li>
       <li>Si falla el pago de una renovación, nuestro proveedor de pagos puede intentarlo de nuevo. Tu acceso de pago se mantiene durante 1 día después del final del periodo pagado en el plan semanal y durante 4 días en los planes mensual y anual; si el pago no se realiza, tu cuenta vuelve al plan gratuito.</li>
     </ul>
+  </section>
+
+  <section class="section">
+    <h2>6 bis. Prueba gratis de 7 días</h2>
+    <p>Con tu primera suscripción IASHARK Pro, tienes una prueba gratis de 7 días, <strong>solo en la suscripción mensual</strong>. Los planes semanal y anual se pagan al contratar, sin prueba. Durante la prueba, tienes acceso a todas las funciones Pro.</p>
+    <ul>
+      <li>Te pedimos tu tarjeta al contratar, pero <strong>no se te cobra nada durante la prueba</strong>.</li>
+      <li>Te enviamos un correo unos 2 días antes de que termine la prueba, con la fecha y el monto del primer cobro.</li>
+      <li>Puedes cancelar la prueba en cualquier momento, gratis y en línea, en 1 clic desde "Mi cuenta". Mantienes el acceso Pro hasta el final de la prueba y no se te cobra nada.</li>
+      <li>Si no cancelas, la suscripción continúa al terminar la prueba: el primer cobro se hace el día 8, al precio de la suscripción mensual (sección 5), y después la suscripción se renueva como se describe en la sección 6. Si este primer cobro falla, el acceso Pro termina al final de la prueba hasta que se realice el pago.</li>
+      <li>La prueba se ofrece una sola vez por persona: no se ofrece a una cuenta, ni a un correo, que ya haya tenido una suscripción o una prueba IASHARK Pro. En ese caso, el primer pago se hace al contratar.</li>
+    </ul>
+    <p>El plazo de revocación de la sección 7 se cuenta desde el día en que contratas, prueba incluida.</p>
   </section>
 
   <section class="section">

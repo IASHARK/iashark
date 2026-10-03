@@ -66,7 +66,19 @@ function match(o) {
     player_history: { home: history(h.id, hp, o.id % 97), away: history(a.id, ap, (o.id % 97) + 1) },
   };
   if (o.squads) out.current_squads = o.squads;
-  return out;
+  return avecButeursV3(out);
+}
+// UNE SEULE SOURCE (01/10/2026) : le classement et la chance viennent des buteurs du MOTEUR V3
+// (v3_buteurs, poses par lib/moteur-v3.js#buteursV3 : titulaires probables, chance vers le bas a
+// 5 points, 45 % au plus, rien sous 10 %). Ici, pour simuler la sortie du moteur sur ces feuilles
+// de match, on prend les titulaires probables du calcul du site et leur probabilite comme p_marque.
+const CHANCE = require("../lib/chance-iashark.js");
+function avecButeursV3(m) {
+  const r = B.rankMatch(m);
+  const liste = (r && r.shown || []).map((c) => ({ joueur_id: c.id, joueur: c.name, cote: Number(c.teamId) === Number(m.home.id) ? "home" : "away", p_marque: Math.round(c.probability * 10000) / 10000, chance: CHANCE.chanceButeur(c.probability) }))
+    .filter((b) => b.chance !== null).sort((x, y) => y.p_marque - x.p_marque);
+  if (liste.length) m.v3_buteurs = liste; else delete m.v3_buteurs;
+  return m;
 }
 function day() {
   return [
@@ -233,6 +245,7 @@ test("absent annonce ou joueur sorti de l'effectif : jamais retenu, jamais resol
   assert.equal(star.name, "Buteur Eta");
   const m = ms.find((x) => x.id === star.match_id);
   m.injuries = [{ team: star.team_id, name: star.name.toUpperCase() + " ", reason: "Genou", status: "Missing Fixture" }];
+  avecButeursV3(m); // nouvelle sortie du moteur : l'absent n'est plus « titulaire probable »
   const apres = B.topScorersOfDay(ms, { day: "2026-09-19" });
   assert.ok(!who(ms, apres).some((p) => p.player_id === star.player_id), "blesse annonce exclu");
   assert.equal(B.scorerNumbersFor(m, star.player_id), null, "aucun chiffre pour un absent");
@@ -247,6 +260,7 @@ test("absent annonce ou joueur sorti de l'effectif : jamais retenu, jamais resol
   const autres = m.player_history[side].map((r) => r.player_id).filter((id, i, arr) => arr.indexOf(id) === i && id !== star.player_id);
   while (autres.length < 11) autres.push(990000 + autres.length);
   m.current_squads = { [side]: autres.map((id) => ({ player_id: id })) };
+  avecButeursV3(m);
   const sansLui = B.topScorersOfDay(ms, { day: "2026-09-19" });
   assert.ok(!who(ms, sansLui).some((p) => p.player_id === star.player_id), "joueur hors effectif exclu");
   assert.ok(!B.candidatesForMatch(m).some((x) => x.entry.player_id === star.player_id));
@@ -386,7 +400,8 @@ test("abonne Pro : memes chiffres que la page match sur les vraies donnees (data
   const matchs = (JSON.parse(read("data.json")).matchs || []).filter((m) => m && m.player_history);
   let n = 0;
   matchs.forEach((m) => { n += assertSameAsMatchPage(m, "data.json " + m.id); });
-  assert.ok(n > 0, "aucun buteur compare");
+  // Buteurs du moteur v3 (v3_buteurs, premium) : absents d'un data.json public ancien.
+  if (matchs.some((m) => Array.isArray(m.v3_buteurs) && m.v3_buteurs.length)) assert.ok(n > 0, "aucun buteur compare");
 });
 
 // ------------------------------------------------------------ section d'accueil (faux navigateur)

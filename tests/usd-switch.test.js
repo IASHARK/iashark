@@ -186,7 +186,13 @@ test("(b) bascule appliquee, build complet en memoire : /en/ en USD partout, che
   assert.match(ab, /data-market-price="pro\.month"[^>]*>\$19\.99</);
   assert.doesNotMatch(ab, /data-market-price="pro\.(week|year)"[^>]*>[^<]*\d/, "aucune autre duree prix");
   const home = files["en/index.html"];
-  assert.match(visible(home), /Pro at \$19\.99 per month/);
+  // 26/09/2026 (commit 936a6b0a2, decision de Clement) : la ligne grise « Essayer
+  // gratuitement · Pro a … par mois » est retiree de l'accueil. Le prix USD reste
+  // visible sur la carte Pro, et la ligne ne revient dans aucune devise.
+  // Fusion V3 (30/09/2026) : grille de prix (assets/pricing-grid.js) ; sans JavaScript,
+  // la ligne de repli donne le prix USD.
+  assert.match(visible(home), /IASHARK Pro \$19\.99 \/ month/);
+  assert.doesNotMatch(visible(home), /Pro at (?:\$|€|£|MX\$)?\s?\d/, "ligne de prix de l'accueil retiree le 26/09");
   assert.match(home, /id="prixGratuit" data-market-price="free"[^>]*>\$0</);
   assert.match(home, /id="prixPro" data-market-price="pro"[^>]*>\$19\.99</);
   assert.match(files["en/landing.html"], /data-market-price="pro"[^>]*>\$19\.99</);
@@ -242,7 +248,8 @@ test("front : chaque point d'entree du paiement envoie IASHARK_MARKET.checkoutMa
   // Accueil : prix gratuit formate comme les autres prix du marche ($0, jamais US$0).
   assert.match(read("index.html"), /var gratuit=typeof mk\.formatPrice==='function'\?mk\.formatPrice\('free'\):null;/);
   // Blog anglais (partage par /en/ /gb/ /za/) : aucun prix ecrit en dur.
-  assert.doesNotMatch(read("en/blog/guides/prediction-ia-football-guide-2026.html"), /19[.,]95|€19|\\u20ac19/);
+  // Guide « prediction IA » retire le 30/09/2026 : le guide xG le remplace pour ce controle.
+  assert.doesNotMatch(read("en/blog/guides/xg-expected-goals-guide-complet.html"), /19[.,]95|€19|\\u20ac19/);
 });
 
 test("e-mails de cycle de vie apres la bascule : fuseau connu, devise USD, jamais un prix faux", () => {

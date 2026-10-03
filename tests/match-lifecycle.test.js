@@ -434,11 +434,35 @@ test("pipeline et publication : registre commite avec son chemin, jamais publie,
   const outputs = wf.match(/OUTPUTS="([^"]*)"/)[1].split(/\s+/);
   assert.ok(!outputs.includes("_redirects"), "_redirects ne doit pas etre restaure a plat");
   assert.match(wf, /LIFECYCLE_DERIVED="_redirects"/);
-  assert.match(wf, /LIFECYCLE_FILES="data\/match-pages-registry\.json data\/league-hubs-registry\.json"/);
+  // + data/quotas-etat.json (mode economie, 03/10/2026) : compteurs des abonnements API, meme traitement.
+  assert.match(wf, /LIFECYCLE_FILES="data\/match-pages-registry\.json data\/league-hubs-registry\.json data\/quotas-etat\.json"/);
   assert.equal((wf.match(/git add \$OUTPUTS \$DIR_INDEXES \$SEO_DIRS sitemap-\*\.xml \$LIFECYCLE_FILES \$LIFECYCLE_DERIVED/g) || []).length, 2);
   assert.match(wf, /if \[ -e "\$p" \]; then cp --parents "\$p" "\$SAVE\/"; fi/);
   assert.match(wf, /cp "\$SAVE\/\$p" "\$p"/);
   assert.match(wf, /L\.writeRedirects\('\.', L\.loadRegistry\('\.'\)\)/);
   // data/ n'est jamais copie dans dist/.
   assert.match(read("scripts/build-public.js"), /\^\(supabase\|scripts\|tests\|docs\|raw_api\|config\|data\|/);
+});
+
+// Treve internationale du 24/09/2026 : les matchs de la Ligue des nations (league_key
+// « other », aucune page championnat) avaient des pages indexables que rien ne liait
+// hors du jour du match (tests/internal-links.test.js rouge depuis le 25/09). Une
+// competition hors du perimetre SEO : noindex,follow et hors sitemap, meme riche.
+test("competition hors perimetre SEO (Ligue des nations, league_key « other ») : noindex,follow, hors sitemap", () => {
+  const NATIONS = Object.assign({}, RICH, { id: 777003, league_key: "other", league: "UEFA Nations League", home: { n: "Netherlands", id: 1118 }, away: { n: "Germany", id: 25 } });
+  assert.ok(SEO.matchContentWords(NATIONS, "fr") >= SEO.MIN_INDEXABLE_WORDS, "page riche : seul le perimetre la sort de l'index");
+  assert.equal(SEO.matchRobotsMeta(NATIONS, "fr", {}), '<meta name="robots" content="noindex,follow">');
+  assert.equal(SEO.matchRobotsMeta(Object.assign({}, NATIONS, { league_key: null }), "fr", {}), '<meta name="robots" content="noindex,follow">');
+  assert.equal(SEO.matchRobotsMeta(RICH, "fr", {}), "", "championnat du perimetre : indexable");
+  assert.match(head(SEO.renderMatchPage(TPL, NATIONS, "fr")), /<meta name="robots" content="noindex,follow">/);
+  const root = tmpRoot();
+  try {
+    cycle(root, [RICH, NATIONS], at(-DAY));
+    assert.match(head(readT(root, "match/777003.html")), /<meta name="robots" content="noindex,follow">/);
+    assert.doesNotMatch(readT(root, "sitemap-fr.xml"), /777003/);
+    assert.match(readT(root, "sitemap-fr.xml"), /777001/);
+  } finally { fs.rmSync(root, { recursive: true, force: true }); }
+  // Page conservee apres le match : meme regle.
+  const e = { status: "archived", in_run: false, snapshot: L.publicSnapshot(NATIONS), kickoff: "2026-09-19T19:00:00Z" };
+  assert.match(head(SEO.renderArchivedPage(TPL, e, "fr", new Date(KICKOFF + 2 * DAY))), /<meta name="robots" content="noindex,follow">/);
 });

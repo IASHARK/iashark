@@ -205,7 +205,13 @@ test("derby : { key, name } depuis data/derby-index.json, ajoute a la liste seul
 test("pipeline : prob_band pose avant le retrait des champs premium, statut API public", () => {
   const wf = read(".github/workflows/update-data.yml");
   const bloc = wf.slice(wf.indexOf("var matchsPublics=allMatchsData.map(function(m){"), wf.indexOf("var retires=allMatchsData.length"));
-  assert.match(bloc, /if\(!m\|\|m\.is_free\|\|!PEUT_PROTEGER\)return m;\s*m=PUBLIC_SPLIT\.withProbBand\(m\);\s*var copie=\{\};/);
+  assert.match(bloc, /if\(!m\)return m;[\s\S]{0,400}?if\(!PEUT_PROTEGER\)return PREMIUM_FIELDS_LIB\.sansChampsPro\(m\);[\s\S]{0,200}?if\(m\.is_free\)return PREMIUM_FIELDS_LIB\.sansChampsPro\(m\);\s*m=PUBLIC_SPLIT\.withProbBand\(m\);\s*var copie=\{\};/);
   assert.match(wf, /status:\(f\.status&&f\.status\.short\)\|\|null,/);
   assert.match(read("scripts/split-public-data.js"), /m && m\.is_free !== true \? split\.withProbBand\(m\) : m; \}\)\.map\(PREMIUM\.stripPremium\)/);
+});
+
+// 28/09/2026 (decision de Clement) : le mur payant couvre aussi les matchs termines.
+test("match-data : aucun match payant n'est ouvert a un non-abonne, meme termine", () => {
+  const fn = read("supabase/functions/match-data/index.ts");
+  assert.match(fn, /const ouvert = false && /, "l'ouverture des matchs termines est coupee");
 });

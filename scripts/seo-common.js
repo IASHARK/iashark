@@ -63,8 +63,6 @@ function guidePath(dir, file) {
 var GUIDE_TITLE_KEYS = {
   "plus-de-2-5-buts-probabilite-methode-poisson.html": "blog_hub.art_over25_title",
   "xg-expected-goals-guide-complet.html": "blog_hub.art_xg_title",
-  "prediction-ia-football-guide-2026.html": "blog_hub.art_prediction_title",
-  "value-bet-guide-complet-2026.html": "blog_hub.art_valuebet_title",
   "guide-paris-sportifs-debutant-complet.html": "blog_hub.art_beginner_title",
   "meilleurs-bookmakers-monde-2026.html": "blog_hub.art_bookmakers_title"
 };
@@ -252,8 +250,20 @@ function fitText(candidates, max) {
   return list.slice().sort(function (a, b) { return Array.from(a).length - Array.from(b).length; })[0] || "";
 }
 // Nature d'une competition pour la presentation factuelle des hubs.
+// config/leagues.json#kind d'abord (competitions ajoutees le 30/09/2026 :
+// national2/3/4, cup, nations, wcq), sinon la table historique.
 const LEAGUE_KIND = { ldc: "ucl", el: "uel", ecl: "uecl", mls: "mls" };
-function leagueKind(key) { return LEAGUE_KIND[key] || "national"; }
+function leagueKind(key) { var l = leagueByKey(key); return (l && l.kind) || LEAGUE_KIND[key] || "national"; }
+// Nom d'une competition dans la langue d'une version (config/leagues.json#names,
+// puis langue de base, puis displayName). Le slug reste celui du displayName.
+function leagueDisplayName(key, dir) {
+  var l = leagueByKey(key);
+  if (!l) return null;
+  var loc = DIRS[dir] ? DIRS[dir].locale : null, n = l.names && typeof l.names === "object" ? l.names : null;
+  if (n && loc && n[loc]) return n[loc];
+  if (n && loc && n[loc.split("-")[0]]) return n[loc.split("-")[0]];
+  return l.displayName;
+}
 
 module.exports = {
   ROOT: ROOT, SITE_URL: SITE_URL, MARKETS: MARKETS, DIRS: DIRS, DIR_CODES: DIR_CODES, X_DEFAULT_DIR: X_DEFAULT_DIR, LEAGUES: LEAGUES,
@@ -265,5 +275,5 @@ module.exports = {
   nearestDirs: nearestDirs, nearestDir: nearestDir, clubsHubPath: clubsHubPath, articlesHubPath: articlesHubPath, methodologyPath: methodologyPath,
   clubEntries: clubEntries, leagueClubPages: leagueClubPages, clubPageFor: clubPageFor, versionNav: versionNav,
   footerNavHtml: footerNavHtml, injectFooterNav: injectFooterNav, FOOTER_NAV_OPEN: FOOTER_NAV_OPEN, FOOTER_NAV_CLOSE: FOOTER_NAV_CLOSE,
-  fitText: fitText, leagueKind: leagueKind
+  fitText: fitText, leagueKind: leagueKind, leagueDisplayName: leagueDisplayName
 };

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Règle ton espace Pro — IASHARK</title>
+<meta name="description" content="Ta langue, ton pays, tes bookmakers, tes compétitions, tes types de paris et tes alertes : 2 minutes pour régler ton espace Pro IASHARK.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="https://iashark.com/accueil-pro.html">
+<link rel="icon" href="/assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" defer></script>
+<link rel="stylesheet" href="/assets/tailwind.css">
+<link rel="stylesheet" href="/assets/pro-space.css">
+<link rel="stylesheet" href="/assets/bottom-navigation.css">
+</head>
+<body class="min-h-[100dvh] bg-page font-sans text-ink antialiased">
+
+<header class="border-b border-hairline">
+  <div class="mx-auto flex h-14 w-full max-w-[760px] items-center gap-4 px-4 sm:px-6">
+    <a href="/" aria-label="IASHARK, accueil" data-i18n-attr="aria-label:site_header.aria_home"><img src="/assets/iashark-logo.png" alt="IASHARK" class="h-7 w-auto object-contain"></a>
+    <a href="/pro.html" class="ml-auto text-[13px] text-soft transition hover:text-ink" data-href="pro.html" data-i18n="pro_onboarding.later">Plus tard</a>
+  </div>
+</header>
+
+<main id="accueilPro" class="mx-auto w-full max-w-[760px] px-4 pb-32 pt-6 sm:px-6 sm:pt-10" aria-live="polite">
+  <p class="text-[14px] text-soft" data-i18n="pro_onboarding.loading">Chargement…</p>
+</main>
+
+<nav class="bottom-nav" aria-label="Navigation principale" data-i18n-attr="aria-label:geo.nav.aria_label"><a href="/"><span>⌂</span><b data-i18n="nav.home">Accueil</b></a><a class="active" href="/pro.html"><span>☆</span><b data-i18n="nav.tools">Pro</b></a><a href="/blog.html"><span>▤</span><b data-i18n="nav.guides">Blog</b></a><a href="/compte.html"><span>♙</span><b data-i18n="nav.account">Compte</b></a></nav>
+
+<script src="/app-client.js" defer></script>
+<script src="/assets/ouverture.js"></script>
+<script src="/i18n/i18n.js"></script>
+<script src="/lib/market-config.js"></script>
+<script src="/lib/pro-preferences.js"></script>
+<script src="/lib/langue-compte.js"></script>
+<script src="/lib/league-names.js"></script>
+<script src="/lib/fav-leagues.js"></script>
+<script src="/pro-onboarding.js" defer></script>
+<script src="/site-prefs.js"></script>
+<script src="/bottom-navigation.js"></script>
+</body>
+</html>

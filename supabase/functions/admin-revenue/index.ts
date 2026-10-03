@@ -55,6 +55,12 @@ Deno.serve(async (req: Request) => {
     // Abonnements : etat, duree, devise, montant mensuel equivalent.
     const mrrByCurrency: Record<string, number> = {};
     const counts = { active: 0, trialing: 0, past_due: 0, canceled: 0, cancel_at_period_end: 0 };
+    // Essais gratuits de 7 jours (remis le 02/10/2026) : en cours, dont
+    // annules (rien ne sera preleve), fin dans les 48 h, et ce que les essais
+    // non annules rapporteront chaque mois s'ils continuent. Un essai ne paie
+    // rien : il n'entre PAS dans le MRR.
+    const trials = { in_progress: 0, cancelled: 0, ending_48h: 0, mrr_if_converted: {} as Record<string, number> };
+    const nowSec = Math.floor(Date.now() / 1000);
     const subs = subsRes.data.map((s) => {
       const item = s.items?.data?.[0];
       const price = item?.price as Stripe.Price | undefined;
@@ -64,7 +70,12 @@ Deno.serve(async (req: Request) => {
       const live = s.status === "active" || s.status === "trialing" || s.status === "past_due";
       if (s.status in counts) (counts as Record<string, number>)[s.status]++;
       if (live && s.cancel_at_period_end) counts.cancel_at_period_end++;
-      if (live && !s.cancel_at_period_end) mrrByCurrency[currency] = (mrrByCurrency[currency] || 0) + monthly(amount, interval);
+      if (s.status === "trialing") {
+        trials.in_progress++;
+        if (s.cancel_at_period_end) trials.cancelled++;
+        else trials.mrr_if_converted[currency] = (trials.mrr_if_converted[currency] || 0) + monthly(amount, interval);
+        if (typeof s.trial_end === "number" && s.trial_end - nowSec <= 48 * 3600) trials.ending_48h++;
+      } else if (live && !s.cancel_at_period_end) mrrByCurrency[currency] = (mrrByCurrency[currency] || 0) + monthly(amount, interval);
       return {
         status: s.status,
         interval,
@@ -73,9 +84,11 @@ Deno.serve(async (req: Request) => {
         cancel_at_period_end: !!s.cancel_at_period_end,
         created: s.created,
         current_period_end: item?.current_period_end ?? null,
+        trial_end: s.trial_end ?? null,
       };
     });
     for (const c of Object.keys(mrrByCurrency)) mrrByCurrency[c] = Math.round(mrrByCurrency[c] * 100) / 100;
+    for (const c of Object.keys(trials.mrr_if_converted)) trials.mrr_if_converted[c] = Math.round(trials.mrr_if_converted[c] * 100) / 100;
 
     // Factures des 30 derniers jours : encaisse (nouveaux vs renouvellements)
     // et paiements en echec (facture ouverte deja tentee, ou irrecuperable).
@@ -111,6 +124,7 @@ Deno.serve(async (req: Request) => {
       generated_at: new Date().toISOString(),
       mrr: mrrByCurrency,
       counts,
+      trials,
       last30d: { ...inv30, paid_amount: paidByCurrency },
       recent,
       subs,

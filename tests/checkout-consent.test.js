@@ -81,12 +81,14 @@ test("sans les cases, le paiement est bloque ; le payload suit le regime", () =>
   // ensemble -> une seule version, sans surcharge par repertoire.
   // 21/09/2026 : /en/ change seul (ouverture de l'hebdomadaire a 4,99 USD) ->
   // surcharge par repertoire, les 8 autres versions gardent celle du 19/09.
-  assert.equal(lib.TERMS_VERSION, "2026-09-19");
-  assert.deepEqual({ ...lib.TERMS_VERSIONS }, { en: "2026-09-21" });
-  for (const d of ["", "fr", "es", "de", "it", "pt", "gb", "za", "mx"]) assert.equal(lib.termsVersionFor(d), "2026-09-19", d || "racine");
-  assert.equal(lib.termsVersionFor("en"), "2026-09-21", "/en/ : version propre");
-  assert.equal(lib.buildPayload({ terms: true, waiver: true }, eu, { dir: "fr" }).terms_version, "2026-09-19");
-  assert.equal(lib.buildPayload({ terms: true, waiver: true }, lib.regimeFor("us"), { dir: "en" }).terms_version, "2026-09-21", "/en/ (marche us) : version du 21/09");
+  // 30/09/2026 : calculateur de mise retire (article 4) sauf gb, za, mx (ligne absente).
+  // 01/10/2026 : controle des chiffres publics, les 9 versions changent ensemble (plus de surcharge).
+  // 02/10/2026 : essai gratuit de 7 jours (article 6 bis), les 9 versions ensemble.
+  assert.equal(lib.TERMS_VERSION, "2026-10-02");
+  assert.deepEqual({ ...lib.TERMS_VERSIONS }, {});
+  for (const d of ["", "fr", "en", "es", "de", "it", "pt", "gb", "za", "mx"]) assert.equal(lib.termsVersionFor(d), "2026-10-02", d || "racine");
+  assert.equal(lib.buildPayload({ terms: true, waiver: true }, eu, { dir: "fr" }).terms_version, "2026-10-02");
+  assert.equal(lib.buildPayload({ terms: true, waiver: true }, lib.regimeFor("us"), { dir: "en" }).terms_version, "2026-10-02", "/en/ (marche us) : version du 02/10");
   assert.equal(lib.buildPayload({ terms: true, waiver: true }, mx, {}).waiver, null, "mx : aucune renonciation envoyee");
   assert.match(lib.TERMS_VERSION, /^\d{4}-\d{2}-\d{2}$/);
 });
@@ -203,7 +205,7 @@ test("serveur : refuse sans CGV, refuse sans 2e case hors MX, accepte MX sans re
   for (const [market, dir] of [[undefined, ""], [undefined, "fr"], ["us", "en"], ["gb", "gb"], ["za", "za"], ["mx", "mx"]]) {
     const payload = lib.buildPayload({ terms: true, waiver: true }, lib.regimeFor(market || "fr"), { dir, locale: "fr", ts });
     const r = srv.validateConsent(JSON.parse(JSON.stringify(payload)), market, ts);
-    const attendue = dir === "en" ? "2026-09-21" : "2026-09-19";
+    const attendue = "2026-10-02";
     assert.equal(r.ok, true, (market || "defaut") + " : consentement de la version " + attendue + " refuse");
     assert.equal(r.metadata.consent_terms_version, attendue, market || "defaut");
   }
@@ -222,9 +224,26 @@ test("create-checkout-session : 400 consent_required traduit, consentement stock
   assert.match(refus, /status: 400/);
   assert.match(refus, /code: consent\.code/);
   assert.match(refus, /msg\(MESSAGES, "consent_required", pickLocale\(req, requestedLocale\)\)/);
-  const bloc = src.slice(sessionAt, sessionAt + 900);
-  assert.match(bloc, /metadata: \{ market: usedMarket, plan: "pro", interval: usedInterval, \.\.\.consent\.metadata \}/);
+  // Offre du 25/09/2026 (commit 75f8de52a, code promo) : les champs communs de la
+  // session, consentement compris, sont regroupes dans baseSession, puis la session
+  // est creee avec ou sans code promo. On verifie donc baseSession ET que CHAQUE
+  // creation de session part de baseSession sans jamais remplacer ses metadonnees.
+  const baseAt = src.indexOf("const baseSession = {");
+  assert.ok(baseAt > validateAt && baseAt < sessionAt, "baseSession construit apres le consentement, avant la session");
+  const bloc = src.slice(baseAt, src.indexOf("\n    };", baseAt));
+  // Ligne entiere : la session ELLE-MEME (pas seulement l'abonnement) garde le consentement.
+  assert.match(bloc, /^\s+metadata: \{ market: usedMarket, plan: "pro", interval: usedInterval, \.\.\.consent\.metadata \},$/m);
   assert.match(bloc, /subscription_data: \{ metadata: \{ market: usedMarket, plan: "pro", interval: usedInterval, \.\.\.consent\.metadata \} \}/);
+  const creations = src.split("stripe.checkout.sessions.create(").slice(1).map((x) => x.slice(0, x.indexOf(");")));
+  assert.ok(creations.length >= 1, "aucune creation de session");
+  for (const c of creations) {
+    assert.match(c, /^\{ \.\.\.baseSession[,\s}]/, "session creee sans baseSession : " + c);
+    assert.doesNotMatch(c, /metadata|subscription_data/, "metadonnees de consentement remplacees : " + c);
+  }
+  for (const nom of ["fieldOnly"]) {
+    const def = src.slice(src.indexOf("const " + nom + " ="), src.indexOf(";", src.indexOf("const " + nom + " =")));
+    assert.doesNotMatch(def, /metadata|subscription_data/, nom + " ne doit pas toucher aux metadonnees");
+  }
   const table = src.slice(src.indexOf("consent_required: {"), src.indexOf("consent_required: {") + 1500);
   for (const loc of LOCALES) assert.match(table, new RegExp('(^|\\s|")' + loc.replace("-", "\\-") + '"?: "'), "message consent_required manquant en " + loc);
 });

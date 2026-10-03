@@ -46,7 +46,7 @@
 {"@type":"Question","name":"Comment calculer la probabilité de plus de 2,5 buts ?","acceptedAnswer":{"@type":"Answer","text":"On estime d'abord les buts attendus de chaque équipe à partir de sa force offensive et de la faiblesse défensive de l'adversaire, rapportées aux moyennes du championnat. On additionne ces deux valeurs pour obtenir le total attendu (lambda). On applique ensuite la loi de Poisson pour obtenir la probabilité de 0, 1 et 2 buts : la probabilité de plus de 2,5 buts est 100 % moins la somme de ces trois valeurs."}},
 {"@type":"Question","name":"Quelle est la probabilité moyenne de plus de 2,5 buts ?","acceptedAnswer":{"@type":"Answer","text":"Elle dépend entièrement du championnat et des équipes. Avec un total attendu de 2,6 buts, elle est d'environ 48 %. À 2,8 buts attendus, environ 53 %. À 3,0 buts attendus, environ 58 %. Un écart de seulement 0,2 but attendu déplace la probabilité de près de 5 points, ce qui explique pourquoi une estimation approximative ne suffit pas."}},
 {"@type":"Question","name":"La loi de Poisson est-elle fiable pour le football ?","acceptedAnswer":{"@type":"Answer","text":"C'est une bonne première approximation, mais elle repose sur des hypothèses fausses en pratique. Elle suppose que les buts des deux équipes sont indépendants, alors que les scores nuls et vierges sont plus fréquents que la loi ne le prédit. Elle suppose aussi un taux de marquage constant sur 90 minutes. Les corrections de type Dixon-Coles existent précisément pour rattraper ces écarts."}},
-{"@type":"Question","name":"Comment savoir si une cote sur plus de 2,5 buts est intéressante ?","acceptedAnswer":{"@type":"Answer","text":"Convertissez la cote en probabilité implicite en divisant 100 par la cote : une cote de 1,90 correspond à environ 52,6 %. Comparez à votre estimation. Si votre modèle donne 53 % contre 52,6 % implicites, l'avantage est inférieur à un point — plus petit que votre marge d'erreur, donc insuffisant pour justifier une mise."}}]}
+{"@type":"Question","name":"Comment comparer une cote sur plus de 2,5 buts à une probabilité estimée ?","acceptedAnswer":{"@type":"Answer","text":"Convertissez la cote en probabilité implicite en divisant 100 par la cote : une cote de 1,90 correspond à environ 52,6 %. Comparez à votre estimation. Si votre modèle donne 53 % contre 52,6 % implicites, l'écart est inférieur à un point — plus petit que votre marge d'erreur : on ne peut rien en conclure."}}]}
 </script>
 </head>
 <body>
@@ -61,7 +61,7 @@
   <div class="meta">
     <span>Publié le 2 septembre 2026</span>
     <span>·</span>
-    <span>10 min de lecture</span>
+    <span>9 min de lecture</span>
     <span>·</span>
     <span>Calculateur inclus</span>
   </div>
@@ -205,7 +205,7 @@
   <div><b>1,87</b><span>cote équitable</span></div>
 </div>
 
-<p>La <strong>cote équitable</strong> est l'inverse de la probabilité : 1 ÷ 0,535 = 1,87. C'est la cote à laquelle le pari ne rapporte ni ne coûte rien sur le long terme. Tout ce qui est en dessous vous fait perdre de l'argent en moyenne ; ce qui est au-dessus vous en fait gagner — <em>si</em> votre estimation est juste.</p>
+<p>La <strong>cote équitable</strong> est l'inverse de la probabilité : 1 ÷ 0,535 = 1,87. C'est la cote qui traduit exactement la probabilité du modèle, sans la marge du bookmaker.</p>
 
 <h2 id="cote">6. Étape 3 : comparer à la cote du bookmaker</h2>
 
@@ -213,16 +213,16 @@
 
 <div class="tw">
 <table>
-  <thead><tr><th>Total attendu</th><th>Probabilité modèle</th><th>Implicite à 1,90</th><th>Espérance</th></tr></thead>
+  <thead><tr><th>Total attendu</th><th>Probabilité modèle</th><th>Implicite à 1,90</th><th>Écart</th></tr></thead>
   <tbody>
-    <tr><td class="num">2,6</td><td class="num">48,2 %</td><td class="num">52,6 %</td><td class="num" style="color:#ff625f">−8,5 %</td></tr>
-    <tr class="hi"><td class="num">2,8</td><td class="num">53,1 %</td><td class="num">52,6 %</td><td class="num">+0,8 %</td></tr>
-    <tr><td class="num">3,0</td><td class="num">57,7 %</td><td class="num">52,6 %</td><td class="num" style="color:#25d6a2">+9,6 %</td></tr>
+    <tr><td class="num">2,6</td><td class="num">48,2 %</td><td class="num">52,6 %</td><td class="num" style="color:#ff625f">−4,4 pts</td></tr>
+    <tr class="hi"><td class="num">2,8</td><td class="num">53,1 %</td><td class="num">52,6 %</td><td class="num">+0,5 pt</td></tr>
+    <tr><td class="num">3,0</td><td class="num">57,7 %</td><td class="num">52,6 %</td><td class="num" style="color:#25d6a2">+5,1 pts</td></tr>
   </tbody>
 </table>
 </div>
 
-<p>Ce tableau est le cœur du sujet. Il montre qu'à cote identique, <strong>un écart de 0,4 but attendu fait passer le pari de nettement perdant à nettement gagnant</strong>. Toute la difficulté n'est pas dans le calcul de Poisson — qui est mécanique — mais dans la justesse du lambda qu'on lui donne à manger. La démarche complète de comparaison entre probabilité et cote est détaillée dans notre <a href="/blog/guides/value-bet-guide-complet-2026.html">guide sur la value bet</a>.</p>
+<p>Ce tableau est le cœur du sujet. Il montre qu'à cote identique, <strong>un écart de 0,4 but attendu fait passer la probabilité du modèle de 48 % à 58 %, de nettement sous la cote à nettement au-dessus</strong>. Toute la difficulté n'est pas dans le calcul de Poisson — qui est mécanique — mais dans la justesse du lambda qu'on lui donne à manger.</p>
 
 <h2 id="erreur">7. La marge d'erreur qu'on ne vous montre jamais</h2>
 
@@ -246,7 +246,7 @@
 
 <div class="box warn">
   <div class="box-t">Ce que ce tableau vous dit vraiment</div>
-  <p>Une erreur de <strong>0,2 sur le lambda</strong> — parfaitement banale quand on estime à partir d'une dizaine de matchs — déplace la probabilité de <strong>près de 5 points</strong> et la cote équitable de 2,08 à 1,88. Or un avantage théorique de 5 points est déjà considéré comme énorme. Autrement dit : <strong>votre marge d'erreur est du même ordre de grandeur que l'avantage que vous cherchez.</strong></p>
+  <p>Une erreur de <strong>0,2 sur le lambda</strong> — parfaitement banale quand on estime à partir d'une dizaine de matchs — déplace la probabilité de <strong>près de 5 points</strong> et la cote équitable de 2,08 à 1,88. Or un écart de 5 points entre une estimation et une cote est déjà considéré comme énorme. Autrement dit : <strong>votre marge d'erreur est du même ordre de grandeur que l'écart que vous voulez mesurer.</strong></p>
 </div>
 
 <p>La conclusion pratique est inconfortable mais honnête. Un écart de moins de 3 à 4 points entre votre estimation et la probabilité implicite du bookmaker <strong>ne devrait pas déclencher un pari</strong> : il est indiscernable du bruit de votre propre méthode.</p>
@@ -284,7 +284,6 @@
 
 <div class="related">
   <a href="/blog/guides/xg-expected-goals-guide-complet.html"><span>Étape précédente</span><b>xG : ce que la statistique dit vraiment, et où elle ment</b></a>
-  <a href="/blog/guides/value-bet-guide-complet-2026.html"><span>Étape suivante</span><b>Value bet : comparer une probabilité à une cote sans se tromper</b></a>
 </div>
 
 <h2 id="faq">10. Questions fréquentes</h2>
@@ -294,7 +293,7 @@
   <details><summary>Comment calculer la probabilité de plus de 2,5 buts ?</summary><p>On estime d'abord les buts attendus de chaque équipe à partir de sa force offensive et de la faiblesse défensive de l'adversaire, rapportées aux moyennes du championnat. On additionne ces deux valeurs pour obtenir le total attendu (lambda). On applique ensuite la loi de Poisson pour obtenir la probabilité de 0, 1 et 2 buts : la probabilité de plus de 2,5 buts est 100 % moins la somme de ces trois valeurs.</p></details>
   <details><summary>Quelle est la probabilité moyenne de plus de 2,5 buts ?</summary><p>Elle dépend entièrement du championnat et des équipes. Avec un total attendu de 2,6 buts, elle est d'environ 48 %. À 2,8 buts attendus, environ 53 %. À 3,0 buts attendus, environ 58 %. Un écart de seulement 0,2 but attendu déplace la probabilité de près de 5 points, ce qui explique pourquoi une estimation approximative ne suffit pas.</p></details>
   <details><summary>La loi de Poisson est-elle fiable pour le football ?</summary><p>C'est une bonne première approximation, mais elle repose sur des hypothèses fausses en pratique. Elle suppose que les buts des deux équipes sont indépendants, alors que les scores nuls et vierges sont plus fréquents que la loi ne le prédit. Elle suppose aussi un taux de marquage constant sur 90 minutes. Les corrections de type Dixon-Coles existent précisément pour rattraper ces écarts.</p></details>
-  <details><summary>Comment savoir si une cote sur plus de 2,5 buts est intéressante ?</summary><p>Convertissez la cote en probabilité implicite en divisant 100 par la cote : une cote de 1,90 correspond à environ 52,6 %. Comparez à votre estimation. Si votre modèle donne 53 % contre 52,6 % implicites, l'avantage est inférieur à un point — plus petit que votre marge d'erreur, donc insuffisant pour justifier une mise.</p></details>
+  <details><summary>Comment comparer une cote sur plus de 2,5 buts à une probabilité estimée ?</summary><p>Convertissez la cote en probabilité implicite en divisant 100 par la cote : une cote de 1,90 correspond à environ 52,6 %. Comparez à votre estimation. Si votre modèle donne 53 % contre 52,6 % implicites, l'écart est inférieur à un point — plus petit que votre marge d'erreur : on ne peut rien en conclure.</p></details>
 </div>
 
 <div class="cta">
@@ -305,9 +304,9 @@
 
 </main>
 
-<!--RELATED_GUIDES--><nav aria-labelledby="related-guides-title" style="max-width:760px;margin:32px auto;padding:0 20px"><h2 id="related-guides-title" style="font-size:18px;margin:0 0 8px">À lire aussi</h2><ul style="list-style:none;padding:0;margin:0"><li style="margin:6px 0"><a href="/blog/guides/prediction-ia-football-guide-2026.html" style="color:#22d3ee">Prédiction football par IA : comprendre les modèles et leurs limites</a></li><li style="margin:6px 0"><a href="/blog/guides/guide-paris-sportifs-debutant-complet.html" style="color:#22d3ee">Paris sportifs : le guide complet pour débuter avec méthode</a></li><li style="margin:6px 0"><a href="/blog/guides/meilleurs-bookmakers-monde-2026.html" style="color:#22d3ee">Choisir un bookmaker : critères de sécurité, cotes et limites</a></li><li style="margin:6px 0"><a href="/fr/leagues/ligue-1.html" style="color:#22d3ee">Pronostics Ligue 1 : les matchs analysés</a></li></ul></nav><!--/RELATED_GUIDES-->
+<!--RELATED_GUIDES--><nav aria-labelledby="related-guides-title" style="max-width:760px;margin:32px auto;padding:0 20px"><h2 id="related-guides-title" style="font-size:18px;margin:0 0 8px">À lire aussi</h2><ul style="list-style:none;padding:0;margin:0"><li style="margin:6px 0"><a href="/blog/guides/guide-paris-sportifs-debutant-complet.html" style="color:#22d3ee">Paris sportifs : le guide complet pour débuter avec méthode</a></li><li style="margin:6px 0"><a href="/blog/guides/meilleurs-bookmakers-monde-2026.html" style="color:#22d3ee">Choisir un bookmaker : critères de sécurité, cotes et limites</a></li><li style="margin:6px 0"><a href="/fr/leagues/ligue-1.html" style="color:#22d3ee">Pronostics Ligue 1 : les matchs analysés</a></li></ul></nav><!--/RELATED_GUIDES-->
 <footer class="art-foot">
-  <p>IASHARK — analyses statistiques de football. Les probabilités publiées sont indicatives et ne garantissent aucun résultat. Les paris sportifs comportent un risque de perte financière et de dépendance : ne misez que ce que vous pouvez vous permettre de perdre. Interdit aux mineurs (18+). Besoin d'aide ? Joueurs Info Service : 09 74 75 13 13 (appel non surtaxé).</p>
+  <p>IASHARK — analyses statistiques de football. Les probabilités publiées sont indicatives et ne garantissent aucun résultat. Les paris sportifs comportent un risque de perte financière et de dépendance : ne pariez que ce que vous pouvez vous permettre de perdre. Interdit aux mineurs (18+). Besoin d'aide ? Joueurs Info Service : 09 74 75 13 13 (appel non surtaxé).</p>
 <p class="legal-links"><a href="/fr/mentions-legales.html" style="color:inherit;text-decoration:underline">Mentions légales</a> · <a href="/fr/cgv.html" style="color:inherit;text-decoration:underline">CGV</a> · <a href="/fr/confidentialite.html" style="color:inherit;text-decoration:underline">Confidentialité</a> · <a href="/fr/cookies.html" style="color:inherit;text-decoration:underline">Cookies</a> · <a href="/fr/jeu-responsable.html" style="color:inherit;text-decoration:underline">Jeu responsable</a></p>
 </footer>
 
@@ -336,14 +335,14 @@
     el.rUnder.textContent=pct(under);
     el.rFair.textContent=over>0?num(1/over,2):'—';
     if(!isFinite(od)||od<=1){ el.rVerdict.textContent='Saisissez une cote supérieure à 1 pour comparer.'; return; }
-    var implied=1/od, edge=over-implied, ev=over*od-1;
+    var implied=1/od, edge=over-implied;
     var verdict;
     if(Math.abs(edge)*100<3){
-      verdict='<b>Écart trop faible pour conclure.</b> Votre estimation ('+pct(over)+') et la probabilité implicite de la cote ('+pct(implied)+') diffèrent de '+num(Math.abs(edge)*100,1)+' point(s) — c\'est à l\'intérieur de la marge d\'erreur d\'un modèle de ce type. Espérance théorique : '+num(ev*100,1)+' %.';
+      verdict='<b>Écart trop faible pour conclure.</b> Votre estimation ('+pct(over)+') et la probabilité implicite de la cote ('+pct(implied)+') diffèrent de '+num(Math.abs(edge)*100,1)+' point(s) — c\'est à l\'intérieur de la marge d\'erreur d\'un modèle de ce type.';
     } else if(edge>0){
-      verdict='<b>Avantage théorique de '+num(edge*100,1)+' points</b> en faveur du pari (modèle '+pct(over)+' contre '+pct(implied)+' implicites). Espérance théorique : +'+num(ev*100,1)+' %. À ne considérer que si vous avez confiance dans vos buts attendus.';
+      verdict='<b>Avantage théorique de '+num(edge*100,1)+' points</b> en faveur du pari (modèle '+pct(over)+' contre '+pct(implied)+' implicites). À ne considérer que si vous avez confiance dans vos buts attendus.';
     } else {
-      verdict='<b>Cote défavorable.</b> Le marché estime '+pct(implied)+' quand votre modèle donne '+pct(over)+', soit '+num(Math.abs(edge)*100,1)+' points de moins. Espérance théorique : '+num(ev*100,1)+' %.';
+      verdict='<b>Cote défavorable.</b> Le marché estime '+pct(implied)+' quand votre modèle donne '+pct(over)+', soit '+num(Math.abs(edge)*100,1)+' points de moins.';
     }
     el.rVerdict.innerHTML=verdict;
   }

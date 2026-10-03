@@ -39,3 +39,26 @@ test("computeSnapshotPhase: les bornes ne se chevauchent jamais (une seule phase
   var phases = hours.map(function (h) { return computeSnapshotPhase(isoIn(h, now), now); });
   phases.forEach(function (p) { assert.ok(["FIRST_SEEN", "T72", "T24", "T6", "CLOSE"].indexOf(p) !== -1); });
 });
+
+test("selections nationales : cotes archivees avant match (plafond de config/quotas.json, mode economie), budget du run tenu ; aucun pari", () => {
+  const S = require("../scripts/save-odds-snapshot.js");
+  const cfg = require("../config/leagues.json");
+  const sel = cfg.leagues.filter(S.estCompetitionSelections).map((l) => l.key).sort();
+  assert.deepEqual(sel, ["nations_league", "wcq_europe"]);
+  const plafondSel = require("../config/quotas.json").api_football.releve_large.matchs_par_competition_selections;
+  assert.equal(S.fixturesPour(cfg.leagues.find((l) => l.key === "nations_league"), 3), plafondSel);
+  assert.ok(plafondSel <= 20, "archivage des selections plafonne");
+  assert.equal(S.fixturesPour(cfg.leagues.find((l) => l.key === "premier"), 3), 3);
+  // Pire cas : chaque competition consomme 1 appel /fixtures + 1 appel /odds par match.
+  const pire = cfg.leagues.reduce((a, l) => a + 1 + S.fixturesPour(l, 3), 0);
+  assert.ok(pire <= S.MAX_API_CALLS_PER_RUN, "budget : " + pire);
+  // Jamais dans les ligues validees (moteur). Voie « cotes du marche » (03/10/2026, VERIF-SELECTIONS.md du 02/10) :
+  // seulement les selections de fiabilite.selections_cotes_marche, 1N2 et double chance seulement.
+  for (const k of sel) {
+    assert.ok(!cfg.fiabilite.ligues_validees.includes(k), k);
+    if (k in cfg.fiabilite.ligues_validees_cotes_marche) {
+      assert.ok(cfg.fiabilite.selections_cotes_marche.includes(k), k);
+      assert.deepEqual(cfg.fiabilite.ligues_validees_cotes_marche[k], ["1N2", "DC"], k);
+    }
+  }
+});

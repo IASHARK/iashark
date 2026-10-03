@@ -248,6 +248,40 @@
       </div>
     </section>
 
+    <!-- 6 ter. Partenaires (programme d'affiliation, migration 0050_affiliation.sql ; sans elle : « a activer ») -->
+    <section class="section" id="partenaires" aria-labelledby="affTitle">
+      <div class="section-head">
+        <h2 class="section-title" id="affTitle">Partenaires</h2>
+        <p class="section-sub">Candidatures à valider, chiffres par partenaire, commissions du mois à payer</p>
+      </div>
+      <div class="cards m-cards" id="affCards">
+        <div class="skel skel-card"></div><div class="skel skel-card"></div><div class="skel skel-card"></div><div class="skel skel-card"></div>
+      </div>
+      <div class="grid g-members" id="affBody" hidden>
+        <section class="card" aria-labelledby="affListTitle">
+          <div class="card-head">
+            <div><h3 class="card-title" id="affListTitle">Candidatures et partenaires</h3><p class="card-sub">Valider, refuser ou suspendre d'un clic. Un partenaire suspendu ne gagne plus rien.</p></div>
+            <button type="button" class="info" aria-expanded="false" aria-controls="helpAff" aria-label="Aide : partenaires">i</button>
+          </div>
+          <p class="help" id="helpAff" hidden>Chaque partenaire touche <b>40 %</b> de chaque paiement encaissé de ses abonnés (hors taxes, après remise), à vie, sur un seul niveau. Une commission reste <b>en attente 30 jours</b> (le temps d'un remboursement éventuel), puis devient <b>payable</b>. Les commissions payables sont versées une fois par mois dès <b>50 €</b> : automatiquement par Stripe Connect quand le partenaire a ouvert son compte de versement, sinon à la main (export CSV, puis « Marquer payé »). Les tentatives d'auto-affiliation (même compte, même e-mail, même carte, même client Stripe) sont refusées automatiquement et visibles dans l'historique.</p>
+          <div id="affList"><div class="skel skel-block"></div></div>
+        </section>
+        <section class="card" aria-labelledby="affPayTitle">
+          <div class="card-head">
+            <div><h3 class="card-title" id="affPayTitle">Commissions à payer</h3><p class="card-sub" id="affPaySub">Payables maintenant, par partenaire et par devise</p></div>
+          </div>
+          <div class="m-tools">
+            <label class="field"><span>Mois</span><input type="month" id="affMonth"></label>
+            <button type="button" class="btn btn-ghost btn-sm" id="affExport">Exporter le mois (CSV)</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="affRunPayouts">Lancer les virements Stripe</button>
+          </div>
+          <div id="affDue"><div class="skel skel-block"></div></div>
+          <h3 class="micro" style="margin-top:16px">Lignes du mois</h3>
+          <div id="affLines"></div>
+        </section>
+      </div>
+    </section>
+
     <!-- 7. Pages et matchs -->
     <div class="grid g2 section">
       <section class="card" aria-labelledby="pagesTitle">

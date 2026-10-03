@@ -1,0 +1,55 @@
+{
+  "_lisezmoi": [
+    "MODE ECONOMIE (03/10/2026). Reglages des 2 abonnements payants. Clement peut changer les chiffres ici, rien d'autre a toucher.",
+    "API-Football (offre Pro) : 7 500 requetes PAR JOUR (remise a zero a minuit UTC = 2 h du matin a Paris en ete).",
+    "The Odds API : 20 000 credits PAR MOIS. Cout d'un appel = nombre de marches x nombre de regions ; /sports et /events sont gratuits.",
+    "Une liste de 10 bookmakers au plus compte comme UNE seule region (Pinnacle + les agrees suivis tiennent dans 1 region).",
+    "alerte_pct : alerte Telegram a Clement (une fois par jour pour API-Football, une fois par mois pour The Odds API).",
+    "minimum_pct : au-dela, mode minimum automatique (seulement l'essentiel : programme du jour, resultats, cote de cloture des paris Pro).",
+    "plafond_jour : au-dela de ce nombre dans la journee, on n'appelle plus que l'essentiel (meme si le mois n'est pas fini).",
+    "Etat mesure (compteurs lus dans les reponses des API, sans aucun secret) : data/quotas-etat.json."
+  ],
+  "api_football": {
+    "quota_jour": 7500,
+    "plafond_jour": 6000,
+    "alerte_pct": 70,
+    "minimum_pct": 95,
+    "matchs_par_date_en_un_appel": true,
+    "cache_heures": {
+      "_lisezmoi": "Cache garde entre les lancements (GitHub Actions), en heures. match_termine : feuille, statistiques, joueurs d'un match DEJA JOUE (ne changent plus). saison_passee : statistiques d'une saison terminee. semaine : effectifs et confrontations directes. journalier : classements, blessures, stats de la saison en cours (1 fois par jour).",
+      "match_termine": 720,
+      "saison_passee": 720,
+      "semaine": 168,
+      "journalier": 20
+    },
+    "couverture_ligues_jours": 7,
+    "cloture": {
+      "_lisezmoi": "Cote de cloture (archive) : une seule capture par match, dans les N minutes avant le coup d'envoi (workflow toutes les 30 min).",
+      "fenetre_minutes": 40
+    },
+    "suivi_proche_coup_envoi": {
+      "_lisezmoi": "forward-odds-near-kickoff (toutes les heures) : matchs dans les N heures, au plus M appels par lancement.",
+      "fenetre_heures": 3,
+      "max_appels_par_lancement": 20
+    },
+    "releve_large": {
+      "_lisezmoi": "forward-odds-broad + releve de nuit du pipeline : N prochains matchs par competition, M pour les selections nationales.",
+      "matchs_par_competition": 2,
+      "matchs_par_competition_selections": 6
+    }
+  },
+  "odds_api": {
+    "quota_mois": 20000,
+    "plafond_jour": 500,
+    "alerte_pct": 70,
+    "minimum_pct": 95,
+    "perimetre": "selection_pro",
+    "_perimetre": "selection_pro = seulement les competitions qui peuvent entrer dans la selection Pro (ligues du moteur v3 + fiabilite.ligues_validees_cotes_marche de config/leagues.json). Les autres gardent la cote Pinnacle lue chez API-Football (deja payee) et la cote indicative. 'toutes' = ancien fonctionnement.",
+    "marches_releve_general": "h2h,totals",
+    "evenements_avant_cotes": true,
+    "pipeline_fenetre_heures": 72,
+    "max_evenements_par_jour": 15,
+    "max_evenements_selections_nationales": 4,
+    "canal_pro_suivi_cotes_minutes": 55
+  }
+}

@@ -31,6 +31,13 @@ test('une carte xG sans deux valeurs réelles reste masquée',()=>{
   assert.equal(display.expectedGoalsForDisplay({match_stats_home:{xg:null},match_stats_away:{xg:null}}),null);
 });
 
+test('les buts attendus du bloc « Ce que dit le modèle » ne viennent que du modèle',()=>{
+  // Visiteur sur un match payant : pas de lambda, seulement l'xG moyen des équipes -> rien.
+  assert.equal(display.expectedGoalsForDisplay({match_stats_home:{xg:1.3},match_stats_away:{xg:0.7}}),null);
+  assert.deepEqual(display.expectedGoalsForDisplay({lambda_h:1.62,lambda_a:0.94,match_stats_home:{xg:1.3},match_stats_away:{xg:0.7}}),{home:1.62,away:0.94});
+  assert.equal(display.expectedGoalsForDisplay({lambda_h:1.62,match_stats_away:{xg:0.7}}),null);
+});
+
 test('la liste des sources ne prétend pas utiliser des données absentes',()=>{
   const labels=display.sourceLabels({injuries:[],market_source:'Aucune cote fiable'});
   assert.deepEqual(labels,['Calendrier et équipes']);

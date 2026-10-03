@@ -133,7 +133,7 @@ test("pipeline : second passage juste avant la selection canonique, le match off
   assert.ok(filter > recheck && runOutput > filter && gratuit > runOutput && publics > gratuit && histo > publics);
   assert.match(source.slice(recheck, filter), /closeMatchForPick\(m, premiumRows\.find\(/);
   // Le match offert exige un pari : un match ferme (pari_rec vide) ne peut pas l'etre.
-  assert.match(source, /var analysable=function\(m\)\{ return m && m\.pari_rec && !m\.no_signal && eligibleForFree\(FIXTURE_BY_ID\[String\(m\.id\)\],OFFRE_MS\); \};/);
+  assert.match(source, /var analysable=function\(m\)\{ return m && m\.pari_rec && !m\.no_signal && !SELECTIONS\.estSelectionNationale\(m\) && m\.league_reliability!=='en_test' && eligibleForFree\(FIXTURE_BY_ID\[String\(m\.id\)\],OFFRE_MS\); \};/);
   assert.match(source, /var creneau=duJour\.filter\(function\(m\)\{ return reasonableParisSlot\(m\); \}\);/);
 });
 

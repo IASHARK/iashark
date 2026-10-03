@@ -30,6 +30,13 @@ const DAY = 24 * 3600 * 1000;
 const UPCOMING_DAYS = 14;
 const RESULTS_DAYS = 30;
 const STANDINGS_MAX_AGE_DAYS = 45;
+// Audit SEO du 29/09/2026 (action A4) : la page La Liga affichait « En tete :
+// Celta Vigo · 7 pts » au-dessus d'un tableau qui commencait a la 11e place
+// (extrait publie avec un match). Un classement n'est AFFICHE que s'il est
+// complet (classement api-football, chaque groupe commence au rang 1, rangs
+// 1..n sans trou ni doublon) et recent (donnees de 3 jours au plus). Sinon :
+// ni tableau, ni ligne « En tete », ni nombre de clubs.
+const STANDINGS_DISPLAY_MAX_AGE_DAYS = 3;
 // Un match commence depuis plus de 2 h est considere joue (meme seuil que
 // scripts/match-lifecycle.js#FINISHED_AFTER_MINUTES).
 const FINISHED_AFTER_MS = 120 * 60000;
@@ -169,6 +176,23 @@ function displayGroups(st) {
   return groups.slice(-3);
 }
 
+// Classement affichable : complet et recent (voir STANDINGS_DISPLAY_MAX_AGE_DAYS).
+// Un extrait publie avec un match (source « matchs » : rangs voisins des deux
+// equipes) n'est jamais affiche : rien ne prouve qu'il contient toutes les equipes.
+function isGroupComplete(g) {
+  if (!g || !Array.isArray(g.rows) || g.rows.length < 2) return false;
+  var ranks = g.rows.map(function (r) { return r && r.rank; }).sort(function (a, b) { return a - b; });
+  for (var i = 0; i < ranks.length; i++) if (ranks[i] !== i + 1) return false;
+  return true;
+}
+function isStandingsDisplayable(st, now) {
+  if (!st || st.source !== "api-football" || !Array.isArray(st.groups) || !st.groups.length) return false;
+  var t = now instanceof Date ? now.getTime() : (typeof now === "number" ? now : Date.now());
+  var asOf = Date.parse(String(st.as_of || "") + "T00:00:00Z");
+  if (!isFinite(asOf) || Date.parse(isoDay(t) + "T00:00:00Z") - asOf > STANDINGS_DISPLAY_MAX_AGE_DAYS * DAY) return false;
+  return st.groups.every(isGroupComplete);
+}
+
 // ---------------------------------------------------------------------------
 // Assemblage d'un hub.
 function teamName(t) { return t && (t.n || t.name) ? String(t.n || t.name) : ""; }
@@ -256,11 +280,15 @@ function collect(key, dir, opts) {
   var store = opts.store || loadStore(root);
   var st = store.leagues[key] && store.leagues[key].standings || null;
   if (st && now - Date.parse(st.as_of + "T00:00:00Z") > STANDINGS_MAX_AGE_DAYS * DAY) st = null;
-  return { upcoming: upcoming, results: results, standings: st ? Object.assign({}, st, { groups: displayGroups(st) }) : null, clubs: C.leagueClubPages(key, dir, root) };
+  // Groupes affiches, puis controle complet + recent (action A4) : sinon aucun classement.
+  var shown = st ? Object.assign({}, st, { groups: displayGroups(st) }) : null;
+  if (shown && !isStandingsDisplayable(shown, now)) shown = null;
+  return { upcoming: upcoming, results: results, standings: shown, clubs: C.leagueClubPages(key, dir, root) };
 }
 
 module.exports = {
   STORE_FILE: STORE_FILE, UPCOMING_DAYS: UPCOMING_DAYS, RESULTS_DAYS: RESULTS_DAYS, STANDINGS_MAX_AGE_DAYS: STANDINGS_MAX_AGE_DAYS,
+  STANDINGS_DISPLAY_MAX_AGE_DAYS: STANDINGS_DISPLAY_MAX_AGE_DAYS, isStandingsDisplayable: isStandingsDisplayable,
   emptyStore: emptyStore, loadStore: loadStore, saveStore: saveStore, serializeStore: serializeStore, updateStore: updateStore,
   cacheStandings: cacheStandings, clearCache: clearCache, displayGroups: displayGroups, collect: collect
 };

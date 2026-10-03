@@ -22,67 +22,103 @@
   var MARKETS=['gb','mx','za'];
   var seg=(location.pathname.match(/^\/([a-z]{2})(?:\/|$)/)||[])[1]||'';
   function message(text,isError){output.textContent=text;output.className='billing-message'+(isError?' error':'');}
-  // Duree choisie (lib/pro-plan-picker.js, "month" coche par defaut). Sans
-  // selecteur : "month", valeur par defaut acceptee par create-checkout-session.
+  // Duree choisie dans la grille de prix (assets/pricing-grid.js : meme API
+  // que lib/pro-plan-picker.js ; "month" par defaut, ?interval= venu d'une
+  // autre grille du site). Sans grille : "month", valeur par defaut acceptee
+  // par create-checkout-session.
   var picker=null;
-  // --- Offre du 25/09/2026 (campagne Turquie–France) - A RETIRER ENSUITE ---
-  // Jusqu'a 20h45 (Paris), le code promo Stripe est applique AUTOMATIQUEMENT au
-  // paiement de la formule au mois (create-checkout-session : champ `promo`,
-  // liste blanche BLEUS / CAIRO5, controle par Stripe). La carte affiche le
-  // prix barre ; « J'ai un autre code » rend le champ code de la page Stripe.
-  // ?promo=CAIRO5 dans l'URL choisit ce code (garde pour la visite).
-  var PROMO_FIN=Date.UTC(2026,8,25,18,45,0);
-  var EUR=['19,95 €','9,95 €','5 €'];
-  var PROMO_PRIX={fr:EUR,es:EUR,de:EUR,it:EUR,pt:EUR,en:['$19.99','$9.95','$5'],gb:['£14.99','£9.95','£5']};
-  var PROMO_TXT={
-    fr:{n:'Code {code} appliqué automatiquement : {new} le premier mois au lieu de {old}, puis {old}/mois. Offre valable jusqu’à 20h45.',w:'L’offre à {new} s’applique à la formule au mois.',m:'Tu pourras saisir ton code sur la page de paiement.',a:'J’ai un autre code',b:'Utiliser le code {code}'},
-    es:{n:'Código {code} aplicado automáticamente: {new} el primer mes en lugar de {old}, luego {old}/mes. Válido hasta las 20:45 (hora de París).',w:'La oferta de {new} se aplica al plan mensual.',m:'Podrás introducir tu código en la página de pago.',a:'Tengo otro código',b:'Usar el código {code}'},
-    de:{n:'Code {code} automatisch angewendet: {new} im ersten Monat statt {old}, danach {old}/Monat. Gültig bis 20:45 Uhr (Pariser Zeit).',w:'Das Angebot für {new} gilt für das Monatsabo.',m:'Du kannst deinen Code auf der Zahlungsseite eingeben.',a:'Ich habe einen anderen Code',b:'Code {code} verwenden'},
-    it:{n:'Codice {code} applicato automaticamente: {new} il primo mese invece di {old}, poi {old}/mese. Valido fino alle 20:45 (ora di Parigi).',w:'L’offerta a {new} vale per il piano mensile.',m:'Potrai inserire il codice nella pagina di pagamento.',a:'Ho un altro codice',b:'Usa il codice {code}'},
-    pt:{n:'Código {code} aplicado automaticamente: {new} no primeiro mês em vez de {old}, depois {old}/mês. Válido até às 20h45 (hora de Paris).',w:'A oferta de {new} aplica-se ao plano mensal.',m:'Poderás introduzir o teu código na página de pagamento.',a:'Tenho outro código',b:'Usar o código {code}'},
-    en:{n:'Code {code} applied automatically: {new} for your first month instead of {old}, then {old}/month. Valid until 20:45 (Paris time).',w:'The {new} offer applies to the monthly plan.',m:'You can enter your code on the payment page.',a:'I have another code',b:'Use code {code}'}
-  };
-  PROMO_TXT.gb=PROMO_TXT.en;
-  var promoDir=DIRS.indexOf(seg)!==-1?seg:'fr';
-  var promoCode=(function(){
-    var q=(new URLSearchParams(location.search).get('promo')||'').toUpperCase();
-    if(q==='BLEUS'||q==='CAIRO5'){try{sessionStorage.setItem('ias-promo-code',q);}catch(e){}return q;}
-    try{var v=sessionStorage.getItem('ias-promo-code');if(v==='BLEUS'||v==='CAIRO5')return v;}catch(e){}
-    return 'BLEUS';
-  })();
-  var promoManuel=false;
-  function promoEnCours(){return Date.now()<PROMO_FIN&&!!PROMO_PRIX[promoDir];}
-  function promoAuto(){return promoEnCours()&&!promoManuel;}
-  function promoPrix(){var p=PROMO_PRIX[promoDir];return {old:p[0],nw:promoCode==='CAIRO5'?p[2]:p[1]};}
-  function remplir(s){var p=promoPrix();return s.split('{code}').join(promoCode).split('{new}').join(p.nw).split('{old}').join(p.old);}
-  function promoRendu(){
-    if(!promoEnCours())return;
-    var box=document.getElementById('proPlanPicker');if(!box)return;
-    var p=promoPrix();
-    box.querySelectorAll('[data-market-price="pro.month"]').forEach(function(el){
-      var voulu=promoAuto();
-      var deja=!!el.querySelector('s[data-promo]');
-      if(voulu&&!deja){el.innerHTML='<s data-promo style="opacity:.45;font-size:.55em;margin-right:.25em">'+p.old+'</s>'+p.nw;}
-      else if(!voulu&&deja){el.textContent=p.old;}
-    });
-    var note=document.getElementById('promoNote');
-    if(!note){
-      note=document.createElement('div');note.id='promoNote';
-      note.style.cssText='margin:14px 0 4px;padding:11px 13px;border:1px solid rgba(34,211,238,.28);border-left:3px solid #22d3ee;border-radius:10px;background:rgba(34,211,238,.06);font-size:13px;line-height:1.5;color:#dce8ee';
-      box.parentNode.insertBefore(note,box.nextSibling);
+  function intervalDemande(){var v=new URLSearchParams(location.search).get('interval')||'';return /^(week|month|year)$/.test(v)?v:undefined;}
+  // Essai de 7 jours (V3 du 3/10/2026) : annonce SEULEMENT si le serveur le
+  // confirme (trial_days > 0 : TRIAL_DAYS a 0 coupe aussi le texte) ET si le
+  // compte connecte n'a jamais eu d'abonnement (meme regle que
+  // create-checkout-session/trial.ts). Inconnu = pas d'annonce, bouton
+  // « Devenir Pro » : jamais une promesse d'essai que le serveur refuserait.
+  // 30/09/2026 : annonce retiree tant que les CGV n'avaient pas d'article sur
+  // l'essai. 02/10/2026 : essai remis (TRIAL_DAYS absent = 7, CGV du 02/10/2026,
+  // article 6 bis) : encart #proTrialInfo revenu, avec une ligne de prix tiree
+  // de config/markets.json (durees payables de la grille) : « 7 jours gratuits,
+  // puis 19,95 €/mois ou 6,99 €/semaine, annulable en 1 clic ».
+  // 02/10/2026 (soir, decision de Clement) : essai sur l'ABONNEMENT MENSUEL
+  // seulement (create-checkout-session/trial.ts#TRIAL_INTERVALS). Encart et
+  // bouton « Commencer l'essai gratuit » seulement quand le MOIS est choisi
+  // (mois par defaut) ; Semaine ou Annee : encart masque, « Devenir Pro ».
+  // Titre : « 7 jours gratuits sur l'abonnement mensuel, puis 19,95 € / mois,
+  // annulable en 1 clic ».
+  var ANNONCE_ESSAI=true;
+  var DUREES_ESSAI=['month'];
+  var essai={serveur:null,compte:null,offreOuverte:false,pro:false,durees:[]};
+  function dureeChoisie(){return picker&&typeof picker.interval==='function'?picker.interval():'month';}
+  // Prix apres l'essai : celui du MOIS (seule duree avec essai), s'il est payable.
+  function prixApresEssai(){
+    var M=window.IASHARK_MARKET,offre=M&&typeof M.proOffer==='function'?M.proOffer():null;
+    if(!offre||essai.durees.indexOf('month')===-1)return '';
+    var it=offre.intervals.filter(function(x){return x.interval==='month';})[0];
+    return it&&it.text?it.text+' '+t('pricing_grid.per_month','/ mois'):'';
+  }
+  function majEssai(){
+    var ok=ANNONCE_ESSAI&&!essai.pro&&essai.offreOuverte&&essai.serveur>0&&essai.compte===true&&DUREES_ESSAI.indexOf(dureeChoisie())!==-1;
+    var prix=ok?prixApresEssai():'';
+    if(!prix)ok=false;
+    montrer(document.getElementById('proTrialInfo'),ok);
+    var titre=document.getElementById('proTrialHeadline');
+    if(titre&&prix){
+      titre.removeAttribute('data-i18n');
+      titre.textContent=t('essai_mensuel.headline','{days} jours gratuits sur l’abonnement mensuel, puis {price}, annulable en 1 clic').split('{days}').join(String(essai.serveur)).split('{price}').join(prix);
     }
-    var T=PROMO_TXT[promoDir];
-    var mensuel=!picker||picker.interval()==='month';
-    var texte=promoManuel?T.m:(mensuel?T.n:T.w);
-    note.textContent='';
-    note.appendChild(document.createTextNode(remplir(texte)+' '));
-    var a=document.createElement('a');a.href='#';a.style.cssText='color:#22d3ee;text-decoration:underline;text-underline-offset:3px;white-space:nowrap';
-    a.textContent=remplir(promoManuel?T.b:T.a);
-    a.onclick=function(e){e.preventDefault();promoManuel=!promoManuel;promoRendu();};
-    note.appendChild(a);
+    if(essai.pro)return;
+    var cle=ok?'pro_trial.cta':'pricing_page.cta_subscribe';
+    button.setAttribute('data-i18n',cle);
+    button.textContent=ok?t('pro_trial.cta','Commencer l’essai gratuit'):t('pricing_page.cta_subscribe','Devenir Pro');
+  }
+  function verifierCompteEssai(ctx){
+    function fin(v){essai.compte=v;majEssai();}
+    if(!ctx||!ctx.user)return fin(true);
+    try{
+      IasharkApp.supabase.from('subscriptions').select('stripe_subscription_id',{count:'exact',head:true}).eq('user_id',ctx.user.id)
+        .then(function(r){fin(!r.error&&r.count===0);},function(){fin(false);});
+    }catch(e){fin(false);}
+  }
+  // Code partenaire saisi au paiement (programme de partenaires, 03/10/2026) :
+  // envoye tel quel (majuscules) a create-checkout-session, qui ne le prend
+  // que si le compte n'a pas deja de parrain et refuse la meme personne. Vide =
+  // rien n'est envoye ; le code memorise par un clic sur un lien (?ref=) est
+  // deja sur le compte depuis l'inscription, ou propose ici en pre-remplissage.
+  var REF_RE=/^[A-Z0-9][A-Z0-9_-]{2,18}[A-Z0-9]$/;
+  function codePartenaire(){
+    var el=document.getElementById('refCode');
+    var v=el?String(el.value||'').trim().toUpperCase():'';
+    return REF_RE.test(v)?v:'';
+  }
+  function majCodePartenaire(){
+    var el=document.getElementById('refCode'),msg=document.getElementById('refCodeMsg');
+    if(!el||!msg)return;
+    var v=String(el.value||'').trim().toUpperCase();
+    msg.className='ref-code-msg';
+    if(!v){msg.textContent='';return;}
+    if(!REF_RE.test(v)){msg.textContent=t('affiliation.checkout_code_invalid','Code invalide : 4 à 20 lettres ou chiffres.');msg.className='ref-code-msg error';return;}
+    msg.textContent='';
+    try{
+      IasharkApp.supabase.rpc('affiliate_code_exists',{p_code:v}).then(function(r){
+        if(String(el.value||'').trim().toUpperCase()!==v)return;
+        if(r&&!r.error&&r.data===true){msg.textContent=t('affiliation.checkout_code_ok','Code reconnu.');msg.className='ref-code-msg ok';}
+        else if(r&&!r.error){msg.textContent=t('affiliation.checkout_code_unknown','Ce code n’existe pas ou n’est pas encore actif.');msg.className='ref-code-msg error';}
+      },function(){});
+    }catch(e){}
+  }
+  function initCodePartenaire(){
+    var el=document.getElementById('refCode'),box=document.getElementById('refCodeBox');
+    if(!el)return;
+    try{
+      var aff=typeof window.iasharkAffiliate==='function'?window.iasharkAffiliate():null;
+      if(aff&&aff.first&&!el.value){el.value=aff.first;if(box)box.open=true;}
+    }catch(e){}
+    el.addEventListener('input',majCodePartenaire);
+    el.addEventListener('blur',majCodePartenaire);
+    if(el.value)majCodePartenaire();
   }
   function payload(){
     var body={interval:picker?picker.interval():'month'},M=window.IASHARK_MARKET;
+    var ref=codePartenaire();if(ref)body.ref=ref;
     if(M&&typeof M.dir==='string'){
       // lib/market-config.js : checkoutMarket vaut null pour le marche EUR par
       // defaut, auquel cas aucun champ market n'est envoye.
@@ -92,11 +128,6 @@
     }
     if(DIRS.indexOf(seg)!==-1)body.dir=seg;
     if(MARKETS.indexOf(seg)!==-1)body.market=seg;
-    return body;
-  }
-  function payloadPromo(){
-    var body=payload();
-    if(promoAuto()&&body.interval==='month')body.promo=promoCode;
     return body;
   }
   // --- Le match d'ou vient le visiteur ---------------------------------------
@@ -177,32 +208,47 @@
   function majOffre(visibles){
     var n=visibles&&visibles.length||0,ferme=n===0;
     var engagement=document.getElementById('proCommitment');
-    if(engagement)engagement.hidden=n<2;
-    ['checkoutConsent','billingMessage','proTrust'].forEach(function(id){montrer(document.getElementById(id),!ferme);});
-    montrer(button,!ferme);
+    if(engagement)engagement.hidden=n<2||essai.pro;
+    // Abonne : ni consentement ni reassurance de paiement, seulement son bouton.
+    ['checkoutConsent','billingMessage','proTrust'].forEach(function(id){montrer(document.getElementById(id),!ferme&&!essai.pro);});
+    montrer(button,!ferme||essai.pro);
+    essai.offreOuverte=!ferme;essai.durees=(visibles||[]).slice();majEssai();
+  }
+  // Grille de prix (30/09/2026) : carte Pro (prix, choix de la duree parmi les
+  // durees payables) puis le Gratuit sur une ligne. « Meme acces », essai,
+  // consentement, bouton et reassurance sont DEPLACES dans la carte Pro (option
+  // slot) : le parcours de paiement ci-dessous ne change pas.
+  function monterGrille(){
+    var el=document.getElementById('pricingGrid');
+    if(!el||!window.IasharkPricingGrid)return null;
+    var slot=['proCommitment','proTrialInfo','checkoutConsent','subscribeButton','billingMessage','proTrust'].map(function(id){return document.getElementById(id);}).filter(Boolean);
+    // Champ « code partenaire » (programme de partenaires) : dans la carte Pro, juste avant le consentement.
+    var refBox=document.getElementById('refCodeBox'),consentEl=document.getElementById('checkoutConsent');
+    if(refBox){var at=slot.indexOf(consentEl);slot.splice(at===-1?slot.length:at,0,refBox);}
+    return window.IasharkPricingGrid.mount(el,{variant:'complet',heading:false,annual:true,checkout:true,slot:slot,interval:intervalDemande(),
+      onChange:function(){if(output.classList.contains('error'))message('',false);majEssai();},
+      onUpdate:function(v){majOffre(v);}});
   }
   function unlock(){button.classList.remove('iash-consent-locked');button.setAttribute('aria-disabled','false');}
   async function init(){
+    // Grille montee tout de suite (elle attend elle-meme le dictionnaire).
+    picker=monterGrille();
     // Dictionnaire et session sont independants : charges en parallele.
     var i18n=(window.I18N&&window.I18N.init)?Promise.resolve().then(function(){return window.I18N.init();}).catch(function(){}):null;
     var ctx=(await Promise.all([i18n,IasharkApp.context()]))[1];
     var box=document.getElementById('checkoutConsent');
-    var pickerBox=document.getElementById('proPlanPicker');
     // Abonne : aucun second paiement (changer de duree = portail, depuis le compte).
     // Un Pro venu d'un match y retourne : c'est l'analyse qu'il voulait lire.
-    if(ctx.isPro){if(box)box.hidden=true;if(pickerBox)pickerBox.hidden=true;montrer(button,true);loaded();unlock();button.textContent=t('pricing_page.cta_pro_member','Accéder aux analyses');button.onclick=function(){location.href=contexte?contexte.path:localHref('');};return;}
+    // Rien n'est annonce tant que le serveur et le compte n'ont pas repondu.
+    essai.pro=!!ctx.isPro;majEssai();
+    if(ctx.isPro)montrer(document.getElementById('refCodeBox'),false);
+    if(ctx.isPro){if(box)montrer(box,false);montrer(document.getElementById('proTrust'),false);montrer(button,true);loaded();unlock();button.textContent=t('pricing_page.cta_pro_member','Accéder aux analyses');button.onclick=function(){location.href=contexte?contexte.path:localHref('');};return;}
     afficherContexte();
+    initCodePartenaire();
     if(!box){box=document.createElement('div');box.id='checkoutConsent';button.parentNode.insertBefore(box,button);}
-    if(pickerBox&&window.IasharkProPlanPicker){
-      picker=window.IasharkProPlanPicker.mount(pickerBox,{onChange:function(){if(output.classList.contains('error'))message('',false);promoRendu();},onUpdate:function(v){majOffre(v);promoRendu();}});
-      // Duree fermee par le serveur (Price Stripe absent) : masquee, jamais un autre prix.
-      if(picker)picker.loadAvailability();
-    }
-    // Offre du 25/09 : le selecteur et lib/market-config.js reecrivent les prix,
-    // le prix barre est donc reapplique a chaque changement du bloc.
-    promoRendu();
-    if(pickerBox&&window.MutationObserver&&promoEnCours())new MutationObserver(function(){promoRendu();}).observe(pickerBox,{childList:true,subtree:true,characterData:true});
-    if(promoEnCours())setTimeout(function(){location.reload();},Math.max(1000,PROMO_FIN-Date.now()+1000));
+    // Duree fermee par le serveur (Price Stripe absent) : masquee, jamais un autre prix.
+    if(picker)picker.loadAvailability().then(function(){essai.serveur=picker.trialDays?picker.trialDays():null;majEssai();},function(){});
+    verifierCompteEssai(ctx);
     var lib=await consentLib();
     var consent=lib?lib.mount(box,{buttons:[button]}):null;
     loaded();
@@ -232,10 +278,11 @@
       try{
         var session=await IasharkApp.supabase.auth.getSession();
         var token=session.data.session&&session.data.session.access_token;
-        var body=payloadPromo();body.consent=consent.payload();
+        var body=payload();body.consent=consent.payload();
         var response=await fetch(IasharkApp.url+'/functions/v1/create-checkout-session',{method:'POST',headers:{apikey:IasharkApp.key,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(body)});
         var data=await response.json();
-        if(data.url){memoriserRetour();location.href=data.url;return;}
+        // Duree choisie gardee pour le rappel des pages de retour (checkout-succes / -annule).
+        if(data.url){memoriserRetour();try{sessionStorage.setItem('iashark.checkout.interval',body.interval);}catch(e){}location.href=data.url;return;}
         if(data&&data.code==='consent_required'){
           if(consent.check())message(data.message||consent.text('error_required'),true);else message('',false);
         }else if(data&&data.processed===false&&data.reason==='market_not_configured'){

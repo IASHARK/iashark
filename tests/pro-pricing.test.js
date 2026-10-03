@@ -292,7 +292,9 @@ test("create-checkout-session (source) : disponibilites sans auth, controles ava
   const sessionAt = at("stripe.checkout.sessions.create");
   assert.ok(at('requestedMode === "availability"') > 0 && at('requestedMode === "availability"') < at("auth.getUser()"), "disponibilites avant authentification, sans id de Price");
   assert.ok(at("resolvePriceId(getEnv, requestedMarket, requestedInterval)") > 0);
-  assert.match(src, /const LIVE_STATUSES = \["active", "trialing", "past_due"\];/);
+  // Liste des abonnements vivants partagee avec l'essai (trial.ts, 02/10/2026).
+  assert.match(read("supabase/functions/create-checkout-session/trial.ts"), /export const LIVE_STATUSES = \["active", "trialing", "past_due"\];/);
+  assert.match(src, /statuses\.some\(isLiveStatus\)/);
   assert.ok(at('reason: "already_subscribed"') > at("auth.getUser()") && at('reason: "already_subscribed"') < sessionAt, "abonnement vivant verifie avant la session");
   assert.ok(at("stripe.prices.retrieve") > 0 && at("stripe.prices.retrieve") < sessionAt, "Price relu avant la session");
   assert.ok(at("priceMatches(") > 0 && at("priceMatches(") < sessionAt);
@@ -499,19 +501,22 @@ test("ordre de deploiement : fonction de paiement plus ancienne que le site -> s
 test("front : chaque point d'entree du checkout envoie la duree, marque les durees non ouvertes et ne les facture jamais", () => {
   for (const f of ["abonnement-page.js", "account-page.js", "gb/gb-page.js", "mx/mx-page.js", "za/za-page.js"]) {
     const js = read(f);
-    assert.match(js, /IasharkProPlanPicker\.mount\(/, f + " : selecteur non monte");
+    // Grille de prix (assets/pricing-grid.js, 30/09/2026) : meme API que le
+    // selecteur de duree (interval, isAvailable, whenReady, loadAvailability).
+    assert.match(js, /IasharkPricingGrid\.mount\(/, f + " : grille de prix non montee");
     assert.match(js, /loadAvailability\(\)/, f + " : disponibilites non chargees");
     assert.match(js, /\.isAvailable\(\)/, f + " : duree non ouverte non bloquee avant l'appel");
     assert.match(js, /interval/, f + " : duree non envoyee");
     assert.match(js, /already_subscribed/, f + " : second abonnement non gere");
     assert.match(js, /interval_not_configured/, f);
   }
-  for (const f of ["abonnement.html", "gb/landing.html", "mx/landing.html", "za/landing.html"]) {
-    assert.match(read(f), /<script src="\/lib\/pro-plan-picker\.js"><\/script>/, f + " : module non charge");
+  for (const f of ["abonnement.html", "gb/landing.html", "mx/landing.html", "za/landing.html", "compte.html"]) {
+    assert.match(read(f), /<script src="\/assets\/pricing-grid\.js"><\/script>/, f + " : module non charge");
   }
   const ab = read("abonnement-page.js");
   assert.ok(ab.indexOf("picker&&!picker.isAvailable()") < ab.indexOf("functions/v1/create-checkout-session"), "abonnement : blocage avant l'appel de paiement");
-  assert.match(ab, /if\(ctx\.isPro\)\{if\(box\)box\.hidden=true;if\(pickerBox\)pickerBox\.hidden=true;/, "abonne : ni selecteur ni paiement");
+  assert.match(ab, /if\(ctx\.isPro\)\{if\(box\)montrer\(box,false\);montrer\(document\.getElementById\('proTrust'\),false\);/, "abonne : ni consentement ni paiement");
+  assert.match(ab, /montrer\(document\.getElementById\(id\),!ferme&&!essai\.pro\)/, "abonne : la grille ne rouvre jamais le consentement");
   // Landings pays (liste de repli sans JS) : exactement les durees payables du
   // marche (config/markets.json#checkoutOpen, 19/09/2026 : /gb/ mensuel seul).
   for (const d of ["gb", "mx", "za"]) {
@@ -532,8 +537,12 @@ test("compte : duree, prochaine echeance, changement de duree par le portail, se
   // resiliation en ligne nommee comme telle (L215-1-1) ; duree inconnue = ligne masquee.
   assert.match(js, /function plusieursDureesOuvertes\(\)/);
   assert.match(js, /!abo.cancel_at_period_end && plusieursDureesOuvertes\(\) \? boutonSecondaire\('changerDuree'/);
-  assert.match(js, /boutonSecondaire\('resilier', tr\('compte_page.cancel_subscription_cta'/);
-  assert.match(js, /\$\('resilier'\).addEventListener\('click', function \(\) \{ facturation\('create-portal-session', \$\('resilier'\)\); \}\)/);
+  // Abonnement paye : bouton nomme « Résilier mon abonnement » (L215-1-1) ;
+  // pendant l'essai : « Annuler l'essai en 1 clic ». Depuis la V3 du 3/10/2026,
+  // les deux passent par cancel-subscription (arret a la fin de la periode,
+  // aucun detour par le portail) ; le portail reste pour la carte et les factures.
+  assert.match(js, /boutonSecondaire\('resilier', abo\.status === 'trialing' \? tr\('pro_trial\.cancel_trial_btn', '[^']*'\) : tr\('compte_page\.cancel_subscription_cta'/);
+  assert.match(js, /\$\('resilier'\)\.addEventListener\('click', function \(\) \{ annuler\(false\); \}\)/);
   assert.doesNotMatch(js, /compte_page.interval_unknown/, "plus d'etat « en cours de synchronisation » permanent");
   for (const l of LOCALES) assert.equal(typeof JSON.parse(read("i18n/dict/" + l + ".json")).compte_page.cancel_subscription_cta, "string", l);
   assert.match(js, /if \(options && options\.flow === 'change_interval'\) corps\.flow = 'change_interval';/);

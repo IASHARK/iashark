@@ -69,7 +69,8 @@ test("i18n/seo : gabarits hub ligue et match dans les limites avec les noms les 
       assert.ok(len(t) <= 60, dir + " match title " + len(t) + " : " + t);
       assert.ok(len(d) <= 155, dir + " match description " + len(d) + " : " + d);
       assert.doesNotMatch(t + " " + d, BANNED, dir + " match");
-      assert.match(t, new RegExp(m.home.n.split(" ")[0]), dir + " : title sans l'equipe a domicile");
+      // Nom affiche de la version (pages fr : config/noms-equipes-fr.json, action A5 du 30/09/2026).
+      assert.match(t, new RegExp(SEO.teamName(m.home, dir).split(" ")[0]), dir + " : title sans l'equipe a domicile");
     }
   }
   // Marche : heure UK / Premier League (gb), SAST / PSL (za), Liga MX / centro (mx).

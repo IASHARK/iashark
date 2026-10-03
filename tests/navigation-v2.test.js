@@ -6,7 +6,9 @@ test("les pages principales partagent la navigation produit à quatre entrées",
     const html=fs.readFileSync(path.join(root,file),"utf8");
     const nav=(html.match(/<nav class="(?:nav-bottom|bottom-nav)"[\s\S]*?<\/nav>/)||[])[0]||"";
     assert.match(nav,/Accueil/i,file);
-    assert.match(nav,/Outils/i,file);
+    // « Outils » s'appelle « Pro » depuis le 29/09/2026 (espace Pro).
+    assert.match(nav,/>\s*Pro\s*</i,file);
+    assert.doesNotMatch(nav,/Outils/i,file);
     assert.match(nav,/Blog/i,file);
     assert.match(nav,/Compte/i,file);
     assert.doesNotMatch(nav,/Marchés/i,file);

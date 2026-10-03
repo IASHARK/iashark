@@ -82,6 +82,25 @@ function periodEndIso(sub: Stripe.Subscription): string | null {
   const ts = onSub ?? onItem;
   return ts ? new Date(ts * 1000).toISOString() : null;
 }
+// Essai termine sans premier paiement (carte refusee au 8e jour) : Stripe
+// passe l'abonnement en "past_due" mais sa periode a deja avance d'une duree
+// entiere. La tolerance d'impaye (pensee pour un client qui a deja paye)
+// offrirait alors une periode gratuite de plus. Periode commencee a la fin de
+// l'essai et pas encore payee = acces coupe des la fin de l'essai.
+// Copie identique dans stripe-webhook et sync-subscription
+// (tests/pro-trial.test.js).
+function unpaidAfterTrial(sub: Stripe.Subscription, status: string): boolean {
+  if (status !== "past_due" && status !== "unpaid") return false;
+  const anySub = sub as unknown as Record<string, unknown>;
+  const trialEnd = anySub.trial_end as number | null | undefined;
+  if (typeof trialEnd !== "number") return false;
+  const onSub = anySub.current_period_start as number | undefined;
+  const onItem = (sub.items?.data?.[0] as unknown as Record<string, unknown> | undefined)
+    ?.current_period_start as number | undefined;
+  const start = onSub ?? onItem;
+  return typeof start === "number" && Math.abs(start - trialEnd) < 3600;
+}
+
 
 // Duree et marche de l'abonnement, lus sur l'objet Stripe reel (jamais sur
 // une donnee du navigateur). Offre Pro unique : la duree ne change pas les
@@ -211,7 +230,7 @@ Deno.serve(async (req: Request) => {
     }, { onConflict: "stripe_subscription_id" });
     if (subError) throw new Error("ecriture subscriptions: " + subError.message);
 
-    const plan = grantsProAccess(status, periodEnd, billing.billing_interval) ? "pro" : "free";
+    const plan = !unpaidAfterTrial(subscription, status) && grantsProAccess(status, periodEnd, billing.billing_interval) ? "pro" : "free";
     const { data: updated, error: planError } = await admin
       .from("users")
       .update({ plan })

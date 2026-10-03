@@ -153,7 +153,8 @@ test("page championnat : sans contenu stable noindex, liens vers les pages match
 
 test("page championnat : indexable sur contenu stable (classement, clubs, 14 jours), sans aucun match du jour", () => {
   const rows = Array.from({ length: 18 }, (_, i) => ({ rank: i + 1, team_id: 9000 + i, name: "Club " + (i + 1), played: 8, won: 4, drawn: 2, lost: 2, gd: 18 - 2 * i, pts: 30 - i }));
-  const standings = { as_of: "2026-09-14", source: "api-football", season: 2026, groups: [{ name: "Liga MX: Apertura", rows: rows }] };
+  // Classement complet et du jour (action A4 du 30/09/2026 : 3 jours au plus, sinon masque).
+  const standings = { as_of: new Date().toISOString().slice(0, 10), source: "api-football", season: 2026, groups: [{ name: "Liga MX: Apertura", rows: rows }] };
   // Liga MX /mx/ un jour sans match : classement seul -> indexable.
   const mx = SEO.renderLeagueHub("liga_mx", "mx", [], { data: Object.assign({}, EMPTY_HUB, { standings: standings }) });
   assert.equal(mx.indexable, true);

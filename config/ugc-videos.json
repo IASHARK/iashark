@@ -1,0 +1,13 @@
+{
+  "_doc": [
+    "Videos courtes (UGC) du bandeau sous la liste des matchs (accueil et pages championnat).",
+    "Liste vide = aucun bandeau sur le site.",
+    "Chaque video : id (unique), src (fichier .mp4 ou .webm), poster (image .jpg/.webp/.png),",
+    "langue (fr, en, es, es-mx, de, it, pt), pays (facultatif : liste parmi fr, gb, za, us, mx ; vide = partout),",
+    "auteur (pseudo de l'affilie, ou IASHARK), type : « image virtuelle » (avatar cree par IA) ou « affilié ».",
+    "Badge OBLIGATOIRE affiche par le site : « Image virtuelle · Publicité » ou « Collaboration commerciale ».",
+    "Fichiers acceptes : /assets/ugc/<nom> ou le stockage public Supabase du projet. Toute autre adresse, ou un type inconnu, fait echouer la publication.",
+    "Copie publique produite par scripts/build-ugc-videos.js -> assets/ugc-videos.json (lancee par scripts/build-public.js)."
+  ],
+  "videos": []
+}

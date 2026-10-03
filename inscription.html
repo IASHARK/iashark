@@ -27,16 +27,20 @@
 <main class="mx-auto grid w-full max-w-[1080px] items-center gap-12 px-5 py-12 lg:min-h-[calc(100dvh-3.5rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:gap-16 lg:py-16">
 
   <!-- Les trois promesses ci-dessous sont verifiees dans le produit :
-       une analyse est bien offerte chaque jour (lib/free-match.js designe le
-       match gratuit), les outils sont bien accessibles en decouverte, et il
+       l'analyse du match offert est bien gratuite (lib/free-match.js designe
+       le match gratuit ; jamais « chaque jour », controle du 30/09/2026), les outils sont bien accessibles en decouverte, et il
        n'y a aucun engagement puisque le compte gratuit ne demande pas de
        moyen de paiement. Rien d'autre n'est promis ici. -->
   <section class="lg:pr-6">
     <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-cyan" data-i18n="auth.signup_eyebrow">Compte gratuit</p>
     <h1 class="mt-3 text-[38px] font-extrabold leading-[1.05] tracking-tight sm:text-[46px]" data-i18n="auth.signup_h1">Commencez gratuitement.</h1>
     <p class="mt-4 max-w-md text-[15px] leading-relaxed text-soft" data-i18n="auth.signup_intro">Essayez IASHARK avant de passer à Pro. Le compte se crée en quelques secondes.</p>
+    <!-- Essai Pro gratuit (abonnement mensuel) : rempli et montre par assets/essai-annonce.js
+         seulement si le serveur ouvre l'essai, que le mois est payable dans ce pays et que la
+         personne y a droit (jamais un abonne ni un ancien abonne). -->
+    <p class="mt-4 max-w-md text-[14px] font-semibold leading-relaxed text-ink" data-essai-annonce data-track="signup_trial_hint" hidden></p>
     <ul class="mt-8 hidden max-w-md space-y-3.5 lg:block">
-      <li class="flex items-start gap-3 text-[14.5px] text-soft"><span aria-hidden="true" class="mt-[3px] text-cyan">✓</span><span data-i18n="auth.signup_bullet_analysis">L’analyse complète offerte chaque jour</span></li>
+      <li class="flex items-start gap-3 text-[14.5px] text-soft"><span aria-hidden="true" class="mt-[3px] text-cyan">✓</span><span data-i18n="auth.signup_bullet_analysis">L’analyse du match offert</span></li>
       <li class="flex items-start gap-3 text-[14.5px] text-soft"><span aria-hidden="true" class="mt-[3px] text-cyan">✓</span><span data-i18n="auth.signup_bullet_tools">La découverte des outils de décision</span></li>
       <li class="flex items-start gap-3 text-[14.5px] text-soft"><span aria-hidden="true" class="mt-[3px] text-cyan">✓</span><span data-i18n="auth.signup_bullet_no_commitment">Aucun engagement, aucune carte demandée</span></li>
     </ul>
@@ -116,6 +120,7 @@
 <script src="/i18n/i18n.js"></script>
 <script src="/lib/market-config.js"></script>
 <script src="/app-client.js" defer></script>
+<script src="/lib/langue-compte.js" defer></script>
 <script src="/auth-pages.js" defer></script>
 <script>
   if (window.I18N && window.I18N.init) { window.I18N.init(); }
@@ -128,5 +133,7 @@
   });
 </script>
 <script src="/site-prefs.js"></script>
+<script src="/assets/essai-annonce.js" defer></script>
+<script src="/assets/telegram-pill.js" defer></script>
 </body>
 </html>

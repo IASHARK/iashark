@@ -81,18 +81,26 @@
   transition:transform .18s ease;
 }
 .site-bottom-nav__item[aria-current="page"] .site-bottom-nav__icon{transform:translateY(-1px) scale(1.06)}
-.site-bottom-nav__label{font:700 10px/1 "Space Mono",ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase}
-body{padding-bottom:calc(84px + env(safe-area-inset-bottom))!important}
+/* Charte (relecture du 30/09/2026) : DM Sans, pas de capitales machine a ecrire. Les
+   dictionnaires ecrivent « ACCUEIL » : ramene a « Accueil » ici, dans toutes les langues. */
+.site-bottom-nav__label{display:block;font:600 12px/1.1 "DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:0;text-transform:lowercase}
+.site-bottom-nav__label::first-letter{text-transform:uppercase}
+/* Pastille Telegram (assets/telegram-pill.js) : bande de --ias-tg-h juste
+   au-dessus de la barre, sur toutes les pages. Sa hauteur est reservee ici
+   (memes valeurs que telegram-pill.js) : elle ne cache jamais de texte. */
+html.ias-tg-on{--ias-tg-h:52px}
+body{padding-bottom:calc(84px + var(--ias-tg-h,0px) + env(safe-area-inset-bottom))!important}
 /* Un element qui recoit le focus (Tab jusqu'au bouton de paiement, cases de
    consentement) ou vers lequel on defile ne doit jamais finir sous la barre
    fixe : marge de defilement egale a sa hauteur. */
-html{scroll-padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+html{scroll-padding-bottom:calc(96px + var(--ias-tg-h,0px) + env(safe-area-inset-bottom))}
 @media(max-width:700px){
   .site-bottom-nav{height:calc(72px + env(safe-area-inset-bottom));padding:6px 6px calc(6px + env(safe-area-inset-bottom));gap:2px}
   .site-bottom-nav__icon{width:24px;height:24px}
-  .site-bottom-nav__label{font-size:9px;letter-spacing:.1em}
-  body{padding-bottom:calc(72px + env(safe-area-inset-bottom))!important}
-  html{scroll-padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+  .site-bottom-nav__label{font-size:11.5px}
+  html.ias-tg-on{--ias-tg-h:48px}
+  body{padding-bottom:calc(72px + var(--ias-tg-h,0px) + env(safe-area-inset-bottom))!important}
+  html{scroll-padding-bottom:calc(84px + var(--ias-tg-h,0px) + env(safe-area-inset-bottom))}
 }
 /* Mouvement reduit : on garde la pastille et le trait, on retire l'animation. */
 @media(prefers-reduced-motion:reduce){

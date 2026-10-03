@@ -49,7 +49,9 @@ test('toutes les pages publiques chargent la navigation inférieure partagée',(
 
 test('la navigation partagée contient exactement les quatre destinations validées',()=>{
   const js=fs.readFileSync(path.join(root,'bottom-navigation.js'),'utf8');
-  for(const label of ['Accueil','Outils','Blog','Compte'])assert.match(js,new RegExp("label:'"+label+"'"));
+  // « Outils » est devenu « Pro » le 29/09/2026 (espace Pro).
+  for(const label of ['Accueil','Pro','Blog','Compte'])assert.match(js,new RegExp("label:'"+label+"'"));
+  assert.doesNotMatch(js,/label:'Outils'/);
   assert.doesNotMatch(js,/label:'Marchés'/);
   assert.match(js,/aria-current/);
 });

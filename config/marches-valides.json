@@ -9,7 +9,8 @@
     "buteur_actif : false tant que le mathematicien n'a pas valide la chance buteur tiree de la cote « Anytime Goal Scorer » (marches-flux.mjs#chanceButeurFlux).",
     "chance (facultatif) : [min, max] = tranches de chance validees ; hors de ces bornes, le pari n'est jamais propose. Remplissage du 03/10/2026 d'apres la verification du mathematicien (372 matchs, 03/09-02/10/2026, bet365 juge, Pinnacle en controle) : seulement les marches et tranches qui passent. Un seul mois de cotes : a refaire avec 3 mois.",
     "cote_min : jamais une selection du flux sous cette cote bet365 (1,20), ni sur la page ni dans le robot ; au dernier controle, une cote tombee dessous retire le pari.",
-    "Releve : la page match et le robot lisent le MEME releve de odds_snapshots, le dernier de moins de age_max_releve_h heures (marches-flux.mjs#lireRelevesFlux) ; la page ecrit son heure (marches_flux.releve_at)."
+    "Releve : la page match et le robot lisent le MEME releve de odds_snapshots, le dernier de moins de age_max_releve_h heures (marches-flux.mjs#lireRelevesFlux) ; la page ecrit son heure (marches_flux.releve_at).",
+    "ligues (03/10/2026, mathematicien) : seulement les competitions MESUREES (clubs verifies sur 372 matchs ; Ligue des nations sur 54 matchs, rien ne contredit) ; corners du match exclus pour les selections (44 % reels pour 54 % annonces sur 54 matchs). Les autres competitions s'ajouteront apres mesure."
   ],
   "reference": "bet365",
   "controle": "pinnacle",
@@ -28,6 +29,23 @@
       "chance": [
         0.5,
         0.8
+      ],
+      "ligues": [
+        "premier",
+        "laliga",
+        "seriea",
+        "bundesliga",
+        "ligue1",
+        "ldc",
+        "el",
+        "eredivisie",
+        "primeira",
+        "mls",
+        "suede",
+        "jleague",
+        "liga_mx",
+        "argentina_liga_profesional",
+        "nations_league"
       ]
     },
     {
@@ -36,6 +54,23 @@
       "chance": [
         0.5,
         0.7
+      ],
+      "ligues": [
+        "premier",
+        "laliga",
+        "seriea",
+        "bundesliga",
+        "ligue1",
+        "ldc",
+        "el",
+        "eredivisie",
+        "primeira",
+        "mls",
+        "suede",
+        "jleague",
+        "liga_mx",
+        "argentina_liga_profesional",
+        "nations_league"
       ]
     },
     {
@@ -44,6 +79,23 @@
       "chance": [
         0.6,
         0.85
+      ],
+      "ligues": [
+        "premier",
+        "laliga",
+        "seriea",
+        "bundesliga",
+        "ligue1",
+        "ldc",
+        "el",
+        "eredivisie",
+        "primeira",
+        "mls",
+        "suede",
+        "jleague",
+        "liga_mx",
+        "argentina_liga_profesional",
+        "nations_league"
       ]
     },
     {
@@ -52,6 +104,23 @@
       "chance": [
         0.5,
         0.6
+      ],
+      "ligues": [
+        "premier",
+        "laliga",
+        "seriea",
+        "bundesliga",
+        "ligue1",
+        "ldc",
+        "el",
+        "eredivisie",
+        "primeira",
+        "mls",
+        "suede",
+        "jleague",
+        "liga_mx",
+        "argentina_liga_profesional",
+        "nations_league"
       ]
     },
     {
@@ -60,6 +129,22 @@
       "chance": [
         0.5,
         0.6
+      ],
+      "ligues": [
+        "premier",
+        "laliga",
+        "seriea",
+        "bundesliga",
+        "ligue1",
+        "ldc",
+        "el",
+        "eredivisie",
+        "primeira",
+        "mls",
+        "suede",
+        "jleague",
+        "liga_mx",
+        "argentina_liga_profesional"
       ]
     },
     {
@@ -68,6 +153,23 @@
       "chance": [
         0.5,
         0.6
+      ],
+      "ligues": [
+        "premier",
+        "laliga",
+        "seriea",
+        "bundesliga",
+        "ligue1",
+        "ldc",
+        "el",
+        "eredivisie",
+        "primeira",
+        "mls",
+        "suede",
+        "jleague",
+        "liga_mx",
+        "argentina_liga_profesional",
+        "nations_league"
       ]
     }
   ]

@@ -76,8 +76,8 @@ test("i18n/seo : gabarits hub ligue et match dans les limites avec les noms les 
   // Marche : heure UK / Premier League (gb), SAST / PSL (za), Liga MX / centro (mx).
   const hubTxt = (key, dir) => SEO.renderLeagueHub(key, dir, [], { data: { upcoming: [], results: [], standings: null, clubs: [] } }).html;
   assert.match(hubTxt("premier", "gb"), /UK time/);
-  assert.match(hubTxt("south_africa_premiership", "za"), /SAST/);
-  assert.match(hubTxt("south_africa_premiership", "za"), /PSL/);
+  // PSL retiree du site le 03/10/2026 : l'heure SAST reste verifiee sur la Premier League /za/.
+  assert.match(hubTxt("premier", "za"), /SAST/);
   assert.match(hubTxt("liga_mx", "mx"), /centro de México/);
   const premierLong = { id: 2, league_key: "premier", league: "Premier League", date: "2026-09-30 21:00", home: { n: "Arsenal", id: 42 }, away: { n: "Chelsea", id: 49 } };
   assert.match(SEO.matchDescription(premierLong, "gb"), /UK time/);

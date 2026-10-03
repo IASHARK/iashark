@@ -400,10 +400,11 @@ function renderMatchRow(m,ctx,H,index){
   }else if(a.state==='open'){
     zone='<span class="hl-zone">'
       +(a.prob!=null
+        // 03/10/2026 (Clement) : meme affichage que les autres matchs, « Analyse 57 % » + le pari, jamais une note sur 10.
         ?'<span class="hl-prob-row">'
-          +'<span class="hl-prob-lbl"><span class="hl-m">'+esc(t('home_list.prob_short','Proba.'))+'</span><span class="hl-d">'+esc(t('home_list.prob_long','Probabilité estimée'))+'</span></span>'
-          +'<span class="hl-prob"><b>'+a.prob+'</b><small>/10</small></span></span>'
-          +'<span class="hl-gauge" aria-hidden="true"><i style="--p:'+Math.round(a.probNum*10)+'%"></i></span>'
+          +'<span class="hl-prob-lbl"><span class="hl-m">'+esc(t('home_list.prono_short','Analyse'))+'</span><span class="hl-d">'+esc(t('home_list.prono_long','Analyse'))+'</span></span>'
+          +'<span class="hl-prob"><b>'+Math.round(a.probNum*10)+'</b><small>%</small></span></span>'
+          +(a.market?'<span class="hl-none-s">'+esc(a.market)+'</span>':'')
         :'<span class="hl-prelim">'+esc(t('home_list.preliminary','Analyse préliminaire'))+'</span>')
       +'</span>';
   }else if(a.state==='gated'){
@@ -429,7 +430,7 @@ function renderMatchRow(m,ctx,H,index){
   var anaAria=a.state==='past'?(m.verdict==='win'?t('home_list.aria_won','Recommandation passée.')
       :m.verdict==='loss'?t('home_list.aria_lost','Recommandation non passée.'):t('home_list.aria_pending','Résultat non encore établi.'))
     :a.state==='locked'?t('home_list.aria_locked','Analyse prête, réservée aux abonnés Pro.')+(a.band?' '+bandLabel(a.band)+'. '+bandNote():'')
-    :a.state==='open'?(a.prob!=null?tf('home_list.aria_prob','Probabilité estimée {p} sur 10.',{p:a.prob}):t('home_list.aria_open','Analyse disponible.'))
+    :a.state==='open'?(a.prob!=null?tf('home_list.aria_prob_pct','Analyse : chance calculée {p} %.',{p:Math.round(a.probNum*10)}):t('home_list.aria_open','Analyse disponible.'))
       +(a.free?' '+t('home_list.aria_free','Analyse offerte.'):'')
     :a.state==='gated'?t('home_list.aria_free_gated','Analyse offerte avec un compte gratuit.')
     :a.state==='pending'?t('home_app.analysis_in_progress','Analyse en cours')+'.'

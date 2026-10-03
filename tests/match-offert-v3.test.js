@@ -78,9 +78,11 @@ test("jamais un match deja commence ; aujourd'hui et demain, un chacun", () => {
   assert.deepEqual(choisir([v3(1, 70), v3(2, 75, "2026-10-04 20:00"), v3(3, 80, "2026-10-05 20:00")]).sort(), [1, 2]);
 });
 
-test("aucun pari v3 : aucun match offert, et le site n'en invente pas un verrouille", () => {
-  const liste = [ancien(1, 90), ancien(2, 80)];
-  assert.deepEqual(choisir(liste), []);
+test("aucun pari v3 ce jour-la : repli sur une Selection IASHARK verifiee (decision de Clement, 03/10) ; sans selection, aucun match offert", () => {
+  assert.deepEqual(choisir([ancien(1, 90), ancien(2, 80)]), [1], "jour sans pari v3 (treve) : la Selection IASHARK la plus probable d'une competition verifiee");
+  assert.deepEqual(choisir([ancien(1, 90), v3(2, 60)]), [2], "un pari v3 ce jour-la : il reste prioritaire");
+  const liste = [ancien(1, 90, null, { pronostic: { market_id: "over-15", chance: 90, selection: false } }), ancien(2, 80, null, { league_reliability: "en_test" })];
+  assert.deepEqual(choisir(liste), [], "ni selection ni competition verifiee : aucun match offert");
   assert.ok(liste.every((m) => m.is_free === false), "is_free pose a false sur chaque match");
   const h = { day: TODAY, now: TODAY + " 10:00" };
   const publique = liste.map((m) => ({ id: m.id, date: m.date, is_free: m.is_free, has_signal: false, data_quality_score: 90 }));
@@ -167,19 +169,19 @@ test("match offert : d'abord un pari « modèle + cotes », un « modèle seul �
 // eliminatoires du Mondial zone Europe (fiabilite.selections_cotes_marche) peuvent etre le
 // match offert, et passent meme en premier (treve internationale), SI le match est une
 // selection ; amicaux et autres selections nationales : jamais.
-test("match offert : jamais une selection nationale (Ligue des nations comprise), ni un amical", () => {
+test("match offert : Ligue des nations / eliminatoires Europe si c'est une selection, jamais les amicaux", () => {
   const ldn = (id, prob, extra) => v3(id, prob, null, Object.assign({ league_id: 5, league: "UEFA Nations League", league_key: "nations_league", league_reliability: "en_test" }, extra || {}));
-  assert.deepEqual(choisir([ldn(1, 70), v3(2, 90, null, { league_key: "premier" })]), [2], "lancement 03/10 : decision du 30/09 maintenue, une selection nationale n'est jamais le match offert");
+  assert.deepEqual(choisir([ldn(1, 70), v3(2, 90, null, { league_key: "premier" })]), [1], "competition connue d'abord : la Ligue des nations pendant la treve (decision de Clement, 03/10)");
   assert.deepEqual(choisir([ldn(1, 90, { pronostic: { market_id: "dc-1x", chance: 90, selection: false } }), v3(2, 70)]), [2], "un pronostic qui n'est pas une selection : jamais offert");
   assert.deepEqual(choisir([v3(1, 90, null, { league_id: 10, league: "Friendlies", league_key: "other" })]), []);
   assert.deepEqual(choisir([ancien(1, 90, null, { league_id: 32 }), ancien(2, 60)], { eteint: true }), [2], "selection hors liste (sans cle verifiee) : jamais, moteur v3 eteint aussi");
 });
 
-test("match offert : une selection nationale par les cotes du marche n'est jamais offerte (decision du 30/09)", () => {
+test("match offert : une selection nationale par les cotes du marche (sans pari v3) peut etre offerte, en premier", () => {
   const nat = v3(1, 64, null, { league_id: 5, league: "UEFA Nations League", league_key: "nations_league", league_reliability: "en_test", v3_pari: undefined, moteur_v3: { source: "v3", origine_probabilite: "modèle seul" },
     pronostic: { market_id: "home-win", chance: 64, selection: true, moteur: "cotes_marche" } });
-  assert.deepEqual(choisir([nat, v3(2, 85, null, { league_key: "ligue1", moteur_v3: { source: "v3", origine_probabilite: "modèle + cotes" } })]), [2], "decision du 30/09 maintenue au lancement");
-  assert.deepEqual(choisir([nat]), [], "seule en lice : toujours pas offerte");
+  assert.deepEqual(choisir([nat, v3(2, 85, null, { league_key: "ligue1", moteur_v3: { source: "v3", origine_probabilite: "modèle + cotes" } })]), [1]);
+  assert.deepEqual(choisir([nat]), [1], "seule en lice : offerte");
   // Amical avec le meme marquage : jamais.
   const ami = Object.assign({}, nat, { id: 3, league_id: 10, league: "Friendlies", league_key: "other" });
   assert.deepEqual(choisir([ami]), []);

@@ -53,10 +53,14 @@ test("Ligue des nations : aucun pari (ni v3 ni ancien), « en test », 1N2 et do
   assert.ok(avant.m.v3_pari, "sans la regle, le moteur publiait bien un pari sur ce match");
 });
 
-test("pipeline : le match offert exclut les selections, le branchement ne passe jamais l'option des tests", () => {
+// 03/10/2026, decision de Clement (« il faut un match offert ») : la regle du 30/09 est levee. Une selection
+// nationale peut etre offerte SEULEMENT si elle est dans la liste verifiee (Ligue des nations, eliminatoires
+// Europe) ET une Selection IASHARK ; amicaux et autres zones : jamais (competitionOffrable).
+test("pipeline : match offert = Selection IASHARK ; selections nationales hors liste verifiee jamais, le branchement ne passe jamais l'option des tests", () => {
   const wf = fs.readFileSync(path.join(root, ".github", "workflows", "update-data.yml"), "utf8");
   assert.match(wf, /var SELECTIONS=require\('\.\/lib\/selections-nationales\.js'\);/);
-  assert.match(wf, /var analysable=function\(m\)\{ return m && m\.pari_rec && !m\.no_signal && !SELECTIONS\.estSelectionNationale\(m\) &&/);
+  assert.match(wf, /if\(SELECTIONS\.estSelectionNationale\(m\)\) return SEL_OFFRABLES\.indexOf\(String\(m\.league_key\|\|''\)\)!==-1;/);
+  assert.match(wf, /var analysable=function\(m\)\{ return m && m\.pari_rec && !m\.no_signal && estSelectionDuJour\(m\) && competitionOffrable\(m\) &&/);
   assert.doesNotMatch(wf, /selectionsNationalesEligibles/);
   assert.match(wf, /creerBranchement\(\{env:process\.env\}\)/);
 });

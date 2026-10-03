@@ -288,6 +288,7 @@
       + '<div class="space-y-4">'
       + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.plan_current_heading', 'Plan actuel') + '</h2><div class="mt-3">' + planResume + '</div>'
           + '<div class="mt-4"><button type="button" data-aller="abonnement" class="text-[13.5px] font-semibold text-cyan transition hover:underline">' + tr('compte_page.view_subscription_cta', 'Voir l’abonnement') + '</button></div>')
+      + carteAffilie()
       + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.profile_prefs_heading', 'Profil et préférences') + '</h2><div class="mt-4">'
           + ligneResume(tr('compte_page.display_name_label', 'Nom affiché'), esc(nomAffiche()), 'preferences')
           + ligneResume(tr('compte_page.email_label', 'Email'), esc(ctx.user.email))
@@ -668,7 +669,9 @@
     { id: 'competitions', titre: 'Mes compétitions préférées', rendu: competitions },
     { id: 'notifications', titre: 'Notifications', rendu: notifications },
     { id: 'securite', titre: 'Sécurité', rendu: securite },
-    { id: 'donnees', titre: 'Données', rendu: donnees }
+    { id: 'donnees', titre: 'Données', rendu: donnees },
+    // Programme de partenaires (03/10/2026) : renvoi vers l'espace partenaire.
+    { id: 'partenaires', titre: 'Partenaires', rendu: partenaires }
   ];
   // Cles i18n des libelles de nav, reutilisant les cles des titres de section
   // deja definis plus haut (meme texte FR) quand elles existent - seul
@@ -683,8 +686,44 @@
     competitions: ['compte_page.fav_leagues_nav', 'Compétitions'],
     notifications: ['compte_page.notifications_heading', 'Notifications'],
     securite: ['compte_page.security_heading', 'Sécurité'],
-    donnees: ['compte_page.nav_data', 'Données']
+    donnees: ['compte_page.nav_data', 'Données'],
+    partenaires: ['affiliation.account_nav', 'Partenaires']
   };
+  /* Programme de partenaires : 40 % de chaque paiement des abonnes amenes,
+     a vie. Tout se passe sur partenaires.html (candidature, espace). */
+  /* Carte « Gagne 40 % en recommandant IASHARK » (03/10/2026, affiliation visible) : vers l'espace
+     partenaire si la personne est partenaire validee, sinon vers la candidature. L'etat vient de la
+     base (RPC affiliate_me, lecture seule, migration 0050) ; sans reponse : la candidature. 40 % est
+     un taux de commission, jamais un gain promis. */
+  var etatAffilie = null, affilieLu = false;
+  function contenuAffilie() {
+    var st = etatAffilie && etatAffilie.status;
+    var k = st === 'active' || st === 'approved' ? 'member' : st === 'pending' ? 'pending' : 'apply';
+    var href = lien('partenaires.html' + (k === 'apply' ? '#candidature' : ''));
+    return '<h2 class="text-[16px] font-bold text-ink">' + esc(tr('partner_promo.account_title', 'Gagne 40 % en recommandant IASHARK')) + '</h2>'
+      + '<p class="mt-2 max-w-xl text-[14px] leading-relaxed text-soft">' + esc(tr('partner_promo.account_text_' + k, '')) + '</p>'
+      + '<a href="' + esc(href) + '" data-track="account_partner_' + k + '" class="mt-4 inline-flex h-11 items-center rounded-xl bg-cyan px-5 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90">' + esc(tr('partner_promo.account_cta_' + k, '')) + '</a>';
+  }
+  function carteAffilie() {
+    if (!affilieLu) { affilieLu = true; setTimeout(lireAffilie, 0); }
+    return '<section id="carteAffilie" class="rounded-2xl border border-cyan/30 bg-[#050a10] p-5 sm:p-6">' + contenuAffilie() + '</section>';
+  }
+  function lireAffilie() {
+    try {
+      Promise.resolve(sb.rpc('affiliate_me')).then(function (r) {
+        if (!r || r.error) return;
+        etatAffilie = r.data || null;
+        var el = document.getElementById('carteAffilie');
+        if (el) el.innerHTML = contenuAffilie();
+      }, function () {});
+    } catch (e) { /* carte « candidature » par defaut */ }
+  }
+
+  function partenaires() {
+    return titreSection(tr('affiliation.account_title', 'IASHARK Partenaires'), tr('affiliation.account_subtitle', 'Recommande IASHARK et touche 40 % de chaque paiement de tes abonnés, à vie.'))
+      + carte('<p class="text-[14px] leading-relaxed text-soft">' + esc(tr('affiliation.account_text', 'Ton lien, ton code, ton QR code, tes chiffres et tes versements sont dans ton espace partenaire.')) + '</p>'
+        + '<a href="' + esc(lien('partenaires.html')) + '" class="mt-5 inline-flex h-11 items-center rounded-xl bg-cyan px-5 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90">' + esc(tr('affiliation.account_cta', 'Ouvrir mon espace partenaire')) + '</a>');
+  }
 
   function navigation() {
     var liens = SECTIONS.map(function (s) {

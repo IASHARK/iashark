@@ -577,11 +577,36 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
        bande de dates, « Mes compétitions » puis A→Z, lignes par competition.
        Le resume SEO et l'etat de chargement ci-dessous sont remplaces au montage. -->
   <div id="homeList">
-  <!--SEO_MATCHES_SUMMARY--><div style="padding:4px 0 12px"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px"><span data-i18n="home_app.seo_summary_title">Today&#39;s AI analyses</span> — <time data-seo-date datetime="2026-09-29">29 September 2026</time> <small style="font-family:'DM Sans',sans-serif;font-size:11px;color:#64748b">(<span data-i18n="home_app.seo_times_paris">Paris time</span>)</small></h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8"><li>18:00 — <strong>Finland vs Belarus</strong> (UEFA Nations League)</li><li>18:00 — <strong>Moldova vs Faroe Islands</strong> (UEFA Nations League)</li><li>20:45 — <strong>Spain vs Croatia</strong> (UEFA Nations League)</li><li>20:45 — <strong>Czechia vs England</strong> (UEFA Nations League)</li><li>20:45 — <strong>Slovakia vs Kazakhstan</strong> (UEFA Nations League)</li><li>20:45 — <strong>Slovenia vs FYR Macedonia</strong> (UEFA Nations League)</li><li>20:45 — <strong>Luxembourg vs Iceland</strong> (UEFA Nations League)</li><li>20:45 — <strong>Bulgaria vs Estonia</strong> (UEFA Nations League)</li><li>20:45 — <strong>Scotland vs Switzerland</strong> (UEFA Nations League)</li><li>20:45 — <strong>San Marino vs Albania</strong> (UEFA Nations League)</li><li>22:30 — <strong>Deportivo Pereira vs Santa Fe</strong> (Primera A Colombia)</li></ul></div><!--/SEO_MATCHES_SUMMARY-->
+  <!--SEO_MATCHES_SUMMARY--><div style="padding:4px 0 12px"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px"><span data-i18n="home_app.seo_summary_title">Today's AI analyses</span> — <time data-seo-date datetime="2026-09-29">29 September 2026</time> <small style="font-family:'DM Sans',sans-serif;font-size:11px;color:#64748b">(<span data-i18n="home_app.seo_times_paris">Paris time</span>)</small></h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8"><li>18:00 — <strong>Finland vs Belarus</strong> (UEFA Nations League)</li><li>18:00 — <strong>Moldova vs Faroe Islands</strong> (UEFA Nations League)</li><li>20:45 — <strong>Spain vs Croatia</strong> (UEFA Nations League)</li><li>20:45 — <strong>Czechia vs England</strong> (UEFA Nations League)</li><li>20:45 — <strong>Slovakia vs Kazakhstan</strong> (UEFA Nations League)</li><li>20:45 — <strong>Slovenia vs FYR Macedonia</strong> (UEFA Nations League)</li><li>20:45 — <strong>Luxembourg vs Iceland</strong> (UEFA Nations League)</li><li>20:45 — <strong>Bulgaria vs Estonia</strong> (UEFA Nations League)</li><li>20:45 — <strong>Scotland vs Switzerland</strong> (UEFA Nations League)</li><li>20:45 — <strong>San Marino vs Albania</strong> (UEFA Nations League)</li><li>22:30 — <strong>Deportivo Pereira vs Santa Fe</strong> (Primera A Colombia)</li></ul></div><!--/SEO_MATCHES_SUMMARY-->
   <div class="loading-state">
     <div class="loading-spinner"></div>
     <div class="loading-text" data-i18n="home_page.loading_analyses">LOADING ANALYSES...</div>
   </div>
+  </div>
+</section>
+
+<style>/* Bloc partenaire (texte seul, 03/10/2026, demande de Clement) */
+.home-partner{padding:8px 16px 28px}
+.home-partner-in{max-width:860px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);overflow:hidden;border-radius:20px;border:1px solid rgba(32,213,239,.28);background:radial-gradient(120% 140% at 100% 0%,rgba(32,213,239,.14) 0%,rgba(6,11,18,0) 55%),#050a10}
+.home-partner-txt{padding:20px 18px 22px}
+.home-partner-kicker{margin:0;font-size:13px;font-weight:700;color:#20d5ef}
+.home-partner-title{margin:4px 0 0;font-size:clamp(24px,3vw,34px);font-weight:800;letter-spacing:-.03em;line-height:1.1;color:#f4f7fb}
+.home-partner-hook{margin:12px 0 0;font-size:17px;font-weight:700;line-height:1.35;color:#f4f7fb}
+.home-partner-hook b{display:inline-block;padding:1px 8px;border-radius:8px;background:#20d5ef;color:#04141b;font-weight:800}
+.home-partner-text{margin:10px 0 0;max-width:52ch;font-size:14.5px;line-height:1.55;color:#a6b4c6}
+.home-partner-cta{margin-top:18px;display:inline-flex;gap:10px;align-items:center;height:48px;padding:0 22px;border-radius:12px;background:#20d5ef;color:#04141b;font-size:14.5px;font-weight:800;text-decoration:none;box-shadow:0 14px 34px -16px rgba(32,213,239,.85);transition:filter .15s}
+.home-partner-cta:hover{filter:brightness(1.08)}
+@media (min-width:768px){.home-partner{padding:12px 32px 40px}.home-partner-in{grid-template-columns:minmax(0,1fr);align-items:center}.home-partner-txt{padding:30px 34px}}
+</style>
+<section class="home-partner" aria-labelledby="homePartnerTitle">
+  <div class="home-partner-in">
+    <div class="home-partner-txt">
+      <p class="home-partner-kicker" data-i18n="partner_promo.kicker">Partner programme</p>
+      <h2 id="homePartnerTitle" class="home-partner-title" data-i18n="partner_promo.title">Become an IASHARK partner</h2>
+      <p class="home-partner-hook"><b>40 %</b> <span data-i18n="partner_promo.hook">commission on every subscription, for life</span></p>
+      <p class="home-partner-text" data-i18n="partner_promo.text">Do you talk football to a community? Your link, your code and your QR code, with a space to follow your subscribers and your commissions.</p>
+      <a href="/za/partenaires.html" class="home-partner-cta" data-track="home_partner" data-track-kind="cta"><span data-i18n="partner_promo.cta">Join the programme</span><span aria-hidden="true">→</span></a>
+    </div>
   </div>
 </section>
 

@@ -150,3 +150,10 @@ test("buteur « Anytime Goal Scorer » : fonction a part, DESACTIVEE par defaut 
   const CH = (await import("node:module")).createRequire(import.meta.url)("../lib/chance-iashark.js");
   assert.equal(CH.chanceButeur(p) % 5, 0);
 });
+
+test("liste blanche : un marche hors de ses tranches de chance validees n'est jamais propose", () => {
+  const cfg = F.lireConfig({ marches: [{ bet_id: 5, chance: [0.5, 0.7] }] });
+  assert.deepEqual(cfg.marches.get(5).chance, [0.5, 0.7]);
+  const sans = F.lireConfig({ marches: [{ bet_id: 5 }] });
+  assert.equal(sans.marches.get(5).chance, null);
+});

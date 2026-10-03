@@ -238,7 +238,9 @@ export function lireConfig(config) {
   for (const m of Array.isArray(c.marches) ? c.marches : []) {
     const id = idMarche(m?.bet_id ?? m?.bet ?? m);
     if (!id || CATALOGUE[id].type === "buteur") continue; // le buteur a sa propre fonction et son propre interrupteur
-    marches.set(id, { lignes: Array.isArray(m?.lignes) ? m.lignes.map(Number).filter(ok) : null, ligues: Array.isArray(m?.ligues) ? m.ligues.map(String) : null });
+    // chance (facultatif) : [min, max] = seules tranches de chance validees par le mathematicien (ex. [0.5, 0.7]).
+    const ch = Array.isArray(m?.chance) && m.chance.length === 2 && m.chance.every((x) => Number.isFinite(Number(x))) ? m.chance.map(Number) : null;
+    marches.set(id, { lignes: Array.isArray(m?.lignes) ? m.lignes.map(Number).filter(ok) : null, ligues: Array.isArray(m?.ligues) ? m.ligues.map(String) : null, chance: ch });
   }
   return {
     reference: cleBookmaker(c.reference || "bet365"),
@@ -267,6 +269,7 @@ export function selectionsDuMatch(raw, { config, dom = "Domicile", ext = "Extér
     const pin = chancesBookmaker(flux, cfg.controle, betId);
     for (const s of chancesBookmaker(flux, cfg.reference, betId)) {
       if (regle.lignes && !regle.lignes.some((l) => Math.abs(l - s.ligne) < 1e-9)) continue;
+      if (regle.chance && (s.chance < regle.chance[0] - 1e-12 || s.chance > regle.chance[1] + 1e-12)) continue; // hors des tranches validees
       const code = codeFlux(betId, s.value);
       const p = pin.find((x) => x.value === s.value && (x.ligne ?? null) === (s.ligne ?? null));
       if (p && Math.abs(p.chance - s.chance) > cfg.ecart_max_pinnacle + 1e-12) {

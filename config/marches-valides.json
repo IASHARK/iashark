@@ -6,13 +6,66 @@
     "Chance d'un pari = cote sans marge de « reference » (bet365, methode puissance) ; controle : si « controle » (Pinnacle) cote le meme pari et que sa chance sans marge s'ecarte de plus de ecart_max_pinnacle (0,08 = 8 points), le pari est ecarte. Aucun modele.",
     "Marches « meme match » (24 Results/Both Teams Score, 25 Result/Total Goals, 49 Total Goals/Both Teams To Score) : cote du bookmaker pour la combinaison, jamais un produit de deux chances. Le week-end, le robot en propose un (cote entre meme_match.cote_min et meme_match.cote_max). AVANT d'en mettre un ici : appliquer la migration 0053_pro_paris_meme_match.sql (famille « meme_match »).",
     "age_max_releve_h : une cote du flux plus vieille ne sert pas (le flux est releve une fois par jour, le matin).",
-    "buteur_actif : false tant que le mathematicien n'a pas valide la chance buteur tiree de la cote « Anytime Goal Scorer » (marches-flux.mjs#chanceButeurFlux)."
+    "buteur_actif : false tant que le mathematicien n'a pas valide la chance buteur tiree de la cote « Anytime Goal Scorer » (marches-flux.mjs#chanceButeurFlux).",
+    "chance (facultatif) : [min, max] = tranches de chance validees ; hors de ces bornes, le pari n'est jamais propose. Remplissage du 03/10/2026 d'apres la verification du mathematicien (372 matchs, 03/09-02/10/2026, bet365 juge, Pinnacle en controle) : seulement les marches et tranches qui passent. Un seul mois de cotes : a refaire avec 3 mois."
   ],
   "reference": "bet365",
   "controle": "pinnacle",
   "ecart_max_pinnacle": 0.08,
   "age_max_releve_h": 12,
   "buteur_actif": false,
-  "meme_match": { "cote_min": 1.40, "cote_max": 4.00 },
-  "marches": []
+  "meme_match": {
+    "cote_min": 1.4,
+    "cote_max": 4.0
+  },
+  "marches": [
+    {
+      "bet_id": 20,
+      "bet": "Double Chance - First Half",
+      "chance": [
+        0.5,
+        0.8
+      ]
+    },
+    {
+      "bet_id": 5,
+      "bet": "Goals Over/Under",
+      "chance": [
+        0.5,
+        0.7
+      ]
+    },
+    {
+      "bet_id": 16,
+      "bet": "Total - Home",
+      "chance": [
+        0.6,
+        1.0
+      ]
+    },
+    {
+      "bet_id": 8,
+      "bet": "Both Teams Score",
+      "chance": [
+        0.5,
+        0.6
+      ]
+    },
+    {
+      "bet_id": 45,
+      "bet": "Corners Over Under",
+      "chance": [
+        0.5,
+        0.6
+      ]
+    },
+    {
+      "bet_id": 57,
+      "bet": "Home Corners Over/Under",
+      "chance": [
+        0.5,
+        0.6
+      ]
+    }
+  ]
 }

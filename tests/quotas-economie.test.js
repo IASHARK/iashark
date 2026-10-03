@@ -50,12 +50,13 @@ test("config/quotas.json : les 2 abonnements, plafonds et seuils lisibles par Cl
   assert.strictEqual(QUOTAS.lireConfig(), CFG);
 });
 
-test("perimetre The Odds API : seulement les competitions qui peuvent entrer dans la selection Pro ; les 48 restent au site", () => {
+test("perimetre The Odds API : seulement les competitions qui peuvent entrer dans la selection Pro ; les 32 restent au site", () => {
   const p = QUOTAS.perimetreOddsApi(LIGUES, MOTEUR, CFG);
   for (const k of Object.keys(LIGUES.fiabilite.ligues_validees_cotes_marche)) assert.ok(p.has(k), k);
   for (const k of ["laliga", "bundesliga", "seriea", "ligue1", "eredivisie", "primeira"]) assert.ok(p.has(k), k + " (moteur v3)");
   for (const k of ["ldc", "jleague", "saudi_proleague", "fa_cup"]) assert.ok(!p.has(k), k + " hors perimetre");
-  assert.strictEqual(LIGUES.leagues.length, 48, "aucune competition retiree du site");
+  // 48 -> 32 le 03/10/2026 : 16 competitions « en test » retirees du site (config/leagues.json#competitions_retirees).
+  assert.strictEqual(LIGUES.leagues.length, 32, "les 16 retirees le 03/10/2026 seulement");
   assert.strictEqual(QUOTAS.perimetreOddsApi(LIGUES, MOTEUR, { odds_api: { perimetre: "toutes" } }), null);
 });
 

@@ -29,7 +29,7 @@ const T = {
     unites: ["jours", "heures", "min", "s"], bientot: "C'est l'heure : la V3 arrive dans quelques instants.",
     nouv: "Ce qui arrive", items: [
       ["Un moteur de calcul refait", "Des chances calculées qui correspondent à ce qui se passe vraiment sur le terrain."],
-      ["Plus de compétitions", "48 compétitions suivies, en Europe et dans le monde."],
+      ["Plus de compétitions", "32 compétitions suivies, en Europe et dans le monde."],
       ["Une page match enrichie", "Le match en 30 secondes, le piège, le chiffre fou, le film du match."],
       ["Vos messages Pro sur Telegram", "Le programme du jour en message privé, dans votre langue."],
       ["Un espace Pro à votre goût", "Vos compétitions, vos types de paris, vos réglages."],
@@ -41,7 +41,7 @@ const T = {
     unites: ["days", "hours", "min", "s"], bientot: "It's time: V3 is arriving in a few moments.",
     nouv: "What's coming", items: [
       ["A rebuilt calculation engine", "Calculated chances that match what really happens on the pitch."],
-      ["More competitions", "48 competitions covered, in Europe and worldwide."],
+      ["More competitions", "32 competitions covered, in Europe and worldwide."],
       ["A richer match page", "The match in 30 seconds, the trap, the crazy stat, the match film."],
       ["Your Pro messages on Telegram", "The daily programme in a private message, in your language."],
       ["A Pro space made for you", "Your competitions, your bet types, your settings."],
@@ -53,7 +53,7 @@ const T = {
     unites: ["días", "horas", "min", "s"], bientot: "Es la hora: la V3 llega en unos instantes.",
     nouv: "Lo que llega", items: [
       ["Un motor de cálculo renovado", "Probabilidades calculadas que se corresponden con lo que pasa en el campo."],
-      ["Más competiciones", "48 competiciones, en Europa y en el mundo."],
+      ["Más competiciones", "32 competiciones, en Europa y en el mundo."],
       ["Una página de partido más completa", "El partido en 30 segundos, la trampa, el dato loco, la película del partido."],
       ["Tus mensajes Pro en Telegram", "El programa del día por mensaje privado, en tu idioma."],
       ["Un espacio Pro a tu medida", "Tus competiciones, tus tipos de apuesta, tus ajustes."],

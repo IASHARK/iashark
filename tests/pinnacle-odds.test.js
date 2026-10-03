@@ -28,14 +28,15 @@ test("mapping cotes : ligue sans cle ou inconnue -> null, JAMAIS la Champions Le
 // api-football /odds?league=128|239|281|265&season=2026 pour les 4.
 test("mapping cotes LATAM : Argentine/Chili avec cle verifiee, Colombie/Perou sans cle (jamais inventee)", () => {
   assert.equal(oddsSportKeyFor(LEAGUES, "argentina_liga_profesional"), "soccer_argentina_primera_division");
-  assert.equal(oddsSportKeyFor(LEAGUES, "chile_primera"), "soccer_chile_campeonato");
+  // Chili, Colombie, Perou : retirees du site le 03/10/2026, plus de cotes demandees.
+  assert.equal(oddsSportKeyFor(LEAGUES, "chile_primera"), null);
   assert.equal(oddsSportKeyFor(LEAGUES, "colombia_primera_a"), null);
   assert.equal(oddsSportKeyFor(LEAGUES, "peru_primera"), null);
 });
 
 test("repli api-football Pinnacle : actif pour toutes les ligues sauf refus explicite (audit du 28/09/2026)", () => {
   assert.equal(usesApiFootballPinnacleFallback(LEAGUES, "liga_mx"), true);
-  assert.equal(usesApiFootballPinnacleFallback(LEAGUES, "south_africa_premiership"), true);
+  assert.equal(usesApiFootballPinnacleFallback(LEAGUES, "south_africa_premiership"), false, "retiree du site le 03/10/2026");
   assert.equal(usesApiFootballPinnacleFallback(LEAGUES, "premier"), true);
   const refus = { leagues: [{ key: "x", apiFootballPinnacleFallback: false }] };
   assert.equal(usesApiFootballPinnacleFallback(refus, "x"), false);

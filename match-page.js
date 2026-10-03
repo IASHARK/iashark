@@ -1073,7 +1073,12 @@ function resumeSeoStatique(){
 }
 
 function viewModel(raw){
-  const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
+  // 03/10/2026 (Clement) : noms d'equipes en francais sur les pages francaises (Macédoine du Nord, Écosse,
+  // « Victoire Écosse »), meme table que l'accueil (lib/noms-equipes-fr.js). Ailleurs : le nom de l'API.
+  let src=raw;
+  try{const N=window.IasharkNomsEquipesFr,loc=window.I18N&&window.I18N.locale;
+    if(raw&&N&&N.nom&&(!loc||loc==='fr')){src=Object.assign({},raw);['home','away'].forEach(k=>{const e=raw[k];if(e&&typeof e==='object'&&e.n)src[k]=Object.assign({},e,{n:N.nom(e.n)});});}}catch(_e){src=raw;}
+  const vm=IasharkMatchViewModel.buildMatchViewModel(src);
   vm._raw=raw;
   document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
   return vm;

@@ -98,8 +98,8 @@ export const MatchCard: React.FC<MatchCardProps> = (props) => {
     </Interactive.Div>
     {activeGoal?<Interactive.Div name="Goal announcement" style={{position:"absolute",top:1330,left:245,right:245,height:175,background:"linear-gradient(110deg,#06304a,#020e17 35%,#051d2e)",border:`3px solid ${props.accentColor}`,borderRadius:"25px 5px 25px 5px",boxShadow:`0 0 ${24*pulse}px ${props.accentColor}88,inset 0 0 30px #0085aa33`,display:"grid",placeItems:"center",opacity:interpolate(goalAge,[0,5,24,32],[0,1,1,0],{extrapolateLeft:"clamp",extrapolateRight:"clamp"}),translate:interpolate(goalAge,[0,8],["-130px 0px","0px 0px"],{extrapolateLeft:"clamp",extrapolateRight:"clamp",easing:Easing.out(Easing.back(1.4))})}}><div style={{fontFamily:"Impact,Arial Black",fontStyle:"italic",fontSize:84,lineHeight:1,color:"white",textShadow:`0 0 24px ${props.accentColor}`}}>BUT !</div></Interactive.Div>:null}
     {halfTimeAge>=0&&halfTimeAge<halfTimePauseInFrames?<Interactive.Div name="Half time" style={{position:"absolute",top:1355,left:300,right:300,height:125,display:"grid",placeItems:"center",borderTop:`3px solid ${props.accentColor}`,borderBottom:`3px solid ${props.accentColor}`,background:"linear-gradient(90deg,transparent,rgba(2,28,42,.92),transparent)",fontFamily:"Impact,Arial Black",fontSize:64,fontStyle:"italic",letterSpacing:5,textShadow:`0 0 24px ${props.accentColor}`,opacity:interpolate(halfTimeAge,[0,8,halfTimePauseInFrames-8,halfTimePauseInFrames-1],[0,1,1,0],{extrapolateLeft:"clamp",extrapolateRight:"clamp"}),translate:interpolate(halfTimeAge,[0,10],["0px 22px","0px 0px"],{extrapolateLeft:"clamp",extrapolateRight:"clamp",easing:Easing.out(Easing.cubic)})}}>MI-TEMPS</Interactive.Div>:null}
-    <Interactive.Div name="Simulation notice" style={{position:"absolute",bottom:270,left:0,right:0,textAlign:"center",fontSize:16,fontWeight:400,letterSpacing:6,color:"#86a9ba",opacity:.78}}>{props.simulationCount?`BASÉ SUR ${props.simulationCount.toLocaleString("fr-FR").replace(/\u202f|\u00a0/g," ")} SIMULATIONS`:"D'APRÈS LES BUTS ATTENDUS DU MODÈLE"}</Interactive.Div>
-    <div style={{position:"absolute",bottom:92,left:0,right:0,textAlign:"center",color:"#9bb3c4",fontSize:18,letterSpacing:12}}>ANALYSER&nbsp;&nbsp; | &nbsp;&nbsp;ANTICIPER&nbsp;&nbsp; | &nbsp;&nbsp;COMPRENDRE</div>
+    <Interactive.Div name="Simulation notice" style={{position:"absolute",bottom:270,left:0,right:0,textAlign:"center",fontSize:16,fontWeight:400,letterSpacing:6,color:"#86a9ba",opacity:.78}}>BASÉ SUR {(props.simulationCount??10000).toLocaleString("fr-FR").replace(/\u202f|\u00a0/g," ")} SIMULATIONS</Interactive.Div>
+    <div style={{position:"absolute",bottom:92,left:0,right:0,textAlign:"center",color:"#9bb3c4",fontSize:18,letterSpacing:12}}>ANALYSER&nbsp;&nbsp; | &nbsp;&nbsp;ANTICIPER&nbsp;&nbsp; | &nbsp;&nbsp;GAGNER</div>
     <AbsoluteFill name="Final score" style={{background:"radial-gradient(circle at 50% 48%,#073044 0%,#020b12 35%,#000 78%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",opacity:interpolate(frame,[durationInFrames-75,durationInFrames-62],[0,1],{extrapolateLeft:"clamp",extrapolateRight:"clamp"})}}>
       <div style={{fontFamily:"Impact,Arial Black",fontSize:86,letterSpacing:-2}}><span>IA</span><span style={{color:props.accentColor}}>SHARK</span></div>
       <div style={{fontSize:25,letterSpacing:9,color:"#9db6c7",marginTop:12}}>SCORE FINAL</div>
@@ -111,7 +111,7 @@ export const MatchCard: React.FC<MatchCardProps> = (props) => {
 };
 
 const DAILY_TICKET_DEMO: DailyTicketProps = {
-  title: "LE PLUS PROBABLE",
+  title: "SAFE",
   dateLabel: "SÉLECTION DU 26 SEPTEMBRE",
   legs: [
     {home: "Slovaquie", away: "Moldavie", pick: "Slovaquie ou match nul", kickoff: "20H45"},

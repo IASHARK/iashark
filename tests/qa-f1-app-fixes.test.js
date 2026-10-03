@@ -68,14 +68,9 @@ test("free-match : jour LOCAL du visiteur, mode historique (Paris) inchange", ()
 test("accueil / outils : les cartes de match restent dans le repertoire (match.html?id=)", () => {
   const home = read("index.html");
   assert.doesNotMatch(home, /lien\('match\/'/, "plus aucun lien vers la page statique FR /match/<id>.html");
-  // Audit SEO du 29/09/2026 (A1) : vedette et bouton principal passent par lienMatch :
-  // vraie page de LA VERSION du visiteur si elle existe (home-list.js#staticMatchPath),
-  // sinon match.html?id= du repertoire (repli, seul appel restant).
-  assert.equal((home.match(/lien\('match\.html\?id='\+encodeURIComponent\(/g) || []).length, 1);
-  assert.equal((home.match(/lienMatch\((m|featured)\)\)/g) || []).length, 2);
-  // Lignes de la liste des matchs (home-list.js) : meme regle, repli lien() d'index.html.
-  assert.match(read("home-list.js"), /\(H&&H\.lien\|\|lien\)\('match\.html\?id='\+encodeURIComponent\(m\.id\)\)/);
-  assert.match(read("home-list.js"), /dir==='fr'\?'\/match\/'\+m\.id\+'\.html':'\/'\+dir\+'\/match\/'\+m\.id\+'\.html'/);
+  assert.equal((home.match(/lien\('match\.html\?id='\+encodeURIComponent\(/g) || []).length, 2);
+  // Lignes de la liste des matchs (home-list.js) : lien() d'index.html, page match du repertoire.
+  assert.match(read("home-list.js"), /H\.lien\('match\.html\?id='\+encodeURIComponent\(m\.id\)\)/);
   assert.doesNotMatch(read("home-list.js"), /lien\('match\/'/);
   assert.doesNotMatch(read("tools-page.js"), /lien\('match\/'/);
   ["gb", "za", "mx", "en", "fr"].forEach((d) => {
@@ -179,17 +174,14 @@ test("prix : MX$ pour le peso, prix du marche ecrit dans le HTML genere", () => 
   assert.doesNotMatch(read("gb/index.html"), /id="heroPrice"[^>]*>[^<]*€/);
 });
 
-test("accueil : 32 competitions partout (config/leagues.json), analyse gratuite honnete (compte gratuit)", () => {
-  const nb = JSON.parse(read("config/leagues.json")).leagues.length;
-  assert.equal(nb, 32, "config/leagues.json : 32 competitions (16 retirees le 03/10/2026)");
+test("accueil : 19 competitions partout, analyse gratuite honnete (compte gratuit)", () => {
   require("./helpers/public-dirs.js").PUBLIC_DIRS.forEach((d) => {
     const visible = read(d + "/index.html").replace(/<script[\s\S]*?<\/script>/g, "").replace(/<style[\s\S]*?<\/style>/g, "");
     assert.doesNotMatch(visible, /\b13\b[^<]{0,3}(championnats|compet|Wettbewerbe|competizioni|competições|competiciones)|Treize|Thirteen|Trece|Dreizehn|Tredici/i, d);
-    assert.match(visible, new RegExp('tabular-nums">' + nb + '<\\/b>'), d);
-    assert.doesNotMatch(visible, /\b19\s(?:COMP|comp|Wettb|WETTB)/, d + " : plus de « 19 compétitions »");
+    assert.match(visible, /tabular-nums">19<\/b>/, d);
   });
-  assert.match(read("gb/index.html"), /[Ww]ith a free account/);
-  assert.match(read("fr/index.html"), /[Aa]vec un compte gratuit/);
+  assert.match(read("gb/index.html"), /with a free account/);
+  assert.match(read("fr/index.html"), /avec un compte gratuit/);
 });
 
 test("noms de competitions : un seul nom par ligue, synchronise depuis config/leagues.json", () => {

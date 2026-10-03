@@ -84,9 +84,6 @@ a{color:inherit}
 .hero-league img{width:18px;height:18px;object-fit:contain}
 .hero-time b{color:var(--text);font-weight:600}
 .hero-teams{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;margin:16px 0 0;font:inherit}
-/* 03/10/2026 : l'en-tete passe en h2 (titre statique present) ; « .card > h2 » (display:flex) gagnait et collait
-   les deux equipes a gauche, le rang et la forme ne tombaient plus sous leur equipe. */
-.card>h2.hero-teams,.card>h1.hero-teams{display:grid}
 .hero-team{display:flex;flex-direction:column;align-items:center;gap:9px;min-width:0;text-align:center}
 .hero-team img{width:60px;height:60px;object-fit:contain;filter:drop-shadow(0 8px 18px rgba(0,0,0,.55))}
 .hero-name{font:700 24px/1.1 var(--body);letter-spacing:-.015em;color:#f4f7fb;overflow-wrap:anywhere}
@@ -739,14 +736,3 @@ a{color:inherit}
 .mrec-link{margin-top:4px;color:var(--accent);font-size:13.5px;text-underline-offset:3px}
 @media(max-width:640px){.match-recovery{margin:20px auto 16px;padding:26px 16px 22px}}
 @media(prefers-reduced-motion:reduce){.mrec-btn{transition:none}}
-
-/* Tous les marches (03/10/2026, marchesFluxCard) : cyan + gris, une liste lisible, pas de cartes identiques. */
-.mf{display:flex;flex-direction:column;gap:16px}
-.mf-nom{margin:0 0 6px;color:var(--soft);font:600 14px/1.3 var(--body)}
-.mf-liste{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
-.mf-ligne{display:grid;grid-template-columns:1fr auto auto;gap:4px 14px;align-items:baseline;padding:8px 0;border-top:1px solid var(--line)}
-.mf-sel{color:var(--text);font:500 14px/1.4 var(--body)}
-.mf-chance b{color:var(--cyan);font:700 15px/1 var(--body)}
-.mf-cote{color:var(--muted);font:400 13px/1.3 var(--body);white-space:nowrap}
-.mf-note{margin:0;color:var(--dim);font:400 12px/1.5 var(--body)}
-@media (max-width:520px){.mf-ligne{grid-template-columns:1fr auto}.mf-cote{grid-column:1/-1}}

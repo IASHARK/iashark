@@ -2,8 +2,6 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 import Stripe from "npm:stripe@17";
 import { validateConsent } from "./consent.ts";
 import { availability, priceMatches, resolvePriceId } from "./pricing.ts";
-import { isLiveStatus, TRIAL_INTERVALS, trialAllowedForInterval, trialDays, trialForAccount, trialSessionParams } from "./trial.ts";
-import { normalizeCode } from "../_shared/affiliation.ts";
 
 // Creation de session de paiement — MASTER V2.1 §3.2/§21/§23. Meme
 // discipline "desactive par defaut" que supabase/functions/stripe-webhook/ :
@@ -60,8 +58,8 @@ const SITE_URL = Deno.env.get("SITE_URL") || "https://iashark.com";
 const getEnv = (name: string) => Deno.env.get(name);
 
 // Abonnements qui interdisent une seconde souscription (aucun double
-// paiement : changer de duree passe par le portail client) : LIVE_STATUSES
-// de trial.ts (actif, essai, impaye), la meme liste que pour l'essai.
+// paiement : changer de duree passe par le portail client).
+const LIVE_STATUSES = ["active", "trialing", "past_due"];
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -143,14 +141,12 @@ Deno.serve(async (req: Request) => {
   let requestedInterval: unknown = undefined;
   let requestedMode: unknown = undefined;
   let requestedPromo: unknown = undefined;
-  let requestedRef: unknown = undefined;
   try {
     const body = await req.clone().json();
     requestedMarket = body?.market;
     requestedInterval = body?.interval;
     requestedMode = body?.mode;
     requestedPromo = body?.promo;
-    requestedRef = body?.ref;
     requestedDir = body?.dir;
     requestedConsent = body?.consent;
     requestedLocale = body?.consent?.locale || body?.locale || body?.dir;
@@ -159,8 +155,7 @@ Deno.serve(async (req: Request) => {
     // consentement : la demande sera refusee plus bas (consent_required).
   }
   if (requestedMode === "availability") {
-    // trial_intervals : l'essai ne concerne que l'abonnement mensuel (trial.ts).
-    return new Response(JSON.stringify({ ok: true, processed: false, mode: "availability", intervals: availability(getEnv, requestedMarket), trial_days: trialDays(getEnv), trial_intervals: TRIAL_INTERVALS }), {
+    return new Response(JSON.stringify({ ok: true, processed: false, mode: "availability", intervals: availability(getEnv, requestedMarket) }), {
       status: 200,
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
@@ -222,16 +217,15 @@ Deno.serve(async (req: Request) => {
   const user = userData.user;
 
   // Aucun second abonnement : un compte deja abonne (quelle que soit la
-  // duree, essai et impaye compris) change de duree dans le portail client,
-  // jamais par un nouveau paiement. Lecture sous RLS (policy
-  // subscriptions_select_own) de TOUTES ses lignes : la meme lecture decide
-  // de l'essai (trial.ts#trialForAccount : une seule fois par personne).
-  const { data: pastRows, error: pastError } = await supabaseAuth
+  // duree) change de duree dans le portail client, jamais par un nouveau
+  // paiement. Lecture sous RLS (policy subscriptions_select_own).
+  const { data: live } = await supabaseAuth
     .from("subscriptions")
-    .select("status")
-    .eq("user_id", user.id);
-  const statuses: string[] | null = pastError ? null : (pastRows || []).map((r: { status: unknown }) => String(r.status));
-  if (statuses && statuses.some(isLiveStatus)) {
+    .select("stripe_subscription_id")
+    .eq("user_id", user.id)
+    .in("status", LIVE_STATUSES)
+    .limit(1);
+  if (live && live.length) {
     return new Response(JSON.stringify({ ok: true, processed: false, reason: "already_subscribed" }), {
       status: 200,
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
@@ -242,35 +236,6 @@ Deno.serve(async (req: Request) => {
     .select("stripe_customer_id")
     .eq("user_id", user.id)
     .maybeSingle();
-
-  // Programme de partenaires (03/10/2026). Source de verite : users.referred_by,
-  // lu sous RLS (sa propre ligne), pose a l'inscription ou ici. Un code SAISI
-  // au paiement (champ « code partenaire ») n'est pris que si la colonne est
-  // vide : la base (affiliate_attach_referral, migration 0050) verifie
-  // l'affilie (valide) et refuse la meme personne (compte, e-mail normalise).
-  // Jamais de changement de parrain apres coup. L'affilie est ensuite pose
-  // dans les metadata de la session ET de l'abonnement Stripe (trace) ; la
-  // commission elle-meme nait dans stripe-webhook a chaque facture payee.
-  let affiliateMeta: Record<string, string> = {};
-  try {
-    const codeSaisi = normalizeCode(requestedRef);
-    let { data: me } = await supabaseAuth.from("users").select("referred_by").eq("id", user.id).maybeSingle();
-    let attachedCode = "";
-    if (codeSaisi && !me?.referred_by) {
-      const { data: attach } = await supabaseAuth.rpc("affiliate_attach_referral", { p_code: codeSaisi });
-      console.log("[create-checkout-session] code partenaire saisi : " + JSON.stringify(attach));
-      if (attach?.ok) {
-        attachedCode = codeSaisi;
-        me = (await supabaseAuth.from("users").select("referred_by").eq("id", user.id).maybeSingle()).data;
-      }
-    }
-    if (me?.referred_by) {
-      affiliateMeta = { affiliate_id: String(me.referred_by), ...(attachedCode ? { affiliate_code: attachedCode } : {}) };
-    }
-  } catch (e) {
-    // Jamais bloquant : le paiement passe, la commission est tranchee au webhook.
-    console.error("[create-checkout-session] lecture du parrainage impossible :", (e as Error).message);
-  }
 
   try {
     const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" });
@@ -308,9 +273,6 @@ Deno.serve(async (req: Request) => {
       metadata: { market: usedMarket, plan: "pro", interval: usedInterval, ...consent.metadata },
       subscription_data: { metadata: { market: usedMarket, plan: "pro", interval: usedInterval, ...consent.metadata } },
     };
-    // Programme de partenaires : l'affilie (trace) sur la session ET sur l'abonnement.
-    Object.assign(baseSession.metadata, affiliateMeta);
-    Object.assign(baseSession.subscription_data.metadata, affiliateMeta);
     // Codes promo (campagne email du 25/09/2026), formule au mois uniquement :
     // les reductions en montant fixe ne doivent jamais rendre une semaine
     // gratuite. Par defaut, champ « code promo » sur la page Stripe. Si la page
@@ -328,43 +290,6 @@ Deno.serve(async (req: Request) => {
         console.error("[create-checkout-session] lecture du code promo " + promoCode + " impossible:", (e as Error).message);
       }
     }
-    // Essai : la personne a-t-elle deja eu un abonnement chez Stripe ?
-    // ATTENTION : supprimer son compte efface aussi le lien vers son client
-    // Stripe (billing_customers, suppression en cascade) et ses lignes de
-    // subscriptions. Le seul lien restant est l'adresse e-mail : on regarde
-    // donc le client relie ET tous les clients Stripe de la meme adresse.
-    // Limite connue : une autre adresse e-mail donne un nouvel essai.
-    // Erreur de lecture = on ne donne pas l'essai (jamais deux essais par erreur).
-    let stripeHasHistory: boolean | null = false;
-    if (trialDays(getEnv) > 0 && trialAllowedForInterval(usedInterval) && statuses && statuses.length === 0) {
-      try {
-        const clients = new Set<string>();
-        if (mapping?.stripe_customer_id) clients.add(mapping.stripe_customer_id);
-        if (user.email) {
-          const memeAdresse = await stripe.customers.list({ email: user.email, limit: 20 });
-          for (const c of memeAdresse.data) clients.add(c.id);
-        }
-        for (const id of clients) {
-          const past = await stripe.subscriptions.list({ customer: id, status: "all", limit: 1 });
-          if (past.data.length > 0) { stripeHasHistory = true; break; }
-        }
-      } catch (e) {
-        console.error("[create-checkout-session] lecture de l'historique Stripe impossible:", (e as Error).message);
-        stripeHasHistory = true;
-      }
-    }
-    // Essai de 7 jours : abonnement MENSUEL seulement (duree resolue ici, jamais
-    // un champ libre du navigateur), nouveau compte ou compte gratuit jamais
-    // abonne ; semaine, annee, ancien abonne / ancien essai (base OU Stripe) :
-    // paiement immediat. Carte toujours demandee (Stripe Checkout en mode
-    // abonnement la demande toujours ; en essai : payment_method_collection
-    // "always").
-    const trial = trialForAccount({ days: trialDays(getEnv), interval: usedInterval, statuses, stripeHasHistory });
-    if (trial.trial) {
-      const tp = trialSessionParams(trial.days, baseSession.subscription_data.metadata as Record<string, string>);
-      Object.assign(baseSession, { payment_method_collection: tp.payment_method_collection, subscription_data: tp.subscription_data });
-      (baseSession.metadata as Record<string, string>).trial_days = String(trial.days);
-    }
     const fieldOnly = usedInterval === "month" ? { allow_promotion_codes: true } : {};
     let session;
     if (promotionCodeId) {
@@ -375,7 +300,7 @@ Deno.serve(async (req: Request) => {
       }
     }
     if (!session) session = await stripe.checkout.sessions.create({ ...baseSession, ...fieldOnly });
-    return new Response(JSON.stringify({ ok: true, processed: true, url: session.url, trial_days: trial.trial ? trial.days : 0 }), {
+    return new Response(JSON.stringify({ ok: true, processed: true, url: session.url }), {
       status: 200,
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });

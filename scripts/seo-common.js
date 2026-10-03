@@ -12,12 +12,7 @@ const DIRS = MARKETS._dirs;
 const RETIRED_DIRS = MARKETS._retiredDirs || {};
 const DIR_CODES = Object.keys(DIRS).filter(function (d) { return !Object.prototype.hasOwnProperty.call(RETIRED_DIRS, d); });
 const X_DEFAULT_DIR = MARKETS._xDefaultDir || "fr";
-const LEAGUES_FILE = JSON.parse(fs.readFileSync(path.join(ROOT, "config/leagues.json"), "utf8"));
-const LEAGUES = LEAGUES_FILE.leagues;
-// Competitions retirees du site (config/leagues.json#competitions_retirees, 03/10/2026) :
-// jamais analysees ni affichees, gardees seulement pour rediriger (301) leurs anciennes
-// pages vers l'accueil de la version (scripts/build-locales.js, scripts/match-lifecycle.js).
-const RETIRED_LEAGUES = Array.isArray(LEAGUES_FILE.competitions_retirees) ? LEAGUES_FILE.competitions_retirees : [];
+const LEAGUES = JSON.parse(fs.readFileSync(path.join(ROOT, "config/leagues.json"), "utf8")).leagues;
 
 // Textes SEO par repertoire public : i18n/seo/<dir>.json.
 var seoCache = {};
@@ -50,14 +45,6 @@ function leagueByKey(key) {
   return null;
 }
 function leagueSlug(key) { var l = leagueByKey(key); return l ? slugify(l.displayName) : null; }
-function retiredLeagueByKey(key) {
-  if (!key || leagueByKey(key)) return null;
-  for (var i = 0; i < RETIRED_LEAGUES.length; i++) if (RETIRED_LEAGUES[i].key === key) return RETIRED_LEAGUES[i];
-  return null;
-}
-function isRetiredLeague(key) { return !!retiredLeagueByKey(key); }
-// Ancienne page championnat d'une competition retiree (meme slug que leagueSlug).
-function retiredLeagueHubPath(dir, key) { var l = retiredLeagueByKey(key); return l ? "/" + dir + "/leagues/" + slugify(l.displayName) + ".html" : null; }
 
 // Chemins publics (URL canonique = forme .html, repertoire = "/<dir>/").
 function homePath(dir) { return "/" + dir + "/"; }
@@ -76,6 +63,8 @@ function guidePath(dir, file) {
 var GUIDE_TITLE_KEYS = {
   "plus-de-2-5-buts-probabilite-methode-poisson.html": "blog_hub.art_over25_title",
   "xg-expected-goals-guide-complet.html": "blog_hub.art_xg_title",
+  "prediction-ia-football-guide-2026.html": "blog_hub.art_prediction_title",
+  "value-bet-guide-complet-2026.html": "blog_hub.art_valuebet_title",
   "guide-paris-sportifs-debutant-complet.html": "blog_hub.art_beginner_title",
   "meilleurs-bookmakers-monde-2026.html": "blog_hub.art_bookmakers_title"
 };
@@ -263,24 +252,11 @@ function fitText(candidates, max) {
   return list.slice().sort(function (a, b) { return Array.from(a).length - Array.from(b).length; })[0] || "";
 }
 // Nature d'une competition pour la presentation factuelle des hubs.
-// config/leagues.json#kind d'abord (competitions ajoutees le 30/09/2026 :
-// national2/3/4, cup, nations, wcq), sinon la table historique.
 const LEAGUE_KIND = { ldc: "ucl", el: "uel", ecl: "uecl", mls: "mls" };
-function leagueKind(key) { var l = leagueByKey(key); return (l && l.kind) || LEAGUE_KIND[key] || "national"; }
-// Nom d'une competition dans la langue d'une version (config/leagues.json#names,
-// puis langue de base, puis displayName). Le slug reste celui du displayName.
-function leagueDisplayName(key, dir) {
-  var l = leagueByKey(key);
-  if (!l) return null;
-  var loc = DIRS[dir] ? DIRS[dir].locale : null, n = l.names && typeof l.names === "object" ? l.names : null;
-  if (n && loc && n[loc]) return n[loc];
-  if (n && loc && n[loc.split("-")[0]]) return n[loc.split("-")[0]];
-  return l.displayName;
-}
+function leagueKind(key) { return LEAGUE_KIND[key] || "national"; }
 
 module.exports = {
-  ROOT: ROOT, SITE_URL: SITE_URL, MARKETS: MARKETS, DIRS: DIRS, DIR_CODES: DIR_CODES, X_DEFAULT_DIR: X_DEFAULT_DIR, LEAGUES: LEAGUES, RETIRED_LEAGUES: RETIRED_LEAGUES,
-  retiredLeagueByKey: retiredLeagueByKey, isRetiredLeague: isRetiredLeague, retiredLeagueHubPath: retiredLeagueHubPath,
+  ROOT: ROOT, SITE_URL: SITE_URL, MARKETS: MARKETS, DIRS: DIRS, DIR_CODES: DIR_CODES, X_DEFAULT_DIR: X_DEFAULT_DIR, LEAGUES: LEAGUES,
   seoConf: seoConf, dictFor: dictFor, get: get, escHtml: escHtml, fill: fill, slugify: slugify,
   leagueByKey: leagueByKey, leagueSlug: leagueSlug, homePath: homePath, leagueHubPath: leagueHubPath, matchPath: matchPath,
   blogHubPath: blogHubPath, guidePath: guidePath, guideLabel: guideLabel, GUIDE_TITLE_KEYS: GUIDE_TITLE_KEYS,
@@ -289,5 +265,5 @@ module.exports = {
   nearestDirs: nearestDirs, nearestDir: nearestDir, clubsHubPath: clubsHubPath, articlesHubPath: articlesHubPath, methodologyPath: methodologyPath,
   clubEntries: clubEntries, leagueClubPages: leagueClubPages, clubPageFor: clubPageFor, versionNav: versionNav,
   footerNavHtml: footerNavHtml, injectFooterNav: injectFooterNav, FOOTER_NAV_OPEN: FOOTER_NAV_OPEN, FOOTER_NAV_CLOSE: FOOTER_NAV_CLOSE,
-  fitText: fitText, leagueKind: leagueKind, leagueDisplayName: leagueDisplayName
+  fitText: fitText, leagueKind: leagueKind
 };

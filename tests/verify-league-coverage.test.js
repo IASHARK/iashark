@@ -7,7 +7,7 @@ const { resolveSeason, computeTier } = require("../scripts/verify-league-coverag
 
 const ROOT = path.join(__dirname, "..");
 
-test("config/leagues.json : contient exactement les 32 competitions, cles/ids uniques", () => {
+test("config/leagues.json : contient exactement les 19 competitions de lancement, cles/ids uniques", () => {
   // 13 -> 14 le 2026-09-13 : ajout de liga_mx (decision produit explicite
   // lancement Mexique, voir config/leagues.json#_readme et
   // data/league-validation-registry.json#leagues.liga_mx).
@@ -20,19 +20,12 @@ test("config/leagues.json : contient exactement les 32 competitions, cles/ids un
   // validation Score Lab - ids/saisons/coverage verifies en direct, voir
   // config/leagues.json#_readme, data/league-validation-registry.json et
   // LATAM_OPENING_STATUS.md.
-  // 19 -> 48 le 2026-09-30 : 29 competitions des niveaux A et B de l'etude
-  // POUR-CLEMENT/23-LIGUES-A-AJOUTER.html (decision de Clement, V3 « machine »),
-  // toutes « en test » (config/leagues.json#fiabilite), groupe « extension »
-  // sauf la Ligue des nations (deja collectee a part) : lib/league-scope.js.
-  // 48 -> 32 le 2026-10-03 : les 16 competitions « en test » sans aucune
-  // verification sont retirees du site (decision de Clement) et deplacees dans
-  // config/leagues.json#competitions_retirees (redirections 301 seulement).
   var config = JSON.parse(fs.readFileSync(path.join(ROOT, "config/leagues.json"), "utf8"));
-  assert.equal(config.leagues.length, 32);
+  assert.equal(config.leagues.length, 19);
   var keys = config.leagues.map(function (l) { return l.key; });
   var ids = config.leagues.map(function (l) { return l.apiFootballId; });
-  assert.equal(new Set(keys).size, 32, "cles internes dupliquees");
-  assert.equal(new Set(ids).size, 32, "apiFootballId dupliques");
+  assert.equal(new Set(keys).size, 19, "cles internes dupliquees");
+  assert.equal(new Set(ids).size, 19, "apiFootballId dupliques");
   config.leagues.forEach(function (l) {
     assert.ok(l.key && l.displayName && l.country && typeof l.apiFootballId === "number", JSON.stringify(l) + " incomplet");
     assert.equal(typeof l.europeanQualification, "boolean");
@@ -42,8 +35,7 @@ test("config/leagues.json : contient exactement les 32 competitions, cles/ids un
 test("config/leagues.json : ligues LATAM - ids verifies, aucune qualification europeenne, aucune cle odds inventee", () => {
   var config = JSON.parse(fs.readFileSync(path.join(ROOT, "config/leagues.json"), "utf8"));
   var byKey = {};
-  // Identite verifiee, en ligne ou retiree du site le 03/10/2026 (config/leagues.json#competitions_retirees).
-  config.leagues.concat(config.competitions_retirees || []).forEach(function (l) { byKey[l.key] = l; });
+  config.leagues.forEach(function (l) { byKey[l.key] = l; });
   var expected = { argentina_liga_profesional: 128, colombia_primera_a: 239, peru_primera: 281, chile_primera: 265 };
   Object.keys(expected).forEach(function (k) {
     assert.ok(byKey[k], k + " absent");
@@ -74,51 +66,6 @@ test("registry : ligues LATAM presentes, jamais presentees comme validees", () =
     assert.equal(e.score_runnable, false, k);
     assert.equal(e.player_runnable, false, k);
     assert.equal(e.live_eligible, false, k);
-  });
-});
-
-test("config/leagues.json : les 29 competitions du 30/09/2026 - ids relus dans les fichiers API-Football, cles odds de la liste publique", () => {
-  var config = JSON.parse(fs.readFileSync(path.join(ROOT, "config/leagues.json"), "utf8"));
-  var byId = {};
-  // Identite verifiee, en ligne ou retiree du site le 03/10/2026 (config/leagues.json#competitions_retirees).
-  config.leagues.concat(config.competitions_retirees || []).forEach(function (l) { byId[l.apiFootballId] = l; });
-  // id API-Football -> cle The Odds API (null : absente de la liste publique du 30/09/2026).
-  var attendu = {
-    40: "soccer_efl_champ", 41: "soccer_england_league1", 42: "soccer_england_league2", 62: "soccer_france_ligue_two",
-    79: "soccer_germany_bundesliga2", 141: "soccer_spain_segunda_division", 136: "soccer_italy_serie_b", 144: "soccer_belgium_first_div",
-    203: "soccer_turkey_super_league", 179: "soccer_spl", 197: "soccer_greece_super_league", 71: "soccer_brazil_campeonato",
-    218: "soccer_austria_bundesliga", 207: "soccer_switzerland_superleague", 119: "soccer_denmark_superliga", 103: "soccer_norway_eliteserien",
-    106: "soccer_poland_ekstraklasa", 180: null, 307: "soccer_saudi_arabia_pro_league", 5: "soccer_uefa_nations_league",
-    32: "soccer_fifa_world_cup_qualifiers_europe", 81: "soccer_germany_dfb_pokal", 137: "soccer_italy_coppa_italia", 143: "soccer_spain_copa_del_rey",
-    45: "soccer_fa_cup", 66: "soccer_france_coupe_de_france", 89: null, 80: "soccer_germany_liga3", 345: null,
-  };
-  Object.keys(attendu).forEach(function (id) {
-    var l = byId[id];
-    assert.ok(l, "competition " + id + " absente");
-    assert.equal(l.oddsSportKey || null, attendu[id], l.key);
-    assert.notEqual(l.apiFootballPinnacleFallback, false, l.key + " : repli Pinnacle api-football garde");
-    assert.equal(l.groupe, l.key === "nations_league" ? "socle" : "extension", l.key);
-    assert.ok(config.fiabilite.ligues_validees.indexOf(l.key) === -1, l.key + " jamais validee a l'ouverture");
-  });
-  // Les 19 d'avant : groupe socle, rien d'autre ne change (15 en ligne depuis le retrait du 03/10/2026 :
-  // Afrique du Sud, Colombie, Perou et Chili sont dans competitions_retirees).
-  config.leagues.slice(0, 15).forEach(function (l) { assert.equal(l.groupe, "socle", l.key); assert.equal(l.kind, undefined, l.key); });
-});
-
-test("registry : les 29 competitions du 30/09/2026, jamais presentees comme validees", () => {
-  var reg = JSON.parse(fs.readFileSync(path.join(ROOT, "data/league-validation-registry.json"), "utf8"));
-  var config = JSON.parse(fs.readFileSync(path.join(ROOT, "config/leagues.json"), "utf8"));
-  config.leagues.filter(function (l) { return l.groupe === "extension" || l.key === "nations_league"; }).forEach(function (l) {
-    var e = reg.leagues[l.key];
-    assert.ok(e, l.key + " absent du registry");
-    assert.equal(e.catalogue_status, "OPENED_WITHOUT_SCORE_LAB_VALIDATION", l.key);
-    assert.equal(e.catalogue_decision.validation_claimed, false, l.key);
-    assert.equal(e.score_runnable, false, l.key);
-    assert.equal(e.live_eligible, false, l.key);
-    // player_runnable : resultat Player Lab deja inscrit AVANT le 30/09 pour 6 d'entre
-    // elles (championship, ligue2, belgium_pro, brazil_seriea, scotland_premiership,
-    // denmark_superliga) : conserve tel quel ; aucune entree creee ce jour ne l'active.
-    if (e.catalogue_decision.date === "2026-09-30" && e.updated_at === "2026-09-30T06:00:00.000Z") assert.equal(e.player_runnable, false, l.key);
   });
 });
 

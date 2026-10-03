@@ -128,40 +128,6 @@
     return brut;
   }
 
-  /* ---------- Langue du compte (02/10/2026) ----------
-     UNE source : public.user_preferences.language (lib/langue-compte.js).
-     Connexion : la destination est reecrite dans la langue du compte (/fr/pro.html
-     -> /es/pro.html pour un compte espagnol). Inscription : la langue de la
-     page ou il s'inscrit devient celle du compte. La cle de session posee ici
-     evite que app-client.js refasse le meme travail (jamais de boucle). */
-  function marquerLangueAppliquee() {
-    var L = window.IasharkLangueCompte;
-    try { sessionStorage.setItem(L ? L.CLE_SESSION : 'iashark_langue_compte_appliquee', '1'); } catch (_e) {}
-  }
-  async function destinationLangueCompte(dest) {
-    var L = window.IasharkLangueCompte;
-    marquerLangueAppliquee();
-    if (!L || !sb) return dest;
-    try {
-      var s = await sb.auth.getSession();
-      var id = s && s.data && s.data.session && s.data.session.user && s.data.session.user.id;
-      if (!id) return dest;
-      var r = await sb.from('user_preferences').select('language').eq('user_id', id).maybeSingle();
-      var lang = r && !r.error && r.data && r.data.language;
-      return lang ? L.destinationPour(lang, dest) : dest;
-    } catch (_e) { return dest; }
-  }
-  async function enregistrerLangueInscription(userId) {
-    var L = window.IasharkLangueCompte;
-    marquerLangueAppliquee();
-    if (!L || !sb || !userId) return;
-    try {
-      // Ligne absente a l'inscription : elle est creee avec la langue de la page.
-      // ignoreDuplicates : une ligne deja posee par la base (0044) n'est jamais ecrasee.
-      await sb.from('user_preferences').upsert({ user_id: userId, language: L.langueDeLaPage(location.pathname) }, { onConflict: 'user_id', ignoreDuplicates: true });
-    } catch (_e) { /* jamais bloquant : la base pose aussi la langue (migration 0044) */ }
-  }
-
   /* ---------- ?next= suit le visiteur d'une page d'auth a l'autre ----------
      « Pas encore de compte ? » (connexion -> inscription) et « Déjà membre ? »
      (inscription -> connexion) perdaient le ?next=. Un visiteur envoye a la
@@ -221,7 +187,7 @@
       if (passeParGuard) {
         // Suivi interne anonyme : la connexion n'est jamais reliee au compte.
         if (window.iasharkTrack) window.iasharkTrack('login_completed', {});
-        location.href = await destinationLangueCompte(destination());
+        location.href = destination();
         return;
       }
     } catch (err) {
@@ -248,14 +214,6 @@
     var dir = m ? m[1] : 'fr';
     var data = { iashark_marketing_opt_in: consenti ? 'true' : 'false', iashark_locale: LOCALE_DU_REPERTOIRE[dir], iashark_market: dir };
     if (consenti) data.iashark_marketing_text_version = EMAIL_CONSENT_TEXT_VERSION;
-    /* Programme de partenaires (03/10/2026) : code memorise par funnel-track.js
-       (?ref=CODE, PREMIER clic gagnant, 60 jours). Le trigger de la base
-       (migration 0050, affiliate_on_signup) le verifie (affilie valide, pas la
-       meme personne) et pose users.referred_by : jamais modifiable ensuite. */
-    try {
-      var aff = typeof window.iasharkAffiliate === 'function' ? window.iasharkAffiliate() : null;
-      if (aff && aff.first) data.referred_by = aff.first;
-    } catch (_e) {}
     return data;
   }
 
@@ -284,7 +242,6 @@
         // Jeton du compte cree transmis avec son user_id : sans lui la
         // politique RLS de funnel_events rejetait l'evenement (cle anon seule).
         var nouvelleSession = res.data.session;
-        await enregistrerLangueInscription(nouvelleSession.user && nouvelleSession.user.id);
         if (window.iasharkTrack) window.iasharkTrack('signup_completed', {}, nouvelleSession.user && nouvelleSession.user.id, nouvelleSession.access_token);
         // Retour la ou l'inscription a commence (match, abonnement...) quand
         // un ?next= interne existe ; sinon « Mon compte » avec le message de

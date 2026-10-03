@@ -57,19 +57,8 @@
       el.style.display = closed ? "none" : "";
     });
   }
-  // Pricing grid (assets/pricing-grid.js, 30/09/2026): the Pro card (price,
-  // one billing-period picker showing only payable periods), then Free on one
-  // line; trial terms only when the server confirms them. Same API as
-  // lib/pro-plan-picker.js (interval, isAvailable, whenReady, loadAvailability):
-  // the checkout code below is unchanged. The consent boxes, the pay button and
-  // its message are MOVED into the Pro card (slot option).
-  var gridEl = document.getElementById("pricingGrid");
-  var picker = (window.IasharkPricingGrid && gridEl)
-    ? window.IasharkPricingGrid.mount(gridEl, {
-        variant: "complet", heading: false, annual: true, checkout: true,
-        slot: ["checkoutConsent", "subscribeProBtn", "proMsg"].map(function (id) { return document.getElementById(id); }).filter(Boolean),
-        onUpdate: offerUpdate
-      })
+  var picker = (window.IasharkProPlanPicker && document.getElementById("proPlanPicker"))
+    ? window.IasharkProPlanPicker.mount(document.getElementById("proPlanPicker"), { onUpdate: offerUpdate })
     : null;
   // Duree non payable (config/markets.json#checkoutOpen, ou Price Stripe
   // absent cote serveur) : masquee (decision du 19/09/2026).

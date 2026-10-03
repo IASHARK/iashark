@@ -6,14 +6,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { buildMatchViewModel } = require('../lib/match-view-model');
 
-// Une seule source (01/10/2026) : chaque match porte la chance posee par le pipeline.
-const CHANCE = require('../lib/chance-iashark');
 function raw(overrides) {
-  const m = rawBrut(overrides);
-  CHANCE.poserChance(m);
-  return m;
-}
-function rawBrut(overrides) {
   return {
     id: 7, date: '2026-09-20 15:00', league: 'Premier League', league_id: 39,
     home: { id: 1, n: 'Home FC' }, away: { id: 2, n: 'Away FC' },
@@ -34,9 +27,7 @@ function rawBrut(overrides) {
 test('carte : le pari retenu est compare a la probabilite juste (marge retiree), pas a 1 / cote', () => {
   const vm = buildMatchViewModel(raw({}));
   assert.equal(vm.model.recommendedImplied, 59.2);
-  // Chance affichee = le plus bas entre 59,8 (modele) et 59,2 (cote sans marge), en % entier : 59.
-  assert.equal(vm.model.recommendation.probability, 59);
-  assert.equal(vm.model.recommendedEdge, -0.2);
+  assert.equal(vm.model.recommendedEdge, 0.6);
 });
 
 test('carte : sans ligne pour le pari dans markets_compared (donnees anterieures), repli sur 1 / cote', () => {
@@ -55,9 +46,9 @@ test('tableau : la ligne du pari retenu reprend exactement les chiffres de la ca
   const vm = buildMatchViewModel(raw({}));
   const row = vm.model.marketTable.find(r => r.recommended);
   assert.ok(row, 'ligne du pari retenu presente');
-  assert.equal(row.model, vm.model.recommendation.probability, 'meme chance que la carte (chance_iashark)');
+  assert.equal(row.model, vm.recommendation ? vm.recommendation.probability : 59.8);
   assert.equal(row.market, 59.2);
-  assert.equal(row.edge, -0.2);
+  assert.equal(row.edge, 0.6);
   assert.equal(vm.model.marketTable.filter(r => r.recommended).length, 1);
 });
 

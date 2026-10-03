@@ -1,11 +1,6 @@
 /* =========================================================================
-   IASHARK ESPACE PRO (ancienne page « Outils », renommee le 29/09/2026)
-   Trois onglets : tableau de bord (pro-dashboard.js), mon combine et
-   detecteur d'ecarts. Plus aucun calcul de mise, aucun capital ni aucune
-   « esperance » (decision de Clement du 30/09/2026 : IASHARK ne conseille
-   pas de mise). Calcul de mise, cote juste, simulateur du capital et
-   journal sont retires ; leurs anciennes ancres menent au
-   tableau de bord.
+   IASHARK TOOL CENTER
+   Six outils : detecter, evaluer, dimensionner, simuler, combiner, mesurer.
 
    SECURITE — regle centrale de ce fichier.
    Cette page ne lit JAMAIS /data.json. Les donnees de match arrivent
@@ -20,7 +15,7 @@
 
   var D = window.IasharkToolsDomain;
   var ctx = { user: null, isPro: false, isAdmin: false };
-  var etat = { outil: 'tableau', matchs: null, perso: { ligues: [], marches: [] } };
+  var etat = { outil: 'scanner', matchs: null, decisions: [], prefs: null, bankroll: null, combo: [] };
 
   function $(sel, racine) { return (racine || document).querySelector(sel); }
   function $$(sel, racine) { return Array.prototype.slice.call((racine || document).querySelectorAll(sel)); }
@@ -38,28 +33,23 @@
   // Lien interne dans le repertoire de langue/marche courant (/gb/, /mx/...).
   function lien(p) { return (window.I18N && window.I18N.href) ? window.I18N.href(p) : '/' + p; }
   function estFr() { return !(window.I18N && window.I18N.locale) || window.I18N.locale === 'fr'; }
+  // Devise du marche courant (lib/market-config.js -> window.IASHARK_MARKET),
+  // EUR par defaut. Les montants saisis ici sont ceux de l'utilisateur.
+  function devise() { return (window.IASHARK_MARKET && window.IASHARK_MARKET.currency) || 'EUR'; }
+  function symboleDevise() {
+    try {
+      var parts = new Intl.NumberFormat(localeTag(), { style: 'currency', currency: devise() }).formatToParts(0);
+      for (var i = 0; i < parts.length; i++) if (parts[i].type === 'currency') return parts[i].value;
+    } catch (e) {}
+    return devise() === 'EUR' ? '€' : devise();
+  }
+  function euros(v) {
+    try { return Number(v).toLocaleString(localeTag(), { style: 'currency', currency: devise(), minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+    catch (e) { return num(v, 0) + ' ' + symboleDevise(); }
+  }
+  function eurosSigne(v) { return (v >= 0 ? '+' : '') + euros(v); }
   function signe(v, d) { return (v >= 0 ? '+' : '') + num(v, d == null ? 1 : d); }
   function points() { return t('tools_page.unit_points', 'pts'); }
-
-  /* ---------------------------------------------------------------------
-     PERSONNALISATION (02/10/2026) : ses competitions (etoiles du compte,
-     user_metadata.fav_leagues, lib/fav-leagues.js) et ses types de paris
-     (pro_preferences.marches, 0044) passent EN PREMIER et portent « Ton
-     choix ». Rien d'autre ne change : memes paris, memes chiffres, meme
-     ordre a l'interieur de chaque groupe. Jamais un calcul.
-     --------------------------------------------------------------------- */
-  // 03/10/2026 (decision de Clement) : plus de « ★ Ton choix » ni de tri par competitions ou types de
-  // paris : les paris sont les MEMES pour tous, dans le meme ordre. Les competitions preferees ne servent
-  // qu'a l'information (matchs du jour et resultats dans les messages Pro).
-  function estChoisi() { return false; }
-  function choisisDabord(rows) {
-    var a = [], b = [];
-    (rows || []).forEach(function (r) { (estChoisi(r) ? a : b).push(r); });
-    return a.concat(b);
-  }
-  function badgeChoix(r) {
-    return estChoisi(r) ? '<span class="ml-1.5 inline-flex shrink-0 items-center gap-1 rounded-full bg-cyan/10 px-2 py-0.5 align-middle text-[10.5px] font-bold text-cyan">★ ' + esc(t('pro_perso.badge', 'Ton choix')) + '</span>' : '';
-  }
 
   /* ---------------------------------------------------------------------
      DONNEES DE DEMONSTRATION
@@ -74,12 +64,10 @@
     { edge: 4.1, match: 'Club C – Club D', market: 'Les deux équipes marquent : Oui', marketId: 'btts-yes', league: 'Championnat 2', modelProbability: 61.0, marketProbability: 56.9, fairOdds: 1.64, risk: 'Modéré' },
     { edge: 3.2, match: 'Club E – Club F', market: 'Plus de 2,5 buts', marketId: 'over-25', league: 'Championnat 1', modelProbability: 55.4, marketProbability: 52.2, fairOdds: 1.81, risk: 'Modéré' }
   ];
-  // Chance retenue = le plus petit des deux chiffres, modele ou cote sans marge,
-  // comme pour un abonne (lib/tools-domain.js#comboSelections).
   var DEMO_COMBO = [
-    { id: 'd1', matchKey: 'd1', match: 'Club A – Club B', market: '1re mi-temps : moins de 1,5 but', marketId: 'fh-under-15', probability: 55.9, modelProbability: 58.2, fairProbability: 55.9, odds: 1.73 },
-    { id: 'd2', matchKey: 'd2', match: 'Club C – Club D', market: 'Les deux équipes marquent : Oui', marketId: 'btts-yes', probability: 54.8, modelProbability: 54.8, fairProbability: 56.2, odds: 1.72 },
-    { id: 'd3', matchKey: 'd3', match: 'Club E – Club F', market: 'Plus de 2,5 buts', marketId: 'over-25', probability: 50.3, modelProbability: 52.0, fairProbability: 50.3, odds: 1.90 }
+    { id: 'd1', matchKey: 'd1', match: 'Club A – Club B', market: '1re mi-temps : moins de 1,5 but', marketId: 'fh-under-15', probability: 64.2, odds: 1.73 },
+    { id: 'd2', matchKey: 'd2', match: 'Club C – Club D', market: 'Les deux équipes marquent : Oui', marketId: 'btts-yes', probability: 61.0, odds: 1.72 },
+    { id: 'd3', matchKey: 'd3', match: 'Club E – Club F', market: 'Plus de 2,5 buts', marketId: 'over-25', probability: 55.4, odds: 1.90 }
   ];
   var DEMO_LEAGUES = { 'Championnat 1': 'tools_page.demo_league_1', 'Championnat 2': 'tools_page.demo_league_2' };
   function ligueAffichee(nom) { return DEMO_LEAGUES[nom] ? t(DEMO_LEAGUES[nom], nom) : (nom || ''); }
@@ -137,7 +125,11 @@
   // traduction se fait ici, en interne, par correspondance exacte du texte.
   var ENTETES = {
     'Détecteur d’écarts': ['tools_page.scan_title', 'tools_page.scan_sub'],
-    'Analyse de combiné': ['tools_page.combo_title', 'tools_page.combo_sub']
+    'Cote juste': ['tools_page.fair_title', 'tools_page.fair_sub'],
+    'Calculateur de mise': ['tools_page.stake_title', 'tools_page.stake_sub'],
+    'Simulateur de capital': ['tools_page.bankroll_title', 'tools_page.bankroll_sub'],
+    'Analyse de combiné': ['tools_page.combo_title', 'tools_page.combo_sub'],
+    'Journal des décisions': ['tools_page.journal_title', 'tools_page.journal_sub']
   };
   function enTete(titre, sous) {
     var clefs = ENTETES[titre];
@@ -145,6 +137,21 @@
     var sousTxt = clefs ? t(clefs[1], sous) : sous;
     return '<header class="mb-6"><h2 class="' + S.titre + '">' + esc(titreTxt) + '</h2>'
       + '<p class="' + S.sous + '">' + esc(sousTxt) + '</p></header>';
+  }
+
+  function champ(id, label, opts) {
+    var o = opts || {};
+    var suffixe = o.unit ? '<span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[13px] font-medium text-soft">' + esc(o.unit) + '</span>' : '';
+    return '<div><label for="' + id + '" class="' + S.label + '">' + esc(label) + '</label>'
+      + '<div class="relative">'
+      + '<input id="' + id + '" type="' + (o.type || 'number') + '"' + (o.step ? ' step="' + o.step + '"' : '')
+      + (o.min != null ? ' min="' + o.min + '"' : '') + (o.max != null ? ' max="' + o.max + '"' : '')
+      + ' value="' + esc(o.value == null ? '' : o.value) + '"'
+      + (o.placeholder ? ' placeholder="' + esc(o.placeholder) + '"' : '')
+      + ' class="' + S.input + (o.unit ? ' pr-12' : '') + '">'
+      + suffixe + '</div>'
+      + (o.help ? '<span class="' + S.aide + '">' + esc(o.help) + '</span>' : '')
+      + '<span class="' + S.err + '" data-err="' + id + '" hidden></span></div>';
   }
 
   function select(id, label, options, valeur) {
@@ -196,6 +203,17 @@
       + (cta || '') + '</div>';
   }
 
+  function erreurChamp(id, message) {
+    var el = document.querySelector('[data-err="' + id + '"]');
+    if (!el) return;
+    el.textContent = message || '';
+    el.hidden = !message;
+    var input = document.getElementById(id);
+    if (input) {
+      input.setAttribute('aria-invalid', message ? 'true' : 'false');
+      input.classList.toggle('border-[#ff8f85]/60', !!message);
+    }
+  }
   window.__iasharkToolsState = null; // pas d'etat premium expose
 
   /* =====================================================================
@@ -210,9 +228,9 @@
       : '<span class="shrink-0 text-[12.5px] text-soft/60">—</span>';
     return '<li class="flex items-center gap-3 border-t border-hairline px-1 py-3 first:border-t-0 sm:gap-4">'
       + edge
-      + '<div class="min-w-0 flex-1"><div class="truncate text-[14px] font-semibold text-ink">' + titre + (reel ? badgeChoix(r) : '') + '</div>'
+      + '<div class="min-w-0 flex-1"><div class="truncate text-[14px] font-semibold text-ink">' + titre + '</div>'
       + '<div class="truncate text-[12.5px] text-soft">' + esc(marcheLigne(r)) + ' · ' + esc(ligueAffichee(r.league)) + '</div></div>'
-      + '<div class="hidden w-[76px] shrink-0 text-right sm:block"><div class="text-[14px] font-bold text-ink tabular-nums">' + num(r.modelProbability, r.chanceIashark ? 0 : 1) + '%</div><div class="text-[11px] text-soft">' + esc(t('tools_page.label_model_short', 'modèle')) + '</div></div>'
+      + '<div class="hidden w-[76px] shrink-0 text-right sm:block"><div class="text-[14px] font-bold text-ink tabular-nums">' + num(r.modelProbability, 1) + '%</div><div class="text-[11px] text-soft">' + esc(t('tools_page.label_model_short', 'modèle')) + '</div></div>'
       + '<div class="hidden w-[76px] shrink-0 text-right sm:block"><div class="text-[14px] font-semibold text-soft tabular-nums">' + (r.marketProbability != null ? num(r.marketProbability, 1) + '%' : '—') + '</div><div class="text-[11px] text-soft">' + esc(t('tools_page.label_market_short', 'marché')) + '</div></div>'
       + action + '</li>';
   }
@@ -237,15 +255,10 @@
         + '<div class="' + S.carte + '"><ul class="list-none p-0">'
         + DEMO_SCAN.map(function (r, i) { return ligneScan(r, i, false); }).join('')
         + '</ul></div>'
-        // Plus de « 5000 simulations par match » ecrit en dur (2e contre-controle de
-        // l'avocat du diable, 30/09/2026) : faux pour un pari du moteur v3, calcule
-        // exactement sans simulation. Le vrai nombre n'est affiche que par match,
-        // quand le champ nb_simulations existe (accueil et liste).
-        + '<div class="mt-5 grid grid-cols-2 gap-3">'
-        // 48 = config/leagues.json#leagues (tests/controle-chiffres-publics.test.js) ; plus de
-        // « 19 championnats analyses chaque jour » ni d'« analyse offerte par jour » (30/09/2026).
-        + kpi('48', t('tools_page.scan_kpi_leagues', 'Compétitions couvertes'))
-        + kpi('1', t('tools_page.scan_kpi_free', 'Match offert, avec son analyse'))
+        + '<div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">'
+        + kpi('19', t('tools_page.scan_kpi_leagues', 'Championnats analysés chaque jour'))
+        + kpi('5000', t('tools_page.scan_kpi_models', 'Simulations par match'))
+        + kpi('1', t('tools_page.scan_kpi_free', 'Analyse complète offerte par jour'))
         + '</div>'
         + panneauPro(t('tools_page.scan_pro_title', 'Le scanner classe tous les marchés du jour par écart.'),
             t('tools_page.scan_pro_sub', 'Les matchs, marchés, probabilités et cotes réels sont servis uniquement aux abonnés.'));
@@ -271,10 +284,10 @@
         var tri = ($('#scanTri') || {}).value || 'edge';
         var rows = D.scanValue(matchs, { minEdge: minEdge }) || [];
         if (tri === 'heure') rows = rows.slice().sort(function (a, b) { return String(a.date || '') < String(b.date || '') ? -1 : 1; });
-        rows = choisisDabord(rows).slice(0, 15);
+        rows = rows.slice(0, 15);
         box.innerHTML = rows.length
           ? '<ul class="list-none p-0">' + rows.map(function (r, i) { return ligneScan(r, i, true); }).join('') + '</ul>'
-          : vide(t('tools_page.scan_empty_threshold_title', 'Aucun marché au-dessus de ce seuil'), t('tools_page.scan_empty_threshold_text', 'Aujourd’hui, aucun écart affiché n’atteint ce seuil. Les écarts en faveur du modèle ne sont pas tous affichés.'));
+          : vide(t('tools_page.scan_empty_threshold_title', 'Aucun marché au-dessus de ce seuil'), t('tools_page.scan_empty_threshold_text', 'C’est une information en soi : aujourd’hui, le marché est aligné sur nos calculs.'));
       }
       peindre();
       ['scanEdge', 'scanTri'].forEach(function (id) {
@@ -285,45 +298,265 @@
   }
 
   /* =====================================================================
-     02-04 — (retires) COTE JUSTE, CALCULATEUR DE MISE, SIMULATEUR DE CAPITAL
-     Decision de Clement du 30/09/2026 : plus aucune mise, aucun capital ni
-     aucune esperance sur le site. Anciennes ancres -> tableau de bord.
+     02 — FAIR ODDS   "Cette cote reflete-t-elle la probabilite ?"
+     Calculateur pur : il ne consomme AUCUNE donnee du modele, il est donc
+     entierement utilisable par un visiteur gratuit avec ses propres chiffres.
      ===================================================================== */
+  function barreProb(label, valeur, largeur, accent) {
+    return '<div class="mb-3"><div class="mb-1.5 flex items-baseline justify-between">'
+      + '<span class="text-[12.5px] font-medium text-soft">' + esc(label) + '</span>'
+      + '<span class="text-[15px] font-bold ' + (accent ? 'text-cyan' : 'text-ink') + ' tabular-nums">' + num(valeur, 1) + '%</span></div>'
+      + '<div class="h-2.5 overflow-hidden rounded-full bg-panel">'
+      + '<div class="h-full rounded-full ' + (accent ? 'bg-cyan' : 'bg-soft/45') + '" style="width:' + Math.max(0, Math.min(100, largeur)) + '%"></div></div></div>';
+  }
+
+  function rendreFair(panneau) {
+    panneau.innerHTML = enTete('Cote juste', 'Traduit une probabilité en cote équitable, et la compare au prix réellement proposé.')
+      + '<div class="grid grid-cols-1 gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">'
+      + '<div class="' + S.carte + ' space-y-4">'
+      + champ('foProb', t('tools_page.fair_prob_label', 'Probabilité estimée'), { unit: '%', min: 0.1, max: 99.9, step: 0.1, value: 58, help: t('tools_page.fair_prob_help', 'Ta propre estimation, ou celle d’une analyse IASHARK.') })
+      + champ('foOdds', t('tools_page.fair_odds_label', 'Cote disponible'), { min: 1.01, step: 0.01, value: 1.90, help: t('tools_page.fair_odds_help', 'La cote décimale proposée par le bookmaker.') })
+      + '</div>'
+      + '<div id="foOut" class="min-w-0"></div></div>'
+      + panneauPro(t('tools_page.fair_pro_title', 'Utilise les probabilités du modèle plutôt que les tiennes.'),
+          t('tools_page.fair_pro_sub', 'Les abonnés retrouvent la probabilité IASHARK directement dans chaque analyse.'));
+
+    function calculer() {
+      var p = document.getElementById('foProb'), o = document.getElementById('foOdds');
+      var out = document.getElementById('foOut');
+      if (!p || !o || !out) return;
+      erreurChamp('foProb', ''); erreurChamp('foOdds', '');
+      var vp = Number(p.value), vo = Number(o.value);
+      var ko = false;
+      if (!(vp > 0 && vp < 100)) { erreurChamp('foProb', t('tools_page.err_probability_range', 'Entre une probabilité entre 0 et 100 %.')); ko = true; }
+      if (!(vo > 1)) { erreurChamp('foOdds', t('tools_page.err_odds_gt_one_decimal', 'La cote décimale doit être supérieure à 1.')); ko = true; }
+      if (ko) { out.innerHTML = vide(t('tools_page.fair_empty_title', 'Résultat indisponible'), t('tools_page.msg_fix_highlighted_fields_calc', 'Corrige les champs signalés pour lancer le calcul.')); return; }
+
+      var r = D.fairOdds({ probability: vp, odds: vo });
+      var note = r.favourable
+        ? t('tools_page.fair_note_favourable', 'La cote proposée est <b class="text-ink">plus généreuse</b> que ta probabilité ne le justifie : c’est un écart en ta faveur.')
+        : t('tools_page.fair_note_unfavourable', 'La cote proposée est <b class="text-ink">moins intéressante</b> que ta probabilité ne le justifie. Le pari est défavorable sur la durée.');
+      var largeurMax = Math.max(r.estimatedProbability, r.impliedProbability, 1);
+      out.innerHTML = resultat(t('tools_page.fair_result_label_gap', 'Écart'), signe(r.edgePoints, 1) + ' ' + esc(points()), note, r.favourable ? 'pos' : 'neg')
+        + '<div class="' + S.carte + ' mt-4">'
+        + barreProb(t('tools_page.fair_bar_your_prob', 'Ta probabilité estimée'), r.estimatedProbability, r.estimatedProbability / largeurMax * 100, true)
+        + barreProb(t('tools_page.fair_bar_implied_prob', 'Probabilité implicite de la cote'), r.impliedProbability, r.impliedProbability / largeurMax * 100, false)
+        + '<p class="mt-3 border-t border-hairline pt-3 text-[13px] leading-relaxed text-soft">' + esc(t('tools_page.fair_note_static', 'Un écart positif signifie que tu estimes l’événement plus probable que ne le fait le prix affiché.')) + '</p>'
+        + '</div>'
+        + '<div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">'
+        + kpi(num(r.fairOdds, 2), t('tools_page.fair_kpi_fair_odds', 'Cote juste'))
+        + kpi(num(r.marketOdds, 2), t('tools_page.fair_odds_label', 'Cote disponible'))
+        + kpi(signe(r.expectedValue, 1) + '%', t('tools_page.fair_kpi_ev', 'Espérance théorique'), r.expectedValue >= 0 ? 'pos' : 'neg')
+        + '</div>';
+    }
+    ['foProb', 'foOdds'].forEach(function (id) {
+      var n = document.getElementById(id);
+      if (n) n.addEventListener('input', calculer);
+    });
+    calculer();
+  }
 
   /* =====================================================================
-     05 — COMBINE   "Quelle chance que tout passe ?"
-     Decision de Clement (30/09/2026) : plus AUCUNE esperance (ni celle du
-     combine, ni celle du « meilleur pari joue seul »). Seulement les
-     selections, la cote du combine et la chance calculee par IASHARK : pour
-     chaque pari, le PLUS PETIT des deux chiffres, le modele ou la cote sans
-     marge (lib/tools-domain.js#comboSelections), meme en Europe. Un pari sans
-     cote sans marge n'est pas propose. Plus de saisie manuelle : une
-     probabilite tapee a la main ne serait pas une chance calculee par IASHARK.
+     03 — STAKE PLANNER   "Quelle mise est coherente avec mon capital ?"
+     Les limites personnelles ALERTENT mais ne modifient jamais les calculs.
+     ===================================================================== */
+  function rendreStake(panneau) {
+    var bk = etat.bankroll || 1000;
+    var plafondJour = etat.prefs && etat.prefs.daily_exposure_pct != null ? Number(etat.prefs.daily_exposure_pct) : 5;
+    var stopLoss = etat.prefs && etat.prefs.stop_loss_pct != null ? Number(etat.prefs.stop_loss_pct) : 10;
+
+    panneau.innerHTML = enTete('Calculateur de mise', 'Calcule la mise à partir du capital, de la cote et du profil de risque choisi.')
+      + '<div class="grid grid-cols-1 gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">'
+      + '<div class="' + S.carte + ' space-y-4">'
+      + champ('spBank', t('tools_page.stake_bank_label', 'Capital disponible'), { unit: symboleDevise(), min: 1, step: 1, value: bk })
+      + champ('spOdds', t('tools_page.stake_odds_label', 'Cote décimale'), { min: 1.01, step: 0.01, value: 2.10 })
+      + champ('spProb', t('tools_page.fair_prob_label', 'Probabilité estimée'), { unit: '%', min: 0.1, max: 99.9, step: 0.1, value: 55 })
+      + select('spProfil', t('tools_page.stake_profile_label', 'Profil de risque'), [['0.25', t('tools_page.stake_profile_cautious', 'Prudent · quart de Kelly')], ['0.5', t('tools_page.stake_profile_balanced', 'Équilibré · demi-Kelly')], ['1', t('tools_page.stake_profile_aggressive', 'Dynamique · Kelly plafonné')]], '0.5')
+      + champ('spCap', t('tools_page.stake_cap_label', 'Plafond par décision'), { unit: '%', min: 0.5, max: 100, step: 0.5, value: plafondJour, help: t('tools_page.stake_cap_help', 'Ta limite personnelle. Elle plafonne la mise, elle ne change jamais la probabilité.') })
+      + (ctx.user ? '<button id="spSave" type="button" class="w-full rounded-xl border border-hairline px-4 py-2.5 text-[13px] font-semibold text-ink transition hover:border-cyan/40">' + esc(t('tools_page.stake_save_btn', 'Enregistrer le capital')) + '</button><span id="spMsg" class="block text-[12.5px] text-soft"></span>' : '')
+      + '</div>'
+      + '<div id="spOut" class="min-w-0"></div></div>'
+      + '<p class="mt-5 text-[12.5px] leading-relaxed text-soft/85">' + t('tools_page.stake_kelly_note', 'Le critère de Kelly maximise la croissance du capital <b class="text-soft">si</b> la probabilité saisie est juste. Il ne garantit aucun gain : une probabilité surestimée conduit à surmiser.') + '</p>'
+      + (stopLoss ? '<p class="mt-2 text-[12.5px] text-soft/85">' + esc(t('tools_page.stake_stoploss_prefix', 'Ton seuil d’arrêt personnel est fixé à −')) + num(stopLoss, 0) + esc(t('tools_page.stake_stoploss_suffix', ' % du capital.')) + '</p>' : '');
+
+    function calculer() {
+      var out = document.getElementById('spOut'); if (!out) return;
+      ['spBank', 'spOdds', 'spProb', 'spCap'].forEach(function (id) { erreurChamp(id, ''); });
+      var b = Number(($('#spBank') || {}).value), o = Number(($('#spOdds') || {}).value),
+          p = Number(($('#spProb') || {}).value), f = Number(($('#spProfil') || {}).value),
+          cap = Number(($('#spCap') || {}).value);
+      var ko = false;
+      if (!(b > 0)) { erreurChamp('spBank', t('tools_page.err_capital_gt_zero', 'Le capital doit être supérieur à 0.')); ko = true; }
+      if (!(o > 1)) { erreurChamp('spOdds', t('tools_page.err_odds_gt_one', 'La cote doit être supérieure à 1.')); ko = true; }
+      if (!(p > 0 && p < 100)) { erreurChamp('spProb', t('tools_page.err_probability_range', 'Entre une probabilité entre 0 et 100 %.')); ko = true; }
+      if (!(cap > 0 && cap <= 100)) { erreurChamp('spCap', t('tools_page.stake_cap_range_err', 'Le plafond doit être entre 0 et 100 %.')); ko = true; }
+      if (ko) { out.innerHTML = vide(t('tools_page.title_calc_impossible', 'Calcul impossible'), t('tools_page.msg_fix_highlighted_fields', 'Corrige les champs signalés.')); return; }
+
+      var brut = D.calculateStake({ bankroll: b, odds: o, probability: p, fraction: f, cap: 1 });
+      var plafonne = D.calculateStake({ bankroll: b, odds: o, probability: p, fraction: f, cap: cap / 100 });
+      if (!brut || !plafonne) { out.innerHTML = vide(t('tools_page.title_calc_impossible', 'Calcul impossible'), t('tools_page.msg_check_values', 'Vérifie les valeurs saisies.')); return; }
+
+      var limite = brut.bankrollPct > plafonne.bankrollPct + 0.01;
+      var note = !plafonne.hasEdge
+        ? t('tools_page.stake_no_edge_note', 'À cette cote et cette probabilité, le pari n’a <b class="text-ink">aucun avantage mathématique</b> : la mise cohérente est nulle.')
+        : limite
+          ? t('tools_page.stake_limit_prefix', 'Le calcul brut suggère <b class="text-ink">') + euros(brut.stake) + t('tools_page.stake_limit_mid', '</b> (') + num(brut.bankrollPct, 1) + t('tools_page.stake_limit_mid2', ' % du capital). Ton plafond personnel ramène la mise à ') + euros(plafonne.stake) + t('tools_page.stake_limit_suffix', '.')
+          : t('tools_page.stake_under_limit_prefix', 'Cette mise représente ') + num(plafonne.bankrollPct, 1) + t('tools_page.stake_under_limit_suffix', ' % de ton capital et reste sous ton plafond personnel.');
+
+      out.innerHTML = resultat(t('tools_page.stake_result_label', 'Mise recommandée'), euros(plafonne.stake), note, plafonne.hasEdge ? 'pos' : 'neutre')
+        + '<div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">'
+        + kpi(num(plafonne.bankrollPct, 1) + '%', t('tools_page.stake_kpi_pct_capital', 'du capital'))
+        + kpi(signe(plafonne.expectedValue, 1) + '%', t('tools_page.stake_kpi_ev_per_bet', 'Espérance par pari'), plafonne.expectedValue >= 0 ? 'pos' : 'neg')
+        + kpi(num(brut.bankrollPct, 1) + '%', t('tools_page.stake_kpi_kelly_precap', 'Kelly avant plafond'))
+        + '</div>'
+        + (limite ? '<div class="mt-4 rounded-xl border border-[#f5a524]/30 bg-[#f5a524]/[0.07] px-4 py-3 text-[13px] leading-relaxed text-soft">' + t('tools_page.stake_limit_reached_prefix', '<b class="text-ink">Limite atteinte.</b> Le calcul dépasse ton plafond de ') + num(cap, 1) + t('tools_page.stake_limit_reached_suffix', ' % par décision. La mise a été réduite, la probabilité n’a pas été touchée.') + '</div>' : '');
+    }
+    ['spBank', 'spOdds', 'spProb', 'spProfil', 'spCap'].forEach(function (id) {
+      var n = document.getElementById(id);
+      if (n) n.addEventListener('input', calculer);
+      if (n && n.tagName === 'SELECT') n.addEventListener('change', calculer);
+    });
+    var save = document.getElementById('spSave');
+    if (save) save.addEventListener('click', function () {
+      var v = Number(($('#spBank') || {}).value), msg = document.getElementById('spMsg');
+      if (!(v > 0)) { if (msg) msg.textContent = t('tools_page.stake_invalid_amount', 'Montant invalide.'); return; }
+      window.IasharkApp.supabase.from('users').update({ capital: v }).eq('id', ctx.user.id).then(function (q) {
+        // "capital_msg_saved" existe deja dans fr.json (tools_page) avec le
+        // meme texte exact ("Capital enregistré.") : reutilise ici plutot
+        // que d'en dupliquer une variante.
+        if (msg) msg.textContent = q.error ? q.error.message : t('tools_page.capital_msg_saved', 'Capital enregistré.');
+        if (!q.error) etat.bankroll = v;
+      });
+    });
+    calculer();
+  }
+
+  /* =====================================================================
+     04 — BANKROLL LAB   "A quoi peut ressembler mon capital sur la duree ?"
+     Monte-Carlo local (aucun appel serveur). Le graphique montre la MEDIANE
+     et une bande de percentiles : l'objectif est de rendre l'incertitude
+     visible, pas d'empiler 5 000 courbes illisibles.
+     ===================================================================== */
+  function graphique(courbe, depart) {
+    if (!courbe || courbe.length < 2) return '';
+    var W = 640, H = 220, P = 8;
+    var vals = courbe.reduce(function (a, c) { return a.concat([c.p05, c.p95]); }, [depart]);
+    var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+    if (max - min < 1) max = min + 1;
+    var x = function (i) { return P + i * (W - 2 * P) / (courbe.length - 1); };
+    var y = function (v) { return H - P - (v - min) / (max - min) * (H - 2 * P); };
+    var haut = courbe.map(function (c, i) { return x(i) + ',' + y(c.p95); }).join(' ');
+    var bas = courbe.map(function (c, i) { return x(i) + ',' + y(c.p05); }).reverse().join(' ');
+    var med = courbe.map(function (c, i) { return (i ? 'L' : 'M') + x(i) + ' ' + y(c.p50); }).join(' ');
+    var ligneDepart = y(depart);
+    return '<figure class="' + S.carte + ' mt-4">'
+      + '<figcaption class="mb-3 text-[13px] text-soft">' + t('tools_page.bankroll_caption', 'Trajectoire simulée du capital — <b class="text-ink">médiane</b> et bande couvrant 90 % des scénarios.') + '</figcaption>'
+      + '<svg viewBox="0 0 ' + W + ' ' + H + '" class="h-[200px] w-full" role="img" aria-label="' + esc(t('tools_page.bankroll_svg_aria', 'Graphique de simulation du capital : ligne médiane et bande de percentiles.')) + '">'
+      + '<polygon points="' + haut + ' ' + bas + '" fill="rgba(32,213,239,.12)"/>'
+      + '<line x1="' + P + '" x2="' + (W - P) + '" y1="' + ligneDepart + '" y2="' + ligneDepart + '" stroke="rgba(166,180,198,.35)" stroke-dasharray="4 4"/>'
+      + '<path d="' + med + '" fill="none" stroke="#20d5ef" stroke-width="2" stroke-linejoin="round"/>'
+      + '</svg>'
+      + '<div class="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-[11.5px] text-soft">'
+      + '<span><span aria-hidden="true" class="mr-1.5 inline-block h-[2px] w-4 align-middle" style="background:#20d5ef"></span>' + esc(t('tools_page.bankroll_legend_median', 'Scénario médian')) + '</span>'
+      + '<span><span aria-hidden="true" class="mr-1.5 inline-block h-2.5 w-4 align-middle" style="background:rgba(32,213,239,.2)"></span>' + esc(t('tools_page.bankroll_legend_band', '5 % – 95 % des cas')) + '</span>'
+      + '<span><span aria-hidden="true" class="mr-1.5 inline-block h-[2px] w-4 align-middle" style="background:rgba(166,180,198,.5)"></span>' + esc(t('tools_page.capital_start', 'Capital de départ')) + '</span>'
+      + '</div></figure>';
+  }
+
+  function rendreBankroll(panneau) {
+    panneau.innerHTML = enTete('Simulateur de capital', 'Rejoue des milliers de séries à partir des hypothèses saisies et montre la dispersion réelle.')
+      + '<div class="grid grid-cols-1 gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">'
+      + '<div class="' + S.carte + ' space-y-4">'
+      + champ('blBank', t('tools_page.capital_start', 'Capital de départ'), { unit: symboleDevise(), min: 1, step: 1, value: etat.bankroll || 1000 })
+      + champ('blStake', t('tools_page.bankroll_stake_label', 'Mise par décision'), { unit: '%', min: 0.1, max: 20, step: 0.1, value: 3 })
+      + champ('blBets', t('tools_page.bankroll_bets_label', 'Nombre de décisions'), { min: 10, max: 2000, step: 10, value: 300 })
+      + champ('blWin', t('tools_page.bankroll_win_label', 'Taux de réussite estimé'), { unit: '%', min: 1, max: 99, step: 0.1, value: 54 })
+      + champ('blOdds', t('tools_page.bankroll_odds_label', 'Cote moyenne'), { min: 1.01, step: 0.01, value: 1.80 })
+      + '</div><div id="blOut" class="min-w-0"></div></div>';
+
+    function lancer() {
+      var out = document.getElementById('blOut'); if (!out) return;
+      ['blBank', 'blStake', 'blBets', 'blWin', 'blOdds'].forEach(function (id) { erreurChamp(id, ''); });
+      var b = Number(($('#blBank') || {}).value), s = Number(($('#blStake') || {}).value),
+          n = Number(($('#blBets') || {}).value), w = Number(($('#blWin') || {}).value),
+          o = Number(($('#blOdds') || {}).value);
+      var ko = false;
+      if (!(b > 0)) { erreurChamp('blBank', t('tools_page.err_capital_gt_zero', 'Le capital doit être supérieur à 0.')); ko = true; }
+      if (!(s > 0 && s <= 20)) { erreurChamp('blStake', t('tools_page.bankroll_stake_range_err', 'La mise doit être entre 0 et 20 %.')); ko = true; }
+      if (!(n >= 10 && n <= 2000)) { erreurChamp('blBets', t('tools_page.bankroll_bets_range_err', 'Entre 10 et 2000 décisions.')); ko = true; }
+      if (!(w > 0 && w < 100)) { erreurChamp('blWin', t('tools_page.bankroll_win_range_err', 'Entre un taux entre 0 et 100 %.')); ko = true; }
+      if (!(o > 1)) { erreurChamp('blOdds', t('tools_page.err_odds_gt_one', 'La cote doit être supérieure à 1.')); ko = true; }
+      if (ko) { out.innerHTML = vide(t('tools_page.bankroll_empty_title', 'Simulation impossible'), t('tools_page.msg_fix_highlighted_fields', 'Corrige les champs signalés.')); return; }
+
+      out.innerHTML = '<div class="' + S.carte + ' animate-pulse"><div class="h-[42px] w-2/3 rounded bg-panel"></div><div class="mt-4 h-[200px] rounded bg-panel"></div></div>';
+      window.requestAnimationFrame(function () {
+        var r = D.simulateVariance({ bankroll: b, stakePct: s, bets: n, winRate: w, odds: o, runs: 5000, curve: true });
+        if (!r) { out.innerHTML = vide(t('tools_page.bankroll_empty_title', 'Simulation impossible'), t('tools_page.msg_check_values', 'Vérifie les valeurs saisies.')); return; }
+        var ev = (w / 100) * o - 1;
+        var note = ev < 0
+          ? t('tools_page.bankroll_note_prefix', 'Chaque décision a une espérance de <b class="text-ink">') + signe(ev * 100, 1) + t('tools_page.bankroll_note_mid', ' %</b>. Elle est négative : aucune gestion de mise ne rend cette série gagnante sur la durée.')
+          : t('tools_page.bankroll_note_prefix', 'Chaque décision a une espérance de <b class="text-ink">') + signe(ev * 100, 1) + t('tools_page.bankroll_note_positive_mid', ' %</b>. La bande montre le creux qu’il faut pouvoir traverser sans dévier.');
+        out.innerHTML = resultat(t('tools_page.bankroll_result_prefix', 'Capital médian après ') + num(n, 0) + t('tools_page.bankroll_result_suffix', ' décisions'), euros(r.median), note, r.median >= b ? 'pos' : 'neg')
+          + graphique(r.curve, b)
+          + '<div class="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">'
+          + kpi(euros(r.p05), t('tools_page.bankroll_kpi_p05', 'Scénario défavorable (5 %)'))
+          + kpi(euros(r.p95), t('tools_page.bankroll_kpi_p95', 'Scénario favorable (5 %)'))
+          + kpi(num(r.drawdown30Probability, 0) + '%', t('tools_page.bankroll_kpi_drawdown', 'Risque de baisse de 30 %'), r.drawdown30Probability > 40 ? 'neg' : '')
+          + kpi(num(r.halfBankrollProbability, 0) + '%', t('tools_page.bankroll_kpi_half', 'Risque de perdre la moitié'), r.halfBankrollProbability > 20 ? 'neg' : '')
+          + '</div>'
+          + '<p class="mt-4 text-[12.5px] leading-relaxed text-soft/85">' + esc(t('tools_page.bankroll_footnote', 'Simulation de 5 000 séries à partir des hypothèses saisies ci-contre. Ce ne sont pas des résultats observés, mais la dispersion que produirait ce profil de mise.')) + '</p>';
+      });
+    }
+    ['blBank', 'blStake', 'blBets', 'blWin', 'blOdds'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('input', lancer);
+    });
+    lancer();
+  }
+
+  /* =====================================================================
+     05 — COMBO AUDITOR   "Ce combine est-il coherent mathematiquement ?"
      ===================================================================== */
   function rendreCombo(panneau) {
     var reel = ctx.isPro;
-    panneau.innerHTML = enTete('Analyse de combiné', 'Multiplie les chances des sélections retenues : un combiné ne passe que si toutes passent.')
+    panneau.innerHTML = enTete('Analyse de combiné', 'Mesure ce qu’un combiné retire réellement à l’espérance de gain.')
       + (reel ? '' : bandeauDemo(t('tools_page.combo_demo_text', 'Les trois sélections ci-dessous sont fictives et servent à montrer le fonctionnement de l’outil.')))
       + '<div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">'
-      + '<div id="cbList" class="' + S.carte + '"><p class="py-6 text-center text-[13.5px] text-soft">' + esc(t('tools_page.combo_loading', 'Chargement…')) + '</p></div>'
+      + '<div><div id="cbList" class="' + S.carte + '"><p class="py-6 text-center text-[13.5px] text-soft">' + esc(t('tools_page.combo_loading', 'Chargement…')) + '</p></div>'
+      + '<div class="' + S.carte + ' mt-4"><p class="mb-3 text-[13px] font-semibold text-ink">' + esc(t('tools_page.combo_manual_add_title', 'Ajouter une sélection manuelle')) + '</p>'
+      + '<div class="grid grid-cols-1 gap-3 sm:grid-cols-3">'
+      + champ('cbMatch', t('tools_page.label_match', 'Match'), { type: 'text', placeholder: t('tools_page.combo_match_placeholder', 'Équipe A – Équipe B') })
+      + champ('cbProb', t('tools_page.combo_prob_label', 'Probabilité'), { unit: '%', min: 0.1, max: 99.9, step: 0.1, value: 60 })
+      + champ('cbOdds', t('tools_page.label_odds', 'Cote'), { min: 1.01, step: 0.01, value: 1.80 })
+      + '</div><button id="cbAdd" type="button" class="mt-3 rounded-xl border border-hairline px-4 py-2.5 text-[13px] font-semibold text-ink transition hover:border-cyan/40">' + esc(t('tools_page.combo_add_btn', 'Ajouter au combiné')) + '</button></div></div>'
       + '<div id="cbOut" class="min-w-0"></div></div>'
       + panneauPro(t('tools_page.combo_pro_title', 'Compose ton combiné à partir des analyses du jour.'),
-          t('tools_page.combo_pro_sub_real', 'Les abonnés cochent les paris réels du jour qui ont une cote sans marge.'));
+          t('tools_page.combo_pro_sub', 'Les abonnés cochent directement les sélections réelles au lieu de les saisir à la main.'));
 
     function sourceListe() {
       if (!reel) return Promise.resolve(DEMO_COMBO);
-      return chargerMatchs().then(function (matchs) { return choisisDabord(D.comboSelections(matchs, { limit: 500 })).slice(0, 12); });
+      return chargerMatchs().then(function (matchs) {
+        return (matchs || []).filter(function (m) {
+          return Number(m.model_probability) > 0 && Number(m.cote_rec) > 1;
+        }).slice(0, 12).map(function (m) {
+          return {
+            id: String(m.id), matchKey: String(m.id),
+            match: (m.home && m.home.n) + ' – ' + (m.away && m.away.n),
+            market: m.pari_rec, probability: Number(m.model_probability), odds: Number(m.cote_rec)
+          };
+        });
+      });
     }
 
     sourceListe().then(function (liste) {
       var box = document.getElementById('cbList');
       if (!box) return;
-      if (!liste.length) { box.innerHTML = vide(t('tools_page.combo_empty_title', 'Aucune sélection disponible'), t('tools_page.combo_empty_nofair', 'Seuls les paris du jour qui ont une cote sans marge peuvent entrer dans un combiné. Il n’y en a pas pour le moment.')); return; }
+      if (!liste.length) { box.innerHTML = vide(t('tools_page.combo_empty_title', 'Aucune sélection disponible'), t('tools_page.combo_empty_text', 'Les analyses du jour ne sont pas encore publiées.')); return; }
       box.innerHTML = '<ul class="list-none p-0">' + liste.map(function (s, i) {
         return '<li class="border-t border-hairline first:border-t-0"><label class="flex cursor-pointer items-center gap-3 py-3">'
           + '<input type="checkbox" data-cb="' + i + '" class="h-4 w-4 shrink-0 accent-[#20d5ef]">'
-          + '<span class="min-w-0 flex-1"><span class="block truncate text-[14px] font-semibold text-ink">' + esc(s.match) + (reel ? badgeChoix(s) : '') + '</span>'
-          + '<span class="block truncate text-[12.5px] text-soft">' + esc(marcheLigne(s)) + ' · ' + num(s.probability, 0) + esc(t('tools_page.combo_chance_suffix', ' % de chance')) + '</span></span>'
+          + '<span class="min-w-0 flex-1"><span class="block truncate text-[14px] font-semibold text-ink">' + esc(s.match) + '</span>'
+          + '<span class="block truncate text-[12.5px] text-soft">' + esc(marcheLigne(s)) + ' · ' + num(s.probability, 1) + esc(t('tools_page.combo_estimated_suffix', ' % estimés')) + '</span></span>'
           + '<span class="shrink-0 text-[14px] font-bold text-ink tabular-nums">' + num(s.odds, 2) + '</span></label></li>';
       }).join('') + '</ul>';
       $$('input[data-cb]', box).forEach(function (input) {
@@ -339,6 +572,7 @@
         var s = liste[Number(input.getAttribute('data-cb'))];
         if (s) picks.push(s);
       });
+      picks = picks.concat(etat.combo);
       if (picks.length < 2) {
         out.innerHTML = vide(t('tools_page.combo_min_two_title', 'Sélectionne au moins deux paris'), t('tools_page.combo_min_two_text', 'Un combiné se juge sur la multiplication des probabilités : il en faut au moins deux.'));
         return;
@@ -346,9 +580,13 @@
       var r = D.combo(picks.map(function (s) { return { probability: s.probability, odds: s.odds, label: s.market }; }));
       var risque = D.comboRisk(picks);
       if (!r) { out.innerHTML = vide(t('tools_page.title_calc_impossible', 'Calcul impossible'), t('tools_page.combo_calc_impossible_text', 'Vérifie les probabilités et les cotes.')); return; }
-      out.innerHTML = resultat(t('tools_page.combo_chance_label', 'Chance calculée par IASHARK'), num(r.probability, 1) + '%',
-          t('tools_page.combo_chance_note', 'Pour chaque sélection, IASHARK retient le plus petit des deux chiffres : son modèle ou la cote sans marge. Toutes les sélections doivent passer.'), 'neutre')
+      var note = r.worseThanSingle
+        ? t('tools_page.combo_worse_prefix', 'Ce combiné rapporte <b class="text-ink">moins</b> que le meilleur de ces paris joué seul (') + signe(r.bestSingleEv, 1) + t('tools_page.combo_worse_suffix', ' % d’espérance).')
+        : t('tools_page.combo_better_prefix', 'Espérance du meilleur pari joué seul : ') + signe(r.bestSingleEv, 1) + t('tools_page.combo_better_suffix', ' %. Un combiné reste plus volatil : toutes les sélections doivent passer.');
+      out.innerHTML = resultat(t('tools_page.combo_result_label', 'Espérance du combiné'), signe(r.expectedValue, 1) + '%', note, r.expectedValue >= 0 ? 'pos' : 'neg')
         + '<div class="mt-4 grid grid-cols-2 gap-3">'
+        + kpi(num(r.probability, 1) + '%', t('tools_page.combo_kpi_prob', 'Probabilité combinée'))
+        + kpi(num(r.fairOdds, 2), t('tools_page.combo_kpi_fair_odds', 'Cote juste estimée'))
         + kpi(num(r.bookOdds, 2), t('tools_page.combo_kpi_book_odds', 'Cote du combiné'))
         + kpi(String(picks.length), t('tools_page.combo_kpi_selections', 'Sélections'))
         + '</div>'
@@ -356,100 +594,132 @@
           ? '<div class="mt-4 rounded-xl border border-[#f5a524]/30 bg-[#f5a524]/[0.07] px-4 py-3 text-[13px] leading-relaxed text-soft">' + t('tools_page.combo_correlation_warning', '<b class="text-ink">Ces sélections peuvent être corrélées.</b> Plusieurs portent sur le même match. Le calcul suppose des événements indépendants : il peut surestimer ou sous-estimer la probabilité réelle. Nous ne disposons pas de mesure de dépendance entre marchés.') + '</div>'
           : '');
     }
+
+    var add = document.getElementById('cbAdd');
+    if (add) add.addEventListener('click', function () {
+      var m = ($('#cbMatch') || {}).value, p = Number(($('#cbProb') || {}).value), o = Number(($('#cbOdds') || {}).value);
+      erreurChamp('cbProb', ''); erreurChamp('cbOdds', '');
+      var ko = false;
+      if (!(p > 0 && p < 100)) { erreurChamp('cbProb', t('tools_page.err_probability_range', 'Entre une probabilité entre 0 et 100 %.')); ko = true; }
+      if (!(o > 1)) { erreurChamp('cbOdds', t('tools_page.err_odds_gt_one', 'La cote doit être supérieure à 1.')); ko = true; }
+      if (ko) return;
+      // La cle vient du NOM DU MATCH normalise : deux selections saisies sur
+      // le meme match declenchent alors l'alerte de correlation. Avec une cle
+      // unique par ajout, cette alerte n'aurait jamais pu se declencher.
+      var cle = (m || '').trim().toLowerCase().replace(/\s+/g, ' ');
+      etat.combo.push({
+        matchKey: cle || 'manuel-' + etat.combo.length,
+        match: m || t('tools_page.combo_default_match', 'Sélection manuelle'), market: t('tools_page.combo_default_market', 'Saisie manuelle'), probability: p, odds: o
+      });
+      activer('combo');
+    });
   }
 
   /* =====================================================================
-     BANDEAU PERSONNEL : bonjour par le prenom (s'il est connu, jamais tire
-     de l'adresse e-mail), ses competitions et ses types de paris, et le lien
-     vers ses reglages. Premiere visite d'un abonne Pro sans reglages (et
-     questionnaire ouvert) : direction le questionnaire, une fois par session.
+     06 — JOURNAL / PERFORMANCE   "Mes decisions sont-elles bonnes ?"
      ===================================================================== */
-  var REGLAGES_OUVERTS = !!(window.IASHARK_OUVERTURE && window.IASHARK_OUVERTURE.reglagesPro === true);
-  function prenom(displayName) {
-    var meta = (ctx.user && ctx.user.user_metadata) || {};
-    var brut = String(displayName || meta.first_name || meta.given_name || meta.full_name || meta.name || '').trim();
-    var mot = brut.split(/\s+/)[0] || '';
-    // Jamais une adresse ou un identifiant technique.
-    return /@|^\d+$/.test(mot) || mot.length > 30 ? '' : mot;
-  }
-  function nomLigue(k) {
-    var LN = window.IasharkLeagueNames;
-    return (LN && LN.displayName && LN.displayName(k)) || null;
-  }
-  function rendreBandeau(displayName) {
-    var slot = document.getElementById('proPerso');
-    if (!slot || !ctx.user) return;
-    var nom = prenom(displayName), p = etat.perso;
-    var html = '<p class="text-[17px] font-bold text-ink">' + esc(nom ? t('pro_perso.hello_name', 'Bonjour {name}').replace('{name}', nom) : t('pro_perso.hello', 'Bonjour')) + '</p>';
-    if (ctx.isPro) {
-      var ligues = p.ligues.map(nomLigue).filter(Boolean);
-      if (ligues.length) {
-        // Deux-points a la francaise (espace insecable avant) seulement en francais.
-        var dp = (window.I18N && window.I18N.locale === 'fr') ? '\u00a0:' : ':';
-        var ligne = function (libelle, valeur) {
-          return '<p class="mt-1.5 text-[13.5px] leading-relaxed"><span class="text-soft">' + esc(libelle + dp) + '</span> <span class="font-semibold text-ink">' + esc(valeur) + '</span></p>';
-        };
-        html += ligne(t('pro_perso.your_competitions', 'Tes compétitions'), ligues.join(', '));
-      }
-      var href = REGLAGES_OUVERTS ? lien('accueil-pro.html?modifier=1') : lien('compte.html#competitions');
-      var libelle = REGLAGES_OUVERTS ? t('pro_perso.edit', 'Modifier mes réglages') : t('pro_perso.edit_competitions', 'Choisir mes compétitions');
-      html += '<a href="' + esc(href) + '" class="mt-3 inline-flex text-[13.5px] font-semibold text-cyan transition hover:underline">' + esc(libelle) + '</a>';
+  function rendreJournal(panneau) {
+    var head = enTete('Journal des décisions', 'Mesure les décisions enregistrées dans la durée : rien n’est calculé sur des données de démonstration.');
+
+    if (!ctx.user) {
+      panneau.innerHTML = head + vide(t('tools_page.journal_login_title', 'Connecte-toi pour ouvrir ton journal'),
+        t('tools_page.journal_login_text', 'Le journal enregistre tes décisions et calcule ta performance réelle. Il ne contient que tes propres données.'),
+        '<a href="' + esc(lien('compte.html')) + '" class="mt-5 inline-flex rounded-xl bg-cyan px-6 py-3 text-[13px] font-extrabold text-page transition hover:brightness-110">' + esc(t('tools_page.journal_login_cta', 'Créer un compte')) + '</a>');
+      return;
     }
-    slot.innerHTML = html;
-    slot.hidden = false;
-  }
-  function chargerPerso() {
-    var sb = window.IasharkApp.supabase, uid = ctx.user.id, P = window.IasharkProPreferences;
-    var meta = ctx.user.user_metadata || {};
-    etat.perso.ligues = (Array.isArray(meta.fav_leagues) ? meta.fav_leagues : []).filter(function (k) { return typeof k === 'string' && /^[a-z0-9_-]{1,60}$/.test(k); });
-    function sur(q) { return q.then(function (x) { return x; }, function () { return { error: true }; }); }
-    var lectures = [sur(sb.from('user_preferences').select('display_name').eq('user_id', uid).maybeSingle())];
-    if (ctx.isPro && REGLAGES_OUVERTS && P) {
-      lectures.push(sur(sb.from(P.TABLE).select('pays,marches').eq('user_id', uid).maybeSingle()).then(function (r) {
-        // Base sans 0044 : la ligne existe-t-elle ? (pas de types de paris enregistres)
-        return r && r.error && P.erreurColonneAbsente(r.error) ? sur(sb.from(P.TABLE).select('pays').eq('user_id', uid).maybeSingle()) : r;
-      }));
+
+    var s = D.summarize(etat.bankroll, etat.decisions);
+    var bloc;
+    if (!etat.decisions.length) {
+      bloc = vide(t('tools_page.journal_empty_title', 'Aucune décision enregistrée'),
+        t('tools_page.journal_empty_text', 'Ajoute ta première décision pour commencer à mesurer ta performance. Aucun chiffre n’est affiché tant qu’il n’y a rien à mesurer.'),
+        '<button id="jrAdd" type="button" class="mt-5 inline-flex rounded-xl bg-cyan px-6 py-3 text-[13px] font-extrabold text-page transition hover:brightness-110">' + esc(t('tools_page.journal_add_btn_first', 'Ajouter une décision')) + '</button>');
+    } else {
+      var lignes = etat.decisions.map(function (d) {
+        var pl = d.result_pnl == null ? D.pnl(d) : Number(d.result_pnl);
+        var badge = d.status === 'won' ? 'text-cyan' : d.status === 'lost' ? 'text-[#ff8f85]' : 'text-soft';
+        return '<li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-t border-hairline py-3 first:border-t-0 sm:grid-cols-[minmax(0,1fr)_80px_80px_90px]">'
+          + '<div class="min-w-0"><div class="truncate text-[14px] font-semibold text-ink">' + esc(d.match_label) + '</div>'
+          + '<div class="truncate text-[12.5px] text-soft">' + esc(marcheLisible(d.market)) + '</div></div>'
+          + '<div class="hidden text-right text-[13.5px] text-soft tabular-nums sm:block">' + num(d.odds, 2) + '</div>'
+          + '<div class="hidden text-right text-[13.5px] text-soft tabular-nums sm:block">' + euros(d.stake) + '</div>'
+          + '<div class="text-right text-[14px] font-bold ' + badge + ' tabular-nums">' + (d.status === 'pending' ? '—' : eurosSigne(pl)) + '</div></li>';
+      }).join('');
+      bloc = '<div class="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">'
+        + kpi(String(s.total), t('tools_page.journal_kpi_count', 'Décisions'))
+        + kpi(signe(s.roi, 1) + '%', t('tools_page.journal_kpi_roi', 'ROI'), s.roi >= 0 ? 'pos' : 'neg')
+        + kpi(eurosSigne(s.profit), t('tools_page.journal_kpi_profit', 'Profit / perte'), s.profit >= 0 ? 'pos' : 'neg')
+        + kpi(num(s.winRate, 1) + '%', t('tools_page.journal_kpi_winrate', 'Taux de réussite'))
+        + '</div>'
+        + '<div class="' + S.carte + '">'
+        + '<div class="mb-2 hidden grid-cols-[minmax(0,1fr)_80px_80px_90px] gap-3 border-b border-hairline pb-2 text-[11px] font-bold tracking-[0.1em] text-soft sm:grid">'
+        + '<span>' + esc(t('tools_page.journal_th_match_market', 'MATCH / MARCHÉ')) + '</span><span class="text-right">' + esc(t('tools_page.journal_th_odds', 'COTE')) + '</span><span class="text-right">' + esc(t('tools_page.journal_th_stake', 'MISE')) + '</span><span class="text-right">' + esc(t('tools_page.journal_th_pl', 'P/L')) + '</span></div>'
+        + '<ul class="list-none p-0">' + lignes + '</ul></div>'
+        + '<button id="jrAdd" type="button" class="mt-4 rounded-xl border border-hairline px-4 py-2.5 text-[13px] font-semibold text-ink transition hover:border-cyan/40">' + esc(t('tools_page.journal_add_btn', '+ Ajouter une décision')) + '</button>';
     }
-    return Promise.all(lectures).then(function (r) {
-      var up = r[0] && !r[0].error && r[0].data;
-      var pro = r[1];
-      if (pro && !pro.error) {
-        // Premiere visite d'un abonne Pro sans reglages : le questionnaire, une fois par session.
-        var vu = false;
-        try { vu = !!sessionStorage.getItem('iashark_accueil_pro_vu'); } catch (_e) { vu = true; }
-        if (!pro.data && !vu) {
-          try { sessionStorage.setItem('iashark_accueil_pro_vu', '1'); } catch (_e) {}
-          location.replace(lien('accueil-pro.html'));
-          return;
-        }
-        if (pro.data && P) etat.perso.marches = P.normaliser(pro.data).marches;
+
+    panneau.innerHTML = head + bloc
+      + '<p class="mt-5 text-[12.5px] leading-relaxed text-soft/85">' + t('tools_page.journal_clv_note', 'Le suivi de la <b class="text-soft">closing line value</b> (comparaison entre la cote prise et la cote de clôture) n’est pas encore disponible : les cotes de clôture ne sont pas collectées à ce jour.') + '</p>'
+      + (ctx.isPro ? '' : panneauPro(t('tools_page.journal_pro_title', 'Le journal synchronisé est réservé aux abonnés.'), t('tools_page.journal_pro_sub', 'Tes décisions sont conservées et ta performance calculée dans la durée.')))
+      + '<dialog id="jrDlg" class="w-[min(440px,92vw)] rounded-2xl border border-hairline bg-surface p-0 text-ink backdrop:bg-black/60">'
+      + '<form method="dialog" class="p-6"><h3 class="text-[17px] font-bold text-ink">' + esc(t('tools_page.journal_dialog_title', 'Nouvelle décision')) + '</h3>'
+      + '<div class="mt-4 space-y-3">'
+      + champ('jrMatch', t('tools_page.label_match', 'Match'), { type: 'text', placeholder: 'PSG – Marseille' })
+      + champ('jrMarket', t('tools_page.journal_market_label', 'Marché'), { type: 'text', placeholder: t('tools_page.journal_market_placeholder', 'Plus de 2,5 buts') })
+      + champ('jrOdds', t('tools_page.label_odds', 'Cote'), { min: 1.01, step: 0.01, value: 1.90 })
+      // Probabilite estimee : colonne obligatoire de betting_decisions (0 < p < 100).
+      // BUG REEL (audit du 18/09/2026) : le formulaire ne l'envoyait pas, chaque
+      // enregistrement du journal Pro echouait. Pre-remplie avec la probabilite
+      // de la cote (100 / cote), modifiable ; suit la cote tant qu'elle n'est pas modifiee.
+      + champ('jrProb', t('tools_page.journal_prob_label', 'Ta probabilité estimée'), { unit: '%', min: 1, max: 99, step: 0.1, value: 52.6, help: t('tools_page.journal_prob_help', 'Par défaut : la probabilité correspondant à la cote.') })
+      + champ('jrStake', t('tools_page.journal_stake_label', 'Mise'), { unit: symboleDevise(), min: 0.01, step: 0.01 })
+      + '</div><p id="jrMsg" class="mt-3 text-[12.5px] text-soft"></p>'
+      + '<div class="mt-5 flex gap-3"><button value="cancel" class="flex-1 rounded-xl border border-hairline px-4 py-2.5 text-[13px] font-semibold text-ink">' + esc(t('tools_page.journal_cancel_btn', 'Annuler')) + '</button>'
+      + '<button id="jrSave" type="button" class="flex-1 rounded-xl bg-cyan px-4 py-2.5 text-[13px] font-extrabold text-page">' + esc(t('tools_page.journal_save_btn', 'Enregistrer')) + '</button></div>'
+      + '</form></dialog>';
+
+    var dlg = document.getElementById('jrDlg');
+    var open = document.getElementById('jrAdd');
+    if (open && dlg) open.addEventListener('click', function () { dlg.showModal(); });
+    var probEl = document.getElementById('jrProb'), oddsEl = document.getElementById('jrOdds'), probTouchee = false;
+    if (probEl) probEl.addEventListener('input', function () { probTouchee = true; });
+    if (oddsEl && probEl) oddsEl.addEventListener('input', function () {
+      var c = Number(oddsEl.value);
+      if (!probTouchee && c > 1) probEl.value = String(Math.round(1000 / c) / 10);
+    });
+    var save = document.getElementById('jrSave');
+    if (save) save.addEventListener('click', function () {
+      var msg = document.getElementById('jrMsg');
+      if (!ctx.isPro) { if (msg) msg.textContent = t('tools_page.journal_pro_only_msg', 'Le journal synchronisé est réservé au plan Pro.'); return; }
+      var row = {
+        user_id: ctx.user.id,
+        match_label: (($('#jrMatch') || {}).value || '').trim(),
+        market: (($('#jrMarket') || {}).value || '').trim(),
+        odds: Number(($('#jrOdds') || {}).value),
+        stake: Number(($('#jrStake') || {}).value),
+        estimated_probability: Number(($('#jrProb') || {}).value)
+      };
+      if (!row.match_label || !row.market || !(row.stake > 0) || !(row.odds > 1) || !(row.estimated_probability > 0 && row.estimated_probability < 100)) {
+        if (msg) msg.textContent = t('tools_page.journal_form_incomplete_prob_msg', 'Complète le match, le marché, une cote > 1, une mise > 0 et une probabilité entre 1 et 99 %.');
+        return;
       }
-      rendreBandeau(up && up.display_name);
+      window.IasharkApp.supabase.from('betting_decisions').insert(row).select().single().then(function (q) {
+        // Jamais le message brut de la base (anglais, technique) a l'ecran.
+        if (q.error) { if (msg) msg.textContent = t('tools_page.journal_save_error', 'Impossible d’enregistrer cette décision pour le moment. Vérifie les champs puis réessaie.'); return; }
+        etat.decisions.unshift(q.data);
+        if (dlg) dlg.close();
+        activer('journal');
+      });
     });
   }
 
   /* =====================================================================
      ROUTEUR
      ===================================================================== */
-  // Espace Pro (V3 du 3/10/2026) : le tableau de bord (pro-dashboard.js) est le
-  // premier onglet, puis « Mon combine » et le detecteur d'ecarts. Retires :
-  // cote juste, simulateur du capital, journal (devenu « Mes paris » du
-  // tableau de bord) et calcul de mise (30/09/2026 : plus aucune mise) ; leurs anciennes ancres menent au tableau de bord.
-  function rendreTableau(panneau) {
-    if (window.IasharkProDashboard) window.IasharkProDashboard.render(panneau, ctx);
-  }
-  // LANCEMENT DU 3/10 (avocat du diable, 01/10/2026) : le tableau de bord, le journal et le
-  // garde-fou dependent des migrations 0040/0041, pas encore appliquees : ils sont CACHES
-  // (ni onglet, ni rendu, ni ancre). « Mon combiné » devient le premier onglet. Passer
-  // TABLEAU_OUVERT a true (et remettre l'onglet dans pro.html) le jour de leur ouverture.
-  var TABLEAU_OUVERT = !!(window.IASHARK_OUVERTURE && window.IASHARK_OUVERTURE.tableauPro === true);
-  var RENDU = TABLEAU_OUVERT ? { tableau: rendreTableau, combo: rendreCombo, scanner: rendreScanner } : { combo: rendreCombo, scanner: rendreScanner };
-  var DEFAUT = TABLEAU_OUVERT ? 'tableau' : 'combo';
-  var ANCIENNES_ANCRES = { fair: DEFAUT, bankroll: DEFAUT, journal: DEFAUT, stake: DEFAUT, tableau: DEFAUT };
+  var RENDU = { scanner: rendreScanner, fair: rendreFair, stake: rendreStake, bankroll: rendreBankroll, combo: rendreCombo, journal: rendreJournal };
 
   function activer(outil) {
-    if (!RENDU[outil] && ANCIENNES_ANCRES[outil]) outil = ANCIENNES_ANCRES[outil];
-    if (!RENDU[outil]) outil = DEFAUT;
+    if (!RENDU[outil]) outil = 'scanner';
     etat.outil = outil;
     $$('[data-tool]').forEach(function (b) {
       var on = b.getAttribute('data-tool') === outil;
@@ -466,13 +736,22 @@
     if (history.replaceState) history.replaceState(null, '', '#' + outil);
   }
 
+  function pied() {
+    var el = document.getElementById('sidebarFoot');
+    if (!el) return;
+    el.innerHTML = etat.bankroll
+      ? '<div class="px-3"><div class="text-[11px] font-bold tracking-[0.14em] text-soft">' + esc(t('tools_page.sidebar_capital_label', 'CAPITAL')) + '</div>'
+        + '<div class="mt-1 text-[18px] font-extrabold text-ink tabular-nums">' + euros(etat.bankroll) + '</div></div>'
+      : '';
+  }
+
   function init() {
-    var ORDRE = TABLEAU_OUVERT ? ['tableau', 'combo', 'scanner'] : ['combo', 'scanner'];
+    var ORDRE = ['scanner', 'fair', 'stake', 'bankroll', 'combo', 'journal'];
     $$('[data-tool]').forEach(function (b) {
       b.addEventListener('click', function () { activer(b.getAttribute('data-tool')); });
       // Motif ARIA "tabs" : les fleches deplacent la selection, Debut/Fin
       // sautent aux extremites. Sans ca, un utilisateur clavier doit tabuler
-      // a travers les cinq onglets pour atteindre le dernier.
+      // a travers les six onglets pour atteindre le dernier.
       b.addEventListener('keydown', function (e) {
         var i = ORDRE.indexOf(b.getAttribute('data-tool'));
         var suivant = null;
@@ -500,18 +779,21 @@
     Promise.all([langue.catch(function () {}), contexte]).then(function (res) {
       var c = res[1];
       ctx = c || ctx;
+      if (c && c.profile && c.profile.capital) etat.bankroll = Number(c.profile.capital);
       if (!c || !c.user) return null;
-      // Bandeau personnel et choix de l'abonne AVANT le premier rendu des listes.
-      var perso = chargerPerso().catch(function () {});
-      // Abonne confirme cote client : la liste de matchs part tout de suite (le
-      // serveur tranche via isPro).
+      // Abonne confirme cote client : la liste de matchs part tout de suite, en
+      // parallele des preferences et du journal (le serveur tranche via isPro).
       chargerMatchs();
-      // Le journal est lu par le tableau de bord (pro-dashboard.js), pas ici.
-      // Les limites personnelles ne servaient qu'au calcul de mise (retire le
-      // 30/09/2026) : plus rien a lire ici.
-      return perso;
+      return Promise.all([
+        window.IasharkApp.supabase.from('user_preferences').select('daily_exposure_pct,stop_loss_pct').eq('user_id', c.user.id).maybeSingle(),
+        window.IasharkApp.supabase.from('betting_decisions').select('*').eq('user_id', c.user.id).order('created_at', { ascending: false }).limit(100)
+      ]).then(function (res) {
+        if (res[0] && res[0].data) etat.prefs = res[0].data;
+        if (res[1] && !res[1].error) etat.decisions = res[1].data || [];
+      });
     }).catch(function () {}).then(function () {
-      activer(RENDU[depart] || ANCIENNES_ANCRES[depart] ? depart : DEFAUT);
+      pied();
+      activer(RENDU[depart] ? depart : 'scanner');
     });
   }
 

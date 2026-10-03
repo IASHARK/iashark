@@ -111,16 +111,17 @@ const reliabilityOk = (p) => !/faible/i.test(p.premium_fields?.reliability?.labe
 // ---------- SAFE : les 3 pronos du site les plus surs ----------
 // Uniquement le prono affiche sur le site pour chaque match (pari_rec), pour
 // que la video dise exactement la meme chose que la page du match. Garde ceux
-// dont la chance IASHARK (chance_iashark : le plus bas entre le modele et la cote
-// sans marge, calculee une fois par le pipeline, la meme que la page) vaut au
-// moins 62 % ; les 3 meilleurs matchs. Rien n'est recalcule ici.
+// ou le modele ET le marche donnent au moins 62 % ; score = la plus basse des
+// deux probas ; les 3 meilleurs matchs.
+const recEntry = (p) => p.markets_compared.find((x) => x.id === p.market_id);
 function buildSafe() {
   const cands = [];
   for (const {m, p} of pool) {
     if (!reliabilityOk(p) || !p.pari_rec) continue;
-    const chance = Number(p.premium_fields?.chance_iashark);
-    if (!(chance >= 62 && chance < 100)) continue;
-    cands.push({m, id: p.market_id, market: p.pari_rec, score: chance});
+    const e = recEntry(p);
+    const prob = Number(p.model_probability), cons = Number(e?.consensus ?? prob);
+    if (!(prob >= 62 && cons >= 62)) continue;
+    cands.push({m, id: p.market_id, market: p.pari_rec, score: Math.min(prob, cons)});
   }
   cands.sort((a, b) => b.score - a.score || leagueRank(a.m) - leagueRank(b.m));
   const legs = cands.slice(0, 3).sort((a, b) => kickoffParis(a.m).localeCompare(kickoffParis(b.m)));
@@ -186,28 +187,18 @@ const ticketProps = (title, legs) => ({
 });
 
 // ---------- Scenario simule (Match simule + Match Pulse) ----------
+const DEFAULT_SHARES = [13, 14, 16, 17, 18, 22]; // repartition moyenne des buts par quart d'heure
 function rng(seed) {
   let s = seed >>> 0;
   return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32);
 }
-// MEMES BUTS ATTENDUS QUE LA PAGE (avocat du diable, 29/09/2026, S3) : les videos
-// Match simule et Match Pulse ne lisent que la simulation 15 min du site
-// (premium_fields.sim_15min, calculee par le pipeline a partir des buts attendus du
-// moteur v3, les memes que la page du match) et ses buts attendus (lambda_h /
-// lambda_a) et scores probables (mc_scores). Plus de repartition par defaut ni de
-// frequence observee (scenario_15min). Match sans simulation (pas de moteur v3) :
-// pas de video de match.
-const simDe = (p) => {
-  const s = p.premium_fields?.sim_15min;
-  return s && Array.isArray(s.tr) && s.tr.length === 6 && s.tr.every((x) => Number(x) > 0 && Number(x) < 1) ? s : null;
-};
-// Part des buts par tranche : buts attendus de chaque tranche (-ln(1 - chance d'au moins un but)).
 function shares(p) {
-  const s = simDe(p);
-  if (!s) return null;
-  const lam = s.tr.map((x) => -Math.log(1 - Number(x)));
-  const tot = lam.reduce((a, x) => a + x, 0);
-  return lam.map((x) => Math.round(x / tot * 100));
+  const s = p.premium_fields?.scenario_15min;
+  if (Array.isArray(s) && s.length === 6 && s.every((x) => Number(x.prob) > 0)) {
+    const tot = s.reduce((a, x) => a + Number(x.prob), 0);
+    return s.map((x) => Math.round(Number(x.prob) / tot * 100));
+  }
+  return DEFAULT_SHARES;
 }
 function simulateGoals({m, p}) {
   const pf = p.premium_fields || {};
@@ -234,21 +225,13 @@ function simulateGoals({m, p}) {
   // deux buts a la meme minute : on decale
   goals.sort((x, y) => x.minute - y.minute);
   for (let i = 1; i < goals.length; i++) if (goals[i].minute <= goals[i - 1].minute) goals[i].minute = Math.min(90, goals[i - 1].minute + 1);
-  // Nombre de simulations : seulement s'il existe vraiment (le moteur v3 donne des
-  // probabilites exactes, pas un nombre de tirages) ; jamais un chiffre invente.
-  // « Base sur N simulations » : seulement si la simulation du site dit combien de
-  // tirages elle a vraiment faits (champ nb_simulations de sim_15min, prevu pour le
-  // cerveau 4). Le calcul actuel est exact, sans tirages : pas de phrase.
-  const nb = Number(simDe(p)?.nb_simulations);
-  return {goals, simulationCount: Number.isInteger(nb) && nb > 0 ? nb : null};
+  return {goals, simulationCount: Number(pf.simulation_count) || 5000};
 }
 
 function matchCardProps(entry) {
   const {m} = entry;
   const {goals, simulationCount} = simulateGoals(entry);
-  const props = {homeTeam: shortName(m.home.n), awayTeam: shortName(m.away.n), homeLogo: teamLogo(m.home), awayLogo: teamLogo(m.away), goals, accentColor: "#08d9ff"};
-  if (simulationCount) props.simulationCount = simulationCount;
-  return props;
+  return {homeTeam: shortName(m.home.n), awayTeam: shortName(m.away.n), homeLogo: teamLogo(m.home), awayLogo: teamLogo(m.away), goals, accentColor: "#08d9ff", simulationCount};
 }
 
 // Commentaire par quart d'heure, ecrit a partir des parts de buts
@@ -258,9 +241,7 @@ function matchCardProps(entry) {
 const PHRASES = {
   peak: {
     titles: ["LE DANGER EXPLOSE", "ALERTE ROUGE", "LE MOMENT CLÉ", "TOUT PEUT BASCULER", "ÇA VA FAIRE MAL", "LA MINUTE DE VÉRITÉ"],
-    // Pas de « tranche la plus chaude » propre au match (condition du mathematicien,
-    // 28/09/2026 : c'est la fin de match pour 100 % des matchs) : phrases generales.
-    notes: ["EN GÉNÉRAL, LA PÉRIODE LA PLUS RICHE EN BUTS", "LES FINS DE MATCH SONT SOUVENT LES PLUS ANIMÉES"],
+    notes: ["LA MEILLEURE FENÊTRE POUR UN BUT DANS CE MATCH", "LE QUART D'HEURE LE PLUS CHAUD SELON L'IA", "C'EST ICI QUE LES BUTS TOMBENT LE PLUS"],
   },
   high: {
     titles: ["{S} MET LE FEU", "{S} APPUIE FORT", "LE MATCH S'EMBALLE", "ÇA S'ACCÉLÈRE", "LES FILETS TREMBLENT"],
@@ -341,9 +322,8 @@ const legLine = (l) => `• ${l.home} – ${l.away} (${l.kickoff}) : ${l.pick}`;
 
 const safe = buildSafe();
 if (safe) {
-  // Jamais « SAFE » (aucune promesse de gain, avocat du diable, 29/09/2026).
-  const props = ticketProps("LE PLUS PROBABLE", safe);
-  write("safe", "DailySafe", props, `Le plus probable du ${dayLabel.toLowerCase()}\n${props.legs.map(legLine).join("\n")}`);
+  const props = ticketProps("SAFE", safe);
+  write("safe", "DailySafe", props, `SAFE du ${dayLabel.toLowerCase()}\n${props.legs.map(legLine).join("\n")}`);
 }
 // Combine mis de cote pour l'instant : seulement avec --combine
 const combo = args.combine ? buildCombo(new Set((safe || []).map((l) => l.m.id))) : null;
@@ -352,39 +332,34 @@ if (combo) {
   const pct = (combo.prob * 100).toFixed(1).replace(".", ",");
   write("combine", "DailyCombo", props, `COMBINÉ @${COMBO_TARGET} du ${dayLabel.toLowerCase()} — cote totale ${combo.cote.toFixed(2).replace(".", ",")}, environ ${pct} % de chances selon le modèle\n${props.legs.map(legLine).join("\n")}`);
 }
-// ---------- Le match des videos du jour ----------
-// Decision de Clement (29/09/2026) : les videos (reseaux, TikTok) GARDENT le
-// « match simule » et la simulation par quart d'heure, en public (sur le site,
-// elles restent reservees aux Pro). Le match des videos est le match du jour dont
-// le moteur v3 est LE PLUS SUR : plus haute probabilite de sa selection « la plus
-// sure » (premium_fields.v3_fiabilite.plus_sur), sur TOUS les matchs couverts par
-// le v3, meme sans pari publie sur le site. Departage : le plus tot, puis le numero
-// du match. Ce match a ses deux videos : « Match simule » et « Match Pulse ».
-const plusSurDe = (p) => {
-  const x = p && p.premium_fields && p.premium_fields.v3_fiabilite && p.premium_fields.v3_fiabilite.plus_sur;
-  const pr = x ? Number(x.probabilite) : NaN;
-  return pr > 0 && pr <= 100 ? pr : null;
+// ---------- Une video par match analyse ----------
+// Tous les matchs du jour ont leur video. La moitie la plus riche en buts
+// (score simule le plus frequent) passe en « Match simule », le reste en
+// « Match Pulse ». Ex. 15 matchs : 7 Match simule + 8 Match Pulse.
+const goalsOf = ({p}) => {
+  const top = (p.premium_fields?.mc_scores || [])[0];
+  return top ? top.score.split("-").reduce((a, x) => a + Number(x), 0) : 0;
 };
-const couverts = matches
-  .map((m) => ({m, p: premiumById.get(String(m.id))}))
-  .filter(({p}) => p && simDe(p) && plusSurDe(p) !== null);
-const matchVideo = [...couverts].sort((a, b) => plusSurDe(b.p) - plusSurDe(a.p)
-  || kickoffParis(a.m).localeCompare(kickoffParis(b.m)) || Number(a.m.id) - Number(b.m.id))[0] || null;
-if (matchVideo) {
-  const e = matchVideo;
-  const props = matchCardProps(e);
-  const h = props.goals.filter((g) => g.side === "home").length, a = props.goals.length - h;
-  write(`simule-${e.m.id}`, "DailyMatchSimule", props, `Match simulé : ${props.homeTeam} ${h}-${a} ${props.awayTeam} (${hourOf(e.m)}, ${props.simulationCount ? `score le plus fréquent sur ${props.simulationCount} simulations` : "score le plus probable selon le modèle"})`);
-  const pulse = matchPulseProps(e);
-  write(`pulse-${e.m.id}`, "DailyMatchPulse", pulse, `Match Pulse : ${pulse.homeName} – ${pulse.awayName} (${pulse.competition})`);
+const byGoals = [...pool].sort((a, b) => goalsOf(b) - goalsOf(a) || leagueRank(a.m) - leagueRank(b.m));
+const simuleSet = new Set(byGoals.slice(0, Math.floor(pool.length / 2)).filter((e) => goalsOf(e) >= 1));
+const byKickoff = [...pool].sort((a, b) => kickoffParis(a.m).localeCompare(kickoffParis(b.m)) || leagueRank(a.m) - leagueRank(b.m));
+for (const e of byKickoff) {
+  if (simuleSet.has(e)) {
+    const props = matchCardProps(e);
+    const h = props.goals.filter((g) => g.side === "home").length, a = props.goals.length - h;
+    write(`simule-${e.m.id}`, "DailyMatchSimule", props, `Match simulé : ${props.homeTeam} ${h}-${a} ${props.awayTeam} (${hourOf(e.m)}, score le plus fréquent sur ${props.simulationCount} simulations)`);
+  } else {
+    const props = matchPulseProps(e);
+    write(`pulse-${e.m.id}`, "DailyMatchPulse", props, `Match Pulse : ${props.homeName} – ${props.awayName} (${props.competition})`);
+  }
 }
 
 // Raison claire quand il n'y a rien a montrer
 const why = !matches.length ? "matchs pas encore chargés (les analyses de ce jour ne sont pas encore publiées)"
-  : !pool.length && !matchVideo ? `analyses complètes pas encore prêtes (${matches.length} match(s) trouvé(s))` : null;
+  : !pool.length ? `analyses complètes pas encore prêtes (${matches.length} match(s) trouvé(s))` : null;
 const manifest = {date: TODAY, matchesToday: matches.length, withAnalysis: pool.length, videos,
   simule: videos.filter((v) => v.composition === "DailyMatchSimule").length,
   pulse: videos.filter((v) => v.composition === "DailyMatchPulse").length,
-  skipped: why ? [why] : [!safe && "le plus probable (moins de 3 sélections)", args.combine && !combo && "combiné (impossible d'atteindre la cote 10)", !matchVideo && "match des vidéos (aucun match couvert par le moteur v3 avec sa simulation)"].filter(Boolean)};
+  skipped: why ? [why] : [!safe && "safe (moins de 3 sélections sûres)", args.combine && !combo && "combiné (impossible d'atteindre la cote 10)"].filter(Boolean)};
 fs.writeFileSync(path.join(OUT, "manifest.json"), JSON.stringify(manifest, null, 2));
 console.log(JSON.stringify({date: TODAY, matches: matches.length, analysed: pool.length, videos: videos.map((v) => v.slug), skipped: manifest.skipped}, null, 2));

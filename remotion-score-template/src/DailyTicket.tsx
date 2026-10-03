@@ -1,8 +1,6 @@
-// « Le plus probable » / Combine du jour : meme style que MontanteOne (fond stade,
-// cartes numerotees, balayage lumineux), mais en vrai texte alimente par
+// Safe / Combine du jour : meme style que MontanteOne (fond stade, cartes
+// numerotees, balayage lumineux, coche), mais en vrai texte alimente par
 // scripts/videos/build-daily-videos.mjs. Volontairement sans cote ni pourcentage.
-// AUCUNE coche verte (contre-controle de l'avocat du diable, 30/09/2026) : la video
-// part AVANT les matchs, une coche y serait lue comme un pari deja gagne.
 import {Fragment} from "react";
 import {AbsoluteFill, Easing, Img, interpolate, staticFile, useCurrentFrame, useVideoConfig} from "remotion";
 import {loadFont} from "@remotion/google-fonts/BarlowCondensed";
@@ -46,6 +44,13 @@ const cardLayout = (n: number) => {
   const sweeps = Array.from({length: n}, (_, i) => 108 + Math.round((i * 136) / Math.max(1, n - 1)));
   return {h, tops, sweeps, k: h / 188};
 };
+
+const Check = ({size}: {size: number}) => (
+  <svg width={size} height={size} viewBox="0 0 48 48">
+    <circle cx="24" cy="24" r="22" fill="#1fc95b" />
+    <path d="M14 24.5l7 7 13-14" fill="none" stroke="#fff" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
 
 export const DailyTicket: React.FC<DailyTicketProps> = ({title, accent = "DU JOUR", dateLabel, legs, badge}) => {
   const frame = useCurrentFrame();
@@ -110,6 +115,7 @@ export const DailyTicket: React.FC<DailyTicketProps> = ({title, accent = "DU JOU
         const enter = 1;
         const sweepX = interpolate(frame, [start, start + 38], [-250, 1220], {...clamp, easing: Easing.inOut(Easing.quad)});
         const checkPulse = pulseAt(frame, start + 33, 13);
+        const checkIn = 1;
         const match = `${leg.home} — ${leg.away}`.toUpperCase();
         return (
           <Fragment key={i}>
@@ -120,6 +126,7 @@ export const DailyTicket: React.FC<DailyTicketProps> = ({title, accent = "DU JOU
                 <div style={{fontSize: (match.length > 28 ? 34 : match.length > 20 ? 40 : 48) * Math.max(k, 0.8), fontWeight: 700, letterSpacing: 0.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"}}>{match}</div>
                 <div style={{fontSize: (leg.pick.length > 30 ? 32 : 37) * Math.max(k, 0.8), fontWeight: 500, color: "#a9dcf0", marginTop: 6 * k, textTransform: "uppercase", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"}}>{leg.pick}</div>
               </div>
+              <div style={{width: 64, marginRight: 22, opacity: checkIn, scale: 0.6 + checkIn * 0.4}}><Check size={60 * Math.max(k, 0.75)} /></div>
               {leg.kickoff ? (
                 <div style={{width: 196, height: Math.min(128, CARD_H - 20), marginRight: 22, borderRadius: 20, border: "2px solid rgba(34,216,255,.4)", background: "rgba(3,18,30,.8)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
                   <div style={{fontSize: 22 * Math.max(k, 0.8), fontWeight: 600, letterSpacing: 5, color: "#8fb3c4"}}>COUP D'ENVOI</div>

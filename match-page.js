@@ -159,7 +159,7 @@ function etatAnalyse(raw){
 // Defense en profondeur (vue visiteur) : copie de lib/premium-fields.js#PREMIUM_FIELDS
 // (tests/match-page-structure.test.js verifie que les deux listes sont
 // identiques). prob_band, has_signal et no_signal restent : ils sont publics.
-const CHAMPS_PREMIUM=["pari_rec","cote_rec","model_probability","markets_compared","market_id","marche","kelly","edge","verdict_shark","facteur_x","dropping_odds","player_markets","facteur_x_i18n","verdict_shark_i18n","conf","p1","pn","p2","po15","po25","btts","lambda_h","lambda_a","market_aware_p1","market_aware_pN","market_aware_p2","market_consensus_p1","market_consensus_pN","market_consensus_p2","mc_scores","scores","simulation_count","paris_safe","paris_risque","vbet","val","hot","risque","mise","pick_downgrade","odds_available","is_canonical_pick","reliability","model_agreement","crit_home","crit_away","elo_signal","analyse_card","analyse_card_i18n","conseil_public","conseil_public_i18n","contexte","contexte_i18n","scenario","scenario_i18n","scenario_15min","decision_factors","risk_principal","top_scorers","marches_flux"];
+const CHAMPS_PREMIUM=["pari_rec","cote_rec","model_probability","markets_compared","market_id","marche","kelly","edge","verdict_shark","facteur_x","dropping_odds","player_markets","facteur_x_i18n","verdict_shark_i18n","conf","p1","pn","p2","po15","po25","btts","lambda_h","lambda_a","market_aware_p1","market_aware_pN","market_aware_p2","market_consensus_p1","market_consensus_pN","market_consensus_p2","mc_scores","scores","simulation_count","paris_safe","paris_risque","vbet","val","hot","risque","mise","pick_downgrade","odds_available","is_canonical_pick","reliability","model_agreement","crit_home","crit_away","elo_signal","analyse_card","analyse_card_i18n","conseil_public","conseil_public_i18n","contexte","contexte_i18n","scenario","scenario_i18n","scenario_15min","decision_factors","risk_principal","top_scorers"];
 function publicCopy(raw){
   const copie={};
   Object.keys(raw||{}).forEach(k=>{if(CHAMPS_PREMIUM.indexOf(k)===-1)copie[k]=raw[k];});
@@ -1073,12 +1073,7 @@ function resumeSeoStatique(){
 }
 
 function viewModel(raw){
-  // 03/10/2026 (Clement) : noms d'equipes en francais sur les pages francaises (Macédoine du Nord, Écosse,
-  // « Victoire Écosse »), meme table que l'accueil (lib/noms-equipes-fr.js). Ailleurs : le nom de l'API.
-  let src=raw;
-  try{const N=window.IasharkNomsEquipesFr,loc=window.I18N&&window.I18N.locale;
-    if(raw&&N&&N.nom&&(!loc||loc==='fr')){src=Object.assign({},raw);['home','away'].forEach(k=>{const e=raw[k];if(e&&typeof e==='object'&&e.n)src[k]=Object.assign({},e,{n:N.nom(e.n)});});}}catch(_e){src=raw;}
-  const vm=IasharkMatchViewModel.buildMatchViewModel(src);
+  const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
   vm._raw=raw;
   document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
   return vm;
@@ -1098,27 +1093,6 @@ function analyseAbonne(vm){
   return blocs.filter(Boolean).join('');
 }
 
-// TOUS LES MARCHES (03/10/2026) : marches valides par le mathematicien (config/marches-valides.json),
-// chance = cote bet365 sans marge, arrondie par le pipeline (lib/chance-iashark.js) : rien n'est recalcule
-// ici. La cote dit TOUJOURS d'ou elle vient (« Cote bet365 : 1,45 »). Aucun lien vers un bookmaker.
-function marchesFluxCard(raw){
-  const mf=raw&&raw.marches_flux;
-  // Jamais une selection du flux sous 1,20 (deja filtree par le pipeline ; verifie encore ici).
-  const liste=mf&&Array.isArray(mf.liste)?mf.liste.filter(x=>x&&x.selection&&Number(x.chance)>0&&Number(x.cote)>=1.2):[];
-  if(!liste.length)return '';
-  const parMarche=new Map();
-  liste.forEach(x=>{const k=String(x.marche||'');if(!parMarche.has(k))parMarche.set(k,[]);parMarche.get(k).push(x);});
-  const cote=v=>Number(v).toFixed(2).replace('.',',');
-  const blocs=[...parMarche.entries()].map(([nom,xs])=>`<div class="mf-bloc"><h3 class="mf-nom">${esc(nom)}</h3><ul class="mf-liste">${
-    xs.sort((a,b)=>b.chance-a.chance).map(x=>`<li class="mf-ligne"><span class="mf-sel">${esc(x.selection)}</span><span class="mf-chance"><b>${esc(x.chance)} %</b></span><span class="mf-cote">${esc(tf('match_page.flux_cote','Cote de référence ({bk}) : {cote}',{bk:x.bookmaker||'bet365',cote:cote(x.cote)}))}</span></li>`).join('')
-  }</ul></div>`).join('');
-  // Heure du relevé utilisé (marches_flux.releve_at, posé par le pipeline) : jamais « même relevé que le robot »,
-  // le robot peut lire un relevé plus récent (avocat-du-diable 03/10).
-  const ra=mf&&mf.releve_at?new Date(mf.releve_at):null;
-  const heure=ra&&!isNaN(ra)?ra.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Paris'}).replace(':',' h '):'';
-  const note=heure?tf('match_page.flux_note_heure','Chance calculée par IASHARK à partir de la cote de référence (bet365), marge du bookmaker retirée. Cote relevée à {heure} (heure de Paris).',{heure}):t('match_page.flux_note_sans_heure','Chance calculée par IASHARK à partir de la cote de référence (bet365), marge du bookmaker retirée.');
-  return `<section class="card mf reveal">${blocs}<p class="mf-note">${esc(note)}</p></section>`;
-}
 function render(raw){
   const vm=viewModel(raw);
   // ORDRE DE LECTURE (16/09/2026, maquette V8 validee par le proprietaire) :
@@ -1129,7 +1103,6 @@ function render(raw){
     ['avis',signalCard(vm)],
     ['stats',stats?groupe({title:t('match_page.stats_group_title','Les stats du match'),sub:t('match_page.stats_group_sub','Données brutes des deux équipes.'),body:stats}):''],
     ['analyse',analyse?groupe({title:t('match_page.analysis_group_title','L’analyse IASHARK'),sub:t('match_page.analysis_group_sub','Ce que calcule notre modèle pour ce match.'),body:analyse}):''],
-    ['marches',(()=>{const b=marchesFluxCard(vm._raw||raw);return b?groupe({title:t('match_page.flux_title','Tous les marchés'),sub:t('match_page.flux_sub','Chaque pari, sa chance et sa cote.'),body:b}):'';})()],
     ['questions',faqCard(vm,{locked:false})]
   ];
   paint(vm,sections,signalSticky(vm),'');

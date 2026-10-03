@@ -157,21 +157,3 @@ dialog{max-height:calc(100dvh - 2rem);overflow-y:auto}
 #proPlanPicker .iash-plans-single{margin:10px 0 0;text-align:left}
 #proPlanPicker .iash-plans-single .iash-plan-body{justify-items:start}
 #proPlanPicker .iash-plans-closed{margin:12px 0 0;text-align:left}
-
-/* ---------- Controle des captures du 30/09/2026 (page Abonnement) ---------- */
-/* Onglets defilants (telephone) : un degrade a droite montre qu'il y en a
-   d'autres (« Mes réglages P… » coupe net) ; marge de fin pour que le dernier
-   onglet sorte du degrade une fois defile. */
-@media(max-width:1023px){
-  .acc-layout nav>div{padding-right:48px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 56px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 56px),transparent)}
-}
-/* Barre du bas : la police du contenu, sans capitales espacees (direction
-   « pas de monospace majuscule ») ; la pastille de l'onglet actif garde la
-   taille de son contenu au lieu d'un quart de l'ecran. */
-/* « ACCUEIL », « COMPTE »... sont en capitales dans les dictionnaires : ecrits « Accueil », « Compte ». */
-.site-bottom-nav .site-bottom-nav__label{display:block;font:600 11px/1 Inter,system-ui,sans-serif;letter-spacing:0;text-transform:lowercase}
-.site-bottom-nav .site-bottom-nav__label::first-letter{text-transform:uppercase}
-.site-bottom-nav .site-bottom-nav__item{justify-self:center;width:100%;max-width:168px}
-/* Pied de page : la barre du bas a deja sa place (padding du body) ; plus de
-   grand vide avant « Championnats ». */
-body>footer.pb-28{padding-bottom:12px}

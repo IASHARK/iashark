@@ -60,10 +60,6 @@ function walk(dirRel, out) {
   }
 }
 
-// Videos UGC (03/10/2026) : config/ugc-videos.json verifie puis recopie dans
-// assets/ugc-videos.json (publie avec assets/). Entree invalide = publication refusee.
-require("./build-ugc-videos.js").run({ check: CHECK_ONLY });
-
 const files = new Set();
 PUBLIC_DIRS.forEach(function (d) { walk(d, files); });
 PUBLIC_ROOT_FILES.forEach(function (f) { if (exists(f)) files.add(f); });
@@ -342,14 +338,3 @@ if (miss.length) {
   console.log("References locales introuvables (ignorees) : " + miss.length);
   miss.slice(0, 15).forEach(function (e) { console.log("  " + e[0] + "  <-  " + e[1]); });
 }
-
-// Mentions legales a completer par Clement (audit V3 du 02/10/2026, point B8) :
-// avertissement bien visible dans le journal de publication, sans bloquer.
-(function () {
-  const dossiers = ["fr", "en", "es", "gb", "mx", "za", "de", "it", "pt"];
-  const restants = dossiers.filter(function (d) {
-    const f = path.join(ROOT, "legal", d, "mentions-legales.html");
-    return fs.existsSync(f) && fs.readFileSync(f, "utf8").indexOf("[À REMPLIR PAR CLÉMENT") !== -1;
-  });
-  if (restants.length) console.log("::warning title=Mentions legales::emplacements [À REMPLIR PAR CLÉMENT] encore presents dans legal/" + restants.join(", legal/") + "/mentions-legales.html (nom EI, statut, SIRET, adresse, directeur de la publication).");
-})();

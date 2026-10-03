@@ -137,9 +137,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Safer gambling</a>
   </nav>
   <h1 class="page-title">Terms of service and sale</h1>
-  <div class="page-date">Last updated: 2 October 2026</div>
-  <!-- LEGAL REVIEW: 02/10/2026 - 7-day free trial restored (owner decision; create-checkout-session/trial.ts: TRIAL_DAYS unset = 7): section 6A added (first subscription only, once per person; card required, nothing charged during the trial; reminder email 2 days before the end, trial-reminder job 0042 to be enabled BEFORE opening; cancel in 1 click; first charge on day 8 at the price of the chosen period; first charge declined = Pro access stops at the end of the trial); section 6: first payment at the end of the trial where applicable. To confirm with local counsel: start of the cancellation/cooling-off period (subscription date, trial included). Previous version archived in legal/gb/archives/cgv-2026-10-01.html. Status: REVIEW. -->
-  <!-- LEGAL REVIEW: 01/10/2026 - controle des chiffres publics : article 4, accès gratuit = analyse d'un match offert certains jours, simulation réservée à Pro (plus « un match par jour ») ; essai gratuit non proposé (TRIAL_DAYS = 0 par défaut) : aucun article sur l'essai, premier paiement à la souscription (article 7 inchangé). Version précédente archivée dans legal/gb/archives/cgv-2026-09-19.html. Statut : REVIEW. -->
+  <div class="page-date">Last updated: 19 September 2026</div>
   <!-- LEGAL REVIEW: 19/09/2026 - owner decision: Pro is payable in the United Kingdom monthly only (GBP 14.99, config/markets.json#gb.checkoutOpen = ["month"]); no Stripe Price exists for the weekly and annual periods. Sections 5 to 8 limited to the monthly plan (weekly and annual prices, annual renewal reminder, change of billing period and weekly grace period removed); "including any applicable taxes" replaced by the French VAT franchise mention. Previous version (weekly / monthly / annual) archived in legal/gb/archives/cgv-2026-09-16.html. Status: REVIEW. -->
 
   <div class="warn-box">
@@ -167,7 +165,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
 
   <section class="section">
     <h2>4. Free account</h2>
-    <p>Creating an account is free and requires a valid email address. A free account includes the analysis of one free match, on some days (the simulation remains Pro only), and the other free content described on our pricing page. What is included in the free account may change.</p>
+    <p>Creating an account is free and requires a valid email address. A free account includes one full match analysis per day and the other free content described on our pricing page. What is included in the free account may change.</p>
   </section>
 
   <!-- LEGAL REVIEW: sections 5, 6, 7 (model form) and 8 rewritten on 16/09/2026 for the single Pro plan sold weekly, monthly or annually, then on 19/09/2026 for the monthly-only offer - REVIEW status, to be reviewed by a UK lawyer before the Stripe prices are opened. Open points: (J1) start date of the DMCC Act 2024 subscription contracts regime (reminder notices, easy exit, renewal cooling-off) - the 30-day annual reminder below is good practice until then; (J2) no pro-rata refund on the annual plan vs CRA 2015 Part 2; (J4) reg. 36/37 on a weekly plan. Prices and computed values taken from config/markets.json (tests/cgv-pro-prices.test.js). Annual reminder template ready (annual_renewal_reminder), sending inactive until Resend and the scheduled job are enabled. -->
@@ -178,32 +176,19 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
       <li><strong>Monthly</strong> — £14.99 per month, renews automatically every month until you cancel.</li>
     </ul>
     <p>The price is a total price in pounds sterling (GBP). VAT not applicable, Article 293 B of the French General Tax Code (CGI).</p>
-    <p>Before you pay, the checkout page shows the billing period, the plan's main features, the total price in pounds sterling (GBP), the billing frequency and the fact that the subscription renews automatically. The contract is formed when your payment is confirmed or, with the free trial, when your card is registered. We will send you confirmation of your subscription by email.</p>
+    <p>Before you pay, the checkout page shows the billing period, the plan's main features, the total price in pounds sterling (GBP), the billing frequency and the fact that the subscription renews automatically. The contract is formed when your payment is confirmed. We will send you confirmation of your subscription by email.</p>
   </section>
 
   <section class="section">
     <h2>6. Payment and automatic renewal</h2>
     <p>Payments are processed securely by Stripe. We never see or store your full card details.</p>
     <ul>
-      <li>You pay at the start of each monthly billing period. With the free trial (section 6A), the first payment is taken at the end of the trial.</li>
+      <li>You pay at the start of each monthly billing period.</li>
       <li><strong>Your subscription renews automatically</strong> at the end of each billing period, for the same period and at the price then in force, until you cancel it.</li>
       <li>An active subscription cannot be bought a second time.</li>
       <li>If we change the price, we will tell you in advance. The new price will only apply from your next renewal, and you can cancel before it applies.</li>
       <li>If a renewal payment fails, our payment provider may retry it. Your paid access continues for 4 days after the end of the paid period; if payment is still not made, your account returns to the free plan.</li>
     </ul>
-  </section>
-
-  <section class="section">
-    <h2>6A. 7-day free trial</h2>
-    <p>With your first IASHARK Pro subscription, you get a 7-day free trial, <strong>on the monthly subscription only</strong>. Weekly and yearly plans, where offered, are paid when you subscribe, with no trial. During the trial, you have access to all Pro features.</p>
-    <ul>
-      <li>Your card is required when you subscribe, but <strong>nothing is charged during the trial</strong>.</li>
-      <li>We email you about 2 days before the trial ends, with the date and amount of the first payment.</li>
-      <li>You can cancel the trial at any time, free of charge and online, in 1 click from "My account". You keep Pro access until the end of the trial and nothing is charged.</li>
-      <li>If you do not cancel, your subscription continues at the end of the trial: the first payment is taken on day 8, at the monthly price shown in section 5, and the subscription then renews as described in section 6. If this first payment fails, Pro access stops at the end of the trial until payment is made.</li>
-      <li>The trial is offered once per person: not to an account, or an email address, that has already had an IASHARK Pro subscription or trial. In that case, the first payment is taken when you subscribe.</li>
-    </ul>
-    <p>The 14-day cancellation period in section 7 starts on the day you subscribe, trial included.</p>
   </section>
 
   <section class="section">

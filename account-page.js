@@ -33,15 +33,6 @@
   var chargement = document.getElementById('chargement');
 
   var ctx = null, prefs = {}, abo = null, nbDecisions = 0;
-  // Abonnement illisible (erreur de lecture) : on ne promet jamais l'essai.
-  var aboInconnu = false;
-  // Jours d'essai confirmes par le serveur (create-checkout-session, mode
-  // availability : trial_days). null = inconnu (paiement desactive, ancienne
-  // fonction, reseau) : l'essai n'est alors pas annonce.
-  var essaiServeur = null;
-  // Reglages Pro (formulaire d'accueil) : public.pro_preferences, contrat du
-  // Canal Pro (0040, branche canal-pro). Ligne presente = formulaire rempli.
-  var prefsPro = null;
   // « Mes compétitions préférées » : user_metadata.fav_leagues (Supabase Auth),
   // meme store que la liste des matchs de l'accueil (lib/fav-leagues.js).
   var favStore = null;
@@ -58,14 +49,6 @@
     var d = new Date(v);
     return isNaN(d) ? null : d.toLocaleDateString(localeTag(), { day: 'numeric', month: 'long', year: 'numeric' });
   }
-  // JJ/MM (ordre de la langue de la page : 09/10 en francais).
-  function dateCourte(v) {
-    if (!v) return null;
-    var d = new Date(v);
-    return isNaN(d) ? null : d.toLocaleDateString(localeTag(), { day: '2-digit', month: '2-digit' });
-  }
-  // Impaye : le bouton du portail Stripe dit ce qu'il faut faire.
-  function impaye() { return !!abo && (abo.status === 'past_due' || abo.status === 'unpaid'); }
   function euros(v) {
     // null et chaine vide ne valent pas zero : une bankroll non renseignee
     // doit s'afficher "Non renseigné", pas "0 €". Number(null) vaut 0, d'ou
@@ -100,8 +83,7 @@
     if (typeof v === 'number' && isFinite(v)) {
       try { return v.toLocaleString(localeTag(), { style: 'currency', currency: devise() }); } catch (_e) {}
     }
-    // Aucun prix ecrit a la main (30/09/2026) : sans marche, pas de prix.
-    return '';
+    return '19,95 €';
   }
   // Lien interne dans le repertoire de langue/marche courant (/gb/, /mx/...).
   function lien(p) { return (window.I18N && window.I18N.href) ? window.I18N.href(p) : '/' + p; }
@@ -113,13 +95,6 @@
     return REPERTOIRES.indexOf(seg) !== -1 ? seg : null;
   }
   var $ = function (id) { return document.getElementById(id); };
-  // Langue du compte : UNE source, user_preferences.language (lib/langue-compte.js).
-  // Compte sans ligne : la langue de la page (jamais 'fr' d'office sur /es/).
-  function langueDeLaPage() {
-    var L = window.IasharkLangueCompte;
-    return L ? L.langueDeLaPage(location.pathname) : 'fr';
-  }
-  function langueDuCompte() { return prefs.language || langueDeLaPage(); }
 
   /* ---------- i18n ----------
      Nomme "tr" (et non "t") : plusieurs fonctions de ce fichier utilisent deja
@@ -185,18 +160,8 @@
     if (abo.status === 'active') {
       return { ton: 'ok', titre: tr('compte_page.sub_status_active_title', 'Actif'), detail: fin ? tr('compte_page.sub_status_active_detail_prefix', 'Prochain renouvellement le ') + fin + '.' : null };
     }
-    // Essai annule (1 clic) : Pro jusqu'a la fin des 7 jours, rien preleve.
-    if (abo.status === 'trialing' && abo.cancel_at_period_end) {
-      return { ton: 'attention', titre: tr('compte_page.sub_status_cancel_scheduled_title', 'Annulation programmée'),
-        detail: tr('pro_trial.cancel_done_trial', 'C’est annulé. Tu gardes Pro jusqu’au {date}, et rien ne sera prélevé.').split('{date}').join(fin || '…') };
-    }
-    // Essai en cours : « Essai gratuit jusqu'au JJ/MM », puis la date du
-    // premier paiement (fin de l'essai, 8e jour).
     if (abo.status === 'trialing') {
-      var court = dateCourte(abo.current_period_end);
-      return { ton: 'ok',
-        titre: court ? tr('pro_trial.until', 'Essai gratuit jusqu’au {date}').split('{date}').join(court) : tr('compte_page.sub_status_trialing_title', 'Période d’essai'),
-        detail: fin ? tr('pro_trial.until_detail', 'Rien n’est prélevé avant. Sans annulation, le premier paiement a lieu le {date}.').split('{date}').join(fin) : null };
+      return { ton: 'ok', titre: tr('compte_page.sub_status_trialing_title', 'Période d’essai'), detail: fin ? tr('compte_page.sub_status_trialing_detail_prefix', 'L’essai se termine le ') + fin + '.' : null };
     }
     if (abo.status === 'past_due' || abo.status === 'unpaid') {
       return { ton: 'alerte', titre: tr('compte_page.sub_status_past_due_title', 'Paiement en attente'),
@@ -322,78 +287,20 @@
     return titreSection(tr('compte_page.section_overview_title', 'Vue d’ensemble'), tr('compte_page.section_overview_subtitle', 'Un résumé de votre compte. Chaque section porte le détail.'))
       + '<div class="space-y-4">'
       + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.plan_current_heading', 'Plan actuel') + '</h2><div class="mt-3">' + planResume + '</div>'
-          + '<div class="mt-4"><button type="button" data-aller="abonnement" class="text-[13.5px] font-semibold text-cyan transition hover:underline">' + tr('compte_page.view_subscription_cta', 'Voir l’abonnement') + '</button></div>'
-          // Compte gratuit : « Essai Pro gratuit 7 jours (abonnement mensuel) »,
-          // montre par assets/essai-annonce.js seulement s'il y a droit.
-          // (Pas deux fois sur l'ecran de bienvenue, qui a deja la sienne en haut.)
-          + (ligneEssaiPossible() && new URLSearchParams(location.search).get('bienvenue') !== '1' ? '<p class="mt-3 text-[13px] leading-relaxed text-ink" data-essai-annonce data-track="account_overview_trial_hint" hidden></p>' : ''))
-      + carteAffilie()
+          + '<div class="mt-4"><button type="button" data-aller="abonnement" class="text-[13.5px] font-semibold text-cyan transition hover:underline">' + tr('compte_page.view_subscription_cta', 'Voir l’abonnement') + '</button></div>')
       + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.profile_prefs_heading', 'Profil et préférences') + '</h2><div class="mt-4">'
           + ligneResume(tr('compte_page.display_name_label', 'Nom affiché'), esc(nomAffiche()), 'preferences')
           + ligneResume(tr('compte_page.email_label', 'Email'), esc(ctx.user.email))
-          + ligneResume(tr('compte_page.language_label', 'Langue'), esc(langues[langueDuCompte()] || langues.fr), 'preferences')
+          + ligneResume(tr('compte_page.language_label', 'Langue'), esc(langues[prefs.language] || langues.fr), 'preferences')
           + ligneResume(tr('compte_page.timezone_label', 'Fuseau horaire'), esc(prefs.timezone || 'Europe/Paris'), 'preferences')
           + ligneResume(tr('compte_page.fav_leagues_label', 'Compétitions préférées'), favoris().length ? esc(favoris().map(nomCompetition).join(', ')) : '', 'competitions')
+          + ligneResume(tr('compte_page.bankroll_label', 'Bankroll'), euros(ctx.profile.capital) ? esc(euros(ctx.profile.capital)) : '', 'preferences')
           + '</div>')
       + activite
       + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.security_heading', 'Sécurité') + '</h2>'
           + '<p class="mt-3 text-[14px] leading-relaxed text-soft">' + tr('compte_page.security_summary', 'Votre compte est protégé par un mot de passe.') + '</p>'
           + '<div class="mt-4"><button type="button" data-aller="securite" class="text-[13.5px] font-semibold text-cyan transition hover:underline">' + tr('compte_page.manage_security_cta', 'Gérer la sécurité') + '</button></div>')
       + '</div>';
-  }
-
-  /* Canal Pro Telegram et robot personnel, inclus dans Pro (V3, 30/09/2026).
-     Un clic ouvre le robot personnel dans Telegram avec un code a usage
-     unique : le robot relie le compte, puis donne le lien d'entree personnel
-     du Canal Pro (1 personne, 24 h). Tout est verifie par le serveur
-     (supabase/functions/telegram-bot, action vip-link). */
-  // LANCEMENT DU 3/10 (avocat du diable, 01/10/2026) : le Canal Pro n'est pas encore ouvert
-  // (migrations 0040/0041 non appliquees) : aucune promesse ni aucun bouton, seulement
-  // « Bientôt : le Canal Pro Telegram ». rejoindreVip() reste pret pour l'ouverture.
-  // Interrupteur d'ouverture (window.IASHARK_OUVERTURE.canalPro), jamais pose par le site avant 0040/0041.
-  var CANAL_PRO_OUVERT = !!(window.IASHARK_OUVERTURE && window.IASHARK_OUVERTURE.canalPro === true);
-  /* Deux robots (03/10/2026, decision de Clement) : le robot Pro envoie seulement ; les
-     questions vont au robot IASHARK Contact. Son nom : config/telegram.json (« contact ») ;
-     config/ n'est jamais publie (scripts/build-public.js), la valeur est donc recopiee ici et
-     tests/telegram-deux-robots.test.mjs verifie qu'elle est identique. */
-  var ROBOT_CONTACT = 'IASHARK_Contact_Bot';
-  function ligneContact() {
-    return '<p class="mt-4 max-w-xl text-[13px] leading-relaxed text-soft">' + tr('compte_page.contact_telegram_prefix', 'Une question ? Écrivez à ')
-      + '<a data-robot-contact href="https://t.me/' + ROBOT_CONTACT + '" target="_blank" rel="noopener" class="font-semibold text-cyan transition hover:underline">IASHARK Contact</a> '
-      + tr('compte_page.contact_telegram_suffix', 'sur Telegram : l’équipe vous répond dans cette conversation.') + '</p>';
-  }
-  function carteVip() {
-    if (!CANAL_PRO_OUVERT) {
-      return carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.vip_soon_heading', 'Vos messages Pro sur Telegram') + '</h2>'
-        + '<p class="mt-3 max-w-xl text-[14px] leading-relaxed text-soft">' + tr('compte_page.vip_soon', 'Bientôt : vos messages Pro sur Telegram, en privé (le programme du jour, vos alertes, vos débriefs).') + '</p>' + ligneContact(), 'mt-4');
-    }
-    return carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.vip_heading', 'Vos messages Pro sur Telegram (en privé)') + '</h2>'
-      + '<p class="mt-3 max-w-xl text-[14px] leading-relaxed text-soft">' + tr('compte_page.vip_detail', 'Inclus dans votre abonnement Pro : chaque jour où il y a un programme, il vous arrive en privé sur Telegram, dans votre langue, avec vos alertes et vos débriefs. Pas de canal à rejoindre : un clic ouvre votre robot IASHARK et relie votre compte, c’est tout.') + '</p>'
-      + '<div class="mt-5">' + boutonPrimaire('vipTelegram', tr('compte_page.vip_cta', 'Ouvrir mon robot sur Telegram')) + '</div>'
-      + '<p id="msgVip" hidden aria-live="polite"></p>' + ligneContact(), 'mt-4');
-  }
-  async function rejoindreVip() {
-    var relacher = occuper($('vipTelegram'), tr('compte_page.opening_label', 'Ouverture…'));
-    retour('msgVip', '');
-    try {
-      var s = await sb.auth.getSession();
-      var token = s.data.session && s.data.session.access_token;
-      var r = await fetch(window.IasharkApp.url + '/functions/v1/telegram-bot', {
-        method: 'POST',
-        headers: { apikey: window.IasharkApp.key, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'vip-link' })
-      });
-      var j = await r.json();
-      relacher();
-      if (j.robot_url) { location.href = j.robot_url; return; }
-      if (j.url) { location.href = j.url; return; }
-      if (j.code === 'already_member') retour('msgVip', tr('compte_page.vip_already', 'Votre compte est déjà relié : vos messages Pro arrivent sur Telegram, en privé, dans votre conversation avec le robot IASHARK.'));
-      else if (j.code === 'vip_not_ready') retour('msgVip', tr('compte_page.vip_not_ready', 'Vos messages Pro sur Telegram (en privé) arrivent très bientôt. Revenez dans quelques jours.'));
-      else retour('msgVip', tr('compte_page.vip_error', 'Impossible de créer votre lien pour le moment. Réessayez dans quelques minutes.'), 'error');
-    } catch (e) {
-      relacher();
-      retour('msgVip', lisible(e), 'error');
-    }
   }
 
   /* Abonnement. Le contenu change reellement selon le type de compte : un
@@ -428,7 +335,7 @@
             + '</div>' : '')
           + (abo ? '' : '<p class="mt-5 text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.pro_manual_grant_detail', 'Aucun abonnement payant n’est enregistré sur ce compte : l’accès Pro y a été accordé manuellement.') + '</p>')
           + '<div class="mt-6 flex flex-wrap gap-3">'
-          + (abo ? boutonPrimaire('portail', impaye() ? tr('pro_trial.update_card_cta', 'Mettre à jour ma carte') : tr('compte_page.manage_subscription_cta', 'Gérer mon abonnement')) : '')
+          + (abo ? boutonPrimaire('portail', tr('compte_page.manage_subscription_cta', 'Gérer mon abonnement')) : '')
           // Changer de duree : portail Stripe, ecran de changement d'offre de
           // l'abonnement (jamais un second paiement). Duree plus longue : effet
           // immediat au prorata ; plus courte : a la fin de la periode payee
@@ -438,55 +345,79 @@
           // consommation L215-1-1, decret 2023-417 : fonctionnalite « resilier
           // votre contrat » directement accessible). Elle ouvre le meme espace
           // securise Stripe, ou l'annulation se confirme.
-          // Annulation en 1 clic (V3 du 3/10/2026, fonction cancel-subscription) :
-          // l'abonnement s'arrete a la fin de la periode en cours ; pendant
-          // l'essai, rien n'est preleve. Abonnement paye : le bouton garde le nom
-          // « Résilier mon abonnement » (L215-1-1). Annulation programmee :
-          // « Finalement, je reste ».
-          + (abo && ['active', 'trialing', 'past_due', 'unpaid'].indexOf(abo.status) !== -1 && !abo.cancel_at_period_end ? boutonSecondaire('resilier', abo.status === 'trialing' ? tr('pro_trial.cancel_trial_btn', 'Annuler l’essai en 1 clic') : tr('compte_page.cancel_subscription_cta', 'Résilier mon abonnement')) : '')
-          + (abo && ['active', 'trialing'].indexOf(abo.status) !== -1 && abo.cancel_at_period_end ? boutonSecondaire('reprendre', tr('pro_trial.cancel_undo', 'Finalement, je reste')) : '')
+          + (abo && ['active', 'trialing', 'past_due', 'unpaid'].indexOf(abo.status) !== -1 && !abo.cancel_at_period_end ? boutonSecondaire('resilier', tr('compte_page.cancel_subscription_cta', 'Résilier mon abonnement')) : '')
           + '</div>'
-          + (abo ? '<p class="mt-3 text-[12.5px] leading-relaxed text-soft">' + tr('compte_page.billing_portal_note', 'Moyen de paiement et factures : dans l’espace sécurisé de notre prestataire de paiement. Pour résilier : le bouton ci-dessus.') + ' ' + tr('compte_page.change_interval_note', 'Passer à une durée plus longue prend effet tout de suite, au prorata ; passer à une durée plus courte prend effet à la fin de la période déjà payée. Le montant et la date d’effet sont affichés avant confirmation.') + '</p>' : '')
-          + '<p id="msgFacturation" hidden aria-live="polite"></p>')
-        + carteVip();
+          + (abo ? '<p class="mt-3 text-[12.5px] leading-relaxed text-soft">' + tr('compte_page.billing_portal_note', 'Moyen de paiement, factures et résiliation se gèrent dans l’espace sécurisé de notre prestataire de paiement.') + ' ' + tr('compte_page.change_interval_note', 'Passer à une durée plus longue prend effet tout de suite, au prorata ; passer à une durée plus courte prend effet à la fin de la période déjà payée. Le montant et la date d’effet sont affichés avant confirmation.') + '</p>' : '')
+          + '<p id="msgFacturation" hidden aria-live="polite"></p>');
     }
 
-    // Gratuit (controle des captures du 30/09/2026) : la MEME carte que la page
-    // d'abonnement, telle quelle (assets/pricing-grid.js, variante complete avec
-    // paiement, montee par brancher()) : carte Pro (prix, ce que Pro ajoute,
-    // choix de la duree, consentement, bouton « Devenir Pro » pleine largeur,
-    // ligne de confiance), puis le Gratuit sur une ligne, marque « Ton offre
-    // actuelle ». Plus de liste propre au compte (7 + 2 + 3 lignes, coches
-    // fines, « Bientot » deplie) : une seule liste, celle de la grille.
-    // Impaye (acces Pro deja coupe) : pas d'essai ni de second abonnement
-    // (create-checkout-session refuse : already_subscribed) ; le compte montre
-    // « Mettre à jour ma carte » (portail client Stripe).
-    var alerte = etat && etat.ton === 'alerte'
-      ? '<div class="rounded-xl border px-4 py-3.5 text-[13.5px] leading-relaxed ' + TON[etat.ton] + '"><b class="font-semibold">' + esc(etat.titre) + '</b><span class="mt-0.5 block opacity-90">' + esc(etat.detail) + '</span>'
-        + (impaye() ? '<div class="mt-3">' + boutonPrimaire('portail', tr('pro_trial.update_card_cta', 'Mettre à jour ma carte')) + '</div>' : '') + '</div>'
-      : '';
+    // Gratuit : un seul appel a l'action. Ce que Pro donne : la MEME liste que
+    // la page d'abonnement (3 groupes, 19/09/2026), jamais une liste propre au
+    // compte ; acces gratuit decrit avec les textes partages pro_offer.free_*.
     return titreSection(tr('compte_page.subscription_heading', 'Abonnement'), tr('compte_page.subscription_free_subtitle', 'Votre plan actuel et ce que Pro ajoute.'))
       + '<div class="space-y-4">'
-      + alerte
-      // Repli sans la grille (script absent) : le prix mensuel du marche ; le
-      // paiement ci-dessous reste utilisable.
-      + '<div id="proPlanPicker"><div class="rounded-2xl border border-cyan/40 bg-surface p-5 sm:p-6"><p class="text-[17px] font-bold">' + esc(tr('compte_page.plan_pro_name', 'IASHARK Pro')) + '</p>'
-      + '<p class="mt-2.5 text-[22px] font-extrabold leading-none tracking-tight"><span data-market-price="pro.month">' + esc(prixPro()) + '</span> ' + esc(tr('compte_page.per_month', '/ mois')) + '</p></div></div>'
-      // Paiement : DEPLACE dans la carte Pro par la grille (option slot), comme
-      // sur la page d'abonnement. Cases CGV + execution immediate
-      // (lib/checkout-consent.js) montees par monterConsentement().
-      + '<div id="comptePaiement" class="flex flex-col">'
-      + '<div id="checkoutConsent"></div>'
-      + (essaiPossible() ? blocEssai() : '')
-      + '<div id="souscrireBox">' + boutonPaiement(essaiAffiche() ? tr('pro_trial.cta', 'Commencer l’essai gratuit') : tr('pricing_grid.cta_pro', 'Devenir Pro')) + '</div>'
-      + '<p id="msgFacturation" hidden aria-live="polite"></p>'
-      + '</div>'
+      + carte('<div class="flex flex-wrap items-start justify-between gap-4">'
+        + '<div><h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.plan_current_heading', 'Plan actuel') + '</h2>'
+        + '<p class="mt-2.5 text-[26px] font-extrabold leading-none tracking-tight">' + tr('compte_page.plan_free_name', 'IASHARK Gratuit') + '</p>'
+        // Prix affiche en EUR uniquement : la conversion multi-devise est un
+        // chantier separe en cours en parallele, hors perimetre ici.
+        + '<p class="mt-2 text-[14px] text-soft">' + esc(prixGratuit()) + '</p></div>'
+        + '<span class="inline-flex items-center rounded-full border border-hairline bg-white/[.04] px-2.5 py-1 text-[11px] font-bold tracking-wider text-soft">' + tr('compte_page.badge_free', 'GRATUIT') + '</span></div>'
+        + '<ul class="mt-5 space-y-2.5">'
+        + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>' + esc(tr('pro_offer.free_matches', '1 match offert par jour, avec un compte gratuit')) + '</li>'
+        + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>' + esc(tr('pro_offer.free_tools', 'Calculateur de mise, cote juste, simulateur de capital')) + '</li>'
+        + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>' + tr('compte_page.benefit_free_blog', 'Le blog et les guides') + '</li>'
+        + '</ul>'
+        + (etat && etat.ton === 'alerte' ? '<div class="mt-5 rounded-xl border px-4 py-3.5 text-[13.5px] leading-relaxed ' + TON[etat.ton] + '"><b class="font-semibold">' + esc(etat.titre) + '</b><span class="mt-0.5 block opacity-90">' + esc(etat.detail) + '</span></div>' : ''))
+      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-cyan">' + tr('compte_page.with_pro_heading', 'Avec Pro') + '</h2>'
+        // Prix affiche en EUR uniquement : voir note ci-dessus, hors perimetre ici.
+        // Selecteur Semaine / Mois / Annee (lib/pro-plan-picker.js), monte par
+        // brancher() ; repli sans module : prix mensuel.
+        + '<div id="proPlanPicker"><p class="mt-2.5 text-[22px] font-extrabold leading-none tracking-tight"><span data-market-price="pro.month">' + esc(prixPro()) + '</span> ' + esc(tr('compte_page.per_month', '/ mois')) + '</p></div>'
+        + '<p id="proDureesNote" class="mt-2 text-[13.5px] text-soft">' + tr('compte_page.pro_durations_note', 'Même accès Pro quelle que soit la durée · résiliable à tout moment.') + '</p>'
+        + listePro()
+        // Cases CGV + execution immediate (lib/checkout-consent.js), montees
+        // par monterConsentement() depuis brancher().
+        + '<div id="checkoutConsent"></div>'
+        + '<div class="mt-6">' + boutonPrimaire('souscrire', tr('compte_page.discover_pro_cta', 'Découvrir Pro'), 'w-full sm:w-auto') + '</div>'
+        + '<p id="msgFacturation" hidden aria-live="polite"></p>')
       + '</div>';
   }
-  // Bouton de paiement du compte : meme dessin que « Devenir Pro » de la page
-  // d'abonnement (pleine largeur, 48 px).
-  function boutonPaiement(texte) {
-    return '<button type="button" id="souscrire" class="inline-flex min-h-[48px] w-full items-center justify-center rounded-xl bg-cyan px-5 py-3 text-center text-[15px] font-bold text-[#04141b] shadow-[0_14px_32px_-18px_rgba(32,213,239,.85)] transition hover:brightness-110 disabled:cursor-wait disabled:opacity-60">' + esc(texte) + '</button>';
+
+  // Tout ce que Pro debloque (19/09/2026) : la liste de la page d'abonnement,
+  // en compact. « Sur chaque match » = les cles du mur Pro de la page match
+  // (match_page.pro_gate_item_*), le reste = pro_offer.* : une seule source.
+  // L'ancienne liste du compte (« six outils branches sur le modele », « suivi
+  // de bankroll lie au compte ») n'est plus affichee : le simulateur de capital
+  // et le calculateur de mise sont gratuits, seul le journal synchronise est Pro.
+  function listePro() {
+    function groupe(titre, items) {
+      return '<p class="mt-4 text-[11px] font-bold uppercase tracking-[0.14em] text-soft">' + esc(titre) + '</p>'
+        + '<ul class="mt-2 space-y-2">' + items.map(function (it) {
+          return '<li class="flex gap-2.5 text-[13.5px] leading-snug"><span aria-hidden="true" class="text-cyan">✓</span><span>' + it + '</span></li>';
+        }).join('') + '</ul>';
+    }
+    var match = [
+      ['pro_gate_item_bet', 'Le marché retenu par le modèle et sa probabilité en %'],
+      ['pro_gate_item_scorer', 'Le buteur le plus probable et les marchés joueurs'],
+      ['pro_gate_item_scenario', 'Le scénario du match par tranche de 15 minutes : quand les buts tombent'],
+      ['pro_gate_item_scores', 'Les scores les plus probables et les buts attendus'],
+      ['pro_gate_item_odds', 'Nos probabilités face aux cotes, marché par marché'],
+      ['pro_gate_item_stats', 'Toutes les stats du match : forme, classement, face-à-face, comparatif'],
+      ['pro_gate_item_faq', 'Les réponses aux questions fréquentes sur ce match']
+    ].map(function (k) { return esc(tr('match_page.' + k[0], k[1])); });
+    return '<div id="proListe">'
+      + groupe(tr('pro_offer.group_match', 'Sur chaque match'), match)
+      + groupe(tr('pro_offer.group_daily', 'Chaque jour'), [
+        esc(tr('pro_offer.daily_all_matches', 'Tous les matchs analysés de nos 19 compétitions, au lieu d’un seul match offert par jour')),
+        esc(tr('pro_offer.daily_scorers', 'Les 3 buteurs du jour')) + ' <span class="ml-1 inline-block rounded-full border border-amber-500/35 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-200">' + esc(tr('pro_offer.badge_new', 'Nouveau')) + '</span>'
+      ])
+      + groupe(tr('pro_offer.group_tools', 'Les outils'), [
+        esc(tr('pro_offer.tool_scanner', 'Détecteur d’écarts du jour, sur les matchs réels')),
+        esc(tr('pro_offer.tool_journal', 'Journal des décisions synchronisé sur ton compte, avec le suivi de tes résultats')),
+        esc(tr('pro_offer.tool_combo', 'Combiné construit sur les analyses réelles'))
+      ])
+      + '</div>';
   }
 
   /* Préférences : profil, affichage, bankroll. Les competitions preferees ne
@@ -503,11 +434,10 @@
       'Europe/Madrid', 'America/Montreal', 'Africa/Casablanca', 'Africa/Dakar', 'UTC'];
   }
   function preferences() {
-    // Chaque langue dans SA langue (on reconnait la sienne meme sur une page
-    // qu'on ne lit pas) : la meme liste que le questionnaire Pro.
     var langues = [
-      ['fr', 'Français'], ['en', 'English'], ['es', 'Español'],
-      ['de', 'Deutsch'], ['it', 'Italiano'], ['pt', 'Português']
+      ['fr', tr('compte_page.lang_name_fr', 'Français')], ['en', tr('compte_page.lang_name_en', 'English')],
+      ['es', tr('compte_page.lang_name_es', 'Espanol')], ['de', tr('compte_page.lang_name_de', 'Deutsch')],
+      ['it', tr('compte_page.lang_name_it', 'Italiano')], ['pt', tr('compte_page.lang_name_pt', 'Portugues')]
     ];
     var tz = prefs.timezone || 'Europe/Paris';
 
@@ -540,16 +470,16 @@
         + '<div class="mt-4 grid gap-4 sm:grid-cols-2">'
         + '<div><label for="langue" class="block text-[13px] font-semibold text-soft">' + tr('compte_page.language_label', 'Langue') + '</label>'
         + '<select id="langue" class="fld mt-2">' + langues.map(function (l) {
-            return '<option value="' + l[0] + '"' + (langueDuCompte() === l[0] ? ' selected' : '') + '>' + l[1] + '</option>';
-          }).join('') + '</select>'
-        + '<p class="mt-1.5 text-[12.5px] text-soft">' + tr('compte_page.language_hint', 'Celle du site, de tes e-mails et de ton robot Telegram.') + '</p></div>'
+            return '<option value="' + l[0] + '"' + ((prefs.language || 'fr') === l[0] ? ' selected' : '') + '>' + l[1] + '</option>';
+          }).join('') + '</select></div>'
         + '<div><label for="fuseau" class="block text-[13px] font-semibold text-soft">' + tr('compte_page.timezone_label', 'Fuseau horaire') + '</label>'
         + '<input id="fuseau" class="fld mt-2" list="listeFuseaux" value="' + esc(tz) + '" autocomplete="off" spellcheck="false">'
         + '<datalist id="listeFuseaux">' + fuseaux().map(function (z) { return '<option value="' + esc(z) + '">'; }).join('') + '</datalist>'
         + '<p class="mt-1.5 text-[12.5px] text-soft">' + tr('compte_page.timezone_hint', 'Tapez pour rechercher.') + '</p></div>'
         + '</div>')
-      // Plus de « Bankroll » ni de simulateur de capital (decision de Clement, 30/09/2026 :
-      // IASHARK ne conseille aucune mise ; avocat du diable, 01/10/2026).
+      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.bankroll_label', 'Bankroll') + '</h2>'
+        + '<p class="mt-2 text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.bankroll_detail', 'Le capital de référence des calculs de mise. Il est privé et n’est utilisé que par vos outils.') + '</p>'
+        + '<div class="mt-4 max-w-xs">' + champ('bankroll', tr('compte_page.bankroll_label', 'Bankroll'), ctx.profile.capital == null ? '' : ctx.profile.capital, { type: 'number', attrs: ' min="1" step="1" inputmode="decimal"', placeholder: tr('compte_page.bankroll_placeholder', 'Ex. 500') }) + '</div>')
       + '<div class="flex flex-wrap items-center gap-3">' + boutonPrimaire('enregistrerPrefs', tr('compte_page.save_btn', 'Enregistrer')) + '</div>'
       + '<p id="msgPrefs" hidden aria-live="polite"></p>'
       + '</div>';
@@ -730,152 +660,16 @@
       + '</div></form></dialog>';
   }
 
-
-  /* ---------- Essai de 7 jours ----------
-     Propose seulement a un compte qui n'a jamais eu d'abonnement (le serveur
-     le verifie de nouveau : create-checkout-session/trial.ts). Texte clair
-     AVANT l'inscription : 0 EUR aujourd'hui, carte demandee, rappel 2 jours
-     avant la fin, annulation en 1 clic, prix de la duree choisie ensuite. */
-  function essaiPossible() { return !abo && !aboInconnu && essaiServeur > 0; }
-  // Essai sur l'ABONNEMENT MENSUEL seulement (02/10/2026, create-checkout-session/
-  // trial.ts#TRIAL_INTERVALS) : encart et « Commencer l'essai gratuit » seulement
-  // quand le mois est choisi (par defaut) ; Semaine ou Annee : « Devenir Pro ».
-  function dureeChoisie() { return selecteur && typeof selecteur.interval === 'function' ? selecteur.interval() : 'month'; }
-  function essaiAffiche() { return essaiPossible() && dureeChoisie() === 'month'; }
-  // Ligne « Essai Pro gratuit » (vue d'ensemble, bienvenue) : compte gratuit sans
-  // abonnement connu ; assets/essai-annonce.js reverifie tout (serveur, pays, compte).
-  function ligneEssaiPossible() { return typeDeCompte() !== 'pro' && typeDeCompte() !== 'admin' && !abo && !aboInconnu; }
-  function majEssaiCompte() {
-    var bloc = $('blocEssai'), b = $('souscrire');
-    if (bloc) bloc.hidden = !essaiAffiche();
-    if (b && !b.disabled) b.textContent = essaiAffiche() ? tr('pro_trial.cta', 'Commencer l’essai gratuit') : tr('pricing_grid.cta_pro', 'Devenir Pro');
-  }
-  function blocEssai() {
-    var jours = String(essaiServeur > 0 ? essaiServeur : 7);
-    return '<div id="blocEssai" class="mt-5 rounded-xl border border-cyan/25 bg-cyan/[.05] px-4 py-3.5"' + (essaiAffiche() ? '' : ' hidden') + '>'
-      + '<p class="text-[13.5px] font-bold text-cyan">' + esc(tr('pricing_grid.trial_short', 'Essai gratuit {days} jours (abonnement mensuel)').split('{days}').join(jours)) + '</p>'
-      + '<ul class="mt-2 space-y-1.5">' + ['pro_trial.line1', 'pro_trial.line2', 'pro_trial.line3', 'essai_mensuel.line4'].map(function (k) {
-        return '<li class="text-[13px] leading-relaxed text-ink">' + esc(tr(k, '')) + '</li>';
-      }).join('') + '</ul>'
-      + '<p class="mt-2 text-[12px] text-soft">' + esc(tr('essai_mensuel.once', 'Essai réservé à un premier abonnement, sur la formule mensuelle. Semaine et année : payées dès la souscription, sans essai.')) + '</p></div>';
-  }
-  // Ligne « Essai Pro gratuit » : script charge a la demande (une fois).
-  function annoncerEssai() {
-    if (!racine || !racine.querySelector('[data-essai-annonce]')) return;
-    if (window.IasharkEssai) { window.IasharkEssai.annoncer(racine); return; }
-    if (document.querySelector('script[data-essai-loader]')) return;
-    var s = document.createElement('script');
-    s.src = '/assets/essai-annonce.js';
-    s.setAttribute('data-essai-loader', '');
-    s.onload = function () { if (window.IasharkEssai) window.IasharkEssai.annoncer(racine); };
-    document.head.appendChild(s);
-  }
-  async function annuler(reprendre) {
-    var bouton = $(reprendre ? 'reprendre' : 'resilier');
-    var relacher = occuper(bouton, tr('compte_page.opening_label', 'Ouverture…'));
-    retour('msgFacturation', '');
-    try {
-      var s = await sb.auth.getSession();
-      var token = s.data.session && s.data.session.access_token;
-      var r = await fetch(window.IasharkApp.url + '/functions/v1/cancel-subscription', {
-        method: 'POST',
-        // Langue de l'e-mail de confirmation : celle de la page (en-tete
-        // autorise par cancel-subscription).
-        headers: { apikey: window.IasharkApp.key, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', 'x-iashark-locale': (window.I18N && window.I18N.locale) || 'fr' },
-        body: JSON.stringify(reprendre ? { undo: true } : {})
-      });
-      var j = await r.json().catch(function () { return {}; });
-      relacher();
-      if (j.code === 'payment_disabled') { retour('msgFacturation', tr('pro_trial.cancel_disabled', 'Le paiement en ligne n’est pas encore activé.'), 'error'); return; }
-      if (!r.ok || !j.ok || !j.processed) { retour('msgFacturation', tr('pro_trial.cancel_error', 'L’annulation n’a pas abouti.'), 'error'); return; }
-      var etaitEssai = abo && abo.status === 'trialing';
-      abo.cancel_at_period_end = !!j.cancel_at_period_end;
-      if (j.ends_at) abo.current_period_end = j.ends_at;
-      afficher();
-      var fin = date(abo.current_period_end) || '';
-      // E-mail de confirmation (L215-1-1) : annonce SEULEMENT s'il est
-      // vraiment parti (reponse email_sent de cancel-subscription). Sinon on
-      // le dit, et ce message indique la date de fin.
-      var mail = reprendre ? '' : ' ' + (j.email_sent === true
-        ? tr('pro_trial.cancel_email_sent', 'Un e-mail de confirmation t’a été envoyé.')
-        : tr('pro_trial.cancel_email_failed', 'L’e-mail de confirmation n’a pas pu partir pour le moment. Garde ce message : il indique ta date de fin.'));
-      retour('msgFacturation', reprendre ? tr('pro_trial.undone', 'Ton abonnement continue.')
-        : tr(etaitEssai ? 'pro_trial.cancel_done_trial' : 'pro_trial.cancel_done', '').split('{date}').join(fin) + mail, 'success');
-    } catch (e) {
-      relacher();
-      retour('msgFacturation', tr('pro_trial.cancel_error', 'L’annulation n’a pas abouti.'), 'error');
-    }
-  }
-
-  /* ---------- Reglages Pro (formulaire d'accueil) ----------
-     Resume des reponses (public.pro_preferences, contrat 0040) et lien pour
-     les modifier (accueil-pro.html). Seul un abonne Pro peut les ecrire (RLS
-     de 0040) : un compte gratuit voit a quoi ils servent, sans formulaire. */
-  function reglagesPro() {
-    var P = window.IasharkProPreferences;
-    var rempli = !!(prefsPro && P);
-    var corps, bouton;
-    // Hors de France : ni alertes ni programme Telegram dans le resume (ils
-    // n'y sont pas envoyes). Pays = celui des reglages, sinon celui de la page.
-    var paysCompte = P ? (rempli ? P.normaliser(prefsPro).pays : P.paysDuMarche(window.IASHARK_MARKET)) : 'fr';
-    var ouvert = !P || P.paysOuvert(paysCompte);
-    var sousTitre = !ouvert ? tr('pro_onboarding.account_text_closed', '') : tr('pro_onboarding.account_text', '');
-    if (!ctx.isPro && !rempli) {
-      // Hors de France : texte neutre, jamais « le programme du Canal Pro »
-      // (pas propose dans ce pays, alors que Pro s'y paie ; ronde 4.2).
-      corps = '<p class="text-[14px] leading-relaxed text-soft">' + esc(tr(ouvert ? 'pro_onboarding.pro_only_text' : 'pro_onboarding.pro_only_text_closed', '')) + '</p>';
-      bouton = '<a href="' + esc(lien('abonnement.html')) + '" class="mt-5 inline-flex h-11 items-center rounded-xl bg-cyan px-5 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90">' + esc(tr('pro_space.locked_cta', 'Voir l’offre Pro')) + '</a>';
-    } else {
-      if (!rempli) {
-        corps = '<p class="text-[14px] leading-relaxed text-soft">' + esc(tr('pro_onboarding.account_not_set', 'Pas encore réglé.')) + ' ' + esc(sousTitre) + '</p>';
-      } else {
-        var p = P.normaliser(prefsPro);
-        // Bookmakers : seulement ceux de SON pays ; hors de France, aucun nom.
-        var bks = !P.paysOuvert(p.pays) ? tr('pro_space.country_closed', '')
-          : (p.bookmakers.length ? p.bookmakers.map(function (id) { return P.nomBookmaker(id, p.pays); }).filter(Boolean).join(', ') : tr('pro_space.strategy_all_bookmakers', ''));
-        var alertes = p.alertes.map(function (a) { return tr('pro_space.alert_' + a, a); });
-        var noms = { fr: 'Français', en: 'English', es: 'Español', de: 'Deutsch', it: 'Italiano', pt: 'Português' };
-        // Competitions preferees (03/10/2026) : pro_preferences.competitions, la meme liste que le robot ; info seulement.
-        var comps = (p.competitions && p.competitions.length ? p.competitions : favoris()).map(nomCompetition);
-        corps = ligneResume(tr('compte_page.language_label', 'Langue'), esc(noms[langueDuCompte()] || langueDuCompte()))
-          + ligneResume(tr('pro_onboarding.q_country', 'Pays'), esc(tr('pro_onboarding.country_' + p.pays, p.pays)))
-          + ligneResume(tr('pro_space.strategy_bookmakers', 'Tes bookmakers'), esc(bks))
-          + ligneResume(tr('pro_perso.your_competitions', 'Tes compétitions'), esc(comps.length ? comps.join(', ') : tr('pro_perso.all', 'toutes')))
-          // Plus de strategie ni de types de paris (03/10/2026) : les memes paris pour tous.
-          // Garde-fou : « Bientôt » dans l'espace Pro (02/10/2026), plus montre ici.
-          // Alertes et programme dans Telegram (« bientot ») : seulement la ou
-          // ils arriveront, la France (meme regle que le tableau de bord,
-          // pro-dashboard.js#blocStrategie ; contre-controle, ronde 4).
-          + (P.paysOuvert(p.pays)
-            ? ligneResume(tr('pro_space.strategy_alerts', 'Tes alertes'), esc(alertes.length ? alertes.join(', ') : tr('pro_space.strategy_alerts_none', 'aucune')))
-              + ligneResume(tr('pro_space.strategy_telegram', 'Ton programme dans Telegram'), esc(p.programme_prive ? tr('pro_space.telegram_on', 'oui') : tr('pro_space.telegram_off', 'non')))
-              + (p.programme_prive ? ligneResume(tr('pro_onboarding.send_time', 'Heure d’envoi du programme'), esc(p.heure_envoi == null ? tr('pro_onboarding.send_time_asap', 'Dès qu’il est prêt') : tr('pro_onboarding.send_time_at', 'À partir de {h} h').replace('{h}', p.heure_envoi))) : '')
-            : '');
-      }
-      bouton = '<a href="' + esc(lien('accueil-pro.html' + (rempli ? '?modifier=1' : ''))) + '" class="mt-5 inline-flex h-11 items-center rounded-xl bg-cyan px-5 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90">'
-        + esc(rempli ? tr('pro_onboarding.account_cta_edit', 'Modifier mes réglages') : tr('pro_onboarding.account_cta_set', 'Régler mon espace Pro')) + '</a>';
-    }
-    return titreSection(tr('pro_onboarding.account_title', 'Mes réglages Pro'), sousTitre)
-      + carte('<div>' + corps + '</div>' + bouton);
-  }
-
   /* ---------- Charpente ---------- */
-  // « Mes réglages Pro » : visible des que le questionnaire Pro (reglagesPro) ou le Canal Pro
-  // ouvre (interrupteurs window.IASHARK_OUVERTURE, poses apres 0040/0041/0044).
-  var REGLAGES_PRO_OUVERTS = CANAL_PRO_OUVERT || !!(window.IASHARK_OUVERTURE && window.IASHARK_OUVERTURE.reglagesPro === true);
   var SECTIONS = [
     { id: 'apercu', titre: 'Vue d’ensemble', rendu: apercu },
     { id: 'abonnement', titre: 'Abonnement', rendu: abonnement },
-    // Reglages Pro (pro_preferences, migration 0040) : caches pour le lancement du 3/10.
-  ].concat(REGLAGES_PRO_OUVERTS ? [{ id: 'reglages-pro', titre: 'Mes réglages Pro', rendu: reglagesPro }] : [], [
     { id: 'preferences', titre: 'Préférences', rendu: preferences },
     { id: 'competitions', titre: 'Mes compétitions préférées', rendu: competitions },
     { id: 'notifications', titre: 'Notifications', rendu: notifications },
     { id: 'securite', titre: 'Sécurité', rendu: securite },
-    { id: 'donnees', titre: 'Données', rendu: donnees },
-    // Programme de partenaires (03/10/2026) : renvoi vers l'espace partenaire.
-    { id: 'partenaires', titre: 'Partenaires', rendu: partenaires }
-  ]);
+    { id: 'donnees', titre: 'Données', rendu: donnees }
+  ];
   // Cles i18n des libelles de nav, reutilisant les cles des titres de section
   // deja definis plus haut (meme texte FR) quand elles existent - seul
   // "Données" (libelle court de nav) differe du titre complet de la section
@@ -885,49 +679,12 @@
   var NAV_LABELS = {
     apercu: ['compte_page.section_overview_title', 'Vue d’ensemble'],
     abonnement: ['compte_page.subscription_heading', 'Abonnement'],
-    'reglages-pro': ['pro_onboarding.account_title', 'Mes réglages Pro'],
     preferences: ['compte_page.preferences_heading', 'Préférences'],
     competitions: ['compte_page.fav_leagues_nav', 'Compétitions'],
     notifications: ['compte_page.notifications_heading', 'Notifications'],
     securite: ['compte_page.security_heading', 'Sécurité'],
-    donnees: ['compte_page.nav_data', 'Données'],
-    partenaires: ['affiliation.account_nav', 'Partenaires']
+    donnees: ['compte_page.nav_data', 'Données']
   };
-  /* Programme de partenaires : 40 % de chaque paiement des abonnes amenes,
-     a vie. Tout se passe sur partenaires.html (candidature, espace). */
-  /* Carte « Gagne 40 % en recommandant IASHARK » (03/10/2026, affiliation visible) : vers l'espace
-     partenaire si la personne est partenaire validee, sinon vers la candidature. L'etat vient de la
-     base (RPC affiliate_me, lecture seule, migration 0050) ; sans reponse : la candidature. 40 % est
-     un taux de commission, jamais un gain promis. */
-  var etatAffilie = null, affilieLu = false;
-  function contenuAffilie() {
-    var st = etatAffilie && etatAffilie.status;
-    var k = st === 'active' || st === 'approved' ? 'member' : st === 'pending' ? 'pending' : 'apply';
-    var href = lien('partenaires.html' + (k === 'apply' ? '#candidature' : ''));
-    return '<h2 class="text-[16px] font-bold text-ink">' + esc(tr('partner_promo.account_title', 'Gagne 40 % en recommandant IASHARK')) + '</h2>'
-      + '<p class="mt-2 max-w-xl text-[14px] leading-relaxed text-soft">' + esc(tr('partner_promo.account_text_' + k, '')) + '</p>'
-      + '<a href="' + esc(href) + '" data-track="account_partner_' + k + '" class="mt-4 inline-flex h-11 items-center rounded-xl bg-cyan px-5 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90">' + esc(tr('partner_promo.account_cta_' + k, '')) + '</a>';
-  }
-  function carteAffilie() {
-    if (!affilieLu) { affilieLu = true; setTimeout(lireAffilie, 0); }
-    return '<section id="carteAffilie" class="rounded-2xl border border-cyan/30 bg-[#050a10] p-5 sm:p-6">' + contenuAffilie() + '</section>';
-  }
-  function lireAffilie() {
-    try {
-      Promise.resolve(sb.rpc('affiliate_me')).then(function (r) {
-        if (!r || r.error) return;
-        etatAffilie = r.data || null;
-        var el = document.getElementById('carteAffilie');
-        if (el) el.innerHTML = contenuAffilie();
-      }, function () {});
-    } catch (e) { /* carte « candidature » par defaut */ }
-  }
-
-  function partenaires() {
-    return titreSection(tr('affiliation.account_title', 'IASHARK Partenaires'), tr('affiliation.account_subtitle', 'Recommande IASHARK et touche 40 % de chaque paiement de tes abonnés, à vie.'))
-      + carte('<p class="text-[14px] leading-relaxed text-soft">' + esc(tr('affiliation.account_text', 'Ton lien, ton code, ton QR code, tes chiffres et tes versements sont dans ton espace partenaire.')) + '</p>'
-        + '<a href="' + esc(lien('partenaires.html')) + '" class="mt-5 inline-flex h-11 items-center rounded-xl bg-cyan px-5 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90">' + esc(tr('affiliation.account_cta', 'Ouvrir mon espace partenaire')) + '</a>');
-  }
 
   function navigation() {
     var liens = SECTIONS.map(function (s) {
@@ -995,7 +752,6 @@
 
   /* ---------- Branchements ---------- */
   function brancher() {
-    annoncerEssai();
     racine.querySelectorAll('[data-aller]').forEach(function (el) {
       el.addEventListener('click', function () { aller(el.getAttribute('data-aller')); });
     });
@@ -1017,21 +773,10 @@
       // Aucune duree payable (config/markets.json#checkoutOpen = [] : gb, mx, za
       // le 19/09/2026) : le selecteur affiche « paiement pas encore ouvert » ;
       // ni consentement ni bouton « Decouvrir Pro » qui echouerait a chaque fois.
-      // Grille de prix (30/09/2026, meme API que lib/pro-plan-picker.js) : la
-      // carte de la page d'abonnement telle quelle (variante complete, paiement
-      // DEPLACE dans la carte : option slot), le Gratuit marque « Ton offre
-      // actuelle » (loggedIn). « Meme acces Pro, quelle que soit la duree » et
-      // la ligne de confiance sont dessines par la grille. Le selecteur
-      // historique reste le repli si la grille n'est pas chargee.
-      var paiement = $('comptePaiement');
-      var monteur = window.IasharkPricingGrid ? function (el, o) {
-        return window.IasharkPricingGrid.mount(el, Object.assign({ variant: 'complet', heading: false, annual: true, checkout: true, session: false, loggedIn: true, ownTrial: true,
-          slot: paiement ? Array.prototype.slice.call(paiement.children) : [] }, o));
-      } : (window.IasharkProPlanPicker ? function (el, o) { return window.IasharkProPlanPicker.mount(el, o); } : null);
-      selecteur = ($('proPlanPicker') && monteur) ? monteur($('proPlanPicker'), {
-        onChange: majEssaiCompte,
+      selecteur = ($('proPlanPicker') && window.IasharkProPlanPicker) ? window.IasharkProPlanPicker.mount($('proPlanPicker'), {
         onUpdate: function (visibles) {
           var n = visibles ? visibles.length : 0;
+          var note = $('proDureesNote'); if (note) note.hidden = n < 2;
           ['souscrire', 'checkoutConsent', 'msgFacturation'].forEach(function (id) {
             var el = $(id);
             if (!el) return;
@@ -1040,25 +785,13 @@
           });
         }
       }) : null;
-      // Paiement deplace dans la carte : son ancien emplacement, vide, disparait.
-      if (paiement && window.IasharkPricingGrid && selecteur && !paiement.children.length) paiement.hidden = true;
-      if (selecteur) selecteur.loadAvailability().then(function () {
-        // Essai annonce seulement si le serveur le confirme (TRIAL_DAYS > 0)
-        // et si le compte n'a jamais eu d'abonnement.
-        essaiServeur = selecteur.trialDays ? selecteur.trialDays() : null;
-        var b = $('souscrire');
-        if (!essaiPossible() || !b || $('blocEssai')) return;
-        b.parentNode.insertAdjacentHTML('beforebegin', blocEssai());
-        majEssaiCompte();
-      }, function () {});
+      if (selecteur) selecteur.loadAvailability();
       monterConsentement();
       $('souscrire').addEventListener('click', function () { facturation('create-checkout-session', $('souscrire')); });
     }
     if ($('portail')) $('portail').addEventListener('click', function () { facturation('create-portal-session', $('portail')); });
     if ($('changerDuree')) $('changerDuree').addEventListener('click', function () { facturation('create-portal-session', $('changerDuree'), { flow: 'change_interval' }); });
-    if ($('resilier')) $('resilier').addEventListener('click', function () { annuler(false); });
-    if ($('reprendre')) $('reprendre').addEventListener('click', function () { annuler(true); });
-    if ($('vipTelegram')) $('vipTelegram').addEventListener('click', rejoindreVip);
+    if ($('resilier')) $('resilier').addEventListener('click', function () { facturation('create-portal-session', $('resilier')); });
     if ($('exporter')) $('exporter').addEventListener('click', exporter);
     if ($('refusSuivi')) $('refusSuivi').addEventListener('click', basculerSuivi);
     racine.querySelectorAll('[data-fav-ligue]').forEach(function (b) {
@@ -1075,6 +808,11 @@
   async function enregistrerPreferences() {
     var relacher = occuper($('enregistrerPrefs'), tr('compte_page.saving_label', 'Enregistrement…'));
     retour('msgPrefs', '');
+    var capitalBrut = $('bankroll').value.trim();
+    var capital = capitalBrut === '' ? null : Number(capitalBrut);
+    if (capital !== null && !(capital > 0)) {
+      relacher(); retour('msgPrefs', tr('compte_page.msg_bankroll_must_be_positive', 'La bankroll doit être un montant supérieur à zéro.'), 'error'); $('bankroll').focus(); return;
+    }
     var ligne = {
       user_id: ctx.user.id,
       display_name: $('nomAffiche').value.trim().slice(0, 40) || null,
@@ -1086,15 +824,14 @@
     try {
       var r1 = await sb.from('user_preferences').upsert(ligne, { onConflict: 'user_id' });
       if (r1.error) throw r1.error;
-      Object.assign(prefs, ligne);
-      // Langue changee : la page se rouvre dans la langue du compte (meme section).
-      var L = window.IasharkLangueCompte;
-      var ailleurs = L && L.cible(ligne.language, { pathname: location.pathname, search: '?langue=1', hash: '#preferences' });
-      if (ailleurs) {
-        try { sessionStorage.setItem(L.CLE_SESSION, '1'); } catch (_e) {}
-        location.replace(ailleurs);
-        return;
+      // La bankroll vit dans public.users.capital, seule source de verite -
+      // les outils lisent la meme colonne. On n'en garde pas une copie ici.
+      if (capital !== ctx.profile.capital) {
+        var r2 = await sb.from('users').update({ capital: capital }).eq('id', ctx.user.id);
+        if (r2.error) throw r2.error;
+        ctx.profile.capital = capital;
       }
+      Object.assign(prefs, ligne);
       relacher();
       retour('msgPrefs', tr('compte_page.msg_preferences_saved', 'Préférences enregistrées.'), 'success');
     } catch (e) {
@@ -1108,8 +845,6 @@
     retour('msgNotifs', '');
     var ligne = {
       user_id: ctx.user.id,
-      // Ligne absente : creee avec la langue de la page, jamais le 'fr' par defaut de la base.
-      language: langueDuCompte(),
       notify_match_analysis: $('notifMatch').getAttribute('aria-checked') === 'true',
       notify_weekly_recap: $('notifHebdo').getAttribute('aria-checked') === 'true'
     };
@@ -1276,12 +1011,6 @@
     bouton.disabled = false;
   }
 
-  // Export : base sans 0044 (marches, heure_envoi absentes) = relecture avec les colonnes de 0040.
-  function exportReglagesSans0044(r) {
-    var PP = window.IasharkProPreferences;
-    if (!(r && r.error && PP && PP.erreurColonneAbsente(r.error))) return r;
-    return sb.from('pro_preferences').select('user_id,' + PP.COLONNES_BASE.join(',') + ',created_at,updated_at').eq('user_id', ctx.user.id).maybeSingle();
-  }
   async function exporter() {
     var relacher = occuper($('exporter'), tr('compte_page.preparing_label', 'Préparation…'));
     retour('msgExport', '');
@@ -1297,13 +1026,7 @@
           .eq('user_id', ctx.user.id).order('created_at', { ascending: false }).limit(5000),
         // Preferences d'emails (migration 0024, lecture de SA ligne via RLS).
         sb.from('email_preferences').select('marketing_opt_in,opt_in_at,opt_in_source,opt_in_text_version,unsubscribed_at,unsubscribe_source,locale,market,created_at,updated_at')
-          .eq('user_id', ctx.user.id).maybeSingle(),
-        // Reglages Pro (pro_preferences) et tickets notes dans Telegram
-        // (pro_tickets) : contrat du Canal Pro (0040), lecture de SES lignes,
-        // colonnes nommees. Table absente ou refus : cle omise.
-        sb.from('pro_preferences').select('user_id,pays,bookmakers,strategie,familles,cote_min_perso,limite_paris_jour,programme_prive,alertes,marches,heure_envoi,competitions,created_at,updated_at').eq('user_id', ctx.user.id).maybeSingle()
-          .then(exportReglagesSans0044),
-        sb.from('pro_tickets').select('id,jour,source,texte,pari_id,match_label,selection,cote,mise,bookmaker,combine,statut,decision_id,created_at').eq('user_id', ctx.user.id).order('created_at', { ascending: false }).limit(5000)
+          .eq('user_id', ctx.user.id).maybeSingle()
       ]);
       var contenu = {
         exporte_le: new Date().toISOString(),
@@ -1314,9 +1037,7 @@
         visites_liees_au_compte: res[4].error ? 'indisponible pour le moment' : (res[4].data || []),
         // Table absente (0024 pas encore appliquee) ou lecture refusee : cle
         // simplement omise (undefined n'est pas ecrit par JSON.stringify).
-        preferences_emails: res[5].error ? undefined : (res[5].data || null),
-        reglages_pro: res[6].error ? undefined : (res[6].data || null),
-        tickets_telegram: res[7].error ? undefined : (res[7].data || [])
+        preferences_emails: res[5].error ? undefined : (res[5].data || null)
       };
       var blob = new Blob([JSON.stringify(contenu, null, 2)], { type: 'application/json' });
       var url = URL.createObjectURL(blob), a = document.createElement('a');
@@ -1492,17 +1213,8 @@
       sb.from('subscriptions').select('status,billing_interval,current_period_end,cancel_at_period_end,created_at')
         .eq('user_id', ctx.user.id).order('created_at', { ascending: false }).limit(1).maybeSingle(),
       sb.from('betting_decisions').select('id', { count: 'exact', head: true }).eq('user_id', ctx.user.id),
-      sb.from('email_preferences').select('marketing_opt_in').eq('user_id', ctx.user.id).maybeSingle(),
-      // Reglages Pro (pro_preferences, 0040), colonnes nommees. Table absente
-      // (0040 pas encore appliquee) : erreur ignoree, « pas encore reglé ».
-      sb.from('pro_preferences').select(window.IasharkProPreferences ? window.IasharkProPreferences.COLONNES.join(',') : 'pays').eq('user_id', ctx.user.id).maybeSingle()
+      sb.from('email_preferences').select('marketing_opt_in').eq('user_id', ctx.user.id).maybeSingle()
     ]);
-    // Base sans 0044 (marches, heure_envoi) : relecture avec les colonnes de 0040.
-    var PP = window.IasharkProPreferences;
-    if (PP && resultats[4] && resultats[4].error && PP.erreurColonneAbsente(resultats[4].error)) {
-      resultats[4] = await sb.from('pro_preferences').select(PP.COLONNES_BASE.join(',')).eq('user_id', ctx.user.id).maybeSingle();
-    }
-    prefsPro = (resultats[4] && !resultats[4].error && resultats[4].data) || null;
     prefs = resultats[0].data || {};
     emailPrefs = resultats[3].error
       ? { etat: 'indisponible', optIn: false }
@@ -1519,7 +1231,6 @@
         .eq('user_id', ctx.user.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
     }
     abo = resultats[1].data || null;
-    aboInconnu = !!resultats[1].error;
     nbDecisions = resultats[2].count || 0;
 
     var ancre = String(location.hash || '').replace('#', '');
@@ -1531,21 +1242,6 @@
 
     if (new URLSearchParams(location.search).get('bienvenue') === '1') {
       alerteSection(tr('compte_page.msg_welcome_account_created', 'Bienvenue. Votre compte est créé.'));
-      // Bienvenue d'un compte gratuit : « Essai Pro gratuit 7 jours (abonnement
-      // mensuel) » + lien, qui reste (assets/essai-annonce.js : seulement s'il y a droit).
-      var pan = $('panneau');
-      if (pan && ligneEssaiPossible()) {
-        var ligne = document.createElement('p');
-        ligne.className = 'mb-5 rounded-lg border border-cyan/25 bg-cyan/[.05] px-3.5 py-3 text-[13.5px] leading-relaxed text-ink';
-        ligne.setAttribute('data-essai-annonce', '');
-        ligne.setAttribute('data-track', 'account_welcome_trial_hint');
-        ligne.hidden = true;
-        pan.insertBefore(ligne, pan.firstChild);
-        annoncerEssai();
-      }
-    }
-    if (new URLSearchParams(location.search).get('langue') === '1') {
-      retour('msgPrefs', tr('compte_page.msg_preferences_saved', 'Préférences enregistrées.'), 'success');
     }
 
     window.addEventListener('hashchange', function () {

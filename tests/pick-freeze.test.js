@@ -130,8 +130,7 @@ test("chaque champ premium est classe : fige (analyse du pari) ou vivant (flux),
     const f = figes.indexOf(k) !== -1, v = F.LIVE_PREMIUM_FIELDS.indexOf(k) !== -1;
     assert.ok(f !== v, k + " doit etre soit fige soit vivant (lib/pick-freeze.js) : " + (f ? "les deux" : "aucun"));
   });
-  // v3_buteurs (01/10/2026) : buteurs du moteur v3, vivants comme top_scorers.
-  assert.deepEqual(F.LIVE_PREMIUM_FIELDS.slice().sort(), ["dropping_odds", "player_markets", "top_scorers", "v3_buteurs", "v3_suivi"]);
+  assert.deepEqual(F.LIVE_PREMIUM_FIELDS.slice().sort(), ["dropping_odds", "player_markets", "top_scorers"]);
   // Le pari et tout ce qui le decrit sur la page match sont figes.
   ["pari_rec", "cote_rec", "model_probability", "market_id", "marche", "markets_compared", "conf", "reliability", "model_agreement",
     "risque", "pick_downgrade", "odds_available", "paris_safe", "analyse_card", "conseil_public", "contexte", "scenario",
@@ -601,13 +600,13 @@ test("pipeline : aucune etape du gel ne peut faire echouer le run (lecture, gel,
   assert.match(lecture, /try\{\s*var colonnes=PICK_FREEZE\.PREMIUM_ROW_SELECT;[\s\S]*\}catch\(e\)\{\s*\/\/[^\n]*\n\s*out=\{lues:\{\},lignes:\{\},echecs:uniques\.length\};/);
   assert.match(WF, /try\{\s*gel=PICK_FREEZE\.freezeAnalysis\(m,precedent,\{[\s\S]{0,400}\}\);\s*\}catch\(e\)\{/);
   assert.match(WF, /var gardes=\{\};\s*try\{ gardes=PICK_FREEZE\.keptFreeDesignations\(/);
-  assert.match(WF, /try\{ if\(alreadyExists&&m\.pari_rec&&PICK_FREEZE\.alignPendingPrediction\(alreadyExists,m,\{[^}]*\}\)\) realignees\+\+; \}\s*catch\(e\)\{/);
+  assert.match(WF, /try\{ if\(alreadyExists&&m\.pari_rec&&PICK_FREEZE\.alignPendingPrediction\(alreadyExists,m\)\) realignees\+\+; \}\s*catch\(e\)\{/);
 });
 
 test("pipeline : l'historique (et donc predictions_archive) suit le pari publie avant l'archivage", () => {
   const debut = at("async function updateHistorique(matchsData){");
   const fn = WF.slice(debut, WF.indexOf("var TRANSFER_CACHE_DAYS", debut));
-  const aligne = fn.indexOf("if(alreadyExists&&m.pari_rec&&PICK_FREEZE.alignPendingPrediction(alreadyExists,m,{moteur:moteurPari,moteur_version:moteurVersion,kickoffMs:koMs,nowMs:Date.now()})) realignees++;");
+  const aligne = fn.indexOf("if(alreadyExists&&m.pari_rec&&PICK_FREEZE.alignPendingPrediction(alreadyExists,m)) realignees++;");
   assert.ok(aligne !== -1);
   assert.ok(aligne < fn.indexOf("await writePredictionsArchive(histo.predictions);"));
   assert.ok(aligne < fn.indexOf("fs.writeFileSync(histoPath,"));

@@ -24,8 +24,7 @@ const hrefs = (html) => new Set([...html.replace(/<(script|style)\b[\s\S]*?<\/\1
 test("site construit : aucune section orpheline, aucun lien interne casse", () => {
   assert.ok(report.indexable > 100, "site construit incomplet (" + report.indexable + " pages indexables)");
   assert.deepEqual(report.orphanSections, [], "sections sans lien entrant depuis le reste du site");
-  // /za/clubs/ retire le 03/10/2026 : ses pages ne suivaient que la Premier Soccer League (competition retiree).
-  for (const s of ["/gb/clubs/", "/en/clubs/", "/es/equipos/", "/mx/equipos/", "/gb/articles/", "/za/articles/", "/gb/leagues/"]) {
+  for (const s of ["/gb/clubs/", "/za/clubs/", "/en/clubs/", "/es/equipos/", "/mx/equipos/", "/gb/articles/", "/za/articles/", "/gb/leagues/"]) {
     assert.ok(report.sections[s] && report.sections[s].inbound > 0, s + " : aucun lien entrant");
   }
   assert.deepEqual(report.broken, [], "liens internes vers une page absente");
@@ -52,8 +51,7 @@ test("accueil et pied de page de chaque version : hubs ligue du perimetre, clubs
     }
     const clubs = C.clubsHubPath(dir, site.dir), arts = C.articlesHubPath(dir, site.dir), meth = C.methodologyPath(dir, site.dir);
     [clubs, arts, meth].filter(Boolean).forEach((p) => assert.ok(links.has(p), dir + " : accueil sans lien vers " + p));
-    // za : plus de hub clubs depuis le retrait de la Premier Soccer League (03/10/2026).
-    if (["gb", "mx", "fr", "en", "es"].includes(dir)) assert.ok(clubs, dir + " : hub clubs attendu");
+    if (["gb", "za", "mx", "fr", "en", "es"].includes(dir)) assert.ok(clubs, dir + " : hub clubs attendu");
     if (["gb", "za", "mx", "fr", "es"].includes(dir)) assert.ok(arts, dir + " : hub articles attendu");
     // Hub hors perimetre (noindex) : jamais mis en avant depuis l'accueil.
     const inScope = new Set(C.leaguesInScope(dir).map((l) => C.leagueHubPath(dir, l.key)));

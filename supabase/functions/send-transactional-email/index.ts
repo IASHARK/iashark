@@ -24,9 +24,7 @@
 //   {"type":"renewal_reminder_scan","market":"mx","interval":"year","daysBefore":30}
 //   {"type":"renewal_reminder_scan","market":"mx","interval":"year","daysBefore":7}
 //   {"type":"renewal_reminder_scan","market":"mx","interval":"month","daysBefore":7}
-//   {"type":"renewal_reminder_scan","market":"mx","interval":"week","daysBefore":2}
-//   (promesse des CGV mx ; taches creees par la migration 0048, avec le
-//   declenchement de la confirmation d'achat par stripe-webhook)
+//   (hebdomadaire MX a J-2 : BLOCKED_LEGAL, ne pas planifier avant avis juridique)
 //   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY fournis par Supabase
 //
 // Apres modification d'un gabarit : node lib/email-build.js (regenere

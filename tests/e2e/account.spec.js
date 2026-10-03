@@ -1,8 +1,6 @@
 'use strict';
 // Compte : redirection anonyme, plans gratuit / Pro / admin, portail Stripe,
 // suppression du compte, deconnexion, mise en page mobile.
-const fs = require('fs');
-const path = require('path');
 const { test, expect, expectNoHorizontalScroll, expectNotHiddenByBottomNav } = require('./helpers/fixtures');
 const { VERSIONS, CONSENT_BOXES } = require('./helpers/versions');
 const { STORAGE_KEY, STRIPE_CHECKOUT_URL, STRIPE_PORTAL_URL } = require('./helpers/supabase-mock');
@@ -12,18 +10,9 @@ const { useUsdSwitch } = require('./helpers/usd-switch');
 // Durees PAYABLES de la version (config/markets.json#checkoutOpen ; gb, mx, za
 // fermes le 19/09/2026) : aucune = ni bouton « Decouvrir Pro » ni consentement.
 const payableOf = (v) => ['week', 'month', 'year'].filter((iv) => typeof v.proAmounts[iv] === 'number' && (!Array.isArray(v.checkoutOpen) || v.checkoutOpen.includes(iv)));
-// Compte gratuit = la carte Pro de la page d'abonnement telle quelle (grille de
-// prix, controle des captures du 30/09/2026) : les lignes Pro ouvertes le 3/10
-// (lancement de la V3), puis le Gratuit (« Ton offre actuelle »). « Bientot dans
-// Pro » (replie) : pages francaises seulement, sauf la simulation quand son
-// interrupteur est sur « bientot ». Interrupteurs de la grille lus dans
-// assets/pricing-grid.js : STATS_IASHARK (eteint par defaut) et SIMULATION.
-const GRID = (() => { const w = {}; new Function('window', fs.readFileSync(path.join(__dirname, '..', '..', 'assets', 'pricing-grid.js'), 'utf8'))(w); return w.IasharkPricingGrid; })();
-const SIM_OUVERTE = GRID.SIMULATION === 'mention' || GRID.SIMULATION === 'ouverte';
-const PRO_LIST_KEYS = ['f_all_matches', 'f_pick', 'f_scenario', 'f_stats_iashark', 'f_stats', 'f_scores', 'f_scorers']
-  .filter((k) => (k !== 'f_stats_iashark' || GRID.STATS_IASHARK) && (k !== 'f_scenario' || SIM_OUVERTE)).map((k) => 'pricing_grid.' + k);
-// Plus de « calculateur de mise » (decision de Clement du 30/09/2026 : plus aucune mise sur le site).
-const FREE_LIST_KEYS = ['f_free_match', 'f_free_stats'].filter((k) => k !== 'f_free_stats' || GRID.STATS_IASHARK).map((k) => 'pricing_grid.' + k);
+// Liste Pro du compte = celle de la page d'abonnement (19/09/2026).
+const PRO_LIST_KEYS = ['pro_gate_item_bet', 'pro_gate_item_scorer', 'pro_gate_item_scenario', 'pro_gate_item_scores', 'pro_gate_item_odds', 'pro_gate_item_stats', 'pro_gate_item_faq'].map((k) => 'match_page.' + k)
+  .concat(['daily_all_matches', 'daily_scorers', 'tool_scanner', 'tool_journal', 'tool_combo'].map((k) => 'pro_offer.' + k));
 const squash = (x) => String(x).replace(/[\s\u00a0\u202f\u2009]+/g, ' ').trim();
 
 for (const v of VERSIONS) {
@@ -44,24 +33,20 @@ for (const v of VERSIONS) {
       await expect(page.locator('#panneau')).toContainText(tr(dict, 'compte_page.plan_free_name'));
       await expect(page.locator('#compte')).toContainText(tr(dict, 'compte_page.badge_free'));
       await expect(page.locator('#portail')).toHaveCount(0);
-      // Ce que Pro donne : la carte de la page d'abonnement (plus de liste propre au compte).
-      await expect(page.locator('#proListe')).toHaveCount(0);
-      const cartes = page.locator('#proPlanPicker article');
-      await expect(cartes).toHaveCount(2);
-      const items = cartes.nth(0).locator('ul > li:not(details li)');
+      // Ce que Pro donne : la liste de la page d'abonnement (plus de « six outils », ni de « suivi de bankroll »).
+      const items = page.locator('#proListe li');
       await expect(items).toHaveCount(PRO_LIST_KEYS.length);
       const texts = (await items.allTextContents()).map(squash);
       PRO_LIST_KEYS.forEach((k, i) => expect(texts[i], k).toContain(squash(tr(dict, k))));
-      await expect(cartes.nth(0).locator('[data-pg-soon]')).toHaveCount(v.dir === 'fr' || !SIM_OUVERTE ? 1 : 0);
-      for (const k of FREE_LIST_KEYS) await expect(cartes.nth(1)).toContainText(squash(tr(dict, k)));
-      await expect(cartes.nth(1)).toContainText(tr(dict, 'pricing_grid.current'));
+      await expect(page.locator('#panneau')).toContainText(tr(dict, 'pro_offer.free_matches'));
+      await expect(page.locator('#panneau')).toContainText(tr(dict, 'pro_offer.free_tools'));
       for (const k of ['benefit_pro_six_tools', 'benefit_pro_bankroll']) await expect(page.locator('#panneau')).not.toContainText(tr(dict, 'compte_page.' + k));
       if (!payableOf(v).length) {
         // Marche pas encore ouvert : ligne « pas encore ouvert », aucun bouton mort.
-        await expect(page.locator('#proPlanPicker [role="status"]')).toHaveText(tr(dict, 'pricing_grid.closed'));
+        await expect(page.locator('#proPlanPicker .iash-plans-closed')).toHaveText(tr(dict, 'pro_plans.closed'));
         await expect(page.locator('#souscrire')).toBeHidden();
         await expect(page.locator('#checkoutConsent')).toBeHidden();
-        await expect(page.locator('#proPlanPicker [data-pg-same]')).toHaveCount(0);
+        await expect(page.locator('#proDureesNote')).toBeHidden();
         expect(supa.callsTo('create-checkout-session')).toHaveLength(0);
         expect(consoleErrors).toEqual([]);
         return;
@@ -107,17 +92,13 @@ for (const v of VERSIONS) {
       } else {
         await expect(change).toHaveCount(0);
       }
-      // Resiliation en ligne nommee comme telle (L215-1-1), en 1 clic depuis la
-      // V3 du 3/10/2026 : cancel-subscription programme l'arret a la fin de la
-      // periode, et « Finalement, je reste » permet de revenir en arriere.
+      // Resiliation en ligne nommee comme telle (L215-1-1) : ouvre l'espace securise.
       const cancel = page.locator('#resilier');
       await expect(cancel).toHaveText(tr(dict, 'compte_page.cancel_subscription_cta'));
-      const cancelCall = supa.waitForCall('cancel-subscription');
+      const cancelCall = supa.waitForCall('create-portal-session');
       await cancel.click();
-      const annulation = await cancelCall;
-      expect(annulation.persona).toBe('pro');
-      expect(annulation.body || {}).toEqual({});
-      await expect(page.locator('#reprendre')).toHaveText(tr(dict, 'pro_trial.cancel_undo'));
+      expect((await cancelCall).persona).toBe('pro');
+      await page.waitForURL(STRIPE_PORTAL_URL);
       await page.goto(`/${v.dir}/compte.html#abonnement`);
       await expect(page.locator('#souscrire')).toHaveCount(0);
       const portal = page.locator('#portail');
@@ -178,7 +159,7 @@ for (const v of VERSIONS) {
         await expectNoHorizontalScroll(page);
         await expectNotHiddenByBottomNav(page, '#souscrire');
       } else {
-        await expect(page.locator('#proPlanPicker [role="status"]')).toBeVisible();
+        await expect(page.locator('#proPlanPicker .iash-plans-closed')).toBeVisible();
         await expect(page.locator('#souscrire')).toBeHidden();
         await expectNoHorizontalScroll(page);
       }
@@ -237,9 +218,8 @@ test.describe('compte /en/ apres la bascule USD (config de test _usdSwitch)', ()
     supa.onFunction('create-checkout-session', { status: 200, json: { processed: true, url: STRIPE_CHECKOUT_URL } });
     await page.goto('/en/compte.html#abonnement');
     await expect(page.locator('#compte')).toBeVisible();
-    // Carte Pro de la grille de prix (30/09/2026) : mensuel par defaut, aucun annuel USD.
-    await expect(page.locator('#proPlanPicker [data-pg-amount]')).toHaveText('$19.99');
-    await expect(page.locator('#proPlanPicker [data-pg-dur="year"]')).toHaveCount(0);
+    await expect(page.locator('#proPlanPicker [data-market-price="pro.month"]')).toHaveText('$19.99');
+    await expect(page.locator('#proPlanPicker input[type="radio"]')).toHaveCount(0);
     expect(squash(await page.locator('#panneau').innerText()), 'aucun prix EUR ni "US$"').not.toMatch(/€|19[.,]95|US\$/);
     const inputs = page.locator('#checkoutConsent input[data-consent]');
     await expect(inputs).toHaveCount(CONSENT_BOXES.eu);

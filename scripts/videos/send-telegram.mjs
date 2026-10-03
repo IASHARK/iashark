@@ -17,10 +17,6 @@ async function call(method, body) {
 }
 const text = (t) => call("sendMessage", new URLSearchParams({chat_id: chatId, text: t}));
 
-// Calcul du matin en echec : on le dit avant tout (videos faites sur les donnees publiees).
-if (process.env.CALCUL_EN_ECHEC === "1") {
-  await text("⚠️ Le calcul du matin a échoué (voir l'e-mail de GitHub). Les vidéos ci-dessous sont faites sur les données déjà publiées, peut-être celles de la veille : vérifie avant de publier.");
-}
 const manifest = JSON.parse(fs.readFileSync(path.join(dir, "manifest.json"), "utf8"));
 const done = manifest.videos.filter((v) => fs.existsSync(v.output));
 const detail = manifest.videos.length ? ` (${manifest.pulse ?? 0} Match Pulse, ${manifest.simule ?? 0} Match simulé)` : "";

@@ -85,18 +85,6 @@ function stripUnavailablePageLinks(html, dir) {
   });
 }
 
-// Elements [data-france-seulement] (ce qui n'arrivera qu'en France : programme
-// du Canal Pro, qualite des cotes, alertes et robot Telegram) : retires du
-// HTML genere hors des pages francaises (marche euro ET langue fr, meme regle
-// que assets/pricing-grid.js#comparatorOpen). Contre-controle, ronde 3 : aucun
-// « bientot » la ou il ne sera pas tenu (gb, mx, za, /en/ ; /es/ traite comme
-// international). L'element ne doit pas contenir d'autre <div> que le sien.
-function pageFrancaise(dir) { var c = DIRS[dir] || {}; return c.market === "fr" && c.locale === "fr"; }
-function stripFranceOnly(html, dir) {
-  if (pageFrancaise(dir)) return html;
-  return html.replace(/[ \t]*<(div|p|li|span)\b[^>]*\sdata-france-seulement\b[^>]*>[\s\S]*?<\/\1>(\r?\n)?/g, "");
-}
-
 function writeIfChanged(file, content) {
   if (fs.existsSync(file) && fs.readFileSync(file, "utf8") === content) return false;
   fs.mkdirSync(path.dirname(file), { recursive: true });
@@ -361,8 +349,7 @@ function homeSeoBlock(dir) {
   var sections = nav.sections.map(function (x) {
     return '<li><a href="' + x.href + '"' + SEO_LINK_STYLE + ">" + escText(x.label) + "</a></li>";
   }).join("");
-  // Guides « value bet » et « prediction IA » (mise Kelly) retires du site le 30/09/2026.
-  var guides = ["plus-de-2-5-buts-probabilite-methode-poisson.html", "xg-expected-goals-guide-complet.html"].map(function (g) {
+  var guides = ["prediction-ia-football-guide-2026.html", "plus-de-2-5-buts-probabilite-methode-poisson.html", "xg-expected-goals-guide-complet.html", "value-bet-guide-complet-2026.html"].map(function (g) {
     return '<li><a href="' + SEO.guidePath(dir, g) + '"' + SEO_LINK_STYLE + ">" + escText(SEO.guideLabel(dir, g)) + "</a></li>";
   }).join("");
   return '<section class="relative border-t border-hairline" aria-labelledby="seo-intro-title">' +
@@ -594,8 +581,6 @@ function leagueNamesData() {
   var out = {};
   readJson("config/leagues.json").leagues.forEach(function (l) {
     out[l.key] = { name: l.displayName, id: l.apiFootballId };
-    // Nom dans les 7 langues du site (config/leagues.json#names, 30/09/2026).
-    if (l.names && typeof l.names === "object") out[l.key].names = l.names;
   });
   return out;
 }
@@ -663,38 +648,6 @@ function legacyGonePrefixes(cfg) {
 function rule(from, to, status, cond) {
   function pad(s, n) { return s.length >= n ? s + "  " : s + new Array(n - s.length + 1).join(" "); }
   return pad(from, 34) + pad(to, 30) + status + (cond ? "  " + cond : "");
-}
-
-// Regles [from, to] des competitions retirees (config/leagues.json#competitions_retirees) :
-// hub /<dir>/leagues/<slug>.html de chaque version, pages club/derby rattachees a ces
-// competitions (config/club-hubs.json) et, si une version n'a plus aucune page club,
-// son index des clubs. Cible : accueil de la version.
-function retiredCompetitionRules() {
-  var rules = [];
-  function both(from, to) { rules.push([from, to]); rules.push([from.replace(/\.html$/, ""), to]); }
-  SEO.RETIRED_LEAGUES.forEach(function (l) {
-    DIR_CODES.forEach(function (d) { both(SEO.retiredLeagueHubPath(d, l.key), "/" + d + "/"); });
-  });
-  var clubs = {};
-  try { clubs = readJson("config/club-hubs.json"); } catch (e) { return rules; }
-  var versions = clubs.versions || {}, gardes = {};
-  (clubs.clubs || []).concat(clubs.derbies || []).forEach(function (c) {
-    Object.keys(c.pages || {}).forEach(function (d) {
-      var v = versions[d], pg = c.pages[d];
-      if (!v || !pg || !pg.slug || DIR_CODES.indexOf(d) === -1) return;
-      if (SEO.isRetiredLeague(c.leagueKey)) both("/" + d + "/" + v.hubSlug + "/" + pg.slug + ".html", "/" + d + "/");
-      else if (c.active === true) gardes[d] = true;
-    });
-  });
-  Object.keys(versions).forEach(function (d) {
-    if (gardes[d] || DIR_CODES.indexOf(d) === -1) return;
-    var touche = rules.some(function (r) { return r[0].indexOf("/" + d + "/" + versions[d].hubSlug + "/") === 0; });
-    if (!touche) return;
-    rules.push(["/" + d + "/" + versions[d].hubSlug + "/index.html", "/" + d + "/"]);
-    rules.push(["/" + d + "/" + versions[d].hubSlug + "/", "/" + d + "/"]);
-    rules.push(["/" + d + "/" + versions[d].hubSlug, "/" + d + "/"]);
-  });
-  return rules;
 }
 
 function redirectsContent() {
@@ -768,26 +721,6 @@ function redirectsContent() {
     out.push(rule("/" + d + "/historique.html", "/" + d + "/", "301!"));
     out.push(rule("/" + d + "/historique", "/" + d + "/", "301!"));
   });
-
-  // La page « Outils » s'appelle « Pro » depuis le 29/09/2026 (espace Pro :
-  // tableau de bord + outils). Son adresse reste /<dir>/pro.html ; les
-  // adresses « outils » que l'on pourrait taper menent au meme endroit.
-  out.push("", "# --- Ancien nom « Outils » -> espace Pro.");
-  out.push(rule("/outils.html", "/" + X_DEFAULT_DIR + "/pro.html", "301!"));
-  out.push(rule("/outils", "/" + X_DEFAULT_DIR + "/pro.html", "301!"));
-  DIR_CODES.forEach(function (d) {
-    out.push(rule("/" + d + "/outils.html", "/" + d + "/pro.html", "301!"));
-    out.push(rule("/" + d + "/outils", "/" + d + "/pro.html", "301!"));
-  });
-
-  // Competitions retirees du site le 03/10/2026 (config/leagues.json#competitions_retirees) :
-  // anciennes pages championnat et pages club/derby de ces competitions -> accueil de la version.
-  var retiredRules = retiredCompetitionRules();
-  if (retiredRules.length) {
-    out.push("", "# --- Competitions retirees le 03/10/2026 (config/leagues.json#competitions_retirees) :",
-      "# anciennes pages championnat, club et derby -> accueil de la version (301).");
-    retiredRules.forEach(function (r) { out.push(rule(r[0], r[1], "301!")); });
-  }
 
   out.push("", "# --- Sources des pages legales (legal/<dir>/) : jamais servies telles quelles.");
   out.push(rule("/legal/*", "/:splat", "301!"));
@@ -1070,7 +1003,6 @@ function build() {
       if (DIRS[dir].locale !== "fr" || countryMarket) html = bakeI18n(html, DICTS[DIRS[dir].locale], countryMarket);
       html = bakeMarket(html, dir);
       html = stripUnavailablePageLinks(html, dir);
-      html = stripFranceOnly(html, dir);
       html = rewriteInternalLinks(html, dir);
       var meta = metaFor(page, dir);
       html = buildHead(html, dir, page.file, meta, altDirs);
@@ -1126,10 +1058,10 @@ function build() {
 module.exports = {
   DIRS: DIRS, DIR_CODES: DIR_CODES, PAGE_FILES: PAGE_FILES, LEGAL_FILE_LIST: LEGAL_FILE_LIST,
   mapPath: mapPath, rewriteInternalLinks: rewriteInternalLinks, bakeI18n: bakeI18n, formatPrice: formatPrice,
-  bakeMarket: bakeMarket, helplineFor: helplineFor, leagueNamesData: leagueNamesData, syncLeagueNames: syncLeagueNames,
+  bakeMarket: bakeMarket, helplineFor: helplineFor, leagueNamesData: leagueNamesData,
   marketRuntimeData: marketRuntimeData, checkoutPriceTable: checkoutPriceTable, legacyRedirectRules: legacyRedirectRules, redirectsContent: redirectsContent, build: build,
   syncI18nDirMarkets: syncI18nDirMarkets,
-  stripUnavailablePageLinks: stripUnavailablePageLinks, stripFranceOnly: stripFranceOnly,
+  stripUnavailablePageLinks: stripUnavailablePageLinks,
   buildHead: buildHead, setHtmlLang: setHtmlLang, injectRuntime: injectRuntime, metaFor: metaFor,
   homeJsonLd: homeJsonLd, homeSeoBlock: homeSeoBlock, rewriteHomeMatchSummary: rewriteHomeMatchSummary,
   injectPageLd: injectPageLd

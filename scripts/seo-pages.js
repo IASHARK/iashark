@@ -17,8 +17,8 @@
 //    methode, guides (contenu STABLE : scripts/league-hub-data.js). Jamais de
 //    probabilite ni de pari : ce sont des donnees reservees (mur Pro de
 //    match-page.js). Indexable si la version est dans le perimetre de la
-//    competition ET si ce contenu stable existe (classement complet et recent
-//    d'au moins MIN_HUB_STANDING_ROWS lignes, une page club, ou MIN_HUB_FIXTURES
+//    competition ET si ce contenu stable existe (classement d'au moins
+//    MIN_HUB_STANDING_ROWS lignes, une page club, ou MIN_HUB_FIXTURES
 //    rencontres a venir ou jouees) - plus jamais selon les seuls matchs du jour.
 // 3. sitemap-matches-i18n.xml et sitemap-leagues.xml, lastmod exact
 //    (scripts/seo-lastmod.js).
@@ -41,11 +41,6 @@ const LASTMOD = require("./seo-lastmod.js");
 const LIFECYCLE = require("./match-lifecycle.js");
 // Contenu stable des pages championnat (calendrier 14 jours, resultats, classement, clubs).
 const HUBDATA = require("./league-hub-data.js");
-// Fiabilite « en test » (competition non validee par le mathematicien,
-// config/leagues.json#fiabilite) : phrase i18n/seo/<dir>.json#league.in_test
-// sur la page championnat, jamais de chiffre (lib/league-scope.js).
-const LEAGUE_SCOPE = require("../lib/league-scope.js");
-const LEAGUES_CFG = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "config", "leagues.json"), "utf8"));
 // Composants partages des pages championnat / club / derby (presentation v2).
 const HUBUI = require("../lib/hub-ui.js");
 
@@ -59,8 +54,7 @@ const DESCRIPTION_MAX = 155;
 // sous ce nombre de mots -> noindex,follow et hors sitemap. Le texte generique
 // (presentation IASHARK, liens, avertissement) n'est pas compte.
 const MIN_INDEXABLE_WORDS = 80;
-// Guide « prediction IA » retire le 30/09/2026 (mise Kelly) : le guide Poisson explique la lecture d'une probabilite.
-const MATCH_GUIDE = "plus-de-2-5-buts-probabilite-methode-poisson.html";
+const MATCH_GUIDE = "prediction-ia-football-guide-2026.html";
 const HUB_GUIDES = ["plus-de-2-5-buts-probabilite-methode-poisson.html", "xg-expected-goals-guide-complet.html"];
 
 var buildLocalesLib = null;
@@ -92,61 +86,15 @@ function hubKey(m) { return C.leagueByKey(m.league_key) ? m.league_key : null; }
 // "<equipe> (domicile)" = repli du pipeline quand api-football ne donne pas de
 // stade : texte francais, jamais un vrai lieu -> stade inconnu.
 function venue(m) { return m.stade && typeof m.stade.nom === "string" && m.stade.nom.trim() && !/\(domicile\)\s*$/i.test(m.stade.nom) ? m.stade.nom.trim() : null; }
-// Noms d'equipes AFFICHES sur les pages francaises (config/noms-equipes-fr.json,
-// audit SEO du 29/09/2026, action A5) : selections (Spain -> Espagne) et clubs
-// dont l'usage francais differe (Paris Saint Germain -> PSG). Affichage
-// seulement : identifiants, registre et JSON publics gardent le nom de l'API.
-var NOMS_FR = null;
-function nomsFr() {
-  if (NOMS_FR) return NOMS_FR;
-  NOMS_FR = {};
-  try {
-    var cfg = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "config", "noms-equipes-fr.json"), "utf8"));
-    [cfg.selections, cfg.clubs].forEach(function (t) {
-      Object.keys(t || {}).forEach(function (k) { if (typeof t[k] === "string" && t[k].trim()) NOMS_FR[k] = t[k].trim(); });
-    });
-  } catch (e) {}
-  return NOMS_FR;
-}
-function teamName(t, dir) {
-  var n = t && t.n ? String(t.n) : "";
-  if (dir !== X_DEFAULT_DIR) return n;
-  var tr = nomsFr();
-  return Object.prototype.hasOwnProperty.call(tr, n) ? tr[n] : n;
-}
-// dir absent : noms de l'API (comptage des mots, identique dans toutes les versions).
-function teams(m, dir) { return teamName(m.home, dir) + " vs " + teamName(m.away, dir); }
+function teams(m) { return m.home.n + " vs " + m.away.n; }
 
 function cleanTpl(s) {
   // Competition inconnue : "( )" et ", ," laisses par un {league} vide.
   return s.replace(/\s*\(\s*\)/g, "").replace(/,\s*,/g, ",").replace(/\s+([:,])/g, function (m, p) { return p === ":" ? " :" : p; }).replace(/\s{2,}/g, " ").trim();
 }
-// Jour court du coup d'envoi pour le title (« 9 oct. », « 4 Oct », « 4 oct. ») :
-// jour sans zero initial, mois abrege de la version ; en espagnol, l'abreviation
-// prend un point (Intl rend « oct »).
-function dayShort(d, dir) {
-  var o = { timeZone: C.seoConf(dir).tz, day: "numeric", month: "short" }, day = "", month = "";
-  try {
-    new Intl.DateTimeFormat(DIRS[dir].intlLocale, o).formatToParts(d).forEach(function (p) {
-      if (p.type === "day") day = String(Number(p.value));
-      else if (p.type === "month") month = p.value.trim();
-    });
-  } catch (e) { return ""; }
-  if (!day || !month) return "";
-  if (/^es/.test(DIRS[dir].htmlLang || DIRS[dir].intlLocale || "") && !/\.$/.test(month)) month += ".";
-  return day + " " + month;
-}
-// Audit SEO du 29/09/2026 (action A2) : title, description et h1 tournes vers la
-// recherche (« Pronostic Lens – Lyon (9 oct.) : stats et probabilites »).
 function matchVars(m, dir) {
   var d = kickoff(m);
-  return { home: teamName(m.home, dir), away: teamName(m.away, dir), league: leagueName(m), date: d ? shortDate(d, dir) : "", day: d ? dayShort(d, dir) : "" };
-}
-// Gros titre (h1) de la page match : « Pronostic Lens – Lyon », « Arsenal v
-// Chelsea prediction », « Pronóstico América vs Chivas ».
-function matchH1(m, dir) {
-  var ms = C.seoConf(dir).match;
-  return (ms.h1 ? cleanTpl(C.fill(ms.h1, matchVars(m, dir))) : "") || teams(m, dir);
+  return { home: m.home.n, away: m.away.n, league: leagueName(m), date: d ? shortDate(d, dir) : "" };
 }
 // Titre <= 60 caracteres : gabarit complet + marque, sans la marque (Google
 // affiche deja le nom du site au-dessus du lien), gabarit court, puis minimal
@@ -172,7 +120,7 @@ function matchCrumbs(m, dir) {
   var items = [{ name: s.breadcrumb.home, url: SITE_URL + C.homePath(dir) }];
   var k = hubKey(m);
   if (k) items.push({ name: leagueName(m), url: SITE_URL + C.leagueHubPath(dir, k) });
-  items.push({ name: teams(m, dir), url: SITE_URL + C.matchPath(dir, m.id) });
+  items.push({ name: teams(m), url: SITE_URL + C.matchPath(dir, m.id) });
   return items;
 }
 
@@ -186,13 +134,13 @@ function matchEvent(m, dir, opts) {
     "@context": "https://schema.org",
     "@type": "SportsEvent",
     "@id": url + "#event",
-    name: teams(m, dir),
+    name: teams(m),
     description: matchDescription(m, dir),
     url: url,
     inLanguage: DIRS[dir].htmlLang,
     sport: C.seoConf(dir).sport,
-    homeTeam: { "@type": "SportsTeam", name: teamName(m.home, dir) },
-    awayTeam: { "@type": "SportsTeam", name: teamName(m.away, dir) },
+    homeTeam: { "@type": "SportsTeam", name: m.home.n },
+    awayTeam: { "@type": "SportsTeam", name: m.away.n },
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode"
   };
@@ -254,9 +202,9 @@ function matchSummaryHtml(m, dir) {
   var modelAvailable = m.model_output_available !== false && Number(m.data_quality_score || 0) > 0;
   var dateLabel = day ? new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(day + "T12:00:00Z")) : "";
   return '<div style="padding:24px 16px;font-family:\'DM Sans\',sans-serif;color:#94a3b8;font-size:13px;line-height:1.6">' +
-    '<h1 style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;letter-spacing:.5px;color:#e2e8f0;margin-bottom:8px">' + esc(matchH1(m, dir)) + "</h1>" +
+    '<h1 style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;letter-spacing:.5px;color:#e2e8f0;margin-bottom:8px">' + esc(m.home.n) + " vs " + esc(m.away.n) + "</h1>" +
     "<p>" + (leagueName(m) ? esc(leagueName(m)) + " — " : "") + (day ? '<time data-seo-date datetime="' + esc(day) + '">' + esc(dateLabel) + "</time>" : "") + "</p>" +
-    // 03/10/2026 (Clement) : plus de ligne « Analyse statistique IASHARK disponible » au-dessus de la carte.
+    (modelAvailable ? '<p data-i18n="match_page.seo_analysis_available">Analyse statistique IASHARK disponible pour ce match.</p>' : '<p data-i18n="match_page.model_unavailable_reason">Les données disponibles ne permettent pas encore une analyse chiffrée fiable.</p>') +
     "</div>";
 }
 
@@ -346,14 +294,9 @@ function matchContentWords(m, dir) {
 function isThinMatch(m) { return matchContentWords(m, X_DEFAULT_DIR) < MIN_INDEXABLE_WORDS; }
 // <meta robots> d'une page match : noindex,follow si contenu propre trop
 // mince, si le registre le demande (J+7) ou si le coup d'envoi date de 7 jours.
-// Competition hors du perimetre SEO (aucune page championnat : Ligue des nations,
-// selections, amicaux, league_key « other ») : noindex,follow aussi. Aucune page du
-// site n'y mene hors du jour du match ; depuis la treve internationale du 24/09/2026,
-// 44 pages indexables etaient orphelines (tests/internal-links.test.js). La page
-// reste servie et liee depuis l'accueil le jour du match.
 function matchRobotsMeta(m, dir, opts) {
   opts = opts || {};
-  var noindex = !!opts.noindex || !hubKey(m) || isThinMatch(m, dir);
+  var noindex = !!opts.noindex || isThinMatch(m, dir);
   if (!noindex && opts.now) noindex = LIFECYCLE.stageFor(LIFECYCLE.kickoffIso(m), opts.now, !opts.archived).noindex;
   return noindex ? '<meta name="robots" content="noindex,follow">' : "";
 }
@@ -380,16 +323,13 @@ function matchFactsHtml(m, dir, opts) {
   links.push('<a href="' + C.guidePath(dir, MATCH_GUIDE) + '"' + LINK + ">" + esc(ms.guide_link) + "</a>");
   return '<section class="match-facts" aria-labelledby="match-facts-title" style="width:100%;max-width:960px;margin:28px auto 0;padding:18px 16px 8px;border-top:1px solid rgba(141,179,211,.18);font-family:\'DM Sans\',system-ui,sans-serif;color:#c3ccd8;font-size:14px;line-height:1.6">' +
     '<nav aria-label="' + esc(ms.breadcrumb_aria) + '" style="font-size:12.5px;color:#91a0b3;margin:0 0 12px">' + nav + "</nav>" +
-    // 03/10/2026 (Clement) : le detail texte (forme, classement, face-a-face) est replie sous « Fiche du match » ;
-    // l'onglet Stats de la page le montre deja. Le contenu reste dans la page (aucun texte cache en CSS).
-    '<details class="match-facts-fiche"><summary style="cursor:pointer;font-size:15px;font-weight:700;color:#f4f7fb;margin:0 0 10px">' +
-    '<h2 id="match-facts-title" style="display:inline;font-size:15px;font-weight:700;color:#f4f7fb;margin:0">' + esc(ms.facts_title) + "</h2></summary>" +
+    '<h2 id="match-facts-title" style="font-size:17px;font-weight:700;color:#f4f7fb;margin:0 0 10px">' + esc(ms.facts_title) + "</h2>" +
     '<dl style="margin:0 0 12px">' + factRowsHtml(m, dir) + "</dl>" +
     matchFactSections(snapshotOf(m), dir) +
     (opts.archived ? "" : '<p style="margin:12px 0 10px">' + esc(ms.about) + "</p>") +
     '<p style="margin:12px 0 10px">' + links.join(" · ") + "</p>" +
     '<p style="margin:0;font-size:12.5px;color:#91a0b3">' + esc(ms.disclaimer) + "</p>" +
-    "</details></section>";
+    "</section>";
 }
 // Page conservee (match sorti du run) : titre visible, score final ou statut,
 // lien vers le hub ligue de la version. Aucun script d'analyse.
@@ -397,10 +337,10 @@ function archivedCardHtml(m, dir, st) {
   var ms = C.seoConf(dir).match, k = hubKey(m), ln = leagueName(m);
   var hub = k ? C.leagueHubPath(dir, k) : C.homePath(dir);
   var status = st.final_score
-    ? '<span style="display:block;font-size:12.5px;color:#91a0b3;text-transform:uppercase;letter-spacing:.06em">' + esc(ms.final_score) + '</span><strong style="font-size:24px;color:#f4f7fb">' + esc(teamName(m.home, dir)) + " " + st.final_score.home + "–" + st.final_score.away + " " + esc(teamName(m.away, dir)) + "</strong>"
+    ? '<span style="display:block;font-size:12.5px;color:#91a0b3;text-transform:uppercase;letter-spacing:.06em">' + esc(ms.final_score) + '</span><strong style="font-size:24px;color:#f4f7fb">' + esc(m.home.n) + " " + st.final_score.home + "–" + st.final_score.away + " " + esc(m.away.n) + "</strong>"
     : '<strong style="font-size:20px;color:#f4f7fb">' + esc(st.finished ? ms.finished : ms.not_tracked) + "</strong>";
   return '<section class="match-archived" aria-labelledby="match-archived-title" style="max-width:960px;margin:24px auto 0;padding:20px 16px;font-family:\'DM Sans\',system-ui,sans-serif;color:#c3ccd8;font-size:14px;line-height:1.6">' +
-    '<h1 id="match-archived-title" style="font-family:\'Bebas Neue\',sans-serif;font-size:30px;letter-spacing:.5px;color:#f4f7fb;margin:0 0 10px">' + esc(teams(m, dir)) + "</h1>" +
+    '<h1 id="match-archived-title" style="font-family:\'Bebas Neue\',sans-serif;font-size:30px;letter-spacing:.5px;color:#f4f7fb;margin:0 0 10px">' + esc(teams(m)) + "</h1>" +
     '<p style="margin:0 0 12px">' + status + "</p>" +
     (k ? '<p style="margin:0 0 8px">' + esc(C.fill(ms.archived_note, { league: ln })) + "</p>" : "") +
     '<p style="margin:0"><a href="' + hub + '"' + LINK + ">" + esc(k ? C.fill(ms.hub_cta, { league: ln }) : ms.free_link) + "</a></p>" +
@@ -460,7 +400,7 @@ function renderArchivedPage(tpl, e, dir, now) {
 // probabilite ni de note : un match analyse porte « Analyse disponible » + lien.
 function hubVars(key, dir) {
   var L = C.seoConf(dir).league;
-  return { league: C.leagueDisplayName(key, dir), country: (L.countries || {})[key] || "", adjective: (L.adjectives || {})[key] || "", tz: C.seoConf(dir).tz_label };
+  return { league: C.leagueByKey(key).displayName, country: (L.countries || {})[key] || "", adjective: (L.adjectives || {})[key] || "", tz: C.seoConf(dir).tz_label };
 }
 // Title <= 60 / description <= 155 : surcharge de la competition, gabarit, gabarit court.
 function hubMeta(key, dir) {
@@ -538,7 +478,7 @@ function hubSeason(st, L) {
 function renderLeagueHub(key, dir, matches, opts) {
   opts = opts || {};
   var s = C.seoConf(dir), L = s.league, conf = DIRS[dir], dict = C.dictFor(dir);
-  var lg = C.leagueByKey(key), name = C.leagueDisplayName(key, dir);
+  var lg = C.leagueByKey(key), name = lg.displayName;
   var meta = hubMeta(key, dir), title = meta.title, desc = meta.description, h1 = meta.h1;
   // Hub hors du perimetre des pages match de la competition (ex. Liga MX en
   // allemand) : noindex,follow, sans hreflang, liens vers la version la plus
@@ -546,9 +486,6 @@ function renderLeagueHub(key, dir, matches, opts) {
   var scope = LIFECYCLE.matchDirsFor(key), inScope = scope.indexOf(dir) !== -1;
   var linkDir = inScope ? dir : C.nearestDir(dir, scope);
   var data = Object.assign(HUBDATA.collect(key, dir, { root: opts.root, now: opts.now, runMatches: matches || [], registry: opts.registry, store: opts.store, linkDir: linkDir }), opts.data || {});
-  // Action A4 (audit SEO du 29/09/2026) : classement complet (rang 1 compris,
-  // toutes les equipes) et recent (3 jours), sinon ni tableau ni « En tete ».
-  if (data.standings && !HUBDATA.isStandingsDisplayable(data.standings, opts.now || new Date())) data = Object.assign({}, data, { standings: null });
   var standingRows = data.standings && data.standings.groups ? data.standings.groups.reduce(function (n, g) { return n + g.rows.length; }, 0) : 0;
   var stable = standingRows >= MIN_HUB_STANDING_ROWS || data.clubs.length > 0 || data.upcoming.length + data.results.length >= MIN_HUB_FIXTURES;
   var indexable = inScope && stable;
@@ -561,14 +498,13 @@ function renderLeagueHub(key, dir, matches, opts) {
   var rgPath = fs.existsSync(path.join(C.ROOT, "legal", dir, "jeu-responsable.html")) ? "/" + dir + "/jeu-responsable.html" : null;
   var country = (L.countries || {})[key] || "", season = standingRows ? hubSeason(data.standings, L) : null;
   var groups = standingRows ? data.standings.groups : [];
-  var leader = groups.length === 1 ? groups[0].rows.filter(function (r) { return r && r.rank === 1; })[0] || null : null;
+  var leader = groups.length === 1 && groups[0].rows[0] ? groups[0].rows[0] : null;
   var next = data.upcoming[0] ? new Date(data.upcoming[0].t) : null;
   var hero = '<div class="hero"><div class="hero-top">' + HUBUI.leagueLogo(lg.apiFootballId) +
     '<div class="chips">' + (country ? HUBUI.chip(country) : "") + (season ? HUBUI.chip(season) : "") + HUBUI.chip("18+", rgPath, "chip-18") + "</div></div>\n" +
     "<h1>" + esc(h1) + "</h1>\n" +
     '<p class="intro">' + esc(hubAbout(key, dir)) + "</p>\n" +
     '<p class="intro">' + esc(C.fill(L.scope, hubVars(key, dir))) + "</p>\n" +
-    (LEAGUE_SCOPE.isInTest(LEAGUES_CFG, key) && L.in_test ? '<p class="intro hub-in-test">' + esc(L.in_test) + "</p>\n" : "") +
     HUBUI.kpis([
       [L.kpi.leader, leader ? esc(leader.name + " · " + leader.pts + " " + L.pts) : null],
       [L.kpi.clubs, standingRows || null],
@@ -587,7 +523,7 @@ function renderLeagueHub(key, dir, matches, opts) {
     ? HUBUI.section("clubs", L.clubs_title, HUBUI.clubGrid(data.clubs.map(function (c) { return { href: c.path, name: c.name, kind: c.kind, ids: c.teamIds || [] }; }), UI))
     : "";
   var others = C.leaguesInScope(dir).filter(function (l) { return l.key !== key; }).map(function (l) {
-    return '<a href="' + C.leagueHubPath(dir, l.key) + '">' + esc(C.leagueDisplayName(l.key, dir)) + "</a>";
+    return '<a href="' + C.leagueHubPath(dir, l.key) + '">' + esc(l.displayName) + "</a>";
   }).join("");
   var clubsHub = C.clubsHubPath(dir, opts.root);
   var guides = HUB_GUIDES.map(function (g) {
@@ -649,8 +585,6 @@ function renderLeagueHub(key, dir, matches, opts) {
     '<nav class="crumbs" aria-label="' + esc(s.match.breadcrumb_aria) + '"><a href="' + C.homePath(dir) + '">' + esc(s.breadcrumb.home) + '</a> <span aria-hidden="true">›</span> <span aria-current="page">' + esc(name) + "</span></nav>\n" +
     hero + HUBUI.jumpNav(jump, L.jump_aria) +
     HUBUI.section("fixtures", L.fixtures_title, fixtures, data.upcoming.length ? L.kickoff_note : null) +
-    // Videos courtes (assets/ugc-reel.js, 03/10/2026) : cache tant qu'aucune video de la langue.
-    '<section data-ugc-reel hidden></section>\n' +
     (standings || results ? '<div class="cols">' + standings + results + "</div>\n" : "") +
     clubs +
     '<section class="sec"><div class="panel"><h2 id="method">' + esc(L.method_title) + '</h2>\n<p class="intro">' + esc(L.method) + "</p>\n" +
@@ -659,7 +593,7 @@ function renderLeagueHub(key, dir, matches, opts) {
     "</main>\n" +
     '<footer class="foot"><p>' + esc(L.disclaimer) + "</p>" + helpHtml + (legal ? "<p>" + legal + "</p>" : "") + "</footer>\n" +
     C.footerNavHtml(dir, opts.root) + "\n" +
-    '<script defer src="/i18n/i18n.js"></script>\n<script defer src="/lib/market-config.js"></script>\n<script defer src="/bottom-navigation.js"></script>\n<script defer src="/assets/ugc-reel.js"></script>\n' +
+    '<script defer src="/i18n/i18n.js"></script>\n<script defer src="/lib/market-config.js"></script>\n<script defer src="/bottom-navigation.js"></script>\n' +
     "</body>\n</html>\n";
   return { html: html, indexable: indexable, count: data.upcoming.length, data: data };
 }
@@ -823,7 +757,7 @@ function writeFrMatchSitemap(root, today, now) {
 
 module.exports = {
   MIN_HUB_FIXTURES: MIN_HUB_FIXTURES, MIN_HUB_STANDING_ROWS: MIN_HUB_STANDING_ROWS, MIN_INDEXABLE_WORDS: MIN_INDEXABLE_WORDS,
-  matchTitle: matchTitle, matchDescription: matchDescription, matchH1: matchH1, teamName: teamName, dayShort: dayShort, matchJsonLd: matchJsonLd, matchEvent: matchEvent,
+  matchTitle: matchTitle, matchDescription: matchDescription, matchJsonLd: matchJsonLd, matchEvent: matchEvent,
   matchHeadExtras: matchHeadExtras, matchFactsHtml: matchFactsHtml, matchSummaryHtml: matchSummaryHtml, matchMetaBlock: matchMetaBlock,
   matchAlternates: matchAlternates, matchDirs: matchDirs, hasMatchVersion: hasMatchVersion,
   matchContentWords: matchContentWords, isThinMatch: isThinMatch, matchRobotsMeta: matchRobotsMeta,

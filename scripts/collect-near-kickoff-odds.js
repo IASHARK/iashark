@@ -13,11 +13,7 @@ const { buildBookmakerOffers } = require("../lib/market-lab/odds-ingest.js");
 const { buildForwardOddsRow, hashRawPayload } = require("../lib/market-lab/forward-odds-dataset.js");
 const { computeSnapshotPhase, isRateLimitOrQuotaError } = require("./save-odds-snapshot.js");
 
-// MODE ECONOMIE (03/10/2026) : fenetre et plafond lus dans config/quotas.json
-// (api_football.suivi_proche_coup_envoi) ; avant : 6 h et 50 appels par lancement horaire.
-const SUIVI_PROCHE = (() => { try { return require("../config/quotas.json").api_football.suivi_proche_coup_envoi || {}; } catch (e) { return {}; } })();
-const MAX_API_CALLS_PER_RUN = SUIVI_PROCHE.max_appels_par_lancement != null ? Number(SUIVI_PROCHE.max_appels_par_lancement) : 50;
-const FENETRE_HEURES = SUIVI_PROCHE.fenetre_heures != null ? Number(SUIVI_PROCHE.fenetre_heures) : 6;
+const MAX_API_CALLS_PER_RUN = 50;
 
 function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
 
@@ -47,13 +43,6 @@ function postJSON(hostname, urlPath, body, headers) {
   });
 }
 
-const LEAGUE_SCOPE = require("../lib/league-scope.js");
-const LEAGUES_CONFIG = require("../config/leagues.json");
-function orderForBudget(list) {
-  return list.map((r, i) => ({ r, i, g: LEAGUE_SCOPE.groupFor(LEAGUES_CONFIG, r.league_id) === LEAGUE_SCOPE.SOCLE ? 0 : 1 }))
-    .sort((a, b) => a.g - b.g || a.i - b.i).map((x) => x.r);
-}
-
 async function main() {
   const apsKey = process.env.APISPORTS_KEY;
   const supaUrl = process.env.SUPABASE_URL, supaKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -66,13 +55,10 @@ async function main() {
   const headers = { apikey: supaKey, Authorization: `Bearer ${supaKey}` };
 
   const nowIso = new Date().toISOString();
-  const sixHoursLaterIso = new Date(Date.now() + FENETRE_HEURES * 3600000).toISOString();
+  const sixHoursLaterIso = new Date(Date.now() + 6 * 3600000).toISOString();
   const rows = await get(u.hostname, `/rest/v1/forward_odds_timeline?select=fixture_id,league_id,kickoff&kickoff=gte.${nowIso}&kickoff=lte.${sixHoursLaterIso}&order=fixture_id.asc`, headers);
-  // Plafond de 50 appels : les competitions du socle passent avant l'extension
-  // (lib/league-scope.js, 30/09/2026), chacun dans l'ordre d'origine (fixture_id
-  // croissant). Sans extension, ordre inchange.
-  const distinctFixtures = orderForBudget([...new Map((Array.isArray(rows) ? rows : []).map((r) => [r.fixture_id, r])).values()]);
-  console.log(`fixtures deja suivies avec coup d'envoi dans les ${FENETRE_HEURES}h : ${distinctFixtures.length}`);
+  const distinctFixtures = [...new Map((Array.isArray(rows) ? rows : []).map((r) => [r.fixture_id, r])).values()];
+  console.log(`fixtures deja suivies avec coup d'envoi dans les 6h : ${distinctFixtures.length}`);
   if (!distinctFixtures.length) { console.log("rien a rafraichir sur ce run."); return; }
 
   let apiCallCount = 0;
@@ -113,4 +99,4 @@ if (require.main === module) {
   main().catch((e) => { console.error("FATAL:", e.message); process.exitCode = 1; });
 }
 
-module.exports = { MAX_API_CALLS_PER_RUN, orderForBudget };
+module.exports = { MAX_API_CALLS_PER_RUN };

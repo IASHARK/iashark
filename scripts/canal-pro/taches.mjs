@@ -381,7 +381,7 @@ export async function tacheProgramme(ctx) {
           { cle: `reporte-${jour}`, traduire: (lang) => C.MESSAGE_REPORTE(jour, "preparation", "donnees", lang) });
       return `aucun match evalue (${vus} matchs, ${nonEvalues.length} non evalues)`;
     }
-    const r = C.preparerProgramme(candidats, { jour, maintenant: d, suspendues: await ctx.suspendues() });
+    const r = C.preparerProgramme(candidats, { jour, maintenant: d, ageMaxFluxH: M.CONFIG_FLUX.age_max_releve_h, suspendues: await ctx.suspendues() });
     // Ecarts du menu (ex. double chance sans vraie cote chez un agree : repli sur le 1N2), puis ceux du controleur.
     const ecartes = [...(Array.isArray(res) ? [] : res.ecartes || []), ...r.ecartes];
     [prog] = await db.insert("pro_programmes", [{ jour, statut: "prepare", ecartes, non_evalues: nonEvalues, matchs_vus: vus, prepare_at: d.toISOString() }], { conflit: "ignorer", cle: "jour" });
@@ -532,7 +532,7 @@ export async function publierProgramme(ctx, prog, parisJour) {
   gardes.sort((a, b) => Date.parse(a.coup_envoi) - Date.parse(b.coup_envoi));
   for (const p of gardes) {
     // La cote prise (et, pour un pari a plusieurs selections, la cote de chaque selection chez ce bookmaker) est archivee avec le pari.
-    const maj = { cotes: p.cotes, meilleure_cote: p.meilleure_cote, meilleur_bookmaker: p.meilleur_bookmaker, selections: p.selections,
+    const maj = { cotes: p.cotes, meilleure_cote: p.meilleure_cote, meilleur_bookmaker: p.meilleur_bookmaker, selections: p.selections, composantes: p.composantes || {},
       cote_vue_at: p.cote_vue_at, explication: p.explication, mode: m.mode, destination, publie_at: d.toISOString() };
     if (m.mode === "ouvert") maj.numero = ++numero;
     const [lu] = await db.update("pro_paris", { id: p.id }, maj);
@@ -821,8 +821,11 @@ async function reglement(ctx, p) {
       const { pin } = cloture(releves, k, j.coup_envoi);
       const clot = { pinnacle_proba_fin: pin?.proba_sans_marge != null ? Number(pin.proba_sans_marge) : null, pinnacle_fin_at: pin ? new Date(pin.releve_at).toISOString() : null };
       if (ANNULE.includes(r.statut)) jambes.push({ resultat: "annule", ...clot });
-      else if (FINI.includes(r.statut) && Number.isInteger(r.bd) && Number.isInteger(r.be)) jambes.push({ score_dom: r.bd, score_ext: r.be, resultat: C.resultatPari(j, r.bd, r.be), ...clot });
-      else return null;
+      else if (FINI.includes(r.statut) && Number.isInteger(r.bd) && Number.isInteger(r.be)) {
+        const res = C.resultatPari(j, r.bd, r.be, r);
+        if (!res) return null; // marche du flux : fait du match pas encore la (pause, corners, cartons), on repassera
+        jambes.push({ score_dom: r.bd, score_ext: r.be, resultat: res, ...clot });
+      } else return null;
     }
     const resultat = C.resultatCombine(jambes.map((j) => j.resultat));
     const q = jambes.every((j) => j.resultat === "annule" || j.pinnacle_proba_fin != null) ? jambes.filter((j) => j.resultat !== "annule").reduce((a, j) => a * j.pinnacle_proba_fin, 1) : null;
@@ -845,7 +848,9 @@ async function reglement(ctx, p) {
   const releves = await ctx.db.select("pro_cotes_releves", { pari_id: p.id, releve_at: ["lte", new Date(p.coup_envoi).toISOString()] });
   const { fin, pin } = cloture(releves, null, p.coup_envoi);
   // pinnacle_fin_at : heure du releve Pinnacle retenu (un releve de plus de 30 min avant le match ne compte pas dans la CLV : C.clvPari).
-  return { resultat: C.resultatPari(p, r.bd, r.be), score_dom: r.bd, score_ext: r.be, cote_fin: fin ? fin.cote : null,
+  const resultat = C.resultatPari(p, r.bd, r.be, r);
+  if (!resultat) return null; // marche du flux : fait du match pas encore la, on repassera
+  return { resultat, score_dom: r.bd, score_ext: r.be, cote_fin: fin ? fin.cote : null,
     pinnacle_cote_fin: pin ? Number(pin.cote) : null, pinnacle_proba_fin: pin?.proba_sans_marge != null ? Number(pin.proba_sans_marge) : null,
     pinnacle_fin_at: pin ? new Date(pin.releve_at).toISOString() : null, faits: r.faits || null };
 }

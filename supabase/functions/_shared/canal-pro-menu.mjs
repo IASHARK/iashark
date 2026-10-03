@@ -26,6 +26,7 @@
 // Module Node seulement (robot scripts/canal-pro, depot de la sortie) : jamais charge par
 // l'Edge Function telegram-bot (qui n'importe que canal-pro.mjs).
 import * as C from "./canal-pro.mjs";
+import * as FLUX from "./marches-flux.mjs";
 import { createRequire } from "node:module";
 const CHANCE = createRequire(import.meta.url)("../../../lib/chance-iashark.js");
 
@@ -102,6 +103,9 @@ const CONFIG_LIGUES = lireConfig("../../../config/leagues.json");
 const CONFIG_MOTEUR = lireConfig("../../../config/moteur-v3.json");
 const LIGUES_DU_MENU = liguesValidees(CONFIG_LIGUES, CONFIG_MOTEUR);
 const LIGUES_COTES_MARCHE = liguesCotesMarche(CONFIG_LIGUES, CONFIG_MOTEUR);
+// MARCHES DU FLUX API-FOOTBALL (03/10/2026) : liste blanche du mathematicien (config/marches-valides.json).
+// Absente ou vide : aucune selection du flux (le robot garde ses voies actuelles).
+export const CONFIG_FLUX = FLUX.lireConfig(lireConfig("../../../config/marches-valides.json"));
 
 export const MENU = Object.freeze({
   version: "menu-2026-09-30",
@@ -182,16 +186,8 @@ export function chanceButeurAffichee(p) {
 }
 
 // ------------------------------------------------------------------ marge retiree (methode « puissance », comme le v3)
-export function sansMargePuissance(cotes) {
-  if (!Array.isArray(cotes) || !cotes.every((o) => ok(o) && o > 1)) return null;
-  const inv = cotes.map((o) => 1 / o);
-  const f = (k) => inv.reduce((s, x) => s + x ** k, 0) - 1;
-  let lo = 0.2, hi = 5;
-  if (f(lo) < 0 || f(hi) > 0) return null;
-  for (let i = 0; i < 80; i++) { const mid = (lo + hi) / 2; if (f(mid) > 0) lo = mid; else hi = mid; }
-  const k = (lo + hi) / 2;
-  return inv.map((x) => x ** k);
-}
+// Une seule implementation : marches-flux.mjs#sansMargePuissance (meme calcul, deplace le 03/10/2026).
+export const sansMargePuissance = FLUX.sansMargePuissance;
 
 // ------------------------------------------------------------------ lecture de la sortie du moteur
 /** Sortie du moteur -> { ok, raison } (contrat, fraicheur 26 h, interrupteur d'urgence). */
@@ -356,12 +352,85 @@ export function jambesCotesMarche(matchs, cotesParMatch, { pays = "FR", ligues =
   return { jambes, ecartes, nonEvalues };
 }
 
+// ------------------------------------------------------------------ voie « flux API-Football » (03/10/2026)
+/**
+ * Matchs evaluables par le flux : ceux des voies v3 et « cotes du marche » (memes competitions autorisees,
+ * Ligue des nations et eliminatoires Europe comprises), ramenes a une forme commune.
+ * -> [{ match_id, fixture, ligue, ligue_cle, domicile, exterieur, coup_envoi_utc }].
+ */
+export function matchsFlux(matchsV3 = [], matchsMarche = []) {
+  const out = new Map();
+  for (const m of matchsV3) {
+    const fx = Number(m.ids_api_football?.fixture) || null;
+    if (fx && m.eligible_vip !== false) out.set(fx, { match_id: m.match_id, fixture: fx, ligue: MENU.ligues[m.ligue_code] || "", ligue_cle: m.ligue_code, domicile: m.domicile, exterieur: m.exterieur, coup_envoi_utc: m.coup_envoi_utc });
+  }
+  for (const m of matchsMarche) {
+    const fx = Number(m.fixture) || null;
+    if (fx && !out.has(fx)) out.set(fx, { match_id: m.match_id, fixture: fx, ligue: m.ligue, ligue_cle: m.ligue_cle, domicile: m.domicile, exterieur: m.exterieur, coup_envoi_utc: m.coup_envoi_utc });
+  }
+  return [...out.values()];
+}
+/**
+ * Jambes du flux : SEULEMENT les marches de la liste blanche (config/marches-valides.json). Chance = cote
+ * sans marge de bet365 (controle Pinnacle) ; cote de la regle (fourchettes) = la cote bet365 ; cote chez
+ * un agree suivi du pays quand The Odds API propose le meme pari (1N2, double chance, buts 2,5).
+ * fluxParFixture[fixture] = { raw (raw_odds), captured_at } (table odds_snapshots, lecture seule).
+ */
+export function jambesFlux(matchs, fluxParFixture, cotesParMatch = {}, { pays = "FR", config = CONFIG_FLUX, maintenant = Date.now() } = {}) {
+  const jambes = [], ecartes = [], nonEvalues = [];
+  if (!config || !config.marches || !config.marches.size) return { jambes, ecartes, nonEvalues };
+  const suivis = C.bookmakersSuivis(pays);
+  for (const m of matchs) {
+    const label = `${m.domicile} – ${m.exterieur}`;
+    const f = fluxParFixture?.[m.fixture];
+    if (!f?.raw) { nonEvalues.push({ match: label, ligue: m.ligue, raison: "pas de cotes du flux API-Football pour ce match" }); continue; }
+    const age = (new Date(maintenant).getTime() - Date.parse(f.captured_at)) / 3600e3;
+    if (!(age <= config.age_max_releve_h)) { nonEvalues.push({ match: label, ligue: m.ligue, raison: `cotes du flux API-Football trop anciennes (${Math.round(age)} h)` }); continue; }
+    const { selections, ecartees } = FLUX.selectionsDuMatch(f.raw, { config, dom: m.domicile, ext: m.exterieur, ligue: m.ligue_cle });
+    for (const e of ecartees) ecartes.push({ match: label, famille: "simple", raison: e.raison, info: true });
+    const cotes = cotesParMatch[m.match_id];
+    for (const s of selections) {
+      if (!(s.chance > 0 && s.chance < 1)) continue;
+      let agrees = {};
+      if (s.marche_menu && cotes?.books) agrees = Object.fromEntries(Object.entries(C.cotesExecutables(cotes.books, s.marche_menu, null)).filter(([bk]) => suivis.includes(C.bookmakerAgree(bk, pays))));
+      const c = CHANCE.chanceIashark(s.chance * 100, null);
+      jambes.push({ match_id: m.match_id, fixture_id: m.fixture, event_id: cotes?.event_id || null, sport_key: cotes?.sport_key || null,
+        ligue: m.ligue, ligue_code: m.ligue_cle, dom: m.domicile, ext: m.exterieur, coup_envoi: iso(m.coup_envoi_utc), voie: C.VOIE_FLUX,
+        marche: s.marche_menu || s.code, flux: { code: s.code, bet_id: s.bet_id, value: s.value, ligne: s.ligne, libelle: s.libelle },
+        meme_match: s.meme_match, cle_v3: null, proba: s.chance, chance: c ? c.chance / 100 : s.chance, cote_moy: s.cote, q_marche: s.chance,
+        ref: { bookmaker: s.bookmaker, cote: s.cote, releve_at: new Date(f.captured_at).toISOString() },
+        cotes: agrees, pinnacle_cote: s.pinnacle ? s.pinnacle.cote : null, pinnacle_chance: s.pinnacle ? s.pinnacle.chance : null,
+        releve_at: Object.keys(agrees).length && cotes?.releve_at ? cotes.releve_at : new Date(f.captured_at).toISOString() });
+    }
+  }
+  return { jambes, ecartes, nonEvalues };
+}
+/** Cote du bookmaker de reference pour un pari a plusieurs selections (toutes chez lui), ou null. */
+export function refCombinee(jambes) {
+  if (!jambes.length || !jambes.every((j) => j.ref && ok(j.ref.cote))) return null;
+  const bk = jambes[0].ref.bookmaker;
+  if (!jambes.every((j) => j.ref.bookmaker === bk)) return null;
+  return { bookmaker: bk, cote: Math.round(produit(jambes.map((j) => j.ref.cote)) * 100) / 100, releve_at: jambes.map((j) => j.ref.releve_at).sort()[0] };
+}
+/**
+ * « Meme match » du week-end tire du flux : la selection la plus probable d'un marche COMBINE du bookmaker
+ * (Result/Total Goals, Results/Both Teams Score, Total Goals/Both Teams To Score) de la liste blanche, cote
+ * bet365 dans la fourchette meme_match, sur un match pas deja pris. Chance = la cote combinee sans marge
+ * (jamais un produit de deux chances).
+ */
+export function choisirMemeMatch(jambes, matchsPris = new Set(), config = CONFIG_FLUX) {
+  const r = config?.meme_match || { cote_min: 1.4, cote_max: 4 };
+  return jambes.filter((j) => j.voie === C.VOIE_FLUX && j.meme_match && !matchsPris.has(cleMatch(j)) && dansFourchette(j, r)).sort(parChance)[0] || null;
+}
+
 // ------------------------------------------------------------------ la regle (REGLE-VIP §1, meme code que math-vip/outils.py)
+/** Cle d'un match : son identifiant API-Football quand il est connu (les voies v3, cotes du marche et flux d'un meme match se rejoignent), sinon match_id. */
+export const cleMatch = (j) => (j && j.fixture_id != null && j.fixture_id !== "" ? `fx-${j.fixture_id}@${String(j.coup_envoi || "").slice(0, 10)}` : String(j?.match_id));
 const parChance = (a, b) => b.proba - a.proba || Date.parse(a.coup_envoi) - Date.parse(b.coup_envoi) || String(a.match_id).localeCompare(String(b.match_id));
 /** Un seul pari par match : le plus probable parmi ceux qui passent la fourchette. */
 function unParMatch(jambes) {
   const best = new Map();
-  for (const j of jambes) { const b = best.get(j.match_id); if (!b || j.proba > b.proba) best.set(j.match_id, j); }
+  for (const j of jambes) { const k = cleMatch(j), b = best.get(k); if (!b || j.proba > b.proba) best.set(k, j); }
   return [...best.values()];
 }
 const dansFourchette = (j, r) => j.cote_moy >= r.cote_min - 1e-9 && j.cote_moy <= r.cote_max + 1e-9;
@@ -377,11 +446,13 @@ export function choisirSimples(jambes) {
  */
 export function choisirCombine(jambes, matchsPris = new Set()) {
   const r = MENU.combine;
-  const z = unParMatch(jambes.filter((j) => dansFourchette(j, r) && !matchsPris.has(j.match_id))).sort(parChance).slice(0, r.parmi);
+  const z = unParMatch(jambes.filter((j) => dansFourchette(j, r) && !matchsPris.has(cleMatch(j)))).sort(parChance).slice(0, r.parmi);
   let best = null;
   const essayer = (idx) => {
     const sel = idx.map((i) => z[i]);
-    if (new Set(sel.map((j) => j.match_id)).size !== sel.length) return; // matchs differents (garanti, verifie quand meme)
+    if (new Set(sel.map(cleMatch)).size !== sel.length) return; // matchs differents (garanti, verifie quand meme)
+    // Avec une selection du flux : un bookmaker (agree suivi, ou la reference bet365) doit proposer toutes les selections.
+    if (sel.some((j) => j.voie === C.VOIE_FLUX) && !Object.keys(cotesCombinees(sel)).length && !refCombinee(sel)) return;
     const o = produit(sel.map((j) => j.cote_moy));
     if (o < r.total_min - 1e-9 || o > r.total_max + 1e-9) return;
     const p = produit(sel.map((j) => j.proba));
@@ -456,15 +527,18 @@ export function cotesCombinees(jambes) {
 }
 const jambeArchive = (j) => ({ match_id: j.match_id, fixture_id: j.fixture_id, event_id: j.event_id, sport_key: j.sport_key, ligue: j.ligue, dom: j.dom, ext: j.ext,
   coup_envoi: j.coup_envoi, marche: j.marche, selection: C.selectionTxt(j), proba: Math.round(j.chance * 10000) / 10000, proba_moteur: Math.round(j.proba * 10000) / 10000,
-  q_marche: ok(j.q_marche) ? Math.round(j.q_marche * 10000) / 10000 : null, cote_moy: j.cote_moy, ...(j.voie ? { voie: j.voie } : {}) });
+  q_marche: ok(j.q_marche) ? Math.round(j.q_marche * 10000) / 10000 : null, cote_moy: j.cote_moy, ...(j.voie ? { voie: j.voie } : {}),
+  ...(j.flux ? { flux: j.flux } : {}), ...(j.ref ? { ref: j.ref } : {}) });
 function plusieurs(famille, choix, { fin } = {}) {
   const js = [...choix.jambes].sort((a, b) => Date.parse(a.coup_envoi) - Date.parse(b.coup_envoi));
   return { famille, marche: "combine", dom: js[0].dom, ext: js[0].ext, ligue: "", fixture_id: js[0].fixture_id, event_id: js[0].event_id, sport_key: js[0].sport_key,
     coup_envoi: js[0].coup_envoi, fin_coup_envoi: js.at(-1).coup_envoi, proba: Math.round(choix.chance * 10000) / 10000,
     source_proba: js.some((j) => j.voie === C.VOIE_COTES_MARCHE)
       ? `chance calculée par IASHARK, matchs différents : produit des chances IASHARK des sélections (moteur v3 : le plus bas entre le moteur et la cote sans marge ; ${SOURCE_COTES_MARCHE} : la cote sans marge)`
+      : js.some((j) => j.voie === C.VOIE_FLUX) ? `chance calculée par IASHARK, matchs différents : produit des chances IASHARK des sélections (cote sans marge de chaque sélection)`
       : `${SOURCE_V3}, matchs différents : produit des chances IASHARK des sélections (chacune le plus bas entre le moteur v3 et la cote sans marge)`,
     selections: js.map(jambeArchive), cotes: cotesCombinees(js), releve_at: js.map((j) => j.releve_at).filter(Boolean).sort()[0] || null,
+    ...(refCombinee(js) ? { ref: refCombinee(js) } : {}),
     ...(fin ? { fin_fenetre: new Date(fin).toISOString() } : {}) };
 }
 
@@ -475,19 +549,34 @@ function plusieurs(famille, choix, { fin } = {}) {
  * - vendredi : ticket autour de 10, ticket autour de 25 (week-end) ; le 1er week-end du mois, le 50-100.
  * matchsJour / matchsWeekend : matchsMenu() ; cotesParMatch : voir jambesCandidates.
  */
-export function construireMenu({ jour, matchsJour, matchsWeekend = [], cotesParMatch, pays = "FR", marcheJour = [], marcheWeekend = [] }) {
+export function construireMenu({ jour, matchsJour, matchsWeekend = [], cotesParMatch, pays = "FR", marcheJour = [], marcheWeekend = [], fluxParFixture = null, configFlux = CONFIG_FLUX, maintenant = Date.now() }) {
   const dow = C.nomJour(jour);
-  // Les deux voies (moteur v3 et cotes du marche) donnent des jambes de meme forme : memes fourchettes, memes regles.
+  // Les voies (moteur v3, cotes du marche, flux API-Football) donnent des jambes de meme forme : memes fourchettes,
+  // memes regles, un seul pari par match (cleMatch : identifiant API-Football).
   const fusion = (a, b) => ({ jambes: [...a.jambes, ...b.jambes], ecartes: [...a.ecartes, ...b.ecartes], nonEvalues: [...a.nonEvalues, ...b.nonEvalues] });
-  const jour1 = fusion(jambesCandidates(matchsJour, cotesParMatch, { pays }), jambesCotesMarche(marcheJour, cotesParMatch, { pays }));
+  const avecFlux = !!(fluxParFixture && configFlux && configFlux.marches && configFlux.marches.size);
+  // Un match evalue par une voie n'est pas « non evalue » parce qu'une autre n'a rien trouve.
+  const flux = (mv3, mm) => {
+    const r = avecFlux ? jambesFlux(matchsFlux(mv3, mm), fluxParFixture, cotesParMatch, { pays, config: configFlux, maintenant }) : { jambes: [], ecartes: [], nonEvalues: [] };
+    return { ...r, nonEvalues: [] , _nonEvalues: r.nonEvalues };
+  };
+  const unir = (a, f) => {
+    const ok1 = new Set(a.jambes.map((j) => `${j.dom} – ${j.ext}`)), ok2 = new Set(f.jambes.map((j) => `${j.dom} – ${j.ext}`));
+    return { jambes: [...a.jambes, ...f.jambes], ecartes: [...a.ecartes, ...f.ecartes],
+      nonEvalues: [...a.nonEvalues.filter((x) => !ok2.has(x.match)), ...f._nonEvalues.filter((x) => !ok1.has(x.match) && !a.nonEvalues.some((y) => y.match === x.match))] };
+  };
+  const jour1 = unir(fusion(jambesCandidates(matchsJour, cotesParMatch, { pays }), jambesCotesMarche(marcheJour, cotesParMatch, { pays })), flux(matchsJour, marcheJour));
   const candidats = [];
   const simples = choisirSimples(jour1.jambes);
   // Chance affichee du simple : sa chance_iashark (la meme que la page match pour ce pari) ; voie « cotes du
   // marche » : la chance sans marge des cotes du marche, avec son libelle.
-  for (const s of simples) candidats.push({ famille: "simple", ...s, proba: s.chance, fin_coup_envoi: s.coup_envoi, source_proba: s.voie === C.VOIE_COTES_MARCHE ? SOURCE_COTES_MARCHE : SOURCE_CHANCE, selections: [] });
-  const combo = choisirCombine(jour1.jambes, new Set(simples.map((s) => s.match_id)));
+  for (const s of simples) candidats.push({ famille: "simple", ...s, proba: s.chance, fin_coup_envoi: s.coup_envoi, source_proba: s.voie === C.VOIE_FLUX ? C.SOURCE_FLUX : s.voie === C.VOIE_COTES_MARCHE ? SOURCE_COTES_MARCHE : SOURCE_CHANCE, selections: [] });
+  const combo = choisirCombine(jour1.jambes, new Set(simples.map(cleMatch)));
   if (combo) candidats.push(plusieurs("combine", combo));
-  if (dow === "samedi" || dow === "dimanche") {
+  // « Meme match » du week-end : d'abord un marche combine du bookmaker (flux, liste blanche) ; sinon le buteur du v3.
+  const mm = dow === "samedi" || dow === "dimanche" ? choisirMemeMatch(jour1.jambes, new Set([...simples.map(cleMatch), ...(combo ? combo.jambes.map(cleMatch) : [])]), configFlux) : null;
+  if (mm) candidats.push({ famille: "meme_match", ...mm, proba: mm.chance, fin_coup_envoi: mm.coup_envoi, source_proba: C.SOURCE_FLUX, selections: [] });
+  if (!mm && (dow === "samedi" || dow === "dimanche")) {
     const b = choisirButeur(matchsJour);
     if (b) {
       const m = b.m;
@@ -501,7 +590,7 @@ export function construireMenu({ jour, matchsJour, matchsWeekend = [], cotesParM
   }
   let we = { jambes: [], ecartes: [], nonEvalues: [] };
   if (C.nomJour(jour) === "vendredi" && (matchsWeekend.length || marcheWeekend.length)) {
-    we = fusion(jambesCandidates(matchsWeekend, cotesParMatch, { pays }), jambesCotesMarche(marcheWeekend, cotesParMatch, { pays }));
+    we = unir(fusion(jambesCandidates(matchsWeekend, cotesParMatch, { pays }), jambesCotesMarche(marcheWeekend, cotesParMatch, { pays })), flux(matchsWeekend, marcheWeekend));
     const fin = fenetreWeekend(jour).fin;
     for (const [fam, regle] of [["fun10", MENU.fun10], ["fun25", MENU.fun25], ...(premierWeekendDuMois(jour) ? [["reve", MENU.reve]] : [])]) {
       const t = choisirTicket(we.jambes, regle);

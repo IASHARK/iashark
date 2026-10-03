@@ -172,6 +172,9 @@ jobs:
           // UNE SEULE SOURCE DE CHIFFRES (01/10/2026) : chance du pari retenu (chance_iashark)
           // et chance buteur, calculees UNE FOIS ici et lues par la page, l'espace Pro et Telegram.
           var CHANCE_IASHARK=require('./lib/chance-iashark.js');
+          // MARCHES DU FLUX API-FOOTBALL (03/10/2026) : flux brut de chaque match, garde le temps du run
+          // (jamais ecrit), pour le bloc « Tous les marchés » de la page match (marches de config/marches-valides.json).
+          var RAW_ODDS_FLUX={};
           // Un pronostic sur chaque match (plan de Clement, 03/10/2026) : lib/pronostic.js.
           var PRONOSTIC=require('./lib/pronostic.js');
           // UNE SEULE COTE (01/10/2026) : la cote du pari est celle des bookmakers agrees ANJ
@@ -3297,6 +3300,7 @@ jobs:
               };
               await sleep(300);
               var odds=parseOdds(oddsRaw);
+              if(oddsRaw&&f&&f.id!=null) RAW_ODDS_FLUX[String(f.id)]=oddsRaw;
               // REPLI COTES SELECTIONS : seulement fiabilite.selections_cotes_marche ET c1/cn/c2 absents.
               // Memes cotes que d'habitude ensuite (mediane = cote indicative, marge retiree plus bas).
               if(ODDS_KEY&&COTES_SEL_REPLI.doitCompleter(odds,lgKey(lg.id),LEAGUES_CONFIG)){
@@ -4294,6 +4298,29 @@ jobs:
               if(rapportAnj.erreurs.length) console.log('::warning title=Cote ANJ::'+rapportAnj.erreurs.slice(0,3).join(' | ').replace(/apiKey=[^&\s]+/g,'apiKey=***'));
             }catch(e){ console.log('::warning title=Cote ANJ::releve impossible ('+String(e&&e.message||e).replace(/apiKey=[^&\s]+/g,'apiKey=***').slice(0,150)+') : cotes indicatives.'); }
             allMatchsData.forEach(function(m){ CHANCE_IASHARK.poserChance(m); });
+            // ================= TOUS LES MARCHES (03/10/2026) =================
+            // Page match : les marches de la liste blanche du mathematicien (config/marches-valides.json),
+            // chance = cote bet365 sans marge (methode puissance, controle Pinnacle), arrondie par
+            // lib/chance-iashark.js comme le reste du site ; la cote affichee dit d'ou elle vient (bet365).
+            // MEME code que le robot Pro (supabase/functions/_shared/marches-flux.mjs). Champ premium marches_flux.
+            try{
+              var FLUX_MOD=await import(require('url').pathToFileURL(require('path').resolve('supabase/functions/_shared/marches-flux.mjs')).href);
+              var CFG_FLUX=FLUX_MOD.lireConfig(JSON.parse(fs.readFileSync('config/marches-valides.json','utf8')));
+              var nFlux=0;
+              allMatchsData.forEach(function(m){
+                delete m.marches_flux;
+                var raw=m&&m.id!=null?RAW_ODDS_FLUX[String(m.id)]:null;
+                if(!raw||!CFG_FLUX.marches.size||m.status&&m.status!=='NS') return;
+                var nomEq=function(e){ return (e&&typeof e==='object'?(e.n||e.name):e)||''; };
+                var r=FLUX_MOD.selectionsDuMatch(raw,{config:CFG_FLUX,dom:nomEq(m.home),ext:nomEq(m.away),ligue:lgKey(m.league_id)});
+                var liste=r.selections.map(function(x){
+                  var c=CHANCE_IASHARK.chanceIashark(x.chance*100,null);
+                  return c?{marche:FLUX_MOD.CATALOGUE[x.bet_id].nom,selection:x.libelle,chance:c.chance,cote:x.cote,bookmaker:FLUX_MOD.nomBookmakerFlux(x.bookmaker)}:null;
+                }).filter(Boolean);
+                if(liste.length){ m.marches_flux={source:'cote '+FLUX_MOD.nomBookmakerFlux(CFG_FLUX.reference)+' sans marge',liste:liste}; nFlux++; }
+              });
+              console.log('  [MARCHES] '+nFlux+' match(s) avec le bloc « Tous les marchés » ('+CFG_FLUX.marches.size+' marche(s) valide(s)).');
+            }catch(e){ console.log('::warning title=Marches du flux::bloc non pose ('+(e&&e.message)+').'); }
             // MOTEUR_V3:DEBUT - chance IASHARK des marches 1N2 / double chance pour le Canal Pro.
             // Fichier TEMPORAIRE du run (jamais dans le depot ni dans les journaux) : l'etape
             // « Canal Pro - deposer la sortie du moteur v3 » le joint a la sortie deposee.

@@ -10,11 +10,14 @@
 //     statistiques (buts attendus, tirs, arrets), ville du stade.
 //   - OpenWeather (OPENWEATHER_KEY) : prevision meteo a l'heure du match.
 //   - data.json du site (depot) : match du duel et choix du modele.
+//   - Table odds_snapshots (LECTURE SEULE, 03/10/2026) : flux de cotes API-Football releve chaque matin
+//     par le pipeline (~70 marches, bet365, Pinnacle…), pour les marches de config/marches-valides.json.
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import * as C from "../../../supabase/functions/_shared/canal-pro.mjs";
 import * as M from "../../../supabase/functions/_shared/canal-pro-menu.mjs";
+import * as FLUX from "../../../supabase/functions/_shared/marches-flux.mjs";
 
 const require = createRequire(import.meta.url);
 // MODE ECONOMIE (03/10/2026) : compteurs lus dans les en-tetes des API, plafonds de config/quotas.json.
@@ -155,8 +158,27 @@ export function creerSources(env, { log = console.log, db = null, fetchFn = (...
     for (const [bk, r] of Object.entries(C.booksDepuisOddsApi({ ...ev, home_team: noms.home_team, away_team: noms.away_team }))) if (r.dc) (c.books[bk] ||= { nom: r.nom }).dc = r.dc;
   }
 
+  /**
+   * Dernier releve du flux de cotes API-Football de chaque match (table odds_snapshots, lecture seule) :
+   * { fixture: { raw, captured_at } }. Pas de base ou liste blanche vide : {} (aucun appel).
+   * Table illisible : {} et une ligne de journal (les autres voies continuent).
+   */
+  async function fluxDesMatchs(fixtures) {
+    const ids = [...new Set(fixtures.map(Number).filter((x) => x > 0))];
+    const out = {};
+    if (!db || !ids.length || !M.CONFIG_FLUX.marches.size) return out;
+    try {
+      for (let i = 0; i < ids.length; i += 40) {
+        const lignes = await db.select("odds_snapshots", { fixture_id: ["in", ids.slice(i, i + 40)] }, { ordre: "captured_at.desc", colonnes: "fixture_id,captured_at,raw_odds" });
+        for (const l of lignes) if (!out[l.fixture_id] && l.raw_odds) out[l.fixture_id] = { raw: l.raw_odds, captured_at: l.captured_at };
+      }
+    } catch (e) { log(`flux de cotes API-Football illisible (${e.status || e.message}) : marches du flux non evalues`); return {}; }
+    return out;
+  }
+
   return {
     sortieV3,
+    fluxDesMatchs,
     /** MODE ECONOMIE : situation des quotas vue par ce tour (en-tetes lus) et compteurs du tour. */
     quotas() { return { situation: QUOTAS.situation(etat, config, maintenant()), etat, config, tour: { ...economie } }; },
     /**
@@ -232,7 +254,9 @@ export function creerSources(env, { log = console.log, db = null, fetchFn = (...
         n++;
         await ajouterDoubleChance(c, noms[m.match_id]);
       }
-      return M.construireMenu({ jour, matchsJour, matchsWeekend, cotesParMatch, marcheJour, marcheWeekend });
+      // Marches du flux API-Football (liste blanche config/marches-valides.json) : lecture seule de odds_snapshots.
+      const fluxParFixture = await fluxDesMatchs(M.matchsFlux(tous, tousMarche).map((m) => m.fixture));
+      return M.construireMenu({ jour, matchsJour, matchsWeekend, cotesParMatch, marcheJour, marcheWeekend, fluxParFixture, maintenant });
     },
     /**
      * Etat actuel de chaque pari (dernier controle, releves) : simple -> etatMarche ; pari a plusieurs
@@ -245,7 +269,8 @@ export function creerSources(env, { log = console.log, db = null, fetchFn = (...
       const legs = [];
       for (const p of paris) {
         if (p.famille === "buteur") continue;
-        (C.estCombine(p) ? p.selections || [] : [p]).forEach((j, k) => legs.push({ pid: p.id, k, event_id: j.event_id, sport_key: j.sport_key, marche: j.marche, ligne: j.ligne ?? null }));
+        (C.estCombine(p) ? p.selections || [] : [p]).forEach((j, k) => legs.push({ pid: p.id, k, event_id: j.event_id, sport_key: j.sport_key, marche: j.marche, ligne: j.ligne ?? null,
+          fixture: j.fixture_id ?? p.fixture_id ?? null, flux: j.flux?.code || p.composantes?.flux?.code || (FLUX.lireCode(j.marche) ? j.marche : null) }));
       }
       const books = {}, noms = {};
       const parSport = new Map();
@@ -260,11 +285,20 @@ export function creerSources(env, { log = console.log, db = null, fetchFn = (...
         const l = legs.find((x) => x.event_id === id);
         await ajouterDoubleChance({ event_id: id, sport_key: l.sport_key, books: books[id] }, noms[id]);
       }
+      // Selections du flux : leur cote bet365 du dernier releve du flux (odds_snapshots).
+      const fluxLegs = legs.filter((l) => l.flux && l.fixture);
+      const flux = fluxLegs.length ? await fluxDesMatchs(fluxLegs.map((l) => l.fixture)) : {};
       const out = {};
       for (const p of paris) {
         if (p.famille === "buteur") continue;
         const mes = legs.filter((l) => l.pid === p.id);
-        const etats = mes.map((l) => (books[l.event_id] ? C.etatMarche(books[l.event_id], l.marche, l.ligne == null ? null : Number(l.ligne)) : null));
+        const etats = mes.map((l) => {
+          const e = books[l.event_id] ? C.etatMarche(books[l.event_id], l.marche, l.ligne == null ? null : Number(l.ligne)) : null;
+          if (!l.flux) return e;
+          const f = flux[l.fixture];
+          const s = f ? FLUX.etatSelection(f.raw, l.flux, { config: M.CONFIG_FLUX }) : null;
+          return { ...(e || { cotes: {} }), flux: s ? { ...s, releve_at: new Date(f.captured_at).toISOString() } : null };
+        });
         if (C.estCombine(p)) out[p.id] = { jambes: etats };
         else if (etats[0]) out[p.id] = etats[0];
       }
@@ -313,12 +347,20 @@ export function creerSources(env, { log = console.log, db = null, fetchFn = (...
         const lire = (t) => {
           const s = Object.fromEntries((t?.statistics || []).map((x) => [x.type, x.value]));
           const n = (v) => (v == null || v === "" ? null : Number(String(v).replace("%", "")));
-          return { xg: n(s.expected_goals), tirs: n(s["Total Shots"]), arrets: n(s["Goalkeeper Saves"]) };
+          return { xg: n(s.expected_goals), tirs: n(s["Total Shots"]), arrets: n(s["Goalkeeper Saves"]), corners: n(s["Corner Kicks"]), jaunes: n(s["Yellow Cards"]), rouges: n(s["Red Cards"]) };
         };
         const dom = st.find((x) => x.team?.id === fx.teams.home.id), ext = st.find((x) => x.team?.id === fx.teams.away.id);
         if (dom || ext) faits = { dom: lire(dom), ext: lire(ext) };
       }
-      return { statut, bd: ft.home ?? fx.goals?.home ?? null, be: ft.away ?? fx.goals?.away ?? null, faits };
+      // Faits pour les marches du flux (marches-flux.mjs#reglerFlux) : score a la pause, corners, cartons (jaunes + rouges).
+      const ht = fx.score?.halftime || {};
+      const paire = (a, b) => (Number.isInteger(a) && Number.isInteger(b) ? [a, b] : null);
+      // API-Football ecrit null pour 0 dans ses statistiques : 0 quand les statistiques des DEUX equipes existent.
+      const deux = !!(faits?.dom && faits?.ext);
+      const stat = (k) => (deux ? paire(faits.dom[k] ?? 0, faits.ext[k] ?? 0) : null);
+      const cartons = deux ? paire((faits.dom.jaunes ?? 0) + (faits.dom.rouges ?? 0), (faits.ext.jaunes ?? 0) + (faits.ext.rouges ?? 0)) : null;
+      return { statut, bd: ft.home ?? fx.goals?.home ?? null, be: ft.away ?? fx.goals?.away ?? null, faits,
+        ht: paire(ht.home, ht.away), corners: stat("corners"), cartons };
     },
     /** Prevision a l'heure du match, a la ville du stade. */
     async meteo(fixtureId, coupEnvoi) {

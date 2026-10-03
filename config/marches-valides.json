@@ -1,0 +1,18 @@
+{
+  "_readme": [
+    "LISTE BLANCHE des marches du flux de cotes API-Football (table odds_snapshots) que le robot Pro et la page match ont le droit d'utiliser. SEUL le mathematicien la remplit, apres verification (chance annoncee contre resultats reels, sur des matchs jamais vus).",
+    "Vide = rien de nouveau : le robot garde ses voies actuelles (moteur v3, cotes du marche : 1N2, double chance, buts 2,5) et la page match n'affiche pas le bloc « Tous les marchés ».",
+    "Une entree : { \"bet_id\": 25, \"bet\": \"Result/Total Goals\", \"lignes\": [2.5], \"ligues\": null }. bet_id = identifiant API-Football (voir supabase/functions/_shared/marches-flux.mjs#CATALOGUE). lignes (facultatif) : seulement ces lignes (ex. [2.5]) ; absent = toutes les demi-lignes. ligues (facultatif) : cles de config/leagues.json ; absent = toutes les competitions deja autorisees au robot.",
+    "Chance d'un pari = cote sans marge de « reference » (bet365, methode puissance) ; controle : si « controle » (Pinnacle) cote le meme pari et que sa chance sans marge s'ecarte de plus de ecart_max_pinnacle (0,08 = 8 points), le pari est ecarte. Aucun modele.",
+    "Marches « meme match » (24 Results/Both Teams Score, 25 Result/Total Goals, 49 Total Goals/Both Teams To Score) : cote du bookmaker pour la combinaison, jamais un produit de deux chances. Le week-end, le robot en propose un (cote entre meme_match.cote_min et meme_match.cote_max). AVANT d'en mettre un ici : appliquer la migration 0053_pro_paris_meme_match.sql (famille « meme_match »).",
+    "age_max_releve_h : une cote du flux plus vieille ne sert pas (le flux est releve une fois par jour, le matin).",
+    "buteur_actif : false tant que le mathematicien n'a pas valide la chance buteur tiree de la cote « Anytime Goal Scorer » (marches-flux.mjs#chanceButeurFlux)."
+  ],
+  "reference": "bet365",
+  "controle": "pinnacle",
+  "ecart_max_pinnacle": 0.08,
+  "age_max_releve_h": 12,
+  "buteur_actif": false,
+  "meme_match": { "cote_min": 1.40, "cote_max": 4.00 },
+  "marches": []
+}

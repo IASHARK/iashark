@@ -117,7 +117,7 @@ test("anti-fuite : pronostic est premium (data.json, Edge, page match), pronosti
   assert.ok(PREMIUM.stripPremium(offert).pronostic, "match offert : pronostic visible");
   assert.deepEqual(Object.keys(PREMIUM.premiumPayload(m)), ["p1", "pn", "p2", "pronostic"].filter((k) => k in PREMIUM.premiumPayload(m)));
   const edge = fs.readFileSync(path.join(root, "supabase/functions/match-data/index.ts"), "utf8");
-  assert.match(edge, /"pronostic",\n\];/);
+  assert.match(edge, /"pronostic",\n/);
   assert.match(fs.readFileSync(path.join(root, "match-page.js"), "utf8"), /const CHAMPS_PREMIUM=\[[^\]]*"pronostic"/);
 });
 

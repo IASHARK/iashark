@@ -235,7 +235,9 @@ function pronosticFor(m,ctx,H,free){
   if(!p||!p.market_id)return {state:'pending',free:free,prob:null};
   var market=H.marketIdLabel({market_id:p.market_id,home:m.home,away:m.away})||p.libelle_fr||'';
   var ch=Number(p.chance),chance=ch>0&&ch<100?Math.round(ch):null;
-  var test=p.fiabilite==='en test';
+  // 03/10/2026 : les 16 competitions sans verification sont retirees du site ; les autres sont
+  // verifiees (moteur ou cotes du marche). Plus jamais « en test » affiche (demande de Clement).
+  var test=false;
   return {state:'prono',free:free,market:market,chance:chance,test:test,
     label:tf('home_list.prono_aria','Pronostic : {market}',{market:market})+(chance!=null?', '+tf('home_list.prono_chance','chance calculée {p} %',{p:chance}):'')+(test?' ('+t('home_list.prono_test','en test')+')':'')};
 }

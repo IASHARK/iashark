@@ -62,8 +62,16 @@
 
     <nav aria-label="Pro" data-i18n-attr="aria-label:site_header.nav_tools" class="hidden lg:block">
       <div class="sticky top-[76px] flex flex-col gap-1" role="tablist" aria-orientation="vertical">
-      <!-- Tableau de bord, journal et garde-fou : caches pour le lancement du 3/10 (migrations 0040/0041 pas encore appliquees ; avocat du diable, 01/10/2026). -->
-      <button type="button" role="tab" id="tab-combo" aria-controls="panel-combo" aria-selected="true" data-tool="combo" data-active="1"
+      <!-- Tableau de bord du jour (03/10/2026 : 0040/0041 appliquees, interrupteur tableauPro) : programme du jour, messages Telegram, reglages, journal, garde-fou. -->
+      <button type="button" role="tab" id="tab-tableau" aria-controls="panel-tableau" aria-selected="true" data-tool="tableau" data-active="1"
+        class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
+        <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z"/></svg>
+        <span class="min-w-0">
+          <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="dashboard_pro.tab">Panel</span>
+          <span data-i18n="dashboard_pro.tab_desc" class="mt-0.5 block text-[12px] leading-snug text-soft">Tu programa del día, tus mensajes de Telegram, tus ajustes.</span>
+        </span>
+      </button>
+      <button type="button" role="tab" id="tab-combo" aria-controls="panel-combo" aria-selected="false" data-tool="combo"
         class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
         <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M7 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M17 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M11 12h2"/></svg>
         <span class="min-w-0">
@@ -87,7 +95,9 @@
 
     <div class="-mx-4 overflow-x-auto px-4 lg:hidden">
       <div class="flex gap-2 pb-1" role="tablist" aria-label="Pro" data-i18n-attr="aria-label:site_header.nav_tools" aria-orientation="horizontal">
-      <button type="button" role="tab" id="mtab-combo" aria-controls="panel-combo" aria-selected="true" data-tool="combo" data-active="1"
+      <button type="button" role="tab" id="mtab-tableau" aria-controls="panel-tableau" aria-selected="true" data-tool="tableau" data-active="1"
+        class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan" data-i18n="dashboard_pro.tab">Panel</button>
+      <button type="button" role="tab" id="mtab-combo" aria-controls="panel-combo" aria-selected="false" data-tool="combo"
         class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan" data-i18n="pro_space.tab_combo">Mi combinada</button>
       <button type="button" role="tab" id="mtab-scanner" aria-controls="panel-scanner" aria-selected="false" data-tool="scanner"
         class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan" data-i18n="tools_page.scan_title">Detector de diferencias</button>
@@ -95,6 +105,7 @@
     </div>
 
     <div class="min-w-0">
+    <section role="tabpanel" id="panel-tableau" aria-labelledby="tab-tableau" data-panel="tableau" hidden class="tool-panel"></section>
     <section role="tabpanel" id="panel-scanner" aria-labelledby="tab-scanner" data-panel="scanner" hidden class="tool-panel"></section>
     <section role="tabpanel" id="panel-combo" aria-labelledby="tab-combo" data-panel="combo" hidden class="tool-panel"></section>
     </div>
@@ -119,7 +130,7 @@
 <script src="/assets/ouverture.js"></script>
 <script src="/i18n/i18n.js"></script>
 <script src="/lib/tools-domain.js"></script>
-<script src="/lib/match-time.js"></script><script src="/lib/free-match.js"></script><script src="/lib/pro-preferences.js"></script><script src="/lib/pro-dashboard-model.js"></script><script src="/pro-dashboard.js"></script>
+<script src="/lib/match-time.js"></script><script src="/lib/free-match.js"></script><script src="/lib/pro-preferences.js"></script><script src="/lib/pro-dashboard-model.js"></script><script src="/lib/selection-pro.js"></script><script src="/pro-dashboard.js"></script>
 <script src="/lib/league-names.js"></script><script src="/lib/market-labels.js"></script><script src="/lib/market-config.js"></script><script src="/assets/pricing-grid.js"></script><script src="/tools-page.js"></script>
 <script src="/auth-header.js"></script>
 <script>document.addEventListener('DOMContentLoaded',function(){IasharkAuthHeader.mount('#authHeaderSlot');});</script>

@@ -84,6 +84,9 @@ a{color:inherit}
 .hero-league img{width:18px;height:18px;object-fit:contain}
 .hero-time b{color:var(--text);font-weight:600}
 .hero-teams{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;margin:16px 0 0;font:inherit}
+/* 03/10/2026 : l'en-tete passe en h2 (titre statique present) ; « .card > h2 » (display:flex) gagnait et collait
+   les deux equipes a gauche, le rang et la forme ne tombaient plus sous leur equipe. */
+.card>h2.hero-teams,.card>h1.hero-teams{display:grid}
 .hero-team{display:flex;flex-direction:column;align-items:center;gap:9px;min-width:0;text-align:center}
 .hero-team img{width:60px;height:60px;object-fit:contain;filter:drop-shadow(0 8px 18px rgba(0,0,0,.55))}
 .hero-name{font:700 24px/1.1 var(--body);letter-spacing:-.015em;color:#f4f7fb;overflow-wrap:anywhere}

@@ -14,7 +14,9 @@ const base = (extra = {}) => ({
   telegram_abonnes: [{ user_id: "es1", chat_id: 777, bloque: false }],
   users: [{ id: "es1", plan: "pro", role: "customer" }],
   user_preferences: [{ user_id: "es1", language: "es" }],
-  pro_preferences: [], pro_tickets: [], pro_paris: [], pro_envois: [], telegram_settings: [], telegram_contact_threads: [],
+  // Fiche Pro remplie (sur le site) : sans elle, toute commande ramene d'abord aux reglages obligatoires
+  // (tests/canal-pro-prive.test.js, « reglages obligatoires »).
+  pro_preferences: [{ user_id: "es1", pays: "es", bookmakers: [] }], pro_tickets: [], pro_paris: [], pro_envois: [], telegram_settings: [], telegram_contact_threads: [],
   ...extra,
 });
 const LUCIA = { id: 777, first_name: "Lucía", language_code: "es" };

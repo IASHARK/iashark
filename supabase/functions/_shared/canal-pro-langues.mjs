@@ -49,13 +49,11 @@ const FR = {
   robot: {
     expire: "Ce lien a expiré. Retourne sur la page Compte du site et clique de nouveau sur « Ouvrir mon robot sur Telegram ».",
     bonjour: (prenom) => `Bonjour${prenom ? " " + prenom : ""}, ton robot IASHARK est prêt.\n\n`,
-    inactif: (commande) => "Ton abonnement Pro n'est plus actif : le robot personnel est en pause (tu peux le reprendre depuis la page Compte du site)." + (commande ? " Pour écrire à l'équipe, envoie simplement ton message ici." : " Ton message est transmis à l'équipe, qui te répond ici."),
     plusDeCanal: "Il n'y a plus de canal à rejoindre : tout ce qui est réservé aux abonnés Pro t'arrive ici, en privé (programme du jour, débriefs, bilan, alertes).",
     programmeVide: "Pas de pari à venir pour l'instant. Les jours où il y a un programme, il t'arrive ici vers 9 h 30, après validation.",
     programmeFerme: "Les envois Pro ne sont pas encore ouverts : pas de programme pour l'instant.",
     lotoVide: "Pas de grille Loto Foot à tenter pour l'instant. Elle t'arrive ici la veille du premier match, à 18 h.",
     journal: "<b>Ton journal d'aujourd'hui</b>", journalVide: "Aucun pari noté aujourd'hui. Écris-moi ton ticket ou envoie sa photo pour le noter.",
-    equipeVide: "Écris ton message juste après /equipe, sur la même ligne.",
     tabacAucun: "Aucun simple du programme n'est encore à venir aujourd'hui.", quelPari: "Pour quel pari ?",
     nonRelie: "Compte non relié ou abonnement inactif.", dejaTraite: "Déjà traité.",
     pasNote: "Pas noté. Si c'était un message pour l'équipe, il lui est transmis : on te répond ici.", pasNoteCourt: "Pas noté.",
@@ -64,7 +62,6 @@ const FR = {
     paysDabord: "Indique d'abord ton pays dans le formulaire de ton espace Pro (page Compte du site).", pasEnregistre: "Pas enregistré : réessaie dans un moment, ou change-le dans ton espace Pro.",
     cestNote: "C'est noté.", photoNon: "Je ne lis pas les photos. Écris-moi ton ticket en texte : « 10 € sur le nul Torino Udinese à 3,30 chez Betclic ».",
     photoIllisible: "Je n'arrive pas à lire ce ticket. Écris-le-moi en texte : « 10 € sur le nul Torino Udinese à 3,30 chez Betclic ».", photoCote: "Je n'arrive pas à lire la cote de ce ticket. Écris-le-moi en texte.",
-    accueil: "Bonjour, ici l'équipe IASHARK.\n\nÉcrivez votre message juste ici (question, abonnement Pro) : on vous répond dans cette conversation.\n\nAbonné Pro ? Ouvrez votre robot personnel depuis la page Compte du site : tout ce qui est réservé aux abonnés Pro arrive ensuite ici, en privé.",
     recu: "Message bien reçu, on vous répond ici rapidement.",
     choisirLangue: "Choisis ta langue :", langueOk: (nom) => `C'est noté : je te parle désormais en ${nom}. (C'est aussi la langue de ton compte sur le site.)`,
     langueErreur: "Je n'ai pas pu enregistrer ta langue. Réessaie dans un moment, ou change-la sur la page Compte du site.",
@@ -196,11 +193,8 @@ const ES = {
   aide: "Soy tu robot IASHARK. Esto es lo que sé hacer:\n"
     + "• /programa: tu programa del día, con tus casas de apuestas\n"
     + "• /ajustes: tus casas de apuestas, tus alertas, tu límite diario\n"
-    + "• /diario: las apuestas que has anotado hoy\n"
     + "• /idioma: cambiar de idioma\n"
-    + "• Escríbeme tu ticket en texto («10 € a Gana Torino a 1,65 en Betclic»): lo anoto en tu diario. Una combinada también («Real Madrid + Bayern a 2,05 en Winamax»): reconozco la combinada del día.\n"
-    + "• Todo lo reservado a los suscriptores Pro te llega aquí, en privado y en español (mismos datos que en francés).\n"
-    + "• Cualquier otro mensaje va al equipo IASHARK, que te responde aquí.",
+    + "• Todo lo reservado a los suscriptores Pro te llega aquí, en privado y en español (mismos datos que en francés).",
   ticket: {
     lu: "Ticket leído: ", sur: (m) => `${m} € a `, combineProg: (nom, sel, c, bk) => `la ${nom} del programa (${sel}) a ${c}${bk}.`,
     match: (sel, match, c, bk) => `${sel} (${match}) a ${c}${bk}.`, autre: (combine, c, bk, sel) => `${combine ? "una combinada" : "una apuesta"} a ${c}${bk} («${sel}»).`,
@@ -214,13 +208,11 @@ const ES = {
   robot: {
     expire: "Este enlace ha caducado. Vuelve a la página Cuenta del sitio y pulsa de nuevo «Abrir mi robot en Telegram».",
     bonjour: (prenom) => `Hola${prenom ? " " + prenom : ""}, tu robot IASHARK está listo.\n\n`,
-    inactif: (commande) => "Tu suscripción Pro ya no está activa: el robot personal está en pausa (puedes reanudarlo desde la página Cuenta del sitio)." + (commande ? " Para escribir al equipo, envía tu mensaje aquí." : " Tu mensaje se ha enviado al equipo, que te responde aquí."),
     plusDeCanal: "Ya no hay ningún canal al que unirse: todo lo reservado a los suscriptores Pro te llega aquí, en privado (programa del día, resúmenes, balance, alertas).",
     programmeVide: "Por ahora no hay ninguna apuesta por venir. Los días en que hay programa, te llega aquí hacia las 9:30 (hora de París), después de su validación.",
     programmeFerme: "Los envíos Pro aún no están abiertos: por ahora no hay programa.",
     lotoVide: "El Loto Foot es un juego de la FDJ (Francia): la parrilla solo se envía en francés, a los suscriptores de Francia.",
     journal: "<b>Tu diario de hoy</b>", journalVide: "Ninguna apuesta anotada hoy. Escríbeme tu ticket para anotarlo.",
-    equipeVide: "Escribe tu mensaje justo después de /equipe, en la misma línea.",
     tabacAucun: "Hoy ya no queda ninguna apuesta simple del programa por jugar.", quelPari: "¿Para qué apuesta?",
     nonRelie: "Cuenta no vinculada o suscripción inactiva.", dejaTraite: "Ya está hecho.",
     pasNote: "No anotado. Si era un mensaje para el equipo, se lo hemos enviado: te responderemos aquí.", pasNoteCourt: "No anotado.",
@@ -229,7 +221,6 @@ const ES = {
     paysDabord: "Indica primero tu país en el formulario de tu espacio Pro (página Cuenta del sitio).", pasEnregistre: "No guardado: inténtalo dentro de un momento, o cámbialo en tu espacio Pro.",
     cestNote: "Hecho.", photoNon: "No leo fotos. Escríbeme tu ticket en texto: «10 € a Gana Torino a 1,65 en Betclic».",
     photoIllisible: "No consigo leer este ticket. Escríbemelo en texto: «10 € a Gana Torino a 1,65 en Betclic».", photoCote: "No consigo leer la cuota de este ticket. Escríbemelo en texto.",
-    accueil: "Hola, aquí el equipo IASHARK.\n\nEscribe tu mensaje justo aquí (pregunta, suscripción Pro): te respondemos en esta conversación.\n\n¿Eres suscriptor Pro? Abre tu robot personal desde la página Cuenta del sitio: todo lo reservado a los suscriptores Pro te llegará luego aquí, en privado.",
     recu: "Mensaje recibido, te respondemos aquí enseguida.",
     choisirLangue: "Elige tu idioma:", langueOk: (nom) => `Hecho: a partir de ahora te hablo en ${nom}. (Es también el idioma de tu cuenta en el sitio.)`,
     langueErreur: "No he podido guardar tu idioma. Inténtalo dentro de un momento, o cámbialo en la página Cuenta del sitio.",
@@ -354,11 +345,8 @@ const EN = {
   aide: "I'm your IASHARK robot. Here is what I can do:\n"
     + "• /program: your programme for today, with your bookmakers\n"
     + "• /settings: your bookmakers, your alerts, your daily limit\n"
-    + "• /journal: the bets you logged today\n"
     + "• /language: change language\n"
-    + "• Write me your ticket as text (\"€10 on Torino to win at 1.65 at Betclic\"): I log it in your journal. An accumulator too (\"Real Madrid + Bayern at 2.05 at Winamax\"): I recognise the accumulator of the day.\n"
-    + "• Everything reserved for Pro subscribers comes to you here, privately and in English (same figures as in French).\n"
-    + "• Any other message goes to the IASHARK team, who will reply here.",
+    + "• Everything reserved for Pro subscribers comes to you here, privately and in English (same figures as in French).",
   ticket: {
     lu: "Ticket read: ", sur: (m) => `€${m} on `, combineProg: (nom, sel, c, bk) => `the programme's ${nom} (${sel}) at ${c}${bk}.`,
     match: (sel, match, c, bk) => `${sel} (${match}) at ${c}${bk}.`, autre: (combine, c, bk, sel) => `${combine ? "an accumulator" : "a bet"} at ${c}${bk} ("${sel}").`,
@@ -372,13 +360,11 @@ const EN = {
   robot: {
     expire: "This link has expired. Go back to the Account page of the site and click \"Open my robot on Telegram\" again.",
     bonjour: (prenom) => `Hello${prenom ? " " + prenom : ""}, your IASHARK robot is ready.\n\n`,
-    inactif: (commande) => "Your Pro subscription is no longer active: the personal robot is paused (you can resume it from the Account page of the site)." + (commande ? " To write to the team, just send your message here." : " Your message has been passed to the team, who will reply here."),
     plusDeCanal: "There is no channel to join any more: everything reserved for Pro subscribers comes to you here, privately (programme of the day, debriefs, weekly summary, alerts).",
     programmeVide: "No upcoming bet for now. On days with a programme, it comes to you here around 9:30 (Paris time), after approval.",
     programmeFerme: "Pro messages are not open yet: no programme for now.",
     lotoVide: "Loto Foot is a French FDJ game: the grid is only sent in French, to subscribers in France.",
     journal: "<b>Your journal for today</b>", journalVide: "No bet logged today. Write me your ticket to log it.",
-    equipeVide: "Write your message right after /equipe, on the same line.",
     tabacAucun: "No single from the programme is still to come today.", quelPari: "Which bet?",
     nonRelie: "Account not linked or subscription inactive.", dejaTraite: "Already done.",
     pasNote: "Not logged. If it was a message for the team, it has been passed on: we will reply here.", pasNoteCourt: "Not logged.",
@@ -387,7 +373,6 @@ const EN = {
     paysDabord: "First enter your country in the form of your Pro space (Account page of the site).", pasEnregistre: "Not saved: try again in a moment, or change it in your Pro space.",
     cestNote: "Done.", photoNon: "I don't read photos. Write me your ticket as text: \"€10 on Torino to win at 1.65 at Betclic\".",
     photoIllisible: "I can't read this ticket. Write it to me as text: \"€10 on Torino to win at 1.65 at Betclic\".", photoCote: "I can't read the odds on this ticket. Write it to me as text.",
-    accueil: "Hello, this is the IASHARK team.\n\nWrite your message right here (question, Pro subscription): we reply in this conversation.\n\nPro subscriber? Open your personal robot from the Account page of the site: everything reserved for Pro subscribers then comes here, privately.",
     recu: "Message received, we'll reply here shortly.",
     choisirLangue: "Choose your language:", langueOk: (nom) => `Done: from now on I talk to you in ${nom}. (It is also your account's language on the site.)`,
     langueErreur: "I couldn't save your language. Try again in a moment, or change it on the Account page of the site.",
@@ -512,11 +497,8 @@ const DE = {
   aide: "Ich bin dein IASHARK-Roboter. Das kann ich:\n"
     + "• /programm: dein Tagesprogramm, mit deinen Buchmachern\n"
     + "• /einstellungen: deine Buchmacher, deine Alarme, dein Tageslimit\n"
-    + "• /tagebuch: die Wetten, die du heute notiert hast\n"
     + "• /sprache: Sprache ändern\n"
-    + "• Schreib mir dein Ticket als Text („10 € auf Sieg Torino zu 1,65 bei Betclic“): ich notiere es in deinem Tagebuch. Auch eine Kombiwette („Real Madrid + Bayern zu 2,05 bei Winamax“): ich erkenne die Kombiwette des Tages.\n"
-    + "• Alles, was Pro-Abonnenten vorbehalten ist, kommt hier privat und auf Deutsch zu dir (gleiche Zahlen wie auf Französisch).\n"
-    + "• Jede andere Nachricht geht an das IASHARK-Team, das dir hier antwortet.",
+    + "• Alles, was Pro-Abonnenten vorbehalten ist, kommt hier privat und auf Deutsch zu dir (gleiche Zahlen wie auf Französisch).",
   ticket: {
     lu: "Ticket gelesen: ", sur: (m) => `${m} € auf `, combineProg: (nom, sel, c, bk) => `die ${nom} aus dem Programm (${sel}) zu ${c}${bk}.`,
     match: (sel, match, c, bk) => `${sel} (${match}) zu ${c}${bk}.`, autre: (combine, c, bk, sel) => `${combine ? "eine Kombiwette" : "eine Wette"} zu ${c}${bk} („${sel}“).`,
@@ -530,13 +512,11 @@ const DE = {
   robot: {
     expire: "Dieser Link ist abgelaufen. Geh zurück auf die Seite Konto der Website und klicke erneut auf „Meinen Roboter auf Telegram öffnen“.",
     bonjour: (prenom) => `Hallo${prenom ? " " + prenom : ""}, dein IASHARK-Roboter ist bereit.\n\n`,
-    inactif: (commande) => "Dein Pro-Abo ist nicht mehr aktiv: der persönliche Roboter pausiert (du kannst ihn auf der Seite Konto der Website wieder starten)." + (commande ? " Um dem Team zu schreiben, schick einfach hier deine Nachricht." : " Deine Nachricht wurde an das Team weitergeleitet, das dir hier antwortet."),
     plusDeCanal: "Es gibt keinen Kanal mehr zum Beitreten: alles, was Pro-Abonnenten vorbehalten ist, kommt hier privat zu dir (Tagesprogramm, Auswertungen, Wochenbilanz, Hinweise).",
     programmeVide: "Im Moment keine anstehende Wette. An Tagen mit Programm kommt es hier gegen 9:30 (Pariser Zeit), nach der Freigabe.",
     programmeFerme: "Die Pro-Nachrichten sind noch nicht freigeschaltet: im Moment kein Programm.",
     lotoVide: "Loto Foot ist ein Spiel der FDJ (Frankreich): der Spielschein wird nur auf Französisch an Abonnenten in Frankreich geschickt.",
     journal: "<b>Dein Tagebuch von heute</b>", journalVide: "Heute keine Wette notiert. Schreib mir dein Ticket, um es zu notieren.",
-    equipeVide: "Schreib deine Nachricht direkt nach /equipe, in dieselbe Zeile.",
     tabacAucun: "Heute steht keine Einzelwette aus dem Programm mehr an.", quelPari: "Für welche Wette?",
     nonRelie: "Konto nicht verknüpft oder Abo nicht aktiv.", dejaTraite: "Bereits erledigt.",
     pasNote: "Nicht notiert. Falls es eine Nachricht an das Team war, wurde sie weitergeleitet: wir antworten dir hier.", pasNoteCourt: "Nicht notiert.",
@@ -545,7 +525,6 @@ const DE = {
     paysDabord: "Gib zuerst dein Land im Formular deines Pro-Bereichs an (Seite Konto der Website).", pasEnregistre: "Nicht gespeichert: versuche es gleich noch einmal oder ändere es in deinem Pro-Bereich.",
     cestNote: "Erledigt.", photoNon: "Ich lese keine Fotos. Schreib mir dein Ticket als Text: „10 € auf Sieg Torino zu 1,65 bei Betclic“.",
     photoIllisible: "Ich kann dieses Ticket nicht lesen. Schreib es mir als Text: „10 € auf Sieg Torino zu 1,65 bei Betclic“.", photoCote: "Ich kann die Quote dieses Tickets nicht lesen. Schreib es mir als Text.",
-    accueil: "Hallo, hier ist das IASHARK-Team.\n\nSchreib deine Nachricht einfach hier (Frage, Pro-Abo): wir antworten dir in diesem Chat.\n\nPro-Abonnent? Öffne deinen persönlichen Roboter auf der Seite Konto der Website: alles, was Pro-Abonnenten vorbehalten ist, kommt danach hier privat an.",
     recu: "Nachricht erhalten, wir antworten dir hier bald.",
     choisirLangue: "Wähle deine Sprache:", langueOk: (nom) => `Erledigt: ab jetzt spreche ich ${nom} mit dir. (Das ist auch die Sprache deines Kontos auf der Website.)`,
     langueErreur: "Ich konnte deine Sprache nicht speichern. Versuche es gleich noch einmal oder ändere sie auf der Seite Konto der Website.",
@@ -671,11 +650,8 @@ const IT = {
   aide: "Sono il tuo robot IASHARK. Ecco cosa so fare:\n"
     + "• /programma: il tuo programma del giorno, con i tuoi bookmaker\n"
     + "• /impostazioni: i tuoi bookmaker, i tuoi avvisi, il tuo limite giornaliero\n"
-    + "• /diario: le scommesse che hai annotato oggi\n"
     + "• /lingua: cambiare lingua\n"
-    + "• Scrivimi la tua schedina in testo («10 € su Vince Torino a 1,65 su Betclic»): la annoto nel tuo diario. Anche una multipla («Real Madrid + Bayern a 2,05 su Winamax»): riconosco la multipla del giorno.\n"
-    + "• Tutto ciò che è riservato agli abbonati Pro ti arriva qui, in privato e in italiano (stessi dati del francese).\n"
-    + "• Ogni altro messaggio va al team IASHARK, che ti risponde qui.",
+    + "• Tutto ciò che è riservato agli abbonati Pro ti arriva qui, in privato e in italiano (stessi dati del francese).",
   ticket: {
     lu: "Schedina letta: ", sur: (m) => `${m} € su `, combineProg: (nom, sel, c, bk) => `la ${nom} del programma (${sel}) a ${c}${bk}.`,
     match: (sel, match, c, bk) => `${sel} (${match}) a ${c}${bk}.`, autre: (combine, c, bk, sel) => `${combine ? "una multipla" : "una scommessa"} a ${c}${bk} («${sel}»).`,
@@ -689,13 +665,11 @@ const IT = {
   robot: {
     expire: "Questo link è scaduto. Torna alla pagina Account del sito e clicca di nuovo su «Apri il mio robot su Telegram».",
     bonjour: (prenom) => `Ciao${prenom ? " " + prenom : ""}, il tuo robot IASHARK è pronto.\n\n`,
-    inactif: (commande) => "Il tuo abbonamento Pro non è più attivo: il robot personale è in pausa (puoi riattivarlo dalla pagina Account del sito)." + (commande ? " Per scrivere al team, invia semplicemente il tuo messaggio qui." : " Il tuo messaggio è stato inoltrato al team, che ti risponde qui."),
     plusDeCanal: "Non c'è più nessun canale a cui unirsi: tutto ciò che è riservato agli abbonati Pro ti arriva qui, in privato (programma del giorno, resoconti, bilancio, avvisi).",
     programmeVide: "Per ora nessuna scommessa in arrivo. Nei giorni con un programma, ti arriva qui verso le 9:30 (ora di Parigi), dopo la convalida.",
     programmeFerme: "Gli invii Pro non sono ancora aperti: per ora nessun programma.",
     lotoVide: "Il Loto Foot è un gioco della FDJ (Francia): la griglia è inviata solo in francese, agli abbonati in Francia.",
     journal: "<b>Il tuo diario di oggi</b>", journalVide: "Nessuna scommessa annotata oggi. Scrivimi la tua schedina per annotarla.",
-    equipeVide: "Scrivi il tuo messaggio subito dopo /equipe, sulla stessa riga.",
     tabacAucun: "Oggi non c'è più nessuna singola del programma da giocare.", quelPari: "Per quale scommessa?",
     nonRelie: "Account non collegato o abbonamento non attivo.", dejaTraite: "Già fatto.",
     pasNote: "Non annotata. Se era un messaggio per il team, gli è stato inoltrato: ti rispondiamo qui.", pasNoteCourt: "Non annotata.",
@@ -704,7 +678,6 @@ const IT = {
     paysDabord: "Indica prima il tuo paese nel modulo del tuo spazio Pro (pagina Account del sito).", pasEnregistre: "Non salvato: riprova tra un attimo, o cambialo nel tuo spazio Pro.",
     cestNote: "Fatto.", photoNon: "Non leggo le foto. Scrivimi la tua schedina in testo: «10 € su Vince Torino a 1,65 su Betclic».",
     photoIllisible: "Non riesco a leggere questa schedina. Scrivimela in testo: «10 € su Vince Torino a 1,65 su Betclic».", photoCote: "Non riesco a leggere la quota di questa schedina. Scrivimela in testo.",
-    accueil: "Ciao, qui è il team IASHARK.\n\nScrivi il tuo messaggio proprio qui (domanda, abbonamento Pro): ti rispondiamo in questa conversazione.\n\nSei abbonato Pro? Apri il tuo robot personale dalla pagina Account del sito: tutto ciò che è riservato agli abbonati Pro arriverà poi qui, in privato.",
     recu: "Messaggio ricevuto, ti rispondiamo qui a breve.",
     choisirLangue: "Scegli la tua lingua:", langueOk: (nom) => `Fatto: da ora ti parlo in ${nom}. (È anche la lingua del tuo account sul sito.)`,
     langueErreur: "Non sono riuscito a salvare la tua lingua. Riprova tra un attimo, o cambiala nella pagina Account del sito.",
@@ -830,11 +803,8 @@ const PT = {
   aide: "Sou o teu robot IASHARK. Eis o que sei fazer:\n"
     + "• /programa: o teu programa do dia, com as tuas casas de apostas\n"
     + "• /definicoes: as tuas casas de apostas, os teus alertas, o teu limite diário\n"
-    + "• /diario: as apostas que anotaste hoje\n"
     + "• /idioma: mudar de idioma\n"
-    + "• Escreve-me o teu bilhete em texto («10 € em Torino vence a 1,65 na Betclic»): anoto-o no teu diário. Uma múltipla também («Real Madrid + Bayern a 2,05 na Winamax»): reconheço a múltipla do dia.\n"
-    + "• Tudo o que é reservado aos subscritores Pro chega-te aqui, em privado e em português (os mesmos dados que em francês).\n"
-    + "• Qualquer outra mensagem vai para a equipa IASHARK, que te responde aqui.",
+    + "• Tudo o que é reservado aos subscritores Pro chega-te aqui, em privado e em português (os mesmos dados que em francês).",
   ticket: {
     lu: "Bilhete lido: ", sur: (m) => `${m} € em `, combineProg: (nom, sel, c, bk) => `a ${nom} do programa (${sel}) a ${c}${bk}.`,
     match: (sel, match, c, bk) => `${sel} (${match}) a ${c}${bk}.`, autre: (combine, c, bk, sel) => `${combine ? "uma múltipla" : "uma aposta"} a ${c}${bk} («${sel}»).`,
@@ -848,13 +818,11 @@ const PT = {
   robot: {
     expire: "Este link expirou. Volta à página Conta do site e clica de novo em «Abrir o meu robot no Telegram».",
     bonjour: (prenom) => `Olá${prenom ? " " + prenom : ""}, o teu robot IASHARK está pronto.\n\n`,
-    inactif: (commande) => "A tua subscrição Pro já não está ativa: o robot pessoal está em pausa (podes retomá-lo na página Conta do site)." + (commande ? " Para escrever à equipa, envia simplesmente a tua mensagem aqui." : " A tua mensagem foi enviada à equipa, que te responde aqui."),
     plusDeCanal: "Já não há canal para entrar: tudo o que é reservado aos subscritores Pro chega-te aqui, em privado (programa do dia, resumos, balanço, alertas).",
     programmeVide: "Por agora não há nenhuma aposta por vir. Nos dias em que há programa, chega-te aqui por volta das 9:30 (hora de Paris), depois da validação.",
     programmeFerme: "Os envios Pro ainda não estão abertos: por agora não há programa.",
     lotoVide: "O Loto Foot é um jogo da FDJ (França): a grelha só é enviada em francês, aos subscritores em França.",
     journal: "<b>O teu diário de hoje</b>", journalVide: "Nenhuma aposta anotada hoje. Escreve-me o teu bilhete para o anotar.",
-    equipeVide: "Escreve a tua mensagem logo a seguir a /equipe, na mesma linha.",
     tabacAucun: "Hoje já não há nenhuma aposta simples do programa por jogar.", quelPari: "Para que aposta?",
     nonRelie: "Conta não ligada ou subscrição inativa.", dejaTraite: "Já está feito.",
     pasNote: "Não anotado. Se era uma mensagem para a equipa, foi-lhe enviada: respondemos-te aqui.", pasNoteCourt: "Não anotado.",
@@ -863,7 +831,6 @@ const PT = {
     paysDabord: "Indica primeiro o teu país no formulário do teu espaço Pro (página Conta do site).", pasEnregistre: "Não guardado: tenta daqui a pouco, ou muda-o no teu espaço Pro.",
     cestNote: "Feito.", photoNon: "Não leio fotos. Escreve-me o teu bilhete em texto: «10 € em Torino vence a 1,65 na Betclic».",
     photoIllisible: "Não consigo ler este bilhete. Escreve-mo em texto: «10 € em Torino vence a 1,65 na Betclic».", photoCote: "Não consigo ler a odd deste bilhete. Escreve-mo em texto.",
-    accueil: "Olá, aqui é a equipa IASHARK.\n\nEscreve a tua mensagem aqui mesmo (pergunta, subscrição Pro): respondemos nesta conversa.\n\nÉs subscritor Pro? Abre o teu robot pessoal na página Conta do site: tudo o que é reservado aos subscritores Pro chega-te depois aqui, em privado.",
     recu: "Mensagem recebida, respondemos aqui em breve.",
     choisirLangue: "Escolhe o teu idioma:", langueOk: (nom) => `Feito: a partir de agora falo contigo em ${nom}. (É também o idioma da tua conta no site.)`,
     langueErreur: "Não consegui guardar o teu idioma. Tenta daqui a pouco, ou muda-o na página Conta do site.",

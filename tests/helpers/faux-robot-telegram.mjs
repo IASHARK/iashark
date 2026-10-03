@@ -19,6 +19,7 @@ export function fausseSupabase(tables) {
     neq(c, v) { this.f.push((r) => String(r[c]) !== String(v)); return this; }
     not(c, op, v) { this.f.push((r) => r[c] != null); return this; }
     gt(c, v) { this.f.push((r) => String(r[c]) > String(v)); return this; }
+    gte(c, v) { this.f.push((r) => String(r[c]) >= String(v)); return this; }
     in(c, v) { this.f.push((r) => v.map(String).includes(String(r[c]))); return this; }
     like(c, motif) { const re = new RegExp(`^${String(motif).split("%").map((m) => m.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join(".*")}$`); this.f.push((r) => re.test(String(r[c] ?? ""))); return this; }
     is(c, v) { this.f.push((r) => r[c] == null); return this; }
@@ -27,14 +28,14 @@ export function fausseSupabase(tables) {
     update(p) { this.op = "update"; this.p = p; return this; }
     insert(rows) { this.op = "insert"; this.rows = [].concat(rows); return this; }
     // Sans onConflict : la cle primaire de la table (comme Supabase).
-    upsert(row, { onConflict } = {}) { this.op = "upsert"; this.rows = [].concat(row); this.cle = onConflict || { telegram_settings: "key", pro_envois: "cle" }[this.t] || "user_id"; return this; }
+    upsert(row, { onConflict } = {}) { this.op = "upsert"; this.rows = [].concat(row); this.cle = onConflict || { telegram_settings: "key", pro_envois: "cle", telegram_contact_threads: "admin_message_id" }[this.t] || "user_id"; return this; }
     delete() { this.op = "delete"; return this; }
     run() {
       const r = tab(this.t), ok = (x) => this.f.every((f) => f(x));
-      if (this.op === "select") return { data: r.filter(ok).map((x) => ({ ...x })), error: null };
+      if (this.op === "select") { const d = r.filter(ok).map((x) => ({ ...x })); return { data: d, count: d.length, error: null }; }
       if (this.op === "update") { const out = r.filter(ok); out.forEach((x) => Object.assign(x, this.p)); return { data: out, error: null }; }
       if (this.op === "insert") {
-        const cle = { telegram_settings: "key", pro_envois: "cle" }[this.t];
+        const cle = { telegram_settings: "key", pro_envois: "cle", telegram_contact_threads: "admin_message_id" }[this.t];
         if (cle && this.rows.some((x) => r.some((y) => y[cle] === x[cle]))) return { data: null, error: { message: "duplicate" } };
         r.push(...this.rows.map((x) => ({ id: `id${r.length + 1}`, ...x }))); return { data: this.rows, error: null };
       }
@@ -50,7 +51,11 @@ export function fausseSupabase(tables) {
   }
   return { from: (t) => new Q(t), auth: { getUser: async () => ({ data: {}, error: "non" }) }, tables: T0 };
 }
-export async function chargerRobot(tables, { reponse } = {}) {
+// Deux robots (03/10/2026) : env = reglages en plus (ex. jeton et secret du robot Contact) ; chaque
+// appel note le robot qui l'a fait (robot : "pro" ou "contact", d'apres le jeton de l'adresse).
+// maj(u, { robot: "contact", secret }) : mise a jour arrivee sur le webhook du robot Contact.
+export const JETON_CONTACT = "factice-contact";
+export async function chargerRobot(tables, { reponse, env: envEnPlus = {} } = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "iashark-robot-"));
   fs.writeFileSync(path.join(dir, "supabase.mjs"), "export const createClient = () => globalThis.__fausseBase;\n");
   fs.writeFileSync(path.join(dir, "anthropic.mjs"), "export default class {}\n");
@@ -60,7 +65,7 @@ export async function chargerRobot(tables, { reponse } = {}) {
     .replace('"npm:@anthropic-ai/sdk"', JSON.stringify(pathToFileURL(path.join(dir, "anthropic.mjs")).href))
     .replaceAll('"../_shared/', `"${partage}`);
   fs.writeFileSync(path.join(dir, "robot.mts"), src);
-  const env = { TELEGRAM_BOT_TOKEN: "factice", TELEGRAM_WEBHOOK_SECRET: "secret", TELEGRAM_ADMIN_CHAT_ID: "42", SUPABASE_URL: "http://faux", SUPABASE_ANON_KEY: "a", SUPABASE_SERVICE_ROLE_KEY: "s" };
+  const env = { TELEGRAM_BOT_TOKEN: "factice", TELEGRAM_WEBHOOK_SECRET: "secret", TELEGRAM_ADMIN_CHAT_ID: "42", SUPABASE_URL: "http://faux", SUPABASE_ANON_KEY: "a", SUPABASE_SERVICE_ROLE_KEY: "s", ...envEnPlus };
   let handler;
   globalThis.Deno = { env: { get: (k) => env[k] }, serve: (h) => { handler = h; } };
   globalThis.__fausseBase = fausseSupabase(tables);
@@ -68,15 +73,16 @@ export async function chargerRobot(tables, { reponse } = {}) {
   let n = 500;
   globalThis.fetch = async (url, init) => {
     const corps = JSON.parse(init.body || "{}");
-    envoyes.push({ methode: String(url).split("/").pop(), corps });
+    const robot = String(url).includes(`/bot${JETON_CONTACT}/`) ? "contact" : "pro";
+    envoyes.push({ methode: String(url).split("/").pop(), corps, robot });
     // reponse(methode, corps) peut simuler une erreur de Telegram : { ok: false, error_code, description, parameters }.
     const r = reponse ? reponse(String(url).split("/").pop(), corps) : null;
     if (r) return { status: r.error_code || 400, json: async () => r };
-    return { status: 200, json: async () => ({ ok: true, result: { message_id: ++n, username: "IasharkBot" } }) };
+    return { status: 200, json: async () => ({ ok: true, result: { message_id: ++n, username: robot === "contact" ? "IasharkContactBot" : "IasharkBot" } }) };
   };
   await import(pathToFileURL(path.join(dir, "robot.mts")).href);
   fs.rmSync(dir, { recursive: true, force: true }); // fichiers temporaires : supprimes des le chargement
-  const maj = (u) => handler(new Request("http://x", { method: "POST", headers: { "x-telegram-bot-api-secret-token": "secret" }, body: JSON.stringify(u) }));
+  const maj = (u, { robot, secret = "secret" } = {}) => handler(new Request(robot ? `http://x/?robot=${robot}` : "http://x", { method: "POST", headers: { "x-telegram-bot-api-secret-token": secret }, body: JSON.stringify(u) }));
   return { maj, envoyes, base: globalThis.__fausseBase };
 }
 

@@ -575,11 +575,14 @@ test("Edge Function : rodage etanche, faille tabacClic fermee, regressions corri
   assert.match(tabac, /ab\?\.actif/);
   assert.match(tabac, /html\(cq\.from\.id/);
   assert.ok(!/cq\.message\.chat\.id, C\.verdictTabac/.test(src));
-  assert.match(src, /Message non compris : il part a l'equipe[\s\S]{0,80}transfererAClement\(m(, lang)?\)/);
-  assert.match(src, /Un ex-abonne peut toujours joindre l'equipe/);
+  // Deux robots (03/10/2026) : le robot Pro ne recoit plus de questions. Texte libre = reponse automatique,
+  // rien n'est transfere a Clement (comportement verifie dans tests/telegram-deux-robots.test.mjs).
+  assert.match(src, /Texte libre, photo, vocal…[^\n]*\n\s*if \(!texte\.startsWith\("\/"\) \|\| !m\.text\) \{ await reponseAuto\(chat, lang\); return; \}/);
+  const perso = src.slice(src.indexOf("async function robotPerso"), src.indexOf("async function ticketClic"));
+  assert.ok(!/transfererAClement|tgc\(/.test(perso), "le robot Pro ne transfere rien a Clement");
   assert.match(src, /\/\^\\\/canal\\b\/\.test\(texte\)\) \{ await html\(chat, R\.plusDeCanal\)/, "commande /canal : plus de canal, tout arrive en prive");
   for (const x of ["vip_chat_id", "createChatInviteLink", "banChatMember", "telegram_vip_members", "TELEGRAM_CANAL_PRO_ES", "u.chat_member"]) assert.ok(!src.includes(x), `plus de canal Pro : ${x}`);
-  assert.match(src, /reglage\("tickets_photo"\)\) !== "oui"/);
+  assert.ok(!/getFile|Anthropic|ANTHROPIC_API_KEY/.test(src), "aucune photo lue par le robot (plus de tickets ecrits au robot)");
   assert.match(src, /Date\.parse\(p\.coup_envoi\) <= Date\.now\(\)[\s\S]{0,300}R\.tropTard/);
   assert.match(LANGUES_SRC, /tropTard: "Trop tard : le match a commencé, ce ticket n'est pas noté\."/);
   assert.match(src, /if \(genre === "pubpro"\) return envoyerProClic/, "message Pro : envoi prive, jamais dans un canal");
@@ -606,8 +609,8 @@ test("Edge Function (contre-controle) : publication unique des messages obligato
   assert.match(src, /if \(m\.forward_origin && await preuveTransferee\(m\)\) return;/);
   assert.match(src, /envoye >= Date\.parse\(p\.publie_at\) - 60000 && envoye < Date\.parse\(p\.coup_envoi\)/);
   assert.match(src, /d\.startsWith\("ep:re:"\)\) return renvoiClic/);
-  // Support : un nombre a virgule ne suffit plus pour un ticket.
-  assert.match(src, /if \(C\.estUnTicket\(t, texte\)\) return proposerTicket/);
+  // Plus de tickets ecrits au robot Pro (03/10/2026) : texte libre = reponse automatique.
+  assert.ok(!/return proposerTicket/.test(src));
   // Accueil du robot : pas de promesse de programme a 9 h 30 en rodage (canal-pro-accueil.mjs, teste dans canal-pro-prive.test.mjs).
   const accueil = src.slice(src.indexOf("async function lierCompte"), src.indexOf("async function robotPerso"));
   assert.match(accueil, /A\.bienvenue\(lang, \{ prenom, ouvert \}\)/);
@@ -985,7 +988,7 @@ test("ronde 2 : Telegram 502/504 ou 200 illisible = envoi INCERTAIN (jamais renv
   assert.ok(p.envoi_tente_at && !p.canal_message_id);
 });
 
-test("ronde 2 (sim2) : support -> les messages realistes partent a l'equipe ; « Annuler » transmet le texte", () => {
+test("ronde 2 (sim2) : detecteur de ticket (fonction gardee) ; « Annuler » (ancien ticket) renvoie vers le robot Contact, rien n'est transfere", () => {
   const p = { id: "x", dom: "Torino", ext: "Udinese", selection: "match nul", marche: "N", ligne: null };
   for (const q of ["le nul à 3,20 d'hier n'est toujours pas réglé", "j'ai perdu 20 € sur le nul à 3,10, je veux résilier",
     "je veux me désabonner, votre pari à 1,85 chez Betclic a perdu", "Bonjour, le handicap à 1,95 d'hier compte comment dans le bilan",
@@ -995,8 +998,9 @@ test("ronde 2 (sim2) : support -> les messages realistes partent a l'equipe ; «
     assert.ok(C.estUnTicket(C.lireTicketTexte(ok, [p]), ok), ok);
   const src = fs.readFileSync(new URL("../supabase/functions/telegram-bot/index.ts", import.meta.url), "utf8");
   const annuler = src.slice(src.indexOf("async function ticketClic"), src.indexOf("let decision = null"));
-  assert.match(annuler, /action === "no"[\s\S]{0,800}transmettreTexteAClement\(cq\.from\.id, cq\.from, String\(t\.texte/, "« Annuler » : le texte part a l'equipe");
-  assert.match(src, /telegram_contact_threads"\)\.insert\(\{ admin_message_id: envoye\.message_id, user_chat_id: chatId \}\)/, "Clement peut repondre");
+  assert.match(annuler, /action === "no"[\s\S]{0,600}reponseAuto\(cq\.from\.id, lang/, "« Annuler » : reponse automatique (robot Contact), rien n'est transfere");
+  assert.ok(!/transmettreTexteAClement/.test(src));
+  assert.match(src, /telegram_contact_threads"\)\.upsert\(\[/, "robot Contact : Clement peut repondre");
   assert.match(LANGUES_SRC, /Ce n'est pas un ticket \? Touche « Annuler » : ton message part à l'équipe/);
 });
 

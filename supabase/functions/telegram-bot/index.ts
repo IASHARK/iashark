@@ -1,5 +1,17 @@
-// Robot Telegram IASHARK. Deploye SANS verification JWT (Telegram n'en
+// Robots Telegram IASHARK. Deploye SANS verification JWT (Telegram n'en
 // envoie pas) : chaque entree est donc authentifiee ici.
+//
+// DEUX ROBOTS (03/10/2026, decision de Clement ; logique pure dans _shared/robots.mjs) :
+// - « IASHARK Pro » (TELEGRAM_BOT_TOKEN) ENVOIE seulement : programme, alertes, compositions,
+//   debriefs, bilan ; accueil + questionnaire a boutons ; /start (liaison), /reglages, /langue
+//   (/idioma…), /programme, /lotofoot ; toutes les commandes et boutons de Clement. On ne peut plus
+//   lui poser de question : tout texte libre (hors Clement) recoit une reponse automatique dans la
+//   langue de la personne, qui renvoie vers le robot Contact. RIEN n'est transfere a Clement.
+// - « IASHARK Contact » (TELEGRAM_CONTACT_BOT_TOKEN, facultatif ; webhook « ?robot=contact » et son
+//   propre secret TELEGRAM_CONTACT_WEBHOOK_SECRET) : seulement les questions. Tout message est
+//   transfere a Clement ; sa reponse (« Repondre », dans la conversation du robot Contact) repart
+//   chez la personne par le robot Contact (table telegram_contact_threads).
+// Sans jeton Contact : le robot Pro marche seul, sa reponse automatique donne contact@iashark.com.
 //
 // MESSAGES PRO EN PRIVE (02/10/2026, decision de Clement) : il n'y a PLUS de canal Pro commun.
 // Tout ce qui est reserve aux abonnes Pro part en message prive, un a un, du robot a chaque abonne
@@ -21,12 +33,10 @@
 //    - Robot personnel : un abonne Pro relie son compte (lien du site avec un code
 //      a usage unique) ; le robot lui souhaite la bienvenue dans sa langue et lui
 //      pose ses questions une par une, avec des boutons (_shared/canal-pro-accueil.mjs) ;
-//      puis : /programme, /reglages, /journal, /langue, tickets en TEXTE notes dans
-//      son journal (la photo est coupee : decision Clement / juriste), cote du tabac ;
-//      tout message non compris part a Clement. Garde-fou. Seuls les paris ENVOYES
-//      avec les envois Pro OUVERTS sont lus.
-//    - Contact : un message prive d'une personne non reliee est transfere a
-//      Clement ; sa reponse (« Repondre ») repart vers elle.
+//      puis : /programme, /reglages, /langue, /lotofoot. Plus de tickets ni de cote du
+//      tabac ecrits au robot (03/10 : texte libre = reponse automatique). Garde-fou. Seuls
+//      les paris ENVOYES avec les envois Pro OUVERTS sont lus.
+//    - Contact : robot IASHARK Contact (voir plus haut).
 // 2. { action: "vip-link" } avec le jeton de session de l'abonne (page Compte) :
 //    renvoie le lien du robot personnel (code a usage unique). Pro, famille et admin
 //    seulement. Plus de lien d'entree a un canal.
@@ -35,21 +45,19 @@
 // dans SA langue (user_preferences.language, sinon langue de son Telegram, sinon
 // francais) ; /langue (/idioma, /language…) pour changer.
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import Anthropic from "npm:@anthropic-ai/sdk";
 import * as C from "../_shared/canal-pro.mjs";
 import * as LG from "../_shared/canal-pro-langues.mjs";
 import * as D from "../_shared/canal-pro-diffusion.mjs";
 import * as A from "../_shared/canal-pro-accueil.mjs";
+import * as RB from "../_shared/robots.mjs";
 
 const TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN") || "";
 const SECRET = Deno.env.get("TELEGRAM_WEBHOOK_SECRET") || "";
 const ADMIN = Number(Deno.env.get("TELEGRAM_ADMIN_CHAT_ID") || 0);
 const CANAL = Deno.env.get("TELEGRAM_PUBLIC_CHANNEL") || "@iasharkdata";
-const ANTHROPIC_KEY = Deno.env.get("ANTHROPIC_API_KEY") || "";
-// Lecture des photos de tickets : COUPEE par defaut (decision Clement / juriste :
-// envoi a un prestataire, politique de confidentialite, conservation). Il faut
-// la cle ET le reglage tickets_photo = 'oui' pour l'allumer.
-const MODELE_TICKET = Deno.env.get("ANTHROPIC_TICKET_MODEL") || "claude-opus-5-5";
+// Robot IASHARK Contact (facultatif) : son jeton et le secret de SON webhook (derive de son jeton).
+const TOKEN_CONTACT = Deno.env.get("TELEGRAM_CONTACT_BOT_TOKEN") || "";
+const SECRET_CONTACT = Deno.env.get("TELEGRAM_CONTACT_WEBHOOK_SECRET") || "";
 const SUPA_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPA_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const db = createClient(SUPA_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
@@ -65,8 +73,8 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 // deno-lint-ignore no-explicit-any
 type Any = any;
 
-async function tg(method: string, body: Record<string, unknown>): Promise<Any> {
-  const res = await fetch(`https://api.telegram.org/bot${TOKEN}/${method}`, {
+async function appelTelegram(jeton: string, method: string, body: Record<string, unknown>): Promise<Any> {
+  const res = await fetch(`https://api.telegram.org/bot${jeton}/${method}`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
@@ -80,6 +88,10 @@ async function tg(method: string, body: Record<string, unknown>): Promise<Any> {
   }
   return j.result;
 }
+/** Robot IASHARK Pro. */
+const tg = (method: string, body: Record<string, unknown>) => appelTelegram(TOKEN, method, body);
+/** Robot IASHARK Contact (seulement quand son jeton est installe). */
+const tgc = (method: string, body: Record<string, unknown>) => appelTelegram(TOKEN_CONTACT, method, body);
 const html = (chat_id: number | string, text: string, extra: Record<string, unknown> = {}) =>
   tg("sendMessage", { chat_id, text, parse_mode: "HTML", link_preview_options: { is_disabled: true }, ...extra });
 const repondre = (cq: Any, text = "", alerte = false) => tg("answerCallbackQuery", { callback_query_id: cq.id, text, show_alert: alerte }).catch(() => null);
@@ -95,12 +107,33 @@ async function enregistrer(key: string, value: string) {
 async function modeCanalPro() {
   return { ouvert: (await reglage("canal_pro_mode")) === "ouvert" };
 }
+// Noms d'utilisateur des robots, gardes en cache (telegram_settings) ; le deploiement efface ce cache
+// (nouveau jeton = nouveau robot) : ils sont alors relus avec getMe.
 async function nomDuRobot() {
   const deja = await reglage("bot_username");
   if (deja) return deja;
   const me = await tg("getMe", {});
   await enregistrer("bot_username", me.username);
   return me.username as string;
+}
+/** Nom du robot Contact (sans @), ou null sans robot Contact : la reponse automatique donne alors l'e-mail. */
+async function nomContact(): Promise<string | null> {
+  if (!TOKEN_CONTACT || !SECRET_CONTACT) return null;
+  try {
+    const deja = await reglage("bot_username_contact");
+    if (RB.nomValide(deja)) return deja;
+    const me = await tgc("getMe", {});
+    if (!RB.nomValide(me?.username)) return null;
+    await enregistrer("bot_username_contact", me.username);
+    return me.username as string;
+  } catch (e) {
+    console.error("[telegram-bot] nom du robot Contact", (e as Error).message);
+    return null;
+  }
+}
+/** Reponse automatique du robot Pro a un texte libre (dans la langue de la personne) : rien n'est transfere a Clement. */
+async function reponseAuto(chat: number, lang: string, avant = "") {
+  await tg("sendMessage", { chat_id: chat, text: `${avant}${RB.reponseAutoPro(lang, await nomContact())}`, link_preview_options: { is_disabled: true } });
 }
 const heureParis = () => new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit" }).format(new Date());
 
@@ -493,17 +526,17 @@ async function robotPerso(m: Any, ab: Any) {
   const lang = await langueDe(ab, m.from);
   const R = LG.textes(lang).robot;
   const cmd = LG.commande(texte);
+  // Texte libre, photo, vocal… (tout sauf une commande) : reponse automatique, rien n'est transfere.
+  if (!texte.startsWith("/") || !m.text) { await reponseAuto(chat, lang); return; }
   if (!ab.actif) {
-    // Un ex-abonne peut toujours joindre l'equipe : son message est transmis.
-    if (!texte.startsWith("/")) await transfererAClement(m, lang);
-    await html(chat, R.inactif(texte.startsWith("/")));
+    // Un ex-abonne : robot en pause ; pour une question, le robot Contact (ou l'e-mail).
+    await tg("sendMessage", { chat_id: chat, text: RB.inactifPro(lang, await nomContact()), link_preview_options: { is_disabled: true } });
     return;
   }
   const prefs = await prefsDe(ab);
-  if (m.photo?.length) return ticketPhoto(m, ab, prefs, lang);
   // /canal (ancienne commande) : plus de canal a rejoindre, tout arrive ici en prive.
   if (/^\/canal\b/.test(texte)) { await html(chat, R.plusDeCanal); return; }
-  if (cmd === "aide") { await html(chat, C.esc(C.aideRobot(lang))); return; }
+  if (cmd === "aide") { await aide(chat, lang); return; }
   if (cmd === "langue") { await html(chat, R.choisirLangue, { reply_markup: LG.clavierLangues(lang) }); return; }
   if (cmd === "reglages") { await html(chat, C.messageReglages(prefs, lang), { reply_markup: C.clavierReglages(prefs, "principal", lang) }); return; }
   if (cmd === "programme") {
@@ -532,50 +565,14 @@ async function robotPerso(m: Any, ab: Any) {
     await html(chat, g ? C.messageGrille(g) : R.lotoVide);
     return;
   }
-  if (cmd === "journal") {
-    const notes = await notesDuJour(ab.user_id);
-    await html(chat, notes.length
-      ? `${R.journal}\n${notes.map((t: Any) => "• " + C.messageTicket({ ...t, match: t.match_label, pari: t.pari_id ? {} : null, texte: t.texte }, "FR", lang).replace(LG.estFrancais(lang) ? "Ticket lu : " : LG.textes(lang).ticket.lu, "")).join("\n")}\n\n${C.messageGardeFou(notes.length, prefs.limite_paris_jour, lang)}`
-      : R.journalVide);
-    return;
-  }
-  if (/^\/equipe\b/.test(texte)) {
-    if (texte.replace(/^\/equipe\s*/, "").length < 2) { await html(chat, R.equipeVide); return; }
-    await transfererAClement(m, lang);
-    return;
-  }
-  if (texte.startsWith("/")) { await html(chat, C.esc(C.aideRobot(lang))); return; }
-  const paris = await parisOuverts();
-  const simples = paris.filter((p: Any) => p.famille === "simple");
-  const tabac = C.coteTabac(texte);
-  if (tabac && C.gardeFouAtteint(prefs, (await notesDuJour(ab.user_id)).length)) { await html(chat, C.messageGardeFou((await notesDuJour(ab.user_id)).length, prefs.limite_paris_jour, lang)); return; }
-  if (tabac) {
-    // Tabac : seulement les simples (un combine ou un buteur ne se compare pas a une seule cote).
-    const p = C.trouverPari(texte, simples) || (simples.length === 1 ? simples[0] : null);
-    if (p) { await html(chat, C.verdictTabac(p, tabac, lang)); return; }
-    if (!simples.length) { await html(chat, R.tabacAucun); return; }
-    await html(chat, R.quelPari, { reply_markup: { inline_keyboard: simples.slice(0, 8).map((p: Any) => [{ text: `${p.dom} – ${p.ext} · ${C.pariTxt(p, lang)}`.slice(0, 60), callback_data: `tb:${p.numero}:${tabac}` }]) } });
-    return;
-  }
-  const t = C.lireTicketTexte(texte, paris, prefs.pays, lang);
-  // Un nombre a virgule ne suffit pas (« pourquoi le pari d'hier a 1,85 a perdu ? ») : sans match,
-  // bookmaker, mise ni mot de pari, ou avec une question, le message part a l'equipe.
-  if (C.estUnTicket(t, texte)) return proposerTicket(chat, ab, { ...t, texte, source: "texte" }, lang);
-  // Message non compris : il part a l'equipe (comme avant le robot personnel).
-  await transfererAClement(m, lang);
+  // /equipe (ancienne commande « ecrire a l'equipe ») : les questions vont au robot Contact.
+  if (/^\/equipe\b/.test(texte)) { await reponseAuto(chat, lang); return; }
+  // Autre commande (dont /journal : plus de tickets ecrits au robot) : l'aide.
+  await aide(chat, lang);
 }
-
-async function proposerTicket(chat: number, ab: Any, t: Any, lang = "fr") {
-  const K = LG.textes(lang).ticket;
-  const { data: ins, error } = await db.from("pro_tickets").insert({ user_id: ab.user_id, jour: C.paris(new Date()).date, source: t.source, texte: String(t.texte || "").slice(0, 500),
-    pari_id: t.pari?.id || null, match_label: t.match || null, selection: String(t.selection || "").slice(0, 120) || null, cote: t.cote, mise: t.mise || null, bookmaker: t.bookmaker || null,
-    combine: !!t.combine }).select().single();
-  if (error || !ins) { await html(chat, K.illisible); return; }
-  // Detecteur de combine : le combine du jour (ou un ticket) reconnu en entier est relie au pari du programme.
-  const nomFamille = (f: string) => (LG.estFrancais(lang) ? C.FAMILLES[f]?.nom.toLowerCase() || "combiné" : (LG.textes(lang).familles[f]?.nom || "").toLowerCase());
-  const noteCombine = t.combine ? (t.pari ? K.relie(nomFamille(t.pari.famille), C.etiquette(t.pari, lang)) : K.pasCeCombine) : "";
-  await html(chat, `${C.messageTicket(t, "FR", lang)}${noteCombine}${t.match && !t.pari && !t.combine ? K.pasCePari : ""}${K.question}`,
-    { reply_markup: { inline_keyboard: [[{ text: K.noter, callback_data: `tk:ok:${ins.id}` }, { text: K.annuler, callback_data: `tk:no:${ins.id}` }]] } });
+/** Aide du robot Pro, avec « Une question ? Écris à IASHARK Contact ». */
+async function aide(chat: number, lang: string) {
+  await html(chat, `${C.esc(C.aideRobot(lang))}\n• ${C.esc(RB.ligneQuestion(lang, await nomContact()))}`);
 }
 
 async function ticketClic(cq: Any) {
@@ -590,11 +587,9 @@ async function ticketClic(cq: Any) {
   if (action === "no") {
     await db.from("pro_tickets").update({ statut: "annule" }).eq("id", id);
     await tg("editMessageReplyMarkup", { chat_id: cq.from.id, message_id: cq.message.message_id, reply_markup: { inline_keyboard: [] } }).catch(() => null);
-    // Un message pris a tort pour un ticket (« je veux resilier, votre pari a 1,85 a perdu ») ne doit
-    // jamais se perdre : sur « Annuler », son texte part a l'equipe (Clement peut repondre).
-    await transmettreTexteAClement(cq.from.id, cq.from, String(t.texte || ""), "a cliqué « Annuler » sur « Ticket lu » : si c'était une question, réponds-lui")
-      .catch((e) => console.error("[telegram-bot] ticket annule -> equipe", (e as Error).message));
-    await html(cq.from.id, R.pasNote);
+    // Ancien ticket encore affiche (avant le 03/10, plus de tickets ecrits au robot) : rien n'est
+    // transfere ; si c'etait une question, la reponse automatique indique le robot Contact.
+    await reponseAuto(cq.from.id, lang, `${R.pasNoteCourt} `);
     await repondre(cq, R.pasNoteCourt);
     return;
   }
@@ -662,51 +657,16 @@ async function reglageClic(cq: Any) {
   await repondre(cq, R.cestNote);
 }
 
-// Photo du ticket : lue par Claude (lecture d'image), puis meme parcours que le texte.
-const CONSIGNE_TICKET = "Voici la photo ou la capture d'un ticket de pari sportif. Réponds UNIQUEMENT par un objet JSON, sans texte autour : "
-  + '{"est_un_ticket": true|false, "selections": [{"match": "Equipe A - Equipe B", "pari": "ce qui est joué"}], "cote_totale": nombre ou null, "mise_eur": nombre ou null, "bookmaker": "nom" ou null}. '
-  + "Recopie seulement ce qui est écrit sur le ticket ; si une valeur est illisible ou absente, mets null.";
-async function lirePhoto(fileId: string): Promise<Any | null> {
-  if (!ANTHROPIC_KEY) return null;
-  const f = await tg("getFile", { file_id: fileId });
-  const img = new Uint8Array(await (await fetch(`https://api.telegram.org/file/bot${TOKEN}/${f.file_path}`)).arrayBuffer());
-  let bin = "";
-  for (let i = 0; i < img.length; i += 0x8000) bin += String.fromCharCode(...img.subarray(i, i + 0x8000));
-  const client = new Anthropic({ apiKey: ANTHROPIC_KEY });
-  const r: Any = await client.beta.messages.create({
-    model: MODELE_TICKET,
-    max_tokens: 2000,
-    betas: ["server-side-fallback-2026-07-01"],
-    fallbacks: "default",
-    output_config: { effort: "low" },
-    messages: [{ role: "user", content: [
-      { type: "image", source: { type: "base64", media_type: "image/jpeg", data: btoa(bin) } },
-      { type: "text", text: CONSIGNE_TICKET },
-    ] }],
-  } as Any);
-  if (r.stop_reason === "refusal") return null;
-  const texte = (r.content || []).filter((b: Any) => b.type === "text").map((b: Any) => b.text).join("");
-  const m = texte.match(/\{[\s\S]*\}/);
-  try { return m ? JSON.parse(m[0]) : null; } catch { return null; }
-}
-async function ticketPhoto(m: Any, ab: Any, prefs: Any, lang = "fr") {
-  const chat = m.chat.id;
-  const R = LG.textes(lang).robot;
-  if (!ANTHROPIC_KEY || (await reglage("tickets_photo")) !== "oui") { await html(chat, R.photoNon); return; }
-  await tg("sendChatAction", { chat_id: chat, action: "typing" }).catch(() => null);
-  let lu: Any = null;
-  try { lu = await lirePhoto(m.photo[m.photo.length - 1].file_id); } catch (e) { console.error("[telegram-bot] photo", (e as Error).message); }
-  if (!lu?.est_un_ticket || !lu.cote_totale) { await html(chat, R.photoIllisible); return; }
-  const sel = (lu.selections || []).map((s: Any) => `${s.match || ""} ${s.pari || ""}`).join(" + ");
-  const texte = `${sel} à ${String(lu.cote_totale).replace(".", ",")}${lu.mise_eur ? ` ${lu.mise_eur} €` : ""}${lu.bookmaker ? ` chez ${lu.bookmaker}` : ""}`;
-  const t = C.lireTicketTexte(texte, (lu.selections || []).length > 1 ? [] : await parisOuverts(), prefs.pays, lang);
-  if (!t) { await html(chat, R.photoCote); return; }
-  await proposerTicket(chat, ab, { ...t, combine: (lu.selections || []).length > 1, texte: sel, source: "photo" }, lang);
+// ---------- 1e. Robot IASHARK Contact (questions) ----------
+const AIDE_ADMIN = "Robot IASHARK Pro.\n\n• Chaque message du canal gratuit vous arrive ici avec « Publier sur le canal ».\n• Le programme Pro arrive ici à 8 h 45 : Valider, Modifier ou Annuler. Sans clic à 12 h, rien ne part. Après votre clic, il part en privé à chaque abonné Pro relié au robot, dans sa langue (plus de canal Pro : rien à créer).\n• Ce robot ne reçoit plus de questions : un abonné qui lui écrit reçoit une réponse automatique qui l'envoie vers le robot IASHARK Contact. Les questions vous arrivent dans votre conversation avec IASHARK Contact : faites « Répondre » là-bas.\n• /canalpro : voir si les envois Pro sont en rodage ou ouverts, et les ouvrir.\n• Débriefs, bilan, Loto Foot et programme reporté vous sont proposés avec « Envoyer aux abonnés Pro » ; le duel avec « Publier ». Débriefs, bilan et duel sont obligatoires : pas de bouton pour ne pas les envoyer, ils reviennent toutes les 3 h tant qu'ils ne sont pas partis.\n• /automatique : envoyer sans votre clic, type par type (éteint par défaut).\n• Un pari « envoi incertain » : transférez-moi son message depuis cette conversation (marqué REGISTRE), ou cliquez « Renvoyer », au plus tard 70 min avant le match (avant les compositions) ; après, c'est refusé.";
+
+/** Langue d'une personne qui ecrit au robot Contact : celle de son compte s'il est relie au robot Pro, sinon de son Telegram. */
+async function langueContact(m: Any): Promise<string> {
+  const { data: ab } = await db.from("telegram_abonnes").select("*").eq("chat_id", m.chat.id).maybeSingle();
+  return ab ? langueDe(ab, m.from) : LG.choisirLangue(null, m.from?.language_code);
 }
 
-// ---------- 1e. Contact (personnes non reliees) ----------
-const AIDE_ADMIN = "Robot IASHARK.\n\n• Chaque message du canal gratuit vous arrive ici avec « Publier sur le canal ».\n• Le programme Pro arrive ici à 8 h 45 : Valider, Modifier ou Annuler. Sans clic à 12 h, rien ne part. Après votre clic, il part en privé à chaque abonné Pro relié au robot, dans sa langue (plus de canal Pro : rien à créer).\n• Quand quelqu'un écrit au robot, son message vous est transféré : faites « Répondre » dessus, votre réponse lui est envoyée.\n• /canalpro : voir si les envois Pro sont en rodage ou ouverts, et les ouvrir.\n• Débriefs, bilan, Loto Foot et programme reporté vous sont proposés avec « Envoyer aux abonnés Pro » ; le duel avec « Publier ». Débriefs, bilan et duel sont obligatoires : pas de bouton pour ne pas les envoyer, ils reviennent toutes les 3 h tant qu'ils ne sont pas partis.\n• /automatique : envoyer sans votre clic, type par type (éteint par défaut).\n• Un pari « envoi incertain » : transférez-moi son message depuis cette conversation (marqué REGISTRE), ou cliquez « Renvoyer », au plus tard 70 min avant le match (avant les compositions) ; après, c'est refusé.";
-
+/** Message d'une personne au robot Contact : transfere a Clement (dans SA conversation avec le robot Contact). */
 async function transfererAClement(m: Any, lang = LG.choisirLangue(null, m.from?.language_code)) {
   if (!ADMIN) return;
   // Accuse de reception une fois par periode de 6 h, pas a chaque message.
@@ -714,21 +674,42 @@ async function transfererAClement(m: Any, lang = LG.choisirLangue(null, m.from?.
   const { count } = await db.from("telegram_contact_threads").select("admin_message_id", { count: "exact", head: true })
     .eq("user_chat_id", m.chat.id).gte("created_at", depuis);
   const nom = [m.from?.first_name, m.from?.last_name].filter(Boolean).join(" ") + (m.from?.username ? ` (@${m.from.username})` : "");
-  const entete = await tg("sendMessage", { chat_id: ADMIN, text: `Message de ${nom || "quelqu'un"} (faites « Répondre » pour lui répondre) :` });
-  const transfere = await tg("forwardMessage", { chat_id: ADMIN, from_chat_id: m.chat.id, message_id: m.message_id });
-  await db.from("telegram_contact_threads").insert([
-    { admin_message_id: transfere.message_id, user_chat_id: m.chat.id },
-    { admin_message_id: entete.message_id, user_chat_id: m.chat.id },
-  ]);
-  if (!count) await tg("sendMessage", { chat_id: m.chat.id, text: LG.textes(lang).robot.recu });
+  const entete = await tgc("sendMessage", { chat_id: ADMIN, text: `Message de ${nom || "quelqu'un"} (faites « Répondre » pour lui répondre) :` });
+  const transfere = await tgc("forwardMessage", { chat_id: ADMIN, from_chat_id: m.chat.id, message_id: m.message_id });
+  // upsert : une ancienne ligne au meme numero (ecrite par l'ancien robot unique) est remplacee,
+  // jamais une reponse envoyee a la mauvaise personne.
+  const maintenant = new Date().toISOString();
+  await db.from("telegram_contact_threads").upsert([
+    { admin_message_id: transfere.message_id, user_chat_id: m.chat.id, created_at: maintenant },
+    { admin_message_id: entete.message_id, user_chat_id: m.chat.id, created_at: maintenant },
+  ], { onConflict: "admin_message_id" });
+  if (!count) await tgc("sendMessage", { chat_id: m.chat.id, text: LG.textes(lang).robot.recu });
 }
 
-/** Texte d'un abonne transmis a Clement (texte simple) ; « Repondre » dessus lui repond. */
-async function transmettreTexteAClement(chatId: number, from: Any, texte: string, pourquoi: string) {
-  if (!ADMIN || !texte.trim()) return;
-  const nom = [from?.first_name, from?.last_name].filter(Boolean).join(" ") + (from?.username ? ` (@${from.username})` : "");
-  const envoye = await tg("sendMessage", { chat_id: ADMIN, text: `Message de ${nom || "un abonné"} (${pourquoi} ; faites « Répondre » pour lui répondre) :\n\n${texte.slice(0, 3500)}` });
-  await db.from("telegram_contact_threads").insert({ admin_message_id: envoye.message_id, user_chat_id: chatId });
+/** Mise a jour recue par le robot Contact. */
+async function messageContact(m: Any) {
+  if (m.chat?.type !== "private") return;
+  if (m.chat.id === ADMIN) {
+    // Clement fait « Repondre » sur un message transfere : sa reponse repart chez la personne, par le robot Contact.
+    const cible = m.reply_to_message?.message_id;
+    if (cible) {
+      const { data } = await db.from("telegram_contact_threads").select("user_chat_id").eq("admin_message_id", cible).maybeSingle();
+      if (data) {
+        await tgc("copyMessage", { chat_id: data.user_chat_id, from_chat_id: ADMIN, message_id: m.message_id });
+        await tgc("sendMessage", { chat_id: ADMIN, text: "Réponse envoyée.", reply_parameters: { message_id: m.message_id } });
+        return;
+      }
+    }
+    await tgc("sendMessage", { chat_id: ADMIN, text: RB.AIDE_ADMIN_CONTACT });
+    return;
+  }
+  const lang = await langueContact(m);
+  if (/^\/start\b/.test(String(m.text || ""))) {
+    await tgc("sendMessage", { chat_id: m.chat.id, text: RB.accueilContact(lang) });
+    return;
+  }
+  // Tout le reste (texte, photo, vocal, document…) part a Clement.
+  await transfererAClement(m, lang);
 }
 
 // ---------- 1g. Automatique (eteint par defaut) ----------
@@ -824,19 +805,12 @@ async function modeClic(cq: Any) {
   await repondre(cq, cq.data === "cp:ouvrir" ? "Envois Pro ouverts : chaque abonné relié reçoit tout en privé." : "Rodage : tout arrive chez vous seul.");
 }
 
+/** Mise a jour recue par le robot Pro. */
 async function message(m: Any) {
   if (m.chat?.type !== "private") return;
   const texte = String(m.text || "");
   if (m.chat.id === ADMIN) {
-    const cible = m.reply_to_message?.message_id;
-    if (cible) {
-      const { data } = await db.from("telegram_contact_threads").select("user_chat_id").eq("admin_message_id", cible).maybeSingle();
-      if (data) {
-        await tg("copyMessage", { chat_id: data.user_chat_id, from_chat_id: ADMIN, message_id: m.message_id });
-        await tg("sendMessage", { chat_id: ADMIN, text: "Réponse envoyée.", reply_parameters: { message_id: m.message_id } });
-        return;
-      }
-    }
+    // Plus de reponse aux questions ici : elles arrivent et se repondent dans le robot Contact.
     if (m.forward_origin && await preuveTransferee(m)) return;
     await adminCommande(m, texte);
     return;
@@ -849,11 +823,14 @@ async function message(m: Any) {
     if (ab.bloque) await db.from("telegram_abonnes").update({ bloque: false }).eq("user_id", ab.user_id);
     return robotPerso(m, ab);
   }
-  if (texte.startsWith("/start")) {
-    await tg("sendMessage", { chat_id: m.chat.id, text: LG.textes(LG.choisirLangue(null, m.from?.language_code)).robot.accueil });
+  // Compte pas relie : une commande (/start…) recoit l'accueil du robot Pro, tout le reste la reponse
+  // automatique. Rien n'est transfere a Clement.
+  const lang = LG.choisirLangue(null, m.from?.language_code);
+  if (m.text && texte.startsWith("/")) {
+    await tg("sendMessage", { chat_id: m.chat.id, text: RB.accueilPro(lang, await nomContact()), link_preview_options: { is_disabled: true } });
     return;
   }
-  await transfererAClement(m);
+  await reponseAuto(m.chat.id, lang);
 }
 
 // ---------- 1f. Canal gratuit : le robot y est-il administrateur ? ----------
@@ -916,14 +893,24 @@ Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   if (!TOKEN || !SECRET) return json({ error: "telegram_misconfigured" }, 500);
 
-  if (req.headers.get("x-telegram-bot-api-secret-token") === SECRET) {
+  // Quel robot ? Il faut le parametre de SON webhook (?robot=contact pour le Contact) ET SON secret.
+  const robot = RB.quelRobot({
+    parametre: new URL(req.url).searchParams.get("robot"),
+    secretRecu: req.headers.get("x-telegram-bot-api-secret-token"),
+    secretPro: SECRET, secretContact: SECRET_CONTACT, contactActif: !!TOKEN_CONTACT,
+  });
+  if (robot) {
     try {
       const u = await req.json();
-      if (u.callback_query) await clic(u.callback_query);
+      if (robot === RB.CONTACT) {
+        // Robot Contact : seulement des messages (aucun bouton, aucun canal).
+        if (u.message) await messageContact(u.message);
+        else if (u.callback_query) await tgc("answerCallbackQuery", { callback_query_id: u.callback_query.id }).catch(() => null);
+      } else if (u.callback_query) await clic(u.callback_query);
       else if (u.message) await message(u.message);
       else if (u.my_chat_member) await roleDuRobot(u.my_chat_member);
     } catch (e) {
-      console.error("[telegram-bot]", (e as Error).message);
+      console.error("[telegram-bot]", robot, (e as Error).message);
     }
     // Toujours 200 : sinon Telegram renvoie la meme mise a jour en boucle.
     return json({ ok: true });

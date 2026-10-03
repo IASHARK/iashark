@@ -1,18 +1,26 @@
 name: Robot Telegram IASHARK
 
-# Installe et entretient le robot Telegram (28/09/2026, demande de Clement) :
-# publication d'un clic sur @iasharkdata, contact, messages Pro EN PRIVE (plus de
-# canal Pro depuis le 02/10/2026), robot personnel (accueil et questions dans la
-# langue de l'abonne) et validation du programme du jour (V3, 30/09/2026).
-# Code du robot : supabase/functions/telegram-bot (tables : migrations 0033 et 0040).
-# Les envois planifies du Canal Pro sont dans .github/workflows/canal-pro.yml.
+# Installe et entretient les robots Telegram (28/09/2026, demande de Clement) :
+# publication d'un clic sur @iasharkdata, messages Pro EN PRIVE (plus de canal Pro
+# depuis le 02/10/2026), robot personnel (accueil et questions dans la langue de
+# l'abonne) et validation du programme du jour (V3, 30/09/2026).
+# DEUX ROBOTS (03/10/2026, decision de Clement) :
+# - « IASHARK Pro » (secret GitHub TELEGRAM_BOT_TOKEN) : envoie seulement ; un texte
+#   libre recoit une reponse automatique qui renvoie vers le robot Contact.
+# - « IASHARK Contact » (secret GitHub TELEGRAM_CONTACT_BOT_TOKEN, FACULTATIF) : les
+#   questions, transferees a Clement ; sa reponse repart par le robot Contact.
+#   Sans ce secret, le robot Pro marche seul et sa reponse automatique donne
+#   l'adresse contact@iashark.com.
+# Code des robots : supabase/functions/telegram-bot (une seule fonction pour les deux :
+# chaque robot a son webhook et son secret). Tables : migrations 0033 et 0040.
+# Les envois planifies sont dans .github/workflows/canal-pro.yml.
 #
-# - installer : donne au robot ses reglages Supabase (a partir des secrets
-#   GitHub deja en place : aucune cle a saisir par Clement), le deploie et le
-#   branche sur Telegram. Tourne a chaque changement du robot sur main, ou a
-#   la main (onglet Actions, « Run workflow »).
-# Plus de « menage » : sans canal, un abonnement termine ne recoit simplement plus rien
-# (verifie a chaque envoi).
+# - installer : donne aux robots leurs reglages Supabase (a partir des secrets
+#   GitHub : aucune cle a saisir par Clement), deploie la fonction, branche les
+#   deux robots sur Telegram, met leurs noms, descriptions et commandes, et
+#   efface le nom des robots garde en cache (relu apres un changement de jeton).
+#   Tourne a chaque changement du robot sur main, ou a la main (onglet Actions,
+#   « Run workflow »).
 
 on:
   push:
@@ -23,6 +31,9 @@ on:
       - 'supabase/functions/_shared/canal-pro-langues.mjs'
       - 'supabase/functions/_shared/canal-pro-diffusion.mjs'
       - 'supabase/functions/_shared/canal-pro-accueil.mjs'
+      - 'supabase/functions/_shared/robots.mjs'
+      - 'scripts/telegram/presentation-robots.mjs'
+      - 'config/telegram.json'
       - '.github/workflows/telegram-bot.yml'
   workflow_dispatch:
 
@@ -41,17 +52,25 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
       - uses: supabase/setup-cli@v1
         with:
           version: latest
       - name: Reglages, deploiement et branchement sur Telegram
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CONTACT_BOT_TOKEN: ${{ secrets.TELEGRAM_CONTACT_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           set -euo pipefail
-          # Secret du webhook derive du jeton du robot : le meme a chaque
+          URL_FONCTION="https://$PROJECT_REF.supabase.co/functions/v1/telegram-bot"
+          MISES_A_JOUR='["message","callback_query","my_chat_member"]'
+          # Secret du webhook derive du jeton de CHAQUE robot : le meme a chaque
           # installation, jamais ecrit nulle part en clair.
           WEBHOOK_SECRET=$(printf '%s' "iashark-webhook:$TELEGRAM_BOT_TOKEN" | sha256sum | cut -c1-48)
           echo "::add-mask::$WEBHOOK_SECRET"
@@ -60,12 +79,44 @@ jobs:
             TELEGRAM_ADMIN_CHAT_ID="$TELEGRAM_CHAT_ID" \
             TELEGRAM_WEBHOOK_SECRET="$WEBHOOK_SECRET" \
             TELEGRAM_PUBLIC_CHANNEL="@iasharkdata"
+          if [ -n "$TELEGRAM_CONTACT_BOT_TOKEN" ]; then
+            CONTACT_SECRET=$(printf '%s' "iashark-webhook:$TELEGRAM_CONTACT_BOT_TOKEN" | sha256sum | cut -c1-48)
+            echo "::add-mask::$CONTACT_SECRET"
+            supabase secrets set --project-ref "$PROJECT_REF" \
+              TELEGRAM_CONTACT_BOT_TOKEN="$TELEGRAM_CONTACT_BOT_TOKEN" \
+              TELEGRAM_CONTACT_WEBHOOK_SECRET="$CONTACT_SECRET"
+          else
+            # Pas de robot Contact : le robot Pro marche seul (reponse automatique = e-mail).
+            supabase secrets unset --project-ref "$PROJECT_REF" TELEGRAM_CONTACT_BOT_TOKEN TELEGRAM_CONTACT_WEBHOOK_SECRET || true
+          fi
           # Lecture des photos de tickets : NON installee (decision Clement / juriste,
-          # confidentialite). Le robot ne lit que le texte.
+          # confidentialite). Plus de tickets ecrits au robot depuis le 03/10/2026.
           supabase functions deploy telegram-bot --project-ref "$PROJECT_REF" --no-verify-jwt
+          # Robot Pro : adresse simple. Robot Contact : ?robot=contact. Chacun son secret.
           curl -fsS "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" \
             -H 'content-type: application/json' \
-            -d "{\"url\":\"https://$PROJECT_REF.supabase.co/functions/v1/telegram-bot\",\"secret_token\":\"$WEBHOOK_SECRET\",\"allowed_updates\":[\"message\",\"callback_query\",\"my_chat_member\"]}" > /dev/null
-          NOM=$(curl -fsS "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/getMe" | node -e 'const r=JSON.parse(require("fs").readFileSync(0)).result;console.log("@"+r.username+" ("+r.first_name+")")')
-          echo "Robot installe : $NOM" | tee -a "$GITHUB_STEP_SUMMARY"
-
+            -d "{\"url\":\"$URL_FONCTION\",\"secret_token\":\"$WEBHOOK_SECRET\",\"allowed_updates\":$MISES_A_JOUR}" > /dev/null
+          if [ -n "$TELEGRAM_CONTACT_BOT_TOKEN" ]; then
+            curl -fsS "https://api.telegram.org/bot$TELEGRAM_CONTACT_BOT_TOKEN/setWebhook" \
+              -H 'content-type: application/json' \
+              -d "{\"url\":\"$URL_FONCTION?robot=contact\",\"secret_token\":\"$CONTACT_SECRET\",\"allowed_updates\":[\"message\",\"callback_query\"]}" > /dev/null
+          fi
+          # Noms, descriptions (fr, es, en) et commandes des deux robots.
+          node scripts/telegram/presentation-robots.mjs
+          # Nom des robots garde en cache par la fonction : efface, il est relu (getMe) au
+          # prochain message. Indispensable apres un changement de jeton (nouveau robot).
+          curl -fsS -X DELETE "$SUPABASE_URL/rest/v1/telegram_settings?key=in.(bot_username,bot_username_contact)" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" > /dev/null
+          nom() { curl -fsS "https://api.telegram.org/bot$1/getMe" | node -e 'const r=JSON.parse(require("fs").readFileSync(0)).result;console.log(r.username)'; }
+          PRO=$(nom "$TELEGRAM_BOT_TOKEN")
+          echo "Robot Pro installe : @$PRO" | tee -a "$GITHUB_STEP_SUMMARY"
+          ATTENDU_PRO=$(node -p 'require("./config/telegram.json").pro')
+          ATTENDU_CONTACT=$(node -p 'require("./config/telegram.json").contact')
+          [ "$PRO" = "$ATTENDU_PRO" ] || echo "A corriger : config/telegram.json indique « pro »: \"$ATTENDU_PRO\", le robot est @$PRO." | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ -n "$TELEGRAM_CONTACT_BOT_TOKEN" ]; then
+            CONTACT=$(nom "$TELEGRAM_CONTACT_BOT_TOKEN")
+            echo "Robot Contact installe : @$CONTACT" | tee -a "$GITHUB_STEP_SUMMARY"
+            [ "$CONTACT" = "$ATTENDU_CONTACT" ] || echo "A corriger : config/telegram.json indique « contact »: \"$ATTENDU_CONTACT\", le robot est @$CONTACT (lien du site)." | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Pas de robot Contact (secret TELEGRAM_CONTACT_BOT_TOKEN absent) : la reponse automatique donne contact@iashark.com." | tee -a "$GITHUB_STEP_SUMMARY"
+          fi

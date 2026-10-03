@@ -226,9 +226,15 @@
   // sans ce cache, le dictionnaire etait telecharge 3 a 4 fois par page.
   // Un echec n'est pas memorise (nouvel essai au prochain appel).
   var dictCache = {};
+  // 03/10/2026 : version du dictionnaire = empreinte ?v= de ce script (posee a la publication). Sans elle,
+  // un navigateur gardait jusqu'a 24 h l'ancien texte (« Pronostic fermé ») apres un changement.
+  var DICT_V = (function(){
+    try { var s = document.currentScript && document.currentScript.src; var m = s && /[?&]v=([\w-]+)/.exec(s); return m ? m[1] : ""; }
+    catch (_e) { return ""; }
+  })();
   function loadDict(locale){
     if (dictCache[locale]) return dictCache[locale];
-    var p = fetch("/i18n/dict/" + locale + ".json").then(function(r){
+    var p = fetch("/i18n/dict/" + locale + ".json" + (DICT_V ? "?v=" + DICT_V : "")).then(function(r){
       if (!r.ok) throw new Error("dict fetch failed: " + r.status);
       return r.json();
     });

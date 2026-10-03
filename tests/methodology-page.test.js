@@ -273,7 +273,8 @@ test("ce que la page affirme est vrai dans le code (sans en publier les valeurs)
   assert.match(pipeline, /async function translateNarratives\(jobs\)/, "la traduction automatique annoncee n'existe plus");
   // « la probabilite estimee s'affiche aussi sur 10 : 6,4/10 correspond a 64 % ».
   assert.match(pipeline, /conf:pickedMarket\?Math\.round\(\(pickedMarket\.prob\/10\)\*10\)\/10/);
-  assert.match(read("home-list.js"), /tf\('home_list\.aria_prob','Probabilité estimée \{p\} sur 10\.'/);
+  // 03/10/2026 : l'accueil affiche « Analyse 64 % » ; la note sur 10 reste sur la page match.
+  assert.match(read("match-page.js"), /<small>\/10<\/small>/);
 });
 
 test("page courte et transparente : outil d'IA annonce (sans le nommer), longueur bornee", () => {

@@ -80,7 +80,7 @@ test("pastille de niveau : 3 libelles, 3 barres (3/3, 2/3, 1/3), note « pas une
 test("Pro confirme ou match offert : Proba. x/10 et jauge, jamais le marche ; sans signal : pas de pari force", () => {
   const pro = HL.renderMatchRow(Object.assign(base({ prob_band: "high" }), SECRET), ctx({ isPro: true }), helpers(), 0);
   assert.match(pro, /is-open/);
-  assert.match(pro, /<b>7,7<\/b><small>\/10<\/small>/);
+  assert.match(pro, /<b>77<\/b><small>%<\/small>/); // 03/10/2026 : « Analyse 77 % », plus de note sur 10
   assert.match(pro, /hl-gauge/);
   // Le marche retenu a quitte la liste le 16/09/2026 : il se lit sur la fiche
   // du match. Ni a l'ecran, ni dans l'aria-label — sinon le pari repart par le

@@ -4405,16 +4405,16 @@ jobs:
               // match offert est la vitrine du site, il vient d'une competition validee.
               // MATCH OFFERT = UNE SELECTION DU JOUR (plan de Clement, 03/10/2026) : jamais un match
               // sans selection (son pronostic doit etre une selection IASHARK, lib/pronostic.js).
-              // Selections nationales : la decision du 30/09 (« jamais le match offert ») reste en vigueur
-              // au lancement (03/10, tests/selections-nationales.test.js). competitionOffrable garde la
-              // liste verifiee (fiabilite.selections_cotes_marche) pour le jour ou Clement l'ouvrira.
+              // Selections nationales (decision de Clement, 03/10/2026 apres-midi : « il faut un match offert »,
+              // la regle du 30/09 est levee) : Ligue des nations et eliminatoires Europe peuvent etre le match
+              // offert SI le match est une Selection IASHARK (competitionOffrable) ; amicaux et autres : jamais.
               var SEL_OFFRABLES=((LEAGUES_CONFIG.fiabilite&&LEAGUES_CONFIG.fiabilite.selections_cotes_marche)||[]).map(String);
               var estSelectionDuJour=function(m){ return !!(m&&m.pronostic&&m.pronostic.selection===true&&m.pari_rec&&!m.no_signal); };
               var competitionOffrable=function(m){
                 if(SELECTIONS.estSelectionNationale(m)) return SEL_OFFRABLES.indexOf(String(m.league_key||''))!==-1;
                 return m.league_reliability!=='en_test';
               };
-              var analysable=function(m){ return m && m.pari_rec && !m.no_signal && !SELECTIONS.estSelectionNationale(m) && estSelectionDuJour(m) && competitionOffrable(m) && eligibleForFree(FIXTURE_BY_ID[String(m.id)],OFFRE_MS); };
+              var analysable=function(m){ return m && m.pari_rec && !m.no_signal && estSelectionDuJour(m) && competitionOffrable(m) && eligibleForFree(FIXTURE_BY_ID[String(m.id)],OFFRE_MS); };
               // Competition connue d'abord : Ligue des nations / eliminatoires (treve), puis coupes
               // d'Europe et grands championnats, puis le reste (0 = la plus connue).
               var GRANDES_COMPETITIONS=['ldc','el','ecl','premier','laliga','seriea','bundesliga','ligue1'];
@@ -4458,7 +4458,7 @@ jobs:
               try{ gardes=PICK_FREEZE.keptFreeDesignations(Object.keys(prevByFixture).map(function(k){ return prevByFixture[k]; }),allMatchsData,{today:TODAY,nowMs:OFFRE_MS,fixturesById:FIXTURE_BY_ID}); }
               catch(e){ console.log('::warning title=Gel des paris::match offert : designation precedente non relue ('+(e&&e.message)+').'); }
               // Une designation precedente dans une competition « en test » n'est jamais gardee.
-              Object.keys(gardes).forEach(function(j){ if(gardes[j]&&gardes[j].league_reliability==='en_test') delete gardes[j]; });
+              Object.keys(gardes).forEach(function(j){ if(gardes[j]&&!competitionOffrable(gardes[j])) delete gardes[j]; });
               // MOTEUR_V3:DEBUT - match offert (avocat du diable C3 ; mathematicien et decision
               // de Clement du 29/09/2026). REGLE COMPLETE, dans cet ordre, pour chaque jour :
               //  1. seulement les paris PUBLIES par le moteur v3, dont le coup d'envoi n'est
@@ -4474,7 +4474,13 @@ jobs:
               // Verifie en executant ce bloc : tests/match-offert-v3.test.js.
               if(MOTEUR_V3.actif){
                 var analysableTous=analysable;
-                analysable=function(m){ return analysableTous(m) && (!!(m.v3_pari&&m.moteur_v3&&m.moteur_v3.source==='v3') || selectionNationaleCotes(m)); };
+                var analysableStrict=function(m){ return analysableTous(m) && (!!(m.v3_pari&&m.moteur_v3&&m.moteur_v3.source==='v3') || selectionNationaleCotes(m)); };
+                // REPLI (decision de Clement, 03/10/2026 : « il faut un match offert chaque jour ») : un jour
+                // sans pari v3 ni selection nationale par les cotes (treve), le match offert est une
+                // Selection IASHARK d'une competition verifiee (meme filtre analysableTous : jamais « en test »).
+                var joursStrict={};
+                allMatchsData.forEach(function(m){ if(analysableStrict(m)) joursStrict[jourDe(m)]=true; });
+                analysable=function(m){ return analysableStrict(m) || (!joursStrict[jourDe(m)] && analysableTous(m)); };
                 // La plus fiable : la plus haute chance affichee (chance IASHARK du pronostic, le
                 // meme chiffre que la page et Telegram), plus la probabilite brute du modele.
                 meilleur=function(liste){

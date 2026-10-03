@@ -85,7 +85,7 @@ function defaultHelpers(){
     leagueLogoUrl:function(m){var id=m.league_id||(LN?LN.apiFootballId(key(m)):null);return id?'https://media.api-sports.io/football/leagues/'+id+'.png':'';},
     teamLogoUrl:function(tm){return tm&&(tm.photo||tm.logo||(tm.id?'https://media.api-sports.io/football/teams/'+tm.id+'.png':''))||'';},
     translateMarket:function(r){return (r&&ML&&ML.marketLabel)?ML.marketLabel(r):r;},
-    marketIdLabel:function(m){return (m&&m.market_id&&ML)?(ML.marketIdLabel||ML.marketIdLabelFr)(m.market_id,{home:m.home&&m.home.n,away:m.away&&m.away.n}):null;},
+    marketIdLabel:function(m){return (m&&m.market_id&&ML)?(ML.marketIdLabel||ML.marketIdLabelFr)(m.market_id,{home:nomEquipe(m.home&&m.home.n||''),away:nomEquipe(m.away&&m.away.n||'')}):null;},
     hasReliableModelOutput:function(m){return DD?DD.hasReliableModelOutput(m):true;},
     pickFreeMatch:function(list){return FM?FM.pickFreeMatch(list,null,(root.IASHARK_MARKET&&root.IASHARK_MARKET.code)||null):null;},
     lien:lien

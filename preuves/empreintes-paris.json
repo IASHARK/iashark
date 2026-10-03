@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "explication": "Empreinte SHA-256 des paris publies chaque jour, chainee a la precedente. Un pari modifie apres coup ou un maillon retire casse la chaine. Le sel de chaque jour est revele deux jours plus tard : empreinte_paris = SHA-256(sel + saut de ligne + JSON canonique des paris du jour, tries par fixture_id, champs fixture_id, home, away, prediction, cote, model_probability, market, moteur, moteur_version, published_at, kickoff_at).",
+  "chaine": [
+    {
+      "n": 1,
+      "jour": "2026-10-03",
+      "genere_le": "2026-10-03T04:35:48.781Z",
+      "nb_paris": 48,
+      "empreinte_paris": "56dbf5ba82f39cefef283edfee8ee3239b1a2711d4b666f78d0536397742a30d",
+      "precedente": "0000000000000000000000000000000000000000000000000000000000000000",
+      "empreinte": "90f94da0649266314ee8b9d88469afe24d073a7d4d4917cc9b730b52694c7eaa"
+    }
+  ]
+}

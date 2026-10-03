@@ -7,7 +7,7 @@ const { resolveSeason, computeTier } = require("../scripts/verify-league-coverag
 
 const ROOT = path.join(__dirname, "..");
 
-test("config/leagues.json : contient exactement les 48 competitions, cles/ids uniques", () => {
+test("config/leagues.json : contient exactement les 32 competitions, cles/ids uniques", () => {
   // 13 -> 14 le 2026-09-13 : ajout de liga_mx (decision produit explicite
   // lancement Mexique, voir config/leagues.json#_readme et
   // data/league-validation-registry.json#leagues.liga_mx).
@@ -24,12 +24,15 @@ test("config/leagues.json : contient exactement les 48 competitions, cles/ids un
   // POUR-CLEMENT/23-LIGUES-A-AJOUTER.html (decision de Clement, V3 « machine »),
   // toutes « en test » (config/leagues.json#fiabilite), groupe « extension »
   // sauf la Ligue des nations (deja collectee a part) : lib/league-scope.js.
+  // 48 -> 32 le 2026-10-03 : les 16 competitions « en test » sans aucune
+  // verification sont retirees du site (decision de Clement) et deplacees dans
+  // config/leagues.json#competitions_retirees (redirections 301 seulement).
   var config = JSON.parse(fs.readFileSync(path.join(ROOT, "config/leagues.json"), "utf8"));
-  assert.equal(config.leagues.length, 48);
+  assert.equal(config.leagues.length, 32);
   var keys = config.leagues.map(function (l) { return l.key; });
   var ids = config.leagues.map(function (l) { return l.apiFootballId; });
-  assert.equal(new Set(keys).size, 48, "cles internes dupliquees");
-  assert.equal(new Set(ids).size, 48, "apiFootballId dupliques");
+  assert.equal(new Set(keys).size, 32, "cles internes dupliquees");
+  assert.equal(new Set(ids).size, 32, "apiFootballId dupliques");
   config.leagues.forEach(function (l) {
     assert.ok(l.key && l.displayName && l.country && typeof l.apiFootballId === "number", JSON.stringify(l) + " incomplet");
     assert.equal(typeof l.europeanQualification, "boolean");
@@ -39,7 +42,8 @@ test("config/leagues.json : contient exactement les 48 competitions, cles/ids un
 test("config/leagues.json : ligues LATAM - ids verifies, aucune qualification europeenne, aucune cle odds inventee", () => {
   var config = JSON.parse(fs.readFileSync(path.join(ROOT, "config/leagues.json"), "utf8"));
   var byKey = {};
-  config.leagues.forEach(function (l) { byKey[l.key] = l; });
+  // Identite verifiee, en ligne ou retiree du site le 03/10/2026 (config/leagues.json#competitions_retirees).
+  config.leagues.concat(config.competitions_retirees || []).forEach(function (l) { byKey[l.key] = l; });
   var expected = { argentina_liga_profesional: 128, colombia_primera_a: 239, peru_primera: 281, chile_primera: 265 };
   Object.keys(expected).forEach(function (k) {
     assert.ok(byKey[k], k + " absent");
@@ -76,7 +80,8 @@ test("registry : ligues LATAM presentes, jamais presentees comme validees", () =
 test("config/leagues.json : les 29 competitions du 30/09/2026 - ids relus dans les fichiers API-Football, cles odds de la liste publique", () => {
   var config = JSON.parse(fs.readFileSync(path.join(ROOT, "config/leagues.json"), "utf8"));
   var byId = {};
-  config.leagues.forEach(function (l) { byId[l.apiFootballId] = l; });
+  // Identite verifiee, en ligne ou retiree du site le 03/10/2026 (config/leagues.json#competitions_retirees).
+  config.leagues.concat(config.competitions_retirees || []).forEach(function (l) { byId[l.apiFootballId] = l; });
   // id API-Football -> cle The Odds API (null : absente de la liste publique du 30/09/2026).
   var attendu = {
     40: "soccer_efl_champ", 41: "soccer_england_league1", 42: "soccer_england_league2", 62: "soccer_france_ligue_two",
@@ -95,8 +100,9 @@ test("config/leagues.json : les 29 competitions du 30/09/2026 - ids relus dans l
     assert.equal(l.groupe, l.key === "nations_league" ? "socle" : "extension", l.key);
     assert.ok(config.fiabilite.ligues_validees.indexOf(l.key) === -1, l.key + " jamais validee a l'ouverture");
   });
-  // Les 19 d'avant : groupe socle, rien d'autre ne change.
-  config.leagues.slice(0, 19).forEach(function (l) { assert.equal(l.groupe, "socle", l.key); assert.equal(l.kind, undefined, l.key); });
+  // Les 19 d'avant : groupe socle, rien d'autre ne change (15 en ligne depuis le retrait du 03/10/2026 :
+  // Afrique du Sud, Colombie, Perou et Chili sont dans competitions_retirees).
+  config.leagues.slice(0, 15).forEach(function (l) { assert.equal(l.groupe, "socle", l.key); assert.equal(l.kind, undefined, l.key); });
 });
 
 test("registry : les 29 competitions du 30/09/2026, jamais presentees comme validees", () => {

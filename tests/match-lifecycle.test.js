@@ -107,12 +107,13 @@ test("perimetre des versions : table explicite dans config/leagues.json, fr touj
   const byKey = Object.fromEntries(leagues.map((l) => [l.key, l]));
   // Ids reels (API-Football) des competitions du perimetre.
   assert.equal(byKey.liga_mx.apiFootballId, 262);
-  assert.equal(byKey.south_africa_premiership.apiFootballId, 288);
+  // south_africa_premiership : retiree du site le 03/10/2026 (config/leagues.json#competitions_retirees).
+  assert.equal(byKey.south_africa_premiership, undefined);
   assert.equal(byKey.mls.apiFootballId, 253);
   assert.equal(byKey.premier.apiFootballId, 39);
   const sorted = (a) => a.slice().sort();
   assert.deepEqual(sorted(L.matchDirsFor("liga_mx")), sorted(["fr", "mx", "es"]));
-  assert.deepEqual(sorted(L.matchDirsFor("south_africa_premiership")), sorted(["fr", "za", "en"]));
+  assert.deepEqual(sorted(L.matchDirsFor("south_africa_premiership")), ["fr"], "competition retiree : hors perimetre");
   assert.deepEqual(sorted(L.matchDirsFor("mls")), sorted(["fr", "en", "gb"]));
   assert.deepEqual(sorted(L.matchDirsFor("premier")), sorted(["fr", "gb", "en", "za"]));
   assert.deepEqual(sorted(L.matchDirsFor("ligue1")), sorted(["fr", "en"]));
@@ -122,7 +123,7 @@ test("perimetre des versions : table explicite dans config/leagues.json, fr touj
   assert.deepEqual(sorted(L.matchDirsFor("bundesliga")), sorted(["fr", "en"]));
   assert.deepEqual(sorted(L.matchDirsFor("primeira")), sorted(["fr", "en"]));
   for (const l of leagues) for (const d of l.seoMatchDirs) assert.ok(C.DIR_CODES.includes(d), l.key + " : version retiree " + d);
-  for (const k of ["argentina_liga_profesional", "colombia_primera_a", "peru_primera", "chile_primera"]) assert.deepEqual(sorted(L.matchDirsFor(k)), sorted(["fr", "es", "en"]), k);
+  for (const k of ["argentina_liga_profesional"]) assert.deepEqual(sorted(L.matchDirsFor(k)), sorted(["fr", "es", "en"]), k);
   for (const k of ["ldc", "el", "ecl"]) assert.deepEqual(sorted(L.matchDirsFor(k)), sorted(C.DIR_CODES), k);
   assert.deepEqual(L.matchDirsFor("competition_inconnue"), ["fr"]);
 });

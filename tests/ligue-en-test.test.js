@@ -100,9 +100,7 @@ test("page championnat : phrase « en test » pour une competition non validee, 
   // Priorite au francais : versions etrangeres des nouvelles competitions hors perimetre (noindex, hors plan du site).
   assert.equal(P.renderLeagueHub("championship", "gb", [], { now }).indexable, false);
   assert.match(P.renderLeagueHub("championship", "gb", [], { now }).html, /<meta name="robots" content="noindex,follow">/);
-  const fr = P.renderLeagueHub("copa_del_rey", "fr", [], { now }).html;
-  assert.match(fr, /<h1>[^<]*Coupe du Roi/);
-  assert.match(fr, /la coupe nationale du football espagnol/);
+  // copa_del_rey : competition retiree du site le 03/10/2026, plus de page championnat.
 });
 
 test("collecte des cotes proches du coup d'envoi : le socle passe avant l'extension (plafond 50)", () => {

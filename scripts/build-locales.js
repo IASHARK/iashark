@@ -665,6 +665,38 @@ function rule(from, to, status, cond) {
   return pad(from, 34) + pad(to, 30) + status + (cond ? "  " + cond : "");
 }
 
+// Regles [from, to] des competitions retirees (config/leagues.json#competitions_retirees) :
+// hub /<dir>/leagues/<slug>.html de chaque version, pages club/derby rattachees a ces
+// competitions (config/club-hubs.json) et, si une version n'a plus aucune page club,
+// son index des clubs. Cible : accueil de la version.
+function retiredCompetitionRules() {
+  var rules = [];
+  function both(from, to) { rules.push([from, to]); rules.push([from.replace(/\.html$/, ""), to]); }
+  SEO.RETIRED_LEAGUES.forEach(function (l) {
+    DIR_CODES.forEach(function (d) { both(SEO.retiredLeagueHubPath(d, l.key), "/" + d + "/"); });
+  });
+  var clubs = {};
+  try { clubs = readJson("config/club-hubs.json"); } catch (e) { return rules; }
+  var versions = clubs.versions || {}, gardes = {};
+  (clubs.clubs || []).concat(clubs.derbies || []).forEach(function (c) {
+    Object.keys(c.pages || {}).forEach(function (d) {
+      var v = versions[d], pg = c.pages[d];
+      if (!v || !pg || !pg.slug || DIR_CODES.indexOf(d) === -1) return;
+      if (SEO.isRetiredLeague(c.leagueKey)) both("/" + d + "/" + v.hubSlug + "/" + pg.slug + ".html", "/" + d + "/");
+      else if (c.active === true) gardes[d] = true;
+    });
+  });
+  Object.keys(versions).forEach(function (d) {
+    if (gardes[d] || DIR_CODES.indexOf(d) === -1) return;
+    var touche = rules.some(function (r) { return r[0].indexOf("/" + d + "/" + versions[d].hubSlug + "/") === 0; });
+    if (!touche) return;
+    rules.push(["/" + d + "/" + versions[d].hubSlug + "/index.html", "/" + d + "/"]);
+    rules.push(["/" + d + "/" + versions[d].hubSlug + "/", "/" + d + "/"]);
+    rules.push(["/" + d + "/" + versions[d].hubSlug, "/" + d + "/"]);
+  });
+  return rules;
+}
+
 function redirectsContent() {
   var out = [
     "# GENERE par scripts/build-locales.js depuis config/markets.json et",
@@ -747,6 +779,15 @@ function redirectsContent() {
     out.push(rule("/" + d + "/outils.html", "/" + d + "/pro.html", "301!"));
     out.push(rule("/" + d + "/outils", "/" + d + "/pro.html", "301!"));
   });
+
+  // Competitions retirees du site le 03/10/2026 (config/leagues.json#competitions_retirees) :
+  // anciennes pages championnat et pages club/derby de ces competitions -> accueil de la version.
+  var retiredRules = retiredCompetitionRules();
+  if (retiredRules.length) {
+    out.push("", "# --- Competitions retirees le 03/10/2026 (config/leagues.json#competitions_retirees) :",
+      "# anciennes pages championnat, club et derby -> accueil de la version (301).");
+    retiredRules.forEach(function (r) { out.push(rule(r[0], r[1], "301!")); });
+  }
 
   out.push("", "# --- Sources des pages legales (legal/<dir>/) : jamais servies telles quelles.");
   out.push(rule("/legal/*", "/:splat", "301!"));

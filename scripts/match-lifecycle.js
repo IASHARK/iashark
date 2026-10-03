@@ -354,6 +354,10 @@ function updateRegistry(reg, runMatchs, now, ctx) {
       if (sc) { e.final_score = sc; summary.scores++; }
     }
     var st = stageFor(kick, t, !!e.in_run);
+    // Competition retiree du site (config/leagues.json#competitions_retirees, 03/10/2026) :
+    // pages supprimees et 301 vers l'accueil de la version tout de suite, sans attendre J+30
+    // (redirectTarget : hub absent de la config -> accueil de la version).
+    if (!e.in_run && C.isRetiredLeague(e.league_key)) st = { status: "redirected", inSitemap: false, noindex: true, removed: true };
     e.status = st.status;
     if (st.status === "redirected") {
       e.removed_at = e.removed_at || today;

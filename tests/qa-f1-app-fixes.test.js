@@ -179,9 +179,9 @@ test("prix : MX$ pour le peso, prix du marche ecrit dans le HTML genere", () => 
   assert.doesNotMatch(read("gb/index.html"), /id="heroPrice"[^>]*>[^<]*€/);
 });
 
-test("accueil : 48 competitions partout (config/leagues.json), analyse gratuite honnete (compte gratuit)", () => {
+test("accueil : 32 competitions partout (config/leagues.json), analyse gratuite honnete (compte gratuit)", () => {
   const nb = JSON.parse(read("config/leagues.json")).leagues.length;
-  assert.equal(nb, 48, "config/leagues.json : 48 competitions (30/09/2026)");
+  assert.equal(nb, 32, "config/leagues.json : 32 competitions (16 retirees le 03/10/2026)");
   require("./helpers/public-dirs.js").PUBLIC_DIRS.forEach((d) => {
     const visible = read(d + "/index.html").replace(/<script[\s\S]*?<\/script>/g, "").replace(/<style[\s\S]*?<\/style>/g, "");
     assert.doesNotMatch(visible, /\b13\b[^<]{0,3}(championnats|compet|Wettbewerbe|competizioni|competições|competiciones)|Treize|Thirteen|Trece|Dreizehn|Tredici/i, d);

@@ -350,8 +350,9 @@ function renderMatchRow(m,ctx,H,index){
   // Indicateurs PUBLICS reels uniquement.
   var tags=[];
   if(a.free)tags.push('<span class="hl-tag hl-tag-free">'+esc(t('home_list.free_chip','Offert'))+'</span>');
-  // Selection IASHARK (le sous-ensemble retenu) : amorce publique has_signal, aucun chiffre.
-  if(sig&&a.state!=='past'&&a.state!=='closed')tags.push('<span class="hl-tag hl-tag-sel">'+esc(t('home_list.selection_chip','✓ Sélection IASHARK'))+'</span>');
+  // Selection IASHARK (le sous-ensemble retenu, jamais sous la cote 1,20) : amorce publique
+  // selection_iashark posee par le pipeline (lib/pronostic.js), aucun chiffre.
+  if(m.selection_iashark===true&&a.state!=='past'&&a.state!=='closed')tags.push('<span class="hl-tag hl-tag-sel">'+esc(t('home_list.selection_chip','✓ Sélection IASHARK'))+'</span>');
   if(derby)tags.push('<span class="hl-tag hl-tag-derby" title="'+esc(derby)+'">'+esc(t('home_list.derby_chip','Derby'))+'</span>');
   if(cd)tags.push('<span class="hl-tag hl-tag-time is-'+cd.kind+'" data-hl-ts="'+(isFinite(ts)?ts:'')+'"'+(cd.estimated?' title="'+esc(t('home_list.status_estimated','Statut estimé d’après l’heure du coup d’envoi'))+'"':'')+'>'+esc(cd.text)+'</span>');
   if(q)tags.push('<span class="hl-tag hl-tag-q is-'+q.level+'"><i aria-hidden="true"></i>'+esc(q.text)+'</span>');

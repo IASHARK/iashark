@@ -504,7 +504,7 @@ const nomInsecable=nom=>esc(nom).replace(/[^\s-]+(?:-[^\s-]+)+/g,m=>`<span class
   // jamais en opacite 0 le temps d'une animation.
   return `<header class="card hero">
     <div class="hero-top">
-      <span class="hero-league">${img(i.league.logo,'',30,30,{eager:true})}<span>${esc(ln)}</span>${vm.model&&vm.model.leagueInTest===true?`<span class="hero-test">${esc(t('match_page.league_in_test','Fiabilité : en test'))}</span>`:''}</span>
+      <span class="hero-league">${img(i.league.logo,'',30,30,{eager:true})}<span>${esc(ln)}</span>${vm.model&&vm.model.leagueInTest===true&&!verifieMarche(vm)?`<span class="hero-test">${esc(t('match_page.league_in_test','Fiabilité : en test'))}</span>`:''}</span>
       <span class="hero-time">${esc(dh.date||t('match_page.date_tbc','Date à confirmer'))} · <b>${esc(dh.time||'—')}</b></span>
     </div>
     ${titreOuvrant}
@@ -535,7 +535,14 @@ const REL_NIVEAUX={high:['match_page.sig_rel_high','Fiabilité élevée'],medium
 function testBadge(){
   return `<span class="sig-rel sig-rel--test"><i aria-hidden="true"></i>${esc(t('match_page.league_in_test','Fiabilité : en test'))}</span>`;
 }
-function relBadgeVm(vm,info){return vm&&vm.model&&vm.model.leagueInTest===true?testBadge():relBadge(info);}
+// Competition verifiee par la route des cotes du marche (amorce publique fiabilite_cotes_marche,
+// lib/pronostic.js, 03/10/2026) : plus de « Fiabilité : en test » dans l'avis ni l'en-tete. Les
+// autres garde-fous d'une competition non validee (pas d'ecart affiche) restent en place.
+function verifieMarche(vm){const r=vm&&vm._raw;return !!(r&&r.fiabilite_cotes_marche===true);}
+function marcheBadge(){
+  return `<span class="sig-rel sig-rel--high"><i aria-hidden="true"></i>${esc(t('match_page.prono.badge_marche','Fiabilité : vérifiée (cotes du marché)'))}</span>`;
+}
+function relBadgeVm(vm,info){return vm&&vm.model&&vm.model.leagueInTest===true?(verifieMarche(vm)?marcheBadge():testBadge()):relBadge(info);}
 function relBadge(info){
   if(!info||!REL_NIVEAUX[info.level])return '';
   return `<span class="sig-rel sig-rel--${info.level}"><i aria-hidden="true"></i>${esc(t(REL_NIVEAUX[info.level][0],REL_NIVEAUX[info.level][1]))}</span>`;

@@ -154,8 +154,11 @@ test("liste : pronostic verrouille hors Pro (aucun champ premium lu), visible po
   assert.match(pro, /Lens ou nul/);
   assert.doesNotMatch(pro, /Sélection IASHARK/, "un pronostic seul n'est pas une selection");
   // Selection : pastille « ✓ Sélection IASHARK » (amorce publique has_signal).
-  const sel = HL.renderMatchRow(match({ id: 78, has_signal: true, no_signal: false }), ctx(), H, 0);
+  const sel = HL.renderMatchRow(match({ id: 78, has_signal: true, no_signal: false, selection_iashark: true }), ctx(), H, 0);
   assert.match(sel, /hl-tag-sel">✓ Sélection IASHARK</);
+  // Pari affiche mais pas « Sélection IASHARK » (cote sous 1,20) : pas de pastille.
+  const sous = HL.renderMatchRow(match({ id: 79, has_signal: true, no_signal: false }), ctx(), H, 0);
+  assert.doesNotMatch(sous, /Sélection IASHARK/);
 });
 
 // Donnees reelles du jour (data.json public) : chaque match a venir qui a des cotes ou un
@@ -210,8 +213,49 @@ test("selections nationales verifiees (VERIF-SELECTIONS.md) : selection du site 
   assert.equal(ami.pronostic.voie, "modele");
 });
 
-test("fourchette des selections nationales = celle des selections simples du robot", async () => {
+test("fourchette et plafond des selections nationales = ceux des selections simples du robot", async () => {
   const M = await import("../supabase/functions/_shared/canal-pro-menu.mjs");
   assert.equal(P.FOURCHETTE_SELECTION.cote_min, M.MENU.simple.cote_min);
   assert.equal(P.FOURCHETTE_SELECTION.cote_max, M.MENU.simple.cote_max);
+  assert.equal(P.FOURCHETTE_SELECTION.max_par_jour, M.MENU.simple.max);
+});
+
+test("selections nationales : au plus 3 par jour, les plus hautes chances ; le gel compte", () => {
+  const ldn = (id, c1, date) => match({ id: id, date: date || "2026-10-03 20:45", league_key: "nations_league", league_id: 5, league: "UEFA Nations League", c1: c1, cn: "3.60", c2: "5.50" });
+  const ms = [ldn(1, "1.95"), ldn(2, "1.50"), ldn(3, "1.80"), ldn(4, "1.45"), ldn(5, "1.62"), ldn(6, "1.50", "2026-10-04 20:45")];
+  assert.equal(P.poserSelectionsNationales(ms, [], { configLigues: CFG }), 4);
+  assert.deepEqual(ms.filter((m) => m.pari_rec).map((m) => m.id).sort(), [2, 4, 5, 6], "le 03 : les 3 plus probables (cotes 1,45 / 1,50 / 1,62) ; le 04 : son match");
+  // Une selection deja figee ce jour compte dans les 3.
+  const gel = ldn(7, "1.70"); Object.assign(gel, { pari_rec: "Victoire Domicile", market_id: "home-win", no_signal: false, chance_iashark: 55, cote_rec: "1.70" });
+  const ms2 = [gel, ldn(1, "1.95"), ldn(2, "1.50"), ldn(3, "1.80"), ldn(4, "1.45")];
+  assert.equal(P.poserSelectionsNationales(ms2, [], { configLigues: CFG }), 2);
+});
+
+test("cote sous 1,20 : jamais « Sélection IASHARK » (ni pastille, ni match offert), le pronostic reste", () => {
+  const m = match({ league_key: "ligue1", league_reliability: "validee", pari_rec: "DC 1X", market_id: "dc-1x", no_signal: false, chance_iashark: 88, cote_rec: "1.15" });
+  P.poserPronostics([m], { configLigues: CFG });
+  assert.equal(m.pronostic.market_id, "dc-1x");
+  assert.equal(m.pronostic.selection, false);
+  assert.equal(m.selection_iashark, undefined);
+  const ok = match({ id: 2, league_key: "ligue1", league_reliability: "validee", pari_rec: "Victoire Domicile", market_id: "home-win", no_signal: false, chance_iashark: 60, cote_rec: "1.55" });
+  P.poserPronostics([ok], { configLigues: CFG });
+  assert.equal(ok.selection_iashark, true);
+  // Repli « Victoire Pays-Bas 1,17 » : un pronostic, jamais une selection.
+  const nl = match({ id: 3, league_key: "nations_league", league_id: 5, league: "UEFA Nations League", c1: "1.17", cn: "6.50", c2: "15", cdc1x: "1.02", cdc2x: "4.6", dc12: "1.10" });
+  P.poserSelectionsNationales([nl], [], { configLigues: CFG });
+  P.poserPronostics([nl], { configLigues: CFG });
+  assert.deepEqual([nl.pronostic.market_id, nl.pronostic.cote, nl.pronostic.selection, nl.pari_rec], ["home-win", 1.17, false, ""]);
+});
+
+test("avis de la page match : competition verifiee par les cotes du marche -> plus « Fiabilité : en test »", () => {
+  const m = match({ league_key: "league_two", league_reliability: "en_test", c1: "2.10", cn: "3.30", c2: "3.40" });
+  P.poserPronostics([m], { configLigues: CFG });
+  assert.equal(m.fiabilite_cotes_marche, true);
+  assert.ok(!PREMIUM.PREMIUM_FIELDS.includes("fiabilite_cotes_marche") && !PREMIUM.PREMIUM_FIELDS.includes("selection_iashark"), "amorces publiques");
+  const hors = match({ league_key: "copa_del_rey", p1: 50, pn: 25, p2: 25 });
+  P.poserPronostics([hors], { configLigues: CFG });
+  assert.equal(hors.fiabilite_cotes_marche, undefined);
+  const js = fs.readFileSync(path.join(root, "match-page.js"), "utf8");
+  assert.match(js, /function relBadgeVm\(vm,info\)\{return vm&&vm\.model&&vm\.model\.leagueInTest===true\?\(verifieMarche\(vm\)\?marcheBadge\(\):testBadge\(\)\):relBadge\(info\);\}/);
+  assert.match(js, /leagueInTest===true&&!verifieMarche\(vm\)\?`<span class="hero-test">/);
 });

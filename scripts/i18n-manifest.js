@@ -682,4 +682,27 @@ var PAGES = [
   {file: "404.html", noSitemap: true}
 ];
 
+// Accueil (refonte du 03/10/2026) : textes nouveaux marques data-i18n="cle" dans index.html,
+// ecrits dans la langue de chaque version au build (le texte francais d'origine sert de motif,
+// tire du dictionnaire : il est forcement identique a celui du fichier source).
+function htmlTxt(v) { return String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+function cle(d, k) { return k.split(".").reduce(function (o, x) { return o == null ? o : o[x]; }, d); }
+function reglesDataI18n(cles, compte) {
+  return cles.map(function (k) {
+    return { find: 'data-i18n="' + k + '">' + htmlTxt(cle(FR_DICT, k)) + "<", count: (compte && compte[k]) || 1,
+      build: function (d) { var v = cle(d, k); return v == null ? null : 'data-i18n="' + k + '">' + htmlTxt(v) + "<"; } };
+  });
+}
+(function () {
+  var accueil = PAGES.filter(function (p) { return p.file === "index.html"; })[0];
+  accueil.replacements = accueil.replacements.concat(reglesDataI18n([
+    "accueil_v3.offer_cta", "accueil_v3.pro_kicker", "accueil_v3.pro_title", "accueil_v3.pro_1", "accueil_v3.pro_2", "accueil_v3.pro_3",
+    "accueil_v3.tg_title", "accueil_v3.tg_text", "accueil_v3.method_link",
+    "partner_promo.nav", "partner_promo.kicker", "partner_promo.title", "partner_promo.hook", "partner_promo.text", "partner_promo.cta"
+  ], { "accueil_v3.offer_cta": 2 }), [{
+    find: 'alt="' + htmlTxt(FR_DICT.partner_promo.img_alt) + '" data-i18n-attr="alt:partner_promo.img_alt"',
+    build: function (d) { return 'alt="' + htmlTxt(d.partner_promo.img_alt).replace(/"/g, "&quot;") + '" data-i18n-attr="alt:partner_promo.img_alt"'; }
+  }]);
+})();
+
 module.exports = PAGES;

@@ -256,7 +256,7 @@ function matchSummaryHtml(m, dir) {
   return '<div style="padding:24px 16px;font-family:\'DM Sans\',sans-serif;color:#94a3b8;font-size:13px;line-height:1.6">' +
     '<h1 style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;letter-spacing:.5px;color:#e2e8f0;margin-bottom:8px">' + esc(matchH1(m, dir)) + "</h1>" +
     "<p>" + (leagueName(m) ? esc(leagueName(m)) + " — " : "") + (day ? '<time data-seo-date datetime="' + esc(day) + '">' + esc(dateLabel) + "</time>" : "") + "</p>" +
-    (modelAvailable ? '<p data-i18n="match_page.seo_analysis_available">Analyse statistique IASHARK disponible pour ce match.</p>' : '<p data-i18n="match_page.model_unavailable_reason">Les données disponibles ne permettent pas encore une analyse chiffrée fiable.</p>') +
+    // 03/10/2026 (Clement) : plus de ligne « Analyse statistique IASHARK disponible » au-dessus de la carte.
     "</div>";
 }
 
@@ -380,13 +380,16 @@ function matchFactsHtml(m, dir, opts) {
   links.push('<a href="' + C.guidePath(dir, MATCH_GUIDE) + '"' + LINK + ">" + esc(ms.guide_link) + "</a>");
   return '<section class="match-facts" aria-labelledby="match-facts-title" style="width:100%;max-width:960px;margin:28px auto 0;padding:18px 16px 8px;border-top:1px solid rgba(141,179,211,.18);font-family:\'DM Sans\',system-ui,sans-serif;color:#c3ccd8;font-size:14px;line-height:1.6">' +
     '<nav aria-label="' + esc(ms.breadcrumb_aria) + '" style="font-size:12.5px;color:#91a0b3;margin:0 0 12px">' + nav + "</nav>" +
-    '<h2 id="match-facts-title" style="font-size:17px;font-weight:700;color:#f4f7fb;margin:0 0 10px">' + esc(ms.facts_title) + "</h2>" +
+    // 03/10/2026 (Clement) : le detail texte (forme, classement, face-a-face) est replie sous « Fiche du match » ;
+    // l'onglet Stats de la page le montre deja. Le contenu reste dans la page (aucun texte cache en CSS).
+    '<details class="match-facts-fiche"><summary style="cursor:pointer;font-size:15px;font-weight:700;color:#f4f7fb;margin:0 0 10px">' +
+    '<h2 id="match-facts-title" style="display:inline;font-size:15px;font-weight:700;color:#f4f7fb;margin:0">' + esc(ms.facts_title) + "</h2></summary>" +
     '<dl style="margin:0 0 12px">' + factRowsHtml(m, dir) + "</dl>" +
     matchFactSections(snapshotOf(m), dir) +
     (opts.archived ? "" : '<p style="margin:12px 0 10px">' + esc(ms.about) + "</p>") +
     '<p style="margin:12px 0 10px">' + links.join(" · ") + "</p>" +
     '<p style="margin:0;font-size:12.5px;color:#91a0b3">' + esc(ms.disclaimer) + "</p>" +
-    "</section>";
+    "</details></section>";
 }
 // Page conservee (match sorti du run) : titre visible, score final ou statut,
 // lien vers le hub ligue de la version. Aucun script d'analyse.

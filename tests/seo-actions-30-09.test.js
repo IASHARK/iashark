@@ -196,7 +196,7 @@ test("A5 : noms d'equipes en francais sur les pages francaises seulement (affich
   const m = { id: 880010, league_key: "other", league: "Friendlies", date: "2026-10-10 20:45", home: { n: "Spain", id: 9 }, away: { n: "Croatia", id: 3 }, model_output_available: true, data_quality_score: 80 };
   // 61 caracteres avec « : stats et probabilités » : gabarit court (title <= 60).
   assert.equal(SEO.matchTitle(m, "fr"), "Pronostic Espagne – Croatie (10 oct.)");
-  assert.equal(SEO.matchH1(m, "fr"), "Pronostic Espagne – Croatie");
+  assert.equal(SEO.matchH1(m, "fr"), "Analyse Espagne – Croatie"); // titre visible « Analyse » (Clement, 03/10) ; <title> garde « Pronostic »
   assert.match(SEO.matchDescription(m, "fr"), /^Pronostic Espagne – Croatie/);
   assert.match(SEO.matchTitle(m, "gb"), /^Spain v Croatia/);
   const fr = SEO.renderMatchPage(TPL, m, "fr");

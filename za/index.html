@@ -50,6 +50,7 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .filter-btn{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;white-space:nowrap;flex-shrink:0;}
 .filter-btn:hover,.filter-btn.active{background:rgba(34,211,238,0.1);border-color:var(--border-cyan);color:var(--cyan);}
 
+
 .champ-dropdown{position:relative;}
 .champ-dropdown-btn{width:100%;display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.5px;padding:10px 12px;cursor:pointer;}
 .champ-dropdown-btn:hover{border-color:rgba(255,255,255,0.15);}
@@ -301,6 +302,8 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 .hero-cta:hover{filter:brightness(1.07);}
 .hero-cta:active{transform:translateY(1px);}
 
+
+
   border:1px solid rgba(32,213,239,.28);background:rgba(32,213,239,.08);
   color:var(--cyan);font-size:14px;font-weight:800;letter-spacing:.04em;}
 
@@ -313,6 +316,7 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
   background:var(--cyan);color:#04121a;font-size:10px;font-weight:800;letter-spacing:.12em;}
   border-left:2px solid var(--cyan);border-bottom:2px solid var(--cyan);transform:rotate(-45deg);opacity:.85;}
   font-size:12.5px;font-weight:800;letter-spacing:.06em;transition:filter .18s,background .18s;}
+
 
 @media(max-width:900px){
   .model-grid{grid-template-columns:repeat(2,1fr);}
@@ -496,7 +500,6 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
 <link rel="stylesheet" href="/assets/home-list.css">
 <link rel="stylesheet" href="/assets/home-scorers.css">
-<link rel="stylesheet" href="/assets/accueil-v3.css">
 <meta property="og:site_name" content="IASHARK">
 <meta property="og:locale" content="en_ZA">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://iashark.com/#organization","name":"IASHARK","url":"https://iashark.com/","logo":{"@type":"ImageObject","url":"https://iashark.com/icon-512.png","width":512,"height":512},"sameAs":["https://www.tiktok.com/@iashark_data","https://t.me/iasharkdata"],"description":"IASHARK analyses soccer matches with statistical models and compares the estimated probabilities with bookmaker odds. It is not a bookmaker."},{"@type":"WebSite","@id":"https://iashark.com/#website","name":"IASHARK","url":"https://iashark.com/","publisher":{"@id":"https://iashark.com/#organization"},"inLanguage":["fr","en-GB","en-ZA","en","es-MX","es"]},{"@type":"WebPage","@id":"https://iashark.com/za/#webpage","url":"https://iashark.com/za/","name":"Soccer Predictions & Stats | IASHARK South Africa","description":"Soccer predictions from statistical models: win, draw, goals and BTTS probabilities against bookmaker odds. Free daily analysis. 18+","inLanguage":"en-ZA","isPartOf":{"@id":"https://iashark.com/#website"},"about":{"@id":"https://iashark.com/#organization"}}]}</script>
@@ -509,7 +512,6 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
     <a href="#decisions">Matches</a>
     <a href="/za/a-propos.html">Method</a>
     <a href="/en/blog/">Guides</a>
-    <a href="/za/partenaires.html" data-i18n="partner_promo.nav">Partners</a>
   </nav>
   <div class="header-actions">
     <span id="langSwitchSlot"></span>
@@ -519,7 +521,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 </header>
 
 <main>
-<section class="hero-stade hero-court" id="heroStade">
+<section class="hero-stade" id="heroStade">
   <!-- Accueil « stade » (25/09/2026, choix du proprietaire) : photo de stade
        generique en deux couches qui defilent a des vitesses differentes
        (parallax leger, sans bibliotheque, sans bloquer le defilement). -->
@@ -528,27 +530,18 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
     <picture class="hero-stade-layer hero-stade-stands" data-depth="0.16"><source media="(orientation: portrait)" srcset="/assets/hero/stade-nuit-portrait.webp"><img src="/assets/hero/stade-nuit.webp" alt="" decoding="async"></picture>
     <div class="hero-stade-fade"></div>
   </div>
-<div class="relative z-10 mx-auto w-full max-w-[1200px] px-5 sm:px-8 hero-court-inner">
-  <div class="hero-stade-title hero-court-title">
+<div class="relative z-10 mx-auto w-full max-w-[1200px] px-5 sm:px-8 grid grid-cols-1 items-center gap-12 pb-6 pt-12 lg:min-h-[72vh] lg:grid-cols-12 lg:gap-12 lg:pb-16 lg:pt-16">
+  <div class="hero-stade-title flex flex-col justify-center gap-6 lg:col-span-6">
     <h1 class="animate-fade-in d2 hero-stade-h1"><span class="hero-stade-brand">IA<span class="text-cyan">SHARK</span></span><span class="hero-stade-tagline">Football, in probabilities</span></h1>
     <div class="animate-fade-in d4 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
       <a href="#decisions" class="hero-cta group inline-flex items-center justify-center gap-2.5 rounded-xl bg-cyan px-7 py-4 text-[14px] font-extrabold tracking-[0.02em] text-page shadow-[0_16px_40px_-16px_rgba(32,213,239,.8)] transition hover:brightness-110 active:scale-[.985]">See the free match<span aria-hidden="true" class="transition-transform group-hover:translate-x-1">→</span></a>
-      <!-- Essai (03/10/2026) : « Essai gratuit 7 jours » SEULEMENT si le serveur le confirme et si le compte
-           n'a jamais ete abonne (assets/pricing-grid.js#trialFor) ; sinon « Voir l'offre Pro ». -->
-      <a href="/za/abonnement.html?interval=month" data-essai-cta data-vente class="hero-cta-2 inline-flex items-center justify-center gap-2 rounded-xl border border-cyan/40 bg-cyan/[0.06] px-6 py-4 text-[14px] font-bold text-ink transition hover:border-cyan/70" data-track="home_hero_trial" data-track-kind="cta"><span data-essai-label data-i18n="accueil_v3.offer_cta">See the Pro plan</span></a>
-    </div>
-    <a href="/za/exemple-analyse.html" class="hero-exemple">See a sample analysis</a>
-    <!-- Chiffres de preuve (comptages reels, ex-bloc « Ce que le moteur a deja traite ») : une bande discrete. -->
-    <div class="home-kpis">
-      <div class="home-kpi"><b id="kpiLigues" class="tabular-nums">32</b><span>Competitions covered</span></div>
-      <div id="kpiSimulations" style="display:none" class="home-kpi"><b id="kpiModeles" class="tabular-nums">—</b><span>Simulations per match</span></div>
-      <div class="home-kpi"><b id="kpiJour" class="tabular-nums">—</b><span>Matches analysed over 3 days</span></div>
+      <a href="/za/exemple-analyse.html" class="inline-flex items-center justify-center gap-2 rounded-xl border border-hairline px-6 py-4 text-[14px] font-semibold text-ink transition hover:border-cyan/40 hover:bg-white/[0.04]">See a sample analysis</a>
     </div>
   </div>
 </div>
 </section>
 
-<section class="home-rail relative border-y border-hairline bg-surface/40">
+<section class="relative border-y border-hairline bg-surface/40 py-7">
   <p class="mb-4 text-center text-[9.5px] font-bold tracking-[0.2em] text-cyan/70">SOME OF THE COMPETITIONS WE COVER</p>
   <div class="group relative flex overflow-hidden mask-fade-x">
     <div class="flex w-max animate-marquee items-center group-hover:[animation-play-state:paused]" aria-hidden="true">
@@ -579,41 +572,32 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
   <div class="hs-foot" data-hs-foot><p class="hs-note">Estimate made before the official line-ups, never a guarantee.</p><a class="hs-cta" href="/za/abonnement.html" data-vente data-track="home_scorers_upsell" data-track-kind="home_scorers_upsell">See the Pro plan <span aria-hidden="true">→</span></a></div>
 </section>
 
-<section class="decisions home-matchs" id="decisions">
-  <div class="home-grid">
+<section class="decisions" id="decisions">
   <!-- Liste des matchs (home-list.js, maquette v2 validee le 15/09/2026) :
        bande de dates, « Mes compétitions » puis A→Z, lignes par competition.
        Le resume SEO et l'etat de chargement ci-dessous sont remplaces au montage. -->
-  <div class="home-col-list">
   <div id="homeList">
-  <!--SEO_MATCHES_SUMMARY--><div style="padding:4px 0 12px"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px"><span data-i18n="home_app.seo_summary_title">Today's AI analyses</span> — <time data-seo-date datetime="2026-10-03">3 October 2026</time> <small style="font-family:'DM Sans',sans-serif;font-size:11px;color:#64748b">(<span data-i18n="home_app.seo_times_paris">Paris time</span>)</small></h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8"><li>00:15 — <strong>Independiente vs Instituto Cordoba</strong> (Liga Profesional Argentina)</li><li>01:00 — <strong>Universidad de Concepcion vs Huachipato</strong> (Primera Division Chile)</li><li>01:00 — <strong>Sao Paulo vs Santos</strong> (Brasileirao Serie A)</li><li>02:30 — <strong>Boca Juniors vs Union Santa Fe</strong> (Liga Profesional Argentina)</li><li>02:30 — <strong>Independ. Rivadavia vs Gimnasia L.P.</strong> (Liga Profesional Argentina)</li><li>02:45 — <strong>Deportivo Cali vs Alianza Valledupar</strong> (Primera A Colombia)</li><li>13:30 — <strong>Chesterfield vs Tranmere</strong> (League Two)</li><li>14:00 — <strong>Albacete vs Eibar</strong> (Segunda Division)</li><li>15:00 — <strong>Finland vs Albania</strong> (UEFA Nations League)</li><li>16:00 — <strong>Livingston vs Ayr Utd</strong> (Scottish Championship)</li><li>16:00 — <strong>Morton vs Raith Rovers</strong> (Scottish Championship)</li><li>16:00 — <strong>Partick vs Arbroath</strong> (Scottish Championship)</li><li>16:00 — <strong>Accrington ST vs Cheltenham</strong> (League Two)</li><li>16:00 — <strong>Barnet vs York</strong> (League Two)</li><li>16:00 — <strong>Colchester vs Port Vale</strong> (League Two)</li><li>16:00 — <strong>Crewe vs Bristol Rovers</strong> (League Two)</li><li>16:00 — <strong>Exeter City vs Rotherham</strong> (League Two)</li><li>16:00 — <strong>Gillingham vs Newport County</strong> (League Two)</li><li>16:00 — <strong>Grimsby vs Shrewsbury</strong> (League Two)</li><li>16:00 — <strong>Northampton vs Oldham</strong> (League Two)</li><li>16:00 — <strong>Rochdale vs Swindon Town</strong> (League Two)</li><li>16:00 — <strong>Salford City vs Fleetwood Town</strong> (League Two)</li><li>16:00 — <strong>Walsall vs Crawley Town</strong> (League Two)</li><li>16:00 — <strong>AFC Wimbledon vs Stevenage</strong> (League One)</li><li>16:00 — <strong>Barnsley vs Milton Keynes Dons</strong> (League One)</li><li>16:00 — <strong>Bromley vs Wycombe</strong> (League One)</li><li>16:00 — <strong>Burton Albion vs Huddersfield</strong> (League One)</li><li>16:00 — <strong>Leyton Orient vs Plymouth</strong> (League One)</li><li>16:00 — <strong>Luton vs Doncaster</strong> (League One)</li><li>16:00 — <strong>Peterborough vs Notts County</strong> (League One)</li><li>16:00 — <strong>Reading vs Bradford</strong> (League One)</li><li>16:00 — <strong>Wigan vs Mansfield Town</strong> (League One)</li><li>16:15 — <strong>Almeria vs Burgos</strong> (Segunda Division)</li><li>16:30 — <strong>Vitesse vs NAC Breda</strong> (Eerste Divisie)</li><li>16:30 — <strong>FC OSS vs MVV</strong> (Eerste Divisie)</li><li>17:30 — <strong>Baztán vs Atletico Calatayud</strong> (Copa del Rey)</li><li>18:00 — <strong>Croatia vs England</strong> (UEFA Nations League)</li><li>18:00 — <strong>Belarus vs San Marino</strong> (UEFA Nations League)</li><li>18:00 — <strong>Iceland vs Bulgaria</strong> (UEFA Nations League)</li><li>18:00 — <strong>Estonia vs Luxembourg</strong> (UEFA Nations League)</li><li>18:00 — <strong>Ceuta 6 de Junio vs Lebrijana</strong> (Copa del Rey)</li><li>18:00 — <strong>Tedeón vs Anaitasuna</strong> (Copa del Rey)</li><li>18:30 — <strong>Cadiz vs Leganes</strong> (Segunda Division)</li><li>18:30 — <strong>Sabadell vs FC Andorra</strong> (Segunda Division)</li><li>19:45 — <strong>Defensa Y Justicia vs San Lorenzo</strong> (Liga Profesional Argentina)</li><li>20:00 — <strong>Almere City FC vs FC Volendam</strong> (Eerste Divisie)</li><li>20:00 — <strong>Den Bosch vs Dordrecht</strong> (Eerste Divisie)</li><li>20:00 — <strong>FC Eindhoven vs De Graafschap</strong> (Eerste Divisie)</li><li>20:00 — <strong>Waalwijk vs Emmen</strong> (Eerste Divisie)</li><li>20:45 — <strong>Spain vs Czechia</strong> (UEFA Nations League)</li><li>20:45 — <strong>Switzerland vs Slovenia</strong> (UEFA Nations League)</li><li>20:45 — <strong>FYR Macedonia vs Scotland</strong> (UEFA Nations League)</li><li>21:00 — <strong>Águilas Doradas vs Jaguares</strong> (Primera A Colombia)</li><li>22:00 — <strong>Atletico Tucuman vs Barracas Central</strong> (Liga Profesional Argentina)</li><li>22:00 — <strong>Newells Old Boys vs Lanus</strong> (Liga Profesional Argentina)</li><li>23:05 — <strong>Deportes Tolima vs Chico</strong> (Primera A Colombia)</li><li>23:30 — <strong>Atletico-MG vs RB Bragantino</strong> (Brasileirao Serie A)</li></ul></div><!--/SEO_MATCHES_SUMMARY-->
+  <!--SEO_MATCHES_SUMMARY--><div style="padding:4px 0 12px"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px"><span data-i18n="home_app.seo_summary_title">Today's AI analyses</span> — <time data-seo-date datetime="2026-10-03">3 October 2026</time> <small style="font-family:'DM Sans',sans-serif;font-size:11px;color:#64748b">(<span data-i18n="home_app.seo_times_paris">Paris time</span>)</small></h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8"><li>00:15 — <strong>Independiente vs Instituto Cordoba</strong> (Liga Profesional Argentina)</li><li>01:00 — <strong>Universidad de Concepcion vs Huachipato</strong> (Primera Division Chile)</li><li>01:00 — <strong>Sao Paulo vs Santos</strong> (Brasileirao Serie A)</li><li>02:30 — <strong>Boca Juniors vs Union Santa Fe</strong> (Liga Profesional Argentina)</li><li>02:30 — <strong>Independ. Rivadavia vs Gimnasia L.P.</strong> (Liga Profesional Argentina)</li><li>02:45 — <strong>Deportivo Cali vs Alianza Valledupar</strong> (Primera A Colombia)</li><li>13:30 — <strong>Chesterfield vs Tranmere</strong> (League Two)</li><li>14:00 — <strong>Albacete vs Eibar</strong> (Segunda Division)</li><li>15:00 — <strong>Finland vs Albania</strong> (UEFA Nations League)</li><li>16:00 — <strong>Livingston vs Ayr Utd</strong> (Scottish Championship)</li><li>16:00 — <strong>Morton vs Raith Rovers</strong> (Scottish Championship)</li><li>16:00 — <strong>Partick vs Arbroath</strong> (Scottish Championship)</li><li>16:00 — <strong>Accrington ST vs Cheltenham</strong> (League Two)</li><li>16:00 — <strong>Barnet vs York</strong> (League Two)</li><li>16:00 — <strong>Colchester vs Port Vale</strong> (League Two)</li><li>16:00 — <strong>Crewe vs Bristol Rovers</strong> (League Two)</li><li>16:00 — <strong>Exeter City vs Rotherham</strong> (League Two)</li><li>16:00 — <strong>Gillingham vs Newport County</strong> (League Two)</li><li>16:00 — <strong>Grimsby vs Shrewsbury</strong> (League Two)</li><li>16:00 — <strong>Northampton vs Oldham</strong> (League Two)</li><li>16:00 — <strong>Rochdale vs Swindon Town</strong> (League Two)</li><li>16:00 — <strong>Salford City vs Fleetwood Town</strong> (League Two)</li><li>16:00 — <strong>Walsall vs Crawley Town</strong> (League Two)</li><li>16:00 — <strong>AFC Wimbledon vs Stevenage</strong> (League One)</li><li>16:00 — <strong>Barnsley vs Milton Keynes Dons</strong> (League One)</li><li>16:00 — <strong>Bromley vs Wycombe</strong> (League One)</li><li>16:00 — <strong>Burton Albion vs Huddersfield</strong> (League One)</li><li>16:00 — <strong>Leyton Orient vs Plymouth</strong> (League One)</li><li>16:00 — <strong>Luton vs Doncaster</strong> (League One)</li><li>16:00 — <strong>Peterborough vs Notts County</strong> (League One)</li><li>16:00 — <strong>Reading vs Bradford</strong> (League One)</li><li>16:00 — <strong>Wigan vs Mansfield Town</strong> (League One)</li><li>16:15 — <strong>Almeria vs Burgos</strong> (Segunda Division)</li><li>16:30 — <strong>Vitesse vs NAC Breda</strong> (Eerste Divisie)</li><li>16:30 — <strong>FC OSS vs MVV</strong> (Eerste Divisie)</li><li>17:30 — <strong>Baztán vs Atletico Calatayud</strong> (Copa del Rey)</li><li>18:00 — <strong>Croatia vs England</strong> (UEFA Nations League)</li><li>18:00 — <strong>Belarus vs San Marino</strong> (UEFA Nations League)</li><li>18:00 — <strong>Iceland vs Bulgaria</strong> (UEFA Nations League)</li><li>18:00 — <strong>Estonia vs Luxembourg</strong> (UEFA Nations League)</li><li>18:00 — <strong>Ceuta 6 de Junio vs Lebrijana</strong> (Copa del Rey)</li><li>18:00 — <strong>Tedeón vs Anaitasuna</strong> (Copa del Rey)</li><li>18:30 — <strong>Cadiz vs Leganes</strong> (Segunda Division)</li><li>18:30 — <strong>Sabadell vs FC Andorra</strong> (Segunda Division)</li><li>19:45 — <strong>Defensa Y Justicia vs San Lorenzo</strong> (Liga Profesional Argentina)</li><li>20:00 — <strong>Almere City FC vs FC Volendam</strong> (Eerste Divisie)</li><li>20:00 — <strong>Den Bosch vs Dordrecht</strong> (Eerste Divisie)</li><li>20:00 — <strong>FC Eindhoven vs De Graafschap</strong> (Eerste Divisie)</li><li>20:00 — <strong>Waalwijk vs Emmen</strong> (Eerste Divisie)</li><li>20:00 — <strong>Atlético Melilla vs Pinatar</strong> (Copa del Rey)</li><li>20:45 — <strong>Spain vs Czechia</strong> (UEFA Nations League)</li><li>20:45 — <strong>Switzerland vs Slovenia</strong> (UEFA Nations League)</li><li>20:45 — <strong>FYR Macedonia vs Scotland</strong> (UEFA Nations League)</li><li>21:00 — <strong>Águilas Doradas vs Jaguares</strong> (Primera A Colombia)</li><li>22:00 — <strong>Atletico Tucuman vs Barracas Central</strong> (Liga Profesional Argentina)</li><li>22:00 — <strong>Newells Old Boys vs Lanus</strong> (Liga Profesional Argentina)</li><li>23:05 — <strong>Deportes Tolima vs Chico</strong> (Primera A Colombia)</li><li>23:30 — <strong>Atletico-MG vs RB Bragantino</strong> (Brasileirao Serie A)</li></ul></div><!--/SEO_MATCHES_SUMMARY-->
   <div class="loading-state">
     <div class="loading-spinner"></div>
     <div class="loading-text" data-i18n="home_page.loading_analyses">LOADING ANALYSES...</div>
   </div>
   </div>
-  </div>
-  <!-- Colonne de droite (03/10/2026, refonte de l'accueil) : sous la liste sur telephone. -->
-  <aside class="home-aside" aria-label="IASHARK Pro" data-i18n-attr="aria-label:accueil_v3.aside_aria">
-    <div class="home-card home-card-pro" data-vente>
-      <p class="home-card-kicker" data-i18n="accueil_v3.pro_kicker">With Pro</p>
-      <h2 class="home-card-title" data-i18n="accueil_v3.pro_title">What Pro includes</h2>
-      <ul class="home-checks">
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg><span data-i18n="accueil_v3.pro_1">Your daily programme, privately on Telegram</span></li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M4 10h16"/></svg><span data-i18n="accueil_v3.pro_2">The full match page: the bet, its calculated chance, the odds</span></li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M17 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M11 12h2"/></svg><span data-i18n="accueil_v3.pro_3">All of today’s analyses, your accumulator and the gap detector</span></li>
-      </ul>
-      <a href="/za/abonnement.html?interval=month" data-essai-cta class="home-card-cta" data-track="home_aside_trial" data-track-kind="cta"><span data-essai-label data-i18n="accueil_v3.offer_cta">See the Pro plan</span></a>
-    </div>
-    <a class="home-card home-card-tg" href="https://t.me/iasharkdata" target="_blank" rel="noopener" data-track="home_aside_telegram" data-track-kind="cta">
-      <span class="home-tg-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></span>
-      <span><span class="home-card-title2" data-i18n="accueil_v3.tg_title">The free Telegram channel</span><span class="home-card-text" data-i18n="accueil_v3.tg_text">Match of the day, news and results.</span></span>
-    </a>
-  </aside>
-  </div>
 </section>
-<!-- Programme Partenaires (03/10/2026) : juste apres la liste des matchs. 40 % = un taux de
-     commission (conditions : partenaires-conditions.html), jamais un gain promis. -->
+
+<style>/* Bloc partenaire (texte seul, 03/10/2026, demande de Clement) */
+.home-partner{padding:8px 16px 28px}
+.home-partner-in{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);overflow:hidden;border-radius:20px;border:1px solid rgba(32,213,239,.28);background:radial-gradient(120% 140% at 100% 0%,rgba(32,213,239,.14) 0%,rgba(6,11,18,0) 55%),#050a10}
+.home-partner-txt{padding:20px 18px 22px}
+.home-partner-kicker{margin:0;font-size:13px;font-weight:700;color:#20d5ef}
+.home-partner-title{margin:4px 0 0;font-size:clamp(24px,3vw,34px);font-weight:800;letter-spacing:-.03em;line-height:1.1;color:#f4f7fb}
+.home-partner-hook{margin:12px 0 0;font-size:17px;font-weight:700;line-height:1.35;color:#f4f7fb}
+.home-partner-hook b{display:inline-block;padding:1px 8px;border-radius:8px;background:#20d5ef;color:#04141b;font-weight:800}
+.home-partner-text{margin:10px 0 0;max-width:52ch;font-size:14.5px;line-height:1.55;color:#a6b4c6}
+.home-partner-cta{margin-top:18px;display:inline-flex;gap:10px;align-items:center;height:48px;padding:0 22px;border-radius:12px;background:#20d5ef;color:#04141b;font-size:14.5px;font-weight:800;text-decoration:none;box-shadow:0 14px 34px -16px rgba(32,213,239,.85);transition:filter .15s}
+.home-partner-cta:hover{filter:brightness(1.08)}
+@media (min-width:768px){.home-partner{padding:12px 32px 40px}.home-partner-in{grid-template-columns:minmax(0,1fr);align-items:center}.home-partner-txt{padding:30px 34px}}
+</style>
 <section class="home-partner" aria-labelledby="homePartnerTitle">
   <div class="home-partner-in">
     <div class="home-partner-txt">
@@ -626,12 +610,52 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
   </div>
 </section>
 
+
 <!-- Videos courtes (assets/ugc-reel.js, 03/10/2026) : cache tant qu'aucune video ne correspond a la langue ;
      petite mention obligatoire « Image virtuelle » ou « Collaboration commerciale ». -->
 <section data-ugc-reel hidden></section>
 
+<section id="analyse" class="relative border-t border-hairline">
+  <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-16 sm:py-24">
+    <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>WHAT YOU GET</div>
+    <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">An analysis, <span class="text-cyan">not a tip</span> thrown at you with no explanation.</h2>
+    <div class="mt-8 grid grid-cols-1 gap-5 md:grid-cols-3">
+      <article class="spot rounded-2xl border border-hairline bg-surface/60 p-7 transition hover:border-cyan/25"><div class="mb-4 text-[12px] font-bold tracking-[0.16em] text-cyan/70">01</div><h3 class="mb-2.5 text-[19px] font-bold text-ink">The signal</h3><p class="text-[14px] leading-relaxed text-soft">The most likely market among those with odds, with our estimate set against the odds.</p></article>
+      <article class="spot rounded-2xl border border-hairline bg-surface/60 p-7 transition hover:border-cyan/25"><div class="mb-4 text-[12px] font-bold tracking-[0.16em] text-cyan/70">02</div><h3 class="mb-2.5 text-[19px] font-bold text-ink">The reasoning</h3><p class="text-[14px] leading-relaxed text-soft">The data and factors that led the model there, written in plain words.</p></article>
+      <article class="spot rounded-2xl border border-hairline bg-surface/60 p-7 transition hover:border-cyan/25"><div class="mb-4 text-[12px] font-bold tracking-[0.16em] text-cyan/70">03</div><h3 class="mb-2.5 text-[19px] font-bold text-ink">The uncertainty</h3><p class="text-[14px] leading-relaxed text-soft">Every analysis shows how reliable its data is. A thin sample is stated, not hidden.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="relative border-t border-hairline">
+  <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-10 sm:py-14">
+    <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>CE QUE LE MOTEUR A DÉJÀ TRAITÉ</div>
+    <div class="mt-6 grid grid-cols-2 divide-hairline md:grid-cols-3 md:divide-x">
+      <div class="flex flex-col gap-1.5 px-2 py-4 text-center sm:px-4"><b id="kpiLigues" class="text-[clamp(30px,4vw,44px)] font-extrabold leading-none tracking-[-0.04em] text-ink tabular-nums">32</b><span class="text-[12.5px] leading-snug text-soft">Competitions covered</span></div>
+      <div id="kpiSimulations" style="display:none" class="flex flex-col gap-1.5 px-2 py-4 text-center sm:px-4"><b id="kpiModeles" class="text-[clamp(30px,4vw,44px)] font-extrabold leading-none tracking-[-0.04em] text-ink tabular-nums">—</b><span class="text-[12.5px] leading-snug text-soft">Simulations per match</span></div>
+      <div class="flex flex-col gap-1.5 px-2 py-4 text-center sm:px-4"><b id="kpiJour" class="text-[clamp(30px,4vw,44px)] font-extrabold leading-none tracking-[-0.04em] text-ink tabular-nums">—</b><span class="text-[12.5px] leading-snug text-soft">Matches analysed over 3 days</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="relative border-t border-hairline bg-surface/30">
+  <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-16 sm:py-24 grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
+    <div class="lg:col-span-5">
+      <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>CE QU’ON NE FERA PAS</div>
+      <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">On préfère te dire <span class="text-cyan">quand on ne sait pas.</span></h2>
+      <p class="mt-4 max-w-2xl text-[15.5px] leading-relaxed text-soft">Une probabilité ne vaut que par sa fiabilité : on affiche les deux, même quand elles sont modestes.</p>
+    </div>
+    <ul class="list-none p-0 lg:col-span-7">
+      <li class="border-t border-hairline py-5 first:border-t-0 first:pt-0"><h3 class="mb-1.5 text-[15.5px] font-bold text-ink">No promise of profit</h3><p class="text-[14px] leading-relaxed text-soft">A bet stays a bet. We compute probabilities; we guarantee no outcome.</p></li>
+      <li class="border-t border-hairline py-5 first:border-t-0 first:pt-0"><h3 class="mb-1.5 text-[15.5px] font-bold text-ink">L’écart s’affiche même quand il te dessert</h3><p class="text-[14px] leading-relaxed text-soft">Si la cote proposée est moins intéressante que notre estimation, c’est écrit noir sur blanc.</p></li>
+      <li class="border-t border-hairline py-5 first:border-t-0 first:pt-0"><h3 class="mb-1.5 text-[15.5px] font-bold text-ink">Le pari ne bouge plus une fois publié</h3><p class="text-[14px] leading-relaxed text-soft">Dès sa publication, le pari est figé : ni lui, ni sa probabilité, ni sa cote ne changent jusqu’au coup d’envoi. Seuls les faits du match (compositions, absences, cotes des bookmakers) continuent d’être mis à jour.</p></li>
+      <li class="border-t border-hairline py-5 first:border-t-0 first:pt-0"><h3 class="mb-1.5 text-[15.5px] font-bold text-ink">La fiabilité affichée</h3><p class="text-[14px] leading-relaxed text-soft">Chaque analyse indique la fiabilité de ses données : un échantillon mince est signalé comme tel.</p></li>
+    </ul>
+  </div>
+</section>
+
 <section id="acces" data-vente class="relative border-t border-hairline">
-  <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 home-sec-pad">
+  <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-16 sm:py-24">
     <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>ACCESS</div>
     <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">Start for free. <span class="text-cyan">Upgrade to Pro</span> when you want to see everything.</h2>
 
@@ -645,24 +669,41 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
   </div>
 </section>
 
-<section id="analyse" class="home-bref relative border-t border-hairline">
-  <div class="home-bref-in">
-    <div class="home-bref-head">
-      <div class="mb-3 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>WHAT YOU GET</div>
-      <h2 class="home-bref-title text-ink">An analysis, <span class="text-cyan">not a tip</span> thrown at you with no explanation.</h2>
-      <a href="/za/a-propos.html" class="home-bref-link" data-i18n="accueil_v3.method_link">The full method →</a>
+<section id="methode" class="relative border-t border-hairline">
+  <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-16 sm:py-24">
+    <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>LA MÉTHODE</div>
+    <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">Quatre étapes, <span class="text-cyan">un seul signal</span> par match.</h2>
+    <p class="mt-4 max-w-2xl text-[15.5px] leading-relaxed text-soft">Chaque étape répond à une question différente. Un seul marché en sort, choisi par une règle fixe.</p>
+    <div class="mt-8 grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_240px_minmax(0,260px)]">
+      <ul class="flex list-none flex-col gap-3 p-0">
+        <li class="rounded-xl border border-hairline bg-surface/60 px-5 py-4"><div class="text-[15px] font-bold text-ink">Forces en présence</div><p class="mt-1 text-[12.5px] leading-snug text-soft">Ce que chaque équipe produit et concède, à domicile ou à l’extérieur.</p></li>
+        <li class="rounded-xl border border-hairline bg-surface/60 px-5 py-4"><div class="text-[15px] font-bold text-ink">Prudence en début de saison</div><p class="mt-1 text-[12.5px] leading-snug text-soft">Avec peu de matchs joués, la saison précédente pèse davantage.</p></li>
+        <li class="rounded-xl border border-hairline bg-surface/60 px-5 py-4"><div class="text-[15px] font-bold text-ink">Probabilité de chaque marché</div><p class="mt-1 text-[12.5px] leading-snug text-soft">Des buts attendus à la probabilité de chaque score, puis de chaque marché.</p></li>
+        <li class="rounded-xl border border-hairline bg-surface/60 px-5 py-4"><div class="text-[15px] font-bold text-ink">Simulation du match</div><p class="mt-1 text-[12.5px] leading-snug text-soft">Le match calculé minute par minute à partir des buts attendus, pour les scores les plus probables.</p></li>
+      </ul>
+      <svg class="hidden h-[300px] w-full lg:block" viewBox="0 0 240 300" fill="none" aria-hidden="true" focusable="false"><defs><linearGradient id="flux" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#20d5ef" stop-opacity=".08"/><stop offset="1" stop-color="#20d5ef" stop-opacity=".55"/></linearGradient></defs><path d="M0 38 C 110 38, 130 150, 196 150" stroke="url(#flux)" stroke-width="1.5" class="conv-line"/><path d="M0 113 C 110 113, 130 150, 196 150" stroke="url(#flux)" stroke-width="1.5" class="conv-line"/><path d="M0 188 C 110 188, 130 150, 196 150" stroke="url(#flux)" stroke-width="1.5" class="conv-line"/><path d="M0 263 C 110 263, 130 150, 196 150" stroke="url(#flux)" stroke-width="1.5" class="conv-line"/><circle cx="196" cy="150" r="26" fill="#0d1926" stroke="#20d5ef" stroke-opacity=".45"/><circle cx="196" cy="150" r="6" fill="#20d5ef"/></svg>
+      <div class="rounded-2xl border border-cyan/25 bg-cyan/[0.05] p-6">
+        <div class="text-[11px] font-bold uppercase tracking-[0.18em] text-cyan/80">Signal IASHARK</div>
+        <p class="mt-2.5 text-[14px] leading-relaxed text-soft">Un marché prioritaire, une probabilité, et l’écart mesuré avec le prix du marché.</p>
+      </div>
     </div>
-    <ul class="home-bref-list">
-      <li><span class="home-bref-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></span><div><h3 class="home-bref-t text-ink">The signal</h3><p>The most likely market among those with odds, with our estimate set against the odds.</p></div></li>
-      <li><span class="home-bref-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span><div><h3 class="home-bref-t">The reasoning</h3><p>The data and factors that led the model there, written in plain words.</p></div></li>
-      <li><span class="home-bref-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"/><path d="M12 8v5M12 16.5v.5"/></svg></span><div><h3 class="home-bref-t">The uncertainty</h3><p>Every analysis shows how reliable its data is. A thin sample is stated, not hidden.</p></div></li>
-      <li><span class="home-bref-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/></svg></span><div><h3 class="home-bref-t">No promise of profit</h3><p>A bet stays a bet. We compute probabilities; we guarantee no outcome.</p></div></li>
-    </ul>
+  </div>
+</section>
+
+<section class="relative border-t border-hairline bg-surface/30">
+  <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-12 sm:py-16">
+    <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>EN PRATIQUE</div>
+    <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">De la donnée brute au <span class="text-cyan">signal exploitable.</span></h2>
+    <ol class="mt-7 flex list-none flex-col gap-6 p-0 md:flex-row md:items-start md:gap-6">
+      <li class="flex flex-1 items-start gap-4 md:flex-col md:items-stretch md:gap-3"><span class="shrink-0 text-[12px] font-extrabold tracking-[0.14em] text-cyan/70">01</span><div><h3 class="text-[15.5px] font-bold text-ink">On ingère la donnée</h3><p class="mt-1.5 text-[13.5px] leading-relaxed text-soft">Calendriers, classements, résultats récents, confrontations directes et absences annoncées, championnat par championnat.</p></div></li><span aria-hidden="true" class="hidden text-[18px] text-soft/40 md:block">→</span>
+      <li class="flex flex-1 items-start gap-4 md:flex-col md:items-stretch md:gap-3"><span class="shrink-0 text-[12px] font-extrabold tracking-[0.14em] text-cyan/70">02</span><div><h3 class="text-[15.5px] font-bold text-ink">Le modèle calcule</h3><p class="mt-1.5 text-[13.5px] leading-relaxed text-soft">Buts attendus, probabilité de chaque score, puis de chaque marché.</p></div></li><span aria-hidden="true" class="hidden text-[18px] text-soft/40 md:block">→</span>
+      <li class="flex flex-1 items-start gap-4 md:flex-col md:items-stretch md:gap-3"><span class="shrink-0 text-[12px] font-extrabold tracking-[0.14em] text-cyan/70">03</span><div><h3 class="text-[15.5px] font-bold text-ink">Tu reçois le signal</h3><p class="mt-1.5 text-[13.5px] leading-relaxed text-soft">Une fiche claire : le pari retenu, sa chance calculée par IASHARK et sa fiabilité.</p></div></li>
+    </ol>
   </div>
 </section>
 
 <section class="relative border-t border-hairline">
-  <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 home-sec-pad">
+  <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-16 sm:py-20">
     <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>FREQUENTLY ASKED</div>
     <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">What you're wondering <span class="text-cyan">before you pay.</span></h2>
     <div class="mt-7 max-w-3xl">
@@ -678,7 +719,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 </section>
 
 <section class="relative border-t border-hairline">
-  <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 home-sec-pad text-center">
+  <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-20 text-center sm:py-24">
     <h2 class="text-[clamp(30px,4vw,48px)] font-extrabold leading-[1.1] tracking-[-0.04em] text-ink">The next match already has <span class="text-cyan">a signal.</span></h2>
     <p class="mx-auto mt-4 max-w-md text-[15.5px] text-soft">Go check it out, it's free.</p>
     <a href="#decisions" class="hero-cta mt-9 inline-flex items-center justify-center gap-2.5 rounded-xl bg-cyan px-9 py-4 text-[14px] font-extrabold tracking-[0.02em] text-page shadow-[0_18px_45px_-18px_rgba(32,213,239,.85)] transition hover:brightness-110"><span data-i18n="home_app.final_cta">See today's match</span><span aria-hidden="true">→</span></a>
@@ -728,7 +769,6 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 <script src="/i18n/i18n.js"></script>
 <script src="/lib/market-config.js"></script>
 <script src="/assets/pricing-grid.js" defer></script>
-<script src="/assets/essai-cta.js" defer></script>
 <script src="/assets/fraicheur.js" defer></script>
 <script src="/lib/display-data.js"></script>
 <script src="/lib/match-time.js"></script>
@@ -951,11 +991,9 @@ function leagueHeader(m){
 // renseigne. Sans ce repli, les cartes et buildHeroFeature affichaient
 // "Analyse en cours - aucun marche prioritaire" pour des matchs dont le
 // pick etait deja calcule, invisible pour les abonnes payants.
-// Noms d'equipes en francais sur les pages francaises (lib/noms-equipes-fr.js, 03/10/2026).
-function nomFr(n){var N=window.IasharkNomsEquipesFr,l=window.I18N&&window.I18N.locale;return N&&(!l||l==='fr')?N.nom(n):n;}
 function marketIdLabel(m){
   return (m.market_id&&window.IasharkMarketLabels)
-    ?(window.IasharkMarketLabels.marketIdLabel||window.IasharkMarketLabels.marketIdLabelFr)(m.market_id,{home:nomFr(m.home&&m.home.n),away:nomFr(m.away&&m.away.n)})
+    ?(window.IasharkMarketLabels.marketIdLabel||window.IasharkMarketLabels.marketIdLabelFr)(m.market_id,{home:m.home&&m.home.n,away:m.away&&m.away.n})
     :null;
 }
 

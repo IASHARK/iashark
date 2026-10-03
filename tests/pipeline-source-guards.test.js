@@ -134,7 +134,8 @@ test("pipeline source: compteurs API_CALLS/CACHE_HITS/RATE_LIMIT_RETRIES/RATE_LI
 
 test("pipeline source: seul v3.football.api-sports.io passe par la file API_FETCHER (throttling/cache/retry) - les autres hotes (meteo/news/odds) gardent leurs propres headers, jamais la cle api-sports", () => {
   assert.match(source, /function isApiSportsUrl\(url\) \{ return url\.indexOf\('v3\.football\.api-sports\.io'\) !== -1; \}/);
-  const getFnBlock = source.slice(source.indexOf("function get(url, headers) {"), source.indexOf("function getArr(url, headers) {"));
+  const getFnBlock = source.slice(source.indexOf("function get(url, headers, opts) {"), source.indexOf("function getArr(url, headers, opts) {"));
+  assert.ok(getFnBlock.length > 50, "get(url, headers, opts) introuvable");
   assert.match(getFnBlock, /rawHttpGetJson\(url, headers\)/, "la branche non-api-sports de get() doit transmettre les headers de l'appelant, jamais forcer APS");
 });
 

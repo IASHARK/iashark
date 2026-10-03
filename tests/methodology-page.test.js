@@ -252,7 +252,9 @@ test("ce que la page affirme est vrai dans le code (sans en publier les valeurs)
   const pipeline = read(".github/workflows/update-data.yml");
   // « Les analyses sont calculees a l'avance, une fois par jour, et ne sont pas
   // refaites juste avant le coup d'envoi. »
-  assert.match(pipeline, /cron: '0 6 \* \* \*'/, "le calcul quotidien annonce n'existe plus");
+  // Plusieurs tentatives planifiees, une seule calcule (etape « Garde », audit I12).
+  assert.match(pipeline, /schedule:[\s\S]*?- cron: '\d+ \d+ \* \* \*'/, "le calcul quotidien annonce n'existe plus");
+  assert.match(pipeline, /name: Garde - sortie du jour deja publiee \?/, "une tentative en trop recalculerait le jour");
   // « une option choisie par une regle fixe parmi les marches reellement cotes,
   // en privilegiant les issues les plus probables ».
   assert.match(pipeline, /var fairSelection=pickMarketFair\(allMarkets,\{shin:shinProbs\}\)/, "la regle fixe de choix annoncee n'existe plus");

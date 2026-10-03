@@ -1,0 +1,118 @@
+name: Moteur v3 - essai a blanc
+
+# ESSAI A BLANC DU MOTEUR V3 (avocat du diable, 2e revue, point D, 29/09/2026).
+# Fait tourner EXACTEMENT les etapes Python du calcul du matin (update-data.yml,
+# « Moteur v3 - ... »), puis controle la sortie avec l'adaptateur du site
+# (lib/moteur-v3.js : contrat, fraicheur, nombre de matchs, de publications).
+# N'ECRIT RIEN ET NE PUBLIE RIEN : aucun commit, aucun push, aucune ecriture
+# Supabase, aucun message Telegram, aucun fichier conserve (pas d'artefact).
+# Lancement a la main seulement (onglet Actions > « Moteur v3 - essai a blanc » >
+# Run workflow). A lancer avant d'allumer MOTEUR_V3 le 3/10.
+
+on:
+  workflow_dispatch: {}
+
+concurrency:
+  group: moteur-v3-essai-a-blanc
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  essai:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Meme source du moteur que le calcul du matin (update-data.yml) : depot PRIVE
+      # IASHARK/iashark-moteur si le secret MOTEUR_V3_DEPOT_PRIVE existe (lecture
+      # seule), sinon la copie moteur-v3/ du depot (ancien comportement).
+      - name: Source du moteur (depot prive ou copie du depot)
+        id: source
+        env:
+          JETON_MOTEUR_PRIVE: ${{ secrets.MOTEUR_V3_DEPOT_PRIVE }}
+        run: |
+          if [ -n "$JETON_MOTEUR_PRIVE" ]; then
+            echo "prive=oui" >> "$GITHUB_OUTPUT"
+            echo "MOTEUR_V3_DIR=.moteur-v3-prive" >> "$GITHUB_ENV"
+            echo "Moteur v3 : depot prive IASHARK/iashark-moteur."
+          else
+            echo "prive=non" >> "$GITHUB_OUTPUT"
+            echo "MOTEUR_V3_DIR=moteur-v3" >> "$GITHUB_ENV"
+            echo "Moteur v3 : secret MOTEUR_V3_DEPOT_PRIVE absent, copie moteur-v3/ du depot."
+            test -f moteur-v3/requirements.lock || { echo "::error title=Essai a blanc du moteur v3::secret MOTEUR_V3_DEPOT_PRIVE absent et moteur-v3/ retire du depot : le calcul du matin ne publierait aucun pari v3 (docs/MOTEUR-V3-DEPOT-PRIVE.md)."; exit 1; }
+          fi
+
+      - name: Recuperer le moteur prive (lecture seule)
+        if: ${{ steps.source.outputs.prive == 'oui' }}
+        uses: actions/checkout@v4
+        with:
+          repository: IASHARK/iashark-moteur
+          ref: ${{ vars.MOTEUR_V3_REF || '1aee60b48b0aa3d32e73ac102cc59503828c5910' }}
+          token: ${{ secrets.MOTEUR_V3_DEPOT_PRIVE }}
+          path: .moteur-v3-prive
+          persist-credentials: false
+
+      # Raccord du site : raccord-moteur-v3/branchement/ (public, hors de moteur-v3/),
+      # copie dans le dossier du moteur du jour, comme le calcul du matin.
+      - name: Raccord du site (reconstruction des etats)
+        run: |
+          if [ -d "$MOTEUR_V3_DIR" ] && [ ! -d "$MOTEUR_V3_DIR/branchement" ]; then
+            cp -R raccord-moteur-v3/branchement "$MOTEUR_V3_DIR/branchement"
+          fi
+          test -f "$MOTEUR_V3_DIR/branchement/reconstruire_etats.py" || { echo "::error title=Essai a blanc du moteur v3::raccord branchement/ absent de $MOTEUR_V3_DIR"; exit 1; }
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: ${{ env.MOTEUR_V3_DIR }}/requirements.lock
+
+      - name: Produire la sortie du jour (comme le calcul du matin)
+        working-directory: ${{ env.MOTEUR_V3_DIR }}
+        timeout-minutes: 25
+        env:
+          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
+          ODDS_API_KEY:  ${{ secrets.ODDS_API_KEY }}
+        run: |
+          python -m pip install --quiet -r requirements.lock
+          python -m branchement.reconstruire_etats
+          python -m moteur.produire --jours 3 --essai
+
+      - name: Controler la sortie avec l'adaptateur du site
+        run: |
+          node -e '
+            const V3 = require("./lib/moteur-v3.js");
+            const cfg = require("./config/moteur-v3.json");
+            const r = V3.chargerSortie(process.env.MOTEUR_V3_DIR + "/sortie_essai", { config: cfg });
+            if (!r.ok) {
+              console.log("::error title=Essai a blanc du moteur v3::" + r.raison + (r.erreurs ? " : " + r.erreurs.slice(0, 5).join(" ; ") : ""));
+              process.exit(1);
+            }
+            const s = r.sortie;
+            const matchs = s.matchs || [];
+            const lies = matchs.filter((m) => m.ids_api_football && m.ids_api_football.fixture != null).length;
+            const pubs = matchs.filter((m) => m.publication).length;
+            const plusSur = matchs.filter((m) => m.selections && m.selections.plus_sur).length;
+            const lignes = [
+              "Sortie lue : " + r.fichier,
+              "Contrat " + s.contrat_version + ", moteur " + s.moteur_version + ", genere le " + s.genere_le,
+              "Matchs : " + matchs.length + " (dont " + lies + " relies a un numero API-Football)",
+              "Selections « la plus probable » : " + plusSur + ", publications : " + pubs,
+              "Interrupteur d urgence : " + (s.interrupteur_urgence ? "OUI" : "non"),
+            ];
+            // Journal public : des compteurs seulement, jamais un pari ni une cote.
+            lignes.forEach((l) => console.log(l));
+            require("fs").appendFileSync(process.env.GITHUB_STEP_SUMMARY, "### Essai a blanc du moteur v3 : sortie conforme\n\n" + lignes.map((l) => "- " + l).join("\n") + "\n");
+            if (!matchs.length) { console.log("::error title=Essai a blanc du moteur v3::aucun match dans la sortie"); process.exit(1); }
+            if (!lies) console.log("::warning title=Essai a blanc du moteur v3::aucun match relie a un numero API-Football : le site devra les retrouver par leurs noms");
+          '

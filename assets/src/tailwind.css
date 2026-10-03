@@ -14,6 +14,51 @@
             mask-image: linear-gradient(to right,transparent,black 12%,black 88%,transparent);
   }
 }
+/* Grille de prix (assets/pricing-grid.js, 30/09/2026) : remise a zero LOCALE,
+   limitee a .pg-root (preflight est coupe et la grille vit sur des pages aux
+   styles tres differents : abonnement, accueil, landings, pages match).
+   :where() garde la specificite d'une seule classe : les utilitaires Tailwind,
+   ecrits apres, l'emportent toujours ; les regles de page par element
+   (h3{...}, button{...}) ne deteignent plus sur la grille. */
+@layer base {
+  .pg-root, .pg-root :where(*, *::before, *::after) { box-sizing: border-box; border-width: 0; border-style: solid; border-color: rgba(141,179,211,.14); }
+  /* Police : celle de la page (Inter sur l'accueil, DM Sans sur l'abonnement,
+     les landings et les pages match), jamais une troisieme police. */
+  .pg-root { font-family: inherit; line-height: 1.5; text-align: left; -webkit-font-smoothing: antialiased; }
+  .pg-root :where(h2, h3, p, ul, li, table, caption, figure) { margin: 0; }
+  .pg-root :where(ul) { list-style: none; padding: 0; }
+  .pg-root :where(h2, h3, p, li, span, b, a, button, th, td, caption) { font-family: inherit; text-transform: none; letter-spacing: normal; font-style: normal; }
+  .pg-root :where(button) { font: inherit; color: inherit; background: transparent; margin: 0; cursor: pointer; }
+  .pg-root :where(a) { text-decoration: none; }
+  .pg-root :where(svg) { display: block; }
+  .pg-root :where(table) { border-collapse: collapse; border-spacing: 0; }
+  .pg-root [hidden] { display: none !important; }
+}
+/* Consentement de paiement (lib/checkout-consent.js) place dans la carte Pro
+   par les pages de paiement : pas de case dans la case, titre en minuscules
+   (direction visuelle : pas de petites capitales espacees). Deux classes :
+   l'emporte sur le style injecte par checkout-consent.js. */
+.pg-root .iash-consent { margin: 0 0 14px; padding: 0; border: 0; border-radius: 0; background: none; }
+.pg-root .iash-consent-title { margin: 0 0 8px; font-size: 13.5px; font-weight: 600; letter-spacing: 0; text-transform: none; color: #f4f7fb; }
+.pg-root .iash-consent-row { font-size: 13px; line-height: 1.55; color: #c3d1de; }
+/* Jamais « (obligatoire) » seul sur sa ligne (controle des captures du 30/09/2026) :
+   derniere ligne equilibree, mention insecable. Le compte (account-page.js) utilise
+   desormais la meme carte : ses anciennes regles #proPlanPicker ~ .iash-consent sont retirees. */
+.pg-root .iash-consent-row > span { text-wrap: pretty; }
+.pg-root .iash-consent-req { white-space: nowrap; }
+/* Ligne de confiance sous le bouton de paiement (grille : .pg-trust ; abonnement.html :
+   .trust-row, meme regle dans sa page) : une ligne si la colonne de paiement fait au
+   moins 430 px, sinon une colonne centree (jamais un morceau seul sur la 2e ligne). */
+.pg-root [data-pg-cta-box] { container-type: inline-size; }
+.pg-root .pg-trust { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+@container (min-width: 430px) { .pg-root .pg-trust { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 4px 16px; } }
+/* Message de paiement vide des landings pays (#proMsg.plan-msg) : pas de trou entre le bouton et la ligne de confiance. */
+.pg-root .plan-msg:empty { min-height: 0; margin-top: 0; }
+/* Le prix change (mensuel / annuel / semaine) : courte entree, pas en boucle. */
+@keyframes pgPop { from { opacity: .2; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@layer utilities {
+  .pg-pop { animation: pgPop .35s cubic-bezier(.16,1,.3,1); }
+}
 /* Le chevron "+" de la FAQ : on retire le marqueur natif du <summary>. */
 summary::-webkit-details-marker { display: none; }
 summary { list-style: none; }
@@ -21,4 +66,5 @@ summary { list-style: none; }
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in { animation: none !important; opacity: 1 !important; transform: none !important; }
   .animate-marquee { animation: none !important; }
+  .pg-pop { animation: none !important; }
 }

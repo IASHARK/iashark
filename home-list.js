@@ -28,7 +28,10 @@
 })(typeof window!=='undefined'?window:null,function(root){
 'use strict';
 
-var DEFAULTS={upsellAfter:3,lockedHref:'match',liveWindowMin:115,staleLiveMin:150,simulations:5000,
+// Plus de « 5000 simulations » par defaut (contre-controle de l'avocat du diable,
+// 30/09/2026) : un pari du moteur v3 est calcule exactement, sans simulation. Le
+// nombre n'est affiche que si le match porte le champ nb_simulations (nbSimulations).
+var DEFAULTS={upsellAfter:3,lockedHref:'match',liveWindowMin:115,staleLiveMin:150,
   collapsedKey:'iashark.hlCollapsed.v1'};
 var PROB_BANDS=['high','good','moderate'];
 
@@ -38,6 +41,21 @@ function tf(key,fb,vars){var s=String(t(key,fb));return vars?s.replace(/\{(\w+)\
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function localeTag(){return (root.I18N&&root.I18N.localeTag)?root.I18N.localeTag():'fr-FR';}
 function lien(p){return (root.I18N&&root.I18N.href)?root.I18N.href(p):'/'+p;}
+// Vraie page d'un match (audit SEO du 29/09/2026, action A1) : /match/<id>.html
+// (francais) ou /<version>/match/<id>.html, SEULEMENT si le pipeline l'a ecrite
+// pour la version du visiteur (champ public page_dirs de data-home.json, pose
+// d'apres les fichiers reellement presents : scripts/match-lifecycle.js
+// #annotateHomePages). Sinon null : l'appelant garde match.html?id= (noindex),
+// jamais un lien vers la page d'une autre version.
+function versionDir(){var I=root.I18N;try{return I?(I.linkDir?I.linkDir():I.dir)||null:null;}catch(e){return null;}}
+function staticMatchPath(m,dir){
+  if(dir===undefined)dir=versionDir();
+  if(!m||m.id==null||!/^\d{1,12}$/.test(String(m.id))||!dir||!/^[a-z]{2}$/.test(dir))return null;
+  if(!Array.isArray(m.page_dirs)||m.page_dirs.indexOf(dir)===-1)return null;
+  return dir==='fr'?'/match/'+m.id+'.html':'/'+dir+'/match/'+m.id+'.html';
+}
+// Lien d'une carte match : vraie page si elle existe, sinon match.html?id= de la version.
+function matchHref(m,H){return staticMatchPath(m)||(H&&H.lien||lien)('match.html?id='+encodeURIComponent(m.id));}
 function reducedMotion(){return !!(root.matchMedia&&root.matchMedia('(prefers-reduced-motion: reduce)').matches);}
 
 /* ---------- Icones ---------- */
@@ -116,6 +134,18 @@ function hasSignal(m){
   if(m&&m.past===true)return false;
   return !!(m&&(m.has_signal||m.pari_rec||m.market_id))&&!m.no_signal;
 }
+// Nombre de simulations REELLEMENT tirees pour ce match (champ public
+// nb_simulations), sinon null : jamais un chiffre par defaut.
+function nbSimulations(m){var n=Number(m&&m.nb_simulations);return Number.isInteger(n)&&n>0?n:null;}
+// Chiffre cle de l'accueil « N simulations par match » : seulement si TOUS les
+// matchs de la liste portent nb_simulations (le plus petit), sinon null.
+function simulationsParMatch(list){
+  list=Array.isArray(list)?list:[];
+  if(!list.length)return null;
+  var min=null;
+  for(var i=0;i<list.length;i++){var n=nbSimulations(list[i]);if(n===null)return null;min=min===null?n:Math.min(min,n);}
+  return min;
+}
 function isFree(m,ctx){return ctx.freeMatchId!=null&&String(m.id)===String(ctx.freeMatchId);}
 function fmtProb(v){v=Math.min(Math.max(v,0),10);return (Math.round(v*10)/10).toLocaleString(localeTag(),{minimumFractionDigits:1,maximumFractionDigits:1});}
 function normConf(c){c=parseFloat(c);if(isNaN(c)||c<0)return null;return c<=1?c*10:c;}
@@ -170,6 +200,9 @@ function analysisFor(m,ctx,H){
   // croire que le modele avait choisi de ne pas parier (20/09/2026). Un match
   // ferme AVEC pari publie garde son analyse (lib/pick-freeze.js
   // FROZEN_CLOSED) et ne passe pas par cet etat.
+  // Match reporte (lib/pick-freeze.js POSTPONED_CLOSED, ronde 5) : « Match reporté »,
+  // jamais « apres le coup d'envoi » pour un match qui ne s'est pas encore joue.
+  if(!hasSignal(m)&&String(m.no_signal_reason||'')==='KICKOFF_POSTPONED')return {state:'closed',postponed:true,free:false};
   if(!hasSignal(m)&&/^(KICKOFF_|FIXTURE_NOT_UPCOMING)/.test(String(m.no_signal_reason||'')))return {state:'closed',free:false};
   if(!hasSignal(m))return {state:'none',free:free,label:m.no_signal_label||t('home_app.no_signal_label','Aucun signal clair sur ce match')};
   // Match offert sans compte : la page match exige un compte gratuit ; ici non
@@ -179,7 +212,11 @@ function analysisFor(m,ctx,H){
   // niveau public prob_band est repris.
   if(!ctx.isPro&&!free)return {state:'locked',band:probBandOf(m)};
   var market=m.pari_rec?H.translateMarket(m.pari_rec):(H.marketIdLabel(m)||null);
-  var c=(H.hasReliableModelOutput(m)&&m.conf!=null&&m.conf!=='')?normConf(m.conf):null;
+  // Une seule source (01/10/2026) : la note sur 10 est la chance IASHARK du pari
+  // (chance_iashark / 10, la meme que la page match et Telegram) ; conf (probabilite
+  // brute du modele / 10) seulement pour une ancienne analyse sans chance_iashark.
+  var ch=m.chance_iashark!=null&&m.chance_iashark!==''&&isFinite(Number(m.chance_iashark))?Number(m.chance_iashark)/10:null;
+  var c=H.hasReliableModelOutput(m)?(ch!=null?ch:(m.conf!=null&&m.conf!==''?normConf(m.conf):null)):null;
   var pn=c==null?null:Math.min(c,10);
   if(!market)return {state:'pending',free:free,prob:pn!=null?fmtProb(pn):null};
   return {state:'open',free:free,probNum:pn,prob:pn!=null?fmtProb(pn):null,market:market};
@@ -226,6 +263,8 @@ function veilleEntree(e){
     date:rtxt(e.kickoff)||'',status:'FT',
     // Le verdict n'existe que s'il a vraiment ete etabli.
     verdict:verdict==='win'||verdict==='loss'?verdict:null,
+    // Pari publie avant la V3 : a presenter « ancien modele » si l'onglet revient.
+    ancien_modele:e.moteur!=='v3',
     past:true
   };
 }
@@ -278,6 +317,9 @@ function matchStarHtml(m,ctx){
   return '<button type="button" class="hl-mstar'+(on?' is-on':'')+'" data-hl-mfav="'+esc(m.id)+'" aria-pressed="'+on+'" aria-label="'+esc(lbl)+'" title="'+esc(lbl)+'">'+ICON.star+'</button>';
 }
 
+// Ligne fermee : « Pronostic fermé » apres le coup d'envoi, « Match reporté » pour un match reporte.
+function closedShort(a){return a.postponed?t('home_list.postponed_short','Match reporté'):t('home_list.closed_short','Pronostic fermé');}
+function closedSub(a){return a.postponed?t('home_list.postponed_sub','Aucun pronostic sur ce match'):t('home_list.closed_sub','L’analyse n’est plus proposée après le coup d’envoi');}
 function renderMatchRow(m,ctx,H,index){
   var a=analysisFor(m,ctx,H),ts=H.matchTimestamp(m),cd=countdown(m,H,ctx.nowTs);
   var home=m.home||{},away=m.away||{},heure=H.heure(m),derby=derbyName(m),q=qualityFor(m),sig=hasSignal(m);
@@ -285,7 +327,7 @@ function renderMatchRow(m,ctx,H,index){
   // Rien si le match n'a pas encore ete regle.
   var verdict=m&&m.verdict==='win'?' hl-win':m&&m.verdict==='loss'?' hl-loss':'';
   var cls='hl-row hl-grid is-'+a.state+(a.free?' is-free':'')+(cd?' cd-'+cd.kind:'')+verdict;
-  var href=(a.state==='locked'&&ctx.lockedHref==='abonnement')?H.lien('abonnement.html'):H.lien('match.html?id='+encodeURIComponent(m.id));
+  var href=(a.state==='locked'&&ctx.lockedHref==='abonnement')?H.lien('abonnement.html'):matchHref(m,H);
 
   // Indicateurs PUBLICS reels uniquement.
   var tags=[];
@@ -293,7 +335,8 @@ function renderMatchRow(m,ctx,H,index){
   if(derby)tags.push('<span class="hl-tag hl-tag-derby" title="'+esc(derby)+'">'+esc(t('home_list.derby_chip','Derby'))+'</span>');
   if(cd)tags.push('<span class="hl-tag hl-tag-time is-'+cd.kind+'" data-hl-ts="'+(isFinite(ts)?ts:'')+'"'+(cd.estimated?' title="'+esc(t('home_list.status_estimated','Statut estimé d’après l’heure du coup d’envoi'))+'"':'')+'>'+esc(cd.text)+'</span>');
   if(q)tags.push('<span class="hl-tag hl-tag-q is-'+q.level+'"><i aria-hidden="true"></i>'+esc(q.text)+'</span>');
-  if(sig)tags.push('<span class="hl-tag hl-tag-sim">'+esc(tf('home_list.sims','{n} simulations',{n:fmtInt(ctx.simulations)}))+'</span>');
+  var nbSim=nbSimulations(m);
+  if(sig&&nbSim)tags.push('<span class="hl-tag hl-tag-sim">'+esc(tf('home_list.sims','{n} simulations',{n:fmtInt(nbSim)}))+'</span>');
 
   var zone;
   if(a.state==='past'){
@@ -321,8 +364,8 @@ function renderMatchRow(m,ctx,H,index){
   }else if(a.state==='pending'){
     zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'+esc(t('home_app.analysis_in_progress','Analyse en cours'))+'</span></span>';
   }else if(a.state==='closed'){
-    zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'+esc(t('home_list.closed_short','Pronostic fermé'))+'</span>'
-      +'<span class="hl-none-s">'+esc(t('home_list.closed_sub','L’analyse n’est plus proposée après le coup d’envoi'))+'</span></span>';
+    zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'+esc(closedShort(a))+'</span>'
+      +'<span class="hl-none-s">'+esc(closedSub(a))+'</span></span>';
   }else{
     zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'+esc(t('home_list.no_signal_short','Pas de signal clair'))+'</span>'
       +'<span class="hl-none-s">'+esc(t('home_list.no_signal_sub','Aucun pari forcé'))+'</span></span>';
@@ -335,7 +378,7 @@ function renderMatchRow(m,ctx,H,index){
       +(a.free?' '+t('home_list.aria_free','Analyse offerte.'):'')
     :a.state==='gated'?t('home_list.aria_free_gated','Analyse offerte avec un compte gratuit.')
     :a.state==='pending'?t('home_app.analysis_in_progress','Analyse en cours')+'.'
-    :a.state==='closed'?t('home_list.closed_short','Pronostic fermé')+'. '+t('home_list.closed_sub','L’analyse n’est plus proposée après le coup d’envoi')+'.':a.label+'.';
+    :a.state==='closed'?closedShort(a)+'. '+closedSub(a)+'.':a.label+'.';
   var extra=[derby?tf('home_list.aria_derby','Derby : {name}',{name:derby}):'',cd?cd.text+(cd.estimated?' ('+t('home_list.estimated','estimé')+')':''):'',q?q.text:''].filter(Boolean).join(', ');
   var aria=tf('home_list.row_aria','{home} contre {away}, {time}. {extra}. {analysis}',{home:home.n||'',away:away.n||'',time:heure,extra:extra,analysis:anaAria}).replace(/\.\s\./g,'.');
   // Suivi du tunnel (funnel-track.js) : ligne verrouillee = kind dedie, sans donnee personnelle.
@@ -441,7 +484,7 @@ function mount(rootEl,options){
   var collapsed={};
   try{collapsed=JSON.parse(root.sessionStorage.getItem(DEFAULTS.collapsedKey)||'{}')||{};}catch(e){collapsed={};}
   var ctx={isPro:!!options.isPro,hasAccount:!!options.hasAccount,freeMatchId:null,lockedHref:options.lockedHref||DEFAULTS.lockedHref,
-    upsellAfter:options.upsellAfter||DEFAULTS.upsellAfter,simulations:options.simulations||DEFAULTS.simulations,
+    upsellAfter:options.upsellAfter||DEFAULTS.upsellAfter,
     favorites:favorites,favMatches:favMatches,collapsed:collapsed,nowTs:Date.now()};
   var state={status:'loading',matches:[],days:[],day:null,clock:H.localClock(),onRetry:null,veille:[],veilleJour:null};
 
@@ -656,5 +699,6 @@ function mount(rootEl,options){
 return {mount:mount,veilleListe:veilleListe,veilleAppel:veilleAppel,renderDateStrip:renderDateStrip,groupByLeague:groupByLeague,renderLeagueBlock:renderLeagueBlock,renderMatchRow:renderMatchRow,
   renderMine:renderMine,renderDayBody:renderDayBody,matchStarHtml:matchStarHtml,
   analysisFor:analysisFor,hasSignal:hasSignal,buildDays:buildDays,countdown:countdown,matchStatus:matchStatus,derbyName:derbyName,
-  probBandOf:probBandOf,PROB_BANDS:PROB_BANDS,defaultHelpers:defaultHelpers};
+  probBandOf:probBandOf,PROB_BANDS:PROB_BANDS,defaultHelpers:defaultHelpers,nbSimulations:nbSimulations,simulationsParMatch:simulationsParMatch,
+  staticMatchPath:staticMatchPath,matchHref:matchHref};
 });

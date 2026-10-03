@@ -13,11 +13,13 @@
 <link rel="alternate" hreflang="es-MX" href="https://iashark.com/mx/landing.html">
 <link rel="alternate" hreflang="es" href="https://iashark.com/es/landing.html">
 <link rel="alternate" hreflang="x-default" href="https://iashark.com/en/landing.html">
-<meta name="description" content="Expected goals, probability of every market, gap with the odds: IASHARK analyses every match with a real statistical model. One free match every day.">
+<meta name="description" content="Expected goals, probability of every market, gap with the odds: IASHARK analyses every match with a real statistical model. One free match.">
 <meta name="robots" content="noindex, follow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- Grille de prix : classes Tailwind (assets/pricing-grid.js). -->
+<link rel="stylesheet" href="/assets/tailwind.css">
 <style>
 :root{
   --bg:#080c12;--card:#0d1520;--card2:#0f1a28;
@@ -157,7 +159,7 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 <meta property="og:site_name" content="IASHARK">
 <meta property="og:locale" content="en">
 <meta property="og:title" content="IASHARK — The model that reads the match before kickoff">
-<meta property="og:description" content="Expected goals, probability of every market, gap with the odds: IASHARK analyses every match with a real statistical model. One free match every day.">
+<meta property="og:description" content="Expected goals, probability of every market, gap with the odds: IASHARK analyses every match with a real statistical model. One free match.">
 <meta property="og:url" content="https://iashark.com/en/landing.html">
 <meta property="og:image" content="https://iashark.com/icon-512.png">
 <meta name="twitter:card" content="summary">
@@ -181,8 +183,8 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
     <h1 class="reveal" style="animation-delay:.1s" data-i18n-html="landing_v2.hero_title">No emotion.<br><b>Only probabilities.</b></h1>
     <p class="sub reveal" style="animation-delay:.15s" data-i18n-html="landing_page.hero_sub">IASHARK starts from <b>both teams' real statistics, current and previous season</b>, to produce a probability signal on every match, before kickoff.</p>
     <div class="cta-row reveal" style="animation-delay:.2s">
-      <a href="/en/" data-href="" class="btn-primary" data-i18n="landing_page.hero_cta">SEE TODAY'S FREE MATCH</a>
-      <div class="cta-note" data-i18n-html="landing_v2.cta_note">No credit card · <b>1 free analysis every day</b></div>
+      <a href="/en/" data-href="" class="btn-primary" data-i18n="landing_page.hero_cta">SEE THE FREE MATCH</a>
+      <div class="cta-note" data-i18n-html="landing_v2.cta_note">No credit card · <b>1 free match</b></div>
     </div>
   </div>
 
@@ -202,7 +204,7 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
       <div class="model-card"><div class="model-tag" data-i18n="landing_page.model1_tag">STEP 1</div><div class="model-name" data-i18n="landing_page.model1_name">Team strengths</div><div class="model-desc" data-i18n="landing_page.model1_desc">What each team produces and concedes in its real situation, at home or away, compared with the level of its competition.</div></div>
       <div class="model-card"><div class="model-tag" data-i18n="landing_page.model2_tag">STEP 2</div><div class="model-name" data-i18n="landing_page.model2_name">Caution early in the season</div><div class="model-desc" data-i18n="landing_page.model2_desc">When few matches have been played, the previous season and a reference level weigh more, then fade away.</div></div>
       <div class="model-card"><div class="model-tag" data-i18n="landing_page.model3_tag">STEP 3</div><div class="model-name" data-i18n="landing_page.model3_name">Probability of every market</div><div class="model-desc" data-i18n="landing_page.model3_desc">Expected goals become the probability of every scoreline, then of every market, corrected by a calibration learnt from past seasons.</div></div>
-      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model4_tag">STEP 4</div><div class="model-name" data-i18n="landing_page.model4_name">Match simulation</div><div class="model-desc" data-i18n="landing_page.model4_desc">The match is replayed a large number of times to bring out the most likely scorelines. The simulation does not choose the bet.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model4_tag">STEP 4</div><div class="model-name" data-i18n="landing_page.model4_name">Match simulation</div><div class="model-desc" data-i18n="landing_page.model4_desc">The match is calculated minute by minute from the expected goals, to bring out the most likely scorelines. The simulation does not choose the bet.</div></div>
     </div>
   </div>
 </section>
@@ -213,8 +215,8 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
     <h2 class="sec-title" data-i18n-html="landing_v2.title_practice">From raw data to a <b>usable signal.</b></h2>
     <div class="step-list">
       <div class="step reveal"><div class="step-num">01</div><div><div class="step-title" data-i18n="landing_page.step1_title">We ingest the data</div><div class="step-desc" data-i18n="landing_page.step1_desc">Fixtures, standings, recent results, head-to-head history and announced absences, league by league.</div></div></div>
-      <div class="step reveal"><div class="step-num">02</div><div><div class="step-title" data-i18n="landing_page.step2_title">The model computes</div><div class="step-desc" data-i18n="landing_page.step2_desc">Expected goals, the probability of every scoreline, then of every market — never using the odds.</div></div></div>
-      <div class="step reveal"><div class="step-num">03</div><div><div class="step-title" data-i18n="landing_page.step3_title">You get the signal</div><div class="step-desc" data-i18n="landing_page.step3_desc">A clear sheet per match: probability, reliability level, and the market where the model detects a gap with the real market.</div></div></div>
+      <div class="step reveal"><div class="step-num">02</div><div><div class="step-title" data-i18n="landing_page.step2_title">The model computes</div><div class="step-desc" data-i18n="landing_page.step2_desc">Expected goals, the probability of every scoreline, then of every market.</div></div></div>
+      <div class="step reveal"><div class="step-num">03</div><div><div class="step-title" data-i18n="landing_page.step3_title">You get the signal</div><div class="step-desc" data-i18n="landing_page.step3_desc">A clear sheet per match: the selected bet, its chance calculated by IASHARK and its reliability level.</div></div></div>
     </div>
   </div>
 </section>
@@ -223,29 +225,11 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
   <div class="wrap">
     <div class="sec-lbl" data-i18n="landing_page.lbl_access">ACCESS</div>
     <h2 class="sec-title" data-i18n-html="landing_v2.title_access">Start for free. <b>Upgrade to Pro</b> when you want to see everything.</h2>
-    <div class="plan-grid">
-      <div class="plan">
-        <div class="plan-name" data-i18n="landing_page.plan_free_name">FREE</div>
-        <div class="plan-price"><b data-market-price="free" style="font-weight:inherit">$0</b></div>
-        <ul class="plan-feats">
-          <li data-i18n="landing_page.plan_free_feat1">1 full analysis offered every day</li>
-          <li data-i18n="landing_v2.plan_free_feat2">All of today's matches visible</li>
-          <li data-i18n="landing_page.plan_free_feat3">Our method explained in detail</li>
-        </ul>
-        <a href="/en/" data-href="" class="plan-cta free" data-i18n="landing_page.plan_free_cta">GET STARTED</a>
-      </div>
-      <div class="plan hi" data-badge="RECOMMENDED" data-i18n-attr="data-badge:landing_page.plan_pro_badge">
-        <div class="plan-name">PRO</div>
-        <div class="plan-price"><b data-market-price="pro" style="font-weight:inherit">$19.99</b><span data-i18n="landing_v2.per_month">/month</span></div>
-        <div class="plan-trial" data-i18n="landing_v2.plan_pro_commitment">No commitment — cancel anytime</div>
-        <ul class="plan-feats">
-          <li data-i18n="landing_page.plan_pro_feat1">All analyses, all leagues</li>
-          <li data-i18n="landing_page.plan_pro_feat2">Today's gap detector on real matches</li>
-          <li data-i18n="landing_page.plan_pro_feat3">Synced decisions journal</li>
-          <li data-i18n="landing_page.plan_pro_feat4">Cancel anytime</li>
-        </ul>
-        <a href="/en/abonnement.html" data-href="abonnement.html" class="plan-cta pro" data-i18n="landing_page.plan_pro_cta">UNLOCK PRO</a>
-      </div>
+    <!-- Grille de prix (assets/pricing-grid.js, 30/09/2026) : memes cartes, choix de la duree et conditions d'essai
+         que l'accueil ; les boutons menent au parcours d'abonnement existant. Repli sans JavaScript :
+         la ligne ci-dessous (prix cuits au build). -->
+    <div class="mt-8" data-pricing-grid="complet" data-pg-heading="false" data-pg-annual="true" data-pg-track="landing_pricing_pro">
+      <p class="pg-fallback plan-trial"><span data-i18n="pricing_grid.free_name">Free</span> <b data-market-price="free">$0</b> · IASHARK Pro <b data-market-price="pro">$19.99</b> <span data-i18n="pricing_grid.per_month">/ month</span> · <a href="/en/abonnement.html" data-href="abonnement.html" data-i18n="pricing_grid.cta_pro">Go Pro</a></p>
     </div>
   </div>
 </section>
@@ -276,6 +260,7 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 
 <script src="/i18n/i18n.js"></script>
 <script src="/lib/market-config.js"></script>
+<script src="/assets/pricing-grid.js" defer></script>
 <script>
 (function(){
   // Ligne d'aide jeu responsable : nom/lien/numero remplis par

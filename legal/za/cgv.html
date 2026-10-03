@@ -137,7 +137,9 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Responsible gambling</a>
   </nav>
   <h1 class="page-title">Terms of service and sale</h1>
-  <div class="page-date">Last updated: 19 September 2026</div>
+  <div class="page-date">Last updated: 2 October 2026</div>
+  <!-- LEGAL REVIEW: 02/10/2026 - 7-day free trial restored (owner decision; create-checkout-session/trial.ts: TRIAL_DAYS unset = 7): section 6A added (first subscription only, once per person; card required, nothing charged during the trial; reminder email 2 days before the end, trial-reminder job 0042 to be enabled BEFORE opening; cancel in 1 click; first charge on day 8 at the price of the chosen period; first charge declined = Pro access stops at the end of the trial); section 6: first payment at the end of the trial where applicable. To confirm with local counsel: start of the cancellation/cooling-off period (subscription date, trial included). Previous version archived in legal/za/archives/cgv-2026-10-01.html. Status: REVIEW. -->
+  <!-- LEGAL REVIEW: 01/10/2026 - controle des chiffres publics : article 4, accès gratuit = analyse d'un match offert certains jours, simulation réservée à Pro (plus « un match par jour ») ; essai gratuit non proposé (TRIAL_DAYS = 0 par défaut) : aucun article sur l'essai, premier paiement à la souscription (article 7 inchangé). Version précédente archivée dans legal/za/archives/cgv-2026-09-19.html. Statut : REVIEW. -->
   <!-- LEGAL REVIEW: 19/09/2026 - owner decision: weekly and monthly plans payable in South Africa (config/markets.json#za.checkoutOpen, Stripe Prices in za.stripePriceIds); still no annual plan. Prices, billing periods, renewal and cancellation rules unchanged from the 16/09/2026 text; "including any applicable taxes" replaced by the French VAT franchise mention. Previous version archived in legal/za/archives/cgv-2026-09-16.html. Status: REVIEW. -->
 
   <div class="warn-box">
@@ -165,7 +167,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
 
   <section class="section">
     <h2>4. Free account</h2>
-    <p>Creating an account is free and requires a valid email address. A free account includes one full match analysis per day and the other free content described on our pricing page. What is included in the free account may change.</p>
+    <p>Creating an account is free and requires a valid email address. A free account includes the analysis of one free match, on some days (the simulation remains Pro only), and the other free content described on our pricing page. What is included in the free account may change.</p>
   </section>
 
   <!-- LEGAL REVIEW: sections 5, 6 and 8 rewritten on 16/09/2026 for the single Pro plan - REVIEW status, to be reviewed by a South African lawyer before the Stripe prices are opened. Owner decision 16/09/2026: the annual period is NOT offered in South Africa at launch (CPA s14 fixed-term agreement: notice 80 to 40 business days before expiry, month-to-month continuation, early-cancellation penalty policy undecided) - no annual price, no annual option, no STRIPE_PRICE_ID_ZA_YEAR. Before opening it: add the annual price in config/markets.json, the s14 notice process and the fixed-term clauses. Prices taken from config/markets.json (tests/cgv-pro-prices.test.js). -->
@@ -176,7 +178,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
       <li><strong>Price</strong> — full prices in South African rand (ZAR): <strong>R69 per week</strong> or <strong>R199 per month</strong>. VAT not applicable, Article 293 B of the French General Tax Code (CGI). The price of the period you choose is shown on the pricing page and on the checkout page before you pay.</li>
       <li><strong>Duration</strong> — weekly and monthly plans have no minimum term. No annual plan is offered at present.</li>
       <li><strong>Reviewing your order</strong> — before you pay, the checkout page lets you review the billing period and price, correct any mistake, or leave without ordering.</li>
-      <li><strong>Access</strong> — paid features are made available as soon as your payment is confirmed.</li>
+      <li><strong>Access</strong> — paid features are made available as soon as your payment is confirmed or, with the free trial (section 6A), as soon as your card is registered.</li>
       <li><strong>Record of your transaction</strong> — your subscription and billing details can be viewed and saved from the secure billing area opened from the "My account" page.</li>
     </ul>
   </section>
@@ -185,13 +187,26 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <h2>6. Payment and automatic renewal</h2>
     <p>Payments are processed by Stripe, using a payment system that is secure according to accepted technological standards. We never see or store your full card details.</p>
     <ul>
-      <li>You pay at the start of each billing period (week or month).</li>
+      <li>You pay at the start of each billing period (week or month). With the free trial (section 6A), the first payment is taken at the end of the trial.</li>
       <li><strong>Weekly and monthly plans renew automatically</strong> for the same period until you cancel them.</li>
       <!-- LEGAL REVIEW: 19/09/2026 - changing billing period: check that the Stripe customer portal configuration (STRIPE_PORTAL_CONFIGURATION_ID or default configuration) applies the rule below (monthly immediate with proration, weekly at the end of the paid month) - otherwise correct this item. -->
       <li><strong>Changing billing period.</strong> You can switch between weekly and monthly from "My account". Moving to the longer period (monthly) takes effect immediately, less a pro-rata credit for the unused part of the current week; moving to the shorter period (weekly) takes effect at the end of the month you have already paid for. The new price and when the change takes effect are shown before you confirm. An active subscription cannot be bought a second time.</li>
       <li>If we change the price, we will tell you in advance. The new price will only apply from your next billing period, and you can cancel before it applies.</li>
       <li>If a renewal payment fails, our payment provider may retry it. Your paid access continues for 1 day after the end of the paid period on the weekly plan, and for 4 days on the monthly plan; if payment is still not made, your account returns to the free plan.</li>
     </ul>
+  </section>
+
+  <section class="section">
+    <h2>6A. 7-day free trial</h2>
+    <p>With your first IASHARK Pro subscription, you get a 7-day free trial, <strong>on the monthly subscription only</strong>. Weekly and yearly plans are paid when you subscribe, with no trial. During the trial, you have access to all Pro features.</p>
+    <ul>
+      <li>Your card is required when you subscribe, but <strong>nothing is charged during the trial</strong>.</li>
+      <li>We email you about 2 days before the trial ends, with the date and amount of the first payment.</li>
+      <li>You can cancel the trial at any time, free of charge and online, in 1 click from "My account". You keep Pro access until the end of the trial and nothing is charged.</li>
+      <li>If you do not cancel, your subscription continues at the end of the trial: the first payment is taken on day 8, at the monthly subscription price (section 5), and the subscription then renews as described in section 6. If this first payment fails, Pro access stops at the end of the trial until payment is made.</li>
+      <li>The trial is offered once per person: not to an account, or an email address, that has already had an IASHARK Pro subscription or trial. In that case, the first payment is taken when you subscribe.</li>
+    </ul>
+    <p>The cooling-off period in section 7 starts on the day you subscribe, trial included.</p>
   </section>
 
   <section class="section">

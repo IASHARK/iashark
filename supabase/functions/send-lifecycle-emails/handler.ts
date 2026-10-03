@@ -22,6 +22,7 @@
 //    email_complete_send : jamais deux fois le meme email.
 // Journaux : adresse masquee, jamais d'email en clair ni d'identifiant.
 import { BUNDLE, Lifecycle, Render } from "../_shared/lifecycle-email-bundle.generated.mjs";
+import { trialDays } from "../create-checkout-session/trial.ts";
 
 export type GetEnv = (name: string) => string | undefined | null;
 export type Logger = { info: (m: string) => void; warn: (m: string) => void; error: (m: string) => void };
@@ -29,6 +30,10 @@ export type CandidateRow = {
   user_id: string;
   email: string;
   market?: string | null;
+  // user_preferences.language, ajoutee par index.ts (listCandidates) ; absente = repertoire d'inscription.
+  language?: string | null;
+  // Le compte a deja eu un abonnement (tous statuts), ajoute par index.ts ; absent/null = inconnu.
+  ever_subscribed?: boolean | null;
   campaign: string;
   campaign_key?: string | null;
   marketing_opt_in?: boolean | null;
@@ -164,10 +169,15 @@ export async function handleRequest(req: Request, deps: HandlerDeps): Promise<Re
       continue;
     }
     if (!Render.isValidEmail(row.email)) { skip(n, campaign, "invalid_email"); continue; }
-    const dir = Lifecycle.DIRS.indexOf(String(row.market)) !== -1 ? String(row.market) : "fr";
+    // Langue du compte (user_preferences.language) d'abord : la meme que le site et le robot.
+    const dir = Lifecycle.dirForLanguage(row.language, row.market);
     const ctx = Lifecycle.siteContext(BUNDLE.markets, dir);
     const need = Lifecycle.CAMPAIGNS[campaign].needs;
-    const data: Json = { marketingOptIn: row.marketing_opt_in === true, freeMatch: null, weekendMatches: [] };
+    // Essai Pro gratuit (abonnement mensuel) annonce dans les e-mails de vente
+    // seulement si TRIAL_DAYS l'ouvre et si le compte n'a JAMAIS eu d'abonnement
+    // (inconnu = pas d'annonce). Le mois payable est verifie au rendu.
+    const venteAvecEssai = ["free_match", "pro_features", "inactive_7d", "inactive_30d"].includes(campaign) && row.ever_subscribed === false;
+    const data: Json = { marketingOptIn: row.marketing_opt_in === true, freeMatch: null, weekendMatches: [], trialDays: venteAvecEssai ? trialDays((k: string) => deps.env(k)) : 0 };
     if (campaign === "welcome" || need === "free_match" || need === "weekend_matches") {
       const list = await matches();
       if (!list && need) { skip(n, campaign, "public_data_unavailable"); continue; }

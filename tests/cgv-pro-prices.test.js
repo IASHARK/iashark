@@ -119,11 +119,13 @@ test("CGV : date de mise a jour = version du consentement, texte en REVIEW, dure
     assert.doesNotMatch(visible(html), /\[TODO|BLOCKED_DECISION/, d + " : aucune note interne visible");
   }
   // Une seule version des CGV le 19/09/2026 (9 versions, pages racine comprises).
-  assert.equal(TERMS_VERSION, "2026-09-19");
-  // /en/ seul a change le 21/09/2026 (ouverture de l'hebdomadaire a 4,99 USD).
-  const VERSION_ATTENDUE = { en: "2026-09-21" };
+  // 30/09/2026 : calculateur de mise retire de l'article 4 ; gb, za et mx
+  // (ligne absente) restent a la version du 19/09/2026.
+  // 01/10/2026 : controle des chiffres publics, les 9 versions changent ensemble.
+  // 02/10/2026 : essai gratuit de 7 jours (article 6 bis), les 9 versions changent ensemble.
+  assert.equal(TERMS_VERSION, "2026-10-02");
   for (const d of DIRS.concat([""])) {
-    assert.equal(versionFor(d), VERSION_ATTENDUE[d] || "2026-09-19", (d || "racine") + " : version des CGV envoyee avec le consentement");
+    assert.equal(versionFor(d), "2026-10-02", (d || "racine") + " : version des CGV envoyee avec le consentement");
   }
 
   // FR (et versions EUR) : trois durees payables, conditions de l'annuel et du changement de duree.
@@ -152,9 +154,9 @@ test("CGV : date de mise a jour = version du consentement, texte en REVIEW, dure
 });
 
 test("CGV : versions precedentes archivees (non publiees), chacune a la date de son nom", () => {
-  const ARCHIVES = { fr: ["2026-09-16", "2026-09-18"] };
+  const ARCHIVES = { fr: ["2026-09-16", "2026-09-18", "2026-09-19", "2026-09-30", "2026-10-01"], en: ["2026-09-16", "2026-09-19", "2026-09-21", "2026-09-30", "2026-10-01"], es: ["2026-09-16", "2026-09-19", "2026-09-30", "2026-10-01"], de: ["2026-09-16", "2026-09-19", "2026-09-30", "2026-10-01"], it: ["2026-09-16", "2026-09-19", "2026-09-30", "2026-10-01"], pt: ["2026-09-16", "2026-09-19", "2026-09-30", "2026-10-01"] };
   for (const d of DIRS) {
-    for (const date of ARCHIVES[d] || ["2026-09-16"]) {
+    for (const date of ARCHIVES[d] || ["2026-09-16", "2026-09-19", "2026-10-01"]) {
       const f = "legal/" + d + "/archives/cgv-" + date + ".html";
       assert.ok(fs.existsSync(path.join(ROOT, f)), f + " absente");
       const html = read(f);
@@ -164,4 +166,10 @@ test("CGV : versions precedentes archivees (non publiees), chacune a la date de 
   }
   // legal/ n'est jamais publie (scripts/build-public.js), archives comprises.
   assert.match(read("scripts/build-public.js"), /const FORBIDDEN = \/\^\([^)]*\blegal\b[^)]*\)\\\//);
+});
+
+test("CGV : plus de calculateur de mise ni de mention de mise (30/09/2026)", () => {
+  const STAKE = /calculateur de mise|stake calculator|calculadora de apuesta|Einsatzrechner|calcolatore di puntata|calculadora de aposta|\bmises?\b|esp[ée]rance|expected value/i;
+  for (const d of DIRS) assert.doesNotMatch(visible(read("legal/" + d + "/cgv.html")).replace(/mise à jour/gi, ""), STAKE, "legal/" + d + "/cgv.html");
+  for (const d of PUBLIC_DIRS) assert.doesNotMatch(visible(read(d + "/cgv.html")).replace(/mise à jour/gi, ""), STAKE, d + "/cgv.html");
 });

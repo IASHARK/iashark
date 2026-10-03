@@ -42,7 +42,10 @@ function currencyOfCheckoutMarket(market) {
   return MARKETS[key] ? MARKETS[key].currency : null;
 }
 
-const ALL_VERSIONS = BASE_VERSIONS.map((v) => {
+// Versions retirees du site public le 25/09/2026 (config/markets.json#_retiredDirs :
+// de, it, pt) : plus jamais testees (audit V3 du 02/10/2026, point I14 : 217 echecs).
+const RETIRED = MARKETS._retiredDirs || {};
+const ALL_VERSIONS = BASE_VERSIONS.filter((v) => !Object.prototype.hasOwnProperty.call(RETIRED, v.dir)).map((v) => {
   const m = marketOfDir(v.dir);
   const pro = (m.prices && m.prices.pro) || {};
   const amount = (iv) => (pro[iv] && typeof pro[iv].amount === 'number' ? pro[iv].amount : null);

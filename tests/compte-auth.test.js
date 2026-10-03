@@ -203,9 +203,9 @@ test("les preferences ecrivent dans les vraies colonnes de user_preferences", ()
 });
 
 test("la bankroll n'a qu'une source de verite", () => {
-  // Elle vit dans users.capital, lue par les outils. La page compte ne doit
-  // pas en garder une seconde copie dans user_preferences.
-  assert.match(compteJs, /update\(\{ capital: capital \}\)/);
+  // Plus de « Bankroll » dans le compte (avocat du diable, 01/10/2026 : aucune mise, aucun
+  // simulateur de capital) : la page ne l'affiche ni ne l'ecrit, et n'en garde aucune copie.
+  assert.doesNotMatch(compteJs, /update\(\{ capital: capital \}\)|id="bankroll"|champ\('bankroll'|compte_page\.bankroll_label/);
   assert.ok(!/bankroll:/.test(compteJs.slice(compteJs.indexOf("var ligne = {"), compteJs.indexOf("var ligne = {") + 400)));
 });
 

@@ -21,6 +21,7 @@ const path = require("path");
 
 const ROOT = path.join(__dirname, "..");
 const LEAGUES_CONFIG = require(path.join(ROOT, "config/leagues.json"));
+const SELECTIONS = require(path.join(ROOT, "lib/selections-nationales.js"));
 let COVERAGE_REPORT = null;
 try { COVERAGE_REPORT = JSON.parse(fs.readFileSync(path.join(ROOT, "league-coverage-report.json"), "utf8")); } catch (e) { /* repli sur SEASON_FALLBACK */ }
 const SEASON_FALLBACK = 2026;
@@ -110,7 +111,29 @@ function postJSON(host, urlPath, body, headers) {
 // fixturesPerLeague) grossit un jour sans que ce fichier soit revu.
 // Jamais de retry infini : un appel qui echoue ou qui signale un
 // rate-limit arrete proprement la boucle, ne la relance jamais.
-var MAX_API_CALLS_PER_RUN = 100;
+// 30/09/2026 : 19 -> 48 competitions (config/leagues.json). 48 x (1 + 3) = 192
+// appels au plus : 250 garde la meme securite (5 runs par jour, 1 250 appels au
+// plus sur 75 000). Les competitions du socle, en tete de la config, passent
+// toujours en premier.
+var MAX_API_CALLS_PER_RUN = 250;
+
+// SELECTIONS NATIONALES (02/10/2026) : ARCHIVE seulement, AUCUN pari. Aucune cote historique n'existe
+// pour les verifier (VERIF-COTES-MARCHE-HORS-V3.md) : on archive nous-memes leurs cotes AVANT chaque match
+// (Ligue des nations, eliminatoires...), pour pouvoir les verifier plus tard (150 paris par marche).
+// Une fenetre internationale compte une vingtaine de matchs par competition : jusqu'a 20 matchs par
+// competition de selections au lieu de 3. 2 competitions x (1 + 20) = 42 appels au plus, soit
+// 48 x 4 + 2 x 17 = 226 appels au plus par run : sous le budget de 250.
+// MODE ECONOMIE (03/10/2026) : plafond lu dans config/quotas.json#api_football.releve_large
+// (matchs_par_competition_selections ; 20 avant le passage a 7 500 requetes par jour).
+var RELEVE_LARGE = (function () { try { return require("../config/quotas.json").api_football.releve_large || {}; } catch (e) { return {}; } })();
+var FIXTURES_SELECTIONS = RELEVE_LARGE.matchs_par_competition_selections != null ? Number(RELEVE_LARGE.matchs_par_competition_selections) : 20;
+function estCompetitionSelections(league) {
+  return !!league && (league.kind === "nations" || league.kind === "wcq" || league.national === true
+    || SELECTIONS.estSelectionNationale({ league_id: league.apiFootballId, league: league.displayName }));
+}
+function fixturesPour(league, fixturesPerLeague) {
+  return estCompetitionSelections(league) ? FIXTURES_SELECTIONS : fixturesPerLeague;
+}
 
 function isRateLimitOrQuotaError(resp) {
   if (!resp || !resp.errors) return false;
@@ -123,7 +146,7 @@ async function main() {
   var apsKey = process.env.APISPORTS_KEY;
   if (!apsKey) { console.error("APISPORTS_KEY absent : aucun snapshot ne sera collecte."); process.exitCode = 1; return; }
   var headers = { "x-apisports-key": apsKey };
-  var fixturesPerLeague = 3;
+  var fixturesPerLeague = RELEVE_LARGE.matchs_par_competition != null ? Number(RELEVE_LARGE.matchs_par_competition) : 3;
   process.argv.forEach(function (a) {
     var m = /^--fixtures-per-league=(\d+)$/.exec(a);
     if (m) fixturesPerLeague = parseInt(m[1], 10);
@@ -145,11 +168,12 @@ async function main() {
     var league = LEAGUES_CONFIG.leagues[li];
     var season = seasonFor(league.apiFootballId);
     if (apiCallCount >= MAX_API_CALLS_PER_RUN) { console.log("Budget d'appels API atteint (" + MAX_API_CALLS_PER_RUN + ") avant meme la ligue " + league.key + " - arret propre, pas de retry."); break; }
-    var fxResp = await get("https://v3.football.api-sports.io/fixtures?league=" + league.apiFootballId + "&season=" + season + "&next=" + fixturesPerLeague, headers);
+    var nFixtures = fixturesPour(league, fixturesPerLeague);
+    var fxResp = await get("https://v3.football.api-sports.io/fixtures?league=" + league.apiFootballId + "&season=" + season + "&next=" + nFixtures, headers);
     apiCallCount++;
     await sleep(300);
     if (isRateLimitOrQuotaError(fxResp)) { console.log("Rate-limit/quota signale par l'API sur /fixtures (" + league.key + ") : " + JSON.stringify(fxResp.errors) + " - arret immediat du run, pas de retry."); stoppedForBudgetOrRateLimit = true; break; }
-    var fixtures = (fxResp.response || []).slice(0, fixturesPerLeague);
+    var fixtures = (fxResp.response || []).slice(0, nFixtures);
     for (var fi = 0; fi < fixtures.length; fi++) {
       if (apiCallCount >= MAX_API_CALLS_PER_RUN) { console.log("Budget d'appels API atteint (" + MAX_API_CALLS_PER_RUN + ") - arret propre, pas de retry."); stoppedForBudgetOrRateLimit = true; break; }
       var fx = fixtures[fi];
@@ -225,4 +249,5 @@ if (require.main === module) {
   main().catch(function (e) { console.error("FATAL:", e.message); process.exitCode = 1; });
 }
 
-module.exports = { computeSnapshotPhase: computeSnapshotPhase, isRateLimitOrQuotaError: isRateLimitOrQuotaError, MAX_API_CALLS_PER_RUN: MAX_API_CALLS_PER_RUN };
+module.exports = { computeSnapshotPhase: computeSnapshotPhase, isRateLimitOrQuotaError: isRateLimitOrQuotaError, MAX_API_CALLS_PER_RUN: MAX_API_CALLS_PER_RUN,
+  FIXTURES_SELECTIONS: FIXTURES_SELECTIONS, estCompetitionSelections: estCompetitionSelections, fixturesPour: fixturesPour };

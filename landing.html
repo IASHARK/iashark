@@ -4,9 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title data-i18n="geo.meta.landing.title">IASHARK — Le modèle qui lit le match avant qu'il commence</title>
-<meta name="description" content="Buts attendus, probabilité de chaque marché, écart avec la cote : IASHARK analyse chaque match avec un vrai modèle statistique. Un match gratuit chaque jour." data-i18n-attr="content:geo.meta.landing.description">
+<meta name="description" content="Buts attendus, probabilité de chaque marché, écart avec la cote : IASHARK analyse chaque match avec un vrai modèle statistique. Un match offert." data-i18n-attr="content:geo.meta.landing.description">
 <meta name="robots" content="noindex, follow">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- Grille de prix : classes Tailwind (assets/pricing-grid.js). -->
+<link rel="stylesheet" href="/assets/tailwind.css">
 <style>
 :root{
   --bg:#080c12;--card:#0d1520;--card2:#0f1a28;
@@ -161,8 +163,8 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
     <h1 class="reveal" style="animation-delay:.1s" data-i18n-html="landing_v2.hero_title">Aucune émotion.<br><b>Que des probabilités.</b></h1>
     <p class="sub reveal" style="animation-delay:.15s" data-i18n-html="landing_page.hero_sub">IASHARK part des <b>statistiques réelles des deux équipes, saison en cours et saison précédente</b>, pour produire un signal de probabilité sur chaque match, avant le coup d'envoi.</p>
     <div class="cta-row reveal" style="animation-delay:.2s">
-      <a href="/" data-href="" class="btn-primary" data-i18n="landing_page.hero_cta">VOIR LE MATCH GRATUIT DU JOUR</a>
-      <div class="cta-note" data-i18n-html="landing_v2.cta_note">Sans carte bancaire · <b>1 analyse offerte chaque jour</b></div>
+      <a href="/" data-href="" class="btn-primary" data-i18n="landing_page.hero_cta">VOIR LE MATCH OFFERT</a>
+      <div class="cta-note" data-i18n-html="landing_v2.cta_note">Sans carte bancaire · <b>1 match offert</b></div>
     </div>
   </div>
 
@@ -182,7 +184,7 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
       <div class="model-card"><div class="model-tag" data-i18n="landing_page.model1_tag">ÉTAPE 1</div><div class="model-name" data-i18n="landing_page.model1_name">Forces en présence</div><div class="model-desc" data-i18n="landing_page.model1_desc">Ce que chaque équipe produit et concède dans sa situation réelle, à domicile ou à l'extérieur, comparé au niveau de sa compétition.</div></div>
       <div class="model-card"><div class="model-tag" data-i18n="landing_page.model2_tag">ÉTAPE 2</div><div class="model-name" data-i18n="landing_page.model2_name">Prudence en début de saison</div><div class="model-desc" data-i18n="landing_page.model2_desc">Quand peu de matchs ont été joués, la saison précédente et un niveau de référence pèsent davantage, puis s'effacent.</div></div>
       <div class="model-card"><div class="model-tag" data-i18n="landing_page.model3_tag">ÉTAPE 3</div><div class="model-name" data-i18n="landing_page.model3_name">Probabilité de chaque marché</div><div class="model-desc" data-i18n="landing_page.model3_desc">Les buts attendus deviennent la probabilité de chaque score, puis de chaque marché, corrigée par une calibration apprise sur les saisons passées.</div></div>
-      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model4_tag">ÉTAPE 4</div><div class="model-name" data-i18n="landing_page.model4_name">Simulation du match</div><div class="model-desc" data-i18n="landing_page.model4_desc">Le match est rejoué un grand nombre de fois pour faire apparaître les scores les plus probables. La simulation ne choisit pas le pari.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model4_tag">ÉTAPE 4</div><div class="model-name" data-i18n="landing_page.model4_name">Simulation du match</div><div class="model-desc" data-i18n="landing_page.model4_desc">Le match est calculé minute par minute à partir des buts attendus, pour faire apparaître les scores les plus probables. La simulation ne choisit pas le pari.</div></div>
     </div>
   </div>
 </section>
@@ -193,8 +195,8 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
     <h2 class="sec-title" data-i18n-html="landing_v2.title_practice">De la donnée brute au <b>signal exploitable.</b></h2>
     <div class="step-list">
       <div class="step reveal"><div class="step-num">01</div><div><div class="step-title" data-i18n="landing_page.step1_title">On ingère la donnée</div><div class="step-desc" data-i18n="landing_page.step1_desc">Calendriers, classements, résultats récents, confrontations directes et absences annoncées, championnat par championnat.</div></div></div>
-      <div class="step reveal"><div class="step-num">02</div><div><div class="step-title" data-i18n="landing_page.step2_title">Le modèle calcule</div><div class="step-desc" data-i18n="landing_page.step2_desc">Buts attendus, probabilité de chaque score, puis de chaque marché — sans jamais utiliser les cotes.</div></div></div>
-      <div class="step reveal"><div class="step-num">03</div><div><div class="step-title" data-i18n="landing_page.step3_title">Tu reçois le signal</div><div class="step-desc" data-i18n="landing_page.step3_desc">Une fiche claire par match : probabilité, niveau de fiabilité, et le marché où le modèle détecte un écart avec le marché réel.</div></div></div>
+      <div class="step reveal"><div class="step-num">02</div><div><div class="step-title" data-i18n="landing_page.step2_title">Le modèle calcule</div><div class="step-desc" data-i18n="landing_page.step2_desc">Buts attendus, probabilité de chaque score, puis de chaque marché.</div></div></div>
+      <div class="step reveal"><div class="step-num">03</div><div><div class="step-title" data-i18n="landing_page.step3_title">Tu reçois le signal</div><div class="step-desc" data-i18n="landing_page.step3_desc">Une fiche claire par match : le pari retenu, sa chance calculée par IASHARK et son niveau de fiabilité.</div></div></div>
     </div>
   </div>
 </section>
@@ -203,29 +205,11 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
   <div class="wrap">
     <div class="sec-lbl" data-i18n="landing_page.lbl_access">L'ACCÈS</div>
     <h2 class="sec-title" data-i18n-html="landing_v2.title_access">Commence gratuitement. <b>Passe à Pro</b> quand tu veux tout voir.</h2>
-    <div class="plan-grid">
-      <div class="plan">
-        <div class="plan-name" data-i18n="landing_page.plan_free_name">GRATUIT</div>
-        <div class="plan-price"><b data-market-price="free" style="font-weight:inherit">0€</b></div>
-        <ul class="plan-feats">
-          <li data-i18n="landing_page.plan_free_feat1">1 analyse complète offerte chaque jour</li>
-          <li data-i18n="landing_v2.plan_free_feat2">Tous les matchs du jour visibles</li>
-          <li data-i18n="landing_page.plan_free_feat3">Notre méthode expliquée en détail</li>
-        </ul>
-        <a href="/" data-href="" class="plan-cta free" data-i18n="landing_page.plan_free_cta">COMMENCER</a>
-      </div>
-      <div class="plan hi" data-badge="RECOMMANDÉ" data-i18n-attr="data-badge:landing_page.plan_pro_badge">
-        <div class="plan-name">PRO</div>
-        <div class="plan-price"><b data-market-price="pro" style="font-weight:inherit">19,95€</b><span data-i18n="landing_v2.per_month">/mois</span></div>
-        <div class="plan-trial" data-i18n="landing_v2.plan_pro_commitment">Sans engagement — résiliable à tout moment</div>
-        <ul class="plan-feats">
-          <li data-i18n="landing_page.plan_pro_feat1">Toutes les analyses, tous les championnats</li>
-          <li data-i18n="landing_page.plan_pro_feat2">Détecteur d’écarts du jour sur les matchs réels</li>
-          <li data-i18n="landing_page.plan_pro_feat3">Journal des décisions synchronisé</li>
-          <li data-i18n="landing_page.plan_pro_feat4">Résiliable à tout moment</li>
-        </ul>
-        <a href="/abonnement.html" data-href="abonnement.html" class="plan-cta pro" data-i18n="landing_page.plan_pro_cta">DÉBLOQUER PRO</a>
-      </div>
+    <!-- Grille de prix (assets/pricing-grid.js, 30/09/2026) : memes cartes, choix de la duree et conditions d'essai
+         que l'accueil ; les boutons menent au parcours d'abonnement existant. Repli sans JavaScript :
+         la ligne ci-dessous (prix cuits au build). -->
+    <div class="mt-8" data-pricing-grid="complet" data-pg-heading="false" data-pg-annual="true" data-pg-track="landing_pricing_pro">
+      <p class="pg-fallback plan-trial"><span data-i18n="pricing_grid.free_name">Gratuit</span> <b data-market-price="free">0 €</b> · IASHARK Pro <b data-market-price="pro">19,95 €</b> <span data-i18n="pricing_grid.per_month">/ mois</span> · <a href="/abonnement.html" data-href="abonnement.html" data-i18n="pricing_grid.cta_pro">Devenir Pro</a></p>
     </div>
   </div>
 </section>
@@ -255,6 +239,7 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 
 <script src="/i18n/i18n.js"></script>
 <script src="/lib/market-config.js"></script>
+<script src="/assets/pricing-grid.js" defer></script>
 <script>
 (function(){
   // Ligne d'aide jeu responsable : nom/lien/numero remplis par

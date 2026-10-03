@@ -20,5 +20,10 @@ test("export : table absente ou lecture refusee => cle omise, l'export continue"
   assert.match(exporter, /preferences_emails: res\[5\]\.error \? undefined : \(res\[5\]\.data \|\| null\)/);
   assert.equal(JSON.stringify({ a: 1, preferences_emails: undefined }), '{"a":1}', "undefined n'est pas ecrit dans le fichier");
   const promiseList = exporter.slice(exporter.indexOf("Promise.all(["), exporter.indexOf("]);"));
-  assert.equal((promiseList.match(/sb\.from\(/g) || []).length, 6, "6 lectures, index res[5] = email_preferences");
+  // + reglages Pro (pro_preferences) et tickets notes dans Telegram (pro_tickets),
+  // contrat du Canal Pro (0040) : res[6], res[7], memes regles (cle omise si refus).
+  assert.equal((promiseList.match(/sb\.from\(/g) || []).length, 8, "8 lectures, index res[5] = email_preferences");
+  assert.match(exporter, /reglages_pro: res\[6\]\.error \? undefined/);
+  assert.match(exporter, /tickets_telegram: res\[7\]\.error \? undefined/);
+  assert.doesNotMatch(exporter, /preferences_pro|alertes_pro/, "anciennes tables abandonnees");
 });

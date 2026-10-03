@@ -1345,7 +1345,26 @@
       id: "mrr", label: "Revenu mensuel (MRR)", icon: ICONS.money, cls: "violet", value: mrr, long: mrr.length > 10,
       delta: '<span class="delta-cap">abonnements en cours, Stripe</span>',
       mean: mrrMean,
-      help: "Revenu mensuel récurrent : la somme des abonnements en cours ramenée au mois (hebdo × 52/12, annuel ÷ 12), lue en direct dans Stripe. Les abonnements dont la résiliation est programmée ne sont pas comptés."
+      help: "Revenu mensuel récurrent : la somme des abonnements en cours ramenée au mois (hebdo × 52/12, annuel ÷ 12), lue en direct dans Stripe. Les abonnements dont la résiliation est programmée ne sont pas comptés, ni les essais gratuits (rien n'est prélevé pendant l'essai)."
+    });
+
+    // Essais gratuits de 7 jours (fonction admin-revenue, Stripe en direct).
+    var tri = rev && rev.trials ? rev.trials : null;
+    var triN = tri ? H.num(tri.in_progress) || 0 : null;
+    var triCancel = tri ? H.num(tri.cancelled) || 0 : 0;
+    var triSoon = tri ? H.num(tri.ending_48h) || 0 : 0;
+    var triMrr = tri ? H.mrrText({ mrr: tri.mrr_if_converted }) : "—";
+    var triMean = !tri ? "Chiffre indisponible pour le moment."
+      : triN === 0 ? "Aucun essai gratuit en cours."
+      : H.fmtInt(triN) + " " + plural(triN, "essai en cours", "essais en cours") + " : rien n'est prélevé pendant 7 jours."
+        + (triCancel > 0 ? " " + H.fmtInt(triCancel) + " " + plural(triCancel, "a déjà annulé", "ont déjà annulé") + " (aucun paiement)." : "")
+        + (triSoon > 0 ? " " + H.fmtInt(triSoon) + " " + plural(triSoon, "se termine", "se terminent") + " dans les 48 h." : "")
+        + (triN - triCancel > 0 ? " S'ils continuent : " + triMrr + " de plus par mois." : "");
+    cards.push({
+      id: "trials", label: "Essais gratuits", icon: ICONS.money, cls: "violet", value: tri ? H.fmtInt(triN) : "—",
+      delta: '<span class="delta-cap">en cours, Stripe</span>',
+      mean: triMean,
+      help: "Essais gratuits de 7 jours en cours chez Stripe (carte enregistrée, 0 € prélevé). Le premier paiement a lieu le 8e jour, sauf annulation. Un compte n'a droit qu'à un seul essai."
     });
 
     var now = liveHumans();
@@ -1709,6 +1728,172 @@
       S.retention = res[1];
       renderMembers();
     });
+  }
+  // ---------- Partenaires (programme d'affiliation, migration 0050) ----------
+  var AFF_FILE = "0050_affiliation.sql";
+  var AFF = { data: null, due: null, month: "", loading: false, open: {} };
+  var AFF_STATUS = { pending: ["À valider", "warn"], approved: ["Validé", "ok"], refused: ["Refusé", ""], suspended: ["Suspendu", "pay"] };
+  var AFF_STYLE = { analysis: "Analyses", tips: "Pronostics", entertainment: "Divertissement", education: "Pédagogie", community: "Communauté", other: "Autre" };
+  function affMoney(cents, cur) { return fmtMoney(cents, cur); }
+  function affSumBalances(list, key) {
+    var out = {};
+    (list || []).forEach(function (a) {
+      Object.keys(a.balances || {}).forEach(function (cur) { out[cur] = (out[cur] || 0) + (H.num(a.balances[cur][key]) || 0); });
+    });
+    return out;
+  }
+  function affMoneyMap(map) {
+    var keys = Object.keys(map);
+    if (!keys.length) return affMoney(0, "eur");
+    return keys.map(function (c) { return affMoney(map[c], c); }).join(" + ");
+  }
+  function loadAffiliates() {
+    if (!sb || AFF.loading) return Promise.resolve();
+    AFF.loading = true;
+    if (!AFF.month) AFF.month = H.parisToday(new Date()).slice(0, 7);
+    var monthEl = $("affMonth");
+    if (monthEl && !monthEl.value) monthEl.value = AFF.month;
+    return Promise.all([rpc("admin_affiliates"), rpc("admin_affiliate_commissions", { p_month: AFF.month })]).then(function (res) {
+      AFF.loading = false;
+      if (res.some(function (x) { return x && x.kind === "denied"; })) { showState("denied"); return; }
+      AFF.data = res[0];
+      AFF.due = res[1];
+      renderAffiliates();
+    });
+  }
+  function renderAffiliates() {
+    if (!AFF.data) return;
+    if (AFF.data.kind === "missing") {
+      $("affBody").hidden = true;
+      $("affCards").innerHTML = '<p class="soft-msg"><b>Programme Partenaires à activer</b>Cette partie s\'affichera quand ton développeur aura appliqué la mise à jour de la base ' + esc(AFF_FILE) + ".</p>";
+      return;
+    }
+    if (AFF.data.error) { $("affBody").hidden = true; blockError($("affCards"), AFF.data, "Partenaires"); return; }
+    var list = (AFF.data.data && AFF.data.data.affiliates) || [];
+    var pending = list.filter(function (a) { return a.status === "pending"; }).length;
+    var approved = list.filter(function (a) { return a.status === "approved"; }).length;
+    var paying = list.reduce(function (s, a) { return s + (H.num(a.active_paying) || 0); }, 0);
+    $("affBody").hidden = false;
+    $("affCards").innerHTML = [
+      ["Candidatures à valider", fmtInt(pending), pending ? "Touche « Valider » dans la liste" : "Rien en attente", pending ? "amber" : "", ICONS.signup],
+      ["Partenaires validés", fmtInt(approved), fmtInt(list.length) + " au total", "green", ICONS.users],
+      ["Abonnés payants amenés", fmtInt(paying), "actifs aujourd'hui", "violet", ICONS.star],
+      ["Commissions payables", affMoneyMap(affSumBalances(list.filter(function (a) { return a.status === "approved"; }), "payable")), "à verser dès 50 € par partenaire", "", ICONS.money]
+    ].map(function (c, i) {
+      return '<article class="kcard ' + c[3] + '" aria-labelledby="lbl-aff' + i + '"><div class="kcard-top"><span class="kcard-icon" aria-hidden="true">' + c[4] + '</span><h3 class="kcard-label" id="lbl-aff' + i + '">' + esc(c[0]) + "</h3></div>"
+        + '<div class="kcard-value tnum">' + esc(c[1]) + '</div><p class="kcard-mean"><span class="micro">Ce que ça veut dire</span>' + esc(c[2]) + "</p></article>";
+    }).join("");
+    renderAffList(list);
+    renderAffDue();
+  }
+  function affBadge(status) {
+    var s = AFF_STATUS[status] || [status, "off"];
+    return '<span class="badge ' + s[1] + '">' + esc(s[0]) + "</span>";
+  }
+  function affActions(a) {
+    var b = function (st, label, cls) { return '<button type="button" class="btn btn-sm ' + (cls || "btn-ghost") + '" data-aff-status="' + st + '" data-aff-id="' + esc(a.id) + '">' + label + "</button>"; };
+    if (a.status === "pending") return b("approved", "Valider", "") + b("refused", "Refuser", "btn-danger");
+    if (a.status === "approved") return b("suspended", "Suspendre", "btn-danger");
+    return b("approved", a.status === "suspended" ? "Réactiver" : "Valider", "");
+  }
+  function renderAffList(list) {
+    var el = $("affList");
+    if (!list.length) { el.innerHTML = emptyHtml("Aucune candidature pour l'instant", "Les candidatures envoyées depuis la page Partenaires du site apparaîtront ici."); return; }
+    el.innerHTML = '<ul class="members">' + list.map(function (a, i) {
+      var bal = a.balances || {};
+      var curs = Object.keys(bal);
+      var soldes = curs.length ? curs.map(function (c) { return affMoney(bal[c].payable, c) + " payable · " + affMoney(bal[c].pending, c) + " en attente · " + affMoney(bal[c].paid, c) + " payé"; }).join(" ; ") : "aucune commission";
+      var open = !!AFF.open[a.id];
+      return '<li class="member">'
+        + '<button type="button" class="m-row" data-aff-open="' + esc(a.id) + '" aria-expanded="' + open + '" aria-controls="affd' + i + '">'
+        + '<span class="m-main"><span class="m-top"><span class="m-mail">' + esc(a.code) + " · " + esc(S.showEmails ? a.email : H.maskEmail(a.email)) + "</span>" + affBadge(a.status) + "</span>"
+        + '<span class="m-meta">' + esc(fmtInt(a.signups) + " inscrits · " + fmtInt(a.active_paying) + " abonnés payants · " + H.countryName(a.country)) + "</span></span>"
+        + '<span class="m-act"></span><svg class="chev v-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>'
+        + '<div class="m-detail" id="affd' + i + '"' + (open ? "" : " hidden") + ">"
+        + "<p><b>Chiffres :</b> " + fmtInt(a.clicks) + " clics · " + fmtInt(a.signups) + " inscrits · " + fmtInt(a.active_paying) + " abonnés payants · " + esc(soldes) + "</p>"
+        + "<p><b>Profil :</b> " + esc(H.countryName(a.country)) + " · " + esc(a.legal_status === "professional" ? "professionnel" : "particulier") + " · " + esc(AFF_STYLE[a.content_style] || a.content_style || "—") + " · " + fmtInt(a.audience) + " abonnés déclarés</p>"
+        + "<p><b>Réseaux :</b> " + (Array.isArray(a.networks) && a.networks.length ? a.networks.map(function (n) { return esc(n); }).join(" · ") : "—") + "</p>"
+        + (a.about ? "<p><b>Mot du candidat :</b> " + esc(a.about) + "</p>" : "")
+        + "<p><b>Candidature :</b> " + esc(fmtDateTime(a.created_at)) + (a.reviewed_at ? " · décision " + esc(fmtDateTime(a.reviewed_at)) : "") + (a.reviewed_note ? " · note : " + esc(a.reviewed_note) : "") + "</p>"
+        + "<p><b>Versement :</b> " + (a.payout_ready ? "compte Stripe Connect prêt (virement automatique)" : a.has_stripe_account ? "compte Stripe Connect commencé, pas terminé" : "manuel (export CSV puis « Marquer payé »)") + "</p>"
+        + '<div class="card-actions">' + affActions(a) + "</div>"
+        + "</div></li>";
+    }).join("") + "</ul>";
+  }
+  function renderAffDue() {
+    var d = AFF.due;
+    var el = $("affDue"), lines = $("affLines");
+    if (!d || d.kind === "missing") { el.innerHTML = ""; lines.innerHTML = ""; return; }
+    if (d.error) { blockError(el, d, "Commissions"); lines.innerHTML = ""; return; }
+    var data = d.data || {};
+    var due = data.due || [];
+    $("affPaySub").textContent = "Payables maintenant, par partenaire et par devise · mois affiché : " + (data.month || AFF.month);
+    el.innerHTML = due.length ? '<ul class="bars">' + due.map(function (x) {
+      return '<li class="bar-row"><span class="bar-name">' + esc(x.affiliate_code) + " <small>" + esc(S.showEmails ? x.affiliate_email : H.maskEmail(x.affiliate_email)) + "</small></span>"
+        + '<span class="bar-val">' + esc(affMoney(x.amount_cents, x.currency)) + (x.above_threshold ? "" : " <small>sous le seuil de 50</small>") + "</span>"
+        + '<span style="grid-column:1 / -1;display:flex;gap:8px;flex-wrap:wrap;align-items:center">'
+        + "<small>" + (x.payout_ready ? "virement Stripe automatique le 5 du mois" : "versement manuel") + "</small>"
+        + (x.above_threshold ? '<button type="button" class="btn btn-sm" data-aff-pay="' + esc(x.affiliate_id) + '" data-aff-cur="' + esc(x.currency) + '">Marquer payé</button>' : "")
+        + "</span></li>";
+    }).join("") + "</ul>" : emptyHtml("Rien à payer pour l'instant", "Les commissions deviennent payables 30 jours après le paiement de l'abonné.");
+    var ls = data.lines || [];
+    lines.innerHTML = ls.length ? '<ul class="members">' + ls.slice(0, 200).map(function (l) {
+      var st = { pending: "en attente", payable: "payable", paid: "payée", reversed: "annulée", refused: "refusée" }[l.status] || l.status;
+      return '<li class="member"><div class="m-row" style="cursor:default"><span class="m-main"><span class="m-top"><span class="m-mail">' + esc(l.affiliate_code) + " · abonné " + esc(l.customer_email || "—") + "</span>"
+        + '<span class="badge ' + (l.status === "paid" ? "ok" : l.status === "payable" ? "cy" : l.status === "pending" ? "warn" : "") + '">' + esc(st) + "</span></span>"
+        + '<span class="m-meta">' + esc(fmtDay(l.at) + " · " + (l.kind === "reversal" ? "− " : "") + affMoney(l.amount_cents, l.currency) + (l.reason ? " · " + l.reason : "")) + "</span></span></div></li>";
+    }).join("") + "</ul>" : '<p class="soft-msg">Aucune ligne ce mois-ci.</p>';
+  }
+  function affCsv() {
+    var d = AFF.due && AFF.due.data;
+    if (!d) { toast("Rien à exporter."); return; }
+    var q = function (v) { return '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"'; };
+    var rows = [["type", "date", "partenaire", "email_partenaire", "abonne", "devise", "base_ht_centimes", "montant_centimes", "statut", "raison", "facture_stripe", "abonnement_stripe", "payable_le", "paye_le"].join(";")];
+    (d.lines || []).forEach(function (l) {
+      rows.push([l.kind, l.at, l.affiliate_code, l.affiliate_email, l.customer_email, l.currency, l.base_cents, l.amount_cents, l.status, l.reason, l.stripe_invoice_id, l.stripe_subscription_id, l.payable_at, l.paid_at].map(q).join(";"));
+    });
+    rows.push("");
+    rows.push(["a_payer_maintenant", "partenaire", "email_partenaire", "devise", "montant_centimes", "lignes", "seuil_atteint", "mode"].join(";"));
+    (d.due || []).forEach(function (x) {
+      rows.push(["", x.affiliate_code, x.affiliate_email, x.currency, x.amount_cents, x.lines, x.above_threshold ? "oui" : "non", x.payout_ready ? "connect" : "manuel"].map(q).join(";"));
+    });
+    var blob = new Blob(["﻿" + rows.join("\n")], { type: "text/csv;charset=utf-8" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "iashark-partenaires-" + (d.month || AFF.month) + ".csv";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+  function affSetStatus(id, status) {
+    var note = status === "approved" ? "" : (window.prompt(status === "refused" ? "Motif du refus (visible par le candidat, facultatif) :" : "Motif de la suspension (visible par le partenaire, facultatif) :", "") || "");
+    if (status !== "approved" && note === null) return;
+    rpc("admin_affiliate_set_status", { p_id: id, p_status: status, p_note: note }).then(function (r) {
+      if (r.kind === "denied") { showState("denied"); return; }
+      if (r.error) { toast(errorText(r.kind, r.error, "Partenaires")); return; }
+      toast(status === "approved" ? "Partenaire validé : son lien et son code sont actifs." : status === "refused" ? "Candidature refusée." : "Partenaire suspendu : il ne gagne plus rien.");
+      loadAffiliates();
+    });
+  }
+  function affMarkPaid(id, cur) {
+    var ref = window.prompt("Référence du virement que tu as fait (facultatif) :", "");
+    if (ref === null) return;
+    rpc("admin_affiliate_mark_paid", { p_affiliate_id: id, p_currency: cur, p_reference: ref }).then(function (r) {
+      if (r.kind === "denied") { showState("denied"); return; }
+      if (r.error) { toast(errorText(r.kind, r.error, "Marquer payé")); return; }
+      var d = r.data || {};
+      toast(d.ok ? "Marqué payé : " + affMoney(d.amount_cents, d.currency) + "." : "Rien de payable pour ce partenaire.");
+      loadAffiliates();
+    });
+  }
+  function affRunPayouts() {
+    if (!sb || !sb.functions || !window.confirm("Lancer maintenant les virements Stripe Connect des commissions payables (seuil 50 €) ? Les partenaires sans compte de versement restent en manuel.")) return;
+    sb.functions.invoke("affiliate-payouts", { body: {} }).then(function (r) {
+      var d = r && r.data;
+      if (!d || !d.ok) { toast("Les virements n'ont pas pu être lancés" + (r && r.error ? " : " + (r.error.message || "") : ".")); return; }
+      toast((d.paid || []).length + " virement(s) Stripe, " + (d.manual || []).length + " lot(s) en manuel" + (!d.connect ? " (Stripe Connect pas encore activé)" : "") + ".");
+      loadAffiliates();
+    }, function () { toast("Les virements n'ont pas pu être lancés."); });
   }
   function trackingNote(since) {
     if (!since) return "Le suivi des visites par inscrit démarre avec la mise en ligne de la mise à jour du site. Pour l'instant, seules la date d'inscription et la dernière connexion sont connues : rien n'est reconstitué pour les jours d'avant.";
@@ -2163,6 +2348,7 @@
       setBusy(false);
       refreshNames();
       loadMembers();
+      loadAffiliates();
       loadUnlocks();
       loadDrop();
       loadRevenue();
@@ -2290,6 +2476,7 @@
       $(x[0]).addEventListener("change", function (ev) { S.drop[x[1]] = ev.target.value; loadDrop(); });
     });
     $("deviceBtn").addEventListener("click", toggleDevice);
+    $("affMonth").addEventListener("change", function (ev) { if (/^\d{4}-\d{2}$/.test(ev.target.value)) { AFF.month = ev.target.value; loadAffiliates(); } });
     $("noticeDeviceClose").addEventListener("click", function () {
       $("noticeDevice").hidden = true;
       try { localStorage.setItem("iashark_admin_device_notice", "1"); } catch (e) {}
@@ -2312,7 +2499,15 @@
       if (ex) { askExclusion(ex.getAttribute("data-exclude")); return; }
       if (t.closest("#visitsMore")) { S.visitLimit += 20; renderVisits(); return; }
       if (t.closest("#signupsMore")) { S.signupLimit += 15; renderSignups(); return; }
-      if (t.closest("#membersEmails")) { S.showEmails = !S.showEmails; renderMemberList(S.members && S.members.data); return; }
+      if (t.closest("#membersEmails")) { S.showEmails = !S.showEmails; renderMemberList(S.members && S.members.data); renderAffiliates(); return; }
+      var affOpen = t.closest("button[data-aff-open]");
+      if (affOpen) { var aid = affOpen.getAttribute("data-aff-open"); AFF.open[aid] = !AFF.open[aid]; renderAffiliates(); return; }
+      var affSt = t.closest("button[data-aff-status]");
+      if (affSt) { affSetStatus(affSt.getAttribute("data-aff-id"), affSt.getAttribute("data-aff-status")); return; }
+      var affPay = t.closest("button[data-aff-pay]");
+      if (affPay) { affMarkPaid(affPay.getAttribute("data-aff-pay"), affPay.getAttribute("data-aff-cur")); return; }
+      if (t.closest("#affExport")) { affCsv(); return; }
+      if (t.closest("#affRunPayouts")) { affRunPayouts(); return; }
       if (t.closest("#membersMore")) { S.memberLimit += 25; renderMemberList(S.members && S.members.data); return; }
       var mrow = t.closest("button.m-row");
       if (mrow) { toggleMember(mrow); return; }

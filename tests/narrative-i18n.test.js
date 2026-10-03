@@ -114,6 +114,82 @@ test("incitation a parier ou promesse de gain : champ rejete", () => {
   assert.ok(errors.some((e) => /incitation/.test(e)) && errors.some((e) => /promesse/.test(e)));
 });
 
+// 3e contre-controle (30/09/2026) : seules les formes de « garantie » etaient
+// refusees. « sure », « safe », « seguro », « sicher », « sicuro » passaient.
+// Traduction relue dans UNE langue : true = gardee (publiee), false = rejetee.
+function garde(locale, phrase) {
+  const tr = {}; for (const l of lib.TARGET_LOCALES) tr[l] = { conseil: l === locale ? phrase : "Texte neutre." };
+  return !!(lib.parseTranslationResponse(JSON.stringify(tr), { conseil: "Un texte source." }).translations[locale] || {}).conseil;
+}
+
+test("mots de promesse dans chaque langue : champ rejete, nuances permises", () => {
+  const src = lib.extractTranslationSource(AN);
+  const r = clone(VALID);
+  r.en.conseil = "A sure victory for PSG at home.";
+  r.es.conseil = "Victoria segura del PSG como local.";
+  r["es-mx"].conseil = "Sin duda, el PSG gana en casa.";
+  r.de.conseil = "Ein sicherer Sieg für PSG zu Hause.";
+  r.it.conseil = "Vittoria sicura del PSG in casa.";
+  r.pt.conseil = "Com certeza, o PSG vence em casa.";
+  const { translations, errors } = lib.parseTranslationResponse(JSON.stringify(r), src);
+  for (const l of lib.TARGET_LOCALES) {
+    assert.equal(translations[l].conseil, undefined, l + " : " + r[l].conseil);
+    assert.ok(errors.some((e) => e.startsWith(l + ".conseil: promesse de resultat")), l);
+    assert.ok(translations[l].contexte, l + " : les autres champs sont gardes");
+  }
+  // Ronde 4 : chaque phrase est relue avec la liste de SA langue.
+  for (const [locale, phrase, attendu] of [
+    ["en", "The safe bet tonight.", false], ["en", "PSG will surely score.", false], ["en", "Victory is certain.", false],
+    ["en", "A risk-free pick.", false], ["en", "Without a doubt, PSG win.", false], ["en", "PSG definitely win.", false],
+    ["es", "Apuesta segura.", false], ["de", "Sieg ist sicher.", false], ["it", "Sicuramente vince il PSG.", false], ["pt", "Sem dúvida, o PSG vence.", false],
+    ["en", "PSG must make sure to close the gaps.", true], ["en", "A certain amount of caution.", true], ["en", "Certain players are missing.", true],
+    ["de", "Die Sicherheit der Abwehr zählt.", true], ["it", "La sicurezza difensiva del PSG.", true], ["es", "La seguridad defensiva del PSG.", true],
+  ]) {
+    assert.equal(garde(locale, phrase), attendu, locale + " : " + phrase);
+  }
+  assert.match(lib.TRANSLATION_SYSTEM_PROMPT, /Never use words of certainty: "sure", "surely", "safe bet"/);
+});
+
+// Contre-controle ronde 4 (30/09/2026). Preuves de l'avocat (scratchpad avocat-v3-r3/trad.js) :
+// 1) des promesses passaient (« a lock », « gana fijo », « bestimmt », « di certo »,
+//    « de certeza », « undoubtedly », « mit Sicherheit », « sem sombra de dúvidas ») ;
+// 2) les traductions naturelles de deux tournures francaises PERMISES (« sans doute »,
+//    « le gardien assure ») etaient rejetees : le bloc disparaissait du site etranger.
+test("ronde 4 : une liste par langue (7 langues), expressions comprises, tournures anodines gardees", () => {
+  assert.deepEqual(Object.keys(lib.MOTS_PROMESSE_PAR_LANGUE).sort(), ["de", "en", "es", "es-mx", "it", "pt"]);
+  for (const l of lib.TARGET_LOCALES) assert.ok(lib.MOTS_PROMESSE_PAR_LANGUE[l].length >= 15, l);
+  const promesses = {
+    en: ["Lens are a lock at home.", "Lens will undoubtedly win at home.", "It is a foregone conclusion.", "The win is in the bag.", "Back them with your eyes closed.", "Lens cannot lose tonight.", "Lens can't lose tonight.", "No doubt Lens win.", "A sure-fire pick.", "Lens win for sure.", "A dead cert at home."],
+    es: ["El Lens gana fijo en casa.", "El Lens ganará indudablemente en casa.", "Sin lugar a dudas, gana el Lens.", "No cabe duda de que gana el Lens.", "Está cantado.", "Apuesta con los ojos cerrados.", "El Lens no puede perder.", "Seguro que gana el Lens.", "Victoria asegurada.", "Es seguro que gana el Lens."],
+    "es-mx": ["El Lens gana fijo en casa.", "Sin duda, el Lens gana.", "El resultado está cantado.", "Triunfo seguro del Lens."],
+    de: ["Lens gewinnt zu Hause bestimmt.", "Lens gewinnt zu Hause mit Sicherheit.", "Der Sieg ist so gut wie sicher.", "Lens hat den Sieg in der Tasche.", "Das Spiel ist schon entschieden.", "Lens kann nicht verlieren.", "Ohne Zweifel gewinnt Lens.", "Lens wird sicherlich gewinnen.", "Ein todsicherer Tipp."],
+    it: ["Il Lens vince di certo in casa.", "Il Lens vincerà certamente in casa.", "Il risultato è scontato.", "Vittoria in tasca per il Lens.", "Da giocare a occhi chiusi.", "Il Lens non può perdere.", "Senza ombra di dubbio vince il Lens.", "È sicuro che vince il Lens."],
+    pt: ["O Lens vence de certeza em casa.", "O Lens vai ganhar sem sombra de dúvidas.", "São favas contadas.", "Aposta de olhos fechados.", "O Lens não pode perder.", "Vitória segura do Lens.", "O Lens certamente vence."],
+  };
+  for (const [l, phrases] of Object.entries(promesses)) for (const p of phrases) assert.equal(garde(l, p), false, l + " doit etre rejete : " + p);
+  // Traductions naturelles de « Il faudra sans doute attendre la seconde période » et de
+  // « Le gardien assure ses sorties (aériennes) » : publiees.
+  const anodines = {
+    en: ["It will probably take until the second half.", "The goalkeeper is dependable when coming off his line.", "The goalkeeper has safe hands.", "The goalkeeper is safe in the air.", "The goalkeeper looks assured.", "Lens will play it safe.", "Lens are not sure to start strongly."],
+    es: ["Probablemente habrá que esperar a la segunda parte.", "Seguramente habrá que esperar a la segunda parte.", "El portero se muestra seguro en las salidas por alto.", "El portero da seguridad.", "El Lens mantiene una defensa segura."],
+    "es-mx": ["Probablemente habrá que esperar al segundo tiempo.", "El portero se ve seguro en las salidas."],
+    de: ["Wahrscheinlich muss man bis zur zweiten Halbzeit warten.", "Der Torwart ist bei hohen Bällen sicher.", "Der Torwart wirkt sicher.", "Der Torwart ist zuverlässig.", "Lens hat eine sichere Abwehr.", "Lens bestimmt das Spiel.", "Das Tempo wird von Lens bestimmt."],
+    it: ["Probabilmente bisognerà aspettare il secondo tempo.", "Il portiere è sicuro nelle uscite alte.", "Il portiere dà sicurezza.", "Il portiere è affidabile."],
+    pt: ["Provavelmente será preciso esperar pela segunda parte.", "O guarda-redes está seguro nas saídas aéreas.", "O guarda-redes transmite segurança.", "O guarda-redes é fiável."],
+  };
+  for (const [l, phrases] of Object.entries(anodines)) for (const p of phrases) assert.equal(garde(l, p), true, l + " doit etre garde : " + p);
+  // Une langue n'est jamais relue avec la liste d'une autre (« seguro » n'est pas une promesse en anglais).
+  assert.equal(lib.motPromesse("Victoria segura.", "en"), null);
+  assert.equal(lib.motPromesse("Victoria segura.", "es"), "Victoria segura");
+  // Le traducteur est prevenu : « sans doute » = probablement, « assure » = fiable.
+  assert.match(lib.TRANSLATION_SYSTEM_PROMPT, /The French "sans doute" means "probably"/);
+  assert.match(lib.TRANSLATION_SYSTEM_PROMPT, /"le gardien assure"\) means "is reliable"/);
+  // Les rejets « promesse de resultat » sont comptes par langue dans le journal du calcul.
+  const wf = read(".github/workflows/update-data.yml");
+  assert.match(wf, /usage\.promesses\[lg\]=\(usage\.promesses\[lg\]\|\|0\)\+1/);
+  assert.match(wf, /\[traduction\] rejets « promesse de resultat » : /);
+});
+
 test("la garantie reste traduisible si la source francaise la mentionne deja (\"rien n'est garanti\")", () => {
   const src = { conseil: "Rien n'est garanti sur ce match." };
   const tr = {}; for (const l of lib.TARGET_LOCALES) tr[l] = { conseil: "Nothing is guaranteed in this match." };

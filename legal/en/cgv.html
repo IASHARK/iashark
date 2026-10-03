@@ -136,7 +136,10 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Responsible gambling</a>
   </nav>
   <h1 class="page-title">Terms of sale</h1>
-  <div class="page-date">Last updated: 21 September 2026</div>
+  <div class="page-date">Last updated: 2 October 2026</div>
+  <!-- LEGAL REVIEW: 02/10/2026 - essai gratuit de 7 jours remis (decision du proprietaire ; create-checkout-session/trial.ts : TRIAL_DAYS absent = 7) : article 6 bis ajoute (premier abonnement seulement, une fois par personne ; carte demandee, rien preleve pendant l'essai ; email de rappel 2 jours avant la fin, tache trial-reminder 0042 a mettre en route AVANT l'ouverture ; annulation en 1 clic ; premier prelevement le 8e jour au prix de la periode choisie ; premier prelevement refuse = acces Pro arrete a la fin de l'essai) ; article 7 : premier paiement a la fin de l'essai le cas echeant. Points a confirmer : point de depart du delai de retractation (souscription, essai compris) et montant proportionnel en cas de retractation apres l'essai. Version precedente archivee dans legal/en/archives/cgv-2026-10-01.html. Statut : REVIEW. -->
+  <!-- LEGAL REVIEW: 01/10/2026 - controle des chiffres publics : article 4, accès gratuit = analyse d'un match offert certains jours, simulation réservée à Pro (plus « un match par jour ») ; article 5, liste Pro alignée sur la grille de prix (plus de journal ni de suivi de bankroll), fonctions « bientôt » exclues tant qu'elles ne sont pas ouvertes ; essai gratuit non proposé (TRIAL_DAYS = 0 par défaut) : aucun article sur l'essai, premier paiement à la souscription (article 7 inchangé). Version précédente archivée dans legal/en/archives/cgv-2026-09-30.html. Statut : REVIEW. -->
+  <!-- LEGAL REVIEW: 30/09/2026 - Article 4: stake calculator removed from free access (tool removed from the site). Version of 21/09/2026 archived in legal/en/archives/cgv-2026-09-21.html. Status: REVIEW. -->
   <!-- LEGAL REVIEW: 19/09/2026 - owner decision: the /en/ version now sells Pro in US dollars, monthly only (config/markets.json#_usdSwitch applied: _dirs.en.market = "us", us.checkoutOpen = ["month"], Stripe Price in us.stripePriceIds.month). Articles 5 to 9 rewritten for a single monthly period, as in the French terms of 18/09/2026 (weekly and annual prices, annual renewal information, change of billing period and weekly grace period removed); 'VAT included' replaced by the French VAT franchise mention. Open points: French law and EU consumer rights kept for a USD offer also served outside the EU (United States, Canada...); US sales taxes not assessed. Previous version (EUR, weekly / monthly / annual) archived in legal/en/archives/cgv-2026-09-16.html. Status: REVIEW. -->
 
   <div class="warn-box">
@@ -165,8 +168,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <h2>Article 4 — Account and free access</h2>
     <p>Creating an account is free and requires a valid email address. Free access includes in particular:</p>
     <ul>
-      <li>the full analysis of one match per day;</li>
-      <li>the stake calculator;</li>
+      <li>the analysis of one free match, on some days; the simulation remains Pro only;</li>
       <li>the blog.</li>
     </ul>
     <p>The scope of free access may change. You are responsible for keeping your login details confidential.</p>
@@ -177,11 +179,13 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <h2>Article 5 — IASHARK Pro subscription</h2>
     <p>IASHARK Pro is a single plan. For its duration, the subscription gives access to the following features:</p>
     <ul>
-      <li>full analysis of all available matches and competitions;</li>
-      <li>advanced filters and detailed reliability indicators;</li>
-      <li>a decision journal synchronised with your account;</li>
-      <li>bankroll tracking linked to your account.</li>
+      <li>the analysis of all the day's matches, in every competition covered;</li>
+      <li>the selected bet, with its probability and its reasons;</li>
+      <li>the match simulation in 15-minute periods, when available, the most likely scorelines and the expected goals;</li>
+      <li>the match statistics and the most likely goalscorers;</li>
+      <li>in the Pro space: the accumulator and the gap finder.</li>
     </ul>
+    <p>Features announced as "soon" on the Pricing page, including the dashboard (your bet log and safety limits), are not part of the subscription until they are opened.</p>
     <p>You can subscribe for a weekly or monthly period. <strong>The content and features are the same whichever period you choose</strong>: only the amount and the frequency of payment change. No annual plan is offered on this version of the site.</p>
     <p>The list of competitions covered and the details of the features may change, but the service will never be substantially reduced during a period that has already been paid for.</p>
   </section>
@@ -198,8 +202,21 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
   </section>
 
   <section class="section">
+    <h2>Article 6A — 7-day free trial</h2>
+    <p>With your first IASHARK Pro subscription, you get a 7-day free trial, <strong>on the monthly subscription only</strong>. Weekly and yearly plans are paid when you subscribe, with no trial. During the trial, you have access to all Pro features.</p>
+    <ul>
+      <li>Your bank card is required when you subscribe, but <strong>nothing is charged during the trial</strong>.</li>
+      <li>We email you about 2 days before the trial ends, with the date and amount of the first charge.</li>
+      <li>You can cancel the trial at any time, free of charge and online, in 1 click from "My account". You then keep Pro access until the end of the trial and nothing is charged.</li>
+      <li>If you do not cancel, the subscription continues at the end of the trial: the first charge is taken on day 8, at the monthly subscription price (Article 6), and the subscription then renews under Article 7. If this first charge fails, Pro access stops at the end of the trial until payment is made.</li>
+      <li>The trial is granted once per person: it is not offered to an account, or to an email address, that has already had an IASHARK Pro subscription or trial. In that case, the first payment is taken when you subscribe.</li>
+    </ul>
+    <p>The withdrawal period in Article 8 runs from the date you subscribe, trial included.</p>
+  </section>
+
+  <section class="section">
     <h2>Article 7 — Payment and renewal</h2>
-    <p>Payment is secured and handled by Stripe (<a href="https://stripe.com" target="_blank" rel="noopener">stripe.com</a>). IASHARK does not store any bank card data. The first payment is taken when you subscribe. The subscription then renews automatically at the end of each period, for a period of the same length and at the price then in force.</p>
+    <p>Payment is secured and handled by Stripe (<a href="https://stripe.com" target="_blank" rel="noopener">stripe.com</a>). IASHARK does not store any bank card data. The first payment is taken when you subscribe or, if you have the free trial, at the end of the trial (Article 6A). The subscription then renews automatically at the end of each period, for a period of the same length and at the price then in force.</p>
     <p>An active subscription cannot be taken out a second time.</p>
     <p>If a renewal payment fails, our payment provider may retry it. Pro access is maintained for 1 day after the end of the paid period on the weekly plan, and for 4 days on the monthly plan; if payment is not made, the account returns to free access.</p>
   </section>

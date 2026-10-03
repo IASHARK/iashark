@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="iashark-market" content="fr">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IASHARK Partenaires : 40 % de chaque abonnement, à vie</title>
+<meta name="description" content="Recommande IASHARK à ta communauté : 40 % de chaque paiement de tes abonnés Pro, à chaque renouvellement. Lien, code, QR code, tableau de bord. 18+">
+<link rel="canonical" href="https://iashark.com/fr/partenaires.html">
+<link rel="alternate" hreflang="fr" href="https://iashark.com/fr/partenaires.html">
+<link rel="alternate" hreflang="en-GB" href="https://iashark.com/gb/partenaires.html">
+<link rel="alternate" hreflang="en-ZA" href="https://iashark.com/za/partenaires.html">
+<link rel="alternate" hreflang="en" href="https://iashark.com/en/partenaires.html">
+<link rel="alternate" hreflang="es-MX" href="https://iashark.com/mx/partenaires.html">
+<link rel="alternate" hreflang="es" href="https://iashark.com/es/partenaires.html">
+<link rel="alternate" hreflang="x-default" href="https://iashark.com/en/partenaires.html">
+<link rel="icon" href="/assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" defer></script>
+<!-- QR code du lien partenaire, dessine dans la page (aucune donnee envoyee a un tiers). -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" defer></script>
+<link rel="stylesheet" href="/assets/tailwind.css">
+<link rel="stylesheet" href="/assets/pro-space.css">
+<link rel="stylesheet" href="/assets/bottom-navigation.css">
+<style>
+.pa-kpi{font-variant-numeric:tabular-nums}
+.pa-qr{display:inline-block;background:#fff;padding:10px;border-radius:12px;line-height:0}
+.pa-qr svg,.pa-qr img{display:block;width:168px;height:168px}
+.pa-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em}
+.pa-table td,.pa-table th{padding:10px 8px;vertical-align:top}
+.pa-table tr+tr td{border-top:1px solid rgba(255,255,255,.06)}
+</style>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="IASHARK">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="IASHARK Partenaires : 40 % de chaque abonnement, à vie">
+<meta property="og:description" content="Recommande IASHARK à ta communauté : 40 % de chaque paiement de tes abonnés Pro, à chaque renouvellement. Lien, code, QR code, tableau de bord. 18+">
+<meta property="og:url" content="https://iashark.com/fr/partenaires.html">
+<meta property="og:image" content="https://iashark.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="min-h-[100dvh] bg-page font-sans text-ink antialiased">
+
+<header class="border-b border-hairline">
+  <div class="mx-auto flex h-14 w-full max-w-[760px] items-center gap-4 px-4 sm:px-6">
+    <a href="/fr/" aria-label="IASHARK, accueil" data-i18n-attr="aria-label:site_header.aria_home"><img src="/assets/iashark-logo.png" alt="IASHARK" class="h-7 w-auto object-contain"></a>
+    <span class="rounded-full border border-cyan/40 bg-cyan/10 px-2.5 py-1 text-[11px] font-bold tracking-wider text-cyan" data-i18n="affiliation.badge">PARTENAIRES</span>
+    <a href="/fr/compte.html" class="ml-auto text-[13px] text-soft transition hover:text-ink" data-href="compte.html" data-i18n="affiliation.my_account">Mon compte</a>
+  </div>
+</header>
+
+<main class="mx-auto w-full max-w-[760px] px-4 pb-32 pt-6 sm:px-6 sm:pt-10">
+
+  <!-- Presentation (statique, indexable). Aucune promesse de gain, aucune mise. -->
+  <section id="presentation" aria-labelledby="paTitle">
+    <p class="text-[12px] font-bold uppercase tracking-[0.16em] text-cyan" data-i18n="affiliation.kicker">Programme IASHARK Partenaires</p>
+    <h1 id="paTitle" class="mt-2 text-[30px] font-extrabold leading-[1.05] tracking-tight sm:text-[38px]" data-i18n="affiliation.title">40 % de chaque abonnement, à vie.</h1>
+    <p class="mt-4 text-[15.5px] leading-relaxed text-soft" data-i18n="affiliation.intro">Tu parles de football à une communauté ? Recommande IASHARK avec ton lien ou ton code. Chaque fois qu'un de tes abonnés paie son abonnement Pro — à la semaine, au mois ou à l'année — tu touches 40 % du montant encaissé. Pas seulement la première fois : à chaque paiement, tant qu'il reste abonné.</p>
+
+    <div class="mt-7 grid gap-3 sm:grid-cols-3">
+      <div class="rounded-2xl border border-hairline bg-surface p-4">
+        <p class="text-[26px] font-extrabold text-cyan">40 %</p>
+        <p class="mt-1 text-[13.5px] leading-relaxed text-soft" data-i18n="affiliation.card_rate">de chaque paiement encaissé, hors taxes, après remise éventuelle.</p>
+      </div>
+      <div class="rounded-2xl border border-hairline bg-surface p-4">
+        <p class="text-[26px] font-extrabold text-cyan" data-i18n="affiliation.card_life_title">À vie</p>
+        <p class="mt-1 text-[13.5px] leading-relaxed text-soft" data-i18n="affiliation.card_life">tant que la personne reste abonnée : chaque renouvellement compte.</p>
+      </div>
+      <div class="rounded-2xl border border-hairline bg-surface p-4">
+        <p class="text-[26px] font-extrabold text-cyan" data-i18n="affiliation.card_days_title">60 jours</p>
+        <p class="mt-1 text-[13.5px] leading-relaxed text-soft" data-i18n="affiliation.card_days">pour qu'un clic sur ton lien soit encore compté à l'inscription.</p>
+      </div>
+    </div>
+
+    <h2 class="mt-9 text-[20px] font-extrabold tracking-tight" data-i18n="affiliation.how_title">Comment ça marche</h2>
+    <ol class="mt-3 space-y-3">
+      <li class="flex gap-3.5 rounded-2xl border border-hairline bg-surface p-4"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan text-[13px] font-bold text-[#04141b]">1</span><p class="text-[14.5px] leading-relaxed text-soft" data-i18n="affiliation.how_1">Tu crées ton compte IASHARK et tu remplis le questionnaire partenaire (tes réseaux, ton public, ton pays).</p></li>
+      <li class="flex gap-3.5 rounded-2xl border border-hairline bg-surface p-4"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan text-[13px] font-bold text-[#04141b]">2</span><p class="text-[14.5px] leading-relaxed text-soft" data-i18n="affiliation.how_2">IASHARK valide ta candidature. Tu reçois ton lien, ton code et un QR code, avec un kit et une formation pour bien présenter le service.</p></li>
+      <li class="flex gap-3.5 rounded-2xl border border-hairline bg-surface p-4"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan text-[13px] font-bold text-[#04141b]">3</span><p class="text-[14.5px] leading-relaxed text-soft" data-i18n="affiliation.how_3">Tes abonnés s'inscrivent avec ton lien ou tapent ton code au paiement. À chaque paiement encaissé, ta commission apparaît dans ton espace ; elle est payable 30 jours plus tard, et versée chaque mois dès 50 €.</p></li>
+    </ol>
+
+    <div class="mt-7 rounded-2xl border border-hairline bg-surface p-4">
+      <h3 class="text-[15px] font-bold" data-i18n="affiliation.rules_title">Les règles, en clair</h3>
+      <ul class="mt-2 space-y-1.5 text-[13.5px] leading-relaxed text-soft">
+        <li data-i18n="affiliation.rule_1">Un seul niveau : tu es payé sur tes abonnés, jamais sur les partenaires que tu amènes.</li>
+        <li data-i18n="affiliation.rule_2">Rien pendant l'essai gratuit : la commission naît au premier paiement réel.</li>
+        <li data-i18n="affiliation.rule_3">Remboursement ou contestation : la commission correspondante est reprise.</li>
+        <li data-i18n="affiliation.rule_4">Chaque contenu doit porter la mention « collaboration commerciale » ou « publicité », s'adresser à un public de 18 ans et plus, et ne jamais promettre de gains ni dire combien jouer.</li>
+        <li data-i18n="affiliation.rule_5">Aucune commission sur soi-même, sur ses propres cartes ou ses propres adresses : ces tentatives sont détectées et entraînent la suspension.</li>
+      </ul>
+      <a href="/fr/partenaires-conditions.html" data-href="partenaires-conditions.html" class="mt-3 inline-block text-[13.5px] font-semibold text-cyan hover:underline" data-i18n="affiliation.read_terms">Lire les conditions complètes du programme →</a>
+    </div>
+
+    <div class="mt-7" id="paCta">
+      <p class="text-[14px] text-soft" data-i18n="affiliation.loading">Chargement…</p>
+    </div>
+  </section>
+
+  <!-- Espace partenaire (candidature, attente, tableau de bord) : rendu par partenaires-page.js. -->
+  <section id="partnerApp" class="mt-10" aria-live="polite" hidden></section>
+</main>
+
+<nav class="bottom-nav" aria-label="Navigation principale" data-i18n-attr="aria-label:geo.nav.aria_label"><a href="/fr/"><span>⌂</span><b data-i18n="nav.home">Accueil</b></a><a href="/fr/pro.html"><span>☆</span><b data-i18n="nav.tools">Pro</b></a><a href="/blog.html"><span>▤</span><b data-i18n="nav.guides">Blog</b></a><a href="/fr/compte.html"><span>♙</span><b data-i18n="nav.account">Compte</b></a></nav>
+
+<script src="/app-client.js" defer></script>
+<script src="/i18n/i18n.js"></script>
+<script src="/lib/market-config.js"></script>
+<script src="/funnel-track.js"></script>
+<script src="/partenaires-page.js" defer></script>
+<script src="/site-prefs.js"></script>
+<script src="/bottom-navigation.js"></script>
+<!--SEO_FOOTER_NAV--><nav class="seo-foot-nav" aria-label="Navigation du site" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#91a0b3;text-align:center"><p style="margin:0 0 4px"><span style="color:#c3ccd8">Championnats :</span> <a href="/fr/leagues/ligue-1.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Ligue 1</a> · <a href="/fr/leagues/champions-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Champions League</a> · <a href="/fr/leagues/premier-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Premier League</a> · <a href="/fr/leagues/la-liga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">La Liga</a> · <a href="/fr/leagues/serie-a.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Serie A</a> · <a href="/fr/leagues/bundesliga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Bundesliga</a> · <a href="/fr/leagues/europa-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Europa League</a> · <a href="/fr/leagues/conference-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Conference League</a> · <a href="/fr/leagues/eredivisie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Eredivisie</a> · <a href="/fr/leagues/liga-portugal.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga Portugal</a> · <a href="/fr/leagues/mls.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">MLS</a> · <a href="/fr/leagues/allsvenskan.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Allsvenskan</a> · <a href="/fr/leagues/j1-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">J1 League</a> · <a href="/fr/leagues/liga-mx.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga MX</a> · <a href="/fr/leagues/premier-soccer-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Premier Soccer League</a> · <a href="/fr/leagues/liga-profesional-argentina.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga Profesional Argentina</a> · <a href="/fr/leagues/primera-a-colombia.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Primera A Colombia</a> · <a href="/fr/leagues/liga-1-peru.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga 1 Peru</a> · <a href="/fr/leagues/primera-division-chile.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Primera Division Chile</a></p><p style="margin:0"><a href="/fr/clubs/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Clubs et derbies</a> · <a href="/fr/articles/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Articles</a> · <a href="/blog.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Blog et guides</a> · <a href="/fr/marches.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Marchés analysés</a> · <a href="/fr/methodologie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Méthodologie</a></p></nav><!--/SEO_FOOTER_NAV-->
+</body>
+</html>

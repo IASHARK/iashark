@@ -136,7 +136,10 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Jogo responsável</a>
   </nav>
   <h1 class="page-title">Condições gerais de venda</h1>
-  <div class="page-date">Última atualização: 19 de setembro de 2026</div>
+  <div class="page-date">Última atualização: 2 de outubro de 2026</div>
+  <!-- LEGAL REVIEW: 02/10/2026 - essai gratuit de 7 jours remis (decision du proprietaire ; create-checkout-session/trial.ts : TRIAL_DAYS absent = 7) : article 6 bis ajoute (premier abonnement seulement, une fois par personne ; carte demandee, rien preleve pendant l'essai ; email de rappel 2 jours avant la fin, tache trial-reminder 0042 a mettre en route AVANT l'ouverture ; annulation en 1 clic ; premier prelevement le 8e jour au prix de la periode choisie ; premier prelevement refuse = acces Pro arrete a la fin de l'essai) ; article 7 : premier paiement a la fin de l'essai le cas echeant. Points a confirmer : point de depart du delai de retractation (souscription, essai compris) et montant proportionnel en cas de retractation apres l'essai. Version precedente archivee dans legal/pt/archives/cgv-2026-10-01.html. Statut : REVIEW. -->
+  <!-- LEGAL REVIEW: 01/10/2026 - controle des chiffres publics : article 4, accès gratuit = analyse d'un match offert certains jours, simulation réservée à Pro (plus « un match par jour ») ; article 5, liste Pro alignée sur la grille de prix (plus de journal ni de suivi de bankroll), fonctions « bientôt » exclues tant qu'elles ne sont pas ouvertes ; essai gratuit non proposé (TRIAL_DAYS = 0 par défaut) : aucun article sur l'essai, premier paiement à la souscription (article 7 inchangé). Version précédente archivée dans legal/pt/archives/cgv-2026-09-30.html. Statut : REVIEW. -->
+  <!-- LEGAL REVIEW: 30/09/2026 - Article 4: stake calculator removed from free access (tool removed from the site). Version of 19/09/2026 archived in legal/pt/archives/cgv-2026-09-19.html. Status: REVIEW. -->
   <!-- LEGAL REVIEW: 19/09/2026 - owner decisions: weekly, monthly and annual plans payable on the EUR market (config/markets.json#fr.checkoutOpen, Stripe Prices in fr.stripePriceIds); 'VAT included' replaced in article 6 by the French VAT franchise mention (art. 293 B CGI). Prices, billing periods, renewal, withdrawal and cancellation rules unchanged from the 16/09/2026 text and aligned with the French terms of 19/09/2026 (legal/fr/cgv.html). Previous version archived in legal/pt/archives/cgv-2026-09-16.html. Status: REVIEW. -->
 
   <div class="warn-box">
@@ -165,8 +168,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <h2>Artigo 4.º — Conta e acesso gratuito</h2>
     <p>A criação de uma conta é gratuita e requer um endereço de email válido. O acesso gratuito inclui, nomeadamente:</p>
     <ul>
-      <li>a análise completa de um jogo por dia;</li>
-      <li>a calculadora de aposta;</li>
+      <li>a análise de um jogo oferecido, em alguns dias; a simulação continua reservada ao Pro;</li>
       <li>o blog.</li>
     </ul>
     <p>O âmbito do acesso gratuito pode evoluir. É responsável pela confidencialidade dos seus dados de acesso.</p>
@@ -177,11 +179,13 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <h2>Artigo 5.º — Subscrição IASHARK Pro</h2>
     <p>A IASHARK Pro é uma oferta única. Durante a sua vigência, a subscrição dá acesso às seguintes funcionalidades:</p>
     <ul>
-      <li>análise completa de todos os jogos e campeonatos disponíveis;</li>
-      <li>filtros avançados e indicadores de fiabilidade detalhados;</li>
-      <li>diário de decisões sincronizado com a sua conta;</li>
-      <li>acompanhamento da bankroll associado à sua conta.</li>
+      <li>a análise de todos os jogos do dia, em cada competição abrangida;</li>
+      <li>a aposta selecionada, com a sua probabilidade e as suas razões;</li>
+      <li>a simulação do jogo por períodos de 15 minutos, quando disponível, os resultados mais prováveis e os golos esperados;</li>
+      <li>as estatísticas do jogo e os marcadores mais prováveis;</li>
+      <li>no espaço Pro: a múltipla e o detetor de diferenças.</li>
     </ul>
+    <p>As funcionalidades anunciadas como «em breve» na página de Subscrição, nomeadamente o painel (registo das suas apostas e limites de segurança), não fazem parte da subscrição enquanto não estiverem abertas.</p>
     <p>A subscrição pode ser feita, à escolha, por um período semanal, mensal ou anual. <strong>O conteúdo e as funcionalidades são idênticos seja qual for o período escolhido</strong>: só mudam o montante e a frequência das cobranças.</p>
     <p>A lista das competições abrangidas e o detalhe das funcionalidades podem evoluir, sem que o serviço seja alguma vez reduzido de forma substancial durante um período já pago.</p>
   </section>
@@ -199,8 +203,21 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
   </section>
 
   <section class="section">
+    <h2>Artigo 6.º-A — Teste gratuito de 7 dias</h2>
+    <p>Na sua primeira subscrição IASHARK Pro, beneficia de um teste gratuito de 7 dias, <strong>apenas na subscrição mensal</strong>. As fórmulas semanal e anual são pagas no momento da subscrição, sem teste. Durante o teste, tem acesso a todas as funcionalidades Pro.</p>
+    <ul>
+      <li>O seu cartão bancário é pedido no momento da subscrição, mas <strong>nenhum montante é cobrado durante o teste</strong>.</li>
+      <li>Enviamos-lhe um email cerca de 2 dias antes do fim do teste, com a data e o montante da primeira cobrança.</li>
+      <li>Pode cancelar o teste a qualquer momento, gratuitamente e online, com 1 clique em «A minha conta». Mantém então o acesso Pro até ao fim do teste e nada é cobrado.</li>
+      <li>Sem cancelamento, a subscrição continua no fim do teste: a primeira cobrança é feita no 8.º dia, ao preço da subscrição mensal (artigo 6.º), e depois a subscrição renova-se nas condições do artigo 7.º. Se esta primeira cobrança falhar, o acesso Pro termina no fim do teste até à regularização do pagamento.</li>
+      <li>O teste é concedido uma única vez por pessoa: não é proposto a uma conta, nem a um endereço de email, que já tenha beneficiado de uma subscrição ou de um teste IASHARK Pro. Nesse caso, o primeiro pagamento é feito no momento da subscrição.</li>
+    </ul>
+    <p>O prazo de livre resolução do artigo 8.º conta a partir da subscrição, teste incluído.</p>
+  </section>
+
+  <section class="section">
     <h2>Artigo 7.º — Pagamento e renovação</h2>
-    <p>O pagamento é seguro e gerido pela Stripe (<a href="https://stripe.com" target="_blank" rel="noopener">stripe.com</a>). A IASHARK não conserva quaisquer dados de cartão bancário. O primeiro pagamento é cobrado no momento da subscrição. A subscrição renova-se depois automaticamente no fim de cada período, por um período da mesma duração e ao preço então em vigor.</p>
+    <p>O pagamento é seguro e gerido pela Stripe (<a href="https://stripe.com" target="_blank" rel="noopener">stripe.com</a>). A IASHARK não conserva quaisquer dados de cartão bancário. O primeiro pagamento é cobrado no momento da subscrição ou, se beneficiar do teste gratuito, no fim deste (artigo 6.º-A). A subscrição renova-se depois automaticamente no fim de cada período, por um período da mesma duração e ao preço então em vigor.</p>
     <!-- LEGAL REVIEW: 19/09/2026 - (a) annual renewal information: template ready (annual_renewal_reminder, D-45 by default, 90 to 30 day window), sending to be enabled (Resend + scheduled job) before the first annual renewal, otherwise the annual-plan paragraph of article 9 applies; (b) changing billing period: check that the Stripe customer portal configuration (STRIPE_PORTAL_CONFIGURATION_ID or default configuration) applies the rule below (longer period immediate with proration, shorter period at the end of the paid period) - otherwise correct this paragraph and compte_page.change_interval_note. -->
     <p><strong>Plano anual: informação antes da renovação.</strong> Informamo-lo por email, no máximo três meses e no mínimo um mês antes do vencimento, da possibilidade de não renovar a sua subscrição anual. O email indica a data de vencimento, o montante que será cobrado e como cancelar online.</p>
     <p><strong>Mudança de duração.</strong> Pode mudar de duração a partir de «A minha conta», na área de faturação do nosso prestador de serviços de pagamento. A passagem para uma duração mais longa (por exemplo, de mensal para anual) produz efeitos imediatamente: o novo período é cobrado de imediato, deduzida proporcionalmente a parte não utilizada do período em curso. A passagem para uma duração mais curta (por exemplo, de anual para mensal) produz efeitos no fim do período já pago, sem reembolso nem cobrança adicional até lá. O montante e a data de efeito são apresentados antes da sua confirmação. Uma subscrição ativa não pode ser subscrita uma segunda vez.</p>

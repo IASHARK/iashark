@@ -1,7 +1,7 @@
 # Tests E2E IASHARK (Playwright)
 
 Suite de bout en bout qui rejoue les parcours reels du site dans un vrai navigateur,
-sur les **9 versions** (`fr gb za en mx es de it pt`), en desktop (Chromium 1366x900)
+sur les **6 versions publiques** (`fr gb za en mx es` ; de, it, pt retirees le 25/09/2026), en desktop (Chromium 1366x900)
 et en mobile (Chromium 375x812, scenarios marques `@mobile`).
 
 **Aucun compte reel, aucun paiement reel.** Supabase (Auth, REST, Edge Functions),

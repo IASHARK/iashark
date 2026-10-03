@@ -680,6 +680,13 @@ const module = { exports: {} };
     // Flux historique sans marche = marche FR (meme regle que resolvePriceId).
     var market = normalizeMarket(meta.market || "fr");
     if (!market || TEMPLATE_KINDS.purchase_confirmation.indexOf(market) === -1) return skip("no_template_for_market", { market: meta.market || null });
+    // Langue du compte (audit V3 du 02/10/2026, point I7) : le gabarit du marche
+    // est ecrit dans la langue de son repertoire (fr = francais, gb = anglais).
+    // Un abonne du marche fr qui a paye depuis /es/, /en/, /de/... ne recoit pas
+    // un e-mail en francais : il est ignore (journal), le recu Stripe (dans sa
+    // langue) reste sa confirmation. consent_dir vide (ancien flux) = repertoire du marche.
+    var dir = String(meta.consent_dir || market).toLowerCase();
+    if (dir !== market) return skip("no_template_for_language", { market: market, dir: dir });
     if (ACTIVE_STATUSES.indexOf(sub.status) === -1) return skip("subscription_not_active", { status: sub.status || null });
     var item = firstItem(sub);
     var price = item.price || {};
@@ -938,6 +945,18 @@ const require = function () { return Render; };
 
   var LOCALES = ["fr", "en", "es", "es-mx", "de", "it", "pt"];
   var DIRS = ["fr", "en", "es", "de", "it", "pt", "gb", "za", "mx"];
+  // Langue du compte (public.user_preferences.language, 02/10/2026) : la SEULE
+  // source de la langue des e-mails. Repertoire du rendu = celui de la version
+  // du site ou il s'est inscrit (email_preferences.market) s'il parle deja
+  // cette langue (gb/za : en ; mx : es), sinon celui de la langue elle-meme.
+  // Langue absente ou inconnue : le repertoire d'inscription, inchange.
+  var DIR_LANGUAGE = { fr: "fr", en: "en", gb: "en", za: "en", es: "es", mx: "es", de: "de", it: "it", pt: "pt" };
+  function dirForLanguage(language, market) {
+    var dir = DIRS.indexOf(String(market)) !== -1 ? String(market) : "fr";
+    var l = String(language == null ? "" : language).toLowerCase().split(/[-_]/)[0];
+    if (["fr", "en", "es", "de", "it", "pt"].indexOf(l) === -1) return dir;
+    return DIR_LANGUAGE[dir] === l ? dir : l;
+  }
 
   // Fuseau de reference de chaque marche (heure locale du marche : jamais
   // d'email marketing la nuit). Les repertoires de langue en/es/de/it/pt
@@ -1177,8 +1196,20 @@ const require = function () { return Render; };
       league: league,
       kickoffAt: kickoff.toISOString(),
       kickoff: new Intl.DateTimeFormat(ctx.intlLocale, { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: ctx.timeZone, timeZoneName: "short" }).format(kickoff),
-      url: SITE_URL + "/" + ctx.dir + "/match.html?id=" + id
+      url: matchUrl(m, id, ctx.dir)
     };
+  }
+
+  // Lien du match (audit SEO du 29/09/2026, action A1) : vraie page de la version
+  // du destinataire (/match/<id>.html en francais, /<dir>/match/<id>.html sinon)
+  // quand data-home.json dit qu'elle existe (champ public page_dirs, pose par le
+  // pipeline d'apres les fichiers ecrits) ; sinon /<dir>/match.html?id= (repli).
+  function matchUrl(m, id, dir) {
+    var pages = m && Array.isArray(m.page_dirs) ? m.page_dirs : [];
+    if (/^[a-z]{2}$/.test(String(dir)) && pages.indexOf(dir) !== -1) {
+      return SITE_URL + (dir === "fr" ? "" : "/" + dir) + "/match/" + id + ".html";
+    }
+    return SITE_URL + "/" + dir + "/match.html?id=" + id;
   }
 
   function isFootball(m) { return !m.sport || m.sport === "football"; }
@@ -1390,6 +1421,10 @@ const require = function () { return Render; };
   // bundle = { layout: {html, text}, copy: {<locale>: {...}}, markets: config/markets.json }
   // data   = { freeMatch, weekendMatches, marketingOptIn }
   // options = { company, unsubscribeUrl, now }
+  function trialDaysOf(data, ctx) {
+    var n = data && typeof data.trialDays === "number" && isFinite(data.trialDays) ? Math.round(data.trialDays) : 0;
+    return n > 0 && ctx && ctx.proPriceMinor != null ? n : 0;
+  }
   function renderLifecycleEmail(bundle, campaign, dir, data, options) {
     options = options || {};
     data = data || {};
@@ -1427,6 +1462,13 @@ const require = function () { return Render; };
       hasProYear: hasWeek && hasYear,
       hasNoProYear: hasWeek && !hasYear,
       hasOnlyProMonth: !hasWeek && !hasYear,
+      // Essai Pro gratuit (02/10/2026) : ABONNEMENT MENSUEL seulement
+      // (create-checkout-session/trial.ts#TRIAL_INTERVALS). Annonce seulement si
+      // l'expediteur l'a confirme pour CE compte (data.trialDays > 0 : TRIAL_DAYS
+      // ouvert et compte qui n'a jamais eu d'abonnement, send-lifecycle-emails)
+      // ET si le mois est payable dans ce marche (jamais dans un pays ferme).
+      trialDays: trialDaysOf(data, ctx),
+      hasTrial: trialDaysOf(data, ctx) > 0,
       freeMatchHome: data.freeMatch ? data.freeMatch.home : null,
       freeMatchAway: data.freeMatch ? data.freeMatch.away : null,
       companyOperatorName: typeof company.operatorName === "string" && company.operatorName.trim() ? company.operatorName.trim() : "[BLOCKED_DECISION: COMPANY_OPERATOR_NAME]",
@@ -1496,6 +1538,7 @@ const require = function () { return Render; };
     MIN_SECRET_LENGTH: MIN_SECRET_LENGTH,
     BLOCKS_MARKER: BLOCKS_MARKER,
     siteContext: siteContext,
+    dirForLanguage: dirForLanguage,
     localClock: localClock,
     parisDate: parisDate,
     factsFromRow: factsFromRow,
@@ -1555,7 +1598,7 @@ export const BUNDLE = {
               "type": "list",
               "ordered": true,
               "items": [
-                "Chaque jour, l'analyse complète d'un match est offerte : elle est signalée sur la page d'accueil.",
+                "Certains jours, l'analyse complète d'un match est offerte : elle est alors signalée sur la page d'accueil.",
                 "Sur la page d'un match, lisez les probabilités estimées par le modèle, les facteurs pris en compte et leurs limites.",
                 "La page Méthodologie explique d'où viennent ces chiffres et comment les lire."
               ]
@@ -1593,7 +1636,7 @@ export const BUNDLE = {
           "blocks": [
             {
               "type": "p",
-              "text": "Chaque jour, IASHARK ouvre gratuitement l'analyse complète d'un match à tous les comptes. Voici celle du jour :"
+              "text": "Certains jours, IASHARK ouvre gratuitement l'analyse complète d'un match à tous les comptes. Voici celle d'aujourd'hui :"
             },
             {
               "type": "match"
@@ -1606,6 +1649,17 @@ export const BUNDLE = {
               "type": "cta",
               "label": "Voir l'analyse offerte",
               "link": "freeMatch"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Pour voir toutes les analyses : essai Pro gratuit {{trialDays}} jours (abonnement mensuel), réservé à un premier abonnement, annulable en 1 clic."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Voir l'offre Pro",
+              "link": "pricing"
             }
           ]
         },
@@ -1616,15 +1670,15 @@ export const BUNDLE = {
           "blocks": [
             {
               "type": "p",
-              "text": "Votre compte gratuit donne accès à l'analyse complète d'un match par jour, au blog et aux outils en découverte. Voici ce que Pro ajoute :"
+              "text": "Votre compte gratuit donne accès à l'analyse complète d'un match offert certains jours, au blog et aux outils en découverte. Voici ce que Pro ajoute :"
             },
             {
               "type": "list",
               "items": [
                 "L'analyse complète sur tous les matchs",
-                "Les six outils branchés sur les probabilités du modèle",
-                "Le journal des décisions synchronisé",
-                "Le suivi de bankroll lié au compte"
+                "Le pari retenu, avec sa probabilité et ses raisons",
+                "Les scores les plus probables et les buts attendus",
+                "Les buteurs les plus probables, dont les 3 buteurs du jour"
               ]
             },
             {
@@ -1645,6 +1699,11 @@ export const BUNDLE = {
             {
               "type": "p",
               "text": "Pro donne accès à davantage d'analyses et d'outils ; il ne rend aucun match plus prévisible."
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Essai gratuit {{trialDays}} jours sur l'abonnement mensuel, pour un premier abonnement : votre carte est demandée, rien n'est prélevé pendant l'essai, un email vous prévient 2 jours avant la fin et vous annulez en 1 clic depuis Mon compte. La semaine et l'année sont payées dès la souscription."
             },
             {
               "type": "cta",
@@ -1671,28 +1730,50 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "text": "L'analyse complète d'un match reste offerte chaque jour avec votre compte gratuit."
+              "text": "Certains jours, l'analyse complète d'un match est offerte avec votre compte gratuit."
             },
             {
               "type": "cta",
               "label": "Voir tous les matchs",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Pour voir toutes les analyses : essai Pro gratuit {{trialDays}} jours (abonnement mensuel), réservé à un premier abonnement, annulable en 1 clic."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Voir l'offre Pro",
+              "link": "pricing"
             }
           ]
         },
         "inactive_30d": {
           "subject": "Votre compte IASHARK est toujours actif",
-          "preheader": "L'analyse offerte du jour reste accessible avec votre compte gratuit.",
+          "preheader": "Votre compte gratuit est toujours actif.",
           "title": "Votre compte est toujours là",
           "blocks": [
             {
               "type": "p",
-              "text": "Vous n'êtes pas revenu sur IASHARK depuis un moment. Votre compte gratuit est toujours actif, et l'analyse complète d'un match reste offerte chaque jour."
+              "text": "Vous n'êtes pas revenu sur IASHARK depuis un moment. Votre compte gratuit est toujours actif, et certains jours l'analyse complète d'un match y est offerte."
             },
             {
               "type": "cta",
               "label": "Revenir sur IASHARK",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Pour voir toutes les analyses : essai Pro gratuit {{trialDays}} jours (abonnement mensuel), réservé à un premier abonnement, annulable en 1 clic."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Voir l'offre Pro",
+              "link": "pricing"
             },
             {
               "type": "p",
@@ -1760,7 +1841,7 @@ export const BUNDLE = {
               "type": "list",
               "ordered": true,
               "items": [
-                "Every day, the full analysis of one match is free: it is highlighted on the home page.",
+                "On some days, the full analysis of one match is free: it is then highlighted on the home page.",
                 "On a match page, read the probabilities estimated by the model, the factors it takes into account and their limits.",
                 "The Methodology page explains where these figures come from and how to read them."
               ]
@@ -1798,7 +1879,7 @@ export const BUNDLE = {
           "blocks": [
             {
               "type": "p",
-              "text": "Every day, IASHARK opens the full analysis of one match to every account, free of charge. Here is today's:"
+              "text": "On some days, IASHARK opens the full analysis of one match to every account, free of charge. Here is today's:"
             },
             {
               "type": "match"
@@ -1811,6 +1892,17 @@ export const BUNDLE = {
               "type": "cta",
               "label": "View the free analysis",
               "link": "freeMatch"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "To see every analysis: free {{trialDays}}-day Pro trial (monthly plan), for a first subscription only, cancel in 1 click."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "See the Pro offer",
+              "link": "pricing"
             }
           ]
         },
@@ -1821,15 +1913,15 @@ export const BUNDLE = {
           "blocks": [
             {
               "type": "p",
-              "text": "Your free account gives you the full analysis of one match a day, the blog and a preview of the tools. Here is what Pro adds:"
+              "text": "Your free account gives you the full analysis of a match offered on some days, the blog and a preview of the tools. Here is what Pro adds:"
             },
             {
               "type": "list",
               "items": [
                 "The full analysis on every match",
-                "The six tools connected to the model's probabilities",
-                "The synced decisions journal",
-                "Bankroll tracking linked to your account"
+                "The selected pick, with its probability and its reasons",
+                "The most likely scores and expected goals",
+                "The most likely scorers, including the 3 scorers of the day"
               ]
             },
             {
@@ -1850,6 +1942,11 @@ export const BUNDLE = {
             {
               "type": "p",
               "text": "Pro gives you more analyses and tools; it does not make any match more predictable."
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Free {{trialDays}}-day trial on the monthly plan, for a first subscription: your card is required, nothing is charged during the trial, an email reminds you 2 days before it ends and you cancel in 1 click from My account. Weekly and yearly plans are paid on subscription."
             },
             {
               "type": "cta",
@@ -1876,28 +1973,50 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "text": "The full analysis of one match is still free every day with your account."
+              "text": "On some days, the full analysis of one match is free with your account."
             },
             {
               "type": "cta",
               "label": "See all matches",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "To see every analysis: free {{trialDays}}-day Pro trial (monthly plan), for a first subscription only, cancel in 1 click."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "See the Pro offer",
+              "link": "pricing"
             }
           ]
         },
         "inactive_30d": {
           "subject": "Your IASHARK account is still active",
-          "preheader": "The free analysis of the day is still available with your account.",
+          "preheader": "Your free account is still active.",
           "title": "Your account is still here",
           "blocks": [
             {
               "type": "p",
-              "text": "You have not been back to IASHARK for a while. Your free account is still active, and the full analysis of one match is still free every day."
+              "text": "You have not been back to IASHARK for a while. Your free account is still active, and on some days the full analysis of one match is free."
             },
             {
               "type": "cta",
               "label": "Back to IASHARK",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "To see every analysis: free {{trialDays}}-day Pro trial (monthly plan), for a first subscription only, cancel in 1 click."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "See the Pro offer",
+              "link": "pricing"
             },
             {
               "type": "p",
@@ -1965,7 +2084,7 @@ export const BUNDLE = {
               "type": "list",
               "ordered": true,
               "items": [
-                "Cada día, el análisis completo de un partido es gratuito: aparece destacado en la página de inicio.",
+                "Algunos días, el análisis completo de un partido es gratuito: entonces aparece destacado en la página de inicio.",
                 "En la página de un partido, consulta las probabilidades estimadas por el modelo, los factores que tiene en cuenta y sus límites.",
                 "La página Metodología explica de dónde salen estas cifras y cómo leerlas."
               ]
@@ -2003,7 +2122,7 @@ export const BUNDLE = {
           "blocks": [
             {
               "type": "p",
-              "text": "Cada día, IASHARK abre gratis a todas las cuentas el análisis completo de un partido. Este es el de hoy:"
+              "text": "Algunos días, IASHARK abre gratis a todas las cuentas el análisis completo de un partido. Este es el de hoy:"
             },
             {
               "type": "match"
@@ -2016,6 +2135,17 @@ export const BUNDLE = {
               "type": "cta",
               "label": "Ver el análisis gratuito",
               "link": "freeMatch"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Para ver todos los análisis: prueba Pro gratuita de {{trialDays}} días (suscripción mensual), solo para una primera suscripción, cancelable en 1 clic."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Ver la oferta Pro",
+              "link": "pricing"
             }
           ]
         },
@@ -2026,15 +2156,15 @@ export const BUNDLE = {
           "blocks": [
             {
               "type": "p",
-              "text": "Tu cuenta gratuita da acceso al análisis completo de un partido al día, al blog y a las herramientas en modo descubrimiento. Esto es lo que añade Pro:"
+              "text": "Tu cuenta gratuita da acceso al análisis completo de un partido ofrecido algunos días, al blog y a las herramientas en modo descubrimiento. Esto es lo que añade Pro:"
             },
             {
               "type": "list",
               "items": [
                 "El análisis completo en todos los partidos",
-                "Las seis herramientas conectadas a las probabilidades del modelo",
-                "El diario de decisiones sincronizado",
-                "El seguimiento de bankroll vinculado a la cuenta"
+                "La apuesta elegida, con su probabilidad y sus razones",
+                "Los resultados más probables y los goles esperados",
+                "Los goleadores más probables, con los 3 goleadores del día"
               ]
             },
             {
@@ -2055,6 +2185,11 @@ export const BUNDLE = {
             {
               "type": "p",
               "text": "Pro da acceso a más análisis y herramientas; no hace que ningún partido sea más previsible."
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Prueba gratuita de {{trialDays}} días en la suscripción mensual, para una primera suscripción: se pide tu tarjeta, no se cobra nada durante la prueba, un email te avisa 2 días antes del final y cancelas en 1 clic desde Mi cuenta. La semana y el año se pagan al suscribirse."
             },
             {
               "type": "cta",
@@ -2081,28 +2216,50 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "text": "El análisis completo de un partido sigue siendo gratuito cada día con tu cuenta."
+              "text": "Algunos días, el análisis completo de un partido es gratuito con tu cuenta."
             },
             {
               "type": "cta",
               "label": "Ver todos los partidos",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Para ver todos los análisis: prueba Pro gratuita de {{trialDays}} días (suscripción mensual), solo para una primera suscripción, cancelable en 1 clic."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Ver la oferta Pro",
+              "link": "pricing"
             }
           ]
         },
         "inactive_30d": {
           "subject": "Tu cuenta IASHARK sigue activa",
-          "preheader": "El análisis gratuito del día sigue disponible con tu cuenta.",
+          "preheader": "Tu cuenta gratuita sigue activa.",
           "title": "Tu cuenta sigue aquí",
           "blocks": [
             {
               "type": "p",
-              "text": "Hace tiempo que no vuelves a IASHARK. Tu cuenta gratuita sigue activa y el análisis completo de un partido sigue siendo gratuito cada día."
+              "text": "Hace tiempo que no vuelves a IASHARK. Tu cuenta gratuita sigue activa y algunos días el análisis completo de un partido es gratuito."
             },
             {
               "type": "cta",
               "label": "Volver a IASHARK",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Para ver todos los análisis: prueba Pro gratuita de {{trialDays}} días (suscripción mensual), solo para una primera suscripción, cancelable en 1 clic."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Ver la oferta Pro",
+              "link": "pricing"
             },
             {
               "type": "p",
@@ -2170,7 +2327,7 @@ export const BUNDLE = {
               "type": "list",
               "ordered": true,
               "items": [
-                "Cada día, el análisis completo de un partido es gratuito: aparece destacado en la página de inicio.",
+                "Algunos días, el análisis completo de un partido es gratuito: entonces aparece destacado en la página de inicio.",
                 "En la página de un partido, revisa las probabilidades estimadas por el modelo, los factores que considera y sus límites.",
                 "La página Metodología explica de dónde salen estas cifras y cómo leerlas."
               ]
@@ -2208,7 +2365,7 @@ export const BUNDLE = {
           "blocks": [
             {
               "type": "p",
-              "text": "Cada día, IASHARK abre gratis a todas las cuentas el análisis completo de un partido. Este es el de hoy:"
+              "text": "Algunos días, IASHARK abre gratis a todas las cuentas el análisis completo de un partido. Este es el de hoy:"
             },
             {
               "type": "match"
@@ -2221,6 +2378,17 @@ export const BUNDLE = {
               "type": "cta",
               "label": "Ver el análisis gratuito",
               "link": "freeMatch"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Para ver todos los análisis: prueba Pro gratis de {{trialDays}} días (suscripción mensual), solo para una primera suscripción, cancelas en 1 clic."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Ver la oferta Pro",
+              "link": "pricing"
             }
           ]
         },
@@ -2231,15 +2399,15 @@ export const BUNDLE = {
           "blocks": [
             {
               "type": "p",
-              "text": "Tu cuenta gratuita da acceso al análisis completo de un partido al día, al blog y a las herramientas en modo de prueba. Esto es lo que agrega Pro:"
+              "text": "Tu cuenta gratuita da acceso al análisis completo de un partido ofrecido algunos días, al blog y a las herramientas en modo de prueba. Esto es lo que agrega Pro:"
             },
             {
               "type": "list",
               "items": [
                 "El análisis completo en todos los partidos",
-                "Las seis herramientas conectadas a las probabilidades del modelo",
-                "El diario de decisiones sincronizado",
-                "El seguimiento de bankroll vinculado a la cuenta"
+                "La apuesta elegida, con su probabilidad y sus razones",
+                "Los marcadores más probables y los goles esperados",
+                "Los goleadores más probables, con los 3 goleadores del día"
               ]
             },
             {
@@ -2260,6 +2428,11 @@ export const BUNDLE = {
             {
               "type": "p",
               "text": "Pro da acceso a más análisis y herramientas; no hace que ningún partido sea más predecible."
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Prueba gratis de {{trialDays}} días en la suscripción mensual, para una primera suscripción: te pedimos tu tarjeta, no se te cobra nada durante la prueba, te avisamos por correo 2 días antes del final y cancelas en 1 clic desde Mi cuenta. La semana y el año se pagan al suscribirte."
             },
             {
               "type": "cta",
@@ -2286,28 +2459,50 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "text": "El análisis completo de un partido sigue siendo gratuito cada día con tu cuenta."
+              "text": "Algunos días, el análisis completo de un partido es gratuito con tu cuenta."
             },
             {
               "type": "cta",
               "label": "Ver todos los partidos",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Para ver todos los análisis: prueba Pro gratis de {{trialDays}} días (suscripción mensual), solo para una primera suscripción, cancelas en 1 clic."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Ver la oferta Pro",
+              "link": "pricing"
             }
           ]
         },
         "inactive_30d": {
           "subject": "Tu cuenta IASHARK sigue activa",
-          "preheader": "El análisis gratuito del día sigue disponible con tu cuenta.",
+          "preheader": "Tu cuenta gratuita sigue activa.",
           "title": "Tu cuenta sigue aquí",
           "blocks": [
             {
               "type": "p",
-              "text": "Hace tiempo que no regresas a IASHARK. Tu cuenta gratuita sigue activa y el análisis completo de un partido sigue siendo gratuito cada día."
+              "text": "Hace tiempo que no regresas a IASHARK. Tu cuenta gratuita sigue activa y algunos días el análisis completo de un partido es gratuito."
             },
             {
               "type": "cta",
               "label": "Regresar a IASHARK",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Para ver todos los análisis: prueba Pro gratis de {{trialDays}} días (suscripción mensual), solo para una primera suscripción, cancelas en 1 clic."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Ver la oferta Pro",
+              "link": "pricing"
             },
             {
               "type": "p",
@@ -2375,7 +2570,7 @@ export const BUNDLE = {
               "type": "list",
               "ordered": true,
               "items": [
-                "Jeden Tag ist die vollständige Analyse eines Spiels kostenlos: Sie ist auf der Startseite hervorgehoben.",
+                "An manchen Tagen ist die vollständige Analyse eines Spiels kostenlos: Sie ist dann auf der Startseite hervorgehoben.",
                 "Auf der Seite eines Spiels lesen Sie die vom Modell geschätzten Wahrscheinlichkeiten, die berücksichtigten Faktoren und ihre Grenzen.",
                 "Die Methodik-Seite erklärt, woher diese Zahlen kommen und wie man sie liest."
               ]
@@ -2413,7 +2608,7 @@ export const BUNDLE = {
           "blocks": [
             {
               "type": "p",
-              "text": "Jeden Tag schaltet IASHARK die vollständige Analyse eines Spiels für alle Konten kostenlos frei. Das ist die heutige:"
+              "text": "An manchen Tagen schaltet IASHARK die vollständige Analyse eines Spiels für alle Konten kostenlos frei. Das ist die heutige:"
             },
             {
               "type": "match"
@@ -2426,6 +2621,17 @@ export const BUNDLE = {
               "type": "cta",
               "label": "Kostenlose Analyse ansehen",
               "link": "freeMatch"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Alle Analysen sehen: Pro {{trialDays}} Tage kostenlos testen (Monatsabo), nur für ein erstes Abo, mit 1 Klick kündbar."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Pro-Angebot ansehen",
+              "link": "pricing"
             }
           ]
         },
@@ -2436,15 +2642,15 @@ export const BUNDLE = {
           "blocks": [
             {
               "type": "p",
-              "text": "Ihr kostenloses Konto bietet die vollständige Analyse eines Spiels pro Tag, den Blog und die Tools zum Kennenlernen. Das fügt Pro hinzu:"
+              "text": "Ihr kostenloses Konto bietet die vollständige Analyse eines an manchen Tagen kostenlosen Spiels, den Blog und die Tools zum Kennenlernen. Das fügt Pro hinzu:"
             },
             {
               "type": "list",
               "items": [
                 "Die vollständige Analyse zu allen Spielen",
-                "Die sechs Tools, verbunden mit den Wahrscheinlichkeiten des Modells",
-                "Das synchronisierte Entscheidungsjournal",
-                "Die Bankroll-Verfolgung, verknüpft mit dem Konto"
+                "Die ausgewählte Wette, mit ihrer Wahrscheinlichkeit und ihren Gründen",
+                "Die wahrscheinlichsten Ergebnisse und die erwarteten Tore",
+                "Die wahrscheinlichsten Torschützen, darunter die 3 Torschützen des Tages"
               ]
             },
             {
@@ -2465,6 +2671,11 @@ export const BUNDLE = {
             {
               "type": "p",
               "text": "Pro bietet mehr Analysen und Tools; es macht kein Spiel vorhersehbarer."
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Kostenloser Test über {{trialDays}} Tage beim Monatsabo, für ein erstes Abo: Ihre Karte wird abgefragt, während des Tests wird nichts abgebucht, eine E-Mail erinnert Sie 2 Tage vor dem Ende und Sie kündigen mit 1 Klick in Mein Konto. Woche und Jahr werden bei Abschluss bezahlt."
             },
             {
               "type": "cta",
@@ -2491,28 +2702,50 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "text": "Die vollständige Analyse eines Spiels bleibt mit Ihrem Konto jeden Tag kostenlos."
+              "text": "An manchen Tagen ist die vollständige Analyse eines Spiels mit Ihrem Konto kostenlos."
             },
             {
               "type": "cta",
               "label": "Alle Spiele ansehen",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Alle Analysen sehen: Pro {{trialDays}} Tage kostenlos testen (Monatsabo), nur für ein erstes Abo, mit 1 Klick kündbar."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Pro-Angebot ansehen",
+              "link": "pricing"
             }
           ]
         },
         "inactive_30d": {
           "subject": "Ihr IASHARK-Konto ist weiterhin aktiv",
-          "preheader": "Die kostenlose Analyse des Tages ist mit Ihrem Konto weiterhin verfügbar.",
+          "preheader": "Ihr kostenloses Konto ist weiterhin aktiv.",
           "title": "Ihr Konto ist noch da",
           "blocks": [
             {
               "type": "p",
-              "text": "Sie waren eine Weile nicht mehr bei IASHARK. Ihr kostenloses Konto ist weiterhin aktiv, und die vollständige Analyse eines Spiels bleibt jeden Tag kostenlos."
+              "text": "Sie waren eine Weile nicht mehr bei IASHARK. Ihr kostenloses Konto ist weiterhin aktiv, und an manchen Tagen ist die vollständige Analyse eines Spiels kostenlos."
             },
             {
               "type": "cta",
               "label": "Zurück zu IASHARK",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Alle Analysen sehen: Pro {{trialDays}} Tage kostenlos testen (Monatsabo), nur für ein erstes Abo, mit 1 Klick kündbar."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Pro-Angebot ansehen",
+              "link": "pricing"
             },
             {
               "type": "p",
@@ -2580,7 +2813,7 @@ export const BUNDLE = {
               "type": "list",
               "ordered": true,
               "items": [
-                "Ogni giorno l'analisi completa di una partita è gratuita: la trovi in evidenza nella pagina iniziale.",
+                "In alcuni giorni l'analisi completa di una partita è gratuita: la trovi allora in evidenza nella pagina iniziale.",
                 "Nella pagina di una partita leggi le probabilità stimate dal modello, i fattori considerati e i loro limiti.",
                 "La pagina Metodologia spiega da dove vengono questi numeri e come leggerli."
               ]
@@ -2618,7 +2851,7 @@ export const BUNDLE = {
           "blocks": [
             {
               "type": "p",
-              "text": "Ogni giorno IASHARK apre gratis a tutti gli account l'analisi completa di una partita. Ecco quella di oggi:"
+              "text": "In alcuni giorni IASHARK apre gratis a tutti gli account l'analisi completa di una partita. Ecco quella di oggi:"
             },
             {
               "type": "match"
@@ -2631,6 +2864,17 @@ export const BUNDLE = {
               "type": "cta",
               "label": "Vedi l'analisi gratuita",
               "link": "freeMatch"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Per vedere tutte le analisi: prova Pro gratuita di {{trialDays}} giorni (abbonamento mensile), riservata a un primo abbonamento, annullabile in 1 clic."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Vedi l'offerta Pro",
+              "link": "pricing"
             }
           ]
         },
@@ -2641,15 +2885,15 @@ export const BUNDLE = {
           "blocks": [
             {
               "type": "p",
-              "text": "Il tuo account gratuito dà accesso all'analisi completa di una partita al giorno, al blog e agli strumenti in prova. Ecco cosa aggiunge Pro:"
+              "text": "Il tuo account gratuito dà accesso all'analisi completa di una partita offerta in alcuni giorni, al blog e agli strumenti in prova. Ecco cosa aggiunge Pro:"
             },
             {
               "type": "list",
               "items": [
                 "L'analisi completa su tutte le partite",
-                "I sei strumenti collegati alle probabilità del modello",
-                "Il diario delle decisioni sincronizzato",
-                "Il monitoraggio della bankroll collegato all'account"
+                "La scommessa scelta, con la sua probabilità e i suoi motivi",
+                "I risultati più probabili e i gol attesi",
+                "I marcatori più probabili, tra cui i 3 marcatori del giorno"
               ]
             },
             {
@@ -2670,6 +2914,11 @@ export const BUNDLE = {
             {
               "type": "p",
               "text": "Pro dà accesso a più analisi e strumenti; non rende nessuna partita più prevedibile."
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Prova gratuita di {{trialDays}} giorni sull'abbonamento mensile, per un primo abbonamento: la carta è richiesta, durante la prova non viene addebitato nulla, un'email ti avvisa 2 giorni prima della fine e annulli in 1 clic dal tuo account. Settimana e anno si pagano alla sottoscrizione."
             },
             {
               "type": "cta",
@@ -2696,28 +2945,50 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "text": "L'analisi completa di una partita resta gratuita ogni giorno con il tuo account."
+              "text": "In alcuni giorni l'analisi completa di una partita è gratuita con il tuo account."
             },
             {
               "type": "cta",
               "label": "Vedi tutte le partite",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Per vedere tutte le analisi: prova Pro gratuita di {{trialDays}} giorni (abbonamento mensile), riservata a un primo abbonamento, annullabile in 1 clic."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Vedi l'offerta Pro",
+              "link": "pricing"
             }
           ]
         },
         "inactive_30d": {
           "subject": "Il tuo account IASHARK è ancora attivo",
-          "preheader": "L'analisi gratuita del giorno resta disponibile con il tuo account.",
+          "preheader": "Il tuo account gratuito è ancora attivo.",
           "title": "Il tuo account è ancora qui",
           "blocks": [
             {
               "type": "p",
-              "text": "È da un po' che non torni su IASHARK. Il tuo account gratuito è ancora attivo e l'analisi completa di una partita resta gratuita ogni giorno."
+              "text": "È da un po' che non torni su IASHARK. Il tuo account gratuito è ancora attivo e in alcuni giorni l'analisi completa di una partita è gratuita."
             },
             {
               "type": "cta",
               "label": "Torna su IASHARK",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Per vedere tutte le analisi: prova Pro gratuita di {{trialDays}} giorni (abbonamento mensile), riservata a un primo abbonamento, annullabile in 1 clic."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Vedi l'offerta Pro",
+              "link": "pricing"
             },
             {
               "type": "p",
@@ -2785,7 +3056,7 @@ export const BUNDLE = {
               "type": "list",
               "ordered": true,
               "items": [
-                "Todos os dias, a análise completa de um jogo é gratuita: está em destaque na página inicial.",
+                "Em alguns dias, a análise completa de um jogo é gratuita: fica então em destaque na página inicial.",
                 "Na página de um jogo, leia as probabilidades estimadas pelo modelo, os fatores considerados e os seus limites.",
                 "A página Metodologia explica de onde vêm estes números e como os ler."
               ]
@@ -2823,7 +3094,7 @@ export const BUNDLE = {
           "blocks": [
             {
               "type": "p",
-              "text": "Todos os dias, o IASHARK abre gratuitamente a todas as contas a análise completa de um jogo. Esta é a de hoje:"
+              "text": "Em alguns dias, o IASHARK abre gratuitamente a todas as contas a análise completa de um jogo. Esta é a de hoje:"
             },
             {
               "type": "match"
@@ -2836,6 +3107,17 @@ export const BUNDLE = {
               "type": "cta",
               "label": "Ver a análise gratuita",
               "link": "freeMatch"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Para ver todas as análises: teste Pro gratuito de {{trialDays}} dias (subscrição mensal), só para uma primeira subscrição, cancelável em 1 clique."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Ver a oferta Pro",
+              "link": "pricing"
             }
           ]
         },
@@ -2846,15 +3128,15 @@ export const BUNDLE = {
           "blocks": [
             {
               "type": "p",
-              "text": "A sua conta gratuita dá acesso à análise completa de um jogo por dia, ao blog e às ferramentas em modo de descoberta. Isto é o que o Pro acrescenta:"
+              "text": "A sua conta gratuita dá acesso à análise completa de um jogo oferecido em alguns dias, ao blog e às ferramentas em modo de descoberta. Isto é o que o Pro acrescenta:"
             },
             {
               "type": "list",
               "items": [
                 "A análise completa em todos os jogos",
-                "As seis ferramentas ligadas às probabilidades do modelo",
-                "O diário de decisões sincronizado",
-                "O acompanhamento da bankroll ligado à conta"
+                "A aposta escolhida, com a sua probabilidade e as suas razões",
+                "Os resultados mais prováveis e os golos esperados",
+                "Os marcadores mais prováveis, incluindo os 3 marcadores do dia"
               ]
             },
             {
@@ -2875,6 +3157,11 @@ export const BUNDLE = {
             {
               "type": "p",
               "text": "O Pro dá acesso a mais análises e ferramentas; não torna nenhum jogo mais previsível."
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Teste gratuito de {{trialDays}} dias na subscrição mensal, para uma primeira subscrição: o seu cartão é pedido, nada é cobrado durante o teste, um email avisa-o 2 dias antes do fim e cancela em 1 clique a partir da sua conta. A semana e o ano são pagos na subscrição."
             },
             {
               "type": "cta",
@@ -2901,28 +3188,50 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "text": "A análise completa de um jogo continua gratuita todos os dias com a sua conta."
+              "text": "Em alguns dias, a análise completa de um jogo é gratuita com a sua conta."
             },
             {
               "type": "cta",
               "label": "Ver todos os jogos",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Para ver todas as análises: teste Pro gratuito de {{trialDays}} dias (subscrição mensal), só para uma primeira subscrição, cancelável em 1 clique."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Ver a oferta Pro",
+              "link": "pricing"
             }
           ]
         },
         "inactive_30d": {
           "subject": "A sua conta IASHARK continua ativa",
-          "preheader": "A análise gratuita do dia continua disponível com a sua conta.",
+          "preheader": "A sua conta gratuita continua ativa.",
           "title": "A sua conta continua aqui",
           "blocks": [
             {
               "type": "p",
-              "text": "Há algum tempo que não volta ao IASHARK. A sua conta gratuita continua ativa e a análise completa de um jogo continua gratuita todos os dias."
+              "text": "Há algum tempo que não volta ao IASHARK. A sua conta gratuita continua ativa e, em alguns dias, a análise completa de um jogo é gratuita."
             },
             {
               "type": "cta",
               "label": "Voltar ao IASHARK",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Para ver todas as análises: teste Pro gratuito de {{trialDays}} dias (subscrição mensal), só para uma primeira subscrição, cancelável em 1 clique."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Ver a oferta Pro",
+              "link": "pricing"
             },
             {
               "type": "p",

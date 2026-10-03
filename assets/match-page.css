@@ -31,7 +31,9 @@ a{color:inherit}
 #authHeaderSlot{margin-left:auto}
 .site-header .lang-switch-slot{margin-left:auto;margin-right:10px}
 .site-header .lang-switch-slot+#authHeaderSlot{margin-left:0}
-.btn-login{padding:12px 22px;color:var(--text);border:1px solid var(--line2);border-radius:10px;text-decoration:none;background:var(--card);font:700 13px var(--mono)}
+.btn-login{display:inline-block;padding:12px 22px;color:var(--text);border:1px solid var(--line2);border-radius:10px;text-decoration:none;background:var(--card);font:600 14px var(--body)}
+#quickLoginBtn,.btn-login[data-i18n="match_page.shell_login"]{text-transform:lowercase}
+#quickLoginBtn::first-letter,.btn-login[data-i18n="match_page.shell_login"]::first-letter{text-transform:uppercase}
 .match-shell{position:relative;z-index:1;width:min(var(--container),calc(100% - 32px));margin:0 auto}
 /* Resume SEO statique (h1 + competition + date) : VISIBLE pendant le
    chargement, style comme une vraie introduction. L'application le remplace
@@ -81,7 +83,12 @@ a{color:inherit}
 .card.hero{padding:18px 20px 16px;background:radial-gradient(90% 120% at 50% -30%,rgba(34,211,238,.08),transparent 62%),var(--card)}
 .hero-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px 14px;font-size:13px;color:var(--muted)}
 .hero-league{display:inline-flex;align-items:center;gap:7px;color:var(--soft);font-weight:600}
-.hero-league img{width:18px;height:18px;object-fit:contain}
+.nw{white-space:nowrap}
+/* Logo de la ligue : pastille claire de 30 px (22 px avant), sur ordinateur comme sur telephone.
+   Ligue 1 (4e relecture du 30/09, logo illisible) : l'image de la source a de larges bords vides
+   (le dessin n'occupe que 36 % de sa largeur et 46 % de sa hauteur) ; elle est cadree sur le dessin. */
+.hero-league img{width:30px;height:30px;padding:2px;border-radius:7px;background:#e8eef3;object-fit:contain;box-sizing:border-box}
+.hero-league img[src$="/leagues/61.png"]{padding:0;object-fit:cover}
 .hero-time b{color:var(--text);font-weight:600}
 .hero-teams{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;margin:16px 0 0;font:inherit}
 .hero-team{display:flex;flex-direction:column;align-items:center;gap:9px;min-width:0;text-align:center}
@@ -111,6 +118,8 @@ a{color:inherit}
 .sig-rel--high{color:#6ee7b7;border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.08)}
 .sig-rel--medium{color:#fcd34d;border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.08)}
 .sig-rel--low{color:#fca5a5;border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.08)}
+.sig-rel--test{color:#a5d8e6;border-color:rgba(125,211,252,.35);background:rgba(125,211,252,.06)}
+.hero-test{margin-left:4px;padding:2px 8px;border:1px solid rgba(125,211,252,.35);border-radius:999px;color:#a5d8e6;font-size:11.5px;font-weight:600;white-space:nowrap}
 /* Ticket du pari : le libelle bookmaker en grand, la cote a droite. */
 .sig-slip{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px 18px;margin-top:16px;padding:16px 18px;border:1px solid var(--accent-border);border-radius:14px;background:rgba(3,10,17,.45)}
 .sig-slip-main{min-width:0}
@@ -120,25 +129,9 @@ a{color:inherit}
 .sig-odds-box{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:96px;min-height:72px;padding:10px 14px;border-radius:12px;background:var(--accent);color:#04222b;text-align:center}
 .sig-odds-box span{font:600 11.5px/1.2 var(--body)}
 .sig-odds-box b{margin-top:2px;font:700 30px/1 var(--body);letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.sig-odds-box .sig-odds-src{margin-top:4px;font:600 11px/1.2 var(--body);opacity:.85}
 .sig-odds-box.is-locked{background:rgba(34,211,238,.1);color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent-border)}
 .sig-odds-box.is-locked .card-icon{width:24px;height:24px}
-/* Indice de confiance (10 segments) et niveau de risque (3 crans). */
-.sig-stat{min-width:0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03)}
-.sig-stat-label{display:block;color:var(--muted);font-size:12px;line-height:1.3}
-.sig-stat-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px}
-.sig-stat-row b{color:var(--text);font:700 19px/1.1 var(--body);font-variant-numeric:tabular-nums;white-space:nowrap}
-.sig-conf-val small{margin-left:1px;color:var(--muted);font:600 12px var(--body)}
-.sig-conf-bar{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:3px;flex:1;max-width:220px}
-.sig-conf-bar i{height:9px;border-radius:2px;background:rgba(255,255,255,.1)}
-.sig-conf-bar i.on{background:linear-gradient(180deg,var(--accent),var(--cyan2))}
-.sig-risk-steps{display:flex;gap:4px}
-.sig-risk-steps i{width:16px;height:9px;border-radius:2px;background:rgba(255,255,255,.1)}
-.sig-risk--low .sig-risk-steps i.on{background:var(--green)}
-.sig-risk--medium .sig-risk-steps i.on{background:var(--orange)}
-.sig-risk--high .sig-risk-steps i.on{background:var(--red)}
-.sig-risk--low b{color:#6ee7b7}
-.sig-risk--medium b{color:#fcd34d}
-.sig-risk--high b{color:#fca5a5}
 .sig-rel-note{margin:12px 0 0;color:var(--soft);font-size:14px;line-height:1.5}
 .sig-figures{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:0;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.2)}
 .sig-figures>div{min-width:0;padding:12px 14px}
@@ -175,6 +168,7 @@ a{color:inherit}
 .mk-tag{display:inline-block;margin:2px 0 0 8px;padding:1px 8px;border-radius:99px;font:700 10.5px/1.5 var(--body);letter-spacing:.03em;vertical-align:1px}
 .mk-tag--signal{background:var(--accent);color:#04222b}
 .mk-tag--value{border:1px solid rgba(52,211,153,.45);color:#6ee7b7}
+.mk-tag--low{border:1px solid rgba(248,113,113,.4);color:#fca5a5}
 .mk-note{margin:12px 0 0;color:var(--muted);font-size:12.5px;line-height:1.55}
 
 /* ==================== Forme et face-a-face ==================== */
@@ -213,6 +207,11 @@ a{color:inherit}
 .score-bar i{display:block;height:8px;overflow:hidden;border-radius:4px;background:var(--card2);box-shadow:inset 0 0 0 1px var(--line)}
 .score-bar i span{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--cyan2),var(--cyan))}
 .score-bar small{color:var(--soft);font-size:12.5px;text-align:right;font-variant-numeric:tabular-nums}
+/* « Le score audacieux » (Pro, 30/09/2026) : barre grise, pastille cyan « audacieux ». */
+.score-bar.score-bold{grid-template-columns:minmax(0,150px) 1fr 44px auto;margin-top:6px;padding-top:8px;border-top:1px dashed var(--line)}
+.score-bold i span{background:linear-gradient(90deg,#5b6878,#94a3b8)}
+.score-bold-tag{font-style:normal;font-size:11px;font-weight:600;line-height:1.5;color:var(--cyan);border:1px solid rgba(32,213,239,.35);border-radius:999px;padding:0 8px;white-space:nowrap}
+.score-bold-note{margin:4px 0 0;color:var(--soft);font-size:12px;line-height:1.45}
 
 /* ==================== Buteur ==================== */
 /* Marches joueurs. Hierarchie : le pari ("X buteur") d'abord, rien au-dessus
@@ -252,10 +251,19 @@ a{color:inherit}
 /* ==================== Comparatif ==================== */
 .cmp-scroll{overflow-x:auto;margin:0 -2px}
 .cmp-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
-.cmp-table thead th{max-width:120px;padding:0 0 10px;color:var(--muted);font:600 10.5px/1.35 var(--body);letter-spacing:.1em;text-align:right;text-transform:uppercase;vertical-align:bottom}
+/* Grille commune des tableaux a deux equipes (30/09/2026) : Comparatif, premier
+   but, arbitre et apres-pause ont les memes colonnes (libelle, equipe, equipe,
+   ecart ou colonne vide) : les chiffres d'une equipe restent sous son nom d'une
+   carte a l'autre. */
+.cmp-table{--cmp-c:150px;--cmp-e:140px;table-layout:fixed}
+.cmp-table thead th+th{width:var(--cmp-c)}
+.cmp-table .sbk-x{width:var(--cmp-e);padding:0}
+.cmp-table thead th{padding:0 0 10px;color:var(--muted);font:600 10.5px/1.35 var(--body);letter-spacing:.1em;text-align:right;text-transform:uppercase;vertical-align:bottom}
 .cmp-table thead th:first-child{text-align:left}
+/* Nom d'equipe long sur deux lignes : jamais colle a la colonne voisine (test hors Europe du 30/09). */
+.cmp-table thead th+th{padding-left:12px}
 .cmp-eq{display:inline-flex;align-items:center;gap:6px;text-align:left}
-.cmp-table thead th:last-child{width:140px}
+.cmp-table thead th:last-child{width:var(--cmp-e)}
 .cmp-groupe th{padding:16px 0 6px;color:var(--accent);font:600 10.5px var(--body);letter-spacing:.14em;text-align:left;text-transform:uppercase}
 .cmp-table tbody tr.cmp-groupe:first-child th{padding-top:0}
 .cmp-table th[scope=row]{padding:8px 12px 8px 0;color:var(--soft);font:400 14px var(--body);text-align:left;white-space:nowrap}
@@ -275,9 +283,16 @@ a{color:inherit}
 .cmp-val.dom{color:var(--accent)}
 .cmp-val.ext{color:#b3c5d4}
 .cmp-val.nul{color:var(--muted);font-weight:400}
+/* Ecart entre deux pourcentages : en points (4e relecture du 30/09) ; 5e relecture : « points » en
+   toutes lettres comme l'avis, en petit SOUS le chiffre (la colonne est etroite). */
+.cmp-val .cmp-u{display:block;margin-top:1px;font-size:.72em;font-weight:500;line-height:1.1}
 .cmp-conclusion{margin:16px 0 0;padding-top:13px;border-top:1px solid rgba(255,255,255,.07);color:var(--soft);font:400 14px/1.6 var(--body)}
 .cmp-conclusion b{color:var(--text);font-weight:700}
 .cmp-note{margin:7px 0 0;color:var(--muted);font-size:12.5px;line-height:1.55}
+
+/* Pied de page (liens des championnats) : un nom ne se coupe jamais (5e relecture du 30/09 :
+   « J1 / League », « Liga 1 / Peru »). */
+.seo-foot-nav a{white-space:nowrap}
 
 /* ==================== Repartition des buts ==================== */
 .scenario-chart{display:block;width:100%;height:auto}
@@ -289,6 +304,30 @@ a{color:inherit}
 .scenario-insight{display:flex;align-items:flex-start;gap:8px;margin-top:10px;padding:10px 12px;border:1px solid var(--accent-border);border-left:3px solid var(--accent);border-radius:8px;background:var(--accent-bg);color:var(--soft);font-size:13px;line-height:1.5}
 .scenario-insight b{flex-shrink:0;color:var(--accent)}
 .scenario-source{margin:9px 0 0;color:var(--muted);font-size:12.5px;line-height:1.55}
+/* Simulation par tranches de 15 min (28/09/2026) : barres cyan identiques, aucune tranche mise en avant. */
+.sim-chart{margin:0}
+.sim-bars{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;align-items:end;margin:4px 0 0;padding:0;list-style:none}
+.sim-bar{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.sim-bar-val{color:var(--soft);font:600 13px var(--body)}
+.sim-bar-track{display:flex;align-items:flex-end;width:100%;max-width:46px;height:96px;border-radius:8px;background:rgba(255,255,255,.04)}
+.sim-bar-track i{display:block;width:100%;border-radius:8px;background:linear-gradient(180deg,var(--accent),var(--cyan2));opacity:.85;transform-origin:bottom;animation:simGrow .8s cubic-bezier(.16,1,.3,1) both}
+.sim-bar-lbl{color:var(--muted);font:500 11.5px var(--body);white-space:nowrap}
+.sim-note{margin:10px 0 0;color:var(--soft);font-size:13.5px}
+.sim-caption{margin:8px 0 0;color:var(--muted);font-size:12.5px;text-align:center}
+@keyframes simGrow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@media(prefers-reduced-motion:reduce){.sim-bar-track i{animation:none}}
+.sim-first{margin-top:14px}
+.sim-sub{margin:0 0 7px;color:var(--soft);font:600 14px var(--body)}
+.sim-first-bar{display:flex;height:10px;overflow:hidden;border-radius:6px;background:rgba(255,255,255,.05)}
+.sim-first-bar i{display:block;height:100%}
+.sim-first-bar .is-home{background:var(--accent)}
+.sim-first-bar .is-none{background:rgba(143,161,181,.28)}
+.sim-first-bar .is-away{background:rgba(143,161,181,.6)}
+.sim-first-leg{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;margin:7px 0 0;padding:0;list-style:none;color:var(--muted);font-size:13px}
+.sim-first-leg li{display:flex;gap:6px;min-width:0}
+.sim-first-leg span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sim-first-leg b{color:var(--soft)}
+@media(max-width:420px){.sim-bars{gap:5px}.sim-bar-val{font-size:12px}.sim-bar-lbl{font-size:10.5px}.sim-bar-track{height:80px}}
 
 /* ==================== FAQ ==================== */
 .faq-list details{margin:0;border-bottom:1px solid rgba(255,255,255,.07)}
@@ -317,7 +356,7 @@ a{color:inherit}
   body{padding-bottom:72px}
   .site-header{height:58px;width:calc(100% - 20px)}
   .brand img{width:128px;height:50px}
-  .btn-login{padding:8px 11px;font-size:9.5px}
+  .btn-login{padding:8px 12px;font-size:13px}
   .match-shell{width:calc(100% - 16px)}
   #matchRoot>.loading-card{min-height:840px}
   #matchRoot .page>.sig-pending{min-height:620px}
@@ -339,8 +378,6 @@ a{color:inherit}
   .sig-market{font-size:23px}
   .sig-odds-box{min-width:78px;min-height:64px;padding:8px 10px}
   .sig-odds-box b{font-size:25px}
-  .sig-stat{padding:10px 12px}
-  .sig-stat-row b{font-size:17px}
   .sig-figures dt{font-size:11.5px}
   .sig-figures dd{font-size:17px}
   .sig-figures>div{padding:10px}
@@ -356,8 +393,11 @@ a{color:inherit}
   .sig-market{font-size:21px}
 }
 @media(max-width:560px){
-  .cmp-table thead th:last-child{width:104px}
+  .cmp-table{--cmp-c:64px;--cmp-e:104px}
+  .cmp-table thead th{vertical-align:top}
+  .cmp-table thead .cmp-eq{flex-direction:column;align-items:flex-end;gap:5px;text-align:right}
   .cmp-jauge{width:34px}
+  .cmp-ecart{gap:6px}
   .cmp-val{min-width:46px}
   .cmp-table th[scope=row]{white-space:normal}
   .ss-tag{display:none}
@@ -455,7 +495,9 @@ a{color:inherit}
 .duo-gap.is-pos i{background:var(--accent)}
 .duo-gap.is-pos b{color:var(--accent)}
 .duo--compact{gap:7px}
-.duo--compact .duo-line{grid-template-columns:112px minmax(0,1fr) 46px;align-items:center;gap:10px}
+/* 150 px : « Ce que disent les cotes » tient sur une ligne, les barres restent alignees (test complet du 30/09). */
+.duo--compact .duo-line{grid-template-columns:150px minmax(0,1fr) 46px;align-items:center;gap:10px}
+.duo--compact .duo-k{white-space:nowrap}
 .duo--compact .duo-k{order:0;color:var(--muted);font-size:12.5px}
 .duo--compact .duo-track{order:1;grid-column:auto;height:8px}
 .duo--compact .duo-v{order:2;font-size:14.5px}
@@ -474,7 +516,6 @@ a{color:inherit}
 .sig2-meta{display:grid;gap:10px;margin-top:14px}
 .sig2-meta .sig-rel-note{margin:0}
 .sig2-detail{margin-top:16px}
-.sig2-detail .sig-conf{margin-bottom:10px}
 .sig2-figures{grid-template-columns:repeat(3,minmax(0,1fr))}
 .sig2-figures>div+div{border-left:1px solid var(--line)}
 
@@ -492,6 +533,9 @@ a{color:inherit}
 .avis .gate-facts{margin:0}
 .btn-gate.avis-cta{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:50px;margin-top:18px;padding:12px 20px;font-size:15px}
 .avis-cta .card-icon{width:16px;height:16px}
+/* Ligne « Essai Pro gratuit 7 jours (abonnement mensuel) » sous le bouton du match offert (assets/essai-annonce.js). */
+.avis-trial{margin:12px 0 0;color:var(--text);font-size:13.5px;line-height:1.5;text-align:center}
+.avis-trial[hidden]{display:none}
 .avis--lock .sig-legal{text-align:center}
 .avis--lock .sig-method{text-align:center}
 
@@ -590,9 +634,10 @@ a{color:inherit}
 @media(max-width:640px){
   /* Barre de navigation basse du site (assets/bottom-navigation.css) : 72 px
      + zone de securite, z-index 1000. La barre d'appel passe juste au-dessus. */
-  body.has-cta-bar{padding-bottom:calc(140px + env(safe-area-inset-bottom))!important}
-  .cta-bar{display:block;position:fixed;left:0;right:0;bottom:calc(72px + env(safe-area-inset-bottom));z-index:999;padding:8px 12px;border-top:1px solid var(--accent-border);background:var(--card);box-shadow:0 -12px 30px -18px #000;transition:transform .28s cubic-bezier(.16,1,.3,1),opacity .2s}
-  .cta-bar.is-hidden{transform:translateY(calc(100% + 72px + env(safe-area-inset-bottom)));opacity:0;pointer-events:none}
+  /* + pastille Telegram (--ias-tg-h, assets/telegram-pill.js) : la barre d'appel passe au-dessus d'elle. */
+  body.has-cta-bar{padding-bottom:calc(140px + var(--ias-tg-h,0px) + env(safe-area-inset-bottom))!important}
+  .cta-bar{display:block;position:fixed;left:0;right:0;bottom:calc(72px + var(--ias-tg-h,0px) + env(safe-area-inset-bottom));z-index:999;padding:8px 12px;border-top:1px solid var(--accent-border);background:var(--card);box-shadow:0 -12px 30px -18px #000;transition:transform .28s cubic-bezier(.16,1,.3,1),opacity .2s}
+  .cta-bar.is-hidden{transform:translateY(calc(100% + 72px + var(--ias-tg-h,0px) + env(safe-area-inset-bottom)));opacity:0;pointer-events:none}
   .cta-bar-in{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .cta-bar-txt{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;min-width:0;color:var(--text);font:600 14px var(--body)}
   .cta-bar-txt .band{padding:3px 9px 3px 8px;font-size:12px}
@@ -614,7 +659,7 @@ a{color:inherit}
   .sig2-figures{grid-template-columns:minmax(0,1fr)}
   .sig2-figures>div+div{border-left:0;border-top:1px solid var(--line)}
   .pr-row.is-signal{margin-left:-6px;margin-right:-6px;padding-left:6px;padding-right:6px}
-  .duo--compact .duo-line{grid-template-columns:118px minmax(0,1fr) 42px;gap:8px}
+  .duo--compact .duo-line{grid-template-columns:136px minmax(0,1fr) 42px;gap:8px}
   .duo--compact .duo-k{overflow:hidden;font-size:12px;text-overflow:ellipsis;white-space:nowrap}
   .lu-grid{grid-template-columns:1fr}
   .st-table th,.st-table td{padding:8px 4px;font-size:13px}
@@ -637,8 +682,10 @@ a{color:inherit}
    Un seul mur, la ou l'analyse commence (match-page.js#proGate). Meme langage
    que le verrou « Buteurs du jour » de l'accueil (assets/home-scorers.css,
    .hs-gate*) : apercu FACTICE floute (aucune donnee : « Xxxx », « ??,? % »),
-   panneau centre par-dessus, cadenas et bouton ambre (ambre = verrou Pro,
-   cyan = donnee). Apercu et panneau partagent la meme cellule de grille : la
+   panneau centre par-dessus. Cadenas et bouton CYAN depuis le controle des
+   captures du 30/09/2026 : meme bouton que « Devenir Pro » de la grille de
+   prix (meme action, une seule couleur ; direction cyan + gris), meme liste,
+   meme coche ronde. Apercu et panneau partagent la meme cellule de grille : la
    hauteur suit le plus grand des deux, rien ne deborde, rien ne bouge.
    Meme contenu sur mobile et ordinateur, seule la disposition change.
    ========================================================================== */
@@ -678,25 +725,23 @@ a{color:inherit}
 .mgate-panel{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;padding:70px 10px 10px;
   background:linear-gradient(180deg,rgba(8,13,20,0),rgba(8,13,20,.3) 45%,rgba(8,13,20,.5))}
 .mgate-card{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;max-width:500px;padding:22px 16px 18px;text-align:center;
-  border:1px solid rgba(245,158,11,.24);border-radius:16px;background:linear-gradient(180deg,rgba(15,26,40,.96),rgba(9,16,25,.98));
-  box-shadow:0 26px 54px -22px #000,0 0 44px -20px rgba(245,158,11,.4)}
-.mgate-lock{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;color:var(--amber);background:rgba(245,158,11,.1);box-shadow:0 0 0 1px rgba(245,158,11,.45),0 0 22px rgba(245,158,11,.25)}
+  border:1px solid rgba(32,213,239,.24);border-radius:16px;background:linear-gradient(180deg,rgba(15,26,40,.96),rgba(9,16,25,.98));
+  box-shadow:0 26px 54px -22px #000,0 0 44px -22px rgba(32,213,239,.35)}
+.mgate-lock{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;color:#20d5ef;background:rgba(32,213,239,.1);box-shadow:0 0 0 1px rgba(32,213,239,.4)}
 .mgate-lock .card-icon{width:18px;height:18px}
 .mgate-title{max-width:20ch;margin:2px 0 0;color:#fff;font:700 clamp(21px,3.4vw,26px)/1.2 var(--body);letter-spacing:-.02em;text-wrap:balance}
 .mgate-note{max-width:40ch;margin:0;color:var(--soft);font-size:14px;line-height:1.5}
 .mgate-band{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 10px;color:var(--soft);font-size:13px}
 .mgate-band .band{padding:4px 11px 4px 9px;font-size:12.5px}
-.mgate-list{display:grid;gap:8px;margin:4px 0 2px;padding:0;list-style:none;text-align:left}
-.mgate-list li{position:relative;padding-left:24px;color:#e6edf3;font:500 14.5px/1.4 var(--body)}
-.mgate-list li:before{content:"";position:absolute;left:4px;top:.32em;width:9px;height:5px;border-left:2px solid var(--accent);border-bottom:2px solid var(--accent);transform:rotate(-45deg)}
-.mgate-cta{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;max-width:340px;min-height:52px;margin-top:6px;padding:0 24px;border-radius:999px;
-  background:linear-gradient(135deg,#fbbf24,var(--amber));color:#1a1203;font:700 16px var(--body);text-decoration:none;
-  box-shadow:0 10px 28px rgba(245,158,11,.3);transition:transform .15s ease,box-shadow .15s ease}
-.mgate-cta:hover{transform:translateY(-1px);box-shadow:0 12px 32px rgba(245,158,11,.4)}
+.mgate-list{display:grid;gap:9px;margin:4px 0 2px;padding:0;list-style:none;text-align:left}
+.mgate-list li{display:flex;align-items:flex-start;gap:10px;color:#e6edf3;font:500 14.5px/1.4 var(--body);text-wrap:pretty}
+.mgate-check{flex:none;width:18px;height:18px;margin-top:1px}
+.mgate-cta{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;max-width:340px;min-height:48px;margin-top:6px;padding:0 24px;border-radius:12px;
+  background:#20d5ef;color:#04141b;font:700 15px var(--body);text-decoration:none;
+  box-shadow:0 14px 32px -18px rgba(32,213,239,.85);transition:transform .15s ease,filter .15s ease}
+.mgate-cta:hover{transform:translateY(-1px);filter:brightness(1.1)}
 .mgate-cta:focus-visible{outline:2px solid #fff;outline-offset:3px}
-/* Ce que Pro donne EN PLUS de ce match (pro_offer.match_more), sous la liste :
-   une ligne, pas une carte. Prix mensuel du marche sous le bouton (mgate-small). */
-.mgate-more{max-width:44ch;margin:0;color:var(--accent);font:600 13.5px/1.45 var(--body)}
+/* Prix mensuel du marche sous le bouton (mgate-small, repli avant la grille). */
 .mgate-small{margin:0;color:var(--soft);font-size:12.5px}
 .mgate .sig-legal,.mgate .sig-method{text-align:center}
 @media(min-width:720px){
@@ -736,3 +781,180 @@ a{color:inherit}
 .mrec-link{margin-top:4px;color:var(--accent);font-size:13.5px;text-underline-offset:3px}
 @media(max-width:640px){.match-recovery{margin:20px auto 16px;padding:26px 16px 22px}}
 @media(prefers-reduced-motion:reduce){.mrec-btn{transition:none}}
+
+/* ==========================================================================
+   PAGE MATCH PLUS (30/09/2026, page francaise) : le match en 30 secondes, le
+   piege du match, le chiffre fou, le film du match, « Si... alors... », les 2
+   buteurs. Composants 21st.dev refaits sans React (voir match-page.js), aux
+   couleurs de la page : cyan et gris ; vert et rouge restent reserves aux
+   ecarts chiffres. Pas de majuscules en police a chasse fixe.
+   ========================================================================== */
+/* Le match en 30 secondes (Payment Summary Card + Social Share Button). */
+.plus-resume{padding:16px 20px 14px;border-color:var(--accent-border);background:linear-gradient(180deg,rgba(34,211,238,.06),transparent 70%),var(--card)}
+.plus-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.plus-head h2{display:flex;align-items:center;gap:8px;margin:0;color:#f4f7fb;font:700 17px/1.25 var(--body);letter-spacing:-.01em}
+.plus-head h2 .card-icon{width:17px;height:17px;color:var(--accent)}
+.plus-share{display:inline-flex;align-items:center;gap:7px;flex-shrink:0;min-height:38px;padding:8px 14px;border:1px solid var(--accent-border);border-radius:999px;background:rgba(34,211,238,.08);color:var(--accent);font:600 13.5px var(--body);cursor:pointer;transition:background .18s ease,transform .18s ease}
+.plus-share:hover{background:rgba(34,211,238,.16)}
+.plus-share:active{transform:scale(.97)}
+.plus-share:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.plus-share[disabled]{opacity:.6;cursor:progress}
+.plus-share .card-icon{width:15px;height:15px}
+.plus-rows{display:grid;gap:0;margin:12px 0 0;padding:0;list-style:none}
+.plus-row{display:grid;grid-template-columns:26px minmax(0,1fr);gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+.plus-num{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:rgba(34,211,238,.1);color:var(--accent);font:700 13px var(--body)}
+.plus-k{margin:0;color:var(--muted);font:500 12.5px/1.3 var(--body)}
+.plus-v{margin:3px 0 0;color:var(--text);font:400 15px/1.5 var(--body)}
+.plus-v>b{color:#fff;font-weight:700}
+.plus-cote{color:var(--muted);font-size:13.5px;white-space:nowrap}
+.plus-scorer{display:inline-flex;align-items:baseline;gap:6px;margin-right:16px;white-space:nowrap}
+.plus-scorer small{color:var(--muted);font-size:12.5px}
+.plus-scorer em{color:var(--accent);font-style:normal;font-weight:700;font-variant-numeric:tabular-nums}
+.plus-scorer-note{display:block;margin-top:2px;color:var(--muted);font-size:12px}
+.plus-lock{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin:0;padding:11px 0 0;border-top:1px solid var(--line);color:var(--soft);font-size:13.5px;line-height:1.45}
+.plus-lock .card-icon{width:14px;height:14px;color:var(--accent)}
+.plus-lock span{flex:1;min-width:0}
+.fold .plus-lock{padding:0;border:0}
+.fold .plus-lock>.card-icon{display:none}
+/* Le piege du match (Alert) : une phrase, sa source entre parentheses. */
+.plus-piege{display:grid;grid-template-columns:18px minmax(0,1fr);gap:10px;margin-top:16px;padding:12px 14px;border:1px solid rgba(251,191,36,.28);border-radius:12px;background:rgba(251,191,36,.06)}
+.plus-piege .card-icon{width:17px;height:17px;margin-top:2px;color:#fcd34d}
+.plus-piege p{margin:0;color:var(--soft);font-size:14px;line-height:1.55}
+.plus-piege b{display:block;margin-bottom:2px;color:#fcd34d;font-weight:700}
+.plus-piege small{color:var(--muted);font-size:12.5px}
+/* Le chiffre fou (Bold Stats) : un seul chiffre, en grand. */
+.plus-fou{padding:18px 22px;border-color:var(--accent-border);background:radial-gradient(80% 140% at 0% 50%,rgba(34,211,238,.10),transparent 60%),var(--card)}
+.plus-eyebrow{display:flex;align-items:center;gap:7px;margin:0;color:var(--accent);font:700 13.5px var(--body)}
+.plus-eyebrow .card-icon{width:15px;height:15px}
+.plus-fou-in{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:6px 20px;margin-top:8px}
+.plus-fou-n{color:var(--accent);font:700 64px/1 var(--body);letter-spacing:-.03em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.plus-fou-t{margin:0;color:#f4f7fb;font:600 17px/1.4 var(--body)}
+.plus-fou-d{margin:5px 0 0;color:var(--muted);font-size:12.5px;line-height:1.5}
+/* Le film du match (Stats Card + Animated Chart) : une phrase sous chaque tranche. */
+.film-cle{margin:0 0 12px;color:var(--muted);font-size:12.5px;line-height:1.5}
+.film-lignes{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:8px 0 0;padding:10px 0 0;list-style:none;border-top:1px solid var(--line)}
+.film-lignes li{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;text-align:center}
+.film-lignes b{color:var(--soft);font:600 12.5px/1.25 var(--body)}
+.film-lignes small{color:var(--text);font:600 12.5px var(--body);white-space:nowrap;font-variant-numeric:tabular-nums}
+.film-lignes b{color:var(--muted);font-weight:500}
+@media(max-width:520px){.film-lignes{gap:4px}.film-lignes b{font-size:10.5px}.film-lignes small{font-size:11px}}
+/* Si... alors... (How It Works) : etapes numerotees. */
+.sia-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.sia-list li{display:grid;grid-template-columns:28px minmax(0,1fr);align-items:start;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025)}
+.sia-n{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:rgba(34,211,238,.1);color:var(--accent);font:700 13px var(--body)}
+.sia-list p{margin:3px 0 0;color:var(--text);font-size:14.5px;line-height:1.5}
+/* Les 2 buteurs (Progress Card) : deux cartes cote a cote, empilees sur telephone. */
+.but-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.but-card{display:flex;flex-direction:column;padding:16px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025);color:inherit;text-decoration:none;transition:border-color .18s ease}
+a.but-card:hover{border-color:var(--accent-border)}
+a.but-card:hover .threat-lien i{transform:translateX(3px)}
+.but-card .threat-id b{font-size:16px}
+.but-faits{display:grid;gap:5px;margin:12px 0 0;padding:0;list-style:none;color:var(--soft);font-size:13px;line-height:1.45}
+.but-card .threat-lien{margin-top:auto;padding-top:12px}
+@media(max-width:640px){.but-grid{grid-template-columns:1fr}.plus-resume{padding:14px 14px 12px}.plus-fou{padding:16px}.plus-fou-n{font-size:48px}.plus-fou-t{font-size:15.5px}.plus-v{font-size:14.5px}}
+@media(max-width:380px){.plus-fou-in{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.plus-share,.but-card{transition:none}}
+
+/* ==========================================================================
+   LES STATS IASHARK (30/09/2026, match-page.js#bookFold)
+   Une carte repliable de plus dans « Les stats du match », au format des
+   autres : tableaux du Comparatif (.cmp-table), notes .cmp-note, sous-titres
+   .sim-sub. Ici, seulement ce qui manque : la marge sous chaque chiffre, les
+   groupes par equipe, la bascule domicile-exterieur (memes pastilles que le
+   sommaire). Pas de vert ni de rouge : aucun chiffre n'est bon ou mauvais.
+   ========================================================================== */
+.sbk-table caption{padding:0 0 10px;text-align:left}
+.sbk-table td b{display:block;color:var(--text);font-weight:600}
+.sbk-table td small{display:block;margin-top:1px;color:var(--muted);font:400 11.5px/1.3 var(--body);white-space:nowrap}
+.sbk-table td.sbk-na{color:var(--muted)}
+.sbk-table th[scope=row] small{color:var(--muted);font-size:12px}
+.sbk-table .cmp-groupe small{margin-left:4px;color:var(--muted);font-weight:400;letter-spacing:0;text-transform:none}
+.sbk-table tbody+tbody tr.cmp-groupe:first-child th{padding-top:16px}
+.cmp-table.sbk-quarts{table-layout:auto}
+.sbk-quarts thead th+th,.sbk-quarts thead th:last-child{width:auto}
+.sbk-quarts th[scope=row]{width:1%}
+.sbk-quarts td{padding-left:10px}
+.sbk-clear{color:var(--accent)!important}
+.cmp-note a{color:var(--accent);text-underline-offset:3px}
+.cmp-note .tip-btn{width:20px;height:20px;margin-left:6px;font-size:11px;vertical-align:1px}
+.fold .cmp-conclusion{margin-top:12px;padding-top:11px}
+.fold .sbk-source{margin-top:14px}
+.sbk-nw{white-space:nowrap}
+.sbk-nw .tip-pop{white-space:normal}
+.sbk-pro{display:flex;align-items:flex-start;gap:10px;margin-top:16px;padding:12px 14px;border:1px solid var(--accent-border);border-radius:10px;background:var(--accent-bg);text-align:left}
+.sbk-pro .card-icon{flex:none;width:16px;height:16px;margin-top:3px;color:var(--accent)}
+.sbk-pro p{margin:0;color:var(--text);font:500 14px/1.55 var(--body)}
+.sbk-detail{margin-top:14px}
+.sbk-detail>.rep-panel>.rep-inner{margin:0 -2px;padding:0 2px}
+.sbk-part{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.sbk-detail .rep-inner>.sbk-part:first-child,[data-sbk-panel]>.sbk-part:first-child{margin-top:0;padding-top:0;border-top:0}
+.sbk-duo th[scope=row],.sbk-trio th[scope=row]{white-space:normal}
+/* Precision sous un en-tete de colonne (« (toutes compétitions) ») : en petit, sans capitales. */
+.cmp-table thead th .sbk-th-sub{display:block;margin-top:3px;font-weight:500;font-size:10.5px;letter-spacing:0;text-transform:none}
+.sbk-q-small{display:none}
+.sbk-phrase{margin:0;color:var(--soft);font:400 14px/1.6 var(--body)}
+.sbk-ligue{display:grid;grid-template-columns:1fr 1fr;gap:0 36px;margin:0;font-variant-numeric:tabular-nums}
+.sbk-ligue div{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid rgba(255,255,255,.05)}
+.sbk-ligue div:nth-child(-n+2){border-top:0}
+.sbk-ligue--3{grid-template-columns:repeat(3,minmax(0,1fr));gap:0 28px}
+.sbk-ligue--3 div:nth-child(3){border-top:0}
+.sbk-ligue dt{color:var(--soft);font-size:14px}
+.sbk-ligue dt small{color:var(--muted);font-size:12px}
+.sbk-ligue dd{margin:0;text-align:right;white-space:nowrap}
+.sbk-ligue dd b{color:var(--text);font:600 14px var(--body)}
+.sbk-ligue dd small{color:var(--muted);font-size:11.5px}
+.sbk-vue{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px}
+.sbk-vue button{min-height:34px;padding:6px 13px;border:1px solid var(--line2);border-radius:999px;background:var(--card);color:var(--soft);font:600 13px/1.3 var(--body);text-align:left;cursor:pointer;transition:background-color .2s,color .2s,border-color .2s}
+.sbk-vue button:hover{color:var(--text);border-color:var(--accent-border)}
+.sbk-vue button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#04222b}
+.sbk-vue button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media(max-width:560px){
+  .sbk-q-large{display:none}
+  .sbk-q-small{display:block}
+  .sbk-q-small .cmp-scroll+.cmp-scroll{margin-top:24px}
+  .sbk-q-small thead th:first-child{white-space:nowrap}
+  /* Telephone : pas de colonne vide, place aux libelles et aux marges. */
+  .cmp-table .sbk-x{display:none}
+  .sbk-duo{--cmp-c:86px}
+  .sbk-trio{--cmp-c:80px;--cmp-e:80px}
+  .sbk-duo td,.sbk-trio td{padding-left:8px}
+  .sbk-quarts td{padding-left:8px}
+  .sbk-quarts td small{font-size:11px}
+  .sbk-ligue,.sbk-ligue--3{grid-template-columns:minmax(0,1fr);gap:0}
+  .sbk-ligue div:nth-child(2),.sbk-ligue--3 div:nth-child(3){border-top:1px solid rgba(255,255,255,.05)}
+}
+/* Visuels (30/09/2026, composants de 21st.dev refaits sans React : Paired Bars, Leaderboard Bars,
+   Heat Strip, Meter, Count Up). Decoratifs (aria-hidden), une seule teinte, jamais vert ni rouge. */
+.sbk-bar,.sbk-metre{position:relative;display:block;width:100%;max-width:132px;margin-left:auto}
+.sbk-bar{height:6px;margin-top:6px;margin-bottom:5px;border-radius:3px;background:rgba(255,255,255,.07)}
+.sbk-bar .sbk-p{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--accent);transform-origin:left;animation:sbkGrow .9s cubic-bezier(.16,1,.3,1) both}
+.sbk-bar.is-away .sbk-p{background:rgba(159,182,201,.75)}
+.sbk-m{position:absolute;top:-3px;bottom:-3px;border-left:1px solid rgba(226,232,240,.75);border-right:1px solid rgba(226,232,240,.75);background:linear-gradient(rgba(226,232,240,.75),rgba(226,232,240,.75)) center/100% 1px no-repeat}
+.sbk-metre{height:14px;margin-top:5px;margin-bottom:3px}
+.sbk-metre:before{content:"";position:absolute;left:0;right:0;top:5px;height:4px;border-radius:2px;background:rgba(255,255,255,.07)}
+.sbk-metre .sbk-m{top:2px;bottom:2px;border-color:var(--accent);background-image:linear-gradient(rgba(34,211,238,.45),rgba(34,211,238,.45));background-size:100% 4px}
+.sbk-metre .sbk-a{position:absolute;top:-1px;bottom:-1px;width:2px;margin-left:-1px;border-radius:1px;background:#fff;box-shadow:0 0 0 1px rgba(8,12,18,.6)}
+.sbk-metre .sbk-v{position:absolute;top:3px;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--card)}
+.sbk-heat{position:relative}
+.sbk-heat:before{content:"";position:absolute;top:4px;bottom:4px;left:3px;right:0;border-radius:6px;background:var(--accent);opacity:calc(.03 + var(--h,0) * .3);pointer-events:none}
+.sbk-heat.is-ref:before{background:#9fb6c9}
+.sbk-heat>*{position:relative}
+.cmp-table td.sbk-heat{padding-right:7px}
+.cmp-conclusion b[data-cu]{display:inline-block}
+.cmp-bar{max-width:96px;height:4px;margin-top:5px;margin-bottom:0}
+.rep-panel[inert] .sbk-bar .sbk-p{animation:none}
+@keyframes sbkGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media(prefers-reduced-motion:reduce){.sbk-vue button{transition:none}.sbk-bar .sbk-p{animation:none}}
+/* « Notre lecture du match » (Pro, 30/09/2026) : conclusion de l'analyse, texte sans chiffre. */
+.plus-lecture{padding:18px 20px}
+.plus-lecture-t{margin:8px 0 0;color:var(--text);font-size:15px;line-height:1.6}
+.plus-lecture-d{margin:8px 0 0;color:var(--soft);font-size:12px}
+/* Selection Pro du jour (03/10/2026) : le message Telegram du Canal Pro, sur la page match. */
+.selpro-card .selpro-intro{margin:0 0 12px;color:var(--muted);font-size:13.5px;line-height:1.5}
+.selpro-item{padding:12px 14px;border:1px solid var(--accent-border);border-radius:14px;margin:0 0 10px}
+.selpro-item p{margin:0 0 6px;font-size:14.5px;line-height:1.5;color:var(--text)}
+.selpro-item p:last-child{margin-bottom:0}
+.selpro-item .selpro-fam{font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--accent)}
+.selpro-item .selpro-num{font-size:13px;color:var(--muted)}
+.selpro-legs{margin:0 0 6px;padding:0;list-style:none;font-size:14px;line-height:1.5;color:var(--text)}
+.selpro-card .selpro-source{margin:8px 0 0;font-size:12.5px;line-height:1.5;color:var(--muted)}

@@ -1,0 +1,71 @@
+name: Robot Telegram IASHARK
+
+# Installe et entretient le robot Telegram (28/09/2026, demande de Clement) :
+# publication d'un clic sur @iasharkdata, contact, messages Pro EN PRIVE (plus de
+# canal Pro depuis le 02/10/2026), robot personnel (accueil et questions dans la
+# langue de l'abonne) et validation du programme du jour (V3, 30/09/2026).
+# Code du robot : supabase/functions/telegram-bot (tables : migrations 0033 et 0040).
+# Les envois planifies du Canal Pro sont dans .github/workflows/canal-pro.yml.
+#
+# - installer : donne au robot ses reglages Supabase (a partir des secrets
+#   GitHub deja en place : aucune cle a saisir par Clement), le deploie et le
+#   branche sur Telegram. Tourne a chaque changement du robot sur main, ou a
+#   la main (onglet Actions, « Run workflow »).
+# Plus de « menage » : sans canal, un abonnement termine ne recoit simplement plus rien
+# (verifie a chaque envoi).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/functions/telegram-bot/**'
+      - 'supabase/functions/_shared/canal-pro.mjs'
+      - 'supabase/functions/_shared/canal-pro-langues.mjs'
+      - 'supabase/functions/_shared/canal-pro-diffusion.mjs'
+      - 'supabase/functions/_shared/canal-pro-accueil.mjs'
+      - '.github/workflows/telegram-bot.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: telegram-bot
+  cancel-in-progress: false
+
+env:
+  PROJECT_REF: ksvjraqitxouwiabecai
+
+jobs:
+  installer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Reglages, deploiement et branchement sur Telegram
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          set -euo pipefail
+          # Secret du webhook derive du jeton du robot : le meme a chaque
+          # installation, jamais ecrit nulle part en clair.
+          WEBHOOK_SECRET=$(printf '%s' "iashark-webhook:$TELEGRAM_BOT_TOKEN" | sha256sum | cut -c1-48)
+          echo "::add-mask::$WEBHOOK_SECRET"
+          supabase secrets set --project-ref "$PROJECT_REF" \
+            TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN" \
+            TELEGRAM_ADMIN_CHAT_ID="$TELEGRAM_CHAT_ID" \
+            TELEGRAM_WEBHOOK_SECRET="$WEBHOOK_SECRET" \
+            TELEGRAM_PUBLIC_CHANNEL="@iasharkdata"
+          # Lecture des photos de tickets : NON installee (decision Clement / juriste,
+          # confidentialite). Le robot ne lit que le texte.
+          supabase functions deploy telegram-bot --project-ref "$PROJECT_REF" --no-verify-jwt
+          curl -fsS "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" \
+            -H 'content-type: application/json' \
+            -d "{\"url\":\"https://$PROJECT_REF.supabase.co/functions/v1/telegram-bot\",\"secret_token\":\"$WEBHOOK_SECRET\",\"allowed_updates\":[\"message\",\"callback_query\",\"my_chat_member\"]}" > /dev/null
+          NOM=$(curl -fsS "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/getMe" | node -e 'const r=JSON.parse(require("fs").readFileSync(0)).result;console.log("@"+r.username+" ("+r.first_name+")")')
+          echo "Robot installe : $NOM" | tee -a "$GITHUB_STEP_SUMMARY"
+

@@ -55,7 +55,7 @@
     "a-propos.html","abonnement.html","exemple-analyse.html","checkout-annule.html",
     "checkout-succes.html","404.html","landing.html",
     "mentions-legales.html","cgv.html","confidentialite.html","cookies.html","jeu-responsable.html",
-    "methodologie.html"
+    "methodologie.html","accueil-pro.html","partenaires.html","partenaires-conditions.html","partenaires-formation.html","partenaires-kit.html"
   ].forEach(function(p){ LOCALIZED_PAGES[p] = true; });
 
   var DIR_PREFIX_RE = /^\/([a-z]{2})(\/.*)?$/;

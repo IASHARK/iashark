@@ -21,20 +21,24 @@
       "title": "IASHARK Pro South Africa: {pro_price} a Month",
       "description": "IASHARK Pro at {pro_price} a month: every soccer match analysis and the tracking tools. Cancel anytime. Statistical estimates only, no guaranteed results. 18+"
     },
+    "partenaires": {
+      "title": "IASHARK Partners: 40% of every subscription, for life",
+      "description": "Recommend IASHARK to your community: 40% of every payment made by your Pro subscribers, on every renewal. Link, code, QR code, dashboard. 18+"
+    },
     "exemple-analyse": {
       "title": "Example Soccer Match Analysis | IASHARK South Africa",
       "description": "A complete IASHARK match analysis (PSG vs Monaco), free to view: recommended market, model probability, gap with the market and team comparison."
     },
     "pro": {
-      "title": "IASHARK Tools: Model Selections & Bet Tracking | SA",
-      "description": "High model-probability selections, automatic bet tracking and a one-click odds check: the IASHARK Tools space for PSL and international soccer."
+      "title": "IASHARK Pro: your dashboard and tools | SA",
+      "description": "Two tools (accumulator, gap finder), for PSL and international soccer."
     }
   },
   "home": {
     "eyebrow": "HOW IT WORKS",
     "title": "Soccer predictions built on probabilities, not hunches",
     "paragraphs": [
-      "IASHARK produces soccer predictions from a statistical score model that never uses the odds. For Betway Premiership (PSL) fixtures, the Premier League, the Champions League and the other competitions we cover, the model estimates the probability of each result, the number of goals and both teams to score, then compares it with the probability implied by bookmaker odds.",
+      "IASHARK produces soccer predictions from a statistical score model. For Betway Premiership (PSL) fixtures, the Premier League, the Champions League and the other competitions we cover, the model estimates the probability of each result, the number of goals and both teams to score, then compares it with the probability implied by bookmaker odds.",
       "These are statistical estimates: soccer is uncertain, no outcome is guaranteed and IASHARK is not a bookmaker. PSL coverage is recent and data quality varies by league, so every analysis shows its data-quality rating. 18+ only."
     ],
     "leagues_title": "Predictions by league",
@@ -72,7 +76,13 @@
       "ucl": "{league}: the leading club competition organised by UEFA. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
       "uel": "{league}: UEFA's second-tier European club competition, below the Champions League. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
       "uecl": "{league}: UEFA's third-tier European club competition. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
-      "mls": "{league} (Major League Soccer): the top professional league in the United States and Canada. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds."
+      "mls": "{league} (Major League Soccer): the top professional league in the United States and Canada. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
+      "national2": "{league}: the second tier of {adjective} soccer. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
+      "national3": "{league}: the third tier of {adjective} soccer. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
+      "national4": "{league}: the fourth tier of {adjective} soccer. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
+      "cup": "{league}: the national cup of {adjective} soccer. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
+      "nations": "{league}: the UEFA competition for European national teams. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
+      "wcq": "{league}: the European qualifiers for the FIFA World Cup. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds."
     },
     "adjectives": {
       "premier": "English",
@@ -89,7 +99,34 @@
       "argentina_liga_profesional": "Argentine",
       "colombia_primera_a": "Colombian",
       "peru_primera": "Peruvian",
-      "chile_primera": "Chilean"
+      "chile_primera": "Chilean",
+      "championship": "English",
+      "league_one": "English",
+      "league_two": "English",
+      "ligue2": "French",
+      "bundesliga2": "German",
+      "spain_segunda": "Spanish",
+      "italy_serieb": "Italian",
+      "belgium_pro": "Belgian",
+      "turkey_superlig": "Turkish",
+      "scotland_premiership": "Scottish",
+      "greece_superleague": "Greek",
+      "brazil_seriea": "Brazilian",
+      "austria_bundesliga": "Austrian",
+      "switzerland_superleague": "Swiss",
+      "denmark_superliga": "Danish",
+      "eliteserien": "Norwegian",
+      "ekstraklasa": "Polish",
+      "scotland_championship": "Scottish",
+      "saudi_proleague": "Saudi",
+      "dfb_pokal": "German",
+      "coppa_italia": "Italian",
+      "copa_del_rey": "Spanish",
+      "fa_cup": "English",
+      "coupe_de_france": "French",
+      "eerste_divisie": "Dutch",
+      "germany_liga3": "German",
+      "czech_liga": "Czech"
     },
     "scope": "This page brings together the next 14 days of fixtures, recent results and the log, drawn from public data and refreshed daily. Kick-off times are in {tz}.",
     "fixtures_title": "Fixtures in the next 14 days",
@@ -125,7 +162,36 @@
       "argentina_liga_profesional": "Argentina",
       "colombia_primera_a": "Colombia",
       "peru_primera": "Peru",
-      "chile_primera": "Chile"
+      "chile_primera": "Chile",
+      "championship": "England",
+      "league_one": "England",
+      "league_two": "England",
+      "ligue2": "France",
+      "bundesliga2": "Germany",
+      "spain_segunda": "Spain",
+      "italy_serieb": "Italy",
+      "belgium_pro": "Belgium",
+      "turkey_superlig": "Turkey",
+      "scotland_premiership": "Scotland",
+      "greece_superleague": "Greece",
+      "brazil_seriea": "Brazil",
+      "austria_bundesliga": "Austria",
+      "switzerland_superleague": "Switzerland",
+      "denmark_superliga": "Denmark",
+      "eliteserien": "Norway",
+      "ekstraklasa": "Poland",
+      "scotland_championship": "Scotland",
+      "saudi_proleague": "Saudi Arabia",
+      "nations_league": "UEFA",
+      "wcq_europe": "UEFA",
+      "dfb_pokal": "Germany",
+      "coppa_italia": "Italy",
+      "copa_del_rey": "Spain",
+      "fa_cup": "England",
+      "coupe_de_france": "France",
+      "eerste_divisie": "Netherlands",
+      "germany_liga3": "Germany",
+      "czech_liga": "Czech Republic"
     },
     "overrides": {
       "south_africa_premiership": {
@@ -170,14 +236,16 @@
     },
     "pts": "pts",
     "club_label": "Club",
-    "derby_label": "Derby"
+    "derby_label": "Derby",
+    "in_test": "Reliability: in testing. Analyses for this competition have not yet been validated on past matches: the gap with the odds is not shown."
   },
   "match": {
-    "title": "{home} vs {away} soccer prediction ({league})",
-    "title_short": "{home} vs {away}: soccer prediction and stats",
-    "title_min": "{home} vs {away} soccer preview",
-    "description": "{home} vs {away}, {league} soccer on {date}: kick-off in SAST, venue, recent form and IASHARK's statistical match analysis. 18+",
-    "description_short": "{home} vs {away} ({league}), {date}: SAST kick-off, venue and statistical analysis. 18+",
+    "title": "{home} vs {away} soccer prediction ({day})",
+    "title_short": "{home} vs {away} soccer prediction",
+    "title_min": "{home} vs {away} prediction",
+    "h1": "{home} vs {away} soccer prediction",
+    "description": "{home} vs {away} soccer prediction ({league}), {date}: stats, model probabilities, recent form and kick-off in SAST. 18+",
+    "description_short": "{home} vs {away} prediction ({league}), {date}: stats, probabilities and SAST kick-off. 18+",
     "facts_title": "Match information",
     "competition": "Competition",
     "kickoff": "Kick-off",

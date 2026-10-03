@@ -227,19 +227,79 @@
       return a && typeof a === "object" ? a : null;
     } catch (e) { return null; }
   }
+  // 03/10/2026 (programme de partenaires, decision de Clement) : PREMIER CLIC
+  // GAGNANT, conserve 60 jours. Passe ce delai, le premier code expire et le
+  // prochain lien clique devient le premier. Double memoire : localStorage ET
+  // cookie iashark_ref (60 jours) ; si l'un des deux a disparu, l'autre le
+  // restaure. Le cookie ne contient que le code et sa date : rien de personnel.
+  var AFFILIATE_DAYS = 60;
+  var AFFILIATE_COOKIE = "iashark_ref";
+  function daysBetweenIso(a, b) {
+    var ta = Date.parse(a + "T00:00:00Z"), tb = Date.parse(b + "T00:00:00Z");
+    return isFinite(ta) && isFinite(tb) ? Math.floor((tb - ta) / 86400000) : NaN;
+  }
+  function readAffiliateCookie() {
+    try {
+      var m = String(document.cookie || "").match(/(?:^|;\s*)iashark_ref=([^;]*)/);
+      if (!m) return null;
+      var parts = decodeURIComponent(m[1]).split("|");
+      var code = normalizeAffiliateCode(parts[0]);
+      return code ? { first: code, first_d: /^\d{4}-\d{2}-\d{2}$/.test(parts[1] || "") ? parts[1] : null } : null;
+    } catch (e) { return null; }
+  }
+  function writeAffiliateCookie(code, day) {
+    try {
+      var secure = loc.protocol === "https:" ? "; Secure" : "";
+      document.cookie = AFFILIATE_COOKIE + "=" + encodeURIComponent(code + "|" + day) + "; Max-Age=" + (AFFILIATE_DAYS * 86400) + "; Path=/; SameSite=Lax" + secure;
+    } catch (e) {}
+  }
   function captureAffiliate() {
     try {
-      var code = normalizeAffiliateCode(param("ref"));
-      if (!code) return;
       var day = new Date().toISOString().slice(0, 10);
       var cur = readAffiliate() || {};
+      // Restauration croisee cookie <-> localStorage.
+      if (!cur.first) {
+        var ck = readAffiliateCookie();
+        if (ck) { cur = { first: ck.first, first_d: ck.first_d || day, last: ck.first, last_d: ck.first_d || day }; }
+      }
+      // Premier code expire (plus de 60 jours) : on repart de zero.
+      if (cur.first && cur.first_d) {
+        var age = daysBetweenIso(cur.first_d, day);
+        if (!(age >= 0 && age <= AFFILIATE_DAYS)) {
+          cur = {};
+          try { localStorage.removeItem(AFFILIATE_KEY); } catch (e) {}
+          try { document.cookie = AFFILIATE_COOKIE + "=; Max-Age=0; Path=/"; } catch (e) {}
+        }
+      }
+      var code = normalizeAffiliateCode(param("ref"));
+      if (!code && !cur.first) return;
       var next = {
         first: cur.first || code,
         first_d: cur.first_d || day,
-        last: code,
-        last_d: day,
+        last: code || cur.last || cur.first,
+        last_d: code ? day : (cur.last_d || cur.first_d || day),
       };
       localStorage.setItem(AFFILIATE_KEY, JSON.stringify(next));
+      if (!readAffiliateCookie()) writeAffiliateCookie(next.first, next.first_d);
+      if (code) pendingAffiliateClick = code;
+    } catch (e) {}
+  }
+  // Clic sur un lien partenaire (?ref=CODE present dans l'URL) : compte
+  // informatif pour l'affilie (jamais paye), un par visite et par jour, code
+  // valide seulement (RPC affiliate_track_click, migration 0050). Envoye
+  // apres la page vue ; jamais pour un robot ou l'appareil du proprietaire.
+  var pendingAffiliateClick = null;
+  function sendAffiliateClick() {
+    var code = pendingAffiliateClick;
+    pendingAffiliateClick = null;
+    if (!code || !enabled) return;
+    try {
+      fetch(SUPA_URL + "/rest/v1/rpc/affiliate_track_click", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: SUPA_KEY },
+        body: JSON.stringify({ p_code: code, p_session: getSessionId(), p_dir: currentSite() }),
+        keepalive: true,
+      }).catch(function () {});
     } catch (e) {}
   }
 
@@ -658,6 +718,8 @@
       window.iasharkTrack("page_view", pageViewMeta);
       // La page d'inscription vue = inscription commencee (toutes versions).
       if (/\/inscription(\.html)?$/.test(loc.pathname)) window.iasharkTrack("signup_started", {});
+      // Clic sur un lien partenaire (?ref=CODE), apres la page vue.
+      sendAffiliateClick();
     } catch (e) {}
   }
 

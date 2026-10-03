@@ -27,7 +27,7 @@
       "blocks": [
         { "type": "p", "text": "Your free IASHARK account is ready. Here is how to use the site in a few minutes." },
         { "type": "list", "ordered": true, "items": [
-          "Every day, the full analysis of one match is free: it is highlighted on the home page.",
+          "On some days, the full analysis of one match is free: it is then highlighted on the home page.",
           "On a match page, read the probabilities estimated by the model, the factors it takes into account and their limits.",
           "The Methodology page explains where these figures come from and how to read them."
         ] },
@@ -43,10 +43,12 @@
       "preheader": "The full analysis of this match is open for free with your account.",
       "title": "Your free analysis of the day",
       "blocks": [
-        { "type": "p", "text": "Every day, IASHARK opens the full analysis of one match to every account, free of charge. Here is today's:" },
+        { "type": "p", "text": "On some days, IASHARK opens the full analysis of one match to every account, free of charge. Here is today's:" },
         { "type": "match" },
         { "type": "p", "text": "You will find the estimated probabilities, the factors used by the model and the points to watch. These are statistical estimates: the outcome of a match remains uncertain." },
-        { "type": "cta", "label": "View the free analysis", "link": "freeMatch" }
+        { "type": "cta", "label": "View the free analysis", "link": "freeMatch" },
+        { "type": "p", "if": "hasTrial", "text": "To see every analysis: free {{trialDays}}-day Pro trial (monthly plan), for a first subscription only, cancel in 1 click." },
+        { "type": "link", "if": "hasTrial", "label": "See the Pro offer", "link": "pricing" }
       ]
     },
     "pro_features": {
@@ -54,17 +56,18 @@
       "preheader": "The list of Pro content and its price, plainly.",
       "title": "What Pro adds to your free account",
       "blocks": [
-        { "type": "p", "text": "Your free account gives you the full analysis of one match a day, the blog and a preview of the tools. Here is what Pro adds:" },
+        { "type": "p", "text": "Your free account gives you the full analysis of a match offered on some days, the blog and a preview of the tools. Here is what Pro adds:" },
         { "type": "list", "items": [
           "The full analysis on every match",
-          "The six tools connected to the model's probabilities",
-          "The synced decisions journal",
-          "Bankroll tracking linked to your account"
+          "The selected pick, with its probability and its reasons",
+          "The most likely scores and expected goals",
+          "The most likely scorers, including the 3 scorers of the day"
         ] },
         { "type": "p", "if": "hasProYear", "text": "Prices on the {{siteVersion}} version of the site: {{proWeekPrice}} per week, {{proPrice}} per month or {{proYearPrice}} per year. The same Pro access whichever period you choose, cancel at any time from My account." },
         { "type": "p", "if": "hasNoProYear", "text": "Prices on the {{siteVersion}} version of the site: {{proWeekPrice}} per week or {{proPrice}} per month. The same Pro access whichever period you choose, cancel at any time from My account." },
         { "type": "p", "if": "hasOnlyProMonth", "text": "Price on the {{siteVersion}} version of the site: {{proPrice}} per month, cancel at any time from My account." },
         { "type": "p", "text": "Pro gives you more analyses and tools; it does not make any match more predictable." },
+        { "type": "p", "if": "hasTrial", "text": "Free {{trialDays}}-day trial on the monthly plan, for a first subscription: your card is required, nothing is charged during the trial, an email reminds you 2 days before it ends and you cancel in 1 click from My account. Weekly and yearly plans are paid on subscription." },
         { "type": "cta", "label": "See the plan details", "link": "pricing" },
         { "type": "p", "text": "If the free account is enough for you, there is nothing to do." }
       ]
@@ -76,17 +79,21 @@
       "blocks": [
         { "type": "p", "text": "Here are some of this weekend's fixtures covered by IASHARK:" },
         { "type": "matches" },
-        { "type": "p", "text": "The full analysis of one match is still free every day with your account." },
-        { "type": "cta", "label": "See all matches", "link": "home" }
+        { "type": "p", "text": "On some days, the full analysis of one match is free with your account." },
+        { "type": "cta", "label": "See all matches", "link": "home" },
+        { "type": "p", "if": "hasTrial", "text": "To see every analysis: free {{trialDays}}-day Pro trial (monthly plan), for a first subscription only, cancel in 1 click." },
+        { "type": "link", "if": "hasTrial", "label": "See the Pro offer", "link": "pricing" }
       ]
     },
     "inactive_30d": {
       "subject": "Your IASHARK account is still active",
-      "preheader": "The free analysis of the day is still available with your account.",
+      "preheader": "Your free account is still active.",
       "title": "Your account is still here",
       "blocks": [
-        { "type": "p", "text": "You have not been back to IASHARK for a while. Your free account is still active, and the full analysis of one match is still free every day." },
+        { "type": "p", "text": "You have not been back to IASHARK for a while. Your free account is still active, and on some days the full analysis of one match is free." },
         { "type": "cta", "label": "Back to IASHARK", "link": "home" },
+        { "type": "p", "if": "hasTrial", "text": "To see every analysis: free {{trialDays}}-day Pro trial (monthly plan), for a first subscription only, cancel in 1 click." },
+        { "type": "link", "if": "hasTrial", "label": "See the Pro offer", "link": "pricing" },
         { "type": "p", "text": "If these emails are no longer useful, unsubscribe in one click with the link at the bottom of this message. If you neither visit nor open our emails, we will stop writing to you in 30 days anyway." }
       ]
     },

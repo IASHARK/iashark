@@ -231,6 +231,22 @@ export function marcheMenu(betId, value, ligne) {
 }
 
 // ------------------------------------------------------------------ liste blanche
+/** Cote bet365 minimale d'une selection du flux (page et robot). */
+export const COTE_MIN_FLUX = 1.2;
+/**
+ * Chance AFFICHEE (entier, %) d'une chance sans marge (fraction) : MEME arrondi que
+ * lib/chance-iashark.js#chanceIashark(p * 100, null) (une decimale moitie vers le haut, puis l'entier,
+ * jamais 0 ni 100). Copie pour l'Edge Function (Deno ne charge pas le module CommonJS) ;
+ * tests/marches-flux.test.mjs verifie l'egalite avec lib/chance-iashark.js.
+ */
+export function chanceAffichee(p) {
+  const x = Number(p);
+  if (!ok(x) || !(x > 0) || x >= 1) return null;
+  const v = x * 100;
+  const d = Math.round(Number((v * 10).toPrecision(12))) / 10;
+  return Math.max(1, Math.min(99, Math.round(d)));
+}
+
 /** Config (config/marches-valides.json) -> { reference, controle, ecart_max_pinnacle, marches: Map(betId -> { lignes, ligues }) }. */
 export function lireConfig(config) {
   const c = config && typeof config === "object" ? config : {};
@@ -246,6 +262,8 @@ export function lireConfig(config) {
     reference: cleBookmaker(c.reference || "bet365"),
     controle: cleBookmaker(c.controle || "pinnacle"),
     ecart_max_pinnacle: ok(Number(c.ecart_max_pinnacle)) ? Number(c.ecart_max_pinnacle) : 0.08,
+    // Jamais une selection du flux sous cette cote (decision du 03/10 : 1,20), page et robot.
+    cote_min: ok(Number(c.cote_min)) && Number(c.cote_min) > 1 ? Number(c.cote_min) : COTE_MIN_FLUX,
     age_max_releve_h: ok(Number(c.age_max_releve_h)) ? Number(c.age_max_releve_h) : 12,
     buteur_actif: c.buteur_actif === true,
     meme_match: { cote_min: Number(c.meme_match?.cote_min) || 1.4, cote_max: Number(c.meme_match?.cote_max) || 4 },
@@ -269,6 +287,7 @@ export function selectionsDuMatch(raw, { config, dom = "Domicile", ext = "Extér
     const pin = chancesBookmaker(flux, cfg.controle, betId);
     for (const s of chancesBookmaker(flux, cfg.reference, betId)) {
       if (regle.lignes && !regle.lignes.some((l) => Math.abs(l - s.ligne) < 1e-9)) continue;
+      if (!(s.odd >= cfg.cote_min - 1e-9)) continue; // jamais sous 1,20
       if (regle.chance && (s.chance < regle.chance[0] - 1e-12 || s.chance > regle.chance[1] + 1e-12)) continue; // hors des tranches validees
       const code = codeFlux(betId, s.value);
       const p = pin.find((x) => x.value === s.value && (x.ligne ?? null) === (s.ligne ?? null));
@@ -293,7 +312,50 @@ export function etatSelection(raw, code, { config } = {}) {
   if (!s) return null;
   const p = chancesBookmaker(flux, cfg.controle, x.bet_id).find((v) => v.value === x.value);
   return { bookmaker: cfg.reference, cote: s.odd, chance: s.chance, pinnacle: p ? { chance: p.chance, cote: p.odd } : null,
-    controle_ok: !p || Math.abs(p.chance - s.chance) <= cfg.ecart_max_pinnacle + 1e-12 };
+    controle_ok: !p || Math.abs(p.chance - s.chance) <= cfg.ecart_max_pinnacle + 1e-12, sous_cote_min: !(s.odd >= cfg.cote_min - 1e-9) };
+}
+
+// ------------------------------------------------------------------ releves (UNE seule source : page et robot)
+export const AGE_MAX_RELEVE_H = 12;
+/**
+ * Lignes legeres { id, fixture_id, captured_at } -> { fixture: { id, captured_at } } : le DERNIER releve de
+ * chaque match pris au plus ageMaxH heures avant maintenant (jamais un releve date du futur).
+ */
+export function choisirReleves(lignes, maintenant = Date.now(), ageMaxH = AGE_MAX_RELEVE_H) {
+  const t = new Date(maintenant).getTime(), out = {};
+  for (const l of lignes || []) {
+    const c = Date.parse(l?.captured_at);
+    if (!ok(c) || c > t + 5 * 60e3 || t - c > ageMaxH * 3600e3) continue;
+    const b = out[l.fixture_id];
+    if (!b || c > Date.parse(b.captured_at)) out[l.fixture_id] = { id: l.id, captured_at: l.captured_at };
+  }
+  return out;
+}
+/**
+ * Lecture du flux de odds_snapshots, IDENTIQUE pour la page (pipeline) et le robot : 1) lignes legeres
+ * (id, match, heure) des releves de moins de ageMaxH heures ; 2) les cotes (bookmakers seulement) des seuls
+ * releves retenus. select(filtres, colonnes) -> lignes (adaptateur PostgREST de l'appelant).
+ * -> { fixture: { raw: { bookmakers }, captured_at, id } }.
+ */
+export async function lireRelevesFlux(select, fixtures, { maintenant = Date.now(), ageMaxH = AGE_MAX_RELEVE_H, lot = 40 } = {}) {
+  const ids = [...new Set((fixtures || []).map(Number).filter((x) => x > 0))];
+  const depuis = new Date(new Date(maintenant).getTime() - ageMaxH * 3600e3).toISOString();
+  const tetes = [];
+  for (let i = 0; i < ids.length; i += lot) tetes.push(...await select({ fixture_id: ["in", ids.slice(i, i + lot)], captured_at: ["gte", depuis] }, "id,fixture_id,captured_at"));
+  const choisis = Object.values(choisirReleves(tetes, maintenant, ageMaxH)).map((x) => x.id);
+  const out = {};
+  for (let i = 0; i < choisis.length; i += 20) {
+    for (const r of await select({ id: ["in", choisis.slice(i, i + 20)] }, "id,fixture_id,captured_at,bookmakers:raw_odds->bookmakers"))
+      if (Array.isArray(r.bookmakers)) out[r.fixture_id] = { raw: { bookmakers: r.bookmakers }, captured_at: r.captured_at, id: r.id };
+  }
+  return out;
+}
+/** Filtres -> parametres PostgREST (pour l'adaptateur du pipeline ; meme forme que scripts/canal-pro/lib/base.mjs). */
+export function versQueryPostgrest(filtres = {}) {
+  return Object.entries(filtres).map(([col, f]) => {
+    const [op, v] = f;
+    return op === "in" ? `${col}=in.(${v.map((x) => encodeURIComponent(String(x))).join(",")})` : `${col}=${op}.${encodeURIComponent(v)}`;
+  });
 }
 
 // ------------------------------------------------------------------ buteur (DESACTIVE tant que non valide)

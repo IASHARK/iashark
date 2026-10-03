@@ -57,19 +57,19 @@ test("controle Pinnacle : ecart de plus de 8 points -> selection ecartee ; Pinna
   assert.match(loin.ecartees[0].raison, /Pinnacle/);
 });
 
-test("etiquette du bookmaker : « Cote bet365 : 1,75 », puis la cote d'un agree suivi qui propose le meme pari ; aucun lien", () => {
+test("etiquette du bookmaker : la cote de l'agree d'abord, puis « Cote de reference (bet365) » sans gras ; aucun lien", () => {
   const p = { famille: "simple", dom: "Lens", ext: "Nantes", ligue: "Ligue 1", coup_envoi: "2026-10-04T15:00:00Z", marche: "O25", proba: 0.55,
     source_proba: C.SOURCE_FLUX, voie: C.VOIE_FLUX, cotes: { winamax: 1.78 }, meilleure_cote: 1.78, meilleur_bookmaker: "winamax",
     composantes: { ref: { bookmaker: "bet365", cote: 1.75, releve_at: "2026-10-04T05:10:00Z" } }, cote_vue_at: "2026-10-04T07:00:00Z" };
   const texte = (ps) => { const m = C.messagesCanal("2026-10-04", ps); return [m.tete, ...m.paris.map((x) => x.html)].join("\n"); };
   const t = texte([p]);
-  assert.match(t, /Cote bet365 : <b>1,75<\/b>/);
-  assert.match(t, /Cote Winamax : <b>1,78<\/b>/);
+  assert.match(t, /Cote Winamax : <b>1,78<\/b>\nCote de référence \(bet365\) : 1,75 · relevée à/);
+  assert.doesNotMatch(t, /<b>1,75<\/b>/, "bet365 jamais en avant");
   assert.match(t, /à partir de la cote bet365/);
   assert.doesNotMatch(t, /https?:|href|mise|espérance|gagn(er|ez) à coup sûr/i);
   // Sans agree : la cote bet365 seule, jamais « pas de cote ».
   const seul = C.messagesCanal("2026-10-04", [{ ...p, marche: "F45:Over 8.5", cotes: {}, meilleure_cote: 1.75, meilleur_bookmaker: "bet365" }]).paris[0].html;
-  assert.match(seul, /Cote bet365 : <b>1,75<\/b>/);
+  assert.match(seul, /Cote de référence \(bet365\) : 1,75/);
   assert.match(seul, /plus de 8,5 corners dans le match/);
   assert.doesNotMatch(seul, /Winamax|pas encore relevée/);
 });
@@ -138,7 +138,7 @@ test("reglement des marches du flux : score, mi-temps, corners, cartons ; fait m
   assert.equal(F.reglerFlux("F80:Under 4.5", f), "perdu");
   assert.equal(F.reglerFlux("F2:Home", { ft: [1, 1] }), "rembourse");
   assert.equal(F.reglerFlux("F45:Over 8.5", { ft: [2, 1] }), null, "corners pas encore connus");
-  assert.equal(C.resultatPari({ marche: "F49:o/yes 2.5" }, 2, 1, { ht: null }), "gagne");
+  assert.equal(C.resultatPari({ marche: "F49:o/yes 2.5" }, 2, 1, { statut: "FT", ht: null }), "gagne");
   assert.equal(C.resultatPari({ marche: "O25" }, 2, 1), "gagne", "anciens marches inchanges");
 });
 
@@ -156,4 +156,89 @@ test("liste blanche : un marche hors de ses tranches de chance validees n'est ja
   assert.deepEqual(cfg.marches.get(5).chance, [0.5, 0.7]);
   const sans = F.lireConfig({ marches: [{ bet_id: 5 }] });
   assert.equal(sans.marches.get(5).chance, null);
+});
+
+// ---------- corrections de l'avocat du diable (03/10) ----------
+test("config : « Total - Home » borne haute 0,85 ; migration 0054 ; jamais une selection du flux sous 1,20 (page et robot)", async () => {
+  const fs = await import("node:fs");
+  const cfgFichier = JSON.parse(fs.readFileSync(new URL("../config/marches-valides.json", import.meta.url), "utf8"));
+  assert.deepEqual(cfgFichier.marches.find((m) => m.bet_id === 16).chance, [0.6, 0.85]);
+  assert.equal(cfgFichier.cote_min, 1.2);
+  assert.ok(fs.existsSync(new URL("../supabase/migrations/0054_pro_paris_meme_match.sql", import.meta.url)));
+  assert.ok(!fs.existsSync(new URL("../supabase/migrations/0053_pro_paris_meme_match.sql", import.meta.url)));
+  // Sous 1,20 : jamais (Over 1.5 a 1,22 passe, une cote a 1,15 non).
+  const r = raw();
+  r.bookmakers[0].bets.find((b) => b.id === 5).values.push(v("Over 0.5", 1.15), v("Under 0.5", 5.0));
+  const s = F.selectionsDuMatch(r, { config: config([{ bet_id: 5 }]) }).selections;
+  assert.ok(s.length && s.every((x) => x.cote >= 1.2));
+  assert.ok(!s.some((x) => x.code === "F5:Over 0.5"));
+  // Page match : filtre aussi a l'affichage.
+  assert.match(fs.readFileSync(new URL("../match-page.js", import.meta.url), "utf8"), /Number\(x\.cote\)>=1\.2/);
+  // Dernier controle : cote tombee sous 1,20 -> pari retire.
+  const e = F.etatSelection(r, "F5:Over 0.5", { config: config([{ bet_id: 5 }]) });
+  assert.equal(e.sous_cote_min, true);
+});
+
+test("une seule source : page et robot lisent le MEME releve (dernier de moins de 12 h), en deux lectures legeres", async () => {
+  const maintenant = Date.parse("2026-10-03T12:00:00Z");
+  const lignes = [{ id: 1, fixture_id: 7, captured_at: "2026-10-02T20:00:00Z" }, { id: 2, fixture_id: 7, captured_at: "2026-10-03T10:51:00Z" },
+    { id: 3, fixture_id: 8, captured_at: "2026-10-02T23:00:00Z" }, { id: 4, fixture_id: 9, captured_at: "2026-10-03T13:00:00Z" }];
+  assert.deepEqual(F.choisirReleves(lignes, maintenant), { 7: { id: 2, captured_at: "2026-10-03T10:51:00Z" } }, "trop vieux (> 12 h) ou dans le futur : jamais");
+  const appels = [];
+  const select = async (filtres, colonnes) => {
+    appels.push({ filtres, colonnes });
+    if (colonnes === "id,fixture_id,captured_at") return lignes.filter((l) => filtres.fixture_id[1].includes(l.fixture_id) && l.captured_at >= filtres.captured_at[1]);
+    return filtres.id[1].map((id) => ({ id, fixture_id: lignes.find((l) => l.id === id).fixture_id, captured_at: lignes.find((l) => l.id === id).captured_at, bookmakers: [] }));
+  };
+  const out = await F.lireRelevesFlux(select, [7, 8, 9], { maintenant });
+  assert.deepEqual(Object.keys(out), ["7"]);
+  assert.equal(out[7].captured_at, "2026-10-03T10:51:00Z");
+  assert.equal(appels[0].filtres.captured_at[1], "2026-10-03T00:00:00.000Z", "seulement les releves de moins de 12 h");
+  assert.equal(appels[1].colonnes, "id,fixture_id,captured_at,bookmakers:raw_odds->bookmakers", "seulement les colonnes utiles");
+  assert.deepEqual(appels[1].filtres, { id: ["in", [2]] }, "les cotes du seul releve retenu");
+  // Le pipeline (page match) et le robot appellent la meme fonction.
+  const fs = await import("node:fs");
+  assert.match(fs.readFileSync(new URL("../.github/workflows/update-data.yml", import.meta.url), "utf8"), /FLUX_MOD\.lireRelevesFlux\(/);
+  assert.match(fs.readFileSync(new URL("../scripts/canal-pro/lib/sources.mjs", import.meta.url), "utf8"), /FLUX\.lireRelevesFlux\(/);
+});
+
+test("dernier controle : la cote bet365 a change -> chance recalculee sur la cote affichee (meme arrondi que lib/chance-iashark.js)", async () => {
+  const CH = (await import("node:module")).createRequire(import.meta.url)("../lib/chance-iashark.js");
+  for (const x of [0.1234, 0.555, 0.5449999, 0.705, 0.98765]) assert.equal(F.chanceAffichee(x), CH.chanceIashark(x * 100, null).chance);
+  const p = { famille: "simple", dom: "Lens", ext: "Nantes", coup_envoi: "2026-10-04T15:00:00Z", fin_coup_envoi: "2026-10-04T15:00:00Z", marche: "F8:Yes", proba: 0.52,
+    voie: C.VOIE_FLUX, source_proba: C.SOURCE_FLUX, cotes: {}, composantes: { ref: { bookmaker: "bet365", cote: 1.9, releve_at: "2026-10-04T05:00:00Z" } } };
+  const etat = { cotes: {}, flux: { bookmaker: "bet365", cote: 1.7, chance: 0.5712, controle_ok: true, sous_cote_min: false, releve_at: "2026-10-04T09:00:00Z" } };
+  const r = C.controlePublication(p, etat, "2026-10-04T10:00:00Z");
+  assert.equal(r.maj.proba, CH.chanceIashark(57.12, null).chance / 100);
+  assert.equal(r.maj.composantes.ref.cote, 1.7);
+  assert.match(r.maj.explication, /57 %/);
+  assert.match(C.controlePublication(p, { ...etat, flux: { ...etat.flux, cote: 1.15, sous_cote_min: true } }, "2026-10-04T10:00:00Z").raison, /1,20/);
+});
+
+test("tabac : jamais « meilleure cote chez les bookmakers agrees … chez bet365 »", () => {
+  const p = { famille: "simple", dom: "Lens", ext: "Nantes", selection: "les deux équipes marquent", marche: "F8:Yes", proba: 0.52, voie: C.VOIE_FLUX,
+    source_proba: C.SOURCE_FLUX, meilleure_cote: 1.9, meilleur_bookmaker: "bet365", cote_vue_at: "2026-10-04T05:00:00Z" };
+  for (const lang of ["fr", "es", "en"]) assert.doesNotMatch(C.verdictTabac(p, 1.8, lang), /chez bet365|1[.,]90/, "pas de « meilleure cote » quand l'operateur n'est pas un agree suivi");
+  assert.match(C.verdictTabac({ ...p, meilleur_bookmaker: "winamax" }, 1.8), /bookmakers agréés : 1,90 chez Winamax/);
+});
+
+test("reglement : corners seulement avec une stat non vide pour chaque equipe et un match fini en temps reglementaire (FT)", async () => {
+  const { creerSources } = await import("../scripts/canal-pro/lib/sources.mjs");
+  const reponse = (statut, cornersExt) => async (url) => {
+    const corps = url.includes("fixtures/statistics")
+      ? [{ team: { id: 1 }, statistics: [{ type: "Corner Kicks", value: 6 }, { type: "Yellow Cards", value: 2 }] }, { team: { id: 2 }, statistics: [{ type: "Corner Kicks", value: cornersExt }, { type: "Yellow Cards", value: 1 }] }]
+      : [{ fixture: { status: { short: statut } }, teams: { home: { id: 1 }, away: { id: 2 } }, score: { fulltime: { home: 2, away: 1 }, halftime: { home: 1, away: 0 } }, goals: { home: 2, away: 1 } }];
+    return { ok: true, headers: new Headers(), json: async () => ({ errors: [], response: corps }) };
+  };
+  const src = (statut, c) => creerSources({ APISPORTS_KEY: "test" }, { log: () => {}, fetchFn: reponse(statut, c) });
+  const ft = await src("FT", 4).resultat(1);
+  assert.deepEqual(ft.corners, [6, 4]);
+  assert.equal(C.resultatPari({ marche: "F45:Over 8.5" }, ft.bd, ft.be, ft), "gagne");
+  const vide = await src("FT", null).resultat(1);
+  assert.equal(vide.corners, null);
+  assert.equal(C.resultatPari({ marche: "F45:Over 8.5" }, vide.bd, vide.be, vide), null, "stat vide : pas de reglement");
+  const aet = await src("AET", 4).resultat(1);
+  assert.equal(aet.corners, null);
+  assert.equal(C.resultatPari({ marche: "F45:Over 8.5" }, aet.bd, aet.be, aet), null, "prolongation : pas de reglement automatique");
+  assert.equal(C.resultatPari({ marche: "F8:Yes" }, 2, 1, { statut: "PEN" }), null);
 });

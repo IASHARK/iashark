@@ -532,7 +532,7 @@ export async function publierProgramme(ctx, prog, parisJour) {
   gardes.sort((a, b) => Date.parse(a.coup_envoi) - Date.parse(b.coup_envoi));
   for (const p of gardes) {
     // La cote prise (et, pour un pari a plusieurs selections, la cote de chaque selection chez ce bookmaker) est archivee avec le pari.
-    const maj = { cotes: p.cotes, meilleure_cote: p.meilleure_cote, meilleur_bookmaker: p.meilleur_bookmaker, selections: p.selections, composantes: p.composantes || {},
+    const maj = { cotes: p.cotes, meilleure_cote: p.meilleure_cote, meilleur_bookmaker: p.meilleur_bookmaker, selections: p.selections, composantes: p.composantes || {}, proba: p.proba,
       cote_vue_at: p.cote_vue_at, explication: p.explication, mode: m.mode, destination, publie_at: d.toISOString() };
     if (m.mode === "ouvert") maj.numero = ++numero;
     const [lu] = await db.update("pro_paris", { id: p.id }, maj);

@@ -1098,15 +1098,16 @@ function analyseAbonne(vm){
 // ici. La cote dit TOUJOURS d'ou elle vient (« Cote bet365 : 1,45 »). Aucun lien vers un bookmaker.
 function marchesFluxCard(raw){
   const mf=raw&&raw.marches_flux;
-  const liste=mf&&Array.isArray(mf.liste)?mf.liste.filter(x=>x&&x.selection&&Number(x.chance)>0&&Number(x.cote)>1):[];
+  // Jamais une selection du flux sous 1,20 (deja filtree par le pipeline ; verifie encore ici).
+  const liste=mf&&Array.isArray(mf.liste)?mf.liste.filter(x=>x&&x.selection&&Number(x.chance)>0&&Number(x.cote)>=1.2):[];
   if(!liste.length)return '';
   const parMarche=new Map();
   liste.forEach(x=>{const k=String(x.marche||'');if(!parMarche.has(k))parMarche.set(k,[]);parMarche.get(k).push(x);});
   const cote=v=>Number(v).toFixed(2).replace('.',',');
   const blocs=[...parMarche.entries()].map(([nom,xs])=>`<div class="mf-bloc"><h3 class="mf-nom">${esc(nom)}</h3><ul class="mf-liste">${
-    xs.sort((a,b)=>b.chance-a.chance).map(x=>`<li class="mf-ligne"><span class="mf-sel">${esc(x.selection)}</span><span class="mf-chance"><b>${esc(x.chance)} %</b></span><span class="mf-cote">${esc(tf('match_page.flux_cote','Cote {bk} : {cote}',{bk:x.bookmaker||'bet365',cote:cote(x.cote)}))}</span></li>`).join('')
+    xs.sort((a,b)=>b.chance-a.chance).map(x=>`<li class="mf-ligne"><span class="mf-sel">${esc(x.selection)}</span><span class="mf-chance"><b>${esc(x.chance)} %</b></span><span class="mf-cote">${esc(tf('match_page.flux_cote','Cote de référence ({bk}) : {cote}',{bk:x.bookmaker||'bet365',cote:cote(x.cote)}))}</span></li>`).join('')
   }</ul></div>`).join('');
-  return `<section class="card mf reveal">${blocs}<p class="mf-note">${esc(t('match_page.flux_note','Chance calculée par IASHARK à partir de la cote bet365, marge du bookmaker retirée. La cote indiquée est celle de bet365, relevée le matin.'))}</p></section>`;
+  return `<section class="card mf reveal">${blocs}<p class="mf-note">${esc(t('match_page.flux_note','Chance calculée par IASHARK à partir de la cote de référence (bet365), marge du bookmaker retirée. Même relevé que le robot Pro.'))}</p></section>`;
 }
 function render(raw){
   const vm=viewModel(raw);

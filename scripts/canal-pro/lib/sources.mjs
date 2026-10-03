@@ -163,17 +163,15 @@ export function creerSources(env, { log = console.log, db = null, fetchFn = (...
    * { fixture: { raw, captured_at } }. Pas de base ou liste blanche vide : {} (aucun appel).
    * Table illisible : {} et une ligne de journal (les autres voies continuent).
    */
-  async function fluxDesMatchs(fixtures) {
+  // UNE seule source (03/10/2026) : MEME lecture que la page match (pipeline) : le dernier releve de moins de
+  // 12 h de chaque match, en deux temps (lignes legeres, puis les cotes des seuls releves retenus).
+  async function fluxDesMatchs(fixtures, quand = maintenant()) {
     const ids = [...new Set(fixtures.map(Number).filter((x) => x > 0))];
-    const out = {};
-    if (!db || !ids.length || !M.CONFIG_FLUX.marches.size) return out;
+    if (!db || !ids.length || !M.CONFIG_FLUX.marches.size) return {};
     try {
-      for (let i = 0; i < ids.length; i += 40) {
-        const lignes = await db.select("odds_snapshots", { fixture_id: ["in", ids.slice(i, i + 40)] }, { ordre: "captured_at.desc", colonnes: "fixture_id,captured_at,raw_odds" });
-        for (const l of lignes) if (!out[l.fixture_id] && l.raw_odds) out[l.fixture_id] = { raw: l.raw_odds, captured_at: l.captured_at };
-      }
+      return await FLUX.lireRelevesFlux((filtres, colonnes) => db.select("odds_snapshots", filtres, { colonnes }), ids,
+        { maintenant: quand, ageMaxH: M.CONFIG_FLUX.age_max_releve_h });
     } catch (e) { log(`flux de cotes API-Football illisible (${e.status || e.message}) : marches du flux non evalues`); return {}; }
-    return out;
   }
 
   return {
@@ -255,7 +253,7 @@ export function creerSources(env, { log = console.log, db = null, fetchFn = (...
         await ajouterDoubleChance(c, noms[m.match_id]);
       }
       // Marches du flux API-Football (liste blanche config/marches-valides.json) : lecture seule de odds_snapshots.
-      const fluxParFixture = await fluxDesMatchs(M.matchsFlux(tous, tousMarche).map((m) => m.fixture));
+      const fluxParFixture = await fluxDesMatchs(M.matchsFlux(tous, tousMarche).map((m) => m.fixture), maintenant);
       return M.construireMenu({ jour, matchsJour, matchsWeekend, cotesParMatch, marcheJour, marcheWeekend, fluxParFixture, maintenant });
     },
     /**
@@ -287,7 +285,7 @@ export function creerSources(env, { log = console.log, db = null, fetchFn = (...
       }
       // Selections du flux : leur cote bet365 du dernier releve du flux (odds_snapshots).
       const fluxLegs = legs.filter((l) => l.flux && l.fixture);
-      const flux = fluxLegs.length ? await fluxDesMatchs(fluxLegs.map((l) => l.fixture)) : {};
+      const flux = fluxLegs.length ? await fluxDesMatchs(fluxLegs.map((l) => l.fixture), _d || maintenant()) : {};
       const out = {};
       for (const p of paris) {
         if (p.famille === "buteur") continue;
@@ -353,14 +351,18 @@ export function creerSources(env, { log = console.log, db = null, fetchFn = (...
         if (dom || ext) faits = { dom: lire(dom), ext: lire(ext) };
       }
       // Faits pour les marches du flux (marches-flux.mjs#reglerFlux) : score a la pause, corners, cartons (jaunes + rouges).
+      // Seulement un match FINI EN TEMPS REGLEMENTAIRE (FT) : apres prolongation (AET, PEN) les statistiques
+      // comptent la prolongation, donc aucun reglement automatique des marches du flux (reglement a la main).
       const ht = fx.score?.halftime || {};
       const paire = (a, b) => (Number.isInteger(a) && Number.isInteger(b) ? [a, b] : null);
-      // API-Football ecrit null pour 0 dans ses statistiques : 0 quand les statistiques des DEUX equipes existent.
-      const deux = !!(faits?.dom && faits?.ext);
-      const stat = (k) => (deux ? paire(faits.dom[k] ?? 0, faits.ext[k] ?? 0) : null);
-      const cartons = deux ? paire((faits.dom.jaunes ?? 0) + (faits.dom.rouges ?? 0), (faits.ext.jaunes ?? 0) + (faits.ext.rouges ?? 0)) : null;
+      const fini90 = statut === "FT";
+      // Corners et cartons : une statistique NON VIDE pour CHAQUE equipe (API-Football ecrit souvent null) ;
+      // sinon pas de reglement (jamais un 0 devine).
+      const stat = (k) => (fini90 && faits?.dom && faits?.ext ? paire(faits.dom[k], faits.ext[k]) : null);
+      const jaunes = stat("jaunes");
+      const cartons = jaunes ? [jaunes[0] + (faits.dom.rouges ?? 0), jaunes[1] + (faits.ext.rouges ?? 0)] : null;
       return { statut, bd: ft.home ?? fx.goals?.home ?? null, be: ft.away ?? fx.goals?.away ?? null, faits,
-        ht: paire(ht.home, ht.away), corners: stat("corners"), cartons };
+        ht: fini90 ? paire(ht.home, ht.away) : null, corners: stat("corners"), cartons };
     },
     /** Prevision a l'heure du match, a la ville du stade. */
     async meteo(fixtureId, coupEnvoi) {

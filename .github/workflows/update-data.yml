@@ -4355,17 +4355,16 @@ jobs:
               // match offert est la vitrine du site, il vient d'une competition validee.
               // MATCH OFFERT = UNE SELECTION DU JOUR (plan de Clement, 03/10/2026) : jamais un match
               // sans selection (son pronostic doit etre une selection IASHARK, lib/pronostic.js).
-              // Selections nationales : la decision du 30/09 (« jamais le match offert ») est
-              // remplacee : Ligue des nations et eliminatoires du Mondial zone Europe
-              // (fiabilite.selections_cotes_marche, VERIF-SELECTIONS.md) peuvent l'etre, SI le match
-              // est une selection ; toute autre selection nationale (amicaux...) : jamais.
+              // Selections nationales : la decision du 30/09 (« jamais le match offert ») reste en vigueur
+              // au lancement (03/10, tests/selections-nationales.test.js). competitionOffrable garde la
+              // liste verifiee (fiabilite.selections_cotes_marche) pour le jour ou Clement l'ouvrira.
               var SEL_OFFRABLES=((LEAGUES_CONFIG.fiabilite&&LEAGUES_CONFIG.fiabilite.selections_cotes_marche)||[]).map(String);
               var estSelectionDuJour=function(m){ return !!(m&&m.pronostic&&m.pronostic.selection===true&&m.pari_rec&&!m.no_signal); };
               var competitionOffrable=function(m){
                 if(SELECTIONS.estSelectionNationale(m)) return SEL_OFFRABLES.indexOf(String(m.league_key||''))!==-1;
                 return m.league_reliability!=='en_test';
               };
-              var analysable=function(m){ return m && estSelectionDuJour(m) && competitionOffrable(m) && eligibleForFree(FIXTURE_BY_ID[String(m.id)],OFFRE_MS); };
+              var analysable=function(m){ return m && m.pari_rec && !m.no_signal && !SELECTIONS.estSelectionNationale(m) && estSelectionDuJour(m) && competitionOffrable(m) && eligibleForFree(FIXTURE_BY_ID[String(m.id)],OFFRE_MS); };
               // Competition connue d'abord : Ligue des nations / eliminatoires (treve), puis coupes
               // d'Europe et grands championnats, puis le reste (0 = la plus connue).
               var GRANDES_COMPETITIONS=['ldc','el','ecl','premier','laliga','seriea','bundesliga','ligue1'];

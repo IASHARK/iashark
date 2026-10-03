@@ -89,7 +89,7 @@ test("match ferme ou sans aucun chiffre : pas de pronostic", () => {
 
 test("poserPronostics : selection ⊂ pronostics, amorce publique, compteurs seulement", () => {
   const ms = [
-    match({ id: 1, pari_rec: "Over 2.5", market_id: "over-25", no_signal: false, chance_iashark: 63, cote_rec: "1.70", p1: 40, pn: 30, p2: 30 }),
+    match({ id: 1, league_key: "ligue1", league_reliability: "validee", pari_rec: "Over 2.5", market_id: "over-25", no_signal: false, chance_iashark: 63, cote_rec: "1.70", p1: 40, pn: 30, p2: 30 }),
     match({ id: 2, p1: 40, pn: 30, p2: 30 }),
     match({ id: 3, league_key: "premier", c1: "2.10", cn: "3.40", c2: "3.50" }),
     match({ id: 4, no_signal_reason: "KICKOFF_PASSED", p1: 40, pn: 30, p2: 30, pronostic: { vieux: true }, pronostic_dispo: true }),
@@ -130,7 +130,7 @@ test("pipeline : pronostics poses apres la chance IASHARK, avant le match offert
   assert.ok(i < script.indexOf("var matchsPublics="));
   assert.ok(i < script.indexOf("PREMIUM_FIELDS_LIB.premiumPayload("));
   // Le match offert est une selection (pronostic.selection) : jamais un match sans selection.
-  assert.match(script, /var analysable=function\(m\)\{ return m && estSelectionDuJour\(m\) && competitionOffrable\(m\)/);
+  assert.match(script, /var analysable=function\(m\)\{ return m && .*estSelectionDuJour\(m\) && competitionOffrable\(m\)/);
   // Journal : compteurs seulement.
   assert.match(script, /console\.log\('  \[PRONOSTIC\] '\+rapportProno\.avec\+/);
 });
@@ -258,4 +258,17 @@ test("avis de la page match : competition verifiee par les cotes du marche -> pl
   const js = fs.readFileSync(path.join(root, "match-page.js"), "utf8");
   assert.match(js, /function relBadgeVm\(vm,info\)\{return vm&&vm\.model&&vm\.model\.leagueInTest===true\?\(verifieMarche\(vm\)\?marcheBadge\(\):testBadge\(\)\):relBadge\(info\);\}/);
   assert.match(js, /leagueInTest===true&&!verifieMarche\(vm\)\?`<span class="hero-test">/);
+});
+
+test("competition en test : le pari reste un pronostic, jamais une « Sélection IASHARK » (avocat-du-diable 03/10)", () => {
+  const m = match({ league_key: "league_two", league_reliability: "en_test", pari_rec: "Victoire Domicile", market_id: "home-win", no_signal: false, chance_iashark: 62, cote_rec: "1.60", p1: 62, pn: 22, p2: 16 });
+  const p = P.choisirPronostic(m, { ligues: LIGUES });
+  assert.ok(p, "le pronostic est affiche");
+  assert.equal(p.selection, false);
+  assert.equal(p.fiabilite, "en test");
+});
+
+test("noms en francais dans le libelle (selections nationales)", () => {
+  const m = match({ home: { n: "Netherlands" }, away: { n: "Serbia" }, league_key: "ligue1", league_reliability: "validee", pari_rec: "DC X2", market_id: "dc-x2", no_signal: false, chance_iashark: 60, cote_rec: "1.50", p1: 40, pn: 30, p2: 30 });
+  assert.equal(P.choisirPronostic(m, { ligues: LIGUES }).libelle_fr, "Match nul ou Serbie");
 });

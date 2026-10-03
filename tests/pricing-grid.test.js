@@ -70,7 +70,7 @@ function gridWith(replacements) {
 }
 // Lignes Pro de la V3 (hors « bientot » de nature), dans l'ordre de la grille :
 // la liste du mur Pro des pages match (match-page.js#LISTE_PRO).
-const PRO_V3 = ["f_all_matches", "f_pick", "f_scenario", "f_stats_iashark", "f_stats", "f_scores", "f_scorers"];
+const PRO_V3 = ["f_all_matches", "f_pronostic", "f_pick", "f_scenario", "f_stats_iashark", "f_stats", "f_scores", "f_scorers"];
 // Lignes Pro ouvertes attendues selon les interrupteurs du composant.
 function proOuvertes(g) {
   return PRO_V3.filter((k) => (k !== "f_stats_iashark" || g.STATS_IASHARK) && (k !== "f_scenario" || g.SIMULATION === "mention" || g.SIMULATION === "ouverte"));
@@ -381,7 +381,7 @@ test("Pro de la V3 (lancement du 3/10) : seulement ce qui est ouvert ce jour-la,
   const fr = G.offerModel(LIB.build("fr"), { annual: true });
   // Pari retenu juste apres « toutes les analyses » ; sans cote minimum
   // (jamais ecrite vers le site, lib/moteur-v3.js C4 du 29/09/2026).
-  assert.deepEqual(ouvertes(fr).filter((f) => !f.free).map((f) => f.key).slice(0, 2), ["f_all_matches", "f_pick"]);
+  assert.deepEqual(ouvertes(fr).filter((f) => !f.free).map((f) => f.key).slice(0, 3), ["f_all_matches", "f_pronostic", "f_pick"]);
   for (const l of LOCALES) {
     const g = DICTS[l].pricing_grid;
     const txt = G.FEATURES.filter((f) => f.tag !== "soon").map((f) => g[f.key]).concat(g.f_scenario_since).join(" | ");

@@ -168,6 +168,8 @@ jobs:
           // UNE SEULE SOURCE DE CHIFFRES (01/10/2026) : chance du pari retenu (chance_iashark)
           // et chance buteur, calculees UNE FOIS ici et lues par la page, l'espace Pro et Telegram.
           var CHANCE_IASHARK=require('./lib/chance-iashark.js');
+          // Un pronostic sur chaque match (plan de Clement, 03/10/2026) : lib/pronostic.js.
+          var PRONOSTIC=require('./lib/pronostic.js');
           // UNE SEULE COTE (01/10/2026) : la cote du pari est celle des bookmakers agrees ANJ
           // (The Odds API, cles *_fr), avec le nom du bookmaker ; sinon « cote indicative ».
           var COTE_ANJ=require('./lib/cote-anj.js');
@@ -4284,6 +4286,22 @@ jobs:
               catch(e){ console.log('::warning title=Canal Pro::chances IASHARK non ecrites ('+(e&&e.message)+') : le Canal Pro prendra la cote sans marge du moteur.'); }
             }
             // MOTEUR_V3:FIN
+            // ================= UN PRONOSTIC SUR CHAQUE MATCH (03/10/2026) =================
+            // Plan de Clement : un PRONOSTIC sur chaque match analyse ; la selection (pari_rec,
+            // regle inchangee) en est un sous-ensemble. Champ premium `pronostic` (Pro, et en
+            // clair seulement sur le match offert) + amorce publique `pronostic_dispo`.
+            // Voies : selection, moteur v3 (1N2 / DC verifies, chances du Canal Pro), cotes du
+            // marche (fiabilite.ligues_validees_cotes_marche), sinon 1N2 du modele « en test ».
+            // Journal : compteurs seulement (jamais un pari, une cote ou une chance).
+            var CHANCES_V3_PRONO=null;
+            // MOTEUR_V3:DEBUT - chances des marches 1N2 / double chance du v3 pour le pronostic
+            // (les memes que le Canal Pro : une seule source). Jamais dans les journaux.
+            if(MOTEUR_V3.actif){ try{ CHANCES_V3_PRONO=MOTEUR_V3.chancesPourCanal(allMatchsData); }catch(e){ CHANCES_V3_PRONO=null; } }
+            // MOTEUR_V3:FIN
+            try{
+              var rapportProno=PRONOSTIC.poserPronostics(allMatchsData,{configLigues:LEAGUES_CONFIG,chancesV3Par:CHANCES_V3_PRONO});
+              console.log('  [PRONOSTIC] '+rapportProno.avec+' match(s) avec pronostic, '+rapportProno.sans+' sans ; '+rapportProno.selections+' selection(s) ; voies : v3='+rapportProno.voies.v3+' cotes_marche='+rapportProno.voies.cotes_marche+' modele='+rapportProno.voies.modele+'.');
+            }catch(e){ console.log('::warning title=Pronostic::pronostics non poses ('+(e&&e.message)+').'); }
             // ================= PROTECTION DU FICHIER PUBLIC =================
             // data.json est servi sans authentification. Il ne doit donc plus
             // contenir le marche recommande, sa cote, la probabilite du modele
@@ -4324,7 +4342,28 @@ jobs:
               var OFFRE_MS=Date.now();
               // Jamais une competition « Fiabilité : en test » (avocat du diable, 01/10/2026) : le
               // match offert est la vitrine du site, il vient d'une competition validee.
-              var analysable=function(m){ return m && m.pari_rec && !m.no_signal && !SELECTIONS.estSelectionNationale(m) && m.league_reliability!=='en_test' && eligibleForFree(FIXTURE_BY_ID[String(m.id)],OFFRE_MS); };
+              // MATCH OFFERT = UNE SELECTION DU JOUR (plan de Clement, 03/10/2026) : jamais un match
+              // sans selection (son pronostic doit etre une selection IASHARK, lib/pronostic.js).
+              // Selections nationales : la decision du 30/09 (« jamais le match offert ») est
+              // remplacee : Ligue des nations et eliminatoires du Mondial zone Europe
+              // (fiabilite.selections_cotes_marche, VERIF-SELECTIONS.md) peuvent l'etre, SI le match
+              // est une selection ; toute autre selection nationale (amicaux...) : jamais.
+              var SEL_OFFRABLES=((LEAGUES_CONFIG.fiabilite&&LEAGUES_CONFIG.fiabilite.selections_cotes_marche)||[]).map(String);
+              var estSelectionDuJour=function(m){ return !!(m&&m.pronostic&&m.pronostic.selection===true&&m.pari_rec&&!m.no_signal); };
+              var competitionOffrable=function(m){
+                if(SELECTIONS.estSelectionNationale(m)) return SEL_OFFRABLES.indexOf(String(m.league_key||''))!==-1;
+                return m.league_reliability!=='en_test';
+              };
+              var analysable=function(m){ return m && estSelectionDuJour(m) && competitionOffrable(m) && eligibleForFree(FIXTURE_BY_ID[String(m.id)],OFFRE_MS); };
+              // Competition connue d'abord : Ligue des nations / eliminatoires (treve), puis coupes
+              // d'Europe et grands championnats, puis le reste (0 = la plus connue).
+              var GRANDES_COMPETITIONS=['ldc','el','ecl','premier','laliga','seriea','bundesliga','ligue1'];
+              var rangCompetition=function(m){
+                var k=String(m&&m.league_key||'');
+                if(SEL_OFFRABLES.indexOf(k)!==-1) return 0;
+                return GRANDES_COMPETITIONS.indexOf(k)!==-1?1:2;
+              };
+              var chanceSelection=function(m){ var c=Number(m&&m.pronostic&&m.pronostic.chance); return c>0?c:(Number(m&&m.chance_iashark)||Number(m&&m.model_probability)||0); };
               var valeurDe=function(m){
                 var p=Number(m&&m.model_probability), o=parseFloat(String(m&&m.cote_rec||'').replace(',','.'));
                 if(!(p>0&&p<=100)||!(o>1)) return null;
@@ -4374,10 +4413,12 @@ jobs:
               if(MOTEUR_V3.actif){
                 var analysableTous=analysable;
                 analysable=function(m){ return analysableTous(m) && !!(m.v3_pari&&m.moteur_v3&&m.moteur_v3.source==='v3'); };
+                // La plus fiable : la plus haute chance affichee (chance IASHARK du pronostic, le
+                // meme chiffre que la page et Telegram), plus la probabilite brute du modele.
                 meilleur=function(liste){
                   return liste.reduce(function(b,m){
                     if(b===null) return m;
-                    var pb=Number(b.model_probability)||0, pm=Number(m.model_probability)||0;
+                    var pb=chanceSelection(b), pm=chanceSelection(m);
                     if(pm>pb) return m;
                     if(pm===pb && String(m.date||'')<String(b.date||'')) return m;
                     if(pm===pb && String(m.date||'')===String(b.date||'') && Number(m.id)<Number(b.id)) return m;
@@ -4410,6 +4451,11 @@ jobs:
               jours.slice(0,2).forEach(function(j){
                 if(gardes[j]){ elus[j]=gardes[j]; return; }
                 var duJour=allMatchsData.filter(function(m){ return analysable(m) && jourDe(m)===j; });
+                // Competition connue d'abord (03/10/2026) : seulement le meilleur rang present ce jour.
+                if(duJour.length){
+                  var rangMin=Math.min.apply(null,duJour.map(rangCompetition));
+                  duJour=duJour.filter(function(m){ return rangCompetition(m)===rangMin; });
+                }
                 // Audit du 28/09/2026 : les 5 derniers matchs offerts etaient des matchs
                 // UNVERIFIED (Ligue des nations), la ou le moteur se trompe le plus et
                 // affiche donc la plus grosse « valeur ». Un match analyse (FULL ou

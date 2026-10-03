@@ -204,6 +204,10 @@ function analysisFor(m,ctx,H){
   // jamais « apres le coup d'envoi » pour un match qui ne s'est pas encore joue.
   if(!hasSignal(m)&&String(m.no_signal_reason||'')==='KICKOFF_POSTPONED')return {state:'closed',postponed:true,free:false};
   if(!hasSignal(m)&&/^(KICKOFF_|FIXTURE_NOT_UPCOMING)/.test(String(m.no_signal_reason||'')))return {state:'closed',free:false};
+  // UN PRONOSTIC SUR CHAQUE MATCH (03/10/2026, lib/pronostic.js) : un match sans selection
+  // garde son pronostic. Contenu Pro : verrouille (« Débloquer avec Pro ») hors Pro, sauf le
+  // match offert. pronostic_dispo est l'amorce publique (aucun chiffre, aucun marche).
+  if(!hasSignal(m)&&m.pronostic_dispo===true)return pronosticFor(m,ctx,H,free);
   if(!hasSignal(m))return {state:'none',free:free,label:m.no_signal_label||t('home_app.no_signal_label','Aucun signal clair sur ce match')};
   // Match offert sans compte : la page match exige un compte gratuit ; ici non
   // plus, aucun champ payant n'est lu.
@@ -220,6 +224,20 @@ function analysisFor(m,ctx,H){
   var pn=c==null?null:Math.min(c,10);
   if(!market)return {state:'pending',free:free,prob:pn!=null?fmtProb(pn):null};
   return {state:'open',free:free,probNum:pn,prob:pn!=null?fmtProb(pn):null,market:market};
+}
+
+// Pronostic d'un match sans selection : verrou hors Pro (match offert compris pour un
+// visiteur sans compte), sinon l'issue, sa chance calculee et sa fiabilite.
+function pronosticFor(m,ctx,H,free){
+  if(free&&!ctx.isPro&&!ctx.hasAccount)return {state:'gated',free:true};
+  if(!ctx.isPro&&!free)return {state:'locked',band:null};
+  var p=m.pronostic;
+  if(!p||!p.market_id)return {state:'pending',free:free,prob:null};
+  var market=H.marketIdLabel({market_id:p.market_id,home:m.home,away:m.away})||p.libelle_fr||'';
+  var ch=Number(p.chance),chance=ch>0&&ch<100?Math.round(ch):null;
+  var test=p.fiabilite==='en test';
+  return {state:'prono',free:free,market:market,chance:chance,test:test,
+    label:tf('home_list.prono_aria','Pronostic : {market}',{market:market})+(chance!=null?', '+tf('home_list.prono_chance','chance calculée {p} %',{p:chance}):'')+(test?' ('+t('home_list.prono_test','en test')+')':'')};
 }
 
 // Competitions favorites d'abord, puis A->Z ; dans chaque competition, matchs
@@ -332,6 +350,8 @@ function renderMatchRow(m,ctx,H,index){
   // Indicateurs PUBLICS reels uniquement.
   var tags=[];
   if(a.free)tags.push('<span class="hl-tag hl-tag-free">'+esc(t('home_list.free_chip','Offert'))+'</span>');
+  // Selection IASHARK (le sous-ensemble retenu) : amorce publique has_signal, aucun chiffre.
+  if(sig&&a.state!=='past'&&a.state!=='closed')tags.push('<span class="hl-tag hl-tag-sel">'+esc(t('home_list.selection_chip','✓ Sélection IASHARK'))+'</span>');
   if(derby)tags.push('<span class="hl-tag hl-tag-derby" title="'+esc(derby)+'">'+esc(t('home_list.derby_chip','Derby'))+'</span>');
   if(cd)tags.push('<span class="hl-tag hl-tag-time is-'+cd.kind+'" data-hl-ts="'+(isFinite(ts)?ts:'')+'"'+(cd.estimated?' title="'+esc(t('home_list.status_estimated','Statut estimé d’après l’heure du coup d’envoi'))+'"':'')+'>'+esc(cd.text)+'</span>');
   if(q)tags.push('<span class="hl-tag hl-tag-q is-'+q.level+'"><i aria-hidden="true"></i>'+esc(q.text)+'</span>');
@@ -361,6 +381,13 @@ function renderMatchRow(m,ctx,H,index){
   }else if(a.state==='gated'){
     zone='<span class="hl-zone"><span class="hl-ready"><i class="hl-dot" aria-hidden="true"></i>'+esc(t('home_list.free_gated','Analyse offerte'))+'</span>'
       +'<span class="hl-freepill">'+esc(t('home_list.free_gated_cta','Compte gratuit'))+'</span></span>';
+  }else if(a.state==='prono'){
+    // Pronostic (pas une selection) : l'issue, la chance calculee, « en test » si la competition l'est.
+    zone='<span class="hl-zone hl-zone-prono">'
+      +'<span class="hl-prob-row">'
+        +'<span class="hl-prob-lbl"><span class="hl-m">'+esc(t('home_list.prono_short','Prono.'))+'</span><span class="hl-d">'+esc(t('home_list.prono_long','Pronostic'))+'</span></span>'
+        +(a.chance!=null?'<span class="hl-prob"><b>'+a.chance+'</b><small>%</small></span>':'')+'</span>'
+      +'<span class="hl-none-s">'+esc(a.market)+(a.test?' · '+esc(t('home_list.prono_test','en test')):'')+'</span></span>';
   }else if(a.state==='pending'){
     zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'+esc(t('home_app.analysis_in_progress','Analyse en cours'))+'</span></span>';
   }else if(a.state==='closed'){

@@ -359,7 +359,7 @@ function coteOrigine(vm){
   if(bk)return `<small class="sig-odds-src">chez ${esc(bk)}</small>`;
   return vm&&vm.model&&vm.model.recommendedOddsIndicative?'<small class="sig-odds-src">cote indicative</small>':'';
 }
-const CHAMPS_PREMIUM=["pari_rec","cote_rec","model_probability","markets_compared","market_id","marche","kelly","edge","verdict_shark","facteur_x","dropping_odds","player_markets","facteur_x_i18n","verdict_shark_i18n","conf","p1","pn","p2","po15","po25","btts","lambda_h","lambda_a","market_aware_p1","market_aware_pN","market_aware_p2","market_consensus_p1","market_consensus_pN","market_consensus_p2","mc_scores","scores","simulation_count","paris_safe","paris_risque","vbet","val","hot","risque","mise","pick_downgrade","odds_available","is_canonical_pick","reliability","model_agreement","crit_home","crit_away","elo_signal","analyse_card","analyse_card_i18n","conseil_public","conseil_public_i18n","contexte","contexte_i18n","scenario","scenario_i18n","scenario_15min","sim_15min","decision_factors","risk_principal","top_scorers","v3_fiabilite","v3_pari","v3_marches","v3_suivi","v3_buteurs","chance_iashark","chance_iashark_source","cote_bookmaker","cote_source","cote_releve_a","sans_marge_anj","stats_iashark","lecture_match"];
+const CHAMPS_PREMIUM=["pari_rec","cote_rec","model_probability","markets_compared","market_id","marche","kelly","edge","verdict_shark","facteur_x","dropping_odds","player_markets","facteur_x_i18n","verdict_shark_i18n","conf","p1","pn","p2","po15","po25","btts","lambda_h","lambda_a","market_aware_p1","market_aware_pN","market_aware_p2","market_consensus_p1","market_consensus_pN","market_consensus_p2","mc_scores","scores","simulation_count","paris_safe","paris_risque","vbet","val","hot","risque","mise","pick_downgrade","odds_available","is_canonical_pick","reliability","model_agreement","crit_home","crit_away","elo_signal","analyse_card","analyse_card_i18n","conseil_public","conseil_public_i18n","contexte","contexte_i18n","scenario","scenario_i18n","scenario_15min","sim_15min","decision_factors","risk_principal","top_scorers","v3_fiabilite","v3_pari","v3_marches","v3_suivi","v3_buteurs","chance_iashark","chance_iashark_source","cote_bookmaker","cote_source","cote_releve_a","sans_marge_anj","stats_iashark","lecture_match","pronostic"];
 function publicCopy(raw){
   const copie={};
   Object.keys(raw||{}).forEach(k=>{if(CHAMPS_PREMIUM.indexOf(k)===-1)copie[k]=raw[k];});
@@ -380,6 +380,44 @@ function libelleLigne(vm,row){
   const ml=window.IasharkMarketLabels,eq={home:nomEq(vm.identity.home),away:nomEq(vm.identity.away)};
   if(ml&&row.id&&ml.marketIdLabel){const s=ml.marketIdLabel(row.id,eq);if(s&&s!==row.id)return s;}
   return marcheFr(vm,row.label);
+}
+
+// ---- PRONOSTIC IASHARK (03/10/2026, plan de Clement : un pronostic sur chaque match) ----
+// Champ premium `pronostic` pose par le pipeline (lib/pronostic.js) : l'issue la plus probable
+// parmi les marches verifies, sa chance calculee (lib/chance-iashark.js, la meme que Telegram),
+// la cote si connue et la fiabilite (« vérifiée » / « en test »). La selection IASHARK en est un
+// sous-ensemble : « ✓ Sélection IASHARK » quand le pronostic est retenu. Lu seulement en vue
+// Pro ou sur le match offert (le serveur ne l'envoie pas ailleurs) ; jamais recalcule ici.
+// Aucune mise, aucune esperance, jamais « conseil ».
+function pronosticDe(raw){
+  const p=raw&&raw.pronostic;
+  if(!p||typeof p!=='object'||!p.market_id&&!p.libelle_fr)return null;
+  const c=Number(p.chance);
+  return Object.assign({},p,{chance:c>0&&c<100?Math.round(c):null});
+}
+function pronosticCard(vm,raw){
+  const p=pronosticDe(raw);
+  if(!p)return '';
+  const ml=window.IasharkMarketLabels,eq={home:nomEq(vm.identity.home),away:nomEq(vm.identity.away)};
+  let issue=estFr()&&p.libelle_fr?p.libelle_fr:'';
+  if(!issue&&ml&&p.market_id&&ml.marketIdLabel){const s=ml.marketIdLabel(p.market_id,eq);if(s&&s!==p.market_id)issue=s;}
+  if(!issue)issue=p.marche?marcheFr(vm,p.marche):String(p.libelle_fr||'');
+  const sep=estFr()?' : ':': ';
+  const cote=Number(p.cote)>1?(estFr()?Number(p.cote).toFixed(2).replace('.',','):Number(p.cote).toFixed(2)):null;
+  const test=p.fiabilite==='en test';
+  const fiab=test?t('match_page.prono.fiab_test','Fiabilité : en test (compétition pas encore vérifiée sur le passé)')
+    :p.voie==='cotes_marche'?t('match_page.prono.fiab_marche','Fiabilité : vérifiée (chance calculée à partir des cotes du marché, marge retirée)')
+    :t('match_page.prono.fiab_ok','Fiabilité : vérifiée sur le passé');
+  const sel=p.selection===true
+    ?`<p class="prono-sel"><b>${esc(t('match_page.prono.selection','✓ Sélection IASHARK'))}</b> · ${esc(t('match_page.prono.selection_sub','ce pronostic fait partie des sélections du jour.'))}</p>`
+    :`<p class="prono-sel prono-sel--non">${esc(t('match_page.prono.non_selection','Pronostic seulement : pas retenu dans les sélections IASHARK du jour.'))}</p>`;
+  return card(t('match_page.prono.title','Pronostic IASHARK'),
+    `<p class="prono-issue">${esc(t('match_page.prono.issue','Pronostic'))}${esc(sep)}<b>${esc(issue)}</b></p>
+    ${p.chance!=null?`<p class="prono-chance">${esc(tf('match_page.prono.chance','Chance calculée par IASHARK : {p} %.',{p:p.chance}))}</p>`:''}
+    ${cote?`<p class="prono-cote">${esc(t('match_page.prono.cote','Cote'))}${esc(sep)}<b>${esc(cote)}</b></p>`:''}
+    <p class="prono-fiab">${esc(fiab)}</p>
+    ${sel}
+    <p class="sig-legal">${esc(t('match_page.avis_legal','Estimation, pas une garantie.'))}</p>`,'prono-card','target');
 }
 
 // Rang au classement dans la convention de la langue (1er/2e, 1st/2nd...).
@@ -2047,8 +2085,11 @@ function render(raw){
   const stats=statsBlocs(vm),analyse=plus?analysePlus(vm):analyseAbonne(vm);
   // Selection Pro du jour (abonne Pro) : avant l'avis ; l'avis v3 s'efface s'il dit la meme chose.
   const selPro=selectionProCard(SELECTIONS_PRO),sansAvis=!!selPro&&selproRemplaceAvis(raw,SELECTIONS_PRO);
+  const prono=pronosticCard(vm,raw);
   const sections=[
     plus?['resume',resumeCard(vm)]:null,
+    // Pronostic IASHARK (tous les matchs) avant la selection et l'avis (03/10/2026).
+    prono?['prono',prono]:null,
     // Quand il remplace l'avis, il en prend la place (sec-avis : le sommaire y mene).
     selPro?[sansAvis?'avis':'selpro',selPro]:null,
     sansAvis?null:['avis',signalCard(vm)],
@@ -2183,6 +2224,8 @@ function lignePrixPro(){
 // cotes, marche par marche »).
 const LISTE_PRO=[
   ['f_all_matches','Toutes les analyses du jour, dans chaque compétition suivie'],
+  // 03/10/2026 : un pronostic sur chaque match (lib/pronostic.js), contenu Pro.
+  ['f_pronostic','Le pronostic IASHARK de ce match, avec sa chance calculée'],
   ['f_pick','Le pari retenu, avec sa probabilité et ses raisons'],
   ['f_scenario','La simulation du match par tranches de 15 minutes'],
   ['f_stats_iashark','Les stats IASHARK : buts par quart d’heure, après la pause'],
@@ -2203,7 +2246,7 @@ function simulationV3(raw){
 const COCHE_PRO='<svg class="mgate-check" aria-hidden="true" focusable="false" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="rgba(32,213,239,.15)"/><path d="M6 10.3l2.6 2.6L14.2 7.3" fill="none" stroke="#20d5ef" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 function proGate(vm,o){
   const raw=vm._raw||{},etat=etatAnalyse(raw),bande=etat==='ready'?bandeDe(raw):null;
-  const contenu=LISTE_PRO.filter(([k])=>(k!=='f_pick'||etat!=='none')&&(k!=='f_scenario'||simulationV3(raw))&&(k!=='f_stats'||o.stats)&&(k!=='f_stats_iashark'||!!vm.bookStats));
+  const contenu=LISTE_PRO.filter(([k])=>(k!=='f_pronostic'||raw.pronostic_dispo===true)&&(k!=='f_pick'||etat!=='none')&&(k!=='f_scenario'||simulationV3(raw))&&(k!=='f_stats'||o.stats)&&(k!=='f_stats_iashark'||!!vm.bookStats));
   const lignePrix=lignePrixPro();
   return `<section class="signal-card is-locked gate mgate avis avis--lock reveal" aria-labelledby="gateTitle">
     <div class="sig-head">

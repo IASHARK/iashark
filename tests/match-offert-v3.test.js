@@ -23,12 +23,15 @@ const debut = WF.indexOf("(function designerMatchGratuit(){");
 const fin = WF.indexOf("\n            })();", debut) + "\n            })();".length;
 const BLOC = WF.slice(debut, fin);
 const SELECTIONS = require("../lib/selections-nationales.js");
-const designer = new Function("eligibleForFree", "FIXTURE_BY_ID", "PICK_FREEZE", "prevByFixture", "allMatchsData", "TODAY", "MOTEUR_V3", "reasonableParisSlot", "console", "SELECTIONS", BLOC);
+const LEAGUES_CONFIG = require("../config/leagues.json");
+const designer = new Function("eligibleForFree", "FIXTURE_BY_ID", "PICK_FREEZE", "prevByFixture", "allMatchsData", "TODAY", "MOTEUR_V3", "reasonableParisSlot", "console", "SELECTIONS", "LEAGUES_CONFIG", BLOC);
 
 const TODAY = "2026-10-03";
 function v3(id, prob, date, extra) {
   return Object.assign({ id: id, date: date || TODAY + " 20:00", pari_rec: "Over 1.5", no_signal: false, model_probability: prob, cote_rec: "1.30",
-    analysis_tier: "FULL_ANALYSIS", v3_pari: { cle: "TOTAL:plus1.5" }, moteur_v3: { source: "v3" }, home: { n: "A" + id }, away: { n: "B" + id } }, extra || {});
+    analysis_tier: "FULL_ANALYSIS", v3_pari: { cle: "TOTAL:plus1.5" }, moteur_v3: { source: "v3" }, home: { n: "A" + id }, away: { n: "B" + id },
+    // Pose par lib/pronostic.js avant la designation (03/10/2026) : la selection est un pronostic.
+    pronostic: { market_id: "over-15", chance: prob, selection: true } }, extra || {});
 }
 function ancien(id, prob, date, extra) {
   return Object.assign(v3(id, prob, date, extra), { v3_pari: undefined, moteur_v3: { source: "ancien moteur (repli)" } });
@@ -38,7 +41,7 @@ function choisir(matchs, opts) {
   const fx = {};
   matchs.forEach((m) => { fx[String(m.id)] = { started: !!m._commence }; });
   designer((f) => !!f && !f.started, fx, { keptFreeDesignations: () => opts.gardes || {} }, {}, matchs, TODAY,
-    { actif: opts.eteint ? false : true }, reasonableParisSlot, { log: () => {} }, SELECTIONS);
+    { actif: opts.eteint ? false : true }, reasonableParisSlot, { log: () => {} }, SELECTIONS, LEAGUES_CONFIG);
   return matchs.filter((m) => m.is_free).map((m) => m.id);
 }
 
@@ -160,12 +163,29 @@ test("match offert : d'abord un pari « modèle + cotes », un « modèle seul �
   assert.deepEqual(choisir([matin, europe(2, 70)], { gardes: { [TODAY]: matin } }), [1]);
 });
 
-// Decision de Clement (30/09/2026) : un match de selections nationales (Ligue des
-// nations, amicaux, qualifications) ne peut jamais etre le match offert.
-test("match offert : jamais un match de selections nationales", () => {
-  assert.deepEqual(choisir([v3(1, 90, null, { league_id: 5, league: "UEFA Nations League" }), v3(2, 70)]), [2]);
-  assert.deepEqual(choisir([v3(1, 90, null, { league_id: 10, league: "Friendlies" })]), []);
-  assert.deepEqual(choisir([ancien(1, 90, null, { league_id: 32 }), ancien(2, 60)], { eteint: true }), [2], "moteur v3 eteint aussi");
+// Decision de Clement (30/09/2026), REMPLACEE le 03/10/2026 : la Ligue des nations et les
+// eliminatoires du Mondial zone Europe (fiabilite.selections_cotes_marche) peuvent etre le
+// match offert, et passent meme en premier (treve internationale), SI le match est une
+// selection ; amicaux et autres selections nationales : jamais.
+test("match offert : Ligue des nations / eliminatoires Europe si c'est une selection, jamais les amicaux", () => {
+  const ldn = (id, prob, extra) => v3(id, prob, null, Object.assign({ league_id: 5, league: "UEFA Nations League", league_key: "nations_league", league_reliability: "en_test" }, extra || {}));
+  assert.deepEqual(choisir([ldn(1, 70), v3(2, 90, null, { league_key: "premier" })]), [1], "competition connue d'abord : la Ligue des nations pendant la treve");
+  assert.deepEqual(choisir([ldn(1, 90, { pronostic: { market_id: "dc-1x", chance: 90, selection: false } }), v3(2, 70)]), [2], "un pronostic qui n'est pas une selection : jamais offert");
+  assert.deepEqual(choisir([v3(1, 90, null, { league_id: 10, league: "Friendlies", league_key: "other" })]), []);
+  assert.deepEqual(choisir([ancien(1, 90, null, { league_id: 32 }), ancien(2, 60)], { eteint: true }), [2], "selection hors liste (sans cle verifiee) : jamais, moteur v3 eteint aussi");
+});
+
+test("match offert : grands championnats avant les autres, puis la plus haute chance", () => {
+  assert.deepEqual(choisir([v3(1, 88, null, { league_key: "league_two" }), v3(2, 72, null, { league_key: "ligue1" })]), [2]);
+  assert.deepEqual(choisir([v3(1, 88, null, { league_key: "league_two" }), v3(2, 72, null, { league_key: "spain_segunda" })]), [1]);
+  // La chance du pronostic (chance IASHARK) departage, pas la probabilite brute.
+  assert.deepEqual(choisir([v3(1, 88, null, { pronostic: { market_id: "x", chance: 70, selection: true } }), v3(2, 80)]), [2]);
+});
+
+test("match offert : jamais un match sans selection (pronostic seul)", () => {
+  const sansSel = v3(1, 95, null, { pari_rec: "", pronostic: { market_id: "dc-1x", chance: 95, selection: false } });
+  assert.deepEqual(choisir([sansSel, v3(2, 60)]), [2]);
+  assert.deepEqual(choisir([sansSel]), []);
 });
 
 // Avocat du diable (01/10/2026) : le match offert n'est JAMAIS dans une competition

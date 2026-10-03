@@ -38,17 +38,17 @@ test("aiguillage : il faut le parametre ET le secret du bon robot", () => {
 });
 
 test("textes : reponse automatique et accueil du Contact dans les 6 langues, lien Contact ou e-mail", () => {
-  assert.equal(RB.reponseAutoPro("fr", "IasharkContactBot"), "Ici je t'envoie seulement tes messages Pro. Une question ? Écris à IASHARK Contact : https://t.me/IasharkContactBot");
+  assert.equal(RB.reponseAutoPro("fr", "IASHARK_Contact_Bot"), "Ici je t'envoie seulement tes messages Pro. Une question ? Écris à IASHARK Contact : https://t.me/IASHARK_Contact_Bot");
   assert.equal(RB.reponseAutoPro("fr", null), "Ici je t'envoie seulement tes messages Pro. Une question ? Écris-nous à contact@iashark.com");
   assert.equal(RB.accueilContact("fr"), "Bonjour, ici l'équipe IASHARK. Écris ta question ici, on te répond dans cette conversation.");
   const vus = new Set();
   for (const l of ["fr", "es", "en", "de", "it", "pt"]) {
-    assert.ok(RB.reponseAutoPro(l, "IasharkContactBot").endsWith("https://t.me/IasharkContactBot"), l);
+    assert.ok(RB.reponseAutoPro(l, "IASHARK_Contact_Bot").endsWith("https://t.me/IASHARK_Contact_Bot"), l);
     assert.ok(RB.reponseAutoPro(l, null).endsWith("contact@iashark.com"), l);
     vus.add(RB.reponseAutoPro(l, "X_bot")).add(RB.accueilContact(l));
   }
   assert.equal(vus.size, 12, "une vraie traduction par langue");
-  assert.equal(RB.reponseAutoPro("xx", "IasharkContactBot"), RB.reponseAutoPro("fr", "IasharkContactBot"), "langue inconnue : francais");
+  assert.equal(RB.reponseAutoPro("xx", "IASHARK_Contact_Bot"), RB.reponseAutoPro("fr", "IASHARK_Contact_Bot"), "langue inconnue : francais");
   assert.equal(RB.lienContact("mauvais nom!"), null, "jamais un lien vers un nom invalide");
 });
 
@@ -62,12 +62,12 @@ test("robot Pro : texte libre d'un abonne -> reponse automatique dans SA langue,
     assert.equal(aLucia.length, 4);
     for (const e of aLucia) {
       assert.equal(e.robot, "pro");
-      assert.equal(e.corps.text, "Aquí solo te envío tus mensajes Pro. ¿Una pregunta? Escribe a IASHARK Contact: https://t.me/IasharkContactBot");
+      assert.equal(e.corps.text, "Aquí solo te envío tus mensajes Pro. ¿Una pregunta? Escribe a IASHARK Contact: https://t.me/IASHARK_Contact_Bot");
     }
     assert.deepEqual(versClement(r), [], "rien n'est transfere a Clement");
     assert.deepEqual(r.base.tables.telegram_contact_threads, []);
     assert.deepEqual(r.base.tables.pro_tickets, [], "plus de ticket note");
-    assert.equal(r.base.tables.telegram_settings.find((x) => x.key === "bot_username_contact")?.value, "IasharkContactBot", "nom du Contact lu par getMe, garde en cache");
+    assert.equal(r.base.tables.telegram_settings.find((x) => x.key === "bot_username_contact")?.value, "IASHARK_Contact_Bot", "nom du Contact lu par getMe, garde en cache");
   });
 });
 
@@ -76,7 +76,7 @@ test("robot Pro : les commandes restent (/ayuda, /ajustes, /idioma), l'aide indi
     const dernier = () => r.envoyes.filter((e) => e.methode === "sendMessage" && e.corps.chat_id === 777).at(-1).corps.text;
     await r.maj(msg(1, 777, LUCIA, { text: "/ayuda" }));
     assert.match(dernier(), /^Soy tu robot IASHARK/);
-    assert.match(dernier(), /• ¿Una pregunta\? Escribe a IASHARK Contact: https:\/\/t\.me\/IasharkContactBot$/);
+    assert.match(dernier(), /• ¿Una pregunta\? Escribe a IASHARK Contact: https:\/\/t\.me\/IASHARK_Contact_Bot$/);
     assert.ok(!/ticket|equipo IASHARK, que te responde/.test(dernier()));
     await r.maj(msg(2, 777, LUCIA, { text: "/ajustes" }));
     assert.match(dernier(), /^<b>Tus ajustes<\/b>/);
@@ -90,9 +90,9 @@ test("robot Pro : personne non reliee -> /start = accueil Pro, texte = reponse a
   await avecRobot(base({ users: [{ id: "es1", plan: "free", role: "customer" }] }), { env: AVEC_CONTACT }, async (r) => {
     const inconnu = { id: 999, language_code: "de" };
     await r.maj(msg(1, 999, inconnu, { text: "/start" }));
-    assert.match(r.envoyes.at(-1).corps.text, /^Hallo, hier ist IASHARK Pro[\s\S]*Eine Frage\? Schreib an IASHARK Contact: https:\/\/t\.me\/IasharkContactBot$/);
+    assert.match(r.envoyes.at(-1).corps.text, /^Hallo, hier ist IASHARK Pro[\s\S]*Eine Frage\? Schreib an IASHARK Contact: https:\/\/t\.me\/IASHARK_Contact_Bot$/);
     await r.maj(msg(2, 999, inconnu, { text: "Hallo, wie viel kostet Pro?" }));
-    assert.equal(r.envoyes.at(-1).corps.text, "Hier schicke ich dir nur deine Pro-Nachrichten. Eine Frage? Schreib an IASHARK Contact: https://t.me/IasharkContactBot");
+    assert.equal(r.envoyes.at(-1).corps.text, "Hier schicke ich dir nur deine Pro-Nachrichten. Eine Frage? Schreib an IASHARK Contact: https://t.me/IASHARK_Contact_Bot");
     // Lucia n'est plus abonnee : une commande -> robot en pause + Contact ; un texte -> reponse automatique.
     await r.maj(msg(3, 777, LUCIA, { text: "/programa" }));
     assert.match(r.envoyes.at(-1).corps.text, /^Tu suscripción Pro ya no está activa[\s\S]*Escribe a IASHARK Contact/);

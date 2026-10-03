@@ -355,7 +355,7 @@
      questions vont au robot IASHARK Contact. Son nom : config/telegram.json (« contact ») ;
      config/ n'est jamais publie (scripts/build-public.js), la valeur est donc recopiee ici et
      tests/telegram-deux-robots.test.mjs verifie qu'elle est identique. */
-  var ROBOT_CONTACT = 'IasharkContactBot';
+  var ROBOT_CONTACT = 'IASHARK_Contact_Bot';
   function ligneContact() {
     return '<p class="mt-4 max-w-xl text-[13px] leading-relaxed text-soft">' + tr('compte_page.contact_telegram_prefix', 'Une question ? Écrivez à ')
       + '<a data-robot-contact href="https://t.me/' + ROBOT_CONTACT + '" target="_blank" rel="noopener" class="font-semibold text-cyan transition hover:underline">IASHARK Contact</a> '

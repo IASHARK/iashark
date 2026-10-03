@@ -78,7 +78,7 @@ export async function chargerRobot(tables, { reponse, env: envEnPlus = {} } = {}
     // reponse(methode, corps) peut simuler une erreur de Telegram : { ok: false, error_code, description, parameters }.
     const r = reponse ? reponse(String(url).split("/").pop(), corps) : null;
     if (r) return { status: r.error_code || 400, json: async () => r };
-    return { status: 200, json: async () => ({ ok: true, result: { message_id: ++n, username: robot === "contact" ? "IasharkContactBot" : "IasharkBot" } }) };
+    return { status: 200, json: async () => ({ ok: true, result: { message_id: ++n, username: robot === "contact" ? "IASHARK_Contact_Bot" : "IasharkBot" } }) };
   };
   await import(pathToFileURL(path.join(dir, "robot.mts")).href);
   fs.rmSync(dir, { recursive: true, force: true }); // fichiers temporaires : supprimes des le chargement

@@ -13,7 +13,7 @@ const read = (f) => fs.readFileSync(path.join(ROOT, f), "utf8");
 test("assets/ouverture.js pose les trois interrupteurs du lancement", () => {
   const ctx = { window: {} };
   vm.runInNewContext(read("assets/ouverture.js"), ctx);
-  assert.deepEqual({ ...ctx.window.IASHARK_OUVERTURE }, { canalPro: true, reglagesPro: true, tableauPro: false });
+  assert.deepEqual({ ...ctx.window.IASHARK_OUVERTURE }, { canalPro: true, reglagesPro: true, tableauPro: true });
 });
 
 test("aucun autre fichier ne definit window.IASHARK_OUVERTURE", () => {

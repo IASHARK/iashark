@@ -105,7 +105,7 @@ jobs:
           node scripts/telegram/presentation-robots.mjs
           # Nom des robots garde en cache par la fonction : efface, il est relu (getMe) au
           # prochain message. Indispensable apres un changement de jeton (nouveau robot).
-          curl -fsS -X DELETE "$SUPABASE_URL/rest/v1/telegram_settings?key=in.(bot_username,bot_username_contact)" \
+          curl -g -fsS -X DELETE "https://$PROJECT_REF.supabase.co/rest/v1/telegram_settings?key=in.(bot_username,bot_username_contact)" \
             -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" > /dev/null
           nom() { curl -fsS "https://api.telegram.org/bot$1/getMe" | node -e 'const r=JSON.parse(require("fs").readFileSync(0)).result;console.log(r.username)'; }
           PRO=$(nom "$TELEGRAM_BOT_TOKEN")

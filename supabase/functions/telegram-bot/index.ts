@@ -261,12 +261,12 @@ async function depsDiffusion() {
       const { data: lies } = await db.from("telegram_abonnes").select("*").not("chat_id", "is", null).eq("bloque", false);
       if (!lies?.length) return [];
       const ids = lies.map((l: Any) => l.user_id);
-      const [{ data: users }, { data: form }, { data: langues }] = await Promise.all([
+      const [{ data: users }, { data: form, error: erreurForm }, { data: langues }] = await Promise.all([
         db.from("users").select("id, plan, role").in("id", ids),
         db.from("pro_preferences").select("*").in("user_id", ids),
         db.from("user_preferences").select("user_id, language").in("user_id", ids),
       ]);
-      return D.destinataires({ lies, users: users || [], form: form || [], langues: langues || [], paysDefaut });
+      return D.destinataires({ lies, users: users || [], form: form || [], langues: langues || [], paysDefaut, formLu: !erreurForm });
     },
     dejaFaits: async (cle: string) => {
       const { data } = await db.from("pro_envois").select("cle").like("cle", `${D.cleEnvoi(cle, "")}%`);
@@ -404,6 +404,38 @@ async function prefsDe(ab: Any, ligne?: Any) {
   // Sans formulaire : francais par defaut, ou pays inconnu si Clement l'a choisi (reglage pays_sans_formulaire = 'aucun').
   return C.preferencesEffectives(form, { paysDefaut: C.paysParDefaut(await reglage("pays_sans_formulaire")) });
 }
+/**
+ * REGLAGES OBLIGATOIRES (03/10/2026, decision de Clement) : langue, pays, bookmakers. Fiche complete =
+ * ligne pro_preferences (site ou robot). Sinon : l'etape en attente (« lg », « py », « bk ») et le choix
+ * en cours (telegram_settings « oblig:<user_id> »). Table illisible : on ne bloque personne (null).
+ */
+async function obligatoire(ab: Any, ligne?: Any) {
+  const l = ligne || await ligneReglages(ab);
+  const marque = A.lireMarque(await reglage(`oblig:${ab.user_id}`));
+  return { ligne: l, marque, etape: l.lisible ? A.etapeObligatoire(l.form, marque) : null };
+}
+/** Reglages vus pendant les questions (pays et bookmakers en cours tant que la ligne n'existe pas). */
+async function prefsQuestions(ab: Any, o: Any) {
+  return A.prefsEnCours(await prefsDe(ab, o.ligne), o.ligne.form, o.marque);
+}
+/** Repose la question obligatoire en attente (nouveau message), precedee de « D'abord, 1 minute… ». */
+async function reposerObligatoire(chat: number, ab: Any, lang: string, o: Any) {
+  const q = A.question(o.etape, await prefsQuestions(ab, o), lang, { note: A.texteSimple(lang, "dabord") });
+  await html(chat, q.text, { reply_markup: q.reply_markup });
+}
+/** Clic d'un abonne (tickets, reglages, langue…) alors que ses reglages obligatoires manquent : ramene a la question. */
+async function rameneAuxReglages(cq: Any): Promise<boolean> {
+  if (!clicPrive(cq)) return false;
+  const ab = await abonneParChat(cq.from.id);
+  if (!ab || !ab.actif) return false;
+  const o = await obligatoire(ab);
+  if (!o.etape) return false;
+  const lang = await langueDe(ab, cq.from);
+  await repondre(cq);
+  await reposerObligatoire(cq.from.id, ab, lang, o);
+  return true;
+}
+
 /** Paris envoyes avec les envois Pro OUVERTS (preuve d'envoi au registre), encore a venir (jamais ceux du rodage). */
 async function parisOuverts() {
   const { data } = await db.from("pro_paris").select("*").eq("mode", "ouvert").not("canal_message_id", "is", null)
@@ -434,22 +466,28 @@ async function lierCompte(m: Any, code: string) {
   if (langueTg) await db.from("telegram_abonnes").update({ langue_telegram: langueTg }).eq("user_id", ab.user_id).then(() => null, () => null);
   const lang = await langueDe(ab, m.from);
   const prenom = m.from?.first_name || "";
-  // Deja passe par l'accueil (il relie de nouveau son compte) : pas de nouveau questionnaire.
+  const o = await obligatoire(ab);
+  // Deja passe par l'accueil (il relie de nouveau son compte) : pas de nouveau questionnaire, SAUF les
+  // reglages obligatoires s'ils manquent encore (la question en attente).
   // Repere dans telegram_settings (« accueil:<user_id> ») : telegram_abonnes.reglages n'est plus jamais lu ni ecrit.
-  if (await reglage(`accueil:${ab.user_id}`)) { await html(m.chat.id, A.retour(lang, prenom)); return; }
-  await enregistrer(`accueil:${ab.user_id}`, `debut ${new Date().toISOString()}`);
-  const ouvert = (await modeCanalPro()).ouvert;
-  // Questionnaire deja rempli sur le site (ligne pro_preferences) : pas de doublon. Bienvenue,
-  // puis le recapitulatif de SES reglages (et /reglages pour changer), sans reposer les questions.
-  const ligne = await ligneReglages(ab);
-  if (ligne.form) {
-    await html(m.chat.id, A.bienvenue(lang, { prenom, ouvert, questions: false }));
-    await html(m.chat.id, A.recap(await prefsDe(ab, ligne), lang));
+  if (await reglage(`accueil:${ab.user_id}`)) {
+    await html(m.chat.id, A.retour(lang, prenom));
+    if (o.etape) await reposerObligatoire(m.chat.id, ab, lang, o);
     return;
   }
-  // Bienvenue dans SA langue, puis les questions une par une (boutons seulement).
+  await enregistrer(`accueil:${ab.user_id}`, `debut ${new Date().toISOString()}`);
+  const ouvert = (await modeCanalPro()).ouvert;
+  // Fiche deja remplie sur le site (ligne pro_preferences) : pas de doublon. Bienvenue,
+  // puis le recapitulatif de SES reglages (et /reglages pour changer), sans reposer les questions.
+  if (o.ligne.form) {
+    await html(m.chat.id, A.bienvenue(lang, { prenom, ouvert, questions: false }));
+    await html(m.chat.id, A.recap(await prefsDe(ab, o.ligne), lang));
+    return;
+  }
+  // Bienvenue dans SA langue, puis les questions une par une (boutons seulement) : langue, pays,
+  // bookmakers OBLIGATOIRES (sans « Plus tard »), puis competitions, alertes, heure (facultatives).
   await html(m.chat.id, A.bienvenue(lang, { prenom, ouvert }));
-  const q = A.question("lg", await prefsDe(ab), lang);
+  const q = A.question(o.etape || "lg", await prefsQuestions(ab, o), lang);
   await html(m.chat.id, q.text, { reply_markup: q.reply_markup });
 }
 
@@ -472,26 +510,52 @@ async function accueilClic(cq: Any) {
     await enregistrer(`accueil:${ab.user_id}`, `fin ${new Date().toISOString()}`);
     await editer(texte);
   };
+  const o = await obligatoire(ab);
+  // Reglages obligatoires pas finis : pas de « Plus tard », pas de saut d'etape (un ancien bouton
+  // ramene a la question en attente).
+  if (o.etape && (!A.OBLIGATOIRES.includes(etape) || A.OBLIGATOIRES.indexOf(etape) > A.OBLIGATOIRES.indexOf(o.etape))) {
+    const q = A.question(o.etape, await prefsQuestions(ab, o), lang);
+    await editer(q.text, q.reply_markup);
+    await repondre(cq);
+    return;
+  }
   if (etape === "x") { await finir(A.texteSimple(lang, "plusTardTxt")); await repondre(cq); return; }
   // « Refaire mes choix » (bouton de /reglages) : les questions reprennent a la premiere.
   if (etape === "go") { const q = A.question("lg", await prefsDe(ab), lang); await editer(q.text, q.reply_markup); await repondre(cq); return; }
   if (!A.ETAPES.includes(etape)) { await repondre(cq); return; }
-  const ligne = await ligneReglages(ab);
-  const prefs = await prefsDe(ab, ligne);
+  const ligne = o.ligne;
+  const prefs = await prefsQuestions(ab, o);
   const r: Any = A.appliquer(etape, valeur, prefs);
   let note = "";
+  // Pas encore de ligne (questions obligatoires) : le choix en cours est garde a part ; la ligne
+  // pro_preferences n'est creee qu'avec le pays ET les bookmakers (ou un pays pas encore ouvert).
+  const enCours = o.etape !== null;
+  const marque: Any = { ...o.marque };
+  const garderMarque = () => enregistrer(`oblig:${ab.user_id}`, JSON.stringify(marque));
+  const creerLigne = async (x: Any) => {
+    const { error } = await db.from("pro_preferences").upsert({ user_id: ab.user_id, ...x }, { onConflict: "user_id" });
+    if (error) { note = A.texteSimple(lang, "reessaie"); r.reste = true; }
+  };
   if (r.langue) {
     const { error } = await db.from("user_preferences").upsert({ user_id: ab.user_id, language: r.langue, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
     if (error) note = A.texteSimple(lang, "pasEnregistre"); else lang = r.langue;
+    if (enCours) { marque.lg = true; await garderMarque(); }
   }
-  if (r.patch) {
+  if (enCours && etape === "py" && r.patch) {
+    if (A.paysOuvertCode(r.patch.pays)) { Object.assign(marque, { lg: true, pays: r.patch.pays, bookmakers: [] }); await garderMarque(); }
+    else await creerLigne({ pays: r.patch.pays, bookmakers: [] });
+  } else if (enCours && etape === "bk") {
+    if (r.patch) { marque.bookmakers = r.patch.bookmakers; await garderMarque(); }
+    else if (valeur === "ok") await creerLigne({ pays: marque.pays, bookmakers: marque.bookmakers || [] }); // « Valider »
+  } else if (r.patch) {
     // Pas encore de ligne : creee avec le pays deja utilise (jamais un autre pays en silence).
     const base = ligne.form || r.patch.pays ? {} : { pays: prefs.pays === C.PAYS_INCONNU ? "autre" : String(prefs.pays).toLowerCase() };
     const { error } = ligne.lisible ? await db.from("pro_preferences").upsert({ user_id: ab.user_id, ...base, ...r.patch }, { onConflict: "user_id" }) : { error: true };
     if (error) { note = A.texteSimple(lang, "pasEnregistre"); r.reste = false; }
   }
   if (!note && r.note) note = A.texteSimple(lang, r.note);
-  const p2 = await prefsDe(ab);
+  const ligne2 = await ligneReglages(ab);
+  const p2 = A.prefsEnCours(await prefsDe(ab, ligne2), ligne2.form, marque);
   const suite = r.reste ? etape : A.suivante(etape, p2);
   if (!suite) { await finir(A.recap(p2, lang)); await repondre(cq, LG.textes(lang).robot.cestNote); return; }
   const q = A.question(suite, p2, lang, { note });
@@ -533,7 +597,10 @@ async function robotPerso(m: Any, ab: Any) {
     await tg("sendMessage", { chat_id: chat, text: RB.inactifPro(lang, await nomContact()), link_preview_options: { is_disabled: true } });
     return;
   }
-  const prefs = await prefsDe(ab);
+  // Reglages obligatoires pas faits (ni sur le site ni ici) : toute commande ramene d'abord a la question en attente.
+  const o = await obligatoire(ab);
+  if (o.etape) { await reposerObligatoire(chat, ab, lang, o); return; }
+  const prefs = await prefsDe(ab, o.ligne);
   // /canal (ancienne commande) : plus de canal a rejoindre, tout arrive ici en prive.
   if (/^\/canal\b/.test(texte)) { await html(chat, R.plusDeCanal); return; }
   if (cmd === "aide") { await aide(chat, lang); return; }
@@ -872,11 +939,29 @@ async function liensPersonnels(req: Request) {
   return json({ ok: true, robot_url: await lienRobot(userId) });
 }
 
+/**
+ * Etat de la liaison Telegram pour l'espace Pro du site (03/10/2026) : { ok, relie }. LECTURE SEULE :
+ * aucun code de liaison cree (contrairement a vip-link), rien d'ecrit. Abonne Pro actif seulement.
+ */
+async function statutLiaison(req: Request) {
+  const authorization = req.headers.get("Authorization");
+  if (!authorization) return json({ error: "unauthorized" }, 401);
+  const anon = createClient(SUPA_URL, SUPA_ANON_KEY, { global: { headers: { Authorization: authorization } } });
+  const { data: auth, error: authError } = await anon.auth.getUser();
+  if (authError || !auth.user) return json({ error: "unauthorized" }, 401);
+  const { data: profil } = await db.from("users").select("plan, role").eq("id", auth.user.id).maybeSingle();
+  if (!profil || !D.estAbonneActif(profil)) return json({ ok: false, code: "not_pro" }, 403);
+  const { data: ab } = await db.from("telegram_abonnes").select("chat_id, bloque").eq("user_id", auth.user.id).maybeSingle();
+  return json({ ok: true, relie: !!(ab?.chat_id && !ab.bloque) });
+}
+
 async function clic(cq: Any) {
   const d = String(cq.data || "");
   if (d.startsWith("pp:")) return programmeClic(cq);
   if (d.startsWith("dp:")) return duelPublier(cq);
   if (d.startsWith("dv:")) return duelVote(cq);
+  // Clics d'un abonne : d'abord ses reglages obligatoires s'ils manquent.
+  if (["tk:", "tb:", "rg:", "lg:"].some((x) => d.startsWith(x)) && await rameneAuxReglages(cq)) return;
   if (d.startsWith("tk:")) return ticketClic(cq);
   if (d.startsWith("tb:")) return tabacClic(cq);
   if (d.startsWith("rg:")) return reglageClic(cq);
@@ -920,6 +1005,7 @@ Deno.serve(async (req: Request) => {
   try { body = await req.json(); } catch (_e) { /* corps vide */ }
   try {
     if (body.action === "vip-link") return await liensPersonnels(req);
+    if (body.action === "statut") return await statutLiaison(req);
   } catch (e) {
     console.error("[telegram-bot]", body.action, (e as Error).message);
     return json({ error: "telegram_error" }, 500);

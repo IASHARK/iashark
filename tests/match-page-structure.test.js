@@ -415,7 +415,7 @@ test("mur Pro : un seul panneau, apercu factice sans aucune donnee, bouton cyan 
   assert.ok(mur.indexOf('class="mgate-list"')<mur.indexOf('class="mgate-cta"'),"liste avant le bouton");
   const frGrid=JSON.parse(read("i18n/dict/fr.json")).pricing_grid;
   for(const m of mur.matchAll(/\['(f_\w+)','([^']*)'\]/g))assert.equal(m[2],frGrid[m[1]],"repli FR de "+m[1]+" = dictionnaire");
-  assert.deepEqual([...mur.matchAll(/\['(f_\w+)','/g)].map((m)=>m[1]),["f_all_matches","f_pick","f_scenario","f_stats_iashark","f_stats","f_scores","f_scorers"]);
+  assert.deepEqual([...mur.matchAll(/\['(f_\w+)','/g)].map((m)=>m[1]),["f_all_matches","f_pronostic","f_pick","f_scenario","f_stats_iashark","f_stats","f_scores","f_scorers"]);
   assert.match(mur,/<circle cx="10" cy="10" r="9" fill="rgba\(32,213,239,\.15\)"\/>/,"coche ronde de la grille");
   assert.match(mur,/<p class="mgate-small">\$\{esc\(lignePrix\)\}<\/p>/);
   const prixFn=js.slice(js.indexOf("function prixPro(interval)"),js.indexOf("function proGate(vm,o)"));
@@ -442,7 +442,7 @@ test("mur Pro : un seul panneau, apercu factice sans aucune donnee, bouton cyan 
   // (ligne « pari » retiree) ; simulation seulement sur un match du moteur v3
   // (champ public moteur_v3.source) ; stats listees seulement si le match en a ;
   // stats IASHARK seulement si ce match en a (vm.bookStats, branche stats-match).
-  assert.match(mur,/const contenu=LISTE_PRO\.filter\(\(\[k\]\)=>\(k!=='f_pick'\|\|etat!=='none'\)&&\(k!=='f_scenario'\|\|simulationV3\(raw\)\)&&\(k!=='f_stats'\|\|o\.stats\)&&\(k!=='f_stats_iashark'\|\|!!vm\.bookStats\)\);/);
+  assert.match(mur,/const contenu=LISTE_PRO\.filter\(\(\[k\]\)=>\(k!=='f_pronostic'\|\|raw\.pronostic_dispo===true\)&&\(k!=='f_pick'\|\|etat!=='none'\)&&\(k!=='f_scenario'\|\|simulationV3\(raw\)\)&&\(k!=='f_stats'\|\|o\.stats\)&&\(k!=='f_stats_iashark'\|\|!!vm\.bookStats\)\);/);
   // Simulation : match publie avant le branchement (ancien moteur, fige), absent
   // du moteur, urgence, moteur eteint = pas de ligne (champ PUBLIC seulement).
   const simV3=new Function(js.slice(js.indexOf("function simulationV3(raw){"),js.indexOf("const COCHE_PRO="))+"return simulationV3;")();

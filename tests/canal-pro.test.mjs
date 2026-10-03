@@ -614,7 +614,8 @@ test("Edge Function (contre-controle) : publication unique des messages obligato
   // Accueil du robot : pas de promesse de programme a 9 h 30 en rodage (canal-pro-accueil.mjs, teste dans canal-pro-prive.test.mjs).
   const accueil = src.slice(src.indexOf("async function lierCompte"), src.indexOf("async function robotPerso"));
   assert.match(accueil, /A\.bienvenue\(lang, \{ prenom, ouvert \}\)/);
-  assert.match(accueil, /if \(await reglage\(`accueil:\$\{ab\.user_id\}`\)\) \{ await html\(m\.chat\.id, A\.retour\(lang, prenom\)\); return; \}/, "deja accueilli : pas de nouveau questionnaire");
+  assert.match(accueil, /if \(await reglage\(`accueil:\$\{ab\.user_id\}`\)\) \{\n\s+await html\(m\.chat\.id, A\.retour\(lang, prenom\)\);\n\s+if \(o\.etape\) await reposerObligatoire\(m\.chat\.id, ab, lang, o\);\n\s+return;/,
+    "deja accueilli : pas de nouveau questionnaire (seulement la question obligatoire en attente, s'il en reste une)");
   assert.ok(!/Chaque matin à 9 h 30, je t'envoie/.test(src));
 });
 

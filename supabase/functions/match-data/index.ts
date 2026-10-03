@@ -101,6 +101,7 @@ const PREMIUM_FIELDS = [
   "cote_bookmaker", "cote_source", "cote_releve_a", "sans_marge_anj",
   "stats_iashark",
   "lecture_match",
+  "pronostic",
 ];
 
 // Un match marque is_free par le pipeline est l'offre d'appel du jour : ses

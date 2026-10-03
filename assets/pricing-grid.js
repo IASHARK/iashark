@@ -180,6 +180,7 @@
     f_free_match: 'L’analyse du match offert',
     f_free_stats: 'Sur le match offert : les stats du premier but et des buts après la 75e',
     f_all_matches: 'Toutes les analyses du jour, dans chaque compétition suivie',
+    f_pronostic: 'Le pronostic IASHARK de ce match, avec sa chance calculée',
     f_pick: 'Le pari retenu, avec sa probabilité et ses raisons',
     f_scenario: 'La simulation du match par tranches de 15 minutes',
     f_scenario_since: 'La simulation du match par tranches de 15 minutes, sur les matchs publiés depuis le {date}',
@@ -267,6 +268,8 @@
     // « cote minimum » (jamais ecrite vers le site : lib/moteur-v3.js, C4 du
     // 29/09/2026) ; elle vient avec le comparateur (bientot).
     { key: 'f_all_matches', free: false, pro: true },
+    // Un pronostic sur chaque match (03/10/2026, lib/pronostic.js).
+    { key: 'f_pronostic', free: false, pro: true },
     { key: 'f_pick', free: false, pro: true },
     { key: 'f_scenario', free: false, pro: true, simulation: true },
     { key: 'f_stats_iashark', free: false, pro: true, stats: true },

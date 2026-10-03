@@ -28,6 +28,7 @@
 // quels de canal-pro.mjs et canal-pro-langues.mjs (memes regles, verifiees par leurs tests).
 import { gardeFouAtteint, estLaNuit, preferencesEffectives, paris as heureDeParis, messageProgrammeAbonne, sectionCompetitions, PAYS_COTES_A_PART } from "./canal-pro.mjs";
 import { choisirLangue, decouper } from "./canal-pro-langues.mjs";
+import { rappelReglages } from "./canal-pro-accueil.mjs";
 
 export const PLANS_PRO = Object.freeze(["pro", "famille"]);
 /** Abonnement actif ou en essai (Stripe « trialing » donne aussi plan = 'pro'), ou administrateur. */
@@ -64,15 +65,23 @@ export function servisDepuisCles(cle, cles) {
  * Destinataires des messages Pro : lignes telegram_abonnes reliees (chat_id), pas bloquees,
  * dont le compte est Pro actif ou en essai. Chacun avec ses reglages (pro_preferences) et sa langue.
  * lies : telegram_abonnes ; users : { id, plan, role } ; form : pro_preferences ; langues : user_preferences.
+ * reglagesAFaire (03/10/2026) : pas de ligne pro_preferences = reglages obligatoires pas faits (ni sur le
+ * site ni sur le robot). formLu = false (table illisible) : on ne le sait pas, donc aucun rappel.
  */
-export function destinataires({ lies = [], users = [], form = [], langues = [], paysDefaut } = {}) {
+export function destinataires({ lies = [], users = [], form = [], langues = [], paysDefaut, formLu = true } = {}) {
   const actifs = new Set(users.filter(estAbonneActif).map((u) => String(u.id)));
-  return lies.filter((l) => l.chat_id != null && !l.bloque && actifs.has(String(l.user_id))).map((l) => ({
-    ...l,
-    prefs: preferencesEffectives(form.find((f) => String(f.user_id) === String(l.user_id)), paysDefaut === undefined ? {} : { paysDefaut }),
-    langue: choisirLangue(langues.find((u) => String(u.user_id) === String(l.user_id))?.language, l.langue_telegram),
-  }));
+  return lies.filter((l) => l.chat_id != null && !l.bloque && actifs.has(String(l.user_id))).map((l) => {
+    const ligne = form.find((f) => String(f.user_id) === String(l.user_id));
+    return {
+      ...l,
+      prefs: preferencesEffectives(ligne, paysDefaut === undefined ? {} : { paysDefaut }),
+      langue: choisirLangue(langues.find((u) => String(u.user_id) === String(l.user_id))?.language, l.langue_telegram),
+      reglagesAFaire: formLu && !ligne,
+    };
+  });
 }
+/** Rappel « Il te reste 1 minute de reglages » : une cle par abonne et par jour (heure de Paris). */
+export const cleRappelReglages = (jour, userId) => cleEnvoi(`rappel-reglages:${jour}`, userId);
 
 /**
  * Le texte d'un abonne : sa langue si elle est preparee, sinon le francais. Plusieurs blocs = un seul message
@@ -161,6 +170,11 @@ export async function diffuser(deps, diffusion) {
     const avecInfos = !!ki && await poser(ki, "pro-infos");
     if (avecInfos) texte = texte ? `${texte}\n\n${section}` : section;
     if (!texte) { await rendre(k).catch(() => null); bilan.ignores++; continue; }
+    // Reglages obligatoires pas faits : le programme part quand meme (reglages par defaut), avec UNE ligne
+    // courte, une fois par jour au plus (cle du jour posee dans pro_envois avant l'envoi).
+    const kr = diffusion.programme && a.reglagesAFaire ? cleRappelReglages(heureDeParis(maintenant()).date, a.user_id) : null;
+    const avecRappel = !!kr && await poser(kr, "pro-rappel-reglages");
+    if (avecRappel) texte = `${texte}\n\n${rappelReglages(a.langue)}`;
     const silencieux = !a.prefs?.alertes?.nuit && estLaNuit(maintenant());
     let parti = null, morceaux = 0;
     try {
@@ -185,6 +199,7 @@ export async function diffuser(deps, diffusion) {
         bilan.refuses++;
         await rendre(k).catch(() => null);
         if (avecInfos) await rendre(ki).catch(() => null);
+        if (avecRappel) await rendre(kr).catch(() => null);
       } else {
         // Incertain (502, coupure, ou une partie seulement est partie) : la cle reste, jamais de doublon.
         bilan.incertains++;

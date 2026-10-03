@@ -204,14 +204,15 @@ test("matchs favoris : store {id, ko}, nettoyage des matchs passes, fusion avec 
   assert.deepEqual(calls, [{ data: { fav_matches: [{ id: "8", ko: now + 1e6 }] } }], "seul fav_matches est ecrit (fav_leagues intact)");
 });
 
-test("competition : favoris puis A->Z, en-tete « N matchs » sans decompte d'analyses, ajout aux favoris suivi", () => {
+test("competition : favoris puis ordre d'importance, en-tete « N matchs » sans decompte d'analyses, ajout aux favoris suivi", () => {
   const H = helpers();
   const groups = HL.groupByLeague([base({ league: "La Liga" }), base({ id: 2, league_key: "el", league: "Europa League", has_signal: false, no_signal: true }), base({ id: 3 })], H);
   assert.deepEqual(groups.map((g) => g.name), ["Europa League", "La Liga"]);
   const block = HL.renderLeagueBlock(groups[1], ctx(), H, 0);
   // Le decompte « M analyses prêtes » a ete retire de l'en-tete le 16/09/2026 :
   // il repetait ce que chaque ligne dit deja, et chargeait la barre de competition.
-  assert.match(block, />2 matchs</);
+  // 03/10/2026 : « N matchs · prochain à HH:MM » (prochain coup d'envoi de la competition).
+  assert.match(block, />2 matchs( · prochain à \d\d:\d\d)?</);
   const stats = (block.match(/<span class="hl-league-stats">([^<]*(?:<[^>]+>[^<]*)*?)<\/span>/) || [])[1] || "";
   assert.doesNotMatch(stats, /analyse/i, "le decompte d'analyses est revenu dans l'en-tete : " + stats);
   // L'aria-label des lignes verrouillees, lui, continue de decrire l'etat au

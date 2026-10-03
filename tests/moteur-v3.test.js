@@ -191,7 +191,8 @@ test("pipeline : chaque appel au moteur v3 est dans un bloc MOTEUR_V3 garde par 
   assert.equal((wf.match(/var MOTEUR_V3=require\('\.\/lib\/moteur-v3\.js'\)\.creerBranchement\(\{env:process\.env\}\);/g) || []).length, 1);
   const debuts = wf.split("// MOTEUR_V3:DEBUT").length - 1, fins = wf.split("// MOTEUR_V3:FIN").length - 1;
   // 7e bloc (01/10/2026) : chances IASHARK des marches pour le Canal Pro (une seule source).
-  assert.equal(debuts, 7); assert.equal(fins, 7);
+  // 8e bloc (03/10/2026) : chances du v3 pour le pronostic de chaque match (lib/pronostic.js).
+  assert.equal(debuts, 8); assert.equal(fins, 8);
   // Hors blocs, le script du pipeline ne mentionne jamais le moteur v3.
   const script = wf.slice(wf.indexOf("cat > pipeline.js << 'JSEOF'"), wf.indexOf("          JSEOF"));
   const horsBlocs = script.replace(/[ \t]*\/\/ MOTEUR_V3:DEBUT[\s\S]*?\/\/ MOTEUR_V3:FIN\n/g, "");
@@ -698,9 +699,11 @@ test("C3 : moteur v3 allume, le match offert est un pari v3, le plus probable, j
   const bloc = WF.slice(debut, WF.indexOf("})();", debut));
   const v3 = bloc.slice(bloc.indexOf("// MOTEUR_V3:DEBUT"), bloc.indexOf("// MOTEUR_V3:FIN"));
   assert.ok(v3.length > 50, "bloc MOTEUR_V3 dans designerMatchGratuit");
-  assert.match(v3, /analysable=function\(m\)\{ return analysableTous\(m\) && !!\(m\.v3_pari&&m\.moteur_v3&&m\.moteur_v3\.source==='v3'\); \};/);
+  // 03/10/2026 : ou une selection nationale verifiee (cotes du marche, lib/pronostic.js).
+  assert.match(v3, /analysable=function\(m\)\{ return analysableTous\(m\) && \(!!\(m\.v3_pari&&m\.moteur_v3&&m\.moteur_v3\.source==='v3'\) \|\| selectionNationaleCotes\(m\)\); \};/);
   assert.match(v3, /meilleur=function\(liste\)/);
-  assert.match(v3, /Number\(m\.model_probability\)/);
+  // 03/10/2026 : la plus fiable = la plus haute chance affichee du pronostic (chance IASHARK).
+  assert.match(v3, /var pb=chanceSelection\(b\), pm=chanceSelection\(m\);/);
   assert.doesNotMatch(v3.split("\n").filter((l) => !/^\s*\/\//.test(l)).join("\n"), /valeurDe|cote_rec|PROBA_MIN/, "aucun critere de valeur");
   assert.match(v3, /if\(!analysable\(gardes\[j\]\)\) delete gardes\[j\];/);
   // Le bloc est pose apres la relecture des designations et avant le choix du jour.

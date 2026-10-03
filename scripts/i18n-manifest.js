@@ -250,17 +250,8 @@ var PAGES = [
       {find: "Une analyse, ", build: function(d,l){ return HOME_V3[l].anaT1; }},
       {find: "pas un pronostic", build: function(d,l){ return HOME_V3[l].anaT2; }},
       {find: " balancé sans explication.", build: function(d,l){ return HOME_V3[l].anaT3; }},
-      {find: "CE QU’ON NE FERA PAS", build: function(d,l){ return HOME_V3[l].trLbl; }},
-      {find: "On préfère te dire ", build: function(d,l){ return HOME_V3[l].trT1; }},
-      {find: "quand on ne sait pas.", build: function(d,l){ return HOME_V3[l].trT2; }},
       {find: "Aucune promesse de gain", build: function(d,l){ return HOME_V3[l].t1t; }},
       {find: "Le pari reste un pari. On calcule des probabilités, on ne garantit aucun résultat.", build: function(d,l){ return HOME_V3[l].t1d; }},
-      {find: "L’écart s’affiche même quand il te dessert", build: function(d,l){ return HOME_V3[l].t2t; }},
-      {find: "Si la cote proposée est moins intéressante que notre estimation, c’est écrit noir sur blanc.", build: function(d,l){ return HOME_V3[l].t2d; }},
-      {find: "Le pari ne bouge plus une fois publié", build: function(d,l){ return HOME_V3[l].t3t; }},
-      {find: "Dès sa publication, le pari est figé : ni lui, ni sa probabilité, ni sa cote ne changent jusqu’au coup d’envoi. Seuls les faits du match (compositions, absences, cotes des bookmakers) continuent d’être mis à jour.", build: function(d,l){ return HOME_V3[l].t3d; }},
-      {find: "La fiabilité affichée", build: function(d,l){ return HOME_V3[l].t4t; }},
-      {find: "Chaque analyse indique la fiabilité de ses données : un échantillon mince est signalé comme tel.", build: function(d,l){ return HOME_V3[l].t4d; }},
       {find: "QUESTIONS FRÉQUENTES", build: function(d,l){ return HOME_V3[l].faqLbl; }},
       {find: "Ce que tu te demandes ", build: function(d,l){ return HOME_V3[l].faqT1; }},
       {find: "avant de payer.", build: function(d,l){ return HOME_V3[l].faqT2; }},
@@ -282,27 +273,9 @@ var PAGES = [
       {find: "Les données et les facteurs qui ont conduit le modèle à cette conclusion, écrits en clair.", build: function(d,l){ return HOME_V4[l].b2d; }},
       {find: "L’incertitude", build: function(d,l){ return HOME_V4[l].b3t; }},
       {find: "Chaque analyse indique la fiabilité de ses données. Un échantillon mince est écrit, pas caché.", build: function(d,l){ return HOME_V4[l].b3d; }},
-      {find: "CE QUE LE MOTEUR A DÉJÀ TRAITÉ", build: function(d,l){ return HOME_V4[l].kpiEye; }},
       {find: "Simulations par match", build: function(d,l){ return HOME_V4[l].kpi3; }},
       {find: "Matchs analysés sur 3 jours", build: function(d,l){ return HOME_V4[l].kpi4; }},
-      {find: "Une probabilité ne vaut que par sa fiabilité : on affiche les deux, même quand elles sont modestes.", build: function(d,l){ return HOME_V4[l].trLead; }},
       {find: "quand tu veux tout voir.", build: function(d,l){ return HOME_V4[l].acc3; }},
-      {find: "par match.", build: function(d,l){ return HOME_V4[l].mTitle3; }},
-      {find: "Chaque étape répond à une question différente. Un seul marché en sort, choisi par une règle fixe.", build: function(d,l){ return HOME_V4[l].mLead; }},
-      {find: ">Forces en présence</div>", build: function(d,l){ return ">" + HOME_V4[l].m1t + "</div>"; }},
-      {find: "Ce que chaque équipe produit et concède, à domicile ou à l’extérieur.", build: function(d,l){ return HOME_V4[l].m1d; }},
-      {find: ">Prudence en début de saison</div>", build: function(d,l){ return ">" + HOME_V4[l].m2t + "</div>"; }},
-      {find: "Avec peu de matchs joués, la saison précédente pèse davantage.", build: function(d,l){ return HOME_V4[l].m2d; }},
-      {find: ">Probabilité de chaque marché</div>", build: function(d,l){ return ">" + HOME_V4[l].m3t + "</div>"; }},
-      {find: "Des buts attendus à la probabilité de chaque score, puis de chaque marché.", build: function(d,l){ return HOME_V4[l].m3d; }},
-      {find: ">Simulation du match</div>", build: function(d,l){ return ">" + HOME_V4[l].m4t + "</div>"; }},
-      {find: "Le match calculé minute par minute à partir des buts attendus, pour les scores les plus probables.", build: function(d,l){ return HOME_V4[l].m4d; }},
-      {find: "Signal IASHARK", build: function(d,l){ return HOME_V4[l].sigT; }},
-      {find: "Un marché prioritaire, une probabilité, et l’écart mesuré avec le prix du marché.", build: function(d,l){ return HOME_V4[l].sigD; }},
-      {find: "Calendriers, classements, résultats récents, confrontations directes et absences annoncées, championnat par championnat.", build: function(d,l){ return HOME_V4[l].s1d; }},
-      {find: ">Le modèle calcule</h3>", build: function(d,l){ return ">" + HOME_V4[l].s2t + "</h3>"; }},
-      {find: "Buts attendus, probabilité de chaque score, puis de chaque marché.", build: function(d,l){ return HOME_V4[l].s2d; }},
-      {find: "Une fiche claire : le pari retenu, sa chance calculée par IASHARK et sa fiabilité.", build: function(d,l){ return HOME_V4[l].s3d; }},
       {find: "Est-ce que IASHARK garantit des gains ?", build: function(d,l){ return HOME_V4[l].q2; }},
       {find: "Non, et personne ne le peut. Le modèle estime des probabilités puis les compare aux cotes. C’est une méthode, pas une garantie.", build: function(d,l){ return HOME_V4[l].a2; }},
       {find: "Comment le signal est-il calculé ?", build: function(d,l){ return HOME_V4[l].q3; }},
@@ -319,18 +292,10 @@ var PAGES = [
       // dans les 6 langues, plutot que d'inventer une seconde version du
       // meme discours. Seules 4 chaines sont nouvelles (HOME_V2).
       {find: 'Compétitions couvertes', build: function(d,l){ return HOME_V2[l].statLeagues; }},
-      {find: 'LA MÉTHODE', build: function(d){ return d.landing_page.lbl_method; }},
       
-      {find: 'Quatre étapes, ', build: function(d){ return d.landing_page.title_method_pre; }},
-      {find: 'un seul signal', build: function(d){ return d.landing_page.title_method_b; }},
       
-      {find: 'EN PRATIQUE', build: function(d){ return d.landing_page.lbl_practice; }},
       
-      {find: 'De la donnée brute au ', build: function(d){ return d.landing_page.title_practice_pre; }},
-      {find: 'signal exploitable.', build: function(d){ return d.landing_page.title_practice_b; }},
       
-      {find: '>On ingère la donnée<', build: function(d){ return '>' + d.landing_page.step1_title + '<'; }},
-      {find: '>Tu reçois le signal<', build: function(d){ return '>' + d.landing_page.step3_title + '<'; }},
       {find: 'L\'ACCÈS', build: function(d){ return d.landing_page.lbl_access; }},
       
       {find: 'Commence gratuitement. ', build: function(d){ return d.landing_page.title_access_pre; }},
@@ -681,5 +646,28 @@ var PAGES = [
   {file: "partenaires-kit.html", noSitemap: true},
   {file: "404.html", noSitemap: true}
 ];
+
+// Accueil (refonte du 03/10/2026) : textes nouveaux marques data-i18n="cle" dans index.html,
+// ecrits dans la langue de chaque version au build (le texte francais d'origine sert de motif,
+// tire du dictionnaire : il est forcement identique a celui du fichier source).
+function htmlTxt(v) { return String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+function cle(d, k) { return k.split(".").reduce(function (o, x) { return o == null ? o : o[x]; }, d); }
+function reglesDataI18n(cles, compte) {
+  return cles.map(function (k) {
+    return { find: 'data-i18n="' + k + '">' + htmlTxt(cle(FR_DICT, k)) + "<", count: (compte && compte[k]) || 1,
+      build: function (d) { var v = cle(d, k); return v == null ? null : 'data-i18n="' + k + '">' + htmlTxt(v) + "<"; } };
+  });
+}
+(function () {
+  var accueil = PAGES.filter(function (p) { return p.file === "index.html"; })[0];
+  accueil.replacements = accueil.replacements.concat(reglesDataI18n([
+    "accueil_v3.offer_cta", "accueil_v3.pro_kicker", "accueil_v3.pro_title", "accueil_v3.pro_1", "accueil_v3.pro_2", "accueil_v3.pro_3",
+    "accueil_v3.tg_title", "accueil_v3.tg_text", "accueil_v3.method_link",
+    "partner_promo.nav", "partner_promo.kicker", "partner_promo.title", "partner_promo.hook", "partner_promo.text", "partner_promo.cta"
+  ], { "accueil_v3.offer_cta": 2 }), [{
+    find: 'alt="' + htmlTxt(FR_DICT.partner_promo.img_alt) + '" data-i18n-attr="alt:partner_promo.img_alt"',
+    build: function (d) { return 'alt="' + htmlTxt(d.partner_promo.img_alt).replace(/"/g, "&quot;") + '" data-i18n-attr="alt:partner_promo.img_alt"'; }
+  }]);
+})();
 
 module.exports = PAGES;

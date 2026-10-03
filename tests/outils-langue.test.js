@@ -43,8 +43,8 @@ test("les libelles courts de la navigation sont en francais", () => {
 test("chaque outil est accompagne d'une phrase qui dit a quoi il sert", () => {
   // Une phrase courte dans la navigation, une phrase complete dans le panneau.
   const courtes = [...html.matchAll(/text-\[12px\] leading-snug text-soft">([^<]+)</g)].map((m) => m[1]);
-  // Lancement du 3/10 : tableau de bord cache (0040/0041 pas appliquees) : les 2 outils.
-  assert.equal(courtes.length, 2, "il faut une phrase par onglet dans la navigation (2 outils)");
+  // 03/10/2026 : tableau de bord ouvert (0040/0041 appliquees) : tableau de bord + 2 outils.
+  assert.equal(courtes.length, 3, "il faut une phrase par onglet dans la navigation (3 onglets)");
   for (const p of courtes) assert.ok(p.length >= 25, `phrase trop courte pour etre utile : "${p}"`);
 
   const longues = [...js.matchAll(/enTete\('[^']+', '([^']+)'\)/g)].map((m) => m[1]);

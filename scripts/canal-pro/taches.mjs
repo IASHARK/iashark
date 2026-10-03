@@ -172,14 +172,15 @@ export function creerContexte(deps) {
     if (!lies.length) return null;
     const ids = lies.map((l) => l.user_id);
     const users = await db.select("users", { id: ["in", ids] });
-    let form = [];
-    try { form = await db.select("pro_preferences", { user_id: ["in", ids] }); } catch (e) { log(`preferences du formulaire illisibles (${e.status || e.message}) : valeurs par defaut`); }
+    let form = [], formLu = true;
+    try { form = await db.select("pro_preferences", { user_id: ["in", ids] }); } catch (e) { formLu = false; log(`preferences du formulaire illisibles (${e.status || e.message}) : valeurs par defaut`); }
     // Langue : user_preferences.language du compte, sinon celle de son Telegram (langue_telegram), sinon francais.
     let langues = [];
     try { langues = await db.select("user_preferences", { user_id: ["in", ids] }); } catch (e) { log(`langues illisibles (${e.status || e.message}) : francais`); }
     // Sans formulaire : francais par defaut, ou pays inconnu si Clement l'a choisi (reglage pays_sans_formulaire = 'aucun').
     // Une seule source : pro_preferences (les clics du robot y ecrivent aussi ; telegram_abonnes.reglages n'est plus lu).
-    return { lies, users, form, langues, paysDefaut: C.paysParDefaut(await ctx.reglage("pays_sans_formulaire")) };
+    // formLu = false : on ne sait pas qui a fait ses reglages, donc aucun rappel « 1 minute de reglages ».
+    return { lies, users, form, langues, formLu, paysDefaut: C.paysParDefaut(await ctx.reglage("pays_sans_formulaire")) };
   };
   /**
    * Destinataires des messages personnels d'un pari selon SON mode. Rodage : Clement seul (exemple,

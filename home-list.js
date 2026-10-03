@@ -204,6 +204,10 @@ function analysisFor(m,ctx,H){
   // jamais « apres le coup d'envoi » pour un match qui ne s'est pas encore joue.
   if(!hasSignal(m)&&String(m.no_signal_reason||'')==='KICKOFF_POSTPONED')return {state:'closed',postponed:true,free:false};
   if(!hasSignal(m)&&/^(KICKOFF_|FIXTURE_NOT_UPCOMING)/.test(String(m.no_signal_reason||'')))return {state:'closed',free:false};
+  // UN PRONOSTIC SUR CHAQUE MATCH (03/10/2026, lib/pronostic.js) : un match sans selection
+  // garde son pronostic. Contenu Pro : verrouille (« Débloquer avec Pro ») hors Pro, sauf le
+  // match offert. pronostic_dispo est l'amorce publique (aucun chiffre, aucun marche).
+  if(!hasSignal(m)&&m.pronostic_dispo===true)return pronosticFor(m,ctx,H,free);
   if(!hasSignal(m))return {state:'none',free:free,label:m.no_signal_label||t('home_app.no_signal_label','Aucun signal clair sur ce match')};
   // Match offert sans compte : la page match exige un compte gratuit ; ici non
   // plus, aucun champ payant n'est lu.
@@ -222,6 +226,20 @@ function analysisFor(m,ctx,H){
   return {state:'open',free:free,probNum:pn,prob:pn!=null?fmtProb(pn):null,market:market};
 }
 
+// Pronostic d'un match sans selection : verrou hors Pro (match offert compris pour un
+// visiteur sans compte), sinon l'issue, sa chance calculee et sa fiabilite.
+function pronosticFor(m,ctx,H,free){
+  if(free&&!ctx.isPro&&!ctx.hasAccount)return {state:'gated',free:true};
+  if(!ctx.isPro&&!free)return {state:'locked',band:null};
+  var p=m.pronostic;
+  if(!p||!p.market_id)return {state:'pending',free:free,prob:null};
+  var market=H.marketIdLabel({market_id:p.market_id,home:m.home,away:m.away})||p.libelle_fr||'';
+  var ch=Number(p.chance),chance=ch>0&&ch<100?Math.round(ch):null;
+  var test=p.fiabilite==='en test';
+  return {state:'prono',free:free,market:market,chance:chance,test:test,
+    label:tf('home_list.prono_aria','Pronostic : {market}',{market:market})+(chance!=null?', '+tf('home_list.prono_chance','chance calculée {p} %',{p:chance}):'')+(test?' ('+t('home_list.prono_test','en test')+')':'')};
+}
+
 // Competitions favorites d'abord, puis A->Z ; dans chaque competition, matchs
 // favoris d'abord, puis par heure de coup d'envoi.
 function groupByLeague(list,H,favLeagues,favMatches){
@@ -238,8 +256,26 @@ function groupByLeague(list,H,favLeagues,favMatches){
     g.matches.sort(function(a,b){return ((fm.has(a.id)?0:1)-(fm.has(b.id)?0:1))||H.compareMatches(a,b);});
     g.ready=g.matches.filter(hasSignal).length;
     return g;
-  }).sort(function(a,b){return ((a.fav?0:1)-(b.fav?0:1))||String(a.name).localeCompare(String(b.name),lt,{sensitivity:'base'});});
+  }).sort(function(a,b){return ((a.fav?0:1)-(b.fav?0:1))||(leagueRank(a)-leagueRank(b))||String(a.name).localeCompare(String(b.name),lt,{sensitivity:'base'});});
 }
+
+/* Ordre d'importance des competitions (03/10/2026, demande de Clement : plus d'ordre
+   alphabetique) : selections nationales (Ligue des nations, eliminatoires, amicaux : en tete
+   pendant les treves), coupes d'Europe, cinq grands championnats, autres championnats d'Europe,
+   puis le reste du monde. Par identifiant api-football (league_id) ou par cle de competition. */
+var RANG_LIGUE={5:0,32:1,29:1,30:1,31:1,34:1,10:2,2:10,3:11,848:12,61:20,39:21,140:22,135:23,78:24,
+  88:30,94:31,144:32,203:33,179:34,40:35,79:36,141:37,136:38,218:39,207:40,119:41,106:42,113:43,41:44,42:45,180:46,
+  253:50,262:51,71:52,128:53,98:54};
+var RANG_CLE={nations_league:0,wcq_europe:1,other:2,ldc:10,el:11,ecl:12,ligue1:20,premier:21,laliga:22,seriea:23,bundesliga:24};
+function leagueRank(g){
+  if(Object.prototype.hasOwnProperty.call(RANG_CLE,g.key))return RANG_CLE[g.key];
+  var m=g.matches&&g.matches[0],id=m&&Number(m.league_id||m.ligue_id);
+  return Object.prototype.hasOwnProperty.call(RANG_LIGUE,id)?RANG_LIGUE[id]:90;
+}
+// Competitions ouvertes d'office : les favorites et les 3 premieres de la liste ; les autres
+// sont repliees (une ligne dense : logo, nom, nombre de matchs, prochain coup d'envoi).
+// Un clic de la personne l'emporte toujours (ctx.collapsed : 1 = repliee, 0 = ouverte).
+var OUVERTES_D_OFFICE=3;
 
 /* ---------- Resultats de la veille : la couleur, rien d'autre ----------
    Source : /results/<jour>.json, ecrit chaque jour par le calcul quotidien
@@ -290,11 +326,18 @@ function veilleAppel(liste,actif,jourHier){
 
 /* ---------- Rendu ligne ---------- */
 function initials(n){return String(n||'?').replace(/[^A-Za-zÀ-ÿ0-9 ]/g,'').split(' ').filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase()||'?';}
+// Nom d'equipe affiche : en francais sur les pages francaises (Finland -> Finlande, Spain ->
+// Espagne ; table config/noms-equipes-fr.json recopiee dans lib/noms-equipes-fr.js, la meme que
+// les pages match statiques). Ailleurs, ou sans la table : le nom de l'API, tel quel.
+function nomEquipe(n){
+  var N=root.IasharkNomsEquipesFr,loc=root.I18N&&root.I18N.locale;
+  return N&&N.nom&&(!loc||loc==='fr')?N.nom(n):String(n==null?'':n);
+}
 function teamHtml(tm,H){
   var url=H.teamLogoUrl(tm),ini=esc(initials(tm&&tm.n));
   var logo=url?'<img class="hl-logo" src="'+esc(url)+'" width="18" height="18" alt="" loading="lazy" decoding="async" data-ini="'+ini+'">'
     :'<span class="hl-logo hl-logo-ph" aria-hidden="true">'+ini+'</span>';
-  return '<span class="hl-team">'+logo+'<span class="hl-tname">'+esc(tm&&tm.n||'')+'</span></span>';
+  return '<span class="hl-team">'+logo+'<span class="hl-tname">'+esc(nomEquipe(tm&&tm.n||''))+'</span></span>';
 }
 function fmtInt(n){return Number(n).toLocaleString(localeTag());}
 function barsHtml(b){
@@ -307,7 +350,7 @@ function bandHtml(b){
     +'<span class="hl-band-txt"><span class="hl-m">'+esc(t(BAND_LABEL[b][0]+'_short',BAND_SHORT[b]))+'</span><span class="hl-d">'+esc(bandLabel(b))+'</span></span>'
     +'<span class="hl-band-i" aria-hidden="true">i</span></span>';
 }
-function matchTitle(m){return (m&&m.home&&m.home.n||'')+' – '+(m&&m.away&&m.away.n||'');}
+function matchTitle(m){return nomEquipe(m&&m.home&&m.home.n||'')+' – '+nomEquipe(m&&m.away&&m.away.n||'');}
 // Etoile du match : bouton frere du lien (jamais un bouton dans un <a>).
 function matchStarHtml(m,ctx){
   var fm=ctx.favMatches;
@@ -332,6 +375,9 @@ function renderMatchRow(m,ctx,H,index){
   // Indicateurs PUBLICS reels uniquement.
   var tags=[];
   if(a.free)tags.push('<span class="hl-tag hl-tag-free">'+esc(t('home_list.free_chip','Offert'))+'</span>');
+  // Selection IASHARK (le sous-ensemble retenu, jamais sous la cote 1,20) : amorce publique
+  // selection_iashark posee par le pipeline (lib/pronostic.js), aucun chiffre.
+  if(m.selection_iashark===true&&a.state!=='past'&&a.state!=='closed')tags.push('<span class="hl-tag hl-tag-sel">'+esc(t('home_list.selection_chip','✓ Sélection IASHARK'))+'</span>');
   if(derby)tags.push('<span class="hl-tag hl-tag-derby" title="'+esc(derby)+'">'+esc(t('home_list.derby_chip','Derby'))+'</span>');
   if(cd)tags.push('<span class="hl-tag hl-tag-time is-'+cd.kind+'" data-hl-ts="'+(isFinite(ts)?ts:'')+'"'+(cd.estimated?' title="'+esc(t('home_list.status_estimated','Statut estimé d’après l’heure du coup d’envoi'))+'"':'')+'>'+esc(cd.text)+'</span>');
   if(q)tags.push('<span class="hl-tag hl-tag-q is-'+q.level+'"><i aria-hidden="true"></i>'+esc(q.text)+'</span>');
@@ -361,6 +407,13 @@ function renderMatchRow(m,ctx,H,index){
   }else if(a.state==='gated'){
     zone='<span class="hl-zone"><span class="hl-ready"><i class="hl-dot" aria-hidden="true"></i>'+esc(t('home_list.free_gated','Analyse offerte'))+'</span>'
       +'<span class="hl-freepill">'+esc(t('home_list.free_gated_cta','Compte gratuit'))+'</span></span>';
+  }else if(a.state==='prono'){
+    // Pronostic (pas une selection) : l'issue, la chance calculee, « en test » si la competition l'est.
+    zone='<span class="hl-zone hl-zone-prono">'
+      +'<span class="hl-prob-row">'
+        +'<span class="hl-prob-lbl"><span class="hl-m">'+esc(t('home_list.prono_short','Prono.'))+'</span><span class="hl-d">'+esc(t('home_list.prono_long','Pronostic'))+'</span></span>'
+        +(a.chance!=null?'<span class="hl-prob"><b>'+a.chance+'</b><small>%</small></span>':'')+'</span>'
+      +'<span class="hl-none-s">'+esc(a.market)+(a.test?' · '+esc(t('home_list.prono_test','en test')):'')+'</span></span>';
   }else if(a.state==='pending'){
     zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'+esc(t('home_app.analysis_in_progress','Analyse en cours'))+'</span></span>';
   }else if(a.state==='closed'){
@@ -380,7 +433,7 @@ function renderMatchRow(m,ctx,H,index){
     :a.state==='pending'?t('home_app.analysis_in_progress','Analyse en cours')+'.'
     :a.state==='closed'?closedShort(a)+'. '+closedSub(a)+'.':a.label+'.';
   var extra=[derby?tf('home_list.aria_derby','Derby : {name}',{name:derby}):'',cd?cd.text+(cd.estimated?' ('+t('home_list.estimated','estimé')+')':''):'',q?q.text:''].filter(Boolean).join(', ');
-  var aria=tf('home_list.row_aria','{home} contre {away}, {time}. {extra}. {analysis}',{home:home.n||'',away:away.n||'',time:heure,extra:extra,analysis:anaAria}).replace(/\.\s\./g,'.');
+  var aria=tf('home_list.row_aria','{home} contre {away}, {time}. {extra}. {analysis}',{home:nomEquipe(home.n||''),away:nomEquipe(away.n||''),time:heure,extra:extra,analysis:anaAria}).replace(/\.\s\./g,'.');
   // Suivi du tunnel (funnel-track.js) : ligne verrouillee = kind dedie, sans donnee personnelle.
   var track=a.state==='locked'?' data-track="home_row_lock" data-track-kind="home_row_lock"':'';
   var star=matchStarHtml(m,ctx);
@@ -400,10 +453,14 @@ function renderMatchRow(m,ctx,H,index){
 /* ---------- Rendu competition ---------- */
 function renderLeagueBlock(g,ctx,H,startIndex){
   var favs=ctx.favorites||NO_FAVS;
-  var fav=!!favs.has(g.key),open=!(ctx.collapsed||{})[g.key],k=esc(g.key);
+  var choix=(ctx.collapsed||{})[g.key];
+  var fav=!!favs.has(g.key),open=choix===1?false:choix===0?true:(fav||!(g.rang>=OUVERTES_D_OFFICE)),k=esc(g.key);
   var hid='hl-h-'+k,pid='hl-p-'+k;
   var favLbl=tf(fav?'home_list.fav_remove':'home_list.fav_add',fav?'Retirer {league} de mes compétitions':'Ajouter {league} à mes compétitions',{league:g.name});
-  var stats=esc(countLabel(g.matches.length));
+  // Prochain coup d'envoi de la competition (heure du premier match pas encore commence).
+  var now=ctx.nowTs||Date.now(),prochain=null;
+  g.matches.some(function(m){var ts=H.matchTimestamp(m);if(ts&&ts>now){prochain=m;return true;}return false;});
+  var stats=esc(countLabel(g.matches.length))+(prochain?' · '+esc(tf('home_list.next_kickoff','prochain à {time}',{time:H.heure(prochain)})):'');
   // Ajout aux favoris : kind dedie (cle de competition seulement).
   var track=fav?'':' data-track="'+k+'" data-track-kind="home_fav_add"';
   return '<section class="hl-league'+(fav?' is-fav':'')+(open?'':' is-collapsed')+'" data-league="'+k+'">'
@@ -412,7 +469,9 @@ function renderLeagueBlock(g,ctx,H,startIndex){
     +'<h4 class="hl-league-h"><button type="button" class="hl-league-toggle" id="'+hid+'" data-hl-toggle="'+k+'" aria-expanded="'+open+'" aria-controls="'+pid+'">'
     +(g.logo?'<span class="hl-league-logo"><img src="'+esc(g.logo)+'" width="19" height="19" alt="" loading="lazy" decoding="async"></span>':'')
     +'<span class="hl-league-text"><span class="hl-league-l1"><span class="hl-league-name">'+esc(g.name)+'</span>'
-    +'<span class="hl-league-country">'+(g.flag?'<span aria-hidden="true">'+g.flag+'</span> ':'')+esc(g.country||t('home_list.country_intl','International'))+'</span></span>'
+    // 03/10/2026 (Clement : « ca ne fait pas pro ») : plus d'emoji drapeau ni de nom du pays a cote
+    // de la competition ; seulement son nom (et son logo quand il existe).
+    +'</span>'
     +'<span class="hl-league-stats">'+stats+'</span></span>'
     +ICON.chev+'</button></h4></div>'
     +'<div class="hl-league-panel" id="'+pid+'" role="region" aria-labelledby="'+hid+'"'+(open?'':' inert aria-hidden="true"')+'><div class="hl-league-inner">'
@@ -468,6 +527,7 @@ function renderDayBody(all,ctx,H){
   var locked=lockedAll.length,upsellDone=!locked;
   html+='<div class="hl-leagues">';
   groups.forEach(function(g,i){
+    g.rang=i;
     html+=renderLeagueBlock(g,ctx,H,idx);idx+=g.matches.length;
     if(!upsellDone&&(i+1===ctx.upsellAfter||i===groups.length-1)){html+=renderUpsell(locked,H);upsellDone=true;}
   });
@@ -583,7 +643,7 @@ function mount(rootEl,options){
     var sec=btn.closest('.hl-league'),k=sec.getAttribute('data-league'),panel=sec.querySelector('.hl-league-panel');
     var open=btn.getAttribute('aria-expanded')!=='true';
     btn.setAttribute('aria-expanded',open);sec.classList.toggle('is-collapsed',!open);
-    if(open){panel.removeAttribute('inert');panel.removeAttribute('aria-hidden');delete collapsed[k];}
+    if(open){panel.removeAttribute('inert');panel.removeAttribute('aria-hidden');collapsed[k]=0;}
     else{panel.setAttribute('inert','');panel.setAttribute('aria-hidden','true');collapsed[k]=1;}
     try{root.sessionStorage.setItem(DEFAULTS.collapsedKey,JSON.stringify(collapsed));}catch(e){}
   }

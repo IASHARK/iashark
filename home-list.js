@@ -239,7 +239,7 @@ function pronosticFor(m,ctx,H,free){
   // verifiees (moteur ou cotes du marche). Plus jamais « en test » affiche (demande de Clement).
   var test=false;
   return {state:'prono',free:free,market:market,chance:chance,test:test,
-    label:tf('home_list.prono_aria','Pronostic : {market}',{market:market})+(chance!=null?', '+tf('home_list.prono_chance','chance calculée {p} %',{p:chance}):'')+(test?' ('+t('home_list.prono_test','en test')+')':'')};
+    label:tf('home_list.prono_aria','Analyse : {market}',{market:market})+(chance!=null?', '+tf('home_list.prono_chance','chance calculée {p} %',{p:chance}):'')+(test?' ('+t('home_list.prono_test','en test')+')':'')};
 }
 
 // Competitions favorites d'abord, puis A->Z ; dans chaque competition, matchs
@@ -363,7 +363,7 @@ function matchStarHtml(m,ctx){
 }
 
 // Ligne fermee : « Pronostic fermé » apres le coup d'envoi, « Match reporté » pour un match reporte.
-function closedShort(a){return a.postponed?t('home_list.postponed_short','Match reporté'):t('home_list.closed_short','Pronostic fermé');}
+function closedShort(a){return a.postponed?t('home_list.postponed_short','Match reporté'):t('home_list.closed_short','Analyse fermée');}
 function closedSub(a){return a.postponed?t('home_list.postponed_sub','Aucun pronostic sur ce match'):t('home_list.closed_sub','L’analyse n’est plus proposée après le coup d’envoi');}
 function renderMatchRow(m,ctx,H,index){
   var a=analysisFor(m,ctx,H),ts=H.matchTimestamp(m),cd=countdown(m,H,ctx.nowTs);
@@ -413,7 +413,7 @@ function renderMatchRow(m,ctx,H,index){
     // Pronostic (pas une selection) : l'issue, la chance calculee, « en test » si la competition l'est.
     zone='<span class="hl-zone hl-zone-prono">'
       +'<span class="hl-prob-row">'
-        +'<span class="hl-prob-lbl"><span class="hl-m">'+esc(t('home_list.prono_short','Prono.'))+'</span><span class="hl-d">'+esc(t('home_list.prono_long','Pronostic'))+'</span></span>'
+        +'<span class="hl-prob-lbl"><span class="hl-m">'+esc(t('home_list.prono_short','Analyse'))+'</span><span class="hl-d">'+esc(t('home_list.prono_long','Analyse'))+'</span></span>'
         +(a.chance!=null?'<span class="hl-prob"><b>'+a.chance+'</b><small>%</small></span>':'')+'</span>'
       +'<span class="hl-none-s">'+esc(a.market)+(a.test?' · '+esc(t('home_list.prono_test','en test')):'')+'</span></span>';
   }else if(a.state==='pending'){

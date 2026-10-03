@@ -433,8 +433,10 @@ test("manifeste i18n : la section « methode » de l'accueil est traduite en ent
   // build-locales.js : le titre d'une carte non couvert par une regle resterait
   // en francais dans /de/ /it/ /pt/. On verifie ici que les quatre titres et
   // les quatre descriptions de la section « methode » ont bien leur regle.
-  ["Forces en présence", "Prudence en début de saison", "Probabilité de chaque marché", "Simulation du match"].forEach(function (t) {
-    assert.ok(src.includes(t), "index.html : carte « " + t + " » absente");
+  // Refonte de l'accueil (03/10/2026) : « La methode » (4 cartes) est remplacee par « Ce que tu recois »
+  // en 4 points ; chaque titre et chaque texte de ce bloc a sa regle de traduction.
+  ["Le signal", "L’explication", "L’incertitude", "Aucune promesse de gain"].forEach(function (t) {
+    assert.ok(src.includes(t), "index.html : point « " + t + " » absent");
     assert.ok(home.replacements.some(function (r) { return r.find.includes(t); }), "aucune regle de traduction pour « " + t + " »");
   });
   home.replacements.forEach(function (r) {

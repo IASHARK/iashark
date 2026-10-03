@@ -206,7 +206,9 @@ test("tableau de bord : meilleure cote chez SES bookmakers de SON pays ; hors de
   assert.ok(appels.length >= 2);
   appels.forEach((a) => assert.match(a, /agreesDuPays\(\)/, "pariPourMoi(" + a + ")"));
   assert.match(js, /function nomBk\(id\) \{ return \(id && P\.nomBookmaker\(id, prefs\(\)\.pays\)\) \|\| ''; \}/, "nom cherche seulement dans la liste du pays");
-  assert.match(js, /if \(!paysOuvert\(\)\) contenu \+= vide\(tr\('pro_space\.country_closed'\)\)/);
+  // 03/10/2026 : programme du jour = le message Telegram, pour tous les pays ; hors pays ouvert,
+  // aucune cote ni aucun bookmaker (comme le robot, qui n'en donne pas : canal-pro-langues#teteSansPays).
+  assert.match(js, /if \(!paysOuvert\(\)\) \{ x\.meilleure_cote = null; x\.meilleur_bookmaker = null; return x; \}/);
   assert.match(js, /bookmaker: P\.bookmakersValides\(prefs\(\)\.pays, \[/, "journal : bookmaker du pays seulement");
 });
 
@@ -308,15 +310,17 @@ test("tableau de bord : ma semaine en image = la semaine derniere, lundi a diman
   assert.doesNotMatch(read("pro-dashboard.js"), /week_img_above/);
 });
 
-test("tableau de bord : qualite des cotes et alertes = « Bientot », aucun chiffre sans donnee ; ni Loto Foot ni duel", () => {
+test("tableau de bord : plus de bloc « Bientot » (03/10/2026), aucun chiffre sans donnee ; ni Loto Foot ni duel", () => {
   const js = read("pro-dashboard.js");
-  assert.match(js, /function blocBientot\(\)[\s\S]{0,600}pro_space\.quality_soon/);
+  assert.doesNotMatch(js, /function blocBientot\(|quality_soon/);
   const code = js.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
   assert.doesNotMatch(code, /closing_odds|contenus_pro|lotofoot_|duel_|blocJeux|blocAlertes|blocQualite/);
   assert.match(DICTS.fr.pro_space.quality_soon, /Pas encore disponible/);
-  assert.match(DICTS.fr.pro_space.locked_alerts, /^Bientôt/);
-  assert.match(DICTS.fr.pro_space.locked_comparator, /^Bientôt/);
-  assert.match(DICTS.fr.pro_space.locked_today, /^Bientôt/);
+  // Alertes envoyees par le robot (scripts/canal-pro/taches.mjs : compositions, alertes de cote, meteo).
+  assert.match(DICTS.fr.pro_space.locked_alerts, /^Avec Pro/);
+  // Le programme du jour et le comparateur existent : plus « Bientot » dans l'apercu gratuit.
+  assert.match(DICTS.fr.pro_space.locked_comparator, /^Avec Pro/);
+  assert.match(DICTS.fr.pro_space.locked_today, /^Avec Pro/);
 });
 
 test("courbe de « Mon bilan » : monotone, ne depasse jamais les vraies valeurs (pas de bosse inventee)", () => {
@@ -704,7 +708,7 @@ function rendreTableau({ pro, pays, marche, donnees, dir, profil }) {
     document: { getElementById: () => null, createElement: () => ({}), body: { appendChild() {} } }
   });
   win.window = win;
-  ["lib/pro-preferences.js", "lib/pro-dashboard-model.js", "pro-dashboard.js"].forEach((f) => vm.runInContext(read(f).replace(/typeof window !== 'undefined' \? window : this/, "window"), ctx, { filename: f }));
+  ["lib/pro-preferences.js", "lib/pro-dashboard-model.js", "lib/selection-pro.js", "pro-dashboard.js"].forEach((f) => vm.runInContext(read(f).replace(/typeof window !== 'undefined' \? window : this/, "window"), ctx, { filename: f }));
   // Les modules s'exposent sur window (pas de module.exports dans ce contexte).
   const panneau = { innerHTML: "", querySelectorAll: () => [], querySelector: () => null };
   const contexte = { user: { id: "u1" }, isPro: !!pro, profile: profil || { capital: 500 } };
@@ -719,35 +723,39 @@ const baseDonnees = (pays) => ({
   betting_decisions: () => ({ data: [{ id: 9, status: "pending", stake: 10, odds: 2, match_label: "X – Y", market: "X gagne", bookmaker: "winamax", created_at: new Date().toISOString() }], error: null }),
   subscriptions: () => ({ data: null, error: null }),
   pro_programmes: () => ({ data: [{ jour: AUJ, statut: "publie", mode: "ouvert", motif_vide: null, publie_at: new Date().toISOString() }], error: null }),
-  pro_paris: () => ({ data: [{ id: "p1", numero: 7, jour: AUJ, famille: "valeur", ligue: "Ligue 1", dom: "Lens", ext: "Nantes", coup_envoi: new Date(Date.now() + 5 * 3600e3).toISOString(), marche: "1", selection: "Lens gagne", cote_min: 2, cotes: { winamax: 2.1, betclic: 2.05 }, cote_vue_at: new Date().toISOString(), explication: "Texte du robot.", compo_voyant: null }], error: null }),
+  pro_paris: () => ({ data: [{ id: "p1", numero: 7, jour: AUJ, famille: "valeur", ligue: "Ligue 1", dom: "Lens", ext: "Nantes", coup_envoi: new Date(Date.now() + 5 * 3600e3).toISOString(), marche: "1", selection: "Lens gagne", selections: [], proba: 0.55, source_proba: "moteur v3", meilleure_cote: 2.1, meilleur_bookmaker: "winamax", cote_min: 2, cotes: { winamax: 2.1, betclic: 2.05 }, cote_vue_at: new Date().toISOString(), explication: "Texte du robot.", compo_voyant: null, publie_at: new Date().toISOString() }], error: null }),
   pro_tickets: () => ({ data: [{ jour: AUJ, statut: "note", decision_id: null }], error: null })
 });
 
 test("rendu reel : le tableau de bord Pro s'affiche sans planter (France), avec les tables du contrat", async () => {
   const { html, appels } = await rendreTableau({ pro: true, pays: "fr", donnees: baseDonnees("fr") });
   assert.match(html, /id="bAujourdhui"/, "le rendu s'est arrete (erreur JS ?)");
-  ["bParis", "bComparateur", "bGardeFou", "bStrategie", "bBientot"].forEach((id) => assert.match(html, new RegExp('id="' + id + '"'), id));
+  ["bParis", "bComparateur", "bGardeFou", "bStrategie", "bTelegram"].forEach((id) => assert.match(html, new RegExp('id="' + id + '"'), id));
+  // 03/10/2026 : plus de bloc « Bientot » ; le programme du jour = les selections du message Telegram.
+  assert.doesNotMatch(html, /id="bBientot"|[Bb]ientôt/);
+  assert.match(html, /Sélection : <b>Lens gagne<\/b>/);
+  assert.match(html, /Chance calculée par IASHARK : 55 %\./);
   // Controle des chiffres publics (30/09/2026) : ni « Mon bilan », ni « Ma semaine en image », ni bilan IASHARK.
   ["bBilan", "bSemaine", "bBilanIashark"].forEach((id) => assert.doesNotMatch(html, new RegExp('id="' + id + '"'), id));
   assert.match(html, /Lens – Nantes/);
   assert.match(html, /Winamax/);
   assert.match(html, /PRO-7/);
-  assert.match(html, /Pas encore disponible/, "qualite des cotes : bientot");
   assert.match(html, /1 dans ton journal et 1 dans Telegram/, "garde-fou : journal + tickets");
   const tables = appels.map((a) => a.table).sort();
-  assert.deepEqual([...new Set(tables)], ["betting_decisions", "pro_paris", "pro_preferences", "pro_programmes", "pro_tickets", "subscriptions"]);
+  assert.deepEqual([...new Set(tables)], ["betting_decisions", "pro_paris", "pro_preferences", "pro_programmes", "pro_tickets", "subscriptions", "user_preferences"]);
   appels.filter((a) => /^pro_/.test(a.table)).forEach((a) => {
     const sel = a.filtres.find((f) => f[0] === "select");
     assert.ok(sel && sel[1] && sel[1] !== "*", a.table + " : colonnes nommees");
   });
 });
 
-test("rendu reel : abonne Pro au Royaume-Uni = aucun bookmaker francais, ni cote, ni pari", async () => {
+test("rendu reel : abonne Pro au Royaume-Uni = les selections du message Telegram, sans aucun bookmaker francais ni cote", async () => {
   const { html } = await rendreTableau({ pro: true, pays: "gb", marche: "gb", donnees: baseDonnees("gb") });
   assert.match(html, /id="bGardeFou"/, "le rendu s'est arrete");
-  assert.match(html, /Le programme du jour n'est pas proposé dans ton pays/);
   ["Winamax", "Betclic", "NetBet", "PMU", "Unibet", "winamax"].forEach((n) => assert.doesNotMatch(html, new RegExp(n), n + " affiche hors de France"));
-  assert.doesNotMatch(html, /Lens – Nantes/);
+  // Le robot envoie le programme a tous les abonnes, sans cote hors pays ouvert (canal-pro-langues#teteSansPays).
+  assert.match(html, /Lens – Nantes/);
+  assert.doesNotMatch(html, /2,10|2\.10|id="bComparateur"/, "aucune cote, aucun comparateur");
 });
 
 test("rendu reel : compte gratuit = aucune table Pro lue, apercu fictif en France, rien annonce au Royaume-Uni", async () => {
@@ -764,7 +772,7 @@ test("rendu reel : tables Pro absentes (0040 pas encore appliquee) = valeurs par
   const donnees = { betting_decisions: () => ({ data: [], error: null }), subscriptions: () => ({ data: null, error: null }) };
   const { html } = await rendreTableau({ pro: true, pays: "fr", donnees });
   assert.match(html, /id="bAujourdhui"/);
-  assert.match(html, /Pas de programme publié pour l'instant/);
+  assert.match(html, /Ton programme arrive vers 9 h 30|Pas de sélection Pro aujourd’hui/);
   assert.match(html, /Règle ton espace en 2 minutes/, "reglages pas encore faits");
 });
 
@@ -823,7 +831,8 @@ test("rendu reel : /en/ sans reglages, gratuit comme Pro = aucun bookmaker, ni a
     assert.match(pro.html, /id="bGardeFou"/, dir + " Pro : le rendu s'est arrete");
     assert.deepEqual(optionsBookmakers(pro.html), [], dir + " Pro : bookmakers dans « Noter un pari »");
     assert.doesNotMatch(pro.html, BK_FR, dir + " Pro : bookmaker ou meilleure cote francaise");
-    assert.doesNotMatch(pro.html, /Lens – Nantes/, dir + " Pro : pari du programme francais");
+    // 03/10/2026 : les selections du message Telegram (le robot les envoie a tous), jamais une cote francaise.
+    assert.match(pro.html, /Lens – Nantes/, dir + " Pro : selections du programme");
     assert.doesNotMatch(pro.html, /id="bBientot"/, dir + " Pro : bloc « Bientot »");
     const dict = DICTS[MARCHES.build(dir).locale];
     assert.ok(pro.html.includes(dict.pro_space.sub_pro_closed), dir + " Pro : sous-titre sans « bientot »");
@@ -836,7 +845,8 @@ test("rendu reel : /en/ sans reglages, gratuit comme Pro = aucun bookmaker, ni a
   assert.match(fr.html, /id="bAujourdhui"/);
   const racine = await rendreTableau({ pro: true, dir: "", donnees: sansReglages() });
   assert.match(racine.html, /Lens – Nantes/);
-  assert.match(racine.html, /id="bBientot"/);
+  // 03/10/2026 : plus de bloc « Bientot » (tableau de bord du jour ouvert).
+  assert.doesNotMatch(racine.html, /id="bBientot"/);
   // Un abonne de /en/ qui a choisi la France dans le formulaire la garde.
   const choisi = await rendreTableau({ pro: true, dir: "en", donnees: baseDonnees("fr") });
   assert.match(choisi.html, /Winamax/);

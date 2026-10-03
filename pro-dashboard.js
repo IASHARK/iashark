@@ -46,7 +46,7 @@
   var M = window.IasharkProDashboardModel;
   var P = window.IasharkProPreferences;
   var sb = null, ctx = null, panneau = null;
-  var d = { prefs: null, prefsRemplies: false, decisions: [], tickets: [], refsParis: [], programme: null, abo: null, aboInconnu: false, offert: null, tousLesParis: false };
+  var d = { telegram: null, langue: null, parisBruts: [], prefs: null, prefsRemplies: false, decisions: [], tickets: [], refsParis: [], programme: null, abo: null, aboInconnu: false, offert: null, tousLesParis: false };
 
   /* ---------- utilitaires ---------- */
   function tr(k, vars) {
@@ -188,26 +188,82 @@
       + (pari.ref ? '<p class="mt-2 text-[11.5px] text-soft/80">' + esc(tr('pro_space.ref', { ref: pari.ref })) + '</p>' : '')
       + '</li>';
   }
+  /* « Ton programme du jour » (03/10/2026) : les selections Pro du jour, EXACTEMENT celles du
+     message Telegram (public.pro_paris, paris publies ET envoyes, RLS 0040), dans le meme rendu que
+     la page match (lib/selection-pro.js : selection, chance calculee et sa source, cote, N° PRO).
+     Les memes paris pour tous (plus de tri « hors de tes choix »). Cote : la meilleure chez SES
+     bookmakers de son pays, comme le message prive ; pays pas encore ouvert : jamais un operateur
+     d'un autre pays, la ligne « cote pas encore relevee » a la place (le robot ne lui en donne pas). */
+  function heureDeParis(date) {
+    try { return Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Paris', hour: '2-digit', hourCycle: 'h23' }).format(date)); }
+    catch (e) { return date.getUTCHours(); }
+  }
+  function ligneAffichee(brut, pari) {
+    var x = {}; Object.keys(brut).forEach(function (k) { x[k] = brut[k]; });
+    if (!paysOuvert()) { x.meilleure_cote = null; x.meilleur_bookmaker = null; return x; }
+    var r = M.pariPourMoi(pari, prefs().bookmakers, agreesDuPays(), prefs());
+    // Bookmaker montre : un des siens s'il a une cote, sinon le meilleur suivi de SON pays ;
+    // jamais un operateur d'un autre pays (le meilleur publie est celui de la France).
+    var choix = prefs().bookmakers.length && r.chezMoi ? r.chezMoi : (agreesDuPays().indexOf(brut.meilleur_bookmaker) !== -1 ? null : (r.marche || false));
+    if (choix === false) { x.meilleure_cote = null; x.meilleur_bookmaker = null; return x; }
+    if (choix) {
+      var autre = choix.id !== brut.meilleur_bookmaker;
+      x.meilleure_cote = choix.cote; x.meilleur_bookmaker = choix.id;
+      // Combine chez un autre bookmaker que le meilleur : la cote de chaque selection chez lui n'est pas connue.
+      if (autre && Array.isArray(x.selections) && window.IasharkSelectionPro && window.IasharkSelectionPro.estCombine(x)) {
+        x.selections = x.selections.map(function (j) { var y = {}; Object.keys(j || {}).forEach(function (k) { y[k] = j[k]; }); y.cote = null; return y; });
+      }
+    }
+    return x;
+  }
+  function boutonJouer(pari) {
+    var r = M.pariPourMoi(pari, prefs().bookmakers, agreesDuPays(), prefs());
+    if (r.retire) return '';
+    if (M.dejaNote(pari, d.decisions, d.tickets)) return '<p class="mt-3 inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-soft" data-deja-note="' + esc(pari.id) + '"><svg viewBox="0 0 24 24" class="h-3.5 w-3.5 fill-none stroke-current stroke-[2.4]" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19 7"/></svg>' + esc(tr('pro_space.played_already')) + '</p>';
+    if (commence(pari)) return '<p class="mt-3 text-[12.5px] text-soft">' + esc(tr('pro_space.started')) + '</p>';
+    return '<button type="button" data-jouer="' + esc(pari.id) + '" class="mt-3 inline-flex h-10 items-center gap-2 rounded-xl border border-cyan/40 px-4 text-[13.5px] font-bold text-cyan transition hover:bg-cyan/10"><svg viewBox="0 0 24 24" class="h-4 w-4 fill-none stroke-current stroke-[2.2]" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>' + esc(tr('pro_space.played_btn')) + '</button>';
+  }
+  function listeProgramme(paris) {
+    var S = window.IasharkSelectionPro;
+    if (!S) return '<ul class="mt-4 space-y-3">' + paris.map(function (p) { return lignePari(p, false); }).join('') + '</ul>';
+    var bruts = {};
+    (d.parisBruts || []).forEach(function (b) { if (b && b.id) bruts[String(b.id)] = b; });
+    var lignes = [];
+    // Meme ordre que le message Telegram : le numero PRO (attribue a la publication).
+    var num = function (p) { var b = bruts[String(p.id)]; return b && Number(b.numero) > 0 ? Number(b.numero) : 1e9; };
+    paris = paris.slice().sort(function (a, b) { return num(a) - num(b); });
+    var html = paris.map(function (pari) {
+      var b = bruts[String(pari.id)];
+      if (!b || !S.valide(b)) return '';
+      var x = ligneAffichee(b, pari);
+      lignes.push(x);
+      var tete = S.estCombine(x) ? '' : '<p class="ps-prog-match">' + esc(b.ligue || '') + (b.ligue ? ' · ' : '') + '<b>' + esc(b.dom || '') + ' – ' + esc(b.ext || '') + '</b>' + (b.coup_envoi ? ' · ' + esc(S.heure(b.coup_envoi)) : '') + '</p>';
+      return S.article(x, { nomBookmaker: nomBk }, tete, boutonJouer(pari));
+    }).join('');
+    return '<div class="ps-prog mt-4">' + html + S.sources(lignes) + '</div>';
+  }
   function blocAujourdhui() {
     var prog = d.programme || { etat: 'aucun', paris: [] };
     var paris = prog.paris || [];
-    var compte = paysOuvert() && paris.length ? '<span class="shrink-0 rounded-full border border-cyan/30 px-3 py-1 text-[12.5px] font-semibold text-cyan">' + esc(tr('pro_space.bets_count', { n: paris.length })) + '</span>' : '';
-    var contenu = titre(tr('pro_space.today_title'), tr('pro_space.today_sub'), compte);
-    // Pays pas encore ouvert : ni pari, ni cote, ni bookmaker (comme le robot).
-    if (!paysOuvert()) contenu += vide(tr('pro_space.country_closed'));
-    else if (prog.etat === 'aucun') contenu += vide(tr('pro_space.today_empty'));
-    // Jour publie sans pari : le texte du motif, rien d'autre (MOTIFS_VIDE du robot).
-    else if (prog.etat === 'vide') contenu += vide(tr('pro_space.motif_' + prog.motif));
-    else {
-      var s = M.selonMesChoix(paris, prefs());
+    var maintenant = new Date(), avantMidi = heureDeParis(maintenant) < 12;
+    var auj = M.jour(maintenant);
+    var compte = paris.length ? '<span class="shrink-0 rounded-full border border-cyan/30 px-3 py-1 text-[12.5px] font-semibold text-cyan">' + esc(tr('pro_space.bets_count', { n: paris.length })) + '</span>' : '';
+    var contenu = titre(tr('dashboard_pro.prog_title'), tr('dashboard_pro.prog_sub'), compte);
+    // Programme du jour pas encore publie (ou publie mais pas encore envoye) : il arrive vers 9 h 30.
+    var attente = avantMidi && (prog.etat === 'aucun' || prog.jour !== auj || (prog.etat === 'vide' && prog.jour === auj));
+    if (prog.etat === 'paris' && prog.jour !== auj) {
+      contenu += vide(tr('dashboard_pro.prog_wait'))
+        + '<p class="mt-5 text-[13px] font-semibold text-ink">' + esc(tr('dashboard_pro.prog_earlier')) + '</p>' + listeProgramme(paris);
+    } else if (prog.etat === 'paris') {
+      // Garde-fou atteint (meme calcul que le bloc « Mon garde-fou ») : on le rappelle au-dessus du programme.
       var g = M.gardeFou(prefs(), d.decisions, new Date(), null, d.tickets, d.refsParis);
       if (g.atteint) contenu += '<p class="mt-4 rounded-xl border border-amber-300/30 bg-amber-300/[.06] px-4 py-3 text-[13.5px] text-amber-100">' + esc(tr('pro_space.guard_stop_today')) + '</p>';
-      contenu += '<ul class="mt-4 space-y-3">' + s.pourMoi.map(function (p) { return lignePari(p, false); }).join('') + '</ul>';
-      if (s.horsChoix.length) {
-        contenu += '<p class="mt-5 text-[13px] font-semibold text-ink">' + esc(tr('pro_space.outside_choices')) + '</p><p class="text-[12.5px] text-soft">' + esc(tr('pro_space.outside_choices_text')) + '</p>'
-          + '<ul class="mt-3 space-y-3">' + s.horsChoix.map(function (p) { return lignePari(p, true); }).join('') + '</ul>';
-      }
+      contenu += listeProgramme(paris);
     }
+    else if (attente) contenu += vide(tr('dashboard_pro.prog_wait'));
+    // Jour publie sans pari : le texte du motif (MOTIFS_VIDE du robot).
+    else if (prog.etat === 'vide') contenu += vide(tr('pro_space.motif_' + prog.motif));
+    else contenu += vide(tr('dashboard_pro.prog_none') + ' ' + tr('dashboard_pro.prog_none_sub'));
     return bloc('bAujourdhui', 'order-1', 'forte', contenu);
   }
   function apercuAujourdhui() {
@@ -323,6 +379,8 @@
     if (!agrees.length) return bloc('bComparateur', 'order-7', 'carte', contenu + vide(tr('pro_space.comparator_country_soon')));
     var paris = (d.programme && d.programme.paris) || [];
     var blocs = paris.map(function (pari) {
+      // Combine ou ticket (plusieurs matchs) : pas de ligne de comparaison (03/10/2026).
+      if (!pari.match || /^\s*–\s*$/.test(pari.match)) return '';
       var min = Number(pari.cote_min);
       var lignes = Object.keys(pari.cotes || {}).filter(function (id) { return agrees.indexOf(id) !== -1; })
         .map(function (id) { return { id: id, cote: Number(pari.cotes[id].cote) }; })
@@ -350,36 +408,84 @@
     return bloc('bComparateur', 'order-7', 'carte', contenu);
   }
 
-  /* ---------- 5. Ma strategie (reglages de pro_preferences) ---------- */
-  function puce(t) { return '<li class="rounded-full bg-white/[.06] px-2.5 py-1 text-[12.5px]">' + esc(t) + '</li>'; }
+  /* ---------- 5. Mes reglages (public.pro_preferences : la MEME ligne que lit le robot Telegram,
+     supabase/functions/telegram-bot/index.ts « Une seule source : pro_preferences ») ---------- */
+  var NOMS_LANGUES = { fr: 'Français', en: 'English', es: 'Español', de: 'Deutsch', it: 'Italiano', pt: 'Português' };
+  function nomsCompetitions(cles) {
+    var liste = (P.COMPETITIONS_PRO && P.COMPETITIONS_PRO.liste) || [];
+    var fr = !(window.I18N && window.I18N.locale) || window.I18N.locale === 'fr';
+    return (cles || []).map(function (k) { var c = liste.filter(function (x) { return x.cle === k; })[0]; return c ? (fr ? c.nom : c.nom_en) : null; }).filter(Boolean);
+  }
+  function ligneReglage(libelle, valeur) {
+    return '<p class="flex flex-wrap justify-between gap-x-3 gap-y-0.5 border-t border-hairline py-2.5 text-[13px] first:border-t-0"><span class="text-soft">' + esc(libelle) + '</span><span class="min-w-0 text-right font-semibold text-ink">' + esc(valeur) + '</span></p>';
+  }
   function blocStrategie() {
-    // 03/10/2026 (decision de Clement) : plus de choix de strategie ni de types de paris (les memes paris
-    // pour tous) : ce bloc montre seulement les reglages de l'abonne (bookmakers, alertes, Telegram).
     var p = prefs();
-    var contenu = titre(tr('pro_onboarding.edit_title'), null, lienAction(lien('accueil-pro.html?modifier=1'), tr('pro_space.strategy_edit')));
+    var contenu = titre(tr('dashboard_pro.settings_title'), tr('dashboard_pro.settings_robot'), lienAction(lien('accueil-pro.html?modifier=1'), tr('dashboard_pro.settings_edit')));
     if (!d.prefsRemplies) contenu += '<p class="mt-3 text-[13.5px] text-soft">' + esc(tr('pro_onboarding.account_not_set')) + '</p>';
     // Bookmakers : seulement ceux de son pays ; hors de France, aucun nom.
     var bks = paysOuvert() ? (p.bookmakers.length ? p.bookmakers.map(nomBk).filter(Boolean).join(', ') : tr('pro_space.strategy_all_bookmakers')) : tr('pro_space.country_closed');
     var alertes = p.alertes.map(function (a) { return tr('pro_space.alert_' + a); });
-    contenu += '<p class="mt-4 text-[12.5px] text-soft">' + esc(tr('pro_space.strategy_bookmakers')) + ' : <span class="text-ink">' + esc(bks) + '</span></p>';
-    // Alertes et programme dans Telegram (« bientot ») : seulement la ou ils arriveront.
-    if (paysOuvert()) contenu += '<p class="mt-1 text-[12.5px] text-soft">' + esc(tr('pro_space.strategy_alerts')) + ' : <span class="text-ink">' + esc(alertes.length ? alertes.join(', ') : tr('pro_space.strategy_alerts_none')) + '</span></p>'
-      + '<p class="mt-1 text-[12.5px] text-soft">' + esc(tr('pro_space.strategy_telegram')) + ' : <span class="text-ink">' + esc(p.programme_prive ? tr('pro_space.telegram_on') : tr('pro_space.telegram_off')) + '</span></p>';
-    return bloc('bStrategie', 'order-8', 'nue', contenu);
+    var comps = nomsCompetitions(p.competitions);
+    var lg = d.langue || (window.I18N && window.I18N.locale ? String(window.I18N.locale).slice(0, 2) : 'fr');
+    contenu += '<div class="mt-3">'
+      + ligneReglage(tr('dashboard_pro.settings_language'), NOMS_LANGUES[lg] || lg)
+      + ligneReglage(tr('dashboard_pro.settings_country'), tr('pro_onboarding.country_' + p.pays))
+      + ligneReglage(tr('dashboard_pro.settings_bookmakers'), bks)
+      + ligneReglage(tr('dashboard_pro.settings_competitions'), comps.length ? comps.join(', ') : tr('dashboard_pro.settings_all'))
+      + (paysOuvert() ? ligneReglage(tr('dashboard_pro.settings_alerts'), alertes.length ? alertes.join(', ') : tr('dashboard_pro.settings_none')) : '')
+      + ligneReglage(tr('dashboard_pro.settings_time'), p.heure_envoi == null ? tr('dashboard_pro.settings_time_asap') : tr('dashboard_pro.settings_time_at', { h: p.heure_envoi }))
+      + '</div>';
+    return bloc('bStrategie', 'order-3', 'carte', contenu);
   }
 
-
-  /* ---------- 7. Bientot (annonce, jamais un chiffre sans donnee) ----------
-     La qualite des cotes n'a pas encore de source (cote de fin pas relevee
-     pour le journal) ; les alertes n'existent que dans Telegram. */
-  function blocBientot() {
-    var items = [[tr('pro_space.quality_title'), tr('pro_space.quality_soon')], [tr('pro_space.alerts_title'), tr('pro_space.locked_alerts')]];
-    var contenu = '<h2 class="flex items-center gap-2 text-[16px] font-bold text-ink"><svg viewBox="0 0 24 24" class="h-4 w-4 fill-none stroke-current stroke-[1.9] text-soft" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.8V12l2.9 1.9"/></svg>' + esc(tr('pro_space.soon')) + '</h2>'
-      + '<ul class="mt-3 space-y-3">' + items.map(function (it) {
-        return '<li><p class="text-[14px] font-semibold text-ink">' + esc(it[0]) + '</p><p class="mt-0.5 text-[12.5px] leading-relaxed text-soft">' + esc(it[1]) + '</p></li>';
-      }).join('') + '</ul>';
-    return bloc('bBientot', 'order-10', 'nue', contenu);
+  /* ---------- 6. Mes messages Telegram ----------
+     Etat (relie ou pas) : fonction telegram-bot, action « statut » (lecture seule, aucun code cree).
+     Bouton « Mes messages Pro » : le MEME appel que la pastille et la page Compte (action vip-link :
+     t.me/<robot>?start=<code> si le compte n'est pas encore relie, sinon t.me/<robot>). */
+  function blocTelegram() {
+    var s = d.telegram;
+    var badge = s === true ? '<span class="shrink-0 rounded-full bg-cyan/[.12] px-2.5 py-1 text-[12px] font-semibold text-cyan">' + esc(tr('dashboard_pro.tg_badge_on')) + '</span>'
+      : s === false ? '<span class="shrink-0 rounded-full bg-white/[.06] px-2.5 py-1 text-[12px] font-semibold text-soft">' + esc(tr('dashboard_pro.tg_badge_off')) + '</span>' : '';
+    var texte = s === true ? tr('dashboard_pro.tg_linked') : s === false ? tr('dashboard_pro.tg_not_linked') : tr('dashboard_pro.tg_unknown');
+    var contenu = titre(tr('dashboard_pro.tg_title'), null, badge)
+      + '<p class="mt-2 text-[13.5px] leading-relaxed text-soft">' + esc(texte) + '</p>'
+      + '<button type="button" id="mesMessagesPro" class="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-cyan px-4 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90"><svg viewBox="0 0 24 24" class="h-4 w-4 fill-none stroke-current stroke-2" aria-hidden="true"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>' + esc(tr('dashboard_pro.tg_cta')) + '</button>'
+      + '<p id="msgTelegram" class="mt-2 text-[12.5px] text-red-300" hidden></p>';
+    return bloc('bTelegram', 'order-2', 'carte', contenu);
   }
+  function jetonSession() {
+    return Promise.resolve(sb.auth && sb.auth.getSession ? sb.auth.getSession() : null).then(function (s) { return s && s.data && s.data.session ? s.data.session.access_token : null; });
+  }
+  function appelRobot(action) {
+    var App = window.IasharkApp;
+    if (!App || !App.url || typeof fetch !== 'function') return Promise.resolve(null);
+    return jetonSession().then(function (jeton) {
+      if (!jeton) return null;
+      return fetch(App.url + '/functions/v1/telegram-bot', { method: 'POST', headers: { apikey: App.key, Authorization: 'Bearer ' + jeton, 'Content-Type': 'application/json' }, body: JSON.stringify({ action: action }) })
+        .then(function (r) { return r.json(); });
+    }).catch(function () { return null; });
+  }
+  function lireStatutTelegram() {
+    return appelRobot('statut').then(function (j) { d.telegram = j && j.ok === true && typeof j.relie === 'boolean' ? j.relie : null; });
+  }
+  function ouvrirMessagesPro() {
+    var b = document.getElementById('mesMessagesPro'), m = document.getElementById('msgTelegram');
+    if (!b || b.getAttribute('aria-busy') === 'true') return;
+    var avant = b.innerHTML;
+    b.setAttribute('aria-busy', 'true'); b.textContent = tr('dashboard_pro.tg_opening');
+    appelRobot('vip-link').then(function (j) {
+      // Seul un lien t.me est suivi (jamais une adresse libre), comme la pastille.
+      if (j && typeof j.robot_url === 'string' && /^https:\/\/t\.me\/[A-Za-z0-9_]+(\?start=[A-Za-z0-9_-]+)?$/.test(j.robot_url)) { location.href = j.robot_url; return; }
+      throw new Error('robot');
+    }).catch(function () {
+      b.removeAttribute('aria-busy'); b.innerHTML = avant;
+      if (m) { m.hidden = false; m.textContent = tr('dashboard_pro.tg_error'); }
+    });
+  }
+
+  /* ---------- 7. (retire le 03/10/2026) « Bientot » : le programme du jour, le journal et le
+     garde-fou existent ; plus aucune annonce « bientot » dans le tableau de bord. ---------- */
 
   /* ---------- Gratuit : ce que Pro ajoute, en une seule carte ----------
      Tout ce qui n'existe pas encore dit « Bientot » (textes locked_*). Le
@@ -443,7 +549,7 @@
       // Hors de France : ni comparateur, ni « Bientot » (aucune promesse qui
       // n'y serait pas tenue ; contre-controle, ronde 4).
       gauche = blocAujourdhui() + blocParis() + (paysOuvert() ? blocComparateur() : '');
-      droite = blocGardeFou() + blocStrategie() + (paysOuvert() ? blocBientot() : '');
+      droite = blocTelegram() + blocStrategie() + blocGardeFou();
     } else {
       // Gratuit : un apercu floute (le programme du jour, exemple FICTIF) et
       // UNE carte « avec Pro » pour le reste. Le programme (et ses
@@ -524,6 +630,7 @@
   function brancher() {
     var b;
     if ((b = document.getElementById('noterPari'))) b.addEventListener('click', function () { ouvrirDialogue(); });
+    if ((b = document.getElementById('mesMessagesPro'))) b.addEventListener('click', ouvrirMessagesPro);
     if ((b = document.getElementById('fpSave'))) b.addEventListener('click', enregistrerPari);
     if ((b = document.getElementById('basculerParis'))) b.addEventListener('click', function () { d.tousLesParis = !d.tousLesParis; rendre(); });
     panneau.querySelectorAll('[data-regler]').forEach(function (el) { el.addEventListener('click', function () { regler(el.getAttribute('data-id'), el.getAttribute('data-regler')); }); });
@@ -562,7 +669,13 @@
         sb.from('pro_tickets').select(M.COLONNES_TICKETS).eq('user_id', uid).eq('statut', 'note').order('created_at', { ascending: false }).limit(1000)
       );
     }
-    var r = await Promise.all(base.map(function (q) { return q.then(function (x) { return x; }, function () { return { error: true }; }); }));
+    // Langue du compte (public.user_preferences.language, lib/langue-compte.js) : en dernier.
+    var iLangue = base.length;
+    base.push(sb.from('user_preferences').select('language').eq('user_id', uid).maybeSingle());
+    var statut = estPro() ? lireStatutTelegram() : Promise.resolve();
+    var r = await Promise.all(base.map(function (q) { return Promise.resolve(q).then(function (x) { return x; }, function () { return { error: true }; }); }));
+    var lg = r[iLangue] && !r[iLangue].error && r[iLangue].data && r[iLangue].data.language;
+    d.langue = typeof lg === 'string' && /^(fr|en|es|de|it|pt)$/.test(lg) ? lg : null;
     var ligne = (r[0] && !r[0].error && r[0].data) || null;
     // Formulaire rempli = la ligne existe (contrat : pas de « termine le »).
     d.prefsRemplies = !!ligne;
@@ -577,10 +690,12 @@
       var progs = (r[3] && !r[3].error && r[3].data) || [];
       var paris = (r[4] && !r[4].error && r[4].data) || [];
       d.programme = M.programmeDuJour(progs, paris, new Date());
+      d.parisBruts = paris;
       d.tickets = (r[5] && !r[5].error && r[5].data) || [];
       // pari_id d'un ticket -> « PRO-7 » : un pari note ici ET dans Telegram compte une fois.
       d.refsParis = paris.map(function (x) { return { id: x.id, ref: x.numero ? 'PRO-' + x.numero : null }; });
       await refsDesTickets();
+      await statut;
     } else {
       try {
         var home = await fetch('/data-home.json', { cache: 'no-cache' }).then(function (x) { return x.ok ? x.json() : null; });

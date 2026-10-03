@@ -351,15 +351,25 @@
   // « Bientôt : le Canal Pro Telegram ». rejoindreVip() reste pret pour l'ouverture.
   // Interrupteur d'ouverture (window.IASHARK_OUVERTURE.canalPro), jamais pose par le site avant 0040/0041.
   var CANAL_PRO_OUVERT = !!(window.IASHARK_OUVERTURE && window.IASHARK_OUVERTURE.canalPro === true);
+  /* Deux robots (03/10/2026, decision de Clement) : le robot Pro envoie seulement ; les
+     questions vont au robot IASHARK Contact. Son nom : config/telegram.json (« contact ») ;
+     config/ n'est jamais publie (scripts/build-public.js), la valeur est donc recopiee ici et
+     tests/telegram-deux-robots.test.mjs verifie qu'elle est identique. */
+  var ROBOT_CONTACT = 'IASHARK_Contact_Bot';
+  function ligneContact() {
+    return '<p class="mt-4 max-w-xl text-[13px] leading-relaxed text-soft">' + tr('compte_page.contact_telegram_prefix', 'Une question ? Écrivez à ')
+      + '<a data-robot-contact href="https://t.me/' + ROBOT_CONTACT + '" target="_blank" rel="noopener" class="font-semibold text-cyan transition hover:underline">IASHARK Contact</a> '
+      + tr('compte_page.contact_telegram_suffix', 'sur Telegram : l’équipe vous répond dans cette conversation.') + '</p>';
+  }
   function carteVip() {
     if (!CANAL_PRO_OUVERT) {
       return carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.vip_soon_heading', 'Vos messages Pro sur Telegram') + '</h2>'
-        + '<p class="mt-3 max-w-xl text-[14px] leading-relaxed text-soft">' + tr('compte_page.vip_soon', 'Bientôt : vos messages Pro sur Telegram, en privé (le programme du jour, vos alertes, vos débriefs).') + '</p>', 'mt-4');
+        + '<p class="mt-3 max-w-xl text-[14px] leading-relaxed text-soft">' + tr('compte_page.vip_soon', 'Bientôt : vos messages Pro sur Telegram, en privé (le programme du jour, vos alertes, vos débriefs).') + '</p>' + ligneContact(), 'mt-4');
     }
     return carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.vip_heading', 'Vos messages Pro sur Telegram (en privé)') + '</h2>'
       + '<p class="mt-3 max-w-xl text-[14px] leading-relaxed text-soft">' + tr('compte_page.vip_detail', 'Inclus dans votre abonnement Pro : chaque jour où il y a un programme, il vous arrive en privé sur Telegram, dans votre langue, avec vos alertes et vos débriefs. Pas de canal à rejoindre : un clic ouvre votre robot IASHARK et relie votre compte, c’est tout.') + '</p>'
       + '<div class="mt-5">' + boutonPrimaire('vipTelegram', tr('compte_page.vip_cta', 'Ouvrir mon robot sur Telegram')) + '</div>'
-      + '<p id="msgVip" hidden aria-live="polite"></p>', 'mt-4');
+      + '<p id="msgVip" hidden aria-live="polite"></p>' + ligneContact(), 'mt-4');
   }
   async function rejoindreVip() {
     var relacher = occuper($('vipTelegram'), tr('compte_page.opening_label', 'Ouverture…'));

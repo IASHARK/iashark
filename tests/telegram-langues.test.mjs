@@ -255,7 +255,8 @@ test("robot personnel : l'abonne espagnol recoit les reponses en espagnol ; /idi
     assert.match(texte(), /^Done: from now on I talk to you in English/);
     // Une personne non reliee, Telegram en espagnol : accueil en espagnol.
     await r.maj({ message: { message_id: 5, chat: { id: 999, type: "private" }, from: { id: 999, language_code: "es" }, text: "/start" } });
-    assert.match(r.envoyes.at(-1).corps.text, /^Hola, aquí el equipo IASHARK/);
+    assert.match(r.envoyes.at(-1).corps.text, /^Hola, aquí IASHARK Pro: este robot envía/);
+    assert.match(r.envoyes.at(-1).corps.text, /¿Una pregunta\? Escríbenos a contact@iashark\.com$/, "sin robot Contact: el e-mail");
   } finally { globalThis.fetch = fetchAvant; }
 });
 

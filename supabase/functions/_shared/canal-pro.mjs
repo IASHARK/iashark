@@ -1787,11 +1787,7 @@ export function appliquerReglage(prefs, data) {
 export const AIDE_ROBOT = "Je suis ton robot IASHARK. Ce que je sais faire :\n"
   + "• /programme : ton programme du jour, avec tes bookmakers\n"
   + "• /reglages : tes bookmakers, tes alertes, ton garde-fou\n"
-  + "• /journal : les paris que tu as notés aujourd'hui\n"
   + "• /lotofoot : notre grille Loto Foot à tenter, quand il y en a une\n"
-  + "• Écris-moi ton ticket en texte (« 10 € sur Torino gagne à 1,65 chez Betclic ») : je le note dans ton journal. Un combiné aussi (« Real Madrid + Bayern à 2,05 chez Winamax ») : je reconnais le combiné du jour.\n"
-  + "• Au tabac, écris la cote que tu vois (« 1,55 au tabac ») : je te donne la meilleure cote relevée chez les agréés pour ce pari.\n"
-  + "• /langue : changer de langue (Español, English, Deutsch, Italiano, Português)\n"
-  + "• Tout autre message part à l'équipe IASHARK, qui te répond ici.";
+  + "• /langue : changer de langue (Español, English, Deutsch, Italiano, Português)";
 /** Aide du robot dans la langue de l'abonne. */
 export const aideRobot = (lang = "fr") => (estFrancais(lang) ? AIDE_ROBOT : textes(lang).aide);

@@ -110,26 +110,29 @@ const PREMIUM_FIELDS = [
   "marches_panneau", "sim_resume", "jumeaux", "premier_but", "v3_premiers_buteurs",
 ];
 
-// Un match marque is_free par le pipeline est l'offre d'appel du jour : ses
-// champs premium restent lisibles par tout le monde, y compris un visiteur
-// non authentifie. C'est le seul cas ou on ne retire rien.
+// Un match marque is_free par le pipeline est l'offre d'appel du jour. Depuis le
+// 04/10/2026 (decision de Clement, avocat du diable point 6), ses champs payants ne
+// sont PLUS dans les fichiers publics : un visiteur sans compte ne recoit rien de
+// payant (apercu flou), un COMPTE CONNECTE (gratuit compris) recoit ici son analyse
+// complete, relue dans match_premium_data, sauf CHAMPS_PRO_SEULEMENT.
 function estGratuit(m: Record<string, unknown>): boolean {
   return m && m.is_free === true;
 }
 
-// Reserves aux Pro SANS EXCEPTION, meme sur le match offert (decision de Clement,
-// 29/09/2026, S2) : la simulation par tranches de 15 minutes. Copie de
-// lib/premium-fields.js#PRO_ONLY_FIELDS (tests/simulation-15min-visibility.test.js).
-// 30/09/2026 : detail des Stats IASHARK (stats_iashark), meme regle.
-// 30/09/2026 (soir) : « Notre lecture du match » (lecture_match), meme regle.
-// 04/10/2026 : panneau « Marches » et ses sources (marches_panneau, v3_marches, marches_flux),
-// Pro seulement meme sur le match offert (tests/tickets-du-jour-contrat.test.js : meme liste).
-// 04/10/2026 : « Qui ouvre le score ? » (premier_but) et premier buteur (v3_premiers_buteurs).
-// 04/10/2026 (avocat du diable, point 5) : « 10 000 fois » (sim_resume) et jumeaux (jumeaux).
-const CHAMPS_PRO_SEULEMENT = ["sim_15min", "stats_iashark", "lecture_match", "marches_panneau", "v3_marches", "marches_flux", "premier_but", "v3_premiers_buteurs", "sim_resume", "jumeaux"];
+// Reserves aux Pro SANS EXCEPTION, meme sur le match offert. Copie de
+// lib/premium-fields.js#PRO_ONLY_FIELDS (tests/premium-fields-sync.test.js,
+// tests/tickets-du-jour-contrat.test.js : meme liste). Decision de Clement du 04/10/2026 :
+// sur le match offert, un compte gratuit connecte voit TOUT (10 000 fois, film, qui ouvre
+// le score, « Et si », joueurs, arbitre, lecture du match) sauf le panneau « Marches » et
+// ses sources (marches_panneau, v3_marches, marches_flux). Les anciens champs Pro seulement
+// du match offert (sim_15min, stats_iashark, lecture_match, premier_but, v3_premiers_buteurs,
+// sim_resume, jumeaux) lui sont rendus. mise, kelly, vbet : jamais (NEVER_PUBLIC_FIELDS).
+const CHAMPS_PRO_SEULEMENT = ["marches_panneau", "v3_marches", "marches_flux"];
+const JAMAIS_HORS_PRO = ["mise", "kelly", "vbet"];
 function sansChampsPro(m: Record<string, unknown>): Record<string, unknown> {
   const copy = { ...m };
   for (const f of CHAMPS_PRO_SEULEMENT) delete copy[f];
+  for (const f of JAMAIS_HORS_PRO) delete copy[f];
   return copy;
 }
 
@@ -178,18 +181,14 @@ function estTermine(m: Record<string, unknown>): boolean {
 }
 
 // run_output public (miroir de lib/public-run-output.js) : garde-fou si un
-// data.json ancien portait encore la SAFE_PICK d'un match payant, les joueurs
-// du top buteurs ou les jambes des combines.
-function runOutputPublic(ro: unknown, matchs: Record<string, unknown>[]): unknown {
+// data.json ancien portait encore la SAFE_PICK d'un match (offert compris depuis le
+// 04/10/2026), les joueurs du top buteurs ou les jambes des combines.
+function runOutputPublic(ro: unknown, _matchs: Record<string, unknown>[]): unknown {
   if (!ro || typeof ro !== "object") return ro;
-  const libres = new Set(matchs.filter(estGratuit).map((m) => String(m.id)));
   const copy = { ...(ro as Record<string, unknown>) };
   const sp = copy.safe_pick as Record<string, unknown> | null | undefined;
   if (sp && typeof sp === "object") {
-    const fid = (sp.fixture as { fixture_id?: unknown } | undefined)?.fixture_id;
-    if (!(fid != null && libres.has(String(fid)))) {
-      copy.safe_pick = { generated_at: sp.generated_at ?? null, status: sp.status ?? null, evaluated_count: sp.evaluated_count ?? null, redacted: true };
-    }
+    copy.safe_pick = { generated_at: sp.generated_at ?? null, status: sp.status ?? null, evaluated_count: sp.evaluated_count ?? null, redacted: true };
   }
   const top = copy.top5_scorers as Record<string, unknown> | null | undefined;
   if (top && typeof top === "object") {
@@ -211,12 +210,75 @@ const CORS_HEADERS = {
 
 const PREMIUM_COLUMNS = "fixture_id,kelly,edge,verdict_shark,facteur_x,dropping_odds,player_markets,pari_rec,cote_rec,model_probability,markets_compared,raw_response,market_id,marche";
 
+// Lignes match_premium_data des matchs demandes, par fixture_id (repli sans la colonne
+// premium_fields si la migration 0020 manque). Erreur de lecture : {} (aucun enrichissement).
+async function lirePremium(supabase: ReturnType<typeof createClient>, ids: unknown[]): Promise<Record<string, Record<string, unknown>>> {
+  if (!ids.length) return {};
+  // Type explicite : les deux select() n'ont pas le meme type infere.
+  let q: { data: unknown; error: { message: string } | null } =
+    await supabase.from("match_premium_data").select(PREMIUM_COLUMNS + ",premium_fields").in("fixture_id", ids);
+  if (q.error) {
+    // Migration 0020 pas encore appliquee : premium_fields est alors lu
+    // dans raw_response.premium_fields (repli du pipeline).
+    console.warn("premium_fields indisponible, lecture sans la colonne :", q.error.message);
+    q = await supabase.from("match_premium_data").select(PREMIUM_COLUMNS).in("fixture_id", ids);
+  }
+  if (q.error) {
+    console.error("match_premium_data query failed:", q.error.message);
+    return {};
+  }
+  return Object.fromEntries(((q.data ?? []) as Record<string, unknown>[]).map((r) => [String(r.fixture_id), r]));
+}
+
+// Match public + sa ligne premium : ce que voit un abonne (et un compte connecte sur le
+// match offert, avant sansChampsPro). Jamais rien venu du navigateur.
+function avecPremium(m: Record<string, unknown>, premium: Record<string, unknown>, detailFields: Set<string>): Record<string, unknown> {
+  const raw = premium.raw_response as { narrative_i18n?: Record<string, unknown>; premium_fields?: Record<string, unknown> } | null;
+  const etendus = (premium.premium_fields ?? raw?.premium_fields ?? null) as Record<string, unknown> | null;
+  const enrichi: Record<string, unknown> = { ...m };
+  if (etendus && typeof etendus === "object") {
+    for (const f of PREMIUM_FIELDS) {
+      if (!(f in etendus)) continue;
+      // Match de liste (detail_omitted) : on ne regonfle pas les champs de detail.
+      if (m.detail_omitted === true && detailFields.has(f)) continue;
+      enrichi[f] = etendus[f];
+    }
+  }
+  // conf (note sur 10 = model_probability / 10, premium depuis le 15/09/2026) :
+  // lignes ecrites avant ce changement sans conf dans premium_fields. Meme
+  // formule que le pipeline ; sans probabilite (pas de pari), pas de note.
+  if (enrichi.conf == null && premium.model_probability != null && Number.isFinite(Number(premium.model_probability))) {
+    enrichi.conf = Math.round(Number(premium.model_probability)) / 10;
+  }
+  return {
+    ...enrichi,
+    kelly: premium.kelly ?? null,
+    edge: premium.edge ?? null,
+    verdict_shark: premium.verdict_shark ?? null,
+    facteur_x: premium.facteur_x ?? null,
+    facteur_x_i18n: raw?.narrative_i18n?.facteur_x_i18n ?? null,
+    verdict_shark_i18n: raw?.narrative_i18n?.verdict_shark_i18n ?? null,
+    dropping_odds: premium.dropping_odds ?? null,
+    player_markets: premium.player_markets ?? null,
+    // Le pari recommande revient ici, depuis la table protegee. On ne fait jamais
+    // confiance a ce qui pourrait trainer dans un fichier public.
+    pari_rec: premium.pari_rec ?? m.pari_rec ?? null,
+    cote_rec: premium.cote_rec ?? m.cote_rec ?? null,
+    model_probability: premium.model_probability ?? m.model_probability ?? null,
+    markets_compared: premium.markets_compared ?? m.markets_compared ?? null,
+    market_id: premium.market_id ?? m.market_id ?? null,
+    marche: premium.marche ?? m.marche ?? null,
+  };
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: CORS_HEADERS });
   }
 
   let isPro = false;
+  // Compte connecte (jeton valide), Pro ou non : seul lui recoit l'analyse du match offert.
+  let connecte = false;
   const authHeader = req.headers.get("Authorization") || "";
   const jwt = authHeader.replace(/^Bearer\s+/i, "");
   const supabase = createClient(SUPA_URL, SERVICE_KEY);
@@ -225,6 +287,7 @@ Deno.serve(async (req: Request) => {
     try {
       const { data: userData } = await supabase.auth.getUser(jwt);
       if (userData?.user) {
+        connecte = true;
         const { data: row } = await supabase
           .from("users")
           .select("plan,role")
@@ -236,6 +299,7 @@ Deno.serve(async (req: Request) => {
       }
     } catch (_e) {
       isPro = false;
+      connecte = false;
     }
   }
   // Pas de bypass "phase de test" ici : cette fonction decide un vrai acces a
@@ -255,9 +319,11 @@ Deno.serve(async (req: Request) => {
   }
 
   const matchs = Array.isArray(data.matchs) ? (data.matchs as Record<string, unknown>[]) : [];
+  const detailFields = new Set(Array.isArray(data.detail_fields) ? (data.detail_fields as string[]) : []);
 
-  // Non-abonne (anonyme ou compte gratuit) : aucun champ premium, jamais,
-  // meme s'il trainait dans un fichier public (ancien commit, transition).
+  // Non-abonne (anonyme ou compte gratuit) : aucun champ premium, jamais, meme
+  // s'il trainait dans un fichier public (ancien commit, transition), SAUF le match
+  // offert pour un compte connecte (relu dans match_premium_data, sans le panneau Marches).
   if (!isPro) {
     // Seul le match TERMINE explicitement demande est enrichi : la liste
     // d'accueil n'a besoin d'aucun champ payant.
@@ -269,6 +335,11 @@ Deno.serve(async (req: Request) => {
     // le coup de sifflet (seul le match offert du jour reste ouvert). Le verdict
     // gagne/perdu reste public via l'historique, sans l'analyse.
     const ouvert = false && !!(demande && estTermine(demande));
+    // Match offert, COMPTE CONNECTE seulement (04/10/2026) : son analyse complete relue dans
+    // match_premium_data (jamais dans un fichier public), sans les champs Pro seulement.
+    // Visiteur sans compte : rien de payant, meme sur le match offert (apercu flou).
+    const offerts = connecte ? matchs.filter(estGratuit).map((m) => m.id).filter((id) => id != null) : [];
+    const premiumOffert = await lirePremium(supabase, offerts);
     let premiumTermine: Record<string, Record<string, unknown>> = {};
     if (ouvert && demande) {
       const q = await supabase.from("match_premium_data")
@@ -277,7 +348,12 @@ Deno.serve(async (req: Request) => {
       else premiumTermine = Object.fromEntries(((q.data ?? []) as Record<string, unknown>[]).map((r) => [String(r.fixture_id), r]));
     }
     data.matchs = matchs.map((m) => {
-      if (estGratuit(m)) return sansChampsPro(m); // analyse offerte du jour, sans la simulation (Pro)
+      if (estGratuit(m)) {
+        const premium = premiumOffert[String(m.id)];
+        // Sans compte, ou sans ligne premium : aucune analyse, jamais reconstituee depuis un fichier public.
+        if (!connecte || !premium) return retirerPremium(m);
+        return sansChampsPro(avecPremium(retirerPremium(m), premium, detailFields));
+      }
       if (ouvert && String(m.id) === portee.id) {
         const premium = premiumTermine[String(m.id)];
         // Sans ligne premium, le match reste sans analyse : jamais reconstituee
@@ -315,66 +391,12 @@ Deno.serve(async (req: Request) => {
   // match_premium_data, plutot que de faire confiance a quoi que ce soit qui
   // viendrait du navigateur.
   const fixtureIds = matchs.map((m) => m.id).filter((id) => id != null);
-  let premiumById: Record<string, Record<string, unknown>> = {};
-  if (fixtureIds.length) {
-    // Type explicite : les deux select() n'ont pas le meme type infere.
-    let q: { data: unknown; error: { message: string } | null } =
-      await supabase.from("match_premium_data").select(PREMIUM_COLUMNS + ",premium_fields").in("fixture_id", fixtureIds);
-    if (q.error) {
-      // Migration 0020 pas encore appliquee : premium_fields est alors lu
-      // dans raw_response.premium_fields (repli du pipeline).
-      console.warn("premium_fields indisponible, lecture sans la colonne :", q.error.message);
-      q = await supabase.from("match_premium_data").select(PREMIUM_COLUMNS).in("fixture_id", fixtureIds);
-    }
-    if (q.error) {
-      console.error("match_premium_data query failed:", q.error.message);
-    } else {
-      premiumById = Object.fromEntries(((q.data ?? []) as Record<string, unknown>[]).map((r) => [String(r.fixture_id), r]));
-    }
-  }
-
-  const detailFields = new Set(Array.isArray(data.detail_fields) ? (data.detail_fields as string[]) : []);
+  const premiumById = await lirePremium(supabase, fixtureIds);
 
   data.matchs = matchs.map((m) => {
     const premium = premiumById[String(m.id)];
     if (!premium) return m;
-    const raw = premium.raw_response as { narrative_i18n?: Record<string, unknown>; premium_fields?: Record<string, unknown> } | null;
-    const etendus = (premium.premium_fields ?? raw?.premium_fields ?? null) as Record<string, unknown> | null;
-    const enrichi: Record<string, unknown> = { ...m };
-    if (etendus && typeof etendus === "object") {
-      for (const f of PREMIUM_FIELDS) {
-        if (!(f in etendus)) continue;
-        // Match de liste (detail_omitted) : on ne regonfle pas les champs de detail.
-        if (m.detail_omitted === true && detailFields.has(f)) continue;
-        enrichi[f] = etendus[f];
-      }
-    }
-    // conf (note sur 10 = model_probability / 10, premium depuis le 15/09/2026) :
-    // lignes ecrites avant ce changement sans conf dans premium_fields. Meme
-    // formule que le pipeline ; sans probabilite (pas de pari), pas de note.
-    if (enrichi.conf == null && premium.model_probability != null && Number.isFinite(Number(premium.model_probability))) {
-      enrichi.conf = Math.round(Number(premium.model_probability)) / 10;
-    }
-    return {
-      ...enrichi,
-      kelly: premium.kelly ?? null,
-      edge: premium.edge ?? null,
-      verdict_shark: premium.verdict_shark ?? null,
-      facteur_x: premium.facteur_x ?? null,
-      facteur_x_i18n: raw?.narrative_i18n?.facteur_x_i18n ?? null,
-      verdict_shark_i18n: raw?.narrative_i18n?.verdict_shark_i18n ?? null,
-      dropping_odds: premium.dropping_odds ?? null,
-      player_markets: premium.player_markets ?? null,
-      // Le pari recommande revient ici, depuis la table protegee, pour un
-      // abonne confirme. On ne fait jamais confiance a ce qui pourrait
-      // trainer dans data.json.
-      pari_rec: premium.pari_rec ?? m.pari_rec ?? null,
-      cote_rec: premium.cote_rec ?? m.cote_rec ?? null,
-      model_probability: premium.model_probability ?? m.model_probability ?? null,
-      markets_compared: premium.markets_compared ?? m.markets_compared ?? null,
-      market_id: premium.market_id ?? m.market_id ?? null,
-      marche: premium.marche ?? m.marche ?? null,
-    };
+    return avecPremium(m, premium, detailFields);
   });
 
   return new Response(JSON.stringify({ ...data, isPro }), {

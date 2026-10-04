@@ -30,7 +30,7 @@ function pub(id, extra) {
 
 const fixtures = {
   fresh: () => ({ generated_at: "2026-09-14T06:25:00Z", run_id: "DAILY_2026-09-14", matchs: [
-    pub(1, { is_free: true, pari_rec: "1", conf: 6.5, analyse_card: "Texte offert" }), // offert : champs premium autorises
+    pub(1, { is_free: true }), // offert : plus aucun champ premium public depuis le 04/10/2026 (servis par match-data)
     pub(2, { league: "Ligue 1", league_key: "ligue1", league_id: 61 }),
     pub(3, { league: "Major League Soccer", league_key: "mls", league_id: 253, date: "2026-09-15 02:30" }),
   ] }),
@@ -113,7 +113,13 @@ test("conf sur un match non offert : fuite critique qui bloque la publication", 
   assert.equal(leak.critical, true);
   assert.match(leak.detail, /FUITE PREMIUM : 1 match\(s\).*conf.*ex\. match 2/);
   assert.ok(checks.isGateFailure(leak));
-  assert.equal(byId(evaluate(fixtures.fresh()), "fuite-data-home").status, "ok", "conf du match offert : autorise");
+  assert.equal(byId(evaluate(fixtures.fresh()), "fuite-data-home").status, "ok");
+  // 04/10/2026 : le match offert n'est plus une exception (son pari est servi aux comptes par match-data).
+  const offert = fixtures.fresh();
+  Object.assign(offert.matchs[0], { pari_rec: "1", conf: 6.5, analyse_card: "Texte offert" });
+  const fuiteOffert = byId(evaluate(offert), "fuite-data-home");
+  assert.equal(fuiteOffert.status, "fail", "champs payants du match offert dans un fichier public : fuite");
+  assert.ok(checks.isGateFailure(fuiteOffert));
 });
 
 test("repli data.json : fuite, safe_pick et date du run_output", () => {
@@ -135,7 +141,8 @@ test("fichiers match/<id>.json : fuite detectee, fichiers manquants signales", (
   const r = evaluate(fixtures.fresh(), { details: { "match/1.json": pub(1, { is_free: true, verdict_shark: "ok" }), "match/2.json": detail }, detailsMissing: ["3 (HTTP 404)"] });
   const leak = byId(r, "fuite-match-detail");
   assert.equal(leak.status, "fail");
-  assert.match(leak.detail, /1 match\(s\).*goal_threat_score.*ex\. match 2/);
+  // 04/10/2026 : le match offert (verdict_shark) est aussi une fuite.
+  assert.match(leak.detail, /2 match\(s\).*goal_threat_score.*verdict_shark/);
   assert.equal(byId(r, "source-match-detail").status, "warn");
 });
 

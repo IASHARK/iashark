@@ -40,7 +40,7 @@ test("noms generiques (val, edge, marche...) : premier niveau seulement", () => 
   assert.equal(checks.fieldList(["a", "b", "c"], 2), "a, b et 1 autre(s)");
 });
 
-test("findMatchLeaks ignore le match offert et signale les matchs payants", () => {
+test("findMatchLeaks signale tous les matchs, match offert compris (04/10/2026)", () => {
   const leaks = checks.findMatchLeaks([
     match(1, { is_free: true, pari_rec: "1", kelly: 2 }),
     match(2, { market_id: "FT_1X2" }),
@@ -48,11 +48,10 @@ test("findMatchLeaks ignore le match offert et signale les matchs payants", () =
     match(3, { conf: 6.9 }),
     match(4, { is_free: true, conf: 7.2 }),
   ], FIELDS);
-  assert.equal(leaks.length, 2);
-  assert.equal(leaks[0].id, "2");
-  assert.deepEqual(leaks[0].paths, ["market_id"]);
-  assert.equal(leaks[1].id, "3");
-  assert.deepEqual(leaks[1].paths, ["conf"], "conf sur un match non offert = fuite");
+  assert.deepEqual(leaks.map((l) => l.id), ["1", "2", "3", "4"]);
+  assert.deepEqual(leaks[1].paths, ["market_id"]);
+  assert.deepEqual(leaks[2].paths, ["conf"], "conf sur un match non offert = fuite");
+  assert.deepEqual(leaks[3].paths, ["conf"], "match offert : son pari n'est plus public (servi par match-data aux comptes)");
 });
 
 test("checkPremiumLeaks : fail avec les champs, ok sans fuite", () => {
@@ -138,10 +137,10 @@ test("checkFreeMatch exige un match offert quand il y a des matchs", () => {
   assert.equal(checks.checkFreeMatch([]).status, "skip");
 });
 
-test("checkSafePick : complet seulement pour le match offert", () => {
+test("checkSafePick : toujours masque, match offert compris (04/10/2026)", () => {
   const ms = [match(10, { is_free: true }), match(11)];
   const pick = (fid) => ({ status: "SELECTED", fixture: { fixture_id: fid }, market: "FT_1X2_HOME", model_probability: 0.7, decimal_odds: 1.6 });
-  assert.equal(checks.checkSafePick({ safe_pick: pick(10) }, ms).status, "ok");
+  assert.equal(checks.checkSafePick({ safe_pick: pick(10) }, ms).status, "fail");
   assert.equal(checks.checkSafePick({ safe_pick: pick(11) }, ms).status, "fail");
   assert.equal(checks.checkSafePick({ safe_pick: { status: "SELECTED", redacted: true } }, ms).status, "ok");
   assert.equal(checks.checkSafePick({ safe_pick: null, daily_combos: { combos: [{ combo_id: "c", legs: [{ market: "x" }] }] } }, ms).status, "fail");
@@ -156,11 +155,13 @@ test("checkLlmTexts : avertit (jamais d'echec) a 0 % en citant ANTHROPIC_KEY", (
   assert.match(none.detail, /ANTHROPIC_KEY/);
   assert.equal(checks.checkLlmTexts([match(1, { contexte: { fr: "Texte" } }), match(2)], "data.json").status, "ok");
   assert.equal(checks.checkLlmTexts([], "data.json").status, "skip");
-  // Textes premium : ratio calcule sur les seuls matchs offerts.
+  // Textes premium : ratio calcule sur les seuls matchs offerts d'un fichier ancien qui les porte encore.
   const mixed = [match(1, { is_free: true, contexte: { fr: "Texte" } }), match(2), match(3)];
   assert.equal(checks.checkLlmTexts(mixed, "data.json", { freeOnly: true }).status, "ok");
-  assert.equal(checks.checkLlmTexts([match(1, { is_free: true }), match(2, { contexte: "x" })], "data.json", { freeOnly: true }).status, "warn");
+  assert.equal(checks.checkLlmTexts([match(1, { is_free: true, contexte: "" }), match(2, { contexte: "x" })], "data.json", { freeOnly: true }).status, "warn");
   assert.equal(checks.checkLlmTexts([match(2)], "data.json", { freeOnly: true }).status, "skip");
+  // Depuis le 04/10/2026, le match offert n'a plus ses textes dans les fichiers publics : verification sautee.
+  assert.equal(checks.checkLlmTexts([match(1, { is_free: true }), match(2)], "data.json", { freeOnly: true }).status, "skip");
 });
 
 test("checkOdds : 0 % echoue, moins de 50 % avertit", () => {
@@ -189,7 +190,9 @@ test("pages, fichiers internes et redirections", () => {
 // --- Fonctions Edge / fournisseurs ----------------------------------------------------
 test("fonctions Edge : match-data, checkout, login-guard", () => {
   const md = (matchs, extra) => ({ status: 200, json: Object.assign({ matchs: matchs, isPro: false }, extra || {}) });
-  assert.equal(checks.checkMatchDataFunction(md([match(1, { is_free: true, pari_rec: "1" }), match(2)]), FIELDS).status, "ok");
+  assert.equal(checks.checkMatchDataFunction(md([match(1, { is_free: true }), match(2)]), FIELDS).status, "ok");
+  // 04/10/2026 : un visiteur ANONYME ne recoit plus le pari du match offert (compte connecte seulement).
+  assert.equal(checks.checkMatchDataFunction(md([match(1, { is_free: true, pari_rec: "1" }), match(2)]), FIELDS).status, "fail");
   assert.equal(checks.checkMatchDataFunction(md([match(2, { edge: 4 })]), FIELDS).status, "fail");
   assert.equal(checks.checkMatchDataFunction(md([]), FIELDS).status, "fail");
   assert.equal(checks.checkMatchDataFunction(md([match(2)], { isPro: true }), FIELDS).status, "fail");

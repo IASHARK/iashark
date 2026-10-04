@@ -188,3 +188,35 @@ test("migration 0050 : table fermee, gel, heure posee par la base, ticket refuse
   // Numero libre : aucune autre migration 0050.
   assert.equal(fs.readdirSync(path.join(__dirname, "..", "supabase/migrations")).filter((f) => f.startsWith("0050_")).length, 1);
 });
+
+// ETATS TOUTE LA JOURNEE (controle de l'ingenieur donnees du 04/10/2026) : le releve de cloture (toutes les
+// 30 min, statuts deja lus, aucun appel en plus) marque un match reporte ou annule d'un ticket deja publie.
+test("actualiserEtats : match reporte dans la journee -> etat et « sans ce match » ; jamais de retour a « a venir » ; aucun ticket recalcule", async () => {
+  const w = jour(10), f0 = fauxFetch();
+  await lancer(w, f0);
+  const ecrit = (type) => f0.appels.find((a) => a.method === "POST" && a.body && a.body[0] && a.body[0].type === type).body[0];
+  const x5 = ecrit("x5");
+  const fid = String(x5.contenu.jambes[0].fixture_id);
+  // Releve de 16:00 : le premier match du ticket est reporte (PST), les autres a venir.
+  const vus = {}; x5.contenu.jambes.forEach((j) => { vus[String(j.fixture_id)] = { fixture: { status: { short: "NS" } } }; });
+  vus[fid] = { fixture: { status: { short: "PST" } } };
+  const f = fauxFetch({ lignes: [{ jour: "2026-10-04", type: "x5", meta: x5.meta, contenu: x5.contenu, etats: {}, publie_a: "2026-10-04T06:00:00Z" }] });
+  const r = await T.actualiserEtats({ fixtureById: vus, nowMs: Date.parse("2026-10-04T14:00:00Z"), supabase: SUPA, fetch: f });
+  assert.deepEqual([r.lus, r.mis_a_jour], [1, 1]);
+  const patch = f.appels.find((a) => a.method === "PATCH");
+  assert.match(patch.url, /tickets_du_jour\?jour=eq\.2026-10-04&type=eq\.x5/);
+  assert.equal(patch.body.etats.jambes[fid], "reporte");
+  assert.ok(patch.body.etats.sans_matchs_reportes && patch.body.etats.sans_matchs_reportes.nb_matchs === x5.contenu.jambes.length - 1);
+  assert.ok(!f.appels.some((a) => a.method === "POST"), "jamais un ticket recalcule ni reecrit");
+  // Releve suivant : le match n'est plus dans la fenetre (aucun statut lu) -> l'etat « reporte » reste.
+  const f2 = fauxFetch({ lignes: [{ jour: "2026-10-04", type: "x5", meta: x5.meta, contenu: x5.contenu, etats: patch.body.etats }] });
+  const r2 = await T.actualiserEtats({ fixtureById: {}, nowMs: Date.parse("2026-10-04T14:30:00Z"), supabase: SUPA, fetch: f2 });
+  assert.deepEqual([r2.lus, r2.mis_a_jour], [1, 0]);
+  // Table illisible : rien, jamais d'exception.
+  const r3 = await T.actualiserEtats({ fixtureById: vus, supabase: SUPA, fetch: fauxFetch({ lecture: "panne" }) });
+  assert.equal(r3.mis_a_jour, 0);
+  // Le releve de cloture l'appelle avec les statuts deja lus.
+  const wf = fs.readFileSync(path.join(__dirname, "..", ".github", "workflows", "closing-odds.yml"), "utf8");
+  assert.match(wf, /if \(fid != null\) statutsVus\[String\(fid\)\] = fx;/);
+  assert.match(wf, /TICKETS\.actualiserEtats\(\{ fixtureById: statutsVus, supabase: \{ url: SUPA_URL, cle: SUPA_KEY \}/);
+});

@@ -83,8 +83,13 @@ test("lib/league-names.js recopie config/leagues.json (id, nom, noms traduits)",
 const REGLES = CFG.fiabilite.corrections_chance;
 
 test("chance corrigee : seulement des baisses mesurees, la plus forte, jamais une hausse", () => {
-  assert.deepEqual(P.chanceCorrigee(59, REGLES, { ligue: "nations_league", famille: "1N2", option: "principale", cote: 1.6 }).chance, 56);
-  assert.equal(P.chanceCorrigee(70, REGLES, { ligue: "argentina_liga_profesional", famille: "DC", option: "principale", cote: 1.3 }).chance, 57);
+  // Ligue des nations : correction -3 retiree le 04/10/2026 (controle du mathematicien : +0,6 point sans elle).
+  assert.deepEqual(P.chanceCorrigee(59, REGLES, { ligue: "nations_league", famille: "1N2", option: "principale", cote: 1.6 }).chance, 59);
+  assert.equal(REGLES.some((r) => r.ligue === "nations_league"), false);
+  // Argentine, double chance -13 : seulement une chance tiree du modele v3, jamais de la cote sans marge.
+  assert.equal(P.chanceCorrigee(70, REGLES, { ligue: "argentina_liga_profesional", famille: "DC", option: "principale", cote: 1.3, source_chance: "modele" }).chance, 57);
+  assert.equal(P.chanceCorrigee(70, REGLES, { ligue: "argentina_liga_profesional", famille: "DC", option: "principale", cote: 1.3, source_chance: "marche" }).chance, 70);
+  assert.equal(P.chanceCorrigee(70, REGLES, { ligue: "argentina_liga_profesional", famille: "DC", option: "principale", cote: 1.3 }).chance, 70, "source inconnue = cotes du marche");
   assert.equal(P.chanceCorrigee(70, REGLES, { ligue: "argentina_liga_profesional", famille: "1N2", option: "principale", cote: 1.3 }).chance, 70);
   // Pologne : double chance seulement dans la tranche 75-85 %.
   assert.equal(P.chanceCorrigee(80, REGLES, { ligue: "ekstraklasa", famille: "DC", option: "principale", cote: 1.2 }).chance, 75);
@@ -94,7 +99,8 @@ test("chance corrigee : seulement des baisses mesurees, la plus forte, jamais un
   assert.equal(P.chanceCorrigee(55, REGLES, { ligue: "ligue2", famille: "1N2", option: "principale", cote: 1.8 }).chance, 55);
   // Option « cote plus haute » (regle A) : -6 partout, la plus forte baisse si plusieurs regles.
   assert.equal(P.chanceCorrigee(72, REGLES, { ligue: "premier", famille: "DC", option: "cote", cote: 1.4 }).chance, 66);
-  assert.equal(P.chanceCorrigee(72, REGLES, { ligue: "argentina_liga_profesional", famille: "DC", option: "cote", cote: 1.4 }).chance, 59);
+  assert.equal(P.chanceCorrigee(72, REGLES, { ligue: "argentina_liga_profesional", famille: "DC", option: "cote", cote: 1.4 }).chance, 66);
+  assert.equal(P.chanceCorrigee(72, REGLES, { ligue: "argentina_liga_profesional", famille: "DC", option: "cote", cote: 1.4, source_chance: "modele" }).chance, 59);
   // Aucune regle ne monte une chance, meme mal ecrite.
   assert.equal(P.chanceCorrigee(60, [{ ligue: "*", famille: "*", option: "*", points: 5 }], { ligue: "x" }).chance, 60);
   assert.equal(P.chanceCorrigee(null, REGLES, {}), null);
@@ -150,18 +156,20 @@ test("publierPronostics : le pari publie est un pari simple dans la fourchette (
   assert.deepEqual([m.pronostic.market_id, m.pronostic.cote, m.pronostic.publie], ["home-win", 1.6, true]);
   assert.equal(row.pari_rec, m.pari_rec); assert.equal(row.market_id, m.market_id); assert.equal(row.cote_rec, 1.6); assert.equal(row.model_probability, m.model_probability);
   assert.equal(row.raw_response.pick_freeze.frozen_at, "2026-10-04T01:00:00.000Z");
-  // Chance affichee de la Ligue des nations : corrigee de 3 points, partout le meme chiffre.
+  // Chance affichee de la Ligue des nations : plus aucune correction (le -3 est retire le 04/10/2026),
+  // partout le meme chiffre.
   const avant = m.model_probability;
   const a = P.alignerChancesAffichees([m], [row], { configLigues: CFG, figes: {} });
-  assert.equal(a.corriges, 1);
-  assert.equal(m.model_probability, Math.round(avant) - 3);
+  assert.equal(a.corriges, 0);
+  assert.equal(m.model_probability, Math.round(avant));
   assert.equal(m.chance_iashark, m.model_probability); assert.equal(row.model_probability, m.model_probability);
   assert.equal(m.conf, Math.round(m.model_probability) / 10);
   assert.equal(m.pronostic.chance, m.model_probability);
-  assert.deepEqual(m.chance_correction.points, -3);
+  assert.deepEqual(m.chance_correction.points, 0);
+  assert.equal(m.pronostic.source_chance, "marche");
   // Une seule fois par run.
   P.alignerChancesAffichees([m], [row], { configLigues: CFG, figes: {} });
-  assert.equal(m.model_probability, Math.round(avant) - 3);
+  assert.equal(m.model_probability, Math.round(avant));
 });
 
 test("publierPronostics : la plus grande chance CORRIGEE parmi les marches dans la fourchette (meme correction que la chance affichee)", () => {
@@ -175,7 +183,7 @@ test("publierPronostics : la plus grande chance CORRIGEE parmi les marches dans 
   assert.equal(m.model_probability, 64, "la chance affichee est celle qui a servi au classement");
 });
 
-test("publierPronostics : jamais un pari fige remplace, jamais un match ferme ; pas de pari seulement sans cote reelle (ou favori sous 1,20), l'analyse reste", () => {
+test("publierPronostics : jamais un pari fige remplace, jamais un match ferme ; pas de pari seulement sans cote reelle, l'analyse reste", () => {
   const fige = match({ id: 1, pari_rec: "DC 1X", market_id: "dc-1x", no_signal: false, chance_iashark: 85, cote_rec: "1.15" });
   P.poserPronostics([fige], { configLigues: CFG });
   const rf = P.publierPronostics([fige], [], { configLigues: CFG, figes: { 1: true } });
@@ -184,11 +192,9 @@ test("publierPronostics : jamais un pari fige remplace, jamais un match ferme ; 
   const ferme = match({ id: 2, no_signal_reason: "KICKOFF_PASSED" }); P.poserPronostics([ferme], { configLigues: CFG });
   assert.equal(P.publierPronostics([ferme], [], { configLigues: CFG, figes: {} }).publies, 0);
   assert.equal(ferme.no_signal_reason, "KICKOFF_PASSED");
-  // Raison : aucune cote reelle sur un marche candidat (ou competition hors liste) ; favori sous 1,20 et rien
-  // d'autre a 50 % ou plus (jamais un « coup » a 15 % parce que le favori est trop bas).
+  // Raison : aucune cote reelle sur un marche candidat (ou competition hors liste).
   const cas = {
     sansCote: [match({ id: 3, c1: null, cn: null, c2: null, cdc1x: null, cdc2x: null, cdc12: null, co25: null, cu25: null, p1: 50, pn: 30, p2: 20 }), P.RAISON_SANS_COTE],
-    petiteCote: [match({ id: 4, league_key: "ligue1", league_id: 61, c1: "1.05", cn: "12", c2: "30", cdc1x: "1.01", cdc2x: "8", cdc12: "1.02", co25: "1.10", cu25: "6.5" }), P.RAISON_HORS_FOURCHETTE],
     horsListe: [match({ id: 5, league_key: "colombia_primera_a", league_id: 239 }), P.RAISON_SANS_COTE],
   };
   Object.keys(cas).forEach((k) => {
@@ -211,6 +217,46 @@ test("publierPronostics : jamais un pari fige remplace, jamais un match ferme ; 
   const rg = P.publierPronostics([grosseCote], [], { configLigues: CFG, figes: {} });
   assert.deepEqual([rg.publies, rg.hors_fourchette, rg.sans_pari], [1, 1, 0]);
   assert.deepEqual([grosseCote.market_id, grosseCote.cote_rec, grosseCote.pronostic.hors_fourchette, grosseCote.pronostic.selection], ["dc-1x", "1.75", true, false]);
+  // Favori sous 1,20 et rien d'autre a 50 % ou plus a 1,20 ou plus : le pari simple (jamais le nul) a la plus
+  // grande chance affichee (decision de Clement du 04/10 : « tu mets un pari peu importe »), jamais un coup a 3 %.
+  const petiteCote = match({ id: 4, league_key: "ligue1", league_id: 61, c1: "1.05", cn: "12", c2: "30", cdc1x: "1.01", cdc2x: "8", cdc12: "1.02", co25: "1.10", cu25: "6.5" });
+  P.poserPronostics([petiteCote], { configLigues: CFG });
+  const rp = P.publierPronostics([petiteCote], [], { configLigues: CFG, figes: {} });
+  assert.deepEqual([rp.publies, rp.hors_fourchette], [1, 1]);
+  assert.ok(petiteCote.model_probability >= 90, "le plus probable, jamais un coup : " + petiteCote.model_probability);
+  assert.notEqual(petiteCote.market_id, "draw");
+  assert.deepEqual([petiteCote.pronostic.hors_fourchette, petiteCote.pronostic.selection], [true, false]);
+});
+
+test("repli hors fourchette (avocat du diable, 04/10/2026) : chance AFFICHEE >= 50 % et cote >= 1,20, jamais le nul, la cote la plus proche ; sinon le plus probable", () => {
+  // Preuve de l'avocat : 1,25 / 6,00 / 12,00 et « plus de 2,5 buts » a 1,85 (49 %) -> jamais le 1,85 a 49 % ;
+  // parmi les paris a 50 % ou plus, la cote la plus proche (« moins de 2,5 buts » a 1,80, 51 %).
+  const favori = match({ id: 31, league_key: "ligue1", league_id: 61, c1: "1.25", cn: "6.00", c2: "12.00", cdc1x: null, cdc2x: null, cdc12: null, co25: "1.85", cu25: "1.80" });
+  P.poserPronostics([favori], { configLigues: CFG });
+  P.publierPronostics([favori], [], { configLigues: CFG, figes: {} });
+  assert.equal(favori.market_id, "under-25");
+  assert.ok(favori.model_probability >= 50 && favori.pronostic.hors_fourchette === true);
+  // Sans plus/moins : le favori a 1,25 (jamais le nul ni l'exterieur a 12,00).
+  const favori1n2 = match({ id: 34, league_key: "ligue1", league_id: 61, c1: "1.25", cn: "6.00", c2: "12.00", cdc1x: null, cdc2x: null, cdc12: null, co25: null, cu25: null });
+  P.poserPronostics([favori1n2], { configLigues: CFG });
+  P.publierPronostics([favori1n2], [], { configLigues: CFG, figes: {} });
+  assert.equal(favori1n2.market_id, "home-win");
+  // 1N2 serre seul (2,95 / 2,75 / 2,95) : jamais le nul a 32 % ; aucune issue a 50 % -> le plus probable hors nul.
+  const serre = match({ id: 32, league_key: "ligue1", league_id: 61, c1: "2.95", cn: "2.75", c2: "2.95", cdc1x: null, cdc2x: null, cdc12: null, co25: null, cu25: null });
+  P.poserPronostics([serre], { configLigues: CFG });
+  P.publierPronostics([serre], [], { configLigues: CFG, figes: {} });
+  assert.ok(["home-win", "away-win"].includes(serre.market_id), serre.market_id);
+  assert.equal(serre.pronostic.hors_fourchette, true);
+  // Le garde-fou de 50 % porte sur la chance AFFICHEE (corrigee), pas sur la chance calculee.
+  // « Plus de 2,5 buts » a 1,75 : 54 % calcules (le plus proche de la fourchette), 44 % affiches avec une
+  // correction de -10 -> le favori a 1,25.
+  const corrige = match({ id: 33, league_key: "ligue1", league_id: 61, c1: "1.25", cn: "6.00", c2: "12.00", cdc1x: null, cdc2x: null, cdc12: null, co25: "1.75", cu25: "2.05" });
+  const ctxRepli = (regles) => ({ fourchette: P.fourchettePari(CFG), ligues: P.liguesCotesMarche(CFG), paris: P.liguesParis(CFG), regles: regles, flux: {}, cles: [] });
+  const sansCorr = P.choisirPariFourchette(corrige, ctxRepli([]));
+  assert.deepEqual([sansCorr.market_id, sansCorr.hors_fourchette], ["over-25", true]);
+  const b = P.choisirPariFourchette(corrige, ctxRepli([{ ligue: "ligue1", famille: "OU2.5", option: "*", points: -10, source: "regle de test, jamais publiee" }]));
+  assert.deepEqual([b.market_id, b.hors_fourchette], ["home-win", true]);
+  assert.ok(b.chance_affichee >= 50);
 });
 
 function matchV3(extra) {
@@ -355,7 +401,7 @@ test("contenu Pro : option_cote et chance_correction premium ; cotes Pinnacle ja
 
 test("pipeline : un pari sur chaque match apres les pronostics, avant le match offert et l'ecriture des donnees", () => {
   const iProno = SCRIPT.indexOf("PRONOSTIC.poserPronostics(");
-  const iPub = SCRIPT.indexOf("PRONOSTIC.publierPronostics(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,figes:GEL_FIGES,chancesV3Par:CHANCES_V3_PRONO,texteMarche:TEXTE_MARCHE,cotesAnjPar:LIVRES_ANJ,releveAnjA:RELEVE_ANJ_A})");
+  const iPub = SCRIPT.indexOf("PRONOSTIC.publierPronostics(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,figes:GEL_FIGES,chancesV3Par:CHANCES_V3_PRONO,texteMarche:TEXTE_MARCHE,cotesAnjPar:LIVRES_ANJ,relevesAnj:RELEVES_ANJ,relevesAnjEvenement:RELEVES_ANJ_EV,releveAnjA:RELEVE_ANJ_A})");
   const iAlign = SCRIPT.indexOf("PRONOSTIC.alignerChancesAffichees(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,figes:GEL_FIGES})");
   const iOpt = SCRIPT.indexOf("PRONOSTIC.poserOptionCote(allMatchsData,{configLigues:LEAGUES_CONFIG,cotesAnjPar:LIVRES_ANJ})");
   assert.ok(iProno > 0 && iPub > iProno && iAlign > iPub && iOpt > iAlign);
@@ -471,8 +517,8 @@ test("un pari sur chaque match : jamais une cote inventee, jamais Pinnacle ni be
     assert.deepEqual([m.chance_iashark, m.conf, m.pronostic.chance, m.paris_safe.proba, m.paris_safe.cote, rows[i].model_probability, rows[i].cote_rec],
       [m.model_probability, Math.round(m.model_probability) / 10, m.model_probability, m.model_probability + "%", Number(m.cote_rec), m.model_probability, Number(m.cote_rec)], String(m.id));
   });
-  // Ligue des nations : chance affichee corrigee de 3 points, paris_safe aussi.
-  assert.equal(matchs[1].chance_correction.points, -3);
+  // Ligue des nations : plus de correction (retiree le 04/10/2026), paris_safe a la meme chance.
+  assert.equal(matchs[1].chance_correction.points, 0);
   assert.equal(matchs[1].paris_safe.proba, matchs[1].model_probability + "%");
   // Segunda, grand favori a 1,23 : rien dans la fourchette -> le plus proche (1,23), jamais une Selection IASHARK.
   assert.deepEqual([matchs[2].market_id, matchs[2].cote_rec, matchs[2].pronostic.hors_fourchette, matchs[2].pronostic.selection], ["home-win", "1.23", true, false]);
@@ -491,6 +537,27 @@ test("familles calibrees seulement : buts et « les deux marquent » dans les co
   P.publierPronostics([m], [], { configLigues: CFG, figes: {} });
   assert.equal(m.market_id, "over-25");
   assert.equal(m.cote_rec, "1.55");
+});
+
+// Verdict du mathematicien du 04/10/2026 (verdicts-maths-finitions.md, mission 1) : plus/moins 1,5 et 3,5 et « les deux
+// marquent » GO dans les 7 championnats europeens seulement ; NO-GO ailleurs (pas assez de matchs pour conclure).
+test("verdict des familles ajoutees : plus/moins 1,5 et 3,5, les deux marquent candidats dans les 7 championnats europeens seulement", () => {
+  const EUROPE = ["premier", "laliga", "seriea", "bundesliga", "ligue1", "eredivisie", "primeira"];
+  const mes = P.famillesMesurees(CFG);
+  for (const f of ["OU1.5", "OU3.5", "BTTS"]) assert.deepEqual(mes[f], EUROPE, f);
+  assert.equal(mes["OU2.5"], undefined, "plus/moins 2,5 : hors de ce verdict");
+  // Meme match, memes cotes : « plus de 1,5 but » a 1,50 (64 %) est le pari en Ligue 1, jamais en Argentine ni en Ligue des nations.
+  const cotes = { c1: "2.10", cn: "3.30", c2: "3.60", cdc1x: "1.28", cdc2x: "1.72", cdc12: "1.33", co25: "2.05", cu25: "1.80", co15: "1.50", cu15: "2.70", co35: "3.80", cu35: "1.30" };
+  const fr = match(Object.assign({ id: 760, league_key: "ligue1", league_id: 61 }, cotes));
+  P.poserPronostics([fr], { configLigues: CFG });
+  P.publierPronostics([fr], [], { configLigues: CFG, figes: {} });
+  assert.equal(fr.market_id, "over-15");
+  for (const [key, id] of [["argentina_liga_profesional", 128], ["nations_league", 5], ["mls", 253], ["jleague", 98]]) {
+    const ail = match(Object.assign({ id: 761, league_key: key, league_id: id }, cotes));
+    P.poserPronostics([ail], { configLigues: CFG });
+    P.publierPronostics([ail], [], { configLigues: CFG, figes: {} });
+    assert.ok(!["over-15", "under-15", "over-35", "under-35", "btts-yes", "btts-no"].includes(ail.market_id), key + " : " + ail.market_id);
+  }
 });
 
 test("selections nationales et option : la cote agreee d'abord, comme le pari publie", () => {
@@ -528,6 +595,34 @@ test("releverLivresAnj : livres des agrees pour chaque match ouvert, un appel pa
   assert.deepEqual([Object.keys(vide.livres).length, appels.length], [0, 1]);
 });
 
+test("heure reelle des cotes (ingenieur donnees, 04/10/2026) : l'heure de l'appel qui a rendu les livres, jamais celle de la relecture", async () => {
+  const ECO = require("../lib/odds-api-econome.js");
+  const ev = { id: "e1", home_team: "Newell's Old Boys", away_team: "Lanus", commence_time: "2026-10-04T23:00:00Z", bookmakers: [
+    { key: "winamax_fr", markets: [{ key: "h2h", outcomes: [{ name: "Newell's Old Boys", price: 2.75 }, { name: "Draw", price: 2.85 }, { name: "Lanus", price: 2.65 }] },
+      { key: "totals", outcomes: [{ name: "Over", point: 2.5, price: 2.3 }, { name: "Under", point: 2.5, price: 1.55 }] }] }] };
+  let horloge = "2026-10-04T02:00:00.000Z";
+  const reponse = (corps) => ({ ok: true, status: 200, headers: { get: () => null }, json: async () => corps });
+  const fetchBrut = async (url) => reponse(/\/events\?/.test(url) ? [{ id: "e1" }] : [ev]);
+  const client = ECO.creerClientOddsApi({ cle: "k", fetchBrut, get maintenant() { return horloge; } });
+  // Appel payant a 02:00 (cote de reference), relecture en memoire a 02:40 : l'heure reste 02:00.
+  const premier = await client.cotesCompetition("soccer_argentina_primera_division");
+  assert.equal(ECO.heureReleve(premier), "2026-10-04T02:00:00.000Z");
+  assert.equal(JSON.stringify(premier).includes("__releve_a"), false, "jamais dans le JSON");
+  horloge = "2026-10-04T02:40:00.000Z";
+  const ms = [{ m: { id: 1, home: { n: "Newells Old Boys" }, away: { n: "Lanus" } }, sport: "soccer_argentina_primera_division", koMs: Date.parse("2026-10-04T23:00:00Z") }];
+  const r = await COTE_ANJ.releverLivresAnj(ms, { cle: "k", fetchJson: client.fetchJsonCoteAnj(), maintenant: horloge });
+  assert.equal(r.releves["1"], "2026-10-04T02:00:00.000Z");
+  assert.equal(r.releve_a, "2026-10-04T02:40:00.000Z", "heure de la relecture : repli seulement");
+  // Le pari publie porte l'heure de l'appel ; double chance : l'heure de l'appel par match.
+  const m = matchArgentine();
+  P.publierPronostics([m], [{ fixture_id: 700, raw_response: {} }], { configLigues: CFG, figes: {}, cotesAnjPar: { 700: LIVRES_ARG },
+    relevesAnj: { 700: "2026-10-04T02:00:00.000Z" }, relevesAnjEvenement: { 700: "2026-10-04T02:10:00.000Z" }, releveAnjA: "2026-10-04T02:40:00.000Z" });
+  assert.deepEqual([m.market_id, m.cote_source, m.cote_releve_a], ["under-25", "anj", "2026-10-04T02:00:00.000Z"]);
+  assert.equal(COTE_ANJ.heureDuMarche("dc-1x", "2026-10-04T02:00:00.000Z", "2026-10-04T02:10:00.000Z"), "2026-10-04T02:10:00.000Z");
+  assert.equal(COTE_ANJ.heureDuMarche("home-win", "2026-10-04T02:00:00.000Z", "2026-10-04T02:10:00.000Z"), "2026-10-04T02:00:00.000Z");
+  assert.match(SCRIPT, /relevesAnj:RELEVES_ANJ,relevesAnjEvenement:RELEVES_ANJ_EV/);
+});
+
 test("pipeline : cotes des agrees relevees pour chaque match ouvert, en memoire seulement ; cotes et blessures prioritaires", () => {
   const iRel = SCRIPT.indexOf("var releveLivres=await COTE_ANJ.releverLivresAnj(aReleverAnj,");
   assert.ok(iRel > SCRIPT.indexOf("var rapportAnj=await COTE_ANJ.poserCotesAnj("), "apres le releve du pari present");
@@ -544,4 +639,53 @@ test("pipeline : cotes des agrees relevees pour chaque match ouvert, en memoire 
   const { parseOdds } = require("../lib/odds.js");
   const o = parseOdds({ bookmakers: [{ id: 1, name: "B", bets: [{ name: "Goals Over/Under", values: [{ value: "Over 1.5", odd: "1.30" }, { value: "Under 1.5", odd: "3.40" }] }] }] });
   assert.deepEqual([o.co15, o.cu15], ["1.30", "3.40"]);
+});
+
+// EXCEPTION AU GEL (decision de Clement du 04/10/2026) : les paris figes du 03/10 sur un marche non verifie
+// (« tirs du match » en Argentine) ou sans aucune cote reelle sont remplaces au prochain calcul ; les autres
+// paris figes ne bougent pas ; l'historique garde la trace honnete de l'ancien pari (rien d'efface en silence).
+test("exception au gel : marche non verifie ou sans cote -> remplace (trace gardee, masquee jusqu'au reglement) ; les autres restent figes", () => {
+  const PF = require("../lib/pick-freeze.js");
+  assert.equal(P.motifExceptionGel({ pari_rec: "Tirs du match over 23.5", market_id: "total-shots-over-23_5", cote_rec: 1.5 }), "marche_non_verifie");
+  assert.equal(P.motifExceptionGel({ pari_rec: "Under 3.5", market_id: "under-35", cote_rec: null }), "sans_cote");
+  assert.equal(P.motifExceptionGel({ pari_rec: "DC 1X", market_id: "dc-1x", cote_rec: "" }), "sans_cote");
+  assert.equal(P.motifExceptionGel({ pari_rec: "Victoire Domicile", market_id: "home-win", cote_rec: 1.85 }), null, "hors fourchette mais verifie et cote : reste fige");
+  assert.equal(P.motifExceptionGel({ pari_rec: "", market_id: null }), null);
+
+  const NOW = Date.parse("2026-10-04T03:00:00Z");
+  const fx = { fixture: { id: 701, status: { short: "NS" }, timestamp: Date.parse("2026-10-04T23:00:00Z") / 1000 } };
+  const tirs = { fixture_id: 701, pari_rec: "Tirs du match over 23.5", cote_rec: 1.5, market_id: "total-shots-over-23_5", marche: "TIRS", model_probability: 67.5,
+    premium_fields: { p1: 40 }, raw_response: { pick_freeze: { frozen_at: "2026-10-03T04:35:38.000Z", kickoff: "2026-10-05 01:00" } } };
+  const frais = match({ id: 701, league_key: "ligue1", league_id: 61, date: "2026-10-05 01:00" });
+  const gel = PF.freezeAnalysis(frais, tirs, { nowMs: NOW, fixture: fx, premiumRow: { fixture_id: 701, raw_response: {} }, exceptionGel: P.motifExceptionGel });
+  assert.notEqual(gel.status, "FROZEN", "jamais conserve");
+  assert.deepEqual(gel.remplacement.ancien, { prediction: "Tirs du match over 23.5", market: "total-shots-over-23_5", cote: 1.5, model_probability: 67.5, publie_le: "2026-10-03T04:35:38.000Z" });
+  assert.equal(gel.remplacement.motif, "marche_non_verifie");
+  assert.deepEqual(gel.premiumRow.raw_response.remplacement, gel.remplacement, "trace privee dans la ligne premium");
+  assert.equal(gel.match.remplacement_gel.motif, "marche_non_verifie");
+  assert.ok(PREMIUM.INTERNAL_FIELDS.includes("remplacement_gel"));
+  assert.equal("remplacement_gel" in PREMIUM.sansChampsInternes(gel.match), false, "jamais dans un fichier public");
+  // Le match n'est plus fige : la regle du jour lui donne un pari simple (jamais les tirs).
+  P.poserPronostics([gel.match], { configLigues: CFG });
+  P.publierPronostics([gel.match], [gel.premiumRow], { configLigues: CFG, figes: {} });
+  assert.ok(P.MARCHE[gel.match.market_id], gel.match.market_id);
+  // Un pari fige conforme (verifie, cote reelle, meme hors fourchette) ne bouge pas.
+  const conforme = Object.assign({}, tirs, { pari_rec: "Victoire Domicile", market_id: "home-win", marche: "RESULTAT", cote_rec: 1.85 });
+  assert.equal(PF.freezeAnalysis(match({ id: 701, date: "2026-10-05 01:00" }), conforme, { nowMs: NOW, fixture: fx, premiumRow: { fixture_id: 701 }, exceptionGel: P.motifExceptionGel }).status, "FROZEN");
+  // Match deja commence : le pari publie reste tel quel (jamais remplace apres le coup d'envoi).
+  const fxJoue = { fixture: { id: 701, status: { short: "2H" }, timestamp: Date.parse("2026-10-04T02:00:00Z") / 1000 } };
+  assert.equal(PF.freezeAnalysis(match({ id: 701 }), tirs, { nowMs: NOW, fixture: fxJoue, premiumRow: { fixture_id: 701 }, exceptionGel: P.motifExceptionGel }).status, "FROZEN_CLOSED");
+
+  // Historique public : trace du remplacement, ancien pari masque tant que le match n'est pas regle, relu ensuite.
+  const ligne = { fixture_id: 701, result: "scheduled", type: "single", prediction: "Over 1.5", cote: 1.5, remplacement: JSON.parse(JSON.stringify(gel.remplacement)) };
+  const pub = PREMIUM.redactPendingPredictions([ligne])[0];
+  assert.deepEqual([pub.remplacement.motif, pub.remplacement.ancien, pub.remplacement.ancien_masque, pub.prediction], ["marche_non_verifie", null, true, undefined]);
+  assert.doesNotMatch(JSON.stringify(pub), /Tirs du match/);
+  assert.equal(PREMIUM.rehydrateRemplacements([pub], [{ fixture_id: 701, raw_response: { remplacement: gel.remplacement } }]), 1);
+  assert.equal(pub.remplacement.ancien.prediction, "Tirs du match over 23.5");
+  assert.equal(PREMIUM.rehydrateRemplacements([PREMIUM.redactPendingPredictions([ligne])[0]], []), 0, "jamais invente");
+  // Pipeline : l'exception est passee au gel, la trace est posee avant le realignement, relue avant le reglement.
+  assert.match(SCRIPT, /exceptionGel:PRONOSTIC\.motifExceptionGel/);
+  assert.ok(SCRIPT.indexOf("alreadyExists.remplacement=JSON.parse(JSON.stringify(m.remplacement_gel));") < SCRIPT.indexOf("PICK_FREEZE.alignPendingPrediction(alreadyExists,m,"));
+  assert.match(SCRIPT, /PREMIUM_FIELDS_LIB\.rehydrateRemplacements\(predictions,lignesRem\)/);
 });

@@ -173,7 +173,8 @@ test("prob_band : dans match/<id>.json et PRELOADED_MATCH, jamais la valeur exac
   assert.doesNotMatch(JSON.stringify(pre), /76/);
   assert.equal(split.preloadedMatch({ id: 78, home: { n: "A" }, away: { n: "B" }, no_signal: true, model_probability: 80 }).prob_band, undefined, "pas d'analyse : aucun niveau");
   const offert = split.preloadedMatch({ id: 79, is_free: true, home: { n: "A" }, away: { n: "B" }, pari_rec: "Over 2.5", model_probability: 70 });
-  assert.equal(offert.pari_rec, "Over 2.5", "match offert : inchange");
+  // 04/10/2026 : plus aucun champ payant du match offert dans un fichier public (servi par match-data).
+  assert.deepEqual([offert.pari_rec, offert.model_probability, offert.is_free], [undefined, undefined, true], "match offert : assaini");
   // Meme fonction dans le pipeline, les pages localisees et la regeneration locale.
   assert.match(read(".github/workflows/update-data.yml"), /'<script>var PRELOADED_MATCH='\+JSON\.stringify\(PUBLIC_SPLIT\.preloadedMatch\(m\)\)/);
   assert.match(read("scripts/seo-pages.js"), /JSON\.stringify\(PUBLIC_SPLIT\.preloadedMatch\(m\)\)/);
@@ -205,7 +206,7 @@ test("derby : { key, name } depuis data/derby-index.json, ajoute a la liste seul
 test("pipeline : prob_band pose avant le retrait des champs premium, statut API public", () => {
   const wf = read(".github/workflows/update-data.yml");
   const bloc = wf.slice(wf.indexOf("var matchsPublics=allMatchsData.map(function(m){"), wf.indexOf("var retires=allMatchsData.length"));
-  assert.match(bloc, /if\(!m\)return m;[\s\S]{0,400}?if\(!PEUT_PROTEGER\)return PREMIUM_FIELDS_LIB\.sansChampsPro\(m\);[\s\S]{0,200}?if\(m\.is_free\)return PREMIUM_FIELDS_LIB\.sansChampsPro\(m\);\s*m=PUBLIC_SPLIT\.withProbBand\(m\);\s*var copie=\{\};/);
+  assert.match(bloc, /if\(!m\)return m;[\s\S]{0,600}?if\(!PEUT_PROTEGER\)return PREMIUM_FIELDS_LIB\.sansChampsReserves\(m\);[\s\S]{0,600}?if\(m\.is_free\)return PREMIUM_FIELDS_LIB\.stripPremium\(m\);\s*m=PUBLIC_SPLIT\.withProbBand\(m\);\s*var copie=\{\};/);
   assert.match(wf, /status:\(f\.status&&f\.status\.short\)\|\|null,/);
   assert.match(read("scripts/split-public-data.js"), /m && m\.is_free !== true \? split\.withProbBand\(m\) : m; \}\)\.map\(PREMIUM\.stripPremium\)/);
 });

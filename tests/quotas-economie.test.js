@@ -1,5 +1,5 @@
 "use strict";
-// MODE ECONOMIE (03/10/2026) : API-Football Pro (7 500 requetes par jour) et The Odds API
+// MODE ECONOMIE (03/10/2026) : API-Football (75 000 requetes par jour, quota reel) et The Odds API
 // (20 000 credits par mois). Reglages : config/quotas.json ; compteurs : lib/quotas.js ;
 // client The Odds API du pipeline : lib/odds-api-econome.js. Aucun appel reseau reel ici.
 const test = require("node:test");
@@ -40,7 +40,8 @@ function fauxOdds({ evenements = { soccer_epl: [{ id: "e1", home_team: "Arsenal"
 }
 
 test("config/quotas.json : les 2 abonnements, plafonds et seuils lisibles par Clement", () => {
-  assert.strictEqual(CFG.api_football.quota_jour, 7500);
+  // Quota reel annonce par l'API (en-tetes) : 75 000 par jour (ingenieur donnees, 04/10/2026).
+  assert.strictEqual(CFG.api_football.quota_jour, 75000);
   assert.strictEqual(CFG.odds_api.quota_mois, 20000);
   assert.ok(CFG.api_football.plafond_jour < CFG.api_football.quota_jour);
   assert.strictEqual(CFG.api_football.alerte_pct, 70);

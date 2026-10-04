@@ -333,7 +333,10 @@ test("fichier public reel (buteurs-du-jour.json du depot) : format public, aucun
   if (!fs.existsSync(path.join(ROOT, "buteurs-du-jour.json"))) return;
   const file = JSON.parse(read("buteurs-du-jour.json"));
   assertPublicFile(file, "buteurs-du-jour.json");
-  assert.ok(Object.values(file.days).some((l) => l.length > 0), "exemple non vide");
+  // Depuis le 04/10/2026 (config/tickets.json#fichier_buteurs_public = « retire », controle de l'ingenieur donnees) :
+  // le fichier public n'a plus aucune entree ; le buteur du jour est servi aux comptes par la fonction tickets-du-jour.
+  if (require("../config/tickets.json").fichier_buteurs_public === "retire") assert.deepEqual(file.days, {}, "aucun match ni rang public");
+  else assert.ok(Object.values(file.days).some((l) => l.length > 0), "exemple non vide");
 });
 
 // ------------------------------------------------------------ chiffres Pro = page match

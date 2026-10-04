@@ -141,18 +141,41 @@ test("garde : couverture verifiee du v3 et feux du mathematicien, sinon rien ; u
   assert.equal(VERDICTS.match.score_le_plus_fou, "NO-GO");
 });
 
-test("arbitre : retire tant que le mathematicien n'a pas dit GO (heure de nomination non mesuree)", () => {
+test("arbitre : feu vert du mathematicien, arbitre de la fixture lu avant le coup d'envoi, faits seulement ; jamais recopie par le gel", () => {
   const sb = { gratuit: { premier_but_dom: null, premier_but_ext: null, ligue_apres_75: { n: 3 }, detail_pro: ["quarts", "arbitre", "ligue"] },
-    pro: { dom: { nom: "A" }, ext: null, ligue: { n: 1 }, arbitre: { nom: "X", cartons: { m: [4.6, 4, 5] } } } };
+    pro: { dom: { nom: "A" }, ext: null, ligue: { n: 1 }, arbitre: { nom: "X", n: 64, debut: "2023-08-01", fin: "2026-10-02",
+      cartons: { m: [4.6, 4, 5], attendu: 4.1, ecart: [0.5, 0.1, 0.9] }, rouges: { m: [0.2, 0.1, 0.3], attendu: 0.1 }, penaltys: { m: [0.3, 0.2, 0.4], attendu: 0.25 } } } };
   assert.equal(VERDICTS.match.arbitre, "en_attente");
-  const r = S.feuArbitre(sb);
+  const AVANT = { avantCoupEnvoi: true, connuLe: "2026-10-04T03:00:00.000Z" };
+  // Sans feu vert : retire, meme lu avant le match.
+  const r = S.feuArbitre(sb, undefined, AVANT);
   assert.equal(r.pro.arbitre, null);
   assert.deepEqual(r.gratuit.detail_pro, ["quarts", "ligue"]);
   assert.equal(sb.pro.arbitre.nom, "X", "l'objet d'origine n'est pas modifie");
-  assert.equal(S.feuArbitre({ gratuit: { detail_pro: ["arbitre"] }, pro: { arbitre: { nom: "X" } } }), null, "rien d'autre que l'arbitre : rien");
+  assert.equal(S.feuArbitre({ gratuit: { detail_pro: ["arbitre"] }, pro: { arbitre: { nom: "X", n: 5, cartons: { m: [4, 3, 5] } } } }, undefined, AVANT), null, "rien d'autre que l'arbitre : rien");
   const go = JSON.parse(JSON.stringify(VERDICTS)); go.match.arbitre = "GO";
-  assert.equal(S.feuArbitre(sb, go), sb);
+  // Feu vert, arbitre lu avant le coup d'envoi : faits seulement (cartons, penaltys par match, nombre de matchs, periode).
+  const ok = S.feuArbitre(sb, go, AVANT);
+  assert.deepEqual(ok.pro.arbitre, { nom: "X", n: 64, debut: "2023-08-01", fin: "2026-10-02", connu_le: "2026-10-04T03:00:00.000Z",
+    cartons: { m: [4.6, 4, 5] }, penaltys: { m: [0.3, 0.2, 0.4] } });
+  assert.doesNotMatch(JSON.stringify(ok.pro.arbitre), /attendu|ecart|rouges/, "jamais l'attendu ni l'ecart");
+  assert.deepEqual(ok.gratuit.detail_pro, ["quarts", "arbitre", "ligue"]);
+  // Match deja commence (fixture lue apres le coup d'envoi) : jamais l'arbitre.
+  assert.equal(S.feuArbitre(sb, go, { avantCoupEnvoi: false }).pro.arbitre, null);
+  assert.equal(S.feuArbitre(sb, go).pro.arbitre, null, "sans garde ouverte connue : jamais");
   assert.equal(S.feuArbitre(null), null);
+  // Gel : stats_iashark est vivant (recalcule a chaque run), jamais restaure depuis la ligne publiee.
+  const F = require("../lib/pick-freeze.js");
+  assert.ok(F.LIVE_PREMIUM_FIELDS.includes("stats_iashark"));
+  assert.ok(!F.FROZEN_PAYLOAD_FIELDS.includes("stats_iashark"));
+  const publie = { fixture_id: 9, pari_rec: "Over 2.5", cote_rec: 1.5, market_id: "over-25", model_probability: 60,
+    premium_fields: { stats_iashark: { arbitre: { nom: "F. Letexier", n: 64 } }, p1: 50 }, raw_response: { pick_freeze: { frozen_at: "2026-10-03T03:00:00.000Z", kickoff: "2026-10-05 20:45" } } };
+  const frais = { id: 9, home: { n: "A" }, away: { n: "B" }, date: "2026-10-05 20:45", stats_iashark: null, pari_rec: "", no_signal: true };
+  const fx = { fixture: { id: 9, status: { short: "NS" }, timestamp: Date.parse("2026-10-05T18:45:00Z") / 1000 } };
+  const gel = F.freezeAnalysis(frais, publie, { nowMs: Date.parse("2026-10-04T03:00:00Z"), fixture: fx, premiumRow: { fixture_id: 9 } });
+  assert.equal(gel.status, "FROZEN");
+  assert.equal(gel.match.pari_rec, "Over 2.5");
+  assert.equal(gel.match.stats_iashark, null, "l'arbitre ne revient jamais par le gel");
 });
 
 test("premier buteur (c3) : titulaires probables, 3 au plus, % entier, jamais en « données limitées »", () => {
@@ -177,11 +200,12 @@ test("premier buteur (c3) : titulaires probables, 3 au plus, % entier, jamais en
   assert.equal(VERDICTS.match.premier_buteur, "GO");
 });
 
-test("acces : sim_resume, jumeaux, premier_but et premier buteur Pro seulement (meme sur le match offert)", () => {
+test("acces : sim_resume, jumeaux, premier_but et premier buteur jamais publics ; sur le match offert, servis au compte connecte (04/10/2026)", () => {
   for (const k of ["sim_resume", "premier_but", "v3_premiers_buteurs", "jumeaux"]) assert.ok(PREMIUM.PREMIUM_PAYLOAD_FIELDS.includes(k), k);
-  // Avocat du diable (04/10/2026, point 5) : le fichier public du match offert est lisible sans
-  // compte ; sim_resume et jumeaux n'y vont plus (le visiteur sans compte ne voit qu'un apercu flou).
-  for (const k of ["premier_but", "v3_premiers_buteurs", "sim_resume", "jumeaux"]) assert.ok(PREMIUM.PRO_ONLY_FIELDS.includes(k), k);
+  // Decision de Clement du 04/10/2026 : sur le match offert, le compte gratuit connecte voit TOUT sauf le panneau
+  // Marches ; rien de payant dans le fichier public (le visiteur sans compte ne voit qu'un apercu flou).
+  assert.deepEqual(PREMIUM.PRO_ONLY_FIELDS, ["marches_panneau", "v3_marches", "marches_flux"]);
+  for (const k of ["premier_but", "v3_premiers_buteurs", "sim_resume", "jumeaux"]) assert.ok(!PREMIUM.PRO_ONLY_FIELDS.includes(k), k);
   const m = Object.assign(matchDe(AVEC_GRILLE[0]), { id: 9, sim_resume: { base: 10000 }, premier_but: { dom: 50 }, v3_premiers_buteurs: [{ joueur: "X", chance: 12 }] });
   const pub = PREMIUM.stripPremium(m);
   for (const k of ["sim_resume", "premier_but", "v3_premiers_buteurs"]) assert.equal(pub[k], undefined, k);
@@ -206,7 +230,7 @@ test("pipeline : sections posees apres le panneau, simulation gardee par la couv
   assert.ok(iPanneau > 0 && iSections > iPanneau && iProtection > iSections);
   assert.match(wf, /ajouts:SECTIONS_MATCH\.ajoutsSimulation\(\)/);
   assert.match(wf, /&&SECTIONS_MATCH\.simulationPermise\(matchObj\)\)/);
-  assert.match(wf, /var sbMatch=SECTIONS_MATCH\.feuArbitre\(statsBookChamps\(f,lg,home,away\)\);/);
+  assert.match(wf, /var sbMatch=SECTIONS_MATCH\.feuArbitre\(statsBookChamps\(f,lg,home,away\),undefined,\{avantCoupEnvoi:kickoffGateFix\.open===true,connuLe:new Date\(\)\.toISOString\(\)\}\);/);
   // Bornes : 1-15, 16-30, 31-45 (+ arrets), 46-60, 61-75, 76-90 (+ arrets) ; prolongations hors tranches.
   const src = /function trancheBut\(e\)\{[^\n]*\}/.exec(wf)[0];
   const trancheBut = new Function(src + "; return trancheBut;")();

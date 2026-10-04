@@ -112,12 +112,15 @@ jobs:
             });
             console.log('Matchs proches du coup d\'envoi (tri sur data.json) : ' + candidats.length + ' sur ' + fixtureIds.length + ' (fenetre de capture : ' + FENETRE_MIN + ' min).');
             const rows = [];
+            // Statuts lus a ce lancement (aucun appel en plus) : etats des tickets du jour (match reporte, annule).
+            const statutsVus = {};
             for (let i = 0; i < candidats.length; i += 20) {
               const lot = candidats.slice(i, i + 20);
               const fr = await get('https://v3.football.api-sports.io/fixtures?ids=' + lot.join('-'), APS);
               await sleep(250);
               for (const fx of (fr.response || [])) {
                 const fid = fx.fixture && fx.fixture.id;
+                if (fid != null) statutsVus[String(fid)] = fx;
                 try {
                   const status = (fx.fixture.status && fx.fixture.status.short) || '';
                   const ts = fx.fixture.timestamp;
@@ -142,6 +145,16 @@ jobs:
                 }
               }
             }
+
+            // TICKETS DU JOUR (04/10/2026, controle de l'ingenieur donnees) : un match d'un ticket deja publie qui est
+            // reporte ou annule dans la journee est marque tout de suite (lib/tickets-du-jour.js#actualiserEtats) ;
+            // la fonction tickets-du-jour le sert a la page (etat de la jambe, « sans ce match »). Jamais bloquant.
+            try {
+              const TICKETS = require('./lib/tickets-du-jour.js');
+              const rt = await TICKETS.actualiserEtats({ fixtureById: statutsVus, supabase: { url: SUPA_URL, cle: SUPA_KEY },
+                avertir: (t) => console.log('::warning title=Tickets du jour::' + t) });
+              console.log('[TICKETS] etats : ' + rt.lus + ' ticket(s) lu(s), ' + rt.mis_a_jour + ' mis a jour (jour ' + rt.jour + ').');
+            } catch (e) { console.log('::warning title=Tickets du jour::etats non mis a jour (' + String(e && e.message || e).slice(0, 80) + ').'); }
 
             if (!rows.length) { console.log('Aucun match dans la fenetre de cloture (0-' + FENETRE_MIN + ' min avant coup d\'envoi) a cette execution.'); return; }
 

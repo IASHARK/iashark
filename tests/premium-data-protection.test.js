@@ -25,11 +25,14 @@ test("la fonction Edge classe le pari recommande comme premium", () => {
   }
 });
 
-test("la fonction Edge laisse passer l'analyse offerte du jour", () => {
+test("la fonction Edge sert l'analyse offerte du jour aux seuls comptes connectes, sans le panneau Marches", () => {
   const fn = read("supabase/functions/match-data/index.ts");
   assert.match(fn, /is_free === true/, "le match offert doit etre reconnu");
-  // Seule exception depuis le 29/09/2026 : la simulation 15 min, reservee aux Pro (S2).
-  assert.match(fn, /if \(estGratuit\(m\)\) return sansChampsPro\(m\);/, "aucun retrait hors champs Pro seulement");
+  // 04/10/2026 (decision de Clement) : plus rien de payant dans les fichiers publics ; un compte connecte
+  // recoit l'analyse depuis match_premium_data, sauf marches_panneau, v3_marches et marches_flux (Pro).
+  assert.match(fn, /const offerts = connecte \? matchs\.filter\(estGratuit\)/);
+  assert.match(fn, /if \(!connecte \|\| !premium\) return retirerPremium\(m\);/, "visiteur sans compte : rien de payant");
+  assert.match(fn, /return sansChampsPro\(avecPremium\(retirerPremium\(m\), premium, detailFields\)\);/);
 });
 
 test("le pipeline retire ces champs du fichier public et des pages match", () => {
@@ -62,8 +65,8 @@ test("le pipeline retire ces champs du fichier public et des pages match", () =>
 test("le pipeline ne retire que les champs Pro seulement s'il ne peut pas persister ailleurs", () => {
   const wf = read(".github/workflows/update-data.yml");
   assert.match(wf, /var PEUT_PROTEGER=!!\(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY\)/);
-  assert.match(wf, /if\(!m\)return m;[\s\S]{0,400}?if\(!PEUT_PROTEGER\)return PREMIUM_FIELDS_LIB\.sansChampsPro\(m\);/,
-    "sans table protegee accessible, seuls les champs Pro seulement sont retires du fichier public");
+  assert.match(wf, /if\(!m\)return m;[\s\S]{0,600}?if\(!PEUT_PROTEGER\)return PREMIUM_FIELDS_LIB\.sansChampsReserves\(m\);/,
+    "sans table protegee accessible, le detail du match et le panneau Marches sont retires quand meme du fichier public");
   assert.doesNotMatch(wf, /if\(!m\|\|!PEUT_PROTEGER\)return m;/, "plus jamais le match complet en clair");
 });
 

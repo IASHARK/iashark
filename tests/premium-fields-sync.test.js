@@ -47,7 +47,7 @@ test("amorces et faits publics : jamais classes premium", () => {
   for (const k of publics) assert.ok(!PREMIUM.PREMIUM_FIELDS.includes(k), k + " ne doit pas etre premium");
 });
 
-test("stripPremium : tout retire hors match offert, has_signal conserve l'amorce", () => {
+test("stripPremium : tout retire, match offert compris (04/10/2026), has_signal conserve l'amorce", () => {
   const complet = { id: 1, home: { n: "A" }, away: { n: "B" }, conf: 6.9, p1: 60, btts: 61, pari_rec: "Under 3.5", paris_safe: { bet: "Under 3.5" }, top_scorers: [{ goal_threat_score: 80 }], fatigue: { home: { val: 100 } } };
   const pub = PREMIUM.stripPremium(complet);
   assert.deepEqual(PREMIUM.premiumLeaks(pub), []);
@@ -55,8 +55,13 @@ test("stripPremium : tout retire hors match offert, has_signal conserve l'amorce
   assert.equal(pub.has_signal, true);
   assert.equal(pub.conf, undefined, "conf (note sur 10) est premium depuis le 15/09/2026");
   assert.deepEqual(pub.fatigue, complet.fatigue, "fatigue.val est un fait, pas la cle premium val");
+  // 04/10/2026 (decision de Clement, avocat du diable point 6) : le match offert n'est plus en clair dans les
+  // fichiers publics ; match-data sert son analyse aux comptes connectes.
   const offert = Object.assign({}, complet, { is_free: true });
-  assert.equal(PREMIUM.stripPremium(offert), offert, "le match offert reste complet");
+  const pubOffert = PREMIUM.stripPremium(offert);
+  assert.deepEqual(PREMIUM.premiumLeaks(pubOffert), []);
+  assert.deepEqual([pubOffert.is_free, pubOffert.has_signal, pubOffert.pari_rec], [true, true, undefined]);
+  assert.deepEqual(PREMIUM.premiumLeaks(offert).length > 0, true, "le match offert complet est une fuite dans un fichier public");
   assert.deepEqual(Object.keys(PREMIUM.premiumPayload(complet)).sort(), ["btts", "conf", "p1", "paris_safe", "top_scorers"]);
 });
 
@@ -67,25 +72,31 @@ test("deepPremiumLeaks detecte un champ premium imbrique ou de premier niveau", 
     { id: 3, home: {}, away: {}, is_free: true, p1: 50, pari_rec: "x" },
   ] };
   const leaks = PREMIUM.deepPremiumLeaks(fichier);
-  assert.equal(leaks.length, 2, leaks.join(" | "));
+  // Match offert compris depuis le 04/10/2026.
+  assert.equal(leaks.length, 4, leaks.join(" | "));
+  assert.ok(leaks.some((l) => /#3\.pari_rec$/.test(l)));
   assert.ok(leaks.some((l) => /#1\.p1$/.test(l)));
   assert.ok(leaks.some((l) => /#2\.extra\.nested\[0\]\.goal_threat_score$/.test(l)));
 });
 
-test("historique : pari en attente masque hors match offert, relu depuis l'archive sans rien inventer", () => {
+test("historique : pari en attente masque, match offert compris, et pari d'un match reporte ; relu depuis l'archive sans rien inventer", () => {
   const preds = [
     { fixture_id: 10, result: "scheduled", prediction: "Under 3.5", cote: 1.4, model_probability: 72, conf: 7.2, market: "under-35", home: "A", away: "B", date: "2026-09-14" },
     { fixture_id: 11, result: "scheduled", prediction: "BTTS Oui", cote: 1.6, model_probability: 61 },
     { fixture_id: 12, result: "win", prediction: "Over 2.5", cote: 1.9 },
     { fixture_id: 13, result: "pending", prediction: "DC 1X", cote: 1.3 },
+    { fixture_id: 14, result: "void", reporte: true, prediction: "Over 2.5", cote: 1.41, score: null },
+    { fixture_id: 15, result: "void", prediction: "Over 2.5", cote: 1.5, score: "1-1" },
   ];
   const pub = PREMIUM.redactPendingPredictions(preds, [11]);
   assert.equal(pub[0].prediction, undefined);
   assert.equal(pub[0].redacted, true);
   assert.equal(pub[0].home, "A", "identite et date conservees pour le reglement");
-  assert.equal(pub[1].prediction, "BTTS Oui", "match offert conserve");
+  assert.equal(pub[1].prediction, undefined, "match offert masque aussi (04/10/2026)");
   assert.equal(pub[2].prediction, "Over 2.5", "prediction reglee conservee");
   assert.equal(pub[3].prediction, undefined);
+  assert.deepEqual([pub[4].prediction, pub[4].redacted, pub[4].result, pub[4].reporte], [undefined, true, "void", true], "match reporte : pari masque, report marque");
+  assert.equal(pub[5].prediction, "Over 2.5", "pari annule (push) d'un match joue : conserve");
   assert.equal(preds[0].prediction, "Under 3.5", "l'entree d'origine n'est jamais modifiee");
   const n = PREMIUM.rehydratePredictions(pub, [{ fixture_id: 10, prediction: "Under 3.5", cote: "1.4", model_probability: 72, conf: 7.2, market: "under-35" }]);
   assert.equal(n, 1);
@@ -145,7 +156,9 @@ test("decoupage, script local et pages SEO utilisent la liste unique", () => {
 
 test("fonction Edge : non-abonne sans champ premium ni run_output detaille, abonne servi depuis la table", () => {
   const fn = read("supabase/functions/match-data/index.ts");
-  assert.match(fn, /if \(estGratuit\(m\)\) return sansChampsPro\(m\);/);
+  // 04/10/2026 : match offert servi seulement a un compte connecte, depuis la table, sans le panneau Marches.
+  assert.match(fn, /if \(!connecte \|\| !premium\) return retirerPremium\(m\);/);
+  assert.match(fn, /return sansChampsPro\(avecPremium\(retirerPremium\(m\), premium, detailFields\)\);/);
   assert.match(fn, /return retirerPremium\(m\);/);
   assert.match(fn, /data\.run_output = runOutputPublic\(data\.run_output, matchs\)/);
   assert.match(fn, /select\(PREMIUM_COLUMNS \+ ",premium_fields"\)/);

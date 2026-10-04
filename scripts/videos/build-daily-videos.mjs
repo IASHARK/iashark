@@ -1,14 +1,18 @@
 #!/usr/bin/env node
-// Prepare les donnees des videos quotidiennes : Safe (+ Combine en option) et
-// une video par match analyse (moitie Match simule, moitie Match Pulse) a partir de data.json (public) et de match_premium_data
+// Prepare les donnees des videos quotidiennes : une video par match analyse
+// (moitie Match simule, moitie Match Pulse) a partir de data.json (public) et de match_premium_data
 // (Supabase, analyses completes). Ecrit un fichier de props par video et un
 // manifest.json que le workflow daily-videos.yml rend puis envoie sur Telegram.
 //
 //   node scripts/videos/build-daily-videos.mjs --out <dossier> [--date AAAA-MM-JJ]
-//        [--premium-file rows.json]   (tests en local, sans cle Supabase)
+//        [--premium-file rows.json] [--data data.json]   (tests en local, sans cle Supabase)
 //
-// Aucune cote ni aucun pourcentage n'apparait dans les videos Safe et Combine :
-// ils servent uniquement a choisir les selections.
+// UNE SEULE SOURCE (controle du trader de cotes du 04/10/2026) : ce script ne calcule PLUS son
+// propre « Safe » (3 paris « les plus surs ») ni son « Combine @10 ». Les paris du jour, les
+// tickets x5 / x10 et la Selection en or sont calcules une seule fois par le calcul quotidien
+// (lib/tickets-du-jour.js, table tickets_du_jour) et servis selon le niveau d'acces par la
+// fonction tickets-du-jour : x10 et Selection en or sont reserves aux Pro, ils ne partent donc
+// jamais dans une video publique. Aucune video « Safe » ni « Combine » n'est plus produite.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -24,9 +28,7 @@ const OUT = path.resolve(args.out || path.join(REPO, "remotion-score-template/ou
 const parisDate = (d = new Date()) => new Intl.DateTimeFormat("fr-CA", {timeZone: "Europe/Paris"}).format(d);
 const TODAY = args.date || parisDate();
 const MOIS = ["JANV.", "FÉVR.", "MARS", "AVRIL", "MAI", "JUIN", "JUIL.", "AOÛT", "SEPT.", "OCT.", "NOV.", "DÉC."];
-const MOIS_LONG = ["JANVIER", "FÉVRIER", "MARS", "AVRIL", "MAI", "JUIN", "JUILLET", "AOÛT", "SEPTEMBRE", "OCTOBRE", "NOVEMBRE", "DÉCEMBRE"];
 const [, mm, dd] = TODAY.split("-").map(Number);
-const dayLabel = `${String(dd).padStart(2, "0")} ${MOIS_LONG[mm - 1]}`;
 // data.json : "AAAA-MM-JJ HH:MM" en heure de Paris
 const kickoffParis = (m) => String(m.date || "");
 const hourOf = (m) => kickoffParis(m).slice(11, 16).replace(":", "H");
@@ -45,26 +47,6 @@ const leagueRank = (m) => {
 const COMPET_LABEL = (league) => String(league || "").toUpperCase()
   .replace("UEFA ", "").replace("NATIONS LEAGUE", "LIGUE DES NATIONS").replace("CHAMPIONS LEAGUE", "LIGUE DES CHAMPIONS")
   .replace("EUROPA LEAGUE", "LIGUE EUROPA").replace("CONFERENCE LEAGUE", "LIGUE CONFÉRENCE").replace("MAJOR LEAGUE SOCCER", "MLS");
-
-// ---------- Libelles de paris lisibles ----------
-const num = (s) => s.replace("_", ",").replace(".", ",");
-function pickLabel(id, market, home, away) {
-  const fixed = {
-    "home-win": `${home} gagne`, "away-win": `${away} gagne`, "draw": "Match nul",
-    "dc-1x": `${home} ou match nul`, "dc-x2": `${away} ou match nul`, "dc-12": "Pas de match nul",
-    "btts-yes": "Les deux équipes marquent", "btts-no": "Une équipe ne marque pas",
-    "fh-over-05": "Au moins 1 but en 1re mi-temps", "fh-under-15": "Moins de 2 buts en 1re mi-temps",
-    "home-team-under-15": `${home} marque moins de 2 buts`, "away-team-under-15": `${away} marque moins de 2 buts`,
-    "home-team-over-15": `${home} marque 2 buts ou plus`, "away-team-over-15": `${away} marque 2 buts ou plus`,
-    "home-team-over-05": `${home} marque`, "away-team-over-05": `${away} marque`,
-  };
-  if (fixed[id]) return fixed[id];
-  let r;
-  if ((r = /^(over|under)-(\d)(\d)$/.exec(id))) return `${r[1] === "over" ? "Plus" : "Moins"} de ${r[2]},${r[3]} buts`;
-  if ((r = /^total-shots-on-target-(over|under)-([\d_]+)$/.exec(id))) return `${r[1] === "over" ? "Plus" : "Moins"} de ${num(r[2])} tirs cadrés`;
-  if ((r = /^total-shots-(over|under)-([\d_]+)$/.exec(id))) return `${r[1] === "over" ? "Plus" : "Moins"} de ${num(r[2])} tirs`;
-  return String(market || id).replace(/\bDomicile\b/g, home).replace(/\bExterieur\b/g, away).replace(/(\d)\.(\d)/g, "$1,$2");
-}
 
 // ---------- Chargement ----------
 const data = JSON.parse(fs.readFileSync(args.data || path.join(REPO, "data.json"), "utf8"));
@@ -106,85 +88,6 @@ const PAYS = {
 };
 const shortName = (n) => PAYS[n] || String(n).replace(/^Paris Saint Germain$/, "PSG").replace(/^Manchester United$/, "Man United").replace(/^Manchester City$/, "Man City");
 const teamLogo = (t) => `https://media.api-sports.io/football/teams/${t.id}.png`;
-const reliabilityOk = (p) => !/faible/i.test(p.premium_fields?.reliability?.label || "");
-
-// ---------- SAFE : les 3 pronos du site les plus surs ----------
-// Uniquement le prono affiche sur le site pour chaque match (pari_rec), pour
-// que la video dise exactement la meme chose que la page du match. Garde ceux
-// ou le modele ET le marche donnent au moins 62 % ; score = la plus basse des
-// deux probas ; les 3 meilleurs matchs.
-const recEntry = (p) => p.markets_compared.find((x) => x.id === p.market_id);
-function buildSafe() {
-  const cands = [];
-  for (const {m, p} of pool) {
-    if (!reliabilityOk(p) || !p.pari_rec) continue;
-    const e = recEntry(p);
-    const prob = Number(p.model_probability), cons = Number(e?.consensus ?? prob);
-    if (!(prob >= 62 && cons >= 62)) continue;
-    cands.push({m, id: p.market_id, market: p.pari_rec, score: Math.min(prob, cons)});
-  }
-  cands.sort((a, b) => b.score - a.score || leagueRank(a.m) - leagueRank(b.m));
-  const legs = cands.slice(0, 3).sort((a, b) => kickoffParis(a.m).localeCompare(kickoffParis(b.m)));
-  return legs.length === 3 ? legs : null;
-}
-
-// ---------- COMBINE COTE 10 : calcul a part ----------
-// N'importe quel marche compare du match (1N2, double chance, buts, les deux
-// marquent...), a condition d'avoir la vraie cote du bookmaker dans data.json.
-// Une seule selection par match (pas de correlation). Proba d'une selection =
-// la plus prudente entre modele et marche. On cherche la combinaison qui atteint
-// une cote totale >= 10 avec la plus forte proba de passer (sac a dos a choix
-// multiples sur log(cote), programmation dynamique). Hors matchs du Safe.
-const COMBO_TARGET = 10, COMBO_MAX_LEGS = 6;
-const ODDS_FIELD = {"home-win": "c1", "draw": "cn", "away-win": "c2", "dc-1x": "dc1x", "dc-x2": "dc2x", "dc-12": "dc12",
-  "over-15": "co15", "over-25": "co25", "under-25": "cu25", "over-35": "co35", "btts-yes": "btts_oui", "btts-no": "btts_non"};
-function buildCombo(excluded) {
-  const STEP = 0.02, TARGET = Math.ceil(Math.log(COMBO_TARGET) / STEP);
-  const options = [];
-  for (const {m, p} of pool) {
-    if (excluded.has(m.id) || !reliabilityOk(p)) continue;
-    const legs = [];
-    for (const e of p.markets_compared) {
-      const cote = Number(String(m[ODDS_FIELD[e.id]] ?? "").replace(",", "."));
-      const prob = Math.min(Number(e.probability), Number(e.consensus)) / 100;
-      if (!(cote >= 1.12 && cote <= 3.2 && prob >= 0.4)) continue;
-      if (Number(e.probability) < Number(e.consensus) - 3) continue; // le modele ne doit pas etre nettement contre
-      legs.push({m, id: e.id, market: e.market, cote, prob, w: Math.round(Math.log(cote) / STEP), v: Math.log(prob)});
-    }
-    if (legs.length) options.push(legs);
-  }
-  // dp[k][w] = meilleure somme de log(proba) avec k selections et une cote (en pas) w (plafonnee a TARGET)
-  let dp = Array.from({length: COMBO_MAX_LEGS + 1}, () => new Map());
-  dp[0].set(0, {v: 0, legs: []});
-  for (const legs of options) {
-    const next = dp.map((mp) => new Map(mp));
-    for (let k = 0; k < COMBO_MAX_LEGS; k++) for (const [w, st] of dp[k]) for (const l of legs) {
-      const nw = Math.min(TARGET, w + l.w), nv = st.v + l.v, cur = next[k + 1].get(nw);
-      if (!cur || nv > cur.v) next[k + 1].set(nw, {v: nv, legs: [...st.legs, l]});
-    }
-    dp = next;
-  }
-  let best = null;
-  for (let k = 2; k <= COMBO_MAX_LEGS; k++) {
-    const st = dp[k].get(TARGET);
-    if (st && (!best || st.v > best.v)) best = st;
-  }
-  if (!best) return null;
-  const cote = best.legs.reduce((x, l) => x * l.cote, 1);
-  if (cote < COMBO_TARGET) return null;
-  const legs = [...best.legs].sort((a, b) => kickoffParis(a.m).localeCompare(kickoffParis(b.m)));
-  return {legs, cote, prob: Math.exp(best.v)};
-}
-
-const ticketProps = (title, legs) => ({
-  title,
-  dateLabel: `SÉLECTION DU ${dayLabel}`,
-  legs: legs.map((l) => ({
-    home: shortName(l.m.home.n), away: shortName(l.m.away.n),
-    pick: pickLabel(l.id, l.market, shortName(l.m.home.n), shortName(l.m.away.n)),
-    kickoff: hourOf(l.m),
-  })),
-});
 
 // ---------- Scenario simule (Match simule + Match Pulse) ----------
 const DEFAULT_SHARES = [13, 14, 16, 17, 18, 22]; // repartition moyenne des buts par quart d'heure
@@ -318,20 +221,7 @@ const write = (slug, composition, props, caption) => {
   fs.writeFileSync(file, JSON.stringify(props, null, 2));
   videos.push({slug, composition, props: file, output: path.join(OUT, `${TODAY}-${slug}.mp4`), caption});
 };
-const legLine = (l) => `• ${l.home} – ${l.away} (${l.kickoff}) : ${l.pick}`;
-
-const safe = buildSafe();
-if (safe) {
-  const props = ticketProps("SAFE", safe);
-  write("safe", "DailySafe", props, `SAFE du ${dayLabel.toLowerCase()}\n${props.legs.map(legLine).join("\n")}`);
-}
-// Combine mis de cote pour l'instant : seulement avec --combine
-const combo = args.combine ? buildCombo(new Set((safe || []).map((l) => l.m.id))) : null;
-if (combo) {
-  const props = {...ticketProps("COMBINÉ", combo.legs), badge: `OBJECTIF @${COMBO_TARGET}`};
-  const pct = (combo.prob * 100).toFixed(1).replace(".", ",");
-  write("combine", "DailyCombo", props, `COMBINÉ @${COMBO_TARGET} du ${dayLabel.toLowerCase()} — cote totale ${combo.cote.toFixed(2).replace(".", ",")}, environ ${pct} % de chances selon le modèle\n${props.legs.map(legLine).join("\n")}`);
-}
+// Plus de video « Safe » ni « Combine » (une seule source : tickets et Selection en or du calcul quotidien).
 // ---------- Une video par match analyse ----------
 // Tous les matchs du jour ont leur video. La moitie la plus riche en buts
 // (score simule le plus frequent) passe en « Match simule », le reste en
@@ -360,6 +250,6 @@ const why = !matches.length ? "matchs pas encore chargés (les analyses de ce jo
 const manifest = {date: TODAY, matchesToday: matches.length, withAnalysis: pool.length, videos,
   simule: videos.filter((v) => v.composition === "DailyMatchSimule").length,
   pulse: videos.filter((v) => v.composition === "DailyMatchPulse").length,
-  skipped: why ? [why] : [!safe && "safe (moins de 3 sélections sûres)", args.combine && !combo && "combiné (impossible d'atteindre la cote 10)"].filter(Boolean)};
+  skipped: why ? [why] : []};
 fs.writeFileSync(path.join(OUT, "manifest.json"), JSON.stringify(manifest, null, 2));
 console.log(JSON.stringify({date: TODAY, matches: matches.length, analysed: pool.length, videos: videos.map((v) => v.slug), skipped: manifest.skipped}, null, 2));

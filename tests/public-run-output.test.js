@@ -11,8 +11,10 @@ const safePick = {
   market: "FT_TEAM_TOTAL_AWAY_1.5_UNDER", model_probability_pct: 69.83, decimal_odds: 1.53, evaluated_count: 880,
 };
 
-test("SAFE_PICK complete publiee seulement si elle porte sur le match offert", () => {
-  assert.deepEqual(publicSafePick(safePick, [{ id: 1557402, is_free: true }]), safePick);
+test("SAFE_PICK : masquee meme sur le match offert (04/10/2026 : son pari n'est plus public avant le match)", () => {
+  const out = publicSafePick(safePick, [{ id: 1557402, is_free: true }]);
+  assert.equal(out.redacted, true);
+  for (const k of ["market", "model_probability_pct", "decimal_odds", "fixture", "selection"]) assert.equal(k in out, false, k);
 });
 
 test("SAFE_PICK d'un match payant : ni marche, ni probabilite, ni cote, ni equipes", () => {

@@ -641,7 +641,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
        Abonne Pro : « Ton abonnement Pro est actif ». Repli sans JS : le prix mensuel. -->
   <div class="mx-auto w-full max-w-[600px] px-4 sm:px-8 py-12 sm:py-20">
     <div id="offreAccueil"><section class="op op--vitrine"><h2 class="op-title" data-i18n="offre_pro.title_general">Hazte Pro: todos los partidos del día, abiertos</h2><p class="op-billing"><b data-market-price="pro.month">19,95 €</b> <span data-i18n="offre_pro.per_month">/ mes</span></p><a class="mu-shimmer op-cta" href="/es/abonnement.html" data-href="abonnement.html" data-i18n="offre_pro.cta_continue_month">Continuar con el mes</a></section></div>
-    <p class="mt-4 text-center text-[13.5px] leading-snug text-soft" id="accesGratuit" data-i18n="offre_pro.free_line">Gratis: el análisis completo del partido del día, con una cuenta.</p>
+    <p class="mt-4 text-center text-[13.5px] leading-snug text-soft" id="accesGratuit" data-i18n="offre_pro.free_line">Gratis: el análisis del partido del día, con una cuenta.</p>
   </div>
 </section>
 
@@ -1066,7 +1066,7 @@ function monterOffre(ctx){
   }
   if(gratuit&&ctx&&ctx.session)gratuit.hidden=true;
   // Tickets en ligne (lib/offre-pro.js#OUVERT) : la ligne du gratuit les nomme.
-  if(gratuit&&window.IasharkOffrePro&&IasharkOffrePro.OUVERT.tickets)gratuit.textContent=t('offre_pro.free_line_tickets','Gratuit : le match du jour, le ticket x5 et le buteur du jour, avec un compte.');
+  if(gratuit&&window.IasharkOffrePro&&IasharkOffrePro.OUVERT.tickets&&(!window.IASHARK_MARKET||!IASHARK_MARKET.code||IASHARK_MARKET.code==='fr'))gratuit.textContent=t('offre_pro.free_line_tickets','Gratuit : le match du jour et le ticket x5, avec un compte.');
   if(window.IasharkOffrePro)IasharkOffrePro.mount(el,{mode:'vitrine',contexte:'general',next:lien(''),connecte:!!(ctx&&ctx.session)});
 }
 

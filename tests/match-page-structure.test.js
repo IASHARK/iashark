@@ -74,7 +74,7 @@ test("la page match assemble les sections dans l'ordre demande",()=>{
   dansLOrdre(ms.slice(ms.indexOf("function sections(c)")),['["sim", simulation(c)','["film", film(c)','["premier", premier(c)','["jumeaux", jumeaux(c)','["equipes", equipes(c)','["joueurs", joueurs(c)','["arbitre", arbitre(c)'],"sections");
   // Match bloque : le composant de paiement juste sous l'en-tete, l'apercu flou dessous.
   dansLOrdre(blocDe("function renderProWall(raw,ctx)","function renderAuthWall"),["['offre',","['apercu',MS.apercuFlou()","IasharkOffrePro.mount(box"],"mur Pro");
-  dansLOrdre(blocDe("function renderAuthWall(raw)","function renderApercu"),["['offre',carte","['apercu',MS.apercuFlou()"],"match offert sans compte");
+  dansLOrdre(blocDe("function renderAuthWall(raw)","function renderApercu"),["['offre',carte","['apercu',MS.apercuFlou({offert:true})"],"match offert sans compte");
   assert.match(js,/hero\(viewModel\(raw\),\{sansStats:true\}\)/,"apercu de chargement sans stats non plus");
   for(const parti of ["rappelCta","analyseVisiteur","ctaBar","bindCtaBar","signalSticky","faqCard"])assert.doesNotMatch(js,new RegExp("function\\s+"+parti+"\\s*\\("),parti+" reintroduit");
 });
@@ -93,11 +93,13 @@ test("vue visiteur : un seul bouton Debloquer par vue, avec son identifiant de s
   assert.match(js,/const suivi=kind=>` data-track="\$\{kind\}" data-track-kind="\$\{kind\}"`;/);
   // Match offert sans compte : un bouton « compte gratuit ».
   assert.equal((js.match(/suivi\('match_avis_unlock'\)/g)||[]).length,1);
-  // Match bloque : LE composant de paiement porte le suivi ; le panneau Marches
-  // flou de l'ordinateur ne fait que remonter jusqu'a lui (aucun second chemin).
+  // Match bloque : LE composant de paiement porte le suivi et le seul bouton ; le panneau
+  // Marches flou de l'ordinateur n'a plus de bouton (controle UX du 04/10 : un deuxieme
+  // « Passe Pro ↑ » montait vers un bloc place a droite).
   const mur=blocDe("function renderProWall(raw,ctx)","function renderAuthWall");
   assert.match(mur,/suivi:'match_gate_unlock'/);
-  assert.match(mur,/href:'#sec-offre'[^}]*attrs:'data-mk-scroll'/);
+  assert.match(mur,/MS\.panneauFlou\(pub\.nb_marches,''\)/);
+  assert.doesNotMatch(mur,/data-mk-scroll|boutonShimmer/);
   for(const k of ["match_recall_unlock","match_analysis_unlock","match_faq_unlock","match_bar_unlock"]){
     assert.ok(!js.includes(k),k+" : emplacement retire le 19/09/2026");
   }
@@ -186,7 +188,9 @@ test("vue visiteur : blocs fermes sans aucune donnee du modele, copie publique a
   copie.filter(k=>!ref.includes(k)).forEach(k=>assert.ok(["marches_panneau","sim_resume","jumeaux"].includes(k),k+" : champ inconnu"));
   // Apercu flou et panneau flou : constantes seulement (aucune donnee lue).
   const MS=require("../lib/match-sections.js");
-  assert.equal(MS.apercuFlou.length,0,"l'apercu ne prend aucune donnee");
+  // Un seul drapeau (match offert : titre adapte), jamais une donnee du match.
+  assert.equal(MS.apercuFlou.length,1);
+  assert.equal(MS.apercuFlou({offert:true,nb_marches:77,chance:63}).replace("l’analyse offerte de ce match","la page Pro de ce match"),MS.apercuFlou(),"l'apercu ne prend aucune donnee");
   assert.equal(MS.panneauFlou(46,"").replace(/46/g,""),MS.panneauFlou(12,"").replace(/12/g,""),"panneau flou : seul le nombre public change");
   const hero=js.slice(js.indexOf("function hero(vm,o)"),js.indexOf("const REL_NIVEAUX"));
   assert.ok(!/probabilities|probBar|recommendation/.test(hero),"l'en-tete ne doit montrer aucune probabilite du modele");

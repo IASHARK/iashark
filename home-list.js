@@ -43,7 +43,12 @@ function reducedMotion(){return !!(root.matchMedia&&root.matchMedia('(prefers-re
 /* ---------- Icones : jeu LUCIDE (lib/icones.js, ISC), trace d'origine, jamais
    dessine a la main (controle UX du 04/10/2026, exigence de Clement : de vrais
    composants). lib/icones.js est charge par la page avant le premier rendu. ---------- */
-function ico(nom,cls){var I=root&&root.IasharkIcones;return I?I.svg(nom,cls||''):'';}
+function icones(){
+  if(root&&root.IasharkIcones)return root.IasharkIcones;
+  // Node (tests) : le meme module, charge directement.
+  try{return (typeof module==='object'&&module.exports&&typeof require==='function')?require('./lib/icones.js'):null;}catch(e){return null;}
+}
+function ico(nom,cls){var I=icones();return I?I.svg(nom,cls||''):'';}
 var ICON={
   get star(){return ico('star','hl-ico');},
   get chev(){return ico('chevron-down','hl-chev');},

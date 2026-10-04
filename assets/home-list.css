@@ -122,18 +122,18 @@
    fausses barres dessinees (controle UX du 04/10/2026 : l'or est reserve a la Selection en or). -- */
 .hl-ready{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;line-height:12px;color:var(--cyan,#20d5ef);white-space:nowrap;}
 .hl-ico{flex:none;width:12px;height:12px;}
-.hl-probadge{gap:5px;height:24px;padding:0 10px;font-size:11px;font-weight:700;background:rgba(32,213,239,.12);color:#cffafe;box-shadow:inset 0 0 0 1px rgba(32,213,239,.42);transition:background .15s;}
-.hl-probadge .hl-lock-ico{width:12px;height:12px;color:var(--cyan,#20d5ef);}
-.hl-row.is-locked:hover .hl-probadge,.hl-row.is-locked:focus-visible .hl-probadge{background:rgba(32,213,239,.2);}
+.hu-badge.hl-probadge{gap:5px;height:24px;padding:0 10px;font:700 11px/1 var(--body,"DM Sans",system-ui,sans-serif);background:rgba(32,213,239,.12);color:#cffafe;box-shadow:inset 0 0 0 1px rgba(32,213,239,.42);transition:background .15s;}
+.hu-badge.hl-probadge .hl-lock-ico{width:12px;height:12px;margin:0;color:var(--cyan,#20d5ef);}
+.hl-row.is-locked:hover .hu-badge.hl-probadge,.hl-row.is-locked:focus-visible .hu-badge.hl-probadge{background:rgba(32,213,239,.2);}
 
 /* -- Visiteur : niveau public prob_band (high / good / moderate), jamais un chiffre -- */
 .hl-zone-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:3px 8px;max-width:100%;}
-.hl-band{gap:4px;height:18px;padding:0 6px;font-size:9.5px;font-weight:700;line-height:1;}
-.hl-band .hl-ico{width:11px;height:11px;}
-.hl-band.is-high{background:rgba(32,213,239,.14);color:var(--cyan,#20d5ef);}
-.hl-band.is-good{background:rgba(32,213,239,.07);color:rgba(143,227,241,.92);}
-.hl-band.is-moderate{background:rgba(141,179,211,.08);color:var(--soft,#a6b4c6);}
-.hl-band .hl-band-i{width:10px;height:10px;opacity:.7;}
+.hu-badge.hl-band{gap:4px;height:18px;padding:0 6px;font:700 9.5px/1 var(--body,"DM Sans",system-ui,sans-serif);}
+.hu-badge.hl-band .hl-ico{width:11px;height:11px;margin:0;}
+.hu-badge.hl-band.is-high{background:rgba(32,213,239,.14);color:var(--cyan,#20d5ef);}
+.hu-badge.hl-band.is-good{background:rgba(32,213,239,.07);color:rgba(143,227,241,.92);}
+.hu-badge.hl-band.is-moderate{background:rgba(141,179,211,.08);color:var(--soft,#a6b4c6);}
+.hu-badge.hl-band .hl-band-i{width:10px;height:10px;opacity:.7;}
 .hl-band-note{margin:8px 0 0;display:flex;align-items:center;gap:7px;font-size:11.5px;line-height:1.4;color:var(--soft,#a6b4c6);}
 .hl-band-note .hl-ico{width:13px;height:13px;}
 
@@ -185,8 +185,8 @@
   .hl-meta{margin-top:6px;height:auto;flex-wrap:nowrap;}
   .hl-zone{gap:6px;}
   .hl-ready{font-size:11.5px;}
-  .hl-band{height:20px;padding:0 7px;gap:5px;font-size:10.5px;}
-  .hl-probadge{height:28px;padding:0 12px;font-size:12px;}
+  .hu-badge.hl-band{height:20px;padding:0 7px;gap:5px;font-size:10.5px;}
+  .hu-badge.hl-probadge{height:28px;padding:0 12px;font-size:12px;}
   .hl-none-s{max-width:none;}
   .hl-freepill{height:28px;padding:0 12px;font-size:12px;}
   .hl-none-t{font-size:12.5px;}

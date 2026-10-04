@@ -97,14 +97,13 @@ test("la page d'accueil ne floute plus une donnee premium", () => {
   const html = read("index.html");
   assert.doesNotMatch(html, /filter:blur\(7px\)/,
     "flouter une vraie donnee en CSS n'est pas une protection : elle reste lisible dans le DOM");
-  // Liste des matchs (home-list.js) : la pilule floutee de la ligne verrouillee
-  // est faite de barres CSS abstraites, identiques sur toutes les lignes, sans
-  // aucun texte ni chiffre (ni vrai ni faux).
+  // Liste des matchs (home-list.js) : la ligne verrouillee porte une pastille HyperUI
+  // « Badges » (cadenas Lucide + « Débloquer avec Pro »), identique sur toutes les lignes,
+  // sans aucun chiffre (ni vrai ni faux) ; plus aucun flou dans la liste (04/10/2026).
   const list = read("home-list.js");
-  assert.match(list, /<span class="hl-ghost"><i class="g1"><\/i><i class="g2"><\/i><i class="g3"><\/i><i class="g4"><\/i><\/span>/);
+  assert.match(list, /<span class="hu-badge hl-probadge" aria-hidden="true">'\+ICON\.lock/);
   const css = read("assets/home-list.css");
-  const blurred = css.match(/[^{}]+\{[^}]*filter:blur\([^)]*\)[^}]*\}/g) || [];
-  blurred.forEach((rule) => assert.match(rule, /^\s*\.hl-ghost\{/, "flou reserve aux barres abstraites : " + rule.trim()));
+  assert.deepEqual(css.match(/[^{}]+\{[^}]*filter:blur\([^)]*\)[^}]*\}/g) || [], [], "aucun flou dans la liste des matchs");
   assert.match(list, /m\.has_signal\|\|m\.pari_rec\|\|m\.market_id/,
     "la ligne doit rester juste quand le pari n'est pas servi");
 });

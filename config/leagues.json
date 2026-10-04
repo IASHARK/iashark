@@ -104,14 +104,17 @@
     "le proprietaire) ; liga_mx -> mx, es ; south_africa_premiership -> za, en ; LATAM (AR, CO, PE, CL) -> es, en (es-MX vise",
     "le Mexique, pas ces pays) ; eredivisie, suede, jleague -> en seul (aucun repertoire neerlandais/suedois/japonais) ;",
     "ligue1 -> en (fr deja couvert) ; competitions UEFA -> les 8 repertoires. hreflang, sitemaps et liens internes ne",
-    "visent que ces versions. Pages championnat hors perimetre : noindex,follow, sans hreflang."
+    "visent que ces versions. Pages championnat hors perimetre : noindex,follow, sans hreflang.",
+    "Ajout 2026-10-04 (etape 0 du plan moteur du 03/10) : \"sansPari\": true (Colombie, Perou, Afrique du Sud, sans cote",
+    "collectable) = AUCUN pari publie pour ce championnat ; ses matchs restent affiches comme une fiche d'information",
+    "(faits publics), no_signal vrai, no_signal_reason LEAGUE_WITHOUT_COLLECTABLE_ODDS. Regles : lib/ligues-sans-pari.js."
   ],
   "leagues": [
     { "key": "premier",     "displayName": "Premier League",      "country": "Angleterre", "apiFootballId": 39,  "oddsSportKey": "soccer_epl",                              "europeanQualification": true, "seoMatchDirs": ["gb", "en", "za"] },
     { "key": "laliga",      "displayName": "La Liga",             "country": "Espagne",    "apiFootballId": 140, "oddsSportKey": "soccer_spain_la_liga",                    "europeanQualification": true, "seoMatchDirs": ["es", "mx", "en"] },
     { "key": "seriea",      "displayName": "Serie A",             "country": "Italie",     "apiFootballId": 135, "oddsSportKey": "soccer_italy_serie_a",                    "europeanQualification": true, "seoMatchDirs": ["en"] },
     { "key": "bundesliga",  "displayName": "Bundesliga",          "country": "Allemagne",  "apiFootballId": 78,  "oddsSportKey": "soccer_germany_bundesliga",               "europeanQualification": true, "seoMatchDirs": ["en"] },
-    { "key": "ligue1",      "displayName": "Ligue 1",             "country": "France",     "apiFootballId": 61,  "oddsSportKey": "soccer_france_ligue_1",                   "europeanQualification": true, "seoMatchDirs": ["en"] },
+    { "key": "ligue1",      "displayName": "Ligue 1",             "country": "France",     "apiFootballId": 61,  "oddsSportKey": "soccer_france_ligue_one",                   "europeanQualification": true, "seoMatchDirs": ["en"] },
     { "key": "ldc",         "displayName": "Champions League",    "country": "UEFA",       "apiFootballId": 2,   "oddsSportKey": "soccer_uefa_champs_league",               "europeanQualification": false, "seoMatchDirs": ["gb", "za", "en", "mx", "es"] },
     { "key": "el",          "displayName": "Europa League",       "country": "UEFA",       "apiFootballId": 3,   "oddsSportKey": "soccer_uefa_europa_league",               "europeanQualification": false, "seoMatchDirs": ["gb", "za", "en", "mx", "es"] },
     { "key": "ecl",         "displayName": "Conference League",   "country": "UEFA",       "apiFootballId": 848, "oddsSportKey": "soccer_uefa_europa_conference_league",    "europeanQualification": false, "seoMatchDirs": ["gb", "za", "en", "mx", "es"] },
@@ -121,10 +124,10 @@
     { "key": "suede",       "displayName": "Allsvenskan",         "country": "Suede",      "apiFootballId": 113, "oddsSportKey": "soccer_sweden_allsvenskan",               "europeanQualification": true, "seoMatchDirs": ["en"] },
     { "key": "jleague",     "displayName": "J1 League",           "country": "Japon",      "apiFootballId": 98,  "oddsSportKey": "soccer_japan_j_league",                   "europeanQualification": false, "seoMatchDirs": ["en"] },
     { "key": "liga_mx",     "displayName": "Liga MX",             "country": "Mexique",    "apiFootballId": 262, "oddsSportKey": "soccer_mexico_ligamx",                    "europeanQualification": false, "apiFootballPinnacleFallback": true, "seoMatchDirs": ["mx", "es"] },
-    { "key": "south_africa_premiership", "displayName": "Premier Soccer League", "country": "Afrique du Sud", "apiFootballId": 288,                                            "europeanQualification": false, "apiFootballPinnacleFallback": true, "seoMatchDirs": ["za", "en"] },
+    { "key": "south_africa_premiership", "displayName": "Premier Soccer League", "country": "Afrique du Sud", "apiFootballId": 288,                                            "europeanQualification": false, "apiFootballPinnacleFallback": true, "sansPari": true, "seoMatchDirs": ["za", "en"] },
     { "key": "argentina_liga_profesional", "displayName": "Liga Profesional Argentina", "country": "Argentine", "apiFootballId": 128, "oddsSportKey": "soccer_argentina_primera_division", "europeanQualification": false, "apiFootballPinnacleFallback": true, "seoMatchDirs": ["es", "en"] },
-    { "key": "colombia_primera_a",         "displayName": "Primera A Colombia",         "country": "Colombie",  "apiFootballId": 239,                                                    "europeanQualification": false, "apiFootballPinnacleFallback": true, "apiNameHint": "Primera A", "seoMatchDirs": ["es", "en"] },
-    { "key": "peru_primera",               "displayName": "Liga 1 Peru",                "country": "Perou",     "apiFootballId": 281,                                                    "europeanQualification": false, "apiFootballPinnacleFallback": true, "apiNameHint": "Primera Division", "seoMatchDirs": ["es", "en"] },
+    { "key": "colombia_primera_a",         "displayName": "Primera A Colombia",         "country": "Colombie",  "apiFootballId": 239,                                                    "europeanQualification": false, "apiFootballPinnacleFallback": true, "sansPari": true, "apiNameHint": "Primera A", "seoMatchDirs": ["es", "en"] },
+    { "key": "peru_primera",               "displayName": "Liga 1 Peru",                "country": "Perou",     "apiFootballId": 281,                                                    "europeanQualification": false, "apiFootballPinnacleFallback": true, "sansPari": true, "apiNameHint": "Primera Division", "seoMatchDirs": ["es", "en"] },
     { "key": "chile_primera",              "displayName": "Primera Division Chile",     "country": "Chili",     "apiFootballId": 265, "oddsSportKey": "soccer_chile_campeonato",          "europeanQualification": false, "apiFootballPinnacleFallback": true, "apiNameHint": "Primera Division", "seoMatchDirs": ["es", "en"] }
   ]
 }

@@ -83,6 +83,16 @@ jobs:
           // sa cote et ses textes jusqu'au coup d'envoi ; le match offert d'un jour
           // deja designe le reste ; l'historique suit le pari publie.
           var PICK_FREEZE=require('./lib/pick-freeze.js');
+          // RELECTURE DES TEXTES DE L'IA (2e contre-controle de l'avocat du diable, 30/09/2026 ;
+          // remise le 04/10 apres le retour du site au 29/09) : une phrase avec « sûr »,
+          // « garanti », « certain » (au sens de sûr), « safe », « valeur », « avantage »...
+          // est retiree avant publication (lib/analyse-mots-interdits.js).
+          var MOTS_INTERDITS=require('./lib/analyse-mots-interdits.js');
+          // CHAMPIONNATS SANS PARI (03/10/2026) : Colombie, Perou, Afrique du Sud, sans cote
+          // collectable. Aucun pari publie, matchs affiches avec leurs faits publics.
+          // Liste : config/leagues.json#sansPari ; regles : lib/ligues-sans-pari.js.
+          var LIGUES_SANS_PARI=require('./lib/ligues-sans-pari.js');
+          var IDS_SANS_PARI=LIGUES_SANS_PARI.idsSansPari(LEAGUES_CONFIG);
           // Pages SEO statiques (titres/JSON-LD des pages match, versions
           // localisees, pages championnat) : scripts/seo-pages.js.
           var SEO_PAGES=require('./scripts/seo-pages.js');
@@ -1329,6 +1339,8 @@ jobs:
           async function genAnalyse(d) {
             // Match commence ou imminent (lib/kickoff-guard.js) : aucun texte d'analyse.
             if(d&&d.skip_kickoff_closed) return null;
+            // Championnat sans pari (lib/ligues-sans-pari.js) : aucun texte d'analyse non plus.
+            if(d&&d.skip_no_pick_league) return null;
             var isWorldCup=(d.leagueId===1);
             var moyBmHdom=d.bmHdom&&d.mdHdom?(d.bmHdom/d.mdHdom).toFixed(2):'?';
             var moyBeHdom=d.beHdom&&d.mdHdom?(d.beHdom/d.mdHdom).toFixed(2):'?';
@@ -1500,7 +1512,14 @@ jobs:
               var cleaned=txt.replace(/```json|```/g,'').trim();
               var firstBrace=cleaned.indexOf('{'), lastBrace=cleaned.lastIndexOf('}');
               if(firstBrace>=0&&lastBrace>firstBrace) cleaned=cleaned.slice(firstBrace,lastBrace+1);
-              return JSON.parse(cleaned);
+              // Relecture du texte produit (2e contre-controle de l'avocat du diable,
+              // 30/09/2026, remise le 04/10) : une phrase avec « sûr », « garanti », « certain »
+              // (au sens de sûr), « safe », « valeur », « avantage »... est retiree avant
+              // publication, jamais reecrite (lib/analyse-mots-interdits.js). Les chiffres,
+              // le pari et les probabilites ne passent jamais par ici.
+              var relu=MOTS_INTERDITS.nettoyerAnalyse(JSON.parse(cleaned));
+              if(relu.retraits.length) console.log('  [genAnalyse] '+relu.retraits.length+' phrase(s) retiree(s), vocabulaire interdit : '+relu.retraits.map(function(x){return x.champ+' ('+x.terme+')';}).join(', '));
+              return relu.an;
             }
             catch(e){console.error('  [genAnalyse] JSON illisible :',txt.slice(0,200));return null;}
           }
@@ -2760,6 +2779,10 @@ jobs:
               // d'information (donnees, forme, classement) sans pari ni analyse.
               var kickoffGateFix=kickoffGate(fix,Date.now(),{marginMinutes:KICKOFF_MARGIN_MINUTES});
               if(!kickoffGateFix.open) console.log('  [KICKOFF] '+home.name+' vs '+away.name+' : '+kickoffGateFix.reason+' (statut '+(kickoffGateFix.status||'?')+', coup d\'envoi '+(f.date||'?')+') - aucun pari, aucune analyse publiee.');
+              // Championnat sans pari (03/10/2026, config/leagues.json#sansPari) : aucun pari,
+              // aucun texte d'analyse ; le match reste affiche avec ses faits publics.
+              var sansPariLigue=LIGUES_SANS_PARI.estSansPari(lg.id,IDS_SANS_PARI);
+              if(sansPariLigue) console.log('  [SANS PARI] '+home.name+' vs '+away.name+' : championnat sans cote collectable ('+lg.name+'), aucun pari publie.');
               var isWorldCupMatch=(lg.id===1);
               // Nations League (league=5, 20/09/2026) : meme traitement
               // selections que la Coupe du monde (stats qualifs/tournoi,
@@ -3259,6 +3282,7 @@ jobs:
               }
               // Match commence/imminent : aucun marche retenu, quel que soit le palier.
               if(!kickoffGateFix.open){ pickedMarket=null; pickDowngrade=null; }
+              if(sansPariLigue){ pickedMarket=null; pickDowngrade=null; }
               var eligibleMarkets=allMarkets.filter(function(m){return parseFloat(m.cote)>=SELECTION.minOdds;});
               // Score(s) le(s) plus probable(s) affiches a l'utilisateur : filtres
               // pour rester coherents avec le marche recommande (ex: pas de "1-0"
@@ -3291,6 +3315,7 @@ jobs:
               // repli") - permet a l'operateur/au monitoring de distinguer un
               // vrai debut de saison d'un run degrade par le quota API.
               var noSignalReason=!currentSeasonGate.dataQualityOk?currentSeasonGate.reason:(!modelDataAvailable?'INSUFFICIENT_MODEL_DATA':(!supportedQuoteCount?'NO_REAL_ODDS':(!allMarkets.length?'NO_RELIABLE_MODEL_FOR_QUOTED_MARKETS':(!eligibleMarkets.length?'NO_ODDS_AT_OR_ABOVE_1_50':null))));
+              if(sansPariLigue) noSignalReason=LIGUES_SANS_PARI.RAISON;
               if(!kickoffGateFix.open) noSignalReason=kickoffGateFix.reason;
               var nbModelesChiffres=allMarketCandidates.filter(function(m){return Number.isFinite(Number(m.prob));}).length;
               console.log('  [SELECTION] modeles='+nbModelesChiffres+' cotes_supportees='+supportedQuoteCount+' modeles_et_cotes='+allMarkets.length+' eligibles_1.50='+eligibleMarkets.length+(noSignalReason?' raison='+noSignalReason:''));
@@ -3342,6 +3367,7 @@ jobs:
               var bestMarket=null;
               var an=await genAnalyse({
                 skip_kickoff_closed:!kickoffGateFix.open,
+                skip_no_pick_league:sansPariLigue,
                 leagueId:lg.id,home:home.name,away:away.name,homeId:home.id,awayId:away.id,
                 league:lg.name,date:TODAY+' '+heure,stade:(f.venue&&f.venue.name)||'',meteo:meteoStr,
                 rkH,rkA,totalH,totalA,mdH,meA,
@@ -3664,6 +3690,9 @@ jobs:
               // Garde coup d'envoi : fiche d'information sans pari (champs premium
               // retires, ligne premium videe). Jamais offert ni candidat canonique.
               if(!kickoffGateFix.open) closeMatchForPick(matchObj, premiumRows.length&&premiumRows[premiumRows.length-1].fixture_id===f.id?premiumRows[premiumRows.length-1]:null, PREMIUM_FIELDS_LIB.PREMIUM_FIELDS, kickoffGateFix.reason);
+              // Championnat sans pari (lib/ligues-sans-pari.js) : meme fiche d'information,
+              // avec sa propre raison. Un pari publie AVANT ce drapeau reste gele (gel ci-dessous).
+              if(kickoffGateFix.open&&sansPariLigue) LIGUES_SANS_PARI.fermerSansPari(matchObj, premiumRows.length&&premiumRows[premiumRows.length-1].fixture_id===f.id?premiumRows[premiumRows.length-1]:null, PREMIUM_FIELDS_LIB.PREMIUM_FIELDS);
               matchsData.push(matchObj);
               // Traduction des textes de `an`, differee apres la boucle (voir
               // translateNarratives). La ligne premium de CE match porte les
@@ -3791,6 +3820,8 @@ jobs:
             // SAFE_PICK / combines canoniques : seulement sur les matchs publies pour la
             // premiere fois (l'injection SAFE_PICK remplacerait le pari d'un match fige).
             RUN_OUTPUT_CANDIDATES=PICK_FREEZE.withoutFrozenCandidates(RUN_OUTPUT_CANDIDATES,GEL_FIGES);
+            // Championnat sans pari (lib/ligues-sans-pari.js) : jamais candidat non plus.
+            RUN_OUTPUT_CANDIDATES=LIGUES_SANS_PARI.sansCandidatsSansPari(RUN_OUTPUT_CANDIDATES,FIXTURE_BY_ID,IDS_SANS_PARI);
             // Snapshot 'prediction' (match_snapshots) : celui de la premiere publication
             // reste en place, ce sont les donnees d'entree qui expliquent le pari fige.
             snapshotRows=snapshotRows.filter(function(r){ return !GEL_FIGES[String(r&&r.fixture_id)]; });
@@ -3953,8 +3984,9 @@ jobs:
             // AVANT le retrait des champs premium (lambda du moteur requis, comme
             // sur la page match d'un abonne). Seule l'identite des joueurs sort.
             var BUTEURS_MS=Date.now();
+            // Championnat sans pari (lib/ligues-sans-pari.js) : aucun de ses joueurs.
             ecrireButeursDuJour(allMatchsData, function(m){
-              return kickoffGate(FIXTURE_BY_ID[String(m.id)],BUTEURS_MS,{marginMinutes:KICKOFF_MARGIN_MINUTES}).open;
+              return kickoffGate(FIXTURE_BY_ID[String(m.id)],BUTEURS_MS,{marginMinutes:KICKOFF_MARGIN_MINUTES}).open&&!LIGUES_SANS_PARI.estSansPari(LIGUES_SANS_PARI.ligueDuMatch(m,FIXTURE_BY_ID),IDS_SANS_PARI);
             });
             // Copie assainie pour le fichier public. allMatchsData reste complet :
             // l'historique, les pages match et les lignes premium en ont besoin.

@@ -27,7 +27,9 @@ test("icones Lucide : contenu SVG d'origine, licence ISC, chaque icone utilisee 
   const noms = new Set();
   for (const f of fichiers) {
     for (const m of read(f).matchAll(/(?:\bico|icone|IasharkIcones\.svg|I\.svg)\(\s*"([a-z0-9-]+)"/g)) noms.add(m[1]);
-    for (const m of read(f).matchAll(/(?:\bico|icone|IasharkIcones\.svg)\(\s*'([a-z0-9-]+)'/g)) noms.add(m[1]);
+    for (const m of read(f).matchAll(/(?:\bico|icone|IasharkIcones\.svg|\blucide)\(\s*'([a-z0-9-]+)'/g)) noms.add(m[1]);
+    for (const m of read(f).matchAll(/const LUCIDE=\{([^}]*)\}/g)) for (const x of m[1].matchAll(/:'([a-z0-9-]+)'/g)) noms.add(x[1]);
+    for (const m of read(f).matchAll(/\['(signal-[a-z]+)','(signal-[a-z]+)','(signal-[a-z]+)'\]/g)) [m[1], m[2], m[3]].forEach((x) => noms.add(x));
     for (const m of read(f).matchAll(/\[\s*"([a-z0-9-]+)",\s*t\("offre_pro\./g)) noms.add(m[1]);
     for (const m of read(f).matchAll(/icone: "([a-z0-9-]+)"/g)) noms.add(m[1]);
     for (const m of read(f).matchAll(/carte\("\w+", "([a-z0-9-]+)"/g)) noms.add(m[1]);
@@ -44,6 +46,13 @@ test("aucun dessin fait main : ni <path>, ni <rect>, ni <circle> ecrits dans les
   // Les seuls cercles SVG du site neuf sont ceux de la jauge Magic UI (r=45, epaisseur 10).
   const c = read("lib/composants.js");
   assert.equal((c.match(/<circle class="mu-gauge-(sec|pri)" cx="50" cy="50" r="45" stroke-width="10"/g) || []).length, 2);
+  // Page match (assemblage du 04/10) : icones Lucide partout ; seul le trace de la cible de
+  // l'Avis reste (l'Avis ne change pas d'un caractere) ; plus de barres « niveau » dessinees.
+  const mp = read("match-page.js");
+  const icons = mp.slice(mp.indexOf("const ICONS={"), mp.indexOf("};", mp.indexOf("const ICONS={")));
+  assert.deepEqual([...icons.matchAll(/^\s*([a-z0-9]+):/gm)].map((m) => m[1]), ["target"]);
+  assert.doesNotMatch(mp + read("assets/match-page.css"), /band-bars/);
+  assert.match(mp, /signal-low','signal-medium','signal-high/);
 });
 
 test("chaque composant cite sa source et sa licence ; mouvement reduit respecte", () => {

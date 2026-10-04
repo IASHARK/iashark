@@ -37,23 +37,16 @@ const img=(src,alt,w,h,opts)=>{
 };
 const empty=txt=>`<div class="empty">${esc(txt)}</div>`;
 
-// Icones : purement decoratives (aria-hidden), memes tokens de couleur.
+// Icones (04/10/2026, exigence de Clement : un vrai jeu d'icones, rien de dessine a
+// la main) : jeu Lucide (lib/icones.js, licence ISC, charge avant ce script). Seule la
+// cible de l'Avis IASHARK garde son trace d'origine : l'Avis ne change pas d'un
+// caractere (tests/match-page-structure.test.js).
 const ICONS={
-  compare:'<path d="M6 20V10M12 20V4M18 20v-7"/>',
-  target:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/>',
-  target2:'<path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/>',
-  chart:'<path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6"/>',
-  cloud:'<path d="M7 18a4 4 0 0 1-.5-7.97A5 5 0 0 1 16 8.5 4.5 4.5 0 0 1 15.5 18H7Z"/>',
-  scale:'<path d="M12 3v18M7 7 4 13a3 3 0 0 0 6 0L7 7ZM17 7l-3 6a3 3 0 0 0 6 0l-3-6ZM4 7h6M14 7h6"/>',
-  alert:'<path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4M12 17v.01"/>',
-  trend:'<path d="M4 17 10 11l4 4 6-8"/><path d="M16 6h4v4"/>',
-  faq:'<circle cx="12" cy="12" r="9"/><path d="M9.2 9.3a2.8 2.8 0 0 1 5.5.8c0 1.9-2.7 2.2-2.7 4"/><circle cx="12" cy="17.4" r=".9" fill="currentColor" stroke="none"/>',
-  lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
-  table:'<path d="M4 5h16v14H4zM4 10h16M4 15h16M10 5v14"/>',
-  pin:'<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/>',
-  calendar:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M10 14.5l4 3M14 14.5l-4 3"/>'
+  target:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/>'
 };
-const cardIcon=key=>ICONS[key]?`<svg viewBox="0 0 24 24" class="card-icon" aria-hidden="true" focusable="false">${ICONS[key]}</svg>`:'';
+const LUCIDE={pin:'map-pin',cloud:'cloud',lock:'lock',calendar:'calendar-x'};
+const lucide=(nom,cls)=>window.IasharkIcones?window.IasharkIcones.svg(nom,cls||'card-icon'):'';
+const cardIcon=key=>ICONS[key]?`<svg viewBox="0 0 24 24" class="card-icon" aria-hidden="true" focusable="false">${ICONS[key]}</svg>`:(LUCIDE[key]?lucide(LUCIDE[key]):'');
 // Carte. opts.fold : la meme carte en version repliable (le titre est le
 // bouton, une ligne de resume reste visible) : { key, summary, open }.
 const card=(title,body,cls='',icon='',opts)=>opts&&opts.fold
@@ -129,7 +122,7 @@ function bandBadge(b,court){
   if(!BANDES[b])return '';
   const [k,fb,niveau]=BANDES[b];
   const label=court?t(k+'_short',BANDES_COURTES[b]):t(k,fb);
-  return `<span class="band is-${b}"><span class="band-bars" aria-hidden="true">${[1,2,3].map(i=>`<i${i<=niveau?' class="on"':''}></i>`).join('')}</span><b>${esc(label)}</b></span>`;
+  return `<span class="band is-${b}">${lucide(['signal-low','signal-medium','signal-high'][niveau-1]||'signal-low','band-ico')}<b>${esc(label)}</b></span>`;
 }
 // Etat PUBLIC de l'analyse : 'ready' (has_signal / no_signal:false), 'none'
 // (no_signal:true), 'unknown'.
@@ -142,9 +135,10 @@ function etatAnalyse(raw){
 
 // Defense en profondeur (vue visiteur) : copie de lib/premium-fields.js#PREMIUM_FIELDS
 // (tests/match-page-structure.test.js verifie qu elle la contient toute ; en plus,
-// 04/10/2026 : marches_panneau, sim_resume, jumeaux). prob_band, has_signal, no_signal
+// 04/10/2026 : marches_panneau, sim_resume, jumeaux, premier_but, v3_premiers_buteurs).
+// prob_band, has_signal, no_signal
 // et nb_marches restent : ils sont publics.
-const CHAMPS_PREMIUM=["pari_rec","cote_rec","model_probability","markets_compared","market_id","marche","kelly","edge","verdict_shark","facteur_x","dropping_odds","player_markets","facteur_x_i18n","verdict_shark_i18n","conf","p1","pn","p2","po15","po25","btts","lambda_h","lambda_a","market_aware_p1","market_aware_pN","market_aware_p2","market_consensus_p1","market_consensus_pN","market_consensus_p2","mc_scores","scores","simulation_count","paris_safe","paris_risque","vbet","val","hot","risque","mise","pick_downgrade","odds_available","is_canonical_pick","reliability","model_agreement","crit_home","crit_away","elo_signal","analyse_card","analyse_card_i18n","conseil_public","conseil_public_i18n","contexte","contexte_i18n","scenario","scenario_i18n","scenario_15min","sim_15min","decision_factors","risk_principal","top_scorers","v3_fiabilite","v3_pari","v3_marches","v3_suivi","v3_buteurs","chance_iashark","chance_iashark_source","cote_bookmaker","cote_source","cote_releve_a","sans_marge_anj","stats_iashark","lecture_match","pronostic","marches_flux","option_cote","chance_correction","marches_panneau","sim_resume","jumeaux"];
+const CHAMPS_PREMIUM=["pari_rec","cote_rec","model_probability","markets_compared","market_id","marche","kelly","edge","verdict_shark","facteur_x","dropping_odds","player_markets","facteur_x_i18n","verdict_shark_i18n","conf","p1","pn","p2","po15","po25","btts","lambda_h","lambda_a","market_aware_p1","market_aware_pN","market_aware_p2","market_consensus_p1","market_consensus_pN","market_consensus_p2","mc_scores","scores","simulation_count","paris_safe","paris_risque","vbet","val","hot","risque","mise","pick_downgrade","odds_available","is_canonical_pick","reliability","model_agreement","crit_home","crit_away","elo_signal","analyse_card","analyse_card_i18n","conseil_public","conseil_public_i18n","contexte","contexte_i18n","scenario","scenario_i18n","scenario_15min","sim_15min","decision_factors","risk_principal","top_scorers","v3_fiabilite","v3_pari","v3_marches","v3_suivi","v3_buteurs","chance_iashark","chance_iashark_source","cote_bookmaker","cote_source","cote_releve_a","sans_marge_anj","stats_iashark","lecture_match","pronostic","marches_flux","option_cote","chance_correction","marches_panneau","sim_resume","jumeaux","premier_but","v3_premiers_buteurs"];
 function publicCopy(raw){
   const copie={};
   Object.keys(raw||{}).forEach(k=>{if(CHAMPS_PREMIUM.indexOf(k)===-1)copie[k]=raw[k];});
@@ -683,7 +677,7 @@ function render(raw,o){
 // gauche renvoie au meme composant (aucun deuxieme chemin de paiement).
 function enTeteOffre(raw){
   const etat=etatAnalyse(raw),bande=etat==='ready'?bandeDe(raw):null;
-  if(etat==='ready')return `<span class="avis-ready"><i aria-hidden="true"></i>${esc(t('match_page.avis_ready','Analyse prête'))}</span>${bande?' '+bandBadge(bande):''}`;
+  if(etat==='ready')return `<span class="avis-ready">${lucide('circle-check','avis-ready-ico')}<span>${esc(t('match_page.avis_ready','Analyse prête'))}</span></span>${bande?' '+bandBadge(bande):''}`;
   if(etat==='none')return esc(t('match_page.avis_no_signal','Pas de pari retenu par le modèle sur ce match'));
   return '';
 }
@@ -709,7 +703,7 @@ function renderAuthWall(raw){
   const retour=encodeURIComponent(cheminMatch(raw));
   const sous=enTeteOffre(vm._raw);
   const carte=`<section class="op op--vitrine gate" aria-labelledby="opCompteT">
-    <div class="op-head"><span class="op-lock" aria-hidden="true">${window.IasharkIcones?IasharkIcones.svg('lock'):cardIcon('lock')}</span><h2 class="op-title" id="opCompteT">${esc(t('match_v4.free_title','Ce match est offert aujourd’hui'))}</h2>${sous?`<div class="op-sub">${sous}</div>`:''}<p class="op-from">${esc(t('match_v4.free_sub','Crée ton compte gratuit pour ouvrir toute l’analyse. Sans carte bancaire.'))}</p></div>
+    <div class="op-head"><span class="op-lock" aria-hidden="true">${lucide('lock','')}</span><h2 class="op-title" id="opCompteT">${esc(t('match_v4.free_title','Ce match est offert aujourd’hui'))}</h2>${sous?`<div class="op-sub">${sous}</div>`:''}<p class="op-from">${esc(t('match_v4.free_sub','Crée ton compte gratuit pour ouvrir toute l’analyse. Sans carte bancaire.'))}</p></div>
     ${boutonAction(lien('inscription.html?next='+retour),t('match_v4.free_cta','Créer mon compte gratuit'),suivi('match_avis_unlock').trim())}
     <a class="op-alt" href="${esc(lien('connexion.html?next='+retour))}">${esc(t('match_v4.free_login','J’ai déjà un compte'))}</a>
   </section>`;

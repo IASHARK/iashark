@@ -480,9 +480,8 @@ a{color:inherit}
 
 /* ---------- Avis visiteur (ferme mais vendeur) ---------- */
 .avis-ready{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;border:1px solid rgba(34,211,238,.42);border-radius:999px;background:rgba(34,211,238,.1);color:var(--accent);font:700 12.5px var(--body)}
-.avis-ready i{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(34,211,238,.18)}
-@media (prefers-reduced-motion:no-preference){.avis-ready i{animation:avisPulse 2.2s ease-in-out infinite}}
-@keyframes avisPulse{50%{box-shadow:0 0 0 7px rgba(34,211,238,0)}}
+/* Lucide circle-check (lib/icones.js). */
+.avis-ready-ico{width:15px;height:15px;flex:none}
 .avis-h{margin:14px 0 0;color:#fff;font:700 clamp(22px,4vw,28px)/1.2 var(--body);letter-spacing:-.015em;text-wrap:balance}
 .avis-free{margin:8px 0 0;color:var(--soft);font-size:14px;line-height:1.55}
 .avis-band{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:rgba(3,10,17,.35)}
@@ -498,12 +497,8 @@ a{color:inherit}
 /* ---------- Niveau prob_band (3 barres, jamais un chiffre) ---------- */
 .band{display:inline-flex;align-items:center;gap:8px;padding:5px 12px 5px 10px;border:1px solid var(--accent-border);border-radius:999px;background:rgba(34,211,238,.08);color:var(--accent);font:600 13.5px var(--body);white-space:nowrap}
 .band b{font-weight:700}
-.band-bars{display:inline-flex;align-items:flex-end;gap:3px;height:14px}
-.band-bars i{width:4px;border-radius:1px;background:rgba(255,255,255,.18)}
-.band-bars i:nth-child(1){height:6px}
-.band-bars i:nth-child(2){height:10px}
-.band-bars i:nth-child(3){height:14px}
-.band-bars i.on{background:currentColor}
+/* Niveau : icones Lucide signal-low / signal-medium / signal-high (lib/icones.js). */
+.band-ico{width:16px;height:16px;flex:none}
 .band.is-good{color:#8fe3f1;background:rgba(34,211,238,.05)}
 .band.is-moderate{color:var(--soft);border-color:rgba(141,179,211,.22);background:rgba(141,179,211,.07)}
 

@@ -10,7 +10,11 @@
 //    jamais « rejoue » ni « tires au sort » ; pas de zone chaude (NO-GO) ;
 //  - « Et si » arrondi a 5 points ; premier but cache dans les tranches fausses ;
 //  - jumeaux : au moins 200, comptes bruts ;
-//  - panneau Marches : marches_panneau seulement, chiffres jamais repetes.
+//  - panneau Marches : marches_panneau seulement, chiffres jamais repetes ;
+//  - assemblage du 04/10 : les sections lisent EXACTEMENT les champs du pipeline
+//    (sim_resume, premier_but, sim_15min.si_affiche / tr_dom / tr_ext / minute
+//    mediane, v3_premiers_buteurs, jumeaux { niveau, pct }), jamais de repli ;
+//  - arbitre : rien sans le feu vert du mathematicien.
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 global.window = undefined;
@@ -96,8 +100,14 @@ function ctx(raw, o) {
   return Object.assign({ raw, vm: v, vuePro: true, verrouPro: false, dit }, o || {});
 }
 
-test("« Si ce match se jouait 10 000 fois » : comptes = % entier x 100 (panneau), jamais de tirage annonce, l'issue de l'Avis renvoie a l'Avis", () => {
-  const raw = { market_id: "home-win", chance_iashark: 60, p1: 58.9, pn: 24.3, p2: 16.8, marches_panneau: PANNEAU };
+// sim_resume tel que le pipeline le pose (lib/sections-match.js#resumeSur10000).
+const RESUME = { v: "grille-v3-1", base: 10000, issues: { dom: 6000, nul: 2400, ext: 1600 },
+  scores: [{ score: "1-0", n: 1400 }, { score: "2-0", n: 1200 }, { score: "1-1", n: 1100 }, { score: "0-0", n: 700 }],
+  total_buts: [{ buts: "0", n: 700 }, { buts: "1", n: 2000 }, { buts: "2", n: 2900 }, { buts: "3", n: 2200 }, { buts: "4+", n: 2200 }] };
+const specs = (h) => [...h.matchAll(/data-ch="([^"]*)"/g)].map((m) => JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&")));
+
+test("« Si ce match se jouait 10 000 fois » : sim_resume seulement (% entier x 100), jamais de tirage annonce, l'issue de l'Avis renvoie a l'Avis", () => {
+  const raw = { market_id: "home-win", chance_iashark: 60, p1: 58.9, pn: 24.3, p2: 16.8, sim_resume: RESUME, marches_panneau: PANNEAU };
   const c = ctx(raw);
   const h = MS.simulation(c);
   assert.match(h, /Si ce match se jouait 10 000 fois/);
@@ -108,65 +118,93 @@ test("« Si ce match se jouait 10 000 fois » : comptes = % entier x 100 (pannea
   assert.match(h, /dans l’avis/);
   assert.deepEqual(c.base, [60, 24, 16]);
   assert.match(h, /Les scores les plus probables/);
+  assert.match(h, /Le nombre de buts du match/);
+  const [, sc, bu] = specs(h);
+  assert.deepEqual(sc.data.datasets[0].data, [1400, 1200, 1100, 700]);
+  // « 0 but » = le 0-0 deja ecrit dans les scores : la barre ne reecrit pas le nombre.
+  assert.deepEqual(bu.data.labels, ["0 (= 0 – 0)", "1", "2", "3", "4+"]);
+  assert.deepEqual(bu.data.datasets[0].data, [null, 2000, 2900, 2200, 2200]);
   assert.doesNotMatch(h, /undefined|NaN/);
-  // Sans panneau (compte gratuit, match offert) : p1/pn/p2 sous la garde de coherence.
-  const libre = MS.simulation(ctx({ market_id: "dc-1x", chance_iashark: 66, p1: 44.1, pn: 23.2, p2: 32.7 }));
-  assert.match(libre, /≈ 4\s400 fois/);
-  assert.doesNotMatch(libre, /Les scores les plus probables/, "scores filtres par le pari : jamais presentes comme les plus probables");
-  // Garde : la chance du modele s'ecarte de plus de 3 points de l'Avis -> issues masquees.
-  assert.equal(MS.simulation(ctx({ market_id: "home-win", chance_iashark: 58, p1: 40.5, pn: 30, p2: 29.5 })), "");
+  // UNE SEULE SOURCE : sans sim_resume, rien (ni panneau, ni p1/pn/p2 recalcules ici).
+  assert.equal(MS.simulation(ctx({ market_id: "dc-1x", chance_iashark: 66, p1: 44.1, pn: 23.2, p2: 32.7, marches_panneau: PANNEAU })), "");
+  // Comptes incoherents (somme differente de 10 000) : issues masquees.
+  const faux = MS.simulation(ctx({ sim_resume: Object.assign({}, RESUME, { issues: { dom: 6000, nul: 2400, ext: 1500 } }) }));
+  assert.doesNotMatch(faux, /x-legend/);
 });
 
-test("film du match : pas de zone chaude (NO-GO), chances par quart d'heure en entiers", () => {
+test("film du match : pas de zone chaude (NO-GO), chances par quart d'heure en entiers, par equipe (tr_dom, tr_ext)", () => {
   const tr = (v) => v.map((x) => [x, x - 0.05, x + 0.05]);
-  const raw = { sim_15min: { tr: [0.292, 0.314, 0.381, 0.352, 0.363, 0.468] },
+  const raw = { sim_15min: { tr: [0.292, 0.314, 0.381, 0.352, 0.363, 0.468], tr_dom: [0.179, 0.186, 0.237, 0.219, 0.22, 0.293], tr_ext: [0.139, 0.158, 0.189, 0.173, 0.186, 0.247] },
     stats_iashark: { dom: { tout: { n: 58, tranches: { n: 58, pour: tr([0.2, 0.2, 0.3, 0.2, 0.3, 0.4]), contre: tr([0.1, 0.2, 0.1, 0.2, 0.2, 0.3]) } } }, ext: { tout: { n: 61, tranches: { n: 61, pour: tr([0.1, 0.1, 0.1, 0.2, 0.2, 0.2]), contre: tr([0.2, 0.2, 0.2, 0.2, 0.2, 0.3]) } } }, zone_chaude: { tranche: 5, net: true } } };
   const h = MS.film(ctx(raw));
   assert.doesNotMatch(h, /zone chaude|Zone chaude/i);
-  const spec = JSON.parse(h.match(/data-ch="([^"]*)"/)[1].replace(/&quot;/g, '"').replace(/&amp;/g, "&"));
+  const spec = specs(h)[0];
   assert.deepEqual(spec.data.datasets[4].data, [29, 31, 38, 35, 36, 47]);
   assert.match(h, /archive IASHARK/);
+  assert.match(h, /Chance de marquer dans ce quart d’heure \(modèle\) : Almeria 29\s?%, Burgos 25\s?%\./);
   assert.doesNotMatch(require("fs").readFileSync(require("path").join(__dirname, "..", "lib/match-sections.js"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, ""), /zone_chaude/);
 });
 
-test("qui ouvre le score + Et si : grille v3, tranches fausses cachees, Et si arrondi a 5 points (somme 100)", () => {
-  const v3 = (h, a, z) => [{ cle: "PREMIER_BUT:dom", probabilite: h }, { cle: "PREMIER_BUT:ext", probabilite: a }, { cle: "PREMIER_BUT:aucun", probabilite: z }];
-  assert.deepEqual(MS.premierBut({ v3_marches: v3(55.4, 36.5, 8.1) }), [55, 8, 37]);
-  assert.equal(MS.premierBut({ v3_marches: v3(78, 15, 7) }), null, "exterieur entre 10 et 20 % : faux (verdict des marches)");
-  assert.equal(MS.premierBut({ v3_marches: v3(83, 9, 8) }), null, "domicile entre 80 et 90 % : hors tolerance");
-  const raw = { v3_marches: v3(55.4, 36.5, 8.1), sim_15min: { si: { dom_premier: { p1: 0.781, pn: 0.152, p2: 0.067 }, ext_premier: { p1: 0.271, pn: 0.318, p2: 0.411 }, nul_pause: { p1: 0.462, pn: 0.351, p2: 0.187 } } } };
+const PB = { dom: 55, ext: 37, aucun: 8, avant_pause: 69 };
+const SI = { dom_premier: { p1: 80, pn: 15, p2: 5 }, ext_premier: { p1: 25, pn: 30, p2: 45 }, nul_pause: { p1: 45, pn: 35, p2: 20 } };
+test("qui ouvre le score + Et si : premier_but et si_affiche du pipeline, tranches fausses cachees, premier buteur = une chance", () => {
+  assert.deepEqual(MS.premierBut({ premier_but: PB }), [55, 8, 37]);
+  assert.equal(MS.premierBut({ premier_but: { dom: 78, ext: 15, aucun: 7 } }), null, "exterieur entre 10 et 20 % : faux (verdict des marches)");
+  assert.equal(MS.premierBut({ premier_but: { dom: 83, ext: 9, aucun: 8 } }), null, "domicile entre 80 et 90 % : hors tolerance");
+  assert.equal(MS.premierBut({ premier_but: { dom: 55, ext: 37, aucun: 9 } }), null, "somme differente de 100 : rien");
+  const raw = { premier_but: PB, sim_15min: { si: { dom_premier: { p1: 0.781, pn: 0.152, p2: 0.067 } }, si_affiche: SI, minute_mediane_premier_but: 29 },
+    v3_premiers_buteurs: [{ joueur_id: 7, joueur: "L. Suarez", cote: "home", poste: "F", p_premier_buteur: 0.1191, chance: 12 }, { joueur_id: 8, joueur: "X. Y", cote: "away", poste: "M", p_premier_buteur: 0.07, chance: 7 }] };
   const c = ctx(raw); c.base = [60, 24, 16];
   const h = MS.premier(c);
   const scen = [...h.matchAll(/data-e="([^"]*)"/g)].map((m) => JSON.parse(m[1].replace(/&quot;/g, '"')));
-  assert.equal(scen.length, 3);
-  for (const s of scen) { assert.equal(s[0] + s[1] + s[2], 100); s.forEach((x) => assert.equal(x % 5, 0)); }
-  assert.deepEqual(scen[0], [80, 15, 5]);
+  assert.deepEqual(scen, [[80, 15, 5], [25, 30, 45], [45, 35, 20]], "si_affiche tel quel (jamais recalcule)");
   assert.match(h, /arrondies à 5 points/);
+  assert.match(h, /Premier but avant la pause : 69\s?%\./);
+  assert.match(h, /Une fois sur deux, le premier but tombe avant la 29e minute\./);
+  assert.match(h, /L\. Suarez/);
+  assert.match(h, /à 12\s?%, c’est à peu près 1 fois sur 8\./);
+  assert.doesNotMatch(h, /marquera|sera le premier|quart d’heure le plus probable/i);
+  // Sans si_affiche : pas d'« Et si » (aucun arrondi refait ici).
+  assert.doesNotMatch(MS.premier(ctx({ premier_but: PB, sim_15min: { si: raw.sim_15min.si } })), /data-e=/);
   // Compte gratuit (champs Pro absents) : ligne cadenas, aucun chiffre.
   const gratuit = MS.premier(ctx({}, { vuePro: false, verrouPro: true }));
   assert.match(gratuit, /: Pro\./);
   assert.doesNotMatch(gratuit.replace(/<[^>]*>/g, ""), /\d/);
+  // Meme si la reponse contenait les champs Pro, un non-Pro ne les voit pas.
+  assert.doesNotMatch(MS.premier(ctx(raw, { vuePro: false, verrouPro: true })), /Suarez|69/);
 });
 
-test("jumeaux : au moins 200, comptes bruts, periode, 3 exemples ; sinon rien", () => {
-  const ok = { resultat: { n: 281, depuis: 2012, dom: 76, nul: 82, ext: 123, exemples: [{ date: "2023-12-16", ligue: "Bundesliga", domicile: "Augsburg", exterieur: "Dortmund", score: "1-1" }] }, buts: { n: 1049, depuis: 2019, plus_2_5: 671, btts: 637 } };
+test("jumeaux : contrat du pipeline (niveau, pct), au moins 200, comptes bruts, periode, 3 exemples ; sinon rien", () => {
+  const ok = { v: "jumeaux-1", resultat: { n: 281, depuis: 2012, niveau: "meme", dom: 76, nul: 82, ext: 123, pct: { dom: 27, nul: 29, ext: 44 }, exemples: [{ date: "2023-12-16", ligue: "Bundesliga", domicile: "Augsburg", exterieur: "Dortmund", score: "1-1" }] },
+    buts: { n: 1049, depuis: 2019, plus_2_5: 671, btts: 637, pct: { plus_2_5: 64, btts: 61 } } };
   const h = MS.jumeaux(ctx({ jumeaux: ok }));
   assert.match(h, /281 matchs jumeaux depuis 2012/);
   assert.match(h, /123 \(44\s?%\)/);
+  assert.match(h, /Même niveau/);
   assert.match(h, /Augsburg/);
   assert.match(h, /671 \(64\s?%\)/);
+  assert.match(h, /637 \(61\s?%\)/);
+  assert.match(MS.jumeaux(ctx({ jumeaux: { resultat: Object.assign({}, ok.resultat, { niveau: "tous" }), buts: null } })), /Tous championnats/);
   assert.doesNotMatch(h.replace(/<[^>]*>/g, "").replace(/2,5 buts/g, ""), /\d,\d/, "aucune decimale (hors la ligne « plus de 2,5 buts »)");
-  assert.equal(MS.jumeaux(ctx({ jumeaux: { resultat: Object.assign({}, ok.resultat, { n: 150, dom: 50, nul: 50, ext: 50 }) } })), "");
+  assert.equal(MS.jumeaux(ctx({ jumeaux: { resultat: Object.assign({}, ok.resultat, { n: 150, dom: 50, nul: 50, ext: 50 }), buts: null } })), "");
+});
+
+test("arbitre : jamais sans le feu vert (stats_iashark.arbitre pose par le pipeline) ; le champ public arbitre n'est jamais lu", () => {
+  assert.equal(MS.arbitre(ctx({ arbitre: { nom: "M. Dupont", cartons: 4.2, penaltys: 0.3, matchs: 40 } })), "");
+  assert.equal(MS.arbitre(ctx({ arbitre: { nom: "M. Dupont" } }, { vuePro: false, verrouPro: true })), "", "aucune ligne cadenas pour un contenu que Pro n'a pas");
+  assert.match(MS.arbitre(ctx({ stats_iashark_gratuit: { detail_pro: ["arbitre"] } }, { vuePro: false, verrouPro: true })), /: Pro\./);
+  const a = { nom: "M. Dupont", n: 60, debut: "2024-08-01", fin: "2026-09-30", cartons: { m: [4.4, 4.1, 4.7], attendu: 4.0, ecart: [0.4, 0.1, 0.7] } };
+  assert.match(MS.arbitre(ctx({ stats_iashark: { arbitre: a } })), /M\. Dupont[\s\S]*hu-stat/);
 });
 
 test("panneau Marches : marches_panneau seulement, pari de l'Avis et issues deja ecrites renvoyees, jamais de cote", () => {
-  const raw = { market_id: "home-win", chance_iashark: 60, p1: 58.9, pn: 24.3, p2: 16.8, marches_panneau: PANNEAU };
+  const raw = { market_id: "home-win", chance_iashark: 60, sim_resume: RESUME, marches_panneau: PANNEAU };
   const c = ctx(raw);
   MS.simulation(c);
   const p = MS.panneau(c);
   assert.equal(p.nb, 9);
   assert.match(p.html, /Victoire Almeria<\/span><span class="mk-r"><a class="mk-ref" href="#sec-avis">Pari de l’avis/);
-  assert.match(p.html, /Match nul<\/span><span class="mk-r"><a class="mk-ref" href="#sec-sim">Dans la simulation/);
+  assert.match(p.html, /Match nul<\/span><span class="mk-r"><a class="mk-ref" href="#sec-sim">Dans « 10 000 matchs »/);
   assert.match(p.html, /Score exact 1-0<\/span><span class="mk-r"><a class="mk-ref" href="#sec-sim">/);
   assert.match(p.html, /Almeria ou match nul<\/span><span class="mk-r"><span class="hu-badge lv5">84\s?%/);
   assert.doesNotMatch(p.html, /cote|valeur|bet365|Pinnacle/i);

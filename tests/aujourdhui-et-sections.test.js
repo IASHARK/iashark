@@ -46,7 +46,7 @@ test("Aujourd'hui, sans compte : en-tete vrai (nombre de matchs, cote totale), c
   assert.match(h, /aria-hidden="true" inert/);
   assert.equal((h.match(/class="aj-unlock hs-gate-card"/g) || []).length, 1, "un seul bloc de deverrouillage");
   assert.equal((h.match(/class="mu-shimmer aj-cta"/g) || []).length, 1, "un seul bouton");
-  assert.match(h, /Ce que tu débloques : le ticket x5 et le buteur du jour, gratuitement\./);
+  assert.match(h, /Ce que tu débloques : le petit combiné et le buteur du jour, gratuitement\./);
   assert.match(h, /href="\/inscription\.html\?next=/);
   assert.doesNotMatch(h, INTERDITS);
   for (const l of AJ.FAUX_LIGNES) for (const x of l) assert.doesNotMatch(x, /\d/, "faux contenu sans chiffre : " + x);
@@ -58,7 +58,7 @@ test("Aujourd'hui, compte gratuit : ticket x5 et buteur complets, x10 et Selecti
   const h = AJ.html(rep, {});
   assert.match(h, /Lens – Lille/);
   assert.match(h, /data-mu-gauge="35"/, "jauge Magic UI du buteur");
-  assert.match(h, /Ce que tu débloques : le ticket x10 et la Sélection en or\./);
+  assert.match(h, /Ce que tu débloques : le grand combiné et la Sélection en or\./);
   assert.match(h, /href="\/abonnement\.html\?duree=month&amp;next=/);
   assert.equal((h.match(/class="mu-shimmer aj-cta"/g) || []).length, 1);
   // Lignes dans l'ordre des coups d'envoi.
@@ -70,13 +70,14 @@ test("Aujourd'hui, Pro : tout ouvert, aucun bouton de paiement ; Selection en or
   const rep = { version: 1, jour: JOUR, niveau: "pro", tickets: [X5, { type: "x10", statut: "aucun", verrou: null }], selection_or: OR, buteur_du_jour: BUT };
   const h = AJ.html(rep, {});
   assert.doesNotMatch(h, /aj-unlock|aj-cta/);
-  assert.match(h, /On ne force jamais un ticket\./);
+  assert.match(h, /On ne force jamais un combiné\./);
   assert.match(h, /<article class="or is-on"><span class="mu-shine" aria-hidden="true"><\/span>/);
   assert.equal((h.match(/mu-shine/g) || []).length, 1);
   assert.doesNotMatch(h, INTERDITS);
   const copie = AJ.texteCopie(X5, JOUR);
-  assert.match(copie, /^Ticket x5 IASHARK · /);
-  assert.match(copie, /Chance calculée du ticket : 18/);
+  assert.match(copie, /^Petit combiné IASHARK · /);
+  // 04/10, Clement : aucun pourcentage de chance sur les combines.
+  assert.doesNotMatch(copie, /Chance|%/);
   assert.match(copie, /Estimation statistique, pas une garantie\. 18\+\niashark\.com$/);
   assert.doesNotMatch(copie, INTERDITS);
 });
@@ -90,7 +91,7 @@ test("Copier le ticket : match annule ou reporte nomme, ligne « Sans ce match �
   assert.match(c, /Porto – Braga \(21\u00a0h 30\)|Porto – Braga \(21\u00a0h\u00a030\)/);
   assert.match(c, /· match annulé/);
   assert.doesNotMatch(c, /match reporté/);
-  assert.match(c, /Sans ce match : cote 2,51 · chance 40\s?%\./);
+  assert.match(c, /Sans ce match : cote 2,51\./);
   const rep = Object.assign({}, annule, { jambes: [Object.assign({}, X5.jambes[0], { etat: "reporte" }), X5.jambes[1], X5.jambes[2]] });
   assert.match(AJ.texteCopie(rep, JOUR), /· match reporté/);
   // La carte : la meme ligne « Sans ce match » et le bon mot.
@@ -122,7 +123,7 @@ test("interrupteurs : essai ouvert (si le serveur l'accorde), tickets fermes ; b
     const textes = OP.avantages().map((a) => a[1]).join(" | ");
     assert.doesNotMatch(textes, /tickets x5/);
     globalThis.IASHARK_MARKET = { code: "fr" };
-    assert.match(OP.avantages().map((a) => a[1]).join(" | "), /tickets x5 et x10/);
+    assert.match(OP.avantages().map((a) => a[1]).join(" | "), /petit et le grand combiné/);
   } finally { OP.OUVERT.tickets = false; delete globalThis.IASHARK_MARKET; }
   assert.doesNotMatch(OP.avantages().map((a) => a[1]).join(" | "), /tickets/);
   // Panneau Marches : en francais seulement (libelles du calcul).

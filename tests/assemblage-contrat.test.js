@@ -216,6 +216,6 @@ test("tickets du jour : la reponse du contrat (3 niveaux) est rendue sans fuite 
   const pro = C.construireReponse({ jour: "2026-10-04", niveau: "pro", lignes: LIGNES, calcul });
   const hP = AJ.html(pro, {});
   for (const x of ["Lens1 – Lille1", "Lens11 – Lille11", "Victoire Lens21"]) assert.ok(hP.includes(x), x);
-  assert.match(hP, /Chance calculée du ticket/);
+  assert.doesNotMatch(hP, /Chance calculée du ticket/); // 04/10 : pas de % sur les combines
   assert.doesNotMatch(hP, /aj-unlock/);
 });

@@ -4604,9 +4604,6 @@ jobs:
             // Jamais la valeur, jamais le marche. Le match offert garde sa note exacte.
             var matchsPublics=allMatchsData.map(function(m){
               if(!m)return m;
-              // 04/10/2026 : champs internes (cotes Pinnacle, operateur non agree en France) : jamais
-              // dans un fichier public, meme le match offert (lib/premium-fields.js#INTERNAL_FIELDS).
-              m=PREMIUM_FIELDS_LIB.sansChampsInternes(m);
               // Sans table protegee, les analyses restent publiques (repli ci-dessus), MAIS les
               // champs « Pro seulement » (simulation 15 min, Stats IASHARK) sont retires quand
               // meme : jamais en clair dans un fichier public, meme en panne (avocat du diable, 30/09/2026).
@@ -4623,6 +4620,9 @@ jobs:
               copie.has_signal=!!(m.pari_rec&&!m.no_signal);
               return copie;
             });
+            // 04/10/2026 : champs internes (cotes Pinnacle, operateur non agree en France) : jamais
+            // dans un fichier public, meme le match offert (lib/premium-fields.js#INTERNAL_FIELDS).
+            matchsPublics=matchsPublics.map(function(m){ return PREMIUM_FIELDS_LIB.sansChampsInternes(m); });
             var retires=allMatchsData.length-matchsPublics.filter(function(m){return m&&m.pari_rec;}).length;
             console.log('  [ACCES] '+retires+' analyse(s) retiree(s) du data.json public.');
             // Les champs premium sans colonne dediee (probabilites, paris_safe, textes

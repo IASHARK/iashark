@@ -194,8 +194,9 @@ test("contenu Pro : option_cote et chance_correction premium ; cotes Pinnacle ja
   assert.ok(!("pinnacle_snapshot" in PREMIUM.premiumPayload(m)), "jamais dans premium_fields");
   // Pipeline : retire les champs internes de CHAQUE match avant d'ecrire les fichiers publics.
   const iPub = SCRIPT.indexOf("var matchsPublics=allMatchsData.map(function(m){");
-  const iInt = SCRIPT.indexOf("m=PREMIUM_FIELDS_LIB.sansChampsInternes(m);", iPub);
-  assert.ok(iPub > 0 && iInt > iPub && iInt < SCRIPT.indexOf("if(m.is_free)return PREMIUM_FIELDS_LIB.sansChampsPro(m);", iPub));
+  const iInt = SCRIPT.indexOf("matchsPublics=matchsPublics.map(function(m){ return PREMIUM_FIELDS_LIB.sansChampsInternes(m); });", iPub);
+  assert.ok(iPub > 0 && iInt > iPub, "champs internes retires de chaque match public");
+  assert.ok(iInt < SCRIPT.indexOf("PUBLIC_SPLIT.writePublicSplit(fs,matchsPublics") && iInt < SCRIPT.indexOf("generateMatchPages(matchsPublics);"), "avant l'ecriture des fichiers publics");
   // Marches du flux : ni la cote ni le nom du bookmaker de reference (bet365).
   assert.doesNotMatch(SCRIPT, /cote:x\.cote,bookmaker:FLUX_MOD\.nomBookmakerFlux/);
   assert.match(SCRIPT, /source:'cote de reference du marche, marge retiree'/);

@@ -12,7 +12,12 @@ const DIRS = MARKETS._dirs;
 const RETIRED_DIRS = MARKETS._retiredDirs || {};
 const DIR_CODES = Object.keys(DIRS).filter(function (d) { return !Object.prototype.hasOwnProperty.call(RETIRED_DIRS, d); });
 const X_DEFAULT_DIR = MARKETS._xDefaultDir || "fr";
-const LEAGUES = JSON.parse(fs.readFileSync(path.join(ROOT, "config/leagues.json"), "utf8")).leagues;
+const LEAGUES_FILE = JSON.parse(fs.readFileSync(path.join(ROOT, "config/leagues.json"), "utf8"));
+const LEAGUES = LEAGUES_FILE.leagues;
+// Competitions retirees du site (config/leagues.json#competitions_retirees, 03/10/2026) :
+// jamais analysees ni affichees, gardees seulement pour rediriger (301) leurs anciennes
+// pages vers l'accueil de la version (scripts/build-locales.js, scripts/match-lifecycle.js).
+const RETIRED_LEAGUES = Array.isArray(LEAGUES_FILE.competitions_retirees) ? LEAGUES_FILE.competitions_retirees : [];
 
 // Textes SEO par repertoire public : i18n/seo/<dir>.json.
 var seoCache = {};
@@ -45,6 +50,14 @@ function leagueByKey(key) {
   return null;
 }
 function leagueSlug(key) { var l = leagueByKey(key); return l ? slugify(l.displayName) : null; }
+function retiredLeagueByKey(key) {
+  if (!key || leagueByKey(key)) return null;
+  for (var i = 0; i < RETIRED_LEAGUES.length; i++) if (RETIRED_LEAGUES[i].key === key) return RETIRED_LEAGUES[i];
+  return null;
+}
+function isRetiredLeague(key) { return !!retiredLeagueByKey(key); }
+// Ancienne page championnat d'une competition retiree (meme slug que leagueSlug).
+function retiredLeagueHubPath(dir, key) { var l = retiredLeagueByKey(key); return l ? "/" + dir + "/leagues/" + slugify(l.displayName) + ".html" : null; }
 
 // Chemins publics (URL canonique = forme .html, repertoire = "/<dir>/").
 function homePath(dir) { return "/" + dir + "/"; }
@@ -253,10 +266,13 @@ function fitText(candidates, max) {
 }
 // Nature d'une competition pour la presentation factuelle des hubs.
 const LEAGUE_KIND = { ldc: "ucl", el: "uel", ecl: "uecl", mls: "mls" };
-function leagueKind(key) { return LEAGUE_KIND[key] || "national"; }
+// config/leagues.json#kind d'abord (national2/3/4, cup, nations, wcq, tournoi), sinon la table
+// historique : une coupe ou une 2e division n'est jamais presentee comme « la premiere division ».
+function leagueKind(key) { var l = leagueByKey(key); return (l && l.kind) || LEAGUE_KIND[key] || "national"; }
 
 module.exports = {
-  ROOT: ROOT, SITE_URL: SITE_URL, MARKETS: MARKETS, DIRS: DIRS, DIR_CODES: DIR_CODES, X_DEFAULT_DIR: X_DEFAULT_DIR, LEAGUES: LEAGUES,
+  ROOT: ROOT, SITE_URL: SITE_URL, MARKETS: MARKETS, DIRS: DIRS, DIR_CODES: DIR_CODES, X_DEFAULT_DIR: X_DEFAULT_DIR, LEAGUES: LEAGUES, RETIRED_LEAGUES: RETIRED_LEAGUES,
+  retiredLeagueByKey: retiredLeagueByKey, isRetiredLeague: isRetiredLeague, retiredLeagueHubPath: retiredLeagueHubPath,
   seoConf: seoConf, dictFor: dictFor, get: get, escHtml: escHtml, fill: fill, slugify: slugify,
   leagueByKey: leagueByKey, leagueSlug: leagueSlug, homePath: homePath, leagueHubPath: leagueHubPath, matchPath: matchPath,
   blogHubPath: blogHubPath, guidePath: guidePath, guideLabel: guideLabel, GUIDE_TITLE_KEYS: GUIDE_TITLE_KEYS,

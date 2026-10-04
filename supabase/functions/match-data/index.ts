@@ -93,9 +93,18 @@ const PREMIUM_FIELDS = [
   "pick_downgrade", "odds_available", "is_canonical_pick",
   "reliability", "model_agreement", "crit_home", "crit_away", "elo_signal",
   "analyse_card", "analyse_card_i18n", "conseil_public", "conseil_public_i18n",
-  "contexte", "contexte_i18n", "scenario", "scenario_i18n", "scenario_15min",
+  "contexte", "contexte_i18n", "scenario", "scenario_i18n", "scenario_15min", "sim_15min",
   "decision_factors", "risk_principal",
   "top_scorers",
+  "v3_fiabilite", "v3_pari", "v3_marches", "v3_suivi", "v3_buteurs",
+  "chance_iashark", "chance_iashark_source",
+  "cote_bookmaker", "cote_source", "cote_releve_a", "sans_marge_anj",
+  "stats_iashark",
+  "lecture_match",
+  "pronostic",
+  "marches_flux",
+  // Option « cote plus haute » et correction de la chance affichee (lib/premium-fields.js, 04/10/2026).
+  "option_cote", "chance_correction",
 ];
 
 // Un match marque is_free par le pipeline est l'offre d'appel du jour : ses
@@ -103,6 +112,18 @@ const PREMIUM_FIELDS = [
 // non authentifie. C'est le seul cas ou on ne retire rien.
 function estGratuit(m: Record<string, unknown>): boolean {
   return m && m.is_free === true;
+}
+
+// Reserves aux Pro SANS EXCEPTION, meme sur le match offert (decision de Clement,
+// 29/09/2026, S2) : la simulation par tranches de 15 minutes. Copie de
+// lib/premium-fields.js#PRO_ONLY_FIELDS (tests/simulation-15min-visibility.test.js).
+// 30/09/2026 : detail des Stats IASHARK (stats_iashark), meme regle.
+// 30/09/2026 (soir) : « Notre lecture du match » (lecture_match), meme regle.
+const CHAMPS_PRO_SEULEMENT = ["sim_15min", "stats_iashark", "lecture_match"];
+function sansChampsPro(m: Record<string, unknown>): Record<string, unknown> {
+  const copy = { ...m };
+  for (const f of CHAMPS_PRO_SEULEMENT) delete copy[f];
+  return copy;
 }
 
 function retirerPremium(m: Record<string, unknown>): Record<string, unknown> {
@@ -214,8 +235,10 @@ Deno.serve(async (req: Request) => {
   // colonne non modifiable par le client : migration 0001).
 
   let data: Record<string, unknown>;
+  let porteeDemandee: { id: string | null; list: boolean } | null = null;
   try {
-    data = await chargerDonnees(await lirePortee(req));
+    porteeDemandee = await lirePortee(req);
+    data = await chargerDonnees(porteeDemandee);
   } catch (e) {
     return new Response(
       JSON.stringify({ error: "Impossible de charger les donnees", details: String(e) }),
@@ -230,9 +253,14 @@ Deno.serve(async (req: Request) => {
   if (!isPro) {
     // Seul le match TERMINE explicitement demande est enrichi : la liste
     // d'accueil n'a besoin d'aucun champ payant.
-    const portee = await lirePortee(req.clone());
+    // Corps deja lu plus haut : req.clone() apres lecture leve « Body is unusable » (500, 03/10/2026).
+    const portee = porteeDemandee ?? { id: null, list: true };
     const demande = portee.id ? matchs.find((m) => String(m.id) === portee.id) : undefined;
-    const ouvert = !!(demande && estTermine(demande));
+    // Decision de Clement (28/09/2026) : le mur payant s'applique AUSSI aux matchs
+    // termines. Un non-abonne ne voit jamais l'analyse d'un match payant, meme apres
+    // le coup de sifflet (seul le match offert du jour reste ouvert). Le verdict
+    // gagne/perdu reste public via l'historique, sans l'analyse.
+    const ouvert = false && !!(demande && estTermine(demande));
     let premiumTermine: Record<string, Record<string, unknown>> = {};
     if (ouvert && demande) {
       const q = await supabase.from("match_premium_data")
@@ -241,7 +269,7 @@ Deno.serve(async (req: Request) => {
       else premiumTermine = Object.fromEntries(((q.data ?? []) as Record<string, unknown>[]).map((r) => [String(r.fixture_id), r]));
     }
     data.matchs = matchs.map((m) => {
-      if (estGratuit(m)) return m;              // analyse offerte du jour
+      if (estGratuit(m)) return sansChampsPro(m); // analyse offerte du jour, sans la simulation (Pro)
       if (ouvert && String(m.id) === portee.id) {
         const premium = premiumTermine[String(m.id)];
         // Sans ligne premium, le match reste sans analyse : jamais reconstituee

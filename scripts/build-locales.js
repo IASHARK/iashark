@@ -581,6 +581,8 @@ function leagueNamesData() {
   var out = {};
   readJson("config/leagues.json").leagues.forEach(function (l) {
     out[l.key] = { name: l.displayName, id: l.apiFootballId };
+    // Nom dans les 7 langues du site (config/leagues.json#names, competitions ajoutees depuis le 30/09/2026).
+    if (l.names && typeof l.names === "object") out[l.key].names = l.names;
   });
   return out;
 }
@@ -648,6 +650,39 @@ function legacyGonePrefixes(cfg) {
 function rule(from, to, status, cond) {
   function pad(s, n) { return s.length >= n ? s + "  " : s + new Array(n - s.length + 1).join(" "); }
   return pad(from, 34) + pad(to, 30) + status + (cond ? "  " + cond : "");
+}
+
+// Regles [from, to] des competitions retirees (config/leagues.json#competitions_retirees,
+// repris du 03/10/2026, decision de Clement du 04/10 : Colombie, Perou, Afrique du Sud...) :
+// hub /<dir>/leagues/<slug>.html de chaque version, pages club/derby rattachees a ces
+// competitions (config/club-hubs.json) et, si une version n'a plus aucune page club,
+// son index des clubs. Cible : accueil de la version.
+function retiredCompetitionRules() {
+  var rules = [];
+  function both(from, to) { rules.push([from, to]); rules.push([from.replace(/\.html$/, ""), to]); }
+  (SEO.RETIRED_LEAGUES || []).forEach(function (l) {
+    DIR_CODES.forEach(function (d) { both(SEO.retiredLeagueHubPath(d, l.key), "/" + d + "/"); });
+  });
+  var clubs = {};
+  try { clubs = readJson("config/club-hubs.json"); } catch (e) { return rules; }
+  var versions = clubs.versions || {}, gardes = {};
+  (clubs.clubs || []).concat(clubs.derbies || []).forEach(function (c) {
+    Object.keys(c.pages || {}).forEach(function (d) {
+      var v = versions[d], pg = c.pages[d];
+      if (!v || !pg || !pg.slug || DIR_CODES.indexOf(d) === -1) return;
+      if (SEO.isRetiredLeague(c.leagueKey)) both("/" + d + "/" + v.hubSlug + "/" + pg.slug + ".html", "/" + d + "/");
+      else if (c.active === true) gardes[d] = true;
+    });
+  });
+  Object.keys(versions).forEach(function (d) {
+    if (gardes[d] || DIR_CODES.indexOf(d) === -1) return;
+    var touche = rules.some(function (r) { return r[0].indexOf("/" + d + "/" + versions[d].hubSlug + "/") === 0; });
+    if (!touche) return;
+    rules.push(["/" + d + "/" + versions[d].hubSlug + "/index.html", "/" + d + "/"]);
+    rules.push(["/" + d + "/" + versions[d].hubSlug + "/", "/" + d + "/"]);
+    rules.push(["/" + d + "/" + versions[d].hubSlug, "/" + d + "/"]);
+  });
+  return rules;
 }
 
 function redirectsContent() {
@@ -721,6 +756,15 @@ function redirectsContent() {
     out.push(rule("/" + d + "/historique.html", "/" + d + "/", "301!"));
     out.push(rule("/" + d + "/historique", "/" + d + "/", "301!"));
   });
+
+  // Competitions retirees (config/leagues.json#competitions_retirees) : anciennes pages
+  // championnat, club et derby de ces competitions -> accueil de la version (301).
+  var retiredRules = retiredCompetitionRules();
+  if (retiredRules.length) {
+    out.push("", "# --- Competitions retirees (config/leagues.json#competitions_retirees) :",
+      "# anciennes pages championnat, club et derby -> accueil de la version (301).");
+    retiredRules.forEach(function (r) { out.push(rule(r[0], r[1], "301!")); });
+  }
 
   out.push("", "# --- Sources des pages legales (legal/<dir>/) : jamais servies telles quelles.");
   out.push(rule("/legal/*", "/:splat", "301!"));
@@ -1064,7 +1108,8 @@ module.exports = {
   stripUnavailablePageLinks: stripUnavailablePageLinks,
   buildHead: buildHead, setHtmlLang: setHtmlLang, injectRuntime: injectRuntime, metaFor: metaFor,
   homeJsonLd: homeJsonLd, homeSeoBlock: homeSeoBlock, rewriteHomeMatchSummary: rewriteHomeMatchSummary,
-  injectPageLd: injectPageLd
+  injectPageLd: injectPageLd,
+  retiredCompetitionRules: retiredCompetitionRules
 };
 
 if (require.main === module) build();

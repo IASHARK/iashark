@@ -186,7 +186,8 @@ test("pipeline : matchs par date en 1 appel, caches, plafond, perimetre, etat pu
   assert.match(wf, /teams\/statistics\?team='\+tid\+'&league='\+lgIdF\+'&season='/, "pre-chargement : meme URL que getTeamStats");
   assert.match(wf, /fixtures\/events\?fixture='\+fixtureId, APS, \{ttlMs: ttl\('match_termine'\)\}/);
   assert.match(wf, /standings\?league='\+lg\.id\+'&season='\+stSeason,APS,\{ttlMs: ttl\('journalier'\)\}/);
-  assert.match(wf, /injuries\?fixture='\+fixtureId, APS, \{ttlMs: ttl\('journalier'\)\}/);
+  // Blessures : cache du jour ; essentielles depuis le 04/10/2026 (un refus du plafond n'est plus « 0 blessure »).
+  assert.match(wf, /injuries\?fixture='\+fixtureId, APS, \{ttlMs: ttl\('journalier'\)(, essentiel: true)?\}/);
   assert.match(wf, /budget: function\(\)\{ return QUOTAS\.autorise\('api_football'/);
   assert.ok(!/regions=eu&markets=h2h,totals,btts/.test(wf), "plus de releve Pinnacle par match (3 credits a chaque match)");
   assert.match(wf, /fetchJsonAnj=oddsClient\(\)\.fetchJsonCoteAnj/);

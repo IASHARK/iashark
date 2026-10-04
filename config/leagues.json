@@ -248,11 +248,17 @@
       "EXIGENCE DE CLEMENT DU 04/10/2026 (2 h) : « des cotes entre 1,40 et 1,70 en sec ; toutes les cases remplies et justes ; c'est tout ».",
       "Le pari publie d'un match est un PARI SIMPLE dont la cote affichee (cote d'un bookmaker agree quand elle est relevee, sinon la cote",
       "moyenne du calcul, jamais Pinnacle ni bet365) est entre cote_min et cote_max (inclus). Parmi les marches autorises et verifies du match",
-      "dans la fourchette : la plus grande chance calculee, corrigee (corrections_chance). Aucun marche dans la fourchette : pas de pari",
-      "(no_signal), l'analyse du match reste publiee. Un pari deja publie (gel) ne change pas. Selections IASHARK, selections nationales,",
-      "match offert et option « cote plus haute » respectent la meme fourchette. Lue par lib/pronostic.js#fourchettePari, nulle part ailleurs."
+      "dans la fourchette : la plus grande chance calculee, corrigee (corrections_chance). Aucun marche dans la fourchette : voir la regle",
+      "du 04/10 (4 h) ci-dessous (avant : pas de pari). L'analyse du match reste publiee. Un pari deja publie (gel) ne change pas. Selections IASHARK, selections nationales,",
+      "match offert et option « cote plus haute » respectent la meme fourchette. Lue par lib/pronostic.js#fourchettePari, nulle part ailleurs.",
+      "EXIGENCE DE CLEMENT DU 04/10/2026 (4 h) : « il faut qu'il y ait un pari selectionne a TOUS les matchs ». Regle de 4 h 15 : « quand on choisit",
+      "un marche, si la cote n'est pas chez un bookmaker agree, on met le bookmaker d'API-Sports et c'est tout ». Donc : cote de chaque marche",
+      "candidat = la meilleure chez un agree ANJ (The Odds API, meme appel que la cote de reference), sinon la cote du marche d'API-Football",
+      "(sans nom de bookmaker). marge_sans_agree : pour cette cote d'API-Football, la borne basse devient cote_min + marge_sans_agree (1,42),",
+      "pour qu'elle reste dans la fourchette chez un agree (point du trader). Aucun marche dans la fourchette : le pari simple dont la cote est",
+      "la plus proche, jamais sous 1,20, marque « hors fourchette » (jamais Selection IASHARK ni match offert)."
     ],
-    "fourchette_pari": { "cote_min": 1.40, "cote_max": 1.70 },
+    "fourchette_pari": { "cote_min": 1.40, "cote_max": 1.70, "marge_sans_agree": 0.02 },
     "_readme_corrections_chance": [
       "Chance affichee = chance calculee + points (toujours negatifs) quand la regle correspond : competition (ou '*'),",
       "famille (1N2, DC, OU2.5 ou '*'), option ('principale', 'cote' ou '*'), et si donnees les bornes de chance (en %) et",

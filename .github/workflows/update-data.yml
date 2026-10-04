@@ -877,14 +877,22 @@ jobs:
             }
             return r.response;
           }
+          // UN PARI SUR CHAQUE MATCH (04/10/2026) : les cotes et les blessures d'un match analyse sont ESSENTIELLES
+          // (elles passent notre plafond du jour, config/quotas.json#api_football.plafond_jour). Preuve du 03/10
+          // (calcul de 15:22 UTC, run 37133018369) : « API-Football : 10651/75000 requetes deja utilisees aujourd'hui
+          // (mode plafond_jour) » puis « refus api-sports : requests: IASHARK : plafond du jour atteint (limit,
+          // config/quotas.json) » : API-Football avait encore 64 000 requetes, c'est NOTRE plafond qui a laisse la
+          // Segunda et l'Argentine sans cote (c1/cn/c2 = « -- ») et sans pari. Cout : 1 appel par match analyse.
           async function getOdds(fixtureId) {
-            var r = await get('https://v3.football.api-sports.io/odds?fixture='+fixtureId, APS);
+            var r = await get('https://v3.football.api-sports.io/odds?fixture='+fixtureId, APS, {essentiel: true});
             if(r.response&&r.response.length) return r.response[0];
             return null;
           }
           async function getInjuries(fixtureId) {
-            var r = await get('https://v3.football.api-sports.io/injuries?fixture='+fixtureId, APS, {ttlMs: ttl('journalier')});
-            if(!Array.isArray(r.response))return{fetch_ok:false,items:[]};
+            var r = await get('https://v3.football.api-sports.io/injuries?fixture='+fixtureId, APS, {ttlMs: ttl('journalier'), essentiel: true});
+            // Un refus (plafond, quota, erreur) n'est JAMAIS « aucune blessure » : fetch_ok faux (avant le 04/10,
+            // le refus du plafond, { response: [] }, etait lu comme « 0 blessure » : injuries_fetch_ok vrai, liste vide).
+            if((r.__ia_status||'OK')!=='OK'||!Array.isArray(r.response))return{fetch_ok:false,items:[]};
             return {fetch_ok:true,items:r.response.map(function(inj){
               return {name:(inj.player&&inj.player.name)||'',team:(inj.team&&inj.team.id)||0,reason:(inj.player&&inj.player.reason)||'Blessure',status:(inj.player&&inj.player.type)||'Injured'};
             })};
@@ -3886,6 +3894,7 @@ jobs:
                 p1:pureProbs.p1||0,pn:pureProbs.pN||0,p2:pureProbs.p2||0,
                 po15:(pureProbs.over15!=null&&isFinite(pureProbs.over15))?pureProbs.over15:null,po25:pureProbs.over25||0,btts:pureProbs.bttsY||0,
                 c1:odds.c1,cn:odds.cn,c2:odds.c2,co15:odds.co15,co25:odds.co25,cu25:odds.cu25,
+                cu15:odds.cu15||'--',cu35:odds.cu35||'--', // 04/10/2026 : l'autre cote des lignes 1,5 et 3,5 (chance sans marge, lib/pronostic.js)
                 dc1x:odds.dc1x,dc2x:odds.dc2x,dc12:odds.dc12,cdc1x:odds.dc1x,cdc2x:odds.dc2x,
                 ah_dom:odds.ah_dom||'--',ah_ext:odds.ah_ext||'--',co35:odds.co35||'--',
                 cbtts:odds.btts_oui,cbtts_non:odds.btts_non,btts_oui:odds.btts_oui,btts_non:odds.btts_non,
@@ -4300,6 +4309,26 @@ jobs:
               var rapportAnj=await COTE_ANJ.poserCotesAnj(parisAnj,{cle:ODDS_KEY,fetchJson:fetchJsonAnj,log:console.log});
               if(rapportAnj.erreurs.length) console.log('::warning title=Cote ANJ::'+rapportAnj.erreurs.slice(0,3).join(' | ').replace(/apiKey=[^&\s]+/g,'apiKey=***'));
             }catch(e){ console.log('::warning title=Cote ANJ::releve impossible ('+String(e&&e.message||e).replace(/apiKey=[^&\s]+/g,'apiKey=***').slice(0,150)+') : cotes indicatives.'); }
+            // ================= COTES DES AGREES POUR CHAQUE MATCH (regle de Clement du 04/10/2026, 4 h 15) =================
+            // « Quand on choisit un marche, si la cote n'est pas chez un bookmaker agree, on met le bookmaker d'API-Sports
+            // et c'est tout. » Livres des agrees ANJ suivis pour CHAQUE match ouvert non fige du perimetre The Odds API,
+            // lus dans le MEME appel par competition que la cote de reference (h2h + totals : aucun credit de plus en mode
+            // economie, lib/odds-api-econome.js), y compris la Segunda et l'Argentine quand API-Football n'a pas de cote.
+            // EN MEMOIRE SEULEMENT (jamais ecrit dans un fichier) : lib/pronostic.js#publierPronostics y lit la meilleure
+            // cote agreee de chaque marche candidat, sinon la cote du marche d'API-Football.
+            var LIVRES_ANJ={}, RELEVE_ANJ_A=null;
+            try{
+              var aReleverAnj=allMatchsData.filter(function(m){
+                return m&&m.id!=null&&!GEL_FIGES[String(m.id)]&&(!m.status||m.status==='NS')&&!/^(KICKOFF_|FIXTURE_NOT_UPCOMING)/.test(String(m.no_signal_reason||''));
+              }).map(function(m){
+                return {m:m, sport:dansPerimetreOdds(lgKey(m.league_id))?oddsSportKeyFor(LEAGUES_CONFIG,lgKey(m.league_id)):null, koMs:parisLocalToMs(m.date)};
+              });
+              var releveLivres=await COTE_ANJ.releverLivresAnj(aReleverAnj,{cle:ODDS_KEY,fetchJson:oddsClient().fetchJsonCoteAnj(estSelectionNationaleOdds)});
+              LIVRES_ANJ=releveLivres.livres||{}; RELEVE_ANJ_A=releveLivres.releve_a||null;
+              // Livres deja completes par les appels par match du pari present (double chance) : ils l'emportent.
+              if(typeof rapportAnj!=='undefined'&&rapportAnj&&rapportAnj.livres) Object.keys(rapportAnj.livres).forEach(function(k){ LIVRES_ANJ[k]=rapportAnj.livres[k]; });
+              console.log('  [COTE ANJ] cotes des agrees relevees pour '+Object.keys(LIVRES_ANJ).length+' match(s) ouvert(s) sur '+aReleverAnj.length+' ('+releveLivres.appels+' competition(s), aucun credit de plus)'+(releveLivres.erreurs.length?' ; '+releveLivres.erreurs.length+' erreur(s)':'')+'.');
+            }catch(e){ LIVRES_ANJ={}; console.log('::warning title=Cote ANJ::livres non releves ('+String(e&&e.message||e).replace(/apiKey=[^&\s]+/g,'apiKey=***').slice(0,150)+') : cote du marche d\'API-Football seulement.'); }
             allMatchsData.forEach(function(m){ CHANCE_IASHARK.poserChance(m); });
             // ================= TOUS LES MARCHES (03/10/2026) =================
             // Page match : les marches de la liste blanche du mathematicien (config/marches-valides.json),
@@ -4364,7 +4393,7 @@ jobs:
             // marge, cote 1,40-2,00, la plus probable). Amicaux : jamais. Avant les pronostics, le
             // match offert, l'historique et la ligne premium (colonnes lues par match-data).
             try{
-              var nSelNat=PRONOSTIC.poserSelectionsNationales(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG});
+              var nSelNat=PRONOSTIC.poserSelectionsNationales(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,cotesAnjPar:LIVRES_ANJ});
               console.log('  [PRONOSTIC] '+nSelNat+' selection(s) de selections nationales (cotes du marche).');
             }catch(e){ console.log('::warning title=Pronostic::selections nationales non posees ('+(e&&e.message)+').'); }
             try{
@@ -4382,16 +4411,16 @@ jobs:
           // (config/leagues.json#fiabilite.corrections_chance ; ex. Ligue des nations 59,1 % annonces / 56,0 % reels).
           // Enfin l'option « cote plus haute » (regle A, champ premium option_cote). Journal : compteurs seulement.
           try{
-            var rapportPub=PRONOSTIC.publierPronostics(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,figes:GEL_FIGES,chancesV3Par:CHANCES_V3_PRONO,texteMarche:TEXTE_MARCHE});
+            var rapportPub=PRONOSTIC.publierPronostics(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,figes:GEL_FIGES,chancesV3Par:CHANCES_V3_PRONO,texteMarche:TEXTE_MARCHE,cotesAnjPar:LIVRES_ANJ,releveAnjA:RELEVE_ANJ_A});
             var fourchetteLog=PRONOSTIC.fourchettePari(LEAGUES_CONFIG);
-            console.log('  [PARIS] fourchette '+fourchetteLog.cote_min.toFixed(2)+'-'+fourchetteLog.cote_max.toFixed(2)+' : '+rapportPub.publies+' pari(s) publie(s) ('+rapportPub.gardes+' garde(s), '+rapportPub.changes+' change(s) de marche, '+rapportPub.nouveaux+' nouveau(x)) ; '+rapportPub.sans_pari+' match(s) sans pari simple dans la fourchette (dont '+rapportPub.retires+' pari(s) retire(s)) ; '+rapportPub.figes+' fige(s) intouche(s) ; textes d\'un autre marche retires sur '+rapportPub.textes_retires+' match(s).');
+            console.log('  [PARIS] fourchette '+fourchetteLog.cote_min.toFixed(2)+'-'+fourchetteLog.cote_max.toFixed(2)+' : '+rapportPub.publies+' pari(s) publie(s) ('+rapportPub.dans_fourchette+' dans la fourchette, '+rapportPub.hors_fourchette+' au plus proche ; cote agreee '+rapportPub.cote_agreee+', cote du marche '+rapportPub.cote_marche+' ; '+rapportPub.gardes+' garde(s), '+rapportPub.changes+' change(s) de marche, '+rapportPub.nouveaux+' nouveau(x)) ; '+rapportPub.sans_pari+' match(s) sans pari (dont '+rapportPub.sans_cote+' sans aucune cote reelle, '+rapportPub.retires+' pari(s) retire(s)) ; '+rapportPub.figes+' fige(s) intouche(s) ; textes d\'un autre marche retires sur '+rapportPub.textes_retires+' match(s).');
           }catch(e){ console.log('::warning title=Paris::pronostics non publies ('+(e&&e.message)+').'); }
           try{
             var rapportAlign=PRONOSTIC.alignerChancesAffichees(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,figes:GEL_FIGES});
             console.log('  [PARIS] chance affichee alignee sur '+rapportAlign.alignes+' pari(s), dont '+rapportAlign.corriges+' corrigee(s) (categorie trop optimiste).');
           }catch(e){ console.log('::warning title=Paris::chances non alignees ('+(e&&e.message)+').'); }
           try{
-            console.log('  [PARIS] option « cote plus haute » posee sur '+PRONOSTIC.poserOptionCote(allMatchsData,{configLigues:LEAGUES_CONFIG})+' match(s).');
+            console.log('  [PARIS] option « cote plus haute » posee sur '+PRONOSTIC.poserOptionCote(allMatchsData,{configLigues:LEAGUES_CONFIG,cotesAnjPar:LIVRES_ANJ})+' match(s).');
           }catch(e){ console.log('::warning title=Paris::option cote non posee ('+(e&&e.message)+').'); }
             // ================= PROTECTION DU FICHIER PUBLIC =================
             // data.json est servi sans authentification. Il ne doit donc plus

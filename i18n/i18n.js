@@ -373,9 +373,11 @@
     applyToDom: function(root){
       root = root || document;
       var self = this;
+      // Cle absente du dictionnaire (ex. dictionnaire encore en cache chez le visiteur apres
+      // une mise en ligne, 04/10/2026) : on GARDE le texte du HTML, jamais le nom de la cle.
       root.querySelectorAll("[data-i18n]").forEach(function(el){
         var key = el.getAttribute("data-i18n");
-        var val = self.t(key, null);
+        var val = self.dict ? get(self.dict, key) : null;
         if (val != null) el.textContent = val;
       });
       root.querySelectorAll("[data-i18n-attr]").forEach(function(el){
@@ -383,7 +385,7 @@
         spec.split(",").forEach(function(pair){
           var parts = pair.split(":");
           if (parts.length !== 2) return;
-          var val = self.t(parts[1].trim(), null);
+          var val = self.dict ? get(self.dict, parts[1].trim()) : null;
           if (val != null) el.setAttribute(parts[0].trim(), val);
         });
       });

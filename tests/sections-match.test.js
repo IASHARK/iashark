@@ -105,9 +105,11 @@ test("scores les plus probables SANS le filtre du pari (verdict d1) : les 5 prem
   }
 });
 
-test("« modèle seul » : plus de 1,5 but est cache (verdict f) : les barres 1 et 2 buts sont fusionnees", () => {
+test("plus de 1,5 but juge faux par le moteur dans ce championnat (H-022) : les barres 1 et 2 buts sont fusionnees", () => {
   const v = AVEC_GRILLE[0];
-  const r = S.resumeSur10000(matchDe(v, { moteur_v3: { source: "v3", origine_probabilite: "modèle seul" } }));
+  const m = matchDe(v, { moteur_v3: { source: "v3", origine_probabilite: "modèle seul" } });
+  m.v3_marches.forEach((x) => { if (/^TOTAL:(plus|moins)1\.5$/.test(x.cle)) x.panneau = false; });
+  const r = S.resumeSur10000(m);
   assert.deepEqual(r.total_buts.map((x) => x.buts), ["0", "1-2", "3", "4+"]);
   assert.equal(somme(r.total_buts), 10000);
   assert.equal(S.tranchesButs({ "TOTAL:plus0.5": 90, "TOTAL:plus1.5": 92 }, () => true), null, "incoherent : rien");
@@ -301,7 +303,7 @@ test("perimetre (point 1) : un match de Ligue des nations « vérifiée » ne re
   const lignes = m.marches_panneau ? m.marches_panneau.familles.flatMap((f) => f.marches) : [];
   assert.deepEqual(lignes.filter((x) => x.source === "modele"), []);
   // Eliminatoires, coupes d'Europe, coupes nationales, amicaux : pareil.
-  for (const lk of ["wcq_europe", "ldc", "el", "ecl", "fa_cup", "copa_del_rey", "spain_segunda", undefined]) {
+  for (const lk of ["wcq_europe", "ldc", "el", "ecl", "fa_cup", "copa_del_rey", "libertadores", undefined]) {
     const x = macedoineEcosse({ league_key: lk, chance_iashark: 41 });
     assert.equal(S.couvertureVerifiee(x), false, String(lk));
   }

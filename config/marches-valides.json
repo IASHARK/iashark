@@ -10,7 +10,8 @@
     "chance (facultatif) : [min, max] = tranches de chance validees ; hors de ces bornes, le pari n'est jamais propose. Remplissage du 03/10/2026 d'apres la verification du mathematicien (372 matchs, 03/09-02/10/2026, bet365 juge, Pinnacle en controle) : seulement les marches et tranches qui passent. Un seul mois de cotes : a refaire avec 3 mois.",
     "cote_min : jamais une selection du flux sous cette cote bet365 (1,20), ni sur la page ni dans le robot ; au dernier controle, une cote tombee dessous retire le pari.",
     "Releve : la page match et le robot lisent le MEME releve de odds_snapshots, le dernier de moins de age_max_releve_h heures (marches-flux.mjs#lireRelevesFlux) ; la page ecrit son heure (marches_flux.releve_at).",
-    "ligues (03/10/2026, mathematicien) : seulement les competitions MESUREES (clubs verifies sur 372 matchs ; Ligue des nations sur 54 matchs, rien ne contredit) ; corners du match exclus pour les selections (44 % reels pour 54 % annonces sur 54 matchs). Les autres competitions s'ajouteront apres mesure."
+    "ligues (03/10/2026, mathematicien) : seulement les competitions MESUREES (clubs verifies sur 372 matchs ; Ligue des nations sur 54 matchs, rien ne contredit) ; corners du match exclus pour les selections (44 % reels pour 54 % annonces sur 54 matchs). Les autres competitions s'ajouteront apres mesure.",
+    "Tirs et tirs cadres (04/10/2026, decision de Clement) : le moteur v3 ne les calcule pas et aucun bookmaker agree ne les propose ; on prend simplement la cote d'API-Football sans marge (bet_id 211, 87, 340, 176), dans toutes les competitions, sans cote ni nom de bookmaker affiches. Pas de pari : seulement le panneau Marches (lib/pronostic.js ne les connait pas)."
   ],
   "reference": "bet365",
   "controle": "pinnacle",
@@ -171,6 +172,22 @@
         "argentina_liga_profesional",
         "nations_league"
       ]
+    },
+    {
+      "bet_id": 211,
+      "bet": "Total Shots"
+    },
+    {
+      "bet_id": 87,
+      "bet": "Total ShotOnGoal"
+    },
+    {
+      "bet_id": 340,
+      "bet": "Shots.1x2"
+    },
+    {
+      "bet_id": 176,
+      "bet": "ShotOnTarget 1x2"
     }
   ]
 }

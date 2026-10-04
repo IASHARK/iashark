@@ -5011,7 +5011,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: IASHARK/iashark-moteur
-          ref: ${{ vars.MOTEUR_V3_REF || '1aee60b48b0aa3d32e73ac102cc59503828c5910' }}
+          ref: ${{ vars.MOTEUR_V3_REF || 'bce7abf54a97df12afce28ba6deb7dbe8f48483b' }}
           token: ${{ secrets.MOTEUR_V3_DEPOT_PRIVE }}
           path: .moteur-v3-prive
           persist-credentials: false

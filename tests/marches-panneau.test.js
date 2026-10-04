@@ -28,7 +28,10 @@ function v3marches(extra) {
     "PREMIER_BUT:avant15": 30.1, "PREMIER_BUT:avant45": 69.9, "PREMIER_BUT:dom": 52.0, "PREMIER_BUT:ext": 40.3, "PREMIER_BUT:aucun": 7.7,
     "BTTS:oui": 51.0, "BTTS:non": 49.0, "CORNERS:plus9.5": 51.0, "HANDICAP_DOM:-1.5:gagne": 21.0, "CARTONS:plus4.5": 40.0,
   }, grille(), extra || {});
-  return Object.keys(p).map((cle) => ({ cle: cle, market_id: null, probabilite: Math.round(p[cle] * 10) / 10, fiabilite_marche: "x", etiquette: "x" }));
+  // H-022 du moteur : le verdict par marche (panneau) ; « faux » ici pour le handicap -1,5, comme si le moteur
+  // l'avait trouve faux dans ce championnat meme apres correction.
+  const faux = (extra && extra.__faux) || ["HANDICAP_DOM:-1.5:gagne"];
+  return Object.keys(p).filter((cle) => cle !== "__faux").map((cle) => ({ cle: cle, market_id: null, probabilite: Math.round(p[cle] * 10) / 10, fiabilite_marche: "x", etiquette: "x", panneau: faux.indexOf(cle) === -1 }));
 }
 function match(o) {
   return Object.assign({
@@ -53,16 +56,25 @@ test("rien sans le feu vert du mathematicien (en_attente, NO-GO)", () => {
   assert.equal(P.construirePanneau(match(), { verdicts: { marches_panneau: { statut: "en_attente", cles_affichees: ["1N2:1"] } } }), null);
   assert.equal(P.construirePanneau(match(), { verdicts: { marches_panneau: { statut: "NO-GO", cles_affichees: ["1N2:1"] } } }), null);
   assert.equal(VERDICTS.marches_panneau.statut, "GO");
-  assert.equal(VERDICTS.marches_panneau.cles_affichees.length, 71, "71 marches juges justes");
+  // 04/10/2026 (nuit), decision de Clement : tous les marches ouverts (109 cles), le moteur dit marche par marche ce qui
+  // est juste dans chaque championnat (H-022) ; avant : 71 cles du verdict du mathematicien.
+  assert.equal(VERDICTS.marches_panneau.cles_affichees.length, 109, "109 marches ouverts");
 });
 
-test("seulement les 71 marches justes : ni handicap, ni corners/cartons du v3, ni BTTS du v3, ni premier but par equipe, ni doublon", () => {
+test("tous les marches ouverts, sauf ceux que le moteur dit faux dans ce championnat, les doublons et le premier but par equipe", () => {
   const p = P.construirePanneau(match(), { verdicts: GO });
   const ids = p.familles.flatMap((f) => f.marches).filter((x) => x.source === "modele").map((x) => x.id);
-  for (const k of ["HANDICAP_DOM:-1.5:gagne", "CORNERS:plus9.5", "CARTONS:plus4.5", "BTTS:oui", "PREMIER_BUT:dom", "PREMIER_BUT:ext", "PREMIER_BUT:aucun", "PREMIER_BUT:avant45", "TOTAL:moins0.5", "MT_FIN:1/1", "EQUIPE_DOM:plus2.5", "EQUIPE_EXT:plus0.5"]) {
+  for (const k of ["HANDICAP_DOM:-1.5:gagne", "PREMIER_BUT:dom", "PREMIER_BUT:ext", "PREMIER_BUT:aucun", "PREMIER_BUT:avant45", "TOTAL:moins0.5"]) {
     assert.ok(!ids.includes(k), k + " cache");
   }
-  for (const k of ["DC:1N", "RB:1", "MT:N", "MT_FIN:N/1", "PREMIER_BUT:avant15", "TOTAL:plus1.5", "EQUIPE_DOM:plus0.5", "MT_PROLIFIQUE:2e"]) assert.ok(ids.includes(k) || ids.includes({ "DC:1N": "dc-1x" }[k]), k + " affiche");
+  for (const k of ["DC:1N", "RB:1", "MT:N", "MT_FIN:N/1", "PREMIER_BUT:avant15", "TOTAL:plus1.5", "EQUIPE_DOM:plus0.5", "MT_PROLIFIQUE:2e",
+    "CORNERS:plus9.5", "CARTONS:plus4.5", "MT_FIN:1/1", "EQUIPE_DOM:plus2.5", "EQUIPE_EXT:plus0.5"]) assert.ok(ids.includes(k) || ids.includes({ "DC:1N": "dc-1x" }[k]), k + " affiche");
+  assert.equal(ligne(p, "CORNERS:plus9.5").libelle, "Plus de 9,5 corners dans le match");
+  assert.equal(ligne(p, "CARTONS:plus4.5").libelle, "Plus de 4,5 cartons dans le match");
+  assert.equal(famille(p, "btts").marches.find((x) => x.source === "modele").chance + famille(p, "btts").marches.filter((x) => x.source === "modele")[1].chance, 100);
+  // Le meme handicap juge juste par le moteur : affiche, avec un libelle clair.
+  const h = P.construirePanneau(match({ v3_marches: v3marches({ __faux: [] }) }), { verdicts: GO });
+  assert.equal(ligne(h, "HANDICAP_DOM:-1.5:gagne").libelle, "Lens gagne par 2 buts d'écart ou plus");
   // Libelles du mathematicien.
   assert.equal(ligne(p, "RB:1").libelle, "Victoire Lens, si le match n'est pas nul");
   assert.equal(ligne(p, "MT_FIN:N/1").libelle, "Nul à la mi-temps / Lens à la fin");
@@ -103,15 +115,21 @@ test("arrondi par groupe (plus grand reste) : mi-temps, mi-temps/fin (calcule su
   assert.deepEqual(P.plusGrandReste([46.3, 27.1, 26.7], 100), [46, 27, 27]);
 });
 
-test("plus/moins 1,5 seulement quand le v3 combine modele et cotes (faux hors Europe, « modèle seul »)", () => {
+test("plus/moins 1,5 : le verdict du moteur dans ce championnat decide (H-022), plus la seule origine des chances", () => {
   const seul = P.construirePanneau(match({ moteur_v3: { source: "v3", origine_probabilite: "modèle seul" } }), { verdicts: GO });
-  assert.equal(ligne(seul, "TOTAL:plus1.5"), undefined);
-  assert.equal(ligne(seul, "TOTAL:moins1.5"), undefined);
-  assert.ok(ligne(seul, "TOTAL:plus2.5") || ligne(seul, "over-25"));
+  assert.ok(ligne(seul, "TOTAL:plus1.5") && ligne(seul, "TOTAL:moins1.5"), "juste dans ce championnat : affiche");
+  const faux = P.construirePanneau(match({ moteur_v3: { source: "v3", origine_probabilite: "modèle seul" }, v3_marches: v3marches({ __faux: ["TOTAL:plus1.5", "TOTAL:moins1.5"] }) }), { verdicts: GO });
+  assert.equal(ligne(faux, "TOTAL:plus1.5"), undefined);
+  assert.equal(ligne(faux, "TOTAL:moins1.5"), undefined);
+  assert.ok(ligne(faux, "TOTAL:plus2.5") || ligne(faux, "over-25"));
+  // Moteur plus ancien (pas de champ panneau) : la liste des cles affichables seule.
+  const ancien = match({ v3_marches: v3marches().map((x) => { const y = Object.assign({}, x); delete y.panneau; return y; }) });
+  assert.ok(ligne(P.construirePanneau(ancien, { verdicts: GO }), "HANDICAP_DOM:-1.5:gagne"));
 });
 
 test("flux de cotes : seulement ce que le v3 ne montre pas (les deux marquent, corners des cotes), jamais le buteur", () => {
-  const p = P.construirePanneau(match(), { verdicts: GO });
+  // Les deux marquent du v3 jugees fausses dans ce championnat : la cote du marche prend le relais.
+  const p = P.construirePanneau(match({ v3_marches: v3marches({ __faux: ["BTTS:oui", "BTTS:non", "HANDICAP_DOM:-1.5:gagne"] }) }), { verdicts: GO });
   assert.equal(famille(p, "btts").marches[0].chance, 52);
   assert.equal(famille(p, "btts").marches[0].source, "marche");
   assert.equal(famille(p, "corners").marches[0].libelle, "Plus de 8,5 corners dans le match");
@@ -135,8 +153,10 @@ test("pipeline : panneau sur les matchs ouverts, nb_marches public ; match ferme
   // 04/10/2026 (controle de l'avocat du diable, point 2) : nb_marches = les lignes AFFICHEES par le
   // panneau (une ligne par paire de contraires), meme regle que la page.
   const lignes = ouvert.marches_panneau.familles.reduce((s, f) => s + f.marches.length, 0);
-  assert.equal(lignes, 41, "39 lignes du v3 (dont 9 de scores) + 2 du flux sur ce match d essai");
-  assert.equal(ouvert.nb_marches, 38, "41 lignes, dont 3 paires de contraires reunies a l'affichage");
+  // H-022 (04/10/2026, nuit) : + les deux marquent, corners, cartons, mi-temps/fin 1/1 et buts par equipe du v3 ; les
+  // deux marquent du flux n'est plus repete (le v3 la montre).
+  assert.equal(lignes, 47, "46 lignes du v3 (dont 9 de scores) + 1 du flux sur ce match d essai");
+  assert.equal(ouvert.nb_marches, 43, "47 lignes, dont 4 paires de contraires reunies a l'affichage");
   assert.equal(ouvert.nb_marches, require("../lib/match-sections.js").nbLignesAffichees(ouvert.marches_panneau.familles));
   assert.equal(ferme.nb_marches, 7);
   assert.equal(vide.marches_panneau, undefined); assert.equal(vide.nb_marches, undefined);
@@ -160,7 +180,7 @@ test("acces : marches_panneau premium et Pro seulement (meme match offert) ; nb_
 
 // CONTROLE DU MATHEMATICIEN DU 04/10/2026 (points 1 et 2) : perimetre du moteur v3.
 test("perimetre : aucune ligne du v3 hors des 12 championnats mesures (selection, coupe) ni hors couverture verifiee", () => {
-  for (const o of [{ league_key: "nations_league" }, { league_key: "wcq_europe" }, { league_key: "ldc" }, { league_key: "coupe_de_france" }, { league_key: "championship" },
+  for (const o of [{ league_key: "nations_league" }, { league_key: "wcq_europe" }, { league_key: "ldc" }, { league_key: "coupe_de_france" }, { league_key: "libertadores" },
     { v3_fiabilite: { couverture: "données limitées" } }, { moteur_v3: { source: "ancien moteur (repli)" } }, { league_key: undefined }]) {
     const m = match(o);
     assert.equal(P.chancesEntieres(m, { verdicts: GO }), null, JSON.stringify(o));
@@ -168,7 +188,9 @@ test("perimetre : aucune ligne du v3 hors des 12 championnats mesures (selection
     const lignes = p ? p.familles.flatMap((f) => f.marches) : [];
     assert.deepEqual(lignes.filter((x) => x.source === "modele"), [], "aucune ligne du v3 : " + JSON.stringify(o));
   }
-  assert.deepEqual(VERDICTS.perimetre_v3.ligues.slice().sort(), ["argentina_liga_profesional", "bundesliga", "eredivisie", "jleague", "laliga", "liga_mx", "ligue1", "mls", "premier", "primeira", "seriea", "suede"]);
+  assert.equal(VERDICTS.perimetre_v3.ligues.length, 30, "les 30 championnats du site (H-022 du moteur)");
+  for (const k of ["premier", "jleague", "turkey_superlig", "chile_primera", "k_league1", "saudi_proleague"]) assert.ok(VERDICTS.perimetre_v3.ligues.includes(k), k);
+  for (const k of ["ldc", "nations_league", "coupe_de_france", "libertadores"]) assert.ok(!VERDICTS.perimetre_v3.ligues.includes(k), k);
 });
 
 test("coherence avec l'Avis : au-dela de 2 points d'ecart avec le v3 sur le meme marche, aucune ligne du v3 (l'Avis reste seul)", () => {

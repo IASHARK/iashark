@@ -82,6 +82,12 @@ export const CATALOGUE = Object.freeze({
   25: { bet: "Result/Total Goals", nom: "Résultat et nombre de buts", type: "resultat_ligne", memeMatch: true },
   49: { bet: "Total Goals/Both Teams To Score", nom: "Nombre de buts et les deux équipes marquent", type: "buts_btts", memeMatch: true },
   92: { bet: "Anytime Goal Scorer", nom: "Buteur (à n'importe quel moment)", type: "buteur" },
+  // Tirs (04/10/2026, decision de Clement) : le moteur v3 ne les calcule pas et aucun bookmaker agree ne les
+  // propose ; chance = cote d'API-Football sans marge, comme les autres marches du flux (ni cote ni bookmaker affiches).
+  87: { bet: "Total ShotOnGoal", nom: "Nombre de tirs cadrés", type: "ligne", stat: "tirs_cadres" },
+  211: { bet: "Total Shots", nom: "Nombre de tirs", type: "ligne", stat: "tirs" },
+  176: { bet: "ShotOnTarget 1x2", nom: "Plus de tirs cadrés", type: "issues", issues: I1N2, stat: "tirs_cadres" },
+  340: { bet: "Shots.1x2", nom: "Plus de tirs", type: "issues", issues: I1N2, stat: "tirs" },
 });
 /** Marches « meme match » : le bookmaker cote lui-meme la combinaison (jamais un produit de deux chances). */
 export const MEME_MATCH = Object.freeze(Object.keys(CATALOGUE).filter((k) => CATALOGUE[k].memeMatch).map(Number));
@@ -172,7 +178,7 @@ export function chancesBookmaker(flux, bk, betId) {
 // ------------------------------------------------------------------ libelles en francais simple
 const nomIssue = (x, dom, ext) => ({ home: `${dom} gagne`, draw: "match nul", away: `${ext} gagne` })[x];
 const SUFFIXE = { mt1: " (1re mi-temps)", mt2: " (2e mi-temps)" };
-const MOT_STAT = { buts: ["but", "buts"], corners: ["corner", "corners"], cartons: ["carton", "cartons"] };
+const MOT_STAT = { buts: ["but", "buts"], corners: ["corner", "corners"], cartons: ["carton", "cartons"], tirs: ["tir", "tirs"], tirs_cadres: ["tir cadré", "tirs cadrés"] };
 /** Le pari en clair : « Lens gagne et plus de 2,5 buts dans le match ». */
 export function libelleFlux(betId, value, dom = "Domicile", ext = "Extérieur") {
   const c = CATALOGUE[betId];
@@ -186,6 +192,10 @@ export function libelleFlux(betId, value, dom = "Domicile", ext = "Extérieur") 
       if (betId === 2) return `${lv === "home" ? dom : ext} gagne (remboursé si match nul)`;
       if (betId === 8 || betId === 34 || betId === 35) return (lv === "yes" ? "les deux équipes marquent" : "au moins une équipe ne marque pas") + suf;
       if (betId === 21) return lv === "odd" ? "nombre de buts impair" : "nombre de buts pair";
+      if (betId === 176 || betId === 340) {
+        const quoi = betId === 176 ? "tirs cadrés" : "tirs";
+        return ({ home: `plus de ${quoi} pour ${dom}`, draw: `autant de ${quoi} pour les deux équipes`, away: `plus de ${quoi} pour ${ext}` })[lv] || v;
+      }
       if (betId === 27 || betId === 28) return lv === "yes" ? `${eq} n'encaisse aucun but` : `${eq} encaisse au moins un but`;
       if (betId === 24) {
         const [r, b] = lv.split("/");
@@ -396,6 +406,7 @@ export function reglerFlux(code, faits) {
   let sc = null;
   if (c.stat === "corners") sc = paire(faits.corners);
   else if (c.stat === "cartons") sc = paire(faits.cartons);
+  else if (c.stat === "tirs" || c.stat === "tirs_cadres") sc = paire(faits[c.stat]); // fait absent : on attend (null)
   else if (c.periode === "mt1") sc = ht;
   else if (c.periode === "mt2") sc = ft && ht ? [ft[0] - ht[0], ft[1] - ht[1]] : null;
   else sc = ft;
@@ -405,7 +416,7 @@ export function reglerFlux(code, faits) {
   const issue1n2 = d > e ? "home" : d === e ? "draw" : "away";
   switch (c.type) {
     case "issues":
-      if ([1, 3, 13].includes(x.bet_id)) return res(lv === issue1n2);
+      if ([1, 3, 13, 176, 340].includes(x.bet_id)) return res(lv === issue1n2);
       if (x.bet_id === 2) return d === e ? "rembourse" : res(lv === issue1n2);
       if ([8, 34, 35].includes(x.bet_id)) return res((d > 0 && e > 0) === (lv === "yes"));
       if (x.bet_id === 21) return res((t % 2 === 1) === (lv === "odd"));

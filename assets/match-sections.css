@@ -43,6 +43,10 @@
 .f-tabs .hu-tab{justify-content:center;padding:.5rem 0;font-size:12.5px}
 .f-detail{margin:0;min-height:3em;color:var(--soft);font-size:13.5px;line-height:1.5}
 .f-line-t{margin:4px 0 -6px!important;font-size:12.5px!important}
+/* E bis. chiffres de l'ancien « Scenario probable » dans le film (04/10/2026, soir) */
+.f-peak{display:flex;align-items:flex-start;gap:8px;margin:0;color:var(--text);font-size:14px;line-height:1.45}
+.f-peak .x-ico{margin-top:3px;color:var(--accent);flex:none}
+.f-peak b{color:var(--accent)}
 /* F. qui ouvre le score + Et si */
 .x-first{border-radius:6px;overflow:hidden}
 .x-facts{display:grid;gap:6px;margin:0;padding:0;list-style:none}
@@ -91,8 +95,10 @@
 .b-n b{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .b-n small{color:var(--muted);font-size:12.5px}
 .b-g{margin:0;color:var(--soft);font-size:12.5px}
-.b-stats{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0}
-.b-stats div{display:flex;align-items:baseline;gap:6px}
+/* Une statistique par ligne : libelle a gauche, valeur a droite (04/10/2026, soir : jusqu'a 4
+   chiffres depuis le retour de ceux de l'ancienne carte « Marches joueurs »). */
+.b-stats{display:grid;gap:5px;margin:0}
+.b-stats div{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 .b-stats dt{color:var(--muted);font-size:12px}
 .b-stats dd{margin:0;font:700 13.5px var(--body,"DM Sans",sans-serif);font-variant-numeric:tabular-nums;color:var(--text)}
 .b-ech{margin:0;color:var(--muted);font-size:11.5px}
@@ -102,6 +108,45 @@
 .b-more small{color:var(--muted)}
 /* J. arbitre (HyperUI Stats) */
 .a-nom{color:var(--soft);font-weight:600}
+
+/* Blocs de l'ancienne page remis (04/10/2026, soir : forme, classement, compositions, ce que dit
+   le modele, probabilites et cotes, comparatif, marches joueurs, questions frequentes) : memes
+   cartes que les sections ci-dessus ; leurs styles internes restent ceux de match-page.css, les
+   marges propres a l'ancienne mise en page sont remises a zero (l'espace vient de la carte). */
+.secs{gap:20px}
+.x-sub b{color:var(--soft);font-weight:600}
+.x-card .pm-list,.x-card .st-note,.x-card .cmp-note,.x-card .mk-note,.x-card .outputs-missing,.x-card .scenario-insight,.x-card .scenario-source,.x-card .threat-alerte{margin:0}
+.x-card .pm-list li:first-child{border-top:0;padding-top:0}
+.x-card .threat-pied{margin-top:14px}
+.x-forme .fh-row:first-child{padding-top:0}
+.x-forme .fh-row:last-child{padding-bottom:0}
+.x-card .pr-legend{margin:0}
+.x-card .pr-list>.pr-row:first-child.is-signal{margin-top:0}
+.x-card .rep{margin-top:0}
+.x-card .outputs-missing{padding-top:11px}
+.x-questions .faq-list summary{padding:13px 0}
+.x-questions .faq-list details:first-child summary{padding-top:0}
+.x-card .lu-coach,.x-card .lu-subs{margin-top:8px}
+/* Barre du pari sous le sommaire : sur ordinateur, son fond reste dans la colonne de droite
+   (jamais par-dessus le panneau Marches). */
+@media(min-width:1100px){
+  .page.has-mk .mnav .sig-sticky:before{box-shadow:0 1px 0 rgba(34,211,238,.18);clip-path:none}
+}
+@media(max-width:640px){
+  .secs{gap:16px}
+}
+/* Comparatif au telephone : tout tient dans la carte, sans defilement de cote (le chiffre de
+   l'ecart reste ; la micro-barre, redondante avec lui, s'efface sous 480 px). */
+@media(max-width:480px){
+  .x-comparatif .cmp-jauge{display:none}
+  .x-comparatif .cmp-ecart{gap:0}
+  .x-comparatif .cmp-table thead th{max-width:none;letter-spacing:.04em;white-space:normal}
+  .x-comparatif .cmp-table thead th:last-child{width:auto}
+  .x-comparatif .cmp-eq{display:inline-block}
+  .x-comparatif .cmp-eq .logo-eq{display:none}
+  .x-comparatif .cmp-table td{padding-left:8px}
+  .x-comparatif .cmp-val{min-width:0}
+}
 
 /* K. Panneau Marches (colonne / tiroir Flowbite) */
 .mk-col{display:none}

@@ -28,7 +28,7 @@
 })(typeof window!=='undefined'?window:null,function(root){
 'use strict';
 
-var DEFAULTS={upsellAfter:3,lockedHref:'match',liveWindowMin:115,staleLiveMin:150,simulations:5000,
+var DEFAULTS={upsellAfter:3,lockedHref:'match',liveWindowMin:115,staleLiveMin:150,
   collapsedKey:'iashark.hlCollapsed.v1'};
 var PROB_BANDS=['high','good','moderate'];
 
@@ -293,7 +293,10 @@ function renderMatchRow(m,ctx,H,index){
   if(derby)tags.push('<span class="hl-tag hl-tag-derby" title="'+esc(derby)+'">'+esc(t('home_list.derby_chip','Derby'))+'</span>');
   if(cd)tags.push('<span class="hl-tag hl-tag-time is-'+cd.kind+'" data-hl-ts="'+(isFinite(ts)?ts:'')+'"'+(cd.estimated?' title="'+esc(t('home_list.status_estimated','Statut estimé d’après l’heure du coup d’envoi'))+'"':'')+'>'+esc(cd.text)+'</span>');
   if(q)tags.push('<span class="hl-tag hl-tag-q is-'+q.level+'"><i aria-hidden="true"></i>'+esc(q.text)+'</span>');
-  if(sig)tags.push('<span class="hl-tag hl-tag-sim">'+esc(tf('home_list.sims','{n} simulations',{n:fmtInt(ctx.simulations)}))+'</span>');
+  // 04/10/2026 : plus de pastille « N simulations ». L'ancien « 5 000 simulations »
+  // ecrit en dur etait faux (le moteur v3 ne tire aucune simulation), et le
+  // mathematicien interdit d'annoncer des tirages (verdicts du 04/10, d1). Le
+  // champ simulation_count est premium : la ligne ne le lit jamais.
 
   var zone;
   if(a.state==='past'){
@@ -441,7 +444,7 @@ function mount(rootEl,options){
   var collapsed={};
   try{collapsed=JSON.parse(root.sessionStorage.getItem(DEFAULTS.collapsedKey)||'{}')||{};}catch(e){collapsed={};}
   var ctx={isPro:!!options.isPro,hasAccount:!!options.hasAccount,freeMatchId:null,lockedHref:options.lockedHref||DEFAULTS.lockedHref,
-    upsellAfter:options.upsellAfter||DEFAULTS.upsellAfter,simulations:options.simulations||DEFAULTS.simulations,
+    upsellAfter:options.upsellAfter||DEFAULTS.upsellAfter,
     favorites:favorites,favMatches:favMatches,collapsed:collapsed,nowTs:Date.now()};
   var state={status:'loading',matches:[],days:[],day:null,clock:H.localClock(),onRetry:null,veille:[],veilleJour:null};
 

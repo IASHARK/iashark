@@ -149,8 +149,10 @@ test("build-locales : prix masques cuits dans le HTML genere ; l'accueil n'annon
     assert.doesNotMatch(html, /prixProDurees|Bientôt aussi|Coming soon: weekly|Próximamente también semanal|Demnächst auch wöchentlich|Presto anche settimanale|Em breve também semanal/, d);
     assert.doesNotMatch(html, /data-market-price="pro\.(week|year)"/, d + " : aucun prix semaine / annee sur l'accueil");
   }
-  // Carte Pro de l'accueil : prix mensuel (duree par defaut) conserve.
-  assert.match(norm(read("za/index.html")), /id="prixPro" data-market-price="pro"[^>]*>R ?199</);
+  // 04/10/2026 : le bloc prix de l'accueil est LE composant de paiement
+  // (lib/offre-pro.js : semaine, mois et annee payables, choisis par le serveur) ;
+  // son repli sans JavaScript garde le prix mensuel du marche, cuit dans le HTML.
+  assert.match(norm(read("za/index.html")), /data-market-price="pro\.month"[^>]*>R ?199</);
 });
 
 test("table des prix de create-checkout-session synchronisee avec config/markets.json (durees vendues seulement)", () => {
@@ -490,14 +492,23 @@ test("ordre de deploiement : fonction de paiement plus ancienne que le site -> s
   assert.deepEqual(off.api.visible(), ["month"], "paiement desactive : flux historique seul");
   const fresh = await mountWith({ ok: true, processed: false, mode: "availability", intervals: { week: true, month: true, year: false } }, { proOffer: () => offer, code: "fr", checkoutMarket: null });
   assert.deepEqual(fresh.api.visible(), ["week", "month"], "fonction a jour : disponibilites du serveur");
-  for (const f of ["abonnement-page.js", "account-page.js", "gb/gb-page.js", "mx/mx-page.js", "za/za-page.js"]) {
+  for (const f of ["account-page.js", "gb/gb-page.js", "mx/mx-page.js", "za/za-page.js"]) {
     const js = read(f);
     assert.ok(/whenReady\(\)/.test(js) && js.indexOf("whenReady()") < js.indexOf(".isAvailable()"), f + " : disponibilites attendues avant le paiement");
   }
+  // 04/10/2026 : la page abonnement et le compte gratuit paient par lib/offre-pro.js,
+  // qui applique la MEME regle (dispoHistorique) et attend les disponibilites.
+  const op = read("lib/offre-pro.js");
+  const payer = op.slice(op.indexOf("async function payer("));
+  assert.ok(payer.indexOf("lireDisponibilite(market)") > 0 && payer.indexOf("lireDisponibilite(market)") < payer.indexOf('Authorization: "Bearer " + jeton'), "offre-pro : disponibilites attendues avant le paiement");
+  assert.ok(payer.indexOf('reason: "interval_not_configured"') < payer.indexOf('Authorization: "Bearer " + jeton'), "offre-pro : duree non payable bloquee avant l'appel");
+  const OP = require("../lib/offre-pro.js");
+  assert.deepEqual(OP.dispoHistorique({ checkoutMarket: null }).intervals, { week: false, month: true, year: false });
+  assert.deepEqual(OP.dispoHistorique({ checkoutMarket: "us" }).intervals, { week: false, month: false, year: false });
 });
 
 test("front : chaque point d'entree du checkout envoie la duree, marque les durees non ouvertes et ne les facture jamais", () => {
-  for (const f of ["abonnement-page.js", "account-page.js", "gb/gb-page.js", "mx/mx-page.js", "za/za-page.js"]) {
+  for (const f of ["account-page.js", "gb/gb-page.js", "mx/mx-page.js", "za/za-page.js"]) {
     const js = read(f);
     assert.match(js, /IasharkProPlanPicker\.mount\(/, f + " : selecteur non monte");
     assert.match(js, /loadAvailability\(\)/, f + " : disponibilites non chargees");
@@ -506,12 +517,14 @@ test("front : chaque point d'entree du checkout envoie la duree, marque les dure
     assert.match(js, /already_subscribed/, f + " : second abonnement non gere");
     assert.match(js, /interval_not_configured/, f);
   }
-  for (const f of ["abonnement.html", "gb/landing.html", "mx/landing.html", "za/landing.html"]) {
+  for (const f of ["gb/landing.html", "mx/landing.html", "za/landing.html"]) {
     assert.match(read(f), /<script src="\/lib\/pro-plan-picker\.js"><\/script>/, f + " : module non charge");
   }
+  // 04/10/2026 : page abonnement = composant unique (lib/offre-pro.js).
+  const op = read("lib/offre-pro.js");
+  for (const x of ["interval_not_configured", "already_subscribed", "corpsPaiement(market, etat.choisi)"]) assert.ok(op.includes(x), "offre-pro : " + x);
   const ab = read("abonnement-page.js");
-  assert.ok(ab.indexOf("picker&&!picker.isAvailable()") < ab.indexOf("functions/v1/create-checkout-session"), "abonnement : blocage avant l'appel de paiement");
-  assert.match(ab, /if\(ctx\.isPro\)\{if\(box\)box\.hidden=true;if\(pickerBox\)pickerBox\.hidden=true;/, "abonne : ni selecteur ni paiement");
+  assert.match(ab, /if\(ctx\.isPro\)\{\s*if\(boite\)boite\.hidden=true;/, "abonne : ni choix de duree ni paiement");
   // Landings pays (liste de repli sans JS) : exactement les durees payables du
   // marche (config/markets.json#checkoutOpen, 19/09/2026 : /gb/ mensuel seul).
   for (const d of ["gb", "mx", "za"]) {

@@ -1,0 +1,162 @@
+/* Page match V4 (04/10/2026) : sections de lib/match-sections.js, panneau Marches
+   (colonne gauche sur ordinateur, tiroir du bas sur telephone), apercu flou du
+   match bloque. Les visuels sont de VRAIS composants (assets/composants.css :
+   Chart.js, Magic UI, HyperUI, Flowbite, icones Lucide) ; ce fichier ne fait que
+   la mise en page. Palette : sombre, cyan + gris ; vert / rouge seulement pour
+   des ecarts chiffres (Et si, arbitre) ; aucun or. Telephone d'abord. */
+.page-main{display:flex;flex-direction:column;gap:14px;min-width:0}
+.x-sr{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.x-card{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;min-width:0}
+.x-card>*,.e-box>*,.sec,.secs{min-width:0}
+.e-box{grid-template-columns:minmax(0,1fr)}
+.x-h h2{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:0;color:var(--text);font:700 18px/1.25 var(--body);letter-spacing:-.01em}
+.x-hico{display:inline-flex;padding:.45rem;border-radius:9999px;background:rgba(34,211,238,.1);color:var(--accent)}
+.x-hico .x-ico{width:18px;height:18px}
+.x-sub{margin:6px 0 0;color:var(--muted);font-size:13.5px;line-height:1.45}
+.x-note{margin:0;color:var(--muted);font-size:12.5px;line-height:1.5}
+.x-note-top{margin-top:-6px}
+.x-line{margin:0;color:var(--soft);font-size:14px;line-height:1.5}
+.x-ico{width:16px;height:16px;flex:none}
+.x-ico-s{width:13px;height:13px}
+.x-lock{display:flex;align-items:center;gap:9px;margin:0;padding:11px 13px;border:1px solid rgba(34,211,238,.25);border-radius:12px;background:rgba(34,211,238,.05);color:var(--soft);font-size:13.5px;line-height:1.4}
+.x-lock .x-ico{color:var(--accent)}
+.x-ref{display:inline-flex;align-items:center;gap:4px;color:var(--accent);font-style:normal;font-size:12.5px;font-weight:600;text-decoration:none;white-space:nowrap}
+.x-card h3{margin:0 0 8px;color:var(--soft);font:600 13.5px/1.3 var(--body)}
+.x-block{display:grid;gap:6px}
+/* Legendes : pastille de couleur + libelle + nombre (une seule fois). */
+.x-legend,.x-keys{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.x-keys{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--soft);font-size:12.5px}
+.x-keys li{display:inline-flex;align-items:center;gap:6px}
+.x-legend li{display:grid;grid-template-columns:12px minmax(0,1fr) auto;align-items:center;gap:8px;font-size:14px}
+.x-sw{display:inline-block;width:12px;height:12px;border-radius:3px;flex:none}
+.x-sw-l{height:2px;background:#f4f7fb;border-radius:1px}
+.x-sw-d{background:transparent;border:2px dashed #cbd5e1}
+.x-lab{min-width:0;color:var(--text)}
+.x-count{color:var(--text);font:700 14px var(--mono);white-space:nowrap}
+/* D. anneau Chart.js + legende */
+.x-sim-g{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:center}
+.x-donut{max-width:170px}
+/* E. film : onglets des quarts d'heure + detail */
+.x-tabs .hu-tab{padding:.5rem .7rem}
+.f-tabs{margin-top:-10px}
+.f-tabs .hu-tablist{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;overflow:visible}
+.f-tabs .hu-tab{justify-content:center;padding:.5rem 0;font-size:12.5px}
+.f-detail{margin:0;min-height:3em;color:var(--soft);font-size:13.5px;line-height:1.5}
+/* F. qui ouvre le score + Et si */
+.x-first{border-radius:6px;overflow:hidden}
+.e-box{display:grid;gap:12px;padding-top:14px;border-top:1px solid var(--line)}
+.e-k{margin:0!important;color:var(--text)!important;font:700 16px var(--body)!important}
+.e-d{font-style:normal;font-size:12.5px;font-weight:700;color:var(--muted)}
+.e-d.is-pos{color:var(--green)}
+.e-d.is-neg{color:var(--red)}
+.e-list li{grid-template-columns:12px minmax(0,1fr) auto auto}
+/* G. jumeaux */
+.j-t{margin:4px 0 6px!important;color:var(--text)!important;font:700 15px var(--body)!important}
+.j-ex{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.j-ex li{display:grid!important;gap:2px!important;padding:.75rem 1rem!important}
+.j-teams{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;font-size:14px;color:var(--text)}
+.j-teams b{font:700 14px var(--mono);color:var(--accent)}
+.j-ex small{color:var(--muted);font-size:12px}
+/* H. radar Chart.js + tableau des valeurs */
+.x-radar{max-width:420px;margin:0 auto}
+.r-table{width:100%;border-collapse:collapse;font-size:13.5px}
+.r-table th,.r-table td{padding:8px 6px;border-top:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+.r-table th[scope="row"]{text-align:left;color:var(--soft);font-weight:600}
+.r-table th[scope="row"] small{display:block;color:var(--muted);font-weight:400;font-size:11.5px}
+.r-table thead th{color:var(--muted);font-weight:600;font-size:12.5px;border-top:0}
+.r-table td.is-best{color:var(--accent);font-weight:700}
+.r-table td.r-ref{text-align:center}
+.r-rec{display:grid;gap:6px;margin:0;padding:0;list-style:none;color:var(--soft);font-size:13.5px}
+.r-rec b{color:var(--text)}
+.r-compos summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:14px;min-height:44px;display:flex;align-items:center}
+.r-lu-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.r-lu h4{margin:0 0 6px;font-size:14px}
+.r-lu ol{margin:0;padding-left:18px;color:var(--soft);font-size:13px;line-height:1.6}
+.r-lu p{margin:6px 0 0;color:var(--muted);font-size:12.5px}
+/* I. joueurs : jauge circulaire Magic UI */
+.b-top{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.b-card{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.02)}
+.b-card.is-top{border-color:rgba(34,211,238,.35)}
+.b-id{display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;gap:12px}
+.b-id img,.b-ini{width:52px;height:52px;border-radius:50%;object-fit:cover;background:#13283a}
+.b-ini{display:grid;place-items:center;color:var(--accent);font:800 16px var(--body)}
+.b-n{display:grid;min-width:0}
+.b-n b{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.b-n small{color:var(--muted);font-size:12.5px}
+.b-g{margin:0;color:var(--soft);font-size:12.5px}
+.b-stats{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0}
+.b-stats div{display:flex;align-items:baseline;gap:6px}
+.b-stats dt{color:var(--muted);font-size:12px}
+.b-stats dd{margin:0;font:700 13.5px var(--mono);color:var(--text)}
+.b-ech{margin:0;color:var(--muted);font-size:11.5px}
+.b-link{display:inline-flex;align-items:center;gap:4px;color:var(--accent);font-weight:600;font-size:13.5px;text-decoration:none;min-height:44px}
+.b-more{display:grid;gap:0;margin:0;padding:0;list-style:none}
+.b-more li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:14px}
+.b-more small{color:var(--muted)}
+/* J. arbitre (HyperUI Stats) */
+.a-nom{color:var(--soft);font-weight:600}
+
+/* K. Panneau Marches (colonne / tiroir Flowbite) */
+.mk-col{display:none}
+.mk-head{display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative;min-height:36px}
+.mk-title{display:flex;align-items:center;gap:8px;margin:0;color:var(--text);font:700 17px var(--body)}
+.mk-title .x-ico{color:var(--accent)}
+.mk-nb{color:var(--muted);font-weight:600}
+.mk-close{display:none}
+.mk-match{margin:-6px 0 0;color:var(--muted);font-size:12.5px}
+.mk-search{position:relative;display:block}
+.mk-search .x-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.mk-search input{width:100%;min-height:44px;padding:0 12px 0 36px;border:1px solid var(--line2);border-radius:10px;background:#0a121c;color:var(--text);font:500 14px var(--body)}
+.mk-search input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.mk-legend{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:0;color:var(--muted);font-size:11.5px}
+.mk-legend .hu-badge{font-size:11px;padding:0 .45rem}
+.mk-legend span:first-child{margin-right:4px}
+.mk-groups{display:grid;gap:14px}
+.mk-fam h3{margin:0 0 4px;color:var(--muted);font:700 12px var(--body);letter-spacing:.02em}
+.mk-fam ul,.mk-fake ul{margin:0;padding:0;list-style:none}
+.mk-fam li,.mk-fake li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.mk-fam li[hidden]{display:none}
+.mk-l{min-width:0;color:var(--text);font-size:13.5px;line-height:1.35}
+.mk-r{display:flex;justify-content:flex-end;flex:none}
+.mk-ref{display:inline-flex;align-items:center;gap:4px;color:var(--accent);font-size:12.5px;font-weight:600;text-decoration:none;white-space:nowrap}
+.mk-empty{margin:0;color:var(--muted);font-size:13px}
+.mk-foot{margin:0;padding-top:10px;border-top:1px solid var(--line);color:var(--muted);font-size:11.5px;line-height:1.5}
+.mk-locked{position:relative;display:grid}
+.mk-fake{display:grid;gap:10px;filter:blur(5px);opacity:.75;user-select:none;-webkit-user-select:none;pointer-events:none}
+.mk-over{position:absolute;inset:0;display:grid;align-content:center;justify-items:center;gap:10px;padding:16px;text-align:center;background:radial-gradient(80% 60% at 50% 50%,rgba(8,12,18,.9),rgba(8,12,18,.4))}
+.mk-over p{margin:0;color:var(--text);font-size:14px;line-height:1.45;max-width:26ch}
+.mk-lock{display:inline-flex;padding:.5rem;border-radius:9999px;background:rgba(34,211,238,.1);color:var(--accent)}
+.mk-lock .x-ico{width:20px;height:20px}
+.mk-over .mu-shimmer{width:auto;min-height:46px;font-size:15px}
+.mk-fab{position:fixed;right:14px;bottom:calc(86px + env(safe-area-inset-bottom));z-index:30;display:inline-flex;align-items:center;gap:6px;min-height:46px;padding:0 16px;border:1px solid rgba(34,211,238,.5);border-radius:999px;background:#0d1a27;color:var(--text);font:700 14px var(--body);box-shadow:0 10px 30px rgba(0,0,0,.45);cursor:pointer}
+.mk-fab b{color:var(--accent);font-weight:700}
+.mk-fab .card-icon{width:14px;height:14px;color:var(--accent)}
+.mnav-mk .mnav-chip{cursor:pointer}
+/* Dans le tiroir Flowbite (telephone, tablette) */
+.fb-drawer .mk-col{display:grid;gap:12px;max-width:640px;margin:0 auto;padding-top:4px}
+.fb-drawer .mk-close{display:inline-flex}
+@media(min-width:1100px){
+  .page.has-mk{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:start}
+  .page.has-mk>.mk-col{display:grid;gap:12px;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;padding:16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);scrollbar-width:thin}
+  .mk-fab,.mnav-mk{display:none!important}
+}
+
+/* Apercu flou du match bloque : constantes dessinees par les memes composants */
+.ap{display:grid;gap:10px}
+.ap-t{margin:0;color:var(--muted);font:600 13.5px var(--body)}
+.ap-body{display:grid;gap:12px;padding:14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);filter:blur(5px);opacity:.7;user-select:none;-webkit-user-select:none;pointer-events:none}
+.ap-slip{display:flex!important;justify-content:space-between;align-items:center;gap:10px}
+.ap-slip span{display:grid}
+.ap-slip small{color:var(--muted)}
+.ap-slip b{font:700 17px var(--body)}
+.ap-odds{color:var(--accent)}
+.ap-row{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;align-items:center}
+
+@media(max-width:420px){
+  .x-sim-g{grid-template-columns:118px minmax(0,1fr);gap:12px}
+  .x-legend li{font-size:13.5px}
+  .e-list li{grid-template-columns:12px minmax(0,1fr) auto;row-gap:0}
+  .e-list .e-d{grid-column:2/4}
+  .b-id{grid-template-columns:44px minmax(0,1fr) auto;gap:10px}
+  .b-id img,.b-ini{width:44px;height:44px}
+}

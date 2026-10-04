@@ -172,7 +172,9 @@ test("eteint : les nouveaux noms de champs premium ne changent rien aux fichiers
     const pub = PREMIUM.stripPremium(m);
     // Match offert : public, sauf les champs Pro seulement et, depuis l'audit I8 du
     // 02/10/2026, l'ancienne mise conseillee (mise, kelly, vbet), jamais publiee.
-    const RETIRES_OFFERT = ["sim_15min", "stats_iashark", "lecture_match", "mise", "kelly", "vbet"];
+    // 04/10/2026 : + panneau Marches et ses sources (marches_panneau, v3_marches, marches_flux), Pro seulement.
+    // + « Qui ouvre le score ? » et premier buteur (premier_but, v3_premiers_buteurs), Pro seulement.
+    const RETIRES_OFFERT = ["sim_15min", "stats_iashark", "lecture_match", "marches_panneau", "v3_marches", "marches_flux", "premier_but", "v3_premiers_buteurs", "mise", "kelly", "vbet"];
     const legacy = (m && m.is_free === true) ? (function () { const o = {}; Object.keys(m).forEach((k) => { if (RETIRES_OFFERT.indexOf(k) === -1) o[k] = m[k]; }); return o; })() : (function () { const o = {}; Object.keys(m).forEach((k) => { if (LEGACY.indexOf(k) === -1) o[k] = m[k]; }); if (!("has_signal" in o)) o.has_signal = !!(m.pari_rec && !m.no_signal); return o; })();
     assert.deepEqual(pub, legacy, "stripPremium identique pour " + m.id);
     const payload = PREMIUM.premiumPayload(m);
@@ -181,7 +183,7 @@ test("eteint : les nouveaux noms de champs premium ne changent rien aux fichiers
     assert.deepEqual(PREMIUM.deepPremiumLeaks(pub), [], "aucune nouvelle fuite detectee a tort pour " + m.id);
   }
   // Champs figes/vivants : l'ancien classement est inchange, v3_suivi est vivant.
-  assert.deepEqual(PICK_FREEZE.FROZEN_PAYLOAD_FIELDS.filter((k) => V3.CHAMPS_PREMIUM_V3.indexOf(k) === -1), LEGACY_PAYLOAD.filter((k) => ["dropping_odds", "player_markets", "top_scorers"].indexOf(k) === -1));
+  assert.deepEqual(PICK_FREEZE.FROZEN_PAYLOAD_FIELDS.filter((k) => V3.CHAMPS_PREMIUM_V3.indexOf(k) === -1), LEGACY_PAYLOAD.filter((k) => ["dropping_odds", "player_markets", "top_scorers", "v3_premiers_buteurs"].indexOf(k) === -1));
   assert.ok(PICK_FREEZE.LIVE_PREMIUM_FIELDS.includes("v3_suivi"));
   assert.equal(PICK_FREEZE.PREMIUM_ROW_SELECT.includes("v3_"), false, "aucune nouvelle colonne relue dans match_premium_data");
 });

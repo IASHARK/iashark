@@ -131,7 +131,8 @@ test("chaque champ premium est classe : fige (analyse du pari) ou vivant (flux),
     assert.ok(f !== v, k + " doit etre soit fige soit vivant (lib/pick-freeze.js) : " + (f ? "les deux" : "aucun"));
   });
   // v3_buteurs (01/10/2026) : buteurs du moteur v3, vivants comme top_scorers.
-  assert.deepEqual(F.LIVE_PREMIUM_FIELDS.slice().sort(), ["dropping_odds", "player_markets", "top_scorers", "v3_buteurs", "v3_suivi"]);
+  // v3_premiers_buteurs (04/10/2026) : premier buteur du moteur v3, vivant comme v3_buteurs.
+  assert.deepEqual(F.LIVE_PREMIUM_FIELDS.slice().sort(), ["dropping_odds", "player_markets", "top_scorers", "v3_buteurs", "v3_premiers_buteurs", "v3_suivi"]);
   // Le pari et tout ce qui le decrit sur la page match sont figes.
   ["pari_rec", "cote_rec", "model_probability", "market_id", "marche", "markets_compared", "conf", "reliability", "model_agreement",
     "risque", "pick_downgrade", "odds_available", "paris_safe", "analyse_card", "conseil_public", "contexte", "scenario",

@@ -105,6 +105,9 @@ const PREMIUM_FIELDS = [
   "marches_flux",
   // Option « cote plus haute » et correction de la chance affichee (lib/premium-fields.js, 04/10/2026).
   "option_cote", "chance_correction",
+  // Nouvelle page match (04/10/2026) : panneau Marches, « si ce match se jouait 10 000 fois »,
+  // jumeaux du match, qui ouvre le score, premier buteur.
+  "marches_panneau", "sim_resume", "jumeaux", "premier_but", "v3_premiers_buteurs",
 ];
 
 // Un match marque is_free par le pipeline est l'offre d'appel du jour : ses
@@ -119,7 +122,10 @@ function estGratuit(m: Record<string, unknown>): boolean {
 // lib/premium-fields.js#PRO_ONLY_FIELDS (tests/simulation-15min-visibility.test.js).
 // 30/09/2026 : detail des Stats IASHARK (stats_iashark), meme regle.
 // 30/09/2026 (soir) : « Notre lecture du match » (lecture_match), meme regle.
-const CHAMPS_PRO_SEULEMENT = ["sim_15min", "stats_iashark", "lecture_match"];
+// 04/10/2026 : panneau « Marches » et ses sources (marches_panneau, v3_marches, marches_flux),
+// Pro seulement meme sur le match offert (tests/tickets-du-jour-contrat.test.js : meme liste).
+// 04/10/2026 : « Qui ouvre le score ? » (premier_but) et premier buteur (v3_premiers_buteurs).
+const CHAMPS_PRO_SEULEMENT = ["sim_15min", "stats_iashark", "lecture_match", "marches_panneau", "v3_marches", "marches_flux", "premier_but", "v3_premiers_buteurs"];
 function sansChampsPro(m: Record<string, unknown>): Record<string, unknown> {
   const copy = { ...m };
   for (const f of CHAMPS_PRO_SEULEMENT) delete copy[f];
@@ -191,7 +197,8 @@ function runOutputPublic(ro: unknown, matchs: Record<string, unknown>[]): unknow
   const dc = copy.daily_combos as Record<string, unknown> | null | undefined;
   if (dc && typeof dc === "object") {
     const combos = Array.isArray(dc.combos) ? (dc.combos as Record<string, unknown>[]) : [];
-    copy.daily_combos = { generated_at: dc.generated_at ?? null, eligible_pool_size: dc.eligible_pool_size ?? null, combos: combos.map((c) => ({ combo_id: c?.combo_id, status: c?.status })), redacted: true };
+    // Statut seulement (lib/public-run-output.js, 04/10/2026) : plus de eligible_pool_size.
+    copy.daily_combos = { generated_at: dc.generated_at ?? null, combos: combos.map((c) => ({ combo_id: c?.combo_id, status: c?.status })), redacted: true };
   }
   return copy;
 }

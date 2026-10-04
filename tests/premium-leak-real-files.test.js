@@ -167,3 +167,25 @@ test("dist/ (ce que Netlify publie) : aucun champ premium dans les JSON et PRELO
     }
   }
 });
+
+// TICKETS DU JOUR ET PANNEAU « MARCHES » (04/10/2026, regles-tickets.md §6) : jamais dans un
+// fichier public, a aucune profondeur, meme sur le match offert (servis seulement par les
+// fonctions tickets-du-jour et match-data, selon le niveau).
+const JAMAIS_PUBLIC = ["tickets_du_jour", "selection_or", "buteur_du_jour", "jambes", "marches_panneau", "v3_marches", "marches_flux"];
+function clesInterdites(v, chemin, out) {
+  if (Array.isArray(v)) v.forEach((x, i) => clesInterdites(x, chemin + "[" + i + "]", out));
+  else if (v && typeof v === "object") Object.keys(v).forEach((k) => { if (JAMAIS_PUBLIC.includes(k)) out.push(chemin + "." + k); clesInterdites(v[k], chemin + "." + k, out); });
+  return out;
+}
+test("fichiers publics reels : aucun ticket, aucune Selection en or, aucun buteur du jour, aucun panneau Marches", () => {
+  const fichiers = ["data.json", "data-home.json", "historique.json", "buteurs-du-jour.json"].filter(exists).concat(listFiles("match", /^\d+\.json$/));
+  for (const f of fichiers) assert.deepEqual(clesInterdites(JSON.parse(read(f)), f, []).slice(0, 5), [], f);
+  const ro = JSON.parse(read("data.json")).run_output || {};
+  for (const c of (ro.daily_combos && ro.daily_combos.combos) || []) {
+    assert.ok(Object.keys(c).every((k) => k === "combo_id" || k === "status"), "daily_combos : statut seulement (" + Object.keys(c).join(",") + ")");
+  }
+  // buteurs-du-jour.json : plus aucun match ni rang une fois config/tickets.json#fichier_buteurs_public = « retire ».
+  if (require("../config/tickets.json").fichier_buteurs_public === "retire" && exists("buteurs-du-jour.json")) {
+    assert.doesNotMatch(read("buteurs-du-jour.json"), /match_id|match_rank|"name"|player/);
+  }
+});

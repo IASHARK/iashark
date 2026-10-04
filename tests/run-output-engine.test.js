@@ -100,123 +100,20 @@ test("TOP5 : scorer_probability_pct est la vraie probabilite modele, jamais une 
 });
 
 // ---------------------------------------------------------------
-// DAILY_COMBOS
+// DAILY_COMBOS (04/10/2026) : runOutputForSnapshot ne construit plus de
+// combine (il est appele avant la publication des paris). Les deux
+// emplacements TICKET_X5 / TICKET_X10 existent, en attente ; les tickets
+// eux-memes sont testes dans tests/tickets-du-jour.test.js.
 // ---------------------------------------------------------------
 
-test("COMBOS : jusqu'a 3, cote totale >= 10.00, max 1 selection par fixture, jamais de marche Asian/HOLD", () => {
+test("COMBOS : emplacements TICKET_X5 et TICKET_X10 en attente, jamais une jambe, quels que soient les candidats", () => {
   const registry = fakeRegistry({ ligue2: REG_PLAYER_OK });
   const candidates = [];
-  for (let i = 0; i < 12; i++) {
-    candidates.push(playerCandidate({ player_id: `p${i}`, fixture_id: 3000 + i, model_probability: 0.5 + i * 0.01, decimal_odds: 1.8 + i * 0.05 }));
-  }
-  candidates.push(playerCandidate({ player_id: "asian", fixture_id: 3999, market: "ASIAN_TOTAL_2.5", model_probability: 0.9, decimal_odds: 1.9 }));
-
-  const result = generateDailyCombos({ candidates, registry, snapshotTime: SNAPSHOT_T });
-  assert.ok(result.combos.length === 3);
-  for (const combo of result.combos) {
-    assert.equal(combo.betting_validation_status, "UNVALIDATED_SHADOW");
-    if (combo.status === "GENERATED") {
-      assert.ok(combo.combo_total_odds >= 10.0, `combo_total_odds=${combo.combo_total_odds} doit etre >=10`);
-      const fixtureIds = combo.legs.map((l) => l.fixture_id);
-      assert.equal(new Set(fixtureIds).size, fixtureIds.length, "jamais 2 jambes de la meme fixture");
-      assert.ok(combo.legs.every((l) => l.market !== "ASIAN_TOTAL_2.5"), "jamais un marche Asian/HOLD en jambe");
-      assert.ok(combo.legs.every((l) => l.decimal_odds >= 1.5), "minOdds=1.50 par jambe");
-    }
-  }
-});
-
-test("COMBOS : NO_QUALIFYING_COMBINATION plutot que force quand le pool est insuffisant (jamais de doublon quasi-identique)", () => {
-  const registry = fakeRegistry({ ligue2: REG_PLAYER_OK });
-  // Un seul pool de jambes suffisant pour UN combo >=10.00 (3.5*3.5=12.25),
-  // aucune jambe supplementaire disponible pour un 2e/3e ticket distinct :
-  // reutiliser les 2 memes jambes produirait un doublon quasi-identique,
-  // donc COMBO_2/3 doivent rester NO_QUALIFYING_COMBINATION, jamais forces.
-  const candidates = [
-    playerCandidate({ player_id: "p1", fixture_id: 4001, model_probability: 0.5, decimal_odds: 3.5 }),
-    playerCandidate({ player_id: "p2", fixture_id: 4002, model_probability: 0.5, decimal_odds: 3.5 }),
-  ];
-  const result = generateDailyCombos({ candidates, registry, snapshotTime: SNAPSHOT_T });
-  assert.equal(result.combos[0].status, "GENERATED");
-  assert.ok(result.combos[0].combo_total_odds >= 10.0);
-  assert.equal(result.combos[1].status, "NO_QUALIFYING_COMBINATION");
-  assert.equal(result.combos[2].status, "NO_QUALIFYING_COMBINATION");
-});
-
-test("COMBOS : rapporte shared_legs_count entre combos et limite le partage", () => {
-  const registry = fakeRegistry({ ligue2: REG_PLAYER_OK });
-  const candidates = [];
-  for (let i = 0; i < 20; i++) {
-    candidates.push(playerCandidate({ player_id: `p${i}`, fixture_id: 5000 + i, model_probability: 0.5 + (i % 5) * 0.02, decimal_odds: 1.9 + (i % 4) * 0.3 }));
-  }
-  const result = generateDailyCombos({ candidates, registry, snapshotTime: SNAPSHOT_T });
-  const generated = result.combos.filter((c) => c.status === "GENERATED");
-  assert.ok(generated.length >= 2, "avec un pool large, au moins 2 combos doivent se generer");
-  for (const c of generated) {
-    for (let j = 1; j <= 3; j++) {
-      const key = `shared_legs_with_combo_${j}`;
-      assert.ok(key in c);
-    }
-  }
-  // Les combos generes ne doivent pas etre des ensembles de jambes identiques.
-  const legSets = generated.map((c) => new Set(c.legs.map((l) => `${l.fixture_id}|${l.market}|${l.selection}`)));
-  for (let i = 0; i < legSets.length; i++) {
-    for (let j = i + 1; j < legSets.length; j++) {
-      const identical = legSets[i].size === legSets[j].size && [...legSets[i]].every((k) => legSets[j].has(k));
-      assert.equal(identical, false, "deux combos ne doivent jamais etre des tickets identiques");
-    }
-  }
-});
-
-test("COMBOS : exclut les jambes de robustesse LOW (data_quality FAIL)", () => {
-  const registry = fakeRegistry({ ligue2: REG_PLAYER_OK });
-  const candidates = [
-    playerCandidate({ player_id: "bad", fixture_id: 6001, model_probability: 0.9, decimal_odds: 20.0, data_quality_status: "FAIL" }),
-    playerCandidate({ player_id: "good1", fixture_id: 6002, model_probability: 0.5, decimal_odds: 3.5 }),
-    playerCandidate({ player_id: "good2", fixture_id: 6003, model_probability: 0.5, decimal_odds: 3.5 }),
-  ];
-  const result = generateDailyCombos({ candidates, registry, snapshotTime: SNAPSHOT_T });
-  assert.ok(result.combos[0].legs.every((l) => l.player_model_version == null || true)); // sanity: acces sans exception
-  for (const c of result.combos) {
-    if (c.status === "GENERATED") assert.ok(!c.fixtures_used.includes(6001), "la jambe FAIL ne doit jamais entrer dans un combo");
-  }
-});
-
-test("COMBOS : determinisme - meme entree, meme snapshot -> sortie strictement identique", () => {
-  const registry = fakeRegistry({ ligue2: REG_PLAYER_OK });
-  const candidates = [];
-  for (let i = 0; i < 10; i++) candidates.push(playerCandidate({ player_id: `p${i}`, fixture_id: 7000 + i, model_probability: 0.4 + i * 0.03, decimal_odds: 2.0 + i * 0.2 }));
-  const r1 = generateDailyCombos({ candidates, registry, snapshotTime: SNAPSHOT_T });
-  const r2 = generateDailyCombos({ candidates, registry, snapshotTime: SNAPSHOT_T });
-  assert.deepEqual(r1, r2);
-});
-
-test("COMBO_PROBABILITY : produit naif quand aucune dependance detectee, jamais qualifie de garanti", () => {
-  const registry = fakeRegistry({ ligue2: REG_PLAYER_OK });
-  const candidates = [
-    playerCandidate({ player_id: "p1", fixture_id: 8001, kickoff: "2026-09-07T15:00:00.000Z", model_probability: 0.5, decimal_odds: 3.5 }),
-    playerCandidate({ player_id: "p2", fixture_id: 8002, kickoff: "2026-09-08T20:00:00.000Z", model_probability: 0.5, decimal_odds: 3.5 }),
-  ];
-  const result = generateDailyCombos({ candidates, registry, snapshotTime: SNAPSHOT_T });
-  const combo1 = result.combos[0];
-  assert.equal(combo1.status, "GENERATED");
-  assert.equal(combo1.dependency_adjustment_applied, false);
-  assert.equal(combo1.estimated_combo_probability, combo1.naive_independent_product);
-  assert.ok(!JSON.stringify(combo1).toLowerCase().includes("guarant"));
-  assert.ok(!JSON.stringify(combo1).toLowerCase().includes("sur̀")); // pas de "sûr"
-});
-
-test("COMBO_PROBABILITY : amortissement applique quand 2 jambes partagent ligue+coup d'envoi (dependance residuelle)", () => {
-  const registry = fakeRegistry({ ligue2: REG_PLAYER_OK });
-  const sharedKickoff = "2026-09-07T18:00:00.000Z";
-  const candidates = [
-    playerCandidate({ player_id: "p1", fixture_id: 9001, kickoff: sharedKickoff, league_key: "ligue2", model_probability: 0.5, decimal_odds: 3.5 }),
-    playerCandidate({ player_id: "p2", fixture_id: 9002, kickoff: sharedKickoff, league_key: "ligue2", model_probability: 0.5, decimal_odds: 3.5 }),
-  ];
-  const result = generateDailyCombos({ candidates, registry, snapshotTime: SNAPSHOT_T });
-  const combo1 = result.combos[0];
-  assert.equal(combo1.status, "GENERATED");
-  assert.equal(combo1.dependency_adjustment_applied, true);
-  assert.ok(combo1.estimated_combo_probability < combo1.naive_independent_product);
+  for (let i = 0; i < 12; i++) candidates.push(playerCandidate({ player_id: `p${i}`, fixture_id: 3000 + i, model_probability: 0.5 + i * 0.01, decimal_odds: 1.8 + i * 0.05 }));
+  const result = runOutputForSnapshot({ candidates, registry, snapshotTime: SNAPSHOT_T });
+  assert.deepEqual(result.DAILY_COMBOS.combos.map((c) => [c.combo_id, c.status]), [["TICKET_X5", "PENDING_PUBLISHED_PICKS"], ["TICKET_X10", "PENDING_PUBLISHED_PICKS"]]);
+  assert.ok(result.DAILY_COMBOS.combos.every((c) => c.jambes === undefined && c.legs === undefined));
+  assert.equal(typeof generateDailyCombos, "function", "generateDailyCombos reste exporte (tickets du jour)");
 });
 
 // ---------------------------------------------------------------
@@ -396,45 +293,31 @@ test("runOutputForSnapshot : une fixture PL valide est eligible a TOP5 (Player),
   assert.ok(plInTop5, "PL doit pouvoir apparaitre dans TOP_5_SCORERS_OF_DAY");
   assert.equal(plInTop5.rank, 1);
 
-  const plLegInAnyCombo = result.DAILY_COMBOS.combos.some((c) => c.status === "GENERATED" && c.legs.some((l) => l.league === PL_LEAGUE_KEY));
-  assert.ok(plLegInAnyCombo, "une jambe Score PL doit pouvoir entrer dans un combo genere");
+  // 04/10/2026 : plus de combine construit ici (tickets du jour = paris publies, tests/tickets-du-jour.test.js).
+  assert.ok(result.DAILY_COMBOS.combos.every((c) => c.status === "PENDING_PUBLISHED_PICKS"));
 
   assert.equal(result.SAFE_PICK_OF_THE_DAY.status, "SELECTED");
   assert.equal(result.SAFE_PICK_OF_THE_DAY.league, PL_LEAGUE_KEY);
 });
 
 // ---------------------------------------------------------------
-// CORRECTIF PASS FINAL, point 2 : les gates reelles ne sont JAMAIS
-// contournees pour atteindre la cote >=10, meme si des jambes Score
-// non-VALIDATED/non-runnable auraient trivialement suffi.
+// CORRECTIF PASS FINAL, point 2 (06/09) : les jambes Score non-runnable ne
+// servaient jamais a franchir la cote 10 de l'ancien combine. Depuis le
+// 04/10/2026 les tickets ne prennent QUE des paris publies sur les pages
+// (verifies, cote agreee) : un candidat du moteur canonique n'y entre
+// jamais (tests/tickets-du-jour.test.js).
 // ---------------------------------------------------------------
 
-test("COMBOS : registry sans AUCUNE ligue Score eligible -> aucun combo GENERATED, jamais de detour par des jambes Score non-runnable", () => {
-  const registry = fakeRegistry({ unvalidated_score_league: { score_status: "INCONCLUSIVE", score_runnable: false, player_status: "NOT_STARTED", player_runnable: false } });
+test("COMBOS : un candidat du moteur canonique (meme tres rentable) n'entre jamais dans un ticket", () => {
   const candidates = [
-    scoreCandidate({ league_key: "unvalidated_score_league", fixture_id: 20001, model_probability: 0.9, decimal_odds: 12.0 }),
-    scoreCandidate({ league_key: "unvalidated_score_league", fixture_id: 20002, model_probability: 0.9, decimal_odds: 15.0 }),
-    scoreCandidate({ league_key: "unvalidated_score_league", fixture_id: 20003, model_probability: 0.9, decimal_odds: 20.0 }),
+    scoreCandidate({ league_key: "unvalidated_score_league", fixture_id: 20001, model_probability: 0.9, decimal_odds: 1.5 }),
+    scoreCandidate({ league_key: "unvalidated_score_league", fixture_id: 20002, model_probability: 0.9, decimal_odds: 1.5 }),
+    scoreCandidate({ league_key: "unvalidated_score_league", fixture_id: 20003, model_probability: 0.9, decimal_odds: 2.2 }),
   ];
-  const result = generateDailyCombos({ candidates, registry, snapshotTime: SNAPSHOT_T });
-  assert.equal(result.eligible_pool_size, 0);
-  assert.ok(result.combos.every((c) => c.status === "NO_QUALIFYING_COMBINATION"), "sans aucune jambe Score eligible, DAILY_COMBOS ne doit jamais forcer un combo");
-});
-
-test("COMBOS : une jambe Score tres rentable mais non-runnable n'est JAMAIS utilisee pour franchir le seuil de cote, meme si le pool eligible est insuffisant seul", () => {
-  const registry = fakeRegistry({ ligue2: REG_PLAYER_OK, unvalidated_score_league: { score_status: "INCONCLUSIVE", score_runnable: false } });
-  const candidates = [
-    playerCandidate({ player_id: "p1", fixture_id: 21001, model_probability: 0.5, decimal_odds: 2.0 }),
-    playerCandidate({ player_id: "p2", fixture_id: 21002, model_probability: 0.5, decimal_odds: 2.0 }), // produit = 4.0, insuffisant seul (<10)
-    scoreCandidate({ league_key: "unvalidated_score_league", fixture_id: 21003, model_probability: 0.9, decimal_odds: 50.0 }), // aurait trivialement franchi 10 si autorise
-  ];
-  const result = generateDailyCombos({ candidates, registry, snapshotTime: SNAPSHOT_T });
-  assert.equal(result.eligible_pool_size, 2, "la jambe Score non-runnable ne doit jamais entrer dans le pool eligible");
-  for (const c of result.combos) {
-    if (c.status === "GENERATED") assert.ok(!c.legs.some((l) => l.league === "unvalidated_score_league"), "jamais une jambe d'une ligue Score non-runnable dans un combo genere");
-    else assert.equal(c.status, "NO_QUALIFYING_COMBINATION");
-  }
-  assert.equal(result.combos[0].status, "NO_QUALIFYING_COMBINATION", "sans la jambe interdite, le pool eligible (4.0) n'atteint pas 10.00 - jamais force");
+  // generateDailyCombos n'attend que des jambes publiees (cote, chance affichee) : des
+  // candidats bruts (decimal_odds, model_probability) ne forment jamais un ticket.
+  const result = generateDailyCombos({ jambes: candidates, snapshotTime: SNAPSHOT_T });
+  assert.ok(result.combos.every((c) => c.status === "NO_QUALIFYING_COMBINATION"), "jamais un ticket a partir de candidats non publies");
 });
 
 test("EXAMPLE_SYNTHETIC_DATA : le script d'exemple marque explicitement ses donnees comme synthetiques", () => {

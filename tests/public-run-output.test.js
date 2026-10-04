@@ -29,6 +29,10 @@ test("top buteurs et combines : compteurs et statuts uniquement", () => {
   const combos = publicDailyCombos({ generated_at: "x", eligible_pool_size: 38, combos: [{ combo_id: "COMBO_1", status: "SELECTED", legs: [{ market: "OVER_2.5" }] }] });
   assert.deepEqual(combos.combos, [{ combo_id: "COMBO_1", status: "SELECTED" }]);
   assert.equal(JSON.stringify(combos).includes("OVER_2.5"), false);
+  // Tickets du jour (04/10/2026) : plus le nombre de paris eligibles du jour.
+  assert.equal("eligible_pool_size" in combos, false);
+  const tickets = publicDailyCombos({ generated_at: "x", combos: [{ combo_id: "TICKET_X5", type: "x5", status: "GENERATED", nb_matchs: 4, cote_totale: 4.62, chance: 17, jambes: [{ fixture_id: 1, pari: "Victoire A" }] }] });
+  assert.deepEqual(tickets, { generated_at: "x", combos: [{ combo_id: "TICKET_X5", status: "GENERATED" }], redacted: true });
 });
 
 test("le pipeline publie run_output via les versions publiques", () => {

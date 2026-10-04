@@ -34,7 +34,11 @@ test("contenusPro : chaque section n'est listee que si elle s'affichera pour un 
   const plein = Object.assign({}, PUBLIC, {
     sim_resume: RESUME, sim_15min: { tr: TR, si_affiche: SI, minute_mediane_premier_but: 29 }, premier_but: { dom: 55, ext: 37, aucun: 8, avant_pause: 69 },
     jumeaux: JUM, v3_buteurs: [{ joueur_id: 1, joueur: "A. B", cote: "home", poste: "F", p_marque: 0.3, chance: 30 }], stats_iashark: { arbitre: ARB }, marches_panneau: PANNEAU });
-  assert.deepEqual(MS.contenusPro(plein), ["sim", "film", "film_modele", "premier", "et_si", "jumeaux", "joueurs", "arbitre", "marches"]);
+  assert.deepEqual(MS.contenusPro(plein), ["sim", "sim_scores", "film", "film_modele", "premier", "et_si", "jumeaux", "joueurs", "arbitre", "marches"]);
+  // 04/10/2026, soir : « 10 000 fois » tire des cotes du marche (hors du v3) = victoire / nul /
+  // victoire seulement : « sim » sans « sim_scores » (l'offre ne promet pas de scores).
+  const parCotes = Object.assign({}, PUBLIC, { sim_resume: { v: "cotes-marche-1", base: 10000, source: "cotes", issues: { dom: 6400, nul: 2000, ext: 1600 }, scores: [], total_buts: null } });
+  assert.deepEqual(MS.contenusPro(parCotes), ["sim", "film"]);
   // Memes seuils que les sections : moins de 200 jumeaux, buteur hors 10-45 %, arbitre sur 20 matchs : rien.
   const faible = Object.assign({}, PUBLIC, { jumeaux: { resultat: Object.assign({}, JUM.resultat, { n: 150, dom: 50, nul: 50, ext: 50 }), buts: null },
     v3_buteurs: [{ joueur: "A. B", cote: "home", chance: 8 }], stats_iashark: { arbitre: Object.assign({}, ARB, { n: 20 }) } });
@@ -44,10 +48,10 @@ test("contenusPro : chaque section n'est listee que si elle s'affichera pour un 
 test("pipeline : pro_sections publique, sans chiffre, posee sur chaque match (et retiree si vide)", () => {
   const a = Object.assign({ id: 1, sim_resume: RESUME }, PUBLIC), b = { id: 2, pro_sections: ["sim"] };
   assert.equal(SM.poserContenusPro([a, b, null]), 1);
-  assert.deepEqual(a.pro_sections, ["sim", "film"]);
+  assert.deepEqual(a.pro_sections, ["sim", "sim_scores", "film"]);
   assert.equal("pro_sections" in b, false, "liste vide : champ retire (rien d'annonce)");
   assert.ok(!PREMIUM.PREMIUM_FIELDS.includes("pro_sections") && !PREMIUM.PRO_ONLY_FIELDS.includes("pro_sections"), "champ public, comme nb_marches");
-  assert.deepEqual(PREMIUM.stripPremium(Object.assign({}, a)).pro_sections, ["sim", "film"], "garde dans la copie publique");
+  assert.deepEqual(PREMIUM.stripPremium(Object.assign({}, a)).pro_sections, ["sim", "sim_scores", "film"], "garde dans la copie publique");
   assert.ok(a.pro_sections.every((k) => MS.CONTENUS.includes(k) && !/\d/.test(k)), "des noms de sections, jamais un chiffre");
   const yml = fs.readFileSync(path.join(__dirname, "..", ".github/workflows/update-data.yml"), "utf8");
   const iJ = yml.indexOf("JUMEAUX.poserJumeaux"), iC = yml.indexOf("SECTIONS_MATCH.poserContenusPro(allMatchsData)"), iP = yml.indexOf("PROTECTION DU FICHIER PUBLIC");
@@ -97,10 +101,14 @@ test("composant de paiement : avantages vrais pour CE match ; 3 ou 4 phrases ail
   const vide = OP.avantages({ contexte: "match", contenus: [] });
   assert.equal(vide.length, 2);
   assert.doesNotMatch(txt(vide), /scores les plus probables|film du match|marchés|ouvre le score/, "aucune promesse que Pro ne tiendra pas sur ce match");
-  const riche = OP.avantages({ contexte: "match", contenus: ["sim", "film", "film_modele", "premier", "et_si", "marches"], nbMarches: 52 });
+  const riche = OP.avantages({ contexte: "match", contenus: ["sim", "sim_scores", "film", "film_modele", "premier", "et_si", "marches"], nbMarches: 52 });
   assert.equal(riche.length, 4);
   assert.match(txt(riche), /Les 52 marchés de ce match/);
   assert.match(txt(riche), /scores les plus probables/);
+  // « 10 000 fois » sans grille de scores (cotes du marche, hors du v3) : jamais « scores les plus probables ».
+  const parCotes = OP.avantages({ contexte: "match", contenus: ["sim", "film", "marches"], nbMarches: 8 });
+  assert.doesNotMatch(txt(parCotes), /scores les plus probables/);
+  assert.match(txt(parCotes), /combien de fois chaque équipe gagne/);
   assert.deepEqual(OP.avantages({ contexte: "match", contenus: ["film"] }).map((x) => x[0]), ["chart-column", "calendar-days", "clapperboard"]);
   const fr = OP.avantages({ contexte: "general" });
   assert.ok(fr.length >= 3 && fr.length <= 4, "accueil, abonnement, compte : 3 ou 4 phrases");
@@ -118,7 +126,7 @@ test("composant de paiement : avantages vrais pour CE match ; 3 ou 4 phrases ail
 });
 
 test("textes nouveaux : presents dans les 7 dictionnaires", () => {
-  const cles = { offre_pro: ["benefit_pick", "benefit_every_match", "benefit_markets_n", "benefit_sim", "benefit_first_whatif", "benefit_first", "benefit_film_model", "benefit_film_teams", "benefit_scorers", "benefit_all_matches", "benefit_v3"],
+  const cles = { offre_pro: ["benefit_pick", "benefit_every_match", "benefit_markets_n", "benefit_sim", "benefit_sim_issues", "benefit_first_whatif", "benefit_first", "benefit_film_model", "benefit_film_teams", "benefit_scorers", "benefit_all_matches", "benefit_v3"],
     match_v4: ["first_lock_only", "panel_inverse"], auth: ["pay_step_eyebrow", "pay_step_h1", "pay_step_intro", "pay_step_intro_noprice", "pay_step_week", "pay_step_month", "pay_step_year"] };
   for (const l of ["fr", "en", "es", "es-mx", "de", "it", "pt"]) {
     const d = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "i18n/dict", l + ".json"), "utf8"));

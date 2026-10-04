@@ -196,17 +196,22 @@ test('carte Marches joueurs : sans historique joueur (visiteur non abonne), list
   assert.deepEqual(vm.players.scoringThreat, []);
 });
 
-// 04/10/2026 (plan UX, demande de Clement) : la page match n'affiche plus que le
-// calcul buteur du moteur v3 (section « Les joueurs », lib/match-sections.js :
-// titulaires probables seulement, une seule source buteur) ; l'ancienne carte
-// scorerModel et sa ligne « titularisations recentes » sont retirees.
+// 04/10/2026 (plan UX, demande de Clement) : section « Les joueurs » (lib/match-sections.js),
+// calcul buteur du moteur v3, titulaires probables seulement. 04/10/2026, soir (Clement : rien de
+// l'ancienne page ne doit manquer) : la carte « Marches joueurs » (ce calcul, scorerModel, le meme
+// que les « Buteurs du jour » de l'accueil) revient ; UNE SEULE SOURCE PAR JOUEUR : quand « Les
+// joueurs » (v3) est sur la page, elle ne redonne aucune chance de marquer.
 test('page match : la section « Les joueurs » montre les titulaires probables, traduite dans les 7 langues', () => {
   const ms = fs.readFileSync(path.join(__dirname, '..', 'lib', 'match-sections.js'), 'utf8');
   // Filtre des buteurs v3 (buteursV3, partage avec la liste publique pro_sections) puis la section.
   const bloc = ms.slice(ms.indexOf('function buteursV3('), ms.indexOf('function intervalle('));
   assert.match(bloc, /raw\.v3_buteurs/);
   assert.match(bloc, /match_v4\.probable_starter/);
-  assert.doesNotMatch(fs.readFileSync(path.join(__dirname, '..', 'match-page.js'), 'utf8'), /function threatsCard/);
+  const mp = fs.readFileSync(path.join(__dirname, '..', 'match-page.js'), 'utf8');
+  const carte = mp.slice(mp.indexOf('function marchesJoueursCarte('), mp.indexOf('// Sources de donnees'));
+  assert.match(carte, /vm\.players\.scoringThreat/);
+  assert.match(carte, /const v3=!!\(dit&&dit\.list\(\)\.some\(k=>\/\^buteur:\/\.test\(k\)\)\);/, 'section v3 rendue : aucune deuxieme chance de marquer');
+  assert.match(carte, /const list=v3\?\[\]:/);
   for (const loc of ['fr', 'en', 'es', 'es-mx', 'de', 'it', 'pt']) {
     const dict = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'i18n', 'dict', loc + '.json'), 'utf8'));
     assert.ok(dict.match_v4.probable_starter, loc);

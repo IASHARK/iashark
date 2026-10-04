@@ -453,15 +453,481 @@ function texteLisible(vm,texte){
 
 
 // ---------------------------------------------------------------------------
+// BLOCS DE L'ANCIENNE PAGE REMIS (04/10/2026, soir, demande de Clement : « c'etait a
+// rajouter ce qu'il fallait et bien espacer, pas les enlever »). Repris de la page du
+// 04/10 matin (commit c7d727c54), au format des sections V4 (carte, titre, icone) :
+// forme recente, classement, compositions, marches joueurs, questions frequentes.
+// Jamais remis : le bloc des face-a-face (retire expres par Clement), ni ce qu'une
+// section V4 montre deja (probabilites et cotes -> panneau Marches ; scores les plus
+// probables -> « 10 000 fois » ; scenario -> film du match ; comparatif -> radar).
+// Memes acces qu'avant : vue complete seulement (abonne Pro, compte connecte sur le match
+// offert, match termine) ; le visiteur ne voit toujours que l'en-tete et l'offre.
+// ---------------------------------------------------------------------------
+// Carte au format des sections V4 (lib/match-sections.js#carte). sous : HTML deja echappe.
+function carteX(cle,icone,titre,corps,sous){
+  const ic=lucide(icone,'x-ico');
+  return `<section class="card x-card x-${cle} reveal" aria-labelledby="x-${cle}-t"><div class="x-h"><h2 id="x-${cle}-t">${ic?`<span class="x-hico">${ic}</span>`:''}<span>${esc(titre)}</span></h2>${sous?`<p class="x-sub">${sous}</p>`:''}</div>${corps}</section>`;
+}
+// Logo d'equipe accole a son nom. SANS pastille ronde : un ecusson a sa propre
+// forme, un masque circulaire lui rogne les angles.
+function logoEquipe(src,nom){
+  return src?`<img class="logo-eq" src="${esc(src)}" alt="" width="16" height="16" loading="lazy">`:'';
+}
+
+// FORME RECENTE : les 5 derniers matchs de chaque equipe, resultat et score (le score
+// et l'adversaire ne sont nulle part ailleurs ; l'en-tete ne donne que les lettres).
+function formeCarte(vm){
+  const f=vm.form||{},i=vm.identity;
+  const ligne=(team,rows)=>rows&&rows.length?`<div class="fh-row"><span class="fh-team">${logoEquipe(team.logo,team.name)}<span>${esc(team.name)}</span></span>${formStrip(rows)}<span class="fh-scores" aria-hidden="true">${rows.slice().reverse().map(r=>`<i>${esc(r.score||'')}</i>`).join('')}</span></div>`:'';
+  const corps=ligne(i.home,f.home)+ligne(i.away,f.away);
+  if(!corps)return '';
+  const bilan=rows=>['W','D','L'].map(k=>`${rows.filter(r=>r.result===k).length} ${lettre(k)}`).join(' · ');
+  const resume=[[i.home,f.home],[i.away,f.away]].filter(x=>x[1]&&x[1].length).map(([tm,rows])=>`<b>${esc(tm.name)}</b> ${esc(bilan(rows))}`).join(' — ');
+  return carteX('forme','trending-up',t('match_page.stats_form_title','Forme récente'),`<div class="fh">${corps}</div>`,resume);
+}
+
+// CLASSEMENT : les deux equipes dans le classement actuel (rang, J, V, N, D, diff., pts).
+function classementCarte(vm){
+  const c=(vm._raw||{}).classement;
+  if(!c||typeof c!=='object')return '';
+  const i=vm.identity;
+  const ligneDe=(team,cote)=>{
+    const st=Array.isArray(c.standings)?c.standings.find(s=>s&&team.id!=null&&Number(s.team_id)===Number(team.id)):null;
+    return st||(c[cote]&&typeof c[cote]==='object'?c[cote]:null);
+  };
+  const lignes=[[i.home,ligneDe(i.home,'home')],[i.away,ligneDe(i.away,'away')]].filter(x=>x[1]);
+  if(!lignes.length)return '';
+  lignes.sort((a,b)=>(n(a[1].rank)===null?99:n(a[1].rank))-(n(b[1].rank)===null?99:n(b[1].rank)));
+  const v=x=>n(x)===null?'—':esc(n(x));
+  const diff=x=>n(x)===null?'—':`${x>0?'+':x<0?'−':''}${Math.abs(n(x))}`;
+  const COLS=[['played','J'],['won','V'],['drawn','N'],['lost','D']];
+  const corps=`<div class="st-scroll"><table class="st-table">
+      <thead><tr><th scope="col">${esc(t('match_page.standings_col_rank','#'))}</th><th scope="col" class="st-team">${esc(t('match_page.standings_col_team','Équipe'))}</th>${COLS.map(([k,fb])=>`<th scope="col">${esc(t('match_page.standings_col_'+k,fb))}</th>`).join('')}<th scope="col">${esc(t('match_page.standings_col_gd','Diff.'))}</th><th scope="col">${esc(t('match_page.standings_col_pts','Pts'))}</th></tr></thead>
+      <tbody>${lignes.map(([tm,s])=>`<tr><td>${v(s.rank)}</td><th scope="row" class="st-team"><span>${logoEquipe(tm.logo,tm.name)}${esc(tm.name)}</span></th>${COLS.map(([k])=>`<td>${v(s[k])}</td>`).join('')}<td>${diff(s.gd)}</td><td class="st-pts">${v(s.pts)}</td></tr>`).join('')}</tbody>
+    </table></div>
+    ${c.league_name?`<p class="st-note">${esc(c.league_name)} · ${esc(t('match_page.standings_note','classement actuel'))}</p>`:''}`;
+  return carteX('classement','chart-column',t('match_page.standings_title','Classement'),corps,'');
+}
+
+// COMPOSITIONS : champ public lineups (/fixtures/lineups), seulement quand un onze
+// officiel existe (jamais une composition devinee) ; postes, entraineur, remplacants.
+const POSTES_COURTS={G:['match_page.lineup_pos_g','G'],D:['match_page.lineup_pos_d','D'],M:['match_page.lineup_pos_m','M'],F:['match_page.lineup_pos_f','A']};
+function compoCarte(vm){
+  const l=vm.players&&vm.players.lineups,i=vm.identity;
+  if(!l)return '';
+  const joueur=p=>p&&p.player?p.player:p||{};
+  const colonne=(team,x)=>{
+    if(!x||!Array.isArray(x.startXI)||!x.startXI.length)return '';
+    const subs=Array.isArray(x.substitutes)?x.substitutes.map(joueur).filter(p=>p.name):[];
+    return `<div class="lu-col">
+      <h4>${logoEquipe(team.logo,team.name)}<span>${esc(team.name)}</span>${x.formation?`<em>${esc(x.formation)}</em>`:''}</h4>
+      <ol class="lu-list">${x.startXI.map(joueur).map(p=>{const pos=POSTES_COURTS[p.pos];return `<li><span class="lu-pos">${esc(pos?t(pos[0],pos[1]):(p.pos||'·'))}</span>${esc(p.name||'')}</li>`;}).join('')}</ol>
+      ${x.coach?`<p class="lu-coach">${esc(t('match_page.lineup_coach','Entraîneur'))}${esc(t('match_page.label_colon',' :'))} ${esc(x.coach)}</p>`:''}
+      ${subs.length?`<p class="lu-subs"><b>${esc(t('match_page.lineup_subs','Remplaçants'))}</b> ${subs.map(p=>esc(p.name)).join(', ')}</p>`:''}
+    </div>`;
+  };
+  const cols=colonne(i.home,l.home)+colonne(i.away,l.away);
+  if(!cols)return '';
+  const forms=[l.home&&l.home.formation,l.away&&l.away.formation].filter(Boolean).map(esc).join(' · ');
+  return carteX('compos','users',t('match_page.lineups_title','Compositions'),`<div class="lu-grid">${cols}</div>`,`${esc(t('match_page.lineups_official','Compositions officielles'))}${forms?' · '+forms:''}`);
+}
+
+// MARCHES JOUEURS. Le joueur le plus dangereux du match, ecrit comme un pari
+// (« A. Elanga buteur »), avec sa probabilite estimee (calcul lib/insights.js#scorerModel,
+// le meme que les « Buteurs du jour » de l'accueil) et les statistiques mesurees,
+// ECHANTILLON compris ; puis les projections du Player Engine (tirs, tirs cadres).
+// UNE SEULE SOURCE PAR JOUEUR : quand la section « Les joueurs » (buteurs du moteur v3) est
+// sur la page, ce bloc ne redonne aucune chance de marquer (ni carte buteur, ni ligne
+// « buteur ») ; il garde seulement les autres marches joueurs, sinon il n'est pas rendu.
+function threatSample(p){
+  const bits=[];
+  if(n(p.appearances)!==null)bits.push(`${p.appearances} ${p.appearances>1?t('match_page.matches_played_plural','matchs joués'):t('match_page.matches_played_singular','match joué')}`);
+  if(n(p.starts)!==null)bits.push(p.starts>0?`${p.starts} ${p.starts>1?t('match_page.starts_plural','titularisations'):t('match_page.starts_singular','titularisation')}`:t('match_page.starts_none','aucune titularisation'));
+  if(n(p.minutes)!==null&&p.minutes>0)bits.push(`${Math.round(p.minutes)} ${t('match_page.minutes_played_suffix','minutes jouées')}`);
+  return bits.length?bits.join(' · '):'';
+}
+// Cle francaise -> [cle i18n, repli francais], resolue a l'appel.
+const POSTES={
+  goalkeeper:['match_page.position_goalkeeper','Gardien'],
+  defender:['match_page.position_defender','Défenseur'],
+  midfielder:['match_page.position_midfielder','Milieu'],
+  attacker:['match_page.position_forward','Attaquant']
+};
+const poste=v=>{const k=String(v||'').trim();const e=POSTES[k.toLowerCase()];return e?t(e[0],e[1]):k;};
+const buteur=name=>{const ml=window.IasharkMarketLabels;return ml&&ml.playerMarketLabelFor?ml.playerMarketLabelFor('ANYTIME_GOALSCORER',name):name;};
+const CODES_JOUEUR={'Buteur':'ANYTIME_GOALSCORER','Tirs':'PLAYER_SHOTS','Tirs cadrés':'PLAYER_SHOTS_ON_TARGET'};
+function marchesJoueursCarte(vm,dit){
+  // Section « Les joueurs » (moteur v3) rendue : elle porte deja la chance de marquer.
+  const v3=!!(dit&&dit.list().some(k=>/^buteur:/.test(k)));
+  const list=v3?[]:(vm.players.scoringThreat||[]);
+  const projections=(vm.players.projections||[]).filter(p=>n(p.probability)!==null&&!(CODES_JOUEUR[p.market]==='ANYTIME_GOALSCORER'&&(v3||list.length)));
+  if(!list.length&&!projections.length)return '';
+  let corps='';
+  if(list.length){
+    const p=list[0];
+    const pid=n(p.id);
+    const href=pid!==null?` href="${esc(lien(`joueur.html?m=${encodeURIComponent(vm.id)}&p=${pid}`))}"`:'';
+    const tag=pid!==null?'a':'div';
+    const prob=n(p.scoringProbability);
+    // Deux decimales fixes sur les moyennes par 90, pour que les colonnes du panneau s'alignent.
+    const deux=v=>Number(v).toLocaleString(localeTag(),{minimumFractionDigits:2,maximumFractionDigits:2});
+    // Titularisations sur les derniers matchs de l'equipe : ce qui fait de lui un titulaire
+    // probable (compositions pas encore connues).
+    const titu=n(p.startsLast)!==null&&n(p.teamMatchesLast)>0?[`${p.startsLast}/${p.teamMatchesLast}`,t('match_page.stat_recent_starts','Titularisations récentes')]:null;
+    const stats=[
+      titu,
+      n(p.goals90)!==null&&p.goals90>0?[deux(p.goals90),t('match_page.stat_goals_per90','Buts / 90 min')]:null,
+      n(p.shotsOn90)!==null&&p.shotsOn90>0?[deux(p.shotsOn90),t('match_page.stat_shots_on_target_per90','Tirs cadrés / 90 min')]:null,
+      n(p.expectedGoals90)!==null?[deux(p.expectedGoals90),t('match_page.stat_expected_goals_per90','Buts attendus / 90 min')]:null,
+      n(p.assists90)!==null&&p.assists90>0?[deux(p.assists90),t('match_page.stat_assists_per90','Passes déc. / 90 min')]:null,
+      n(p.rating5)!==null?[Number(p.rating5).toLocaleString(localeTag(),{minimumFractionDigits:1,maximumFractionDigits:1}),t('match_page.stat_average_rating','Note moyenne')]:null
+    ].filter(Boolean).slice(0,3);
+    const sample=threatSample(p);
+    const largeur=prob===null?null:clamp(prob);
+    corps+=`<${tag} class="threat group"${href}>
+      <div class="threat-id">
+        ${img(p.photo,'',54,54)}
+        <div class="threat-who">
+          <b>${esc(buteur(p.name))}</b>
+          <small>${esc(p.team||'')}${p.position?' · '+esc(poste(p.position)):''}</small>
+        </div>
+      </div>
+      ${prob===null?'':`<div class="threat-prob">
+        <div class="threat-prob-tete"><span>${esc(t('match_page.scoring_probability_label','Probabilité de marquer'))}</span><b>${pct(prob)}</b></div>
+        <div class="threat-jauge" role="img" aria-label="${esc(t('match_page.scoring_probability_label','Probabilité de marquer'))} : ${pct(prob)}"><i style="width:${largeur}%"></i></div>
+      </div>`}
+      ${stats.length?`<div class="threat-panneau">${stats.map(([v,k])=>`<div><b>${v}</b><span>${esc(k)}</span></div>`).join('')}</div>`:''}
+      <div class="threat-pied">
+        ${sample?`<span class="threat-sample${p.thinSample?' is-thin':''}">${esc(sample)}</span>`:'<span></span>'}
+        ${pid!==null?`<span class="threat-lien">${esc(t('match_page.view_profile_link','Voir la fiche'))} <i aria-hidden="true">→</i></span>`:''}
+      </div>
+      ${p.thinSample?`<p class="threat-alerte">${esc(t('match_page.thin_sample_alert','Temps de jeu limité sur ce championnat : ces moyennes par 90 minutes reposent sur peu de minutes et restent fragiles.'))}</p>`:''}
+    </${tag}>`;
+    const autres=list.slice(1,4).filter(x=>n(x.scoringProbability)!==null);
+    if(autres.length)corps+=`<ul class="pm-list">${autres.map(x=>`<li><span>${esc(buteur(x.name))}<small>${esc(x.team||'')}</small></span><b>${pct(x.scoringProbability)}</b></li>`).join('')}</ul>`;
+  }
+  if(projections.length){
+    const ml=window.IasharkMarketLabels;
+    corps+=`<ul class="pm-list">${projections.slice(0,6).map(x=>{
+      const code=CODES_JOUEUR[x.market];
+      const label=code&&ml&&ml.playerMarketLabelFor?ml.playerMarketLabelFor(code,x.player):`${x.player} · ${x.market}`;
+      return `<li><span>${esc(label)}</span><b>${pct(x.probability)}</b></li>`;
+    }).join('')}</ul>`;
+  }
+  if(list.length)corps+=`<p class="x-note">${esc(t('match_page.players_note','Estimé avant les compositions officielles : seuls les titulaires probables (titularisations récentes) sont mis en avant, avec leurs tirs cadrés et buts récents et les buts attendus de leur équipe dans ce match. Aucune cote de bookmaker.'))}</p>`;
+  return carteX('buteurs','target',t('match_page.player_markets_title','Marchés joueurs'),corps,list.length?esc(t('match_page.players_sub','Les buteurs les plus probables')):'');
+}
+
+// Bouton + panneau repliable (grid-template-rows 0fr -> 1fr ; ferme = inert).
+function repliable(o){
+  const id=uid('rep'),ouvert=!!o.open;
+  return `<div class="rep${ouvert?' is-open':''}${o.cls?' '+o.cls:''}">
+    <button type="button" class="rep-btn" aria-expanded="${ouvert}" aria-controls="${id}" data-label-open="${esc(o.labelOpen||o.label)}" data-label-closed="${esc(o.label)}"><span>${esc(ouvert?(o.labelOpen||o.label):o.label)}</span><i aria-hidden="true"></i></button>
+    <div class="rep-panel" id="${id}"${ouvert?'':' inert'}><div class="rep-inner">${o.body}</div></div>
+  </div>`;
+}
+
+// CE QUE DIT LE MODELE : buts attendus et scores les plus probables du modele (mc_scores),
+// ecrits comme au bookmaker (« Score exact : 1-1 »). Seulement ce que la page ne montre pas
+// deja : buts attendus deja dans l'Avis ou dans « 10 000 fois », scores deja dans « 10 000
+// fois » (grille du v3) -> pas reecrits (registre). Rien a montrer : pas de carte.
+function modeleCarte(vm,dit){
+  const x=vm.model.expectedGoals,s=vm.model.scores||[],i=vm.identity;
+  const xgAilleurs=!!(dit&&(dit.has('xg')||dit.has('raison:xg')));
+  const scoresAilleurs=!!(dit&&dit.list().some(k=>/^score:/.test(k)));
+  const cols=[],manquant=[];
+  if(x&&!xgAilleurs){
+    cols.push(`<div class="outputs-col outputs-xg"><small>${esc(t('match_page.stat_expected_goals','Buts attendus'))} (xG)</small><div class="xg-row">${img(i.home.logo,'',26,26)}<b>${fmt(x.home)}</b><span>${esc(i.home.name)} – ${esc(i.away.name)}</span><b>${fmt(x.away)}</b>${img(i.away.logo,'',26,26)}</div></div>`);
+  } else if(!x&&!xgAilleurs)manquant.push(t('match_page.xg_unavailable','xG indisponibles'));
+  if(s.length&&!scoresAilleurs){
+    const ml=window.IasharkMarketLabels;
+    const maxP=Math.max.apply(null,s.map(sc=>Number(sc.probability)||0))||1;
+    cols.push(`<div class="outputs-col"><small>${esc(t('match_page.scores_title','Scores les plus probables'))}</small><div class="score-bars">${s.map(sc=>`<div class="score-bar"><b>${esc(ml&&ml.exactScoreLabel?ml.exactScoreLabel(sc.score):sc.score)}</b><i><span style="width:${clamp(Number(sc.probability)/maxP*100)}%"></span></i><small>${pct(sc.probability,0)}</small></div>`).join('')}</div></div>`);
+  } else if(!s.length&&!scoresAilleurs)manquant.push(t('match_page.scores_unavailable','Scores probables indisponibles'));
+  if(!cols.length)return '';
+  return carteX('modele','chart-column',t('match_page.outputs_title','Ce que dit le modèle'),
+    `<div class="outputs${cols.length===1?' outputs-1col':' outputs-2col'}">${cols.join('')}</div>`
+    +(manquant.length?`<p class="outputs-missing">${esc(manquant.join(' · '))}.</p>`:''),esc(t('match_page.outputs_sub','Buts attendus et scores les plus probables')));
+}
+
+// PROBABILITES ET COTES : deux barres par pari (« Notre estimation » / « Ce que dit la
+// cote »), ecart dit en mots, bulle « ? ». Le pari conseille ouvre la liste (memes chiffres
+// que l'Avis), 4 lignes visibles, le reste replie. Donnees : lib/match-view-model.js#marketTable
+// (marche absent = non disponible, jamais 0 %).
+const GROUPES_MARCHES=[['result','Résultat'],['goals','Buts'],['stats','Tirs, corners, cartons'],['other','Autres marchés']];
+// Ligne du tableau des marches : l'identifiant moteur quand il est connu (plus fiable), sinon le libelle.
+function libelleLigne(vm,row){
+  const ml=window.IasharkMarketLabels,eq={home:vm.identity.home.name,away:vm.identity.away.name};
+  if(ml&&row.id&&ml.marketIdLabel){const s=ml.marketIdLabel(row.id,eq);if(s&&s!==row.id)return s;}
+  return marcheFr(vm,row.label);
+}
+function probasCarte(vm){
+  const rows=vm.model.marketTable||[];
+  if(rows.length<2)return '';
+  const ordre=rows.filter(r=>r.recommended).map(r=>({r,g:'signal'}));
+  GROUPES_MARCHES.forEach(([g])=>rows.filter(r=>!r.recommended&&r.group===g).forEach(r=>ordre.push({r,g})));
+  const nomGroupe=g=>{const x=GROUPES_MARCHES.find(y=>y[0]===g);return x?t('match_page.markets_group_'+g,x[1]):'';};
+  const ligne=({r})=>{
+    const e=marcheValide(r.market)===null?null:n(r.edge),c=n(r.odds);
+    const tags=`${r.recommended?`<span class="mk-tag mk-tag--signal">${esc(t('match_page.proba_tag_signal','Pari conseillé'))}</span>`:''}${!r.recommended&&e!==null&&e>=3?`<span class="mk-tag mk-tag--value">${esc(t('match_page.proba_tag_favorable','Écart favorable'))}</span>`:''}`;
+    return `<li class="pr-row${r.recommended?' is-signal':''}">
+      <div class="pr-head"><span class="pr-label">${esc(libelleLigne(vm,r))}</span>${tags}${c!==null?`<span class="pr-odds">${esc(t('match_page.proba_odds_short','cote'))} <b>${odds(c)}</b></span>`:''}</div>
+      ${duoBars({model:r.model,market:r.market,odds:c,edge:r.edge,kind:c!==null?'odds':'consensus',compact:true})}
+    </li>`;
+  };
+  const liste=(part,avant)=>{let g0=avant;return part.map(x=>{const h=x.g!=='signal'&&x.g!==g0?`<li class="pr-group"><h4>${esc(nomGroupe(x.g))}</h4></li>`:'';g0=x.g;return h+ligne(x);}).join('');};
+  const tete=ordre.slice(0,4),reste=ordre.slice(4);
+  const corps=`<div class="pr-legend tip-host"><span class="pr-key is-model" aria-hidden="true"></span>${esc(t('match_page.proba_model_label','Notre estimation'))}<span class="pr-key is-market" aria-hidden="true"></span>${esc(t('match_page.proba_market_label','Ce que dit la cote'))}${aide(texteAideCote(),labelAideCote())}</div>
+    <ul class="pr-list">${liste(tete,null)}</ul>
+    ${reste.length?repliable({label:tf('match_page.proba_more','Voir les {n} autres paris',{n:reste.length}),labelOpen:t('match_page.proba_less','Masquer les autres paris'),body:`<ul class="pr-list">${liste(reste,tete.length?tete[tete.length-1].g:null)}</ul>`}):''}
+    <p class="mk-note">${esc(t('match_page.proba_note','« Ce que dit la cote » : probabilité tirée des cotes, marge du bookmaker retirée quand les deux issues sont cotées. Écart en points de pourcentage. Estimation statistique, pas une garantie.'))}</p>`;
+  return carteX('probas','sliders-horizontal',t('match_page.markets_title','Probabilités et cotes'),corps,esc(t('match_page.proba_sub','Nos chances face à la cote, pari par pari')));
+}
+
+// SCENARIO PROBABLE. Ses chiffres (part des buts des deux equipes par quart d'heure, tranche
+// la plus fournie, nombre de buts et de matchs) sont repris dans « Le film du match »
+// (lib/match-sections.js#film). Cette carte ne sert que si le film manque (donnees de buts
+// encaisses absentes) : graphique Chart.js (lib/composants.js), jamais un dessin fait main.
+function scenarioCarte(vm){
+  const g=vm.editorial.goalTiming,C=window.IasharkComposants;
+  if(!g||!g.slots.length)return '';
+  const parts=g.slots.map(sl=>Math.round(n(sl.share)||0));
+  const graphe=C&&C.canvas?C.canvas({type:'line',data:{labels:g.slots.map(sl=>String(sl.label||'').replace('min','')),datasets:[{data:parts,borderColor:'#20d5ef',backgroundColor:'#20d5ef',borderWidth:2,pointRadius:3,tension:.35,fill:false}]},
+    options:{layout:{padding:{top:20}},scales:{x:{grid:{display:false},border:{display:false},ticks:{color:'#a3b1c2'}},y:{display:false,beginAtZero:true,grace:'15%'}}},etiquettes:{format:'pct',ancre:'end',alignement:'top',taille:11,extra:{display:true}}},
+    {hauteur:150,aria:g.slots.map((sl,i)=>`${sl.label} : ${parts[i]} %`).join(' ; ')}):'';
+  const gh=g.games&&g.games.home,ga=g.games&&g.games.away;
+  const periode=(gh>0&&ga>0)
+    ?(gh===ga?tf('match_page.scenario_source_games_same',' lors de leurs {n} derniers matchs.',{n:gh})
+      :tf('match_page.scenario_source_games_each',' lors de leurs {home} et {away} derniers matchs.',{home:gh,away:ga}))
+      +t('match_page.scenario_source_note',' Fréquence observée, pas une prévision pour celui-ci.')
+    :t('match_page.scenario_source_suffix',' sur leurs derniers matchs. Fréquence observée, pas une prévision pour celui-ci.');
+  return carteX('scenario','clock',t('match_page.scenario_title','Scénario probable du match'),`${graphe}
+    <div class="scenario-insight"><b aria-hidden="true">!</b><span>${esc(t('match_page.scenario_peak_prefix','Tranche la plus fournie : '))}<b>${esc(g.peak.label)}${esc(t('match_page.scenario_peak_middle',' min'))}</b> — ${Math.round(g.peak.share)}${esc(t('match_page.scenario_peak_suffix',' % des buts des deux équipes y sont tombés.'))}</span></div>
+    <p class="scenario-source">${esc(t('match_page.scenario_source_prefix','Sur '))}${g.totalGoals}${esc(t('match_page.scenario_source_middle',' buts marqués par '))}${esc(vm.identity.home.name)}${esc(t('match_page.scenario_source_and',' et '))}${esc(vm.identity.away.name)}${esc(periode)}</p>`,
+    esc(t('match_page.scenario_sub','Quand les buts tombent, par tranche de 15 minutes')));
+}
+
+// COMPARATIF DES DEUX EQUIPES : vrai tableau groupe par theme, micro-barre d'ecart dans la
+// ligne, pied qui conclut. Sur « Buts concedes » et « Fautes », le plus petit gagne ;
+// « Hors-jeu » et « Arrets » n'ont pas de verdict. Le radar de « Les deux equipes » garde sa
+// forme ; ses valeurs, ecrites ici, n'y sont pas reecrites (lib/match-sections.js#equipes).
+// CMP_* sont des CLES DE CORRESPONDANCE avec vm.comparison.rows[].label (toujours en francais).
+const CMP_SENS={
+  'Buts marqués':'haut','Tirs':'haut','Tirs cadrés':'haut','Possession':'haut','Corners':'haut',
+  'Buts concédés':'bas','Fautes':'bas',
+  'Hors-jeu':'neutre','Arrêts':'neutre'
+};
+const CMP_GROUPES=[
+  ['Attaque',['Buts marqués','Tirs','Tirs cadrés']],
+  ['Maîtrise',['Possession','Corners']],
+  ['Défense',['Buts concédés','Arrêts']],
+  ['Discipline',['Fautes','Hors-jeu']]
+];
+const CMP_UNITE={'Possession':'%'};
+const CMP_LABEL_KEYS={
+  'Buts marqués':'stat_goals_scored','Buts concédés':'stat_goals_conceded','Tirs':'stat_shots',
+  'Tirs cadrés':'stat_shots_on_target','Possession':'stat_possession','Corners':'stat_corners',
+  'Fautes':'stat_fouls','Hors-jeu':'stat_offsides','Arrêts':'stat_saves'
+};
+const CMP_GROUP_KEYS={'Attaque':'group_attack','Maîtrise':'group_control','Défense':'group_defense','Discipline':'group_discipline'};
+const cmpLabel=label=>{const k=CMP_LABEL_KEYS[label];return k?t('match_page.'+k,label):label;};
+function comparatifCarte(vm){
+  const c=vm.comparison;
+  if(!c||!c.rows.length)return '';
+  const parLabel={};
+  c.rows.forEach(r=>{parLabel[r.label]=r;});
+  const dom=vm.identity.home.name,ext=vm.identity.away.name;
+  // Une decimale sur les moyennes, aucune sur les pourcentages.
+  const un=(v,unite)=>Number(v).toLocaleString(localeTag(),unite==='%'?{maximumFractionDigits:0}:{minimumFractionDigits:1,maximumFractionDigits:1});
+  let gagnesDom=0,gagnesExt=0,depart=0;
+  const lignes=[];
+  const relatif=r=>Math.abs(r.home-r.away)/Math.max(Math.abs(r.home),Math.abs(r.away),0.0001);
+  const comparables=c.rows.filter(r=>(CMP_SENS[r.label]||'neutre')!=='neutre');
+  const ecartMax=comparables.length?Math.max(...comparables.map(relatif),0.0001):1;
+  CMP_GROUPES.forEach(([groupe,labels])=>{
+    const presentes=labels.map(l=>parLabel[l]).filter(Boolean);
+    if(!presentes.length)return;
+    lignes.push(`<tr class="cmp-groupe"><th scope="rowgroup" colspan="4">${esc(CMP_GROUP_KEYS[groupe]?t('match_page.'+CMP_GROUP_KEYS[groupe],groupe):groupe)}</th></tr>`);
+    presentes.forEach(r=>{
+      const sens=CMP_SENS[r.label]||'neutre';
+      const unite=CMP_UNITE[r.label]||'';
+      const ecartV=r.home-r.away;
+      let devant=null;
+      if(sens!=='neutre'&&Math.abs(ecartV)>0.001)devant=(sens==='haut')===(ecartV>0)?'dom':'ext';
+      if(devant==='dom')gagnesDom++;else if(devant==='ext')gagnesExt++;else if(sens!=='neutre')depart++;
+      const part=Math.min(100,Math.round(relatif(r)/ecartMax*100));
+      const cote=ecartV>0?'g':'d';
+      const barre=devant===null
+        ?'<span class="cmp-jauge" aria-hidden="true"><i class="axe"></i></span>'
+        :`<span class="cmp-jauge" aria-hidden="true"><i class="axe"></i><i class="trait ${cote} ${devant}" style="width:${part/2}%"></i></span>`;
+      const signe=ecartV>0?'+':ecartV<0?'−':'';
+      const valeurEcart=Math.abs(ecartV)<0.001?'—':signe+un(Math.abs(ecartV),unite)+unite;
+      lignes.push(`<tr>
+        <th scope="row">${esc(cmpLabel(r.label))}</th>
+        <td class="${devant==='dom'?'gagne':''}">${un(r.home,unite)}${esc(unite)}</td>
+        <td class="${devant==='ext'?'gagne':''}">${un(r.away,unite)}${esc(unite)}</td>
+        <td class="cmp-ecart">${barre}<span class="cmp-val ${devant||'nul'}">${valeurEcart}</span></td>
+      </tr>`);
+    });
+  });
+  const rangees=new Set(CMP_GROUPES.flatMap(g=>g[1]));
+  const orphelines=c.rows.filter(r=>!rangees.has(r.label));
+  if(orphelines.length){
+    lignes.push(`<tr class="cmp-groupe"><th scope="rowgroup" colspan="4">${esc(t('match_page.group_other','Autres'))}</th></tr>`);
+    orphelines.forEach(r=>{lignes.push(`<tr><th scope="row">${esc(cmpLabel(r.label))}</th><td>${un(r.home)}</td><td>${un(r.away)}</td><td class="cmp-ecart"><span class="cmp-val nul">—</span></td></tr>`);});
+  }
+  const total=gagnesDom+gagnesExt+depart;
+  let conclusion='';
+  if(total){
+    const meneur=gagnesDom>gagnesExt?dom:gagnesExt>gagnesDom?ext:null;
+    const compte=Math.max(gagnesDom,gagnesExt);
+    conclusion=meneur
+      ?`<b>${esc(meneur)}</b>${esc(t('match_page.comparison_leads_middle',' est devant sur '))}${compte}${esc(t('match_page.comparison_leads_of',' des '))}${total}${esc(t('match_page.comparison_leads_suffix',' mesures comparables.'))}`
+      :`${esc(t('match_page.comparison_tie_prefix','Les deux équipes se partagent les '))}${total}${esc(t('match_page.comparison_leads_suffix',' mesures comparables.'))}`;
+  }
+  const note=n(c.sampleSize)!==null
+    ?`${t('match_page.comparison_note_with_sample_prefix','Moyennes par match sur ')}${c.sampleSize} ${c.sampleSize>1?t('match_page.comparison_note_match_plural','rencontres'):t('match_page.comparison_note_match_singular','rencontre')}${c.sampleSize<5?t('match_page.comparison_note_thin_sample_suffix',' — échantillon encore court'):''}.`
+    :t('match_page.comparison_note_simple','Moyennes par match.');
+  const table=`<div class="cmp-scroll"><table class="cmp-table">
+      <thead><tr>
+        <th scope="col">${esc(t('match_page.comparison_table_header','Par match'))}</th>
+        <th scope="col"><span class="cmp-eq">${logoEquipe(vm.identity.home.logo,dom)}${esc(dom)}</span></th>
+        <th scope="col"><span class="cmp-eq">${logoEquipe(vm.identity.away.logo,ext)}${esc(ext)}</span></th>
+        <th scope="col">${esc(t('match_page.comparison_gap_header','Écart'))}</th>
+      </tr></thead>
+      <tbody>${lignes.join('')}</tbody>
+    </table></div>
+    <p class="cmp-note">${esc(note)} ${esc(t('match_page.comparison_note_disclaimer',"Hors-jeu et arrêts sont donnés sans verdict : plus d'arrêts signifie surtout plus de tirs subis."))}</p>`;
+  return carteX('comparatif','list-checks',t('match_page.comparison_title','Comparatif des deux équipes'),table,conclusion);
+}
+
+// BARRE DU PARI : garde le pari et sa cote sous les yeux une fois l'Avis sorti de l'ecran par
+// le haut (sous le sommaire collant). Elle recopie l'Avis, ne calcule rien.
+function signalSticky(vm){
+  const r=vm.model.recommendation;
+  if(!r)return '';
+  const marketOdds=n(vm.model.recommendedOdds);
+  const prob=n(r.probability)!==null&&r.probability>0?r.probability:null;
+  return `<div class="sig-sticky" id="sigSticky" aria-hidden="true">
+    <div class="ss-in">
+      <span class="ss-tag">${esc(t('match_page.sig_bet_label','Pari recommandé'))}</span>
+      <b class="ss-market">${esc(marcheFr(vm,r.market))}</b>
+      ${marketOdds!==null?`<span class="ss-odds">${odds(marketOdds)}</span>`:''}
+      ${prob!==null?`<span class="ss-prob">${pct(prob)}</span>`:''}
+    </div>
+  </div>`;
+}
+function bindSticky(){
+  const bar=document.getElementById('sigSticky'),anchor=root.querySelector('.signal-card');
+  if(!bar||!anchor||!('IntersectionObserver' in window))return;
+  new IntersectionObserver(([en])=>{
+    bar.classList.toggle('on',!en.isIntersecting&&en.boundingClientRect.top<0);
+  },{threshold:0}).observe(anchor);
+}
+
+// Sources de donnees (lib/display-data.js#sourceLabels, libelles francais) : premier
+// segment traduit, nom de fournisseur conserve.
+const SOURCES_CLES={'Calendrier et équipes':'source_fixtures','Statistiques équipes':'source_team_stats','Événements historiques':'source_events','Blessures et suspensions':'source_injuries','Marché':'source_market'};
+function libelleSource(x){
+  const parts=String(x).split(' · ');
+  const k=SOURCES_CLES[parts[0]];
+  if(!k)return String(x);
+  let reste=parts.slice(1).join(' · ');
+  if(reste==='Cotes moyennes multi-bookmakers')reste=t('match_page.source_avg_odds',reste);
+  return t('match_page.'+k,parts[0])+(reste?' · '+reste:'');
+}
+
+// QUESTIONS FREQUENTES — en dernier (aussi lues par les moteurs de recherche). Faits
+// publics (quand / ou, forme), statistiques brutes des deux equipes
+// (vm.editorial.exclusiveFacts) et reponses du modele (pronostic : les chiffres de l'Avis ;
+// chances de chaque equipe : les MEMES nombres que « Si ce match se jouait 10 000 fois »,
+// sim_resume, jamais p1/pn/p2 a cote ; 15 premieres minutes ; sur quoi repose l'analyse).
+// Le face-a-face n'y revient pas (bloc des face-a-face retire expres par Clement).
+function faqCarte(vm){
+  const raw=vm._raw||{},etat=etatAnalyse(raw);
+  const id=vm.identity,f=vm.editorial.exclusiveFacts||{},g=vm.editorial.goalTiming;
+  const dom=id.home.name,ext=id.away.name;
+  const plusGrand=p=>p.home>=p.away?dom:ext,plusPetit=p=>p.home<=p.away?dom:ext;
+  const faits=[],stats=[],modele=[],fin=[];
+  // 1. Faits publics.
+  const dh=dateHeure(vm),lieu=vm.conditions&&vm.conditions.venue;
+  if(dh.date&&dh.time)faits.push([tf('match_page.faq_q_when','Quand et où se joue {home} – {away} ?',{home:dom,away:ext}),
+    tf('match_page.faq_when_answer','Coup d’envoi le {date} à {time} (heure locale).',{date:esc(dh.date),time:esc(dh.time)})+(lieu?' '+tf('match_page.faq_when_venue','Stade : {venue}.',{venue:esc(lieu)}):'')]);
+  const fm=vm.form||{};
+  const bilan=rows=>({w:rows.filter(r=>r.result==='W').length,d:rows.filter(r=>r.result==='D').length,l:rows.filter(r=>r.result==='L').length,n:rows.length});
+  if(fm.home&&fm.home.length&&fm.away&&fm.away.length){
+    const a=bilan(fm.home),b=bilan(fm.away);
+    faits.push([t('match_page.faq_q_form','Quelle est la forme récente des deux équipes ?'),
+      tf('match_page.faq_form_answer','{home} : {hw} V · {hd} N · {hl} D sur ses {hn} derniers matchs. {away} : {aw} V · {ad} N · {al} D sur ses {an} derniers matchs.',{home:esc(dom),away:esc(ext),hw:a.w,hd:a.d,hl:a.l,hn:a.n,aw:b.w,ad:b.d,al:b.l,an:b.n})]);
+  }
+  // 2. Statistiques brutes des deux equipes.
+  if(g&&g.slots.length>=6){
+    const totD=g.slots.reduce((s,x)=>s+x.home,0),totE=g.slots.reduce((s,x)=>s+x.away,0);
+    if(totD>0&&totE>0){
+      const pD=Math.round(g.slots.slice(0,3).reduce((s,x)=>s+x.home,0)/totD*100),pE=Math.round(g.slots.slice(0,3).reduce((s,x)=>s+x.away,0)/totE*100);
+      const verdict=Math.abs(pD-pE)<3?t('match_page.faq_early_verdict_equal','Les deux entrent dans leurs matchs au même rythme.'):tf('match_page.faq_early_verdict_team','{team} entre donc plus vite dans ses matchs.',{team:esc(pD>pE?dom:ext)});
+      stats.push([t('match_page.faq_q_early','Laquelle des deux marque le plus tôt ?'),tf('match_page.faq_early_answer_plain','{home} inscrit {homePct} % de ses buts avant la mi-temps, {away} {awayPct} %. {verdict}',{home:esc(dom),away:esc(ext),homePct:pD,awayPct:pE,verdict})]);
+    }
+  }
+  if(f.encaisseFin){
+    const verdictFin=Math.abs(f.encaisseFin.home-f.encaisseFin.away)<4?t('match_page.faq_late_verdict_equal','Les deux tiennent la fin de match de la même façon.'):tf('match_page.faq_late_verdict_team','{team} est la plus exposée sur la fin, ce qui compte pour un pari qui se joue au score final.',{team:esc(plusGrand(f.encaisseFin))});
+    stats.push([t('match_page.faq_q_late','Une des deux craque-t-elle en fin de match ?'),tf('match_page.faq_late_answer','{home} encaisse {homePct} % de ses buts sur la dernière demi-heure, {away} {awayPct} %. {verdict}',{home:esc(dom),away:esc(ext),homePct:f.encaisseFin.home,awayPct:f.encaisseFin.away,verdict:verdictFin})]);
+  }
+  if(f.cartons){
+    const rugueux=Math.abs(f.cartons.home-f.cartons.away)<0.3?null:plusGrand(f.cartons);
+    const nbRouges=f.rouges?f.rouges.home+f.rouges.away:0;
+    const rouges=nbRouges>0?(nbRouges>1?tf('match_page.faq_cards_red_other','Sur la période suivie, {n} cartons rouges au total.',{n:nbRouges}):tf('match_page.faq_cards_red_one','Sur la période suivie, {n} carton rouge au total.',{n:nbRouges})):'';
+    const verdict=rugueux?tf('match_page.faq_cards_verdict_team','{team} est la plus sanctionnée des deux.',{team:esc(rugueux)}):t('match_page.faq_cards_verdict_equal','Les deux sont sanctionnées au même rythme.');
+    stats.push([t('match_page.faq_q_cards','Combien de cartons dans un match de ces équipes ?'),tf('match_page.faq_cards_answer','{home} en prend {homeCards} par match et {away} {awayCards}. {verdict}',{home:esc(dom),away:esc(ext),homeCards:fmt(f.cartons.home),awayCards:fmt(f.cartons.away),verdict:verdict+(rouges?' '+rouges:'')})]);
+  }
+  if(f.xg&&f.xga){
+    stats.push([t('match_page.faq_q_chances','Ces équipes se créent-elles beaucoup d’occasions ?'),tf('match_page.faq_chances_answer','Sur la saison, {home} génère {homeXg} buts attendus par match et en concède {homeXga}&nbsp;; {away} {awayXg} et {awayXga}. {best} se procure le plus d’occasions, {solid} en concède le moins.',{home:esc(dom),away:esc(ext),homeXg:fmt(f.xg.home),homeXga:fmt(f.xga.home),awayXg:fmt(f.xg.away),awayXga:fmt(f.xga.away),best:esc(plusGrand(f.xg)),solid:esc(plusPetit(f.xga))})]);
+  }
+  if(f.passes&&Math.abs(f.passes.home-f.passes.away)>=2){
+    stats.push([t('match_page.faq_q_passing','Laquelle joue le plus proprement ?'),tf('match_page.faq_passing_answer','{team} réussit {best} % de ses passes, contre {other} % en face. Une différence de cet ordre se traduit souvent par plus de possession et moins de contres subis.',{team:esc(plusGrand(f.passes)),best:fmt(Math.max(f.passes.home,f.passes.away),0),other:fmt(Math.min(f.passes.home,f.passes.away),0)})]);
+  }
+  // 3. Reponses du modele (vue complete seulement : render).
+  {
+    const r=vm.model.recommendation;
+    if(r||etat==='none')modele.push([t('match_page.faq_q_pick','Quel est le pronostic IASHARK pour ce match ?'),r
+      ?tf('match_page.faq_pick_answer','Pari conseillé : {market}, cote {odds}, probabilité estimée {prob}. Estimation statistique, pas une garantie.',{market:esc(marcheFr(vm,r.market)),odds:esc(odds(vm.model.recommendedOdds)),prob:esc(pct(r.probability,0))})
+      :esc(t('match_page.faq_pick_none','Le modèle n’a retenu aucun pari sur ce match.'))]);
+    if(g&&g.slots.length&&g.totalGoals)modele.push([t('match_page.faq_q_first15','Que peut-il se passer dans les 15 premières minutes ?'),
+      tf('match_page.faq_first15_answer','Sur les matchs de la saison de ces deux équipes, {share} % des buts sont tombés dans le premier quart d’heure ({n} sur {total}). Fréquence observée, pas une prévision.',{share:Math.round(g.slots[0].share),n:g.slots[0].home+g.slots[0].away,total:g.totalGoals})]);
+    // Une seule source : les nombres de « Si ce match se jouait 10 000 fois » (sim_resume).
+    const MS=window.IasharkMatchSections,iss=MS&&MS.issuesAffichees?MS.issuesAffichees(raw):null;
+    if(iss){
+      const marche=raw.sim_resume&&raw.sim_resume.source==='cotes';
+      const v={home:esc(dom),away:esc(ext),p1:esc(pct(iss[0],0)),pn:esc(pct(iss[1],0)),p2:esc(pct(iss[2],0))};
+      modele.push(marche
+        ?[t('match_v4.faq_q_outcomes_market','Quelles chances les cotes donnent-elles à chaque équipe ?'),tf('match_v4.faq_outcomes_answer_market','D’après les cotes des bookmakers, marge retirée : victoire {home} {p1} · match nul {pn} · victoire {away} {p2}. Estimation statistique, pas une garantie.',v)]
+        :[t('match_page.faq_q_outcomes','Quelles chances le modèle donne-t-il à chaque équipe ?'),tf('match_page.faq_outcomes_answer','Victoire {home} : {p1} · match nul : {pn} · victoire {away} : {p2}. Estimation statistique, pas une garantie.',v)]);
+    }
+    const sources=Array.isArray(vm.model.sources)?vm.model.sources.filter(Boolean):[];
+    const sims=n(vm.model.simulationCount),qualite=n(vm.model.quality);
+    if(sims!==null||sources.length||qualite!==null){
+      const bits=[];
+      if(sims!==null)bits.push(tf('match_page.faq_basis_sims','{n} simulations de Monte-Carlo',{n:sims.toLocaleString(localeTag())}));
+      if(sources.length)bits.push(tf('match_page.faq_basis_sources','les données {sources}',{sources:sources.map(x=>esc(libelleSource(String(x)))).join(', ')}));
+      if(qualite!==null)bits.push(tf('match_page.faq_basis_quality','un score de qualité des données de {score}/100',{score:fmt(qualite)}));
+      fin.push([t('match_page.faq_q_basis','Sur quoi repose cette analyse ?'),tf('match_page.faq_basis_answer','L’analyse s’appuie sur {bits}. Les probabilités décrivent une fréquence attendue sur un grand nombre de matchs semblables, jamais une certitude sur celui-ci.',{bits:bits.join(', ')})]);
+    }
+  }
+  const toutes=[...faits,...modele,...stats,...fin];
+  if(toutes.length<2)return '';
+  return carteX('questions','circle-help',t('match_page.faq_section_title','Questions fréquentes'),
+    `<div class="faq-list">${toutes.map(([q,a])=>`<details><summary><span>${esc(q)}</span></summary><p>${a}</p></details>`).join('')}</div>`,'');
+}
+
+// ---------------------------------------------------------------------------
 // PAGE MATCH V4 (04/10/2026, demande de Clement). L'Avis IASHARK ci-dessus ne
-// change pas d'un caractere. Retires : confrontations directes (tete-a-tete),
-// questions frequentes, barre collante du pari, « Probabilites et cotes »,
-// « Ce que dit le modele », « Scenario probable », ancien calcul buteur
-// (scorerModel). Les nouvelles sections (le match en simulation, le film du
+// change pas d'un caractere. Les nouvelles sections (le match en simulation, le film du
 // match, qui ouvre le score et « Et si... ? », les jumeaux, les deux equipes,
 // les joueurs, l'arbitre) et le panneau Marches vivent dans
 // lib/match-sections.js ; aucune information n'y est ecrite deux fois
-// (registre unique, l'Avis inscrit ses cles en premier).
+// (registre unique, l'Avis inscrit ses cles en premier). 04/10/2026, soir : TOUS les
+// blocs de l'ancienne page sont remis (voir « BLOCS DE L'ANCIENNE PAGE REMIS »), sauf
+// le bloc des face-a-face, retire expres par Clement.
 // ---------------------------------------------------------------------------
 
 // Modules charges a la demande : une page statique /match/<id>.html generee
@@ -490,10 +956,12 @@ const boutonAction=(href,label,attrs,cls)=>window.IasharkComposants?IasharkCompo
 
 // SOMMAIRE COLLANT : une puce par section rendue, dans l'ordre de la page ;
 // sur telephone, une puce « Marches » ouvre le tiroir.
-function navChips(items,apres){
+// sticky : barre du pari (signalSticky), sous les puces.
+function navChips(items,apres,sticky){
   if(items.length<2&&!apres)return '';
   return `<nav class="mnav" id="matchNav" aria-label="${esc(t('match_page.nav_aria','Sommaire du match'))}">
-    <ul class="mnav-chips">${items.map(x=>`<li><a class="mnav-chip" href="#sec-${x.cle}" data-nav="${x.cle}">${esc(x.label)}${x.lock?cardIcon('lock'):''}</a></li>`).join('')}${apres||''}</ul>
+    <ul class="mnav-chips">${items.map(x=>`<li><a class="mnav-chip" href="#sec-${x.cle}" data-nav="${x.nav||x.cle}">${esc(x.label)}${x.lock?cardIcon('lock'):''}</a></li>`).join('')}${apres||''}</ul>
+    ${sticky||''}
   </nav>`;
 }
 let navSurDefilement=null,navSurRedim=null;
@@ -512,7 +980,8 @@ function bindNav(){
     let cur=null;
     for(const s of secs){if(s.getBoundingClientRect().top<=seuil)cur=s;else break;}
     if(secs.length&&window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-4)cur=secs[secs.length-1];
-    const key=cur?cur.dataset.sec:null;
+    // Groupe de la section (une puce pour plusieurs blocs d'un meme theme, ex. « Équipes »).
+    const key=cur?(cur.dataset.nav||cur.dataset.sec):null;
     if(key===actif)return;
     actif=key;
     chips.forEach(c=>{const on=c.dataset.nav===key;c.classList.toggle('is-active',on);if(on)c.setAttribute('aria-current','true');else c.removeAttribute('aria-current');});
@@ -603,24 +1072,26 @@ function bindMotion(){
 }
 
 
-// Assemble la page. sections : [cle, html, libelle du sommaire (ou null), verrouillee].
-// opts : { sansStats, panneau: { html, nb, flou, fab } }.
+// Assemble la page. sections : [cle, html, libelle du sommaire (ou null), verrouillee, groupe du
+// sommaire (facultatif : la puce du groupe est posee sur sa premiere section)].
+// opts : { sansStats, panneau: { html, nb, flou, fab }, sticky (barre du pari, vue complete) }.
 // Ordinateur (>= 1100 px) : panneau Marches en colonne gauche collante.
 // Telephone : bouton flottant et puce « Marches » qui ouvrent le tiroir du bas.
 function paint(vm,sections,opts){
   opts=opts||{};
   const S=sections.filter(x=>x&&x[1]);
-  const items=S.filter(x=>x[2]).map(x=>({cle:x[0],label:x[2],lock:!!x[3]}));
-  const corps=S.map(([k,html,,lock])=>`<div class="sec" id="sec-${k}" data-sec="${k}"${lock?' data-locked="true"':''}>${html}</div>`).join('');
+  const items=S.filter(x=>x[2]).map(x=>({cle:x[0],label:x[2],lock:!!x[3],nav:x[4]||x[0]}));
+  const corps=S.map(([k,html,,lock,g])=>`<div class="sec" id="sec-${k}" data-sec="${k}" data-nav="${g||k}"${lock?' data-locked="true"':''}>${html}</div>`).join('');
   const mk=opts.panneau||null;
   const libMk=t('match_v4.panel_title','Marchés');
   const puce=mk&&mk.fab?`<li class="mnav-mk"><button type="button" class="mnav-chip" data-mk-open>${esc(libMk)}${mk.flou?cardIcon('lock'):''}</button></li>`:'';
   const fab=mk&&mk.fab?`<button type="button" class="mk-fab" data-mk-open>${esc(libMk)}${mk.nb?` <b>· ${esc(Number(mk.nb).toLocaleString(localeTag()))}</b>`:''}${mk.flou?cardIcon('lock'):''}</button>`:'';
   document.body.classList.remove('has-cta-bar');
-  root.innerHTML=`<div class="page${mk?' has-mk':''}">${mk?`<aside class="mk-col${mk.flou?' is-locked':''}" id="mkCol" aria-labelledby="mkTitle">${mk.html}</aside>`:''}<div class="page-main">${hero(vm,opts)}${navChips(items,puce)}<div class="secs">${corps}</div></div></div>${fab}`;
+  root.innerHTML=`<div class="page${mk?' has-mk':''}">${mk?`<aside class="mk-col${mk.flou?' is-locked':''}" id="mkCol" aria-labelledby="mkTitle">${mk.html}</aside>`:''}<div class="page-main">${hero(vm,opts)}${navChips(items,puce,opts.sticky)}<div class="secs">${corps}</div></div></div>${fab}`;
   bindMotion();
   bindUi();
   bindNav();
+  bindSticky();
   const MS=window.IasharkMatchSections;
   if(MS){
     try{MS.bind(root);}catch(e){}
@@ -649,19 +1120,37 @@ function cheminMatch(raw){
 // sections du match (10 000 fois, film, qui ouvre le score, jumeaux, joueurs...), comme un Pro,
 // SAUF le panneau Marches, reserve aux Pro (flou, cadenas « Pro » sur le panneau seulement). Les
 // sections n'affichent que ce que le serveur (match-data) envoie a ce compte.
+// ORDRE DE LA PAGE COMPLETE (04/10/2026, soir) : les sections V4 dans leur ordre, et les blocs
+// de l'ancienne page remis a leur place logique (modele et cotes apres « 10 000 fois », forme et
+// classement avant les deux equipes, comparatif et compositions apres, marches joueurs apres
+// les joueurs, questions frequentes a la fin).
+const ORDRE_PAGE=['sim','modele','probas','film','scenario','premier','jumeaux','forme','classement','equipes','comparatif','compos','joueurs','buteurs','arbitre','questions'];
+// Sommaire : une puce par theme (controle des captures du 04/10/2026, soir : 14 puces = trois lignes
+// sur ordinateur). Les blocs d'un meme theme partagent la puce de leur premiere section.
+const GROUPES_NAV={modele:'sim',scenario:'film',forme:'equipes',classement:'equipes',comparatif:'equipes',compos:'equipes',buteurs:'joueurs'};
 function render(raw,o){
   o=o||{};
   const vm=viewModel(raw);
   const MS=window.IasharkMatchSections;
   const secs=[['avis',signalCard(vm),t('match_v4.nav_avis','Avis'),false]];
-  let panneau=null;
+  // Blocs de l'ancienne page qui ne dependent d'aucune section V4.
+  const par={
+    probas:[probasCarte(vm),t('match_v4.nav_odds','Cotes')],
+    forme:[formeCarte(vm)],
+    classement:[classementCarte(vm)],
+    comparatif:[comparatifCarte(vm)],
+    compos:[compoCarte(vm)]
+  };
+  let panneau=null,dit=null;
   if(MS){
-    const dit=MS.registre();
+    dit=MS.registre();
     MS.clesAvis(vm,raw,dit);
     // contenus : ce que Pro aura VRAIMENT sur ce match (pro_sections, public) : seules ces lignes
     // cadenas s'affichent (controle UX du 04/10/2026, tour 2).
-    const c={raw,vm,vuePro:!!(o.vuePro||o.verrouPro),verrouPro:false,dit,contenus:Array.isArray(raw.pro_sections)?raw.pro_sections:[]};
-    MS.sections(c).forEach(([k,html,lab])=>secs.push([k,html,t(lab[0],lab[1]),false]));
+    // ailleurs : ce que les blocs remis montrent deja (« Les deux equipes » ne le reecrit pas).
+    const c={raw,vm,vuePro:!!(o.vuePro||o.verrouPro),verrouPro:false,dit,contenus:Array.isArray(raw.pro_sections)?raw.pro_sections:[],
+      ailleurs:{classement:!!par.classement[0],compos:!!par.compos[0],comparatif:par.comparatif[0]&&vm.comparison?vm.comparison.rows.map(r=>r.label):[]}};
+    MS.sections(c).forEach(([k,html,lab])=>{par[k]=[html,t(lab[0],lab[1])];});
     if(o.panneau!==false){
       if(o.vuePro){const p=MS.panneau(c);if(p)panneau={html:p.html,nb:p.nb,fab:true};}
       // Panneau flou (« les N marches ») : en francais seulement, le seul ou le panneau existe
@@ -672,7 +1161,20 @@ function render(raw,o){
       }
     }
   }
-  paint(vm,secs,{panneau});
+  // Apres les sections V4 (registre rempli) : seulement ce qu'elles ne montrent pas deja.
+  par.modele=[modeleCarte(vm,dit),t('match_v4.nav_model','Modèle')];
+  if(!par.film)par.scenario=[scenarioCarte(vm),t('match_v4.nav_scenario','Scénario')];
+  par.buteurs=[marchesJoueursCarte(vm,dit)];
+  par.questions=[faqCarte(vm),t('match_page.nav_questions','Questions')];
+  const LIB_GROUPE={equipes:t('match_v4.nav_teams','Équipes'),joueurs:t('match_v4.nav_players','Joueurs')};
+  const vus={};
+  ORDRE_PAGE.forEach(k=>{
+    if(!(par[k]&&par[k][0]))return;
+    const g=GROUPES_NAV[k]||k;
+    secs.push([k,par[k][0],vus[g]?null:(LIB_GROUPE[g]||par[k][1]||null),false,g]);
+    vus[g]=true;
+  });
+  paint(vm,secs,{panneau,sticky:signalSticky(vm)});
 }
 
 // VUE VISITEUR. Le serveur decide ce qu'il envoie (match-data, fichiers publics

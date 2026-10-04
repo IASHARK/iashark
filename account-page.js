@@ -49,17 +49,6 @@
     var d = new Date(v);
     return isNaN(d) ? null : d.toLocaleDateString(localeTag(), { day: 'numeric', month: 'long', year: 'numeric' });
   }
-  function euros(v) {
-    // null et chaine vide ne valent pas zero : une bankroll non renseignee
-    // doit s'afficher "Non renseigné", pas "0 €". Number(null) vaut 0, d'ou
-    // le test explicite avant la conversion.
-    if (v == null || v === '') return null;
-    var n = Number(v);
-    // Le tag de locale devient dynamique (separateur decimal, ordre) ; la devise
-    // reste EUR volontairement - la conversion multi-devise est un chantier
-    // separe en cours en parallele, hors perimetre ici.
-    return isFinite(n) ? n.toLocaleString(localeTag(), { style: 'currency', currency: devise(), maximumFractionDigits: 0 }) : null;
-  }
   // Marche courant (lib/market-config.js -> window.IASHARK_MARKET : code,
   // devise, prix). Repli : marche FR historique, EUR.
   function marche() { return window.IASHARK_MARKET || null; }
@@ -298,7 +287,7 @@
           + ligneResume(tr('compte_page.language_label', 'Langue'), esc(langues[prefs.language] || langues.fr), 'preferences')
           + ligneResume(tr('compte_page.timezone_label', 'Fuseau horaire'), esc(prefs.timezone || 'Europe/Paris'), 'preferences')
           + ligneResume(tr('compte_page.fav_leagues_label', 'Compétitions préférées'), favoris().length ? esc(favoris().map(nomCompetition).join(', ')) : '', 'competitions')
-          + ligneResume(tr('compte_page.bankroll_label', 'Bankroll'), euros(ctx.profile.capital) ? esc(euros(ctx.profile.capital)) : '', 'preferences')
+          // 04/10/2026 (regle de Clement : ni mise, ni unite, ni capital) : plus de ligne « Bankroll ».
           + '</div>')
       + activite
       + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.security_heading', 'Sécurité') + '</h2>'
@@ -369,7 +358,8 @@
         + '<span class="inline-flex items-center rounded-full border border-hairline bg-white/[.04] px-2.5 py-1 text-[11px] font-bold tracking-wider text-soft">' + tr('compte_page.badge_free', 'GRATUIT') + '</span></div>'
         + '<ul class="mt-5 space-y-2.5">'
         + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>' + esc(tr('pro_offer.free_matches', '1 match offert par jour, avec un compte gratuit')) + '</li>'
-        + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>' + esc(tr('pro_offer.free_tools', 'Calculateur de mise, cote juste, simulateur de capital')) + '</li>'
+        // 04/10/2026 (regle de Clement : ni mise, ni capital) : plus de « Calculateur de mise,
+        // simulateur de capital » parmi les avantages du compte gratuit.
         + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>' + tr('compte_page.benefit_free_blog', 'Le blog et les guides') + '</li>'
         + '</ul>'
         + (etat && etat.ton === 'alerte' ? '<div class="mt-5 rounded-xl border px-4 py-3.5 text-[13.5px] leading-relaxed ' + TON[etat.ton] + '"><b class="font-semibold">' + esc(etat.titre) + '</b><span class="mt-0.5 block opacity-90">' + esc(etat.detail) + '</span></div>' : ''))
@@ -379,7 +369,7 @@
       + '</div>';
   }
 
-  /* Préférences : profil, affichage, bankroll. Les competitions preferees ne
+  /* Préférences : profil, affichage. Les competitions preferees ne
      sont PAS ici — elles ont leur propre section (« Mes compétitions
      préférées »), qui ecrit dans le store lu par l'accueil. */
   function fuseaux() {
@@ -436,9 +426,8 @@
         + '<datalist id="listeFuseaux">' + fuseaux().map(function (z) { return '<option value="' + esc(z) + '">'; }).join('') + '</datalist>'
         + '<p class="mt-1.5 text-[12.5px] text-soft">' + tr('compte_page.timezone_hint', 'Tapez pour rechercher.') + '</p></div>'
         + '</div>')
-      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.bankroll_label', 'Bankroll') + '</h2>'
-        + '<p class="mt-2 text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.bankroll_detail', 'Le capital de référence des calculs de mise. Il est privé et n’est utilisé que par vos outils.') + '</p>'
-        + '<div class="mt-4 max-w-xs">' + champ('bankroll', tr('compte_page.bankroll_label', 'Bankroll'), ctx.profile.capital == null ? '' : ctx.profile.capital, { type: 'number', attrs: ' min="1" step="1" inputmode="decimal"', placeholder: tr('compte_page.bankroll_placeholder', 'Ex. 500') }) + '</div>')
+      // 04/10/2026 (regle de Clement : ni mise, ni unite, ni capital, nulle part) : la carte
+      // « Bankroll » (capital de reference des calculs de mise) est retiree du compte.
       + '<div class="flex flex-wrap items-center gap-3">' + boutonPrimaire('enregistrerPrefs', tr('compte_page.save_btn', 'Enregistrer')) + '</div>'
       + '<p id="msgPrefs" hidden aria-live="polite"></p>'
       + '</div>';
@@ -811,11 +800,6 @@
   async function enregistrerPreferences() {
     var relacher = occuper($('enregistrerPrefs'), tr('compte_page.saving_label', 'Enregistrement…'));
     retour('msgPrefs', '');
-    var capitalBrut = $('bankroll').value.trim();
-    var capital = capitalBrut === '' ? null : Number(capitalBrut);
-    if (capital !== null && !(capital > 0)) {
-      relacher(); retour('msgPrefs', tr('compte_page.msg_bankroll_must_be_positive', 'La bankroll doit être un montant supérieur à zéro.'), 'error'); $('bankroll').focus(); return;
-    }
     var ligne = {
       user_id: ctx.user.id,
       display_name: $('nomAffiche').value.trim().slice(0, 40) || null,
@@ -827,13 +811,8 @@
     try {
       var r1 = await sb.from('user_preferences').upsert(ligne, { onConflict: 'user_id' });
       if (r1.error) throw r1.error;
-      // La bankroll vit dans public.users.capital, seule source de verite -
-      // les outils lisent la meme colonne. On n'en garde pas une copie ici.
-      if (capital !== ctx.profile.capital) {
-        var r2 = await sb.from('users').update({ capital: capital }).eq('id', ctx.user.id);
-        if (r2.error) throw r2.error;
-        ctx.profile.capital = capital;
-      }
+      // 04/10/2026 : plus aucun capital saisi ni enregistre depuis le compte (regle de Clement :
+      // ni mise, ni capital). La colonne public.users.capital n'est plus ecrite par cette page.
       Object.assign(prefs, ligne);
       relacher();
       retour('msgPrefs', tr('compte_page.msg_preferences_saved', 'Préférences enregistrées.'), 'success');

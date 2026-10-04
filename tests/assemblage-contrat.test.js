@@ -160,7 +160,9 @@ test("jumeaux : la sortie de lib/jumeaux.js est rendue telle quelle (comptes, pc
   }
   const j = J.jumeauxDuMatch(J.construireTable(lignes, { fin: "2026-10-03" }), m);
   assert.ok(j && j.resultat, "jumeaux produits");
-  const h = MS.jumeaux({ raw: { jumeaux: j }, vm: vmDe({ home: { n: "A" }, away: { n: "B" } }), vuePro: false, verrouPro: false, dit: MS.registre() });
+  // Garde vuePro (avocat du diable, 04/10/2026, point 4) : rien sans Pro (ou compte gratuit sur le match offert).
+  assert.equal(MS.jumeaux({ raw: { jumeaux: j }, vm: vmDe({ home: { n: "A" }, away: { n: "B" } }), vuePro: false, verrouPro: false, dit: MS.registre() }), "");
+  const h = MS.jumeaux({ raw: { jumeaux: j }, vm: vmDe({ home: { n: "A" }, away: { n: "B" } }), vuePro: true, verrouPro: false, dit: MS.registre() });
   const t = texte(h).replace(/ | /g, " ");
   const r = j.resultat;
   assert.ok(t.includes(r.n + " matchs jumeaux depuis " + r.depuis), t.slice(0, 200));

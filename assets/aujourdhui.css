@@ -1,105 +1,167 @@
 /* Bloc « Aujourd'hui » (lib/aujourdhui.js, 04/10/2026) : accueil et compte.
-   Les cartes sont de VRAIS composants (assets/composants.css) : tickets =
-   21st.dev « Ticket Confirmation Card », Selection en or = Magic UI « Shine
-   Border » (le SEUL or du site), buteur = Magic UI « Animated Circular Progress
-   Bar », copie = Magic UI « Animated Subscribe Button », bouton = Magic UI
-   « Shimmer Button », icones Lucide. Ce fichier ne fait que la mise en page. */
-.aj{--aj-cyan:#20d5ef;--aj-text:#f4f7fb;--aj-soft:#a3b1c2;--aj-dim:#8796a8;--aj-line:rgba(141,179,211,.16);--aj-card:#0d1520;--aj-gold:#e8c46a;--aj-gold2:#f6dc95;
-  --tc-bg:#060b12;
-  display:grid;gap:14px;width:min(1200px,calc(100% - 32px));margin:0 auto;padding:28px 0 34px;color:var(--aj-text);font-family:"DM Sans",Inter,system-ui,sans-serif;
+   Demande de Clement (04/10, 16 h) : ticket x5, ticket x10 et buteur cote a cote en PETITES
+   CARTES, la Selection en or dessous, sans faire scroller (le bloc tient en un ecran et
+   demi de telephone environ).
+   Les cartes sont de VRAIS composants (assets/composants.css) : petites cartes = shadcn/ui
+   « Card » + « Separator » en pointilles (ligne de perforation du ticket), chance = Magic UI
+   « Animated Circular Progress Bar », Selection en or = Magic UI « Shine Border » (le SEUL
+   or du site), copie = Magic UI « Animated Subscribe Button », bouton = Magic UI « Shimmer
+   Button », pastilles = HyperUI « Badges », tiroir du telephone = Flowbite « Drawer »,
+   icones Lucide. Ce fichier ne fait que la mise en page. */
+.aj,.aj-drw{--aj-cyan:#20d5ef;--aj-text:#f4f7fb;--aj-soft:#a3b1c2;--aj-dim:#8796a8;--aj-line:rgba(141,179,211,.16);--aj-card:#0d1520;--aj-gold:#e8c46a;--aj-gold2:#f6dc95;
+  color:var(--aj-text);font-family:"DM Sans",Inter,system-ui,sans-serif}
+.aj{display:grid;gap:12px;width:min(1200px,calc(100% - 32px));margin:0 auto;padding:24px 0 28px;
   /* La mise en page suit la largeur du BLOC (requetes @container), pas celle de l'ecran : dans
-     la colonne de 880 px du compte, les cartes ne sont plus ecrasees (controle UX du 04/10). */
+     la colonne du compte, les cartes ne sont pas ecrasees (controle UX du 04/10). */
   container-type:inline-size;container-name:aj}
-.aj--compte{--tc-bg:#0a1420;width:100%;padding:0}
+.aj--compte{width:100%;padding:0}
 .aj[hidden]{display:none}
-.aj *{box-sizing:border-box}
+.aj *,.aj-drw *{box-sizing:border-box}
 .aj-sr{position:absolute!important;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-.aj-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
-.aj-title{margin:0;font:800 clamp(24px,5vw,32px)/1.1 "DM Sans",Inter,system-ui,sans-serif;letter-spacing:-.03em}
-.aj-date{margin:0;color:var(--aj-soft);font-size:14px}
-.aj-grid{display:grid;gap:14px}
-.aj-col{display:grid;gap:14px;align-content:start}
-.aj-ico{width:18px;height:18px;flex:none}
-.aj-msg{margin:0;color:var(--aj-soft);font-size:13.5px;line-height:1.5}
-.aj-note{margin:0;padding:0 16px 14px;color:var(--aj-dim);font-size:12px;line-height:1.45}
-/* Lignes : heure, match + pari, cote, chance (badge HyperUI). */
-.tk-m{display:grid;min-width:0}
-.tk-m b{overflow-wrap:anywhere;font-size:14px;font-weight:700;line-height:1.3}
-/* Le nom du pari passe a la ligne au lieu d'etre coupe (« Les deux équipes … » : controle UX du
-   04/10, tour 2). */
-.tk-m small{overflow-wrap:anywhere;color:var(--aj-soft);font-size:12.5px;line-height:1.35}
-.tk-th{display:none}
-.tk-o{display:grid;justify-items:end}
-.tk-o b{font:700 15px "DM Sans",Inter,sans-serif;font-variant-numeric:tabular-nums}
-.tk-o small{color:var(--aj-dim);font-size:11px}
-.tk-t{color:var(--aj-soft);font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
-/* Ticket (21st.dev) : la liste des matchs, un encadre par match. */
-.tk .tc-title{display:flex;align-items:center;gap:8px}
-.tk-x10 .tc-title{color:var(--aj-cyan)}
-.tk.is-empty .tc-body,.tk.is-locked .tc-body{padding-bottom:1.5rem}
-.tk-l{display:grid;gap:8px;margin:0;padding:0;list-style:none}
-.tk-leg{display:grid!important;grid-template-columns:54px minmax(0,1fr) auto auto;gap:10px!important;padding:.75rem!important}
-.tk-leg.is-off{opacity:.55}
-.tk-leg.is-off .tk-m b{text-decoration:line-through}
-.tk-c{font-size:12.5px}
-.tk-rep{margin:0;padding:9px 11px;border-radius:10px;background:rgba(255,255,255,.04);color:var(--aj-soft);font-size:12.5px;line-height:1.45}
-.tk-f{display:flex;justify-content:center}
-.tk-f .mu-sub{width:100%}
-.tk-note{margin:-6px 0 0;color:var(--aj-dim);font-size:12px;line-height:1.45;text-align:center}
-.tk-copytext{display:block;width:100%;min-height:150px;padding:10px;border:1px solid var(--aj-line);border-radius:10px;background:#07111b;color:var(--aj-text);font:13px/1.5 "DM Sans",sans-serif}
-.tk-copytext[hidden]{display:none}
+.aj-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px}
+.aj-title{margin:0;font:800 clamp(22px,5vw,30px)/1.1 "DM Sans",Inter,system-ui,sans-serif;letter-spacing:-.03em}
+.aj-date{margin:0;color:var(--aj-soft);font-size:13.5px}
+.aj-ico{width:16px;height:16px;flex:none}
+.aj-msg{margin:0;color:var(--aj-soft);font-size:13px;line-height:1.45}
+.aj-note{margin:0;color:var(--aj-dim);font-size:12px;line-height:1.45}
 /* Contenus verrouilles : faux chiffres constants, floutes. */
 .aj-blur{filter:blur(5px);opacity:.7;user-select:none;-webkit-user-select:none;pointer-events:none}
-/* Selection en or (Magic UI Shine Border) : le seul or du site. */
-.or{position:relative;display:grid;border:1px solid rgba(232,196,106,.28);border-radius:16px;background:var(--aj-card)}
-.or-h,.bt-h{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--aj-line)}
-.or-ico,.bt-ico{display:inline-flex;padding:.55rem;border-radius:9999px;flex:none}
-.or-ico{background:rgba(232,196,106,.12);color:var(--aj-gold)}
-.bt-ico{background:rgba(32,213,239,.1);color:var(--aj-cyan)}
-.or-ico .lucide,.bt-ico .lucide{width:20px;height:20px}
+
+/* ---- Les trois petites cartes, cote a cote (telephone ET ordinateur). ---- */
+.aj-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:stretch}
+.aj-row.aj-n2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.aj-row.aj-n1{grid-template-columns:minmax(0,1fr)}
+.sc{padding:.7rem 0;gap:.55rem}
+.sc-h{padding:0 .625rem;gap:.3rem}
+.sc-ico{display:inline-flex;align-items:center;color:var(--aj-cyan);padding-top:1px}
+.sc-ico .lucide{width:16px;height:16px}
+.sc-t{font-size:14px;letter-spacing:-.01em}
+.tk-x10 .sc-t{color:var(--aj-cyan)}
+.sc-d{font-size:11.5px}
+.sc-wide{display:none}
+.sc-c{display:grid;gap:.45rem;align-content:start;padding:0 .625rem}
+.sc-fig{display:grid;gap:1px;min-width:0}
+.sc-k{margin:0;font-size:11px;line-height:1.3;color:var(--aj-soft);overflow-wrap:anywhere}
+.sc-v{margin:0;font:700 19px/1.15 "DM Sans",Inter,sans-serif;font-variant-numeric:tabular-nums;color:var(--aj-text)}
+.sc-name{font-size:14px;line-height:1.2;overflow-wrap:anywhere}
+.sc-g{display:inline-flex}
+.sc .mu-gauge{width:48px;height:48px;font-size:12.5px}
+.sc-short{font-size:12.5px}
+/* Pastille « verrouille » (HyperUI Badges) : en bas de la petite carte, a cote du titre sur une
+   carte large. */
+.sc-lock{gap:.25rem;padding:.125rem .5rem;font-size:11.5px;background:rgba(148,163,184,.14);color:#dbe4ee}
+.sc-lock .lucide{width:12px;height:12px;margin:0}
+.sc.is-locked{padding-bottom:2.1rem}
+.sc.is-locked .sc-a{position:absolute;left:.625rem;bottom:.6rem}
+/* Toute la petite carte s'ouvre au toucher (bouton etire, comme le lien d'une Card shadcn). */
+.sc-hit{position:absolute;inset:0;z-index:1;display:flex;align-items:flex-end;justify-content:flex-end;padding:.55rem .6rem;border:0;border-radius:inherit;
+  background:transparent;color:var(--aj-cyan);cursor:pointer;font:600 12px "DM Sans",sans-serif;-webkit-tap-highlight-color:transparent}
+.sc-hit:focus-visible{outline:2px solid var(--aj-cyan);outline-offset:2px}
+.sc-hit:hover{background:rgba(32,213,239,.04)}
+.sc-more{display:inline-flex;align-items:center;gap:1px}
+.sc-more .lucide{width:14px;height:14px}
+.sc:has(.sc-hit){padding-bottom:2rem}
+.sc-det{display:none}
+.sc.is-off .sc-c{opacity:.55}
+.sc.has-off{border-color:rgba(203,213,225,.32)}
+
+/* Carte large (ordinateur, compte) : titre et pastille sur une ligne, cote et anneau cote a
+   cote, matchs du ticket et « Copier le ticket » dans la carte. */
+@container sc (min-width:230px){
+  .sc{padding:1rem 0;gap:.75rem}
+  .sc-h{padding:0 1rem;gap:.5rem}
+  .sc-t{font-size:16px}
+  .sc-d{font-size:12.5px}
+  .sc-wide{display:inline}
+  .sc-c{grid-template-columns:minmax(0,1fr) auto;align-items:center;padding:0 1rem}
+  .sc-k{font-size:12px}
+  .sc-v{font-size:22px}
+  .sc-name{font-size:16px}
+  .sc .mu-gauge{width:56px;height:56px;font-size:14px}
+  .sc.is-locked{padding-bottom:1rem}
+  .sc.is-locked .sc-a{position:static}
+  .sc-det{padding:0 1rem}
+}
+@container aj (min-width:720px){
+  .aj-row{gap:16px}
+  .sc-det{display:grid;gap:.6rem}
+  .sc-hit{display:none}
+  .sc:has(.sc-hit){padding-bottom:1rem}
+  .sc-short{display:none}
+  .sc.is-empty .sc-sep,.sc.is-empty .sc-c{display:none}
+}
+
+/* ---- Lignes d'un ticket (carte large et tiroir) ---- */
+.tk-l{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.tk-leg{display:grid;grid-template-columns:44px minmax(0,1fr) auto auto;align-items:center;gap:8px;padding:.5rem .625rem;border-radius:.5rem;background:rgba(148,163,184,.08)}
+.tk-leg.is-off{opacity:.55}
+.tk-leg.is-off .tk-m b{text-decoration:line-through}
+.tk-m{display:grid;min-width:0}
+.tk-m b{overflow-wrap:anywhere;font-size:13.5px;font-weight:700;line-height:1.3}
+/* Le nom du pari passe a la ligne au lieu d'etre coupe (controle UX du 04/10, tour 2). */
+.tk-m small{overflow-wrap:anywhere;color:var(--aj-soft);font-size:12px;line-height:1.35}
+.tk-th{display:none}
+.tk-o{display:grid;justify-items:end}
+.tk-o b{font:700 14px "DM Sans",Inter,sans-serif;font-variant-numeric:tabular-nums}
+.tk-o small{color:var(--aj-dim);font-size:10.5px}
+.tk-t{color:var(--aj-soft);font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tk-c{font-size:12px}
+.tk-rep{margin:0;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);color:var(--aj-soft);font-size:12px;line-height:1.45}
+.tk-f{display:flex;justify-content:center}
+.tk-f .mu-sub{width:100%}
+.tk-copytext{display:block;width:100%;min-height:150px;padding:10px;border:1px solid var(--aj-line);border-radius:10px;background:#07111b;color:var(--aj-text);font:13px/1.5 "DM Sans",sans-serif}
+.tk-copytext[hidden]{display:none}
+/* Carte etroite (ou tiroir etroit) : pastille de chance sur la ligne de la cote, l'heure passe
+   devant le pari (controle UX du 04/10, tour 2). */
+@container sc (max-width:330px){
+  .tk-leg{grid-template-columns:minmax(0,1fr) auto auto;gap:6px}
+  .tk-leg .tk-t{display:none}
+  .tk-th{display:inline}
+}
+
+/* ---- Selection en or (Magic UI Shine Border) : lignes compactes, le seul or du site. ---- */
+.or{position:relative;display:grid;border:1px solid rgba(232,196,106,.28);border-radius:12px;background:var(--aj-card)}
+.or-h{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--aj-line)}
+.or-ico{display:inline-flex;padding:.4rem;border-radius:9999px;flex:none;background:rgba(232,196,106,.12);color:var(--aj-gold)}
+.or-ico .lucide{width:18px;height:18px}
 .or-t{display:grid;min-width:0;flex:1}
-.or-t b{font:700 18px/1.2 "DM Sans",sans-serif;letter-spacing:-.01em}
-.or .or-t b{color:var(--aj-gold2)}
-.or-t span{color:var(--aj-soft);font-size:13px}
-.or .aj-msg,.bt .aj-msg{padding:12px 16px 16px}
-.or .aj-blur,.bt .aj-blur{margin:10px 16px 16px}
-.or-l{display:grid;margin:0;padding:6px 16px 10px;list-style:none}
-.or-l li{display:grid;grid-template-columns:28px minmax(0,1fr) auto auto;align-items:center;gap:10px;padding:10px 0;border-top:1px solid rgba(232,196,106,.14)}
+.or-t b{font:700 16px/1.2 "DM Sans",sans-serif;letter-spacing:-.01em;color:var(--aj-gold2)}
+.or-t span{color:var(--aj-soft);font-size:12.5px}
+.or .sc-lock{flex:none}
+.or .aj-msg{padding:10px 14px 12px}
+.or .aj-blur{margin:8px 14px 12px}
+.or-l{display:grid;margin:0;padding:2px 14px 6px;list-style:none}
+.or-l li{display:grid;grid-template-columns:24px minmax(0,1fr) auto auto;align-items:center;gap:8px;padding:8px 0;border-top:1px solid rgba(232,196,106,.14)}
 .or-l li:first-child{border-top:0}
-.or-r{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;border:1px solid rgba(232,196,106,.6);color:var(--aj-gold2);font:800 13px "DM Sans",sans-serif}
-.or-c{min-width:46px;padding:2px 8px;border-radius:9999px;background:rgba(232,196,106,.16);color:#fbe7b5;font:700 13px "DM Sans",Inter,sans-serif;font-variant-numeric:tabular-nums;text-align:center;white-space:nowrap}
+.or-r{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;border:1px solid rgba(232,196,106,.6);color:var(--aj-gold2);font:800 12px "DM Sans",sans-serif}
+.or-c{min-width:44px;padding:2px 8px;border-radius:9999px;background:rgba(232,196,106,.16);color:#fbe7b5;font:700 12.5px "DM Sans",Inter,sans-serif;font-variant-numeric:tabular-nums;text-align:center;white-space:nowrap}
 .or .tk-l{padding:0}
-/* Buteur du jour : ligne joueur + jauge circulaire (Magic UI). */
-.bt{display:grid;border:1px solid rgba(141,179,211,.24);border-radius:16px;background:var(--aj-card)}
-.bt-row{display:grid;grid-template-columns:46px minmax(0,1fr) auto;align-items:center;gap:12px;padding:14px 16px}
-.bt-av{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:#13283a;color:var(--aj-cyan);font:800 15px "DM Sans",sans-serif}
-.bt-fake-v{font:700 18px "DM Sans",Inter,sans-serif;font-variant-numeric:tabular-nums}
-.bt.is-off .bt-row{opacity:.55}
-/* Deblocage : un cadenas, une ligne, un seul bouton (Magic UI Shimmer Button). */
-.aj-unlock{display:grid;gap:12px;justify-items:stretch;padding:18px 16px;border:1px solid rgba(32,213,239,.32);border-radius:16px;background:#0a1521}
-.aj-unlock-t{display:flex;align-items:flex-start;gap:10px;margin:0;font-size:15px;line-height:1.45;font-weight:600}
-.aj-unlock-i{display:inline-flex;padding:.45rem;border-radius:9999px;background:rgba(32,213,239,.1);color:var(--aj-cyan);flex:none}
-.aj-unlock-i .lucide{width:18px;height:18px}
-.aj-small{margin:0;color:var(--aj-soft);font-size:12.5px;text-align:center}
-.aj-legal{margin:0;color:var(--aj-dim);font-size:12px}
-/* Bloc large : les deux tickets cote a cote (espace de 28 px : les encoches ne se touchent
-   plus), la Selection en or et le buteur dessous, cote a cote ; tres large : a droite. */
-@container aj (min-width:780px){
-  .aj-col-t,.aj-col:not(.aj-col-t){grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;column-gap:28px}
+
+/* ---- Deblocage : une ligne, un seul bouton (Magic UI Shimmer Button). ---- */
+.aj-unlock{display:grid;gap:10px;justify-items:stretch;padding:14px;border:1px solid rgba(32,213,239,.32);border-radius:12px;background:#0a1521}
+.aj-unlock-t{display:flex;align-items:flex-start;gap:10px;margin:0;font-size:14.5px;line-height:1.4;font-weight:600}
+.aj-unlock .mu-shimmer{min-height:48px;font-size:15px}
+.aj-small{margin:0;color:var(--aj-soft);font-size:12px;text-align:center}
+/* Mentions : en tout petit et en gris (demande de Clement du 04/10, 16 h). */
+.aj-legal{margin:0;color:var(--aj-dim);font-size:11px;line-height:1.5}
+@container aj (min-width:720px){
   .aj-unlock{grid-template-columns:1fr auto;align-items:center}
   .aj-unlock .aj-cta{width:auto;min-width:260px}
   .aj-small{grid-column:1/-1;text-align:left}
 }
-@container aj (min-width:1150px){
-  .aj-grid{grid-template-columns:minmax(0,2fr) minmax(0,1fr);column-gap:28px}
-  .aj-col:not(.aj-col-t){grid-template-columns:minmax(0,1fr)}
-}
-/* Telephone : la pastille de chance reste sur la ligne de la cote (controle UX du 04/10, tour 2 :
-   une ligne de plus par match, 893 px pour le seul ticket x10) ; l'heure passe devant le pari. */
-@container aj (max-width:420px){
-  .tk-leg{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important;align-items:center}
-  .tk-leg .tk-t{display:none}
-  .tk-th{display:inline}
-  .or-l li{grid-template-columns:24px minmax(0,1fr) auto auto;gap:8px}
-  .or-r{width:24px;height:24px;font-size:12px}
-}
+
+/* ---- Tiroir du telephone (Flowbite Drawer, assets/composants.css) ---- */
+.aj-drw{padding:1rem 1rem calc(1rem + env(safe-area-inset-bottom,0px));container-type:inline-size;container-name:sc}
+.aj-drw-h{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.5rem;align-items:start;padding:0 3rem .75rem 0;border-bottom:2px dashed var(--c-line2,rgba(255,255,255,.18))}
+.aj-drw-h .sc-ico .lucide{width:20px;height:20px}
+.aj-drw-t{margin:0;font:700 18px/1.2 "DM Sans",sans-serif;color:var(--aj-text)}
+.aj-drw-h .sc-d{margin:2px 0 0;font-size:13px;color:var(--aj-soft)}
+.aj-drw .fb-close{top:2.6rem}
+.aj-drw-b{display:grid;gap:.75rem;padding-top:.75rem}
+.aj-drw-sum{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;padding:0}
+.aj-drw-sum .sc-v{font-size:22px}
+.aj-drw-sum .sc-name{font-size:17px}
+.aj-drw-sum .sc-wide{display:inline}
+.aj-drw-sum .mu-gauge{width:60px;height:60px;font-size:14px}
+.aj-drw-det{display:grid;gap:.6rem}
+.aj-drw .aj-msg{font-size:14px}

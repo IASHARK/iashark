@@ -62,7 +62,7 @@ test("chaque composant cite sa source et sa licence ; mouvement reduit respecte"
     ["Magic UI — Shine Border", "magicui/shine-border.tsx"], ["Magic UI — Animated Circular Progress Bar", "animated-circular-progress-bar.tsx"],
     ["Magic UI — Animated Subscribe Button", "animated-subscribe-button.tsx"], ["HyperUI — Radio Groups", "radio-groups/2-dark.html"],
     ["HyperUI — Tabs", "tabs/2-dark.html"], ["HyperUI — Badges", "badges/2-dark.html"], ["HyperUI — Stats", "stats/3-dark.html"],
-    ["Flowbite — Drawer", "flowbite/blob/main/src/components/drawer/index.ts"], ["21st.dev — « Ticket Confirmation Card »", "ravikatiyar162/components/ticket-confirmation-card"]
+    ["Flowbite — Drawer", "flowbite/blob/main/src/components/drawer/index.ts"], ["shadcn/ui — Card (MIT)", "new-york-v4/ui/card.tsx"], ["shadcn/ui — Separator (MIT)", "new-york-v4/ui/separator.tsx"]
   ]) {
     assert.ok(css.includes(nom), "source citee : " + nom);
     assert.ok(css.includes(url), "lien : " + url);
@@ -72,10 +72,12 @@ test("chaque composant cite sa source et sa licence ; mouvement reduit respecte"
   assert.match(css, /@keyframes mu-spin-around\{0%\{transform:translateZ\(0\) rotate\(0\)\}15%,35%\{transform:translateZ\(0\) rotate\(90deg\)\}65%,85%\{transform:translateZ\(0\) rotate\(270deg\)\}100%\{transform:translateZ\(0\) rotate\(360deg\)\}\}/);
   assert.match(css, /@keyframes mu-shine\{0%\{background-position:0% 0%\}50%\{background-position:100% 100%\}to\{background-position:0% 0%\}\}/);
   const reduit = css.slice(css.lastIndexOf("@media (prefers-reduced-motion:reduce)"));
-  for (const sel of [".mu-shimmer-spark", ".mu-beam", ".mu-gauge", ".mu-sub", ".fb-drawer", ".tc"]) assert.ok(reduit.includes(sel), "mouvement reduit : " + sel);
+  for (const sel of [".mu-shimmer-spark", ".mu-beam", ".mu-gauge", ".mu-sub", ".fb-drawer"]) assert.ok(reduit.includes(sel), "mouvement reduit : " + sel);
   assert.match(css, /@media \(prefers-reduced-motion:no-preference\)\{\.mu-shine\{animation:/, "reflet seulement sans mouvement reduit");
   const lic = read("assets/vendor/LICENCES.txt");
-  for (const x of ["Chart.js 4.5.1", "MIT License", "Lucide", "ISC License", "Magic UI", "HyperUI", "Flowbite", "chartjs-plugin-datalabels 2.2.0", "ravikatiyar162"]) assert.ok(lic.includes(x), "licence : " + x);
+  for (const x of ["Chart.js 4.5.1", "MIT License", "Lucide", "ISC License", "Magic UI", "HyperUI", "Flowbite", "chartjs-plugin-datalabels 2.2.0", "shadcn/ui — Card, Separator", "Copyright (c) 2023 shadcn"]) assert.ok(lic.includes(x), "licence : " + x);
+  // 04/10/2026 : la « Ticket Confirmation Card » de 21st.dev (aucune licence publiee) est retiree.
+  assert.doesNotMatch(css.replace(/Remplace la « Ticket Confirmation Card »[^\n]*/g, ""), /ravikatiyar162|\.tc[{-]/);
 });
 
 test("Chart.js et son greffon : fichiers d'origine, charges a la demande depuis le site, jamais un CDN", () => {

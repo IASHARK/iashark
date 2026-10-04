@@ -262,7 +262,8 @@ function macedoineEcosse(o) {
   return Object.assign({ id: 1545660, home: { n: "FYR Macedonia" }, away: { n: "Scotland" }, date: "2026-10-03 20:45", league_key: "nations_league",
     pari_rec: "Victoire Exterieur", market_id: "away-win", no_signal: false, chance_iashark: 58,
     moteur_v3: { source: "v3", couverture: "vérifiée", origine_probabilite: "modèle seul" }, v3_fiabilite: { couverture: "vérifiée" }, v3_marches: v3,
-    sim_15min: { v: 1, tr: [0.2, 0.2, 0.25, 0.22, 0.24, 0.3], si: { dom_premier: { p1: 0.4, pn: 0.3, p2: 0.3 } }, si_affiche: { dom_premier: { p1: 40, pn: 30, p2: 30 } } },
+    sim_15min: { v: 1, tr: [0.2, 0.2, 0.25, 0.22, 0.24, 0.3], tr_dom: [0.1, 0.1, 0.12, 0.11, 0.12, 0.15], tr_ext: [0.11, 0.11, 0.14, 0.12, 0.13, 0.17],
+      si: { dom_premier: { p1: 0.4, pn: 0.3, p2: 0.3 } }, si_affiche: { dom_premier: { p1: 40, pn: 30, p2: 30 } } },
     v3_premiers_buteurs: [{ joueur: "X", cote: "away", chance: 12 }] }, o || {});
 }
 
@@ -293,13 +294,15 @@ test("coherence (point 2) : Macedoine du Nord - Ecosse, Avis 58 % contre 40,5 % 
   for (const k of ["sim_resume", "premier_but", "v3_premiers_buteurs"]) assert.equal(m[k], undefined, k);
   assert.ok(m.sim_15min && Array.isArray(m.sim_15min.tr), "le film du match reste");
   assert.equal(m.sim_15min.si, undefined); assert.equal(m.sim_15min.si_affiche, undefined);
+  // Controle du mathematicien de la PR 114, point 4 : ni la chance de chaque equipe par quart d'heure.
+  assert.equal(m.sim_15min.tr_dom, undefined); assert.equal(m.sim_15min.tr_ext, undefined);
   const lignes = m.marches_panneau ? m.marches_panneau.familles.flatMap((f) => f.marches) : [];
   assert.deepEqual(lignes.filter((x) => x.source === "modele"), [], "aucune ligne du v3 au panneau");
   // Avis a 41 % (0,5 point du v3) : tout est produit, et l'Ecosse vaut exactement 41 partout.
   const ok = macedoineEcosse({ league_key: "ligue1", chance_iashark: 41 });
   P.poserPanneaux([ok]); S.poserSections([ok]);
   assert.equal(ok.sim_resume.issues.ext, 4100);
-  assert.ok(ok.premier_but && ok.sim_15min.si_affiche && ok.v3_premiers_buteurs);
+  assert.ok(ok.premier_but && ok.sim_15min.si_affiche && ok.v3_premiers_buteurs && ok.sim_15min.tr_dom && ok.sim_15min.tr_ext);
   // Juste au seuil : 2 points d'ecart acceptes, 2,1 non.
   const pv = ok.v3_marches.find((x) => x.cle === "1N2:2").probabilite;
   assert.equal(P.avisCoherent(macedoineEcosse({ league_key: "ligue1", chance_iashark: pv + 2 })), true);

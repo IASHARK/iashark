@@ -202,10 +202,13 @@ test("les preferences ecrivent dans les vraies colonnes de user_preferences", ()
   }
 });
 
-test("la bankroll n'a qu'une source de verite", () => {
-  // Elle vit dans users.capital, lue par les outils. La page compte ne doit
-  // pas en garder une seconde copie dans user_preferences.
-  assert.match(compteJs, /update\(\{ capital: capital \}\)/);
+// 04/10/2026 (regle de Clement : ni mise, ni unite, ni capital, nulle part) : la page compte ne
+// montre plus de « Bankroll », ni « Calculateur de mise, simulateur de capital », et n'ecrit plus
+// aucun capital.
+test("compte : ni bankroll, ni calculateur de mise, ni capital", () => {
+  assert.doesNotMatch(compteJs, /tr\('compte_page\.bankroll_|champ\('bankroll'|\$\('bankroll'\)/);
+  assert.doesNotMatch(compteJs, /pro_offer\.free_tools/);
+  assert.doesNotMatch(compteJs, /update\(\{ capital/);
   assert.ok(!/bankroll:/.test(compteJs.slice(compteJs.indexOf("var ligne = {"), compteJs.indexOf("var ligne = {") + 400)));
 });
 

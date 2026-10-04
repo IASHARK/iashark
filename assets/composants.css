@@ -259,45 +259,33 @@ body.fb-no-scroll{overflow:hidden}
 .fb-handle:focus-visible{outline:2px solid var(--c-cyan);outline-offset:-2px}
 
 /* ===================================================================
-   21st.dev — « Ticket Confirmation Card », auteur ravikatiyar162
-   https://21st.dev/@ravikatiyar162/components/ticket-confirmation-card
-   Carte : relative w-full max-w-sm bg-card rounded-2xl shadow-lg z-10
-   animate-in fade-in-0 zoom-in-95 duration-500 ; encoches : absolute -left-4 /
-   -right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-background ;
-   en-tete : p-8 flex flex-col items-center text-center, pastille d'icone
-   p-3 bg-primary/10 rounded-full ; corps : px-8 pb-8 space-y-6 ; ligne :
-   w-full border-t-2 border-dashed border-border ; grille : grid grid-cols-2
-   gap-4 ; encadre : bg-muted/50 p-4 rounded-lg flex items-center space-x-4.
-   Adaptations : encoches posees sur la ligne en pointilles (la « dechirure ») et coupees
-   au bord de la carte (overflow hidden : deux tickets cote a cote ne forment plus de tache
-   entre eux), marges de 24 px au telephone ; ni confettis ni code-barres.
+   shadcn/ui — Card (MIT) — petites cartes du bloc « Aujourd'hui » (tickets x5 / x10,
+   buteur du jour) et encadres compacts (exemples des jumeaux, apercu flou)
+   https://github.com/shadcn-ui/ui/blob/main/apps/v4/registry/new-york-v4/ui/card.tsx
+   Card : flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm
+   CardHeader : @container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start
+     gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto]
+   CardTitle : leading-none font-semibold ; CardDescription : text-sm text-muted-foreground
+   CardAction : col-start-2 row-span-2 row-start-1 self-start justify-self-end
+   CardContent : px-6 ; CardFooter : flex items-center px-6
+   shadcn/ui — Separator (MIT), ligne de perforation du ticket :
+   https://github.com/shadcn-ui/ui/blob/main/apps/v4/registry/new-york-v4/ui/separator.tsx
+   shrink-0 bg-border data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full,
+   en pointilles par className (h-0 bg-transparent border-t-2 border-dashed), comme le permet
+   le composant. Marges reduites (petites cartes cote a cote au telephone) ; couleurs du site.
+   Remplace la « Ticket Confirmation Card » de 21st.dev (aucune licence publiee, 04/10/2026).
    =================================================================== */
-.tc{position:relative;width:100%;background:var(--c-card);color:var(--c-ink);border-radius:1rem;z-index:1;overflow:hidden;
-  box-shadow:0 10px 15px -3px rgb(0 0 0 / .1),0 4px 6px -4px rgb(0 0 0 / .1);border:1px solid var(--c-line);
-  animation:tc-in .5s ease both}
-@keyframes tc-in{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
-.tc-head{padding:2rem 2rem 1.5rem;display:flex;flex-direction:column;align-items:center;text-align:center}
-.tc-ico{padding:.75rem;background:rgba(32,213,239,.1);border-radius:9999px;color:var(--c-cyan);display:inline-flex}
-.tc-ico .lucide{width:2rem;height:2rem}
-.tc-title{font:600 1.5rem/1.2 var(--body,"DM Sans",system-ui,sans-serif);margin:1rem 0 0;color:var(--c-ink)}
-.tc-sub{color:var(--c-soft);margin:.25rem 0 0;font-size:15px}
-.tc-body{padding:0 2rem 2rem;display:grid;gap:1.5rem}
-.tc-cut{position:relative}
-.tc-cut::before,.tc-cut::after{content:"";position:absolute;top:50%;transform:translateY(-50%);width:2rem;height:2rem;border-radius:9999px;background:var(--tc-bg,var(--c-page))}
-.tc-cut::before{left:calc(-2rem - 1rem)}
-.tc-cut::after{right:calc(-2rem - 1rem)}
-.tc-dash{width:100%;border:0;border-top:2px dashed var(--c-line2);margin:0}
-.tc-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;text-align:left}
-.tc-k{font-size:.75rem;line-height:1rem;color:var(--c-soft);margin:0}
-.tc-v{font-weight:600;font-size:1.125rem;margin:2px 0 0;color:var(--c-ink)}
-.tc-r{text-align:right}
-.tc-box{background:var(--c-muted);padding:1rem;border-radius:.5rem;display:flex;align-items:center;gap:1rem}
-@media (max-width:520px){
-  .tc-head{padding:1.5rem 1.5rem 1.25rem}
-  .tc-body{padding:0 1.5rem 1.5rem;gap:1.25rem}
-  .tc-cut::before{left:calc(-1.5rem - 1rem)}
-  .tc-cut::after{right:calc(-1.5rem - 1rem)}
-}
+.sc{position:relative;display:flex;flex-direction:column;gap:.75rem;min-width:0;border-radius:.75rem;border:1px solid var(--c-line);
+  background:var(--c-card);color:var(--c-ink);padding:.875rem 0;box-shadow:0 1px 2px 0 rgb(0 0 0 / .05);container-type:inline-size;container-name:sc}
+.sc-h{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start;gap:.5rem;padding:0 .875rem}
+.sc-h:has(.sc-a){grid-template-columns:auto minmax(0,1fr) auto}
+.sc-ht{display:grid;gap:.25rem;min-width:0}
+.sc-t{margin:0;line-height:1.1;font:600 15px/1.15 var(--body,"DM Sans",system-ui,sans-serif);color:var(--c-ink)}
+.sc-d{margin:0;font-size:12.5px;line-height:1.3;color:var(--c-soft)}
+.sc-a{grid-column:3;grid-row:1;align-self:start;justify-self:end}
+.sc-c{padding:0 .875rem}
+.sc-sep{flex:none;width:100%;height:0;background:transparent;border-top:2px dashed var(--c-line2)}
+.sc-box{display:flex;align-items:center;gap:1rem;border-radius:.75rem;border:1px solid var(--c-line);background:var(--c-card2);padding:.75rem 1rem}
 
 /* Mouvement reduit : etat final immediat, aucun reflet ni faisceau. */
 @media (prefers-reduced-motion:reduce){
@@ -308,7 +296,6 @@ body.fb-no-scroll{overflow:hidden}
   .mu-gauge-v{animation:none}
   .mu-sub.is-on,.mu-sub.is-on .mu-sub-b,.mu-sub.is-out .mu-sub-a{animation:none}
   .fb-drawer{transition:none}
-  .tc{animation:none}
 }
 .ch-box{position:relative;width:100%}
 .ch-box canvas{display:block}

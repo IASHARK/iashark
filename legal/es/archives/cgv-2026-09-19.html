@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="iashark-market" content="fr">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Condiciones generales de venta — IASHARK</title>
 <meta name="description" content="Condiciones generales de venta y de uso de IASHARK: acceso gratuito, suscripción Pro, precio, derecho de desistimiento y cancelación.">
@@ -11,18 +10,9 @@
 <meta property="og:type" content="website">
 <meta property="og:locale" content="es_ES">
 <link rel="canonical" href="https://iashark.com/es/cgv.html">
-<link rel="alternate" hreflang="fr" href="https://iashark.com/fr/cgv.html">
-<link rel="alternate" hreflang="en-GB" href="https://iashark.com/gb/cgv.html">
-<link rel="alternate" hreflang="en-ZA" href="https://iashark.com/za/cgv.html">
-<link rel="alternate" hreflang="en" href="https://iashark.com/en/cgv.html">
-<link rel="alternate" hreflang="es-MX" href="https://iashark.com/mx/cgv.html">
-<link rel="alternate" hreflang="es" href="https://iashark.com/es/cgv.html">
-<link rel="alternate" hreflang="x-default" href="https://iashark.com/en/cgv.html">
 <meta property="og:url" content="https://iashark.com/es/cgv.html">
 <meta property="og:image" content="https://iashark.com/icon-512.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* IASHARK legal pages - shared style block (identical in every legal/<dir>/*.html). */
@@ -129,10 +119,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
   .warn-box,.highlight,.tbl-wrap,.legal-foot{background:none;box-shadow:none;border-color:#999;}
 }
 </style>
-<link rel="stylesheet" href="/assets/bottom-navigation.css">
-<meta property="og:site_name" content="IASHARK">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://iashark.com/es/"},{"@type":"ListItem","position":2,"name":"Condiciones generales de venta","item":"https://iashark.com/es/cgv.html"}]}</script>
-</head>
+<link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
 <body>
 <!-- LEGAL REVIEW: (1) the current checkout (Stripe Checkout) does not collect the consumer's express consent to immediate performance nor the acknowledgement of loss of the right of withdrawal (French Consumer Code art. L221-28 13°): until this is implemented, the 14-day right of withdrawal applies in full; (2) no terms-acceptance checkbox exists at checkout; (3) no consumer mediator appointed (art. L612-1 / L616-1); (4) VAT: French VAT franchise confirmed by the owner on 19/09/2026 ('TVA non applicable, article 293 B du CGI', stated in every version, replaces 'VAT included'); (5) classification of the service (digital content vs digital service) to be confirmed. Offer updated from abonnement.html and supabase/functions/create-checkout-session (single monthly subscription, no free trial). -->
 <header class="hdr">
@@ -149,7 +136,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Juego responsable</a>
   </nav>
   <h1 class="page-title">Condiciones generales de venta</h1>
-  <div class="page-date">Última actualización: 4 de octubre de 2026</div>
+  <div class="page-date">Última actualización: 19 de septiembre de 2026</div>
   <!-- LEGAL REVIEW: 19/09/2026 - owner decisions: weekly, monthly and annual plans payable on the EUR market (config/markets.json#fr.checkoutOpen, Stripe Prices in fr.stripePriceIds); 'VAT included' replaced in article 6 by the French VAT franchise mention (art. 293 B CGI). Prices, billing periods, renewal, withdrawal and cancellation rules unchanged from the 16/09/2026 text and aligned with the French terms of 19/09/2026 (legal/fr/cgv.html). Previous version archived in legal/es/archives/cgv-2026-09-16.html. Status: REVIEW. -->
 
   <div class="warn-box">
@@ -209,13 +196,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     </div>
     <p>A título informativo, 199 € al año equivalen a 16,59 € al mes, es decir, un 16 % menos que doce meses con la tarifa mensual (239,40 €).</p>
     <p>El precio aplicable es el que se muestra en la página Suscripción para el periodo elegido y se resume en la página de pago antes de que usted confirme su pedido. Cualquier modificación del precio se le notificará antes de su entrada en vigor; solo se aplicará a partir del siguiente periodo de facturación y usted podrá cancelar su suscripción antes de esa fecha.</p>
-    <!-- LEGAL REVIEW: 04/10/2026 - owner decision: 7-day free trial kept and shown (monthly plan only, first subscription, card required, automatic charge at the end of the trial unless cancelled). Matches the live create-checkout-session function (v23, trial.ts, read on 04/10/2026: TRIAL_DAYS absent = 7, monthly only, once per account and per Stripe customer, subscription stopped if no card at the end). No reminder before the end of the trial is promised: the trial-reminder function exists but its scheduled job (0042) is not applied in the database. To be checked by a lawyer: how the trial interacts with the withdrawal/cancellation period. Previous version archived in archives/cgv-2026-09-19.html. Status: REVIEW. -->
-    <p><strong>Prueba de 7 días (solo con la modalidad mensual).</strong> En una primera suscripción mensual, los 7 primeros días son gratuitos. Se le pide su tarjeta al suscribirse; no se cobra ningún importe durante la prueba. Al final de la prueba, la suscripción mensual empieza automáticamente: se cobran 19,95 € y después cada mes en la misma fecha, salvo que usted cancele antes del final de la prueba desde «Mi cuenta», lo que impide cualquier cobro. Si no hay ningún medio de pago válido al final de la prueba, la suscripción termina. La prueba se concede una sola vez: una cuenta, o un cliente de nuestro proveedor de pagos, que ya haya tenido una suscripción no tiene derecho a ella. Las modalidades semanal y anual no tienen prueba: se cobran desde la suscripción. La prueba puede modificarse o retirarse para nuevas suscripciones; su duración se indica antes del pago.</p>
   </section>
 
   <section class="section">
     <h2>Artículo 7 — Pago y renovación</h2>
-    <p>El pago es seguro y lo gestiona Stripe (<a href="https://stripe.com" target="_blank" rel="noopener">stripe.com</a>). IASHARK no almacena ningún dato de tarjeta bancaria. El primer pago se cobra en el momento de la suscripción, o al final de la prueba en una primera suscripción mensual (artículo 6). Después, la suscripción se renueva automáticamente al final de cada periodo, por un periodo de la misma duración y al precio vigente en ese momento.</p>
+    <p>El pago es seguro y lo gestiona Stripe (<a href="https://stripe.com" target="_blank" rel="noopener">stripe.com</a>). IASHARK no almacena ningún dato de tarjeta bancaria. El primer pago se cobra en el momento de la suscripción. Después, la suscripción se renueva automáticamente al final de cada periodo, por un periodo de la misma duración y al precio vigente en ese momento.</p>
     <!-- LEGAL REVIEW: 19/09/2026 - (a) annual renewal information: template ready (annual_renewal_reminder, D-45 by default, 90 to 30 day window), sending to be enabled (Resend + scheduled job) before the first annual renewal, otherwise the annual-plan paragraph of article 9 applies; (b) changing billing period: check that the Stripe customer portal configuration (STRIPE_PORTAL_CONFIGURATION_ID or default configuration) applies the rule below (longer period immediate with proration, shorter period at the end of the paid period) - otherwise correct this paragraph and compte_page.change_interval_note. -->
     <p><strong>Plan anual: información antes de la renovación.</strong> Le informaremos por correo electrónico, no antes de tres meses y no después de un mes antes del vencimiento, de la posibilidad de no renovar su suscripción anual. El correo indica la fecha de vencimiento, el importe que se cobrará y cómo cancelar en línea.</p>
     <p><strong>Cambio de duración.</strong> Puede cambiar de duración desde «Mi cuenta», en el área de facturación de nuestro proveedor de pagos. El paso a una duración más larga (por ejemplo, de mensual a anual) surte efecto de inmediato: el nuevo periodo se cobra en ese momento, descontando a prorrata la parte no utilizada del periodo en curso. El paso a una duración más corta (por ejemplo, de anual a mensual) surte efecto al final del periodo ya pagado, sin reembolso ni cobro adicional hasta entonces. El importe y la fecha de efecto se muestran antes de su confirmación. Una suscripción activa no puede contratarse por segunda vez.</p>
@@ -290,9 +275,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
   <footer class="legal-foot">
     <div><a href="mentions-legales.html">Aviso legal</a> <a href="cgv.html">Condiciones de venta</a> <a href="confidentialite.html">Privacidad</a> <a href="cookies.html">Cookies</a> <a href="jeu-responsable.html">Juego responsable</a></div>
     <div>&copy; 2026 IASHARK &middot; <a href="mailto:contact@iashark.com">contact@iashark.com</a> &middot; <a href="./">Inicio</a></div>
-    <div><span data-i18n="rg_footer.age_line">18+ · Prohibido a menores · Juega con responsabilidad</span><br><span data-i18n="match_page.shell_help_label">Ayuda:</span> <a data-market-helpline="url" href="https://www.gamblingtherapy.org">gamblingtherapy.org</a><span data-market-helpline-if="phone" hidden> · <span data-market-helpline="phone" hidden></span></span></div>
+    <div><span data-i18n="rg_footer.age_line">18+ · Prohibido a menores · Juega con responsabilidad</span><br><span data-i18n="match_page.shell_help_label">Ayuda:</span> <a data-market-helpline="url" href="https://www.gamblingtherapy.org">gamblingtherapy.org</a><span data-market-helpline-if="phone" hidden> · <span data-market-helpline="phone"></span></span></div>
   </footer>
-<!--SEO_FOOTER_NAV--><nav class="seo-foot-nav" aria-label="Navegación del sitio" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#91a0b3;text-align:center"><p style="margin:0 0 4px"><span style="color:#c3ccd8">Competiciones:</span> <a href="/es/leagues/la-liga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">La Liga</a> · <a href="/es/leagues/champions-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Champions League</a> · <a href="/es/leagues/europa-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Europa League</a> · <a href="/es/leagues/conference-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Conference League</a> · <a href="/es/leagues/liga-mx.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga MX</a> · <a href="/es/leagues/liga-profesional-argentina.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga Profesional Argentina</a> · <a href="/es/leagues/primera-a-colombia.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Primera A Colombia</a> · <a href="/es/leagues/liga-1-peru.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga 1 Peru</a> · <a href="/es/leagues/primera-division-chile.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Primera Division Chile</a></p><p style="margin:0"><a href="/es/equipos/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Equipos y clásicos</a> · <a href="/es/articulos/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Artículos</a> · <a href="/es/blog/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Blog y guías</a> · <a href="/es/marches.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Mercados analizados</a> · <a href="/es/methodologie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Metodología</a></p></nav><!--/SEO_FOOTER_NAV-->
 </main>
 <script src="/i18n/i18n.js"></script>
 <script src="/lib/market-config.js"></script>

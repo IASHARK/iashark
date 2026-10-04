@@ -81,12 +81,13 @@ test("sans les cases, le paiement est bloque ; le payload suit le regime", () =>
   // ensemble -> une seule version, sans surcharge par repertoire.
   // 21/09/2026 : /en/ change seul (ouverture de l'hebdomadaire a 4,99 USD) ->
   // surcharge par repertoire, les 8 autres versions gardent celle du 19/09.
-  assert.equal(lib.TERMS_VERSION, "2026-09-19");
-  assert.deepEqual({ ...lib.TERMS_VERSIONS }, { en: "2026-09-21" });
-  for (const d of ["", "fr", "es", "de", "it", "pt", "gb", "za", "mx"]) assert.equal(lib.termsVersionFor(d), "2026-09-19", d || "racine");
-  assert.equal(lib.termsVersionFor("en"), "2026-09-21", "/en/ : version propre");
-  assert.equal(lib.buildPayload({ terms: true, waiver: true }, eu, { dir: "fr" }).terms_version, "2026-09-19");
-  assert.equal(lib.buildPayload({ terms: true, waiver: true }, lib.regimeFor("us"), { dir: "en" }).terms_version, "2026-09-21", "/en/ (marche us) : version du 21/09");
+  // 04/10/2026 : les 9 versions changent ensemble (essai de 7 jours sur le mois, decision de
+  // Clement) -> de nouveau une seule version, sans surcharge par repertoire.
+  assert.equal(lib.TERMS_VERSION, "2026-10-04");
+  assert.deepEqual({ ...lib.TERMS_VERSIONS }, {});
+  for (const d of ["", "fr", "es", "de", "it", "pt", "gb", "za", "mx", "en"]) assert.equal(lib.termsVersionFor(d), "2026-10-04", d || "racine");
+  assert.equal(lib.buildPayload({ terms: true, waiver: true }, eu, { dir: "fr" }).terms_version, "2026-10-04");
+  assert.equal(lib.buildPayload({ terms: true, waiver: true }, lib.regimeFor("us"), { dir: "en" }).terms_version, "2026-10-04", "/en/ (marche us)");
   assert.equal(lib.buildPayload({ terms: true, waiver: true }, mx, {}).waiver, null, "mx : aucune renonciation envoyee");
   assert.match(lib.TERMS_VERSION, /^\d{4}-\d{2}-\d{2}$/);
 });
@@ -207,7 +208,7 @@ test("serveur : refuse sans CGV, refuse sans 2e case hors MX, accepte MX sans re
   for (const [market, dir] of [[undefined, ""], [undefined, "fr"], ["us", "en"], ["gb", "gb"], ["za", "za"], ["mx", "mx"]]) {
     const payload = lib.buildPayload({ terms: true, waiver: true }, lib.regimeFor(market || "fr"), { dir, locale: "fr", ts });
     const r = srv.validateConsent(JSON.parse(JSON.stringify(payload)), market, ts);
-    const attendue = dir === "en" ? "2026-09-21" : "2026-09-19";
+    const attendue = "2026-10-04";
     assert.equal(r.ok, true, (market || "defaut") + " : consentement de la version " + attendue + " refuse");
     assert.equal(r.metadata.consent_terms_version, attendue, market || "defaut");
   }

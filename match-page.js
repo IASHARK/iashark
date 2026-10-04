@@ -643,8 +643,12 @@ function cheminMatch(raw){
   const id=raw&&raw.id!=null?String(raw.id):'';
   return /^\d+$/.test(id)?lien('match.html?id='+id):lien('');
 }
-// o : { vuePro (abonne confirme), verrouPro (compte gratuit sur le match offert :
-// lignes cadenas et panneau flou), panneau (false : aucun panneau) }
+// o : { vuePro (abonne confirme), verrouPro (compte gratuit sur le match offert : panneau
+// Marches flou avec son cadenas Pro, et c'est tout), panneau (false : aucun panneau) }
+// MATCH OFFERT (decision de Clement du 04/10/2026) : un compte gratuit connecte voit TOUTES les
+// sections du match (10 000 fois, film, qui ouvre le score, jumeaux, joueurs...), comme un Pro,
+// SAUF le panneau Marches, reserve aux Pro (flou, cadenas « Pro » sur le panneau seulement). Les
+// sections n'affichent que ce que le serveur (match-data) envoie a ce compte.
 function render(raw,o){
   o=o||{};
   const vm=viewModel(raw);
@@ -656,7 +660,7 @@ function render(raw,o){
     MS.clesAvis(vm,raw,dit);
     // contenus : ce que Pro aura VRAIMENT sur ce match (pro_sections, public) : seules ces lignes
     // cadenas s'affichent (controle UX du 04/10/2026, tour 2).
-    const c={raw,vm,vuePro:!!o.vuePro,verrouPro:!!o.verrouPro,dit,contenus:Array.isArray(raw.pro_sections)?raw.pro_sections:[]};
+    const c={raw,vm,vuePro:!!(o.vuePro||o.verrouPro),verrouPro:false,dit,contenus:Array.isArray(raw.pro_sections)?raw.pro_sections:[]};
     MS.sections(c).forEach(([k,html,lab])=>secs.push([k,html,t(lab[0],lab[1]),false]));
     if(o.panneau!==false){
       if(o.vuePro){const p=MS.panneau(c);if(p)panneau={html:p.html,nb:p.nb,fab:true};}
@@ -718,9 +722,11 @@ function renderAuthWall(raw){
     <a class="op-alt" href="${esc(lien('connexion.html?next='+retour))}">${esc(t('match_v4.free_login','J’ai déjà un compte'))}</a>
   </section>`;
   const secs=[['offre',carte,null,true]];
-  // Apercu de ce que voit un COMPTE GRATUIT sur ce match (jamais un contenu Pro) : calcule sur la
-  // copie publique (aucun champ payant), de faux chiffres constants.
-  if(MS){const ap=MS.apercuFlou({offert:true,contenus:MS.contenusPro(vm._raw),pari:etatAnalyse(vm._raw)==='ready'});if(ap)secs.push(['apercu',ap,null,true]);}
+  // Apercu de ce que voit un COMPTE GRATUIT sur ce match : toutes les sections sauf le panneau
+  // Marches (decision de Clement du 04/10/2026), donc la liste publique pro_sections (ce qui existe
+  // vraiment sur ce match, aucun chiffre) ; repli : ce que montre la copie publique. Faux chiffres
+  // constants.
+  if(MS){const pub=vm._raw,contenus=Array.isArray(pub.pro_sections)?pub.pro_sections:MS.contenusPro(pub);const ap=MS.apercuFlou({offert:true,contenus,pari:etatAnalyse(pub)==='ready'});if(ap)secs.push(['apercu',ap,null,true]);}
   paint(vm,secs,{sansStats:true});
 }
 // Apercu : en-tete du match (donnees publiques, aucune sortie du modele) et
@@ -882,9 +888,8 @@ async function init(){
     await modules;
     if(isFree&&!ctx.session){renderAuthWall(raw);return;}
     if(!isFree&&!termine&&!vuePro){renderProWall(raw,ctx);return;}
-    // Compte gratuit sur le match offert : lignes cadenas pour le Pro seulement
-    // (sim_15min, stats_iashark) et panneau Marches flou. Match termine : aucun
-    // panneau (plus rien a jouer).
+    // Compte gratuit sur le match offert : toutes les sections, panneau Marches flou
+    // (cadenas Pro sur le panneau seulement). Match termine : aucun panneau (plus rien a jouer).
     render(raw,{vuePro,verrouPro:!vuePro&&isFree&&!termine,panneau:termine?false:undefined});
   }catch(e){
     root.innerHTML=`<div class="match-error"><b>${esc(e.message||t('match_page.generic_load_error','Erreur de chargement'))}</b><a href="${esc(lien(''))}">${esc(t('match_page.back_to_home','Retour à l\'accueil'))}</a></div>`;

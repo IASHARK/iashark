@@ -146,16 +146,16 @@ test("lib/offre-pro.js : durees payables seulement, ordre de deploiement, aucune
   const none = OP.html({ mode: "paiement", contexte: "general", plans: [], choisi: null, jours: 0, connecte: true, uid: "z" });
   assert.match(none, /class="op-closed"/);
   assert.doesNotMatch(none, /subscribeButton|checkoutConsent|op-cta|data-op-pay|€|£|MX\$/);
-  // Essai : FERME tant qu'il n'est pas dans les CGV (avocat du diable, 04/10/2026, point 2) ;
-  // une fois ouvert, seulement si le serveur l'accorde sur le mois.
-  assert.equal(OP.OUVERT.essai, false);
-  assert.equal(OP.essaiOuvert({ trial_days: 7, trial_intervals: ["month"] }), 0);
-  OP.OUVERT.essai = true;
+  // Essai : OUVERT depuis le 04/10/2026, 16 h (decision de Clement, CGV du 04/10 a l'appui),
+  // seulement si le serveur l'accorde sur le mois ; ferme, jamais ecrit.
+  assert.equal(OP.OUVERT.essai, true);
+  assert.equal(OP.essaiOuvert({ trial_days: 7, trial_intervals: ["month"] }), 7);
+  assert.equal(OP.essaiOuvert({ trial_days: 7, trial_intervals: ["year"] }), 0);
+  assert.equal(OP.essaiOuvert(OP.dispoHistorique(marche("fr"))), 0);
+  OP.OUVERT.essai = false;
   try {
-    assert.equal(OP.essaiOuvert({ trial_days: 7, trial_intervals: ["month"] }), 7);
-    assert.equal(OP.essaiOuvert({ trial_days: 7, trial_intervals: ["year"] }), 0);
-    assert.equal(OP.essaiOuvert(OP.dispoHistorique(marche("fr"))), 0);
-  } finally { OP.OUVERT.essai = false; }
+    assert.equal(OP.essaiOuvert({ trial_days: 7, trial_intervals: ["month"] }), 0);
+  } finally { OP.OUVERT.essai = true; }
   // ?duree= en liste blanche.
   assert.equal(OP.dureeValide("year"), "year");
   assert.equal(OP.dureeValide("<script>"), null);

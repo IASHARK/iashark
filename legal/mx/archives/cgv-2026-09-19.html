@@ -3,7 +3,6 @@
 <html lang="es-MX">
 <head>
 <meta charset="UTF-8">
-<meta name="iashark-market" content="mx">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Términos y condiciones — IASHARK</title>
 <meta name="description" content="Términos y condiciones de IASHARK en México: cuenta gratuita, suscripciones en pesos, renovación automática, cancelación, derechos del consumidor, PROFECO.">
@@ -12,18 +11,9 @@
 <meta property="og:type" content="website">
 <meta property="og:locale" content="es_MX">
 <link rel="canonical" href="https://iashark.com/mx/cgv.html">
-<link rel="alternate" hreflang="fr" href="https://iashark.com/fr/cgv.html">
-<link rel="alternate" hreflang="en-GB" href="https://iashark.com/gb/cgv.html">
-<link rel="alternate" hreflang="en-ZA" href="https://iashark.com/za/cgv.html">
-<link rel="alternate" hreflang="en" href="https://iashark.com/en/cgv.html">
-<link rel="alternate" hreflang="es-MX" href="https://iashark.com/mx/cgv.html">
-<link rel="alternate" hreflang="es" href="https://iashark.com/es/cgv.html">
-<link rel="alternate" hreflang="x-default" href="https://iashark.com/en/cgv.html">
 <meta property="og:url" content="https://iashark.com/mx/cgv.html">
 <meta property="og:image" content="https://iashark.com/icon-512.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* IASHARK legal pages - shared style block (identical in every legal/<dir>/*.html). */
@@ -130,10 +120,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
   .warn-box,.highlight,.tbl-wrap,.legal-foot{background:none;box-shadow:none;border-color:#999;}
 }
 </style>
-<link rel="stylesheet" href="/assets/bottom-navigation.css">
-<meta property="og:site_name" content="IASHARK">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://iashark.com/mx/"},{"@type":"ListItem","position":2,"name":"Términos y condiciones","item":"https://iashark.com/mx/cgv.html"}]}</script>
-</head>
+<link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
 <body>
 <!-- LEGAL REVIEW: (1) aplicabilidad del derecho de revocación de 5 días hábiles (LFPC arts. 51 a 56) a suscripciones digitales contratadas en línea - redactado de forma condicional, a confirmar; (2) precios en MXN creados en Stripe (config/markets.json#mx.stripePriceIds: semanal, mensual y anual) - planes contratables por decisión del propietario del 19/09/2026; (3) IVA sobre servicios digitales prestados por residentes en el extranjero a consumidores en México - a confirmar con asesor fiscal (decisión del propietario del 19/09/2026: se indica la franquicia francesa 'IVA no aplicable, artículo 293 B del CGI' en la sección 5, como en todas las versiones); (4) validez de la elección de la ley francesa frente a consumidores mexicanos y competencia de tribunales - a confirmar; (5) registro de contrato de adhesión ante PROFECO: verificar si es obligatorio para este tipo de servicio; (6) validación jurídica local del modelo 'servicio de información sobre apuestas' exigida por el 07_IAShark_Mexico_Launch_Kit antes de cualquier cobro real. -->
 <header class="hdr">
@@ -150,7 +137,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Juego responsable</a>
   </nav>
   <h1 class="page-title">Términos y condiciones</h1>
-  <div class="page-date">Última actualización: 4 de octubre de 2026</div>
+  <div class="page-date">Última actualización: 19 de septiembre de 2026</div>
   <!-- LEGAL REVIEW: 19/09/2026 - owner decision: weekly, monthly and annual plans payable in Mexico (config/markets.json#mx.checkoutOpen, Stripe Prices in mx.stripePriceIds). Prices, billing periods, renewal, notices and cancellation rules unchanged from the 16/09/2026 text; "con los impuestos aplicables incluidos" replaced by the French VAT franchise mention. Previous version archived in legal/mx/archives/cgv-2026-09-16.html. Status: REVIEW. -->
 
   <div class="warn-box">
@@ -192,15 +179,13 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
       <li><strong>Acceso</strong> — las funciones de pago se activan en cuanto se confirma tu pago.</li>
       <li><strong>Comprobante</strong> — puedes consultar los datos de tu suscripción y de tus pagos en el área de facturación segura que se abre desde la página "Mi cuenta".</li>
     </ul>
-    <!-- LEGAL REVIEW: 04/10/2026 - owner decision: 7-day free trial kept and shown (monthly plan only, first subscription, card required, automatic charge at the end of the trial unless cancelled). Matches the live create-checkout-session function (v23, trial.ts, read on 04/10/2026: TRIAL_DAYS absent = 7, monthly only, once per account and per Stripe customer, subscription stopped if no card at the end). No reminder before the end of the trial is promised: the trial-reminder function exists but its scheduled job (0042) is not applied in the database. To be checked by a lawyer: how the trial interacts with the withdrawal/cancellation period. Previous version archived in archives/cgv-2026-09-19.html. Status: REVIEW. -->
-    <p><strong>Prueba gratuita de 7 días (solo plan mensual).</strong> En una primera suscripción mensual, los primeros 7 días son gratis. Se te pide tu tarjeta al contratar; durante la prueba no se cobra nada. Al final de la prueba, la suscripción mensual empieza automáticamente: se cobran MX$199 y después cada mes en la misma fecha, salvo que canceles antes de que termine la prueba desde "Mi cuenta", en cuyo caso no se te cobra nada. Si al final de la prueba no hay un medio de pago válido, la suscripción termina. La prueba se otorga una sola vez: una cuenta, o un cliente de nuestro proveedor de pagos, que ya haya tenido una suscripción no tiene derecho a ella. Los planes semanal y anual no tienen prueba: se cobran desde que contratas. Podemos modificar o retirar la prueba para nuevas contrataciones; su duración se muestra antes de pagar.</p>
   </section>
 
   <section class="section">
     <h2>6. Pago y renovación automática</h2>
     <p>Los pagos se procesan de forma segura a través de Stripe. IASHARK no ve ni almacena los datos completos de tu tarjeta.</p>
     <ul>
-      <li>Pagas al inicio de cada periodo de facturación (semana, mes o año, según el plazo elegido); en una primera suscripción mensual, el primer cobro se hace al final de la prueba gratuita descrita en el apartado 5.</li>
+      <li>Pagas al inicio de cada periodo de facturación (semana, mes o año, según el plazo elegido).</li>
       <li><strong>Tu suscripción se renueva automáticamente</strong> al final de cada periodo, por un periodo igual, hasta que la canceles.</li>
       <!-- LEGAL REVIEW: 19/09/2026 - MX prices opened by the owner: the notices below (renewal_reminder / annual_renewal_reminder) must actually be sent from the first renewal (Resend + scheduled jobs enabled) - check before publishing. Changing billing period: check that the Stripe customer portal configuration applies the rule below (longer period immediate with proration, shorter period at the end of the paid period). -->
       <!-- BLOCKED_DECISION: weekly plan notice 2 days before each charge (current rule kept) vs LFPC art. 76 Bis fracc. IX (DOF 12/12/2025) as read in the LEGAL REVIEW note of section 7 (notice at least 5 calendar days before an automatic renewal): decide between a notice sent 5 days before each weekly charge, keeping D-2 after Mexican counsel's review, or not selling the weekly plan in Mexico. -->
@@ -277,7 +262,6 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <div>&copy; 2026 IASHARK &middot; <a href="mailto:contact@iashark.com">contact@iashark.com</a> &middot; <a href="./">Inicio</a></div>
     <div><span data-i18n="rg_footer.age_line">18+ · Prohibido para menores · Juega con responsabilidad</span><br><span data-i18n="match_page.shell_help_label">Ayuda:</span> <a data-market-helpline="url" href="https://www.gob.mx/conasama/articulos/linea-de-la-vida-800-911-2000">gob.mx/conasama</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">800 911 2000</span></span></div>
   </footer>
-<!--SEO_FOOTER_NAV--><nav class="seo-foot-nav" aria-label="Navegación del sitio" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#91a0b3;text-align:center"><p style="margin:0 0 4px"><span style="color:#c3ccd8">Ligas:</span> <a href="/mx/leagues/liga-mx.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga MX</a> · <a href="/mx/leagues/champions-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Champions League</a> · <a href="/mx/leagues/la-liga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">La Liga</a> · <a href="/mx/leagues/europa-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Europa League</a> · <a href="/mx/leagues/conference-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Conference League</a></p><p style="margin:0"><a href="/mx/equipos/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Equipos y clásicos</a> · <a href="/mx/articulos/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Artículos de futbol mexicano</a> · <a href="/mx/blog/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Blog y guías</a> · <a href="/mx/marches.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Mercados analizados</a> · <a href="/mx/methodologie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Metodología</a></p></nav><!--/SEO_FOOTER_NAV-->
 </main>
 <script src="/i18n/i18n.js"></script>
 <script src="/lib/market-config.js"></script>

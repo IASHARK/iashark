@@ -59,9 +59,11 @@ test("apercu flou : seulement ce que le visiteur aura une fois debloque (faux ch
   const seulPari = MS.apercuFlou({ contenus: [] });
   assert.match(seulPari, /ap-slip/);
   assert.doesNotMatch(seulPari, /ap-row/, "ni anneau ni frise quand Pro n'aura ni « 10 000 matchs » ni film");
-  // L'anneau ne figure que si « sim » est dans la liste ; jamais sur l'apercu du match offert (Pro seulement).
+  // L'anneau ne figure que si « sim » est dans la liste. Match offert (decision de Clement du
+  // 04/10/2026) : un compte gratuit y voit toutes les sections sauf le panneau Marches, donc
+  // l'anneau aussi quand « 10 000 matchs » existe sur ce match.
   const src = fs.readFileSync(path.join(__dirname, "..", "lib/match-sections.js"), "utf8");
-  assert.match(src, /var anneau = !o\.offert && l\.indexOf\("sim"\) !== -1, frise = l\.indexOf\("film"\) !== -1/);
+  assert.match(src, /var anneau = l\.indexOf\("sim"\) !== -1, frise = l\.indexOf\("film"\) !== -1/);
 });
 
 test("lignes cadenas du match offert : seulement pour un contenu que Pro aura sur CE match", () => {

@@ -103,13 +103,15 @@ test("Copier le ticket : match annule ou reporte nomme, ligne « Sans ce match �
   assert.equal(AJ.heure(JOUR + " 15:30"), "15\u00a0h\u00a030");
 });
 
-// Controle de l'avocat du diable (04/10/2026, points 1, 2 et 4) : interrupteurs fermes tant que
-// la fonction tickets-du-jour n'est pas deployee et que l'essai n'est pas dans les CGV ; tickets
-// et panneau seulement la ou ils sont vrais.
-test("interrupteurs : essai et tickets fermes ; bloc « Aujourd'hui » seulement ouvert ET marche francais", () => {
-  assert.equal(OP.OUVERT.essai, false);
+// Controle de l'avocat du diable (04/10/2026, points 1, 2 et 4) : tickets fermes tant que la
+// fonction tickets-du-jour n'est pas deployee ; tickets et panneau seulement la ou ils sont vrais.
+// Essai : OUVERT depuis la decision de Clement du 04/10, 16 h (« on le garde et on l'affiche »),
+// CGV du 04/10/2026 a l'appui ; ecrit seulement si le serveur l'accorde sur le mois.
+test("interrupteurs : essai ouvert (si le serveur l'accorde), tickets fermes ; bloc « Aujourd'hui » seulement ouvert ET marche francais", () => {
+  assert.equal(OP.OUVERT.essai, true);
   assert.equal(OP.OUVERT.tickets, false);
-  assert.equal(OP.essaiOuvert({ trial_days: 7, trial_intervals: ["month"] }), 0, "« 7 jours offerts » jamais ecrit");
+  assert.equal(OP.essaiOuvert({ trial_days: 7, trial_intervals: ["month"] }), 7);
+  assert.equal(OP.essaiOuvert({ trial_days: 0, trial_intervals: [] }), 0, "le serveur ne l'accorde pas : rien d'ecrit");
   assert.equal(AJ.enLigne({}), false);
   assert.equal(AJ.enLigne({ ouvert: true }), true);
   OP.OUVERT.tickets = true;
@@ -282,7 +284,7 @@ test("composant de paiement : textes sans mot interdit ni fausse urgence", () =>
     assert.doesNotMatch(h, /plus que|dernières heures|compte à rebours|expire/i, "aucune fausse urgence");
     assert.match(h, /Passe Pro pour ouvrir ce match/);
   }
-  assert.match(OP.html({ mode: "vitrine", contexte: "general", plans, choisi: "month", jours: 7, connecte: false, uid: "v" }), /Commencer mes 7 jours gratuits/);
+  assert.match(OP.html({ mode: "vitrine", contexte: "general", plans, choisi: "month", jours: 7, connecte: false, uid: "v" }), /Commencer mes 7 jours d’essai/);
 });
 
 // Controle UX du 04/10/2026 : aucune repetition (le nombre de buts et le film), « Et si » ecrit

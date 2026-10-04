@@ -720,6 +720,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
       <a href="/en/confidentialite.html" style="color:#22d3ee;text-decoration:underline;margin:0 8px;">Privacy</a>
       <a href="/en/methodologie.html" data-requires-page="methodologie.html" style="color:#22d3ee;text-decoration:underline;margin:0 8px;">Methodology</a>
     </div>
+    <div data-i18n="aujourdhui.no_financial_advice" style="margin-top:6px;font-family:'DM Sans',system-ui,sans-serif;font-size:10px;letter-spacing:0;color:#8796a8;">This site does not provide any financial advice.</div>
   </div>
 </footer>
 <!--SEO_FOOTER_NAV--><nav class="seo-foot-nav" aria-label="Site navigation" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#91a0b3;text-align:center"><p style="margin:0 0 4px"><span style="color:#c3ccd8">Leagues:</span> <a href="/en/leagues/premier-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Premier League</a> · <a href="/en/leagues/champions-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Champions League</a> · <a href="/en/leagues/la-liga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">La Liga</a> · <a href="/en/leagues/serie-a.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Serie A</a> · <a href="/en/leagues/bundesliga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Bundesliga</a> · <a href="/en/leagues/ligue-1.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Ligue 1</a> · <a href="/en/leagues/europa-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Europa League</a> · <a href="/en/leagues/conference-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Conference League</a> · <a href="/en/leagues/eredivisie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Eredivisie</a> · <a href="/en/leagues/liga-portugal.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga Portugal</a> · <a href="/en/leagues/mls.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">MLS</a> · <a href="/en/leagues/allsvenskan.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Allsvenskan</a> · <a href="/en/leagues/j1-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">J1 League</a> · <a href="/en/leagues/premier-soccer-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Premier Soccer League</a> · <a href="/en/leagues/liga-profesional-argentina.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga Profesional Argentina</a> · <a href="/en/leagues/primera-a-colombia.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Primera A Colombia</a> · <a href="/en/leagues/liga-1-peru.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga 1 Peru</a> · <a href="/en/leagues/primera-division-chile.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Primera Division Chile</a></p><p style="margin:0"><a href="/en/clubs/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Clubs and derbies</a> · <a href="/en/blog/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Blog and guides</a> · <a href="/en/marches.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Markets analysed</a> · <a href="/en/methodologie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Methodology</a></p></nav><!--/SEO_FOOTER_NAV-->
@@ -1037,7 +1038,7 @@ function renderMatchs(){
 }
 
 // 04/10/2026 : plus de « 5 000 simulations » ecrit en dur (le moteur actuel n'en
-// tire aucune) ; home-list.js n'ecrit le nombre que s'il est reel (simulation_count).
+// tire aucune) ; home-list.js n'ecrit plus aucun nombre de simulations.
 function monterListe(){
   if(homeList||!window.IasharkHomeList)return;
   homeFavorites=window.IasharkFavLeagues?IasharkFavLeagues.createStore():null;
@@ -1120,6 +1121,9 @@ async function loadData(){
       allMatchs=d.matchs||[];
     }
     setKpi('kpiJour',allMatchs.length);
+    // Statut PUBLIC des matchs pour le bloc « Aujourd'hui » : un match d'un ticket reporte ou
+    // annule dans la journee est signale tout de suite (lib/aujourdhui.js#statuts).
+    if(window.IasharkAujourdhui){var parId={};allMatchs.forEach(function(m){if(m&&m.id!=null)parId[String(m.id)]=m.status;});IasharkAujourdhui.statuts(document.getElementById('aujourdhui'),function(fid){return parId[String(fid)]||null;});}
     // no_signal_label is a fixed French sentence written by the pipeline: shown in the page language.
     allMatchs.forEach(function(m){if(m&&m.no_signal_label==='Aucun signal clair sur ce match')m.no_signal_label=t('home_app.no_signal_label',m.no_signal_label);});
     // Un abonne n'a pas a relire l'argumentaire de vente et le tarif a chaque

@@ -55,15 +55,19 @@ const jambe = (fid, d, e, h, pari, cote, op, ch) => ({ fixture_id: fid, domicile
 const X5 = { type: "x5", statut: "publie", verrou: null, nb_matchs: 3, cote_totale: 4.62, chance: 18, operateur_unique: null, sans_matchs_reportes: null,
   jambes: [jambe(1, "Lens", "Lille", "15:00", "Victoire Lens", 1.55, "Winamax", 64), jambe(2, "Monaco", "Nice", "17:00", "Les deux équipes marquent", 1.62, "Betclic", 62), jambe(3, "Porto", "Braga", "21:30", "Porto ou nul", 1.44, "Unibet", 66)] };
 
-test("Aujourd'hui : un seul cadenas (celui de « Ce que tu debloques »), une fausse ligne par carte floutee", () => {
+// 04/10/2026, 16 h (demande de Clement : petites cartes cote a cote) : chaque petite carte
+// verrouillee porte SON cadenas (pastille HyperUI « Pro » ou « Gratuit ») ; le bloc de
+// deverrouillage n'en ajoute pas (une ligne, un bouton).
+test("Aujourd'hui : un cadenas par bloc verrouille (aucun dans « Ce que tu debloques »), une fausse ligne par liste floutee", () => {
   const verrou = (v) => ({ statut: "publie", verrou: v, nb_matchs: 4, cote_totale: 4.8 });
   const anonyme = AJ.html({ version: 1, jour: JOUR, niveau: "anonyme", tickets: [Object.assign({ type: "x5" }, verrou("compte")), Object.assign({ type: "x10" }, verrou("pro"))],
     selection_or: { statut: "publie", verrou: "pro", nb_paris: 3 }, buteur_du_jour: { statut: "publie", verrou: "compte" } }, {});
-  assert.equal((anonyme.match(/lucide-lock/g) || []).length, 1, "un seul cadenas pour tout le bloc");
-  assert.match(anonyme, /class="aj-unlock hs-gate-card"><p class="aj-unlock-t"><span class="aj-unlock-i"><svg class="lucide lucide-lock/);
+  assert.equal((anonyme.match(/lucide-lock/g) || []).length, 4, "x5, x10, buteur, Selection en or");
+  assert.match(anonyme, /class="aj-unlock hs-gate-card"><p class="aj-unlock-t"><span>/);
+  assert.doesNotMatch(anonyme.slice(anonyme.indexOf("aj-unlock")), /lucide-lock/, "aucun cadenas dans le bloc de deverrouillage");
   for (const ol of anonyme.match(/<ol class="tk-l aj-blur"[\s\S]*?<\/ol>/g)) assert.equal((ol.match(/<li /g) || []).length, 1, "une seule fausse ligne");
   const gratuit = AJ.html({ version: 1, jour: JOUR, niveau: "gratuit", tickets: [X5, Object.assign({ type: "x10" }, verrou("pro"))], selection_or: { statut: "publie", verrou: "pro", nb_paris: 3 }, buteur_du_jour: null }, {});
-  assert.equal((gratuit.match(/lucide-lock/g) || []).length, 1);
+  assert.equal((gratuit.match(/lucide-lock/g) || []).length, 2, "x10 et Selection en or");
 });
 
 test("Aujourd'hui : pastille sur la ligne de la cote au telephone, nom du pari jamais coupe, note des cotes une seule fois", () => {
@@ -72,9 +76,11 @@ test("Aujourd'hui : pastille sur la ligne de la cote au telephone, nom du pari j
   assert.equal((h.match(/Meilleures cotes relevées/g) || []).length, 1, "une seule fois pour le bloc");
   const css = read("assets/aujourdhui.css");
   assert.doesNotMatch(css, /\.tk-m small\{[^}]*(nowrap|ellipsis)/, "le nom du pari passe a la ligne");
-  const etroit = css.slice(css.indexOf("@container aj (max-width:420px)"));
-  assert.match(etroit, /\.tk-leg\{grid-template-columns:minmax\(0,1fr\) auto auto!important/);
-  assert.doesNotMatch(etroit, /grid-column:2\/4/, "la pastille ne passe plus sur sa propre ligne");
+  // Carte etroite ou tiroir du telephone : pastille sur la ligne de la cote, heure devant le pari.
+  const etroit = css.slice(css.indexOf("@container sc (max-width:330px)"));
+  assert.match(etroit, /\.tk-leg\{grid-template-columns:minmax\(0,1fr\) auto auto;/);
+  assert.match(etroit, /\.tk-th\{display:inline\}/);
+  assert.doesNotMatch(etroit.slice(0, etroit.indexOf("}\n}")), /grid-column:2\/4/, "la pastille ne passe plus sur sa propre ligne");
   assert.doesNotMatch(read("lib/aujourdhui.js"), /aj-lock-s/);
 });
 

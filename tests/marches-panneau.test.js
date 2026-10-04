@@ -132,7 +132,12 @@ test("pipeline : panneau sur les matchs ouverts, nb_marches public ; match ferme
   const n = P.poserPanneaux([ouvert, ferme, vide], { verdicts: GO });
   assert.equal(n, 1);
   assert.equal(ouvert.nb_marches, ouvert.marches_panneau.nb);
-  assert.equal(ouvert.nb_marches, 41, "39 lignes du v3 (dont 9 de scores) + 2 du flux sur ce match d essai");
+  // 04/10/2026 (controle de l'avocat du diable, point 2) : nb_marches = les lignes AFFICHEES par le
+  // panneau (une ligne par paire de contraires), meme regle que la page.
+  const lignes = ouvert.marches_panneau.familles.reduce((s, f) => s + f.marches.length, 0);
+  assert.equal(lignes, 41, "39 lignes du v3 (dont 9 de scores) + 2 du flux sur ce match d essai");
+  assert.equal(ouvert.nb_marches, 38, "41 lignes, dont 3 paires de contraires reunies a l'affichage");
+  assert.equal(ouvert.nb_marches, require("../lib/match-sections.js").nbLignesAffichees(ouvert.marches_panneau.familles));
   assert.equal(ferme.nb_marches, 7);
   assert.equal(vide.marches_panneau, undefined); assert.equal(vide.nb_marches, undefined);
 });

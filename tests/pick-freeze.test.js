@@ -426,7 +426,9 @@ test("garde fermee sans restauration : reporte, annule, fixture inconnue, ou auc
   });
 });
 
-test("coup d'envoi deplace : moins de 24 h, reste fige ; plus de 24 h (reprogramme), nouvelle premiere publication", () => {
+// Regle de Clement du 04/10/2026, 20 h (« chaque decision affichee ne doit plus jamais changer ») : un match
+// reprogramme garde son pari (avant : plus de 24 h -> nouvelle premiere publication, un pari B a la place de A).
+test("coup d'envoi deplace : moins de 24 h ou plus de 24 h (reprogramme), le pari publie reste fige", () => {
   const fri = publishedFriday();
   const opts = function (iso) { return { nowMs: RUN, fixture: apiFixture(1001, iso), premiumRow: premiumRowOf(computed("samedi")) }; };
   // Horaire TV decale de 3 h.
@@ -434,17 +436,19 @@ test("coup d'envoi deplace : moins de 24 h, reste fige ; plus de 24 h (reprogram
   assert.equal(tv.status, "FROZEN");
   assert.equal(tv.match.pari_rec, "Over 2.5");
   assert.equal(tv.match.date, "2026-09-20 18:00", "le nouvel horaire est affiche");
-  // Reporte au mercredi.
+  // Reporte au mercredi, connu avant l'heure d'origine : le pari A reste, la reference reste l'heure d'origine.
   const report = F.freezeAnalysis(computed("samedi", { date: "2026-09-23 21:00" }), fri.row, opts("2026-09-23T19:00:00+00:00"));
-  assert.equal(report.status, "FIRST_PUBLICATION");
-  assert.equal(report.reason, "KICKOFF_MOVED");
-  assert.equal(report.match.pari_rec, "Victoire Domicile");
-  assert.equal(report.match.pick_frozen_at, new Date(RUN).toISOString());
-  assert.equal(report.premiumRow.raw_response.pick_freeze.kickoff, "2026-09-23 21:00");
-  // Ligne sans metadonnees : reference = date du data.json precedent.
+  assert.equal(report.status, "FROZEN");
+  assert.equal(report.match.pari_rec, "Over 2.5", "jamais le pari B du jour");
+  assert.equal(report.match.cote_rec, fri.match.cote_rec, "meme cote");
+  assert.equal(report.match.model_probability, fri.match.model_probability, "meme chance");
+  assert.equal(report.match.date, "2026-09-23 21:00", "la nouvelle date est affichee");
+  assert.equal(report.premiumRow.raw_response.pick_freeze.kickoff, "2026-09-20 21:00", "heure d'origine gardee");
+  // Ligne sans metadonnees : reference = date du data.json precedent ; meme regle.
   const legacy = storedRow(computed("vendredi"), premiumRowOf(computed("vendredi")), "2026-09-18T10:20:00+00:00");
   const r2 = F.freezeAnalysis(computed("samedi", { date: "2026-09-27 21:00" }), legacy, Object.assign(opts("2026-09-27T19:00:00+00:00"), { previousPublic: { id: 1001, date: "2026-09-20 21:00" } }));
-  assert.equal(r2.reason, "KICKOFF_MOVED");
+  assert.equal(r2.status, "FROZEN");
+  assert.equal(r2.match.pari_rec, "Over 2.5");
   assert.equal(F.kickoffShiftHours("2026-09-20 21:00", "2026-09-21 21:00"), 24);
   assert.equal(F.kickoffShiftHours(null, "2026-09-21 21:00"), null);
 });
@@ -453,7 +457,9 @@ test("coup d'envoi deplace : moins de 24 h, reste fige ; plus de 24 h (reprogram
 // Match offert du jour.
 // ---------------------------------------------------------------------------
 
-test("match offert : la designation d'un jour faite par un run precedent est gardee tant qu'elle peut etre servie", () => {
+// Regle de Clement du 04/10/2026, 20 h : « le match gratuit reste le meme de 00 h a 23 h 59 (heure de Paris), quoi
+// qu'il arrive ». Avant : la designation n'etait gardee que tant que le match pouvait etre servi.
+test("match offert : la designation d'un jour faite par un run precedent est gardee tout ce jour-la, quoi qu'il arrive", () => {
   const today = "2026-09-19";
   const iso = function (d, h) { return d + "T" + h + ":00+00:00"; };
   const fx = {
@@ -476,27 +482,31 @@ test("match offert : la designation d'un jour faite par un run precedent est gar
   assert.deepEqual(Object.keys(kept).sort(), ["2026-09-19", "2026-09-20"]);
   assert.equal(kept["2026-09-19"], cur[0], "l'objet du run (pari fige) est rendu");
   assert.equal(kept["2026-09-20"].id, 2);
-  // Ne peut plus etre servi : commence, reporte/annule, imminent, sans pari,
-  // deplace a un autre jour, absent du run.
-  const nonServi = function (mutFx, mutCur) {
+  // Gardee QUOI QU'IL ARRIVE : commence, termine, reporte, annule, imminent, sans pari, pari hors fourchette
+  // ou sans cote, deplace a un autre jour (reste le match offert du jour de sa designation), fixture inconnue.
+  const garde = function (mutFx, mutCur) {
     const f = clone(fx), c = clone(cur);
     if (mutFx) mutFx(f);
     if (mutCur) mutCur(c);
-    return F.keptFreeDesignations(prev, c, { today: today, nowMs: RUN, fixturesById: f })["2026-09-19"];
+    const k = F.keptFreeDesignations(prev, c, { today: today, nowMs: RUN, fixturesById: f })["2026-09-19"];
+    return k ? k.id : undefined;
   };
-  assert.equal(nonServi(function (f) { f[1].fixture.status.short = "1H"; }), undefined, "commence");
-  assert.equal(nonServi(function (f) { f[1].fixture.status.short = "PST"; }), undefined, "reporte");
-  assert.equal(nonServi(function (f) { f[1].fixture.status.short = "CANC"; }), undefined, "annule");
-  assert.equal(nonServi(function (f) { f[1] = apiFixture(1, new Date(RUN + 10 * 60000).toISOString()); }), undefined, "imminent");
-  assert.equal(nonServi(null, function (c) { c[0].pari_rec = ""; c[0].no_signal = true; }), undefined, "sans pari");
-  assert.equal(nonServi(null, function (c) { c[0].date = "2026-09-21 20:00"; }), undefined, "deplace a un autre jour");
-  assert.equal(nonServi(null, function (c) { c.splice(0, 1); }), undefined, "absent du run");
-  assert.equal(nonServi(function (f) { delete f[1]; }), undefined, "fixture inconnue");
-  // Encore servable a 30 min du coup d'envoi (marge de la garde, 15 min) :
-  // annonce le matin, elle ne bascule pas au run de midi.
-  const f30 = clone(fx);
-  f30[1] = apiFixture(1, new Date(RUN + 30 * 60000).toISOString());
-  assert.equal(F.keptFreeDesignations(prev, cur, { today: today, nowMs: RUN, fixturesById: f30 })["2026-09-19"].id, 1);
+  assert.equal(garde(function (f) { f[1].fixture.status.short = "1H"; }), 1, "commence");
+  assert.equal(garde(function (f) { f[1].fixture.status.short = "FT"; }), 1, "termine");
+  assert.equal(garde(function (f) { f[1].fixture.status.short = "PST"; }), 1, "reporte");
+  assert.equal(garde(function (f) { f[1].fixture.status.short = "CANC"; }), 1, "annule");
+  assert.equal(garde(function (f) { f[1] = apiFixture(1, new Date(RUN + 10 * 60000).toISOString()); }), 1, "imminent");
+  assert.equal(garde(null, function (c) { c[0].pari_rec = ""; c[0].no_signal = true; }), 1, "sans pari");
+  assert.equal(garde(null, function (c) { c[0].cote_rec = "1.95"; }), 1, "pari hors fourchette");
+  assert.equal(garde(null, function (c) { c[0].cote_rec = ""; }), 1, "sans cote");
+  assert.equal(garde(null, function (c) { c[0].date = "2026-09-21 20:00"; }), 1, "reporte a un autre jour : toujours le match offert du 19");
+  assert.equal(garde(function (f) { delete f[1]; }), 1, "fixture inconnue");
+  // Seule limite : un match qui n'est plus dans le calcul ne peut pas etre servi.
+  assert.equal(garde(null, function (c) { c.splice(0, 1); }), undefined, "absent du run");
+  // Jour de la designation = free_day quand il est pose (match deja reporte lors d'un run precedent).
+  const prevReporte = [{ id: 1, date: "2026-09-22 20:00", free_day: "2026-09-19", is_free: true }];
+  assert.equal(F.keptFreeDesignations(prevReporte, cur, { today: today })["2026-09-19"].id, 1);
+  assert.equal(F.keptFreeDesignations(prevReporte, cur, { today: "2026-09-20" })["2026-09-19"], undefined, "le lendemain : plus offert");
   assert.deepEqual(F.keptFreeDesignations([], cur, { today: today, nowMs: RUN, fixturesById: fx }), {});
 });
 

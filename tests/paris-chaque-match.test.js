@@ -403,7 +403,7 @@ test("pipeline : un pari sur chaque match apres les pronostics, avant le match o
   const iProno = SCRIPT.indexOf("PRONOSTIC.poserPronostics(");
   const iPub = SCRIPT.indexOf("PRONOSTIC.publierPronostics(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,figes:GEL_FIGES,chancesV3Par:CHANCES_V3_PRONO,texteMarche:TEXTE_MARCHE,cotesAnjPar:LIVRES_ANJ,relevesAnj:RELEVES_ANJ,relevesAnjEvenement:RELEVES_ANJ_EV,releveAnjA:RELEVE_ANJ_A})");
   const iAlign = SCRIPT.indexOf("PRONOSTIC.alignerChancesAffichees(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,figes:GEL_FIGES})");
-  const iOpt = SCRIPT.indexOf("PRONOSTIC.poserOptionCote(allMatchsData,{configLigues:LEAGUES_CONFIG,cotesAnjPar:LIVRES_ANJ})");
+  const iOpt = SCRIPT.indexOf("PRONOSTIC.poserOptionCote(allMatchsData,{configLigues:LEAGUES_CONFIG,cotesAnjPar:LIVRES_ANJ,figes:GEL_FIGES})");
   assert.ok(iProno > 0 && iPub > iProno && iAlign > iPub && iOpt > iAlign);
   assert.ok(iOpt < SCRIPT.indexOf("(function designerMatchGratuit(){"));
   assert.ok(iOpt < SCRIPT.indexOf("await writePremiumData(premiumRows);"));

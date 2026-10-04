@@ -38,7 +38,8 @@ function fixtureDir(home, opts) {
   return dir;
 }
 
-const FRESH = () => ({ generated_at: "2026-09-14T06:25:00Z", matchs: [pub(1, { is_free: true, pari_rec: "1" }), pub(2), pub(3, { date: "2026-09-15 20:00" })] });
+// Match offert (1) : plus aucun champ payant dans les fichiers publics depuis le 04/10/2026 (servis par match-data).
+const FRESH = () => ({ generated_at: "2026-09-14T06:25:00Z", matchs: [pub(1, { is_free: true }), pub(2), pub(3, { date: "2026-09-15 20:00" })] });
 
 function run(args) {
   return spawnSync(process.execPath, [SCRIPT].concat(args, ["--now", NOW_ISO]), { encoding: "utf8" });
@@ -82,7 +83,7 @@ test("CLI local : fuite premium (liste ou detail) -> code 1 meme en --gate", () 
   leaky.matchs[1].kelly = 0.04;
   const r = run(["--local", fixtureDir(leaky), "--gate"]);
   assert.equal(r.status, 1);
-  assert.match(r.stdout, /FUITE PREMIUM : 1 match\(s\) payant\(s\) exposent kelly \(ex\. match 2\)/);
+  assert.match(r.stdout, /FUITE PREMIUM : 1 match\(s\) exposent kelly \(ex\. match 2\)/);
 
   const home = FRESH();
   const dir = fixtureDir(home, { detail: { 2: Object.assign(pub(2), { verdict_shark: "texte payant" }) } });

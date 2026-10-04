@@ -539,6 +539,27 @@ test("familles calibrees seulement : buts et « les deux marquent » dans les co
   assert.equal(m.cote_rec, "1.55");
 });
 
+// Verdict du mathematicien du 04/10/2026 (verdicts-maths-finitions.md, mission 1) : plus/moins 1,5 et 3,5 et « les deux
+// marquent » GO dans les 7 championnats europeens seulement ; NO-GO ailleurs (pas assez de matchs pour conclure).
+test("verdict des familles ajoutees : plus/moins 1,5 et 3,5, les deux marquent candidats dans les 7 championnats europeens seulement", () => {
+  const EUROPE = ["premier", "laliga", "seriea", "bundesliga", "ligue1", "eredivisie", "primeira"];
+  const mes = P.famillesMesurees(CFG);
+  for (const f of ["OU1.5", "OU3.5", "BTTS"]) assert.deepEqual(mes[f], EUROPE, f);
+  assert.equal(mes["OU2.5"], undefined, "plus/moins 2,5 : hors de ce verdict");
+  // Meme match, memes cotes : « plus de 1,5 but » a 1,50 (64 %) est le pari en Ligue 1, jamais en Argentine ni en Ligue des nations.
+  const cotes = { c1: "2.10", cn: "3.30", c2: "3.60", cdc1x: "1.28", cdc2x: "1.72", cdc12: "1.33", co25: "2.05", cu25: "1.80", co15: "1.50", cu15: "2.70", co35: "3.80", cu35: "1.30" };
+  const fr = match(Object.assign({ id: 760, league_key: "ligue1", league_id: 61 }, cotes));
+  P.poserPronostics([fr], { configLigues: CFG });
+  P.publierPronostics([fr], [], { configLigues: CFG, figes: {} });
+  assert.equal(fr.market_id, "over-15");
+  for (const [key, id] of [["argentina_liga_profesional", 128], ["nations_league", 5], ["mls", 253], ["jleague", 98]]) {
+    const ail = match(Object.assign({ id: 761, league_key: key, league_id: id }, cotes));
+    P.poserPronostics([ail], { configLigues: CFG });
+    P.publierPronostics([ail], [], { configLigues: CFG, figes: {} });
+    assert.ok(!["over-15", "under-15", "over-35", "under-35", "btts-yes", "btts-no"].includes(ail.market_id), key + " : " + ail.market_id);
+  }
+});
+
 test("selections nationales et option : la cote agreee d'abord, comme le pari publie", () => {
   const sel = match({ id: 740, c1: "1.80", cn: "3.60", c2: "4.60", cdc1x: "1.20", cdc2x: "2.00", cdc12: "1.30" });
   const L = { 740: livres({ betclic_fr: [1.68, 3.50, 4.40], unibet_fr: [1.70, 3.55, 4.30], pinnacle: [1.78, 3.70, 4.80] }) };

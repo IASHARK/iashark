@@ -4254,15 +4254,15 @@ jobs:
               premiumRows.forEach(function(r,ir){ if(r&&String(r.fixture_id)===cleGel) iLignes.push(ir); });
               // Precedent : ligne relue, null si aucune ligne, undefined si illisible.
               var precedent=PUBLICATIONS_PRECEDENTES.lues[cleGel]?(PUBLICATIONS_PRECEDENTES.lignes[cleGel]||null):undefined;
+              // EXCEPTION AU GEL (decision de Clement du 04/10/2026, exceptionGel) : pari publie sur un marche non
+              // verifie (tirs du match...) ou sans aucune cote reelle -> remplace par la regle du jour, trace gardee.
               var gel;
               try{
                 gel=PICK_FREEZE.freezeAnalysis(m,precedent,{
                   nowMs:KICKOFF_CHECK_MS, fixture:FIXTURE_BY_ID[cleGel], previousPublic:prevByFixture[cleGel]||null,
                   premiumRow:iLignes.length?premiumRows[iLignes[iLignes.length-1]]:null,
-                  historyLock:VERROUS_HISTORIQUE[cleGel]||null,
-                  // EXCEPTION AU GEL (decision de Clement du 04/10/2026) : pari publie sur un marche non verifie
-                  // (tirs du match...) ou sans aucune cote reelle -> remplace par la regle du jour, trace gardee.
-                  exceptionGel:PRONOSTIC.motifExceptionGel
+                  exceptionGel:PRONOSTIC.motifExceptionGel,
+                  historyLock:VERROUS_HISTORIQUE[cleGel]||null
                 });
               }catch(e){
                 // Jamais bloquant : calcul du jour publie tel quel pour ce match.

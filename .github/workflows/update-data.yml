@@ -2133,6 +2133,14 @@ jobs:
           // equipes, meme date), puis archivee au meme run. Jamais de pari invente.
           var HISTORIQUE_COMPLET_URL='https://raw.githubusercontent.com/IASHARK/iashark/403802257108c83278d0f71e2b0ff6767833b064/historique.json';
           async function rehydraterPredictionsMasquees(predictions){
+            // Ancien pari d'une exception au gel (remplacement.ancien, masque dans le fichier public) : relu dans
+            // la ligne premium du match (raw_response.remplacement), jamais invente (04/10/2026).
+            var remplaces=(predictions||[]).filter(function(p){return p&&p.fixture_id!=null&&p.remplacement&&p.remplacement.ancien_masque===true;})
+              .map(function(p){return String(p.fixture_id);}).filter(function(v,i,a){return /^\d+$/.test(v)&&a.indexOf(v)===i;});
+            if(remplaces.length&&SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY){
+              var lignesRem=await rawHttpGetJson(SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/match_premium_data?select=fixture_id,raw_response&fixture_id=in.('+remplaces.slice(0,100).join(',')+')',{'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY});
+              if(Array.isArray(lignesRem)) console.log('  [historique] '+PREMIUM_FIELDS_LIB.rehydrateRemplacements(predictions,lignesRem)+' ancien(s) pari(s) remplace(s) relu(s) sur '+remplaces.length+'.');
+            }
             var masquees=function(){ return (predictions||[]).filter(function(p){return p&&p.redacted&&p.fixture_id!=null;}); };
             var total=masquees().length;
             if(!total) return;
@@ -2312,6 +2320,12 @@ jobs:
               // publie aucun nouveau pari, et le pari en attente est annule, comme un match PST.
               try{ if(alreadyExists&&PICK_FREEZE.voidPostponedPrediction(alreadyExists,m,{today:TODAY})) console.log('  VOID (match reporte apres l heure prevue): '+alreadyExists.match); }
               catch(e){ console.log('  [GEL] match reporte non traite : '+(e&&e.message)); }
+              // EXCEPTION AU GEL (04/10/2026) : l'ancien pari publie (vu par les abonnes) est garde dans la ligne
+              // d'historique AVANT le realignement sur le nouveau pari (remplacement : motif, heure, ancien pari ;
+              // ancien pari masque dans le fichier public jusqu'au reglement). Rien n'est efface en silence.
+              if(alreadyExists&&m.remplacement_gel&&(alreadyExists.result==='scheduled'||alreadyExists.result==='pending')&&!alreadyExists.remplacement){
+                alreadyExists.remplacement=JSON.parse(JSON.stringify(m.remplacement_gel));
+              }
               try{ if(alreadyExists&&m.pari_rec&&PICK_FREEZE.alignPendingPrediction(alreadyExists,m,{moteur:moteurPari,moteur_version:moteurVersion,kickoffMs:koMs,nowMs:Date.now()})) realignees++; }
               catch(e){ console.log('  [GEL] prediction non realignee : '+(e&&e.message)); }
               // Deuxieme barriere : jamais un pari publie pour la premiere fois apres le coup d'envoi.
@@ -4121,8 +4135,9 @@ jobs:
               // STATS IASHARK : 2 chiffres publics (stats_iashark_gratuit) et detail reserve aux Pro
               // (stats_iashark, champ premium « Pro seulement » comme sim_15min, lib/premium-fields.js).
               // Seulement des profils termines AVANT le jour du match (lib/stats-book.js#profilUtilisable).
-              // Arbitre : seulement avec le feu vert du mathematicien (lib/sections-match.js#feuArbitre).
-              var sbMatch=SECTIONS_MATCH.feuArbitre(statsBookChamps(f,lg,home,away));
+              // Arbitre (lib/sections-match.js#feuArbitre) : feu vert du mathematicien, arbitre de la fixture
+              // lue MAINTENANT et match pas encore commence (connu avant le match), faits seulement.
+              var sbMatch=SECTIONS_MATCH.feuArbitre(statsBookChamps(f,lg,home,away),undefined,{avantCoupEnvoi:kickoffGateFix.open===true,connuLe:new Date().toISOString()});
               matchObj.stats_iashark_gratuit=sbMatch?sbMatch.gratuit:null;
               matchObj.stats_iashark=sbMatch?sbMatch.pro:null;
               matchsData.push(matchObj);
@@ -4244,7 +4259,10 @@ jobs:
                 gel=PICK_FREEZE.freezeAnalysis(m,precedent,{
                   nowMs:KICKOFF_CHECK_MS, fixture:FIXTURE_BY_ID[cleGel], previousPublic:prevByFixture[cleGel]||null,
                   premiumRow:iLignes.length?premiumRows[iLignes[iLignes.length-1]]:null,
-                  historyLock:VERROUS_HISTORIQUE[cleGel]||null
+                  historyLock:VERROUS_HISTORIQUE[cleGel]||null,
+                  // EXCEPTION AU GEL (decision de Clement du 04/10/2026) : pari publie sur un marche non verifie
+                  // (tirs du match...) ou sans aucune cote reelle -> remplace par la regle du jour, trace gardee.
+                  exceptionGel:PRONOSTIC.motifExceptionGel
                 });
               }catch(e){
                 // Jamais bloquant : calcul du jour publie tel quel pour ce match.
@@ -4255,6 +4273,7 @@ jobs:
               allMatchsData[iGel]=gel.match;
               iLignes.forEach(function(ir){ premiumRows[ir]=gel.premiumRow; });
               GEL_COMPTES[gel.status]=(GEL_COMPTES[gel.status]||0)+1;
+              if(gel.remplacement) GEL_COMPTES['EXCEPTION_'+gel.remplacement.motif]=(GEL_COMPTES['EXCEPTION_'+gel.remplacement.motif]||0)+1;
               // FROZEN_CLOSED (20/09/2026) : match commence/joue dont l'analyse
               // publiee est restauree figee - meme traitement aval que FROZEN
               // (jamais SAFE_PICK, jamais un nouveau snapshot 'prediction').

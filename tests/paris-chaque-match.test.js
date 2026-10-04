@@ -619,3 +619,52 @@ test("pipeline : cotes des agrees relevees pour chaque match ouvert, en memoire 
   const o = parseOdds({ bookmakers: [{ id: 1, name: "B", bets: [{ name: "Goals Over/Under", values: [{ value: "Over 1.5", odd: "1.30" }, { value: "Under 1.5", odd: "3.40" }] }] }] });
   assert.deepEqual([o.co15, o.cu15], ["1.30", "3.40"]);
 });
+
+// EXCEPTION AU GEL (decision de Clement du 04/10/2026) : les paris figes du 03/10 sur un marche non verifie
+// (« tirs du match » en Argentine) ou sans aucune cote reelle sont remplaces au prochain calcul ; les autres
+// paris figes ne bougent pas ; l'historique garde la trace honnete de l'ancien pari (rien d'efface en silence).
+test("exception au gel : marche non verifie ou sans cote -> remplace (trace gardee, masquee jusqu'au reglement) ; les autres restent figes", () => {
+  const PF = require("../lib/pick-freeze.js");
+  assert.equal(P.motifExceptionGel({ pari_rec: "Tirs du match over 23.5", market_id: "total-shots-over-23_5", cote_rec: 1.5 }), "marche_non_verifie");
+  assert.equal(P.motifExceptionGel({ pari_rec: "Under 3.5", market_id: "under-35", cote_rec: null }), "sans_cote");
+  assert.equal(P.motifExceptionGel({ pari_rec: "DC 1X", market_id: "dc-1x", cote_rec: "" }), "sans_cote");
+  assert.equal(P.motifExceptionGel({ pari_rec: "Victoire Domicile", market_id: "home-win", cote_rec: 1.85 }), null, "hors fourchette mais verifie et cote : reste fige");
+  assert.equal(P.motifExceptionGel({ pari_rec: "", market_id: null }), null);
+
+  const NOW = Date.parse("2026-10-04T03:00:00Z");
+  const fx = { fixture: { id: 701, status: { short: "NS" }, timestamp: Date.parse("2026-10-04T23:00:00Z") / 1000 } };
+  const tirs = { fixture_id: 701, pari_rec: "Tirs du match over 23.5", cote_rec: 1.5, market_id: "total-shots-over-23_5", marche: "TIRS", model_probability: 67.5,
+    premium_fields: { p1: 40 }, raw_response: { pick_freeze: { frozen_at: "2026-10-03T04:35:38.000Z", kickoff: "2026-10-05 01:00" } } };
+  const frais = match({ id: 701, league_key: "ligue1", league_id: 61, date: "2026-10-05 01:00" });
+  const gel = PF.freezeAnalysis(frais, tirs, { nowMs: NOW, fixture: fx, premiumRow: { fixture_id: 701, raw_response: {} }, exceptionGel: P.motifExceptionGel });
+  assert.notEqual(gel.status, "FROZEN", "jamais conserve");
+  assert.deepEqual(gel.remplacement.ancien, { prediction: "Tirs du match over 23.5", market: "total-shots-over-23_5", cote: 1.5, model_probability: 67.5, publie_le: "2026-10-03T04:35:38.000Z" });
+  assert.equal(gel.remplacement.motif, "marche_non_verifie");
+  assert.deepEqual(gel.premiumRow.raw_response.remplacement, gel.remplacement, "trace privee dans la ligne premium");
+  assert.equal(gel.match.remplacement_gel.motif, "marche_non_verifie");
+  assert.ok(PREMIUM.INTERNAL_FIELDS.includes("remplacement_gel"));
+  assert.equal("remplacement_gel" in PREMIUM.sansChampsInternes(gel.match), false, "jamais dans un fichier public");
+  // Le match n'est plus fige : la regle du jour lui donne un pari simple (jamais les tirs).
+  P.poserPronostics([gel.match], { configLigues: CFG });
+  P.publierPronostics([gel.match], [gel.premiumRow], { configLigues: CFG, figes: {} });
+  assert.ok(P.MARCHE[gel.match.market_id], gel.match.market_id);
+  // Un pari fige conforme (verifie, cote reelle, meme hors fourchette) ne bouge pas.
+  const conforme = Object.assign({}, tirs, { pari_rec: "Victoire Domicile", market_id: "home-win", marche: "RESULTAT", cote_rec: 1.85 });
+  assert.equal(PF.freezeAnalysis(match({ id: 701, date: "2026-10-05 01:00" }), conforme, { nowMs: NOW, fixture: fx, premiumRow: { fixture_id: 701 }, exceptionGel: P.motifExceptionGel }).status, "FROZEN");
+  // Match deja commence : le pari publie reste tel quel (jamais remplace apres le coup d'envoi).
+  const fxJoue = { fixture: { id: 701, status: { short: "2H" }, timestamp: Date.parse("2026-10-04T02:00:00Z") / 1000 } };
+  assert.equal(PF.freezeAnalysis(match({ id: 701 }), tirs, { nowMs: NOW, fixture: fxJoue, premiumRow: { fixture_id: 701 }, exceptionGel: P.motifExceptionGel }).status, "FROZEN_CLOSED");
+
+  // Historique public : trace du remplacement, ancien pari masque tant que le match n'est pas regle, relu ensuite.
+  const ligne = { fixture_id: 701, result: "scheduled", type: "single", prediction: "Over 1.5", cote: 1.5, remplacement: JSON.parse(JSON.stringify(gel.remplacement)) };
+  const pub = PREMIUM.redactPendingPredictions([ligne])[0];
+  assert.deepEqual([pub.remplacement.motif, pub.remplacement.ancien, pub.remplacement.ancien_masque, pub.prediction], ["marche_non_verifie", null, true, undefined]);
+  assert.doesNotMatch(JSON.stringify(pub), /Tirs du match/);
+  assert.equal(PREMIUM.rehydrateRemplacements([pub], [{ fixture_id: 701, raw_response: { remplacement: gel.remplacement } }]), 1);
+  assert.equal(pub.remplacement.ancien.prediction, "Tirs du match over 23.5");
+  assert.equal(PREMIUM.rehydrateRemplacements([PREMIUM.redactPendingPredictions([ligne])[0]], []), 0, "jamais invente");
+  // Pipeline : l'exception est passee au gel, la trace est posee avant le realignement, relue avant le reglement.
+  assert.match(SCRIPT, /exceptionGel:PRONOSTIC\.motifExceptionGel/);
+  assert.ok(SCRIPT.indexOf("alreadyExists.remplacement=JSON.parse(JSON.stringify(m.remplacement_gel));") < SCRIPT.indexOf("PICK_FREEZE.alignPendingPrediction(alreadyExists,m,"));
+  assert.match(SCRIPT, /PREMIUM_FIELDS_LIB\.rehydrateRemplacements\(predictions,lignesRem\)/);
+});

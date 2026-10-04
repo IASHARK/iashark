@@ -2116,14 +2116,14 @@ jobs:
             console.log('  Sitemap done: '+(STATIC_SITEMAP_PAGES.length+nbMatchsFr)+' urls FR, '+sitemapFiles.length+' sitemap(s) i18n');
           }
           // historique.json est commite dans le depot GitHub, qui est PUBLIC : une
-          // prediction en attente n'y porte plus le pari d'un match payant
+          // prediction en attente n'y porte plus le pari d'un match a venir, match offert
+          // COMPRIS depuis le 04/10/2026, ni celui d'un match reporte
           // (lib/premium-fields.js#redactPendingPredictions). La version complete vit
           // dans predictions_archive (service role) et est relue avant le reglement.
           // Sans cle service role, rien n'est masque : le pari ne pourrait plus etre regle.
-          function historiquePublic(h,matchsData){
+          function historiquePublic(h,matchsData){ // eslint-disable-line no-unused-vars
             if(!SUPA_URL_PIPELINE||!SUPA_SERVICE_KEY) return h;
-            var libres=(matchsData||[]).filter(function(m){return m&&m.is_free===true;}).map(function(m){return m.id;});
-            return Object.assign({},h,{predictions:PREMIUM_FIELDS_LIB.redactPendingPredictions(h.predictions,libres)});
+            return Object.assign({},h,{predictions:PREMIUM_FIELDS_LIB.redactPendingPredictions(h.predictions)});
           }
           // Hotfix du 14/09/2026 : historique.json a ete masque a la main alors que
           // predictions_archive ne recevait plus de nouvelle prediction depuis le
@@ -2158,6 +2158,25 @@ jobs:
             console.log('  [historique] '+total+' prediction(s) masquee(s) : '+n+' relue(s) depuis predictions_archive, '+nGit+' depuis la version complete du 14/09, '+reste+' non relue(s).');
             if(reste) console.log('::warning title=historique::'+reste+' prediction(s) en attente masquee(s) sans source complete : non reglees ce run (jamais reglees a l aveugle).');
           }
+          // MATCHS REPORTES (04/10/2026, « tout match reporte est traite ») : un pari en attente dont le
+          // coup d'envoi d'origine est passe et dont le match n'apparait dans aucune des dates relues
+          // (match reprogramme a un autre jour) est relu par son NUMERO (/fixtures?ids=, 20 par appel,
+          // statut et date actuels). Le reglement l'annule alors s'il est reporte (PICK_FREEZE.motifAnnulation).
+          async function fixturesEnAttenteParIds(predictions, dejaVus){
+            var ids=(predictions||[]).filter(function(p){
+              if(!p||(p.result!=='scheduled'&&p.result!=='pending')||p.fixture_id==null||dejaVus[String(p.fixture_id)]) return false;
+              var ko=Date.parse(String(p.kickoff_at||''));
+              return Number.isFinite(ko)?ko<Date.now()-3*3600000:(String(p.date||'').substring(0,10)<TODAY);
+            }).map(function(p){return String(p.fixture_id);}).filter(function(v,i,a){return /^\d+$/.test(v)&&a.indexOf(v)===i;});
+            var out=[];
+            for(var i=0;i<ids.length&&i<100;i+=20){
+              var r=await get('https://v3.football.api-sports.io/fixtures?ids='+ids.slice(i,i+20).join('-')+'&timezone=Europe/Paris',APS);
+              out=out.concat((r&&r.response)||[]);
+              await sleep(150);
+            }
+            if(ids.length) console.log('  Resultats par numero (paris en attente hors des dates relues) : '+ids.length+' match(s), '+out.length+' relu(s)');
+            return out;
+          }
           async function updateHistorique(matchsData){
             console.log('\n=== HISTORIQUE UPDATE ===');
             var histoPath='historique.json';
@@ -2189,6 +2208,9 @@ jobs:
                 console.log('  Resultats '+rDate+': '+(fClassic.response||[]).length+' classique + '+(fWC.response||[]).length+' World Cup + '+(fNL.response||[]).length+' Nations League');
                 await sleep(150);
               }
+              var vusParDate={};
+              yResults.forEach(function(f){ if(f&&f.fixture&&f.fixture.id!=null) vusParDate[String(f.fixture.id)]=1; });
+              yResults=yResults.concat(await fixturesEnAttenteParIds(histo.predictions, vusParDate));
               async function buildSettlementContext(fix,prediction){
                 // AUCUNE CLE NULLE (corrige le 20/09/2026, lot R1). lib/resolvers.js
                 // teste Number.isFinite(Number(context.X)) et Number(null) vaut 0 :
@@ -2232,8 +2254,11 @@ jobs:
                 var gh=regScore.gh, ga=regScore.ga;
                 var status=fix.fixture&&fix.fixture.status&&fix.fixture.status.short||'';
                 var isVoidStatus=(status==='PST'||status==='CANC'||status==='ABD');
-                if(!isVoidStatus&&status!=='FT'&&status!=='AET'&&status!=='PEN')continue;
-                if(!isVoidStatus&&(gh===null||ga===null))continue;
+                var joue=(status==='FT'||status==='AET'||status==='PEN');
+                // A venir (NS/TBD) : seulement pour reconnaitre un match REPROGRAMME (motifAnnulation).
+                var aVenir=(status==='NS'||status==='TBD');
+                if(!isVoidStatus&&!joue&&!aVenir)continue;
+                if(joue&&(gh===null||ga===null))continue;
                 var found=histo.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.fixture_id===fid;});
                 // Reglement par numero de match UNIQUEMENT (audit du 28/09/2026) : l'ancien
                 // repli « noms ressemblants » (Levenshtein <= 3) pouvait donner le resultat
@@ -2247,11 +2272,16 @@ jobs:
                 // (« Genoa vs Como » portant le numero de Parme-Monza) donnerait encore
                 // le resultat d'un autre match. On verifie que les equipes correspondent.
                 if(!memesEquipes(found,homeN,awayN)){console.log('::warning title=Reglement::'+found.match+' : equipes differentes du match '+fid+' ('+homeN+' vs '+awayN+'), resultat non attribue.');continue;}
-                if(isVoidStatus){
+                // Reporte (PST, ou reprogramme a plus de 24 h de l'heure d'origine) ou annule : pari annule,
+                // marque reporte (lib/pick-freeze.js#motifAnnulation) ; jamais regle sur le match rejoue.
+                var motifVoid=PICK_FREEZE.motifAnnulation(found,fix);
+                if(motifVoid){
                   found.result='void';found.score=null;found.fixture_id=fid;found.resolved_date=TODAY;
-                  console.log('  VOID (match '+status+'): '+found.match);
+                  if(motifVoid==='reporte') found.reporte=true;
+                  console.log('  VOID (match '+(motifVoid==='reporte'?'reporte':'annule')+', statut '+status+'): '+found.match);
                   continue;
                 }
+                if(!joue)continue;
                 var settlementContext=await buildSettlementContext(fix,found.prediction);
                 var isWin=resolveMarketWin(found.prediction, gh, ga, settlementContext);
                 if(isWin===null){ continue; }
@@ -2992,6 +3022,9 @@ jobs:
                   yResEarly=yResEarly.concat(fClassicE.response||[], fWCE.response||[]);
                   await sleep(150);
                 }
+                var vusParDateE={};
+                yResEarly.forEach(function(f){ if(f&&f.fixture&&f.fixture.id!=null) vusParDateE[String(f.fixture.id)]=1; });
+                yResEarly=yResEarly.concat(await fixturesEnAttenteParIds(histoEarly.predictions, vusParDateE));
                 yResEarly.forEach(function(fix){
                   var fid=fix.fixture&&fix.fixture.id;
                   var homeN=fix.teams&&fix.teams.home&&fix.teams.home.name||'';
@@ -3000,17 +3033,22 @@ jobs:
                   var gh=regScoreE.gh, ga=regScoreE.ga;
                   var status=fix.fixture&&fix.fixture.status&&fix.fixture.status.short||'';
                   var isVoidStatusE=(status==='PST'||status==='CANC'||status==='ABD');
-                  if(!isVoidStatusE&&status!=='FT'&&status!=='AET'&&status!=='PEN')return;
-                  if(!isVoidStatusE&&(gh===null||ga===null))return;
+                  var joueE=(status==='FT'||status==='AET'||status==='PEN');
+                  var aVenirE=(status==='NS'||status==='TBD');
+                  if(!isVoidStatusE&&!joueE&&!aVenirE)return;
+                  if(joueE&&(gh===null||ga===null))return;
                   var found=histoEarly.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.fixture_id===fid;});
                   // Meme regle que le reglement principal : numero de match, sinon noms identiques pour un pari sans numero.
                   if(!found)found=histoEarly.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&!p.fixture_id&&p.type==='single'&&p.date&&resolveDatesEarly.indexOf(p.date.substring(0,10))!==-1&&(p.home||'').trim().toLowerCase()===homeN.trim().toLowerCase()&&(p.away||'').trim().toLowerCase()===awayN.trim().toLowerCase();});
                   if(!found||found.redacted)return;
                   if(!memesEquipes(found,homeN,awayN)){console.log('::warning title=Reglement::'+found.match+' : equipes differentes du match '+fid+', resultat non attribue.');return;}
-                  if(isVoidStatusE){
+                  var motifVoidE=PICK_FREEZE.motifAnnulation(found,fix);
+                  if(motifVoidE){
                     found.result='void';found.score=null;found.fixture_id=fid;found.resolved_date=TODAY;
+                    if(motifVoidE==='reporte') found.reporte=true;
                     return;
                   }
+                  if(!joueE)return;
                   // Aucune cle nulle : Number(null) vaut 0 et reglerait un marche
                   // « premiere mi-temps » comme un 0-0 faute de donnee (voir la
                   // note detaillee dans buildSettlementContext).
@@ -4333,7 +4371,9 @@ jobs:
             // economie, lib/odds-api-econome.js), y compris la Segunda et l'Argentine quand API-Football n'a pas de cote.
             // EN MEMOIRE SEULEMENT (jamais ecrit dans un fichier) : lib/pronostic.js#publierPronostics y lit la meilleure
             // cote agreee de chaque marche candidat, sinon la cote du marche d'API-Football.
-            var LIVRES_ANJ={}, RELEVE_ANJ_A=null;
+            // Heure REELLE des cotes de chaque match (ingenieur donnees, 04/10/2026) : l'appel de la competition
+            // (RELEVES_ANJ) ou l'appel par match (RELEVES_ANJ_EV), jamais l'heure de la relecture en memoire.
+            var LIVRES_ANJ={}, RELEVE_ANJ_A=null, RELEVES_ANJ={}, RELEVES_ANJ_EV={};
             try{
               var aReleverAnj=allMatchsData.filter(function(m){
                 return m&&m.id!=null&&!GEL_FIGES[String(m.id)]&&(!m.status||m.status==='NS')&&!/^(KICKOFF_|FIXTURE_NOT_UPCOMING)/.test(String(m.no_signal_reason||''));
@@ -4341,11 +4381,15 @@ jobs:
                 return {m:m, sport:dansPerimetreOdds(lgKey(m.league_id))?oddsSportKeyFor(LEAGUES_CONFIG,lgKey(m.league_id)):null, koMs:parisLocalToMs(m.date)};
               });
               var releveLivres=await COTE_ANJ.releverLivresAnj(aReleverAnj,{cle:ODDS_KEY,fetchJson:oddsClient().fetchJsonCoteAnj(estSelectionNationaleOdds)});
-              LIVRES_ANJ=releveLivres.livres||{}; RELEVE_ANJ_A=releveLivres.releve_a||null;
+              LIVRES_ANJ=releveLivres.livres||{}; RELEVE_ANJ_A=releveLivres.releve_a||null; RELEVES_ANJ=releveLivres.releves||{};
               // Livres deja completes par les appels par match du pari present (double chance) : ils l'emportent.
-              if(typeof rapportAnj!=='undefined'&&rapportAnj&&rapportAnj.livres) Object.keys(rapportAnj.livres).forEach(function(k){ LIVRES_ANJ[k]=rapportAnj.livres[k]; });
+              if(typeof rapportAnj!=='undefined'&&rapportAnj&&rapportAnj.livres) Object.keys(rapportAnj.livres).forEach(function(k){
+                LIVRES_ANJ[k]=rapportAnj.livres[k];
+                if(rapportAnj.releves&&rapportAnj.releves[k]) RELEVES_ANJ[k]=rapportAnj.releves[k];
+                if(rapportAnj.releves_evenement&&rapportAnj.releves_evenement[k]) RELEVES_ANJ_EV[k]=rapportAnj.releves_evenement[k];
+              });
               console.log('  [COTE ANJ] cotes des agrees relevees pour '+Object.keys(LIVRES_ANJ).length+' match(s) ouvert(s) sur '+aReleverAnj.length+' ('+releveLivres.appels+' competition(s), aucun credit de plus)'+(releveLivres.erreurs.length?' ; '+releveLivres.erreurs.length+' erreur(s)':'')+'.');
-            }catch(e){ LIVRES_ANJ={}; console.log('::warning title=Cote ANJ::livres non releves ('+String(e&&e.message||e).replace(/apiKey=[^&\s]+/g,'apiKey=***').slice(0,150)+') : cote du marche d\'API-Football seulement.'); }
+            }catch(e){ LIVRES_ANJ={}; RELEVES_ANJ={}; RELEVES_ANJ_EV={}; console.log('::warning title=Cote ANJ::livres non releves ('+String(e&&e.message||e).replace(/apiKey=[^&\s]+/g,'apiKey=***').slice(0,150)+') : cote du marche d\'API-Football seulement.'); }
             allMatchsData.forEach(function(m){ CHANCE_IASHARK.poserChance(m); });
             // ================= TOUS LES MARCHES (03/10/2026) =================
             // Page match : les marches de la liste blanche du mathematicien (config/marches-valides.json),
@@ -4429,7 +4473,7 @@ jobs:
           // (config/leagues.json#fiabilite.corrections_chance ; ex. Ligue des nations 59,1 % annonces / 56,0 % reels).
           // Enfin l'option « cote plus haute » (regle A, champ premium option_cote). Journal : compteurs seulement.
           try{
-            var rapportPub=PRONOSTIC.publierPronostics(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,figes:GEL_FIGES,chancesV3Par:CHANCES_V3_PRONO,texteMarche:TEXTE_MARCHE,cotesAnjPar:LIVRES_ANJ,releveAnjA:RELEVE_ANJ_A});
+            var rapportPub=PRONOSTIC.publierPronostics(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,figes:GEL_FIGES,chancesV3Par:CHANCES_V3_PRONO,texteMarche:TEXTE_MARCHE,cotesAnjPar:LIVRES_ANJ,relevesAnj:RELEVES_ANJ,relevesAnjEvenement:RELEVES_ANJ_EV,releveAnjA:RELEVE_ANJ_A});
             var fourchetteLog=PRONOSTIC.fourchettePari(LEAGUES_CONFIG);
             console.log('  [PARIS] fourchette '+fourchetteLog.cote_min.toFixed(2)+'-'+fourchetteLog.cote_max.toFixed(2)+' : '+rapportPub.publies+' pari(s) publie(s) ('+rapportPub.dans_fourchette+' dans la fourchette, '+rapportPub.hors_fourchette+' au plus proche ; cote agreee '+rapportPub.cote_agreee+', cote du marche '+rapportPub.cote_marche+' ; '+rapportPub.gardes+' garde(s), '+rapportPub.changes+' change(s) de marche, '+rapportPub.nouveaux+' nouveau(x)) ; '+rapportPub.sans_pari+' match(s) sans pari (dont '+rapportPub.sans_cote+' sans aucune cote reelle, '+rapportPub.retires+' pari(s) retire(s)) ; '+rapportPub.figes+' fige(s) intouche(s) ; textes d\'un autre marche retires sur '+rapportPub.textes_retires+' match(s).');
           }catch(e){ console.log('::warning title=Paris::pronostics non publies ('+(e&&e.message)+').'); }
@@ -4689,7 +4733,17 @@ jobs:
               var REG_OFFERTS='preuves/matchs-offerts.json';
               var regOfferts=MATCHS_OFFERTS.vide();
               try{ regOfferts=JSON.parse(fs.readFileSync(REG_OFFERTS,'utf8')); }catch(e){}
-              var nOfferts=MATCHS_OFFERTS.enregistrer(regOfferts,allMatchsData.filter(function(m){ return m&&m.is_free===true; }),{nowIso:new Date().toISOString(),versionAncien:MODEL_VERSION});
+              // Pari MASQUE jusqu'au coup d'envoi (04/10/2026, lib/matchs-offerts.js) : devoile ensuite depuis
+              // match_premium_data (le pari publie, fige jusqu'au coup d'envoi), jamais invente.
+              var OFFERTS_MS=Date.now();
+              var nOfferts=MATCHS_OFFERTS.enregistrer(regOfferts,allMatchsData.filter(function(m){ return m&&m.is_free===true; }),{nowIso:new Date(OFFERTS_MS).toISOString(),nowMs:OFFERTS_MS,versionAncien:MODEL_VERSION});
+              var nMasques=MATCHS_OFFERTS.masquerAvantCoupEnvoi(regOfferts,OFFERTS_MS);
+              var aDevoiler=MATCHS_OFFERTS.aReveler(regOfferts,OFFERTS_MS), nDevoiles=0;
+              if(aDevoiler.length&&SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY){
+                var repDev=await rawHttpGetJson(SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/match_premium_data?select=fixture_id,pari_rec,market_id,cote_rec,model_probability,premium_fields&fixture_id=in.('+aDevoiler.slice(0,200).join(',')+')',{'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY});
+                if(Array.isArray(repDev)) nDevoiles=MATCHS_OFFERTS.reveler(regOfferts,repDev,OFFERTS_MS);
+              }
+              if(nMasques||aDevoiler.length) console.log('  [offerts] '+nMasques+' pari(s) masque(s) avant le coup d\'envoi, '+nDevoiles+' devoile(s) sur '+aDevoiler.length+'.');
               var aLire=MATCHS_OFFERTS.aCompleter(regOfferts);
               var nClot=0;
               if(aLire.length&&SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY){
@@ -4715,13 +4769,16 @@ jobs:
             // Jamais la valeur, jamais le marche. Le match offert garde sa note exacte.
             var matchsPublics=allMatchsData.map(function(m){
               if(!m)return m;
-              // Sans table protegee, les analyses restent publiques (repli ci-dessus), MAIS les
-              // champs « Pro seulement » (simulation 15 min, Stats IASHARK) sont retires quand
-              // meme : jamais en clair dans un fichier public, meme en panne (avocat du diable, 30/09/2026).
-              if(!PEUT_PROTEGER)return PREMIUM_FIELDS_LIB.sansChampsPro(m);
-              // Match offert : son analyse est publique, SAUF la simulation 15 min, reservee
-              // aux Pro sans exception (decision de Clement, 29/09/2026, S2).
-              if(m.is_free)return PREMIUM_FIELDS_LIB.sansChampsPro(m);
+              // Sans table protegee, les analyses restent publiques (repli ci-dessus), MAIS le detail
+              // du match (simulation, film, qui ouvre le score, jumeaux, Stats IASHARK, lecture) et le
+              // panneau Marches sont retires quand meme : jamais en clair dans un fichier public, meme en
+              // panne (avocat du diable, 30/09/2026 ; lib/premium-fields.js#RETIRES_SANS_TABLE).
+              if(!PEUT_PROTEGER)return PREMIUM_FIELDS_LIB.sansChampsReserves(m);
+              // Match offert (decision de Clement du 04/10/2026, avocat du diable point 6) : plus rien
+              // de payant dans les fichiers publics, comme les autres matchs (le visiteur sans compte ne
+              // voit qu'un apercu flou). Ses champs payants partent dans match_premium_data et la
+              // fonction match-data les sert aux comptes connectes, sauf le panneau Marches (Pro).
+              if(m.is_free)return PREMIUM_FIELDS_LIB.stripPremium(m);
               m=PUBLIC_SPLIT.withProbBand(m);
               var copie={};
               Object.keys(m).forEach(function(k){ if(CHAMPS_PREMIUM.indexOf(k)===-1)copie[k]=m[k]; });

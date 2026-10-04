@@ -177,11 +177,12 @@ test("premier buteur (c3) : titulaires probables, 3 au plus, % entier, jamais en
   assert.equal(VERDICTS.match.premier_buteur, "GO");
 });
 
-test("acces : sim_resume, jumeaux, premier_but et premier buteur Pro seulement (meme sur le match offert)", () => {
+test("acces : sim_resume, jumeaux, premier_but et premier buteur jamais publics ; sur le match offert, servis au compte connecte (04/10/2026)", () => {
   for (const k of ["sim_resume", "premier_but", "v3_premiers_buteurs", "jumeaux"]) assert.ok(PREMIUM.PREMIUM_PAYLOAD_FIELDS.includes(k), k);
-  // Avocat du diable (04/10/2026, point 5) : le fichier public du match offert est lisible sans
-  // compte ; sim_resume et jumeaux n'y vont plus (le visiteur sans compte ne voit qu'un apercu flou).
-  for (const k of ["premier_but", "v3_premiers_buteurs", "sim_resume", "jumeaux"]) assert.ok(PREMIUM.PRO_ONLY_FIELDS.includes(k), k);
+  // Decision de Clement du 04/10/2026 : sur le match offert, le compte gratuit connecte voit TOUT sauf le panneau
+  // Marches ; rien de payant dans le fichier public (le visiteur sans compte ne voit qu'un apercu flou).
+  assert.deepEqual(PREMIUM.PRO_ONLY_FIELDS, ["marches_panneau", "v3_marches", "marches_flux"]);
+  for (const k of ["premier_but", "v3_premiers_buteurs", "sim_resume", "jumeaux"]) assert.ok(!PREMIUM.PRO_ONLY_FIELDS.includes(k), k);
   const m = Object.assign(matchDe(AVEC_GRILLE[0]), { id: 9, sim_resume: { base: 10000 }, premier_but: { dom: 50 }, v3_premiers_buteurs: [{ joueur: "X", chance: 12 }] });
   const pub = PREMIUM.stripPremium(m);
   for (const k of ["sim_resume", "premier_but", "v3_premiers_buteurs"]) assert.equal(pub[k], undefined, k);

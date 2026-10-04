@@ -158,6 +158,40 @@ test("3. optimalite : 200 tirages de 8 a 14 jambes, le resultat = la recherche p
   }
 });
 
+test("3 bis. recherche exacte (controle du mathematicien du 04/10/2026) : egalites de cotes et de chances = force brute ; plus aucun plafond de 40 jambes", () => {
+  // Beaucoup d'egalites (4 cotes, 3 chances possibles) : le choix par jeux de cotes = la force brute.
+  const rnd = prng(41004);
+  for (let t = 0; t < 150; t++) {
+    const n = 8 + Math.floor(rnd() * 9);
+    const legs = [];
+    for (let i = 0; i < n; i++) legs.push(leg(2000 + Math.floor(rnd() * 500) * 10 + i, [1.4, 1.5, 1.65, 1.7][Math.floor(rnd() * 4)], [55, 60, 65][Math.floor(rnd() * 3)]));
+    const r = generateDailyCombos({ jambes: legs, snapshotTime: SNAP });
+    for (const type of ["x5", "x10"]) {
+      const c = r.combos.find((x) => x.type === type);
+      const b = bruteForce(legs, REGLES[type]);
+      if (!b) { assert.equal(c.status, "NO_QUALIFYING_COMBINATION", "egalites " + t + " " + type); continue; }
+      assert.deepEqual(c.jambes.map((j) => j.fixture_id), b.ids, "egalites " + t + " " + type);
+    }
+  }
+  // 44 jambes tres probables a 1,40 et UNE a 1,70 (la moins probable, 45e) : le seul ticket x5 possible
+  // (1,40^3 x 1,70 = 4,66) a besoin d'elle. L'ancien plafond de 40 jambes ne publiait aucun ticket.
+  const jour = [];
+  for (let i = 0; i < 44; i++) jour.push(leg(3000 + i, 1.4, 70));
+  jour.push(leg(3999, 1.7, 50));
+  const x5 = generateDailyCombos({ jambes: jour, snapshotTime: SNAP }).combos[0];
+  assert.equal(x5.status, "GENERATED");
+  assert.deepEqual(x5.jambes.map((j) => j.fixture_id), [3000, 3001, 3002, 3999]);
+  assert.equal(x5.cote_totale, 4.66);
+  assert.equal(REGLES.jambes_max, undefined, "plus de plafond dans config/tickets.json");
+  // Journee tres chargee (120 jambes, 31 cotes) : resultat en moins d'une seconde.
+  const charge = [];
+  for (let i = 0; i < 120; i++) charge.push(leg(5000 + i, Math.round((1.4 + (i % 31) * 0.01) * 100) / 100, 52 + ((i * 7) % 20)));
+  const t0 = Date.now();
+  const rc = generateDailyCombos({ jambes: charge, snapshotTime: SNAP });
+  assert.ok(Date.now() - t0 < 1000, "recherche trop lente : " + (Date.now() - t0) + " ms");
+  assert.deepEqual(rc.combos.map((c) => c.status), ["GENERATED", "GENERATED"]);
+});
+
 // ------------------------------------------------------------ 4. determinisme et departage
 test("4. departage deterministe : entree melangee -> meme ticket ; egalite : moins de jambes, centre, numeros", () => {
   const legs = [leg(11, 1.55, 60), leg(12, 1.6, 62), leg(13, 1.45, 64), leg(14, 1.5, 58), leg(15, 1.7, 61), leg(16, 1.42, 59), leg(17, 1.65, 63), leg(18, 1.48, 57)];

@@ -5,15 +5,14 @@
     "Ticket x5 : 3 ou 4 jambes, cote totale (arrondie au centime) entre 4,50 et 5,50. Ticket x10 : 5 ou 6 jambes, cote totale entre 9,00 et 11,00. Parmi TOUTES les combinaisons, la plus grande chance (produit des chances affichees). Egalite : moins de jambes, puis cote la plus proche du centre, puis numeros de match. Aucune combinaison : pas de ticket (jamais force).",
     "Selection en or : les 3 paris eligibles les plus probables (exactement 3, sinon rien). Buteur du jour : le plus probable du calcul buteur du moteur v3 (v3_buteurs), chance lib/chance-iashark.js#chanceButeur.",
     "Un ticket publie ne change plus (table tickets_du_jour, migration 0050). Rien n'est produit sans le feu vert du mathematicien (config/verdicts-maths.json).",
-    "jambes_max : au-dela, seules les jambes les plus probables sont essayees (enumeration complete en dessous).",
-    "fichier_buteurs_public : « complet » = buteurs-du-jour.json comme le 19/09 (ancien calcul, match et rang publics, lu par home-scorers.js) ; « retire » = fichier sans aucune entree (a poser le jour ou l'accueil lit la fonction tickets-du-jour au lieu de home-scorers.js)."
+    "Recherche exacte de la meilleure combinaison, sans plafond de jambes (controle du mathematicien du 04/10/2026 : l'ancien plafond jambes_max = 40 ratait le meilleur ticket un jour charge sur cinq) : lib/run-output/combos.js#meilleureCombinaison.",
+    "fichier_buteurs_public : « retire » depuis le 04/10/2026 (controle de l'ingenieur donnees : aucune page ne charge plus home-scorers.js, et le fichier revelait le match et le rang du buteur reserve aux comptes) = buteurs-du-jour.json sans aucune entree ; « complet » = ancien fichier du 19/09 (match et rang publics), a ne plus utiliser."
   ],
   "regle_version": "tickets-2026-10-04",
   "x5": { "jambes": [3, 4], "cote_min": 4.5, "cote_max": 5.5, "centre": 5 },
   "x10": { "jambes": [5, 6], "cote_min": 9, "cote_max": 11, "centre": 10 },
-  "jambes_max": 40,
   "marge_coup_envoi_min": 15,
   "operateurs": "anj_suivis",
   "selection_or": { "nb": 3 },
-  "fichier_buteurs_public": "complet"
+  "fichier_buteurs_public": "retire"
 }

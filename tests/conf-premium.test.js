@@ -33,7 +33,8 @@ function confLeaks(value, base) {
     if (Array.isArray(v)) { v.forEach((x, i) => walk(x, p + "[" + i + "]", inPaid)); return; }
     if (!v || typeof v !== "object") return;
     let paid = inPaid;
-    if (isMatchLike(v)) paid = v.is_free !== true;
+    // 04/10/2026 : le match offert n'est plus une exception (sa note est servie aux comptes par match-data).
+    if (isMatchLike(v)) paid = true;
     Object.keys(v).forEach((k) => {
       if (paid && CONF_KEYS.indexOf(k) !== -1) out.push(p + "." + k);
       walk(v[k], p + "." + k, paid);
@@ -59,9 +60,10 @@ test("conf est premium : liste unique, copie de la fonction match-data, charge p
   const paye = { id: 1, home: { n: "A" }, away: { n: "B" }, conf: 6.9, has_signal: true };
   assert.equal(PREMIUM.stripPremium(paye).conf, undefined);
   assert.deepEqual(PREMIUM.premiumLeaks(paye), ["conf"]);
-  assert.equal(PREMIUM.stripPremium(Object.assign({}, paye, { is_free: true })).conf, 6.9, "le match offert garde sa note");
+  // 04/10/2026 : le match offert n'a plus sa note dans les fichiers publics (servie aux comptes par match-data).
+  assert.equal(PREMIUM.stripPremium(Object.assign({}, paye, { is_free: true })).conf, undefined, "match offert : note retiree du fichier public");
   assert.deepEqual(PREMIUM.premiumPayload(paye), { conf: 6.9 });
-  assert.deepEqual(confLeaks({ matchs: [paye, { id: 2, home: {}, away: {}, is_free: true, conf: 7 }] }), [".matchs[0].conf"]);
+  assert.deepEqual(confLeaks({ matchs: [paye, { id: 2, home: {}, away: {}, is_free: true, conf: 7 }] }), [".matchs[0].conf", ".matchs[1].conf"]);
 });
 
 test("data.json, data-home.json, match/<id>.json reels : aucune note sur un match non offert", () => {

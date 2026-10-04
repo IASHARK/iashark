@@ -263,11 +263,14 @@
       "Chance affichee = chance calculee + points (toujours negatifs) quand la regle correspond : competition (ou '*'),",
       "famille (1N2, DC, OU2.5 ou '*'), option ('principale', 'cote' ou '*'), et si donnees les bornes de chance (en %) et",
       "de cote. Plusieurs regles : on garde la plus forte baisse. Sources : PLAN-MOTEUR-2026-10-03.md. A revoir par le",
-      "mathematicien sur l'archive (300 choix par groupe)."
+      "mathematicien sur l'archive (300 choix par groupe).",
+      "source_chance (04/10/2026, controle du mathematicien) : 'modele' = la regle ne vaut QUE pour une chance tiree du modele",
+      "(moteur v3 plus bas que la cote sans marge) ; jamais pour une chance tiree des cotes du marche (absente ou '*' : toutes).",
+      "Retiree le 04/10/2026 : Ligue des nations -3 points (mesuree avec l'ancienne fourchette 1,40-2,00 ; sur la regle du",
+      "04/10, 296 paris de Ligue des nations : 53,4 % affiches sans elle pour 54,1 % reels, +0,6 point ; avec elle +3,6)."
     ],
     "corrections_chance": [
-      { "ligue": "nations_league", "famille": "*", "option": "*", "points": -3, "source": "Ligue des nations recente : 59,1 % annonces, 56,0 % reels" },
-      { "ligue": "argentina_liga_profesional", "famille": "DC", "option": "*", "points": -13, "source": "H-017, double chance : 68,8 % annonces, 56,1 % reels" },
+      { "ligue": "argentina_liga_profesional", "famille": "DC", "option": "*", "source_chance": "modele", "points": -13, "source": "H-017 (moteur v3 seul), double chance : 68,8 % annonces, 56,1 % reels ; jamais sur la cote sans marge (49,5 % affiches pour 64,8 % reels sur 1 417 paris, controle du 04/10/2026)" },
       { "ligue": "ekstraklasa", "famille": "DC", "option": "*", "chance_min": 75, "chance_max": 85, "points": -5, "source": "Pologne, double chance 75-85 % : 76,5 % annonces, 71,3 % reels" },
       { "ligue": "ligue2", "famille": "*", "option": "*", "cote_min": 1.2, "cote_max": 1.5, "points": -2, "source": "Ligue 2, cotes 1,20-1,50 : 73,1 % annonces, 70,8 % reels" },
       { "ligue": "*", "famille": "*", "option": "cote", "points": -6, "source": "Regle A (la plus grosse cote a 70 % ou plus), Premier League : 71,0 % annonces, 64,6 % reels ; appliquee partout tant qu'aucune autre mesure n'existe" }

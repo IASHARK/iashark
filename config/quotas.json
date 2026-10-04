@@ -1,7 +1,7 @@
 {
   "_lisezmoi": [
     "MODE ECONOMIE (03/10/2026). Reglages des 2 abonnements payants. Clement peut changer les chiffres ici, rien d'autre a toucher.",
-    "API-Football (offre Pro) : 7 500 requetes PAR JOUR (remise a zero a minuit UTC = 2 h du matin a Paris en ete).",
+    "API-Football : 75 000 requetes PAR JOUR (quota reel annonce par l'API dans ses en-tetes, controle de l'ingenieur donnees du 04/10/2026 ; remise a zero a minuit UTC = 2 h du matin a Paris en ete). quota_jour ne sert que si les en-tetes manquent (repli) ; plafond_jour reste notre propre limite.",
     "The Odds API : 20 000 credits PAR MOIS. Cout d'un appel = nombre de marches x nombre de regions ; /sports et /events sont gratuits.",
     "Une liste de 10 bookmakers au plus compte comme UNE seule region (Pinnacle + les agrees suivis tiennent dans 1 region).",
     "alerte_pct : alerte Telegram a Clement (une fois par jour pour API-Football, une fois par mois pour The Odds API).",
@@ -10,7 +10,7 @@
     "Etat mesure (compteurs lus dans les reponses des API, sans aucun secret) : data/quotas-etat.json."
   ],
   "api_football": {
-    "quota_jour": 7500,
+    "quota_jour": 75000,
     "plafond_jour": 6000,
     "alerte_pct": 70,
     "minimum_pct": 95,

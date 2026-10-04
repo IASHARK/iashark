@@ -100,18 +100,45 @@ test("moteur v3 eteint : l'ancien choix reste en place (le bloc v3 ne s'applique
   assert.equal(ids.length, 1);
 });
 
-test("archive des matchs offerts : cote affichee, puis cote de cloture une fois le match commence", () => {
+// Pari du match offert : masque jusqu'au coup d'envoi (decision de Clement du 04/10/2026), devoile ensuite
+// depuis match_premium_data (le pari publie, fige jusqu'au coup d'envoi).
+function devoiler(reg, id, ligne) {
+  return MO.reveler(reg, [Object.assign({ fixture_id: id }, ligne)], Date.parse(TODAY + "T19:00:00Z"), TODAY + "T19:00:00.000Z");
+}
+
+test("archive des matchs offerts : pari masque jusqu'au coup d'envoi, puis devoile, puis cote de cloture", () => {
   const reg = MO.vide();
   const m = Object.assign(v3(11, 81, TODAY + " 20:00", { market_id: "over-15", cote_rec: "1.31" }), { is_free: true, moteur_v3: { source: "v3", version_moteur: "3.0.0" } });
   assert.equal(MO.enregistrer(reg, [m], { nowIso: "2026-10-03T06:05:00Z" }), 1);
   assert.equal(MO.enregistrer(reg, [m], { nowIso: "2026-10-03T12:00:00Z" }), 0, "une seule entree par jour et par match");
-  assert.deepEqual(reg.matchs[0], { jour: TODAY, fixture_id: 11, match: "A11 - B11", ligue: null, coup_envoi: TODAY + " 20:00", pari: "Over 1.5", market_id: "over-15", probabilite: 81, chance_iashark: null, cote_affichee: 1.31, moteur: "v3", moteur_version: "3.0.0", designe_le: "2026-10-03T06:05:00Z", cote_cloture: null, cloture_relevee_le: null });
+  assert.deepEqual(reg.matchs[0], { jour: TODAY, fixture_id: 11, match: "A11 - B11", ligue: null, coup_envoi: TODAY + " 20:00", pari: null, market_id: null, probabilite: null, chance_iashark: null, cote_affichee: null, moteur: "v3", moteur_version: "3.0.0", designe_le: "2026-10-03T06:05:00Z", cote_cloture: null, cloture_relevee_le: null, masque: true });
+  assert.doesNotMatch(JSON.stringify(reg), /Over 1\.5|1\.31/, "aucun pari public avant le match");
+  // Avant le coup d'envoi (18:00 UTC) : rien a devoiler ; apres : le pari publie.
+  assert.deepEqual(MO.aReveler(reg, Date.parse(TODAY + "T17:00:00Z")), []);
+  assert.deepEqual(MO.aReveler(reg, Date.parse(TODAY + "T19:00:00Z")), [11]);
+  assert.equal(MO.reveler(reg, [{ fixture_id: 11, pari_rec: "Over 1.5", market_id: "over-15", cote_rec: 1.31, model_probability: 81, premium_fields: { chance_iashark: 79 } }], Date.parse(TODAY + "T17:00:00Z")), 0, "jamais avant le coup d'envoi");
   const snap = [{ fixture_id: 11, captured_at: "2026-10-03T17:45:00Z", raw_inputs: { odds: { co15: "1.27" } } }];
+  assert.equal(MO.completerClotures(reg, snap, () => true), 0, "pari encore masque : la cloture attend");
+  assert.equal(devoiler(reg, 11, { pari_rec: "Over 1.5", market_id: "over-15", cote_rec: 1.31, model_probability: 81, premium_fields: { chance_iashark: 79 } }), 1);
+  assert.deepEqual([reg.matchs[0].pari, reg.matchs[0].market_id, reg.matchs[0].probabilite, reg.matchs[0].chance_iashark, reg.matchs[0].cote_affichee, reg.matchs[0].masque, reg.matchs[0].devoile_le],
+    ["Over 1.5", "over-15", 81, 79, 1.31, undefined, TODAY + "T19:00:00.000Z"]);
   assert.equal(MO.completerClotures(reg, snap, () => false), 0, "match pas commence : on attend");
   assert.equal(MO.completerClotures(reg, snap, () => true), 1);
   assert.equal(reg.matchs[0].cote_cloture, 1.27);
   assert.deepEqual(MO.aCompleter(reg), []);
   assert.match(WF, /MATCHS_OFFERTS\.enregistrer\(regOfferts,allMatchsData\.filter\(function\(m\)\{ return m&&m\.is_free===true; \}\)/);
+  assert.match(WF, /MATCHS_OFFERTS\.masquerAvantCoupEnvoi\(regOfferts,OFFERTS_MS\)/);
+  assert.match(WF, /match_premium_data\?select=fixture_id,pari_rec,market_id,cote_rec,model_probability,premium_fields/);
+  // Entree ecrite en clair avant le 04/10/2026 : masquee tant que le match n'a pas commence ; sans ligne, reste masquee.
+  const ancien = MO.vide();
+  ancien.matchs.push({ jour: TODAY, fixture_id: 15, coup_envoi: TODAY + " 20:00", pari: "Victoire Domicile", market_id: "home-win", probabilite: 59.8, chance_iashark: 58, cote_affichee: 1.62, cote_cloture: null, cloture_relevee_le: null });
+  assert.equal(MO.masquerAvantCoupEnvoi(ancien, Date.parse(TODAY + "T10:00:00Z")), 1);
+  assert.equal(ancien.matchs[0].pari, null);
+  assert.equal(devoiler(ancien, 99, { pari_rec: "x" }), 0, "jamais un pari invente");
+  assert.equal(ancien.matchs[0].masque, true);
+  const joue = MO.vide();
+  joue.matchs.push({ jour: TODAY, fixture_id: 16, coup_envoi: TODAY + " 20:00", pari: "Victoire Domicile", market_id: "home-win" });
+  assert.equal(MO.masquerAvantCoupEnvoi(joue, Date.parse(TODAY + "T19:00:00Z")), 0, "match commence : deja public");
 });
 
 // Ronde 5 (30/09/2026). Point encore ouvert : la cote de cloture etait la derniere ligne
@@ -121,6 +148,7 @@ test("cote de cloture : le DERNIER releve pris AVANT le coup d'envoi, quel que s
   const reg = MO.vide();
   const m = Object.assign(v3(12, 81, TODAY + " 20:00", { market_id: "over-15", cote_rec: "1.31" }), { is_free: true, moteur_v3: { source: "v3", version_moteur: "3.0.0" } });
   MO.enregistrer(reg, [m], { nowIso: "2026-10-03T06:05:00Z" });
+  devoiler(reg, 12, { pari_rec: "Over 1.5", market_id: "over-15", cote_rec: 1.31, model_probability: 81 });
   // Coup d'envoi : 20:00 a Paris = 18:00 UTC.
   const snaps = [
     { fixture_id: 12, captured_at: TODAY + "T17:50:00Z", raw_inputs: { odds: { co15: "1.25" } } }, // derniere avant le match

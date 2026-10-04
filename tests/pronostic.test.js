@@ -114,7 +114,9 @@ test("anti-fuite : pronostic est premium (data.json, Edge, page match), pronosti
   assert.deepEqual(PREMIUM.deepPremiumLeaks([pub]), []);
   assert.ok(PREMIUM.deepPremiumLeaks([{ id: 9, home: { n: "A" }, away: { n: "B" }, autre: { pronostic: {} } }]).length, "cle cherchee en profondeur");
   const offert = Object.assign({}, m, { is_free: true });
-  assert.ok(PREMIUM.stripPremium(offert).pronostic, "match offert : pronostic visible");
+  // 04/10/2026 : le pronostic du match offert n'est plus dans un fichier public (servi aux comptes par match-data).
+  assert.equal(PREMIUM.stripPremium(offert).pronostic, undefined, "match offert : pronostic hors du fichier public");
+  assert.ok(PREMIUM.sansChampsPro(offert).pronostic, "match offert : pronostic servi au compte connecte");
   assert.deepEqual(Object.keys(PREMIUM.premiumPayload(m)), ["p1", "pn", "p2", "pronostic"].filter((k) => k in PREMIUM.premiumPayload(m)));
   const edge = fs.readFileSync(path.join(root, "supabase/functions/match-data/index.ts"), "utf8");
   assert.match(edge, /"pronostic",\n/);

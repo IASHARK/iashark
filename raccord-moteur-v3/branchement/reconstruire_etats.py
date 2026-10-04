@@ -71,6 +71,9 @@ def _lire_csv(fichier):
     n = len(tete)
     corps = [[c.strip() for c in (l + [""] * n)[:n]] for l in lignes[1:]]
     df = pd.DataFrame(corps, columns=tete, dtype=str).replace("", np.nan)
+    # Colonne en double dans l'en-tete (ex. « LB » deux fois dans mmz4281/0405/D2.csv) : on garde la premiere,
+    # sinon la mise bout a bout des saisons plante (04/10/2026, 30 championnats).
+    df = df.loc[:, ~pd.Index(df.columns).duplicated()]
     return df.loc[:, [c for c in df.columns if c]]
 
 

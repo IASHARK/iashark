@@ -55,7 +55,10 @@ test("perimetre The Odds API : seulement les competitions qui peuvent entrer dan
   const p = QUOTAS.perimetreOddsApi(LIGUES, MOTEUR, CFG);
   for (const k of Object.keys(LIGUES.fiabilite.ligues_validees_cotes_marche)) assert.ok(p.has(k), k);
   for (const k of ["laliga", "bundesliga", "seriea", "ligue1", "eredivisie", "primeira"]) assert.ok(p.has(k), k + " (moteur v3)");
-  for (const k of ["ldc", "jleague", "saudi_proleague", "fa_cup"]) assert.ok(!p.has(k), k + " hors perimetre");
+  // 04/10/2026 (nuit) : les 30 championnats sont calcules par le v3 (config/moteur-v3.json#ligues), Japon et
+  // Arabie saoudite compris ; les coupes restent hors perimetre.
+  for (const k of ["jleague", "saudi_proleague", "k_league1"]) assert.ok(p.has(k), k + " (moteur v3)");
+  for (const k of ["ldc", "fa_cup"]) assert.ok(!p.has(k), k + " hors perimetre");
   // 48 -> 32 le 03/10/2026 : 16 competitions « en test » retirees du site (config/leagues.json#competitions_retirees).
   assert.strictEqual(LIGUES.leagues.length, 32, "les 16 retirees le 03/10/2026 seulement");
   assert.strictEqual(QUOTAS.perimetreOddsApi(LIGUES, MOTEUR, { odds_api: { perimetre: "toutes" } }), null);

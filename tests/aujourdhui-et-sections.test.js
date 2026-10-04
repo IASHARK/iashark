@@ -108,12 +108,14 @@ test("Copier le ticket : match annule ou reporte nomme, ligne « Sans ce match �
 // fonction tickets-du-jour n'est pas deployee ; tickets et panneau seulement la ou ils sont vrais.
 // Essai : OUVERT depuis la decision de Clement du 04/10, 16 h (« on le garde et on l'affiche »),
 // CGV du 04/10/2026 a l'appui ; ecrit seulement si le serveur l'accorde sur le mois.
-test("interrupteurs : essai ouvert (si le serveur l'accorde), tickets fermes ; bloc « Aujourd'hui » seulement ouvert ET marche francais", () => {
+// 04/10/2026, 18 h : migration 0050 et fonction tickets-du-jour deployees -> tickets OUVERTS.
+test("interrupteurs : essai ouvert (si le serveur l'accorde), tickets ouverts ; bloc « Aujourd'hui » seulement ouvert ET marche francais", () => {
   assert.equal(OP.OUVERT.essai, true);
-  assert.equal(OP.OUVERT.tickets, false);
+  assert.equal(OP.OUVERT.tickets, true);
+  OP.OUVERT.tickets = false;
   assert.equal(OP.essaiOuvert({ trial_days: 7, trial_intervals: ["month"] }), 7);
   assert.equal(OP.essaiOuvert({ trial_days: 0, trial_intervals: [] }), 0, "le serveur ne l'accorde pas : rien d'ecrit");
-  assert.equal(AJ.enLigne({}), false);
+  assert.equal(AJ.enLigne({}), false, "interrupteur ferme : rien");
   assert.equal(AJ.enLigne({ ouvert: true }), true);
   OP.OUVERT.tickets = true;
   try {
@@ -126,6 +128,7 @@ test("interrupteurs : essai ouvert (si le serveur l'accorde), tickets fermes ; b
     assert.match(OP.avantages().map((a) => a[1]).join(" | "), /petit et le grand combiné/);
   } finally { OP.OUVERT.tickets = false; delete globalThis.IASHARK_MARKET; }
   assert.doesNotMatch(OP.avantages().map((a) => a[1]).join(" | "), /tickets/);
+  OP.OUVERT.tickets = true;
   // Panneau Marches : en francais seulement (libelles du calcul).
   globalThis.I18N = { locale: "en", t: (k, fb) => fb };
   try { assert.doesNotMatch(OP.avantages().map((a) => a[1]).join(" | "), /marchés/); } finally { delete globalThis.I18N; }

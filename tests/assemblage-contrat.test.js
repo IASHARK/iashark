@@ -92,7 +92,8 @@ test("« 10 000 fois » : la page montre exactement sim_resume (issues, scores, 
     assert.deepEqual(sc.data.labels, r.scores.map((x) => x.score.replace("-", " – ")));
     assert.deepEqual(sc.data.datasets[0].data, r.scores.map((x) => x.n));
     const zero = r.scores.some((x) => x.score === "0-0");
-    assert.deepEqual(bu.data.datasets[0].data, r.total_buts.map((x) => (x.buts === "0" && zero ? null : x.n)));
+    assert.deepEqual(bu.data.datasets[0].data, r.total_buts.map((x) => x.n));
+    assert.deepEqual(bu.data.datasets[0].datalabels.display, r.total_buts.map((x) => !(x.buts === "0" && zero)), "0 but = 0-0 : nombre jamais reecrit");
   }
 });
 

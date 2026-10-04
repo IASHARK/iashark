@@ -142,6 +142,15 @@
   .page.has-mk{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:start}
   .page.has-mk>.mk-col{display:grid;gap:12px;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;padding:16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);scrollbar-width:thin}
   .mk-fab,.mnav-mk{display:none!important}
+  /* Le fond du sommaire collant reste dans la colonne de droite : il ne couvre plus le
+     panneau Marches (avant : bande sombre sur toute la largeur, une ligne du panneau cachee). */
+  .page.has-mk .mnav:before{box-shadow:0 1px 0 var(--line);clip-path:none}
+}
+/* Sommaire : centre quand il tient, defilable depuis la premiere puce sinon (avec
+   justify-content:center, la puce « Avis » etait coupee a gauche et inatteignable). */
+@media(min-width:720px){
+  .mnav-chips{justify-content:flex-start}
+  .mnav-chips::before,.mnav-chips::after{content:"";margin:auto}
 }
 
 /* Apercu flou du match bloque : constantes dessinees par les memes composants */

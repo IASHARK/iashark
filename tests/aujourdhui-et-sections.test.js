@@ -121,9 +121,11 @@ test("« Si ce match se jouait 10 000 fois » : sim_resume seulement (% entier x
   assert.match(h, /Le nombre de buts du match/);
   const [, sc, bu] = specs(h);
   assert.deepEqual(sc.data.datasets[0].data, [1400, 1200, 1100, 700]);
-  // « 0 but » = le 0-0 deja ecrit dans les scores : la barre ne reecrit pas le nombre.
-  assert.deepEqual(bu.data.labels, ["0 (= 0 – 0)", "1", "2", "3", "4+"]);
-  assert.deepEqual(bu.data.datasets[0].data, [null, 2000, 2900, 2200, 2200]);
+  // « 0 but » = le 0-0 deja ecrit dans les scores : la barre reste, son nombre n'est pas reecrit.
+  assert.deepEqual(bu.data.labels, ["0", "1", "2", "3", "4+"]);
+  assert.deepEqual(bu.data.datasets[0].data, [700, 2000, 2900, 2200, 2200]);
+  assert.deepEqual(bu.data.datasets[0].datalabels.display, [false, true, true, true, true]);
+  assert.match(h, /0 but = le score 0 – 0 ci-dessus\./);
   assert.doesNotMatch(h, /undefined|NaN/);
   // UNE SEULE SOURCE : sans sim_resume, rien (ni panneau, ni p1/pn/p2 recalcules ici).
   assert.equal(MS.simulation(ctx({ market_id: "dc-1x", chance_iashark: 66, p1: 44.1, pn: 23.2, p2: 32.7, marches_panneau: PANNEAU })), "");

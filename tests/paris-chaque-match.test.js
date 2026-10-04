@@ -109,19 +109,46 @@ function match(extra) {
     data_quality_score: 60, data_quality_label: "Moyenne", market_source: "Cotes moyennes multi-bookmakers" }, extra || {});
 }
 
-test("publierPronostics : le pronostic devient le pari publie (page du 29/09 : pari_rec, cote_rec, model_probability)", () => {
+// --------------------------------------------------------------------------- fourchette (04/10/2026)
+// Exigence de Clement (04/10/2026, 2 h) : « des cotes entre 1,40 et 1,70 en sec ; toutes les cases
+// remplies et justes ; c'est tout ».
+const F = P.fourchettePari(CFG);
+const dansF = (k) => P.dansFourchette(k, F);
+
+test("fourchette : bornes 1,40-1,70 dans config/leagues.json (un seul endroit), bornes comprises", () => {
+  assert.deepEqual(CFG.fiabilite.fourchette_pari, { cote_min: 1.4, cote_max: 1.7 });
+  assert.deepEqual([F.cote_min, F.cote_max], [1.4, 1.7]);
+  assert.ok(dansF("1.40") && dansF("1,70") && dansF(1.55));
+  assert.ok(!dansF("1.39") && !dansF(1.71) && !dansF(null) && !dansF(""));
+  // Les selections nationales et l'option suivent la meme fourchette.
+  assert.deepEqual([P.FOURCHETTE_SELECTION.cote_min, P.FOURCHETTE_SELECTION.cote_max], [1.4, 1.7]);
+  // Jamais les bornes ecrites en dur dans le code du calcul (commentaires exceptes).
+  const code = (f) => fs.readFileSync(path.join(ROOT, f), "utf8").split("\n").filter((l) => !/^\s*\/\//.test(l)).join("\n");
+  assert.doesNotMatch(code("lib/pronostic.js"), /\b1[.,](?:4|40|7|70)\b/);
+  const bloc = SCRIPT.slice(SCRIPT.indexOf("(function designerMatchGratuit(){"), SCRIPT.indexOf("\n            })();", SCRIPT.indexOf("(function designerMatchGratuit(){")));
+  assert.match(bloc, /var FOURCHETTE_OFFERT=PRONOSTIC\.fourchettePari\(LEAGUES_CONFIG\);/);
+  // Config absente ou illisible : la fourchette du depot, jamais une fourchette inventee.
+  assert.deepEqual(P.fourchettePari({ fiabilite: {} }), F);
+  assert.deepEqual(P.fourchettePari({ fiabilite: { fourchette_pari: { cote_min: 1.5, cote_max: 1.6 } } }), { cote_min: 1.5, cote_max: 1.6 });
+});
+
+test("publierPronostics : le pari publie est un pari simple dans la fourchette (page du 29/09 : pari_rec, cote_rec, model_probability)", () => {
   const m = match();
   const row = { fixture_id: 101, pari_rec: "", cote_rec: null, model_probability: null, market_id: null, marche: null, raw_response: {} };
   P.poserPronostics([m], { configLigues: CFG });
-  assert.ok(m.pronostic && m.pronostic.market_id, "pronostic pose");
   const r = P.publierPronostics([m], [row], { configLigues: CFG, figes: {}, nowIso: "2026-10-04T01:00:00.000Z" });
-  assert.equal(r.publies, 1);
+  assert.equal(r.publies, 1); assert.equal(r.nouveaux, 1);
+  // France - Belgique : 1 a 1,60 (dans la fourchette) ; 1X a 1,15, 12 a 1,25, X2 a 2,40 (dehors).
+  assert.equal(m.market_id, "home-win");
   assert.equal(m.pari_rec, P.MARCHE[m.market_id].marche);
-  assert.ok(["1N2", "DC"].includes(P.MARCHE[m.market_id].famille), "selection : 1N2 ou double chance seulement");
-  assert.ok(Number(m.cote_rec) >= P.COTE_MIN);
-  assert.equal(m.no_signal, false);
+  assert.equal(m.marche, "RESULTAT");
+  assert.equal(m.cote_rec, "1.60"); assert.ok(dansF(m.cote_rec));
+  assert.equal(m.cote_source, "indicative"); assert.equal(m.cote_bookmaker, null);
+  assert.equal(m.no_signal, false); assert.equal(m.no_signal_reason, undefined);
+  assert.equal(m.odds_available, true); assert.equal(m.risque, "FAIBLE");
   assert.equal(m.pick_frozen_at, "2026-10-04T01:00:00.000Z");
-  assert.equal(row.pari_rec, m.pari_rec); assert.equal(row.market_id, m.market_id); assert.equal(row.model_probability, m.model_probability);
+  assert.deepEqual([m.pronostic.market_id, m.pronostic.cote, m.pronostic.publie], ["home-win", 1.6, true]);
+  assert.equal(row.pari_rec, m.pari_rec); assert.equal(row.market_id, m.market_id); assert.equal(row.cote_rec, 1.6); assert.equal(row.model_probability, m.model_probability);
   assert.equal(row.raw_response.pick_freeze.frozen_at, "2026-10-04T01:00:00.000Z");
   // Chance affichee de la Ligue des nations : corrigee de 3 points, partout le meme chiffre.
   const avant = m.model_probability;
@@ -137,20 +164,154 @@ test("publierPronostics : le pronostic devient le pari publie (page du 29/09 : p
   assert.equal(m.model_probability, Math.round(avant) - 3);
 });
 
-test("publierPronostics : jamais un pari fige remplace, jamais un match ferme, jamais « modele seul », jamais sous 1,20", () => {
-  const fige = match({ id: 1 }); P.poserPronostics([fige], { configLigues: CFG });
-  assert.equal(P.publierPronostics([fige], [], { configLigues: CFG, figes: { 1: true } }).publies, 0);
+test("publierPronostics : la plus grande chance CORRIGEE parmi les marches dans la fourchette (meme correction que la chance affichee)", () => {
+  // Ligue 2 : 1X a 1,48 (65 % calcules, -2 entre 1,20 et 1,50 -> 63 %) contre X2 a 1,55 (64 %, sans correction).
+  const m = match({ id: 50, league_key: "ligue2", league_id: 62, league: "Ligue 2", c1: "2.62", cn: "3.30", c2: "2.75", cdc1x: "1.48", cdc2x: "1.55", cdc12: "1.36", co25: "1.95", cu25: "1.85" });
+  P.poserPronostics([m], { configLigues: CFG });
+  P.publierPronostics([m], [], { configLigues: CFG, figes: {} });
+  assert.equal(m.market_id, "dc-x2");
+  assert.equal(m.cote_rec, "1.55");
+  P.alignerChancesAffichees([m], [], { configLigues: CFG, figes: {} });
+  assert.equal(m.model_probability, 64, "la chance affichee est celle qui a servi au classement");
+});
+
+test("publierPronostics : jamais un pari fige remplace, jamais un match ferme ; aucun marche dans la fourchette = pas de pari, l'analyse reste", () => {
+  const fige = match({ id: 1, pari_rec: "DC 1X", market_id: "dc-1x", no_signal: false, chance_iashark: 85, cote_rec: "1.15" });
+  P.poserPronostics([fige], { configLigues: CFG });
+  const rf = P.publierPronostics([fige], [], { configLigues: CFG, figes: { 1: true } });
+  assert.deepEqual([rf.publies, rf.figes, fige.market_id, fige.cote_rec], [0, 1, "dc-1x", "1.15"], "gel prioritaire");
+  assert.equal(fige.pronostic.selection, false, "un pari fige hors fourchette n'est jamais une Selection IASHARK");
   const ferme = match({ id: 2, no_signal_reason: "KICKOFF_PASSED" }); P.poserPronostics([ferme], { configLigues: CFG });
   assert.equal(P.publierPronostics([ferme], [], { configLigues: CFG, figes: {} }).publies, 0);
-  const sansCote = match({ id: 3, c1: null, cn: null, c2: null, cdc1x: null, cdc2x: null, cdc12: null, co25: null, cu25: null, p1: 50, pn: 30, p2: 20 });
-  P.poserPronostics([sansCote], { configLigues: CFG });
-  const r = P.publierPronostics([sansCote], [], { configLigues: CFG, figes: {} });
-  assert.equal(r.publies, 0); assert.equal(r.voie_modele, 1); assert.equal(sansCote.pari_rec, "");
-  const petiteCote = match({ id: 4, league_key: "ligue1", league_id: 61, c1: "1.05", cn: "12", c2: "30", cdc1x: "1.01", cdc2x: "8", cdc12: "1.02", co25: "1.10", cu25: "6.5" });
-  P.poserPronostics([petiteCote], { configLigues: CFG });
-  assert.equal(P.publierPronostics([petiteCote], [], { configLigues: CFG, figes: {} }).publies, 0);
-  const horsListe = match({ id: 5, league_key: "colombia_primera_a", league_id: 239 }); P.poserPronostics([horsListe], { configLigues: CFG });
-  assert.equal(P.publierPronostics([horsListe], [], { configLigues: CFG, figes: {} }).publies, 0);
+  assert.equal(ferme.no_signal_reason, "KICKOFF_PASSED");
+  const cas = {
+    sansCote: match({ id: 3, c1: null, cn: null, c2: null, cdc1x: null, cdc2x: null, cdc12: null, co25: null, cu25: null, p1: 50, pn: 30, p2: 20 }),
+    petiteCote: match({ id: 4, league_key: "ligue1", league_id: 61, c1: "1.05", cn: "12", c2: "30", cdc1x: "1.01", cdc2x: "8", cdc12: "1.02", co25: "1.10", cu25: "6.5" }),
+    grosseCote: match({ id: 6, league_key: "ligue1", league_id: 61, c1: "2.90", cn: "3.10", c2: "2.60", cdc1x: "1.75", cdc2x: "1.80", cdc12: "1.30", co25: "1.85", cu25: "1.95" }),
+    horsListe: match({ id: 5, league_key: "colombia_primera_a", league_id: 239 }),
+  };
+  Object.keys(cas).forEach((k) => {
+    const m = Object.assign(cas[k], { p1: 50, pn: 30, p2: 20, lineups: { home: { formation: "4-3-3" } }, arbitre: { nom: "C. Turpin" }, analyse_card: "Texte ecrit sans pari." });
+    P.poserPronostics([m], { configLigues: CFG });
+    const r = P.publierPronostics([m], [], { configLigues: CFG, figes: {}, texteMarche: { [m.id]: "" } });
+    assert.deepEqual([r.publies, r.sans_pari], [0, 1], k);
+    assert.equal(m.pari_rec, "", k); assert.equal(m.market_id, null, k); assert.equal(m.cote_rec, "", k);
+    assert.equal(m.no_signal, true, k);
+    assert.equal(m.no_signal_reason, P.RAISON_HORS_FOURCHETTE, k);
+    assert.equal(m.no_signal_label, "Aucun signal clair sur ce match", k + " : libelle deja traduit par l'accueil");
+    assert.equal(m.pronostic, undefined, k); assert.equal(m.selection_iashark, undefined, k);
+    // L'analyse du match reste publiee.
+    assert.deepEqual([m.p1, m.lineups.home.formation, m.arbitre.nom, m.analyse_card], [50, "4-3-3", "C. Turpin", "Texte ecrit sans pari."], k);
+  });
+});
+
+function matchV3(extra) {
+  return match(Object.assign({ id: 200, league_key: "premier", league_id: 39, league: "Premier League", league_reliability: "validee",
+    home: { n: "Arsenal" }, away: { n: "Burnley" }, c1: "1.45", cn: "4.60", c2: "7.50", cdc1x: "1.10", cdc2x: "3.00", cdc12: "1.20", co25: "1.45", cu25: "2.75",
+    pari_rec: "DC 1X", market_id: "dc-1x", marche: "DOUBLE_CHANCE", cote_rec: "1.18", cote_source: "anj", cote_bookmaker: "Winamax", sans_marge_anj: { "dc-1x": 85 },
+    no_signal: false, no_signal_reason: undefined, model_probability: 86.2, chance_iashark: 84, chance_iashark_source: "le plus bas entre le modèle et la cote sans marge",
+    moteur_v3: { source: "v3" }, v3_fiabilite: { couverture: "vérifiée" },
+    v3_pari: { cle: "DC:1N", market_id: "dc-1x", raisons: ["Arsenal invaincu a domicile"] },
+    v3_suivi: { cle: "DC:1N", voyant: "vert", alerte_cote: "baisse" },
+    v3_marches: [
+      { cle: "1N2:1", market_id: "home-win", probabilite: 67.5, fiabilite_marche: "vérifié sur le passé", etiquette: "vérifié sur le passé" },
+      { cle: "1N2:N", market_id: "draw", probabilite: 19, fiabilite_marche: "vérifié sur le passé", etiquette: "vérifié sur le passé" },
+      { cle: "1N2:2", market_id: "away-win", probabilite: 13.5, fiabilite_marche: "vérifié sur le passé", etiquette: "vérifié sur le passé" },
+      { cle: "DC:1N", market_id: "dc-1x", probabilite: 86.5, fiabilite_marche: "vérifié sur le passé", etiquette: "vérifié sur le passé" },
+    ],
+    decision_factors: ["Arsenal invaincu a domicile"], key_absences: ["Burnley sans son buteur"],
+    analyse_card: "Le 1X d'Arsenal se justifie par 12 matchs sans defaite.", conseil_public: "Double chance Arsenal.", contexte: "Arsenal 2e, Burnley 18e.",
+  }, extra || {}));
+}
+const CHANCES_V3 = { 200: { marches: { "1N2:1": 66, "1N2:N": 19, "1N2:2": 13, "DC:1N": 84, "DC:N2": 32, "DC:12": 80 } } };
+
+test("pari du moteur v3 hors fourchette : remplace par le marche verifie le plus probable dans la fourchette ; ni texte ni raison d'un autre marche", () => {
+  const m = matchV3();
+  const row = { fixture_id: 200, pari_rec: "DC 1X", market_id: "dc-1x", cote_rec: 1.18, model_probability: 86.2, verdict_shark: "Le 1X est le signal le plus fort.", facteur_x: "12 matchs sans defaite.", kelly: "0.02", edge: "+1.5%",
+    raw_response: { analyse_card: "x", verdict_shark: "y", narrative_i18n: { verdict_shark_i18n: { en: "y" }, facteur_x_i18n: { en: "z" } } } };
+  P.poserPronostics([m], { configLigues: CFG, chancesV3Par: CHANCES_V3 });
+  const r = P.publierPronostics([m], [row], { configLigues: CFG, figes: {}, chancesV3Par: CHANCES_V3, texteMarche: { 200: "dc-1x" } });
+  assert.deepEqual([r.publies, r.changes, r.textes_retires], [1, 1, 1]);
+  // 1X a 1,18 (ANJ) et 12 a 1,20 : hors fourchette ; seule la victoire d'Arsenal (1,45) y est.
+  assert.equal(m.market_id, "home-win"); assert.equal(m.pari_rec, "Victoire Domicile"); assert.equal(m.marche, "RESULTAT");
+  assert.equal(m.cote_rec, "1.45");
+  assert.deepEqual([m.cote_source, m.cote_bookmaker, m.sans_marge_anj], ["indicative", null, undefined], "la cote ANJ du 1X ne decrit jamais la victoire");
+  assert.equal(m.chance_iashark, 66); assert.equal(m.model_probability, 66);
+  // Selection IASHARK gardee (competition validee, marche verifie du v3), mais ce n'est plus le pari du moteur v3 lui-meme.
+  assert.deepEqual([m.pronostic.selection, m.pronostic.moteur, m.selection_iashark], [true, "v3", true]);
+  assert.equal(m.v3_pari, undefined);
+  assert.deepEqual([m.v3_suivi.cle, m.v3_suivi.alerte_cote, m.v3_suivi.voyant], [null, null, "vert"]);
+  // Textes et raisons ecrits pour le 1X : retires ; le contexte (vrai quel que soit le pari) reste.
+  assert.deepEqual([m.analyse_card, m.conseil_public, m.contexte], ["", "", "Arsenal 2e, Burnley 18e."]);
+  assert.deepEqual(m.decision_factors, ["Burnley sans son buteur"]);
+  assert.deepEqual([row.verdict_shark, row.facteur_x, row.raw_response.analyse_card, row.raw_response.verdict_shark], ["", "", "", ""]);
+  assert.deepEqual(row.raw_response.narrative_i18n, {});
+  assert.deepEqual([row.market_id, row.cote_rec, row.model_probability, row.kelly, row.edge], ["home-win", 1.45, 66, "0", ""]);
+});
+
+test("pari du moteur v3 dans la fourchette : garde tel quel (cote ANJ, textes, raisons, v3_pari)", () => {
+  const m = matchV3({ pari_rec: "Victoire Domicile", market_id: "home-win", marche: "RESULTAT", cote_rec: "1.52", chance_iashark: 66,
+    v3_pari: { cle: "1N2:1", market_id: "home-win", raisons: ["Arsenal 9 victoires sur 10"] }, v3_suivi: { cle: "1N2:1", voyant: "vert" }, decision_factors: ["Arsenal 9 victoires sur 10"] });
+  const r = P.publierPronostics([m], [], { configLigues: CFG, figes: {}, chancesV3Par: CHANCES_V3, texteMarche: { 200: "home-win" } });
+  assert.deepEqual([r.publies, r.gardes, r.textes_retires], [1, 1, 0]);
+  assert.deepEqual([m.market_id, m.cote_rec, m.cote_source, m.cote_bookmaker], ["home-win", "1.52", "anj", "Winamax"]);
+  assert.deepEqual(m.v3_pari.raisons, ["Arsenal 9 victoires sur 10"]);
+  assert.equal(m.v3_suivi.cle, "1N2:1");
+  assert.equal(m.analyse_card, "Le 1X d'Arsenal se justifie par 12 matchs sans defaite.", "texte ecrit pour ce pari : garde");
+  assert.deepEqual(m.decision_factors, ["Arsenal 9 victoires sur 10"]);
+  // Cote ANJ hors fourchette (1,75) alors que la moyenne est dedans : la cote affichee decide, pas de pari sur ce marche.
+  const anj = matchV3({ pari_rec: "Victoire Domicile", market_id: "home-win", cote_rec: "1.75", c1: "1.65", co25: "1.30", cu25: "3.40", chance_iashark: 62,
+    v3_pari: { cle: "1N2:1", market_id: "home-win" } });
+  P.publierPronostics([anj], [], { configLigues: CFG, figes: {}, chancesV3Par: CHANCES_V3 });
+  assert.equal(anj.pari_rec, "");
+  assert.equal(anj.no_signal_reason, P.RAISON_HORS_FOURCHETTE);
+});
+
+test("textes ecrits pour un match sans pari : vides quand un pari est publie (jamais « aucun pari » a cote d'un pari)", () => {
+  const m = match({ id: 300, contexte: "Aucun pari n'est retenu sur ce match aujourd'hui. La France reste sur 5 victoires.", analyse_card: "Aucun pari publie.",
+    lecture_match: "La France devrait controler.", scenario: { phase1: "Debut ferme.", phase2: "Pas de pari sur ce match. La France pousse.", phase3: "Fin animee." },
+    contexte_i18n: { en: "No bet." }, scenario_i18n: { en: { phase1: "x" } } });
+  P.publierPronostics([m], [], { configLigues: CFG, figes: {}, texteMarche: { 300: "" } });
+  assert.equal(m.market_id, "home-win");
+  assert.equal(m.contexte, "La France reste sur 5 victoires.");
+  assert.equal(m.contexte_i18n, undefined, "traduction d'une phrase retiree : masquee");
+  assert.equal(m.analyse_card, "");
+  assert.equal(m.lecture_match, "La France devrait controler.");
+  assert.deepEqual(m.scenario, { phase1: "Debut ferme.", phase2: "La France pousse.", phase3: "Fin animee." });
+  assert.equal(m.scenario_i18n, undefined);
+});
+
+test("selections nationales : meme fourchette 1,40-1,70 ; la selection suit le pari publie", () => {
+  // 1,75 n'est plus dans la fourchette (elle etait 1,40-2,00) : aucun marche -> aucune selection, aucun pari.
+  const hors = match({ id: 401, c1: "1.75", cn: "3.70", c2: "4.80", cdc1x: "1.20", cdc2x: "2.05", cdc12: "1.30" });
+  assert.equal(P.poserSelectionsNationales([hors], [], { configLigues: CFG }), 0);
+  const dedans = match({ id: 402, c1: "1.65", cn: "3.70", c2: "4.80", cdc1x: "1.20", cdc2x: "2.05", cdc12: "1.30" });
+  assert.equal(P.poserSelectionsNationales([dedans], [], { configLigues: CFG }), 1);
+  P.poserPronostics([hors, dedans], { configLigues: CFG });
+  P.publierPronostics([hors, dedans], [], { configLigues: CFG, figes: {} });
+  assert.deepEqual([dedans.market_id, dedans.cote_rec, dedans.pronostic.selection, dedans.selection_iashark], ["home-win", "1.65", true, true]);
+  assert.equal(hors.pari_rec, ""); assert.equal(hors.selection_iashark, undefined);
+});
+
+test("option « cote plus haute » : dans la fourchette elle aussi, 70 % ou plus, jamais le pari principal, chance corrigee", () => {
+  // 1X a 1,40 (79 %) : le pari ; 12 a 1,45 (75 %) : l'option ; victoire a 1,80 : hors fourchette.
+  const m = match({ id: 9, league_key: "ligue1", league_id: 61, c1: "1.80", cn: "3.70", c2: "4.40", cdc1x: "1.40", cdc2x: "2.20", cdc12: "1.45", co25: "1.90", cu25: "1.90" });
+  P.poserPronostics([m], { configLigues: CFG });
+  P.publierPronostics([m], [], { configLigues: CFG, figes: {} });
+  P.alignerChancesAffichees([m], [], { configLigues: CFG, figes: {} });
+  assert.equal(m.market_id, "dc-1x");
+  assert.equal(P.poserOptionCote([m], { configLigues: CFG }), 1);
+  const o = m.option_cote;
+  assert.equal(o.market_id, "dc-12"); assert.ok(dansF(o.cote));
+  assert.ok(o.chance_calculee >= P.OPTION_COTE.chance_min);
+  assert.equal(o.chance, o.chance_calculee - 6);
+  assert.equal(o.cote_minimum, Math.round((100 / o.chance) * 100) / 100);
+  // Aucune autre issue a 70 % ou plus dans la fourchette : pas d'option.
+  const serre = match({ id: 10, league_key: "ligue1", league_id: 61, c1: "2.60", cn: "3.20", c2: "2.80", cdc1x: "1.45", cdc2x: "1.50", cdc12: "1.35", co25: "2.00", cu25: "1.80" });
+  P.poserPronostics([serre], { configLigues: CFG });
+  P.publierPronostics([serre], [], { configLigues: CFG, figes: {} });
+  P.poserOptionCote([serre], { configLigues: CFG });
+  assert.equal(serre.option_cote, undefined);
 });
 
 test("publierPronostics : un championnat non verifie recoit son pari par les cotes du marche (fiabilite « en test »)", () => {
@@ -160,26 +321,6 @@ test("publierPronostics : un championnat non verifie recoit son pari par les cot
   assert.equal(m.pronostic.fiabilite, "en test");
   assert.equal(P.publierPronostics([m], [], { configLigues: CFG, figes: {} }).publies, 1);
   assert.ok(m.model_probability >= 50 && m.model_probability < 100);
-});
-
-test("option « cote plus haute » : 70 % ou plus, la plus grosse cote, jamais le pari principal, chance corrigee", () => {
-  const m = match({ id: 9, league_key: "ligue1", league_id: 61, c1: "1.30", cn: "5.50", c2: "11.00", cdc1x: "1.05", cdc2x: "3.60", cdc12: "1.20", co25: "1.55", cu25: "2.45" });
-  P.poserPronostics([m], { configLigues: CFG });
-  P.publierPronostics([m], [], { configLigues: CFG, figes: {} });
-  P.alignerChancesAffichees([m], [], { configLigues: CFG, figes: {} });
-  assert.equal(P.poserOptionCote([m], { configLigues: CFG }), 1);
-  const o = m.option_cote;
-  assert.notEqual(o.market_id, m.market_id);
-  assert.ok(o.chance_calculee >= P.OPTION_COTE.chance_min);
-  assert.equal(o.chance, o.chance_calculee - 6);
-  assert.equal(o.cote_minimum, Math.round((100 / o.chance) * 100) / 100);
-  assert.ok(o.cote >= P.COTE_MIN);
-  // Aucune issue a 70 % ou plus en dehors du pari : pas d'option.
-  const serre = match({ id: 10, league_key: "ligue1", league_id: 61, c1: "2.60", cn: "3.20", c2: "2.80", cdc1x: "1.45", cdc2x: "1.50", cdc12: "1.35", co25: "2.00", cu25: "1.80" });
-  P.poserPronostics([serre], { configLigues: CFG });
-  P.publierPronostics([serre], [], { configLigues: CFG, figes: {} });
-  P.poserOptionCote([serre], { configLigues: CFG });
-  assert.equal(serre.option_cote, undefined);
 });
 
 // --------------------------------------------------------------------------- garde-fous
@@ -204,7 +345,7 @@ test("contenu Pro : option_cote et chance_correction premium ; cotes Pinnacle ja
 
 test("pipeline : un pari sur chaque match apres les pronostics, avant le match offert et l'ecriture des donnees", () => {
   const iProno = SCRIPT.indexOf("PRONOSTIC.poserPronostics(");
-  const iPub = SCRIPT.indexOf("PRONOSTIC.publierPronostics(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,figes:GEL_FIGES})");
+  const iPub = SCRIPT.indexOf("PRONOSTIC.publierPronostics(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,figes:GEL_FIGES,chancesV3Par:CHANCES_V3_PRONO,texteMarche:TEXTE_MARCHE})");
   const iAlign = SCRIPT.indexOf("PRONOSTIC.alignerChancesAffichees(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,figes:GEL_FIGES})");
   const iOpt = SCRIPT.indexOf("PRONOSTIC.poserOptionCote(allMatchsData,{configLigues:LEAGUES_CONFIG})");
   assert.ok(iProno > 0 && iPub > iProno && iAlign > iPub && iOpt > iAlign);
@@ -212,6 +353,12 @@ test("pipeline : un pari sur chaque match apres les pronostics, avant le match o
   assert.ok(iOpt < SCRIPT.indexOf("await writePremiumData(premiumRows);"));
   assert.ok(iOpt < SCRIPT.indexOf("await updateHistorique(allMatchsData);"));
   assert.ok(SCRIPT.indexOf("var GEL_FIGES={}") < iPub, "le gel est connu avant la publication");
+  // Fourchette (04/10/2026) : apres le gel, la SAFE_PICK, la cote ANJ et les selections nationales (il decide le pari final).
+  ["var rapportAnj=await COTE_ANJ.poserCotesAnj(", "PRONOSTIC.poserSelectionsNationales(", "matchCibleSafePick.pari_rec="].forEach((x) => assert.ok(SCRIPT.indexOf(x) > 0 && SCRIPT.indexOf(x) < iPub, x));
+  // Marche des textes d'analyse : relevé a la construction de chaque match, en memoire seulement.
+  assert.match(SCRIPT, /var TEXTE_MARCHE=\{\};/);
+  assert.match(SCRIPT, /matchsData\.push\(matchObj\);\n\s*TEXTE_MARCHE\[String\(f\.id\)\]=pickedMarket\?String\(pickedMarket\.id\):'';/);
+  assert.doesNotMatch(SCRIPT, /writeFileSync\([^)]*TEXTE_MARCHE/);
   // Arbitre : nom lu dans la fixture, aucune statistique inventee.
   assert.match(SCRIPT, /\{nom:f\.referee\.split\(','\)\[0\]\.trim\(\),cartons:null,penaltys:null,matchs:null\}/);
   // Gabarit des pages match du 29/09 : titre « A vs B ».

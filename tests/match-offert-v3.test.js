@@ -24,11 +24,12 @@ const fin = WF.indexOf("\n            })();", debut) + "\n            })();".len
 const BLOC = WF.slice(debut, fin);
 const SELECTIONS = require("../lib/selections-nationales.js");
 const LEAGUES_CONFIG = require("../config/leagues.json");
-const designer = new Function("eligibleForFree", "FIXTURE_BY_ID", "PICK_FREEZE", "prevByFixture", "allMatchsData", "TODAY", "MOTEUR_V3", "reasonableParisSlot", "console", "SELECTIONS", "LEAGUES_CONFIG", BLOC);
+const PRONOSTIC = require("../lib/pronostic.js");
+const designer = new Function("eligibleForFree", "FIXTURE_BY_ID", "PICK_FREEZE", "prevByFixture", "allMatchsData", "TODAY", "MOTEUR_V3", "reasonableParisSlot", "console", "SELECTIONS", "LEAGUES_CONFIG", "PRONOSTIC", BLOC);
 
 const TODAY = "2026-10-03";
 function v3(id, prob, date, extra) {
-  return Object.assign({ id: id, date: date || TODAY + " 20:00", pari_rec: "Over 1.5", no_signal: false, model_probability: prob, cote_rec: "1.30",
+  return Object.assign({ id: id, date: date || TODAY + " 20:00", pari_rec: "Over 1.5", no_signal: false, model_probability: prob, cote_rec: "1.55",
     analysis_tier: "FULL_ANALYSIS", v3_pari: { cle: "TOTAL:plus1.5" }, moteur_v3: { source: "v3" }, home: { n: "A" + id }, away: { n: "B" + id },
     // Pose par lib/pronostic.js avant la designation (03/10/2026) : la selection est un pronostic.
     pronostic: { market_id: "over-15", chance: prob, selection: true } }, extra || {});
@@ -41,7 +42,7 @@ function choisir(matchs, opts) {
   const fx = {};
   matchs.forEach((m) => { fx[String(m.id)] = { started: !!m._commence }; });
   designer((f) => !!f && !f.started, fx, { keptFreeDesignations: () => opts.gardes || {} }, {}, matchs, TODAY,
-    { actif: opts.eteint ? false : true }, reasonableParisSlot, { log: () => {} }, SELECTIONS, LEAGUES_CONFIG);
+    { actif: opts.eteint ? false : true }, reasonableParisSlot, { log: () => {} }, SELECTIONS, LEAGUES_CONFIG, PRONOSTIC);
   return matchs.filter((m) => m.is_free).map((m) => m.id);
 }
 
@@ -54,8 +55,8 @@ test("la regle est ecrite en clair dans le bloc du pipeline", () => {
 
 test("le plus probable des paris v3, jamais un pari de l'ancien moteur ni la « valeur »", () => {
   assert.deepEqual(choisir([v3(1, 78), v3(2, 81), ancien(3, 90)]), [2]);
-  // « Valeur » : 60 % a 1,70 (valeur +0,02) contre 83 % a 1,10 (valeur -0,09) : le plus probable gagne.
-  assert.deepEqual(choisir([v3(1, 83, null, { cote_rec: "1.10" }), v3(2, 60, null, { cote_rec: "1.70" })]), [1]);
+  // « Valeur » : 70 % a 1,70 (valeur +0,19) contre 83 % a 1,40 (valeur +0,16) : le plus probable gagne.
+  assert.deepEqual(choisir([v3(1, 83, null, { cote_rec: "1.40" }), v3(2, 70, null, { cote_rec: "1.70" })]), [1]);
 });
 
 test("egalites : le plus tot, puis le plus petit numero de match (ordre fixe)", () => {
@@ -95,7 +96,7 @@ test("aucun pari v3 ce jour-la : repli sur une Selection IASHARK verifiee (decis
 });
 
 test("moteur v3 eteint : l'ancien choix reste en place (le bloc v3 ne s'applique pas)", () => {
-  const ids = choisir([ancien(1, 60, null, { cote_rec: "2.00" }), ancien(2, 80, null, { cote_rec: "1.20" })], { eteint: true });
+  const ids = choisir([ancien(1, 60, null, { cote_rec: "1.70" }), ancien(2, 80, null, { cote_rec: "1.45" })], { eteint: true });
   assert.equal(ids.length, 1);
 });
 
@@ -209,4 +210,19 @@ test("match offert : jamais une competition « en test », ni designee ce run ni
   const matin = v3(1, 90, null, { league_reliability: "en_test" });
   assert.deepEqual(choisir([matin, v3(2, 70)], { gardes: { [TODAY]: matin } }), [2], "designation precedente en test : remplacee");
   assert.deepEqual(choisir([v3(1, 90, null, { league_reliability: "validee" }), v3(2, 70)]), [1], "temoin : competition validee");
+});
+
+test("fourchette du 04/10/2026 : le match offert a une cote entre 1,40 et 1,70 (config), jamais un pari fige hors fourchette, meme garde", () => {
+  const F = PRONOSTIC.fourchettePari(LEAGUES_CONFIG);
+  assert.deepEqual([F.cote_min, F.cote_max], [1.4, 1.7]);
+  assert.match(BLOC, /var FOURCHETTE_OFFERT=PRONOSTIC\.fourchettePari\(LEAGUES_CONFIG\);/);
+  // Le plus probable est hors fourchette (1,30 ou 1,75) : c'est le suivant, dans la fourchette.
+  assert.deepEqual(choisir([v3(1, 90, null, { cote_rec: "1.30" }), v3(2, 85, null, { cote_rec: "1.75" }), v3(3, 70, null, { cote_rec: "1.70" })]), [3]);
+  // Bornes comprises.
+  assert.deepEqual(choisir([v3(1, 90, null, { cote_rec: "1.39" }), v3(2, 80, null, { cote_rec: "1.40" })]), [2]);
+  // Aucun pari dans la fourchette : aucun match offert.
+  assert.deepEqual(choisir([v3(1, 90, null, { cote_rec: "1.25" }), v3(2, 60, null, { cote_rec: "1.90" })]), []);
+  // Designation d'un run precedent (gel) dont le pari est hors fourchette : pas gardee.
+  const garde = v3(1, 90, null, { cote_rec: "1.25" });
+  assert.deepEqual(choisir([garde, v3(2, 70, null, { cote_rec: "1.60" })], { gardes: { [TODAY]: garde } }), [2]);
 });

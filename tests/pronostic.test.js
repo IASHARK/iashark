@@ -192,18 +192,19 @@ test("cote minimale 1,20 (decision de Clement) : jamais « Pays-Bas ou nul a 1,0
 
 test("selections nationales verifiees (VERIF-SELECTIONS.md) : selection du site par la regle du robot, amicaux exclus", () => {
   assert.deepEqual(P.clesSelectionsCotes(CFG), ["nations_league", "wcq_europe"]);
-  const ldn = match({ id: 10, league_key: "nations_league", league_id: 5, league: "UEFA Nations League", c1: "1.75", cn: "3.70", c2: "4.80", cdc1x: "1.20", cdc2x: "2.05", dc12: "1.30", co25: "1.9", cu25: "1.9" });
+  // Fourchette du 04/10/2026 (config/leagues.json#fiabilite.fourchette_pari) : 1,40-1,70.
+  const ldn = match({ id: 10, league_key: "nations_league", league_id: 5, league: "UEFA Nations League", c1: "1.65", cn: "3.70", c2: "4.80", cdc1x: "1.20", cdc2x: "2.05", dc12: "1.30", co25: "1.9", cu25: "1.9" });
   const ami = match({ id: 11, league_key: "other", league_id: 10, league: "Friendlies", c1: "1.75", cn: "3.70", c2: "4.80", p1: 52, pn: 27, p2: 21 });
   const hors = match({ id: 12, league_key: "nations_league", league_id: 5, league: "UEFA Nations League", c1: "1.15", cn: "7", c2: "15", cdc1x: "1.02", cdc2x: "4.5", dc12: "1.08" });
   const fige = match({ id: 13, league_key: "nations_league", league_id: 5, league: "UEFA Nations League", pari_rec: "DC X2", market_id: "dc-x2", no_signal: false, chance_iashark: 70, cote_rec: "1.45", c1: "1.75", cn: "3.70", c2: "4.80" });
   const rows = [{ fixture_id: 10 }, { fixture_id: 13 }];
   assert.equal(P.poserSelectionsNationales([ldn, ami, hors, fige], rows, { configLigues: CFG }), 1);
-  assert.equal(ldn.market_id, "home-win", "1N2 / DC dans la fourchette 1,40-2,00, le plus probable");
+  assert.equal(ldn.market_id, "home-win", "1N2 / DC dans la fourchette 1,40-1,70, le plus probable");
   assert.equal(ldn.pari_rec, "Victoire Domicile");
-  assert.equal(ldn.cote_rec, "1.75");
+  assert.equal(ldn.cote_rec, "1.65");
   assert.equal(ldn.no_signal, false);
   assert.ok(ldn.chance_iashark > 50 && ldn.chance_iashark < 60);
-  assert.deepEqual(rows[0], { fixture_id: 10, pari_rec: "Victoire Domicile", market_id: "home-win", marche: "Victoire Domicile", cote_rec: "1.75", model_probability: ldn.model_probability });
+  assert.deepEqual(rows[0], { fixture_id: 10, pari_rec: "Victoire Domicile", market_id: "home-win", marche: "Victoire Domicile", cote_rec: "1.65", model_probability: ldn.model_probability });
   assert.ok(!ami.pari_rec, "amical : jamais");
   assert.ok(!hors.pari_rec, "aucun marche dans la fourchette : pas de selection");
   assert.equal(fige.market_id, "dc-x2", "selection deja posee (gel) : intouchee");
@@ -213,11 +214,11 @@ test("selections nationales verifiees (VERIF-SELECTIONS.md) : selection du site 
   assert.equal(ami.pronostic.voie, "modele");
 });
 
-test("fourchette et plafond des selections nationales = ceux des selections simples du robot", async () => {
-  const M = await import("../supabase/functions/_shared/canal-pro-menu.mjs");
-  assert.equal(P.FOURCHETTE_SELECTION.cote_min, M.MENU.simple.cote_min);
-  assert.equal(P.FOURCHETTE_SELECTION.cote_max, M.MENU.simple.cote_max);
-  assert.equal(P.FOURCHETTE_SELECTION.max_par_jour, M.MENU.simple.max);
+test("fourchette des selections nationales = celle de tout pari publie (config/leagues.json#fiabilite.fourchette_pari, 04/10/2026) ; plafond 3 par jour", () => {
+  // Le robot du Canal Pro (canal-pro-menu.mjs, 1,40-2,00) n'est pas dans ce depot : la regle du site est la fourchette du 04/10/2026.
+  assert.equal(P.FOURCHETTE_SELECTION.cote_min, CFG.fiabilite.fourchette_pari.cote_min);
+  assert.equal(P.FOURCHETTE_SELECTION.cote_max, CFG.fiabilite.fourchette_pari.cote_max);
+  assert.equal(P.FOURCHETTE_SELECTION.max_par_jour, 3);
 });
 
 test("selections nationales : au plus 3 par jour, les plus hautes chances ; le gel compte", () => {

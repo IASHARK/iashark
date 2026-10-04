@@ -897,7 +897,7 @@ jobs:
             // le refus du plafond, { response: [] }, etait lu comme « 0 blessure » : injuries_fetch_ok vrai, liste vide).
             if((r.__ia_status||'OK')!=='OK'||!Array.isArray(r.response))return{fetch_ok:false,items:[]};
             return {fetch_ok:true,items:r.response.map(function(inj){
-              return {name:(inj.player&&inj.player.name)||'',team:(inj.team&&inj.team.id)||0,reason:(inj.player&&inj.player.reason)||'Blessure',status:(inj.player&&inj.player.type)||'Injured'};
+              return {name:(inj.player&&inj.player.name)||'',player_id:(inj.player&&inj.player.id)||null,team:(inj.team&&inj.team.id)||0,reason:(inj.player&&inj.player.reason)||'Blessure',status:(inj.player&&inj.player.type)||'Injured'};
             })};
           }
           async function getH2H(homeId, awayId) {
@@ -3756,7 +3756,9 @@ jobs:
               // a alors aucune probabilite honnete a publier. Dans tous les
               // autres cas, l'echelle de repli ci-dessus a fourni un marche.
               var noSignal=!pickedMarket;
-              var injuries=(injRaw||[]).map(function(inj){return{name:inj.name,team:inj.team===home.id?home.id:away.id,reason:inj.reason||'Blessure',status:(inj.status||'out').toLowerCase().includes('suspend')?'suspended':'out',impact:'medium'};});
+              // player_id et type (« Missing Fixture » / « Questionable » d'API-Football) : lus par lib/buteurs-figes.js#absenceDe
+              // (un buteur annonce absent ne reste pas propose ; « Questionable » ne retire personne). Regle du 04/10/2026, 20 h.
+              var injuries=(injRaw||[]).map(function(inj){return{name:inj.name,player_id:inj.player_id||null,type:inj.status||null,team:inj.team===home.id?home.id:away.id,reason:inj.reason||'Blessure',status:(inj.status||'out').toLowerCase().includes('suspend')?'suspended':'out',impact:'medium'};});
               var matchup=calcMatchup(xgH,xgA,sH,sA);
               var keyAbsenceAlerts=calcKeyAbsences(injuries,topScorersH,topScorersA,home.id,away.id,bmHdom,mdHdom,bmAext,meAext);
               var disciplineRisk=calcDisciplineRisk(refStats,xgH,xgA,home.name,away.name);
@@ -4409,7 +4411,9 @@ jobs:
               });
               console.log('  [COTE ANJ] cotes des agrees relevees pour '+Object.keys(LIVRES_ANJ).length+' match(s) ouvert(s) sur '+aReleverAnj.length+' ('+releveLivres.appels+' competition(s), aucun credit de plus)'+(releveLivres.erreurs.length?' ; '+releveLivres.erreurs.length+' erreur(s)':'')+'.');
             }catch(e){ LIVRES_ANJ={}; RELEVES_ANJ={}; RELEVES_ANJ_EV={}; console.log('::warning title=Cote ANJ::livres non releves ('+String(e&&e.message||e).replace(/apiKey=[^&\s]+/g,'apiKey=***').slice(0,150)+') : cote du marche d\'API-Football seulement.'); }
-            allMatchsData.forEach(function(m){ CHANCE_IASHARK.poserChance(m); });
+            // Pari fige (GEL_FIGES) : sa chance publiee ne bouge plus (regle de Clement du 04/10/2026, 20 h,
+            // lib/pronostic.js#poserChancesAffichees) ; les autres : lib/chance-iashark.js#poserChance.
+            PRONOSTIC.poserChancesAffichees(allMatchsData,{figes:GEL_FIGES});
             // ================= TOUS LES MARCHES (03/10/2026) =================
             // Page match : les marches de la liste blanche du mathematicien (config/marches-valides.json),
             // chance = cote bet365 sans marge (methode puissance, controle Pinnacle), arrondie par
@@ -4501,8 +4505,23 @@ jobs:
             console.log('  [PARIS] chance affichee alignee sur '+rapportAlign.alignes+' pari(s), dont '+rapportAlign.corriges+' corrigee(s) (categorie trop optimiste).');
           }catch(e){ console.log('::warning title=Paris::chances non alignees ('+(e&&e.message)+').'); }
           try{
-            console.log('  [PARIS] option « cote plus haute » posee sur '+PRONOSTIC.poserOptionCote(allMatchsData,{configLigues:LEAGUES_CONFIG,cotesAnjPar:LIVRES_ANJ})+' match(s).');
+            // Pari fige : son option publiee reste telle quelle, jamais recalculee (regle de Clement du 04/10/2026, 20 h).
+            console.log('  [PARIS] option « cote plus haute » posee sur '+PRONOSTIC.poserOptionCote(allMatchsData,{configLigues:LEAGUES_CONFIG,cotesAnjPar:LIVRES_ANJ,figes:GEL_FIGES})+' match(s).');
           }catch(e){ console.log('::warning title=Paris::option cote non posee ('+(e&&e.message)+').'); }
+          // ================= BUTEURS FIGES (regle de Clement du 04/10/2026, 20 h) =================
+          // « Chaque decision affichee ne doit plus jamais changer. Seule exception : les buteurs, si le joueur n'est
+          // pas dans la composition. » Les buteurs probables de la page match (v3_buteurs, top_scorers) deja servis
+          // (ligne match_premium_data relue avant le calcul) restent ceux-la ; un joueur n'est remplace que s'il est
+          // absent (composition officielle publiee sans lui, absence annoncee pour ce match, hors de l'effectif
+          // convoque), avant le coup d'envoi (lib/buteurs-figes.js). Pendant la journee : workflow
+          // buteurs-jour-de-match. AVANT les tickets : le buteur du jour se choisit parmi les buteurs affiches.
+          // Le premier buteur (v3_premiers_buteurs) : apres les sections de la page (plus bas). Journal : compteurs.
+          var BUTEURS_FIGES=null;
+          try{
+            BUTEURS_FIGES=require('./lib/buteurs-figes.js');
+            var rapportButeurs=BUTEURS_FIGES.figerButeurs(allMatchsData,PUBLICATIONS_PRECEDENTES.lignes,{nowMs:Date.now(),fixtureById:FIXTURE_BY_ID,champs:['v3_buteurs','top_scorers']});
+            console.log('  [BUTEURS] listes deja servies gardees : '+rapportButeurs.figes+' ; joueurs absents remplaces : '+rapportButeurs.remplaces+', retires sans remplacant : '+rapportButeurs.retires+'.');
+          }catch(e){ console.log('::warning title=Buteurs figes::listes non figees ('+(e&&e.message)+') : les buteurs de la page match peuvent changer a ce run.'); }
           // ================= TICKETS DU JOUR, SELECTION EN OR, BUTEUR DU JOUR (demande de Clement, 04/10/2026) =================
           // Juste APRES la publication des paris : les jambes sont exactement les paris simples affiches sur les
           // pages match (meme pari, meme cote, meme chance ; lib/run-output/jambes-du-jour.js). Ticket x5 (3-4 matchs,
@@ -4540,6 +4559,12 @@ jobs:
             var nbSections=SECTIONS_MATCH.poserSections(allMatchsData);
             console.log('  [SECTIONS] 10 000 fois : '+nbSections.sim_resume+' match(s) (dont '+nbSections.cotes_marche+' par les cotes du marche sans marge, hors du moteur v3), qui ouvre le score : '+nbSections.premier_but+' match(s).');
           }catch(e){ console.log('::warning title=Sections match::sections non posees ('+(e&&e.message)+').'); }
+          // Premier buteur deja servi : garde (meme exception des absents, lib/buteurs-figes.js), APRES les sections
+          // qui peuvent le retirer, AVANT la liste des contenus Pro.
+          try{
+            var rapportPremiers=BUTEURS_FIGES.figerButeurs(allMatchsData,PUBLICATIONS_PRECEDENTES.lignes,{nowMs:Date.now(),fixtureById:FIXTURE_BY_ID,champs:['v3_premiers_buteurs']});
+            console.log('  [BUTEURS] premier buteur deja servi garde : '+rapportPremiers.figes+' ; remplaces : '+rapportPremiers.remplaces+', retires : '+rapportPremiers.retires+'.');
+          }catch(e){ console.log('::warning title=Buteurs figes::premier buteur non fige ('+(e&&e.message)+').'); }
           // Les jumeaux du match (lib/jumeaux.js) : faits d'archive, seulement avec la table validee par
           // l'ingenieur donnees (config/jumeaux.json#table) ET le feu vert du mathematicien. Sinon : rien.
           try{
@@ -4605,7 +4630,8 @@ jobs:
                 return m.league_reliability!=='en_test';
               };
               // FOURCHETTE (exigence de Clement, 04/10/2026) : le match offert a, lui aussi, une cote affichee entre
-              // les bornes de config/leagues.json#fiabilite.fourchette_pari (un pari fige hors fourchette n'est jamais offert).
+              // les bornes de config/leagues.json#fiabilite.fourchette_pari (un pari fige hors fourchette n'est jamais CHOISI ;
+              // une designation deja publiee reste, elle, jusqu'a minuit : regle du 04/10/2026, 20 h, plus bas).
               var FOURCHETTE_OFFERT=PRONOSTIC.fourchettePari(LEAGUES_CONFIG);
               var dansFourchetteOffert=function(m){ return !!m && PRONOSTIC.dansFourchette(m.cote_rec,FOURCHETTE_OFFERT); };
               var analysable=function(m){ return m && m.pari_rec && !m.no_signal && estSelectionDuJour(m) && competitionOffrable(m) && dansFourchetteOffert(m) && eligibleForFree(FIXTURE_BY_ID[String(m.id)],OFFRE_MS); };
@@ -4641,18 +4667,25 @@ jobs:
                 }
                 return liste.reduce(function(b,m){ return (b===null||(Number(m.conf)||0)>(Number(b.conf)||0))?m:b; }, null);
               };
-              // GEL (19/09/2026, lib/pick-freeze.js#keptFreeDesignations) : l'analyse
-              // offerte d'un jour deja designee par un run precedent (is_free du
-              // data.json publie) le reste pour ce jour tant qu'elle peut etre servie
-              // (meme fixture, meme jour, pari publie, coup d'envoi a venir, statut
-              // NS/TBD). Le proprietaire l'annonce aux membres le matin : elle ne
-              // bascule pas au run de midi. Sinon (commence, reporte, annule) : choix
-              // habituel ci-dessous parmi les matchs analysables.
+              // GEL (19/09/2026 ; regle de Clement du 04/10/2026, 20 h : « le match gratuit reste le meme
+              // de 00 h a 23 h 59, heure de Paris, quoi qu'il arrive », lib/pick-freeze.js#keptFreeDesignations) :
+              // l'analyse offerte d'un jour deja designee par un run precedent (is_free du data.json publie,
+              // jour = free_day) le reste TOUT ce jour-la, meme commencee, terminee, reportee, annulee, sans
+              // pari, hors fourchette, sans cote ou dans une competition passee « en test ». Les filtres
+              // ci-dessus (analysable : selection, competition, fourchette, coup d'envoi) ne servent qu'a
+              // CHOISIR un jour encore sans match offert ; ils ne retirent jamais une designation.
               var gardes={};
               try{ gardes=PICK_FREEZE.keptFreeDesignations(Object.keys(prevByFixture).map(function(k){ return prevByFixture[k]; }),allMatchsData,{today:TODAY,nowMs:OFFRE_MS,fixturesById:FIXTURE_BY_ID}); }
               catch(e){ console.log('::warning title=Gel des paris::match offert : designation precedente non relue ('+(e&&e.message)+').'); }
-              // Une designation precedente dans une competition « en test » n'est jamais gardee.
-              Object.keys(gardes).forEach(function(j){ if(gardes[j]&&(!competitionOffrable(gardes[j])||!dansFourchetteOffert(gardes[j]))) delete gardes[j]; });
+              // Jours deja pourvus par un run precedent : jamais un AUTRE match offert ce jour-la, meme si le
+              // match designe n'est plus dans le calcul (avertissement ; on ne sert pas un match qu'on n'a plus).
+              var joursDejaOfferts={};
+              Object.keys(prevByFixture).forEach(function(k){
+                var p=prevByFixture[k];
+                if(!p||p.is_free!==true) return;
+                var jp=/^\d{4}-\d{2}-\d{2}$/.test(String(p.free_day||''))?String(p.free_day):jourDe(p);
+                if(jp&&jp>=TODAY) joursDejaOfferts[jp]=true;
+              });
               // MOTEUR_V3:DEBUT - match offert (avocat du diable C3 ; mathematicien et decision
               // de Clement du 29/09/2026). REGLE COMPLETE, dans cet ordre, pour chaque jour :
               //  1. seulement les paris PUBLIES par le moteur v3, dont le coup d'envoi n'est
@@ -4663,8 +4696,8 @@ jobs:
               //     (reasonableParisSlot) - filtre garde par decision de Clement ;
               //  4. le plus probable (model_probability) ; a egalite le plus tot ; a egalite
               //     encore, le plus petit numero de match (ordre fixe).
-              // JAMAIS sur la « valeur » (rejetee : CLV -5 %). Une designation precedente qui
-              // n'est pas un pari v3 n'est pas gardee. Aucun pari v3 : aucun match offert.
+              // JAMAIS sur la « valeur » (rejetee : CLV -5 %). Une designation precedente reste
+              // jusqu'a minuit, meme si elle ne passe plus ces filtres (regle du 04/10/2026, 20 h).
               // Verifie en executant ce bloc : tests/match-offert-v3.test.js.
               if(MOTEUR_V3.actif){
                 var analysableTous=analysable;
@@ -4687,7 +4720,7 @@ jobs:
                     return b;
                   }, null);
                 };
-                Object.keys(gardes).forEach(function(j){ if(!analysable(gardes[j])) delete gardes[j]; });
+                // Une designation deja annoncee (gardes) n'est JAMAIS retiree par ces filtres (regle du 04/10/2026, 20 h).
                 // Avocat du diable (30/09/2026, point 5) : le match offert, choisi sur le plus
                 // haut chiffre, tombait sur des paris « modèle seul » (hors d'Europe, ~7 points
                 // trop hauts au-dessus de la cote). Chaque jour, on choisit D'ABORD parmi les
@@ -4712,6 +4745,7 @@ jobs:
               var elus={};
               jours.slice(0,2).forEach(function(j){
                 if(gardes[j]){ elus[j]=gardes[j]; return; }
+                if(joursDejaOfferts[j]){ console.log('::warning title=Match offert::le match offert deja designe pour '+j+' n\'est plus dans le calcul : aucun autre match offert ce jour-la.'); return; }
                 var duJour=allMatchsData.filter(function(m){ return analysable(m) && jourDe(m)===j; });
                 // Competition connue d'abord (03/10/2026) : seulement le meilleur rang present ce jour.
                 if(duJour.length){
@@ -4730,14 +4764,19 @@ jobs:
                 if(choisi) elus[j]=choisi;
               });
               if(!Object.keys(elus).length){
-                var tousAnalysables=allMatchsData.filter(analysable), tousFiables=tousAnalysables.filter(tierFiable);
+                var tousAnalysables=allMatchsData.filter(function(m){ return analysable(m) && !joursDejaOfferts[jourDe(m)]; }), tousFiables=tousAnalysables.filter(tierFiable);
                 var repli=meilleur(tousFiables.length?tousFiables:tousAnalysables);
                 if(repli) elus[jourDe(repli)||'repli']=repli;
               }
               var ids=Object.keys(elus).map(function(k){ return elus[k].id; });
+              // free_day (public, une date) : le jour de Paris pour lequel le match est offert. Un match reporte
+              // a un autre jour reste le match offert du jour ou il a ete designe (lib/free-match.js).
+              var jourOffert={};
+              Object.keys(elus).forEach(function(k){ jourOffert[String(elus[k].id)]=/^\d{4}-\d{2}-\d{2}$/.test(k)?k:jourDe(elus[k]); });
               allMatchsData.forEach(function(m){
                 if(!m) return;
                 m.is_free=ids.indexOf(m.id)!==-1;
+                if(m.is_free&&jourOffert[String(m.id)]) m.free_day=jourOffert[String(m.id)]; else delete m.free_day;
                 delete m.free_markets;
               });
               var cles=Object.keys(elus).sort();

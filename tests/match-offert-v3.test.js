@@ -41,7 +41,7 @@ function choisir(matchs, opts) {
   opts = opts || {};
   const fx = {};
   matchs.forEach((m) => { fx[String(m.id)] = { started: !!m._commence }; });
-  designer((f) => !!f && !f.started, fx, { keptFreeDesignations: () => opts.gardes || {} }, {}, matchs, TODAY,
+  designer((f) => !!f && !f.started, fx, { keptFreeDesignations: () => opts.gardes || {} }, opts.prev || {}, matchs, TODAY,
     { actif: opts.eteint ? false : true }, reasonableParisSlot, { log: () => {} }, SELECTIONS, LEAGUES_CONFIG, PRONOSTIC);
   return matchs.filter((m) => m.is_free).map((m) => m.id);
 }
@@ -235,8 +235,10 @@ test("match offert : jamais un match sans selection (pronostic seul)", () => {
 test("match offert : jamais une competition « en test », ni designee ce run ni gardee d'un run precedent", () => {
   assert.deepEqual(choisir([v3(1, 90, null, { league_reliability: "en_test" }), v3(2, 70)]), [2]);
   assert.deepEqual(choisir([v3(1, 90, null, { league_reliability: "en_test" })]), [], "seul match : en test -> aucun match offert");
+  // Regle de Clement du 04/10/2026, 20 h (« le match gratuit reste le meme de 00 h a 23 h 59 ») : une designation
+  // deja publiee reste jusqu'a minuit, meme si sa competition est passee « en test » (avant : remplacee).
   const matin = v3(1, 90, null, { league_reliability: "en_test" });
-  assert.deepEqual(choisir([matin, v3(2, 70)], { gardes: { [TODAY]: matin } }), [2], "designation precedente en test : remplacee");
+  assert.deepEqual(choisir([matin, v3(2, 70)], { gardes: { [TODAY]: matin } }), [1], "designation precedente : gardee jusqu'a minuit");
   assert.deepEqual(choisir([v3(1, 90, null, { league_reliability: "validee" }), v3(2, 70)]), [1], "temoin : competition validee");
 });
 
@@ -250,7 +252,59 @@ test("fourchette du 04/10/2026 : le match offert a une cote entre 1,40 et 1,70 (
   assert.deepEqual(choisir([v3(1, 90, null, { cote_rec: "1.39" }), v3(2, 80, null, { cote_rec: "1.40" })]), [2]);
   // Aucun pari dans la fourchette : aucun match offert.
   assert.deepEqual(choisir([v3(1, 90, null, { cote_rec: "1.25" }), v3(2, 60, null, { cote_rec: "1.90" })]), []);
-  // Designation d'un run precedent (gel) dont le pari est hors fourchette : pas gardee.
+  // Designation d'un run precedent (gel) dont le pari fige est hors fourchette : GARDEE jusqu'a minuit (regle de
+  // Clement du 04/10/2026, 20 h ; avant : remplacee en cours de journee).
   const garde = v3(1, 90, null, { cote_rec: "1.25" });
-  assert.deepEqual(choisir([garde, v3(2, 70, null, { cote_rec: "1.60" })], { gardes: { [TODAY]: garde } }), [2]);
+  assert.deepEqual(choisir([garde, v3(2, 70, null, { cote_rec: "1.60" })], { gardes: { [TODAY]: garde } }), [1]);
+});
+
+// REGLE DE CLEMENT DU 04/10/2026, 20 h : « Le match gratuit reste le meme de 00 h a 23 h 59 (heure de Paris), quoi
+// qu'il arrive. » On EXECUTE le vrai bloc du pipeline : une designation deja publiee pour le jour n'est jamais
+// remplacee, meme commencee, reportee, sans pari, sans cote ou hors fourchette ; free_day dit pour quel jour.
+test("match offert garde toute la journee : commence, reporte, sans pari, sans cote, hors fourchette -> le meme, free_day pose", () => {
+  const cas = {
+    commence: { _commence: true },
+    reporte: { date: "2026-10-06 20:00", no_signal: true, pari_rec: "", no_signal_reason: "KICKOFF_POSTPONED" },
+    sans_pari: { pari_rec: "", no_signal: true, pronostic: undefined },
+    sans_cote: { cote_rec: "" },
+    hors_fourchette: { cote_rec: "1.95" },
+    moteur_eteint_ou_ancien: { v3_pari: undefined, moteur_v3: { source: "ancien moteur (repli)" } },
+  };
+  for (const [nom, mut] of Object.entries(cas)) {
+    const offert = v3(1, 80, null, mut);
+    const autre = v3(2, 85);
+    const matchs = [offert, autre];
+    assert.deepEqual(choisir(matchs, { gardes: { [TODAY]: offert } }), [1], nom);
+    assert.equal(offert.free_day, TODAY, nom + " : jour de la designation");
+    assert.equal(autre.free_day, undefined, nom);
+  }
+});
+
+test("jour deja pourvu par un run precedent mais match introuvable : aucun AUTRE match offert ce jour-la ; le lendemain, choix normal", () => {
+  const prev = { 7: { id: 7, date: TODAY + " 20:00", is_free: true } };
+  assert.deepEqual(choisir([v3(2, 85), v3(3, 80, "2026-10-04 20:00")], { prev: prev }), [3], "aujourd'hui : personne d'autre ; demain : choisi");
+  assert.deepEqual(choisir([v3(2, 85)], { prev: prev }), [], "ni par le repli");
+  // Designation d'un jour passe : ignoree.
+  const hier = { 7: { id: 7, date: "2026-10-02 20:00", is_free: true } };
+  assert.deepEqual(choisir([v3(2, 85)], { prev: hier }), [2]);
+});
+
+test("site : un match offert reporte a un autre jour reste le match offert de son jour (free_day) jusqu'a minuit", () => {
+  const horloge = { day: "2026-10-03", now: "2026-10-03 21:00" };
+  const reporte = { id: 1, is_free: true, free_day: "2026-10-03", date: "2026-10-06 20:00" };
+  const demain = { id: 2, is_free: true, free_day: "2026-10-04", date: "2026-10-04 20:00" };
+  assert.equal(FM.pickFreeMatchId([demain, reporte], horloge), 1);
+  // Le lendemain : celui du nouveau jour.
+  assert.equal(FM.pickFreeMatchId([demain, reporte], { day: "2026-10-04", now: "2026-10-04 09:00" }), 2);
+  // Commence ou termine : toujours celui du jour.
+  const commence = { id: 3, is_free: true, free_day: "2026-10-03", date: "2026-10-03 15:00", status: "FT" };
+  assert.equal(FM.pickFreeMatchId([commence, demain], horloge), 3);
+});
+
+test("archive des matchs offerts : un match offert reporte est enregistre une fois, pour son jour de designation", () => {
+  const reg = MO.vide();
+  const m = { id: 1, free_day: "2026-10-03", date: "2026-10-06 20:00", pari_rec: "Over 1.5", market_id: "over-15", cote_rec: "1.55", model_probability: 80, home: { n: "A" }, away: { n: "B" } };
+  assert.equal(MO.enregistrer(reg, [m], { nowIso: "2026-10-03T08:00:00Z" }), 1);
+  assert.equal(reg.matchs[0].jour, "2026-10-03");
+  assert.equal(MO.enregistrer(reg, [m], { nowIso: "2026-10-03T12:00:00Z" }), 0, "pas de doublon");
 });

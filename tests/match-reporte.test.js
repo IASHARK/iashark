@@ -93,17 +93,29 @@ test("match passe par le statut PST (ligne premium videe) puis reprogramme : tou
   assert.equal(a.result, "void");
 });
 
-test("nouvelle date connue AVANT l'heure d'origine : nouveau pari B, et l'historique le suit (inchange)", () => {
+// Regle de Clement du 04/10/2026, 20 h (« chaque decision affichee ne doit plus jamais changer ») : avant, le
+// pari A etait libere et un pari B le remplacait (FIRST_PUBLICATION, KICKOFF_MOVED). Desormais A reste, puis a
+// l'heure d'origine le match est ferme comme reporte (A annule, jamais remplace).
+test("nouvelle date connue AVANT l'heure d'origine : le pari A reste (jamais de pari B), puis annule a l'heure d'origine", () => {
   const now = koO - 30 * H;
   const lock = { kickoffMs: koO, result: "scheduled" };
   const r = PF.freezeAnalysis(frais(), precedent(), { nowMs: now, fixture: fixture(), premiumRow: ligneDuJour(), historyLock: lock });
-  assert.equal(r.status, "FIRST_PUBLICATION");
-  assert.equal(r.reason, "KICKOFF_MOVED");
-  assert.equal(r.match.pari_rec, "Victoire Domicile");
+  assert.equal(r.status, "FROZEN");
+  assert.equal(r.match.pari_rec, "Plus de 2.5 buts", "jamais le pari B");
+  assert.equal(r.match.date, NOUVELLE, "nouvelle date affichee");
+  assert.equal(r.premiumRow.raw_response.pick_freeze.kickoff, ORIGINE, "heure d'origine gardee comme reference");
   const a = predA();
   assert.equal(PF.voidPostponedPrediction(a, r.match, { today: "2026-10-03" }), false);
-  assert.equal(PF.alignPendingPrediction(a, r.match, { moteur: "v3", moteur_version: "3.0.0", kickoffMs: koN, nowMs: now }), true);
-  assert.equal(a.prediction, "Victoire Domicile", "page et historique : le meme pari B");
+  assert.equal(PF.alignPendingPrediction(a, r.match, { moteur: "v3", moteur_version: "3.0.0", kickoffMs: koN, nowMs: now }), false, "deja le meme pari");
+  assert.equal(a.prediction, "Plus de 2.5 buts", "page et historique : le meme pari A");
+  // Run suivant (la ligne ecrite est relue), toujours avant l'heure d'origine : toujours A.
+  const relue = Object.assign({}, r.premiumRow, { premium_fields: { conf: 7.2 }, updated_at: "2026-10-03T20:00:00Z" });
+  assert.equal(PF.freezeAnalysis(frais(), relue, { nowMs: koO - 6 * H, fixture: fixture(), premiumRow: ligneDuJour(), historyLock: lock }).match.pari_rec, "Plus de 2.5 buts");
+  // A l'heure d'origine : ferme comme reporte, A annule (jamais B).
+  const ferme = PF.freezeAnalysis(frais(), relue, { nowMs: koO + 1 * H, fixture: fixture(), premiumRow: ligneDuJour(), historyLock: lock });
+  assert.equal(ferme.status, "POSTPONED_CLOSED");
+  assert.equal(ferme.reason, "KICKOFF_MOVED_AFTER_KICKOFF");
+  assert.equal(ferme.match.pari_rec, "");
 });
 
 test("simple retard (moins de 24 h) apres l'heure d'origine : le pari A reste, sur la page et dans l'historique", () => {

@@ -27,6 +27,12 @@
       "_lisezmoi": "Cote de cloture (archive) : une seule capture par match, dans les N minutes avant le coup d'envoi (workflow toutes les 30 min).",
       "fenetre_minutes": 40
     },
+    "buteurs_jour_de_match": {
+      "_lisezmoi": "Buteurs des matchs proches (workflow buteurs-jour-de-match, toutes les 30 min de 10:07 a 21:37 UTC) : composition officielle, absences du match et effectif des selections pour les matchs qui commencent dans les N minutes ; au plus M matchs et A appels par lancement. Aucun match proche : aucun appel.",
+      "fenetre_minutes": 135,
+      "max_matchs_par_lancement": 15,
+      "max_appels_par_lancement": 60
+    },
     "suivi_proche_coup_envoi": {
       "_lisezmoi": "forward-odds-near-kickoff (toutes les heures) : matchs dans les N heures, au plus M appels par lancement.",
       "fenetre_heures": 3,

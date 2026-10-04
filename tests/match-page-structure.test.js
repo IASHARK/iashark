@@ -9,23 +9,21 @@ test("la page Match est un shell léger sans ancien rendu inline",()=>{
   assert.doesNotMatch(html,/function render\(/);assert.doesNotMatch(html,/crit_home\.att===0/);
 });
 test("la page simple expose une seule colonne de sections réelles, sans onglets",()=>{
+  // Page match V4 (04/10/2026, demande de Clement) : l'Avis IASHARK inchange, puis
+  // les sections de lib/match-sections.js ; « Confrontations directes » et
+  // « Questions fréquentes » retirees ; « Probabilites et cotes » absorbees par
+  // le panneau Marches. Les onglets HyperUI vivent DANS les sections (quarts
+  // d'heure, scenarios, familles de marches), jamais pour decouper la page.
+  const ms=read("lib/match-sections.js");
   assert.doesNotMatch(js,/data-tab=/);assert.doesNotMatch(js,/role="tablist"/);
-  // Libelles mis a jour le 02/09/2026 apres decisions produit explicites :
-  // "Recommandation IASHARK" -> "Le signal IASHARK" (remontee en tete de page) ;
-  // "Pourquoi le pari ressort" -> "Comparatif des deux equipes" ;
-  // "Questions sur ce match" ajoutee.
-  // Refonte du 14/09/2026 (demande du proprietaire) : le signal au centre.
-  // Page match V8 (16/09/2026, maquette validee par le proprietaire, fixture
-  // mise a jour deliberement) : "L'avis IASHARK", "Les stats du match" (forme,
-  // classement, confrontations, comparatif, compositions), "L'analyse IASHARK"
-  // (scenario, ce que dit le modele, probabilites et cotes, marches joueurs),
-  // "Questions frequentes". "Absences" et "Forme et face-a-face" retirees.
-  for(const value of ['L’avis IASHARK','Pari recommandé','Les stats du match','Forme récente','Classement','Confrontations directes','Comparatif des deux équipes','Compositions','L’analyse IASHARK','Scénario probable du match','Ce que dit le modèle','Buts attendus','Scores les plus probables','Probabilités et cotes','Marchés joueurs','Questions fréquentes'])assert.match(js,new RegExp(value));
+  for(const value of ['L’avis IASHARK','Pari recommandé'])assert.match(js,new RegExp(value));
+  for(const value of ['Si ce match se jouait 10 000 fois','Le film du match','Qui ouvre le score ?','Les jumeaux du match','Les deux équipes','Les joueurs','L’arbitre','Marchés'])assert.match(ms,new RegExp(value.replace(/[?]/g,'\\?')));
+  for(const retire of ['Confrontations directes','Questions fréquentes','Probabilités et cotes','function faqCard','function h2hFold','function marketsCard'])assert.ok(!js.includes(retire)&&!ms.includes(retire),retire+" reintroduit");
   assert.doesNotMatch(js,/function absencesCard|absences_title|abs-grid|formh2h_title/);
   assert.doesNotMatch(css,/\.abs-|\.mk-table|\.mk-scroll/);
-  // Marque ecrite comme sur le reste du site.
-  assert.doesNotMatch(js,/IAShark/);
+  assert.doesNotMatch(js+ms,/IAShark/);
 });
+
 test("la page est responsive",()=>{
   assert.match(css,/@media\(max-width:640px\)/);
 });
@@ -33,8 +31,16 @@ test("le rendu ne contient plus les valeurs métier précédemment codées en du
   assert.doesNotMatch(js,/10[\s.,]?000 simulations/i);assert.doesNotMatch(js,/37%/);assert.doesNotMatch(js,/33%/);assert.doesNotMatch(js,/30%/);
 });
 test("aucune section ne prétend avoir une donnée absente : chaque bloc a un état vide honnête",()=>{
-  for(const value of ['Aucun marché ne franchit les seuils','xG indisponibles','Statistiques comparatives indisponibles','Scores probables indisponibles','Pas assez de buts enregistrés pour établir une répartition fiable'])assert.match(js,new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+  // L'Avis garde son etat vide honnete ; une section de lib/match-sections.js
+  // sans donnee n'est PAS rendue (aucun trou, aucun « indisponible » en serie).
+  assert.match(js,/Aucun marché ne franchit les seuils/);
+  const MS=require("../lib/match-sections.js");
+  const vm={identity:{home:{name:"A"},away:{name:"B"}},model:{},players:{}};
+  const c={raw:{},vm,vuePro:true,verrouPro:false,dit:MS.registre()};
+  assert.deepEqual(MS.sections(c),[],"sections rendues sans aucune donnee");
+  assert.equal(MS.panneau(c),null);
 });
+
 test("le workflow alimente les blocs comparatifs sans valeur de secours",()=>{
   const workflow=read(".github/workflows/update-data.yml");
   assert.match(workflow,/markets_compared:marketsCompared/);
@@ -59,20 +65,18 @@ function dansLOrdre(bloc,attendu,nom){
   }
 }
 test("la page match assemble les sections dans l'ordre demande",()=>{
-  dansLOrdre(blocDe("const sections=[","];"),["['avis',signalCard","'Les stats du match'","['analyse',","['questions',faqCard"],"abonne");
-  assert.match(blocDe("function render(raw)","const sections=["),/analyse=analyseAbonne\(vm\)/);
-  dansLOrdre(blocDe("function analyseAbonne(vm)","function render(raw)"),["scenarioCard(vm)","outputsCard(vm,","marketsCard(vm)","threatsCard(vm,"],"analyse abonne");
-  dansLOrdre(blocDe("function statsBlocs(vm)","}"),["formeFold","classementFold","h2hFold","comparatifFold","compoFold"],"stats");
-  const visiteur=blocDe("function renderVisitor(raw,opts)","function renderAuthWall");
-  // Vue visiteur (decision du proprietaire, 19/09/2026) : l'en-tete sans
-  // stats et UN panneau, rien d'autre (ni stats, ni FAQ, ni rappel, ni
-  // analyse fermee, ni barre mobile).
-  assert.match(visiteur,/paint\(vm,\[\['avis',o\.free\?gateCard\(vm,o\):proGate\(vm,o\),true\]\],'','',\{sansStats:true\}\);/);
-  assert.doesNotMatch(visiteur,/\['stats',|\['questions',|\['rappel',|\['analyse',|faqCard\(/);
+  // Page match V4 (04/10/2026) : l'Avis IASHARK puis, dans cet ordre, la
+  // simulation (10 000 matchs), le film, le premier but, les jumeaux, les deux
+  // equipes, les joueurs, l'arbitre ; panneau Marches a gauche / en tiroir.
+  const rendu=blocDe("function render(raw,o)","function enTeteOffre");
+  dansLOrdre(rendu,["['avis',signalCard(vm)","MS.clesAvis(vm,raw,dit)","MS.sections(c)","MS.panneau(c)"],"abonne");
+  const ms=read("lib/match-sections.js");
+  dansLOrdre(ms.slice(ms.indexOf("function sections(c)")),['["sim", simulation(c)','["film", film(c)','["premier", premier(c)','["jumeaux", jumeaux(c)','["equipes", equipes(c)','["joueurs", joueurs(c)','["arbitre", arbitre(c)'],"sections");
+  // Match bloque : le composant de paiement juste sous l'en-tete, l'apercu flou dessous.
+  dansLOrdre(blocDe("function renderProWall(raw,ctx)","function renderAuthWall"),["['offre',","['apercu',MS.apercuFlou()","IasharkOffrePro.mount(box"],"mur Pro");
+  dansLOrdre(blocDe("function renderAuthWall(raw)","function renderApercu"),["['offre',carte","['apercu',MS.apercuFlou()"],"match offert sans compte");
   assert.match(js,/hero\(viewModel\(raw\),\{sansStats:true\}\)/,"apercu de chargement sans stats non plus");
-  for(const parti of ["rappelCta","analyseVisiteur","ctaBar","bindCtaBar"])assert.doesNotMatch(js,new RegExp("function\\s+"+parti+"\\s*\\("),parti+" reintroduit");
-  // Sommaire collant.
-  assert.match(js,/nav_avis','Avis IASHARK'[\s\S]*nav_stats','Stats'[\s\S]*nav_analysis','Analyse'[\s\S]*nav_questions','Questions'/);
+  for(const parti of ["rappelCta","analyseVisiteur","ctaBar","bindCtaBar","signalSticky","faqCard"])assert.doesNotMatch(js,new RegExp("function\\s+"+parti+"\\s*\\("),parti+" reintroduit");
 });
 
 test("les blocs retires a la demande de l'utilisateur ne reviennent pas",()=>{
@@ -87,9 +91,13 @@ test("les blocs retires a la demande de l'utilisateur ne reviennent pas",()=>{
 // anciens emplacements (rappel, analyse, FAQ, barre mobile) ont disparu.
 test("vue visiteur : un seul bouton Debloquer par vue, avec son identifiant de suivi",()=>{
   assert.match(js,/const suivi=kind=>` data-track="\$\{kind\}" data-track-kind="\$\{kind\}"`;/);
-  for(const k of ["match_gate_unlock","match_avis_unlock"]){
-    assert.equal((js.match(new RegExp("suivi\\('"+k+"'\\)","g"))||[]).length,1,k);
-  }
+  // Match offert sans compte : un bouton « compte gratuit ».
+  assert.equal((js.match(/suivi\('match_avis_unlock'\)/g)||[]).length,1);
+  // Match bloque : LE composant de paiement porte le suivi ; le panneau Marches
+  // flou de l'ordinateur ne fait que remonter jusqu'a lui (aucun second chemin).
+  const mur=blocDe("function renderProWall(raw,ctx)","function renderAuthWall");
+  assert.match(mur,/suivi:'match_gate_unlock'/);
+  assert.match(mur,/href:'#sec-offre'[^}]*attrs:'data-mk-scroll'/);
   for(const k of ["match_recall_unlock","match_analysis_unlock","match_faq_unlock","match_bar_unlock"]){
     assert.ok(!js.includes(k),k+" : emplacement retire le 19/09/2026");
   }
@@ -131,7 +139,8 @@ test("le tableau des marches ne duplique pas le pari du signal",()=>{
 // Methodologie et mentions 18+ / jeu responsable retires de la page match -
 // outil d'analyse, pas un bookmaker. La mention 18+ reste au pied de page.
 test("l'avis IASHARK montre pari, cote, deux barres, ecart, fiabilite, raisons et risques",()=>{
-  const bloc=js.slice(js.indexOf("function signalCard(vm)"),js.indexOf("function marketsCard"));
+  // 04/10/2026 : l'Avis ne change pas d'un caractere (demande de Clement).
+  const bloc=js.slice(js.indexOf("function signalCard(vm)"),js.indexOf("function texteRisque("));
   for(const attendu of ["sig-market","Cote utilisée","duoBars(","sig2-cmp","Nos chances face à la cote","relBadge(info)","Pourquoi ce pari","À surveiller",
     "Estimation statistique, pas une garantie."]){
     assert.ok(bloc.includes(attendu),`element de l'avis manquant : ${attendu}`);
@@ -139,19 +148,18 @@ test("l'avis IASHARK montre pari, cote, deux barres, ecart, fiabilite, raisons e
   for(const absent of ["Détail des chiffres","methodLink(","18+","Jouez responsable"]){
     assert.ok(!bloc.includes(absent),`retire le 21/09/2026, toujours present : ${absent}`);
   }
-  // Une probabilite nulle ou absente n'est jamais affichee "0 %".
   assert.match(bloc,/r\.probability>0/);
   for(const attendu of ["sig-slip","sig-odds-box","confMeter(r.confidence)","riskStat(vm.editorial.riskCode)","raisons.slice(0,3)"]){
     assert.ok(bloc.includes(attendu),`element de l'avis manquant : ${attendu}`);
   }
   assert.match(js,/function confMeter\(conf\)[\s\S]*role="meter"[\s\S]*aria-valuemax="10"/);
   assert.match(js,/t\('match_page\.sig_conf_label','Probabilité estimée'\)/);
-  // Analyse annoncee mais champs premium absents : jamais "aucun marche".
   assert.match(bloc,/raw\.has_signal===true&&raw\.no_signal!==true/);
-  // Deux barres par pari dans « Probabilites et cotes », marche absent = non disponible.
-  const marches=js.slice(js.indexOf("function marketsCard"),js.indexOf("function formeFold"));
-  assert.match(marches,/duoBars\(\{model:r\.model,market:r\.market/);
-  assert.match(marches,/aide\(texteAideCote\(\),labelAideCote\(\)\)/);
+  // A l'octet pres : la fonction est celle de la version d'origine (29/09).
+  const crypto=require("node:crypto");
+  const debut=js.indexOf("function signalCard(vm){");let p=0,fin=-1;
+  for(let i=js.indexOf("{",debut);i<js.length;i++){if(js[i]==="{")p++;else if(js[i]==="}"){p--;if(!p){fin=i+1;break;}}}
+  assert.equal(crypto.createHash("sha256").update(js.slice(debut,fin)).digest("hex"),"fce71ea0c37fadb1ed60d79d274daeac974bac3c54badcd1706d4569a33b827a");
 });
 
 // REGLE DU PROPRIETAIRE (16/09/2026) : tout ce que l'IA donne est FERME pour le
@@ -159,31 +167,27 @@ test("l'avis IASHARK montre pari, cote, deux barres, ecart, fiabilite, raisons e
 // analyse, rappel, barre mobile) et la vue visiteur ne lisent aucune sortie du
 // modele ; l'en-tete commun (hero) ne montre aucune probabilite.
 test("vue visiteur : blocs fermes sans aucune donnee du modele, copie publique avant tout calcul",()=>{
-  const gate=js.slice(js.indexOf("function gateCard(vm,opts)"),js.indexOf("function renderAuthWall"));
-  assert.ok(gate.length>2000,"vue visiteur introuvable");
-  for(const fn of ["function gateCard","function proGate","function renderVisitor"])assert.ok(gate.includes(fn),fn+" hors de la tranche controlee");
-  for(const interdit of ["recommendation","probabilities","marketTable","recommendedOdds","recommendedEdge","recommendedImplied","scoringProbability","signalReasons","expectedGoals","goalTiming","simulationCount","pari_rec","cote_rec","model_probability","market_id","riskCode","odds(","pct(","pts(","confMeter","signalCard(","marketsCard(","outputsCard(","threatsCard(","scenarioCard(","analyseAbonne(","signalSticky("]){
+  const gate=js.slice(js.indexOf("function enTeteOffre(raw)"),js.indexOf("function renderApercu"));
+  assert.ok(gate.length>1500,"vue visiteur introuvable");
+  for(const fn of ["function renderProWall","function renderAuthWall"])assert.ok(gate.includes(fn),fn+" hors de la tranche controlee");
+  for(const interdit of ["recommendation","probabilities","marketTable","recommendedOdds","recommendedEdge","recommendedImplied","scoringProbability","signalReasons","expectedGoals","goalTiming","simulationCount","pari_rec","cote_rec","model_probability","market_id","riskCode","odds(","pct(","pts(","confMeter","signalCard(","MS.sections(","MS.panneau(","sim_15min","marches_panneau","v3_buteurs"]){
     assert.ok(!gate.includes(interdit),`la vue visiteur lit ${interdit}`);
   }
   assert.doesNotMatch(gate,/\.conf\b/);
-  assert.match(gate,/sig-ghost/);
-  assert.match(gate,/const vm=viewModel\(publicCopy\(raw\)\);/);
-  assert.doesNotMatch(gate,/faqCard\(/,"aucune FAQ pour le visiteur");
-  // Champs publics seulement : etat de l'analyse et niveau prob_band.
+  assert.equal((gate.match(/const vm=viewModel\(publicCopy\(raw\)\);/g)||[]).length,2,"copie publique avant tout calcul, dans les deux murs");
   assert.match(gate,/etatAnalyse\(raw\)/);
   assert.match(gate,/bandeDe\(raw\)/);
   assert.match(js,/const bandeDe=m=>m&&Object\.prototype\.hasOwnProperty\.call\(BANDES,m\.prob_band\)\?m\.prob_band:null;/);
-  // Copie locale de la liste premium = lib/premium-fields.js, a l'identique.
+  // Copie locale de la liste premium : au moins lib/premium-fields.js, plus les
+  // champs du 04/10 (panneau, simulation, jumeaux) meme avant leur ajout la-bas.
   const copie=JSON.parse(js.match(/const CHAMPS_PREMIUM=(\[[^\]]*\]);/)[1]);
-  assert.deepEqual(copie,require("../lib/premium-fields.js").PREMIUM_FIELDS);
-  // Match payant : mur Pro (offre Pro avec retour a ce match) ; match offert
-  // sans compte : meme page, CTA compte gratuit.
-  assert.match(js,/function renderProWall\(raw\)\{\s*renderVisitor\(raw,\{href:offrePro\(raw\)\}\);/);
-  assert.ok(gate.includes("function proGate(vm,o)"),"mur Pro hors de la tranche controlee");
-  const auth=js.slice(js.indexOf("function renderAuthWall"),js.indexOf("function renderProWall"));
-  assert.match(auth,/renderVisitor\(raw,\{\s*free:true,/);
-  assert.match(auth,/lien\('compte\.html'\)/);
-  assert.match(auth,/Créer un compte gratuit \/ Se connecter/);
+  const ref=require("../lib/premium-fields.js").PREMIUM_FIELDS;
+  ref.forEach(k=>assert.ok(copie.includes(k),k+" absent de la copie"));
+  copie.filter(k=>!ref.includes(k)).forEach(k=>assert.ok(["marches_panneau","sim_resume","jumeaux"].includes(k),k+" : champ inconnu"));
+  // Apercu flou et panneau flou : constantes seulement (aucune donnee lue).
+  const MS=require("../lib/match-sections.js");
+  assert.equal(MS.apercuFlou.length,0,"l'apercu ne prend aucune donnee");
+  assert.equal(MS.panneauFlou(46,"").replace(/46/g,""),MS.panneauFlou(12,"").replace(/12/g,""),"panneau flou : seul le nombre public change");
   const hero=js.slice(js.indexOf("function hero(vm,o)"),js.indexOf("const REL_NIVEAUX"));
   assert.ok(!/probabilities|probBar|recommendation/.test(hero),"l'en-tete ne doit montrer aucune probabilite du modele");
   assert.doesNotMatch(js,/function probBar\(/);
@@ -221,16 +225,16 @@ test("en-tete : logos dimensionnes, charges en priorite ; pas de repli data.json
 // plus fort que le nom du joueur. Elle est desormais lue dans l'ordre : qui,
 // puis quelle probabilite, puis les chiffres de contexte.
 test("la carte buteur affiche la probabilite de marquer sans ecraser le joueur",()=>{
-  assert.match(js,/scoringProbability/);
-  assert.match(js,/Probabilité de marquer/);
-  // La probabilite est aussi lisible autrement que par la jauge. Le libelle
-  // passe desormais par t('match_page.scoring_probability_label', ...) (i18n,
-  // 13/09/2026) : on verifie donc que role="img" et aria-label portent
-  // toujours le repli francais "Probabilité de marquer", meme si le texte
-  // n'est plus colle immediatement apres aria-label=" dans le code source.
-  assert.match(js,/role="img" aria-label="[^"]*Probabilité de marquer/);
-  assert.match(css,/\.threat-jauge/);
-  assert.match(css,/\.threat-panneau/);
+  // 04/10/2026 : section « Les joueurs » (lib/match-sections.js), calcul buteur du
+  // moteur v3 seulement ; jauge Magic UI lisible aussi par un lecteur d'ecran.
+  const MS=require("../lib/match-sections.js");
+  global.window=undefined;
+  const vm={id:7,identity:{home:{name:"Lens"},away:{name:"Lille"}},model:{},players:{}};
+  const raw={v3_buteurs:[{joueur_id:1,joueur:"A. Buteur",cote:"home",poste:"F",p_marque:0.36,chance:35},{joueur_id:2,joueur:"B. Autre",cote:"away",poste:"M",p_marque:0.2,chance:20},{joueur_id:3,joueur:"Trop Haut",cote:"home",chance:60}]};
+  const h=MS.joueurs({raw,vm,vuePro:true,dit:MS.registre()});
+  assert.match(h,/A\. Buteur/);assert.match(h,/titulaire probable/);
+  assert.doesNotMatch(h,/Trop Haut/,"plus de 45 % : jamais affiche");
+  assert.equal(MS.joueurs({raw:{},vm,vuePro:true,dit:MS.registre()}),"","sans v3_buteurs : section absente");
 });
 
 // "Un truc propre, pas trop ecrit en gros" : plus rien au-dessus de 20px
@@ -246,12 +250,11 @@ test("la carte buteur ne comporte plus de tres gros caracteres",()=>{
 
 // Le panneau ne doit jamais reprendre un chiffre deja donne juste au-dessus.
 test("la carte buteur ne repete pas la probabilite dans son panneau",()=>{
-  const bloc=js.slice(js.indexOf("function threatsCard"),js.indexOf("const ALERTES_ABSENCE"));
-  const panneau=bloc.slice(bloc.indexOf("const stats=["),bloc.indexOf("].filter(Boolean)"));
-  assert.ok(!/scoringProbability/.test(panneau),
-    "la probabilite de marquer est repetee dans le panneau de chiffres");
-  // Trois chiffres au maximum, pour que le panneau reste lisible.
-  assert.match(bloc,/\.slice\(0,3\)/);
+  const MS=require("../lib/match-sections.js");
+  const vm={id:7,identity:{home:{name:"Lens"},away:{name:"Lille"}},model:{},players:{}};
+  const raw={v3_buteurs:[{joueur_id:1,joueur:"A. Buteur",cote:"home",poste:"F",p_marque:0.36,chance:35}]};
+  const h=MS.joueurs({raw,vm,vuePro:true,dit:MS.registre()});
+  assert.equal((h.match(/35\s?%/g)||[]).length,1,"la chance d'un joueur n'est ecrite qu'une fois");
 });
 
 // ---------------------------------------------------------------------------
@@ -333,35 +336,25 @@ test("la page match affiche les marches traduits, jamais le libelle brut",()=>{
 // « Quel est le pronostic IASHARK pour ce match ? » est posee, reponse fermee
 // au visiteur.
 test("la FAQ ne repose pas les questions deja traitees dans la page",()=>{
-  const bloc=js.slice(js.indexOf("function faqCard(vm,o)"));
-  for(const deja of ["Qui est favori","Combien de buts sont attendus","Quel pari IASHARK retient",
-                     "d’accord avec le marché","niveau de risque de ce pari"]){
-    assert.ok(!bloc.includes(deja),`la FAQ repose une question deja traitee : "${deja}"`);
-  }
-  assert.match(bloc,/exclusiveFacts/);
-  for(const attendu of ["marque le plus tôt","craque-t-elle en fin de match","cartons","occasions"]){
-    assert.ok(bloc.includes(attendu),`question exclusive manquante : "${attendu}"`);
-  }
+  // 04/10/2026 (demande de Clement : « aucune repetition ») : plus de FAQ sur la
+  // page match ; chaque reponse est dans sa section (simulation, film, equipes,
+  // arbitre). Aucun balisage FAQ.
+  assert.doesNotMatch(js,/function faqCard|FAQPage|faq_section_title/);
 });
 
 // Questions frequentes : faits publics ouverts ; reponses du modele (pronostic,
 // 15 premieres minutes, chances de chaque equipe, sur quoi repose l'analyse)
 // FERMEES au visiteur, texte jamais construit.
 test("FAQ : vue abonne seulement, jamais de question verrouillee",()=>{
-  const faq=js.slice(js.indexOf("function faqCard(vm,o)"),js.indexOf("\n}\n",js.indexOf("function faqCard(vm,o)")));
-  assert.ok(faq.length>1000,"faqCard introuvable");
-  // 19/09/2026 : le visiteur ne voit plus la FAQ (panneau seul) ; plus de
-  // branche fermee, de question « Pro » verrouillee ni de lien « Debloquer ».
-  assert.doesNotMatch(faq,/if\(ferme\)|verrou|faq-lock|faq-pro|match_faq_unlock|,null\]/);
-  const visiteur=js.slice(js.indexOf("function renderVisitor(raw,opts)"),js.indexOf("function renderAuthWall"));
-  assert.doesNotMatch(visiteur,/faqCard\(/);
-  assert.match(faq,/faq_section_title','Questions fréquentes'/);
+  const ms=read("lib/match-sections.js");
+  assert.doesNotMatch(js+ms,/faq-lock|faq-pro|match_faq_unlock/);
 });
 
 // Les logos d'equipe ne doivent jamais etre masques en rond : un ecusson a sa
 // propre forme.
 test("les logos d'equipe sont detoures, pas mis en pastille ronde",()=>{
-  assert.match(js,/function logoEquipe/);
+  // 04/10/2026 : logoEquipe servait aux blocs forme / face-a-face, retires. La
+  // regle CSS reste : un ecusson garde sa forme.
   assert.match(css,/\.logo-eq\{[^}]*border-radius:0/);
   assert.match(css,/\.logo-eq\{[^}]*object-fit:contain/);
   assert.match(css,/\.logo-eq\{[^}]*background:none/);
@@ -374,61 +367,24 @@ test("les logos d'equipe sont detoures, pas mis en pastille ronde",()=>{
 // langage du verrou « Buteurs du jour » de l'accueil.
 // ---------------------------------------------------------------------------
 const LOCALES=["fr","en","es","es-mx","de","it","pt"];
-const CLES_MUR=["pro_gate_title","pro_gate_sr","pro_gate_item_bet","pro_gate_item_scorer","pro_gate_item_scenario","pro_gate_item_scores","pro_gate_item_odds","pro_gate_item_stats","pro_gate_item_faq","pro_gate_cta","pro_gate_small","recovery_title","recovery_text","recovery_free_cta","recovery_home_cta"];
+// 04/10/2026 : le mur Pro est le composant de paiement (offre_pro.*) ; restent ici
+// les textes de reprise.
+const CLES_MUR=["recovery_title","recovery_text","recovery_free_cta","recovery_home_cta"];
 test("mur Pro : un seul panneau, apercu factice sans aucune donnee, bouton ambre suivi, resiliation",()=>{
-  const mur=js.slice(js.indexOf("const FAUX_TICKET="),js.indexOf("function renderVisitor(raw,opts)"));
-  assert.ok(mur.length>1500,"mur Pro introuvable");
-  // Apercu : texte factice (« Xxxx », « ??,? % »), aucun chiffre, masque aux lecteurs d'ecran.
-  const faux=js.slice(js.indexOf("const FAUX_TICKET="),js.indexOf("function apercuFactice"));
-  assert.doesNotMatch(faux,/\d/,"l'apercu factice ne doit contenir aucun chiffre");
-  assert.doesNotMatch(faux,/\$\{/,"l'apercu factice ne lit aucune donnee");
-  assert.match(faux,/\?\?,\? %/);
-  assert.match(mur,/<div class="mgate-preview" aria-hidden="true">/);
-  // Panneau : titre (h2), explication pour lecteur d'ecran, contenu, bouton, resiliation.
-  assert.match(mur,/<h2 id="gateTitle" class="mgate-title">\$\{esc\(t\('match_page\.pro_gate_title','Débloque l’analyse complète de ce match'\)\)\}<\/h2>/);
-  assert.match(mur,/<p class="sr-only">\$\{esc\(t\('match_page\.pro_gate_sr',/);
-  assert.match(mur,/<a class="mgate-cta" href="\$\{esc\(o\.href\)\}"\$\{suivi\('match_gate_unlock'\)\}>\$\{esc\(t\('match_page\.pro_gate_cta','Débloquer avec Pro'\)\)\}/);
-  assert.match(mur,/pro_gate_small','Résiliable à tout moment depuis ton compte\.'/);
-  // 19/09/2026 : ce que Pro donne en plus (une ligne sous la liste) et prix
-  // mensuel pres du bouton, lu dans la MEME source que la page d'abonnement
-  // (lib/market-config.js#proOffer) ; sans prix, la ligne de resiliation seule.
-  assert.match(mur,/<p class="mgate-more">\$\{esc\(t\('pro_offer\.match_more','\+ tous les matchs du jour, les 3 buteurs du jour et les outils Pro'\)\)\}<\/p>/);
-  assert.ok(mur.indexOf('class="mgate-list"')<mur.indexOf('class="mgate-more"')&&mur.indexOf('class="mgate-more"')<mur.indexOf('class="mgate-cta"'),"ligne « en plus » entre la liste et le bouton");
-  assert.match(mur,/<p class="mgate-small">\$\{esc\(lignePrix\)\}<\/p>/);
-  const prixFn=js.slice(js.indexOf("function prixPro(interval)"),js.indexOf("function proGate(vm,o)"));
-  assert.match(prixFn,/const M=window\.IASHARK_MARKET;/);
-  assert.match(prixFn,/M\.proOffer\(\)\.intervals\.filter\(i=>i\.interval===interval\)\[0\]/);
-  assert.match(prixFn,/return it&&it\.amount!=null&&it\.open!==false&&it\.text\?it\.text:null;/,"prix absent ou duree pas encore payable = pas de prix, jamais devine");
-  // 20/09/2026 : hebdo + mensuel quand les deux sont payables, mensuel seul
-  // sinon, mention generique sans aucune duree payable.
-  assert.match(prixFn,/if\(mois&&semaine\)return tf\('pro_offer\.price_week_month'/);
-  assert.match(prixFn,/if\(mois\)return tf\('pro_offer\.price_month'/);
-  assert.match(prixFn,/return t\('match_page\.pro_gate_small'/);
-  assert.doesNotMatch(prixFn+mur,/\d+[,.]\d\d\s?€|€\s?\d|£|MX\$|\bR\s?\d/,"aucun prix ecrit en dur");
-  // Match offert (compte gratuit) : aucun prix.
-  const avis=js.slice(js.indexOf("function gateCard(vm,opts)"),js.indexOf("// MUR PRO (visiteur"));
-  assert.ok(avis.length>500,"gateCard introuvable");
-  assert.doesNotMatch(avis,/prixPro|lignePrix|price_month|price_week_month|proOffer|IASHARK_MARKET/,"le panneau du match offert n'affiche jamais de prix");
-  for(const k of ["pro_gate_item_bet","pro_gate_item_scorer","pro_gate_item_scenario","pro_gate_item_scores","pro_gate_item_odds","pro_gate_item_stats","pro_gate_item_faq"])assert.ok(mur.includes(`['${k}',`),k);
-  // « Pas de pari retenu » (public) : ni ticket factice ni promesse de pari ;
-  // stats et FAQ listees seulement si le match en a.
-  assert.match(mur,/\.filter\(\(\[k\],i\)=>\(etat!=='none'\|\|i>0\)&&\(o\.stats\|\|/);
-  assert.match(mur,/apercuFactice\(etat!=='none'\)/);
-  // Libelles honnetes (18/09/2026) : jamais « pari conseille » dans le mur.
-  assert.doesNotMatch(mur,/pari conseillé|Pari recommandé/);
-  // Match payant seulement : le match offert garde son avis « compte gratuit ».
-  assert.match(js,/\['avis',o\.free\?gateCard\(vm,o\):proGate\(vm,o\),true\]/);
-  // Offre Pro avec retour a ce match (abonnement-page.js#contexteMatch).
-  assert.match(js,/function offrePro\(raw\)\{[\s\S]{0,200}lien\('abonnement\.html\?next='\+encodeURIComponent\(lien\('match\.html\?id='\+id\)\)\)/);
-  // Style : meme langage que .hs-gate* de l'accueil (flou, bouton ambre).
-  const bloc=css.slice(css.indexOf("MUR PRO (visiteur"));
-  assert.match(bloc,/\.mgate-preview\{[^}]*filter:blur\([3-8]px\)/);
-  assert.match(bloc,/\.mgate-card\{[^}]*background:linear-gradient\(180deg,rgba\(15,26,40,\.96\),rgba\(9,16,25,\.98\)\)/,"carte opaque : texte lisible sur le flou");
-  assert.match(bloc,/\.mgate-cta\{[^}]*background:linear-gradient\(135deg,#fbbf24,var\(--amber\)\)/);
-  assert.match(bloc,/\.mgate-stage>\*\{grid-area:1\/1/);
-  assert.match(css,/--amber:#f59e0b/);
-  assert.match(bloc,/\.mgate-more\{[^}]*color:var\(--accent\)/,"ligne « en plus » : une ligne de texte, pas une carte");
-  assert.doesNotMatch((bloc.match(/\.mgate-more\{[^}]*\}/)||[""])[0],/border|background|padding/,"pas de boite autour de la ligne « en plus »");
+  // 04/10/2026 (demande de Clement) : LE composant de paiement (lib/offre-pro.js)
+  // juste sous l'en-tete, un apercu flou court dessous ; bouton cyan (l'or est
+  // reserve a la Selection en or) ; prix lus dans config/markets.json.
+  const mur=blocDe("function renderProWall(raw,ctx)","function renderAuthWall");
+  assert.match(mur,/IasharkOffrePro\.mount\(box,\{mode:'vitrine',contexte:'match',next:cheminMatch\(raw\)/);
+  assert.doesNotMatch(js,/\d+[,.]\d\d\s?€|€\s?\d|£|MX\$|\bR\s?\d/,"aucun prix ecrit en dur");
+  const auth=blocDe("function renderAuthWall(raw)","function renderApercu");
+  assert.doesNotMatch(auth,/IasharkOffrePro|proOffer|IASHARK_MARKET|price/,"le match offert n'affiche jamais de prix");
+  assert.doesNotMatch(js+read("assets/offre-pro.css"),/mgate-cta|#fbbf24|--amber\)/,"bouton ambre retire");
+  const MS=require("../lib/match-sections.js");
+  const ap=MS.apercuFlou();
+  assert.match(ap,/aria-hidden="true" inert/);
+  assert.match(ap,/Xxxx xxxxxxxxx/);
+  assert.doesNotMatch(ap,/pari conseillé|Pari recommandé/);
 });
 
 // Plus d'impasse « Match introuvable » (19/09/2026).
@@ -458,6 +414,12 @@ test("mur Pro et reprise : textes dans les 7 langues, dictionnaires et parts ide
       assert.ok(typeof dict[k]==="string"&&dict[k].trim(),`${loc} : match_page.${k} absent du dictionnaire`);
       assert.equal(part[k],dict[k],`${loc} : match_page.${k} differe entre parts et dictionnaire`);
     }
+  }
+  // Textes du match offert (match_v4.free_*) et du composant de paiement : 7 langues.
+  for(const loc of LOCALES){
+    const d=JSON.parse(read(`i18n/dict/${loc}.json`));
+    for(const k of ["free_title","free_sub","free_cta","free_login","preview_title","panel_cta"])assert.ok(String(d.match_v4[k]||"").trim(),`${loc} : match_v4.${k}`);
+    for(const k of ["title_match","title_general","pay_card","pay_stripe","pay_no_commitment","pay_cancel"])assert.ok(String(d.offre_pro[k]||"").trim(),`${loc} : offre_pro.${k}`);
   }
   const fr=JSON.parse(read("i18n/dict/fr.json")).match_page;
   for(const k of CLES_MUR){

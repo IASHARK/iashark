@@ -196,15 +196,20 @@ test('carte Marches joueurs : sans historique joueur (visiteur non abonne), list
   assert.deepEqual(vm.players.scoringThreat, []);
 });
 
-test('page match : la carte affiche les titularisations recentes, traduites dans les 7 langues', () => {
-  const js = fs.readFileSync(path.join(__dirname, '..', 'match-page.js'), 'utf8');
-  const bloc = js.slice(js.indexOf('function threatsCard'), js.indexOf('const ALERTES_ABSENCE'));
-  assert.match(bloc, /match_page\.stat_recent_starts/);
-  assert.match(bloc, /p\.startsLast/);
+// 04/10/2026 (plan UX, demande de Clement) : la page match n'affiche plus que le
+// calcul buteur du moteur v3 (section « Les joueurs », lib/match-sections.js :
+// titulaires probables seulement, une seule source buteur) ; l'ancienne carte
+// scorerModel et sa ligne « titularisations recentes » sont retirees.
+test('page match : la section « Les joueurs » montre les titulaires probables, traduite dans les 7 langues', () => {
+  const ms = fs.readFileSync(path.join(__dirname, '..', 'lib', 'match-sections.js'), 'utf8');
+  const bloc = ms.slice(ms.indexOf('function joueurs(c)'), ms.indexOf('function intervalle('));
+  assert.match(bloc, /raw\.v3_buteurs/);
+  assert.match(bloc, /match_v4\.probable_starter/);
+  assert.doesNotMatch(fs.readFileSync(path.join(__dirname, '..', 'match-page.js'), 'utf8'), /function threatsCard/);
   for (const loc of ['fr', 'en', 'es', 'es-mx', 'de', 'it', 'pt']) {
     const dict = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'i18n', 'dict', loc + '.json'), 'utf8'));
-    assert.ok(dict.match_page.stat_recent_starts, loc);
-    assert.ok(dict.match_page.players_note, loc);
+    assert.ok(dict.match_v4.probable_starter, loc);
+    assert.ok(dict.match_v4.players_note, loc);
   }
 });
 

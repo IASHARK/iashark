@@ -557,11 +557,13 @@ test("gate_view : sans IntersectionObserver ou sans panneau, rien n'est envoye e
   const noIo = run({ pathname: "/fr/match/555.html", extraGlobals: { MutationObserver: class { observe() {} disconnect() {} } } });
   assert.ok(!noIo.events().some((e) => e.event_type === "gate_view"));
   assert.equal(noIo.events()[0].event_type, "page_view");
-  // Les deux panneaux emis par match-page.js et home-scorers.js sont bien ceux observes.
+  // Les panneaux emis par match-page.js (04/10/2026 : composant de paiement du
+  // match bloque, carte « compte gratuit » du match offert) et par le bloc
+  // « Aujourd'hui » de l'accueil sont bien ceux observes (.gate, .hs-gate-card).
   const matchPage = fs.readFileSync(path.join(root, "match-page.js"), "utf8");
-  assert.match(matchPage, /<section class="signal-card is-locked gate avis/);
-  assert.match(matchPage, /<section class="signal-card is-locked gate mgate/);
-  assert.match(fs.readFileSync(path.join(root, "home-scorers.js"), "utf8"), /'<div class="hs-gate-card">'/);
+  assert.match(matchPage, /<div id="offreMatch" class="gate">/);
+  assert.match(matchPage, /<section class="op op--vitrine gate" aria-labelledby="opCompteT">/);
+  assert.match(fs.readFileSync(path.join(root, "lib/aujourdhui.js"), "utf8"), /'<div class="aj-unlock hs-gate-card">/);
 });
 
 // ---------- Premiere source d'acquisition (« first touch », 20/09/2026) ----------

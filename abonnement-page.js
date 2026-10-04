@@ -1,11 +1,18 @@
 (function(){
   'use strict';
-  var button=document.getElementById('subscribeButton');
-  var output=document.getElementById('billingMessage');
-  // i18n : repli francais si I18N n'est pas charge. Aucun texte serveur brut
-  // (souvent en francais) n'est affiche : chaque cas connu a sa cle.
+  // PAGE ABONNEMENT (04/10/2026, demande de Clement : « deux blocs, mal forme ;
+  // appel a l'action direct en haut »). UNE colonne : le composant de paiement
+  // unique (lib/offre-pro.js, mode « paiement »), puis les mentions. L'offre promo du 25/09 (codes BLEUS / CAIRO5) est
+  // retiree : elle etait expiree et rechargeait encore la page.
+  //
+  // Chemins :
+  //  - compte gratuit : duree -> cases legales -> Payer -> Stripe (1 ecran) ;
+  //  - sans compte : duree -> « Creer mon compte et continuer » (jamais grise,
+  //    aucune case avant l'inscription) -> inscription -> retour ICI avec la
+  //    duree deja cochee (?duree=) et « Compte cree, il reste a confirmer le
+  //    paiement » (?etape=compte), focus sur les cases -> Payer -> Stripe ;
+  //  - abonne Pro : aucun second paiement, retour au match ou aux matchs du jour.
   function t(key,fallback){return (window.I18N&&window.I18N.t)?window.I18N.t(key,fallback):fallback;}
-  // Lien interne qui reste dans le repertoire courant (/gb/, /mx/, /en/...).
   function localHref(p){
     var i=p.search(/[?#]/),tail='';
     if(i>=0){tail=p.slice(i);p=p.slice(0,i);}
@@ -14,244 +21,71 @@
     }
     return '/'+p+tail;
   }
-  // Premier segment du chemin = repertoire de langue ou de marche. Envoye a
-  // create-checkout-session : `dir` pour que Stripe renvoie l'acheteur sur
-  // /<dir>/checkout-succes.html (ou -annule), `market` pour gb/mx/za afin
-  // que le prix du marche soit utilise (jamais le tarif FR par defaut).
-  var DIRS=['fr','en','es','de','it','pt','gb','za','mx'];
-  var MARKETS=['gb','mx','za'];
-  var seg=(location.pathname.match(/^\/([a-z]{2})(?:\/|$)/)||[])[1]||'';
-  function message(text,isError){output.textContent=text;output.className='billing-message'+(isError?' error':'');}
-  // Duree choisie (lib/pro-plan-picker.js, "month" coche par defaut). Sans
-  // selecteur : "month", valeur par defaut acceptee par create-checkout-session.
-  var picker=null;
-  // --- Offre du 25/09/2026 (campagne Turquie–France) - A RETIRER ENSUITE ---
-  // Jusqu'a 20h45 (Paris), le code promo Stripe est applique AUTOMATIQUEMENT au
-  // paiement de la formule au mois (create-checkout-session : champ `promo`,
-  // liste blanche BLEUS / CAIRO5, controle par Stripe). La carte affiche le
-  // prix barre ; « J'ai un autre code » rend le champ code de la page Stripe.
-  // ?promo=CAIRO5 dans l'URL choisit ce code (garde pour la visite).
-  var PROMO_FIN=Date.UTC(2026,8,25,18,45,0);
-  var EUR=['19,95 €','9,95 €','5 €'];
-  var PROMO_PRIX={fr:EUR,es:EUR,de:EUR,it:EUR,pt:EUR,en:['$19.99','$9.95','$5'],gb:['£14.99','£9.95','£5']};
-  var PROMO_TXT={
-    fr:{n:'Code {code} appliqué automatiquement : {new} le premier mois au lieu de {old}, puis {old}/mois. Offre valable jusqu’à 20h45.',w:'L’offre à {new} s’applique à la formule au mois.',m:'Tu pourras saisir ton code sur la page de paiement.',a:'J’ai un autre code',b:'Utiliser le code {code}'},
-    es:{n:'Código {code} aplicado automáticamente: {new} el primer mes en lugar de {old}, luego {old}/mes. Válido hasta las 20:45 (hora de París).',w:'La oferta de {new} se aplica al plan mensual.',m:'Podrás introducir tu código en la página de pago.',a:'Tengo otro código',b:'Usar el código {code}'},
-    de:{n:'Code {code} automatisch angewendet: {new} im ersten Monat statt {old}, danach {old}/Monat. Gültig bis 20:45 Uhr (Pariser Zeit).',w:'Das Angebot für {new} gilt für das Monatsabo.',m:'Du kannst deinen Code auf der Zahlungsseite eingeben.',a:'Ich habe einen anderen Code',b:'Code {code} verwenden'},
-    it:{n:'Codice {code} applicato automaticamente: {new} il primo mese invece di {old}, poi {old}/mese. Valido fino alle 20:45 (ora di Parigi).',w:'L’offerta a {new} vale per il piano mensile.',m:'Potrai inserire il codice nella pagina di pagamento.',a:'Ho un altro codice',b:'Usa il codice {code}'},
-    pt:{n:'Código {code} aplicado automaticamente: {new} no primeiro mês em vez de {old}, depois {old}/mês. Válido até às 20h45 (hora de Paris).',w:'A oferta de {new} aplica-se ao plano mensal.',m:'Poderás introduzir o teu código na página de pagamento.',a:'Tenho outro código',b:'Usar o código {code}'},
-    en:{n:'Code {code} applied automatically: {new} for your first month instead of {old}, then {old}/month. Valid until 20:45 (Paris time).',w:'The {new} offer applies to the monthly plan.',m:'You can enter your code on the payment page.',a:'I have another code',b:'Use code {code}'}
-  };
-  PROMO_TXT.gb=PROMO_TXT.en;
-  var promoDir=DIRS.indexOf(seg)!==-1?seg:'fr';
-  var promoCode=(function(){
-    var q=(new URLSearchParams(location.search).get('promo')||'').toUpperCase();
-    if(q==='BLEUS'||q==='CAIRO5'){try{sessionStorage.setItem('ias-promo-code',q);}catch(e){}return q;}
-    try{var v=sessionStorage.getItem('ias-promo-code');if(v==='BLEUS'||v==='CAIRO5')return v;}catch(e){}
-    return 'BLEUS';
-  })();
-  var promoManuel=false;
-  function promoEnCours(){return Date.now()<PROMO_FIN&&!!PROMO_PRIX[promoDir];}
-  function promoAuto(){return promoEnCours()&&!promoManuel;}
-  function promoPrix(){var p=PROMO_PRIX[promoDir];return {old:p[0],nw:promoCode==='CAIRO5'?p[2]:p[1]};}
-  function remplir(s){var p=promoPrix();return s.split('{code}').join(promoCode).split('{new}').join(p.nw).split('{old}').join(p.old);}
-  function promoRendu(){
-    if(!promoEnCours())return;
-    var box=document.getElementById('proPlanPicker');if(!box)return;
-    var p=promoPrix();
-    box.querySelectorAll('[data-market-price="pro.month"]').forEach(function(el){
-      var voulu=promoAuto();
-      var deja=!!el.querySelector('s[data-promo]');
-      if(voulu&&!deja){el.innerHTML='<s data-promo style="opacity:.45;font-size:.55em;margin-right:.25em">'+p.old+'</s>'+p.nw;}
-      else if(!voulu&&deja){el.textContent=p.old;}
-    });
-    var note=document.getElementById('promoNote');
-    if(!note){
-      note=document.createElement('div');note.id='promoNote';
-      note.style.cssText='margin:14px 0 4px;padding:11px 13px;border:1px solid rgba(34,211,238,.28);border-left:3px solid #22d3ee;border-radius:10px;background:rgba(34,211,238,.06);font-size:13px;line-height:1.5;color:#dce8ee';
-      box.parentNode.insertBefore(note,box.nextSibling);
-    }
-    var T=PROMO_TXT[promoDir];
-    var mensuel=!picker||picker.interval()==='month';
-    var texte=promoManuel?T.m:(mensuel?T.n:T.w);
-    note.textContent='';
-    note.appendChild(document.createTextNode(remplir(texte)+' '));
-    var a=document.createElement('a');a.href='#';a.style.cssText='color:#22d3ee;text-decoration:underline;text-underline-offset:3px;white-space:nowrap';
-    a.textContent=remplir(promoManuel?T.b:T.a);
-    a.onclick=function(e){e.preventDefault();promoManuel=!promoManuel;promoRendu();};
-    note.appendChild(a);
-  }
-  function payload(){
-    var body={interval:picker?picker.interval():'month'},M=window.IASHARK_MARKET;
-    if(M&&typeof M.dir==='string'){
-      // lib/market-config.js : checkoutMarket vaut null pour le marche EUR par
-      // defaut, auquel cas aucun champ market n'est envoye.
-      if(M.dir)body.dir=M.dir;
-      if(M.checkoutMarket)body.market=M.checkoutMarket;
-      return body;
-    }
-    if(DIRS.indexOf(seg)!==-1)body.dir=seg;
-    if(MARKETS.indexOf(seg)!==-1)body.market=seg;
-    return body;
-  }
-  function payloadPromo(){
-    var body=payload();
-    if(promoAuto()&&body.interval==='month')body.promo=promoCode;
-    return body;
-  }
+  var params=new URLSearchParams(location.search);
   // --- Le match d'ou vient le visiteur ---------------------------------------
-  // Tunnel reel (analytics 09/2026) : match -> « Debloquer » -> abonnement.
-  // Sans ce contexte la page vendait un abonnement generique, et le retour
-  // Stripe (succes ou annulation) laissait l'acheteur loin de son match. Le
-  // chemin est lu dans ?next= (interne seulement) ou dans le referrer
-  // same-origin, puis garde en sessionStorage pour checkout-succes /
-  // checkout-annule. Jamais envoye au serveur, jamais un chemin externe.
+  // Chemin lu dans ?next= (interne seulement) ou dans le referrer same-origin,
+  // garde en sessionStorage pour checkout-succes / checkout-annule. Jamais
+  // envoye au serveur, jamais un chemin externe.
   var RETOUR_KEY='iashark.checkout.return';
   function cheminInterne(p){return typeof p==='string'&&p.charAt(0)==='/'&&p.charAt(1)!=='/'&&p.indexOf('\\')===-1;}
+  function cheminRetour(){
+    var next=params.get('next')||'';
+    if(cheminInterne(next))return next;
+    try{var ref=document.referrer?new URL(document.referrer):null;if(ref&&ref.origin===location.origin&&/\/match\.html$/.test(ref.pathname))return ref.pathname+ref.search;}catch(e){}
+    return '';
+  }
+  var next=cheminRetour();
   function contexteMatch(){
-    var next=new URLSearchParams(location.search).get('next')||'';
-    var chemin=cheminInterne(next)?next:'';
-    if(!chemin){
-      try{var ref=document.referrer?new URL(document.referrer):null;if(ref&&ref.origin===location.origin&&/\/match\.html$/.test(ref.pathname))chemin=ref.pathname+ref.search;}catch(e){}
-    }
-    if(!chemin||!/\/match\.html(\?|$)/.test(chemin))return null;
+    if(!next||!/\/match\.html(\?|$)/.test(next))return null;
     var id=null;
-    try{id=new URL(chemin,location.origin).searchParams.get('id');}catch(e){}
-    return {path:chemin,id:id&&/^\d+$/.test(id)?id:null,label:''};
+    try{id=new URL(next,location.origin).searchParams.get('id');}catch(e){}
+    return {path:next,id:id&&/^\d+$/.test(id)?id:null,label:''};
   }
   var contexte=contexteMatch();
   function memoriserRetour(){
     try{if(contexte)sessionStorage.setItem(RETOUR_KEY,JSON.stringify(contexte));else sessionStorage.removeItem(RETOUR_KEY);}catch(e){}
   }
-  // Ligne de contexte au-dessus du choix de duree : « Tu etais sur Banfield –
-  // Barracas Central ». Les noms viennent du JSON public du match (aucun
-  // champ premium) ; sans id ou sans reponse, la ligne reste generique.
-  function afficherContexte(){
-    var slot=document.getElementById('proContext');
-    if(!slot||!contexte)return;
-    var texte=t('pricing_page.context_match','Tu étais sur {match} — l’analyse complète s’ouvre dès le paiement validé.');
-    var rendre=function(label){
-      var parts=texte.split('{match}');
-      slot.textContent='';
-      slot.appendChild(document.createTextNode(parts[0]));
-      var b=document.createElement('b');b.textContent=label;slot.appendChild(b);
-      slot.appendChild(document.createTextNode(parts.slice(1).join('{match}')));
-      slot.hidden=false;
-    };
-    if(!contexte.id){rendre(t('pricing_page.context_match_generic','ce match'));return;}
-    fetch('/match/'+contexte.id+'.json',{cache:'force-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(m){
+  // « Tu etais sur Lens – Lille : l'analyse s'ouvre des le paiement valide. » Les
+  // noms viennent du JSON public du match (aucun champ premium).
+  function texteContexte(label){
+    var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+    var parts=t('offre_pro.context_match','Tu étais sur {match} : l’analyse s’ouvre dès le paiement validé.').split('{match}');
+    return esc(parts[0])+'<b>'+esc(label)+'</b>'+esc(parts.slice(1).join('{match}'));
+  }
+  function libelleContexte(){
+    if(!contexte)return Promise.resolve(null);
+    if(!contexte.id)return Promise.resolve(t('pricing_page.context_match_generic','ce match'));
+    return fetch('/match/'+contexte.id+'.json',{cache:'force-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(m){
       var h=m&&m.home&&m.home.n,a=m&&m.away&&m.away.n;
-      if(h&&a){contexte.label=h+' – '+a;memoriserRetour();}
-      rendre(contexte.label||t('pricing_page.context_match_generic','ce match'));
-    }).catch(function(){rendre(t('pricing_page.context_match_generic','ce match'));});
+      if(h&&a){contexte.label=h+' – '+a;return contexte.label;}
+      return t('pricing_page.context_match_generic','ce match');
+    }).catch(function(){return t('pricing_page.context_match_generic','ce match');});
   }
-  // Consentement obligatoire avant paiement (lib/checkout-consent.js : CGV +
-  // demande d'execution immediate selon le marche), reverifie par
-  // create-checkout-session. Charge a la demande si la page generee ne
-  // l'inclut pas encore ; s'il ne se charge pas, aucun paiement n'est lance.
-  function consentLib(){
-    return new Promise(function(resolve){
-      if(window.IasharkCheckoutConsent)return resolve(window.IasharkCheckoutConsent);
-      var s=document.createElement('script');s.src='/lib/checkout-consent.js';
-      s.onload=function(){resolve(window.IasharkCheckoutConsent||null);};
-      s.onerror=function(){resolve(null);};
-      document.head.appendChild(s);
-    });
-  }
-  // abonnement.html rend le bouton verrouille (aria-disabled="true", classe
-  // iash-consent-locked, title "Chargement…") : aucun clic sans effet pendant
-  // le chargement. Il ne s'active qu'une fois le consentement monte et coche
-  // (lib/checkout-consent.js#syncButtons), ou tout de suite pour un Pro.
-  function loaded(){button.removeAttribute('data-loading');button.removeAttribute('data-i18n-attr');button.removeAttribute('title');}
-  // Durees affichees par le selecteur (lib/pro-plan-picker.js#onUpdate : seules
-  // les durees PAYABLES, decision du 19/09/2026). « Meme acces Pro, quelle que
-  // soit la duree » n'a de sens qu'avec plusieurs durees a choisir. Aucune
-  // duree payable (pays pas encore ouvert) : ni consentement ni bouton de
-  // paiement, le selecteur affiche a leur place « paiement pas encore ouvert,
-  // aucun montant preleve » ; la comparaison et la liste Pro restent.
-  // Le HTML genere porte deja l'etat de la configuration (data-market-open-if,
-  // scripts/build-locales.js) ; a partir d'ici c'est le selecteur qui decide
-  // (serveur compris) : l'attribut est retire pour que lib/market-config.js ne
-  // le reapplique jamais par-dessus.
-  function montrer(el,visible){if(!el)return;el.removeAttribute('data-market-open-if');el.hidden=!visible;}
-  function majOffre(visibles){
-    var n=visibles&&visibles.length||0,ferme=n===0;
-    var engagement=document.getElementById('proCommitment');
-    if(engagement)engagement.hidden=n<2;
-    ['checkoutConsent','billingMessage','proTrust'].forEach(function(id){montrer(document.getElementById(id),!ferme);});
-    montrer(button,!ferme);
-  }
-  function unlock(){button.classList.remove('iash-consent-locked');button.setAttribute('aria-disabled','false');}
   async function init(){
-    // Dictionnaire et session sont independants : charges en parallele.
     var i18n=(window.I18N&&window.I18N.init)?Promise.resolve().then(function(){return window.I18N.init();}).catch(function(){}):null;
-    var ctx=(await Promise.all([i18n,IasharkApp.context()]))[1];
-    var box=document.getElementById('checkoutConsent');
-    var pickerBox=document.getElementById('proPlanPicker');
-    // Abonne : aucun second paiement (changer de duree = portail, depuis le compte).
-    // Un Pro venu d'un match y retourne : c'est l'analyse qu'il voulait lire.
-    if(ctx.isPro){if(box)box.hidden=true;if(pickerBox)pickerBox.hidden=true;montrer(button,true);loaded();unlock();button.textContent=t('pricing_page.cta_pro_member','Accéder aux analyses');button.onclick=function(){location.href=contexte?contexte.path:localHref('');};return;}
-    afficherContexte();
-    if(!box){box=document.createElement('div');box.id='checkoutConsent';button.parentNode.insertBefore(box,button);}
-    if(pickerBox&&window.IasharkProPlanPicker){
-      picker=window.IasharkProPlanPicker.mount(pickerBox,{onChange:function(){if(output.classList.contains('error'))message('',false);promoRendu();},onUpdate:function(v){majOffre(v);promoRendu();}});
-      // Duree fermee par le serveur (Price Stripe absent) : masquee, jamais un autre prix.
-      if(picker)picker.loadAvailability();
+    // app-client.js est en defer : il est pret au DOMContentLoaded (ce script aussi).
+    var ctx={user:null,isPro:false};
+    try{ctx=(await Promise.all([i18n,window.IasharkApp?IasharkApp.context():null]))[1]||ctx;}catch(e){}
+    var boite=document.getElementById('offrePro');
+    if(ctx.isPro){
+      if(boite)boite.hidden=true;
+      var pro=document.getElementById('abPro'),lienPro=document.getElementById('abProLien');
+      if(lienPro&&contexte){lienPro.setAttribute('href',contexte.path);lienPro.removeAttribute('data-href');lienPro.textContent=t('offre_pro.pro_cta_match','Retour au match');}
+      if(pro)pro.hidden=false;
+      return;
     }
-    // Offre du 25/09 : le selecteur et lib/market-config.js reecrivent les prix,
-    // le prix barre est donc reapplique a chaque changement du bloc.
-    promoRendu();
-    if(pickerBox&&window.MutationObserver&&promoEnCours())new MutationObserver(function(){promoRendu();}).observe(pickerBox,{childList:true,subtree:true,characterData:true});
-    if(promoEnCours())setTimeout(function(){location.reload();},Math.max(1000,PROMO_FIN-Date.now()+1000));
-    var lib=await consentLib();
-    var consent=lib?lib.mount(box,{buttons:[button]}):null;
-    loaded();
-    // Module de consentement indisponible : bouton actif, le clic affiche
-    // l'erreur de chargement et aucun paiement n'est lance.
-    if(!consent)unlock();
-    // Le message d'erreur sous le bouton disparait des que les cases requises sont cochees.
-    if(consent)box.addEventListener('change',function(){if(consent.isValid()&&output.classList.contains('error'))message('',false);});
-    button.onclick=async function(){
-      if(!consent){message(t('checkout_consent.error_load','Les conditions de paiement n’ont pas pu être chargées. Rechargez la page.'),true);return;}
-      // Le bloc de consentement affiche deja son message d'erreur : un seul message a l'ecran.
-      if(!consent.check()){message('',false);return;}
-      // Disponibilites du serveur connues avant de payer (lib/pro-plan-picker.js#whenReady).
-      if(picker&&picker.whenReady)await picker.whenReady();
-      if(picker&&!picker.isAvailable()){message(t('pricing_page.checkout_interval_not_configured','Cette durée n’est pas encore ouverte au paiement. Choisis une autre durée ou reviens bientôt. Aucun montant n’a été prélevé.'),true);return;}
-      var current=await IasharkApp.context();
-      // Sans compte : inscription directe (le visiteur qui clique « Devenir
-      // Pro » n'en a presque jamais), avec retour ICI - duree et match
-      // conserves - au lieu du detour compte -> connexion -> « Mon compte »
-      // qui perdait les inscrits avant le paiement. « Deja un compte ? » sur
-      // la page d'inscription garde le meme retour (auth-pages.js#propagerNext).
-      if(!current.user){
-        var retour=location.pathname+(contexte?'?next='+encodeURIComponent(contexte.path):'');
-        location.href=localHref('inscription.html?next='+encodeURIComponent(retour));return;
-      }
-      button.disabled=true;message(t('pricing_page.checkout_opening','Ouverture du paiement sécurisé…'));
-      try{
-        var session=await IasharkApp.supabase.auth.getSession();
-        var token=session.data.session&&session.data.session.access_token;
-        var body=payloadPromo();body.consent=consent.payload();
-        var response=await fetch(IasharkApp.url+'/functions/v1/create-checkout-session',{method:'POST',headers:{apikey:IasharkApp.key,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(body)});
-        var data=await response.json();
-        if(data.url){memoriserRetour();location.href=data.url;return;}
-        if(data&&data.code==='consent_required'){
-          if(consent.check())message(data.message||consent.text('error_required'),true);else message('',false);
-        }else if(data&&data.processed===false&&data.reason==='market_not_configured'){
-          message(t('pricing_page.checkout_market_not_configured','Le paiement n’est pas encore ouvert pour ce pays. Aucun montant n’a été prélevé.'),true);
-        }else if(data&&data.processed===false&&data.reason==='interval_not_configured'){
-          message(t('pricing_page.checkout_interval_not_configured','Cette durée n’est pas encore ouverte au paiement. Choisis une autre durée ou reviens bientôt. Aucun montant n’a été prélevé.'),true);
-        }else if(data&&data.processed===false&&data.reason==='already_subscribed'){
-          message(t('pricing_page.checkout_already_subscribed','Tu as déjà un abonnement Pro. Pour changer de durée, passe par ton compte.'),true);
-        }else if(data&&data.processed===false&&data.reason==='price_mismatch'){
-          message(t('pricing_page.checkout_price_mismatch','Le paiement de cette durée est momentanément indisponible. Aucun montant n’a été prélevé.'),true);
-        }else{
-          message(t('pricing_page.checkout_unavailable','Le paiement en ligne sera bientôt disponible.'),true);
-        }
-      }catch(error){message(t('pricing_page.checkout_error','Impossible d’ouvrir le paiement pour le moment.'),true);}
-      button.disabled=false;
-    };
+    if(!boite||!window.IasharkOffrePro)return;
+    var etapeCompte=params.get('etape')==='compte'&&!!ctx.user;
+    if(etapeCompte){var n=document.getElementById('abNotice');if(n)n.hidden=false;}
+    var label=await libelleContexte();
+    window.IasharkOffrePro.mount(boite,{
+      mode:'paiement',contexte:'general',next:next,
+      duree:window.IasharkOffrePro.dureeValide(params.get('duree')),
+      connecte:!!ctx.user,
+      contexteMatch:label?texteContexte(label):'',
+      focusConsent:etapeCompte,
+      onRetour:memoriserRetour
+    });
   }
   init();
 })();

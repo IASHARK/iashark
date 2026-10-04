@@ -707,7 +707,8 @@ test("C3 : moteur v3 allume, le match offert est un pari v3, le plus probable, j
   // 03/10/2026 : la plus fiable = la plus haute chance affichee du pronostic (chance IASHARK).
   assert.match(v3, /var pb=chanceSelection\(b\), pm=chanceSelection\(m\);/);
   assert.doesNotMatch(v3.split("\n").filter((l) => !/^\s*\/\//.test(l)).join("\n"), /valeurDe|cote_rec|PROBA_MIN/, "aucun critere de valeur");
-  assert.match(v3, /if\(!analysable\(gardes\[j\]\)\) delete gardes\[j\];/);
+  // Regle de Clement du 04/10/2026, 20 h : une designation deja publiee n'est plus jamais retiree par ces filtres.
+  assert.doesNotMatch(v3, /delete gardes\[j\]/);
   // Le bloc est pose apres la relecture des designations et avant le choix du jour.
   assert.ok(bloc.indexOf("// MOTEUR_V3:DEBUT") > bloc.indexOf("gardes=PICK_FREEZE.keptFreeDesignations(") && bloc.indexOf("// MOTEUR_V3:DEBUT") < bloc.indexOf("var jours=[];"));
 });

@@ -320,10 +320,21 @@ test("11. match reporte apres publication : etat reporte, ticket inchange, « sa
   assert.deepEqual(etats.sans_matchs_reportes, { nb_matchs: 2, cote_totale: 2.02, chance: 41 });
   assert.equal(t.cote_totale, 4.7, "le ticket lui-meme ne change pas");
   assert.deepEqual(T.etatsDe("x5", contenu, { fixtureById: {} }), {}, "tout a venir : rien a ecrire");
-  // Buteur annonce absent (disparu des titulaires probables) : retire, pas de remplacant.
+  // Regle de Clement du 04/10/2026, 20 h : un buteur seulement sorti des titulaires probables du moteur (aucune
+  // composition officielle, aucune absence annoncee) n'est plus marque « retire » : il reste affiche.
   const m = match(7, { v3_buteurs: [{ joueur_id: 2, joueur: "Autre", cote: "home", p_marque: 0.3 }] });
-  assert.deepEqual(T.etatsDe("buteur", { fixture_id: 7, joueur_id: 1, joueur: "Parti" }, { fixtureById: { 7: fixture(NOW + 3600e3, "NS") }, matchParId: { 7: m } }), { joueur: "retire" });
-  assert.deepEqual(T.etatsDe("buteur", { fixture_id: 7, joueur_id: 2, joueur: "Autre" }, { fixtureById: { 7: fixture(NOW + 3600e3, "NS") }, matchParId: { 7: m } }), {});
+  const fx7 = { 7: fixture(NOW + 3600e3, "NS") };
+  assert.deepEqual(T.etatsDe("buteur", { fixture_id: 7, joueur_id: 1, joueur: "Parti", cote: "home" }, { fixtureById: fx7, matchParId: { 7: m } }), {});
+  assert.deepEqual(T.etatsDe("buteur", { fixture_id: 7, joueur_id: 2, joueur: "Autre", cote: "home" }, { fixtureById: fx7, matchParId: { 7: m } }), {});
+  // Composition officielle publiee sans lui, ou absence annoncee pour ce match : retire ; la trace des remplacements reste.
+  const onze = (debut) => Array.from({ length: 11 }, (_, i) => ({ id: debut + i, name: "Titulaire " + String.fromCharCode(65 + i) + "x" }));
+  const compo = match(7, { lineups: { home: { startXI: onze(100) }, away: { startXI: onze(200) } } });
+  const trace = [{ motif: "absent_composition", ancien: { joueur: "Avant" } }];
+  assert.deepEqual(T.etatsDe("buteur", { fixture_id: 7, joueur_id: 1, joueur: "Parti", cote: "home" }, { fixtureById: fx7, matchParId: { 7: compo }, etatsActuels: { remplacements: trace } }), { joueur: "retire", remplacements: trace });
+  const blesse = match(7, { injuries: [{ name: "Parti Joueur", player_id: 1, team: 70, type: "Missing Fixture" }] });
+  assert.deepEqual(T.etatsDe("buteur", { fixture_id: 7, joueur_id: 1, joueur: "Parti Joueur", cote: "home" }, { fixtureById: fx7, matchParId: { 7: blesse } }), { joueur: "retire" });
+  const incertain = match(7, { injuries: [{ name: "Parti Joueur", player_id: 1, team: 70, type: "Questionable" }] });
+  assert.deepEqual(T.etatsDe("buteur", { fixture_id: 7, joueur_id: 1, joueur: "Parti Joueur", cote: "home" }, { fixtureById: fx7, matchParId: { 7: incertain } }), {}, "incertain : reste");
 });
 
 test("calcul complet du jour : x5, x10, Selection en or et buteur a partir des matchs publies", () => {

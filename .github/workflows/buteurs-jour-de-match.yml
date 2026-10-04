@@ -1,0 +1,44 @@
+name: buteurs-jour-de-match
+
+# MISE A JOUR LEGERE DES BUTEURS, JOURS DE MATCH (demande de Clement du 04/10/2026).
+# Le calcul quotidien (update-data.yml) ne tourne que la nuit : ni les compositions officielles
+# (environ 1 h avant le match) ni les absences annoncees dans la journee n'arrivaient, et un joueur
+# parti du rassemblement restait propose comme buteur. Toutes les 30 min, de 10:07 a 21:37 UTC
+# (12:07 a 23:37 a Paris en ete), pour les SEULS matchs qui commencent dans les 2 h 15
+# (config/quotas.json#api_football.buteurs_jour_de_match) : composition officielle, absences du
+# match, effectif convoque des selections ; tout buteur absent est retire des buteurs probables et du
+# premier buteur, et le buteur du jour absent est remplace (migration 0051) ou marque retire.
+# RIEN D'AUTRE n'est touche : paris, cotes, chances, selections, combines, match offert restent
+# figes. Aucun match proche : aucun appel. Jamais bloquant. Detail : scripts/buteurs-jour-de-match.js.
+# Rien n'est commite (data.json n'est pas reecrit) : seules les lignes Supabase des buteurs changent.
+
+on:
+  schedule:
+    - cron: '7,37 10-21 * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: buteurs-jour-de-match
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  buteurs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Buteurs des matchs proches (compositions et absences)
+        env:
+          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/buteurs-jour-de-match.js

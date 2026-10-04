@@ -127,7 +127,9 @@ test("pipeline : pronostics poses apres la chance IASHARK, avant le match offert
   const wf = fs.readFileSync(path.join(root, ".github", "workflows", "update-data.yml"), "utf8");
   const script = wf.slice(wf.indexOf("cat > pipeline.js << 'JSEOF'"), wf.indexOf("          JSEOF"));
   const i = script.indexOf("PRONOSTIC.poserPronostics(allMatchsData,");
-  assert.ok(i > script.indexOf("CHANCE_IASHARK.poserChance(m)"));
+  // Chance posee avant (regle du 04/10/2026, 20 h : jamais recalculee sur un pari fige, lib/pronostic.js#poserChancesAffichees).
+  assert.ok(script.indexOf("PRONOSTIC.poserChancesAffichees(allMatchsData,{figes:GEL_FIGES});") > 0);
+  assert.ok(i > script.indexOf("PRONOSTIC.poserChancesAffichees(allMatchsData,{figes:GEL_FIGES});"));
   assert.ok(i < script.indexOf("(function designerMatchGratuit(){"));
   assert.ok(i < script.indexOf("var matchsPublics="));
   assert.ok(i < script.indexOf("PREMIUM_FIELDS_LIB.premiumPayload("));

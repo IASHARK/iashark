@@ -172,7 +172,8 @@ test("eteint : les nouveaux noms de champs premium ne changent rien aux fichiers
     const pub = PREMIUM.stripPremium(m);
     // Match offert : public, sauf les champs Pro seulement et, depuis l'audit I8 du
     // 02/10/2026, l'ancienne mise conseillee (mise, kelly, vbet), jamais publiee.
-    const RETIRES_OFFERT = ["sim_15min", "stats_iashark", "lecture_match", "mise", "kelly", "vbet"];
+    // 04/10/2026 : + panneau Marches et ses sources (marches_panneau, v3_marches, marches_flux), Pro seulement.
+    const RETIRES_OFFERT = ["sim_15min", "stats_iashark", "lecture_match", "marches_panneau", "v3_marches", "marches_flux", "mise", "kelly", "vbet"];
     const legacy = (m && m.is_free === true) ? (function () { const o = {}; Object.keys(m).forEach((k) => { if (RETIRES_OFFERT.indexOf(k) === -1) o[k] = m[k]; }); return o; })() : (function () { const o = {}; Object.keys(m).forEach((k) => { if (LEGACY.indexOf(k) === -1) o[k] = m[k]; }); if (!("has_signal" in o)) o.has_signal = !!(m.pari_rec && !m.no_signal); return o; })();
     assert.deepEqual(pub, legacy, "stripPremium identique pour " + m.id);
     const payload = PREMIUM.premiumPayload(m);

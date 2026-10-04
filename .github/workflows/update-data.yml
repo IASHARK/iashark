@@ -2080,6 +2080,10 @@ jobs:
             try{
               var BUTEURS_LIB=require('./lib/buteurs-du-jour.js');
               var fichierButeurs=BUTEURS_LIB.buildDailyFile(matchsData||[],{now:Date.now(),isEligible:estOuvert||null});
+              // 04/10/2026 (regles-tickets.md §6) : le buteur du jour est servi par la fonction tickets-du-jour
+              // (compte gratuit). config/tickets.json#fichier_buteurs_public = « retire » : plus aucun match ni rang
+              // public dans ce fichier (a poser quand l'accueil ne lit plus home-scorers.js).
+              if(require('./config/tickets.json').fichier_buteurs_public==='retire') fichierButeurs={generated_at:fichierButeurs.generated_at,days:{}};
               fs.writeFileSync(FICHIER_BUTEURS,JSON.stringify(fichierButeurs,null,2));
               var joursButeurs=Object.keys(fichierButeurs.days);
               console.log('  [BUTEURS] buteurs-du-jour.json : '+joursButeurs.map(function(j){ return j+' = '+fichierButeurs.days[j].length+' joueur(s)'; }).join(', ')+' ('+(matchsData||[]).length+' match(s) examine(s))');
@@ -4360,7 +4364,8 @@ jobs:
                 var liste=r.selections.map(function(x){
                   var c=CHANCE_IASHARK.chanceIashark(x.chance*100,null);
                   // 04/10/2026 : ni la cote ni le nom du bookmaker de reference (bet365, non agree en France) ; cote minimum = 1 / chance.
-                return c?{marche:FLUX_MOD.CATALOGUE[x.bet_id].nom,selection:x.libelle,chance:c.chance,cote_minimum:Math.round(10000/c.chance)/100}:null;
+                // code (« F5:Over 2.5 », sans bookmaker) : relie la selection au meme marche du moteur v3 (panneau Marches, lib/marches-panneau.js).
+                return c?{marche:FLUX_MOD.CATALOGUE[x.bet_id].nom,selection:x.libelle,chance:c.chance,cote_minimum:Math.round(10000/c.chance)/100,code:x.code}:null;
                 }).filter(Boolean);
                 if(liste.length){ m.marches_flux={source:'cote de reference du marche, marge retiree',releve_at:new Date(rel.captured_at).toISOString(),liste:liste}; nFlux++; }
               });
@@ -4422,6 +4427,33 @@ jobs:
           try{
             console.log('  [PARIS] option « cote plus haute » posee sur '+PRONOSTIC.poserOptionCote(allMatchsData,{configLigues:LEAGUES_CONFIG,cotesAnjPar:LIVRES_ANJ})+' match(s).');
           }catch(e){ console.log('::warning title=Paris::option cote non posee ('+(e&&e.message)+').'); }
+          // ================= TICKETS DU JOUR, SELECTION EN OR, BUTEUR DU JOUR (demande de Clement, 04/10/2026) =================
+          // Juste APRES la publication des paris : les jambes sont exactement les paris simples affiches sur les
+          // pages match (meme pari, meme cote, meme chance ; lib/run-output/jambes-du-jour.js). Ticket x5 (3-4 matchs,
+          // cote 4,50-5,50) et x10 (5-6 matchs, cote 9-11) : la plus grande chance parmi TOUTES les combinaisons
+          // (lib/run-output/combos.js), jamais force. Gele a sa publication dans la table tickets_du_jour (migration 0050,
+          // lib/tickets-du-jour.js) : un ticket publie ne se recalcule plus. Rien sans le feu vert du mathematicien
+          // (config/verdicts-maths.json). Table ou cle absente : simple avertissement, le calcul quotidien continue.
+          // data.json : statut de chaque ticket seulement (lib/public-run-output.js). Journal : statuts et compteurs seulement.
+          try{
+            var TICKETS_DU_JOUR=require('./lib/tickets-du-jour.js');
+            var rapportTickets=await TICKETS_DU_JOUR.publierTicketsDuJour({
+              matchs:allMatchsData, fixtureById:FIXTURE_BY_ID, nowMs:Date.now(), configLigues:LEAGUES_CONFIG,
+              supabase:(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY)?{url:SUPA_URL_PIPELINE,cle:SUPA_SERVICE_KEY}:null,
+              pipelineSha:process.env.GITHUB_SHA||null, snapshotTime:runOutput.snapshot_time,
+              avertir:function(t){ console.log('::warning title=Tickets::'+t); },
+              erreur:function(t){ console.log('::error title=Tickets::'+t); }
+            });
+            runOutput.DAILY_COMBOS=rapportTickets.daily_combos;
+            console.log('  '+TICKETS_DU_JOUR.ligneJournal(rapportTickets));
+          }catch(e){ console.log('::warning title=Tickets::tickets non calcules ('+(e&&e.message)+'), le calcul quotidien continue.'); }
+          // ================= PANNEAU « MARCHES » (demande de Clement, 04/10/2026) =================
+          // Tous les marches calcules de chaque match ouvert, par familles, chance AFFICHEE (lib/chance-iashark.js) et cote
+          // minimum (lib/marches-panneau.js). Champ premium marches_panneau, Pro seulement meme sur le match offert ; nombre
+          // public nb_marches (entier seul). Rien sans le feu vert du mathematicien (config/verdicts-maths.json).
+          try{
+            console.log('  [MARCHES] panneau « Marchés » pose sur '+require('./lib/marches-panneau.js').poserPanneaux(allMatchsData)+' match(s).');
+          }catch(e){ console.log('::warning title=Panneau Marches::panneau non pose ('+(e&&e.message)+').'); }
             // ================= PROTECTION DU FICHIER PUBLIC =================
             // data.json est servi sans authentification. Il ne doit donc plus
             // contenir le marche recommande, sa cote, la probabilite du modele

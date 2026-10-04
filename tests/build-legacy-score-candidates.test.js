@@ -187,6 +187,7 @@ test("SMOKE (5 fixtures) : PL passe le gate, LaLiga Score refuse, LaLiga Player 
   // structure valide, meme quand la valeur est vide/NO_SELECTION.
   assert.ok(["SELECTED", "NO_SAFE_SELECTION"].includes(runOutput.SAFE_PICK_OF_THE_DAY.status));
   assert.equal(typeof runOutput.TOP_5_SCORERS_OF_DAY.count_returned, "number");
-  assert.equal(runOutput.DAILY_COMBOS.combos.length, 3);
+  // 04/10/2026 : deux emplacements de tickets (x5, x10), remplis apres la publication des paris.
+  assert.equal(runOutput.DAILY_COMBOS.combos.length, 2);
   assert.equal(runOutput.betting_validation_status, "UNVALIDATED_SHADOW");
 });

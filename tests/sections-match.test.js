@@ -120,7 +120,7 @@ test("garde : couverture verifiee du v3 et feux du mathematicien, sinon rien ; u
   const ancien = matchDe(v, { moteur_v3: { source: "ancien moteur (repli)" } });
   const ferme = matchDe(v, { no_signal_reason: "KICKOFF_PASSED", sim_resume: { gele: true } });
   const n = S.poserSections([ok, limite, ancien, ferme]);
-  assert.deepEqual(n, { sim_resume: 1, premier_but: 1, hors_perimetre: 1, ecart_avis: 0 });
+  assert.deepEqual(n, { sim_resume: 1, premier_but: 1, hors_perimetre: 1, ecart_avis: 0, cotes_marche: 0 });
   assert.ok(ok.sim_resume && ok.premier_but);
   assert.equal(limite.sim_resume, undefined); assert.equal(limite.premier_but, undefined);
   assert.equal(ancien.sim_resume, undefined);
@@ -129,7 +129,7 @@ test("garde : couverture verifiee du v3 et feux du mathematicien, sinon rien ; u
   const sans = JSON.parse(JSON.stringify(VERDICTS));
   Object.keys(sans.match).forEach((k) => { if (sans.match[k] === "GO") sans.match[k] = "en_attente"; });
   const m2 = matchDe(v);
-  assert.deepEqual(S.poserSections([m2], { verdicts: sans }), { sim_resume: 0, premier_but: 0, hors_perimetre: 0, ecart_avis: 0 });
+  assert.deepEqual(S.poserSections([m2], { verdicts: sans }), { sim_resume: 0, premier_but: 0, hors_perimetre: 0, ecart_avis: 0, cotes_marche: 0 });
   assert.equal(m2.sim_resume, undefined);
   assert.equal(S.simulationPermise(m2, sans), false);
   assert.deepEqual(S.ajoutsSimulation(sans), { tr_equipes: false, et_si: false, minute_mediane: false });
@@ -314,7 +314,7 @@ test("coherence (point 2) : Macedoine du Nord - Ecosse, Avis 58 % contre 40,5 % 
   const m = macedoineEcosse({ league_key: "ligue1" });
   assert.ok(P.ecartAvisV3(m) > 17);
   P.poserPanneaux([m]); const n = S.poserSections([m]);
-  assert.deepEqual(n, { sim_resume: 0, premier_but: 0, hors_perimetre: 0, ecart_avis: 1 });
+  assert.deepEqual(n, { sim_resume: 0, premier_but: 0, hors_perimetre: 0, ecart_avis: 1, cotes_marche: 0 });
   for (const k of ["sim_resume", "premier_but", "v3_premiers_buteurs"]) assert.equal(m[k], undefined, k);
   assert.ok(m.sim_15min && Array.isArray(m.sim_15min.tr), "le film du match reste");
   assert.equal(m.sim_15min.si, undefined); assert.equal(m.sim_15min.si_affiche, undefined);
@@ -331,4 +331,84 @@ test("coherence (point 2) : Macedoine du Nord - Ecosse, Avis 58 % contre 40,5 % 
   const pv = ok.v3_marches.find((x) => x.cle === "1N2:2").probabilite;
   assert.equal(P.avisCoherent(macedoineEcosse({ league_key: "ligue1", chance_iashark: pv + 2 })), true);
   assert.equal(P.avisCoherent(macedoineEcosse({ league_key: "ligue1", chance_iashark: pv + 2.1 })), false);
+});
+
+// « 10 000 FOIS » ET PANNEAU SUR TOUS LES MATCHS (demande de Clement du 04/10/2026, soir) : hors du
+// perimetre du v3, chances SANS MARGE des cotes du match, la MEME source que l'Avis ; rien ne change
+// pour un match du v3 ; jamais de score exact ni de premier but tires des cotes.
+const PR = require("../lib/pronostic.js");
+// Ligue des nations (cotes moyennes reelles de France - Belgique, 05/10/2026), pari publie par la voie
+// « cotes du marche » : plus de 2,5 buts a 65 %, cote 1,47.
+function franceBelgique(o) {
+  return Object.assign({ id: 1528944, home: { n: "France", id: 2 }, away: { n: "Belgium", id: 1 }, date: "2026-10-05 20:45", league_key: "nations_league",
+    c1: "1.53", cn: "4.40", c2: "5.50", co25: "1.47", cu25: "2.75", co15: "1.12", co35: "2.40", btts_oui: "1.60", btts_non: "2.30",
+    pari_rec: "Over 2.5", market_id: "over-25", no_signal: false, chance_iashark: 65, model_probability: 65, cote_rec: 1.47, cote_source: "indicative" }, o || {});
+}
+test("cotes du marche : « 10 000 fois » hors du v3 (victoire / nul / victoire), meme source que l'Avis, sommes justes", () => {
+  const m = franceBelgique();
+  const q = PR.sansMargeDesCotes(m);
+  const n = S.poserSections([m]);
+  assert.deepEqual(n, { sim_resume: 1, premier_but: 0, hors_perimetre: 0, ecart_avis: 0, cotes_marche: 1 });
+  const r = m.sim_resume;
+  assert.equal(r.v, S.VERSION_RESUME_MARCHE); assert.equal(r.source, "cotes"); assert.equal(r.base, 10000);
+  assert.deepEqual(r.scores, [], "jamais de score exact sans grille"); assert.equal(r.total_buts, null);
+  assert.equal(r.issues.dom + r.issues.nul + r.issues.ext, 10000);
+  for (const [k, id] of [["dom", "home-win"], ["nul", "draw"], ["ext", "away-win"]]) assert.ok(Math.abs(r.issues[k] / 100 - q[id]) < 1, k + " : la cote sans marge");
+  assert.equal(m.premier_but, undefined, "ni premier but"); assert.equal(m.sim_15min, undefined);
+  // Pari en 1N2 : son issue porte EXACTEMENT la chance de l'Avis.
+  const v = franceBelgique({ pari_rec: "Victoire Domicile", market_id: "home-win", chance_iashark: Math.round(q["home-win"]), cote_rec: 1.53 });
+  S.poserSections([v]);
+  assert.equal(v.sim_resume.issues.dom, Math.round(q["home-win"]) * 100);
+  // Double chance : ses deux issues font la chance de l'Avis.
+  const dc = franceBelgique({ pari_rec: "DC 1X", market_id: "dc-1x", chance_iashark: Math.round(q["dc-1x"]) });
+  S.poserSections([dc]);
+  assert.equal(dc.sim_resume.issues.dom + dc.sim_resume.issues.nul, Math.round(q["dc-1x"]) * 100);
+  // Les cotes des agrees quand la cote de l'Avis est agreee (meme source que l'Avis).
+  const anj = franceBelgique({ cote_source: "anj", sans_marge_anj: { "home-win": 60.2, draw: 22.5, "away-win": 17.3, "over-25": 64.6, "under-25": 35.4 } });
+  S.poserSections([anj]);
+  assert.deepEqual(anj.sim_resume.issues, { dom: 6000, nul: 2300, ext: 1700 });
+});
+test("cotes du marche : garde d'ecart avec l'Avis, aucune cote, feu du mathematicien ; un match du v3 ne change pas", () => {
+  // Chance de l'Avis a plus de 2 points de la cote sans marge du meme marche (chance corrigee) : rien.
+  const q = PR.sansMargeDesCotes(franceBelgique());
+  const loin = franceBelgique({ chance_iashark: Math.round(q["over-25"]) - 3 });
+  S.poserSections([loin]);
+  assert.equal(loin.sim_resume, undefined);
+  assert.equal(P.chancesMarche(loin), null);
+  // Aucune cote reelle : rien.
+  const sans = franceBelgique({ c1: "--", cn: "--", c2: "--", co25: "--", cu25: "--", btts_oui: null, btts_non: null });
+  S.poserSections([sans]);
+  assert.equal(sans.sim_resume, undefined);
+  // Sans feu vert du mathematicien : rien.
+  const nogo = JSON.parse(JSON.stringify(VERDICTS)); nogo.match.sim_resume = "en_attente";
+  const m3 = franceBelgique(); S.poserSections([m3], { verdicts: nogo });
+  assert.equal(m3.sim_resume, undefined);
+  // Match du v3 dans son perimetre : sa grille, jamais les cotes (meme avec des cotes).
+  const v = AVEC_GRILLE[0];
+  const v3 = matchDe(v, { c1: "1.80", cn: "3.60", c2: "4.50" });
+  S.poserSections([v3]);
+  assert.equal(v3.sim_resume.v, S.VERSION_RESUME);
+  assert.equal(P.chancesMarche(v3), null, "perimetre du v3 : jamais la voie des cotes");
+  // v3 en perimetre mais Avis trop loin : l'Avis reste seul, aucun repli sur les cotes.
+  const loinV3 = matchDe(v, { c1: "1.80", cn: "3.60", c2: "4.50", pari_rec: "x", market_id: "home-win", chance_iashark: 99 });
+  const n = S.poserSections([loinV3]);
+  assert.equal(n.ecart_avis, 1); assert.equal(loinV3.sim_resume, undefined);
+});
+test("cotes du marche : le panneau Marches liste les marches cotes (chance sans marge), le pari garde la chance de l'Avis", () => {
+  const m = franceBelgique();
+  P.poserPanneaux([m]);
+  const lignes = m.marches_panneau.familles.flatMap((f) => f.marches);
+  assert.ok(lignes.length >= 8 && lignes.every((l) => l.source === "marche"));
+  const par = (id) => lignes.find((l) => l.id === id);
+  assert.equal(par("over-25").chance, 65); assert.equal(par("over-25").pari_avis, true);
+  assert.equal(par("over-25").chance + par("under-25").chance, 100);
+  assert.equal(par("home-win").chance + par("draw").chance + par("away-win").chance, 100);
+  assert.equal(par("dc-1x").chance, par("home-win").chance + par("draw").chance);
+  assert.ok(par("BTTS:oui") && par("BTTS:oui").libelle === "Les deux équipes marquent");
+  assert.ok(!lignes.some((l) => /^SCORE:|^PREMIER_BUT:/.test(String(l.id))), "jamais de score ni de premier but tires des cotes");
+  assert.equal(m.nb_marches, m.marches_panneau.nb);
+  // Champs payants, Pro seulement (inchanges) : jamais dans la copie publique.
+  const pub = PREMIUM.stripPremium(Object.assign({}, m, { is_free: false }));
+  assert.equal(pub.marches_panneau, undefined); assert.equal(pub.sim_resume, undefined);
+  assert.ok(PREMIUM.PRO_ONLY_FIELDS.includes("marches_panneau"));
 });

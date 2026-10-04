@@ -89,11 +89,14 @@ jobs:
           // calcul exact a partir de lambda_h/lambda_a et du favori. Remplace la frequence
           // observee de la page (events_*.slots, bruit sur 20 matchs). Champ premium sim_15min.
           var SIM15=require('./lib/simulation-15min.js');
+          // NOUVELLES SECTIONS DE LA PAGE MATCH (04/10/2026, lib/sections-match.js) : feux du
+          // mathematicien (config/verdicts-maths.json#match), couverture « vérifiée » du v3 seulement.
+          var SECTIONS_MATCH=require('./lib/sections-match.js');
           function sim15Champ(lh,la,p1,p2,leagueId,disponible){
             if(!disponible||!(Number(lh)>0)||!(Number(la)>0)) return null;
             try{
               var fav=(Number(p1)>Number(p2))?'home':((Number(p2)>Number(p1))?'away':null);
-              return SIM15.champPipeline({lambdaH:Number(lh),lambdaA:Number(la),favori:fav,ligueApi:leagueId});
+              return SIM15.champPipeline({lambdaH:Number(lh),lambdaA:Number(la),favori:fav,ligueApi:leagueId,ajouts:SECTIONS_MATCH.ajoutsSimulation()});
             }catch(e){ console.log('  [SIM15] calcul impossible : '+(e&&e.message)); return null; }
           }
           // STATS IASHARK (30/09/2026, lib/stats-book.js) : profils descriptifs calcules sur le
@@ -3235,7 +3238,12 @@ jobs:
                 var allGoals=teamEvts.filter(function(e){return e.type==='Goal'&&e.detail!=='Missed Penalty';});
                 var concGoals=oppEvts.filter(function(e){return e.type==='Goal'&&e.detail!=='Missed Penalty';});
                 var games=Math.max(eventsArr.length,1);
-                function goalsIn(min1,min2,arr){return arr.filter(function(e){var m=e.time&&e.time.elapsed||0;return m>=min1&&m<min2;}).length;}
+                // Bornes justes (verdicts-maths-temps.md, 04/10/2026) : 1-15, 16-30, 31-45 (+ arrets de
+                // jeu de la 1re mi-temps : elapsed 45 + extra), 46-60, 61-75, 76-90 (+ arrets). Avant :
+                // un but a la 15e tombait dans « 15-30 » et un but a la 45e+2 dans « 45-60 ».
+                // Prolongations (elapsed > 90) : hors tranches, comme avant. Libelles inchanges.
+                function trancheBut(e){var m=Number(e&&e.time&&e.time.elapsed);if(!(m>=0)||m>90)return -1;return m<=15?0:m<=30?1:m<=45?2:m<=60?3:m<=75?4:5;}
+                function goalsIn(min1,min2,arr){var k=[0,15,30,45,60,75].indexOf(min1);return arr.filter(function(e){return trancheBut(e)===k;}).length;}
                 var redCards=teamEvts.filter(function(e){return e.type==='Card'&&e.detail==='Red Card';}).length;
                 var yellowCards=teamEvts.filter(function(e){return e.type==='Card'&&e.detail==='Yellow Card';}).length;
                 function avg(n){return (n/games).toFixed(2);}
@@ -4066,12 +4074,17 @@ jobs:
               // et p1/p2 du v3 : les memes buts attendus que la page), jamais avec ceux de
               // l'ancien moteur (trop sur de lui, condition du mathematicien). Match sans
               // moteur v3 (ancien moteur, repli, urgence) ou deja commence : pas de simulation.
-              matchObj.sim_15min=(kickoffGateFix.open&&matchObj.moteur_v3&&matchObj.moteur_v3.source==='v3'&&matchObj.reliability&&matchObj.reliability.source==='moteur_v3')
+              // 04/10/2026 (verdicts-maths-temps.md a1 condition 1) : seulement en couverture
+              // « vérifiée » du v3 (ni coupe, ni selection, ni « données limitées ») ; ajouts
+              // (marque / encaisse par equipe, « Et si... ? », minute mediane du premier but)
+              // selon les feux du mathematicien (lib/sections-match.js#ajoutsSimulation).
+              matchObj.sim_15min=(kickoffGateFix.open&&matchObj.moteur_v3&&matchObj.moteur_v3.source==='v3'&&matchObj.reliability&&matchObj.reliability.source==='moteur_v3'&&SECTIONS_MATCH.simulationPermise(matchObj))
                 ?sim15Champ(matchObj.lambda_h,matchObj.lambda_a,matchObj.p1,matchObj.p2,lg.id,true):null;
               // STATS IASHARK : 2 chiffres publics (stats_iashark_gratuit) et detail reserve aux Pro
               // (stats_iashark, champ premium « Pro seulement » comme sim_15min, lib/premium-fields.js).
               // Seulement des profils termines AVANT le jour du match (lib/stats-book.js#profilUtilisable).
-              var sbMatch=statsBookChamps(f,lg,home,away);
+              // Arbitre : seulement avec le feu vert du mathematicien (lib/sections-match.js#feuArbitre).
+              var sbMatch=SECTIONS_MATCH.feuArbitre(statsBookChamps(f,lg,home,away));
               matchObj.stats_iashark_gratuit=sbMatch?sbMatch.gratuit:null;
               matchObj.stats_iashark=sbMatch?sbMatch.pro:null;
               matchsData.push(matchObj);
@@ -4454,6 +4467,21 @@ jobs:
           try{
             console.log('  [MARCHES] panneau « Marchés » pose sur '+require('./lib/marches-panneau.js').poserPanneaux(allMatchsData)+' match(s).');
           }catch(e){ console.log('::warning title=Panneau Marches::panneau non pose ('+(e&&e.message)+').'); }
+          // ================= NOUVELLES SECTIONS DE LA PAGE MATCH (demande de Clement, 04/10/2026) =================
+          // « Si ce match se jouait 10 000 fois » (sim_resume) et « Qui ouvre le score ? » (premier_but) :
+          // memes arrondis que le panneau (le pari garde la chance de l'Avis), couverture « vérifiée » du
+          // v3, feux du mathematicien (lib/sections-match.js). Journal : compteurs seulement.
+          try{
+            var nbSections=SECTIONS_MATCH.poserSections(allMatchsData);
+            console.log('  [SECTIONS] 10 000 fois : '+nbSections.sim_resume+' match(s), qui ouvre le score : '+nbSections.premier_but+' match(s).');
+          }catch(e){ console.log('::warning title=Sections match::sections non posees ('+(e&&e.message)+').'); }
+          // Les jumeaux du match (lib/jumeaux.js) : faits d'archive, seulement avec la table validee par
+          // l'ingenieur donnees (config/jumeaux.json#table) ET le feu vert du mathematicien. Sinon : rien.
+          try{
+            var JUMEAUX=require('./lib/jumeaux.js');
+            var tableJumeaux=JUMEAUX.chargerTable();
+            console.log('  [JUMEAUX] '+(tableJumeaux?JUMEAUX.poserJumeaux(allMatchsData,tableJumeaux)+' match(s).':'table absente : aucun jumeau.'));
+          }catch(e){ console.log('::warning title=Jumeaux::jumeaux non poses ('+(e&&e.message)+').'); }
             // ================= PROTECTION DU FICHIER PUBLIC =================
             // data.json est servi sans authentification. Il ne doit donc plus
             // contenir le marche recommande, sa cote, la probabilite du modele

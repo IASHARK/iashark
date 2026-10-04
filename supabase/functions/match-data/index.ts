@@ -105,8 +105,9 @@ const PREMIUM_FIELDS = [
   "marches_flux",
   // Option « cote plus haute » et correction de la chance affichee (lib/premium-fields.js, 04/10/2026).
   "option_cote", "chance_correction",
-  // Nouvelle page match (04/10/2026) : panneau Marches, match rejoue, jumeaux du match.
-  "marches_panneau", "sim_resume", "jumeaux",
+  // Nouvelle page match (04/10/2026) : panneau Marches, « si ce match se jouait 10 000 fois »,
+  // jumeaux du match, qui ouvre le score, premier buteur.
+  "marches_panneau", "sim_resume", "jumeaux", "premier_but", "v3_premiers_buteurs",
 ];
 
 // Un match marque is_free par le pipeline est l'offre d'appel du jour : ses
@@ -123,7 +124,8 @@ function estGratuit(m: Record<string, unknown>): boolean {
 // 30/09/2026 (soir) : « Notre lecture du match » (lecture_match), meme regle.
 // 04/10/2026 : panneau « Marches » et ses sources (marches_panneau, v3_marches, marches_flux),
 // Pro seulement meme sur le match offert (tests/tickets-du-jour-contrat.test.js : meme liste).
-const CHAMPS_PRO_SEULEMENT = ["sim_15min", "stats_iashark", "lecture_match", "marches_panneau", "v3_marches", "marches_flux"];
+// 04/10/2026 : « Qui ouvre le score ? » (premier_but) et premier buteur (v3_premiers_buteurs).
+const CHAMPS_PRO_SEULEMENT = ["sim_15min", "stats_iashark", "lecture_match", "marches_panneau", "v3_marches", "marches_flux", "premier_but", "v3_premiers_buteurs"];
 function sansChampsPro(m: Record<string, unknown>): Record<string, unknown> {
   const copy = { ...m };
   for (const f of CHAMPS_PRO_SEULEMENT) delete copy[f];

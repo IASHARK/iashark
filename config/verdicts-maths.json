@@ -5,7 +5,7 @@
     "Chaque passage a GO note la source (fichier de verdict) et la date. Sources : verdicts-maths-tickets.md et verdicts-maths-temps.md (04/10/2026).",
     "categories_no_go : categories exclues des tickets, de la Selection en or et du buteur du jour : { \"ligue\": \"<league_key>\" } et/ou { \"famille\": \"1N2\" | \"DC\" | \"OU2.5\" } (absent = toutes).",
     "marches_panneau.cles_exclues / familles_exclues : marches du panneau « Marches » que le mathematicien dit faux (cle du moteur v3, ex. « SCORE:2-1 », ou famille, ex. « SCORE »).",
-    "04/10/2026 : verdicts-maths-tickets.md (e, f, g) et verdicts-maths-temps.md (a, b, c, d) lus ; valeurs ci-dessous. Chaque GO est un « GO avec condition » : les conditions sont appliquees dans le code (lib/tickets-du-jour.js, lib/run-output/jambes-du-jour.js, lib/marches-panneau.js, lib/simulation-15min.js, lib/sur-10000.js) et le mathematicien doit revoir l'integration sur les vrais fichiers du jour avant la mise en ligne.",
+    "04/10/2026 : verdicts-maths-tickets.md (e, f, g) et verdicts-maths-temps.md (a, b, c, d) lus ; valeurs ci-dessous. Chaque GO est un « GO avec condition » : les conditions sont appliquees dans le code (lib/tickets-du-jour.js, lib/run-output/jambes-du-jour.js, lib/marches-panneau.js, lib/simulation-15min.js, lib/sections-match.js, lib/moteur-v3.js) et le mathematicien doit revoir l'integration sur les vrais fichiers du jour avant la mise en ligne.",
     "competitions_jambes : types de competition (config/leagues.json#leagues[].kind) et cles de ligue exclus des tickets, de la Selection en or et du buteur du jour."
   ],
   "tickets": {
@@ -20,10 +20,15 @@
     "film_tr_equipes": "GO",
     "zone_chaude": "NO-GO",
     "et_si": "GO",
+    "qui_ouvre": "GO",
+    "premier_but_avant_pause": "GO",
     "minute_mediane_premier_but": "GO",
+    "premier_buteur": "GO",
     "sim_resume": "GO",
+    "score_le_plus_fou": "NO-GO",
     "jumeaux": "en_attente",
-    "source": "verdicts-maths-temps.md : a1 GO (tr), a2 GO (tr_dom, tr_ext, valeurs de controle), a3 NO-GO (zone chaude, aucune forme), b1-b2 GO (si.*, arrondi a 5 points a l'affichage), c1 GO (premier but : marches v3 PREMIER_BUT), c2 GO (minute mediane, sous 50 % de chance de but rien), d1 GO (comptes exacts de la grille sur 10 000, jamais de tirage), d2 NO-GO. Couverture « vérifiée » du v3 seulement. Jumeaux : GO avec condition (verdicts-maths-tickets.md §3) mais la table des jumeaux (reservoir football-data par niveau) n'est pas construite : rien n'est produit.",
+    "arbitre": "en_attente",
+    "source": "verdicts-maths-temps.md : a1 GO (sim_15min.tr), a2 GO (tr_dom, tr_ext ; valeurs de controle du § 7 retrouvees a 0,0001 pres, tests/simulation-15min-detail.test.js), a3 NO-GO (zone chaude, sous toutes ses formes), b1-b2 GO (sim_15min.si : si le domicile / l'exterieur ouvre le score, si 0-0 a la pause ; si_affiche arrondi a 5 points, somme 100), c1 GO (qui ouvre le score : marches v3 PREMIER_BUT dom / ext / aucun ; ATTENTION verdicts-maths-tickets.md §2 cache ces deux marches dans le panneau : a trancher par le mathematicien avant la mise en ligne), c2 GO pour « premier but avant la pause » (= au moins un but en 1re mi-temps) et la minute mediane (rien sous 50 % de chance de but), NO-GO pour « le quart d'heure le plus probable » (jamais produit), c3 GO (premier buteur : p_premier_buteur du v3, entier, 3 joueurs au plus, titulaires probables), d1 GO (comptes exacts de la grille sur 10 000, jamais de tirage ni « rejoue 10 000 fois »), d2 NO-GO. Couverture « vérifiée » du v3 seulement. Jumeaux : GO avec condition (verdicts-maths-tickets.md §3) mais la table des jumeaux (reservoir football-data par niveau) n'est pas construite ni validee par l'ingenieur donnees : rien n'est produit. Arbitre : verdicts-maths-tickets.md §2 « jamais l'arbitre tant que l'heure de sa nomination n'est pas mesuree » : statistiques de l'arbitre retirees (lib/sections-match.js#feuArbitre).",
     "date": "2026-10-04"
   },
   "marches_panneau": {

@@ -45,7 +45,10 @@ function leg(id, cote, chance, o) {
 
 // ------------------------------------------------------------ 1. fourchette lue dans la config
 test("1. fourchette lue dans config/leagues.json : 1,39 et 1,71 refusees, 1,40 et 1,70 acceptees", () => {
-  assert.deepEqual(LIGUES.fiabilite.fourchette_pari, { cote_min: 1.4, cote_max: 1.7 });
+  // Bornes de la fourchette (marge_sans_agree, 04/10/2026, ne concerne que les cotes non agreees,
+  // jamais retenues dans un ticket).
+  assert.equal(LIGUES.fiabilite.fourchette_pari.cote_min, 1.4);
+  assert.equal(LIGUES.fiabilite.fourchette_pari.cote_max, 1.7);
   const r = jambesDe([match(1, { cote_rec: "1.39" }), match(2, { cote_rec: "1.40" }), match(3, { cote_rec: "1.70" }), match(4, { cote_rec: "1.71" })]);
   assert.deepEqual(r.jambes.map((j) => j.fixture_id), [2, 3]);
   assert.equal(r.exclus.hors_fourchette, 2);

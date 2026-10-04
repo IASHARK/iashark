@@ -73,8 +73,9 @@ test("la page match assemble les sections dans l'ordre demande",()=>{
   const ms=read("lib/match-sections.js");
   dansLOrdre(ms.slice(ms.indexOf("function sections(c)")),['["sim", simulation(c)','["film", film(c)','["premier", premier(c)','["jumeaux", jumeaux(c)','["equipes", equipes(c)','["joueurs", joueurs(c)','["arbitre", arbitre(c)'],"sections");
   // Match bloque : le composant de paiement juste sous l'en-tete, l'apercu flou dessous.
-  dansLOrdre(blocDe("function renderProWall(raw,ctx)","function renderAuthWall"),["['offre',","['apercu',MS.apercuFlou()","IasharkOffrePro.mount(box"],"mur Pro");
-  dansLOrdre(blocDe("function renderAuthWall(raw)","function renderApercu"),["['offre',carte","['apercu',MS.apercuFlou({offert:true})"],"match offert sans compte");
+  // Apercu HONNETE (controle UX du 04/10, tour 2) : seulement ce que le visiteur aura (pro_sections).
+  dansLOrdre(blocDe("function renderProWall(raw,ctx)","function renderAuthWall"),["['offre',","MS.apercuFlou({contenus,pari:","['apercu',ap","IasharkOffrePro.mount(box"],"mur Pro");
+  dansLOrdre(blocDe("function renderAuthWall(raw)","function renderApercu"),["['offre',carte","MS.apercuFlou({offert:true,contenus:MS.contenusPro(vm._raw)","['apercu',ap"],"match offert sans compte");
   assert.match(js,/hero\(viewModel\(raw\),\{sansStats:true\}\)/,"apercu de chargement sans stats non plus");
   for(const parti of ["rappelCta","analyseVisiteur","ctaBar","bindCtaBar","signalSticky","faqCard"])assert.doesNotMatch(js,new RegExp("function\\s+"+parti+"\\s*\\("),parti+" reintroduit");
 });

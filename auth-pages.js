@@ -115,8 +115,10 @@
       input.focus();
     });
   }
-  var OEIL = '<svg viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
-  var OEIL_BARRE = '<svg viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 6.2A9.8 9.8 0 0 1 12 6c6.4 0 10 6 10 6a17 17 0 0 1-3.2 3.9M6.2 7.1A16.7 16.7 0 0 0 2 12s3.6 7 10 7a9.7 9.7 0 0 0 4-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+  // Icones Lucide « eye » et « eye-off » (lucide-static v1.51.0, ISC ; trace exact, aucun dessin
+  // fait main : controle UX du 04/10/2026, tour 2 ; licence dans assets/vendor/LICENCES.txt).
+  var OEIL = '<svg viewBox="0 0 24 24" class="lucide lucide-eye h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>';
+  var OEIL_BARRE = '<svg viewBox="0 0 24 24" class="lucide lucide-eye-off h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>';
 
   /* ---------- Destination apres connexion ----------
      ?next= n'est suivi QUE s'il s'agit d'un chemin interne. Une URL absolue,
@@ -149,6 +151,57 @@
     }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', propagerNext); else propagerNext();
+
+  /* ---------- Chemin de paiement : etape 1 sur 2 (controle UX du 04/10/2026, tour 2) ----------
+     Sans compte, « Continuer avec l'annee » (lib/offre-pro.js) passe par l'inscription puis
+     revient sur l'abonnement : ?next=/abonnement.html?duree=year... La page d'inscription le
+     dit au lieu de « Compte gratuit, commencez gratuitement » : etape 1 sur 2, la duree choisie
+     et son prix (config/markets.json via lib/market-config.js, jamais ecrit ici), puis le
+     paiement par Stripe. Duree lue en LISTE BLANCHE ; un ?next= externe est ignore. */
+  function dureeDuRetour(brut) {
+    if (!brut || brut.charAt(0) !== '/' || brut.charAt(1) === '/' || brut.indexOf('\\') !== -1) return null;
+    var m = /^\/(?:[a-z]{2}\/)?abonnement\.html\?(?:[^#]*&)?duree=(week|month|year)(?:[&#]|$)/.exec(brut);
+    return m ? m[1] : null;
+  }
+  function tf(key, fallback, vars) {
+    return String(t(key, fallback)).replace(/\{(\w+)\}/g, function (m, k) { return vars && vars[k] != null ? vars[k] : m; });
+  }
+  function etapePaiement() {
+    var h1 = document.querySelector('[data-i18n="auth.signup_h1"], [data-pay-step="h1"]');
+    if (!h1) return;
+    var duree = dureeDuRetour(new URLSearchParams(location.search).get('next') || '');
+    if (!duree) return;
+    var prix = null;
+    try {
+      var M = window.IASHARK_MARKET, o = M && typeof M.proOffer === 'function' ? M.proOffer() : null;
+      var p = o && Array.isArray(o.intervals) ? o.intervals.filter(function (x) { return x && x.interval === duree && x.text; })[0] : null;
+      prix = p ? p.text : null;
+    } catch (_e) { prix = null; }
+    var NOMS = { week: ['auth.pay_step_week', 'de la semaine'], month: ['auth.pay_step_month', 'du mois'], year: ['auth.pay_step_year', 'de l’année'] };
+    var poser = function () {
+      var vars = { duree: t(NOMS[duree][0], NOMS[duree][1]), prix: prix };
+      var fixer = function (cle, texte) {
+        var el = document.querySelector('[data-i18n="auth.signup_' + cle + '"], [data-pay-step="' + cle + '"]');
+        if (!el) return;
+        el.removeAttribute('data-i18n');
+        el.setAttribute('data-pay-step', cle);
+        el.textContent = texte;
+      };
+      fixer('eyebrow', t('auth.pay_step_eyebrow', 'Passer Pro'));
+      fixer('h1', t('auth.pay_step_h1', 'Étape 1 sur 2 : ton compte.'));
+      fixer('intro', prix ? tf('auth.pay_step_intro', 'Ensuite : paiement {duree} ({prix}) par Stripe. Ta durée reste choisie.', vars)
+        : tf('auth.pay_step_intro_noprice', 'Ensuite : le paiement {duree} par Stripe. Ta durée reste choisie.', vars));
+      // Les avantages du compte gratuit (« aucune carte demandée »...) ne decrivent pas ce chemin.
+      var puce = document.querySelector('[data-i18n="auth.signup_bullet_analysis"]');
+      var liste = puce && puce.closest('ul');
+      if (liste) { liste.hidden = true; liste.style.display = 'none'; }
+    };
+    poser();
+    // Dictionnaire charge apres coup (autre langue) : on reecrit dans la bonne langue.
+    var I = window.I18N;
+    if (I && typeof I.init === 'function' && !I.dict) Promise.resolve().then(function () { return I.init(); }).then(poser, function () {});
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', etapePaiement); else etapePaiement();
 
   /* ---------- Connexion ---------- */
   async function connexion(e) {

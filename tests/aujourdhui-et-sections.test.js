@@ -224,8 +224,13 @@ test("qui ouvre le score + Et si : premier_but et si_affiche du pipeline, tranch
   // Sans si_affiche : pas d'« Et si » (aucun arrondi refait ici).
   assert.doesNotMatch(MS.premier(ctx({ premier_but: PB, sim_15min: { si: raw.sim_15min.si } })), /data-e=/);
   // Compte gratuit (champs Pro absents) : ligne cadenas, aucun chiffre.
-  const gratuit = MS.premier(ctx({}, { vuePro: false, verrouPro: true }));
-  assert.match(gratuit, /: Pro\./);
+  // Ligne cadenas SEULEMENT si Pro aura la section sur ce match (pro_sections : controle UX du
+  // 04/10, tour 2) ; sinon rien du tout.
+  assert.equal(MS.premier(ctx({}, { vuePro: false, verrouPro: true })), "", "rien d'annonce sans pro_sections");
+  assert.equal(MS.premier(ctx({}, { vuePro: false, verrouPro: true, contenus: ["film", "sim"] })), "");
+  const gratuit = MS.premier(ctx({}, { vuePro: false, verrouPro: true, contenus: ["premier", "et_si"] }));
+  assert.match(gratuit, /Qui marque en premier et « Et si… \? » : Pro\./);
+  assert.match(MS.premier(ctx({}, { vuePro: false, verrouPro: true, contenus: ["premier"] })), /Qui marque en premier : Pro\./);
   assert.doesNotMatch(gratuit.replace(/<[^>]*>/g, ""), /\d/);
   // Meme si la reponse contenait les champs Pro, un non-Pro ne les voit pas.
   assert.doesNotMatch(MS.premier(ctx(raw, { vuePro: false, verrouPro: true })), /Suarez|69/);
@@ -249,7 +254,8 @@ test("jumeaux : contrat du pipeline (niveau, pct), au moins 200, comptes bruts, 
 test("arbitre : jamais sans le feu vert (stats_iashark.arbitre pose par le pipeline) ; le champ public arbitre n'est jamais lu", () => {
   assert.equal(MS.arbitre(ctx({ arbitre: { nom: "M. Dupont", cartons: 4.2, penaltys: 0.3, matchs: 40 } })), "");
   assert.equal(MS.arbitre(ctx({ arbitre: { nom: "M. Dupont" } }, { vuePro: false, verrouPro: true })), "", "aucune ligne cadenas pour un contenu que Pro n'a pas");
-  assert.match(MS.arbitre(ctx({ stats_iashark_gratuit: { detail_pro: ["arbitre"] } }, { vuePro: false, verrouPro: true })), /: Pro\./);
+  assert.equal(MS.arbitre(ctx({ stats_iashark_gratuit: { detail_pro: ["arbitre"] } }, { vuePro: false, verrouPro: true })), "", "annonce sans pro_sections : rien");
+  assert.match(MS.arbitre(ctx({ stats_iashark_gratuit: { detail_pro: ["arbitre"] } }, { vuePro: false, verrouPro: true, contenus: ["arbitre"] })), /: Pro\./);
   const a = { nom: "M. Dupont", n: 60, debut: "2024-08-01", fin: "2026-09-30", cartons: { m: [4.4, 4.1, 4.7], attendu: 4.0, ecart: [0.4, 0.1, 0.7] } };
   assert.match(MS.arbitre(ctx({ stats_iashark: { arbitre: a } })), /M\. Dupont[\s\S]*hu-stat/);
 });
@@ -317,6 +323,8 @@ test("apercu flou : titre du match offert ; match bloque : panneau flou sans deu
   const mp = require("fs").readFileSync(require("path").join(__dirname, "..", "match-page.js"), "utf8");
   assert.match(mp, /panneauFlou\(pub\.nb_marches,''\)/, "match bloque : aucun bouton dans le panneau flou");
   assert.doesNotMatch(mp, /icone:'arrow-up',cls:'mk-cta'/);
-  assert.match(mp, /o\.verrouPro&&estFr\(\)/);
-  assert.match(mp, /MS&&estFr\(\)\?\{html:MS\.panneauFlou/);
+  // Panneau flou seulement si ce match a un panneau pour Pro (nb_marches) : jamais « tous les
+  // marches de ce match » quand Pro n'en aura pas (controle UX du 04/10, tour 2).
+  assert.match(mp, /o\.verrouPro&&estFr\(\)&&n\(raw\.nb_marches\)>0/);
+  assert.match(mp, /MS&&estFr\(\)&&n\(pub\.nb_marches\)>0\?\{html:MS\.panneauFlou/);
 });

@@ -496,6 +496,10 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 .hero-stade-tagline{margin-top:clamp(22px,4vh,40px);font-family:'Inter',sans-serif;font-weight:700;font-size:clamp(13px,1.4vw,16px);letter-spacing:.18em;text-transform:uppercase;color:#dfe6ee}
 @media (max-width:1023px){.hero-stade-bg{bottom:auto;height:calc(100svh - 110px)}.hero-stade-layer img{object-position:center 55%}.hero-stade-title{text-align:center;align-items:center;min-height:calc(100svh - 260px)}.hero-stade-bg::after{background:linear-gradient(180deg,rgba(6,11,18,.25) 0%,rgba(6,11,18,.45) 60%,rgba(6,11,18,.85) 100%)}}
 @media (prefers-reduced-motion:reduce){.hero-stade-layer{transform:none!important}}
+/* Bandeau des chiffres (3 colonnes) et composant de paiement (#acces, 600 px au plus) : regles
+   ecrites ici, pas en classes Tailwind non compilees (controle UX du 04/10, tour 2). */
+.kpi-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.acces-in{max-width:600px}
 </style>
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
 <link rel="stylesheet" href="/assets/home-list.css">
@@ -611,7 +615,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 <section class="relative border-t border-hairline">
   <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-10 sm:py-14">
     <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>LO QUE EL MOTOR YA HA PROCESADO</div>
-    <div class="mt-6 grid grid-cols-3 divide-hairline md:divide-x">
+    <div class="mt-6 grid kpi-3 divide-hairline md:divide-x">
       <div class="flex flex-col gap-1.5 px-2 py-4 text-center sm:px-4"><b id="kpiAnalyses" class="text-[clamp(30px,4vw,44px)] font-extrabold leading-none tracking-[-0.04em] text-ink tabular-nums">—</b><span class="text-[12.5px] leading-snug text-soft">Análisis publicados</span></div>
       <div class="flex flex-col gap-1.5 px-2 py-4 text-center sm:px-4"><b id="kpiLigues" class="text-[clamp(30px,4vw,44px)] font-extrabold leading-none tracking-[-0.04em] text-ink tabular-nums">19</b><span class="text-[12.5px] leading-snug text-soft">Competiciones cubiertas</span></div>
       <div class="flex flex-col gap-1.5 px-2 py-4 text-center sm:px-4"><b id="kpiJour" class="text-[clamp(30px,4vw,44px)] font-extrabold leading-none tracking-[-0.04em] text-ink tabular-nums">—</b><span class="text-[12.5px] leading-snug text-soft">Partidos analizados en 3 días</span></div>
@@ -639,7 +643,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
   <!-- LE composant de paiement (lib/offre-pro.js, mode vitrine, 04/10/2026) : la
        semaine, le mois et l'annee, un bouton, ce que donne Pro, comment on paie.
        Abonne Pro : « Ton abonnement Pro est actif ». Repli sans JS : le prix mensuel. -->
-  <div class="mx-auto w-full max-w-[600px] px-4 sm:px-8 py-12 sm:py-20">
+  <div class="acces-in mx-auto w-full px-4 sm:px-8 py-12 sm:py-20">
     <div id="offreAccueil"><section class="op op--vitrine"><h2 class="op-title" data-i18n="offre_pro.title_general">Hazte Pro: todos los partidos del día, abiertos</h2><p class="op-billing"><b data-market-price="pro.month">MX$199</b> <span data-i18n="offre_pro.per_month">/ mes</span></p><a class="mu-shimmer op-cta" href="/mx/abonnement.html" data-href="abonnement.html" data-i18n="offre_pro.cta_continue_month">Continuar con el mes</a></section></div>
     <p class="mt-4 text-center text-[13.5px] leading-snug text-soft" id="accesGratuit" data-i18n="offre_pro.free_line">Gratis: el análisis del partido del día, con una cuenta.</p>
   </div>
@@ -1060,7 +1064,7 @@ function monterOffre(ctx){
   var el=document.getElementById('offreAccueil'),gratuit=document.getElementById('accesGratuit');
   if(!el)return;
   if(ctx&&ctx.isPro){
-    el.innerHTML='<section class="op op--vitrine"><h2 class="op-title">'+esc(t('offre_pro.pro_active','Ton abonnement Pro est actif'))+'</h2><a class="op-cta" href="'+esc(lien('compte.html#abonnement'))+'">'+esc(t('offre_pro.pro_account','Mon compte'))+' <span aria-hidden="true">→</span></a></section>';
+    el.innerHTML='<section class="op op--vitrine"><h2 class="op-title">'+esc(t('offre_pro.pro_active','Ton abonnement Pro est actif'))+'</h2><a class="op-alt op-alt--start" href="'+esc(lien('compte.html#abonnement'))+'">'+esc(t('offre_pro.pro_account','Mon compte'))+' <span aria-hidden="true">→</span></a></section>';
     if(gratuit)gratuit.hidden=true;
     return;
   }

@@ -4482,6 +4482,12 @@ jobs:
             var tableJumeaux=JUMEAUX.chargerTable();
             console.log('  [JUMEAUX] '+(tableJumeaux?JUMEAUX.poserJumeaux(allMatchsData,tableJumeaux)+' match(s).':'table absente : aucun jumeau.'));
           }catch(e){ console.log('::warning title=Jumeaux::jumeaux non poses ('+(e&&e.message)+').'); }
+          // Contenus Pro de chaque match (liste PUBLIQUE pro_sections, sur le modele de nb_marches, aucun chiffre) :
+          // l'apercu flou, les lignes cadenas et les avantages du composant de paiement ne montrent que ce que Pro
+          // aura VRAIMENT sur ce match (controle UX du 04/10/2026, tour 2). Apres toutes les sections, jumeaux compris.
+          try{
+            console.log('  [SECTIONS] contenus Pro listes sur '+SECTIONS_MATCH.poserContenusPro(allMatchsData)+' match(s).');
+          }catch(e){ console.log('::warning title=Sections match::contenus Pro non listes ('+(e&&e.message)+').'); }
             // ================= PROTECTION DU FICHIER PUBLIC =================
             // data.json est servi sans authentification. Il ne doit donc plus
             // contenir le marche recommande, sa cote, la probabilite du modele

@@ -92,15 +92,15 @@
     "no_account_prompt": "Pas encore de compte ?",
     "create_account_link": "Créer un compte",
     "signup_eyebrow": "Compte gratuit",
-    "signup_h1": "Commencez gratuitement.",
-    "signup_intro": "Essayez IASHARK avant de passer à Pro. Le compte se crée en quelques secondes.",
+    "signup_h1": "Commence gratuitement.",
+    "signup_intro": "Essaie IASHARK avant de passer à Pro. Le compte se crée en quelques secondes.",
     "signup_bullet_analysis": "L’analyse complète offerte chaque jour",
     "signup_bullet_tools": "La découverte des outils de décision",
     "signup_bullet_no_commitment": "Aucun engagement, aucune carte demandée",
     "signup_form_heading": "Créer mon compte",
     "signup_submit": "Créer mon compte",
     "signup_submit_loading": "Création…",
-    "legal_prefix": "En créant un compte, vous acceptez les",
+    "legal_prefix": "En créant un compte, tu acceptes les",
     "legal_cgv": "CGV",
     "legal_and": "et la",
     "legal_privacy": "politique de confidentialité",
@@ -132,7 +132,14 @@
     "meta_forgot_title": "Mot de passe oublié — IASHARK",
     "meta_forgot_description": "Recevez un lien pour réinitialiser le mot de passe de votre compte IASHARK.",
     "meta_reset_title": "Nouveau mot de passe — IASHARK",
-    "meta_reset_description": "Choisissez un nouveau mot de passe pour votre compte IASHARK."
+    "meta_reset_description": "Choisissez un nouveau mot de passe pour votre compte IASHARK.",
+    "pay_step_eyebrow": "Passer Pro",
+    "pay_step_h1": "Étape 1 sur 2 : ton compte.",
+    "pay_step_intro": "Ensuite : paiement {duree} ({prix}) par Stripe. Ta durée reste choisie.",
+    "pay_step_intro_noprice": "Ensuite : le paiement {duree} par Stripe. Ta durée reste choisie.",
+    "pay_step_month": "du mois",
+    "pay_step_week": "de la semaine",
+    "pay_step_year": "de l’année"
   },
   "account": {
     "dashboard_history": "HISTORIQUE",
@@ -2714,7 +2721,9 @@
     "panel_film": "Dans « Film »",
     "preview_title_free": "Aperçu : l’analyse offerte de ce match",
     "whatif_tab_ht": "0-0 à la pause",
-    "whatif_tab_team": "{team} ouvre"
+    "whatif_tab_team": "{team} ouvre",
+    "first_lock_only": "Qui marque en premier : Pro.",
+    "panel_inverse": "contraire : {label}"
   },
   "aujourdhui": {
     "and": "et",
@@ -2770,9 +2779,7 @@
   },
   "offre_pro": {
     "after_signup": "Compte créé. Il reste à confirmer le paiement.",
-    "benefit_film": "Le film du match et le buteur le plus probable.",
     "benefit_markets": "Tous les marchés du match, avec leur chance.",
-    "benefit_match": "Chaque match du jour ouvert : le pari, sa chance et les scores les plus probables.",
     "benefit_tickets": "Les tickets x5 et x10 du jour et la Sélection en or.",
     "billing_month": "soit {price} par semaine · prélevé chaque mois",
     "billing_month_plain": "Prélevé chaque mois",
@@ -2812,6 +2819,17 @@
     "title_tickets": "Passe Pro pour le ticket x10 et la Sélection en or",
     "trial_badge": "{n} jours offerts",
     "trial_detail": "{n} jours gratuits pour un premier abonnement : ta carte est demandée, rien n’est prélevé avant la fin de l’essai.",
-    "year_weekly": "soit {price} / semaine"
+    "year_weekly": "soit {price} / semaine",
+    "benefit_all_matches": "Tous les matchs du jour ouverts : le pari retenu, sa chance et pourquoi.",
+    "benefit_every_match": "Tous les autres matchs du jour, ouverts aussi.",
+    "benefit_film_model": "Le film du match, avec la chance d’un but par quart d’heure.",
+    "benefit_film_teams": "Le film du match en six quarts d’heure et les deux équipes comparées.",
+    "benefit_first": "Qui a le plus de chances d’ouvrir le score.",
+    "benefit_first_whatif": "Qui ouvre le score, et « Et si… ? » : la chance de gagner selon qui marque en premier.",
+    "benefit_markets_n": "Les {n} marchés de ce match, avec leur chance.",
+    "benefit_pick": "Le pari retenu sur ce match, sa chance et pourquoi.",
+    "benefit_scorers": "Les buteurs les plus probables du match.",
+    "benefit_sim": "Les scores les plus probables et le nombre de buts de ce match.",
+    "benefit_v3": "Sur les championnats les mieux mesurés : les scores les plus probables et qui ouvre le score."
   }
 }

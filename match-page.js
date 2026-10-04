@@ -654,13 +654,15 @@ function render(raw,o){
   if(MS){
     const dit=MS.registre();
     MS.clesAvis(vm,raw,dit);
-    const c={raw,vm,vuePro:!!o.vuePro,verrouPro:!!o.verrouPro,dit};
+    // contenus : ce que Pro aura VRAIMENT sur ce match (pro_sections, public) : seules ces lignes
+    // cadenas s'affichent (controle UX du 04/10/2026, tour 2).
+    const c={raw,vm,vuePro:!!o.vuePro,verrouPro:!!o.verrouPro,dit,contenus:Array.isArray(raw.pro_sections)?raw.pro_sections:[]};
     MS.sections(c).forEach(([k,html,lab])=>secs.push([k,html,t(lab[0],lab[1]),false]));
     if(o.panneau!==false){
       if(o.vuePro){const p=MS.panneau(c);if(p)panneau={html:p.html,nb:p.nb,fab:true};}
       // Panneau flou (« les N marches ») : en francais seulement, le seul ou le panneau existe
       // pour un abonne (libelles du calcul ; controle de l'avocat du diable du 04/10, point 4).
-      else if(o.verrouPro&&estFr()){
+      else if(o.verrouPro&&estFr()&&n(raw.nb_marches)>0){
         const cta=boutonAction(window.IasharkOffrePro?IasharkOffrePro.lienAbonnement('month',cheminMatch(raw)):lien('abonnement.html'),t('match_v4.panel_cta','Passe Pro'),suivi('match_gate_unlock').trim(),'mk-cta');
         panneau={html:MS.panneauFlou(raw.nb_marches,cta),nb:n(raw.nb_marches),flou:true,fab:true};
       }
@@ -690,13 +692,17 @@ function renderProWall(raw,ctx){
   // Repli sans module : un lien vers l'abonnement (jamais une page vide).
   const repli=`<section class="op op--vitrine"><h2 class="op-title">${esc(t('offre_pro.title_match','Passe Pro pour ouvrir ce match'))}</h2>${boutonAction(lien('abonnement.html?duree=month&next='+encodeURIComponent(cheminMatch(raw))),t('match_v4.panel_cta','Passe Pro'),suivi('match_gate_unlock').trim())}</section>`;
   const secs=[['offre',`<div id="offreMatch" class="gate">${repli}</div>`,null,true]];
-  if(MS)secs.push(['apercu',MS.apercuFlou(),null,true]);
+  // Apercu HONNETE (controle UX du 04/10/2026, tour 2) : seulement ce que Pro aura sur CE match
+  // (pro_sections, liste publique du calcul quotidien), de faux chiffres constants.
+  const contenus=Array.isArray(pub.pro_sections)?pub.pro_sections:[];
+  if(MS){const ap=MS.apercuFlou({contenus,pari:etatAnalyse(pub)==='ready'});if(ap)secs.push(['apercu',ap,null,true]);}
   // Panneau flou (ordinateur) : un cadenas et la ligne « Ce que tu debloques », SANS bouton :
   // le seul bouton de la page est celui du composant de paiement (controle UX du 04/10).
-  // En francais seulement (controle de l'avocat du diable du 04/10, point 4).
-  paint(vm,secs,{sansStats:true,panneau:MS&&estFr()?{html:MS.panneauFlou(pub.nb_marches,''),flou:true,fab:false}:null});
+  // En francais seulement (controle de l'avocat du diable du 04/10, point 4), et seulement si
+  // ce match a un panneau pour Pro (nb_marches).
+  paint(vm,secs,{sansStats:true,panneau:MS&&estFr()&&n(pub.nb_marches)>0?{html:MS.panneauFlou(pub.nb_marches,''),flou:true,fab:false}:null});
   const box=document.getElementById('offreMatch');
-  if(window.IasharkOffrePro&&box)IasharkOffrePro.mount(box,{mode:'vitrine',contexte:'match',next:cheminMatch(raw),connecte:!!(ctx&&ctx.session),sousTitre:enTeteOffre(pub),suivi:'match_gate_unlock'});
+  if(window.IasharkOffrePro&&box)IasharkOffrePro.mount(box,{mode:'vitrine',contexte:'match',next:cheminMatch(raw),connecte:!!(ctx&&ctx.session),sousTitre:enTeteOffre(pub),suivi:'match_gate_unlock',contenus,nbMarches:n(pub.nb_marches)});
 }
 // MATCH OFFERT, SANS COMPTE : meme dessin que le composant de paiement, un seul
 // bouton « Creer mon compte gratuit » (retour sur ce match), lien discret
@@ -712,7 +718,9 @@ function renderAuthWall(raw){
     <a class="op-alt" href="${esc(lien('connexion.html?next='+retour))}">${esc(t('match_v4.free_login','J’ai déjà un compte'))}</a>
   </section>`;
   const secs=[['offre',carte,null,true]];
-  if(MS)secs.push(['apercu',MS.apercuFlou({offert:true}),null,true]);
+  // Apercu de ce que voit un COMPTE GRATUIT sur ce match (jamais un contenu Pro) : calcule sur la
+  // copie publique (aucun champ payant), de faux chiffres constants.
+  if(MS){const ap=MS.apercuFlou({offert:true,contenus:MS.contenusPro(vm._raw),pari:etatAnalyse(vm._raw)==='ready'});if(ap)secs.push(['apercu',ap,null,true]);}
   paint(vm,secs,{sansStats:true});
 }
 // Apercu : en-tete du match (donnees publiques, aucune sortie du modele) et

@@ -202,7 +202,8 @@ test('carte Marches joueurs : sans historique joueur (visiteur non abonne), list
 // scorerModel et sa ligne « titularisations recentes » sont retirees.
 test('page match : la section « Les joueurs » montre les titulaires probables, traduite dans les 7 langues', () => {
   const ms = fs.readFileSync(path.join(__dirname, '..', 'lib', 'match-sections.js'), 'utf8');
-  const bloc = ms.slice(ms.indexOf('function joueurs(c)'), ms.indexOf('function intervalle('));
+  // Filtre des buteurs v3 (buteursV3, partage avec la liste publique pro_sections) puis la section.
+  const bloc = ms.slice(ms.indexOf('function buteursV3('), ms.indexOf('function intervalle('));
   assert.match(bloc, /raw\.v3_buteurs/);
   assert.match(bloc, /match_v4\.probable_starter/);
   assert.doesNotMatch(fs.readFileSync(path.join(__dirname, '..', 'match-page.js'), 'utf8'), /function threatsCard/);

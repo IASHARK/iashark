@@ -446,7 +446,9 @@
 
   /* Mes compétitions préférées : les competitions couvertes (config/leagues.json,
      noms via lib/league-names.js), une etoile chacune, enregistrement immediat. */
-  var ICONE_ETOILE = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="acc-fav-star"><path d="M12 2.8l2.8 5.8 6.4.9-4.6 4.5 1.1 6.3L12 17.3l-5.7 3 1.1-6.3L2.8 9.5l6.4-.9z"/></svg>';
+  // Icone Lucide « star » (lucide-static v1.51.0, ISC ; trace exact, aucun dessin fait main :
+  // controle UX du 04/10/2026, tour 2), en cyan comme l'etoile de la liste de l'accueil.
+  var ICONE_ETOILE = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="lucide lucide-star acc-fav-star" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>';
   function favoris() { return favStore ? favStore.list() : []; }
   function competitionsCouvertes() {
     var LN = window.IasharkLeagueNames;

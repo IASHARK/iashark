@@ -301,7 +301,7 @@ test("perimetre (point 1) : un match de Ligue des nations « vérifiée » ne re
   const lignes = m.marches_panneau ? m.marches_panneau.familles.flatMap((f) => f.marches) : [];
   assert.deepEqual(lignes.filter((x) => x.source === "modele"), []);
   // Eliminatoires, coupes d'Europe, coupes nationales, amicaux : pareil.
-  for (const lk of ["wcq_europe", "ldc", "el", "ecl", "fa_cup", "copa_del_rey", "spain_segunda", undefined]) {
+  for (const lk of ["wcq_europe", "ldc", "el", "ecl", "fa_cup", "copa_del_rey", "turkey_superlig", undefined]) {
     const x = macedoineEcosse({ league_key: lk, chance_iashark: 41 });
     assert.equal(S.couvertureVerifiee(x), false, String(lk));
   }

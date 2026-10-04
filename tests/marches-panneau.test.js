@@ -160,7 +160,7 @@ test("acces : marches_panneau premium et Pro seulement (meme match offert) ; nb_
 
 // CONTROLE DU MATHEMATICIEN DU 04/10/2026 (points 1 et 2) : perimetre du moteur v3.
 test("perimetre : aucune ligne du v3 hors des 12 championnats mesures (selection, coupe) ni hors couverture verifiee", () => {
-  for (const o of [{ league_key: "nations_league" }, { league_key: "wcq_europe" }, { league_key: "ldc" }, { league_key: "coupe_de_france" }, { league_key: "championship" },
+  for (const o of [{ league_key: "nations_league" }, { league_key: "wcq_europe" }, { league_key: "ldc" }, { league_key: "coupe_de_france" }, { league_key: "turkey_superlig" },
     { v3_fiabilite: { couverture: "données limitées" } }, { moteur_v3: { source: "ancien moteur (repli)" } }, { league_key: undefined }]) {
     const m = match(o);
     assert.equal(P.chancesEntieres(m, { verdicts: GO }), null, JSON.stringify(o));
@@ -168,7 +168,7 @@ test("perimetre : aucune ligne du v3 hors des 12 championnats mesures (selection
     const lignes = p ? p.familles.flatMap((f) => f.marches) : [];
     assert.deepEqual(lignes.filter((x) => x.source === "modele"), [], "aucune ligne du v3 : " + JSON.stringify(o));
   }
-  assert.deepEqual(VERDICTS.perimetre_v3.ligues.slice().sort(), ["argentina_liga_profesional", "bundesliga", "eredivisie", "jleague", "laliga", "liga_mx", "ligue1", "mls", "premier", "primeira", "seriea", "suede"]);
+  assert.deepEqual(VERDICTS.perimetre_v3.ligues.slice().sort(), ["argentina_liga_profesional", "bundesliga", "championship", "eredivisie", "italy_serieb", "jleague", "laliga", "liga_mx", "ligue1", "ligue2", "mls", "premier", "primeira", "seriea", "spain_segunda", "suede"]);
 });
 
 test("coherence avec l'Avis : au-dela de 2 points d'ecart avec le v3 sur le meme marche, aucune ligne du v3 (l'Avis reste seul)", () => {

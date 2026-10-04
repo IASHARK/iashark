@@ -920,7 +920,9 @@ test("moteur hors du depot public : recupere du depot prive si le secret existe,
     assert.match(wf, /if \[ -n "\$JETON_MOTEUR_PRIVE" \]; then[\s\S]*?MOTEUR_V3_DIR=\.moteur-v3-prive[\s\S]*?else[\s\S]*?MOTEUR_V3_DIR=moteur-v3"/, nom);
     assert.match(wf, /repository: IASHARK\/iashark-moteur/, nom);
     assert.match(wf, /token: \$\{\{ secrets\.MOTEUR_V3_DEPOT_PRIVE \}\}\n\s+path: \.moteur-v3-prive\n\s+persist-credentials: false/, nom);
-    assert.match(wf, /ref: \$\{\{ vars\.MOTEUR_V3_REF \|\| '1aee60b48b0aa3d32e73ac102cc59503828c5910' \}\}/, nom);
+    // Repli sans la variable MOTEUR_V3_REF : toujours un commit precis du moteur prive (40 caracteres), jamais une
+    // branche (04/10/2026 : le calcul du matin passe au commit des 30 championnats, H-021 du moteur).
+    assert.match(wf, /ref: \$\{\{ vars\.MOTEUR_V3_REF \|\| '[0-9a-f]{40}' \}\}/, nom);
     assert.doesNotMatch(wf, /echo[^\n]*\$JETON_MOTEUR_PRIVE/, nom + " : le jeton n'est jamais affiche");
   }
   // Le calcul du matin lance le moteur dans le dossier choisi et lit sa sortie la.

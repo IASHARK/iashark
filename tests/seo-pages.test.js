@@ -153,7 +153,8 @@ test("page championnat : sans contenu stable noindex, liens vers les pages match
 
 test("page championnat : indexable sur contenu stable (classement, clubs, 14 jours), sans aucun match du jour", () => {
   const rows = Array.from({ length: 18 }, (_, i) => ({ rank: i + 1, team_id: 9000 + i, name: "Club " + (i + 1), played: 8, won: 4, drawn: 2, lost: 2, gd: 18 - 2 * i, pts: 30 - i }));
-  const standings = { as_of: "2026-09-14", source: "api-football", season: 2026, groups: [{ name: "Liga MX: Apertura", rows: rows }] };
+  // Classement complet et du jour (action A4 du 30/09/2026 : 3 jours au plus, sinon masque).
+  const standings = { as_of: new Date().toISOString().slice(0, 10), source: "api-football", season: 2026, groups: [{ name: "Liga MX: Apertura", rows: rows }] };
   // Liga MX /mx/ un jour sans match : classement seul -> indexable.
   const mx = SEO.renderLeagueHub("liga_mx", "mx", [], { data: Object.assign({}, EMPTY_HUB, { standings: standings }) });
   assert.equal(mx.indexable, true);
@@ -161,10 +162,11 @@ test("page championnat : indexable sur contenu stable (classement, clubs, 14 jou
   assert.match(mx.html, /<table>/);
   assert.match(mx.html, /Tabla de Liga MX/);
   assert.match(mx.html, /Liga MX: la primera división del futbol mexicano|La Liga MX es la primera división/);
-  // PSL /za/ : pages club seules -> indexable, liens vers les clubs.
-  const za = SEO.renderLeagueHub("south_africa_premiership", "za", [], { data: Object.assign({}, EMPTY_HUB, { clubs: [{ kind: "club", name: "Kaizer Chiefs", path: "/za/clubs/kaizer-chiefs.html" }] }) });
+  // Pages club seules -> indexable, liens vers les clubs (exemple PSL /za/ remplace le 03/10/2026 :
+  // competition retiree du site ; meme regle avec la Premier League /gb/).
+  const za = SEO.renderLeagueHub("premier", "gb", [], { data: Object.assign({}, EMPTY_HUB, { clubs: [{ kind: "club", name: "Arsenal", path: "/gb/clubs/arsenal.html" }] }) });
   assert.equal(za.indexable, true);
-  assert.match(za.html, /href="\/za\/clubs\/kaizer-chiefs\.html"/);
+  assert.match(za.html, /href="\/gb\/clubs\/arsenal\.html"/);
   // Rencontres des 14 jours et resultats (registre, cache) : 3 suffisent.
   const fx = (id, t, score) => ({ id: String(id), t: Date.parse(t), home: { n: "Ajax" }, away: { n: "PSV" }, venue: null, score: score || null, href: null });
   const ere = SEO.renderLeagueHub("eredivisie", "en", [], { data: Object.assign({}, EMPTY_HUB, { upcoming: [fx(1, "2099-01-02T18:00:00Z"), fx(2, "2099-01-05T18:00:00Z")], results: [fx(3, "2098-12-20T18:00:00Z", { home: 2, away: 1 })] }) });

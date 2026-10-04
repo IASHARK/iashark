@@ -17,26 +17,28 @@
 <link rel="icon" href="/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/product-pages.css">
+<link rel="stylesheet" href="/assets/composants.css">
+<link rel="stylesheet" href="/assets/offre-pro.css">
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
 <style>
-.pricing-page{width:min(1000px,calc(100% - 40px));margin:46px auto 70px;text-align:center}
-.pricing-intro{max-width:650px;margin:0 auto 26px}.pricing-intro h1{font:clamp(44px,6vw,72px)/.95 'Bebas Neue';letter-spacing:.02em;margin:13px 0 12px}.pricing-intro p{margin:0;color:var(--soft);font-size:15px;line-height:1.6}
-.section-label{margin:0 0 12px;color:var(--cyan);font:700 10px 'Space Mono';letter-spacing:.2em;text-transform:uppercase}
-.pricing-layout{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:18px;align-items:start;text-align:left}.pricing-card,.pro-list-card{background:linear-gradient(145deg,#0b1c2b,#07131f);border:1px solid var(--line);border-radius:12px;padding:26px}.pricing-card{border-color:var(--cyan);box-shadow:0 18px 55px rgba(0,0,0,.24)}.pricing-card [hidden]{display:none!important}
-.plan-name{font:700 10px 'Space Mono';letter-spacing:.22em;color:var(--cyan);text-align:center}.price{text-align:center;font:58px/1 'Bebas Neue';margin:18px 0 5px}.price span{font:400 11px 'Space Mono';color:var(--soft);margin-left:7px}.commitment{text-align:center;color:var(--soft);font-size:12px;margin:10px 0 0}
-/* Une seule duree payable (lib/pro-plan-picker.js) : meme rendu que le prix de repli, sans flash. */
-#proPlanPicker .iash-plans-closed{margin:18px 0 6px;padding:12px 14px;border:1px solid rgba(141,179,211,.22);border-radius:12px;font-size:13px;line-height:1.5;color:var(--soft);text-align:center}#proPlanPicker .iash-plans-single{margin:18px 0 5px}#proPlanPicker .iash-plans-single .iash-plan-price b{font:58px/1 'Bebas Neue';font-weight:400;color:var(--text)}#proPlanPicker .iash-plans-single .iash-plan-per{font:400 11px 'Space Mono';color:var(--soft);margin-left:3px}#proPlanPicker .iash-plans-single .iash-plan-billed{margin-top:6px;font-size:12px;text-align:center}
-.feature-list{list-style:none;margin:0;padding:0;display:grid;gap:11px}.feature-list li{display:flex;gap:11px;align-items:flex-start;color:var(--text);font-size:13.5px;line-height:1.45}.feature-list svg{width:17px;height:17px;flex:none;margin-top:1px;fill:none;stroke:var(--cyan);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.pricing-cta{width:100%;border:1px solid var(--cyan);border-radius:7px;padding:15px 16px;background:var(--cyan);color:#03151b;font:700 10px 'Space Mono';letter-spacing:.16em;text-transform:uppercase;cursor:pointer}.pricing-cta:hover{background:#4be1f7}.pricing-cta:disabled{opacity:.55;cursor:wait}.pricing-cta[aria-disabled="true"]{opacity:.5;cursor:not-allowed;filter:saturate(.6)}.pricing-cta[aria-disabled="true"]:hover{background:var(--cyan)}.pricing-cta[data-loading]{cursor:progress}#checkoutConsent:not(.iash-consent){margin:16px 0 14px;min-height:145px}@media(max-width:760px){#checkoutConsent:not(.iash-consent){min-height:115px}}@media(max-width:480px){#checkoutConsent:not(.iash-consent){min-height:200px}}@media(max-width:360px){#checkoutConsent:not(.iash-consent){min-height:270px}}.billing-message{min-height:20px;margin:10px 0 0;text-align:center;color:var(--soft);font-size:11px}.billing-message.error{color:var(--red)}
-.trust-row{display:flex;justify-content:center;gap:44px;margin:24px 0;color:var(--soft);font-size:11px}.trust-row span{display:flex;align-items:center;gap:8px}.pricing-card .trust-row{margin:14px 0 0;gap:16px;flex-wrap:wrap}
-.pro-context{margin:14px 0 0;padding:10px 12px;border:1px solid rgba(32,213,239,.28);border-radius:8px;background:rgba(32,213,239,.06);color:var(--text);font-size:12.5px;line-height:1.5;text-align:center}.pro-context b{color:var(--cyan)}
-/* Tout ce que Pro debloque : 3 groupes (chaque match, chaque jour, outils). */
-.pro-list-card h2{margin:0 0 16px}.pro-group+.pro-group{margin-top:18px;padding-top:16px;border-top:1px solid #193245}.pro-group h3{margin:0 0 11px;color:var(--soft);font:700 10px 'Space Mono';letter-spacing:.16em;text-transform:uppercase}
-.tag-new{display:inline-block;margin-left:8px;padding:2px 8px;border:1px solid rgba(245,184,75,.55);border-radius:999px;color:var(--amber);font:700 9px/1.5 'Space Mono';letter-spacing:.12em;text-transform:uppercase;vertical-align:1px;white-space:nowrap}
-.legal-note{margin:34px auto 0;color:var(--soft);font:9px/1.9 'Space Mono';letter-spacing:.1em;text-transform:uppercase}.legal-note a{color:var(--soft);text-decoration:none;display:inline-flex;align-items:center;min-height:44px;padding:0 2px}.legal-note a:hover{color:var(--cyan)}
-@media(max-width:760px){.pricing-page{width:calc(100% - 22px);margin-top:25px}.pricing-layout{grid-template-columns:1fr}.pricing-intro h1{font-size:48px}.price,#proPlanPicker .iash-plans-single .iash-plan-price b{font-size:52px}.trust-row{gap:12px;flex-wrap:wrap}.pricing-card,.pro-list-card{padding:22px 18px}}
+/* Page abonnement (04/10/2026) : UNE colonne de 560 px, le composant de paiement
+   (le composant offre-pro, fait de vrais composants : assets/composants.css), puis les
+   mentions. Aucun dessin fait main (demande de Clement du 04/10, 5 h 20). */
+.pricing-page{width:min(560px,calc(100% - 32px));margin:22px auto 70px}
+.pricing-page [hidden]{display:none!important}
+.ab-fallback{display:grid;gap:10px;padding:20px 16px;border:1px solid rgba(141,179,211,.3);border-radius:18px;background:#0b1825}
+.ab-fallback h1{margin:0;font:800 23px/1.2 "DM Sans",sans-serif;letter-spacing:-.02em}
+.ab-fallback .ab-price{margin:0;font:800 30px/1 "DM Sans",sans-serif}
+.ab-fallback .ab-price span{margin-left:4px;color:var(--soft);font-size:14px;font-weight:500}
+.ab-fallback p{margin:0;color:var(--soft);font-size:14px}
+.ab-notice{margin:0 0 12px;padding:12px 14px;border:1px solid rgba(32,213,239,.35);border-radius:12px;background:rgba(32,213,239,.07);color:var(--text);font-size:14px;line-height:1.5}
+.ab-pro{display:grid;gap:12px;padding:22px 18px;border:1px solid rgba(32,213,239,.35);border-radius:18px;background:#0b1825}
+.ab-pro h1{margin:0;font:800 24px/1.2 "DM Sans",sans-serif;letter-spacing:-.02em}
+.ab-pro p{margin:0;color:var(--soft);font-size:14.5px}
+.ab-pro a{display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:12px;background:#20d5ef;color:#060b12;font:800 16px "DM Sans",sans-serif;text-decoration:none}
+.legal-note{margin:28px auto 0;color:var(--soft);font-size:12px;line-height:1.7;text-align:center}.legal-note a{color:var(--soft);text-decoration:none;display:inline-flex;align-items:center;min-height:44px;padding:0 2px}.legal-note a:hover{color:var(--cyan)}
 </style>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="IASHARK">
@@ -51,50 +53,24 @@
 <body>
 <header class="topbar"><a class="brand" href="/mx/" data-href=""><img src="/assets/iashark-logo.png" alt="IASHARK"></a><div class="top-actions"><a class="btn-login" href="/mx/" data-href="" data-i18n="pricing_page.back_to_matches">← Volver a los partidos</a><span id="authHeaderSlot"><a class="btn-login" href="/mx/connexion.html" data-href="connexion.html" data-i18n="pricing_page.login">Iniciar sesión</a></span></div></header>
 <main class="pricing-page">
-  <section class="pricing-intro"><span class="eyebrow" data-i18n="pricing_page.eyebrow">Suscripción Pro</span><h1 data-i18n="pricing_page.heading">Desbloquea todo IASHARK</h1><p data-i18n="pricing_page.intro">Accede a todos los análisis y a las herramientas para darle seguimiento a tus decisiones con método.</p></section>
-  <section class="pricing-layout" aria-label="Suscripción Pro" data-i18n-attr="aria-label:pricing_page.eyebrow">
-    <article class="pricing-card">
-      <div class="plan-name">IASHARK PRO</div>
-      <!-- Match d'origine (abonnement-page.js#afficherContexte) : rempli uniquement quand le visiteur vient d'un match. -->
-      <p id="proContext" class="pro-context" hidden></p>
-      <!-- Offre Pro unique : lib/pro-plan-picker.js remplace ce bloc et n'affiche que les durees PAYABLES (repli sans JS = prix mensuel). -->
-      <!-- Marche ferme au paiement (config/markets.json#checkoutOpen = [], gb/mx/za le 19/09/2026) : ni prix ni bouton dans le HTML genere, la ligne « pas encore ouvert » (data-market-open-if / data-market-closed-if, scripts/build-locales.js). -->
-      <div id="proPlanPicker"><div class="price" data-market-open-if="pro.month"><b data-market-price="pro.month" style="font-weight:inherit">MX$199</b> <span data-i18n="pricing_page.per_month">/ mes</span></div><p class="iash-plans-closed" data-market-closed-if="pro" data-i18n="pro_plans.closed" hidden>El pago todavía no está disponible en este país. No se hará ningún cargo.</p></div>
-      <!-- Seulement quand plusieurs durees sont proposees (abonnement-page.js#majOffre). -->
-      <div class="commitment" id="proCommitment" data-i18n="pricing_page.commitment" hidden>El mismo acceso Pro con cualquier plazo · Cancela cuando quieras</div>
-      <div id="checkoutConsent" data-market-open-if="pro"></div><button class="pricing-cta iash-consent-locked" id="subscribeButton" data-market-open-if="pro" type="button" aria-disabled="true" data-loading="true" title="CARGANDO..." data-i18n-attr="title:common.loading" data-i18n="pricing_page.cta_subscribe">Hazte Pro</button><div id="billingMessage" class="billing-message" aria-live="polite"></div>
-      <!-- Reassurance a l'endroit de la decision (sous le bouton), pas en bas de page apres les cartes. -->
-      <div class="trust-row" id="proTrust" data-market-open-if="pro"><span>▣ <span data-i18n="pricing_page.trust_secure">Pago seguro</span></span><span>◇ <span data-i18n="pricing_page.trust_no_commitment">Sin plazo forzoso</span></span><span>↻ <span data-i18n="pricing_page.trust_cancel">Cancela cuando quieras</span></span></div>
-    </article>
-    <!-- Tout ce que Pro debloque. « Sur chaque match » = les cles du mur Pro de la page match (match-page.js#proGate) : une seule source. -->
-    <article class="pro-list-card" aria-labelledby="proListTitle">
-      <h2 class="section-label" id="proListTitle" data-i18n="pro_offer.list_title">Todo lo que desbloquea Pro</h2>
-      <div class="pro-group" data-group="match"><h3 data-i18n="pro_offer.group_match">En cada partido</h3><ul class="feature-list">
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="match_page.pro_gate_item_bet">El mercado elegido por el modelo y su probabilidad en %</span></li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="match_page.pro_gate_item_scorer">El goleador más probable y los mercados de jugadores</span></li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="match_page.pro_gate_item_scenario">El escenario del partido por tramos de 15 minutos: cuándo llegan los goles</span></li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="match_page.pro_gate_item_scores">Los marcadores más probables y los goles esperados</span></li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="match_page.pro_gate_item_odds">Nuestras probabilidades frente a los momios, mercado por mercado</span></li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="match_page.pro_gate_item_stats">Todas las estadísticas del partido: forma, tabla, cara a cara, comparativa</span></li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="match_page.pro_gate_item_faq">Las respuestas a las preguntas frecuentes sobre este partido</span></li>
-      </ul></div>
-      <div class="pro-group" data-group="daily"><h3 data-i18n="pro_offer.group_daily">Cada día</h3><ul class="feature-list">
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="pro_offer.daily_all_matches">Todos los partidos analizados de nuestras 19 competencias, en lugar de un solo partido gratis al día</span></li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span><span data-i18n="pro_offer.daily_scorers">Los 3 goleadores del día</span> <span class="tag-new" data-i18n="pro_offer.badge_new">Nuevo</span></span></li>
-      </ul></div>
-      <div class="pro-group" data-group="tools"><h3 data-i18n="pro_offer.group_tools">Las herramientas</h3><ul class="feature-list">
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="pro_offer.tool_scanner">Detector de diferencias del día, en partidos reales</span></li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="pro_offer.tool_journal">Diario de decisiones sincronizado con tu cuenta, con el seguimiento de tus resultados</span></li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="pro_offer.tool_combo">Parlay basado en los análisis reales</span></li>
-      </ul></div>
-    </article>
-  </section>
+  <!-- Retour d'inscription (?etape=compte) : la duree choisie est deja cochee, il reste les cases et le paiement. -->
+  <p class="ab-notice" id="abNotice" hidden data-i18n="offre_pro.after_signup">Cuenta creada. Solo falta confirmar el pago.</p>
+  <!-- Abonne Pro : aucun second paiement (changer de duree = compte). -->
+  <section class="ab-pro" id="abPro" hidden><h1 data-i18n="offre_pro.pro_title">Eres Pro</h1><p data-i18n="offre_pro.pro_text">Todos los partidos del día están abiertos. Para cambiar de duración o cancelar, ve a tu cuenta.</p><a id="abProLien" href="/mx/" data-href="" data-i18n="offre_pro.pro_cta_home">Ver los partidos del día</a></section>
+  <!-- LE composant de paiement (IasharkOffrePro, mode « paiement »). Repli sans JS : le prix mensuel du marche, ou la ligne « pas encore ouvert ». -->
+  <div id="offrePro">
+    <section class="ab-fallback">
+      <h1 data-i18n="offre_pro.title_general">Hazte Pro: todos los partidos del día, abiertos</h1>
+      <p class="ab-price" data-market-open-if="pro.month"><b data-market-price="pro.month" style="font-weight:inherit">MX$199</b><span data-i18n="offre_pro.per_month">/ mes</span></p>
+      <p data-market-closed-if="pro" data-i18n="offre_pro.closed" hidden>El pago aún no está abierto para este país. No se cobrará nada.</p>
+    </section>
+  </div>
   <p class="legal-note" data-i18n="pricing_page.legal_note">Información con fines estadísticos — No constituye una recomendación de apuestas · Prohibido para menores de 18 años</p>
   <p class="legal-note" style="margin-top:6px"><span data-i18n="match_page.shell_help_label">Ayuda:</span> <a data-market-helpline="url" href="https://www.gob.mx/conasama/articulos/linea-de-la-vida-800-911-2000">gob.mx/conasama</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">800 911 2000</span></span></p>
   <p class="legal-note" style="margin-top:10px"><a href="/mx/mentions-legales.html" data-href="mentions-legales.html" data-i18n="footer.mentions_legales">Aviso Legal</a> · <a href="/mx/cgv.html" data-href="cgv.html" data-i18n="footer.cgv">Términos</a> · <a href="/mx/confidentialite.html" data-href="confidentialite.html" data-i18n="footer.confidentialite">Privacidad</a> · <a href="/mx/cookies.html" data-href="cookies.html" data-i18n="footer.cookies">Cookies</a> · <a href="/mx/jeu-responsable.html" data-href="jeu-responsable.html" data-i18n="footer.responsible_gambling">Juego responsable</a></p>
 </main>
 <nav class="bottom-nav" aria-label="Navegación principal" data-i18n-attr="aria-label:geo.nav.aria_label"><a href="/mx/"><span>⌂</span><b data-i18n="nav.home">INICIO</b></a><a href="/mx/pro.html"><span>☆</span><b data-i18n="nav.tools">HERRAMIENTAS</b></a><a href="/mx/blog/"><span>▤</span><b data-i18n="nav.guides">BLOG</b></a><a href="/mx/compte.html"><span>♙</span><b data-i18n="nav.account">CUENTA</b></a></nav>
-<script src="/i18n/i18n.js"></script><script src="/lib/market-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" defer></script><script src="/app-client.js" defer></script><script src="/auth-header.js"></script><script>document.addEventListener('DOMContentLoaded',function(){IasharkAuthHeader.mount('#authHeaderSlot');});</script><script src="/lib/checkout-consent.js"></script><script src="/lib/pro-plan-picker.js"></script><script src="/abonnement-page.js" defer></script><script src="/site-prefs.js"></script>
+<script src="/i18n/i18n.js"></script><script src="/lib/market-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" defer></script><script src="/app-client.js" defer></script><script src="/auth-header.js"></script><script>document.addEventListener('DOMContentLoaded',function(){IasharkAuthHeader.mount('#authHeaderSlot');});</script><script src="/lib/checkout-consent.js"></script><script src="/lib/icones.js"></script><script src="/lib/composants.js"></script><script src="/lib/offre-pro.js"></script><script src="/abonnement-page.js" defer></script><script src="/site-prefs.js"></script>
 <script src="/bottom-navigation.js"></script>
 <!--SEO_FOOTER_NAV--><nav class="seo-foot-nav" aria-label="Navegación del sitio" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#91a0b3;text-align:center"><p style="margin:0 0 4px"><span style="color:#c3ccd8">Ligas:</span> <a href="/mx/leagues/liga-mx.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga MX</a> · <a href="/mx/leagues/champions-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Champions League</a> · <a href="/mx/leagues/la-liga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">La Liga</a> · <a href="/mx/leagues/europa-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Europa League</a> · <a href="/mx/leagues/conference-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Conference League</a></p><p style="margin:0"><a href="/mx/equipos/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Equipos y clásicos</a> · <a href="/mx/articulos/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Artículos de futbol mexicano</a> · <a href="/mx/blog/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Blog y guías</a> · <a href="/mx/marches.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Mercados analizados</a> · <a href="/mx/methodologie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Metodología</a></p></nav><!--/SEO_FOOTER_NAV-->
 </body></html>

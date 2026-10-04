@@ -118,13 +118,19 @@ test("CGV : date de mise a jour = version du consentement, texte en REVIEW, dure
     assert.doesNotMatch(html, /\bEdge\b|annual_edge/, d);
     assert.doesNotMatch(visible(html), /\[TODO|BLOCKED_DECISION/, d + " : aucune note interne visible");
   }
-  // Une seule version des CGV le 19/09/2026 (9 versions, pages racine comprises).
-  assert.equal(TERMS_VERSION, "2026-09-19");
-  // /en/ seul a change le 21/09/2026 (ouverture de l'hebdomadaire a 4,99 USD).
-  const VERSION_ATTENDUE = { en: "2026-09-21" };
+  // 04/10/2026 : de nouveau une seule version des CGV (9 versions, pages racine comprises) :
+  // essai de 7 jours sur le mois (decision de Clement), prelevement automatique a la fin.
+  assert.equal(TERMS_VERSION, "2026-10-04");
   for (const d of DIRS.concat([""])) {
-    assert.equal(versionFor(d), VERSION_ATTENDUE[d] || "2026-09-19", (d || "racine") + " : version des CGV envoyee avec le consentement");
+    assert.equal(versionFor(d), "2026-10-04", (d || "racine") + " : version des CGV envoyee avec le consentement");
+    if (!d) continue;
+    const html = read("legal/" + d + "/cgv.html");
+    assert.match(html, /<!-- LEGAL REVIEW: 04\/10\/2026 - [^>]*REVIEW\. -->/, d + " : note de revue du 04/10/2026");
+    // L'essai : 7 jours, le mois seulement, prelevement automatique a la fin sauf resiliation.
+    assert.match(visible(html), /(7 jours|7-day|7 días|7 Tage|7 giorni|7 dias)/, d + " : essai de 7 jours");
   }
+  // Versions precedentes archivees (regle 4 de CLAUDE.md).
+  for (const d of DIRS) assert.ok(require("node:fs").existsSync(require("node:path").join(__dirname, "..", "legal", d, "archives", d === "en" ? "cgv-2026-09-21.html" : "cgv-2026-09-19.html")), d + " : version precedente archivee");
 
   // FR (et versions EUR) : trois durees payables, conditions de l'annuel et du changement de duree.
   const fr = visible(read("legal/fr/cgv.html"));

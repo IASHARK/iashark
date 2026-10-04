@@ -1,0 +1,18 @@
+{
+  "_readme": [
+    "TICKETS DU JOUR, SELECTION EN OR, BUTEUR DU JOUR (demande de Clement du 04/10/2026, regles du trader de cotes : regles-tickets.md).",
+    "Jambes = les paris simples deja publies sur les pages match du jour de Paris (meme pari, meme cote, meme chance), cote dans config/leagues.json#fiabilite.fourchette_pari (lue la-bas, jamais recopiee ici), pari « verifie », cote relevee chez un operateur agree ANJ suivi (config/bookmakers-agrees.json), coup d'envoi a plus de 15 min. Un seul pari par match.",
+    "Ticket x5 : 3 ou 4 jambes, cote totale (arrondie au centime) entre 4,50 et 5,50. Ticket x10 : 5 ou 6 jambes, cote totale entre 9,00 et 11,00. Parmi TOUTES les combinaisons, la plus grande chance (produit des chances affichees). Egalite : moins de jambes, puis cote la plus proche du centre, puis numeros de match. Aucune combinaison : pas de ticket (jamais force).",
+    "Selection en or : les 3 paris eligibles les plus probables (exactement 3, sinon rien). Buteur du jour : le plus probable du calcul buteur du moteur v3 (v3_buteurs), chance lib/chance-iashark.js#chanceButeur.",
+    "Un ticket publie ne change plus (table tickets_du_jour, migration 0050). Rien n'est produit sans le feu vert du mathematicien (config/verdicts-maths.json).",
+    "Recherche exacte de la meilleure combinaison, sans plafond de jambes (controle du mathematicien du 04/10/2026 : l'ancien plafond jambes_max = 40 ratait le meilleur ticket un jour charge sur cinq) : lib/run-output/combos.js#meilleureCombinaison.",
+    "fichier_buteurs_public : « retire » depuis le 04/10/2026 (controle de l'ingenieur donnees : aucune page ne charge plus home-scorers.js, et le fichier revelait le match et le rang du buteur reserve aux comptes) = buteurs-du-jour.json sans aucune entree ; « complet » = ancien fichier du 19/09 (match et rang publics), a ne plus utiliser."
+  ],
+  "regle_version": "tickets-2026-10-04",
+  "x5": { "jambes": [3, 4], "cote_min": 4.5, "cote_max": 5.5, "centre": 5 },
+  "x10": { "jambes": [5, 6], "cote_min": 9, "cote_max": 11, "centre": 10 },
+  "marge_coup_envoi_min": 15,
+  "operateurs": "anj_suivis",
+  "selection_or": { "nb": 3 },
+  "fichier_buteurs_public": "retire"
+}

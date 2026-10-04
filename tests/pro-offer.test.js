@@ -62,229 +62,116 @@ test("i18n : pro_offer.* complet et identique dans les 7 dictionnaires et leurs 
   assert.doesNotMatch(read("tools-page.js").slice(read("tools-page.js").indexOf("function rendreBankroll"), read("tools-page.js").indexOf("05 — COMBO AUDITOR")), /ctx\.isPro/, "le simulateur de capital n'est pas verrouille");
 });
 
-test("page d'abonnement : prix et liste Pro en 3 groupes cote a cote, sans tableau « Gratuit ou Pro » (une seule source de textes)", () => {
+// ------------------------------------------------------------------------
+// 04/10/2026 (demande de Clement : « mal forme, deux blocs ; appel a l'action
+// direct en haut, quelques phrases sur ce qu'il y a dans le Pro ») : UN SEUL
+// composant de paiement (lib/offre-pro.js), le meme sur le match bloque, la page
+// abonnement, l'accueil et le compte. Les anciennes listes (3 groupes, mur Pro a
+// 7 lignes, listePro du compte) sont retirees. Ces tests gardent les regles qui
+// comptent : durees payables seulement, ordre de deploiement, aucun bouton mort,
+// une seule source de prix, textes dans les 7 langues.
+const OP = require("../lib/offre-pro.js");
+function marche(dir, reopened) {
+  const mk = {};
+  new Function("window", read("lib/market-config.js"))(mk);
+  const m = mk.IasharkMarketConfig.build(dir);
+  if (reopened) m.checkoutOpen = null;
+  return m;
+}
+const ids = (l) => l.map((x) => x.interval);
+
+test("page d'abonnement : une colonne, le composant de paiement unique, ni tableau ni dessin fait main", () => {
   const html = read("abonnement.html");
-  const at = (s) => html.indexOf(s);
-  // Tableau « Gratuit ou Pro » retire (proprietaire, 19/09/2026) : ni balisage, ni styles, ni cles.
   assert.doesNotMatch(html, /pro-compare|class="cmp"|\.cmp[\s{.,]|compare_(title|col_|row_|matches_|scorers_|tools_)/);
   for (const l of LOCALES) assert.deepEqual(Object.keys(DICTS[l].pro_offer).filter((k) => /^compare_/.test(k)), [], l + " : cles du tableau retirees");
-  // Carte prix puis carte liste, dans la meme grille (cote a cote sur ordinateur, prix d'abord sur mobile).
-  const layout = html.slice(at('<section class="pricing-layout"'), html.indexOf("</section>", at('<section class="pricing-layout"')));
-  assert.ok(layout.indexOf('class="pricing-card"') > 0 && layout.indexOf('class="pricing-card"') < layout.indexOf('class="pro-list-card"'), "prix puis liste");
-  assert.ok(at('class="pricing-intro"') < at('<section class="pricing-layout"'));
-  assert.match(html, /\.pricing-layout\{display:grid;grid-template-columns:minmax\(0,\.92fr\) minmax\(0,1\.08fr\);/);
-  assert.match(html, /@media\(max-width:760px\)\{[^@]*\.pricing-layout\{grid-template-columns:1fr\}/);
-  // Liste complete : 3 groupes, les 7 lignes du mur Pro de la page match, dans son ordre.
-  const list = html.slice(at('class="pro-list-card"'), html.indexOf("</article>", at('class="pro-list-card"')));
-  assert.deepEqual([...list.matchAll(/data-group="(\w+)"/g)].map((m) => m[1]), ["match", "daily", "tools"]);
-  const matchGroup = list.slice(list.indexOf('data-group="match"'), list.indexOf('data-group="daily"'));
-  assert.deepEqual([...matchGroup.matchAll(/data-i18n="match_page\.(\w+)"/g)].map((m) => m[1]), MATCH_KEYS);
-  const gate = read("match-page.js").slice(read("match-page.js").indexOf("function proGate(vm,o)"));
-  assert.deepEqual([...gate.slice(0, gate.indexOf("].filter(")).matchAll(/\['(pro_gate_item_\w+)',/g)].map((m) => m[1]), MATCH_KEYS, "meme liste que le mur Pro de la page match");
-  const daily = list.slice(list.indexOf('data-group="daily"'), list.indexOf('data-group="tools"'));
-  assert.deepEqual([...daily.matchAll(/data-i18n="pro_offer\.(\w+)"/g)].map((m) => m[1]), ["group_daily", "daily_all_matches", "daily_scorers", "badge_new"]);
-  assert.match(daily, /<span class="tag-new" data-i18n="pro_offer\.badge_new">Nouveau<\/span>/);
-  const tools = list.slice(list.indexOf('data-group="tools"'));
-  assert.deepEqual([...tools.matchAll(/data-i18n="pro_offer\.(\w+)"/g)].map((m) => m[1]), ["group_tools", "tool_scanner", "tool_journal", "tool_combo"]);
-  assert.equal((list.match(/<li>/g) || []).length, 12);
-  // Anciennes listes vagues retirees (aucun doublon).
-  assert.doesNotMatch(html, /pro_feat_|free_feat_|free_heading|unlock_(title|analyses|journal|bankroll)|class="free-card"|class="unlock-grid"/);
-  for (const l of LOCALES) assert.ok(!/pro_feat_|free_feat_|unlock_analyses/.test(Object.keys(DICTS[l].pricing_page).join(" ")), l + " : anciennes cles retirees");
-  // Paiement intact : consentement unique avant le bouton, bouton verrouille, modules charges.
-  assert.ok(at('id="checkoutConsent"') < at('id="subscribeButton"'));
-  assert.match(html, /<script src="\/lib\/checkout-consent\.js"><\/script><script src="\/lib\/pro-plan-picker\.js"><\/script><script src="\/abonnement-page\.js" defer><\/script>/);
-  // « Meme acces Pro, quelle que soit la duree » : masque tant qu'une seule duree est proposee.
-  assert.match(html, /<div class="commitment" id="proCommitment" data-i18n="pricing_page\.commitment" hidden>/);
-  assert.match(html, /\.pricing-card \[hidden\]\{display:none!important\}/, "trust-row (display:flex) masquable");
-  // Mobile : la comparaison passe en 2 colonnes (libelle au-dessus), jamais de defilement horizontal.
+  assert.doesNotMatch(html, /pricing-layout|pro-list-card|ab-inc|ab-tile|<svg/, "deux blocs ou vignettes dessinees a la main");
+  assert.match(html, /<div id="offrePro">/);
+  assert.match(html, /\.pricing-page\{width:min\(560px,calc\(100% - 32px\)\)/);
+  assert.match(html, /<script src="\/lib\/checkout-consent\.js"><\/script><script src="\/lib\/icones\.js"><\/script><script src="\/lib\/composants\.js"><\/script><script src="\/lib\/offre-pro\.js"><\/script><script src="\/abonnement-page\.js" defer><\/script>/);
+  const js = read("abonnement-page.js");
+  assert.match(js, /IasharkOffrePro\.mount\(boite,\{\s*mode:'paiement'/);
+  assert.match(js, /duree:window\.IasharkOffrePro\.dureeValide\(params\.get\('duree'\)\)/, "duree choisie gardee (liste blanche)");
+  assert.doesNotMatch(js.replace(/\/\/.*$/gm, ""), /BLEUS|CAIRO5|promo/i, "promo expiree du 25/09 retiree");
+  // Ce que Pro donne : 3 ou 4 phrases ; comment on paie : carte, Stripe, sans engagement, resiliable.
+  const plans = [{ interval: "month", amount: 19.95, text: "19,95 €", open: true }, { interval: "year", amount: 199, text: "199 €", open: true }];
+  const h = OP.html({ mode: "vitrine", contexte: "general", plans, choisi: "month", jours: 0, connecte: false, uid: "a" });
+  const phrases = (h.match(/<ul class="op-benefits">([\s\S]*?)<\/ul>/) || ["", ""])[1].match(/<li>/g) || [];
+  assert.ok(phrases.length >= 3 && phrases.length <= 4, "3 ou 4 phrases");
+  for (const x of ["Carte bancaire", "Paiement sécurisé par Stripe", "Sans engagement", "Résiliable en ligne à tout moment"]) assert.ok(h.includes(x), x);
+  assert.equal((h.match(/class="mu-shimmer op-cta"/g) || []).length, 1, "un seul gros bouton");
+  const an = OP.html({ mode: "vitrine", contexte: "general", plans, choisi: "year", jours: 0, connecte: false, uid: "b" });
+  assert.doesNotMatch(an.slice(an.indexOf('data-op-pay')), /Sans engagement/, "annuel : jamais « sans engagement » (CGV art. 6)");
 });
 
-test("pages generees : liste Pro traduite dans les versions publiques, prix ou « pas encore ouvert » cuit dans le HTML", () => {
+test("pages generees : textes du composant traduits dans les versions publiques, prix cuit dans le HTML", () => {
   const src = read("abonnement.html");
-  const keys = [...src.matchAll(/data-i18n="((?:pro_offer|match_page)\.\w+)"/g)].map((m) => m[1]);
-  // Titre, 3 groupes, 7 lignes « match », 5 autres lignes, « Nouveau » + « Aide : » (pied de page).
-  assert.equal(keys.length, 18, keys.join(" "));
+  const keys = [...src.matchAll(/data-i18n="(offre_pro\.\w+)"/g)].map((m) => m[1]);
+  assert.ok(keys.length >= 6, keys.join(" "));
   const get = (d, k) => k.split(".").reduce((o, p) => (o ? o[p] : undefined), d);
   for (const dir of DIRS) {
     const loc = MARKETS._dirs[dir].locale;
     const page = read(dir + "/abonnement.html");
     for (const k of keys) {
       const v = get(DICTS[loc], k);
-      assert.ok(typeof v === "string", loc + " " + k);
-      assert.ok(page.includes('data-i18n="' + k + '">' + escHtml(v) + "<") || (dir === "fr" && page.includes('data-i18n="' + k + '">')), dir + " : " + k + " non traduit");
+      assert.ok(typeof v === "string" && v.trim(), loc + " " + k);
+      const re = new RegExp('data-i18n="' + k.replace(".", "\\.") + '"[^>]*>([^<]*)<');
+      const vu = (page.match(re) || [])[1];
+      assert.ok(vu !== undefined && (vu === escHtml(v) || dir === "fr"), dir + " : " + k + " non traduit");
     }
-    assert.match(page, /id="proCommitment"[^>]*hidden>/, dir);
-    assert.match(page, /<button[^>]*id="subscribeButton"[^>]*aria-disabled="true"/, dir);
-    // Marche ferme au paiement (checkoutOpen = []) : ni prix, ni consentement,
-    // ni bouton dans le HTML genere ; la ligne « pas encore ouvert » a la place.
-    const mk = MARKETS[MARKETS._dirs[dir].market];
-    const closed = Array.isArray(mk.checkoutOpen) && mk.checkoutOpen.length === 0;
-    const tagOf = (re) => (page.match(re) || [""])[0];
-    const isHidden = (tag) => /\shidden(?=[\s>=])/.test(tag);
-    assert.equal(isHidden(tagOf(/<div class="price" data-market-open-if="pro\.month"[^>]*>/)), closed, dir + " : prix");
-    assert.equal(isHidden(tagOf(/<button[^>]*id="subscribeButton"[^>]*>/)), closed, dir + " : bouton");
-    assert.equal(isHidden(tagOf(/<div id="checkoutConsent"[^>]*>/)), closed, dir + " : consentement");
-    assert.equal(isHidden(tagOf(/<div class="trust-row" id="proTrust"[^>]*>/)), closed, dir + " : reassurance paiement");
-    const closedLine = tagOf(/<p class="iash-plans-closed" data-market-closed-if="pro"[^>]*>[^<]*<\/p>/);
-    assert.ok(closedLine, dir + " : ligne « pas encore ouvert » absente");
-    assert.equal(isHidden(closedLine), !closed, dir + " : ligne « pas encore ouvert »");
-    assert.ok(closedLine.includes(escHtml(DICTS[loc].pro_plans.closed)) || dir === "fr", dir + " : ligne traduite");
   }
   assert.match(read("gb/abonnement.html"), /data-market-price="pro\.month"[^>]*>£14\.99</);
   assert.match(read("mx/abonnement.html"), /data-market-price="pro\.month"[^>]*>MX\$199</);
   assert.match(read("za/abonnement.html"), /data-market-price="pro\.month"[^>]*>R\s?199</);
 });
 
-// ------------------------------------------------------------------------
-// abonnement-page.js execute sur un faux DOM : durees affichees -> ligne
-// « meme acces », bouton, consentement. Aucune duree payable (fonction
-// redeployee, pays sans Price Stripe) : ni selecteur vide ni bouton mort.
-function fakeEl(id) {
-  const attrs = {}, classes = new Set(), listeners = {};
-  return {
-    id, hidden: false, textContent: "", className: "", innerHTML: "", children: [],
-    classList: { add: (c) => classes.add(c), remove: (c) => classes.delete(c), contains: (c) => classes.has(c), toggle: (c, on) => (on ? classes.add(c) : classes.delete(c)) },
-    setAttribute: (k, v) => { attrs[k] = String(v); }, getAttribute: (k) => (k in attrs ? attrs[k] : null), removeAttribute: (k) => { delete attrs[k]; },
-    addEventListener: (t, f) => { (listeners[t] = listeners[t] || []).push(f); },
-    querySelectorAll: () => [], appendChild(c) { this.children.push(c); return c; },
-    get parentNode() { return { insertBefore() {} }; },
-    firstChild: { classList: { add() {} } }
-  };
-}
-// reopened : simule un marche rouvert (config/markets.json#checkoutOpen retire).
-async function runSubscriptionPage(dir, availability, reopened) {
-  const els = Object.fromEntries(["subscribeButton", "billingMessage", "checkoutConsent", "proPlanPicker", "proCommitment", "proTrust", "proContext"].map((id) => [id, fakeEl(id)]));
-  els.proCommitment.hidden = true;
-  els.subscribeButton.setAttribute("aria-disabled", "true");
-  const doc = { readyState: "complete", referrer: "", getElementById: (id) => els[id] || null, createElement: () => fakeEl(), head: fakeEl("head"), addEventListener() {} };
-  els.proPlanPicker.ownerDocument = doc;
-  const calls = [];
-  const win = {
-    document: doc,
-    I18N: { dict: DICTS[MARKETS._dirs[dir].locale], t: (k, f) => f, init: () => Promise.resolve() },
-    IasharkApp: { url: "https://x.supabase.co", key: "anon", context: () => Promise.resolve({ user: null, isPro: false }) },
-    IasharkCheckoutConsent: { mount: () => ({ isValid: () => false, check: () => false, payload: () => ({}), text: () => "" }) },
-    fetch: (url, init) => {
-      calls.push(JSON.parse(init.body));
-      return Promise.resolve({ json: () => Promise.resolve(availability ? { ok: true, processed: false, mode: "availability", intervals: availability } : { ok: true, processed: false, reason: "market_not_configured" }) });
-    }
-  };
-  const mk = {};
-  new Function("window", read("lib/market-config.js"))(mk);
-  win.IASHARK_MARKET = mk.IasharkMarketConfig.build(dir);
-  if (reopened) win.IASHARK_MARKET.checkoutOpen = null;
-  new Function("window", read("lib/pro-plan-picker.js"))(win);
-  const loc = { pathname: "/" + dir + "/abonnement.html", search: "", origin: "http://x" };
-  new Function("window", "document", "location", "IasharkApp", "fetch", "sessionStorage", read("abonnement-page.js"))(win, doc, loc, win.IasharkApp, win.fetch, { setItem() {}, removeItem() {} });
-  for (let i = 0; i < 30; i++) await new Promise((r) => setImmediate(r));
-  return { els, calls };
-}
-
-test("abonnement-page.js : une duree = prix seul sans « meme acces », plusieurs = choix, aucune = ni bouton ni consentement", async () => {
-  // Configuration du 19/09/2026 (decisions du proprietaire), fonction de
-  // paiement a jour (mode "availability", toutes les durees disponibles cote
-  // serveur) : FR et MX 3 durees, ZA et EN semaine + mois (hebdomadaire USD a
-  // 4,99 ouvert le 21/09/2026), GB mois seul (semaine et annee jamais
-  // affichees, meme si le serveur les annoncait).
-  const ALL = { week: true, month: true, year: true };
+test("lib/offre-pro.js : durees payables seulement, ordre de deploiement, aucune = ni bouton ni consentement", () => {
+  const ALL = { intervals: { week: true, month: true, year: true } };
   const EXPECT = { fr: ["week", "month", "year"], mx: ["week", "month", "year"], za: ["week", "month"], gb: ["month"], en: ["week", "month"] };
   for (const [dir, ivs] of Object.entries(EXPECT)) {
-    const r = await runSubscriptionPage(dir, ALL);
-    const html = r.els.proPlanPicker.innerHTML;
-    assert.equal(r.els.subscribeButton.hidden, false, dir + " : bouton de paiement");
-    assert.equal(r.els.checkoutConsent.hidden, false, dir + " : consentement");
-    if (ivs.length === 1) {
-      assert.match(html, /^<div class="iash-plans iash-plans-single" data-interval="month">/, dir);
-      assert.doesNotMatch(html, /pro\.week|pro\.year|<input/, dir + " : aucune duree non payable");
-      assert.equal(r.els.proCommitment.hidden, true, dir + " : une seule duree, pas de « meme acces, quelle que soit la duree »");
-    } else {
-      assert.deepEqual([...html.matchAll(/<input type="radio"[^>]*value="(\w+)"/g)].map((m) => m[1]), ivs, dir);
-      assert.equal(r.els.proCommitment.hidden, false, dir + " : plusieurs durees, « meme acces » affiche");
-    }
-    assert.equal(r.calls.length, 1, dir);
-    assert.deepEqual(r.calls[0], MARKETS[MARKETS._dirs[dir].market].checkoutMarket ? { mode: "availability", market: MARKETS[MARKETS._dirs[dir].market].checkoutMarket } : { mode: "availability" }, dir + " : disponibilites du bon marche");
+    const m = marche(dir);
+    assert.deepEqual(ids(OP.plans(m, ALL)), ivs, dir);
+    // Corps EXACT de la demande de disponibilites : jamais market:'fr'.
+    assert.deepEqual(OP.corpsDisponibilite(m), m.checkoutMarket && m.checkoutMarket !== "fr" ? { mode: "availability", market: m.checkoutMarket } : { mode: "availability" }, dir);
   }
-  // Fonction deployee plus ancienne que le site (sans mode "availability") :
-  // FR = mensuel seul (flux historique, sans champ market) ; marches pays
-  // (gb, mx, za, us) = aucun paiement (l'ancienne fonction ignore la duree et,
-  // selon sa version, refuse le marche ou le facture au prix FR).
-  const frOldFn = await runSubscriptionPage("fr", null);
-  assert.match(frOldFn.els.proPlanPicker.innerHTML, /^<div class="iash-plans iash-plans-single" data-interval="month">/);
-  assert.doesNotMatch(frOldFn.els.proPlanPicker.innerHTML, /pro\.week|pro\.year|<input/);
-  assert.equal(frOldFn.els.proCommitment.hidden, true, "une seule duree : pas de « meme acces, quelle que soit la duree »");
-  assert.equal(frOldFn.els.subscribeButton.hidden, false);
-  assert.equal(frOldFn.els.checkoutConsent.hidden, false);
-  for (const dir of ["gb", "mx", "za", "en"]) {
-    const cfg = await runSubscriptionPage(dir, null);
-    assert.match(cfg.els.proPlanPicker.innerHTML, /^<p class="iash-plans-closed" role="status">/, dir);
-    assert.equal(cfg.els.subscribeButton.hidden, true, dir + " : pas de bouton qui echoue");
-    assert.equal(cfg.els.checkoutConsent.hidden, true, dir);
-  }
-  // Marche rouvert, fonction deployee sans mode "availability" (plus ancienne
-  // que le site : ordre de deploiement, 19/09/2026) -> disponibilites inconnues :
-  // aucun paiement de marche pays (l'ancienne fonction ignore la duree et,
-  // selon sa version, refuse le marche ou le facture au prix FR).
-  const gb = await runSubscriptionPage("gb", null, true);
-  assert.equal(gb.calls.length, 1);
-  assert.deepEqual(gb.calls[0], { mode: "availability", market: "gb" });
-  assert.match(gb.els.proPlanPicker.innerHTML, /^<p class="iash-plans-closed" role="status">/);
-  assert.equal(gb.els.subscribeButton.hidden, true, "ancienne fonction : pas de paiement GBP");
-  // Marche FR rouvert (3 durees), meme fonction : le mensuel seul, sans champ market.
-  const frOld = await runSubscriptionPage("fr", null, true);
-  assert.deepEqual(frOld.calls[0], { mode: "availability" });
-  assert.match(frOld.els.proPlanPicker.innerHTML, /^<div class="iash-plans iash-plans-single" data-interval="month">/);
-  assert.equal(frOld.els.subscribeButton.hidden, false);
-  // Fonction a jour, toutes les durees ouvertes : 3 choix et « meme acces ».
-  const gbAll = await runSubscriptionPage("gb", { week: true, month: true, year: true }, true);
-  assert.equal((gbAll.els.proPlanPicker.innerHTML.match(/<input type="radio"/g) || []).length, 3);
-  assert.equal(gbAll.els.proCommitment.hidden, false, "plusieurs durees : « meme acces » affiche");
-  // Serveur : semaine fermee -> masquee.
-  const gb2 = await runSubscriptionPage("gb", { week: false, month: true, year: true }, true);
-  assert.doesNotMatch(gb2.els.proPlanPicker.innerHTML, /value="week"/);
-  assert.equal((gb2.els.proPlanPicker.innerHTML.match(/<input type="radio"/g) || []).length, 2);
-  // Serveur : tout ferme -> ligne « paiement pas encore ouvert », ni prix, ni bouton, ni consentement.
-  for (const dir of ["gb", "mx", "za"]) {
-    const none = await runSubscriptionPage(dir, { week: false, month: false, year: false }, true);
-    const loc = MARKETS._dirs[dir].locale;
-    // Meme echappement que lib/pro-plan-picker.js#esc (apostrophe droite -> &#39;).
-    assert.equal(none.els.proPlanPicker.innerHTML, '<p class="iash-plans-closed" role="status">' + escHtml(DICTS[loc].pro_plans.closed).replace(/'/g, "&#39;") + "</p>", dir);
-    assert.doesNotMatch(none.els.proPlanPicker.innerHTML, /data-market-price|£|€|MX\$|R\s?\d/, dir + " : aucun prix");
-    assert.equal(none.els.subscribeButton.hidden, true, dir + " : pas de bouton mort");
-    assert.equal(none.els.checkoutConsent.hidden, true, dir);
-    assert.equal(none.els.proTrust.hidden, true, dir);
-    assert.equal(none.els.billingMessage.hidden, true, dir);
-    assert.equal(none.els.proCommitment.hidden, true, dir);
-  }
+  assert.deepEqual(OP.corpsDisponibilite(marche("fr")), { mode: "availability" }, "France : jamais de champ market");
+  // Fonction deployee plus ancienne que le site (aucune disponibilite) : FR =
+  // mensuel seul, marches pays = aucun paiement (meme regle que pro-plan-picker).
+  assert.deepEqual(ids(OP.plans(marche("fr"), OP.dispoHistorique(marche("fr")))), ["month"]);
+  assert.deepEqual(ids(OP.plans(marche("fr", true), OP.dispoHistorique(marche("fr", true)))), ["month"]);
+  for (const dir of ["gb", "mx", "za", "en"]) assert.deepEqual(ids(OP.plans(marche(dir, true), OP.dispoHistorique(marche(dir, true)))), [], dir);
+  // Le serveur ferme une duree : masquee ; jamais rouverte si la configuration la ferme.
+  assert.deepEqual(ids(OP.plans(marche("gb", true), { intervals: { week: false, month: true, year: true } })), ["month", "year"]);
+  assert.deepEqual(ids(OP.plans(marche("gb"), ALL)), ["month"], "gb : semaine et annee fermees par la configuration");
+  // Tout ferme : ligne « pas encore ouvert », ni prix, ni bouton, ni consentement.
+  const none = OP.html({ mode: "paiement", contexte: "general", plans: [], choisi: null, jours: 0, connecte: true, uid: "z" });
+  assert.match(none, /class="op-closed"/);
+  assert.doesNotMatch(none, /subscribeButton|checkoutConsent|op-cta|data-op-pay|€|£|MX\$/);
+  // Essai : OUVERT depuis le 04/10/2026, 16 h (decision de Clement, CGV du 04/10 a l'appui),
+  // seulement si le serveur l'accorde sur le mois ; ferme, jamais ecrit.
+  assert.equal(OP.OUVERT.essai, true);
+  assert.equal(OP.essaiOuvert({ trial_days: 7, trial_intervals: ["month"] }), 7);
+  assert.equal(OP.essaiOuvert({ trial_days: 7, trial_intervals: ["year"] }), 0);
+  assert.equal(OP.essaiOuvert(OP.dispoHistorique(marche("fr"))), 0);
+  OP.OUVERT.essai = false;
+  try {
+    assert.equal(OP.essaiOuvert({ trial_days: 7, trial_intervals: ["month"] }), 0);
+  } finally { OP.OUVERT.essai = true; }
+  // ?duree= en liste blanche.
+  assert.equal(OP.dureeValide("year"), "year");
+  assert.equal(OP.dureeValide("<script>"), null);
+  assert.equal(OP.defaut([{ interval: "week" }, { interval: "month" }], "decade"), "month");
 });
 
-test("compte gratuit : meme liste Pro que la page d'abonnement, meme regle pour les durees, jamais de bouton mort", () => {
+test("compte gratuit : le meme composant de paiement, paiement direct, jamais de bouton mort", () => {
   const js = read("account-page.js");
-  const liste = js.slice(js.indexOf("function listePro()"), js.indexOf("/* Préférences : profil"));
-  assert.ok(liste.length > 500, "listePro introuvable");
-  assert.deepEqual([...liste.matchAll(/\['(pro_gate_item_\w+)',/g)].map((m) => m[1]), MATCH_KEYS, "memes lignes que le mur Pro de la page match");
-  assert.deepEqual([...liste.matchAll(/tr\('pro_offer\.(\w+)'/g)].map((m) => m[1]), ["group_match", "group_daily", "daily_all_matches", "daily_scorers", "badge_new", "group_tools", "tool_scanner", "tool_journal", "tool_combo"]);
-  for (const m of js.matchAll(/tr\('pro_offer\.(free_\w+)', '((?:[^'\\]|\\.)*)'\)/g)) assert.equal(m[2], DICTS.fr.pro_offer[m[1]], m[1]);
-  // Fallbacks = dictionnaire FR (une seule source).
-  for (const m of liste.matchAll(/tr\('(pro_offer|match_page)\.(\w+)', '((?:[^'\\]|\\.)*)'\)/g)) assert.equal(m[3], DICTS.fr[m[1]][m[2]], m[1] + "." + m[2]);
-  for (const m of liste.matchAll(/\['(pro_gate_item_\w+)', '((?:[^'\\]|\\.)*)'\]/g)) assert.equal(m[2], DICTS.fr.match_page[m[1]], m[1]);
-  assert.match(js, /\+ listePro\(\)/);
-  // Anciennes promesses retirees de l'affichage (six outils, suivi de bankroll).
-  assert.doesNotMatch(js, /tr\('compte_page\.benefit_(pro_all_matches|pro_six_tools|pro_decisions_log|pro_bankroll|free_analysis|free_tools)'/);
-  assert.match(js, /esc\(tr\('pro_offer\.free_matches', '1 match offert par jour, avec un compte gratuit'\)\)/);
-  assert.match(js, /esc\(tr\('pro_offer\.free_tools', 'Calculateur de mise, cote juste, simulateur de capital'\)\)/);
-  // Aucune duree payable : ni bouton « Decouvrir Pro » ni consentement.
-  assert.match(js, /\['souscrire', 'checkoutConsent', 'msgFacturation'\]\.forEach/);
-  assert.match(js, /if \(n === 0\) \{ el\.hidden = true; el\.style\.display = 'none'; \}/);
-  assert.match(js, /<p id="proDureesNote" class="mt-2 text-\[13\.5px\] text-soft">' \+ tr\('compte_page\.pro_durations_note'/);
-  assert.match(js, /var note = \$\('proDureesNote'\); if \(note\) note\.hidden = n < 2;/);
-  // BUG REEL (19/09/2026) : compte.html ne chargeait pas lib/pro-plan-picker.js,
-  // le selecteur n'etait jamais monte (prix de repli fixe, « meme acces quelle
-  // que soit la duree » toujours affiche, aucun masquage possible).
+  assert.match(js, /IasharkOffrePro\.mount\(\$\('offreCompte'\), \{ mode: 'paiement', contexte: 'general', connecte: true \}\)/);
+  assert.match(js, /<div id="offreCompte"><\/div>/);
+  assert.doesNotMatch(js, /function listePro\(\)/, "ancienne liste retiree (une seule source : le composant)");
   for (const d of [""].concat(DIRS.map((x) => x + "/"))) {
     const html = read(d + "compte.html");
     const at = (x) => html.indexOf(x);
-    assert.ok(at('<script src="/lib/pro-plan-picker.js"></script>') > 0, d + "compte.html : selecteur non charge");
-    assert.ok(at('<script src="/lib/pro-plan-picker.js"></script>') < at('<script src="/account-page.js"'), d + "compte.html : selecteur apres le script de page");
+    for (const src of ["/lib/checkout-consent.js", "/lib/icones.js", "/lib/composants.js", "/lib/offre-pro.js", "/lib/aujourdhui.js"]) assert.ok(at('<script src="' + src + '"></script>') > 0, d + "compte.html : " + src);
+    assert.ok(at('<script src="/lib/offre-pro.js"></script>') < at('<script src="/account-page.js"'), d + "compte.html : composant apres le script de page");
   }
 });
 

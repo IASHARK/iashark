@@ -150,7 +150,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Safer gambling</a>
   </nav>
   <h1 class="page-title">Terms of service and sale</h1>
-  <div class="page-date">Last updated: 19 September 2026</div>
+  <div class="page-date">Last updated: 4 October 2026</div>
   <!-- LEGAL REVIEW: 19/09/2026 - owner decision: Pro is payable in the United Kingdom monthly only (GBP 14.99, config/markets.json#gb.checkoutOpen = ["month"]); no Stripe Price exists for the weekly and annual periods. Sections 5 to 8 limited to the monthly plan (weekly and annual prices, annual renewal reminder, change of billing period and weekly grace period removed); "including any applicable taxes" replaced by the French VAT franchise mention. Previous version (weekly / monthly / annual) archived in legal/gb/archives/cgv-2026-09-16.html. Status: REVIEW. -->
 
   <div class="warn-box">
@@ -190,13 +190,15 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     </ul>
     <p>The price is a total price in pounds sterling (GBP). VAT not applicable, Article 293 B of the French General Tax Code (CGI).</p>
     <p>Before you pay, the checkout page shows the billing period, the plan's main features, the total price in pounds sterling (GBP), the billing frequency and the fact that the subscription renews automatically. The contract is formed when your payment is confirmed. We will send you confirmation of your subscription by email.</p>
+    <!-- LEGAL REVIEW: 04/10/2026 - owner decision: 7-day free trial kept and shown (monthly plan only, first subscription, card required, automatic charge at the end of the trial unless cancelled). Matches the live create-checkout-session function (v23, trial.ts, read on 04/10/2026: TRIAL_DAYS absent = 7, monthly only, once per account and per Stripe customer, subscription stopped if no card at the end). No reminder before the end of the trial is promised: the trial-reminder function exists but its scheduled job (0042) is not applied in the database. To be checked by a lawyer: how the trial interacts with the withdrawal/cancellation period. Previous version archived in archives/cgv-2026-09-19.html. Status: REVIEW. -->
+    <p><strong>7-day free trial.</strong> For a first subscription, the first 7 days are free. Your card is requested when you subscribe; nothing is charged during the trial. At the end of the trial, your monthly subscription starts automatically: £14.99 is charged, then every month on the same date, unless you cancel before the end of the trial from "My account", in which case you are not charged. If no valid payment method is available at the end of the trial, the subscription ends. The trial is offered only once: an account, or a customer of our payment provider, that has already had a subscription is not eligible. We may change or withdraw the trial for new subscriptions; its length is shown before you pay.</p>
   </section>
 
   <section class="section">
     <h2>6. Payment and automatic renewal</h2>
     <p>Payments are processed securely by Stripe. We never see or store your full card details.</p>
     <ul>
-      <li>You pay at the start of each monthly billing period.</li>
+      <li>You pay at the start of each monthly billing period; for a first subscription, the first payment is taken at the end of the free trial described in section 5.</li>
       <li><strong>Your subscription renews automatically</strong> at the end of each billing period, for the same period and at the price then in force, until you cancel it.</li>
       <li>An active subscription cannot be bought a second time.</li>
       <li>If we change the price, we will tell you in advance. The new price will only apply from your next renewal, and you can cancel before it applies.</li>

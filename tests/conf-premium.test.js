@@ -33,7 +33,8 @@ function confLeaks(value, base) {
     if (Array.isArray(v)) { v.forEach((x, i) => walk(x, p + "[" + i + "]", inPaid)); return; }
     if (!v || typeof v !== "object") return;
     let paid = inPaid;
-    if (isMatchLike(v)) paid = v.is_free !== true;
+    // 04/10/2026 : le match offert n'est plus une exception (sa note est servie aux comptes par match-data).
+    if (isMatchLike(v)) paid = true;
     Object.keys(v).forEach((k) => {
       if (paid && CONF_KEYS.indexOf(k) !== -1) out.push(p + "." + k);
       walk(v[k], p + "." + k, paid);
@@ -59,9 +60,10 @@ test("conf est premium : liste unique, copie de la fonction match-data, charge p
   const paye = { id: 1, home: { n: "A" }, away: { n: "B" }, conf: 6.9, has_signal: true };
   assert.equal(PREMIUM.stripPremium(paye).conf, undefined);
   assert.deepEqual(PREMIUM.premiumLeaks(paye), ["conf"]);
-  assert.equal(PREMIUM.stripPremium(Object.assign({}, paye, { is_free: true })).conf, 6.9, "le match offert garde sa note");
+  // 04/10/2026 : le match offert n'a plus sa note dans les fichiers publics (servie aux comptes par match-data).
+  assert.equal(PREMIUM.stripPremium(Object.assign({}, paye, { is_free: true })).conf, undefined, "match offert : note retiree du fichier public");
   assert.deepEqual(PREMIUM.premiumPayload(paye), { conf: 6.9 });
-  assert.deepEqual(confLeaks({ matchs: [paye, { id: 2, home: {}, away: {}, is_free: true, conf: 7 }] }), [".matchs[0].conf"]);
+  assert.deepEqual(confLeaks({ matchs: [paye, { id: 2, home: {}, away: {}, is_free: true, conf: 7 }] }), [".matchs[0].conf", ".matchs[1].conf"]);
 });
 
 test("data.json, data-home.json, match/<id>.json reels : aucune note sur un match non offert", () => {
@@ -106,14 +108,16 @@ test("pipeline et accueil : la note n'est rendue que si elle existe, jamais d'ap
   assert.equal((resume.match(/m\.conf|m\.pari_rec/g) || []).length, 0, "ni conf ni pari lus dans le resume");
   const home = read("index.html");
   assert.doesNotMatch(home, /ovrConf|normEdge|parseEdge/, "couleur/palier/tri jamais d'apres l'ecart");
-  assert.match(home, /function probConf\(m\)\{var c=normConf\(m&&m\.conf\);return c==null\?null:/);
+  // Une seule source (01/10/2026) : la vitrine lit d'abord la chance IASHARK du pari (chance_iashark).
+  assert.match(home, /function probConf\(m\)\{var ch=m&&m\.chance_iashark[^}]*var c=normConf\(m&&m\.conf\);return c==null\?null:/);
   // Liste des matchs (home-list.js, 16/09/2026) : verrou AVANT toute lecture de
   // conf, note rendue seulement si elle existe, jamais d'apres l'ecart.
   const list = read("home-list.js");
   assert.doesNotMatch(list, /ovrConf|normEdge|parseEdge|m\.edge\b/, "liste : jamais d'apres l'ecart");
   assert.match(list, /if\(!ctx\.isPro&&!free\)return \{state:'locked',band:probBandOf\(m\)\};/);
   assert.ok(list.indexOf("state:'locked'") < list.indexOf("m.conf"), "verrou avant la lecture de conf");
-  assert.match(list, /m\.conf!=null&&m\.conf!==''\)\?normConf\(m\.conf\):null/, "aucun chiffre sans note");
+  assert.match(list, /\(ch!=null\?ch:\(m\.conf!=null&&m\.conf!==''\?normConf\(m\.conf\):null\)\):null/, "aucun chiffre sans note");
+  assert.ok(list.indexOf("state:'locked'") < list.indexOf("m.chance_iashark"), "verrou avant la lecture de la chance");
   const fm = read("lib/free-match.js");
   assert.doesNotMatch(fm, /\bm(?:&&m)?\.(?:conf|edge)\b/, "repli du match offert : critere public uniquement");
   const kg = read("lib/kickoff-guard.js");

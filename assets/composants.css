@@ -1,0 +1,302 @@
+/* IASHARK — COMPOSANTS DE BIBLIOTHEQUES RECONNUES (04/10/2026, exigence de
+   Clement : « prends des elements, des composants », aucun dessin fait main).
+   Chaque bloc ci-dessous reprend FIDELEMENT le code source d'origine : memes
+   elements, memes classes traduites une a une de Tailwind en CSS, memes
+   keyframes. Seuls les couleurs (cyan / gris du site, or pour la Selection en
+   or) et les textes changent. Licences : assets/vendor/LICENCES.txt.
+   Mouvement reduit (prefers-reduced-motion) : animations coupees, etat final.
+   Border Beam : comme dans la demo Magic UI, le parent est relative + overflow
+   hidden (sinon le faisceau carre deborde de la page au telephone). */
+
+:root{
+  --c-page:#060b12;--c-card:#0d1520;--c-card2:#0f1a28;--c-muted:rgba(148,163,184,.08);
+  --c-line:rgba(255,255,255,.10);--c-line2:rgba(255,255,255,.18);
+  --c-ink:#f4f7fb;--c-soft:#a3b1c2;--c-dim:#8796a8;
+  --c-cyan:#20d5ef;--c-cyan2:#06b6d4;--c-cyan-ink:#04131c;
+  --c-gold:#e8c46a;--c-gold2:#b8862b;--c-gold3:#fff1c1
+}
+
+/* ===================================================================
+   Magic UI — Shimmer Button (MIT)
+   https://github.com/magicuidesign/magicui/blob/main/apps/www/registry/magicui/shimmer-button.tsx
+   <button> : group relative z-0 flex cursor-pointer items-center justify-center
+   overflow-hidden [border-radius:var(--radius)] border border-white/10 px-6 py-3
+   whitespace-nowrap text-white [background:var(--bg)] transform-gpu
+   transition-transform duration-300 ease-in-out active:translate-y-px
+   Proprietes : --spread 90deg, --shimmer-color, --radius, --speed, --cut, --bg.
+   Couleurs du site : fond cyan, texte sombre, reflet blanc.
+   =================================================================== */
+.mu-shimmer{
+  --spread:90deg;--shimmer-color:#ffffff;--radius:14px;--speed:3s;--cut:.05em;--bg:var(--c-cyan);
+  position:relative;z-index:0;display:flex;align-items:center;justify-content:center;gap:.5rem;cursor:pointer;
+  overflow:hidden;border-radius:var(--radius);border:1px solid rgba(255,255,255,.1);
+  padding:.75rem 1.5rem;white-space:nowrap;color:var(--c-cyan-ink);background:var(--bg);
+  transform:translateZ(0);transition:transform .3s ease-in-out;
+  font:800 16px/1.2 var(--body,"DM Sans",system-ui,sans-serif);text-decoration:none;min-height:52px;width:100%
+}
+.mu-shimmer:active{transform:translateY(1px)}
+.mu-shimmer:focus-visible{outline:2px solid var(--c-ink);outline-offset:3px}
+.mu-shimmer[disabled]{cursor:wait;opacity:.75}
+/* spark container : -z-30 blur-[2px] @container-[size] absolute inset-0 overflow-visible */
+.mu-shimmer-spark-c{position:absolute;inset:0;z-index:-30;filter:blur(2px);container-type:size;overflow:visible}
+/* spark : animate-shimmer-slide absolute inset-0 aspect-[1] h-[100cqh] rounded-none [mask:none] */
+.mu-shimmer-spark{position:absolute;inset:0;aspect-ratio:1;height:100cqh;border-radius:0;-webkit-mask:none;mask:none;
+  animation:mu-shimmer-slide var(--speed) ease-in-out infinite alternate}
+/* spark before : animate-spin-around absolute -inset-full w-auto [translate:0_0] rotate-0 conic-gradient */
+.mu-shimmer-spark-b{position:absolute;inset:-100%;width:auto;translate:0 0;rotate:0deg;
+  background:conic-gradient(from calc(270deg - (var(--spread) * .5)),transparent 0,var(--shimmer-color) var(--spread),transparent var(--spread));
+  animation:mu-spin-around calc(var(--speed) * 2) infinite linear}
+/* highlight : absolute inset-0 size-full rounded-2xl shadow-[inset_0_-8px_10px_#ffffff1f] transition-all duration-300 */
+.mu-shimmer-hl{position:absolute;inset:0;width:100%;height:100%;border-radius:1rem;box-shadow:inset 0 -8px 10px #ffffff1f;
+  transform:translateZ(0);transition:all .3s ease-in-out;pointer-events:none}
+.mu-shimmer:hover .mu-shimmer-hl{box-shadow:inset 0 -6px 10px #ffffff3f}
+.mu-shimmer:active .mu-shimmer-hl{box-shadow:inset 0 -10px 10px #ffffff3f}
+/* backdrop : absolute inset-(--cut) -z-20 [border-radius:var(--radius)] [background:var(--bg)] */
+.mu-shimmer-bd{position:absolute;inset:var(--cut);z-index:-20;border-radius:var(--radius);background:var(--bg)}
+.mu-shimmer>.lucide{width:18px;height:18px;flex:none}
+@keyframes mu-shimmer-slide{to{transform:translate(calc(100cqw - 100%),0)}}
+@keyframes mu-spin-around{0%{transform:translateZ(0) rotate(0)}15%,35%{transform:translateZ(0) rotate(90deg)}65%,85%{transform:translateZ(0) rotate(270deg)}100%{transform:translateZ(0) rotate(360deg)}}
+
+/* ===================================================================
+   Magic UI — Border Beam (MIT)
+   https://github.com/magicuidesign/magicui/blob/main/apps/www/registry/magicui/border-beam.tsx
+   Cadre : pointer-events-none absolute inset-0 rounded-[inherit]
+   border-(length:--border-beam-width) border-transparent
+   mask-[linear-gradient(transparent,transparent),linear-gradient(#000,#000)]
+   mask-intersect [mask-clip:padding-box,border-box]
+   Faisceau (motion.div) : absolute aspect-square bg-linear-to-l
+   from-(--color-from) via-(--color-to) to-transparent ; width:size ;
+   offset-path: rect(0 auto auto 0 round SIZEpx) ; offsetDistance 0% -> 100%,
+   repeat Infinity, ease linear, duration 6 s (Motion reecrit en @keyframes).
+   =================================================================== */
+.mu-beam{--border-beam-width:1px;pointer-events:none;position:absolute;inset:0;border-radius:inherit;
+  border:var(--border-beam-width) solid transparent;
+  -webkit-mask:linear-gradient(transparent,transparent) padding-box,linear-gradient(#000,#000) border-box;
+  -webkit-mask-composite:source-in;
+  mask:linear-gradient(transparent,transparent) padding-box,linear-gradient(#000,#000) border-box;
+  mask-composite:intersect}
+.mu-beam-i{--size:90px;--color-from:var(--c-cyan);--color-to:#7dd3fc;position:absolute;aspect-ratio:1;width:var(--size);
+  background:linear-gradient(to left,var(--color-from),var(--color-to),transparent);
+  offset-path:rect(0 auto auto 0 round 90px);offset-distance:0%;
+  animation:mu-beam var(--duration,6s) linear infinite}
+@keyframes mu-beam{from{offset-distance:0%}to{offset-distance:100%}}
+
+/* ===================================================================
+   Magic UI — Shine Border (MIT) — SEUL usage de l'or du site (Selection en or)
+   https://github.com/magicuidesign/magicui/blob/main/apps/www/registry/magicui/shine-border.tsx
+   motion-safe:animate-shine pointer-events-none absolute inset-0 size-full
+   rounded-[inherit] will-change-[background-position] ; background-image
+   radial-gradient(transparent,transparent,COULEURS,transparent,transparent),
+   background-size 300% 300%, masque content-box xor, padding --border-width.
+   @keyframes shine : 0% 0% 0% -> 50% 100% 100% -> 0% 0% ; duree --duration (14 s).
+   =================================================================== */
+.mu-shine{--border-width:1.5px;--duration:14s;pointer-events:none;position:absolute;inset:0;width:100%;height:100%;border-radius:inherit;
+  will-change:background-position;
+  background-image:radial-gradient(transparent,transparent,var(--c-gold),var(--c-gold2),var(--c-gold3),transparent,transparent);
+  background-size:300% 300%;
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;
+  padding:var(--border-width)}
+@media (prefers-reduced-motion:no-preference){.mu-shine{animation:mu-shine var(--duration) infinite linear}}
+@keyframes mu-shine{0%{background-position:0% 0%}50%{background-position:100% 100%}to{background-position:0% 0%}}
+
+/* ===================================================================
+   Magic UI — Animated Circular Progress Bar (MIT)
+   https://github.com/magicuidesign/magicui/blob/main/apps/www/registry/magicui/animated-circular-progress-bar.tsx
+   Variables d'origine : --circle-size 100px, --circumference, --percent-to-px,
+   --gap-percent 5, --offset-factor 0, --transition-length 1s, --delay 0s,
+   --percent-to-deg 3.6deg. Deux cercles r=45, stroke-width 10, linecap round.
+   =================================================================== */
+.mu-gauge{--circle-size:100px;--circumference:282.7433388;--percent-to-px:2.827433388px;--gap-percent:5;--offset-factor:0;
+  --transition-length:1s;--transition-step:200ms;--delay:0s;--percent-to-deg:3.6deg;
+  position:relative;width:64px;height:64px;font:700 15px/1 var(--body,"DM Sans",system-ui,sans-serif);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--c-ink);transform:translateZ(0);flex:none}
+.mu-gauge svg{width:100%;height:100%;display:block}
+.mu-gauge-sec{stroke:rgba(148,163,184,.22);stroke-dasharray:calc(var(--stroke-percent) * var(--percent-to-px)) var(--circumference);
+  transform:rotate(calc(1turn - 90deg - (var(--gap-percent) * var(--percent-to-deg) * var(--offset-factor-secondary)))) scaleY(-1);
+  transition:all var(--transition-length) ease var(--delay);transform-origin:calc(var(--circle-size) / 2) calc(var(--circle-size) / 2);
+  --offset-factor-secondary:calc(1 - var(--offset-factor))}
+.mu-gauge-pri{stroke:var(--c-cyan);stroke-dasharray:calc(var(--stroke-percent) * var(--percent-to-px)) var(--circumference);
+  transition:var(--transition-length) ease var(--delay),stroke var(--transition-length) ease var(--delay);transition-property:stroke-dasharray,transform;
+  transform:rotate(calc(-90deg + var(--gap-percent) * var(--offset-factor) * var(--percent-to-deg)));
+  transform-origin:calc(var(--circle-size) / 2) calc(var(--circle-size) / 2)}
+/* span : animate-in fade-in absolute inset-0 m-auto size-fit */
+.mu-gauge-v{position:absolute;inset:0;margin:auto;width:fit-content;height:fit-content;animation:mu-fade-in var(--transition-length) linear var(--delay) both}
+.mu-gauge--lg{width:84px;height:84px;font-size:18px}
+@keyframes mu-fade-in{from{opacity:0}to{opacity:1}}
+
+/* ===================================================================
+   Magic UI — Animated Subscribe Button (MIT) — « Copier le ticket » -> « Copie »
+   https://github.com/magicuidesign/magicui/blob/main/apps/www/registry/magicui/animated-subscribe-button.tsx
+   bg-primary text-primary-foreground relative flex h-10 w-fit items-center
+   justify-center overflow-hidden rounded-lg px-6 ; etat 1 : le libelle sort
+   vers la droite (x: 50, 0,1 s) ; etat 2 : le bouton apparait (opacite 0 -> 1)
+   et son libelle descend (y: -50 -> 0).
+   =================================================================== */
+.mu-sub{position:relative;display:flex;height:2.5rem;width:fit-content;align-items:center;justify-content:center;overflow:hidden;
+  border-radius:.5rem;padding:0 1.5rem;border:none;cursor:pointer;background:var(--c-cyan);color:var(--c-cyan-ink);
+  font:700 14px/1 var(--body,"DM Sans",system-ui,sans-serif);min-height:44px}
+.mu-sub:focus-visible{outline:2px solid var(--c-ink);outline-offset:3px}
+.mu-sub-s{position:relative;display:flex;align-items:center;justify-content:center;gap:.45rem;font-weight:600}
+.mu-sub-s .lucide{width:16px;height:16px}
+.mu-sub-b{display:none}
+.mu-sub.is-on{animation:mu-fade-in .2s ease-out both}
+.mu-sub.is-on .mu-sub-a{display:none}
+.mu-sub.is-on .mu-sub-b{display:flex;height:100%;width:100%;animation:mu-sub-down .35s cubic-bezier(.22,1,.36,1) both}
+.mu-sub.is-out .mu-sub-a{animation:mu-sub-right .1s ease-in both}
+@keyframes mu-sub-down{from{transform:translateY(-50px)}to{transform:translateY(0)}}
+@keyframes mu-sub-right{from{transform:translateX(0)}to{transform:translateX(50px)}}
+
+/* ===================================================================
+   HyperUI — Radio Groups n° 2 (MIT) — choix de la duree
+   https://github.com/markmead/hyperui/blob/main/public/examples/application/radio-groups/2-dark.html
+   <fieldset class="space-y-3"> ; <label> flex items-center justify-between gap-4
+   rounded border border-gray-600 bg-gray-900 p-3 text-sm font-medium shadow-sm
+   transition-colors hover:bg-gray-800 has-checked:border-blue-600
+   has-checked:ring-1 has-checked:ring-blue-600 ; <input type=radio> size-5.
+   Bleu -> cyan du site.
+   =================================================================== */
+.hu-radios{border:0;margin:0;padding:0;min-width:0;display:grid;gap:.75rem}
+.hu-radio{display:flex;align-items:center;justify-content:space-between;gap:1rem;border-radius:.25rem;border:1px solid var(--c-line2);
+  background:var(--c-page);padding:.75rem;font-size:.875rem;line-height:1.25rem;font-weight:500;cursor:pointer;
+  box-shadow:0 1px 3px 0 rgb(0 0 0 / .1),0 1px 2px -1px rgb(0 0 0 / .1);
+  transition:color .15s cubic-bezier(.4,0,.2,1),background-color .15s cubic-bezier(.4,0,.2,1),border-color .15s cubic-bezier(.4,0,.2,1);min-height:56px}
+.hu-radio:hover{background:var(--c-card2)}
+.hu-radio:has(input:checked){border-color:var(--c-cyan);box-shadow:0 0 0 1px var(--c-cyan),0 1px 3px 0 rgb(0 0 0 / .1)}
+.hu-radio input{width:1.25rem;height:1.25rem;margin:0;flex:none;accent-color:var(--c-cyan2)}
+.hu-radio input:focus-visible{outline:2px solid var(--c-cyan);outline-offset:2px}
+.hu-radio-t{min-width:0}
+.hu-radio-t p{margin:0}
+.hu-radio-n{color:var(--c-ink);font-weight:600;font-size:15px}
+.hu-radio-d{color:var(--c-soft);font-size:13px;margin-top:2px!important}
+.hu-radio-p{margin:0 0 0 auto;color:var(--c-ink);text-align:right;white-space:nowrap}
+.hu-radio-p b{font:800 18px/1.1 var(--body,"DM Sans",system-ui,sans-serif);letter-spacing:-.01em}
+.hu-radio-p small{display:block;color:var(--c-soft);font-size:12px;font-weight:500}
+
+/* ===================================================================
+   HyperUI — Tabs n° 2 (MIT) — familles de marches, scenarios « Et si »
+   https://github.com/markmead/hyperui/blob/main/public/examples/application/tabs/2-dark.html
+   conteneur : border-b border-gray-700 ; tablist : -mb-px flex gap-4 ;
+   onglet : flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium
+   transition-colors ; actif : border-blue-600 text-blue-600 ; sinon
+   border-transparent text-gray-300 hover:text-gray-200.
+   Telephone : la liste defile horizontalement (aucun onglet coupe).
+   =================================================================== */
+.hu-tabs{border-bottom:1px solid var(--c-line);min-width:0;max-width:100%}
+.hu-tablist{margin-bottom:-1px;display:flex;gap:1rem;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.hu-tablist::-webkit-scrollbar{display:none}
+.hu-tab{display:flex;align-items:center;gap:.5rem;border:0;border-bottom:2px solid transparent;background:none;padding:.5rem 1rem;
+  font:500 .875rem/1.25rem var(--body,"DM Sans",system-ui,sans-serif);color:#cbd5e1;cursor:pointer;white-space:nowrap;min-height:44px;
+  transition:color .15s cubic-bezier(.4,0,.2,1),border-color .15s cubic-bezier(.4,0,.2,1)}
+.hu-tab:hover{color:#e2e8f0}
+.hu-tab[aria-selected="true"],.hu-tab[aria-pressed="true"]{border-bottom-color:var(--c-cyan);color:var(--c-cyan)}
+.hu-tab:focus-visible{outline:2px solid var(--c-cyan);outline-offset:-2px}
+
+/* ===================================================================
+   HyperUI — Badges n° 2 (MIT) — pastille de chance
+   https://github.com/markmead/hyperui/blob/main/public/examples/application/badges/2-dark.html
+   inline-flex items-center justify-center rounded-full bg-purple-700
+   px-2.5 py-0.5 text-purple-100 ; <p class="text-sm whitespace-nowrap">.
+   Echelle de chance en 5 intensites de cyan (pas de vert ni de rouge).
+   Police du site (comme l'original, text-sm) : avec une police a chasse fixe, l'espace
+   avant « % » faisait un grand blanc (« 35  % », controle UX du 04/10).
+   =================================================================== */
+.hu-badge{display:inline-flex;align-items:center;justify-content:center;border-radius:9999px;padding:.125rem .625rem;
+  font:700 .875rem/1.25rem var(--body,"DM Sans",system-ui,sans-serif);font-variant-numeric:tabular-nums;white-space:nowrap;background:rgba(32,213,239,.12);color:#cffafe}
+.hu-badge.lv5{background:#0891b2;color:#ecfeff}.hu-badge.lv4{background:rgba(8,145,178,.72);color:#ecfeff}
+.hu-badge.lv3{background:rgba(8,145,178,.48);color:#e0f7fb}.hu-badge.lv2{background:rgba(8,145,178,.28);color:#cdeef5}
+.hu-badge.lv1{background:rgba(148,163,184,.16);color:#cbd5e1}
+.hu-badge .lucide{width:14px;height:14px;margin:0 .3rem 0 -.2rem}
+
+/* ===================================================================
+   HyperUI — Stats n° 3 (MIT) — l'arbitre
+   https://github.com/markmead/hyperui/blob/main/public/examples/application/stats/3-dark.html
+   <article> flex items-end justify-between rounded-lg border border-gray-800
+   bg-gray-900 p-6 ; a gauche : <p> text-sm text-gray-400 puis <p> text-2xl
+   font-medium text-white ; a droite, la tendance : inline-flex gap-2 rounded-sm
+   bg-green-700 p-1 text-green-50 (rouge pour une baisse), icone size-4 et
+   <span class="text-xs font-medium">. Vert / rouge seulement pour un ecart
+   chiffre net ; sinon gris. Telephone : marges de 16 px.
+   =================================================================== */
+.hu-stats{display:grid;gap:1rem}
+.hu-stat{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;border-radius:.5rem;border:1px solid #1f2937;background:var(--c-page);padding:1.5rem}
+.hu-stat-tr{display:inline-flex;gap:.5rem;align-items:center;flex:none;border-radius:.125rem;padding:.25rem;background:rgba(148,163,184,.16);color:#e2e8f0}
+.hu-stat-tr.is-up{background:#15803d;color:#f0fdf4}
+.hu-stat-tr.is-down{background:#b91c1c;color:#fef2f2}
+.hu-stat-tr .lucide{width:1rem;height:1rem}
+.hu-stat-tr span{font-size:.75rem;line-height:1rem;font-weight:500}
+.hu-stat p{margin:0}
+.hu-stat-k{font-size:.875rem;line-height:1.25rem;color:#9ca3af}
+.hu-stat-v{font-size:1.5rem;line-height:2rem;font-weight:500;color:#fff;font-variant-numeric:tabular-nums}
+.hu-stat-f{font-size:.75rem;line-height:1rem;color:#9ca3af}
+@media (max-width:520px){.hu-stat{padding:1rem}}
+
+/* ===================================================================
+   Flowbite — Drawer, placement « bottom » (MIT) — tiroir Marches au telephone
+   https://github.com/themesberg/flowbite/blob/main/src/components/drawer/index.ts
+   Tiroir : fixed bottom-0 left-0 right-0 z-40 w-full p-4 overflow-y-auto
+   transition-transform bg-gray-800 ; cache : translate-y-full ; ouvert :
+   transform-none. Fond : bg-dark-backdrop/70 fixed inset-0 z-30. Ouvert :
+   role=dialog, aria-modal, body overflow-hidden ; Echap et fond ferment.
+   Bouton fermer : rounded-lg absolute top-2.5 end-2.5, agrandi a 44 px (taille tactile
+   minimale ; controle UX du 04/10). Couches 1100 / 1101
+   (au-dessus de la barre de navigation du bas du site, z-index 1000).
+   =================================================================== */
+.fb-drawer{position:fixed;bottom:0;left:0;right:0;z-index:1101;width:100%;padding:1rem;overflow-y:auto;max-height:88vh;max-height:88dvh;
+  transition:transform .15s cubic-bezier(.4,0,.2,1);background:#0b131d;border-top:1px solid var(--c-line2);border-radius:16px 16px 0 0;
+  transform:translateY(100%);visibility:hidden}
+.fb-drawer.is-open{transform:none;visibility:visible}
+.fb-drawer:not(.is-open){transition:transform .15s cubic-bezier(.4,0,.2,1),visibility 0s linear .15s}
+.fb-backdrop{position:fixed;inset:0;z-index:1100;background:rgba(3,7,12,.7)}
+.fb-close{position:absolute;top:.625rem;right:.625rem;display:inline-flex;align-items:center;justify-content:center;width:2.75rem;height:2.75rem;
+  border-radius:.5rem;border:0;background:transparent;color:#9ca3af;cursor:pointer;font-size:.875rem}
+.fb-close:hover{background:#4b5563;color:#fff}
+.fb-close .lucide{width:18px;height:18px}
+body.fb-no-scroll{overflow:hidden}
+/* Poignee du Flowbite « Swipeable drawer » : p-4 cursor-pointer ; barre absolute w-8 h-1
+   -translate-x-1/2 bg-gray-600 rounded-lg top-3 left-1/2. Zone tactile de 44 px. */
+.fb-handle{position:relative;display:block;width:100%;height:44px;margin:-1rem 0 -.75rem;padding:0;border:0;background:transparent;cursor:grab;touch-action:none}
+.fb-handle-bar{position:absolute;top:.75rem;left:50%;width:2rem;height:.25rem;border-radius:.5rem;background:#4b5563;transform:translateX(-50%)}
+.fb-handle:focus-visible{outline:2px solid var(--c-cyan);outline-offset:-2px}
+
+/* ===================================================================
+   shadcn/ui — Card (MIT) — petites cartes du bloc « Aujourd'hui » (tickets x5 / x10,
+   buteur du jour) et encadres compacts (exemples des jumeaux, apercu flou)
+   https://github.com/shadcn-ui/ui/blob/main/apps/v4/registry/new-york-v4/ui/card.tsx
+   Card : flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm
+   CardHeader : @container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start
+     gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto]
+   CardTitle : leading-none font-semibold ; CardDescription : text-sm text-muted-foreground
+   CardAction : col-start-2 row-span-2 row-start-1 self-start justify-self-end
+   CardContent : px-6 ; CardFooter : flex items-center px-6
+   shadcn/ui — Separator (MIT), ligne de perforation du ticket :
+   https://github.com/shadcn-ui/ui/blob/main/apps/v4/registry/new-york-v4/ui/separator.tsx
+   shrink-0 bg-border data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full,
+   en pointilles par className (h-0 bg-transparent border-t-2 border-dashed), comme le permet
+   le composant. Marges reduites (petites cartes cote a cote au telephone) ; couleurs du site.
+   Remplace la « Ticket Confirmation Card » de 21st.dev (aucune licence publiee, 04/10/2026).
+   =================================================================== */
+.sc{position:relative;display:flex;flex-direction:column;gap:.75rem;min-width:0;border-radius:.75rem;border:1px solid var(--c-line);
+  background:var(--c-card);color:var(--c-ink);padding:.875rem 0;box-shadow:0 1px 2px 0 rgb(0 0 0 / .05);container-type:inline-size;container-name:sc}
+.sc-h{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start;gap:.5rem;padding:0 .875rem}
+.sc-h:has(.sc-a){grid-template-columns:auto minmax(0,1fr) auto}
+.sc-ht{display:grid;gap:.25rem;min-width:0}
+.sc-t{margin:0;line-height:1.1;font:600 15px/1.15 var(--body,"DM Sans",system-ui,sans-serif);color:var(--c-ink)}
+.sc-d{margin:0;font-size:12.5px;line-height:1.3;color:var(--c-soft)}
+.sc-a{grid-column:3;grid-row:1;align-self:start;justify-self:end}
+.sc-c{padding:0 .875rem}
+.sc-sep{flex:none;width:100%;height:0;background:transparent;border-top:2px dashed var(--c-line2)}
+.sc-box{display:flex;align-items:center;gap:1rem;border-radius:.75rem;border:1px solid var(--c-line);background:var(--c-card2);padding:.75rem 1rem}
+
+/* Mouvement reduit : etat final immediat, aucun reflet ni faisceau. */
+@media (prefers-reduced-motion:reduce){
+  .mu-shimmer-spark,.mu-shimmer-spark-b{animation:none}
+  .mu-shimmer-spark-c{display:none}
+  .mu-beam{display:none}
+  .mu-gauge{--transition-length:0s}
+  .mu-gauge-v{animation:none}
+  .mu-sub.is-on,.mu-sub.is-on .mu-sub-b,.mu-sub.is-out .mu-sub-a{animation:none}
+  .fb-drawer{transition:none}
+}
+.ch-box{position:relative;width:100%}
+.ch-box canvas{display:block}
+.fb-drawer:focus{outline:none}

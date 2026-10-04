@@ -333,7 +333,10 @@ test("fichier public reel (buteurs-du-jour.json du depot) : format public, aucun
   if (!fs.existsSync(path.join(ROOT, "buteurs-du-jour.json"))) return;
   const file = JSON.parse(read("buteurs-du-jour.json"));
   assertPublicFile(file, "buteurs-du-jour.json");
-  assert.ok(Object.values(file.days).some((l) => l.length > 0), "exemple non vide");
+  // Depuis le 04/10/2026 (config/tickets.json#fichier_buteurs_public = « retire », controle de l'ingenieur donnees) :
+  // le fichier public n'a plus aucune entree ; le buteur du jour est servi aux comptes par la fonction tickets-du-jour.
+  if (require("../config/tickets.json").fichier_buteurs_public === "retire") assert.deepEqual(file.days, {}, "aucun match ni rang public");
+  else assert.ok(Object.values(file.days).some((l) => l.length > 0), "exemple non vide");
 });
 
 // ------------------------------------------------------------ chiffres Pro = page match
@@ -799,42 +802,24 @@ test("home-scorers.js : exports du tunnel (cleanEntry, renderTeaser, renderGate)
 });
 
 // ------------------------------------------------------------ branchements
-test("accueil (index.html) : section, plateau (liste + panneau), squelette sans decalage, scripts et styles charges dans l'ordre", () => {
+// 04/10/2026 (demande de Clement) : le bloc « Buteurs du jour » de l'accueil
+// (ancien calcul scorerModel) est remplace par le bloc « Aujourd'hui » (tickets x5 /
+// x10, Selection en or, buteur du jour du moteur v3 : lib/aujourdhui.js). Le module
+// home-scorers.js reste teste ci-dessus mais n'est plus charge par l'accueil.
+test("accueil (index.html) : bloc « Aujourd'hui » a la place de « Buteurs du jour », masque sans reponse, scripts et styles charges", () => {
   const html = read("index.html");
-  const sec = (html.match(/<section class="hs" id="buteurs-du-jour"[\s\S]*?<\/section>/) || [])[0];
-  assert.ok(sec, "section Buteurs du jour");
-  assert.ok(html.indexOf('id="buteurs-du-jour"') < html.indexOf('id="decisions"'), "avant la liste des matchs");
-  assert.ok(html.indexOf('id="heroStade"') < html.indexOf('id="buteurs-du-jour"'), "apres le haut de page");
-  assert.match(sec, /<h2 class="hs-title" id="hsTitle" data-i18n="home_scorers\.title">Buteurs du jour<\/h2>/);
-  assert.match(sec, /aria-labelledby="hsTitle"/);
-  // Plateau : la liste puis le panneau « Débloquer » (cache), dans le meme cadre.
-  assert.match(sec, /<div class="hs-board">\s*<ol class="hs-list" data-hs-list aria-busy="true"[^>]*>[\s\S]*?<\/ol>\s*<div class="hs-gate" data-hs-gate hidden><\/div>\s*<\/div>\s*<div class="hs-foot" data-hs-foot>/);
-  const ol = (sec.match(/<ol class="hs-list"[\s\S]*?<\/ol>/) || [""])[0];
-  assert.equal(count(ol, /<li class="hs-card" aria-hidden="true">/g), 3, "squelette : 3 lignes");
-  assert.equal(count(ol, /<li/g), 3);
-  assert.doesNotMatch(ol, /<a |href=|<h3|<img|hs-blurred/, "squelette : ni lien ni joueur");
-  assert.doesNotMatch(sec, /\d\s?%/, "aucun chiffre dans le HTML statique");
+  assert.doesNotMatch(html, /id="buteurs-du-jour"|<script src="\/home-scorers\.js">|assets\/home-scorers\.css/, "ancien bloc retire");
+  const sec = (html.match(/<section class="aj" id="aujourdhui"[^>]*><\/section>/) || [])[0];
+  assert.ok(sec, "section Aujourd'hui");
+  assert.match(sec, / hidden>/, "masquee tant qu'aucune reponse lisible : aucun trou");
+  assert.ok(html.indexOf('id="heroStade"') < html.indexOf('id="aujourdhui"'), "apres le haut de page");
+  assert.ok(html.indexOf('id="aujourdhui"') < html.indexOf('id="decisions"'), "avant la liste des matchs");
   const pos = (s) => html.indexOf(s);
-  assert.ok(pos('<script src="/lib/match-time.js">') < pos('<script src="/home-scorers.js">'));
-  assert.ok(pos('<script src="/lib/league-names.js">') < pos('<script src="/home-scorers.js">'));
-  assert.ok(pos('<script src="/lib/insights.js">') < pos('<script src="/lib/buteurs-du-jour.js">'));
-  assert.ok(pos('<script src="/lib/buteurs-du-jour.js">') < pos('<script src="/home-scorers.js">'));
-  assert.match(html, /<link rel="stylesheet" href="\/assets\/home-scorers\.css">/);
-  assert.match(html, /monterButeurs\(\);\n\s*if\(window\.IasharkApp\)\{try\{authCtx=await IasharkApp\.context\(\);\}catch\(e\)\{\}\}\n\s*if\(homeScorers\)homeScorers\.setViewer\(authCtx\);/);
-  const js = read("home-scorers.js");
-  assert.match(js, /FILE_URL='\/buteurs-du-jour\.json'/, "reference litterale : publiee par scripts/build-public.js");
-  assert.doesNotMatch(js, /data\.json['"]/, "jamais data.json");
-  assert.match(js, /res\.data\.isPro!==true/, "joueurs seulement si le serveur confirme le plan");
-  assert.match(js, /B\.resolvePick\(raw,rank\)/, "meme resolution que lib/buteurs-du-jour.js");
-  const css = read("assets/home-scorers.css");
-  assert.match(css, /\.hs-zone\{[^}]*min-height:/, "zone chiffree a hauteur fixe");
-  assert.match(css, /\.hs-board\{position:relative;\}/, "panneau pose sur la liste");
-  assert.match(css, /\.hs-gate\{position:absolute;inset:0;/);
-  assert.match(css, /\.hs-gate\[hidden\]\{display:none;\}/, "panneau cache pour un abonne");
-  // Le flou n'habille que du contenu factice ou verrouille (aucune vraie donnee dans le DOM).
-  const blurred = [...css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{[^}]*filter:blur/g)].map((m) => m[1].trim());
-  assert.ok(blurred.length > 0);
-  blurred.forEach((s) => assert.ok([".hs-blurred", ".hs.is-locked .hs-list .hs-link"].includes(s), "flou hors verrou : " + s));
+  ["/lib/icones.js", "/lib/composants.js", "/lib/offre-pro.js", "/lib/aujourdhui.js"].forEach((src) => assert.ok(pos('<script src="' + src + '">') > 0, src));
+  assert.ok(pos('<script src="/lib/composants.js">') < pos('<script src="/lib/aujourdhui.js">'));
+  assert.match(html, /<link rel="stylesheet" href="\/assets\/composants\.css">/);
+  assert.match(html, /<link rel="stylesheet" href="\/assets\/aujourdhui\.css">/);
+  assert.match(html, /IasharkAujourdhui\.mount\(el,\{\}\)/);
 });
 
 test("i18n : cles home_scorers identiques dans les 7 langues (dict et parts), regles du manifeste pour les textes statiques", () => {
@@ -869,15 +854,11 @@ test("i18n : cles home_scorers identiques dans les 7 langues (dict et parts), re
   const manifest = require("../scripts/i18n-manifest.js");
   const rules = manifest.find((p) => p.file === "index.html").replacements;
   const html = read("index.html");
+  // Le bloc a quitte l'accueil le 04/10/2026 : plus aucune regle de substitution
+  // ne le vise (des regles orphelines ne traduiraient rien).
   const mine = rules.filter((r) => /hs-|home_scorers|Buteurs du jour/.test(r.find));
-  assert.equal(mine.length, 5);
-  mine.forEach((r) => {
-    assert.equal(html.split(r.find).length - 1, 1, "une occurrence : " + r.find.slice(0, 60));
-    LOCS.forEach((l) => {
-      const v = r.build(JSON.parse(read("i18n/dict/" + l + ".json")), l, (s) => s);
-      assert.ok(v && !/undefined/.test(v), l + " : " + r.find.slice(0, 40));
-    });
-  });
+  assert.equal(mine.length, 0);
+  assert.doesNotMatch(html, /home_scorers\./);
 });
 
 test("pipeline : fichier ecrit apres la garde coup d'envoi, avant la copie publique, ajoute au commit, jamais bloquant", () => {

@@ -136,7 +136,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Responsible gambling</a>
   </nav>
   <h1 class="page-title">Terms of sale</h1>
-  <div class="page-date">Last updated: 21 September 2026</div>
+  <div class="page-date">Last updated: 4 October 2026</div>
   <!-- LEGAL REVIEW: 19/09/2026 - owner decision: the /en/ version now sells Pro in US dollars, monthly only (config/markets.json#_usdSwitch applied: _dirs.en.market = "us", us.checkoutOpen = ["month"], Stripe Price in us.stripePriceIds.month). Articles 5 to 9 rewritten for a single monthly period, as in the French terms of 18/09/2026 (weekly and annual prices, annual renewal information, change of billing period and weekly grace period removed); 'VAT included' replaced by the French VAT franchise mention. Open points: French law and EU consumer rights kept for a USD offer also served outside the EU (United States, Canada...); US sales taxes not assessed. Previous version (EUR, weekly / monthly / annual) archived in legal/en/archives/cgv-2026-09-16.html. Status: REVIEW. -->
 
   <div class="warn-box">
@@ -195,11 +195,13 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
       <p>Price in US dollars (USD). VAT not applicable, Article 293 B of the French General Tax Code (CGI).</p>
     </div>
     <p>The applicable price is the one displayed on the Subscription page and summarised on the payment page before you confirm your order. Any price change will be notified to you before it takes effect; it will only apply from the next billing period and you may cancel your subscription before that date.</p>
+    <!-- LEGAL REVIEW: 04/10/2026 - owner decision: 7-day free trial kept and shown (monthly plan only, first subscription, card required, automatic charge at the end of the trial unless cancelled). Matches the live create-checkout-session function (v23, trial.ts, read on 04/10/2026: TRIAL_DAYS absent = 7, monthly only, once per account and per Stripe customer, subscription stopped if no card at the end). No reminder before the end of the trial is promised: the trial-reminder function exists but its scheduled job (0042) is not applied in the database. To be checked by a lawyer: how the trial interacts with the withdrawal/cancellation period. Previous version archived in archives/cgv-2026-09-21.html. Status: REVIEW. -->
+    <p><strong>7-day trial (monthly plan only).</strong> For a first monthly subscription, the first 7 days are free. Your card is requested when you subscribe; nothing is charged during the trial. At the end of the trial, the monthly subscription starts automatically: <span data-market-price="pro.month">$19.99</span> is charged, then every month on the same date, unless you cancel before the end of the trial from "My account", in which case nothing is charged. If no valid payment method is available at the end of the trial, the subscription ends. The trial is granted only once: an account, or a customer of our payment provider, that has already had a subscription is not eligible. The weekly plan has no trial: it is charged when you subscribe. The trial may be changed or withdrawn for new subscriptions; its length is shown before payment.</p>
   </section>
 
   <section class="section">
     <h2>Article 7 — Payment and renewal</h2>
-    <p>Payment is secured and handled by Stripe (<a href="https://stripe.com" target="_blank" rel="noopener">stripe.com</a>). IASHARK does not store any bank card data. The first payment is taken when you subscribe. The subscription then renews automatically at the end of each period, for a period of the same length and at the price then in force.</p>
+    <p>Payment is secured and handled by Stripe (<a href="https://stripe.com" target="_blank" rel="noopener">stripe.com</a>). IASHARK does not store any bank card data. The first payment is taken when you subscribe, or at the end of the trial for a first monthly subscription (Article 6). The subscription then renews automatically at the end of each period, for a period of the same length and at the price then in force.</p>
     <p>An active subscription cannot be taken out a second time.</p>
     <p>If a renewal payment fails, our payment provider may retry it. Pro access is maintained for 1 day after the end of the paid period on the weekly plan, and for 4 days on the monthly plan; if payment is not made, the account returns to free access.</p>
   </section>

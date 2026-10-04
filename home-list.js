@@ -28,7 +28,7 @@
 })(typeof window!=='undefined'?window:null,function(root){
 'use strict';
 
-var DEFAULTS={upsellAfter:3,lockedHref:'match',liveWindowMin:115,staleLiveMin:150,simulations:5000,
+var DEFAULTS={lockedHref:'match',liveWindowMin:115,staleLiveMin:150,
   collapsedKey:'iashark.hlCollapsed.v1'};
 var PROB_BANDS=['high','good','moderate'];
 
@@ -40,13 +40,21 @@ function localeTag(){return (root.I18N&&root.I18N.localeTag)?root.I18N.localeTag
 function lien(p){return (root.I18N&&root.I18N.href)?root.I18N.href(p):'/'+p;}
 function reducedMotion(){return !!(root.matchMedia&&root.matchMedia('(prefers-reduced-motion: reduce)').matches);}
 
-/* ---------- Icones ---------- */
+/* ---------- Icones : jeu LUCIDE (lib/icones.js, ISC), trace d'origine, jamais
+   dessine a la main (controle UX du 04/10/2026, exigence de Clement : de vrais
+   composants). lib/icones.js est charge par la page avant le premier rendu. ---------- */
+function icones(){
+  if(root&&root.IasharkIcones)return root.IasharkIcones;
+  // Node (tests) : le meme module, charge directement.
+  try{return (typeof module==='object'&&module.exports&&typeof require==='function')?require('./lib/icones.js'):null;}catch(e){return null;}
+}
+function ico(nom,cls){var I=icones();return I?I.svg(nom,cls||''):'';}
 var ICON={
-  star:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.4.9-4.6 4.5 1.1 6.3L12 17.3l-5.7 3 1.1-6.3L2.8 9.5l6.4-.9z"/></svg>',
-  chev:'<svg class="hl-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  lock:'<svg class="hl-lock-ico" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.6" fill="currentColor"/><path d="M5.2 7V5.2a2.8 2.8 0 015.6 0V7" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>',
-  cal:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
-  alert:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l9.5 16.5h-19z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 10v4.5M12 17.2v.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
+  get star(){return ico('star','hl-ico');},
+  get chev(){return ico('chevron-down','hl-chev');},
+  get lock(){return ico('lock','hl-lock-ico');},
+  get cal(){return ico('calendar','hl-ico');},
+  get alert(){return ico('triangle-alert','hl-ico');}
 };
 
 /* ---------- Helpers injectables (index.html) ; replis = libs du depot ---------- */
@@ -155,7 +163,6 @@ function qualityFor(m){
   return q?{level:q[0],text:t(q[1],q[2])}:null;
 }
 var BAND_LABEL={high:['home_list.band_high','Probabilité élevée'],good:['home_list.band_good','Bonne probabilité'],moderate:['home_list.band_moderate','Probabilité modérée']};
-var BAND_LEVEL={high:3,good:2,moderate:1};
 var BAND_SHORT={high:'Proba. élevée',good:'Bonne proba.',moderate:'Proba. modérée'};
 function bandLabel(b){return t(BAND_LABEL[b][0],BAND_LABEL[b][1]);}
 function bandNote(){return t('home_list.band_note','Estimation du modèle, pas une garantie. Détail et pari réservés aux abonnés Pro.');}
@@ -258,15 +265,14 @@ function teamHtml(tm,H){
   return '<span class="hl-team">'+logo+'<span class="hl-tname">'+esc(tm&&tm.n||'')+'</span></span>';
 }
 function fmtInt(n){return Number(n).toLocaleString(localeTag());}
-function barsHtml(b){
-  var lvl=BAND_LEVEL[b];
-  return '<span class="hl-bars" aria-hidden="true"><i class="'+(lvl>=1?'on':'')+'"></i><i class="'+(lvl>=2?'on':'')+'"></i><i class="'+(lvl>=3?'on':'')+'"></i></span>';
-}
-// Pastille de niveau (ligne verrouillee) : libelle court sur mobile, complet sur desktop.
+// Pastille de niveau (ligne verrouillee) : HyperUI « Badges » n° 2 (assets/composants.css,
+// .hu-badge) avec les icones Lucide « signal » et « info » ; libelle court sur mobile,
+// complet sur desktop.
+var BAND_ICON={high:'signal-high',good:'signal-medium',moderate:'signal-low'};
 function bandHtml(b){
-  return '<span class="hl-band is-'+b+'" title="'+esc(bandNote())+'">'+barsHtml(b)
+  return '<span class="hu-badge hl-band is-'+b+'" title="'+esc(bandNote())+'">'+ico(BAND_ICON[b],'hl-ico')
     +'<span class="hl-band-txt"><span class="hl-m">'+esc(t(BAND_LABEL[b][0]+'_short',BAND_SHORT[b]))+'</span><span class="hl-d">'+esc(bandLabel(b))+'</span></span>'
-    +'<span class="hl-band-i" aria-hidden="true">i</span></span>';
+    +ico('info','hl-ico hl-band-i')+'</span>';
 }
 function matchTitle(m){return (m&&m.home&&m.home.n||'')+' – '+(m&&m.away&&m.away.n||'');}
 // Etoile du match : bouton frere du lien (jamais un bouton dans un <a>).
@@ -293,30 +299,32 @@ function renderMatchRow(m,ctx,H,index){
   if(derby)tags.push('<span class="hl-tag hl-tag-derby" title="'+esc(derby)+'">'+esc(t('home_list.derby_chip','Derby'))+'</span>');
   if(cd)tags.push('<span class="hl-tag hl-tag-time is-'+cd.kind+'" data-hl-ts="'+(isFinite(ts)?ts:'')+'"'+(cd.estimated?' title="'+esc(t('home_list.status_estimated','Statut estimé d’après l’heure du coup d’envoi'))+'"':'')+'>'+esc(cd.text)+'</span>');
   if(q)tags.push('<span class="hl-tag hl-tag-q is-'+q.level+'"><i aria-hidden="true"></i>'+esc(q.text)+'</span>');
-  if(sig)tags.push('<span class="hl-tag hl-tag-sim">'+esc(tf('home_list.sims','{n} simulations',{n:fmtInt(ctx.simulations)}))+'</span>');
+  // 04/10/2026 : plus de pastille « N simulations ». L'ancien « 5 000 simulations »
+  // ecrit en dur etait faux (le moteur v3 ne tire aucune simulation), et le
+  // mathematicien interdit d'annoncer des tirages (verdicts du 04/10, d1). Le
+  // champ simulation_count est premium : la ligne ne le lit jamais.
 
   var zone;
   if(a.state==='past'){
     zone='';
   }else if(a.state==='locked'){
-    // Aucune donnee de pari : badge, niveau public et pilule abstraite (barres CSS, pas de chiffre).
+    // Aucune donnee de pari : niveau public et une pastille HyperUI « Badges » n° 2, CYAN
+    // (cadenas Lucide + « Débloquer avec Pro ») : plus de pilule ambree ni de fausses barres
+    // dessinees (controle UX du 04/10 : l'or est reserve a la Selection en or).
     zone='<span class="hl-zone">'
       +(a.band?'<span class="hl-zone-top">'+bandHtml(a.band)+'</span>':'')
-      +'<span class="hl-lockpill" aria-hidden="true">'+ICON.lock
-      +'<span class="hl-ghost"><i class="g1"></i><i class="g2"></i><i class="g3"></i><i class="g4"></i></span>'
-      +'<span class="hl-lockpill-pro">PRO</span>'
-      +'<span class="hl-lockpill-cta">'+esc(t('home_list.unlock','Débloquer avec Pro'))+'</span></span></span>';
+      +'<span class="hu-badge hl-probadge" aria-hidden="true">'+ICON.lock
+      +'<span>'+esc(t('home_list.unlock','Débloquer avec Pro'))+'</span></span></span>';
   }else if(a.state==='open'){
     zone='<span class="hl-zone">'
       +(a.prob!=null
         ?'<span class="hl-prob-row">'
           +'<span class="hl-prob-lbl"><span class="hl-m">'+esc(t('home_list.prob_short','Proba.'))+'</span><span class="hl-d">'+esc(t('home_list.prob_long','Probabilité estimée'))+'</span></span>'
           +'<span class="hl-prob"><b>'+a.prob+'</b><small>/10</small></span></span>'
-          +'<span class="hl-gauge" aria-hidden="true"><i style="--p:'+Math.round(a.probNum*10)+'%"></i></span>'
         :'<span class="hl-prelim">'+esc(t('home_list.preliminary','Analyse préliminaire'))+'</span>')
       +'</span>';
   }else if(a.state==='gated'){
-    zone='<span class="hl-zone"><span class="hl-ready"><i class="hl-dot" aria-hidden="true"></i>'+esc(t('home_list.free_gated','Analyse offerte'))+'</span>'
+    zone='<span class="hl-zone"><span class="hl-ready">'+ico('circle-check','hl-ico')+esc(t('home_list.free_gated','Analyse offerte'))+'</span>'
       +'<span class="hl-freepill">'+esc(t('home_list.free_gated_cta','Compte gratuit'))+'</span></span>';
   }else if(a.state==='pending'){
     zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'+esc(t('home_app.analysis_in_progress','Analyse en cours'))+'</span></span>';
@@ -396,13 +404,8 @@ function renderOffer(list,ctx,H,startIndex){
     +'<ul class="hl-rows hl-offer-rows">'+list.map(function(m,i){return renderMatchRow(m,ctx,H,(startIndex||0)+i);}).join('')+'</ul></section>';
 }
 
-function renderUpsell(n,H){
-  return '<aside class="hl-upsell" data-vente aria-label="'+esc(t('home_list.upsell_aria','Offre Pro'))+'">'
-    +'<span class="hl-upsell-ico">'+ICON.lock+'</span>'
-    +'<div class="hl-upsell-txt"><strong>'+esc(t('home_list.upsell_title','Débloque toutes les analyses'))+'</strong>'
-    +'<p>'+esc(tf('home_list.upsell_text','Probabilité estimée et marché conseillé pour les {n} analyses prêtes de ce jour. Sans engagement.',{n:n}))+'</p></div>'
-    +'<a class="hl-upsell-cta" href="'+esc(H.lien('abonnement.html'))+'" data-track="home_list_upsell" data-track-kind="home_list_upsell">'+esc(t('home_list.upsell_cta','Voir les offres'))+' <span aria-hidden="true">→</span></a></aside>';
-}
+// 04/10/2026 (controle UX) : plus de bloc de vente « Débloque toutes les analyses » au
+// milieu de la liste. La page n'a qu'UN composant de paiement (lib/offre-pro.js, #acces).
 
 function renderSkeleton(){
   function row(){return '<div class="hl-skel-row"><span class="hl-sk" style="width:34px;height:14px"></span><span style="flex:1;display:grid;gap:7px"><span class="hl-sk" style="width:62%;height:13px"></span><span class="hl-sk" style="width:48%;height:13px"></span></span><span style="display:grid;gap:5px;justify-items:end"><span class="hl-sk" style="width:74px;height:11px"></span><span class="hl-sk" style="width:110px;height:22px;border-radius:11px"></span></span></div>';}
@@ -420,13 +423,11 @@ function renderDayBody(all,ctx,H){
   if(offer.length){html+=renderOffer(offer,ctx,H,idx);idx+=offer.length;}
   var mine=all.filter(function(m){return fm.has(m.id);}).sort(H.compareMatches);
   if(mine.length){html+=renderMine(mine,ctx,H,idx);idx+=mine.length;}
-  if(lockedAll.some(probBandOf))html+='<p class="hl-band-note"><span class="hl-band-i" aria-hidden="true">i</span>'+esc(bandNote())+'</p>';
+  if(lockedAll.some(probBandOf))html+='<p class="hl-band-note">'+ico('info','hl-ico')+esc(bandNote())+'</p>';
   var groups=groupByLeague(all,H,favs,fm);
-  var locked=lockedAll.length,upsellDone=!locked;
   html+='<div class="hl-leagues">';
-  groups.forEach(function(g,i){
+  groups.forEach(function(g){
     html+=renderLeagueBlock(g,ctx,H,idx);idx+=g.matches.length;
-    if(!upsellDone&&(i+1===ctx.upsellAfter||i===groups.length-1)){html+=renderUpsell(locked,H);upsellDone=true;}
   });
   return html+'</div>';
 }
@@ -441,7 +442,6 @@ function mount(rootEl,options){
   var collapsed={};
   try{collapsed=JSON.parse(root.sessionStorage.getItem(DEFAULTS.collapsedKey)||'{}')||{};}catch(e){collapsed={};}
   var ctx={isPro:!!options.isPro,hasAccount:!!options.hasAccount,freeMatchId:null,lockedHref:options.lockedHref||DEFAULTS.lockedHref,
-    upsellAfter:options.upsellAfter||DEFAULTS.upsellAfter,simulations:options.simulations||DEFAULTS.simulations,
     favorites:favorites,favMatches:favMatches,collapsed:collapsed,nowTs:Date.now()};
   var state={status:'loading',matches:[],days:[],day:null,clock:H.localClock(),onRetry:null,veille:[],veilleJour:null};
 

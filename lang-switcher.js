@@ -43,7 +43,8 @@
       '<div class="lang-switch">' +
       '<button type="button" class="lang-switch-btn" id="langSwitchBtn" aria-haspopup="true" aria-expanded="false">' +
       "<span>" + (SHORT[activeOpt.dir] || activeOpt.dir.toUpperCase()) + "</span>" +
-      '<svg viewBox="0 0 24 24" width="10" height="10" style="stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;"><polyline points="6 9 12 15 18 9"/></svg>' +
+      // Icone Lucide « chevron-down » (lucide-static 1.51.0, ISC), trace d'origine.
+      '<svg class="lucide lucide-chevron-down" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>' +
       "</button>" +
       '<div class="lang-switch-menu" id="langSwitchMenu">' +
       opts.map(function (o) {

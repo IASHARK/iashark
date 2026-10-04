@@ -130,7 +130,10 @@ test("chaque champ premium est classe : fige (analyse du pari) ou vivant (flux),
     const f = figes.indexOf(k) !== -1, v = F.LIVE_PREMIUM_FIELDS.indexOf(k) !== -1;
     assert.ok(f !== v, k + " doit etre soit fige soit vivant (lib/pick-freeze.js) : " + (f ? "les deux" : "aucun"));
   });
-  assert.deepEqual(F.LIVE_PREMIUM_FIELDS.slice().sort(), ["dropping_odds", "player_markets", "top_scorers"]);
+  // v3_buteurs (01/10/2026) : buteurs du moteur v3, vivants comme top_scorers.
+  // v3_premiers_buteurs (04/10/2026) : premier buteur du moteur v3, vivant comme v3_buteurs.
+  // stats_iashark (04/10/2026) : faits descriptifs recalcules a chaque run (l'arbitre ne revient plus par le gel).
+  assert.deepEqual(F.LIVE_PREMIUM_FIELDS.slice().sort(), ["dropping_odds", "player_markets", "stats_iashark", "top_scorers", "v3_buteurs", "v3_premiers_buteurs", "v3_suivi"]);
   // Le pari et tout ce qui le decrit sur la page match sont figes.
   ["pari_rec", "cote_rec", "model_probability", "market_id", "marche", "markets_compared", "conf", "reliability", "model_agreement",
     "risque", "pick_downgrade", "odds_available", "paris_safe", "analyse_card", "conseil_public", "contexte", "scenario",
@@ -600,14 +603,47 @@ test("pipeline : aucune etape du gel ne peut faire echouer le run (lecture, gel,
   assert.match(lecture, /try\{\s*var colonnes=PICK_FREEZE\.PREMIUM_ROW_SELECT;[\s\S]*\}catch\(e\)\{\s*\/\/[^\n]*\n\s*out=\{lues:\{\},lignes:\{\},echecs:uniques\.length\};/);
   assert.match(WF, /try\{\s*gel=PICK_FREEZE\.freezeAnalysis\(m,precedent,\{[\s\S]{0,400}\}\);\s*\}catch\(e\)\{/);
   assert.match(WF, /var gardes=\{\};\s*try\{ gardes=PICK_FREEZE\.keptFreeDesignations\(/);
-  assert.match(WF, /try\{ if\(alreadyExists&&m\.pari_rec&&PICK_FREEZE\.alignPendingPrediction\(alreadyExists,m\)\) realignees\+\+; \}\s*catch\(e\)\{/);
+  assert.match(WF, /try\{ if\(alreadyExists&&m\.pari_rec&&PICK_FREEZE\.alignPendingPrediction\(alreadyExists,m,\{[^}]*\}\)\) realignees\+\+; \}\s*catch\(e\)\{/);
 });
 
 test("pipeline : l'historique (et donc predictions_archive) suit le pari publie avant l'archivage", () => {
   const debut = at("async function updateHistorique(matchsData){");
   const fn = WF.slice(debut, WF.indexOf("var TRANSFER_CACHE_DAYS", debut));
-  const aligne = fn.indexOf("if(alreadyExists&&m.pari_rec&&PICK_FREEZE.alignPendingPrediction(alreadyExists,m)) realignees++;");
+  const aligne = fn.indexOf("if(alreadyExists&&m.pari_rec&&PICK_FREEZE.alignPendingPrediction(alreadyExists,m,{moteur:moteurPari,moteur_version:moteurVersion,kickoffMs:koMs,nowMs:Date.now()})) realignees++;");
   assert.ok(aligne !== -1);
   assert.ok(aligne < fn.indexOf("await writePredictionsArchive(histo.predictions);"));
   assert.ok(aligne < fn.indexOf("fs.writeFileSync(histoPath,"));
+});
+
+// TOUT MATCH REPORTE EST TRAITE (04/10/2026) : PST, CANC/ABD, ou match reprogramme a plus de 24 h de
+// l'heure d'origine du pari (kickoff_at) -> pari annule, marque reporte, masque dans historique.json.
+test("motifAnnulation : reporte (PST ou reprogramme), annule (CANC, ABD), sinon rien ; jamais devine sans heure d'origine", () => {
+  const PF = require("../lib/pick-freeze.js");
+  const PREM = require("../lib/premium-fields.js");
+  const fx = (st, iso) => ({ fixture: { id: 7, status: { short: st }, timestamp: iso ? Date.parse(iso) / 1000 : null, date: iso || null } });
+  const pari = { fixture_id: 7, result: "scheduled", type: "single", date: "2026-09-28", kickoff_at: "2026-09-28T20:00:00.000Z", prediction: "Over 2.5", cote: 1.41 };
+  assert.equal(PF.motifAnnulation(pari, fx("PST", "2026-09-28T20:00:00Z")), "reporte");
+  assert.equal(PF.motifAnnulation(pari, fx("CANC", "2026-09-28T20:00:00Z")), "annule");
+  assert.equal(PF.motifAnnulation(pari, fx("ABD", "2026-09-28T20:00:00Z")), "annule");
+  // Reprogramme 2 jours plus tard : reporte, a venir comme deja rejoue (jamais regle sur le match rejoue).
+  assert.equal(PF.motifAnnulation(pari, fx("NS", "2026-09-30T22:00:00Z")), "reporte");
+  assert.equal(PF.motifAnnulation(pari, fx("FT", "2026-09-30T22:00:00Z")), "reporte");
+  // Decalage d'horaire de moins de 24 h, ou joue a l'heure : rien.
+  assert.equal(PF.motifAnnulation(pari, fx("FT", "2026-09-29T02:00:00Z")), null);
+  assert.equal(PF.motifAnnulation(pari, fx("FT", "2026-09-28T20:00:00Z")), null);
+  // Ligne ancienne sans heure d'origine : seul le statut compte (la date de la ligne est celle de l'enregistrement).
+  assert.equal(PF.motifAnnulation(Object.assign({}, pari, { kickoff_at: undefined }), fx("FT", "2026-10-02T22:00:00Z")), null);
+  // Annule pour report : marque reporte et masque dans le fichier public (le match peut encore se jouer).
+  const ligne = Object.assign({}, pari, { result: "void", score: null, reporte: true });
+  const pub = PREM.redactPendingPredictions([ligne])[0];
+  assert.deepEqual([pub.prediction, pub.cote, pub.redacted, pub.reporte, pub.result], [undefined, undefined, true, true, "void"]);
+  // POSTPONED_CLOSED (pick-freeze) marque aussi le report.
+  const p2 = Object.assign({}, pari);
+  assert.equal(PF.voidPostponedPrediction(p2, { id: 7, no_signal_reason: PF.POSTPONED_REASON }, { today: "2026-10-04" }), true);
+  assert.deepEqual([p2.result, p2.reporte, p2.score], ["void", true, null]);
+  // Pipeline : les deux reglements passent par motifAnnulation et relisent par numero les paris hors des dates relues.
+  const wf = fs.readFileSync(path.join(__dirname, "..", ".github", "workflows", "update-data.yml"), "utf8");
+  assert.equal((wf.match(/PICK_FREEZE\.motifAnnulation\(found,fix\)/g) || []).length, 2);
+  assert.equal((wf.match(/await fixturesEnAttenteParIds\(/g) || []).length, 2);
+  assert.match(wf, /fixtures\?ids='\+ids\.slice\(i,i\+20\)\.join\('-'\)/);
 });

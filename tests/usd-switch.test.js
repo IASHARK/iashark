@@ -186,9 +186,10 @@ test("(b) bascule appliquee, build complet en memoire : /en/ en USD partout, che
   assert.match(ab, /data-market-price="pro\.month"[^>]*>\$19\.99</);
   assert.doesNotMatch(ab, /data-market-price="pro\.(week|year)"[^>]*>[^<]*\d/, "aucune autre duree prix");
   const home = files["en/index.html"];
-  assert.match(visible(home), /Pro at \$19\.99 per month/);
-  assert.match(home, /id="prixGratuit" data-market-price="free"[^>]*>\$0</);
-  assert.match(home, /id="prixPro" data-market-price="pro"[^>]*>\$19\.99</);
+  // 04/10/2026 : le bloc prix de l'accueil est le composant de paiement
+  // (lib/offre-pro.js) ; son repli sans JavaScript porte le prix mensuel du marche.
+  assert.match(home, /data-market-price="pro\.month"[^>]*>\$19\.99</);
+  assert.doesNotMatch(home, /id="prixGratuit"|id="prixPro"/);
   assert.match(files["en/landing.html"], /data-market-price="pro"[^>]*>\$19\.99</);
   const cgv = visible(files["en/cgv.html"]);
   assert.match(cgv, /Monthly: \$19\.99 per month/);
@@ -237,10 +238,11 @@ test("front : chaque point d'entree du paiement envoie IASHARK_MARKET.checkoutMa
   assert.match(acc, /var code = mk \? \(mk\.checkoutMarket \|\| ''\) :/);
   assert.match(acc, /if \(code\) corps\.market = String\(code\)\.toLowerCase\(\);/);
   assert.doesNotMatch(acc, /code === 'gb' \|\| code === 'mx' \|\| code === 'za'\) corps\.market/, "marche us oublie = facture en EUR");
-  assert.match(read("abonnement-page.js"), /if\(M\.checkoutMarket\)body\.market=M\.checkoutMarket;/);
+  // 04/10/2026 : page abonnement et accueil = lib/offre-pro.js (jamais market:'fr').
+  const op = read("lib/offre-pro.js");
+  assert.match(op, /if \(market && market\.checkoutMarket && market\.checkoutMarket !== "fr"\) body\.market = market\.checkoutMarket;/);
+  assert.equal((op.match(/body\.market = market\.checkoutMarket/g) || []).length, 2, "disponibilites et paiement");
   assert.match(read("lib/pro-plan-picker.js"), /if \(market && market\.checkoutMarket\) body\.market = market\.checkoutMarket;/);
-  // Accueil : prix gratuit formate comme les autres prix du marche ($0, jamais US$0).
-  assert.match(read("index.html"), /var gratuit=typeof mk\.formatPrice==='function'\?mk\.formatPrice\('free'\):null;/);
   // Blog anglais (partage par /en/ /gb/ /za/) : aucun prix ecrit en dur.
   assert.doesNotMatch(read("en/blog/guides/prediction-ia-football-guide-2026.html"), /19[.,]95|€19|\\u20ac19/);
 });

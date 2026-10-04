@@ -252,7 +252,9 @@ test("ce que la page affirme est vrai dans le code (sans en publier les valeurs)
   const pipeline = read(".github/workflows/update-data.yml");
   // « Les analyses sont calculees a l'avance, une fois par jour, et ne sont pas
   // refaites juste avant le coup d'envoi. »
-  assert.match(pipeline, /cron: '0 6 \* \* \*'/, "le calcul quotidien annonce n'existe plus");
+  // Plusieurs tentatives planifiees, une seule calcule (etape « Garde », audit I12).
+  assert.match(pipeline, /schedule:[\s\S]*?- cron: '\d+ \d+ \* \* \*'/, "le calcul quotidien annonce n'existe plus");
+  assert.match(pipeline, /name: Garde - sortie du jour deja publiee \?/, "une tentative en trop recalculerait le jour");
   // « une option choisie par une regle fixe parmi les marches reellement cotes,
   // en privilegiant les issues les plus probables ».
   assert.match(pipeline, /var fairSelection=pickMarketFair\(allMarkets,\{shin:shinProbs\}\)/, "la regle fixe de choix annoncee n'existe plus");
@@ -271,7 +273,8 @@ test("ce que la page affirme est vrai dans le code (sans en publier les valeurs)
   assert.match(pipeline, /async function translateNarratives\(jobs\)/, "la traduction automatique annoncee n'existe plus");
   // « la probabilite estimee s'affiche aussi sur 10 : 6,4/10 correspond a 64 % ».
   assert.match(pipeline, /conf:pickedMarket\?Math\.round\(\(pickedMarket\.prob\/10\)\*10\)\/10/);
-  assert.match(read("home-list.js"), /tf\('home_list\.aria_prob','Probabilité estimée \{p\} sur 10\.'/);
+  // 03/10/2026 : l'accueil affiche « Analyse 64 % » ; la note sur 10 reste sur la page match.
+  assert.match(read("match-page.js"), /<small>\/10<\/small>/);
 });
 
 test("page courte et transparente : outil d'IA annonce (sans le nommer), longueur bornee", () => {
@@ -431,8 +434,10 @@ test("manifeste i18n : la section « methode » de l'accueil est traduite en ent
   // build-locales.js : le titre d'une carte non couvert par une regle resterait
   // en francais dans /de/ /it/ /pt/. On verifie ici que les quatre titres et
   // les quatre descriptions de la section « methode » ont bien leur regle.
-  ["Forces en présence", "Prudence en début de saison", "Probabilité de chaque marché", "Simulation du match"].forEach(function (t) {
-    assert.ok(src.includes(t), "index.html : carte « " + t + " » absente");
+  // Refonte de l'accueil (03/10/2026) : « La methode » (4 cartes) est remplacee par « Ce que tu recois »
+  // en 4 points ; chaque titre et chaque texte de ce bloc a sa regle de traduction.
+  ["Le signal", "L’explication", "L’incertitude", "Aucune promesse de gain"].forEach(function (t) {
+    assert.ok(src.includes(t), "index.html : point « " + t + " » absent");
     assert.ok(home.replacements.some(function (r) { return r.find.includes(t); }), "aucune regle de traduction pour « " + t + " »");
   });
   home.replacements.forEach(function (r) {

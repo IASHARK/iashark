@@ -1,0 +1,42 @@
+/* Composant de paiement Pro unique (lib/offre-pro.js, 04/10/2026).
+   Meme bloc sur le match bloque, l'abonnement, l'accueil et le compte. Il est
+   fait de VRAIS composants (assets/composants.css : HyperUI « Radio Groups » pour
+   la duree, Magic UI « Shimmer Button » pour le bouton, Magic UI « Border Beam »
+   pour le cadre, icones Lucide) ; ce fichier ne fait que la mise en page :
+   telephone d'abord, aucune police a chasse fixe en majuscules, aucun or, aucun
+   vert ni rouge. */
+.op{--op-cyan:#20d5ef;--op-text:#f4f7fb;--op-soft:#a3b1c2;--op-dim:#8796a8;--op-line:rgba(141,179,211,.16);--op-line2:rgba(141,179,211,.3);
+  position:relative;display:grid;gap:14px;margin:0;padding:20px 16px 18px;border:1px solid var(--op-line2);border-radius:18px;
+  background:#0a1521;color:var(--op-text);overflow:hidden;font-family:"DM Sans",Inter,system-ui,sans-serif;text-align:left;line-height:1.45}
+.op *{box-sizing:border-box}
+.op-sr{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.op-head{display:grid;gap:6px}
+.op-lock{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;padding:.5rem;border-radius:9999px;color:var(--op-cyan);background:rgba(32,213,239,.1)}
+.op-lock .lucide{width:18px;height:18px}
+.op-title{margin:0;color:#fff;font:800 clamp(20px,5.2vw,25px)/1.18 "DM Sans",Inter,system-ui,sans-serif;letter-spacing:-.02em;text-wrap:balance}
+.op-sub{color:var(--op-soft);font-size:13.5px}
+.op-from{margin:0;color:var(--op-soft);font-size:13.5px}
+.op-from b{color:var(--op-text);font-weight:700}
+.op-plan-note.is-trial{color:var(--op-cyan);font-weight:700}
+.op-billing{margin:-4px 0 0;color:var(--op-soft);font-size:13px;min-height:1.45em}
+.op-closed{margin:0;padding:12px 14px;border:1px solid var(--op-line2);border-radius:12px;color:var(--op-soft);font-size:13.5px}
+.op .op-cta{width:100%}
+.op .iash-consent-locked[aria-disabled="true"]{opacity:.5;cursor:not-allowed;filter:saturate(.6)}
+.op-consent{margin:0}
+.op-consent[hidden]{display:none}
+.op-msg{margin:-6px 0 0;color:var(--op-soft);font-size:13px;min-height:0}
+.op-msg:empty{display:none}
+.op-msg.is-error{color:#ffb4a8}
+.op-benefits{display:grid;gap:10px;margin:2px 0 0;padding:14px 0 0;border-top:1px solid var(--op-line);list-style:none}
+.op-benefits li{display:flex;align-items:flex-start;gap:10px;color:var(--op-text);font-size:14.5px;line-height:1.4}
+.op-ico{flex:none;width:20px;height:20px;color:var(--op-cyan)}
+.op-ico-s{width:16px;height:16px;color:var(--op-soft)}
+.op-pay{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0;padding:0;list-style:none;color:var(--op-soft);font-size:12.5px;line-height:1.4}
+.op-pay li{display:inline-flex;align-items:center;gap:6px}
+.op-trial{margin:-4px 0 0;color:var(--op-soft);font-size:12.5px}
+.op-trial[hidden]{display:none}
+.op-alt{justify-self:center;color:var(--op-soft);font-size:13.5px;text-decoration:underline;text-underline-offset:3px}
+.op-alt--start{justify-self:start;color:var(--op-cyan)}
+@media (min-width:640px){
+  .op{padding:24px 24px 22px;gap:16px}
+}

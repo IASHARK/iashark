@@ -11,8 +11,10 @@ const safePick = {
   market: "FT_TEAM_TOTAL_AWAY_1.5_UNDER", model_probability_pct: 69.83, decimal_odds: 1.53, evaluated_count: 880,
 };
 
-test("SAFE_PICK complete publiee seulement si elle porte sur le match offert", () => {
-  assert.deepEqual(publicSafePick(safePick, [{ id: 1557402, is_free: true }]), safePick);
+test("SAFE_PICK : masquee meme sur le match offert (04/10/2026 : son pari n'est plus public avant le match)", () => {
+  const out = publicSafePick(safePick, [{ id: 1557402, is_free: true }]);
+  assert.equal(out.redacted, true);
+  for (const k of ["market", "model_probability_pct", "decimal_odds", "fixture", "selection"]) assert.equal(k in out, false, k);
 });
 
 test("SAFE_PICK d'un match payant : ni marche, ni probabilite, ni cote, ni equipes", () => {
@@ -29,6 +31,10 @@ test("top buteurs et combines : compteurs et statuts uniquement", () => {
   const combos = publicDailyCombos({ generated_at: "x", eligible_pool_size: 38, combos: [{ combo_id: "COMBO_1", status: "SELECTED", legs: [{ market: "OVER_2.5" }] }] });
   assert.deepEqual(combos.combos, [{ combo_id: "COMBO_1", status: "SELECTED" }]);
   assert.equal(JSON.stringify(combos).includes("OVER_2.5"), false);
+  // Tickets du jour (04/10/2026) : plus le nombre de paris eligibles du jour.
+  assert.equal("eligible_pool_size" in combos, false);
+  const tickets = publicDailyCombos({ generated_at: "x", combos: [{ combo_id: "TICKET_X5", type: "x5", status: "GENERATED", nb_matchs: 4, cote_totale: 4.62, chance: 17, jambes: [{ fixture_id: 1, pari: "Victoire A" }] }] });
+  assert.deepEqual(tickets, { generated_at: "x", combos: [{ combo_id: "TICKET_X5", status: "GENERATED" }], redacted: true });
 });
 
 test("le pipeline publie run_output via les versions publiques", () => {

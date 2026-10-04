@@ -81,12 +81,13 @@ test("sans les cases, le paiement est bloque ; le payload suit le regime", () =>
   // ensemble -> une seule version, sans surcharge par repertoire.
   // 21/09/2026 : /en/ change seul (ouverture de l'hebdomadaire a 4,99 USD) ->
   // surcharge par repertoire, les 8 autres versions gardent celle du 19/09.
-  assert.equal(lib.TERMS_VERSION, "2026-09-19");
-  assert.deepEqual({ ...lib.TERMS_VERSIONS }, { en: "2026-09-21" });
-  for (const d of ["", "fr", "es", "de", "it", "pt", "gb", "za", "mx"]) assert.equal(lib.termsVersionFor(d), "2026-09-19", d || "racine");
-  assert.equal(lib.termsVersionFor("en"), "2026-09-21", "/en/ : version propre");
-  assert.equal(lib.buildPayload({ terms: true, waiver: true }, eu, { dir: "fr" }).terms_version, "2026-09-19");
-  assert.equal(lib.buildPayload({ terms: true, waiver: true }, lib.regimeFor("us"), { dir: "en" }).terms_version, "2026-09-21", "/en/ (marche us) : version du 21/09");
+  // 04/10/2026 : les 9 versions changent ensemble (essai de 7 jours sur le mois, decision de
+  // Clement) -> de nouveau une seule version, sans surcharge par repertoire.
+  assert.equal(lib.TERMS_VERSION, "2026-10-04");
+  assert.deepEqual({ ...lib.TERMS_VERSIONS }, {});
+  for (const d of ["", "fr", "es", "de", "it", "pt", "gb", "za", "mx", "en"]) assert.equal(lib.termsVersionFor(d), "2026-10-04", d || "racine");
+  assert.equal(lib.buildPayload({ terms: true, waiver: true }, eu, { dir: "fr" }).terms_version, "2026-10-04");
+  assert.equal(lib.buildPayload({ terms: true, waiver: true }, lib.regimeFor("us"), { dir: "en" }).terms_version, "2026-10-04", "/en/ (marche us)");
   assert.equal(lib.buildPayload({ terms: true, waiver: true }, mx, {}).waiver, null, "mx : aucune renonciation envoyee");
   assert.match(lib.TERMS_VERSION, /^\d{4}-\d{2}-\d{2}$/);
 });
@@ -111,8 +112,11 @@ test("les 7 dictionnaires portent tous les textes du consentement", () => {
 // Ordre dans le code source : verification du consentement AVANT l'appel a
 // create-checkout-session, et consentement envoye dans le corps.
 const ENTRY_POINTS = {
-  "abonnement-page.js": { html: "abonnement.html" },
   "account-page.js": { html: "compte.html" },
+  // 04/10/2026 : la page abonnement et le compte paient par LE composant unique
+  // (lib/offre-pro.js) ; l'appel de paiement est celui qui porte le jeton de session
+  // (l'appel « availability » qui le precede ne paie rien).
+  "lib/offre-pro.js": { html: "abonnement.html", appel: 'Authorization: "Bearer " + jeton' },
   "gb/gb-page.js": { html: "gb/landing.html", market: "gb" },
   "za/za-page.js": { html: "za/landing.html", market: "za" },
   "mx/mx-page.js": { html: "mx/landing.html", market: "mx" },
@@ -124,7 +128,7 @@ test("chaque point d'entree du checkout verifie le consentement avant d'appeler 
     // account-page.js appelle la fonction par nom : '/functions/v1/' + fonction.
     const fetchAt = file === "account-page.js"
       ? js.indexOf("'/functions/v1/' + fonction")
-      : js.indexOf("/functions/v1/create-checkout-session");
+      : conf.appel ? js.indexOf(conf.appel) : js.indexOf("/functions/v1/create-checkout-session");
     assert.ok(fetchAt > 0, file + " : appel checkout introuvable");
     const checkAt = js.indexOf(".check()");
     assert.ok(checkAt > 0 && checkAt < fetchAt, file + " : .check() doit preceder l'appel au checkout");
@@ -144,28 +148,29 @@ test("chaque point d'entree du checkout verifie le consentement avant d'appeler 
   }
   // Conteneurs explicites (le compte le rend en JS, abonnement le cree au besoin).
   for (const d of ["gb", "za", "mx"]) assert.match(read(d + "/landing.html"), /id="checkoutConsent"/, d);
-  assert.match(read("account-page.js"), /id="checkoutConsent"/);
-  assert.match(read("abonnement-page.js"), /checkoutConsent/);
+  // Compte gratuit : le composant unique (lib/offre-pro.js) rend les cases et le bouton.
+  assert.match(read("account-page.js"), /IasharkOffrePro\.mount\(\$\('offreCompte'\), \{ mode: 'paiement'/);
+  assert.match(read("lib/offre-pro.js"), /id="checkoutConsent"/);
 });
 
-test("abonnement : bouton verrouille des le rendu, chargements paralleles, dictionnaire partage avec l'en-tete", () => {
-  const html = read("abonnement.html");
-  const btn = (html.match(/<button[^>]*id="subscribeButton"[^>]*>/) || [""])[0];
+// 04/10/2026 : le bouton est rendu par le composant de paiement (lib/offre-pro.js).
+test("abonnement : bouton verrouille des le rendu (compte connecte), jamais grise sans compte, chargements paralleles", () => {
+  const OP = require("../lib/offre-pro.js");
+  const plans = [{ interval: "month", amount: 19.95, text: "19,95 €", open: true }];
+  const avec = OP.html({ mode: "paiement", contexte: "general", plans, choisi: "month", jours: 0, connecte: true, uid: "t1" });
+  const btn = (avec.match(/<button[^>]*id="subscribeButton"[^>]*>/) || [""])[0];
   assert.match(btn, /aria-disabled="true"/, "bouton actif avant le chargement du consentement");
   assert.match(btn, /class="[^"]*\biash-consent-locked\b/);
-  assert.match(btn, /data-i18n-attr="title:common\.loading"/, "infobulle de chargement localisee");
-  assert.ok(html.indexOf('id="checkoutConsent"') !== -1 && html.indexOf('id="checkoutConsent"') < html.indexOf('id="subscribeButton"'), "emplacement du consentement reserve avant le bouton");
-  assert.match(html, /#checkoutConsent:not\(\.iash-consent\)\{[^}]*min-height:/, "hauteur du bloc de consentement non reservee");
-  // 25/09/2026 : repertoires publics seulement (de/it/pt retires, 301 vers /en/).
-  for (const d of require("./helpers/public-dirs.js").PUBLIC_DIRS) {
-    const page = read(d + "/abonnement.html");
-    assert.match((page.match(/<button[^>]*id="subscribeButton"[^>]*>/) || [""])[0], /aria-disabled="true"/, d + "/abonnement.html non regenere");
-  }
+  assert.ok(avec.indexOf('id="checkoutConsent"') !== -1 && avec.indexOf('id="checkoutConsent"') < avec.indexOf('id="subscribeButton"'), "emplacement du consentement reserve avant le bouton");
+  const sans = OP.html({ mode: "paiement", contexte: "general", plans, choisi: "month", jours: 0, connecte: false, uid: "t2" });
+  assert.doesNotMatch((sans.match(/<button[^>]*id="subscribeButton"[^>]*>/) || [""])[0], /aria-disabled/, "sans compte : bouton jamais grise");
+  assert.match(sans, /id="checkoutConsent" hidden/, "sans compte : aucune case avant l'inscription");
+  assert.match(sans, /Créer mon compte et continuer/);
   const js = read("abonnement-page.js");
-  assert.match(js, /Promise\.all\(\[i18n,IasharkApp\.context\(\)\]\)/, "dictionnaire et session charges l'un apres l'autre");
-  // Pro : bouton deverrouille (aucun consentement monte).
-  const pro = js.slice(js.indexOf("if(ctx.isPro)"), js.indexOf("return;}", js.indexOf("if(ctx.isPro)")));
-  assert.match(pro, /unlock\(\)/, "Pro : bouton laisse verrouille");
+  assert.match(js, /Promise\.all\(\[i18n,window\.IasharkApp\?IasharkApp\.context\(\):null\]\)/, "dictionnaire et session charges l'un apres l'autre");
+  // Pro : aucun composant de paiement monte (aucun consentement).
+  const pro = js.slice(js.indexOf("if(ctx.isPro)"), js.indexOf("return;", js.indexOf("if(ctx.isPro)")));
+  assert.doesNotMatch(pro, /mount\(/, "Pro : composant de paiement monte");
   const i18n = read("i18n/i18n.js");
   assert.match(i18n, /loadDict: loadDict/, "cache du dictionnaire non expose");
   assert.match(read("auth-header.js"), /I\.loadDict\(locale\)/, "auth-header.js retelecharge le dictionnaire");
@@ -203,7 +208,7 @@ test("serveur : refuse sans CGV, refuse sans 2e case hors MX, accepte MX sans re
   for (const [market, dir] of [[undefined, ""], [undefined, "fr"], ["us", "en"], ["gb", "gb"], ["za", "za"], ["mx", "mx"]]) {
     const payload = lib.buildPayload({ terms: true, waiver: true }, lib.regimeFor(market || "fr"), { dir, locale: "fr", ts });
     const r = srv.validateConsent(JSON.parse(JSON.stringify(payload)), market, ts);
-    const attendue = dir === "en" ? "2026-09-21" : "2026-09-19";
+    const attendue = "2026-10-04";
     assert.equal(r.ok, true, (market || "defaut") + " : consentement de la version " + attendue + " refuse");
     assert.equal(r.metadata.consent_terms_version, attendue, market || "defaut");
   }

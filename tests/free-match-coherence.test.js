@@ -27,15 +27,19 @@ test("le match gratuit vient d'une seule source, partagee par les deux pages", (
 // 19/09/2026 : le mur Pro (match payant) affiche le prix mensuel du marche ;
 // le panneau du match OFFERT (compte gratuit) n'affiche jamais de prix : ce
 // match est gratuit, seul un compte gratuit est demande.
+// 04/10/2026 : le mur Pro est LE composant de paiement (lib/offre-pro.js, prix lus
+// dans config/markets.json) ; le match offert sans compte garde une carte « compte
+// gratuit » sans aucun prix.
 test("match offert : le panneau « compte gratuit » ne montre aucun prix, le mur Pro seul le montre", () => {
   const js = read("match-page.js");
-  const avis = js.slice(js.indexOf("function gateCard(vm,opts)"), js.indexOf("// MUR PRO (visiteur"));
-  const mur = js.slice(js.indexOf("function proGate(vm,o)"), js.indexOf("function renderVisitor(raw,opts)"));
-  assert.ok(avis.length > 500 && mur.length > 500);
-  assert.doesNotMatch(avis, /prix|price|proOffer|IASHARK_MARKET|abonnement\.html/, "prix ou offre dans le panneau du match offert");
-  assert.match(mur, /const lignePrix=lignePrixPro\(\);/);
-  assert.match(js, /\['avis',o\.free\?gateCard\(vm,o\):proGate\(vm,o\),true\]/, "match offert -> gateCard, jamais le mur Pro");
-  assert.match(js, /function renderAuthWall\(raw\)\{\s*renderVisitor\(raw,\{\s*free:true,[\s\S]{0,200}href:lien\('compte\.html'\)/);
+  const auth = js.slice(js.indexOf("function renderAuthWall(raw)"), js.indexOf("function renderApercu"));
+  const mur = js.slice(js.indexOf("function renderProWall(raw,ctx)"), js.indexOf("function renderAuthWall(raw)"));
+  assert.ok(auth.length > 500 && mur.length > 500);
+  assert.doesNotMatch(auth, /prix|price|proOffer|IASHARK_MARKET|abonnement\.html|IasharkOffrePro/, "prix ou offre dans le panneau du match offert");
+  assert.match(mur, /IasharkOffrePro\.mount\(box,\{mode:'vitrine',contexte:'match'/);
+  assert.match(js, /if\(isFree&&!ctx\.session\)\{renderAuthWall\(raw\);return;\}/, "match offert -> carte compte gratuit, jamais le mur Pro");
+  assert.match(js, /if\(!isFree&&!termine&&!vuePro\)\{renderProWall\(raw,ctx\);return;\}/);
+  assert.match(auth, /lien\('inscription\.html\?next='\+retour\)/);
 });
 
 const horloge = { day: "2026-09-02", now: "2026-09-02 10:00" };

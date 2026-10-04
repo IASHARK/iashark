@@ -33,7 +33,7 @@ function fixedId(html) {
 }
 function assertNoLeak(value, label) {
   const leaks = PREMIUM.deepPremiumLeaks(value);
-  assert.deepEqual(leaks.slice(0, 10), [], label + " : " + leaks.length + " champ(s) premium sur un match non offert");
+  assert.deepEqual(leaks.slice(0, 10), [], label + " : " + leaks.length + " champ(s) premium sur un match (offert compris)");
 }
 function listFiles(dirRel, re) {
   const abs = path.join(root, dirRel);
@@ -109,26 +109,26 @@ test("accueils : le bloc SEO_MATCHES_SUMMARY ne nomme jamais le pari (le HTML st
   }
 });
 
-test("historique.json (depot public) : aucun pari en attente en clair hors match offert", () => {
-  const { free } = accessMap();
+// 04/10/2026 (decision de Clement, avocat du diable point 6) : match offert COMPRIS, et pari d'un match reporte.
+test("historique.json (depot public) : aucun pari en attente en clair, match offert compris ; match reporte masque", () => {
   const h = JSON.parse(read("historique.json"));
   for (const p of h.predictions || []) {
-    if ((p.result === "scheduled" || p.result === "pending") && p.fixture_id != null && !free.has(String(p.fixture_id))) {
+    const masquer = (p.result === "scheduled" || p.result === "pending" || (p.result === "void" && p.reporte === true)) && p.fixture_id != null;
+    if (masquer) {
       for (const k of PREMIUM.PENDING_REDACTED_FIELDS) assert.equal(p[k], undefined, "historique.json : " + k + " en clair pour " + p.fixture_id);
       assert.equal(p.redacted, true, "prediction en attente non marquee redacted : " + p.fixture_id);
     }
   }
 });
 
-test("l'analyse offerte reste complete, les amorces publiques restent presentes (conf n'en est plus une)", () => {
+test("le match offert n'a plus rien de payant dans les fichiers publics (servi aux comptes par match-data), amorces publiques presentes", () => {
   const d = JSON.parse(read("data-home.json"));
-  for (const m of d.matchs.filter((x) => x.is_free === true && x.pari_rec)) {
-    const detail = JSON.parse(read("match/" + m.id + ".json"));
-    assert.equal(detail.pari_rec, m.pari_rec, "le match offert garde son pari");
-    for (const k of ["p1", "pn", "p2"]) if (k in (JSON.parse(read("data.json")).matchs.find((x) => x.id === m.id) || {})) assert.ok(k in detail, k + " doit rester sur le match offert");
+  for (const m of d.matchs.filter((x) => x.is_free === true)) {
+    assert.deepEqual(PREMIUM.premiumLeaks(m), [], "data-home.json, match offert " + m.id);
+    if (exists("match/" + m.id + ".json")) assert.deepEqual(PREMIUM.premiumLeaks(JSON.parse(read("match/" + m.id + ".json"))), [], "match/" + m.id + ".json");
   }
   for (const m of JSON.parse(read("data.json")).matchs.filter((x) => x.is_free === true)) {
-    assert.deepEqual(PREMIUM.stripPremium(m), m, "le match offert n'est jamais retire de data.json");
+    assert.deepEqual(PREMIUM.premiumLeaks(m), [], "data.json, match offert " + m.id);
   }
   const avecSignal = d.matchs.filter((m) => m.is_free !== true && m.has_signal === true);
   for (const m of avecSignal) {
@@ -165,5 +165,30 @@ test("dist/ (ce que Netlify publie) : aucun champ premium dans les JSON et PRELO
     for (const p of h.predictions || []) {
       if (p.result === "scheduled" || p.result === "pending") assert.equal(p.prediction, undefined, "pari en attente publie dans dist/historique.json");
     }
+  }
+});
+
+// TICKETS DU JOUR ET PANNEAU « MARCHES » (04/10/2026, regles-tickets.md §6) : jamais dans un
+// fichier public, a aucune profondeur, meme sur le match offert (servis seulement par les
+// fonctions tickets-du-jour et match-data, selon le niveau).
+const JAMAIS_PUBLIC = ["tickets_du_jour", "selection_or", "buteur_du_jour", "jambes", "marches_panneau", "v3_marches", "marches_flux"];
+function clesInterdites(v, chemin, out) {
+  if (Array.isArray(v)) v.forEach((x, i) => clesInterdites(x, chemin + "[" + i + "]", out));
+  else if (v && typeof v === "object") Object.keys(v).forEach((k) => { if (JAMAIS_PUBLIC.includes(k)) out.push(chemin + "." + k); clesInterdites(v[k], chemin + "." + k, out); });
+  return out;
+}
+test("fichiers publics reels : aucun ticket, aucune Selection en or, aucun buteur du jour, aucun panneau Marches", () => {
+  const fichiers = ["data.json", "data-home.json", "historique.json", "buteurs-du-jour.json"].filter(exists).concat(listFiles("match", /^\d+\.json$/));
+  for (const f of fichiers) assert.deepEqual(clesInterdites(JSON.parse(read(f)), f, []).slice(0, 5), [], f);
+  const ro = JSON.parse(read("data.json")).run_output || {};
+  for (const c of (ro.daily_combos && ro.daily_combos.combos) || []) {
+    assert.ok(Object.keys(c).every((k) => k === "combo_id" || k === "status"), "daily_combos : statut seulement (" + Object.keys(c).join(",") + ")");
+  }
+  // buteurs-du-jour.json : plus aucun match ni rang (config/tickets.json#fichier_buteurs_public = « retire » depuis le
+  // 04/10/2026, controle de l'ingenieur donnees) : le fichier public ne dit plus dans quel match est le buteur du jour.
+  assert.equal(require("../config/tickets.json").fichier_buteurs_public, "retire");
+  if (exists("buteurs-du-jour.json")) {
+    assert.doesNotMatch(read("buteurs-du-jour.json"), /match_id|match_rank|"name"|player/);
+    assert.deepEqual(JSON.parse(read("buteurs-du-jour.json")).days, {});
   }
 });

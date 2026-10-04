@@ -47,11 +47,15 @@
   var locale=DIR_LOCALE[dir]||'fr';
   var fb=FALLBACK[locale]||null;
   function t(key,fallback){return (window.I18N && window.I18N.t && window.I18N.dict) ? window.I18N.t(key,fallback) : fallback;}
+  // Icones : jeu LUCIDE (https://lucide.dev, lucide-static 1.51.0, licence ISC,
+  // assets/vendor/LICENCES.txt) : house, star, book-open, user, trace d'origine copie tel
+  // quel (controle UX du 04/10/2026 : plus aucune icone dessinee a la main). Ce script est
+  // charge seul sur chaque page (sans lib/icones.js) : les traces sont donc ici.
   var items=[
-    {id:'home',href:href('index.html'),key:'nav.home',label:'Accueil',icon:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/>'},
-    {id:'tools',href:href('pro.html'),key:'nav.tools',label:'Outils',icon:'<path d="m12 2 2.9 6.6 7.1.7-5 4.9 1.2 7.8-6.2-3.7L5.8 22 7 14.2 2 9.3l7.1-.7Z"/>'},
-    {id:'blog',href:href('blog.html'),key:'nav.guides',label:'Blog',icon:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/>'},
-    {id:'account',href:href('compte.html'),key:'nav.account',label:'Compte',icon:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>'}
+    {id:'home',href:href('index.html'),key:'nav.home',label:'Accueil',icon:'<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'},
+    {id:'tools',href:href('pro.html'),key:'nav.tools',label:'Outils',icon:'<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>'},
+    {id:'blog',href:href('blog.html'),key:'nav.guides',label:'Blog',icon:'<path d="M12 5v16"/><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"/>'},
+    {id:'account',href:href('compte.html'),key:'nav.account',label:'Compte',icon:'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'}
   ];
   function renderLabel(item){return t(item.key,fb?fb[item.key.split('.')[1]]:item.label);}
   function ariaLabel(){return t('geo.nav.aria_label',fb?fb.aria:'Navigation principale');}
@@ -63,7 +67,7 @@
   // document apres ce script, les libelles sont traduits au meme moment.
   nav.setAttribute('data-i18n-attr','aria-label:geo.nav.aria_label');
   nav.innerHTML=items.map(function(item){
-    return '<a class="site-bottom-nav__item" href="'+esc(item.href)+'"'+(active===item.id?' aria-current="page"':'')+'><svg class="site-bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+item.icon+'</svg><span class="site-bottom-nav__label" data-nav-id="'+item.id+'" data-i18n="'+item.key+'">'+esc(renderLabel(item))+'</span></a>';
+    return '<a class="site-bottom-nav__item" href="'+esc(item.href)+'"'+(active===item.id?' aria-current="page"':'')+'><svg class="site-bottom-nav__icon lucide lucide-'+(item.id==='home'?'house':item.id==='tools'?'star':item.id==='blog'?'book-open':'user')+'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+item.icon+'</svg><span class="site-bottom-nav__label" data-nav-id="'+item.id+'" data-i18n="'+item.key+'">'+esc(renderLabel(item))+'</span></a>';
   }).join('');
   var legacy=document.querySelector('.nav-bottom,.bottom-nav');
   if(legacy)legacy.replaceWith(nav);else document.body.appendChild(nav);

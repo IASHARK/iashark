@@ -25,10 +25,14 @@ test("la fonction Edge classe le pari recommande comme premium", () => {
   }
 });
 
-test("la fonction Edge laisse passer l'analyse offerte du jour", () => {
+test("la fonction Edge sert l'analyse offerte du jour aux seuls comptes connectes, sans le panneau Marches", () => {
   const fn = read("supabase/functions/match-data/index.ts");
   assert.match(fn, /is_free === true/, "le match offert doit etre reconnu");
-  assert.match(fn, /if \(estGratuit\(m\)\) return m;/, "il ne doit subir aucun retrait");
+  // 04/10/2026 (decision de Clement) : plus rien de payant dans les fichiers publics ; un compte connecte
+  // recoit l'analyse depuis match_premium_data, sauf marches_panneau, v3_marches et marches_flux (Pro).
+  assert.match(fn, /const offerts = connecte \? matchs\.filter\(estGratuit\)/);
+  assert.match(fn, /if \(!connecte \|\| !premium\) return retirerPremium\(m\);/, "visiteur sans compte : rien de payant");
+  assert.match(fn, /return sansChampsPro\(avecPremium\(retirerPremium\(m\), premium, detailFields\)\);/);
 });
 
 test("le pipeline retire ces champs du fichier public et des pages match", () => {
@@ -55,11 +59,15 @@ test("le pipeline retire ces champs du fichier public et des pages match", () =>
 // les champs du fichier public laisserait les analyses NULLE PART : un abonne
 // payant ne verrait plus aucun pari. Une fuite connue vaut mieux qu'un produit
 // casse pour les clients qui paient.
-test("le pipeline ne retire rien s'il ne peut pas persister ailleurs", () => {
+// 30/09/2026 (avocat du diable) : SAUF les champs « Pro seulement » (simulation 15 min,
+// Stats IASHARK), retires meme dans ce cas : sinon stats_iashark serait ecrit en clair
+// dans match/<id>.json du depot public, ce qui annulerait le fichier chiffre.
+test("le pipeline ne retire que les champs Pro seulement s'il ne peut pas persister ailleurs", () => {
   const wf = read(".github/workflows/update-data.yml");
   assert.match(wf, /var PEUT_PROTEGER=!!\(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY\)/);
-  assert.match(wf, /if\(!m\|\|m\.is_free\|\|!PEUT_PROTEGER\)return m;/,
-    "sans table protegee accessible, le fichier public reste inchange");
+  assert.match(wf, /if\(!m\)return m;[\s\S]{0,600}?if\(!PEUT_PROTEGER\)return PREMIUM_FIELDS_LIB\.sansChampsReserves\(m\);/,
+    "sans table protegee accessible, le detail du match et le panneau Marches sont retires quand meme du fichier public");
+  assert.doesNotMatch(wf, /if\(!m\|\|!PEUT_PROTEGER\)return m;/, "plus jamais le match complet en clair");
 });
 
 // 16/09/2026 (audit du site en ligne) : plus aucun pari nomme dans le resume SEO
@@ -92,14 +100,13 @@ test("la page d'accueil ne floute plus une donnee premium", () => {
   const html = read("index.html");
   assert.doesNotMatch(html, /filter:blur\(7px\)/,
     "flouter une vraie donnee en CSS n'est pas une protection : elle reste lisible dans le DOM");
-  // Liste des matchs (home-list.js) : la pilule floutee de la ligne verrouillee
-  // est faite de barres CSS abstraites, identiques sur toutes les lignes, sans
-  // aucun texte ni chiffre (ni vrai ni faux).
+  // Liste des matchs (home-list.js) : la ligne verrouillee porte une pastille HyperUI
+  // « Badges » (cadenas Lucide + « Débloquer avec Pro »), identique sur toutes les lignes,
+  // sans aucun chiffre (ni vrai ni faux) ; plus aucun flou dans la liste (04/10/2026).
   const list = read("home-list.js");
-  assert.match(list, /<span class="hl-ghost"><i class="g1"><\/i><i class="g2"><\/i><i class="g3"><\/i><i class="g4"><\/i><\/span>/);
+  assert.match(list, /<span class="hu-badge hl-probadge" aria-hidden="true">'\+ICON\.lock/);
   const css = read("assets/home-list.css");
-  const blurred = css.match(/[^{}]+\{[^}]*filter:blur\([^)]*\)[^}]*\}/g) || [];
-  blurred.forEach((rule) => assert.match(rule, /^\s*\.hl-ghost\{/, "flou reserve aux barres abstraites : " + rule.trim()));
+  assert.deepEqual(css.match(/[^{}]+\{[^}]*filter:blur\([^)]*\)[^}]*\}/g) || [], [], "aucun flou dans la liste des matchs");
   assert.match(list, /m\.has_signal\|\|m\.pari_rec\|\|m\.market_id/,
     "la ligne doit rester juste quand le pari n'est pas servi");
 });

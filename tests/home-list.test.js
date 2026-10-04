@@ -59,14 +59,17 @@ test("ligne verrouillee : aucun champ premium lu, aucun chiffre ni pari dans le 
   }
 });
 
-test("pastille de niveau : 3 libelles, 3 barres (3/3, 2/3, 1/3), note « pas une garantie », valeur hors liste ignoree", () => {
-  const expected = { high: ["Probabilité élevée", 3], good: ["Bonne probabilité", 2], moderate: ["Probabilité modérée", 1] };
+// 04/10/2026 (controle UX) : pastille HyperUI « Badges » n° 2 avec les icones Lucide
+// « signal » (3, 2 ou 1 barre) et « info » ; plus de barres ni de « i » dessines a la main.
+test("pastille de niveau : 3 libelles, icone Lucide signal (haut, moyen, bas), note « pas une garantie », valeur hors liste ignoree", () => {
+  const expected = { high: ["Probabilité élevée", "signal-high"], good: ["Bonne probabilité", "signal-medium"], moderate: ["Probabilité modérée", "signal-low"] };
   for (const band of Object.keys(expected)) {
     const html = HL.renderMatchRow(base({ prob_band: band }), ctx(), helpers(), 0);
-    const pill = html.match(/<span class="hl-band is-[a-z]+"[\s\S]*?<span class="hl-band-i" aria-hidden="true">i<\/span><\/span>/)[0];
-    assert.match(pill, new RegExp('class="hl-band is-' + band + '"'));
+    const pill = html.match(/<span class="hu-badge hl-band is-[a-z]+"[\s\S]*?lucide-info hl-ico hl-band-i[\s\S]*?<\/svg><\/span>/)[0];
+    assert.match(pill, new RegExp('class="hu-badge hl-band is-' + band + '"'));
     assert.match(pill, new RegExp(expected[band][0]));
-    assert.equal((pill.match(/<i class="on"><\/i>/g) || []).length, expected[band][1]);
+    assert.match(pill, new RegExp('lucide-' + expected[band][1] + ' hl-ico'));
+    assert.doesNotMatch(pill, /<i class=/, "aucune barre dessinee");
     assert.match(pill, /title="Estimation du modèle, pas une garantie\. Détail et pari réservés aux abonnés Pro\."/);
     assert.match(html, /aria-label="[^"]*Estimation du modèle, pas une garantie/);
     assert.doesNotMatch(pill, /confiance/i);
@@ -81,20 +84,20 @@ test("Pro confirme ou match offert : Proba. x/10 et jauge, jamais le marche ; sa
   const pro = HL.renderMatchRow(Object.assign(base({ prob_band: "high" }), SECRET), ctx({ isPro: true }), helpers(), 0);
   assert.match(pro, /is-open/);
   assert.match(pro, /<b>7,7<\/b><small>\/10<\/small>/);
-  assert.match(pro, /hl-gauge/);
+  assert.doesNotMatch(pro, /hl-gauge/, "plus de jauge dessinee a la main (controle UX du 04/10)");
   // Le marche retenu a quitte la liste le 16/09/2026 : il se lit sur la fiche
   // du match. Ni a l'ecran, ni dans l'aria-label — sinon le pari repart par le
   // lecteur d'ecran.
   assert.doesNotMatch(pro, /Plus de 2,5 buts/, "le marche retenu est revenu dans la liste");
   assert.doesNotMatch(pro, /Marché/, "le marche retenu est revenu dans la liste");
-  assert.doesNotMatch(pro, /hl-band|hl-lockpill/, "le Pro garde la note exacte, pas la pastille");
+  assert.doesNotMatch(pro, /hl-band|hl-probadge/, "le Pro garde la note exacte, pas la pastille");
   const free = HL.renderMatchRow(Object.assign(base({ is_free: true }), SECRET), ctx({ freeMatchId: 1570383, hasAccount: true }), helpers(), 0);
   assert.match(free, /is-open is-free/);
   assert.match(free, /hl-tag-free">Offert</);
   const none = HL.renderMatchRow(base({ has_signal: false, no_signal: true }), ctx(), helpers(), 0);
   assert.match(none, /Pas de signal clair/);
   assert.match(none, /Aucun pari forcé/);
-  assert.doesNotMatch(none, /Analyse prête|hl-lockpill/);
+  assert.doesNotMatch(none, /Analyse prête|hl-probadge/);
 });
 
 test("statut : champ API public prioritaire, statut en direct perime ignore, estimation signalee", () => {
@@ -146,8 +149,9 @@ test("accueil simplifie : ni banniere, ni recherche, ni filtres, ni bloc « Mes 
   assert.doesNotMatch(src, /hl-banner|hl-search|hl-chip|data-hl-filter|home_banner_ready|hl-block"|fav_title|all_title/);
   const html = HL.renderDayBody([base(), base({ id: 2, league_key: "el", league: "Europa League" })], ctx({ upsellAfter: 3 }), helpers());
   assert.doesNotMatch(html, /hl-banner|hl-summary|hl-mine/, "pas de section « Mes matchs » sans match favori");
-  assert.equal((html.match(/class="hl-upsell"/g) || []).length, 1, "un seul rappel Pro");
-  assert.doesNotMatch(html.match(/<aside class="hl-upsell"[\s\S]*?<\/aside>/)[0], /[€£$]|MX\$|\bR\s?\d/, "rappel sans prix");
+  // 04/10/2026 (controle UX) : plus de bloc de vente au milieu de la liste ; la page n'a qu'UN
+  // composant de paiement (lib/offre-pro.js, #acces).
+  assert.doesNotMatch(html, /hl-upsell|data-vente/, "aucun deuxieme bloc de vente");
 });
 
 test("favoris : competitions favorites en tete de la meme liste, matchs favoris en tete de leur competition + « Mes matchs »", () => {
@@ -176,7 +180,7 @@ test("favoris : competitions favorites en tete de la meme liste, matchs favoris 
   const lockedMine = HL.renderMine([m], ctx({ favMatches: favM }), H, 0);
   assert.deepEqual(reads, []);
   assert.match(lockedMine, /is-locked/);
-  assert.match(lockedMine, /hl-lockpill/);
+  assert.match(lockedMine, /hl-probadge/);
   assert.match(lockedMine, /hl-band is-high/);
 });
 

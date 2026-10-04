@@ -28,23 +28,26 @@ test("mapping cotes : ligue sans cle ou inconnue -> null, JAMAIS la Champions Le
 // api-football /odds?league=128|239|281|265&season=2026 pour les 4.
 test("mapping cotes LATAM : Argentine/Chili avec cle verifiee, Colombie/Perou sans cle (jamais inventee)", () => {
   assert.equal(oddsSportKeyFor(LEAGUES, "argentina_liga_profesional"), "soccer_argentina_primera_division");
-  assert.equal(oddsSportKeyFor(LEAGUES, "chile_primera"), "soccer_chile_campeonato");
+  // Chili, Colombie, Perou : retirees du site le 03/10/2026, plus de cotes demandees.
+  assert.equal(oddsSportKeyFor(LEAGUES, "chile_primera"), null);
   assert.equal(oddsSportKeyFor(LEAGUES, "colombia_primera_a"), null);
   assert.equal(oddsSportKeyFor(LEAGUES, "peru_primera"), null);
 });
 
-test("repli api-football Pinnacle : active uniquement pour Liga MX, PSL et les 4 ligues LATAM", () => {
+test("repli api-football Pinnacle : actif pour toutes les ligues sauf refus explicite (audit du 28/09/2026)", () => {
   assert.equal(usesApiFootballPinnacleFallback(LEAGUES, "liga_mx"), true);
-  assert.equal(usesApiFootballPinnacleFallback(LEAGUES, "south_africa_premiership"), true);
-  const autres = LEAGUES.leagues.filter((l) => l.apiFootballPinnacleFallback === true).map((l) => l.key).sort();
-  assert.deepEqual(autres, ["argentina_liga_profesional", "chile_primera", "colombia_primera_a", "liga_mx", "peru_primera", "south_africa_premiership"]);
-  assert.equal(usesApiFootballPinnacleFallback(LEAGUES, "premier"), false);
+  assert.equal(usesApiFootballPinnacleFallback(LEAGUES, "south_africa_premiership"), false, "retiree du site le 03/10/2026");
+  assert.equal(usesApiFootballPinnacleFallback(LEAGUES, "premier"), true);
+  const refus = { leagues: [{ key: "x", apiFootballPinnacleFallback: false }] };
+  assert.equal(usesApiFootballPinnacleFallback(refus, "x"), false);
+  assert.equal(usesApiFootballPinnacleFallback(LEAGUES, "ligue_inconnue"), false);
 });
 
 test("getPinnacleOdds du pipeline : plus de repli vers soccer_uefa_champs_league", () => {
   const wf = fs.readFileSync(path.join(root, ".github/workflows/update-data.yml"), "utf8");
   assert.doesNotMatch(wf, /sportMap\[leagueKey\]\|\|'soccer_uefa_champs_league'/);
-  assert.match(wf, /var sport=oddsSportKeyFor\(LEAGUES_CONFIG,leagueKey\);\s*if\(!sport\) return null;/);
+  // Mode economie (03/10/2026) : aussi null, sans appel, hors du perimetre « selection Pro » (config/quotas.json).
+  assert.match(wf, /var sport=oddsSportKeyFor\(LEAGUES_CONFIG,leagueKey\);\s*if\(!sport \|\| !dansPerimetreOdds\(leagueKey\)\) return null;/);
   assert.match(wf, /pinnacleOddsFromApiFootball\(oddsRaw\)/);
 });
 

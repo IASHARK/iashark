@@ -49,17 +49,6 @@
     var d = new Date(v);
     return isNaN(d) ? null : d.toLocaleDateString(localeTag(), { day: 'numeric', month: 'long', year: 'numeric' });
   }
-  function euros(v) {
-    // null et chaine vide ne valent pas zero : une bankroll non renseignee
-    // doit s'afficher "Non renseigné", pas "0 €". Number(null) vaut 0, d'ou
-    // le test explicite avant la conversion.
-    if (v == null || v === '') return null;
-    var n = Number(v);
-    // Le tag de locale devient dynamique (separateur decimal, ordre) ; la devise
-    // reste EUR volontairement - la conversion multi-devise est un chantier
-    // separe en cours en parallele, hors perimetre ici.
-    return isFinite(n) ? n.toLocaleString(localeTag(), { style: 'currency', currency: devise(), maximumFractionDigits: 0 }) : null;
-  }
   // Marche courant (lib/market-config.js -> window.IASHARK_MARKET : code,
   // devise, prix). Repli : marche FR historique, EUR.
   function marche() { return window.IASHARK_MARKET || null; }
@@ -284,8 +273,11 @@
         + '<a href="' + esc(lien('pro.html')) + '" class="mt-4 inline-flex h-10 items-center rounded-lg border border-hairline px-4 text-[13.5px] font-semibold transition hover:border-cyan/40">' + tr('compte_page.activity_empty_cta', 'Voir les outils') + '</a>');
     }
 
+    // Bloc « Aujourd'hui » (lib/aujourdhui.js, 04/10/2026) : le MEME que l'accueil,
+    // meme fonction tickets-du-jour, memes etats par niveau. Masque sans reponse.
     return titreSection(tr('compte_page.section_overview_title', 'Vue d’ensemble'), tr('compte_page.section_overview_subtitle', 'Un résumé de votre compte. Chaque section porte le détail.'))
       + '<div class="space-y-4">'
+      + '<section class="aj aj--compte" id="aujourdhui" aria-labelledby="ajTitre" hidden></section>'
       + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.plan_current_heading', 'Plan actuel') + '</h2><div class="mt-3">' + planResume + '</div>'
           + '<div class="mt-4"><button type="button" data-aller="abonnement" class="text-[13.5px] font-semibold text-cyan transition hover:underline">' + tr('compte_page.view_subscription_cta', 'Voir l’abonnement') + '</button></div>')
       + carteAffilie()
@@ -295,7 +287,7 @@
           + ligneResume(tr('compte_page.language_label', 'Langue'), esc(langues[prefs.language] || langues.fr), 'preferences')
           + ligneResume(tr('compte_page.timezone_label', 'Fuseau horaire'), esc(prefs.timezone || 'Europe/Paris'), 'preferences')
           + ligneResume(tr('compte_page.fav_leagues_label', 'Compétitions préférées'), favoris().length ? esc(favoris().map(nomCompetition).join(', ')) : '', 'competitions')
-          + ligneResume(tr('compte_page.bankroll_label', 'Bankroll'), euros(ctx.profile.capital) ? esc(euros(ctx.profile.capital)) : '', 'preferences')
+          // 04/10/2026 (regle de Clement : ni mise, ni unite, ni capital) : plus de ligne « Bankroll ».
           + '</div>')
       + activite
       + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.security_heading', 'Sécurité') + '</h2>'
@@ -366,62 +358,18 @@
         + '<span class="inline-flex items-center rounded-full border border-hairline bg-white/[.04] px-2.5 py-1 text-[11px] font-bold tracking-wider text-soft">' + tr('compte_page.badge_free', 'GRATUIT') + '</span></div>'
         + '<ul class="mt-5 space-y-2.5">'
         + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>' + esc(tr('pro_offer.free_matches', '1 match offert par jour, avec un compte gratuit')) + '</li>'
-        + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>' + esc(tr('pro_offer.free_tools', 'Calculateur de mise, cote juste, simulateur de capital')) + '</li>'
+        // 04/10/2026 (regle de Clement : ni mise, ni capital) : plus de « Calculateur de mise,
+        // simulateur de capital » parmi les avantages du compte gratuit.
         + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>' + tr('compte_page.benefit_free_blog', 'Le blog et les guides') + '</li>'
         + '</ul>'
         + (etat && etat.ton === 'alerte' ? '<div class="mt-5 rounded-xl border px-4 py-3.5 text-[13.5px] leading-relaxed ' + TON[etat.ton] + '"><b class="font-semibold">' + esc(etat.titre) + '</b><span class="mt-0.5 block opacity-90">' + esc(etat.detail) + '</span></div>' : ''))
-      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-cyan">' + tr('compte_page.with_pro_heading', 'Avec Pro') + '</h2>'
-        // Prix affiche en EUR uniquement : voir note ci-dessus, hors perimetre ici.
-        // Selecteur Semaine / Mois / Annee (lib/pro-plan-picker.js), monte par
-        // brancher() ; repli sans module : prix mensuel.
-        + '<div id="proPlanPicker"><p class="mt-2.5 text-[22px] font-extrabold leading-none tracking-tight"><span data-market-price="pro.month">' + esc(prixPro()) + '</span> ' + esc(tr('compte_page.per_month', '/ mois')) + '</p></div>'
-        + '<p id="proDureesNote" class="mt-2 text-[13.5px] text-soft">' + tr('compte_page.pro_durations_note', 'Même accès Pro quelle que soit la durée · résiliable à tout moment.') + '</p>'
-        + listePro()
-        // Cases CGV + execution immediate (lib/checkout-consent.js), montees
-        // par monterConsentement() depuis brancher().
-        + '<div id="checkoutConsent"></div>'
-        + '<div class="mt-6">' + boutonPrimaire('souscrire', tr('compte_page.discover_pro_cta', 'Découvrir Pro'), 'w-full sm:w-auto') + '</div>'
-        + '<p id="msgFacturation" hidden aria-live="polite"></p>')
+      // Composant de paiement unique (lib/offre-pro.js, mode « paiement », 04/10/2026) :
+      // la duree, les cases legales, un bouton, paiement direct depuis le compte.
+      + '<div id="offreCompte"></div>'
       + '</div>';
   }
 
-  // Tout ce que Pro debloque (19/09/2026) : la liste de la page d'abonnement,
-  // en compact. « Sur chaque match » = les cles du mur Pro de la page match
-  // (match_page.pro_gate_item_*), le reste = pro_offer.* : une seule source.
-  // L'ancienne liste du compte (« six outils branches sur le modele », « suivi
-  // de bankroll lie au compte ») n'est plus affichee : le simulateur de capital
-  // et le calculateur de mise sont gratuits, seul le journal synchronise est Pro.
-  function listePro() {
-    function groupe(titre, items) {
-      return '<p class="mt-4 text-[11px] font-bold uppercase tracking-[0.14em] text-soft">' + esc(titre) + '</p>'
-        + '<ul class="mt-2 space-y-2">' + items.map(function (it) {
-          return '<li class="flex gap-2.5 text-[13.5px] leading-snug"><span aria-hidden="true" class="text-cyan">✓</span><span>' + it + '</span></li>';
-        }).join('') + '</ul>';
-    }
-    var match = [
-      ['pro_gate_item_bet', 'Le marché retenu par le modèle et sa probabilité en %'],
-      ['pro_gate_item_scorer', 'Le buteur le plus probable et les marchés joueurs'],
-      ['pro_gate_item_scenario', 'Le scénario du match par tranche de 15 minutes : quand les buts tombent'],
-      ['pro_gate_item_scores', 'Les scores les plus probables et les buts attendus'],
-      ['pro_gate_item_odds', 'Nos probabilités face aux cotes, marché par marché'],
-      ['pro_gate_item_stats', 'Toutes les stats du match : forme, classement, face-à-face, comparatif'],
-      ['pro_gate_item_faq', 'Les réponses aux questions fréquentes sur ce match']
-    ].map(function (k) { return esc(tr('match_page.' + k[0], k[1])); });
-    return '<div id="proListe">'
-      + groupe(tr('pro_offer.group_match', 'Sur chaque match'), match)
-      + groupe(tr('pro_offer.group_daily', 'Chaque jour'), [
-        esc(tr('pro_offer.daily_all_matches', 'Tous les matchs analysés de nos 19 compétitions, au lieu d’un seul match offert par jour')),
-        esc(tr('pro_offer.daily_scorers', 'Les 3 buteurs du jour')) + ' <span class="ml-1 inline-block rounded-full border border-amber-500/35 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-200">' + esc(tr('pro_offer.badge_new', 'Nouveau')) + '</span>'
-      ])
-      + groupe(tr('pro_offer.group_tools', 'Les outils'), [
-        esc(tr('pro_offer.tool_scanner', 'Détecteur d’écarts du jour, sur les matchs réels')),
-        esc(tr('pro_offer.tool_journal', 'Journal des décisions synchronisé sur ton compte, avec le suivi de tes résultats')),
-        esc(tr('pro_offer.tool_combo', 'Combiné construit sur les analyses réelles'))
-      ])
-      + '</div>';
-  }
-
-  /* Préférences : profil, affichage, bankroll. Les competitions preferees ne
+  /* Préférences : profil, affichage. Les competitions preferees ne
      sont PAS ici — elles ont leur propre section (« Mes compétitions
      préférées »), qui ecrit dans le store lu par l'accueil. */
   function fuseaux() {
@@ -478,9 +426,8 @@
         + '<datalist id="listeFuseaux">' + fuseaux().map(function (z) { return '<option value="' + esc(z) + '">'; }).join('') + '</datalist>'
         + '<p class="mt-1.5 text-[12.5px] text-soft">' + tr('compte_page.timezone_hint', 'Tapez pour rechercher.') + '</p></div>'
         + '</div>')
-      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.bankroll_label', 'Bankroll') + '</h2>'
-        + '<p class="mt-2 text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.bankroll_detail', 'Le capital de référence des calculs de mise. Il est privé et n’est utilisé que par vos outils.') + '</p>'
-        + '<div class="mt-4 max-w-xs">' + champ('bankroll', tr('compte_page.bankroll_label', 'Bankroll'), ctx.profile.capital == null ? '' : ctx.profile.capital, { type: 'number', attrs: ' min="1" step="1" inputmode="decimal"', placeholder: tr('compte_page.bankroll_placeholder', 'Ex. 500') }) + '</div>')
+      // 04/10/2026 (regle de Clement : ni mise, ni unite, ni capital, nulle part) : la carte
+      // « Bankroll » (capital de reference des calculs de mise) est retiree du compte.
       + '<div class="flex flex-wrap items-center gap-3">' + boutonPrimaire('enregistrerPrefs', tr('compte_page.save_btn', 'Enregistrer')) + '</div>'
       + '<p id="msgPrefs" hidden aria-live="polite"></p>'
       + '</div>';
@@ -488,7 +435,9 @@
 
   /* Mes compétitions préférées : les competitions couvertes (config/leagues.json,
      noms via lib/league-names.js), une etoile chacune, enregistrement immediat. */
-  var ICONE_ETOILE = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="acc-fav-star"><path d="M12 2.8l2.8 5.8 6.4.9-4.6 4.5 1.1 6.3L12 17.3l-5.7 3 1.1-6.3L2.8 9.5l6.4-.9z"/></svg>';
+  // Icone Lucide « star » (lucide-static v1.51.0, ISC ; trace exact, aucun dessin fait main :
+  // controle UX du 04/10/2026, tour 2), en cyan comme l'etoile de la liste de l'accueil.
+  var ICONE_ETOILE = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="lucide lucide-star acc-fav-star" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>';
   function favoris() { return favStore ? favStore.list() : []; }
   function competitionsCouvertes() {
     var LN = window.IasharkLeagueNames;
@@ -806,6 +755,10 @@
     if ($('enregistrerPrefs')) $('enregistrerPrefs').addEventListener('click', enregistrerPreferences);
     if ($('enregistrerNotifs')) $('enregistrerNotifs').addEventListener('click', enregistrerNotifications);
     if ($('emailMarketing')) $('emailMarketing').addEventListener('click', enregistrerEmailMarketing);
+    if ($('offreCompte') && window.IasharkOffrePro) {
+      window.IasharkOffrePro.mount($('offreCompte'), { mode: 'paiement', contexte: 'general', connecte: true });
+    }
+    if ($('aujourdhui') && window.IasharkAujourdhui) window.IasharkAujourdhui.mount($('aujourdhui'), {});
     if ($('souscrire')) {
       // Seules les durees payables sont affichees (19/09/2026) : « meme acces
       // quelle que soit la duree » seulement s'il y a plusieurs durees a choisir.
@@ -847,11 +800,6 @@
   async function enregistrerPreferences() {
     var relacher = occuper($('enregistrerPrefs'), tr('compte_page.saving_label', 'Enregistrement…'));
     retour('msgPrefs', '');
-    var capitalBrut = $('bankroll').value.trim();
-    var capital = capitalBrut === '' ? null : Number(capitalBrut);
-    if (capital !== null && !(capital > 0)) {
-      relacher(); retour('msgPrefs', tr('compte_page.msg_bankroll_must_be_positive', 'La bankroll doit être un montant supérieur à zéro.'), 'error'); $('bankroll').focus(); return;
-    }
     var ligne = {
       user_id: ctx.user.id,
       display_name: $('nomAffiche').value.trim().slice(0, 40) || null,
@@ -863,13 +811,8 @@
     try {
       var r1 = await sb.from('user_preferences').upsert(ligne, { onConflict: 'user_id' });
       if (r1.error) throw r1.error;
-      // La bankroll vit dans public.users.capital, seule source de verite -
-      // les outils lisent la meme colonne. On n'en garde pas une copie ici.
-      if (capital !== ctx.profile.capital) {
-        var r2 = await sb.from('users').update({ capital: capital }).eq('id', ctx.user.id);
-        if (r2.error) throw r2.error;
-        ctx.profile.capital = capital;
-      }
+      // 04/10/2026 : plus aucun capital saisi ni enregistre depuis le compte (regle de Clement :
+      // ni mise, ni capital). La colonne public.users.capital n'est plus ecrite par cette page.
       Object.assign(prefs, ligne);
       relacher();
       retour('msgPrefs', tr('compte_page.msg_preferences_saved', 'Préférences enregistrées.'), 'success');

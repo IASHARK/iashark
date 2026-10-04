@@ -494,10 +494,14 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 .hero-stade-tagline{margin-top:clamp(22px,4vh,40px);font-family:'Inter',sans-serif;font-weight:700;font-size:clamp(13px,1.4vw,16px);letter-spacing:.18em;text-transform:uppercase;color:#dfe6ee}
 @media (max-width:1023px){.hero-stade-bg{bottom:auto;height:calc(100svh - 110px)}.hero-stade-layer img{object-position:center 55%}.hero-stade-title{text-align:center;align-items:center;min-height:calc(100svh - 260px)}.hero-stade-bg::after{background:linear-gradient(180deg,rgba(6,11,18,.25) 0%,rgba(6,11,18,.45) 60%,rgba(6,11,18,.85) 100%)}}
 @media (prefers-reduced-motion:reduce){.hero-stade-layer{transform:none!important}}
+/* Bandeau des chiffres (3 colonnes) et composant de paiement (#acces, 600 px au plus) : regles
+   ecrites ici, pas en classes Tailwind non compilees (controle UX du 04/10, tour 2). */
+.kpi-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.acces-in{max-width:600px}
 </style>
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
 <link rel="stylesheet" href="/assets/home-list.css">
-<link rel="stylesheet" href="/assets/home-scorers.css"></head>
+<link rel="stylesheet" href="/assets/composants.css"><link rel="stylesheet" href="/assets/aujourdhui.css"><link rel="stylesheet" href="/assets/offre-pro.css"></head>
 <body>
 
 <header class="hdr">
@@ -545,26 +549,12 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
   </div>
 </section>
 
-<!-- Buteurs du jour (home-scorers.js, assets/home-scorers.css, 19/09/2026) :
-     les 3 joueurs les plus susceptibles de marquer ce jour-la, fichier public
-     /buteurs-du-jour.json (aucune probabilite). Squelette aux dimensions des
-     cartes reelles : aucun decalage au chargement. Section masquee s'il n'y a
-     rien a montrer. -->
-<section class="hs" id="buteurs-du-jour" aria-labelledby="hsTitle" data-home-scorers>
-  <div class="hs-head">
-    <h2 class="hs-title" id="hsTitle" data-i18n="home_scorers.title">Buteurs du jour</h2>
-    <p class="hs-sub" data-hs-sub>Les 3 joueurs les plus susceptibles de marquer aujourd'hui, avant les compositions.</p>
-  </div>
-  <div class="hs-board">
-  <ol class="hs-list" data-hs-list aria-busy="true" aria-label="Buteurs du jour, du plus probable au moins probable" data-i18n-attr="aria-label:home_scorers.list_aria">
-      <li class="hs-card" aria-hidden="true"><div class="hs-link hs-skel"><span class="hs-rank">01</span><span class="hs-photo-wrap"><span class="hs-photo hs-avatar"></span></span><span class="hs-id"><span class="hs-sk hs-sk-n"></span><span class="hs-sk hs-sk-m"></span><span class="hs-sk hs-sk-c"></span></span><span class="hs-zone is-pending"><span class="hs-sk hs-sk-v"></span><span class="hs-gauge is-empty"></span></span></div></li>
-      <li class="hs-card" aria-hidden="true"><div class="hs-link hs-skel"><span class="hs-rank">02</span><span class="hs-photo-wrap"><span class="hs-photo hs-avatar"></span></span><span class="hs-id"><span class="hs-sk hs-sk-n"></span><span class="hs-sk hs-sk-m"></span><span class="hs-sk hs-sk-c"></span></span><span class="hs-zone is-pending"><span class="hs-sk hs-sk-v"></span><span class="hs-gauge is-empty"></span></span></div></li>
-      <li class="hs-card" aria-hidden="true"><div class="hs-link hs-skel"><span class="hs-rank">03</span><span class="hs-photo-wrap"><span class="hs-photo hs-avatar"></span></span><span class="hs-id"><span class="hs-sk hs-sk-n"></span><span class="hs-sk hs-sk-m"></span><span class="hs-sk hs-sk-c"></span></span><span class="hs-zone is-pending"><span class="hs-sk hs-sk-v"></span><span class="hs-gauge is-empty"></span></span></div></li>
-    </ol>
-    <div class="hs-gate" data-hs-gate hidden></div>
-  </div>
-  <div class="hs-foot" data-hs-foot><p class="hs-note">Estimation avant les compositions officielles, jamais une garantie.</p><a class="hs-cta" href="/abonnement.html" data-vente data-track="home_scorers_upsell" data-track-kind="home_scorers_upsell">Voir l'offre Pro <span aria-hidden="true">→</span></a></div>
-</section>
+<!-- Aujourd'hui (lib/aujourdhui.js, assets/aujourdhui.css, 04/10/2026) : ticket x5,
+     ticket x10, Selection en or, buteur du jour, servis par la fonction
+     tickets-du-jour selon le niveau du visiteur (sans compte, gratuit, Pro).
+     Masque tant qu'aucune reponse lisible : aucun trou. Remplace « Buteurs du
+     jour » (ancien calcul scorerModel). -->
+<section class="aj" id="aujourdhui" aria-labelledby="ajTitre" hidden></section>
 
 <section class="decisions" id="decisions">
   <!-- Liste des matchs (home-list.js, maquette v2 validee le 15/09/2026) :
@@ -619,10 +609,9 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 <section class="relative border-t border-hairline">
   <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-10 sm:py-14">
     <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>CE QUE LE MOTEUR A DÉJÀ TRAITÉ</div>
-    <div class="mt-6 grid grid-cols-2 divide-hairline md:grid-cols-4 md:divide-x">
+    <div class="mt-6 grid kpi-3 divide-hairline md:divide-x">
       <div class="flex flex-col gap-1.5 px-2 py-4 text-center sm:px-4"><b id="kpiAnalyses" class="text-[clamp(30px,4vw,44px)] font-extrabold leading-none tracking-[-0.04em] text-ink tabular-nums">—</b><span class="text-[12.5px] leading-snug text-soft">Analyses publiées</span></div>
       <div class="flex flex-col gap-1.5 px-2 py-4 text-center sm:px-4"><b id="kpiLigues" class="text-[clamp(30px,4vw,44px)] font-extrabold leading-none tracking-[-0.04em] text-ink tabular-nums">19</b><span class="text-[12.5px] leading-snug text-soft">Compétitions couvertes</span></div>
-      <div class="flex flex-col gap-1.5 px-2 py-4 text-center sm:px-4"><b id="kpiModeles" class="text-[clamp(30px,4vw,44px)] font-extrabold leading-none tracking-[-0.04em] text-ink tabular-nums">5000</b><span class="text-[12.5px] leading-snug text-soft">Simulations par match</span></div>
       <div class="flex flex-col gap-1.5 px-2 py-4 text-center sm:px-4"><b id="kpiJour" class="text-[clamp(30px,4vw,44px)] font-extrabold leading-none tracking-[-0.04em] text-ink tabular-nums">—</b><span class="text-[12.5px] leading-snug text-soft">Matchs analysés sur 3 jours</span></div>
     </div>
   </div>
@@ -644,48 +633,13 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
   </div>
 </section>
 
-<section id="acces" data-vente class="relative border-t border-hairline">
-  <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-16 sm:py-24">
-    <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>L'ACCÈS</div>
-    <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">Commence gratuitement. <span class="text-cyan">Passe à Pro</span> quand tu veux tout voir.</h2>
-
-    <div class="mt-8 rounded-3xl border border-hairline bg-surface/40 p-1.5">
-      <div class="flex flex-col gap-1.5 lg:flex-row">
-
-        <div class="flex flex-1 flex-col p-6 sm:p-7">
-          <h3 class="text-[12px] font-bold uppercase tracking-[0.18em] text-soft">Gratuit</h3>
-          <div id="prixGratuit" data-market-price="free" class="mt-3 text-[36px] font-extrabold leading-none tracking-[-0.04em] text-ink">0 €</div>
-          <p class="mt-2.5 text-[13.5px] leading-snug text-soft">Pour juger le produit sur pièce : compte gratuit, sans carte bancaire.</p>
-          <a href="#decisions" class="mt-6 block rounded-xl border border-hairline px-6 py-3.5 text-center text-[13.5px] font-bold text-ink transition hover:border-cyan/40 hover:bg-white/[0.05]">Commencer</a>
-          <ul class="mt-7 flex list-none flex-col gap-3 border-t border-hairline p-0 pt-6">
-            <li class="flex items-start gap-2.5 text-[14px] leading-snug text-soft"><svg aria-hidden="true" viewBox="0 0 16 16" class="mt-[3px] h-3.5 w-3.5 shrink-0 text-cyan"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2.5 8.5l3.5 3.5 7.5-8"/></svg>Analyse gratuite du jour, complète, avec un compte gratuit</li>
-            <li class="flex items-start gap-2.5 text-[14px] leading-snug text-soft"><svg aria-hidden="true" viewBox="0 0 16 16" class="mt-[3px] h-3.5 w-3.5 shrink-0 text-cyan"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2.5 8.5l3.5 3.5 7.5-8"/></svg>Marché identifié et probabilité estimée</li>
-            <li class="flex items-start gap-2.5 text-[14px] leading-snug text-soft"><svg aria-hidden="true" viewBox="0 0 16 16" class="mt-[3px] h-3.5 w-3.5 shrink-0 text-cyan"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2.5 8.5l3.5 3.5 7.5-8"/></svg>Explication détaillée du signal</li>
-          </ul>
-        </div>
-
-        <div class="flex flex-col rounded-[18px] bg-surface-2 p-6 sm:p-7 lg:w-[54%]">
-          <div class="flex items-center justify-between gap-3">
-            <h3 class="text-[12px] font-bold uppercase tracking-[0.18em] text-soft">Pro</h3>
-            <span class="rounded-full bg-cyan px-2.5 py-1 text-[10px] font-extrabold tracking-[0.1em] text-page">RECOMMANDÉ</span>
-          </div>
-          <div class="mt-3 flex items-baseline gap-1.5">
-            <b id="prixPro" data-market-price="pro" class="text-[36px] font-extrabold leading-none tracking-[-0.04em] text-ink">19,95 €</b>
-            <span class="text-[14px] text-soft">/mois</span>
-          </div>
-          <p class="mt-2.5 text-[13.5px] leading-snug text-soft">Sans engagement · résiliable en ligne à tout moment</p>
-          <a href="/abonnement.html" class="mt-6 block rounded-xl bg-cyan px-6 py-3.5 text-center text-[13.5px] font-extrabold text-page shadow-[0_16px_38px_-18px_rgba(32,213,239,.9)] transition hover:brightness-110">Débloquer Pro</a>
-          <div class="mt-7 border-t border-hairline pt-6 text-[13px] font-semibold text-ink">Tout le plan Gratuit, plus :</div>
-          <ul class="mt-4 flex list-none flex-col gap-3 p-0">
-            <li class="flex items-start gap-2.5 text-[14px] leading-snug text-soft"><svg aria-hidden="true" viewBox="0 0 16 16" class="mt-[3px] h-3.5 w-3.5 shrink-0 text-cyan"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2.5 8.5l3.5 3.5 7.5-8"/></svg>Toutes les analyses, tous les championnats</li>
-            <li class="flex items-start gap-2.5 text-[14px] leading-snug text-soft"><svg aria-hidden="true" viewBox="0 0 16 16" class="mt-[3px] h-3.5 w-3.5 shrink-0 text-cyan"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2.5 8.5l3.5 3.5 7.5-8"/></svg>Détecteur d’écarts du jour sur les matchs réels</li>
-            <li class="flex items-start gap-2.5 text-[14px] leading-snug text-soft"><svg aria-hidden="true" viewBox="0 0 16 16" class="mt-[3px] h-3.5 w-3.5 shrink-0 text-cyan"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2.5 8.5l3.5 3.5 7.5-8"/></svg>Les outils Pro : détecteur d’écarts sur les matchs réels, combiné sur les analyses, journal synchronisé</li>
-            <li class="flex items-start gap-2.5 text-[14px] leading-snug text-soft"><svg aria-hidden="true" viewBox="0 0 16 16" class="mt-[3px] h-3.5 w-3.5 shrink-0 text-cyan"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2.5 8.5l3.5 3.5 7.5-8"/></svg>Résiliable à tout moment</li>
-          </ul>
-        </div>
-
-      </div>
-    </div>
+<section id="acces" class="relative border-t border-hairline">
+  <!-- LE composant de paiement (lib/offre-pro.js, mode vitrine, 04/10/2026) : la
+       semaine, le mois et l'annee, un bouton, ce que donne Pro, comment on paie.
+       Abonne Pro : « Ton abonnement Pro est actif ». Repli sans JS : le prix mensuel. -->
+  <div class="acces-in mx-auto w-full px-4 sm:px-8 py-12 sm:py-20">
+    <div id="offreAccueil"><section class="op op--vitrine"><h2 class="op-title" data-i18n="offre_pro.title_general">Passe Pro : tous les matchs du jour, ouverts</h2><p class="op-billing"><b data-market-price="pro.month">19,95 €</b> <span data-i18n="offre_pro.per_month">/ mois</span></p><a class="mu-shimmer op-cta" href="/abonnement.html" data-href="abonnement.html" data-i18n="offre_pro.cta_continue_month">Continuer avec le mois</a></section></div>
+    <p class="mt-4 text-center text-[13.5px] leading-snug text-soft" id="accesGratuit" data-i18n="offre_pro.free_line">Gratuit : l’analyse du match du jour, avec un compte.</p>
   </div>
 </section>
 
@@ -694,14 +648,13 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
     <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>LA MÉTHODE</div>
     <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">Quatre étapes, <span class="text-cyan">un seul signal</span> par match.</h2>
     <p class="mt-4 max-w-2xl text-[15.5px] leading-relaxed text-soft">Chaque étape répond à une question différente. Un seul marché en sort, choisi par une règle fixe.</p>
-    <div class="mt-8 grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_240px_minmax(0,260px)]">
+    <div class="mt-8 grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_260px]">
       <ul class="flex list-none flex-col gap-3 p-0">
         <li class="rounded-xl border border-hairline bg-surface/60 px-5 py-4"><div class="text-[15px] font-bold text-ink">Forces en présence</div><p class="mt-1 text-[12.5px] leading-snug text-soft">Ce que chaque équipe produit et concède, à domicile ou à l’extérieur.</p></li>
         <li class="rounded-xl border border-hairline bg-surface/60 px-5 py-4"><div class="text-[15px] font-bold text-ink">Prudence en début de saison</div><p class="mt-1 text-[12.5px] leading-snug text-soft">Avec peu de matchs joués, la saison précédente pèse davantage.</p></li>
         <li class="rounded-xl border border-hairline bg-surface/60 px-5 py-4"><div class="text-[15px] font-bold text-ink">Probabilité de chaque marché</div><p class="mt-1 text-[12.5px] leading-snug text-soft">Des buts attendus à la probabilité de chaque score, puis de chaque marché.</p></li>
-        <li class="rounded-xl border border-hairline bg-surface/60 px-5 py-4"><div class="text-[15px] font-bold text-ink">Simulation du match</div><p class="mt-1 text-[12.5px] leading-snug text-soft">Le match rejoué un grand nombre de fois, pour les scores les plus probables.</p></li>
+        <li class="rounded-xl border border-hairline bg-surface/60 px-5 py-4"><div class="text-[15px] font-bold text-ink">Les scores les plus probables</div><p class="mt-1 text-[12.5px] leading-snug text-soft">Les chances de chaque score, classées pour faire ressortir les plus probables.</p></li>
       </ul>
-      <svg class="hidden h-[300px] w-full lg:block" viewBox="0 0 240 300" fill="none" aria-hidden="true" focusable="false"><defs><linearGradient id="flux" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#20d5ef" stop-opacity=".08"/><stop offset="1" stop-color="#20d5ef" stop-opacity=".55"/></linearGradient></defs><path d="M0 38 C 110 38, 130 150, 196 150" stroke="url(#flux)" stroke-width="1.5" class="conv-line"/><path d="M0 113 C 110 113, 130 150, 196 150" stroke="url(#flux)" stroke-width="1.5" class="conv-line"/><path d="M0 188 C 110 188, 130 150, 196 150" stroke="url(#flux)" stroke-width="1.5" class="conv-line"/><path d="M0 263 C 110 263, 130 150, 196 150" stroke="url(#flux)" stroke-width="1.5" class="conv-line"/><circle cx="196" cy="150" r="26" fill="#0d1926" stroke="#20d5ef" stroke-opacity=".45"/><circle cx="196" cy="150" r="6" fill="#20d5ef"/></svg>
       <div class="rounded-2xl border border-cyan/25 bg-cyan/[0.05] p-6">
         <div class="text-[11px] font-bold uppercase tracking-[0.18em] text-cyan/80">Signal IASHARK</div>
         <p class="mt-2.5 text-[14px] leading-relaxed text-soft">Un marché prioritaire, une probabilité, et l’écart mesuré avec le prix du marché.</p>
@@ -761,24 +714,25 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
       <a href="/confidentialite.html" style="color:#22d3ee;text-decoration:underline;margin:0 8px;">Confidentialité</a>
       <a href="/methodologie.html" data-requires-page="methodologie.html" style="color:#22d3ee;text-decoration:underline;margin:0 8px;">Méthodologie</a>
     </div>
+    <div data-i18n="aujourdhui.no_financial_advice" style="margin-top:6px;font-family:'DM Sans',system-ui,sans-serif;font-size:10px;letter-spacing:0;color:#8796a8;">Ce site ne fournit aucun conseil financier.</div>
   </div>
 </footer>
 
 <nav class="nav-bottom">
   <a href="/" class="nav-item active">
-    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
     <div class="nav-lbl">ACCUEIL</div>
   </a>
   <a href="/pro.html" class="nav-item">
-    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.2 2 9.3l7.1-.7z"/></svg></div>
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg></div>
     <div class="nav-lbl">OUTILS</div>
   </a>
   <a href="/blog.html" class="nav-item">
-    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v16"/><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"/></svg></div>
     <div class="nav-lbl">BLOG</div>
   </a>
   <a href="/compte.html" class="nav-item">
-    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
     <div class="nav-lbl">COMPTE</div>
   </a>
 </nav>
@@ -793,9 +747,8 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 <script src="/lib/market-labels.js"></script>
 <script src="/lib/fav-leagues.js"></script>
 <script src="/home-list.js"></script>
-<script src="/lib/insights.js"></script>
-<script src="/lib/buteurs-du-jour.js"></script>
-<script src="/home-scorers.js"></script>
+<script src="/lib/icones.js"></script><script src="/lib/composants.js"></script><script src="/lib/offre-pro.js"></script>
+<script src="/lib/aujourdhui.js"></script>
 <script src="/app-client.js" defer></script>
 <script>
 var allMatchs=[],currentSport='football';
@@ -1077,14 +1030,14 @@ function renderMatchs(){
   if(homeList)homeList.setData(getSportMatchs(),{freeMatchId:freeMatchId,isPro:proConfirme,hasAccount:!!(authCtx&&authCtx.session),day:jourDemande||undefined});
 }
 
-// « 5 000 simulations » : meme source que le chiffre cle de la methode (#kpiModeles).
-function simulationsParMatch(){var el=document.getElementById('kpiModeles');var n=el?parseInt(String(el.textContent).replace(/\D/g,''),10):NaN;return n>0?n:5000;}
+// 04/10/2026 : plus de « 5 000 simulations » ecrit en dur (le moteur actuel n'en
+// tire aucune) ; home-list.js n'ecrit plus aucun nombre de simulations.
 function monterListe(){
   if(homeList||!window.IasharkHomeList)return;
   homeFavorites=window.IasharkFavLeagues?IasharkFavLeagues.createStore():null;
   homeFavMatches=window.IasharkFavLeagues?IasharkFavLeagues.createStore({kind:'matches'}):null;
   homeList=IasharkHomeList.mount(document.getElementById('homeList'),{
-    isPro:false,favorites:homeFavorites,favMatches:homeFavMatches,simulations:simulationsParMatch(),
+    isPro:false,favorites:homeFavorites,favMatches:homeFavMatches,
     helpers:{
       heure:heureLocale,matchDay:matchDayStr,compareMatches:compareMatchs,
       leagueName:leagueName,leagueFlag:leagueFlag,leagueLogoUrl:leagueLogoUrl,leagueCountry:leagueCountry,
@@ -1094,17 +1047,25 @@ function monterListe(){
   });
   homeList.setLoading();
 }
-// Buteurs du jour (home-scorers.js) : fichier public sans probabilite ; les
-// chiffres ne sont calcules que pour un abonne Pro confirme par match-data.
-var homeScorers=null;
-function monterButeurs(){
-  if(homeScorers||!window.IasharkHomeScorers)return;
-  var el=document.getElementById('buteurs-du-jour');
+// Aujourd'hui (lib/aujourdhui.js) : tickets, Selection en or, buteur du jour, selon
+// le niveau que le SERVEUR attribue (fonction tickets-du-jour). Section masquee si
+// la fonction ne repond pas. Offre Pro (#acces) : le composant de paiement unique.
+function monterAujourdhui(){
+  var el=document.getElementById('aujourdhui');
+  if(el&&window.IasharkAujourdhui)IasharkAujourdhui.mount(el,{});
+}
+function monterOffre(ctx){
+  var el=document.getElementById('offreAccueil'),gratuit=document.getElementById('accesGratuit');
   if(!el)return;
-  homeScorers=IasharkHomeScorers.mount(el,{helpers:{
-    leagueName:function(p){return leagueName({league_key:p&&p.league_key,league:p&&p.league});},
-    lien:lien
-  }});
+  if(ctx&&ctx.isPro){
+    el.innerHTML='<section class="op op--vitrine"><h2 class="op-title">'+esc(t('offre_pro.pro_active','Ton abonnement Pro est actif'))+'</h2><a class="op-alt op-alt--start" href="'+esc(lien('compte.html#abonnement'))+'">'+esc(t('offre_pro.pro_account','Mon compte'))+' <span aria-hidden="true">→</span></a></section>';
+    if(gratuit)gratuit.hidden=true;
+    return;
+  }
+  if(gratuit&&ctx&&ctx.session)gratuit.hidden=true;
+  // Tickets en ligne (lib/offre-pro.js#OUVERT) : la ligne du gratuit les nomme.
+  if(gratuit&&window.IasharkOffrePro&&IasharkOffrePro.OUVERT.tickets&&(!window.IASHARK_MARKET||!IASHARK_MARKET.code||IASHARK_MARKET.code==='fr'))gratuit.textContent=t('offre_pro.free_line_tickets','Gratuit : le match du jour et le ticket x5, avec un compte.');
+  if(window.IasharkOffrePro)IasharkOffrePro.mount(el,{mode:'vitrine',contexte:'general',next:lien(''),connecte:!!(ctx&&ctx.session)});
 }
 
 // A minuit (heure du visiteur) le match du jour et les onglets Aujourd'hui /
@@ -1118,9 +1079,9 @@ async function loadData(){
     appliquerMarche();
     traduireLibellesMarche();
     monterListe();
-    monterButeurs();
     if(window.IasharkApp){try{authCtx=await IasharkApp.context();}catch(e){}}
-    if(homeScorers)homeScorers.setViewer(authCtx);
+    monterAujourdhui();
+    monterOffre(authCtx);
     // Meme source que la page match (match-page.js) : un abonne connecte lit
     // la fonction Edge 'match-data', qui renvoie les champs premium
     // (pari_rec/cote_rec/model_probability) non retires. Sans ca, la vitrine
@@ -1153,6 +1114,9 @@ async function loadData(){
       allMatchs=d.matchs||[];
     }
     setKpi('kpiJour',allMatchs.length);
+    // Statut PUBLIC des matchs pour le bloc « Aujourd'hui » : un match d'un ticket reporte ou
+    // annule dans la journee est signale tout de suite (lib/aujourdhui.js#statuts).
+    if(window.IasharkAujourdhui){var parId={};allMatchs.forEach(function(m){if(m&&m.id!=null)parId[String(m.id)]=m.status;});IasharkAujourdhui.statuts(document.getElementById('aujourdhui'),function(fid){return parId[String(fid)]||null;});}
     // no_signal_label is a fixed French sentence written by the pipeline: shown in the page language.
     allMatchs.forEach(function(m){if(m&&m.no_signal_label==='Aucun signal clair sur ce match')m.no_signal_label=t('home_app.no_signal_label',m.no_signal_label);});
     // Un abonne n'a pas a relire l'argumentaire de vente et le tarif a chaque

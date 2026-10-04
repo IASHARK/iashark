@@ -79,6 +79,9 @@ test("la page match assemble les sections dans l'ordre demande",()=>{
   // questions frequentes a la fin.
   const ordre=JSON.parse(js.match(/const ORDRE_PAGE=(\[[^\]]*\]);/)[1].replace(/'/g,'"'));
   assert.deepEqual(ordre,['sim','modele','probas','film','scenario','premier','jumeaux','forme','classement','equipes','comparatif','compos','joueurs','buteurs','arbitre','questions']);
+  // Sommaire : une puce par theme (blocs d'un meme theme sous la puce de leur premiere section).
+  const groupes=JSON.parse(js.match(/const GROUPES_NAV=(\{[^}]*\});/)[1].replace(/'/g,'"').replace(/(\w+):/g,'"$1":'));
+  assert.deepEqual(groupes,{modele:'sim',scenario:'film',forme:'equipes',classement:'equipes',comparatif:'equipes',compos:'equipes',buteurs:'joueurs'});
   dansLOrdre(rendu,["MS.sections(c)","par.modele=[modeleCarte(vm,dit)","par.buteurs=[marchesJoueursCarte(vm,dit)","par.questions=[faqCarte(vm)","ORDRE_PAGE.forEach","paint(vm,secs,{panneau,sticky:signalSticky(vm)})"],"blocs remis apres les sections (registre rempli)");
   // Match bloque : le composant de paiement juste sous l'en-tete, l'apercu flou dessous.
   // Apercu HONNETE (controle UX du 04/10, tour 2) : seulement ce que le visiteur aura (pro_sections).

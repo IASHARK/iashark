@@ -960,7 +960,7 @@ const boutonAction=(href,label,attrs,cls)=>window.IasharkComposants?IasharkCompo
 function navChips(items,apres,sticky){
   if(items.length<2&&!apres)return '';
   return `<nav class="mnav" id="matchNav" aria-label="${esc(t('match_page.nav_aria','Sommaire du match'))}">
-    <ul class="mnav-chips">${items.map(x=>`<li><a class="mnav-chip" href="#sec-${x.cle}" data-nav="${x.cle}">${esc(x.label)}${x.lock?cardIcon('lock'):''}</a></li>`).join('')}${apres||''}</ul>
+    <ul class="mnav-chips">${items.map(x=>`<li><a class="mnav-chip" href="#sec-${x.cle}" data-nav="${x.nav||x.cle}">${esc(x.label)}${x.lock?cardIcon('lock'):''}</a></li>`).join('')}${apres||''}</ul>
     ${sticky||''}
   </nav>`;
 }
@@ -980,7 +980,8 @@ function bindNav(){
     let cur=null;
     for(const s of secs){if(s.getBoundingClientRect().top<=seuil)cur=s;else break;}
     if(secs.length&&window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-4)cur=secs[secs.length-1];
-    const key=cur?cur.dataset.sec:null;
+    // Groupe de la section (une puce pour plusieurs blocs d'un meme theme, ex. « Équipes »).
+    const key=cur?(cur.dataset.nav||cur.dataset.sec):null;
     if(key===actif)return;
     actif=key;
     chips.forEach(c=>{const on=c.dataset.nav===key;c.classList.toggle('is-active',on);if(on)c.setAttribute('aria-current','true');else c.removeAttribute('aria-current');});
@@ -1071,15 +1072,16 @@ function bindMotion(){
 }
 
 
-// Assemble la page. sections : [cle, html, libelle du sommaire (ou null), verrouillee].
+// Assemble la page. sections : [cle, html, libelle du sommaire (ou null), verrouillee, groupe du
+// sommaire (facultatif : la puce du groupe est posee sur sa premiere section)].
 // opts : { sansStats, panneau: { html, nb, flou, fab }, sticky (barre du pari, vue complete) }.
 // Ordinateur (>= 1100 px) : panneau Marches en colonne gauche collante.
 // Telephone : bouton flottant et puce « Marches » qui ouvrent le tiroir du bas.
 function paint(vm,sections,opts){
   opts=opts||{};
   const S=sections.filter(x=>x&&x[1]);
-  const items=S.filter(x=>x[2]).map(x=>({cle:x[0],label:x[2],lock:!!x[3]}));
-  const corps=S.map(([k,html,,lock])=>`<div class="sec" id="sec-${k}" data-sec="${k}"${lock?' data-locked="true"':''}>${html}</div>`).join('');
+  const items=S.filter(x=>x[2]).map(x=>({cle:x[0],label:x[2],lock:!!x[3],nav:x[4]||x[0]}));
+  const corps=S.map(([k,html,,lock,g])=>`<div class="sec" id="sec-${k}" data-sec="${k}" data-nav="${g||k}"${lock?' data-locked="true"':''}>${html}</div>`).join('');
   const mk=opts.panneau||null;
   const libMk=t('match_v4.panel_title','Marchés');
   const puce=mk&&mk.fab?`<li class="mnav-mk"><button type="button" class="mnav-chip" data-mk-open>${esc(libMk)}${mk.flou?cardIcon('lock'):''}</button></li>`:'';
@@ -1123,6 +1125,9 @@ function cheminMatch(raw){
 // classement avant les deux equipes, comparatif et compositions apres, marches joueurs apres
 // les joueurs, questions frequentes a la fin).
 const ORDRE_PAGE=['sim','modele','probas','film','scenario','premier','jumeaux','forme','classement','equipes','comparatif','compos','joueurs','buteurs','arbitre','questions'];
+// Sommaire : une puce par theme (controle des captures du 04/10/2026, soir : 14 puces = trois lignes
+// sur ordinateur). Les blocs d'un meme theme partagent la puce de leur premiere section.
+const GROUPES_NAV={modele:'sim',scenario:'film',forme:'equipes',classement:'equipes',comparatif:'equipes',compos:'equipes',buteurs:'joueurs'};
 function render(raw,o){
   o=o||{};
   const vm=viewModel(raw);
@@ -1131,10 +1136,10 @@ function render(raw,o){
   // Blocs de l'ancienne page qui ne dependent d'aucune section V4.
   const par={
     probas:[probasCarte(vm),t('match_v4.nav_odds','Cotes')],
-    forme:[formeCarte(vm),t('match_v4.nav_form','Forme')],
-    classement:[classementCarte(vm),t('match_v4.nav_standings','Classement')],
-    comparatif:[comparatifCarte(vm),t('match_v4.nav_compare','Comparatif')],
-    compos:[compoCarte(vm),t('match_v4.nav_lineups','Compos')]
+    forme:[formeCarte(vm)],
+    classement:[classementCarte(vm)],
+    comparatif:[comparatifCarte(vm)],
+    compos:[compoCarte(vm)]
   };
   let panneau=null,dit=null;
   if(MS){
@@ -1159,9 +1164,16 @@ function render(raw,o){
   // Apres les sections V4 (registre rempli) : seulement ce qu'elles ne montrent pas deja.
   par.modele=[modeleCarte(vm,dit),t('match_v4.nav_model','Modèle')];
   if(!par.film)par.scenario=[scenarioCarte(vm),t('match_v4.nav_scenario','Scénario')];
-  par.buteurs=[marchesJoueursCarte(vm,dit),t('match_v4.nav_player_markets','Marchés joueurs')];
+  par.buteurs=[marchesJoueursCarte(vm,dit)];
   par.questions=[faqCarte(vm),t('match_page.nav_questions','Questions')];
-  ORDRE_PAGE.forEach(k=>{if(par[k]&&par[k][0])secs.push([k,par[k][0],par[k][1],false]);});
+  const LIB_GROUPE={equipes:t('match_v4.nav_teams','Équipes'),joueurs:t('match_v4.nav_players','Joueurs')};
+  const vus={};
+  ORDRE_PAGE.forEach(k=>{
+    if(!(par[k]&&par[k][0]))return;
+    const g=GROUPES_NAV[k]||k;
+    secs.push([k,par[k][0],vus[g]?null:(LIB_GROUPE[g]||par[k][1]||null),false,g]);
+    vus[g]=true;
+  });
   paint(vm,secs,{panneau,sticky:signalSticky(vm)});
 }
 

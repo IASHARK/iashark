@@ -104,3 +104,36 @@ test("Magic UI Shimmer Button : structure d'origine ; jauge et bascule d'origine
   const cv = C.canvas({ type: "bar", data: { labels: ["a"], datasets: [{ data: [1] }] } }, { hauteur: 120, aria: "Graphique" });
   assert.match(cv, /^<div class="ch-box" style="height:120px"><canvas role="img" aria-label="Graphique" data-ch="\{&quot;type&quot;:&quot;bar&quot;/);
 });
+
+// Controle UX du 04/10/2026 (ROUGE) et exigence de Clement (« prends des elements, des
+// composants ») : l'accueil et la barre du bas n'ont plus aucun dessin fait main.
+test("accueil et barre du bas : icones Lucide d'origine, pastille HyperUI cyan, aucun trace fait main", () => {
+  const I = require("../lib/icones.js");
+  const sansEspace = (x) => x.replace(/>\s+</g, "><");
+  const interieur = (nom) => sansEspace(I.svg(nom).replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, ""));
+  // Liste des matchs de l'accueil.
+  const hl = read("home-list.js").replace(/\/\*[\s\S]*?\*\//g, "");
+  assert.doesNotMatch(hl, /<svg\b|<path\b|<rect\b|<circle\b|<polygon\b/, "home-list.js : aucun trace SVG");
+  for (const nom of ["star", "chevron-down", "lock", "calendar", "triangle-alert", "info", "circle-check", "signal-high", "signal-medium", "signal-low"]) {
+    assert.ok(I.noms.includes(nom), nom);
+    assert.ok(hl.includes("'" + nom + "'"), "home-list.js utilise l'icone Lucide " + nom);
+  }
+  assert.match(hl, /class="hu-badge hl-probadge"/, "pastille HyperUI Badges");
+  assert.doesNotMatch(hl, /hl-ghost|hl-lockpill|hl-gauge|hl-bars|hl-upsell|renderUpsell/);
+  const css = read("assets/home-list.css");
+  assert.doesNotMatch(css, /hl-ghost|hl-lockpill|hl-gauge|hl-bars|hl-upsell|hl-dot/);
+  assert.doesNotMatch(css, /\.hl-(star|mstar)\.is-on\{color:var\(--amber/, "etoiles cyan : l'or est reserve a la Selection en or");
+  assert.doesNotMatch(css.match(/\.hl-probadge\{[^}]*\}/)[0], /245,158,11|amber|gold/);
+  // Barre de navigation du bas : traces Lucide exacts (house, star, book-open, user).
+  const bn = read("bottom-navigation.js");
+  for (const nom of ["house", "star", "book-open", "user"]) assert.ok(sansEspace(bn).includes(interieur(nom)), "barre du bas : trace Lucide " + nom);
+  assert.doesNotMatch(bn, /M3 10\.5 12 3l9 7\.5|m12 2 2\.9 6\.6|cx="12" cy="8" r="4"/, "anciens dessins faits main");
+  assert.doesNotMatch(read("assets/bottom-navigation.css"), /\.site-bottom-nav__label\{[^}]*Space Mono/, "pas de majuscules en police a chasse fixe");
+  // Accueil : plus de schema « flux » dessine ; barre du bas de secours (sans JavaScript) en Lucide.
+  const idx = read("index.html");
+  assert.doesNotMatch(idx, /viewBox="0 0 240 300"|M3 10\.5L12 3l9 7\.5|M12 2l2\.9 6\.6/);
+  const nav = sansEspace(idx.slice(idx.indexOf('<nav class="nav-bottom"'), idx.indexOf("</nav>", idx.indexOf('<nav class="nav-bottom"'))));
+  for (const nom of ["house", "star", "book-open", "user"]) assert.ok(nav.includes(interieur(nom)), "index.html, barre de secours : " + nom);
+  // Plus aucun « match rejoue » sur l'accueil (verdict d1).
+  assert.doesNotMatch(idx, /rejoué/);
+});

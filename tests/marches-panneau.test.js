@@ -32,9 +32,11 @@ function v3marches(extra) {
 }
 function match(o) {
   return Object.assign({
-    id: 1, home: { n: "Lens" }, away: { n: "Lille" }, date: "2026-10-04 18:00",
-    moteur_v3: { source: "v3", origine_probabilite: "modèle + cotes" },
-    pari_rec: "Victoire Domicile", market_id: "home-win", no_signal: false, chance_iashark: 44, cote_rec: "1.62",
+    // Ligue 1 (un des 12 championnats mesures du v3), couverture « vérifiée » ; chance de l'Avis
+    // a moins de 2 points du v3 (46,3 %) : perimetre du mathematicien (04/10/2026).
+    id: 1, home: { n: "Lens" }, away: { n: "Lille" }, date: "2026-10-04 18:00", league_key: "ligue1",
+    moteur_v3: { source: "v3", origine_probabilite: "modèle + cotes" }, v3_fiabilite: { couverture: "vérifiée" },
+    pari_rec: "Victoire Domicile", market_id: "home-win", no_signal: false, chance_iashark: 45, cote_rec: "1.62",
     v3_marches: v3marches(),
     marches_flux: { source: "cote de reference du marche, marge retiree", releve_at: "2026-10-04T07:12:00.000Z", liste: [
       { marche: "Les deux équipes marquent", selection: "les deux équipes marquent", chance: 52, cote_minimum: 1.92, code: "F8:Yes" },
@@ -73,7 +75,7 @@ test("seulement les 71 marches justes : ni handicap, ni corners/cartons du v3, n
 test("une seule source : le pari de l'avis porte la chance affichee, son groupe fait 100, double chance = somme", () => {
   const p = P.construirePanneau(match(), { verdicts: GO });
   const v1 = ligne(p, "home-win"), vn = ligne(p, "draw"), v2 = ligne(p, "away-win");
-  assert.equal(v1.chance, 44); assert.equal(v1.pari_avis, true);
+  assert.equal(v1.chance, 45); assert.equal(v1.pari_avis, true);
   assert.equal(v1.chance + vn.chance + v2.chance, 100);
   assert.equal(ligne(p, "dc-1x").chance, v1.chance + vn.chance);
   assert.equal(ligne(p, "dc-x2").chance, vn.chance + v2.chance);
@@ -149,4 +151,34 @@ test("acces : marches_panneau premium et Pro seulement (meme match offert) ; nb_
   const payant = PREMIUM.stripPremium(Object.assign({}, m, { is_free: false }));
   assert.equal(payant.marches_panneau, undefined);
   assert.equal(PREMIUM.premiumPayload(m).marches_panneau.nb, m.marches_panneau.nb, "persiste dans premium_fields pour match-data");
+});
+
+// CONTROLE DU MATHEMATICIEN DU 04/10/2026 (points 1 et 2) : perimetre du moteur v3.
+test("perimetre : aucune ligne du v3 hors des 12 championnats mesures (selection, coupe) ni hors couverture verifiee", () => {
+  for (const o of [{ league_key: "nations_league" }, { league_key: "wcq_europe" }, { league_key: "ldc" }, { league_key: "coupe_de_france" }, { league_key: "championship" },
+    { v3_fiabilite: { couverture: "données limitées" } }, { moteur_v3: { source: "ancien moteur (repli)" } }, { league_key: undefined }]) {
+    const m = match(o);
+    assert.equal(P.chancesEntieres(m, { verdicts: GO }), null, JSON.stringify(o));
+    const p = P.construirePanneau(m, { verdicts: GO });
+    const lignes = p ? p.familles.flatMap((f) => f.marches) : [];
+    assert.deepEqual(lignes.filter((x) => x.source === "modele"), [], "aucune ligne du v3 : " + JSON.stringify(o));
+  }
+  assert.deepEqual(VERDICTS.perimetre_v3.ligues.slice().sort(), ["argentina_liga_profesional", "bundesliga", "eredivisie", "jleague", "laliga", "liga_mx", "ligue1", "mls", "premier", "primeira", "seriea", "suede"]);
+});
+
+test("coherence avec l'Avis : au-dela de 2 points d'ecart avec le v3 sur le meme marche, aucune ligne du v3 (l'Avis reste seul)", () => {
+  assert.equal(VERDICTS.perimetre_v3.ecart_max_avis_points, 2);
+  // 46,3 % au v3 : 44 (2,3 points) -> rien ; 48 (1,7) -> le panneau.
+  assert.equal(P.ecartAvisV3(match({ chance_iashark: 44 })), 2.3);
+  assert.equal(P.avisCoherent(match({ chance_iashark: 44 })), false);
+  assert.equal(P.chancesEntieres(match({ chance_iashark: 44 }), { verdicts: GO }), null);
+  assert.ok(P.chancesEntieres(match({ chance_iashark: 48 }), { verdicts: GO }));
+  // Double chance : comparee au DC du v3 (73,4 %).
+  assert.equal(P.avisCoherent(match({ market_id: "dc-1x", chance_iashark: 76 })), false);
+  assert.equal(P.avisCoherent(match({ market_id: "dc-1x", chance_iashark: 72 })), true);
+  // Sans pari ou pari absent du v3 : rien a comparer.
+  assert.equal(P.ecartAvisV3(match({ pari_rec: null })), null);
+  // Flux de cotes garde (ce que le v3 ne montre pas).
+  const p = P.construirePanneau(match({ chance_iashark: 58 }), { verdicts: GO });
+  assert.ok(p && p.familles.flatMap((f) => f.marches).every((x) => x.source === "marche"));
 });

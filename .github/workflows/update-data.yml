@@ -4415,7 +4415,7 @@ jobs:
               console.log('  [PRONOSTIC] '+nSelNat+' selection(s) de selections nationales (cotes du marche).');
             }catch(e){ console.log('::warning title=Pronostic::selections nationales non posees ('+(e&&e.message)+').'); }
             try{
-              var rapportProno=PRONOSTIC.poserPronostics(allMatchsData,{configLigues:LEAGUES_CONFIG,chancesV3Par:CHANCES_V3_PRONO});
+              var rapportProno=PRONOSTIC.poserPronostics(allMatchsData,{configLigues:LEAGUES_CONFIG,chancesV3Par:CHANCES_V3_PRONO,figes:GEL_FIGES});
               console.log('  [PRONOSTIC] '+rapportProno.avec+' match(s) avec pronostic, '+rapportProno.sans+' sans ; '+rapportProno.selections+' selection(s) ; voies : v3='+rapportProno.voies.v3+' cotes_marche='+rapportProno.voies.cotes_marche+' modele='+rapportProno.voies.modele+'.');
             }catch(e){ console.log('::warning title=Pronostic::pronostics non poses ('+(e&&e.message)+').'); }
           // ================= UN PARI SUR CHAQUE MATCH (decision de Clement, 03/10/2026, 23 h) =================

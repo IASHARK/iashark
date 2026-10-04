@@ -109,7 +109,7 @@
    =================================================================== */
 .mu-gauge{--circle-size:100px;--circumference:282.7433388;--percent-to-px:2.827433388px;--gap-percent:5;--offset-factor:0;
   --transition-length:1s;--transition-step:200ms;--delay:0s;--percent-to-deg:3.6deg;
-  position:relative;width:64px;height:64px;font:700 15px/1 var(--mono,"Space Mono",monospace);color:var(--c-ink);transform:translateZ(0);flex:none}
+  position:relative;width:64px;height:64px;font:700 15px/1 var(--body,"DM Sans",system-ui,sans-serif);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--c-ink);transform:translateZ(0);flex:none}
 .mu-gauge svg{width:100%;height:100%;display:block}
 .mu-gauge-sec{stroke:rgba(148,163,184,.22);stroke-dasharray:calc(var(--stroke-percent) * var(--percent-to-px)) var(--circumference);
   transform:rotate(calc(1turn - 90deg - (var(--gap-percent) * var(--percent-to-deg) * var(--offset-factor-secondary)))) scaleY(-1);
@@ -197,9 +197,11 @@
    inline-flex items-center justify-center rounded-full bg-purple-700
    px-2.5 py-0.5 text-purple-100 ; <p class="text-sm whitespace-nowrap">.
    Echelle de chance en 5 intensites de cyan (pas de vert ni de rouge).
+   Police du site (comme l'original, text-sm) : avec une police a chasse fixe, l'espace
+   avant « % » faisait un grand blanc (« 35  % », controle UX du 04/10).
    =================================================================== */
 .hu-badge{display:inline-flex;align-items:center;justify-content:center;border-radius:9999px;padding:.125rem .625rem;
-  font:700 .875rem/1.25rem var(--mono,"Space Mono",monospace);white-space:nowrap;background:rgba(32,213,239,.12);color:#cffafe}
+  font:700 .875rem/1.25rem var(--body,"DM Sans",system-ui,sans-serif);font-variant-numeric:tabular-nums;white-space:nowrap;background:rgba(32,213,239,.12);color:#cffafe}
 .hu-badge.lv5{background:#0891b2;color:#ecfeff}.hu-badge.lv4{background:rgba(8,145,178,.72);color:#ecfeff}
 .hu-badge.lv3{background:rgba(8,145,178,.48);color:#e0f7fb}.hu-badge.lv2{background:rgba(8,145,178,.28);color:#cdeef5}
 .hu-badge.lv1{background:rgba(148,163,184,.16);color:#cbd5e1}
@@ -235,7 +237,8 @@
    transition-transform bg-gray-800 ; cache : translate-y-full ; ouvert :
    transform-none. Fond : bg-dark-backdrop/70 fixed inset-0 z-30. Ouvert :
    role=dialog, aria-modal, body overflow-hidden ; Echap et fond ferment.
-   Bouton fermer : rounded-lg w-8 h-8 absolute top-2.5 end-2.5. Couches 1100 / 1101
+   Bouton fermer : rounded-lg absolute top-2.5 end-2.5, agrandi a 44 px (taille tactile
+   minimale ; controle UX du 04/10). Couches 1100 / 1101
    (au-dessus de la barre de navigation du bas du site, z-index 1000).
    =================================================================== */
 .fb-drawer{position:fixed;bottom:0;left:0;right:0;z-index:1101;width:100%;padding:1rem;overflow-y:auto;max-height:88vh;max-height:88dvh;
@@ -244,11 +247,16 @@
 .fb-drawer.is-open{transform:none;visibility:visible}
 .fb-drawer:not(.is-open){transition:transform .15s cubic-bezier(.4,0,.2,1),visibility 0s linear .15s}
 .fb-backdrop{position:fixed;inset:0;z-index:1100;background:rgba(3,7,12,.7)}
-.fb-close{position:absolute;top:.625rem;right:.625rem;display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;
+.fb-close{position:absolute;top:.625rem;right:.625rem;display:inline-flex;align-items:center;justify-content:center;width:2.75rem;height:2.75rem;
   border-radius:.5rem;border:0;background:transparent;color:#9ca3af;cursor:pointer;font-size:.875rem}
 .fb-close:hover{background:#4b5563;color:#fff}
 .fb-close .lucide{width:18px;height:18px}
 body.fb-no-scroll{overflow:hidden}
+/* Poignee du Flowbite « Swipeable drawer » : p-4 cursor-pointer ; barre absolute w-8 h-1
+   -translate-x-1/2 bg-gray-600 rounded-lg top-3 left-1/2. Zone tactile de 44 px. */
+.fb-handle{position:relative;display:block;width:100%;height:44px;margin:-1rem 0 -.75rem;padding:0;border:0;background:transparent;cursor:grab;touch-action:none}
+.fb-handle-bar{position:absolute;top:.75rem;left:50%;width:2rem;height:.25rem;border-radius:.5rem;background:#4b5563;transform:translateX(-50%)}
+.fb-handle:focus-visible{outline:2px solid var(--c-cyan);outline-offset:-2px}
 
 /* ===================================================================
    21st.dev — « Ticket Confirmation Card », auteur ravikatiyar162
@@ -260,10 +268,11 @@ body.fb-no-scroll{overflow:hidden}
    p-3 bg-primary/10 rounded-full ; corps : px-8 pb-8 space-y-6 ; ligne :
    w-full border-t-2 border-dashed border-border ; grille : grid grid-cols-2
    gap-4 ; encadre : bg-muted/50 p-4 rounded-lg flex items-center space-x-4.
-   Adaptations : encoches posees sur la ligne en pointilles (la « dechirure »),
-   marges de 24 px au telephone ; ni confettis ni code-barres.
+   Adaptations : encoches posees sur la ligne en pointilles (la « dechirure ») et coupees
+   au bord de la carte (overflow hidden : deux tickets cote a cote ne forment plus de tache
+   entre eux), marges de 24 px au telephone ; ni confettis ni code-barres.
    =================================================================== */
-.tc{position:relative;width:100%;background:var(--c-card);color:var(--c-ink);border-radius:1rem;z-index:1;
+.tc{position:relative;width:100%;background:var(--c-card);color:var(--c-ink);border-radius:1rem;z-index:1;overflow:hidden;
   box-shadow:0 10px 15px -3px rgb(0 0 0 / .1),0 4px 6px -4px rgb(0 0 0 / .1);border:1px solid var(--c-line);
   animation:tc-in .5s ease both}
 @keyframes tc-in{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}

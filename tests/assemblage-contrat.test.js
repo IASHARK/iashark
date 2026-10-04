@@ -31,19 +31,24 @@ const read = (f) => fs.readFileSync(path.join(ROOT, f), "utf8");
 const SORTIES = ["vraie_sortie_bb2a929.json", "exemple_sortie.json"].map((f) => require("./fixtures/moteur-v3/" + f));
 const AVEC_GRILLE = [];
 SORTIES.forEach((s) => s.matchs.forEach((v) => { if (v.marches.some((x) => x.cle === "SCORE:0-0") && v.marches.some((x) => x.cle === "PREMIER_BUT:dom")) AVEC_GRILLE.push(v); }));
-const PARIS = [null, ["home-win", 48], ["away-win", 30], ["draw", 27], ["dc-1x", 70], ["over-25", 52]];
+// [marche, ecart en points avec le v3 arrondi] : dans la tolerance de 2 points du
+// mathematicien (controle du 04/10/2026, point 2).
+const PARIS = [null, ["home-win", 1], ["away-win", -1], ["draw", 0], ["dc-1x", 1], ["over-25", -1]];
 
 // Match tel que le pipeline le laisse apres publication des paris, puis les nouveaux champs
 // poses par les MEMES fonctions que .github/workflows/update-data.yml.
 function matchPipeline(v, pr) {
-  const m = { id: 1, home: { n: v.domicile }, away: { n: v.exterieur },
+  const m = { id: 1, home: { n: v.domicile }, away: { n: v.exterieur }, league_key: "mls",
     moteur_v3: { source: "v3", origine_probabilite: "modèle + cotes", couverture: v.couverture }, v3_fiabilite: { couverture: "vérifiée" },
     v3_marches: v.marches.map((x) => ({ cle: x.cle, probabilite: Math.round(x.probabilite * 1000) / 10 })) };
-  if (pr) Object.assign(m, { pari_rec: "x", market_id: pr[0], chance_iashark: pr[1] });
+  if (pr) {
+    const pv = m.v3_marches.find((x) => x.cle === P.cleV3DuMarche(pr[0])).probabilite;
+    Object.assign(m, { pari_rec: "x", market_id: pr[0], chance_iashark: Math.round(pv) + pr[1] });
+  }
   P.poserPanneaux([m]);
   S.poserSections([m]);
   m.sim_15min = SIM.champPipeline({ lambdaH: 1.5, lambdaA: 1.2, favori: "home", ligueApi: 39, ajouts: S.ajoutsSimulation() });
-  const pb = V3.premiersButeursV3(v);
+  const pb = V3.premiersButeursV3(v, { ligue: m.league_key });
   if (pb.length) m.v3_premiers_buteurs = pb;
   return m;
 }
@@ -67,7 +72,7 @@ test("feux du mathematicien : NO-GO et « en_attente » ne sont jamais produits 
   assert.equal(V.match.score_le_plus_fou, "NO-GO");
   assert.notEqual(V.match.arbitre, "GO", "arbitre : jamais tant que l'heure de nomination n'est pas mesuree");
   assert.notEqual(V.tickets.buteur_du_jour, "GO", "buteur du jour : aucun verdict sur « le plus probable de la journee »");
-  const m = matchPipeline(AVEC_GRILLE[0], ["home-win", 48]);
+  const m = matchPipeline(AVEC_GRILLE[0], ["home-win", 1]);
   assert.doesNotMatch(JSON.stringify(m.sim_15min), /chaude|hot|zone/i);
   assert.ok(!("simulation_count" in m) && !("mc_scores_fou" in m));
   for (const k of ["film_tr", "film_tr_equipes", "et_si", "qui_ouvre", "premier_but_avant_pause", "minute_mediane_premier_but", "premier_buteur", "sim_resume"]) assert.equal(V.match[k], "GO", k);
@@ -128,7 +133,13 @@ test("film du match : tr, tr_dom, tr_ext du pipeline en pourcentages entiers", (
   m.events_home = { games: 20, slots: [3, 4, 3, 8, 1, 6].map((n) => ({ n })), slots_against: [4, 2, 3, 7, 7, 5].map((n) => ({ n })) };
   m.events_away = { games: 20, slots: [2, 3, 3, 4, 5, 6].map((n) => ({ n })), slots_against: [3, 3, 4, 4, 4, 5].map((n) => ({ n })) };
   const h = rendre(m).secs.film;
-  const ligne = specs(h)[0].data.datasets.find((d) => d.type === "line");
+  // La courbe a son propre graphique (avec son echelle), sous les barres (controle UX du 04/10).
+  const sp = specs(h);
+  assert.equal(sp[0].type, "bar");
+  assert.ok(!sp[0].data.datasets.some((d) => d.type === "line"), "plus de courbe posee sur l'axe des buts");
+  const ligne = sp[1].data.datasets[0];
+  assert.equal(sp[1].type, "line");
+  assert.equal(sp[1].options.scales.x.offset, true, "alignee sur les 6 colonnes des barres");
   assert.deepEqual(ligne.data, m.sim_15min.tr.map((x) => Math.round(x * 100)));
   const details = JSON.parse(h.match(/data-f-all="([^"]*)"/)[1].replace(/&quot;/g, '"'));
   details.forEach((d, i) => {
@@ -160,7 +171,7 @@ test("jumeaux : la sortie de lib/jumeaux.js est rendue telle quelle (comptes, pc
 test("chaque champ produit est lu par l'interface (ou volontairement ignore, raison ecrite)", () => {
   const src = read("lib/match-sections.js") + read("lib/aujourdhui.js") + read("match-page.js");
   const lit = (k) => new RegExp("[.\"']" + k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b").test(src);
-  const m = matchPipeline(AVEC_GRILLE[0], ["home-win", 48]);
+  const m = matchPipeline(AVEC_GRILLE[0], ["home-win", 1]);
   const IGNORES = {
     v: "numero de version du format, pas un chiffre affiche",
     premier: "sim_15min.premier : le verdict c1 prend la grille v3 (premier_but), pas la simulation",

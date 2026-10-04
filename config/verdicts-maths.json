@@ -6,7 +6,9 @@
     "categories_no_go : categories exclues des tickets, de la Selection en or et du buteur du jour : { \"ligue\": \"<league_key>\" } et/ou { \"famille\": \"1N2\" | \"DC\" | \"OU2.5\" } (absent = toutes).",
     "marches_panneau.cles_exclues / familles_exclues : marches du panneau « Marches » que le mathematicien dit faux (cle du moteur v3, ex. « SCORE:2-1 », ou famille, ex. « SCORE »).",
     "04/10/2026 : verdicts-maths-tickets.md (e, f, g) et verdicts-maths-temps.md (a, b, c, d) lus ; valeurs ci-dessous. Chaque GO est un « GO avec condition » : les conditions sont appliquees dans le code (lib/tickets-du-jour.js, lib/run-output/jambes-du-jour.js, lib/marches-panneau.js, lib/simulation-15min.js, lib/sections-match.js, lib/moteur-v3.js) et le mathematicien doit revoir l'integration sur les vrais fichiers du jour avant la mise en ligne.",
-    "competitions_jambes : types de competition (config/leagues.json#leagues[].kind) et cles de ligue exclus des tickets, de la Selection en or et du buteur du jour."
+    "competitions_jambes : types de competition (config/leagues.json#leagues[].kind) et cles de ligue exclus des tickets, de la Selection en or et du buteur du jour.",
+    "perimetre_v3 (controle du mathematicien du 04/10/2026, points 1 et 2) : (1) les nouvelles sections de la page match (sim_15min, sim_resume, premier_but, v3_premiers_buteurs) et les lignes du moteur v3 du panneau Marches ne sont produites QUE pour les 12 championnats mesures du v3 (ligues), en plus de la couverture « vérifiée » : jamais une selection (Ligue des nations, eliminatoires), une coupe ou un championnat « données limitées », ou seul le 1N2 est teste. (2) Quand la chance du pari affichee par l'Avis s'ecarte de plus de ecart_max_avis_points de la probabilite du moteur v3 pour le MEME marche, ni sim_resume, ni premier_but, ni « Et si » (sim_15min.si, si_affiche), ni premier buteur, ni ligne du v3 au panneau : l'Avis reste seul (cas reel du 03/10 : Macedoine du Nord - Ecosse, Avis 58 %, v3 40,5 %).",
+    "categories_no_go (controle du mathematicien du 04/10/2026, point 3) : plus/moins 1,5 et 3,5 buts et « les deux marquent » restent hors des tickets et de la Selection en or tant qu'au moins 300 jambes par famille, a cote 1,40-1,70, n'ont pas ete mesurees avec la chance reellement affichee (le verdict e ne mesure que 1N2, double chance et plus/moins 2,5)."
   ],
   "tickets": {
     "chance_ticket": "GO",
@@ -120,6 +122,18 @@
       "ligue": "argentina_liga_profesional",
       "famille": "DC",
       "raison": "correction -13 points de la voie modele appliquee a la voie cotes du marche : chance affichee trop basse de 14 points (verdicts-maths-tickets.md §1)"
+    },
+    {
+      "famille": "OU1.5",
+      "raison": "non mesure dans la fourchette 1,40-1,70 avec la chance affichee (verdict e : 1N2, DC et plus/moins 2,5 seulement) ; exclu tant que 300 jambes au moins ne sont pas mesurees (controle du mathematicien du 04/10/2026, point 3)"
+    },
+    {
+      "famille": "OU3.5",
+      "raison": "non mesure dans la fourchette 1,40-1,70 avec la chance affichee (verdict e : 1N2, DC et plus/moins 2,5 seulement) ; exclu tant que 300 jambes au moins ne sont pas mesurees (controle du mathematicien du 04/10/2026, point 3)"
+    },
+    {
+      "famille": "BTTS",
+      "raison": "non mesure dans la fourchette 1,40-1,70 avec la chance affichee (verdict e : 1N2, DC et plus/moins 2,5 seulement) ; exclu tant que 300 jambes au moins ne sont pas mesurees (controle du mathematicien du 04/10/2026, point 3)"
     }
   ],
   "competitions_jambes": {
@@ -133,5 +147,24 @@
       "ecl"
     ],
     "source": "verdicts-maths-tickets.md §1 point 6 : jambes seulement dans les competitions ou le pari simple est mesure (championnats ; selections : Ligue des nations et eliminatoires Europe). Coupes nationales (kind « cup »), tournois (kind « tournoi ») et coupes d'Europe (ldc, el, ecl) : non mesures dans la fourchette, exclus tant qu'ils ne le sont pas."
+  },
+  "perimetre_v3": {
+    "ligues": [
+      "premier",
+      "laliga",
+      "seriea",
+      "bundesliga",
+      "ligue1",
+      "eredivisie",
+      "primeira",
+      "mls",
+      "liga_mx",
+      "argentina_liga_profesional",
+      "jleague",
+      "suede"
+    ],
+    "ecart_max_avis_points": 2,
+    "source": "controle du mathematicien du 04/10/2026 (points 1 et 2) : a1 condition 1, b1 condition 4, c3 condition 4 et f limitent ces calculs aux 12 championnats du v3 ; seuil P8 fixe a 2 points.",
+    "date": "2026-10-04"
   }
 }

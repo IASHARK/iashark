@@ -6,7 +6,10 @@
    « Shimmer Button », icones Lucide. Ce fichier ne fait que la mise en page. */
 .aj{--aj-cyan:#20d5ef;--aj-text:#f4f7fb;--aj-soft:#a3b1c2;--aj-dim:#8796a8;--aj-line:rgba(141,179,211,.16);--aj-card:#0d1520;--aj-gold:#e8c46a;--aj-gold2:#f6dc95;
   --tc-bg:#060b12;
-  display:grid;gap:14px;width:min(1200px,calc(100% - 32px));margin:0 auto;padding:28px 0 34px;color:var(--aj-text);font-family:"DM Sans",Inter,system-ui,sans-serif}
+  display:grid;gap:14px;width:min(1200px,calc(100% - 32px));margin:0 auto;padding:28px 0 34px;color:var(--aj-text);font-family:"DM Sans",Inter,system-ui,sans-serif;
+  /* La mise en page suit la largeur du BLOC (requetes @container), pas celle de l'ecran : dans
+     la colonne de 880 px du compte, les cartes ne sont plus ecrasees (controle UX du 04/10). */
+  container-type:inline-size;container-name:aj}
 .aj--compte{--tc-bg:#0a1420;width:100%;padding:0}
 .aj[hidden]{display:none}
 .aj *{box-sizing:border-box}
@@ -63,13 +66,13 @@
 .or-l li{display:grid;grid-template-columns:28px minmax(0,1fr) auto auto;align-items:center;gap:10px;padding:10px 0;border-top:1px solid rgba(232,196,106,.14)}
 .or-l li:first-child{border-top:0}
 .or-r{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;border:1px solid rgba(232,196,106,.6);color:var(--aj-gold2);font:800 13px "DM Sans",sans-serif}
-.or-c{min-width:46px;padding:2px 8px;border-radius:9999px;background:rgba(232,196,106,.16);color:#fbe7b5;font:700 13px "Space Mono",monospace;text-align:center}
+.or-c{min-width:46px;padding:2px 8px;border-radius:9999px;background:rgba(232,196,106,.16);color:#fbe7b5;font:700 13px "DM Sans",Inter,sans-serif;font-variant-numeric:tabular-nums;text-align:center;white-space:nowrap}
 .or .tk-l{padding:0}
 /* Buteur du jour : ligne joueur + jauge circulaire (Magic UI). */
 .bt{display:grid;border:1px solid rgba(141,179,211,.24);border-radius:16px;background:var(--aj-card)}
 .bt-row{display:grid;grid-template-columns:46px minmax(0,1fr) auto;align-items:center;gap:12px;padding:14px 16px}
 .bt-av{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:#13283a;color:var(--aj-cyan);font:800 15px "DM Sans",sans-serif}
-.bt-fake-v{font:700 18px "Space Mono",monospace}
+.bt-fake-v{font:700 18px "DM Sans",Inter,sans-serif;font-variant-numeric:tabular-nums}
 .bt.is-off .bt-row{opacity:.55}
 /* Deblocage : un cadenas, une ligne, un seul bouton (Magic UI Shimmer Button). */
 .aj-unlock{display:grid;gap:12px;justify-items:stretch;padding:18px 16px;border:1px solid rgba(32,213,239,.32);border-radius:16px;background:#0a1521}
@@ -78,19 +81,19 @@
 .aj-unlock-i .lucide{width:18px;height:18px}
 .aj-small{margin:0;color:var(--aj-soft);font-size:12.5px;text-align:center}
 .aj-legal{margin:0;color:var(--aj-dim);font-size:12px}
-/* Ordinateur : les deux tickets cote a cote, la Selection en or et le buteur a
-   droite (grand ecran) ou dessous, cote a cote (ecran moyen). */
-@media (min-width:900px){
-  .aj-col-t,.aj-col:not(.aj-col-t){grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+/* Bloc large : les deux tickets cote a cote (espace de 28 px : les encoches ne se touchent
+   plus), la Selection en or et le buteur dessous, cote a cote ; tres large : a droite. */
+@container aj (min-width:780px){
+  .aj-col-t,.aj-col:not(.aj-col-t){grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;column-gap:28px}
   .aj-unlock{grid-template-columns:1fr auto;align-items:center}
   .aj-unlock .aj-cta{width:auto;min-width:260px}
   .aj-small{grid-column:1/-1;text-align:left}
 }
-@media (min-width:1180px){
-  .aj-grid{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+@container aj (min-width:1150px){
+  .aj-grid{grid-template-columns:minmax(0,2fr) minmax(0,1fr);column-gap:28px}
   .aj-col:not(.aj-col-t){grid-template-columns:minmax(0,1fr)}
 }
-@media (max-width:420px){
+@container aj (max-width:420px){
   .tk-leg{grid-template-columns:52px minmax(0,1fr) auto!important;row-gap:4px!important}
   .tk-leg .tk-c{grid-column:2/4;justify-self:start}
   .or-l li{grid-template-columns:28px minmax(0,1fr) auto}

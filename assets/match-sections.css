@@ -32,7 +32,7 @@
 .x-sw-l{height:2px;background:#f4f7fb;border-radius:1px}
 .x-sw-d{background:transparent;border:2px dashed #cbd5e1}
 .x-lab{min-width:0;color:var(--text)}
-.x-count{color:var(--text);font:700 14px var(--mono);white-space:nowrap}
+.x-count{color:var(--text);font:700 14px var(--body,"DM Sans",sans-serif);font-variant-numeric:tabular-nums;white-space:nowrap}
 /* D. anneau Chart.js + legende */
 .x-sim-g{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:center}
 .x-donut{max-width:170px}
@@ -42,6 +42,7 @@
 .f-tabs .hu-tablist{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;overflow:visible}
 .f-tabs .hu-tab{justify-content:center;padding:.5rem 0;font-size:12.5px}
 .f-detail{margin:0;min-height:3em;color:var(--soft);font-size:13.5px;line-height:1.5}
+.f-line-t{margin:4px 0 -6px!important;font-size:12.5px!important}
 /* F. qui ouvre le score + Et si */
 .x-first{border-radius:6px;overflow:hidden}
 .x-facts{display:grid;gap:6px;margin:0;padding:0;list-style:none}
@@ -53,6 +54,9 @@
 .e-d.is-pos{color:var(--green)}
 .e-d.is-neg{color:var(--red)}
 .e-list li{grid-template-columns:12px minmax(0,1fr) auto auto}
+/* « Et si » : 3 onglets egaux, libelles courts sur deux lignes au plus (rien ne sort de l'ecran). */
+.e-box .hu-tablist{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;overflow:visible}
+.e-box .hu-tab{justify-content:center;padding:.5rem .3rem;white-space:normal;text-align:center;line-height:1.25;overflow-wrap:anywhere}
 /* G. jumeaux */
 .j-t{margin:4px 0 6px!important;color:var(--text)!important;font:700 15px var(--body)!important}
 .j-ex{display:grid;gap:8px;margin:0;padding:0;list-style:none}
@@ -90,7 +94,7 @@
 .b-stats{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0}
 .b-stats div{display:flex;align-items:baseline;gap:6px}
 .b-stats dt{color:var(--muted);font-size:12px}
-.b-stats dd{margin:0;font:700 13.5px var(--mono);color:var(--text)}
+.b-stats dd{margin:0;font:700 13.5px var(--body,"DM Sans",sans-serif);font-variant-numeric:tabular-nums;color:var(--text)}
 .b-ech{margin:0;color:var(--muted);font-size:11.5px}
 .b-link{display:inline-flex;align-items:center;gap:4px;color:var(--accent);font-weight:600;font-size:13.5px;text-decoration:none;min-height:44px}
 .b-more{display:grid;gap:0;margin:0;padding:0;list-style:none}
@@ -109,8 +113,11 @@
 .mk-match{margin:-6px 0 0;color:var(--muted);font-size:12.5px}
 .mk-search{position:relative;display:block}
 .mk-search .x-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
-.mk-search input{width:100%;min-height:44px;padding:0 12px 0 36px;border:1px solid var(--line2);border-radius:10px;background:#0a121c;color:var(--text);font:500 14px var(--body)}
+.mk-search input{width:100%;min-height:44px;padding:0 12px 0 36px;border:1px solid var(--line2);border-radius:10px;background:#0a121c;color:var(--text);font:500 16px var(--body)}
 .mk-search input:focus{outline:2px solid var(--accent);outline-offset:1px}
+/* Familles : les onglets passent a la ligne (aucun onglet cache hors de l'ecran). */
+.mk-tabs .hu-tablist{flex-wrap:wrap;overflow:visible;gap:0}
+.mk-tabs .hu-tab{padding:.5rem .65rem}
 .mk-legend{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:0;color:var(--muted);font-size:11.5px}
 .mk-legend .hu-badge{font-size:11px;padding:0 .45rem}
 .mk-legend span:first-child{margin-right:4px}
@@ -146,11 +153,10 @@
      panneau Marches (avant : bande sombre sur toute la largeur, une ligne du panneau cachee). */
   .page.has-mk .mnav:before{box-shadow:0 1px 0 var(--line);clip-path:none}
 }
-/* Sommaire : centre quand il tient, defilable depuis la premiere puce sinon (avec
-   justify-content:center, la puce « Avis » etait coupee a gauche et inatteignable). */
+/* Sommaire sur ordinateur et tablette : les puces passent a la ligne (controle UX du 04/10 :
+   a 1440 px, la puce « Joueurs » sortait du cadre et la barre de defilement etait cachee). */
 @media(min-width:720px){
-  .mnav-chips{justify-content:flex-start}
-  .mnav-chips::before,.mnav-chips::after{content:"";margin:auto}
+  .mnav-chips{flex-wrap:wrap;overflow:visible;justify-content:center;row-gap:6px}
 }
 
 /* Apercu flou du match bloque : constantes dessinees par les memes composants */

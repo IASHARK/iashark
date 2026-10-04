@@ -658,7 +658,9 @@ function render(raw,o){
     MS.sections(c).forEach(([k,html,lab])=>secs.push([k,html,t(lab[0],lab[1]),false]));
     if(o.panneau!==false){
       if(o.vuePro){const p=MS.panneau(c);if(p)panneau={html:p.html,nb:p.nb,fab:true};}
-      else if(o.verrouPro){
+      // Panneau flou (« les N marches ») : en francais seulement, le seul ou le panneau existe
+      // pour un abonne (libelles du calcul ; controle de l'avocat du diable du 04/10, point 4).
+      else if(o.verrouPro&&estFr()){
         const cta=boutonAction(window.IasharkOffrePro?IasharkOffrePro.lienAbonnement('month',cheminMatch(raw)):lien('abonnement.html'),t('match_v4.panel_cta','Passe Pro'),suivi('match_gate_unlock').trim(),'mk-cta');
         panneau={html:MS.panneauFlou(raw.nb_marches,cta),nb:n(raw.nb_marches),flou:true,fab:true};
       }
@@ -689,8 +691,10 @@ function renderProWall(raw,ctx){
   const repli=`<section class="op op--vitrine"><h2 class="op-title">${esc(t('offre_pro.title_match','Passe Pro pour ouvrir ce match'))}</h2>${boutonAction(lien('abonnement.html?duree=month&next='+encodeURIComponent(cheminMatch(raw))),t('match_v4.panel_cta','Passe Pro'),suivi('match_gate_unlock').trim())}</section>`;
   const secs=[['offre',`<div id="offreMatch" class="gate">${repli}</div>`,null,true]];
   if(MS)secs.push(['apercu',MS.apercuFlou(),null,true]);
-  const cta=window.IasharkComposants?IasharkComposants.boutonShimmer({href:'#sec-offre',label:t('match_v4.panel_cta','Passe Pro'),icone:'arrow-up',cls:'mk-cta',attrs:'data-mk-scroll'}):`<a class="mu-shimmer mk-cta" href="#sec-offre" data-mk-scroll>${esc(t('match_v4.panel_cta','Passe Pro'))}</a>`;
-  paint(vm,secs,{sansStats:true,panneau:MS?{html:MS.panneauFlou(pub.nb_marches,cta),flou:true,fab:false}:null});
+  // Panneau flou (ordinateur) : un cadenas et la ligne « Ce que tu debloques », SANS bouton :
+  // le seul bouton de la page est celui du composant de paiement (controle UX du 04/10).
+  // En francais seulement (controle de l'avocat du diable du 04/10, point 4).
+  paint(vm,secs,{sansStats:true,panneau:MS&&estFr()?{html:MS.panneauFlou(pub.nb_marches,''),flou:true,fab:false}:null});
   const box=document.getElementById('offreMatch');
   if(window.IasharkOffrePro&&box)IasharkOffrePro.mount(box,{mode:'vitrine',contexte:'match',next:cheminMatch(raw),connecte:!!(ctx&&ctx.session),sousTitre:enTeteOffre(pub),suivi:'match_gate_unlock'});
 }
@@ -703,12 +707,12 @@ function renderAuthWall(raw){
   const retour=encodeURIComponent(cheminMatch(raw));
   const sous=enTeteOffre(vm._raw);
   const carte=`<section class="op op--vitrine gate" aria-labelledby="opCompteT">
-    <div class="op-head"><span class="op-lock" aria-hidden="true">${lucide('lock','')}</span><h2 class="op-title" id="opCompteT">${esc(t('match_v4.free_title','Ce match est offert aujourd’hui'))}</h2>${sous?`<div class="op-sub">${sous}</div>`:''}<p class="op-from">${esc(t('match_v4.free_sub','Crée ton compte gratuit pour ouvrir toute l’analyse. Sans carte bancaire.'))}</p></div>
+    <div class="op-head"><span class="op-lock" aria-hidden="true">${lucide('lock','')}</span><h2 class="op-title" id="opCompteT">${esc(t('match_v4.free_title','Ce match est offert aujourd’hui'))}</h2>${sous?`<div class="op-sub">${sous}</div>`:''}<p class="op-from">${esc(t('match_v4.free_sub','Crée ton compte gratuit pour ouvrir l’analyse de ce match. Sans carte bancaire.'))}</p></div>
     ${boutonAction(lien('inscription.html?next='+retour),t('match_v4.free_cta','Créer mon compte gratuit'),suivi('match_avis_unlock').trim())}
     <a class="op-alt" href="${esc(lien('connexion.html?next='+retour))}">${esc(t('match_v4.free_login','J’ai déjà un compte'))}</a>
   </section>`;
   const secs=[['offre',carte,null,true]];
-  if(MS)secs.push(['apercu',MS.apercuFlou(),null,true]);
+  if(MS)secs.push(['apercu',MS.apercuFlou({offert:true}),null,true]);
   paint(vm,secs,{sansStats:true});
 }
 // Apercu : en-tete du match (donnees publiques, aucune sortie du modele) et

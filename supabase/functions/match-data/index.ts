@@ -125,7 +125,8 @@ function estGratuit(m: Record<string, unknown>): boolean {
 // 04/10/2026 : panneau « Marches » et ses sources (marches_panneau, v3_marches, marches_flux),
 // Pro seulement meme sur le match offert (tests/tickets-du-jour-contrat.test.js : meme liste).
 // 04/10/2026 : « Qui ouvre le score ? » (premier_but) et premier buteur (v3_premiers_buteurs).
-const CHAMPS_PRO_SEULEMENT = ["sim_15min", "stats_iashark", "lecture_match", "marches_panneau", "v3_marches", "marches_flux", "premier_but", "v3_premiers_buteurs"];
+// 04/10/2026 (avocat du diable, point 5) : « 10 000 fois » (sim_resume) et jumeaux (jumeaux).
+const CHAMPS_PRO_SEULEMENT = ["sim_15min", "stats_iashark", "lecture_match", "marches_panneau", "v3_marches", "marches_flux", "premier_but", "v3_premiers_buteurs", "sim_resume", "jumeaux"];
 function sansChampsPro(m: Record<string, unknown>): Record<string, unknown> {
   const copy = { ...m };
   for (const f of CHAMPS_PRO_SEULEMENT) delete copy[f];

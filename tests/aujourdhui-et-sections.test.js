@@ -81,6 +81,58 @@ test("Aujourd'hui, Pro : tout ouvert, aucun bouton de paiement ; Selection en or
   assert.doesNotMatch(copie, INTERDITS);
 });
 
+// Controle du trader de cotes (04/10/2026, point 2) : le texte copie dit la meme chose que la
+// carte quand un match est reporte ou annule ; controle UX : « 15 h » insecable.
+test("Copier le ticket : match annule ou reporte nomme, ligne « Sans ce match » ; heures insecables", () => {
+  const annule = Object.assign({}, X5, { sans_matchs_reportes: { nb_matchs: 2, cote_totale: 2.51, chance: 40 },
+    jambes: [Object.assign({}, X5.jambes[0], { etat: "annule" }), X5.jambes[1], X5.jambes[2]] });
+  const c = AJ.texteCopie(annule, JOUR);
+  assert.match(c, /Porto – Braga \(21\u00a0h 30\)|Porto – Braga \(21\u00a0h\u00a030\)/);
+  assert.match(c, /· match annulé/);
+  assert.doesNotMatch(c, /match reporté/);
+  assert.match(c, /Sans ce match : cote 2,51 · chance 40\s?%\./);
+  const rep = Object.assign({}, annule, { jambes: [Object.assign({}, X5.jambes[0], { etat: "reporte" }), X5.jambes[1], X5.jambes[2]] });
+  assert.match(AJ.texteCopie(rep, JOUR), /· match reporté/);
+  // La carte : la meme ligne « Sans ce match » et le bon mot.
+  const h = AJ.html({ version: 1, jour: JOUR, niveau: "pro", tickets: [annule], selection_or: null, buteur_du_jour: null }, {});
+  assert.match(h, /Match annulé : la plupart des opérateurs/);
+  assert.match(h, /Sans ce match : cote 2,51/);
+  // Sans match reporte ni annule : pas de ligne « Sans ce match ».
+  assert.doesNotMatch(AJ.texteCopie(Object.assign({}, X5, { sans_matchs_reportes: { nb_matchs: 2, cote_totale: 2.51, chance: 40 } }), JOUR), /Sans ce match/);
+  assert.equal(AJ.heure(JOUR + " 15:00"), "15\u00a0h");
+  assert.equal(AJ.heure(JOUR + " 15:30"), "15\u00a0h\u00a030");
+});
+
+// Controle de l'avocat du diable (04/10/2026, points 1, 2 et 4) : interrupteurs fermes tant que
+// la fonction tickets-du-jour n'est pas deployee et que l'essai n'est pas dans les CGV ; tickets
+// et panneau seulement la ou ils sont vrais.
+test("interrupteurs : essai et tickets fermes ; bloc « Aujourd'hui » seulement ouvert ET marche francais", () => {
+  assert.equal(OP.OUVERT.essai, false);
+  assert.equal(OP.OUVERT.tickets, false);
+  assert.equal(OP.essaiOuvert({ trial_days: 7, trial_intervals: ["month"] }), 0, "« 7 jours offerts » jamais ecrit");
+  assert.equal(AJ.enLigne({}), false);
+  assert.equal(AJ.enLigne({ ouvert: true }), true);
+  OP.OUVERT.tickets = true;
+  try {
+    assert.equal(AJ.enLigne({}), true);
+    globalThis.IASHARK_MARKET = { code: "gb" };
+    assert.equal(AJ.enLigne({}), false, "hors de France : cotes d'operateurs francais, rien");
+    const textes = OP.avantages().map((a) => a[1]).join(" | ");
+    assert.doesNotMatch(textes, /tickets x5/);
+    globalThis.IASHARK_MARKET = { code: "fr" };
+    assert.match(OP.avantages().map((a) => a[1]).join(" | "), /tickets x5 et x10/);
+  } finally { OP.OUVERT.tickets = false; delete globalThis.IASHARK_MARKET; }
+  assert.doesNotMatch(OP.avantages().map((a) => a[1]).join(" | "), /tickets/);
+  // Panneau Marches : en francais seulement (libelles du calcul).
+  globalThis.I18N = { locale: "en", t: (k, fb) => fb };
+  try { assert.doesNotMatch(OP.avantages().map((a) => a[1]).join(" | "), /marchés/); } finally { delete globalThis.I18N; }
+  assert.match(OP.avantages().map((a) => a[1]).join(" | "), /Tous les marchés du match/);
+  // Ligne « gratuit » : plus de buteur du jour promis.
+  const fr = require("../i18n/dict/fr.json");
+  assert.doesNotMatch(fr.offre_pro.free_line_tickets, /buteur/);
+  assert.doesNotMatch(fr.offre_pro.free_line, /complète/);
+});
+
 test("Aujourd'hui : reponse illisible ou absente = bloc entier masque (aucun trou)", () => {
   assert.equal(AJ.html(null, {}), "");
   assert.equal(AJ.html({ version: 2, jour: JOUR, tickets: [] }, {}), "");
@@ -140,8 +192,11 @@ test("film du match : pas de zone chaude (NO-GO), chances par quart d'heure en e
     stats_iashark: { dom: { tout: { n: 58, tranches: { n: 58, pour: tr([0.2, 0.2, 0.3, 0.2, 0.3, 0.4]), contre: tr([0.1, 0.2, 0.1, 0.2, 0.2, 0.3]) } } }, ext: { tout: { n: 61, tranches: { n: 61, pour: tr([0.1, 0.1, 0.1, 0.2, 0.2, 0.2]), contre: tr([0.2, 0.2, 0.2, 0.2, 0.2, 0.3]) } } }, zone_chaude: { tranche: 5, net: true } } };
   const h = MS.film(ctx(raw));
   assert.doesNotMatch(h, /zone chaude|Zone chaude/i);
-  const spec = specs(h)[0];
-  assert.deepEqual(spec.data.datasets[4].data, [29, 31, 38, 35, 36, 47]);
+  // La chance d'au moins un but a son propre graphique avec son echelle (controle UX du 04/10).
+  const sp = specs(h);
+  assert.equal(sp[0].data.datasets.length, 4, "barres seules");
+  assert.equal(sp[1].type, "line");
+  assert.deepEqual(sp[1].data.datasets[0].data, [29, 31, 38, 35, 36, 47]);
   assert.match(h, /archive IASHARK/);
   assert.match(h, /Chance de marquer dans ce quart d’heure \(modèle\) : Almeria 29\s?%, Burgos 25\s?%\./);
   assert.doesNotMatch(require("fs").readFileSync(require("path").join(__dirname, "..", "lib/match-sections.js"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, ""), /zone_chaude/);
@@ -222,4 +277,46 @@ test("composant de paiement : textes sans mot interdit ni fausse urgence", () =>
     assert.match(h, /Passe Pro pour ouvrir ce match/);
   }
   assert.match(OP.html({ mode: "vitrine", contexte: "general", plans, choisi: "month", jours: 7, connecte: false, uid: "v" }), /Commencer mes 7 jours gratuits/);
+});
+
+// Controle UX du 04/10/2026 : aucune repetition (le nombre de buts et le film), « Et si » ecrit
+// tout de suite ses valeurs finales, apercu du match offert, un seul bouton sur le match bloque.
+test("aucune repetition : plus/moins de k,5 buts et le premier but avant la 15e renvoient a leur section", () => {
+  const dit = MS.registre();
+  const raw = { sim_resume: { v: "grille-v3-1", base: 10000, issues: { dom: 4800, nul: 2300, ext: 2900 }, scores: [{ score: "1-0", n: 1100 }, { score: "0-0", n: 800 }],
+    total_buts: [{ buts: "0", n: 800 }, { buts: "1", n: 2100 }, { buts: "2", n: 2600 }, { buts: "3", n: 1000 }, { buts: "4+", n: 3500 }] } };
+  MS.simulation({ raw, vm: vm(), vuePro: true, verrouPro: false, dit });
+  for (const id of ["TOTAL:plus3.5", "TOTAL:moins3.5", "over-35", "under-35", "TOTAL:plus0.5", "TOTAL:moins0.5"]) assert.equal(MS.dejaEcrit(id, dit), "sim", id);
+  for (const id of ["TOTAL:plus2.5", "over-25", "TOTAL:plus1.5", "PREMIER_BUT:avant30"]) assert.equal(MS.dejaEcrit(id, dit), null, id + " : chiffre different, garde");
+  // Film : « au moins un but de 1 a 15 » = « premier but avant la 15e » : un seul chiffre.
+  dit.add("but_par_tranche", "film");
+  assert.equal(MS.dejaEcrit("PREMIER_BUT:avant15", dit), "film");
+  const p = MS.panneau({ raw: { marches_panneau: { v: "panneau-2", nb: 3, familles: [{ cle: "buts", libelle: "Buts", marches: [ligne("TOTAL:plus3.5", "Plus de 3,5 buts", 35), ligne("over-25", "Plus de 2,5 buts", 45)] },
+    { cle: "premier_but", libelle: "Premier but", marches: [ligne("PREMIER_BUT:avant15", "Premier but avant la 15e minute", 29)] }] } }, vm: vm(), vuePro: true, verrouPro: false, dit });
+  assert.match(p.html, /Plus de 3,5 buts<\/span><span class="mk-r"><a class="mk-ref" href="#sec-sim">Dans « 10 000 matchs »/);
+  assert.match(p.html, /Premier but avant la 15e minute<\/span><span class="mk-r"><a class="mk-ref" href="#sec-film">Dans « Film »/);
+  assert.match(p.html, /Plus de 2,5 buts<\/span><span class="mk-r"><span class="hu-badge lv2">45/);
+});
+
+test("Et si : valeurs finales ecrites tout de suite (aucun compteur qui defile), onglets courts", () => {
+  const raw = { premier_but: { dom: 55, ext: 37, aucun: 8 }, sim_15min: { si_affiche: { dom_premier: { p1: 80, pn: 15, p2: 5 }, ext_premier: { p1: 25, pn: 30, p2: 45 }, nul_pause: { p1: 45, pn: 35, p2: 20 } } } };
+  const h = MS.premier({ raw, vm: vm(), vuePro: true, verrouPro: false, dit: MS.registre() });
+  assert.doesNotMatch(h, /data-mu-ticker/);
+  assert.match(h, /data-e-v="0">80\s?%/);
+  assert.match(h, />Almeria ouvre<\/button>/);
+  assert.match(h, /aria-label="Si Almeria marque en premier"/);
+  assert.match(h, />0-0 à la pause<\/button>/);
+});
+
+test("apercu flou : titre du match offert ; match bloque : panneau flou sans deuxieme bouton", () => {
+  assert.match(MS.apercuFlou({ offert: true }), /Aperçu : l’analyse offerte de ce match/);
+  assert.match(MS.apercuFlou(), /Aperçu : la page Pro de ce match/);
+  const flou = MS.panneauFlou(54, "");
+  assert.doesNotMatch(flou, /mu-shimmer|<a /);
+  assert.match(flou, /Ce que tu débloques : les 54 marchés de ce match/);
+  const mp = require("fs").readFileSync(require("path").join(__dirname, "..", "match-page.js"), "utf8");
+  assert.match(mp, /panneauFlou\(pub\.nb_marches,''\)/, "match bloque : aucun bouton dans le panneau flou");
+  assert.doesNotMatch(mp, /icone:'arrow-up',cls:'mk-cta'/);
+  assert.match(mp, /o\.verrouPro&&estFr\(\)/);
+  assert.match(mp, /MS&&estFr\(\)\?\{html:MS\.panneauFlou/);
 });

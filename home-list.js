@@ -185,7 +185,8 @@ function analysisFor(m,ctx,H){
   // Verrou : on sort ICI, avant de lire conf / pari_rec / market_id. Seul le
   // niveau public prob_band est repris.
   if(!ctx.isPro&&!free)return {state:'locked',band:probBandOf(m)};
-  var market=m.pari_rec?H.translateMarket(m.pari_rec):(H.marketIdLabel(m)||null);
+  // Autre marche des bookmakers (code « F… », 06/10/2026) : libelle construit depuis le code, jamais relu.
+  var market=(/^F\d+:/.test(String(m.market_id||''))?H.marketIdLabel(m):null)||(m.pari_rec?H.translateMarket(m.pari_rec):(H.marketIdLabel(m)||null));
   var c=(H.hasReliableModelOutput(m)&&m.conf!=null&&m.conf!=='')?normConf(m.conf):null;
   var pn=c==null?null:Math.min(c,10);
   if(!market)return {state:'pending',free:free,prob:pn!=null?fmtProb(pn):null};

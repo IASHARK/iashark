@@ -542,7 +542,7 @@
           return {
             id: String(m.id), matchKey: String(m.id),
             match: (m.home && m.home.n) + ' – ' + (m.away && m.away.n),
-            market: m.pari_rec, probability: Number(m.model_probability), odds: Number(m.cote_rec)
+            market: m.pari_rec, marketId: /^F\d+:/.test(String(m.market_id || '')) ? m.market_id : null, probability: Number(m.model_probability), odds: Number(m.cote_rec)
           };
         });
       });

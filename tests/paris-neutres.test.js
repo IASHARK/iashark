@@ -61,7 +61,7 @@ test("verdict du 06/10 : marches caches (joueurs, paires non contraires, tirs/ho
     { id: 231, name: "Home Anytime Goal Scorer", values: v([["Diego Sanchez", 1.5]]) }, { id: 39, name: "To Win Either Half", values: v([["Home", 1.5], ["Away", 2.5]]) }]);
   assert.ok(c.includes("F8:Yes") && !c.includes("F8:No"));
   assert.ok(!c.some((x) => /^F(231|39):/.test(x)), "jamais la methode puissance sans issue contraire");
-  assert.equal(FP.estCode("F8:No"), false); assert.equal(FP.estCode("F87:Over 8.5"), false);
+  assert.equal(FP.estPubliable("F8:No"), false); assert.equal(FP.estPubliable("F87:Over 8.5"), false);
 });
 
 test("controle Pinnacle : seulement sur les marches 1, 4, 5, 6, 13, 16, 17, 19", () => {
@@ -107,7 +107,7 @@ test("choix neutre : le plus probable dans 1,40-2,20, toutes familles, aucun bon
   assert.equal(r.publies, 1);
   assert.equal(m.market_id, "F4:Home +0.5", "le plus probable dans la fourchette (handicap a 1,42), jamais les corners a 1,40");
   assert.deepEqual([m.cote_rec, m.cote_source, m.cote_bookmaker, m.marche], ["1.42", "indicative", null, "AUTRE_MARCHE"]);
-  assert.equal(m.pari_rec, "Lens (+0,5)");
+  assert.equal(m.pari_rec, "Lens +0,5 (handicap)");
   assert.equal(P.motifExceptionGel({ pari_rec: m.pari_rec, market_id: m.market_id, cote_rec: 1.42 }), null);
   const m2 = Object.assign({}, M, { id: 503 });
   P.publierPronostics([m2], [], { configLigues: LIGUES, figes: {}, fluxPar: { 503: { raw: raw(bets.slice().reverse()) } } });
@@ -144,7 +144,7 @@ test("reglement : score, mi-temps, evenements (ordre, minutes 00:00-09:59, contr
   const R = (code) => FP.regler(code, F);
   assert.equal(R("F1:Home"), true); assert.equal(R("F13:Away"), true); assert.equal(R("F3:Home"), true);
   assert.equal(R("F7:Away/Home"), true); assert.equal(R("F25:Home/Over 2.5"), true);
-  assert.equal(R("F14:Away"), true); assert.equal(R("F15:Home"), true); assert.equal(FP.estCode("F124:Yes"), false, "revient et gagne : cache (2e tour)");
+  assert.equal(R("F14:Away"), true); assert.equal(R("F15:Home"), true); assert.equal(FP.estPubliable("F124:Yes"), false, "revient et gagne : cache (2e tour)");
   assert.equal(R("F54:Away"), true, "but a la 10e (09:xx) : dans 00:00-09:59");
   const F11 = FP.faitsDuMatch({ fixture, events: [Object.assign({}, events[0], { time: { elapsed: 11 } })].concat(events.slice(1)) });
   assert.equal(FP.regler("F54:Draw", F11), true, "but a la 11e (10:xx) : hors des 10 premieres minutes");
@@ -184,10 +184,10 @@ test("coherence : handicaps et nouveaux marches dans le catalogue de coherence (
 
 test("pipeline : reglement des autres marches par les faits d'API-Football ; releve gardé en memoire", () => {
   assert.match(WF, /const FLUX_PARIS_REG = require\('\.\/lib\/flux-paris\.js'\);/);
-  assert.match(WF, /if\(FLUX_PARIS_REG\.estCode\(found\.market\)\)\{/);
+  assert.match(WF, /if\(\/\^F\\d\+:\/\.test\(String\(found\.market\|\|''\)\)\)\{/);
   assert.match(WF, /fixtures\/events\?fixture='\+fidF/);
   assert.match(WF, /isWin=rF==='rembourse'\?'void':rF;/);
-  assert.match(WF, /if\(FLUX_PARIS_REG\.estCode\(found\.market\)\)return;/);
+  assert.match(WF, /if\(\/\^F\\d\+:\/\.test\(String\(found\.market\|\|''\)\)\)return;/);
   assert.doesNotMatch(WF, /writeFileSync\([^)]*FLUX_PARIS/);
 });
 

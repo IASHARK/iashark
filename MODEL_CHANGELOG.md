@@ -2,6 +2,13 @@
 
 Changements qui affectent le calcul des probabilités, marchés, edge/Kelly ou la manière dont ils sont décidés. Journal complet et non-technique dans `IASHARK_V2_EXECUTION_STATE.md` ; ce fichier ne liste que ce qui touche le moteur lui-même.
 
+## 2026-10-06 (nuit) — corrections du contrôle ROUGE de l'avocat du diable
+
+- **Libellé affiché = pari réglé** : un pari « F… » s'affiche à partir de son CODE (`lib/market-labels.js#fluxLibelle`, 7 langues), jamais en relisant le libellé français (qui changeait de mi-temps, d'équipe ou perdait une condition dans 9 cas sur 17 vrais matchs). Vue du match, accueil, outils et tickets passent par le code ; test sur tous les codes publiables.
+- **Combinés et Sélection en or** : exclusions plus/moins 1,5 et 3,5 et « les deux marquent » remises ; les autres marchés des bookmakers n'y entrent jamais (mesurés comme pari de la page seulement).
+- **Publiable / réglable séparés** : un code caché après sa publication se règle toujours par ses faits (pipeline et page des résultats), jamais par son libellé.
+- **Jumeaux** de la correction « petits scores » (aucun but 14/15, nul sans les deux 24, nul et moins de 1,5 25/78) : même correction ; test d'équivalence sur tous les scores.
+
 ## 2026-10-06 (soir) — choix neutre parmi tous les marchés des bookmakers, fourchette 1,40-2,20 (verdict ORANGE du mathématicien appliqué)
 
 - **Règle** : sur chaque match dont le relevé API-Football est connu, le pari est l'issue la plus probable dont la cote affichée est entre 1,40 et 2,20 (`config/leagues.json#fiabilite.fourchette_pari`, `marge_sans_agree` à 0 pour la neutralité), parmi tous les marchés publiables de `lib/flux-paris.js` ; sinon le repli d'avant. Corners et cartons exclus.

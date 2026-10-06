@@ -2293,7 +2293,7 @@ jobs:
                 }
                 if(!joue)continue;
                 var isWin;
-                if(FLUX_PARIS_REG.estCode(found.market)){
+                if(/^F\d+:/.test(String(found.market||''))){
                   // Autre marche des bookmakers (lib/flux-paris.js) : regle avec les faits d'API-Football dont il a
                   // besoin (evenements, statistiques du match, statistiques des joueurs) ; un fait absent : en attente.
                   var besoinF=FLUX_PARIS_REG.besoins(found.market), fidF=fix.fixture&&fix.fixture.id;
@@ -3082,7 +3082,7 @@ jobs:
                   // « premiere mi-temps » comme un 0-0 faute de donnee (voir la
                   // note detaillee dans buildSettlementContext).
                   // Autre marche des bookmakers : regle seulement par le reglement principal (faits d'API-Football).
-                  if(FLUX_PARIS_REG.estCode(found.market))return;
+                  if(/^F\d+:/.test(String(found.market||'')))return;
                   var ctxE={}, htE=fix.score&&fix.score.halftime;
                   if(htE&&htE.home!=null)ctxE.halftimeHome=htE.home;
                   if(htE&&htE.away!=null)ctxE.halftimeAway=htE.away;

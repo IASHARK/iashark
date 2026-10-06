@@ -176,3 +176,18 @@ test("combines et Selection en or : exclusions plus/moins 1,5 et 3,5 et « les d
   assert.equal(r.selections.length, 0);
   assert.equal(r.exclus.autre_marche_non_mesure_en_jambe, 1);
 });
+
+// Avocat du diable (06/10, 2e controle) : un code « F… » ne doit jamais etre relu comme un libelle par marketFamily,
+// sinon « F107:Over 1.5 » devenait « plus de 107 buts » et la page affichait une fausse statistique de face-a-face.
+test("code F… : aucune statistique de face-a-face sous le pari (marketFamily -> other, h2hOutcome -> null)", () => {
+  const INS = require("../lib/insights.js");
+  const h2h = [{ home: "Lens", away: "Nice", score: "2-1" }, { home: "Nice", away: "Lens", score: "0-0" }, { home: "Lens", away: "Nice", score: "3-3" }];
+  const codes = codesPubliables();
+  assert.ok(codes.length >= 250, "au moins 250 codes publiables parcourus");
+  codes.forEach((code) => {
+    const fam = ML.marketFamily(code);
+    assert.equal(fam.family, "other", code);
+    assert.equal(INS.h2hOutcome(fam, h2h, "Lens", "Nice"), null, code);
+  });
+  assert.equal(ML.marketFamily("over-25").family !== "other", true, "les anciens marches gardent leur famille");
+});

@@ -54,7 +54,9 @@ test("verdict du 06/10 : marches caches (joueurs, paires non contraires, tirs/ho
     87, 211, 276, 176, 340, 164, 167, 168, 281, 2, 97, 228, 229, 245, 59, 61, 224, 225, 298, 10, 31, 38, 42, 46, 62].forEach((id) => assert.ok(FP.raisonExclusion(id, "x"), "bet " + id));
   ["Corners Over Under", "Cards Over/Under", "Yellow Over/Under", "RCARD", "First Card Received (3 way)", "Corners. Odd/Even", "Red Card In The Match (1st Half)", "Multicorners"].forEach((n) =>
     assert.match(FP.raisonExclusion(999, n), /corners et cartons/, n));
-  [7, 25, 54, 40, 41, 349].forEach((id) => assert.equal(FP.raisonExclusion(id, "x"), null, "publiable : " + id));
+  [7, 25, 54, 349].forEach((id) => assert.equal(FP.raisonExclusion(id, "x"), null, "publiable : " + id));
+  [185, 124, 129, 40, 41].forEach((id) => assert.ok(FP.raisonExclusion(id, "x"), "2e tour du mathematicien, cache : " + id));
+  assert.deepEqual(FP.VALEURS_EXCLUES[349], ["2 or 3 goals"], "349 : seule l'issue « 2 ou 3 buts » est cachee");
   const c = codes([B1, { id: 8, name: "Both Teams Score", values: v([["Yes", 1.9], ["No", 1.9]]) },
     { id: 231, name: "Home Anytime Goal Scorer", values: v([["Diego Sanchez", 1.5]]) }, { id: 39, name: "To Win Either Half", values: v([["Home", 1.5], ["Away", 2.5]]) }]);
   assert.ok(c.includes("F8:Yes") && !c.includes("F8:No"));
@@ -142,12 +144,13 @@ test("reglement : score, mi-temps, evenements (ordre, minutes 00:00-09:59, contr
   const R = (code) => FP.regler(code, F);
   assert.equal(R("F1:Home"), true); assert.equal(R("F13:Away"), true); assert.equal(R("F3:Home"), true);
   assert.equal(R("F7:Away/Home"), true); assert.equal(R("F25:Home/Over 2.5"), true);
-  assert.equal(R("F14:Away"), true); assert.equal(R("F15:Home"), true); assert.equal(R("F124:Yes"), true);
+  assert.equal(R("F14:Away"), true); assert.equal(R("F15:Home"), true); assert.equal(FP.estCode("F124:Yes"), false, "revient et gagne : cache (2e tour)");
   assert.equal(R("F54:Away"), true, "but a la 10e (09:xx) : dans 00:00-09:59");
   const F11 = FP.faitsDuMatch({ fixture, events: [Object.assign({}, events[0], { time: { elapsed: 11 } })].concat(events.slice(1)) });
   assert.equal(FP.regler("F54:Draw", F11), true, "but a la 11e (10:xx) : hors des 10 premieres minutes");
   assert.equal(R("F139:Away"), true); assert.equal(R("F137:Draw"), true);
   assert.equal(R("F149:Yes"), true, "90+4 compte dans 76-90"); assert.equal(R("F146:No"), true);
+  assert.equal(FP.petitScore("F146:No"), true); assert.equal(FP.petitScore("F107:Under 0.5"), true); assert.equal(FP.petitScore("F136:Draw"), true); assert.equal(FP.petitScore("F146:Yes"), false);
   assert.equal(R("F4:Home -0.5"), true); assert.equal(R("F9:Draw -1"), true); assert.equal(R("F19:Away +0.5"), true, "1re mi-temps 0-1");
   assert.equal(R("F92:Diego Sanchez#11"), null, "marche cache : jamais regle (jamais publie)");
   const sansEv = FP.faitsDuMatch({ fixture });

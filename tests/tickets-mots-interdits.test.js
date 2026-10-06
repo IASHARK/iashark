@@ -31,7 +31,19 @@ function match(id, o) {
 test("20. aucune donnee produite pour les tickets ni pour le panneau ne porte un mot interdit", async () => {
   const ms = []; for (let i = 1; i <= 10; i++) ms.push(match(i));
   const fixtureById = {}; ms.forEach((m) => { fixtureById[String(m.id)] = { fixture: { timestamp: Date.parse("2026-10-04T16:00:00Z") / 1000, status: { short: "NS" } } }; });
-  const c = T.calculerDuJour(ms, { jour: "2026-10-04", nowMs: NOW, fixtureById, configLigues: LIGUES });
+  // Regle du 06/10/2026 : candidats de chaque match (jambe sure impliquee par le pari affiche « Dom gagne » ; pari de la
+  // Selection en or qui va dans le meme sens, d'apres la grille des scores du moteur v3).
+  const pois = (l, x) => { let p = Math.exp(-l); for (let y = 1; y <= x; y++) p *= l / y; return p; };
+  const candidatsPar = {};
+  ms.forEach((m, k) => {
+    const i = k + 1;
+    for (let h = 0; h <= 6; h++) for (let a = 0; a <= 6; a++) m.v3_marches.push({ cle: "SCORE:" + h + "-" + a, probabilite: Math.round(pois(1.8, h) * pois(0.9, a) * 10000) / 100 });
+    candidatsPar[String(m.id)] = [
+      { market_id: "home-team-over-05", famille: "BUTS_DOM", cote: 1.25 + (i % 5) * 0.03, cote_anj: false, bookmaker: null, chance: 76, chance_affichee: 76, fiabilite: "vérifiée", p_modele: 78, q: 76 },
+      { market_id: "over-25", famille: "OU2.5", cote: 1.8 + i * 0.02, cote_anj: false, bookmaker: null, chance: 52, chance_affichee: 52, fiabilite: "vérifiée", p_modele: 52 + i, q: 52 },
+    ];
+  });
+  const c = T.calculerDuJour(ms, { jour: "2026-10-04", nowMs: NOW, fixtureById, configLigues: LIGUES, candidatsPar });
   const C = await import(pathToFileURL(path.join(__dirname, "..", "supabase/functions/_shared/tickets-contrat.mjs")).href);
   const lignes = ["x5", "x10", "or", "buteur"].filter((t) => c[t]).map((t) => ({ type: t, meta: c[t].meta, contenu: c[t].contenu, etats: {}, publie_a: "2026-10-04T06:00:01Z" }));
   assert.equal(lignes.length, 4);

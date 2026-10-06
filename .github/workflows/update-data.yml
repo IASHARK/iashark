@@ -4419,6 +4419,10 @@ jobs:
             // chance = cote bet365 sans marge (methode puissance, controle Pinnacle), arrondie par
             // lib/chance-iashark.js comme le reste du site ; la cote affichee dit d'ou elle vient (bet365).
             // MEME code que le robot Pro (supabase/functions/_shared/marches-flux.mjs). Champ premium marches_flux.
+            // FLUX_PARIS (06/10/2026, paris sur tous les marches) : les selections de la liste blanche (cote et chance sans
+            // marge) et toutes les cotes du bookmaker de reference, EN MEMOIRE seulement (jamais ecrites ni journalisees) :
+            // lib/pronostic.js les lit pour le pari de chaque match, les combines et la Selection en or.
+            var FLUX_PARIS={};
             try{
               var FLUX_MOD=await import(require('url').pathToFileURL(require('path').resolve('supabase/functions/_shared/marches-flux.mjs')).href);
               var CFG_FLUX=FLUX_MOD.lireConfig(JSON.parse(fs.readFileSync('config/marches-valides.json','utf8')));
@@ -4441,6 +4445,7 @@ jobs:
                 if(!raw||!CFG_FLUX.marches.size||m.status&&m.status!=='NS') return;
                 var nomEq=function(e){ return (e&&typeof e==='object'?(e.n||e.name):e)||''; };
                 var r=FLUX_MOD.selectionsDuMatch(raw,{config:CFG_FLUX,dom:nomEq(m.home),ext:nomEq(m.away),ligue:lgKey(m.league_id)});
+                FLUX_PARIS[String(m.id)]={selections:r.selections,toutes:FLUX_MOD.toutesLesCotes(raw,{config:CFG_FLUX})};
                 var liste=r.selections.map(function(x){
                   var c=CHANCE_IASHARK.chanceIashark(x.chance*100,null);
                   // 04/10/2026 : ni la cote ni le nom du bookmaker de reference (bet365, non agree en France) ; cote minimum = 1 / chance.
@@ -4496,7 +4501,7 @@ jobs:
           // (config/leagues.json#fiabilite.corrections_chance ; ex. Ligue des nations 59,1 % annonces / 56,0 % reels).
           // Enfin l'option « cote plus haute » (regle A, champ premium option_cote). Journal : compteurs seulement.
           try{
-            var rapportPub=PRONOSTIC.publierPronostics(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,figes:GEL_FIGES,chancesV3Par:CHANCES_V3_PRONO,texteMarche:TEXTE_MARCHE,cotesAnjPar:LIVRES_ANJ,relevesAnj:RELEVES_ANJ,relevesAnjEvenement:RELEVES_ANJ_EV,releveAnjA:RELEVE_ANJ_A});
+            var rapportPub=PRONOSTIC.publierPronostics(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,figes:GEL_FIGES,chancesV3Par:CHANCES_V3_PRONO,texteMarche:TEXTE_MARCHE,cotesAnjPar:LIVRES_ANJ,relevesAnj:RELEVES_ANJ,relevesAnjEvenement:RELEVES_ANJ_EV,releveAnjA:RELEVE_ANJ_A,fluxPar:FLUX_PARIS});
             var fourchetteLog=PRONOSTIC.fourchettePari(LEAGUES_CONFIG);
             console.log('  [PARIS] fourchette '+fourchetteLog.cote_min.toFixed(2)+'-'+fourchetteLog.cote_max.toFixed(2)+' : '+rapportPub.publies+' pari(s) publie(s) ('+rapportPub.dans_fourchette+' dans la fourchette, '+rapportPub.hors_fourchette+' au plus proche ; cote agreee '+rapportPub.cote_agreee+', cote du marche '+rapportPub.cote_marche+' ; '+rapportPub.gardes+' garde(s), '+rapportPub.changes+' change(s) de marche, '+rapportPub.nouveaux+' nouveau(x)) ; '+rapportPub.sans_pari+' match(s) sans pari (dont '+rapportPub.sans_cote+' sans aucune cote reelle, '+rapportPub.retires+' pari(s) retire(s)) ; '+rapportPub.figes+' fige(s) intouche(s) ; textes d\'un autre marche retires sur '+rapportPub.textes_retires+' match(s).');
           }catch(e){ console.log('::warning title=Paris::pronostics non publies ('+(e&&e.message)+').'); }
@@ -4523,17 +4528,24 @@ jobs:
             console.log('  [BUTEURS] listes deja servies gardees : '+rapportButeurs.figes+' ; joueurs absents remplaces : '+rapportButeurs.remplaces+', retires sans remplacant : '+rapportButeurs.retires+'.');
           }catch(e){ console.log('::warning title=Buteurs figes::listes non figees ('+(e&&e.message)+') : les buteurs de la page match peuvent changer a ce run.'); }
           // ================= TICKETS DU JOUR, SELECTION EN OR, BUTEUR DU JOUR (demande de Clement, 04/10/2026) =================
-          // Juste APRES la publication des paris : les jambes sont exactement les paris simples affiches sur les
-          // pages match (meme pari, meme cote, meme chance ; lib/run-output/jambes-du-jour.js). Ticket x5 (3-4 matchs,
-          // cote 4,50-5,50) et x10 (5-6 matchs, cote 9-11) : la plus grande chance parmi TOUTES les combinaisons
-          // (lib/run-output/combos.js), jamais force. Gele a sa publication dans la table tickets_du_jour (migration 0050,
+          // Juste APRES la publication des paris. Regle du 06/10/2026 (config/tickets.json) : Selection en or = 3 paris
+          // « valeur » du moteur v3 (cote 1,70-2,50, classement interne par ecart modele / cote sans marge) ; petit
+          // combine (4-5 jambes, cote 4,00-6,00) et grand combine (7-8 jambes, cote 8,50-12,00) = jambes sures (1,20-1,45)
+          // de tous les marches justes, une par match, coherentes avec le pari affiche ; la plus grande chance
+          // (lib/run-output/combos.js#meilleurCombine), jamais force. Gele a sa publication dans la table tickets_du_jour (migration 0050,
           // lib/tickets-du-jour.js) : un ticket publie ne se recalcule plus. Rien sans le feu vert du mathematicien
           // (config/verdicts-maths.json). Table ou cle absente : simple avertissement, le calcul quotidien continue.
           // data.json : statut de chaque ticket seulement (lib/public-run-output.js). Journal : statuts et compteurs seulement.
+          // 06/10/2026 (demande de Clement : « plein de marches ») : les combines et la Selection en or prennent TOUS les
+          // marches justes de chaque match (lib/pronostic.js#marchesCandidats, memes chances et memes cotes que le choix du
+          // pari), coherents avec le pari affiche (lib/marches-paris.js#coherent). Candidats en memoire seulement.
           try{
             var TICKETS_DU_JOUR=require('./lib/tickets-du-jour.js');
+            var CANDIDATS_DU_JOUR=null;
+            try{ CANDIDATS_DU_JOUR=PRONOSTIC.marchesCandidats(allMatchsData,{configLigues:LEAGUES_CONFIG,chancesV3Par:CHANCES_V3_PRONO,cotesAnjPar:LIVRES_ANJ,fluxPar:FLUX_PARIS}); }
+            catch(e){ CANDIDATS_DU_JOUR=null; console.log('::warning title=Tickets::candidats des combines non calcules ('+(e&&e.message)+') : seuls les paris affiches servent.'); }
             var rapportTickets=await TICKETS_DU_JOUR.publierTicketsDuJour({
-              matchs:allMatchsData, fixtureById:FIXTURE_BY_ID, nowMs:Date.now(), configLigues:LEAGUES_CONFIG,
+              matchs:allMatchsData, fixtureById:FIXTURE_BY_ID, nowMs:Date.now(), configLigues:LEAGUES_CONFIG, candidatsPar:CANDIDATS_DU_JOUR,
               supabase:(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY)?{url:SUPA_URL_PIPELINE,cle:SUPA_SERVICE_KEY}:null,
               pipelineSha:process.env.GITHUB_SHA||null, snapshotTime:runOutput.snapshot_time,
               avertir:function(t){ console.log('::warning title=Tickets::'+t); },

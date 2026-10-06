@@ -20,11 +20,24 @@ function match(id, o) {
     pronostic: { market_id: "home-win", publie: true, fiabilite: "vérifiée" },
   }, o || {});
 }
+// Regle du 06/10/2026 : candidats de chaque match (lib/pronostic.js#marchesCandidats) = une jambe sure impliquee par
+// le pari affiche (« Dom ou nul ») et un pari « valeur » qui va dans le meme sens (« plus de 2,5 buts », grille v3).
+const pois = (l, k) => { let p = Math.exp(-l); for (let x = 1; x <= k; x++) p *= l / x; return p; };
+const GRILLE = [];
+for (let h = 0; h <= 6; h++) for (let a = 0; a <= 6; a++) GRILLE.push({ cle: "SCORE:" + h + "-" + a, probabilite: Math.round(pois(1.8, h) * pois(0.9, a) * 10000) / 100 });
 function jour(n) {
-  const ms = []; for (let i = 1; i <= n; i++) ms.push(match(i));
+  const ms = []; for (let i = 1; i <= n; i++) ms.push(match(i, { v3_marches: GRILLE }));
   ms[0].v3_buteurs = [{ joueur_id: 3, joueur: "Z", cote: "away", p_marque: 0.33 }];
   const fixtureById = {}; ms.forEach((m) => { fixtureById[String(m.id)] = { fixture: { timestamp: Date.parse("2026-10-04T16:00:00Z") / 1000, status: { short: "NS" } } }; });
-  return { matchs: ms, fixtureById };
+  const candidatsPar = {};
+  ms.forEach((m, k) => {
+    const i = k + 1;
+    candidatsPar[String(m.id)] = [
+      { market_id: "dc-1x", famille: "DC", cote: 1.25 + (i % 5) * 0.03, cote_anj: true, bookmaker: "Winamax", chance: 78, chance_affichee: 78 - (i % 3), fiabilite: "vérifiée", p_modele: 80, q: 78 },
+      { market_id: "over-25", famille: "OU2.5", cote: 1.8 + i * 0.02, cote_anj: false, bookmaker: null, chance: 52, chance_affichee: 52, fiabilite: "vérifiée", p_modele: 52 + i, q: 52 },
+    ];
+  });
+  return { matchs: ms, fixtureById, candidatsPar };
 }
 // Faux PostgREST : enregistre les appels, rend les lignes donnees.
 function fauxFetch(opts) {
@@ -49,7 +62,7 @@ function fauxFetch(opts) {
 }
 async function lancer(w, f, extra) {
   const avert = [], err = [];
-  const r = await T.publierTicketsDuJour(Object.assign({ matchs: w.matchs, fixtureById: w.fixtureById, nowMs: NOW, configLigues: LIGUES, verdicts: GO, supabase: SUPA, fetch: f, snapshotTime: "2026-10-04T06:00:00.000Z",
+  const r = await T.publierTicketsDuJour(Object.assign({ matchs: w.matchs, fixtureById: w.fixtureById, candidatsPar: w.candidatsPar, nowMs: NOW, configLigues: LIGUES, verdicts: GO, supabase: SUPA, fetch: f, snapshotTime: "2026-10-04T06:00:00.000Z",
     avertir: (t) => avert.push(t), erreur: (t) => err.push(t) }, extra || {}));
   return { r, avert, err };
 }

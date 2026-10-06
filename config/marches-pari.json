@@ -1,0 +1,15 @@
+{
+  "_readme": [
+    "PARIS SUR TOUS LES MARCHES (demande de Clement du 06/10/2026 : « Je veux plein de marches, il choisit le meilleur, c'est tout. »). Lu par lib/pronostic.js (choix du pari de chaque match, candidats des combines et de la Selection en or).",
+    "Catalogue des marches publiables : lib/marches-paris.js (chaque marche y est chiffrable, affichable dans les 7 langues et reglable par lib/resolvers.js). Un marche absent du catalogue n'est jamais publie.",
+    "Chance d'un marche, par ordre : (1) moteur v3, seulement si le moteur le dit juste dans CE championnat (v3_marches[].panneau = true et justesse dans v3_justesse_acceptee, ou 1N2 / double chance « vérifié sur le passé »), match en couverture « vérifiée », championnat de config/verdicts-maths.json#perimetre_v3 ; chance = le plus bas entre le v3 et la cote sans marge du meme marche (jamais le modele seul) ; (2) cotes du marche sans marge (voies d'avant : config/leagues.json#fiabilite) ; (3) flux API-Football, SEULEMENT les marches et tranches de la liste blanche du mathematicien (config/marches-valides.json), familles_pari_mesurees respectees.",
+    "v3_familles : familles du moteur v3 (prefixe de la cle) qui peuvent donner un pari en plus du 1N2 et de la double chance. Jamais : RB (rembourse si nul), HANDICAP_DOM, SCORE, MT_FIN, PREMIER_BUT, MT_PROLIFIQUE, CORNERS, CARTONS.",
+    "tirs_seulement_si_statistiques : un pari sur les tirs (cadres ou non) seulement dans une competition ou API-Football donne les statistiques du match (league-coverage-report.json, coverage.fixtures.statistics_fixtures = true) : sinon on ne saurait pas le regler.",
+    "selections_nationales : marches permis sur les matchs de selections (decision du 03/10/2026 : 1N2 et double chance seulement)."
+  ],
+  "regle_version": "paris-tous-marches-2026-10-06",
+  "v3_justesse_acceptee": ["juste", "recalibré"],
+  "v3_familles": ["TOTAL", "BTTS", "EQUIPE_DOM", "EQUIPE_EXT", "MT_TOTAL", "2MT_TOTAL", "MT"],
+  "tirs_seulement_si_statistiques": true,
+  "selections_nationales": ["1N2", "DC"]
+}

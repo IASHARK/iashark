@@ -2,6 +2,14 @@
 
 Changements qui affectent le calcul des probabilités, marchés, edge/Kelly ou la manière dont ils sont décidés. Journal complet et non-technique dans `IASHARK_V2_EXECUTION_STATE.md` ; ce fichier ne liste que ce qui touche le moteur lui-même.
 
+## 2026-10-06 — paris sur tous les marchés (branche `paris-tous-marches`, en attente du mathématicien et de l'avocat du diable)
+
+- **Demande de Clément** : « Je veux plein de marchés, il choisit le meilleur, c'est tout. » La règle du pari ne change pas (le plus probable dont la cote affichée est dans `config/leagues.json#fiabilite.fourchette_pari`, sinon le plus proche, jamais sous 1,20) ; seuls les **candidats** s'élargissent.
+- **Catalogue** (`lib/marches-paris.js`, 154 marchés, chacun chiffrable, affichable en 7 langues et réglable par `lib/resolvers.js`) : 1N2, double chance, buts 0,5 à 4,5, les deux marquent, buts de chaque équipe (0,5 à 2,5), 1re mi-temps (buts, résultat, double chance), 2e mi-temps (buts), tirs cadrés et tirs du match.
+- **Sources de chance** (`lib/pronostic.js#evaluerCandidats`) : moteur v3 seulement là où il se dit juste ou recalibré dans le championnat (`v3_marches[].panneau`, `justesse`), chance = le plus bas entre le v3 et la cote sans marge ; cotes du marché (voies d'avant) ; flux API-Football seulement pour la liste blanche du mathématicien (`config/marches-valides.json`), tirs seulement là où API-Football donne les statistiques du match.
+- **Sélection en or** : 3 paris du moteur v3 à cote 1,70-2,50, classés en interne par écart modèle / cote sans marge. **Combinés** : jambes 1,20-1,45 de tous les marchés justes, une par match, petit 4-5 jambes (4,00-6,00), grand 7-8 jambes (8,50-12,00). **Cohérence** (`lib/marches-paris.js#coherent`) : jamais une sélection qui contredit le pari affiché ou une autre sélection du jour.
+- **À valider** : calibration des nouvelles familles dans 1,40-1,70 sur matchs jamais vus ; valeur réelle de la Sélection en or (la formule « valeur » du v3 avait été rejetée le 29/09, CLV −5 %) ; chance réelle des combinés. Exclusions OU1.5/OU3.5/BTTS des tickets retirées de `config/verdicts-maths.json#categories_no_go` en attendant.
+
 ## 2026-09-19 — choix du pari : une même règle pour toutes les familles
 
 - **Constat.** Banc d'essai sur les vraies cotes historiques (football-data.co.uk, 12 championnats, `scripts/backtest-market-selection.js`), en rejouant le moteur de production (`calcLambdas` + `calcFinalProbs`, sans le mélange xG faute d'historique). L'ancienne règle, « plus haute probabilité du modèle, cote ≥ 1,50 », n'était pas neutre : chaque famille a son propre calcul, et celle dont le calcul exagère gagnait l'argmax.

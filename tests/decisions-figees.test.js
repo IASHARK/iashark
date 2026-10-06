@@ -120,7 +120,7 @@ test("c. pari fige hors fourchette : pronostic, pastille « Sélection IASHARK �
 test("a. exception au gel UNIQUE : seulement pour un pari publie avant le 2026-10-04 18:00 UTC", () => {
   assert.equal(PF.FIN_EXCEPTION_GEL, "2026-10-04T18:00:00Z");
   const fx = { fixture: { id: 701, status: { short: "NS" }, timestamp: Date.parse("2026-10-06T19:00:00Z") / 1000 } };
-  const tirs = (frozenAt, updatedAt) => ({ fixture_id: 701, pari_rec: "Tirs du match over 23.5", cote_rec: 1.5, market_id: "total-shots-over-23_5", marche: "TIRS", model_probability: 67.5,
+  const tirs = (frozenAt, updatedAt) => ({ fixture_id: 701, pari_rec: "Corners du match over 9.5", cote_rec: 1.5, market_id: "total-corners-over-9_5", marche: "CORNERS", model_probability: 67.5,
     premium_fields: { p1: 40 }, raw_response: frozenAt ? { pick_freeze: { frozen_at: frozenAt, kickoff: "2026-10-06 21:00" } } : {}, updated_at: updatedAt || frozenAt });
   const sansCote = (frozenAt) => Object.assign(tirs(frozenAt), { pari_rec: "Victoire Domicile", market_id: "home-win", marche: "RESULTAT", cote_rec: null });
   const gel = (prev, extra) => PF.freezeAnalysis(frais({ id: 701, date: "2026-10-06 21:00" }), prev, Object.assign({ nowMs: Date.parse("2026-10-05T03:00:00Z"), fixture: fx, premiumRow: { fixture_id: 701 }, exceptionGel: P.motifExceptionGel }, extra || {}));
@@ -133,7 +133,7 @@ test("a. exception au gel UNIQUE : seulement pour un pari publie avant le 2026-1
   // A 18:00 ou apres : plus jamais remplace, quel que soit le marche ou la cote.
   for (const t of ["2026-10-04T18:00:00Z", "2026-10-04T23:00:00Z", "2026-10-05T01:00:00Z"]) {
     assert.equal(gel(tirs(t)).status, "FROZEN", "tirs " + t);
-    assert.equal(gel(tirs(t)).match.pari_rec, "Tirs du match over 23.5");
+    assert.equal(gel(tirs(t)).match.pari_rec, "Corners du match over 9.5");
     assert.equal(gel(sansCote(t)).status, "FROZEN", "sans cote " + t);
   }
   // Heure de publication : metadonnees du gel, sinon pick_frozen_at du data.json precedent, sinon updated_at
@@ -144,7 +144,7 @@ test("a. exception au gel UNIQUE : seulement pour un pari publie avant le 2026-1
   assert.equal(gel(Object.assign(tirs(null), { updated_at: null })).status, "FROZEN");
   // Le pari qui remplace (publie apres 18:00) ne sera lui-meme plus jamais remplace.
   const relu = Object.assign({}, avant.premiumRow, { premium_fields: PREMIUM.premiumPayload(avant.match), updated_at: "2026-10-05T03:00:00Z" });
-  assert.equal(gel(Object.assign(relu, { pari_rec: "Tirs du match over 23.5", market_id: "total-shots-over-23_5", cote_rec: 1.5 })).status, "FROZEN");
+  assert.equal(gel(Object.assign(relu, { pari_rec: "Corners du match over 9.5", market_id: "total-corners-over-9_5", cote_rec: 1.5 })).status, "FROZEN");
 });
 
 test("pari publie puis match reprogramme (plus de 24 h) avant l'heure d'origine : meme pari (jamais un pari B)", () => {

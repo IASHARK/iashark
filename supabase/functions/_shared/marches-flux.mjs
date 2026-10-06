@@ -312,6 +312,30 @@ export function selectionsDuMatch(raw, { config, dom = "Domicile", ext = "Extér
   }
   return { selections, ecartees };
 }
+/**
+ * COTES DU MATCH POUR LE CHOIX DU PARI (06/10/2026, paris sur tous les marches) : TOUTES les selections du
+ * catalogue chez le bookmaker de reference, liste blanche ou non, avec leur cote et leur chance sans marge.
+ * Sert seulement de COTE affichee (« cote du marche », sans nom de bookmaker) pour un pari dont la chance vient
+ * du moteur v3 ; la chance d'un pari tire du flux ne vient QUE de selectionsDuMatch (liste blanche du
+ * mathematicien). controle_ok : faux si Pinnacle s'ecarte de plus de ecart_max_pinnacle.
+ * -> [{ code, bet_id, value, ligne, cote, chance, controle_ok }].
+ */
+export function toutesLesCotes(raw, { config } = {}) {
+  const cfg = config && config.marches instanceof Map ? config : lireConfig(config);
+  const flux = lireFlux(raw);
+  const out = [];
+  if (!flux[cfg.reference]) return out;
+  for (const id of Object.keys(CATALOGUE).map(Number)) {
+    if (CATALOGUE[id].type === "buteur" || CATALOGUE[id].memeMatch) continue;
+    const pin = chancesBookmaker(flux, cfg.controle, id);
+    for (const s of chancesBookmaker(flux, cfg.reference, id)) {
+      const p = pin.find((x) => x.value === s.value && (x.ligne ?? null) === (s.ligne ?? null));
+      out.push({ code: codeFlux(id, s.value), bet_id: id, value: s.value, ligne: s.ligne, cote: s.odd, chance: s.chance,
+        controle_ok: !p || Math.abs(p.chance - s.chance) <= cfg.ecart_max_pinnacle + 1e-12 });
+    }
+  }
+  return out;
+}
 /** Cote actuelle d'une selection (dernier controle) : { cote, chance, pinnacle } ou null si le marche a disparu. */
 export function etatSelection(raw, code, { config } = {}) {
   const cfg = config && config.marches instanceof Map ? config : lireConfig(config);

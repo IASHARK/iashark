@@ -242,16 +242,16 @@ test("match offert : jamais une competition « en test », ni designee ce run ni
   assert.deepEqual(choisir([v3(1, 90, null, { league_reliability: "validee" }), v3(2, 70)]), [1], "temoin : competition validee");
 });
 
-test("fourchette du 04/10/2026 : le match offert a une cote entre 1,40 et 1,70 (config), jamais un pari fige hors fourchette, meme garde", () => {
+test("fourchette du 04/10/2026 : le match offert a une cote dans la fourchette du pari (config : 1,40-2,20 depuis le 06/10), jamais un pari fige hors fourchette, meme garde", () => {
   const F = PRONOSTIC.fourchettePari(LEAGUES_CONFIG);
-  assert.deepEqual([F.cote_min, F.cote_max], [1.4, 1.7]);
+  assert.deepEqual([F.cote_min, F.cote_max], [1.4, 2.2]);
   assert.match(BLOC, /var FOURCHETTE_OFFERT=PRONOSTIC\.fourchettePari\(LEAGUES_CONFIG\);/);
-  // Le plus probable est hors fourchette (1,30 ou 1,75) : c'est le suivant, dans la fourchette.
-  assert.deepEqual(choisir([v3(1, 90, null, { cote_rec: "1.30" }), v3(2, 85, null, { cote_rec: "1.75" }), v3(3, 70, null, { cote_rec: "1.70" })]), [3]);
+  // Le plus probable est hors fourchette (1,30 ou 2,25) : c'est le suivant, dans la fourchette.
+  assert.deepEqual(choisir([v3(1, 90, null, { cote_rec: "1.30" }), v3(2, 85, null, { cote_rec: "2.25" }), v3(3, 70, null, { cote_rec: "1.70" })]), [3]);
   // Bornes comprises.
   assert.deepEqual(choisir([v3(1, 90, null, { cote_rec: "1.39" }), v3(2, 80, null, { cote_rec: "1.40" })]), [2]);
   // Aucun pari dans la fourchette : aucun match offert.
-  assert.deepEqual(choisir([v3(1, 90, null, { cote_rec: "1.25" }), v3(2, 60, null, { cote_rec: "1.90" })]), []);
+  assert.deepEqual(choisir([v3(1, 90, null, { cote_rec: "1.25" }), v3(2, 60, null, { cote_rec: "2.30" })]), []);
   // Designation d'un run precedent (gel) dont le pari fige est hors fourchette : GARDEE jusqu'a minuit (regle de
   // Clement du 04/10/2026, 20 h ; avant : remplacee en cours de journee).
   const garde = v3(1, 90, null, { cote_rec: "1.25" });
@@ -267,7 +267,7 @@ test("match offert garde toute la journee : commence, reporte, sans pari, sans c
     reporte: { date: "2026-10-06 20:00", no_signal: true, pari_rec: "", no_signal_reason: "KICKOFF_POSTPONED" },
     sans_pari: { pari_rec: "", no_signal: true, pronostic: undefined },
     sans_cote: { cote_rec: "" },
-    hors_fourchette: { cote_rec: "1.95" },
+    hors_fourchette: { cote_rec: "2.35" },
     moteur_eteint_ou_ancien: { v3_pari: undefined, moteur_v3: { source: "ancien moteur (repli)" } },
   };
   for (const [nom, mut] of Object.entries(cas)) {

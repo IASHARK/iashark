@@ -23,7 +23,8 @@ const J = require("../lib/run-output/jambes-du-jour.js");
 const T = require("../lib/tickets-du-jour.js");
 const LEGER = require("../lib/buteurs-jour-de-match.js");
 const SCRIPT_LEGER = require("../scripts/buteurs-jour-de-match.js");
-const CFG = require("../config/leagues.json");
+// Bornes du 04/10 (1,40-1,70) passees dans la config : mecanique du gel inchangee (bornes du depot : 1,40-2,20, 06/10).
+const CFG = Object.assign({}, require("../config/leagues.json"), { fiabilite: Object.assign({}, require("../config/leagues.json").fiabilite, { fourchette_pari: { cote_min: 1.4, cote_max: 1.7, marge_sans_agree: 0.02 } }) });
 const WF = fs.readFileSync(path.join(ROOT, ".github", "workflows", "update-data.yml"), "utf8");
 const SCRIPT = WF.slice(WF.indexOf("cat > pipeline.js << 'JSEOF'"), WF.indexOf("          JSEOF"));
 const clone = (v) => JSON.parse(JSON.stringify(v));

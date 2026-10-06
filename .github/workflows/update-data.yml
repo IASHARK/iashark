@@ -71,6 +71,8 @@ jobs:
           const { poissonProb, calcPoissonProbs, dixonColesCorr, calcDixonColesProbs, calcMonteCarlo, shinProbabilities } = require('./lib/models.js');
           const { fractionalKelly } = require('./lib/betting.js');
           const { resolveMarketWin, extractRegulationScore } = require('./lib/resolvers.js');
+          // Reglement des autres marches des bookmakers (06/10/2026, choix neutre du pari) : lib/flux-paris.js.
+          const FLUX_PARIS_REG = require('./lib/flux-paris.js');
           const { parseOdds } = require('./lib/odds.js');
           const { pickMarketDeterministic, pickMarketFair, fairMarketProbabilities, SELECTION, computeRiskLabel, computeModelAgreement, computeDataQualityScore, computeReliability, scoresConsistentWithMarket } = require('./lib/decision.js');
           const { buildPoissonMatrix, buildDixonColesMatrix, blendMatrices, deriveMarketsFromMatrix } = require('./lib/markets/score-matrix.js');
@@ -2290,8 +2292,21 @@ jobs:
                   continue;
                 }
                 if(!joue)continue;
-                var settlementContext=await buildSettlementContext(fix,found.prediction);
-                var isWin=resolveMarketWin(found.prediction, gh, ga, settlementContext);
+                var isWin;
+                if(FLUX_PARIS_REG.estCode(found.market)){
+                  // Autre marche des bookmakers (lib/flux-paris.js) : regle avec les faits d'API-Football dont il a
+                  // besoin (evenements, statistiques du match, statistiques des joueurs) ; un fait absent : en attente.
+                  var besoinF=FLUX_PARIS_REG.besoins(found.market), fidF=fix.fixture&&fix.fixture.id;
+                  var srcF={fixture:fix};
+                  if(besoinF.evenements){ var evR=await get('https://v3.football.api-sports.io/fixtures/events?fixture='+fidF,APS); srcF.events=evR&&Array.isArray(evR.response)?evR.response:null; }
+                  if(besoinF.stats){ var stR=await get('https://v3.football.api-sports.io/fixtures/statistics?fixture='+fidF,APS); srcF.statistics=stR&&Array.isArray(stR.response)?stR.response:null; }
+                  if(besoinF.joueurs){ var plR=await get('https://v3.football.api-sports.io/fixtures/players?fixture='+fidF,APS); srcF.players=plR&&Array.isArray(plR.response)?plR.response:null; }
+                  var rF=FLUX_PARIS_REG.regler(found.market,FLUX_PARIS_REG.faitsDuMatch(srcF));
+                  isWin=rF==='rembourse'?'void':rF;
+                } else {
+                  var settlementContext=await buildSettlementContext(fix,found.prediction);
+                  isWin=resolveMarketWin(found.prediction, gh, ga, settlementContext);
+                }
                 if(isWin===null){ continue; }
                 if(isWin==='void'){
                   found.result='void';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
@@ -3066,6 +3081,8 @@ jobs:
                   // Aucune cle nulle : Number(null) vaut 0 et reglerait un marche
                   // « premiere mi-temps » comme un 0-0 faute de donnee (voir la
                   // note detaillee dans buildSettlementContext).
+                  // Autre marche des bookmakers : regle seulement par le reglement principal (faits d'API-Football).
+                  if(FLUX_PARIS_REG.estCode(found.market))return;
                   var ctxE={}, htE=fix.score&&fix.score.halftime;
                   if(htE&&htE.home!=null)ctxE.halftimeHome=htE.home;
                   if(htE&&htE.away!=null)ctxE.halftimeAway=htE.away;
@@ -4445,7 +4462,7 @@ jobs:
                 if(!raw||!CFG_FLUX.marches.size||m.status&&m.status!=='NS') return;
                 var nomEq=function(e){ return (e&&typeof e==='object'?(e.n||e.name):e)||''; };
                 var r=FLUX_MOD.selectionsDuMatch(raw,{config:CFG_FLUX,dom:nomEq(m.home),ext:nomEq(m.away),ligue:lgKey(m.league_id)});
-                FLUX_PARIS[String(m.id)]={selections:r.selections,toutes:FLUX_MOD.toutesLesCotes(raw,{config:CFG_FLUX})};
+                FLUX_PARIS[String(m.id)]={selections:r.selections,toutes:FLUX_MOD.toutesLesCotes(raw,{config:CFG_FLUX}),raw:raw};
                 var liste=r.selections.map(function(x){
                   var c=CHANCE_IASHARK.chanceIashark(x.chance*100,null);
                   // 04/10/2026 : ni la cote ni le nom du bookmaker de reference (bet365, non agree en France) ; cote minimum = 1 / chance.

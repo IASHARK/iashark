@@ -10,7 +10,10 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.join(__dirname, "..");
-const CFG = JSON.parse(fs.readFileSync(path.join(ROOT, "config", "leagues.json"), "utf8"));
+const CFG_DEPOT = JSON.parse(fs.readFileSync(path.join(ROOT, "config", "leagues.json"), "utf8"));
+// Mecanique de la fourchette testee avec les bornes du 04/10 (1,40-1,70, marge 0,02) passees dans la config ; bornes du
+// depot (1,40-2,20, marge 0, decision de Clement du 06/10) : test « fourchette » ci-dessous et tests/paris-tous-marches.test.js.
+const CFG = JSON.parse(JSON.stringify(CFG_DEPOT)); CFG.fiabilite.fourchette_pari = { cote_min: 1.4, cote_max: 1.7, marge_sans_agree: 0.02 };
 const P = require("../lib/pronostic.js");
 const PREMIUM = require("../lib/premium-fields.js");
 const WF = fs.readFileSync(path.join(ROOT, ".github", "workflows", "update-data.yml"), "utf8");
@@ -121,20 +124,20 @@ function match(extra) {
 const F = P.fourchettePari(CFG);
 const dansF = (k) => P.dansFourchette(k, F);
 
-test("fourchette : bornes 1,40-1,70 dans config/leagues.json (un seul endroit), bornes comprises", () => {
-  assert.deepEqual(CFG.fiabilite.fourchette_pari, { cote_min: 1.4, cote_max: 1.7, marge_sans_agree: 0.02 });
+test("fourchette : bornes 1,40-2,20 dans config/leagues.json (un seul endroit, decision de Clement du 06/10), bornes comprises", () => {
+  assert.deepEqual(CFG_DEPOT.fiabilite.fourchette_pari, { cote_min: 1.4, cote_max: 2.2, marge_sans_agree: 0 });
   assert.deepEqual([F.cote_min, F.cote_max], [1.4, 1.7]);
   assert.ok(dansF("1.40") && dansF("1,70") && dansF(1.55));
   assert.ok(!dansF("1.39") && !dansF(1.71) && !dansF(null) && !dansF(""));
   // Les selections nationales et l'option suivent la meme fourchette.
-  assert.deepEqual([P.FOURCHETTE_SELECTION.cote_min, P.FOURCHETTE_SELECTION.cote_max], [1.4, 1.7]);
+  assert.deepEqual([P.FOURCHETTE_SELECTION.cote_min, P.FOURCHETTE_SELECTION.cote_max], [1.4, 2.2]);
   // Jamais les bornes ecrites en dur dans le code du calcul (commentaires exceptes).
   const code = (f) => fs.readFileSync(path.join(ROOT, f), "utf8").split("\n").filter((l) => !/^\s*\/\//.test(l)).join("\n");
   assert.doesNotMatch(code("lib/pronostic.js"), /\b1[.,](?:4|40|7|70)\b/);
   const bloc = SCRIPT.slice(SCRIPT.indexOf("(function designerMatchGratuit(){"), SCRIPT.indexOf("\n            })();", SCRIPT.indexOf("(function designerMatchGratuit(){")));
   assert.match(bloc, /var FOURCHETTE_OFFERT=PRONOSTIC\.fourchettePari\(LEAGUES_CONFIG\);/);
   // Config absente ou illisible : la fourchette du depot, jamais une fourchette inventee.
-  assert.deepEqual(P.fourchettePari({ fiabilite: {} }), F);
+  assert.deepEqual(P.fourchettePari({ fiabilite: {} }), P.fourchettePari(CFG_DEPOT));
   assert.deepEqual(P.fourchettePari({ fiabilite: { fourchette_pari: { cote_min: 1.5, cote_max: 1.6 } } }), { cote_min: 1.5, cote_max: 1.6, marge_sans_agree: 0 });
 });
 
@@ -230,11 +233,12 @@ test("publierPronostics : jamais un pari fige remplace, jamais un match ferme ; 
 
 test("repli hors fourchette (avocat du diable, 04/10/2026) : chance AFFICHEE >= 50 % et cote >= 1,20, jamais le nul, la cote la plus proche ; sinon le plus probable", () => {
   // Preuve de l'avocat : 1,25 / 6,00 / 12,00 et « plus de 2,5 buts » a 1,85 (49 %) -> jamais le 1,85 a 49 % ;
-  // parmi les paris a 50 % ou plus, la cote la plus proche (« moins de 2,5 buts » a 1,80, 51 %).
+  // parmi les paris a 50 % ou plus, la cote la plus proche. Depuis le 06/10 (correction « petits scores », -3 points) « moins de
+  // 2,5 buts » a 1,80 affiche 48 % : sous 50 %, il sort du repli ; reste le favori a 1,25.
   const favori = match({ id: 31, league_key: "ligue1", league_id: 61, c1: "1.25", cn: "6.00", c2: "12.00", cdc1x: null, cdc2x: null, cdc12: null, co25: "1.85", cu25: "1.80" });
   P.poserPronostics([favori], { configLigues: CFG });
   P.publierPronostics([favori], [], { configLigues: CFG, figes: {} });
-  assert.equal(favori.market_id, "under-25");
+  assert.equal(favori.market_id, "home-win");
   assert.ok(favori.model_probability >= 50 && favori.pronostic.hors_fourchette === true);
   // Sans plus/moins : le favori a 1,25 (jamais le nul ni l'exterieur a 12,00).
   const favori1n2 = match({ id: 34, league_key: "ligue1", league_id: 61, c1: "1.25", cn: "6.00", c2: "12.00", cdc1x: null, cdc2x: null, cdc12: null, co25: null, cu25: null });

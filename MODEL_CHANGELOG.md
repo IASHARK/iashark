@@ -2,6 +2,13 @@
 
 Changements qui affectent le calcul des probabilités, marchés, edge/Kelly ou la manière dont ils sont décidés. Journal complet et non-technique dans `IASHARK_V2_EXECUTION_STATE.md` ; ce fichier ne liste que ce qui touche le moteur lui-même.
 
+## 2026-10-06 (soir) — choix neutre parmi tous les marchés des bookmakers, fourchette 1,40-2,20 (verdict ORANGE du mathématicien appliqué)
+
+- **Règle** : sur chaque match dont le relevé API-Football est connu, le pari est l'issue la plus probable dont la cote affichée est entre 1,40 et 2,20 (`config/leagues.json#fiabilite.fourchette_pari`, `marge_sans_agree` à 0 pour la neutralité), parmi tous les marchés publiables de `lib/flux-paris.js` ; sinon le repli d'avant. Corners et cartons exclus.
+- **Chance** : même méthode pour tous — cote sans marge du bookmaker de référence (bet365, sinon ordre fixe), méthode puissance sur le marché complet (paire plus/moins, ligne de handicap, toutes les issues), double chance tirée du 1N2 ; moteur v3 juste : le plus bas des deux. Jamais de méthode puissance sans issue contraire.
+- **Verdict du mathématicien (399 matchs jamais vus)** : marchés joueurs, paires non contraires, tirs/hors-jeu/tacles (et fautes, par prudence), remboursements, lignes entières et en quart, scores exacts et nombres exacts peu mesurés : cachés ; « les deux marquent : non » caché ; correction « petits scores » −3 points avant le choix ; contrôle Pinnacle sur 1, 4, 5, 6, 13, 16, 17, 19 seulement ; tirs retirés de `config/marches-valides.json`.
+- **Règlement** : score, mi-temps, événements (ordre des buts, minutes, contre son camp), statut (prolongation, tirs au but) via `lib/flux-paris.js#regler` dans le pipeline.
+
 ## 2026-10-06 — paris sur tous les marchés (branche `paris-tous-marches`, en attente du mathématicien et de l'avocat du diable)
 
 - **Demande de Clément** : « Je veux plein de marchés, il choisit le meilleur, c'est tout. » La règle du pari ne change pas (le plus probable dont la cote affichée est dans `config/leagues.json#fiabilite.fourchette_pari`, sinon le plus proche, jamais sous 1,20) ; seuls les **candidats** s'élargissent.

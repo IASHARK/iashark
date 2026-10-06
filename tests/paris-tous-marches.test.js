@@ -140,7 +140,7 @@ test("pari : nouvelles familles du v3 seulement si le moteur les dit justes ici 
   assert.ok(!sansFlux.some((c) => c.market_id === "fh-over-05"));
 });
 
-test("pari : flux API-Football (liste blanche du mathematicien) ; tirs seulement avec les statistiques du match ; jamais sur une selection", async () => {
+test("pari (voie liste blanche, sans releve complet) : tirs retires de la liste (verdict du 06/10) ; jamais sur une selection", async () => {
   const F = await import(pathToFileURL(path.join(ROOT, "supabase/functions/_shared/marches-flux.mjs")).href);
   const cfg = F.lireConfig(require("../config/marches-valides.json"));
   const v = (o, u) => [{ value: o[0], odd: String(o[1]) }, { value: u[0], odd: String(u[1]) }];
@@ -154,14 +154,10 @@ test("pari : flux API-Football (liste blanche du mathematicien) ; tirs seulement
   assert.ok(flux.toutes.some((x) => x.bet_id === 1), "toutes les cotes, liste blanche ou non");
   assert.ok(!flux.toutes.some((x) => x.bet_id === 92 || x.bet_id === 25), "jamais buteur ni « meme match »");
   const m = { id: 5, home: { n: "A" }, away: { n: "B" }, date: "2026-10-07 02:00", league_key: "mls", league_id: 253, league: "MLS", league_reliability: "validee", no_signal: true, pari_rec: "" };
-  const r = P.publierPronostics([m], [], { configLigues: LIGUES, figes: {}, fluxPar: { 5: flux } });
-  assert.equal(r.publies, 1);
-  assert.equal(m.market_id, "total-shots-on-target-over-7_5", "le plus probable dans 1,40-1,70 (cote 1,43)");
-  assert.equal(m.pari_rec, "Tirs cadres du match over 7.5");
-  assert.equal(m.marche, "TIRS");
-  assert.deepEqual([m.cote_rec, m.cote_source, m.cote_bookmaker], ["1.43", "indicative", null]);
-  assert.equal(m.pronostic.libelle_fr, "Plus de 7,5 tirs cadrés");
-  assert.notEqual(R.resolveMarketWin(m.pari_rec, 1, 1, { totalShotsOnTarget: 9 }), null, "reglable");
+  P.publierPronostics([m], [], { configLigues: LIGUES, figes: {}, fluxPar: { 5: flux } });
+  assert.ok(!/shots/.test(String(m.market_id || "")), "tirs : jamais candidats (retires de config/marches-valides.json, verdict du 06/10)");
+  assert.ok(!require("../config/marches-valides.json").marches.some((x) => x.bet_id === 87 || x.bet_id === 211));
+  assert.notEqual(R.resolveMarketWin("Tirs cadres du match over 7.5", 1, 1, { totalShotsOnTarget: 9 }), null, "un pari fige sur les tirs se regle toujours");
   // « plus de 1,5 but » du flux en MLS : famille mesuree seulement dans 7 championnats europeens (NO-GO ailleurs).
   const c = P.marchesCandidats([m], { configLigues: LIGUES, fluxPar: { 5: flux } })["5"];
   assert.ok(!c.some((x) => x.market_id === "over-15"));
@@ -183,7 +179,7 @@ test("candidats des combines : chaque match ouvert (fige compris), jamais un mat
   assert.equal(c["79"], undefined);
   // Pipeline : flux et candidats en memoire seulement, jamais ecrits ni journalises.
   assert.match(WF, /var FLUX_PARIS=\{\};/);
-  assert.match(WF, /FLUX_PARIS\[String\(m\.id\)\]=\{selections:r\.selections,toutes:FLUX_MOD\.toutesLesCotes\(raw,\{config:CFG_FLUX\}\)\};/);
+  assert.match(WF, /FLUX_PARIS\[String\(m\.id\)\]=\{selections:r\.selections,toutes:FLUX_MOD\.toutesLesCotes\(raw,\{config:CFG_FLUX\}\),raw:raw\};/);
   assert.match(WF, /releveAnjA:RELEVE_ANJ_A,fluxPar:FLUX_PARIS\}\);/);
   assert.match(WF, /CANDIDATS_DU_JOUR=PRONOSTIC\.marchesCandidats\(allMatchsData,\{configLigues:LEAGUES_CONFIG,chancesV3Par:CHANCES_V3_PRONO,cotesAnjPar:LIVRES_ANJ,fluxPar:FLUX_PARIS\}\)/);
   assert.match(WF, /candidatsPar:CANDIDATS_DU_JOUR,/);

@@ -7,7 +7,8 @@
 // N'ECRIT RIEN : ni fichier, ni base, ni message. Aucun appel reseau.
 //
 // Usage : node scripts/essai-paris-tous-marches.js [fichier.json] [--flux flux.json] [--maintenant 2026-10-06T04:00:00Z] [--detail]
-//   --flux : { "<fixture>": { selections: [...], toutes: [...] } } (supabase/functions/_shared/marches-flux.mjs
+//   --flux : { "<fixture>": { raw: { bookmakers: [...] } } } (releve odds_snapshots : choix NEUTRE sur tous les marches,
+//            lib/flux-paris.js) ; ou { selections, toutes } (supabase/functions/_shared/marches-flux.mjs
 //            #selectionsDuMatch et #toutesLesCotes sur un releve odds_snapshots), facultatif.
 //   --detail : liste chaque match (pari, cote, chance) ; sans lui, seulement des compteurs.
 
@@ -48,7 +49,7 @@ P.alignerChancesAffichees(matchs, [], { configLigues: LIGUES });
 const familles = {}, change = { meme: 0, autre: 0 };
 matchs.forEach((m) => {
   if (!m || m.id == null || !m.market_id || m.no_signal === true) return;
-  const f = (P.MARCHE[m.market_id] || {}).famille || "?";
+  const f = (P.MARCHE[m.market_id] || {}).famille || ((require("../lib/flux-paris.js").definitionCode(m.market_id) || {}).famille) || "?";
   familles[f] = (familles[f] || 0) + 1;
   if (avant[String(m.id)] === m.market_id) change.meme++; else change.autre++;
 });

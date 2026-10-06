@@ -44,12 +44,12 @@ function leg(id, cote, chance, o) {
 }
 
 // ------------------------------------------------------------ 1. fourchette lue dans la config
-test("1. fourchette lue dans config/leagues.json : 1,39 et 1,71 refusees, 1,40 et 1,70 acceptees", () => {
+test("1. fourchette lue dans la config passee (bornes du 04/10 : 1,39 et 1,71 refusees, 1,40 et 1,70 acceptees)", () => {
   // Bornes de la fourchette (marge_sans_agree, 04/10/2026, ne concerne que les cotes non agreees,
   // jamais retenues dans un ticket).
-  assert.equal(LIGUES.fiabilite.fourchette_pari.cote_min, 1.4);
-  assert.equal(LIGUES.fiabilite.fourchette_pari.cote_max, 1.7);
-  const r = jambesDe([match(1, { cote_rec: "1.39" }), match(2, { cote_rec: "1.40" }), match(3, { cote_rec: "1.70" }), match(4, { cote_rec: "1.71" })]);
+  const LIGUES_0410 = JSON.parse(JSON.stringify(LIGUES)); LIGUES_0410.fiabilite.fourchette_pari = { cote_min: 1.4, cote_max: 1.7, marge_sans_agree: 0.02 };
+  assert.deepEqual([LIGUES.fiabilite.fourchette_pari.cote_min, LIGUES.fiabilite.fourchette_pari.cote_max], [1.4, 2.2], "depot : 1,40-2,20 (06/10)");
+  const r = jambesDe([match(1, { cote_rec: "1.39" }), match(2, { cote_rec: "1.40" }), match(3, { cote_rec: "1.70" }), match(4, { cote_rec: "1.71" })], { configLigues: LIGUES_0410 });
   assert.deepEqual(r.jambes.map((j) => j.fixture_id), [2, 3]);
   assert.equal(r.exclus.hors_fourchette, 2);
   // Une autre fourchette dans la config passee : appliquee (jamais recopiee en dur).

@@ -14,7 +14,9 @@ const path = require("node:path");
 const P = require("../lib/pronostic.js");
 const PREMIUM = require("../lib/premium-fields.js");
 const HL = require("../home-list.js");
-const CFG = require("../config/leagues.json");
+// Mecanique de la fourchette testee avec les bornes du 04/10 (1,40-1,70, marge 0,02), passees dans la config comme en
+// production ; les bornes du depot (1,40-2,20, decision du 06/10) : tests/paris-tous-marches.test.js.
+const CFG = Object.assign({}, require("../config/leagues.json"), { fiabilite: Object.assign({}, require("../config/leagues.json").fiabilite, { fourchette_pari: { cote_min: 1.4, cote_max: 1.7, marge_sans_agree: 0.02 } }) });
 
 const root = path.join(__dirname, "..");
 const LIGUES = P.liguesCotesMarche(CFG);
@@ -220,8 +222,8 @@ test("selections nationales verifiees (VERIF-SELECTIONS.md) : selection du site 
 
 test("fourchette des selections nationales = celle de tout pari publie (config/leagues.json#fiabilite.fourchette_pari, 04/10/2026) ; plafond 3 par jour", () => {
   // Le robot du Canal Pro (canal-pro-menu.mjs, 1,40-2,00) n'est pas dans ce depot : la regle du site est la fourchette du 04/10/2026.
-  assert.equal(P.FOURCHETTE_SELECTION.cote_min, CFG.fiabilite.fourchette_pari.cote_min);
-  assert.equal(P.FOURCHETTE_SELECTION.cote_max, CFG.fiabilite.fourchette_pari.cote_max);
+  assert.equal(P.FOURCHETTE_SELECTION.cote_min, require("../config/leagues.json").fiabilite.fourchette_pari.cote_min);
+  assert.equal(P.FOURCHETTE_SELECTION.cote_max, require("../config/leagues.json").fiabilite.fourchette_pari.cote_max);
   assert.equal(P.FOURCHETTE_SELECTION.max_par_jour, 3);
 });
 

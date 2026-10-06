@@ -270,9 +270,10 @@
       "candidat = la meilleure chez un agree ANJ (The Odds API, meme appel que la cote de reference), sinon la cote du marche d'API-Football",
       "(sans nom de bookmaker). marge_sans_agree : pour cette cote d'API-Football, la borne basse devient cote_min + marge_sans_agree (1,42),",
       "pour qu'elle reste dans la fourchette chez un agree (point du trader). Aucun marche dans la fourchette : le pari simple dont la cote est",
-      "la plus proche, jamais sous 1,20, marque « hors fourchette » (jamais Selection IASHARK ni match offert)."
+      "la plus proche, jamais sous 1,20, marque « hors fourchette » (jamais Selection IASHARK ni match offert).",
+      "DECISION DE CLEMENT DU 06/10/2026 (soir, branche paris-tous-marches) : choix NEUTRE parmi tous les marches des bookmakers sauf corners et cartons (lib/flux-paris.js, lib/pronostic.js#evaluerCandidatsNeutres), « le plus probable », fourchette corrigee a 1,40-2,20. marge_sans_agree passe a 0 : la relever pour les seules cotes non agreees favorisait les quelques marches cotes chez un agree (1N2, double chance, buts), contraire a « sans en favoriser un »."
     ],
-    "fourchette_pari": { "cote_min": 1.40, "cote_max": 1.70, "marge_sans_agree": 0.02 },
+    "fourchette_pari": { "cote_min": 1.40, "cote_max": 2.20, "marge_sans_agree": 0 },
     "_readme_corrections_chance": [
       "Chance affichee = chance calculee + points (toujours negatifs) quand la regle correspond : competition (ou '*'),",
       "famille (1N2, DC, OU2.5 ou '*'), option ('principale', 'cote' ou '*'), et si donnees les bornes de chance (en %) et",
@@ -287,7 +288,8 @@
       { "ligue": "argentina_liga_profesional", "famille": "DC", "option": "*", "source_chance": "modele", "points": -13, "source": "H-017 (moteur v3 seul), double chance : 68,8 % annonces, 56,1 % reels ; jamais sur la cote sans marge (49,5 % affiches pour 64,8 % reels sur 1 417 paris, controle du 04/10/2026)" },
       { "ligue": "ekstraklasa", "famille": "DC", "option": "*", "chance_min": 75, "chance_max": 85, "points": -5, "source": "Pologne, double chance 75-85 % : 76,5 % annonces, 71,3 % reels" },
       { "ligue": "ligue2", "famille": "*", "option": "*", "cote_min": 1.2, "cote_max": 1.5, "points": -2, "source": "Ligue 2, cotes 1,20-1,50 : 73,1 % annonces, 70,8 % reels" },
-      { "ligue": "*", "famille": "*", "option": "cote", "points": -6, "source": "Regle A (la plus grosse cote a 70 % ou plus), Premier League : 71,0 % annonces, 64,6 % reels ; appliquee partout tant qu'aucune autre mesure n'existe" }
+      { "ligue": "*", "famille": "*", "option": "cote", "points": -6, "source": "Regle A (la plus grosse cote a 70 % ou plus), Premier League : 71,0 % annonces, 64,6 % reels ; appliquee partout tant qu'aucune autre mesure n'existe" },
+      { "ligue": "*", "famille": "petits scores", "option": "*", "points": -3, "source": "Verdict du mathematicien du 06/10/2026 (399 matchs jamais vus, 02/09-05/10) : les issues de petit score sont trop optimistes ; -3 points dans toutes les competitions et a toutes les cotes, avant le choix du pari. Issues : « moins de » des buts (bet 5, 6, 26, 16, 17, demi-lignes 50 et 72), « non » des deux marquent par mi-temps (34, 35), « n encaisse aucun but : oui » (27, 28), « u/no » (49), « moins de 2 buts » (349). Liste dans lib/flux-paris.js#petitScore." }
     ]
   },
   "budgetExtension": {

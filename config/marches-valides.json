@@ -11,7 +11,9 @@
     "cote_min : jamais une selection du flux sous cette cote bet365 (1,20), ni sur la page ni dans le robot ; au dernier controle, une cote tombee dessous retire le pari.",
     "Releve : la page match et le robot lisent le MEME releve de odds_snapshots, le dernier de moins de age_max_releve_h heures (marches-flux.mjs#lireRelevesFlux) ; la page ecrit son heure (marches_flux.releve_at).",
     "ligues (03/10/2026, mathematicien) : seulement les competitions MESUREES (clubs verifies sur 372 matchs ; Ligue des nations sur 54 matchs, rien ne contredit) ; corners du match exclus pour les selections (44 % reels pour 54 % annonces sur 54 matchs). Les autres competitions s'ajouteront apres mesure.",
-    "Tirs et tirs cadres (04/10/2026, decision de Clement) : le moteur v3 ne les calcule pas et aucun bookmaker agree ne les propose ; on prend simplement la cote d'API-Football sans marge (bet_id 211, 87, 340, 176), dans toutes les competitions, sans cote ni nom de bookmaker affiches. Pas de pari : seulement le panneau Marches (lib/pronostic.js ne les connait pas)."
+    "Tirs et tirs cadres (04/10/2026, decision de Clement) : le moteur v3 ne les calcule pas et aucun bookmaker agree ne les propose ; on prend simplement la cote d'API-Football sans marge (bet_id 211, 87, 340, 176), dans toutes les competitions, sans cote ni nom de bookmaker affiches. Pas de pari : seulement le panneau Marches (lib/pronostic.js ne les connait pas).",
+    "06/10/2026 (demande de Clement : « plein de marches, il choisit le meilleur », branche paris-tous-marches) : les marches de cette liste (dont tirs et tirs cadres, bet_id 211 et 87) deviennent aussi des CANDIDATS au pari de chaque match, aux combines et a la Selection en or (lib/pronostic.js#candidatsFlux, catalogue lib/marches-paris.js), dans leurs tranches de chance ; les tirs seulement dans une competition ou API-Football donne les statistiques du match (reglement). « Le plus de tirs » (340, 176) reste au panneau seulement (reglement par equipe non branche). La cote affichee est alors celle d'API-Football, sans nom de bookmaker. Cette liste reste celle du mathematicien : rien n'y est ajoute ici.",
+    "06/10/2026 (soir, verdict ORANGE du mathematicien sur 399 matchs jamais vus) : tirs (211) et tirs cadres (87) RETIRES de cette liste : « moins de » trop optimistes (tirs cadres : 56 % annonces, 25 % reels) et reglement API-Football different de celui du bookmaker. « Le plus de tirs » (340, 176) reste au panneau seulement."
   ],
   "reference": "bet365",
   "controle": "pinnacle",
@@ -172,14 +174,6 @@
         "argentina_liga_profesional",
         "nations_league"
       ]
-    },
-    {
-      "bet_id": 211,
-      "bet": "Total Shots"
-    },
-    {
-      "bet_id": 87,
-      "bet": "Total ShotOnGoal"
     },
     {
       "bet_id": 340,

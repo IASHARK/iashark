@@ -24,6 +24,14 @@ const args = Object.fromEntries(process.argv.slice(2).reduce((acc, a, i, all) =>
 const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../..");
 const OUT = path.resolve(args.out || path.join(REPO, "remotion-score-template/out/daily"));
 
+// Mode « Instagram du jour » (--date instagram:AAAA-MM-JJ, lancé à la main) : rien n'est calculé,
+// les Reels préparés sont téléchargés puis envoyés sur Telegram par send-telegram.mjs.
+if (String(args.date || "").startsWith("instagram:")) {
+  const {preparerInstagram} = await import("./instagram-telegram.mjs");
+  await preparerInstagram(OUT, String(args.date).slice("instagram:".length));
+  process.exit(0);
+}
+
 // ---------- Dates (heure de Paris) ----------
 const parisDate = (d = new Date()) => new Intl.DateTimeFormat("fr-CA", {timeZone: "Europe/Paris"}).format(d);
 const TODAY = args.date || parisDate();

@@ -18,6 +18,31 @@ async function call(method, body) {
 const text = (t) => call("sendMessage", new URLSearchParams({chat_id: chatId, text: t}));
 
 const manifest = JSON.parse(fs.readFileSync(path.join(dir, "manifest.json"), "utf8"));
+
+// Mode « Instagram du jour » (instagram-telegram.mjs) : pour chaque Reel, l'heure, la vidéo,
+// la couverture puis la description seule, pour la copier-coller facilement.
+if (manifest.instagram) {
+  const pause = () => new Promise((r) => setTimeout(r, 3500));
+  await text(manifest.intro);
+  for (const r of manifest.instagram) {
+    const form = new FormData();
+    form.append("chat_id", chatId);
+    form.append("caption", r.entete.slice(0, 1024));
+    form.append("supports_streaming", "true");
+    form.append("video", new Blob([fs.readFileSync(path.join(dir, path.basename(r.video)))], {type: "video/mp4"}), path.basename(r.video));
+    await call("sendVideo", form); await pause();
+    if (r.couverture) {
+      const photo = new FormData();
+      photo.append("chat_id", chatId);
+      photo.append("caption", `Couverture du Reel de ${r.heure}`);
+      photo.append("photo", new Blob([fs.readFileSync(path.join(dir, path.basename(r.couverture)))], {type: "image/jpeg"}), path.basename(r.couverture));
+      await call("sendPhoto", photo); await pause();
+    }
+    await text(r.texte); await pause();
+    console.log(`envoyé : Reel de ${r.heure}`);
+  }
+  process.exit(0);
+}
 const done = manifest.videos.filter((v) => fs.existsSync(v.output));
 const detail = manifest.videos.length ? ` (${manifest.pulse ?? 0} Match Pulse, ${manifest.simule ?? 0} Match simulé)` : "";
 await text(`🎬 IASHARK — vidéos du ${manifest.date}\n${done.length} vidéo(s) prête(s) sur ${manifest.videos.length}${detail}` +

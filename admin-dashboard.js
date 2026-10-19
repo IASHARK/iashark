@@ -141,20 +141,27 @@
 
   // ---------- Sources ----------
   // MEMES regles (memes expressions, meme ordre) que public.admin_source_group
-  // dans supabase/migrations/0019_admin_dashboard_v2.sql (test de parite).
+  // dans supabase/migrations/0052_admin_diagnostics.sql (test de parite ;
+  // 0019 avant le 19/10/2026 : YouTube, Snapchat, IA, Reddit, Telegram ajoutes).
   var SOURCE_RULES = [
     ["whatsapp", "whatsapp|^wa\\.me$"],
     ["tiktok", "tiktok|musical\\.ly|bytedance|^tt$"],
     ["instagram", "instagram|^ig$"],
     ["facebook", "facebook|^fb$|(^|\\.)fb\\.com$|^m\\.me$|messenger"],
     ["x", "^t\\.co$|twitter|^x$|(^|\\.)x\\.com$"],
+    ["youtube", "youtube|youtu\\.be|^yt$"],
+    ["snapchat", "snapchat|^snap$"],
+    ["ia", "chatgpt|openai|perplexity|gemini\\.google|copilot|claude\\.ai|^ia$"],
     ["google", "(^|\\.)google(\\.|$)|googlequicksearchbox"],
-    ["bing", "(^|\\.)bing(\\.|$)"]
+    ["bing", "(^|\\.)bing(\\.|$)"],
+    ["reddit", "reddit"],
+    ["telegram", "telegram|^t\\.me$"]
   ];
   var SOURCE_RES = SOURCE_RULES.map(function (r) { return [r[0], new RegExp(r[1])]; });
   var SOURCE_LABELS = {
     tiktok: "TikTok", instagram: "Instagram", facebook: "Facebook", google: "Google", bing: "Bing",
-    x: "X / Twitter", whatsapp: "WhatsApp", direct: "Direct", other: "Autres sites"
+    x: "X / Twitter", whatsapp: "WhatsApp", youtube: "YouTube", snapchat: "Snapchat", ia: "ChatGPT et autres IA",
+    reddit: "Reddit", telegram: "Telegram", direct: "Direct", other: "Autres sites"
   };
   function trimOrNull(v) {
     if (v === null || v === undefined) return null;
@@ -168,6 +175,7 @@
       if (/^tiktok/i.test(b)) return "tiktok";
       if (/^instagram/i.test(b)) return "instagram";
       if (/^facebook/i.test(b)) return "facebook";
+      if (/^snapchat/i.test(b)) return "snapchat";
       return "direct";
     }
     s = s.toLowerCase();
@@ -964,7 +972,181 @@
     });
   }
 
+  // ---------- 9 écrans (19/10/2026) ----------
+  // Une question par écran, dans l'ordre où le propriétaire doit les lire.
+  // key = ancre (#ecran-<key>) et valeur de data-screen dans admin.html.
+  var SCREENS = [
+    { key: "aujourdhui", label: "Aujourd'hui", title: "Que dois-je faire aujourd'hui ?", sub: "Les problèmes qui te coûtent le plus de clients, puis les chiffres de la période et qui est sur le site maintenant." },
+    { key: "site", label: "Le site", title: "Est-ce que le site marche bien ?", sub: "Pannes, vitesse d'affichage et matchs qui s'affichent (ou pas) : ce qui peut faire fuir un visiteur sans qu'il le dise." },
+    { key: "provenance", label: "Provenance", title: "Quel réseau amène des gens utiles ?", sub: "Pour chaque réseau et chaque publication : combien viennent, combien regardent vraiment, combien s'inscrivent ou ouvrent le paiement." },
+    { key: "arrivee", label: "Arrivée", title: "Pourquoi les gens partent dès l'arrivée ?", sub: "La première page vue, le temps passé dessus et la langue : c'est là que se joue la plus grosse perte." },
+    { key: "parcours", label: "Parcours", title: "À quelle étape on perd les futurs clients ?", sub: "Du premier match ouvert jusqu'au paiement, étape par étape, avec le formulaire d'inscription et le paiement en détail." },
+    { key: "envie", label: "Envie", title: "Qu'est-ce qui donne envie de payer ?", sub: "Les boutons « Débloquer » cliqués, les pages et les matchs les plus regardés." },
+    { key: "inscrits", label: "Inscrits", title: "Les inscrits reviennent-ils ?", sub: "Ce que font les personnes qui ont créé un compte, et qui relancer." },
+    { key: "argent", label: "Argent", title: "Combien ça rapporte ?", sub: "Abonnements en cours, argent encaissé, nouveaux abonnés et résiliations, d'après Stripe et les comptes." },
+    { key: "fiabilite", label: "Fiabilité", title: "Peut-on croire ces chiffres ?", sub: "Ce qui est mesuré, ce qui manque, ce qui est retiré (robots, tests, ton appareil), et tous les filtres." }
+  ];
+  function screenKey(hash) {
+    var m = String(hash || "").match(/^#ecran-([a-z]+)$/);
+    if (!m) return null;
+    for (var i = 0; i < SCREENS.length; i++) if (SCREENS[i].key === m[1]) return m[1];
+    return null;
+  }
+
+  // ---------- Diagnostics (admin_diagnostics, migration 0052) ----------
+  var DIAG_FILE = "0052_admin_diagnostics.sql";
+  function pctOf(n, d) {
+    var a = num(n), b = num(d);
+    return a === null || b === null || b <= 0 ? null : (a / b) * 100;
+  }
+  // « 1,8 s » au-dessus d'une seconde, « 350 ms » en dessous.
+  function msText(ms) {
+    var v = num(ms);
+    if (v === null || v < 0) return "—";
+    if (v < 1000) return NF.format(Math.round(v)) + " ms";
+    return new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 }).format(v / 1000) + " s";
+  }
+  // Seuils officiels Google (web.dev/vitals), 75e centile.
+  var VITALS = {
+    lcp: { label: "Affichage du contenu principal", good: 2500, poor: 4000, words: ["Rapide", "Moyen", "Lent"], unit: "ms" },
+    fcp: { label: "Premier affichage", good: 1800, poor: 3000, words: ["Rapide", "Moyen", "Lent"], unit: "ms" },
+    inp: { label: "Réaction après un clic", good: 200, poor: 500, words: ["Réactif", "Un peu lent", "Lent au clic"], unit: "ms" },
+    cls: { label: "Page qui bouge pendant le chargement", good: 0.1, poor: 0.25, words: ["Stable", "Bouge un peu", "La page saute"], unit: "" }
+  };
+  function vitalVerdict(metric, value) {
+    var v = num(value), def = VITALS[metric];
+    if (!def || v === null) return { level: "unknown", word: "Pas encore mesuré" };
+    if (v <= def.good) return { level: "good", word: def.words[0] };
+    if (v <= def.poor) return { level: "mid", word: def.words[1] };
+    return { level: "bad", word: def.words[2] };
+  }
+  function vitalValue(metric, value) {
+    var v = num(value);
+    if (v === null) return "—";
+    return metric === "cls" ? new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(v) : msText(v);
+  }
+  var LANG_NAMES = {
+    fr: "français", en: "anglais", es: "espagnol", pt: "portugais", de: "allemand", it: "italien", ar: "arabe",
+    nl: "néerlandais", tr: "turc", fi: "finnois", sv: "suédois", pl: "polonais", ru: "russe", ro: "roumain",
+    vi: "vietnamien", zh: "chinois", ja: "japonais", ko: "coréen", el: "grec", hu: "hongrois", cs: "tchèque", da: "danois", no: "norvégien", nb: "norvégien"
+  };
+  function langName(code) {
+    var c = String(code || "").toLowerCase();
+    return LANG_NAMES[c] || (/^[a-z]{2}$/.test(c) ? "langue « " + c + " »" : "langue inconnue");
+  }
+  var SITE_LANG = { fr: "en français", en: "en anglais", gb: "en anglais (Royaume-Uni)", za: "en anglais (Afrique du Sud)", es: "en espagnol", mx: "en espagnol (Mexique)", de: "en allemand", it: "en italien", pt: "en portugais" };
+  function siteLangText(site) { return SITE_LANG[site] || "dans une version inconnue"; }
+  // Page d'arrivée lisible : « Accueil (FR) », « Page match (EN) »...
+  function landingName(page, site) {
+    var p = String(page || "/");
+    if (p === "/") return "Accueil, adresse iashark.com";
+    if (p === "/match/") return "Page match, adresse courte iashark.com/match/…";
+    var info = pageInfo(p, null, {});
+    var key = SITES[site] ? site : /^\/(fr|en|es|de|it|pt|gb|za|mx)(\/|$)/.test(p) ? info.site : null;
+    return info.name + (key && SITES[key] ? " (" + SITES[key].short + ")" : "");
+  }
+  // Libellés courts des motifs d'échec envoyés par le site (auth-pages.js,
+  // lib/offre-pro.js). Motif inconnu : affiché tel quel.
+  var FAIL_REASONS = {
+    champ_email: "adresse e-mail refusée par le formulaire", champ_mdp: "mot de passe trop court", champ_mdp_confirmation: "les deux mots de passe ne correspondent pas",
+    deja_inscrit: "compte déjà existant", mdp_trop_court: "mot de passe trop court (serveur)", mdp_trop_simple: "mot de passe trop simple",
+    trop_de_tentatives: "trop de tentatives", reseau: "problème de connexion", email_refuse: "adresse e-mail refusée", inscriptions_fermees: "inscriptions fermées", autre: "autre erreur",
+    interval_not_configured: "durée d'abonnement pas ouverte", market_not_configured: "paiement pas ouvert dans ce pays", already_subscribed: "déjà abonné",
+    price_mismatch: "prix indisponible", consent_required: "case des conditions non cochée", consent_not_loaded: "conditions de paiement pas chargées",
+    app_missing: "page mal chargée", reseau_ou_erreur: "problème de connexion ou erreur", checkout_unavailable: "paiement indisponible (ancien suivi)"
+  };
+  function failReason(code) {
+    var c = String(code || "");
+    if (FAIL_REASONS[c]) return FAIL_REASONS[c];
+    if (/^http_\d{3}$/.test(c)) return "erreur du serveur (" + c.slice(5) + ")";
+    return c || "motif inconnu";
+  }
+
+  // « À faire en premier » : 3 actions au plus, les plus graves d'abord.
+  // Chaque action dit le problème EN CHIFFRES, où regarder, quoi faire.
+  // Seuils volontairement simples (peu de trafic) : au moins 20 visiteurs
+  // pour parler d'une page ou d'une source, sinon c'est du hasard.
+  function todoActions(d) {
+    var out = [];
+    if (!d || !d.totals) return out;
+    var t = d.totals;
+    var sessions = num(t.sessions) || 0;
+    var pay = d.payment || {}, su = d.signup || {};
+    // 1) Paiement qui échoue : urgence absolue (de l'argent perdu).
+    if ((num(pay.failed) || 0) > 0) {
+      out.push({ level: "urgent", screen: "parcours", weight: 1000 + num(pay.failed),
+        title: fmtInt(pay.failed) + " personne" + (pay.failed > 1 ? "s ont" : " a") + " voulu payer sans que le paiement s'ouvre",
+        why: "Le motif est dans l'écran Parcours, partie « Le paiement ». C'est de l'argent perdu : à corriger avant tout le reste." });
+    }
+    // 2) Pannes JavaScript.
+    if ((num(t.with_error) || 0) > 0) {
+      out.push({ level: "urgent", screen: "site", weight: 900 + num(t.with_error),
+        title: "Le site plante pour " + fmtInt(t.with_error) + " visiteur" + (t.with_error > 1 ? "s" : ""),
+        why: "Une erreur du site s'est produite pendant leur visite. Le détail (message, page) est dans l'écran Le site : envoie-le à ton développeur." });
+    }
+    // 3) Source qui amène du monde inutile (pub mal ciblée, mauvaise page).
+    (d.sources || []).forEach(function (s) {
+      var n = num(s.sessions) || 0, u = num(s.useful) || 0;
+      if (n >= 20 && u / n < 0.15) {
+        out.push({ level: "important", screen: "provenance", weight: 400 + (n - u),
+          title: sourceLabel(s.source) + " : " + fmtInt(n) + " visites, seulement " + fmtInt(u) + " utile" + (u > 1 ? "s" : ""),
+          why: "Presque tous repartent sans rien regarder. Si c'est une pub, vérifie la cible et la page d'arrivée avant de remettre de l'argent." });
+      }
+    });
+    // 4) Page d'arrivée qui fait fuir.
+    var worst = null;
+    (d.landing || []).forEach(function (l) {
+      var n = num(l.sessions) || 0, one = num(l.one_page) || 0;
+      if (n >= 20 && one / n >= 0.75 && (!worst || one > num(worst.one_page))) worst = l;
+    });
+    if (worst) {
+      out.push({ level: "important", screen: "arrivee", weight: 350 + num(worst.one_page),
+        title: "« " + landingName(worst.page, worst.site) + " » : " + fmtInt(worst.one_page) + " arrivées sur " + fmtInt(worst.sessions) + " repartent sans 2e page",
+        why: "Le premier écran ne donne pas envie d'aller plus loin. Regarde-le sur un téléphone : comprend-on tout de suite quoi faire ?" });
+    }
+    // 5) Langue qui ne correspond pas au visiteur.
+    var mis = num(t.lang_mismatch) || 0;
+    if (mis >= 10 && mis / Math.max(1, sessions) >= 0.08) {
+      out.push({ level: "important", screen: "arrivee", weight: 300 + mis,
+        title: fmtInt(mis) + " visiteurs lisent le site dans une autre langue que la leur",
+        why: "Leur téléphone est réglé dans une langue, ils tombent sur une autre version. Le détail par langue est dans l'écran Arrivée." });
+    }
+    // 6) Contenu qui ne s'affiche pas avant le départ.
+    var known = num(t.content_known) || 0, before = num(t.before_content) || 0;
+    if (known >= 10 && before / known >= 0.2) {
+      out.push({ level: "important", screen: "site", weight: 280 + before,
+        title: fmtInt(before) + " visiteurs partent avant que les matchs s'affichent",
+        why: "La liste ou l'analyse met trop de temps à apparaître. Voir la vitesse d'affichage dans l'écran Le site." });
+    }
+    // 7) Vitesse sur téléphone.
+    (d.vitals || []).forEach(function (v) {
+      if (v.device === "mobile" && (num(v.n_lcp) || 0) >= 10 && num(v.lcp) > VITALS.lcp.poor) {
+        out.push({ level: "important", screen: "site", weight: 260,
+          title: "Sur téléphone, la page met " + msText(v.lcp) + " à s'afficher",
+          why: "Au-delà de 4 s, beaucoup de visiteurs abandonnent. À montrer à ton développeur (images, scripts trop lourds)." });
+      }
+    });
+    // 8) Inscription qui bloque.
+    var page = num(su.page) || 0, done = num(su.completed) || 0;
+    if (page >= 5 && done / page < 0.5) {
+      out.push({ level: "important", screen: "parcours", weight: 200 + (page - done),
+        title: "Inscription : " + fmtInt(page) + " ouvrent le formulaire, " + fmtInt(done) + " le terminent",
+        why: "Regarde dans Parcours à quel moment ils abandonnent (avant de taper, ou après une erreur)." });
+    }
+    // 9) Offre vue, paiement jamais ouvert.
+    var offer = num(pay.offer) || 0, click = num(pay.click) || 0;
+    if (offer >= 5 && click === 0) {
+      out.push({ level: "info", screen: "envie", weight: 150 + offer,
+        title: fmtInt(offer) + " personnes ont vu l'offre Pro, aucune n'a ouvert le paiement",
+        why: "L'offre ne convainc pas encore : ce que Pro apporte en plus du gratuit doit se voir en un coup d'œil." });
+    }
+    out.sort(function (a, b) { return b.weight - a.weight; });
+    return out.slice(0, 3);
+  }
+
   return {
+    SCREENS: SCREENS, screenKey: screenKey, DIAG_FILE: DIAG_FILE, pctOf: pctOf, msText: msText, VITALS: VITALS, vitalVerdict: vitalVerdict,
+    vitalValue: vitalValue, langName: langName, siteLangText: siteLangText, landingName: landingName, failReason: failReason, todoActions: todoActions,
     DROP_FILE: DROP_FILE, DROP_STEPS: DROP_STEPS, DROP_SOURCES: DROP_SOURCES, DROP_DEVICES: DROP_DEVICES,
     dropSteps: dropSteps, dropLeak: dropLeak, dropNotes: dropNotes, countryBasisText: countryBasisText,
     excludedText: excludedText, signupTimingText: signupTimingText, exitRows: exitRows,
@@ -1013,7 +1195,8 @@
     openHelp: {}, openVisit: null, visitLimit: 20, signupLimit: 15, lastLiveCount: null,
     members: null, retention: null, membersLoading: false, showEmails: false, openMember: null, journeys: {}, memberLimit: 25,
     unlocks: null,
-    drop: { country: "", device: "", source: "" }, dropRes: null, dropSeq: 0
+    drop: { country: "", device: "", source: "" }, dropRes: null, dropSeq: 0,
+    screen: "aujourdhui", diag: null, diagSeq: 0
   };
 
   function $(id) { return document.getElementById(id); }
@@ -1936,7 +2119,7 @@
   function renderUnlocks() {
     var el = $("unlockClicks");
     if (!el || !S.unlocks) return;
-    var title = '<h3 class="micro unlock-title">Clics « Débloquer » par emplacement (page match)</h3>';
+    var title = '<h3 class="flow-sub unlock-title">Clics « Débloquer » par emplacement (page match)</h3>';
     if (S.unlocks.kind === "missing") {
       el.innerHTML = title + '<p class="soft-msg"><b>À activer</b>Les clics sur chaque bouton « Débloquer » s\'afficheront ici quand ton développeur aura appliqué la mise à jour ' + esc(MEMBERS_FILE) + ".</p>";
       return;
@@ -2050,6 +2233,341 @@
     if (ids.some(function (id) { return !S.names[id]; })) loadMissingNames(ids).then(function (changed) { if (changed) renderDrop(); });
   }
 
+  // ---------- Les 9 écrans ----------
+  // L'ancre #ecran-<cle> choisit l'écran ; une ancre vers un bloc (#maintenant,
+  // #inscrits...) ouvre l'écran qui le contient puis y descend.
+  function screenOf(hash) {
+    var key = H.screenKey(hash);
+    if (key) return { key: key, target: null };
+    var id = String(hash || "").replace(/^#/, "");
+    var el = id && /^[A-Za-z][\w-]*$/.test(id) ? document.getElementById(id) : null;
+    var box = el && el.closest ? el.closest("[data-screen]") : null;
+    return box ? { key: box.getAttribute("data-screen"), target: el } : { key: S.screen || "aujourdhui", target: null };
+  }
+  function applyScreen(hash, scroll) {
+    var r = screenOf(hash);
+    S.screen = r.key;
+    var def = H.SCREENS.filter(function (x) { return x.key === r.key; })[0] || H.SCREENS[0];
+    Array.prototype.forEach.call(document.querySelectorAll("[data-screen]"), function (el) {
+      el.classList.toggle("off-screen", el.getAttribute("data-screen") !== def.key);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-screen-link]"), function (a) {
+      if (a.getAttribute("data-screen-link") === def.key) {
+        a.setAttribute("aria-current", "page");
+        if (a.scrollIntoView && scroll !== false) {
+          var track = a.closest(".screens-track");
+          if (track) track.scrollTo({ left: a.offsetLeft - (track.clientWidth - a.offsetWidth) / 2, behavior: "smooth" });
+        }
+      } else a.removeAttribute("aria-current");
+    });
+    $("screenTitle").textContent = def.title;
+    $("screenSub").textContent = def.sub;
+    document.title = "IASHARK — " + def.label;
+    if (scroll === false) return;
+    if (r.target) r.target.scrollIntoView({ behavior: "smooth", block: "start" });
+    else {
+      var nav = $("screens");
+      var top = nav ? nav.getBoundingClientRect().top + window.pageYOffset - 70 : 0;
+      if (window.pageYOffset > top) window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    }
+  }
+
+  // ---------- Diagnostics (admin_diagnostics, migration 0052) ----------
+  function loadDiag() {
+    if (!sb || !S.range) return Promise.resolve();
+    var r = S.range, seq = ++S.diagSeq;
+    return rpc("admin_diagnostics", merge({ p_from: r.from, p_to: r.to, p_include_internal: false }, filterArgs())).then(function (x) {
+      if (seq !== S.diagSeq) return;
+      if (x.kind === "denied") { showState("denied"); return; }
+      S.diag = x;
+      renderDiag();
+    });
+  }
+  function diagMissing(el) {
+    el.innerHTML = '<p class="soft-msg"><b>Mise à jour de la base à appliquer</b>Cette partie s\'affichera quand la mise à jour ' + esc(H.DIAG_FILE) + " sera appliquée dans Supabase. Le reste du tableau de bord fonctionne normalement.</p>";
+  }
+  var DIAG_BLOCKS = ["todo", "speed", "errors", "shown", "channels", "posts", "landing", "langs", "signupFlow", "payFlow", "money", "quality"];
+  function renderDiag() {
+    var x = S.diag;
+    if (!x) return;
+    if (!x.data) {
+      DIAG_BLOCKS.forEach(function (id) {
+        var el = $(id);
+        if (!el) return;
+        if (x.kind === "missing") diagMissing(el); else blockError(el, x, "Diagnostic");
+      });
+      return;
+    }
+    var d = x.data;
+    renderTodo(d); renderSpeed(d); renderErrors(d); renderShown(d); renderChannels(d); renderPosts(d);
+    renderLanding(d); renderLangs(d); renderSignupFlow(d); renderPayFlow(d); renderMoney(d); renderQuality(d);
+  }
+  function pctTxt(n, d) {
+    var p = H.pctOf(n, d);
+    return p === null ? "—" : H.fmtPct(p, p > 0 && p < 10 ? 1 : 0);
+  }
+  // Depuis quand une mesure existe : phrase si elle a démarré pendant la période.
+  function sinceNote(iso, what) {
+    if (!iso) return "Mesure de « " + what + " » ajoutée le 19/10/2026 : les premiers chiffres arrivent avec les prochaines visites.";
+    if (S.range && H.parisToday(new Date(iso)) > S.range.from) return "Mesure de « " + what + " » ajoutée le " + fmtDay(iso).toLowerCase() + " : elle ne couvre pas toute la période.";
+    return "";
+  }
+  function noteHtml(text) { return text ? '<p class="note">' + esc(text) + "</p>" : ""; }
+
+  function renderTodo(d) {
+    var el = $("todo");
+    var acts = H.todoActions(d);
+    var sessions = Number(d.totals && d.totals.sessions) || 0;
+    if (!acts.length) {
+      el.innerHTML = sessions < 20
+        ? '<p class="soft-msg"><b>Pas encore assez de visiteurs pour conclure</b>' + esc(H.fmtInt(sessions) + " visiteur" + (sessions > 1 ? "s" : "") + " sur la période. Choisis « 7 jours » ou « 15 jours » en haut pour avoir assez de recul.") + "</p>"
+        : '<p class="soft-msg"><b>Rien d\'urgent sur cette période</b>Pas de panne, pas de paiement bloqué, pas de grosse fuite repérée. Regarde l\'écran Provenance pour savoir quel réseau pousser.</p>';
+      return;
+    }
+    var LEVEL = { urgent: "Urgent", important: "Important", info: "À regarder" };
+    el.innerHTML = '<ol class="todo">' + acts.map(function (a, i) {
+      return '<li class="todo-item todo-' + esc(a.level) + '"><span class="todo-n tnum" aria-hidden="true">' + (i + 1) + '</span><div class="todo-body">'
+        + '<span class="badge ' + (a.level === "urgent" ? "warn" : a.level === "important" ? "cy" : "") + '">' + esc(LEVEL[a.level]) + "</span>"
+        + "<b>" + esc(a.title) + "</b><p>" + esc(a.why) + '</p><a class="todo-link" href="#ecran-' + esc(a.screen) + '">Voir le détail ›</a></div></li>';
+    }).join("") + "</ol>";
+  }
+
+  function renderSpeed(d) {
+    var el = $("speed");
+    var rows = (d.vitals || []).filter(function (v) { return v.device === "mobile" || v.device === "desktop"; });
+    var any = rows.some(function (v) { return Number(v.n_lcp) > 0 || Number(v.n_inp) > 0; });
+    if (!any) {
+      el.innerHTML = emptyHtml("Pas encore de mesure de vitesse", "La mesure part avec la mise à jour du site du 19/10/2026 : les chiffres arrivent avec les prochaines visites.");
+      return;
+    }
+    var html = "";
+    rows.sort(function (a, b) { return a.device === "mobile" ? -1 : b.device === "mobile" ? 1 : 0; }).forEach(function (v) {
+      html += '<h3 class="vit-dev">' + esc(v.device === "mobile" ? "Sur téléphone" : "Sur ordinateur") + '<small class="tnum">' + esc(H.fmtInt(v.n_lcp) + " mesure" + (Number(v.n_lcp) > 1 ? "s" : "")) + "</small></h3><ul class=\"vits\">";
+      ["lcp", "inp", "cls"].forEach(function (m) {
+        var verdict = H.vitalVerdict(m, v[m]);
+        html += '<li class="vit vit-' + verdict.level + '"><span class="vit-name">' + esc(H.VITALS[m].label) + '</span><span class="vit-val tnum">' + esc(H.vitalValue(m, v[m])) + '</span><span class="vit-word">' + esc(verdict.word) + "</span></li>";
+      });
+      html += "</ul>";
+    });
+    el.innerHTML = html + noteHtml(sinceNote(d.quality && d.quality.since && d.quality.since.vitals, "vitesse"));
+  }
+
+  function renderErrors(d) {
+    var el = $("errors");
+    var list = d.errors || [];
+    var since = d.quality && d.quality.since && d.quality.since.js_error;
+    if (!list.length) {
+      el.innerHTML = '<div class="bots-big"><b class="tnum">0</b><span>panne enregistrée</span></div>'
+        + '<p class="bots-text">' + esc(since ? "Aucune erreur pendant les visites de la période." : "Aucune erreur pour l'instant. Le suivi des pannes démarre avec la mise à jour du site du 19/10/2026.") + "</p>";
+      return;
+    }
+    var t = d.totals || {};
+    el.innerHTML = '<p class="err-sum">' + esc(H.fmtInt(t.with_error) + " visiteur" + (Number(t.with_error) > 1 ? "s touchés" : " touché") + " sur " + H.fmtInt(t.sessions) + " (" + pctTxt(t.with_error, t.sessions) + ")") + "</p>"
+      + '<ul class="errs">' + list.map(function (e) {
+        var where = [e.src ? "fichier " + e.src : null, e.page ? "page " + H.pageInfo(e.page, null, S.names).name : null].filter(Boolean).join(" · ");
+        return '<li class="err"><code class="err-msg">' + esc(e.msg) + '</code><span class="err-meta tnum">' + esc(H.fmtInt(e.n) + " fois · " + H.fmtInt(e.sessions) + " visiteur" + (Number(e.sessions) > 1 ? "s" : "") + (where ? " · " + where : "") + " · dernière " + fmtDay(e.last_at).toLowerCase() + " " + fmtTime(e.last_at)) + "</span></li>";
+      }).join("") + "</ul>" + noteHtml(sinceNote(since, "pannes"));
+  }
+
+  function renderShown(d) {
+    var el = $("shown"), t = d.totals || {};
+    var known = Number(t.content_known) || 0;
+    if (!known) {
+      el.innerHTML = emptyHtml("Pas encore de mesure", "La mesure part avec la mise à jour du site du 19/10/2026 : elle arrivera avec les prochaines visites de l'accueil et des pages match.");
+      return;
+    }
+    var before = Number(t.before_content) || 0;
+    var rows = (d.landing || []).filter(function (l) { return Number(l.content_known) > 0; });
+    el.innerHTML = '<div class="bots-big"><b class="tnum">' + esc(pctTxt(before, known)) + '</b><span>partent avant de voir les matchs</span></div>'
+      + '<p class="bots-text">' + esc(H.fmtInt(before) + " visiteur" + (before > 1 ? "s" : "") + " sur " + H.fmtInt(known) + " arrivés sur l'accueil ou une page match sont partis pendant le chargement.") + "</p>"
+      + (rows.length ? '<ul class="bars shown-list">' + rows.slice(0, 5).map(function (l) {
+        return '<li class="bar-row"><span class="bar-name">' + esc(H.landingName(l.page, l.site)) + '</span><span class="bar-val tnum">' + esc(H.msText(l.content_ms)) + "<small>" + esc("délai médian") + "</small></span></li>";
+      }).join("") + "</ul>" : "")
+      + noteHtml(sinceNote(d.quality && d.quality.since && d.quality.since.content, "contenu affiché"));
+  }
+
+  // Tableau qui devient une liste de fiches sur téléphone (data-label).
+  function tableHtml(cols, rows, opts) {
+    opts = opts || {};
+    return '<div class="dt-wrap"><table class="dt' + (opts.cls ? " " + opts.cls : "") + '"><thead><tr>' + cols.map(function (c) {
+      return '<th scope="col"' + (c.num ? ' class="num"' : "") + ">" + esc(c.label) + "</th>";
+    }).join("") + "</tr></thead><tbody>" + rows.map(function (r) {
+      return "<tr" + (r.cls ? ' class="' + r.cls + '"' : "") + ">" + cols.map(function (c, i) {
+        var v = r.cells[i];
+        return (i === 0 ? '<th scope="row"' : "<td") + ' data-label="' + esc(c.label) + '"' + (c.num ? ' class="num tnum"' : "") + ">" + (i === 0 ? v : '<span class="dt-v">' + v + "</span>") + (i === 0 ? "</th>" : "</td>");
+      }).join("") + "</tr>";
+    }).join("") + "</tbody></table></div>";
+  }
+  function cnt(n, of) {
+    var v = H.fmtInt(n);
+    return of === undefined ? esc(v) : esc(v) + '<small class="dt-pct">' + esc(pctTxt(n, of)) + "</small>";
+  }
+
+  function renderChannels(d) {
+    var el = $("channels"), list = d.sources || [];
+    if (!list.length) { el.innerHTML = emptyHtml("Aucun visiteur sur cette période", "Le tableau se remplira dès les premières visites."); return; }
+    var cols = [{ label: "Provenance" }, { label: "Visiteurs", num: true }, { label: "Utiles", num: true }, { label: "Temps médian", num: true },
+      { label: "Inscrits", num: true }, { label: "Intérêt Pro", num: true }, { label: "Paiement ouvert", num: true }];
+    el.innerHTML = tableHtml(cols, list.map(function (s) {
+      var n = Number(s.sessions) || 0, u = Number(s.useful) || 0;
+      return {
+        cls: n >= 20 && u / n < 0.15 ? "row-warn" : "",
+        cells: [esc(H.sourceLabel(s.source)), cnt(n), cnt(u, n), esc(H.fmtDur(s.median_sec)), cnt(s.signups), cnt(s.pro_interest), cnt(s.pay_clicks)]
+      };
+    })) + '<p class="note">Lignes en orange : au moins 20 visiteurs, mais moins de 15 % sont utiles. Pourcentage = part des visiteurs de la ligne.</p>';
+  }
+
+  function renderPosts(d) {
+    var el = $("posts"), list = d.campaigns || [];
+    if (!list.length) {
+      el.innerHTML = emptyHtml("Aucun lien marqué sur cette période", "Ajoute une étiquette utm aux liens de tes vidéos, de ta bio et de tes pubs : chaque publication aura alors sa ligne ici.");
+      return;
+    }
+    var cols = [{ label: "Publication" }, { label: "Visiteurs", num: true }, { label: "Utiles", num: true }, { label: "Partis sans 2e page", num: true }, { label: "Inscrits", num: true }, { label: "Paiement ouvert", num: true }];
+    el.innerHTML = tableHtml(cols, list.map(function (c) {
+      var n = Number(c.sessions) || 0;
+      var label = [H.sourceLabel(c.source), c.medium === "paid" || c.medium === "cpc" || c.medium === "paid_social" ? "pub" : c.medium, c.campaign, c.content].filter(Boolean).join(" · ");
+      return { cls: n >= 20 && (Number(c.useful) || 0) / n < 0.15 ? "row-warn" : "",
+        cells: [esc(label) + '<small class="dt-sub">' + esc("arrivée : " + H.landingName(c.landing, null)) + "</small>", cnt(n), cnt(c.useful, n), cnt(c.one_page, n), cnt(c.signups), cnt(c.pay_clicks)] };
+    }));
+  }
+
+  function renderLanding(d) {
+    var el = $("landing"), list = (d.landing || []).slice(0, 15);
+    if (!list.length) { el.innerHTML = emptyHtml("Aucune arrivée sur cette période", "Le tableau se remplira dès les premières visites."); return; }
+    var cols = [{ label: "Page d'arrivée" }, { label: "Arrivées", num: true }, { label: "Partis sans 2e page", num: true }, { label: "Temps sur la page", num: true }, { label: "Contenu pas affiché", num: true }, { label: "Autre langue", num: true }];
+    el.innerHTML = tableHtml(cols, list.map(function (l) {
+      var n = Number(l.sessions) || 0, one = Number(l.one_page) || 0;
+      var shown = Number(l.content_known) > 0 ? cnt(l.before_content, l.content_known) : '<span class="dt-na">non mesuré</span>';
+      return { cls: n >= 20 && one / n >= 0.75 ? "row-warn" : "",
+        cells: [esc(H.landingName(l.page, l.site)), cnt(n), cnt(one, n), esc(H.fmtDur(l.median_sec)), shown, cnt(l.lang_mismatch, n)] };
+    })) + '<p class="note">Lignes en orange : au moins 20 arrivées et 3 sur 4 repartent sans voir une autre page.</p>'
+      + noteHtml(sinceNote(d.quality && d.quality.since && d.quality.since.content, "contenu affiché"));
+  }
+
+  function renderLangs(d) {
+    var el = $("langs"), list = d.languages || [];
+    if (!list.length) { el.innerHTML = emptyHtml("Aucun visiteur sur cette période", ""); return; }
+    var t = d.totals || {};
+    var cols = [{ label: "Téléphone réglé en" }, { label: "A lu le site", num: false }, { label: "Visiteurs", num: true }, { label: "Utiles", num: true }, { label: "Partis sans 2e page", num: true }];
+    el.innerHTML = '<p class="err-sum">' + esc(H.fmtInt(t.lang_mismatch) + " visiteur" + (Number(t.lang_mismatch) > 1 ? "s" : "") + " sur " + H.fmtInt(t.sessions) + " (" + pctTxt(t.lang_mismatch, t.sessions) + ") ont lu le site dans une autre langue que celle de leur téléphone.") + "</p>"
+      + tableHtml(cols, list.slice(0, 14).map(function (l) {
+        var n = Number(l.sessions) || 0;
+        return { cls: l.mismatch ? "row-warn" : "", cells: [esc(l.lang ? H.langName(l.lang) : "langue inconnue"), esc(H.siteLangText(l.site)), cnt(n), cnt(l.useful, n), cnt(l.one_page, n)] };
+      }));
+  }
+
+  function flowHtml(steps) {
+    var first = Number(steps[0].value) || 0;
+    var html = '<ol class="steps flow">';
+    steps.forEach(function (s, i) {
+      if (s.value === null) {
+        html += '<li class="step step-na"><span class="step-name">' + esc(s.label) + (s.help ? "<small>" + esc(s.help) + "</small>" : "")
+          + '</span><span class="step-num"><span>pas encore mesuré</span></span><span class="step-bar" aria-hidden="true"><i style="width:0"></i></span></li>';
+        return;
+      }
+      var v = Number(s.value) || 0;
+      var w = first ? Math.max(0, Math.min(100, (v / first) * 100)) : 0;
+      html += '<li class="step' + (s.bad && v > 0 ? " step-leak" : "") + '"><span class="step-name">' + esc(s.label) + (s.help ? "<small>" + esc(s.help) + "</small>" : "")
+        + '</span><span class="step-num"><b class="tnum">' + esc(H.fmtInt(v)) + "</b>" + (i > 0 && first && !s.bad ? '<span class="tnum">' + esc(pctTxt(v, first)) + "</span>" : "")
+        + '</span><span class="step-bar" aria-hidden="true"><i style="width:' + w.toFixed(1) + '%"></i></span></li>';
+    });
+    return html + "</ol>";
+  }
+  function reasonsHtml(list, keyName, title) {
+    if (!list || !list.length) return "";
+    return '<h3 class="flow-sub">' + esc(title) + '</h3><ul class="bars">' + list.map(function (r) {
+      return '<li class="bar-row"><span class="bar-name">' + esc(H.failReason(r[keyName])) + '</span><span class="bar-val tnum">' + esc(H.fmtInt(r.n)) + "</span></li>";
+    }).join("") + "</ul>";
+  }
+  function renderSignupFlow(d) {
+    var el = $("signupFlow"), s = d.signup || {};
+    if (!Number(s.page) && !Number(s.completed)) { el.innerHTML = emptyHtml("Personne n'a ouvert l'inscription sur cette période", ""); return; }
+    var steps = [
+      { label: "Page d'inscription ouverte", value: s.page },
+      { label: "A commencé à remplir", value: s.form_started, help: "a tapé au moins une lettre" },
+      { label: "A envoyé le formulaire", value: s.submitted },
+      { label: "Compte créé", value: s.completed }
+    ];
+    var started = d.quality && d.quality.since && d.quality.since.signup_form;
+    // Mesure plus recente que la periode : « pas encore mesure » plutot qu'un 0 trompeur.
+    if (!started || (S.range && H.parisToday(new Date(started)) > S.range.from)) { steps[1].value = null; steps[2].value = null; }
+    el.innerHTML = flowHtml(steps)
+      + (Number(s.failed) ? '<p class="leak-box">' + esc(H.fmtInt(s.failed) + " visiteur" + (Number(s.failed) > 1 ? "s ont" : " a") + " vu une erreur en s'inscrivant.") + "</p>" : "")
+      + reasonsHtml(s.reasons, "code", "Pourquoi l'inscription a été refusée")
+      + noteHtml(sinceNote(started, "formulaire"));
+  }
+  function renderPayFlow(d) {
+    var el = $("payFlow"), p = d.payment || {};
+    var steps = [
+      { label: "Panneau Pro vu", value: p.gate, help: "le panneau « Débloquer » est resté affiché au moins 1 s" },
+      { label: "Offre Pro ouverte", value: p.offer, help: "page abonnement ou offre" },
+      { label: "Case des conditions cochée", value: p.consent },
+      { label: "A cliqué pour payer", value: p.click },
+      { label: "Abonné", value: p.success, help: "page de confirmation Stripe" }
+    ];
+    var html = flowHtml(steps);
+    if (Number(p.failed)) html += '<p class="leak-box">' + esc(H.fmtInt(p.failed) + " visiteur" + (Number(p.failed) > 1 ? "s" : "") + " : le paiement n'a pas pu s'ouvrir.") + "</p>";
+    if (Number(p.cancel)) html += '<p class="note">' + esc(H.fmtInt(p.cancel) + " retour" + (Number(p.cancel) > 1 ? "s" : "") + " depuis Stripe sans payer (bouton « retour » sur la page de paiement).") + "</p>";
+    el.innerHTML = html + reasonsHtml(p.reasons, "reason", "Pourquoi le paiement n'a pas pu s'ouvrir")
+      + noteHtml(sinceNote(d.quality && d.quality.since && d.quality.since.checkout_failed, "paiement qui échoue"));
+  }
+
+  function renderMoney(d) {
+    var el = $("money"), m = d.money || {};
+    var MARKET = { fr: "France (€)", gb: "Royaume-Uni (£)", za: "Afrique du Sud (R)", mx: "Mexique ($)", us: "États-Unis ($)" };
+    var INTERVAL = { month: "au mois", week: "à la semaine", year: "à l'année", day: "au jour" };
+    var mrr = S.revenue ? H.mrrText(S.revenue) : S.revenueLoading ? "…" : "—";
+    var paid = S.business ? H.revenueText(S.business) : null;
+    var tiles = [
+      { v: mrr, l: "revenu mensuel des abonnements en cours (lu chez Stripe)", big: true },
+      { v: paid || "—", l: "encaissé · " + (S.range ? S.range.label : "période") },
+      { v: H.fmtInt(m.active), l: "abonnés Pro en cours" },
+      { v: H.fmtInt(m.new_in_period), l: "nouveaux abonnés · " + (S.range ? S.range.label : "période") },
+      { v: H.fmtInt(m.canceled_in_period), l: "abonnements terminés · " + (S.range ? S.range.label : "période") },
+      { v: H.fmtInt(m.cancel_planned), l: "résiliations prévues (encore Pro)" },
+      { v: H.fmtInt(m.past_due), l: "paiements en retard (carte refusée)" }
+    ];
+    var detail = [];
+    if (Number(m.trialing)) detail.push(H.fmtInt(m.trialing) + " en essai");
+    Object.keys(m.by_market || {}).forEach(function (k) { detail.push(H.fmtInt(m.by_market[k]) + " " + (MARKET[k] || k)); });
+    Object.keys(m.by_interval || {}).forEach(function (k) { detail.push(H.fmtInt(m.by_interval[k]) + " " + (INTERVAL[k] || k)); });
+    el.innerHTML = '<div class="money">' + tiles.map(function (t) {
+      return '<div class="money-tile' + (t.big ? " big" : "") + '"><b class="tnum">' + esc(t.v) + "</b><span>" + esc(t.l) + "</span></div>";
+    }).join("") + "</div>" + (detail.length ? '<p class="note">' + esc("Abonnés en cours : " + detail.join(" · ") + ".") + "</p>" : "")
+      + '<p class="note">' + esc("Résiliés depuis le lancement : " + H.fmtInt(m.canceled_total) + ".") + "</p>";
+  }
+
+  function renderQuality(d) {
+    var el = $("quality"), q = d.quality || {}, since = q.since || {};
+    var EV = { page_view: "Pages vues", page_leave: "Départs de page (temps, vitesse)", click: "Clics", gate_view: "Panneaux Pro vus", signup_started: "Inscriptions ouvertes",
+      signup_completed: "Comptes créés", login_completed: "Connexions", js_error: "Pannes", signup_form_started: "Formulaires commencés", signup_submitted: "Formulaires envoyés",
+      signup_failed: "Inscriptions refusées", checkout_failed: "Paiements bloqués", checkout_started: "Paiements lancés", checkout_success_view: "Paiements confirmés", checkout_cancel_view: "Retours sans payer" };
+    var last = q.last_event_at;
+    var hours = last ? (Date.now() - Date.parse(last)) / 36e5 : null;
+    var lastLine = last ? "Dernière donnée reçue " + fmtDay(last).toLowerCase() + " à " + fmtTime(last) + (hours !== null && hours > 6 ? " : rien depuis plus de 6 h, vérifie que le site tourne." : ".") : "Aucune donnée reçue.";
+    var sessions = Number(q.sessions) || 0;
+    var facts = [
+      lastLine,
+      H.fmtInt(q.excluded_sessions) + " visites retirées (robots, tests, ton appareil, comptes internes).",
+      H.fmtInt(q.direct) + " visiteurs sur " + H.fmtInt(sessions) + " sans provenance connue (« Direct »).",
+      H.fmtInt(q.no_leave) + " visiteurs sans temps mesuré (téléphone fermé brutalement ou navigateur qui bloque l'envoi)."
+    ];
+    var news = [
+      ["Pannes du site", since.js_error], ["Vitesse d'affichage", since.vitals], ["Matchs affichés ou pas", since.content],
+      ["Formulaire d'inscription", since.signup_form], ["Publication précise (utm_content)", since.utm_content], ["Paiement bloqué", since.checkout_failed]
+    ];
+    el.innerHTML = '<ul class="checks">' + facts.map(function (f, i) {
+      return '<li class="check ' + (i === 0 && hours !== null && hours > 6 ? "warn" : "ok") + '"><span class="check-dot" aria-hidden="true"></span><div><p>' + esc(f) + "</p></div></li>";
+    }).join("") + "</ul>"
+      + '<h3 class="flow-sub">Mesures ajoutées le 19/10/2026</h3><ul class="checks">' + news.map(function (n) {
+        return '<li class="check ' + (n[1] ? "ok" : "warn") + '"><span class="check-dot" aria-hidden="true"></span><div><b>' + esc(n[0]) + "</b><p>" + esc(n[1] ? "Premières données le " + fmtDateTime(n[1]) + "." : "En attente des premières données (aucun cas encore).") + "</p></div></li>";
+      }).join("") + "</ul>"
+      + '<h3 class="flow-sub">Données reçues sur la période</h3><ul class="bars">' + (q.events || []).map(function (e) {
+        return '<li class="bar-row"><span class="bar-name">' + esc(EV[e.event_type] || e.event_type) + '</span><span class="bar-val tnum">' + esc(H.fmtInt(e.n)) + "<small>" + esc("dernière " + fmtTime(e.last_at)) + "</small></span></li>";
+      }).join("") + "</ul>";
+  }
+
   // ---------- Bandeaux ----------
   function renderNotices() {
     var bits = [];
@@ -2157,7 +2675,7 @@
       $("noticeError").hidden = !failed;
       $("noticeErrorText").textContent = failed ? errorText(S.analyticsError.kind, S.analyticsError.error, "Statistiques") : "";
       renderAll();
-      $("updatedAt").textContent = "Mis à jour à " + fmtTime(new Date().toISOString()) + " · « Qui est là maintenant » se rafraîchit toutes les 30 s";
+      $("updatedAt").textContent = "Mis à jour à " + fmtTime(new Date().toISOString()) + " (toutes les heures sont celles de Paris) · « Qui est là maintenant » se rafraîchit toutes les 30 s";
       var c = S.analytics && S.analytics.coverage;
       $("footCoverage").textContent = "Suivi des visites démarré le " + fmtDateTime((c && c.launch_at) || H.LAUNCH_AT) + " (heure de Paris). Les données sont gardées 13 mois.";
       setBusy(false);
@@ -2165,6 +2683,7 @@
       loadMembers();
       loadUnlocks();
       loadDrop();
+      loadDiag();
       loadRevenue();
       if (!opts.silent) return loadLive().then(startTimers);
     }).catch(function (e) {
@@ -2185,8 +2704,13 @@
     S.revenueLoading = true;
     sb.functions.invoke("admin-revenue", { body: {} }).then(function (r) {
       S.revenueLoading = false;
-      if (r && r.data && r.data.ok) { S.revenue = r.data; renderCards(); }
-    }, function () { S.revenueLoading = false; });
+      if (!(r && r.data && r.data.ok) && S.diag && S.diag.data) renderMoney(S.diag.data);
+      if (r && r.data && r.data.ok) {
+        S.revenue = r.data;
+        renderCards();
+        if (S.diag && S.diag.data) renderMoney(S.diag.data);
+      }
+    }, function () { S.revenueLoading = false; if (S.diag && S.diag.data) renderMoney(S.diag.data); });
   }
 
   function loadLive() {
@@ -2331,6 +2855,7 @@
     $("confirmCancel").addEventListener("click", function () { pending = null; $("confirmDialog").close(); });
     $("confirmDialog").addEventListener("close", function () { pending = null; });
     document.addEventListener("visibilitychange", function () { if (!document.hidden && S.liveTimer) loadLive(); });
+    if (typeof window.addEventListener === "function") window.addEventListener("hashchange", function () { applyScreen(window.location.hash); });
   }
 
   // ---------- Demarrage ----------
@@ -2347,6 +2872,7 @@
     loadPrefs();
     loadNamesCache();
     wire();
+    try { applyScreen(window.location && window.location.hash, false); } catch (e) {}
     if (!window.supabase || typeof window.supabase.createClient !== "function") {
       showState("error", "Le module de connexion (Supabase) n'a pas pu se charger. Vérifie ta connexion Internet ou désactive le bloqueur de publicités pour cette page, puis recharge.");
       return;

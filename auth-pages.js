@@ -270,6 +270,34 @@
     return data;
   }
 
+  /* ---------- Suivi du formulaire d'inscription (19/10/2026) ----------
+     Pour savoir OU l'inscription bloque (admin, migration 0052) :
+     signup_form_started (premiere saisie, une fois par page), signup_submitted
+     (envoi), signup_failed { code } (code court : champ refuse ou motif du
+     serveur). Jamais la valeur saisie, jamais l'email. */
+  function suivre(type, md) {
+    try { if (window.iasharkTrack) window.iasharkTrack(type, md || {}); } catch (_e) {}
+  }
+  function codeErreur(brut) {
+    var m = String(brut || '');
+    if (/User already registered|already been registered/i.test(m)) return 'deja_inscrit';
+    if (/Password should be at least/i.test(m)) return 'mdp_trop_court';
+    if (/weak.?password/i.test(m)) return 'mdp_trop_simple';
+    if (/rate limit|too many|429/i.test(m)) return 'trop_de_tentatives';
+    if (/Failed to fetch|NetworkError|Load failed/i.test(m)) return 'reseau';
+    if (/invalid.*email|email.*invalid|Anonymous sign-ins/i.test(m)) return 'email_refuse';
+    if (/signups? not allowed|disabled/i.test(m)) return 'inscriptions_fermees';
+    return 'autre';
+  }
+  var saisieSignalee = false;
+  if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') document.addEventListener('input', function (ev) {
+    if (saisieSignalee || !/\/inscription(\.html)?$/.test(location.pathname)) return;
+    var f = ev.target && ev.target.form;
+    if (!f || !f.querySelector('#password2')) return;
+    saisieSignalee = true;
+    suivre('signup_form_started', {});
+  }, true);
+
   /* ---------- Inscription ---------- */
   async function inscription(e) {
     if (e) e.preventDefault();
@@ -280,8 +308,13 @@
     if (!EMAIL_RE.test(email)) { champ('email', t('auth.err_enter_valid_email', 'Entrez une adresse email valide.')); faute = faute || 'email'; }
     if (pwd.length < MIN_PASSWORD) { champ('password', t('auth.password_hint_min_chars', MIN_PASSWORD + ' caractères minimum.')); faute = faute || 'password'; }
     if (pwd2 !== pwd) { champ('password2', t('auth.err_passwords_mismatch', 'Les deux mots de passe ne correspondent pas.')); faute = faute || 'password2'; }
-    if (faute) { $(faute).focus(); return; }
+    if (faute) {
+      suivre('signup_failed', { code: { email: 'champ_email', password: 'champ_mdp', password2: 'champ_mdp_confirmation' }[faute] });
+      $(faute).focus();
+      return;
+    }
 
+    suivre('signup_submitted', {});
     var relacher = occuper($('submit'), t('auth.signup_submit_loading', 'Création…'));
     try {
       var caseEmails = $('emailMarketing');
@@ -308,6 +341,7 @@
     } catch (err) {
       relacher();
       var brut = String((err && err.message) || '');
+      suivre('signup_failed', { code: codeErreur(brut) });
       var texte = messageLisible(brut);
       global('formMsg', texte, 'error');
       // Teste le signal brut (toujours en anglais, cote Supabase), pas le

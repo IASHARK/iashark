@@ -50,7 +50,6 @@
 
     <div class="topline">
       <div class="topline-text">
-        <p class="eyebrow">Heures affichées : Paris</p>
         <h1 class="title">Ton site en un coup d'œil</h1>
       </div>
       <div class="toolbar">
@@ -86,8 +85,38 @@
       </div>
     </div>
 
+    <!-- Les 9 écrans (19/10/2026) : une question par écran. Les liens changent
+         l'ancre (#ecran-...), le bouton « retour » du téléphone fonctionne. -->
+    <nav class="screens" id="screens" aria-label="Écrans du tableau de bord">
+      <ol class="screens-track">
+        <li><a href="#ecran-aujourdhui" data-screen-link="aujourdhui" aria-current="page">Aujourd'hui</a></li>
+        <li><a href="#ecran-site" data-screen-link="site">Le site</a></li>
+        <li><a href="#ecran-provenance" data-screen-link="provenance">Provenance</a></li>
+        <li><a href="#ecran-arrivee" data-screen-link="arrivee">Arrivée</a></li>
+        <li><a href="#ecran-parcours" data-screen-link="parcours">Parcours</a></li>
+        <li><a href="#ecran-envie" data-screen-link="envie">Envie</a></li>
+        <li><a href="#ecran-inscrits" data-screen-link="inscrits">Inscrits</a></li>
+        <li><a href="#ecran-argent" data-screen-link="argent">Argent</a></li>
+        <li><a href="#ecran-fiabilite" data-screen-link="fiabilite">Fiabilité</a></li>
+      </ol>
+    </nav>
+    <div class="screen-head">
+      <h2 class="screen-title" id="screenTitle">Que dois-je faire aujourd'hui ?</h2>
+      <p class="screen-sub" id="screenSub">Les problèmes qui te coûtent le plus de clients, puis les chiffres de la période et qui est sur le site maintenant.</p>
+    </div>
+
+    <!-- Écran 1 : À faire en premier (admin_diagnostics, 0052) -->
+    <section class="card section todo-card" data-screen="aujourdhui" aria-labelledby="todoTitle">
+      <div class="card-head">
+        <div><h2 class="card-title" id="todoTitle">À faire en premier</h2><p class="card-sub">Calculé sur la période choisie en haut, robots et tests retirés</p></div>
+        <button type="button" class="info" aria-expanded="false" aria-controls="helpTodo" aria-label="Aide : à faire en premier">i</button>
+      </div>
+      <p class="help" id="helpTodo" hidden>Trois problèmes au plus, les plus graves d'abord : paiement qui échoue, site qui plante, puis les endroits où tu perds le plus de visiteurs. Chaque ligne t'emmène vers l'écran qui donne le détail. Rien ne s'affiche quand il n'y a pas assez de visiteurs pour être sûr (moins de 20 sur une page ou une source).</p>
+      <div id="todo"><div class="skel skel-block"></div></div>
+    </section>
+
     <!-- 1. Aujourd'hui en une phrase -->
-    <section class="hero" aria-labelledby="heroLabel">
+    <section class="hero section" data-screen="aujourdhui" aria-labelledby="heroLabel">
       <div class="hero-glow" aria-hidden="true"></div>
       <h2 class="micro" id="heroLabel">Aujourd'hui en une phrase</h2>
       <p class="hero-text" id="heroText"><span class="skel skel-line" style="display:block;width:78%"></span></p>
@@ -95,7 +124,7 @@
     </section>
 
     <!-- 2. Grandes cartes -->
-    <section class="section" aria-labelledby="cardsTitle">
+    <section class="section" data-screen="aujourdhui" aria-labelledby="cardsTitle">
       <div class="section-head">
         <h2 class="section-title" id="cardsTitle">L'essentiel · <span id="periodLabel">aujourd'hui</span></h2>
         <p class="section-sub" id="cardsSub">Uniquement de vrais visiteurs : robots, tests et ton appareil sont retirés.</p>
@@ -106,7 +135,7 @@
     </section>
 
     <!-- 2 bis. Jour par jour (periodes de plusieurs jours) -->
-    <section class="section" id="dailySection" aria-labelledby="dailyTitle" hidden>
+    <section class="section" id="dailySection" data-screen="aujourdhui" aria-labelledby="dailyTitle" hidden>
       <div class="section-head">
         <h2 class="section-title" id="dailyTitle">Jour par jour</h2>
         <p class="section-sub">Clique sur un jour pour voir tous ses chiffres.</p>
@@ -114,8 +143,8 @@
       <div class="card"><div id="daily"></div></div>
     </section>
 
-    <!-- 3. Sante + 4. Parcours -->
-    <div class="grid g-health section">
+    <!-- Écran 2 : le site marche-t-il ? -->
+    <div class="grid g2 section" data-screen="site">
       <section class="card" aria-labelledby="healthTitle">
         <div class="card-head">
           <div><h2 class="card-title" id="healthTitle">Santé du site</h2><p class="card-sub">Est-ce que tout tourne normalement ?</p></div>
@@ -125,6 +154,38 @@
         <div id="health"><div class="skel skel-block"></div></div>
       </section>
 
+      <section class="card" aria-labelledby="speedTitle">
+        <div class="card-head">
+          <div><h2 class="card-title" id="speedTitle">Vitesse d'affichage</h2><p class="card-sub">Mesurée chez tes vrais visiteurs, sur leur téléphone ou ordinateur</p></div>
+          <button type="button" class="info" aria-expanded="false" aria-controls="helpSpeed" aria-label="Aide : vitesse d'affichage">i</button>
+        </div>
+        <p class="help" id="helpSpeed" hidden>Ces mesures viennent du navigateur de chaque visiteur (Web Vitals de Google). On montre le cas des 3 visiteurs sur 4 les mieux servis : si la valeur est « Lent », un quart des visiteurs attend encore plus. Rapide = moins de 2,5 s pour voir le contenu principal, moins de 0,2 s pour réagir à un clic.</p>
+        <div id="speed"><div class="skel skel-block"></div></div>
+      </section>
+    </div>
+
+    <div class="grid g2 section" data-screen="site">
+      <section class="card" aria-labelledby="errorsTitle">
+        <div class="card-head">
+          <div><h2 class="card-title" id="errorsTitle">Pannes du site</h2><p class="card-sub">Erreurs survenues pendant les visites</p></div>
+          <button type="button" class="info" aria-expanded="false" aria-controls="helpErrors" aria-label="Aide : pannes du site">i</button>
+        </div>
+        <p class="help" id="helpErrors" hidden>Quand une partie du site plante chez un visiteur (bouton qui ne répond plus, liste qui ne se charge pas), son navigateur l'enregistre ici avec le message d'erreur et la page. Aucun visiteur n'est identifié. Copie le message et envoie-le à ton développeur.</p>
+        <div id="errors"><div class="skel skel-block"></div></div>
+      </section>
+
+      <section class="card" aria-labelledby="shownTitle">
+        <div class="card-head">
+          <div><h2 class="card-title" id="shownTitle">Les matchs s'affichent-ils ?</h2><p class="card-sub">Sur l'accueil et les pages match, avant que le visiteur parte</p></div>
+          <button type="button" class="info" aria-expanded="false" aria-controls="helpShown" aria-label="Aide : les matchs s'affichent-ils">i</button>
+        </div>
+        <p class="help" id="helpShown" hidden>À l'ouverture, l'accueil et la page match affichent d'abord un squelette gris, puis la liste des matchs ou l'analyse. On mesure le temps avant que le vrai contenu apparaisse, et combien de visiteurs partent avant de l'avoir vu.</p>
+        <div id="shown"><div class="skel skel-block"></div></div>
+      </section>
+    </div>
+
+    <!-- Écran 5 : parcours -->
+    <div class="grid g2 section" data-screen="parcours">
       <section class="card" aria-labelledby="funnelTitle">
         <div class="card-head">
           <div><h2 class="card-title" id="funnelTitle">Du visiteur au client</h2><p class="card-sub" id="funnelSub">Combien de personnes passent chaque étape</p></div>
@@ -132,12 +193,29 @@
         </div>
         <p class="help" id="helpFunnel" hidden>Chaque ligne compte les personnes qui ont atteint l'étape. Le pourcentage indique la part de tous les visiteurs. Quelqu'un peut arriver directement sur une page match ou sur la page abonnement, c'est pourquoi une étape peut parfois dépasser la précédente. « Paiement commencé » = clic sur le bouton de paiement. « Abonné » = paiement confirmé.</p>
         <div id="funnel"><div class="skel skel-block"></div></div>
-        <div class="unlock" id="unlockClicks"></div>
+      </section>
+
+      <section class="card" aria-labelledby="signupFlowTitle">
+        <div class="card-head">
+          <div><h2 class="card-title" id="signupFlowTitle">Le formulaire d'inscription</h2><p class="card-sub">Où les gens abandonnent la création du compte</p></div>
+          <button type="button" class="info" aria-expanded="false" aria-controls="helpSignupFlow" aria-label="Aide : formulaire d'inscription">i</button>
+        </div>
+        <p class="help" id="helpSignupFlow" hidden>Page ouverte = la page d'inscription s'est affichée. A commencé à remplir = a tapé au moins une lettre. A envoyé = a appuyé sur le bouton. Les refus disent pourquoi (mot de passe trop court, adresse déjà utilisée…). Jamais ce que la personne a tapé.</p>
+        <div id="signupFlow"><div class="skel skel-block"></div></div>
       </section>
     </div>
 
+    <section class="card section" data-screen="parcours" aria-labelledby="payFlowTitle">
+      <div class="card-head">
+        <div><h2 class="card-title" id="payFlowTitle">Le paiement</h2><p class="card-sub">Du panneau Pro jusqu'au paiement confirmé</p></div>
+        <button type="button" class="info" aria-expanded="false" aria-controls="helpPayFlow" aria-label="Aide : le paiement">i</button>
+      </div>
+      <p class="help" id="helpPayFlow" hidden>Chaque ligne compte les visiteurs de la période qui ont atteint l'étape. « Le paiement n'a pas pu s'ouvrir » = la personne a cliqué pour payer, mais une erreur l'en a empêchée : c'est la ligne la plus grave. « Abonné » vient de la page de confirmation de Stripe.</p>
+      <div id="payFlow"><div class="skel skel-block"></div></div>
+    </section>
+
     <!-- 4 bis. Ou les visiteurs decrochent (migration 0031_admin_conversion_funnel.sql ; sans elle : « a appliquer ») -->
-    <section class="card section" id="decrochage" aria-labelledby="dropTitle">
+    <section class="card section" id="decrochage" data-screen="parcours" aria-labelledby="dropTitle">
       <div class="card-head">
         <div><h2 class="card-title" id="dropTitle">Où les visiteurs décrochent</h2><p class="card-sub" id="dropSub">Étape par étape, jusqu'au paiement · période choisie en haut</p></div>
         <button type="button" class="info" aria-expanded="false" aria-controls="helpDrop" aria-label="Aide : où les visiteurs décrochent">i</button>
@@ -179,8 +257,26 @@
       </div>
     </section>
 
-    <!-- 5. Sources + pays / villes -->
-    <div class="grid g2 section">
+    <!-- Écran 3 : provenance -->
+    <section class="card section" data-screen="provenance" aria-labelledby="channelsTitle">
+      <div class="card-head">
+        <div><h2 class="card-title" id="channelsTitle">Chaque réseau</h2><p class="card-sub">Visiteurs, visiteurs utiles, inscriptions et paiements, par provenance</p></div>
+        <button type="button" class="info" aria-expanded="false" aria-controls="helpChannels" aria-label="Aide : chaque réseau">i</button>
+      </div>
+      <p class="help" id="helpChannels" hidden>Un visiteur « utile » a ouvert une page match, OU vu au moins 2 pages, OU passé au moins 30 secondes sur le site. Les autres sont repartis aussitôt. « Direct » = adresse tapée, favori, ou application qui ne dit pas d'où elle vient (souvent WhatsApp ou un e-mail). « Intérêt Pro » = clic sur « Débloquer » ou sur l'offre Pro.</p>
+      <div id="channels"><div class="skel skel-block"></div></div>
+    </section>
+
+    <section class="card section" data-screen="provenance" aria-labelledby="postsTitle">
+      <div class="card-head">
+        <div><h2 class="card-title" id="postsTitle">Chaque publication et chaque pub</h2><p class="card-sub">Les liens marqués (utm) : quelle vidéo, quel message ou quelle pub a amené qui</p></div>
+        <button type="button" class="info" aria-expanded="false" aria-controls="helpPosts" aria-label="Aide : chaque publication">i</button>
+      </div>
+      <p class="help" id="helpPosts" hidden>Pour suivre une publication précise, son lien doit porter une étiquette, par exemple <code>iashark.com/?utm_source=tiktok&amp;utm_campaign=ldc&amp;utm_content=video-psg</code>. Sans étiquette, la visite est seulement rangée par réseau (au-dessus).</p>
+      <div id="posts"><div class="skel skel-block"></div></div>
+    </section>
+
+    <div class="grid g2 section" data-screen="provenance">
       <section class="card" aria-labelledby="sourcesTitle">
         <div class="card-head">
           <div><h2 class="card-title" id="sourcesTitle">D'où viennent les gens</h2><p class="card-sub">Le site ou l'application qui les a amenés</p></div>
@@ -204,7 +300,7 @@
     </div>
 
     <!-- 6. Qui est la maintenant -->
-    <section class="card section" id="maintenant" aria-labelledby="liveTitle">
+    <section class="card section" id="maintenant" data-screen="aujourdhui" aria-labelledby="liveTitle">
       <div class="card-head">
         <div>
           <h2 class="card-title" id="liveTitle"><span class="dot" id="liveDot" aria-hidden="true"></span> Qui est là maintenant</h2>
@@ -218,7 +314,7 @@
     </section>
 
     <!-- 6 bis. Mes inscrits (migration 0025_admin_members.sql ; sans elle : « a activer ») -->
-    <section class="section" id="inscrits" aria-labelledby="membersTitle">
+    <section class="section" id="inscrits" data-screen="inscrits" aria-labelledby="membersTitle">
       <div class="section-head">
         <h2 class="section-title" id="membersTitle">Mes inscrits</h2>
         <p class="section-sub">Ce que font les personnes qui ont créé un compte (comptes admin et de test masqués)</p>
@@ -248,8 +344,34 @@
       </div>
     </section>
 
-    <!-- 7. Pages et matchs -->
-    <div class="grid g2 section">
+    <!-- Écran 4 : arrivée -->
+    <section class="card section" data-screen="arrivee" aria-labelledby="landingTitle">
+      <div class="card-head">
+        <div><h2 class="card-title" id="landingTitle">La première page vue</h2><p class="card-sub">Pour chaque page d'arrivée : combien repartent sans voir une 2e page, et pourquoi</p></div>
+        <button type="button" class="info" aria-expanded="false" aria-controls="helpLanding" aria-label="Aide : la première page vue">i</button>
+      </div>
+      <p class="help" id="helpLanding" hidden>La page d'arrivée est la première page ouverte par le visiteur. « Partis sans 2e page » = il n'a rien ouvert d'autre. « Temps sur la page » = temps actif médian (écran allumé, onglet visible). « Contenu pas affiché » = parti avant que la liste des matchs ou l'analyse apparaisse. « Autre langue » = son téléphone est réglé dans une autre langue que celle de la page.</p>
+      <div id="landing"><div class="skel skel-block"></div></div>
+    </section>
+
+    <section class="card section" data-screen="arrivee" aria-labelledby="langsTitle">
+      <div class="card-head">
+        <div><h2 class="card-title" id="langsTitle">La langue</h2><p class="card-sub">Langue du téléphone du visiteur, face à la version du site qu'il a lue</p></div>
+        <button type="button" class="info" aria-expanded="false" aria-controls="helpLangs" aria-label="Aide : la langue">i</button>
+      </div>
+      <p class="help" id="helpLangs" hidden>L'adresse iashark.com envoie vers la version anglaise ou espagnole quand le téléphone est réglé en anglais, espagnol, allemand, italien ou portugais. Toutes les autres langues (arabe, néerlandais…) tombent sur le français. Un visiteur peut aussi arriver par Google directement sur une page dans une autre langue. Les lignes en orange sont celles où la langue ne correspond pas.</p>
+      <div id="langs"><div class="skel skel-block"></div></div>
+    </section>
+
+    <!-- Écran 6 : envie de payer -->
+    <section class="card section" data-screen="envie" aria-labelledby="unlockTitle">
+      <div class="card-head">
+        <div><h2 class="card-title" id="unlockTitle">Les boutons « Débloquer »</h2><p class="card-sub">Où les visiteurs cliquent pour voir l'analyse complète</p></div>
+      </div>
+      <div class="unlock" id="unlockClicks"></div>
+    </section>
+
+    <div class="grid g2 section" data-screen="envie">
       <section class="card" aria-labelledby="pagesTitle">
         <div class="card-head">
           <div><h2 class="card-title" id="pagesTitle">Pages les plus vues</h2><p class="card-sub">Nombre de fois où la page a été ouverte</p></div>
@@ -264,8 +386,34 @@
       </section>
     </div>
 
-    <!-- 8. Robots et tests filtres + appareil -->
-    <div class="grid g2 section" id="filtres">
+    <section class="card section" data-screen="inscrits" aria-labelledby="signupsTitle">
+      <div class="card-head">
+        <div><h2 class="card-title" id="signupsTitle">Derniers inscrits</h2><p class="card-sub" id="signupsSub">Comptes créés sur le site (comptes admin et de test masqués)</p></div>
+      </div>
+      <div id="signups"><div class="skel skel-block"></div></div>
+    </section>
+
+    <!-- Écran 8 : argent -->
+    <section class="card section" data-screen="argent" aria-labelledby="moneyTitle">
+      <div class="card-head">
+        <div><h2 class="card-title" id="moneyTitle">Abonnements et argent</h2><p class="card-sub" id="moneySub">Comptes admin et de test retirés</p></div>
+        <button type="button" class="info" aria-expanded="false" aria-controls="helpMoney" aria-label="Aide : abonnements et argent">i</button>
+      </div>
+      <p class="help" id="helpMoney" hidden>« Revenu mensuel » = ce que rapportent chaque mois les abonnements en cours si rien ne change (lu en direct chez Stripe). « Encaissé » = argent réellement reçu sur la période. « Résiliation prévue » = abonné qui a demandé à arrêter : il garde Pro jusqu'à la fin du mois payé.</p>
+      <div id="money"><div class="skel skel-block"></div></div>
+    </section>
+
+    <!-- Écran 9 : fiabilité -->
+    <section class="card section" data-screen="fiabilite" aria-labelledby="qualityTitle">
+      <div class="card-head">
+        <div><h2 class="card-title" id="qualityTitle">Ce qui est mesuré</h2><p class="card-sub">Dernières données reçues, et depuis quand chaque mesure existe</p></div>
+        <button type="button" class="info" aria-expanded="false" aria-controls="helpQuality" aria-label="Aide : ce qui est mesuré">i</button>
+      </div>
+      <p class="help" id="helpQuality" hidden>Si une mesure est récente, ses chiffres ne couvrent pas toute la période : c'est indiqué. Si plus rien n'arrive depuis des heures alors que des gens visitent le site, le suivi est cassé : préviens ton développeur.</p>
+      <div id="quality"><div class="skel skel-block"></div></div>
+    </section>
+
+    <div class="grid g2 section" id="filtres" data-screen="fiabilite">
       <section class="card" aria-labelledby="botsTitle">
         <div class="card-head">
           <div><h2 class="card-title" id="botsTitle">Robots et tests filtrés</h2><p class="card-sub">Visites retirées de tes chiffres</p></div>
@@ -286,8 +434,8 @@
     </div>
 
     <!-- 9. Details -->
-    <details class="details section" id="details">
-      <summary><span class="summary-title">Détails</span><span class="summary-sub">Dernières visites, inscrits, filtres, période personnalisée</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+    <details class="details section" id="details" data-screen="fiabilite">
+      <summary><span class="summary-title">Détails</span><span class="summary-sub">Filtres, période personnalisée, dernières visites une par une</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
 
       <div class="details-body">
         <section class="card" aria-labelledby="filtersTitle">
@@ -341,12 +489,6 @@
           <div id="visits"><div class="skel skel-block"></div></div>
         </section>
 
-        <section class="card" aria-labelledby="signupsTitle">
-          <div class="card-head">
-            <div><h3 class="card-title" id="signupsTitle">Derniers inscrits</h3><p class="card-sub" id="signupsSub">Comptes créés sur le site (comptes admin et de test masqués)</p></div>
-          </div>
-          <div id="signups"><div class="skel skel-block"></div></div>
-        </section>
       </div>
     </details>
 

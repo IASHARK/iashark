@@ -685,6 +685,9 @@
       utm_source: clip(params.get("utm_source"), 80),
       utm_medium: clip(params.get("utm_medium"), 80),
       utm_campaign: clip(params.get("utm_campaign"), 80),
+      // Publication precise (19/10/2026) : ?utm_content=tt_20261019_01 sur le
+      // lien d'une video, d'une bio... (admin « Chaque reseau, chaque publication »).
+      utm_content: clip(params.get("utm_content"), 80),
       device: deviceType(),
       browser: browserName(),
       os: osName(),
@@ -715,6 +718,119 @@
   } catch (e) {
     sendPageView(null);
   }
+
+  // ---------- Vitesse (Web Vitals) et contenu reellement affiche (19/10/2026) ----------
+  // Joints au page_leave (admin « Le site marche-t-il ? », migration 0052),
+  // sans bibliotheque ni service tiers : API PerformanceObserver du navigateur.
+  // lcp / fcp / ttfb / inp en millisecondes, cls sans unite. Navigateur trop
+  // ancien : champs absents (jamais 0 invente).
+  // content_ms : delai (ms depuis l'ouverture) avant que la liste des matchs
+  // (#homeList, accueil) ou l'analyse (#matchRoot, page match) remplace son
+  // squelette de chargement ; -1 = toujours pas affiche au depart du
+  // visiteur ; absent sur les autres pages (pas de detecteur).
+  var vitals = { lcp: null, fcp: null, ttfb: null, cls: null, inp: null };
+  var contentMs = null;
+  try {
+    if (typeof window.PerformanceObserver === "function") {
+      var supported = window.PerformanceObserver.supportedEntryTypes || [];
+      var observe = function (type, cb, extra) {
+        if (supported.indexOf(type) === -1) return false;
+        try {
+          var opts = { type: type, buffered: true };
+          if (extra) for (var k in extra) opts[k] = extra[k];
+          new window.PerformanceObserver(function (list) { try { cb(list.getEntries()); } catch (e) {} }).observe(opts);
+          return true;
+        } catch (e) { return false; }
+      };
+      observe("largest-contentful-paint", function (es) {
+        var e = es[es.length - 1];
+        if (e) vitals.lcp = Math.round(e.renderTime || e.loadTime || e.startTime);
+      });
+      observe("paint", function (es) {
+        for (var i = 0; i < es.length; i++) if (es[i].name === "first-contentful-paint") vitals.fcp = Math.round(es[i].startTime);
+      });
+      // CLS : plus grande « fenetre » de decalages (regle officielle : ecarts
+      // < 1 s, fenetre de 5 s au plus), hors decalages provoques par un clic.
+      var clsMax = 0, clsWin = 0, clsFirst = 0, clsLast = 0;
+      if (observe("layout-shift", function (es) {
+        for (var i = 0; i < es.length; i++) {
+          var e = es[i];
+          if (e.hadRecentInput) continue;
+          if (clsWin && e.startTime - clsLast < 1000 && e.startTime - clsFirst < 5000) clsWin += e.value;
+          else { clsWin = e.value; clsFirst = e.startTime; }
+          clsLast = e.startTime;
+          if (clsWin > clsMax) clsMax = clsWin;
+        }
+        vitals.cls = Math.round(clsMax * 1000) / 1000;
+      })) vitals.cls = 0;
+      // INP approche : interaction la plus lente de la page (peu
+      // d'interactions par page : le 98e centile officiel revient au maximum).
+      observe("event", function (es) {
+        for (var i = 0; i < es.length; i++) {
+          var e = es[i];
+          if (!e.interactionId) continue;
+          var d = Math.round(e.duration);
+          if (vitals.inp === null || d > vitals.inp) vitals.inp = d;
+        }
+      }, { durationThreshold: 40 });
+    }
+    var navEntry = window.performance && typeof performance.getEntriesByType === "function" ? performance.getEntriesByType("navigation")[0] : null;
+    if (navEntry && navEntry.responseStart > 0) vitals.ttfb = Math.round(navEntry.responseStart);
+  } catch (e) {}
+  try {
+    var contentTries = 0;
+    var contentReady = function () {
+      var home = document.getElementById("homeList"), match = document.getElementById("matchRoot");
+      if (!home && !match) return document.readyState !== "loading"; // page sans detecteur : on arrete
+      if (contentMs === null) contentMs = -1;
+      var ok = (home && home.childElementCount > 0 && !home.querySelector(".hl-skel"))
+        || (match && match.childElementCount > 0 && !match.querySelector(".loading-card"));
+      if (ok) contentMs = Math.round(window.performance && performance.now ? performance.now() : 0);
+      return ok;
+    };
+    var pollContent = function () {
+      if (contentReady() || ++contentTries > 240) return;
+      setTimeout(pollContent, 250);
+    };
+    pollContent();
+  } catch (e) {}
+
+  // ---------- js_error : pannes JavaScript de la page (19/10/2026) ----------
+  // Message coupe a 160 caracteres (adresses e-mail retirees, liens sans leurs
+  // parametres), nom du fichier et ligne. 5 erreurs par page au plus, chacune
+  // une seule fois. Ignorees : « Script error. » (script d'un autre site, sans
+  // detail) et les extensions du navigateur (chrome-extension://...).
+  try {
+    var errorsSent = 0, errorsSeen = {};
+    var reportError = function (msg, src, line) {
+      try {
+        if (errorsSent >= 5) return;
+        var m = String(msg || "").replace(/\S+@\S+/g, "").replace(/https?:\/\/[^\s?#]+[?#]\S*/g, function (u) { return u.split(/[?#]/)[0]; })
+          .replace(/\s+/g, " ").trim().slice(0, 160);
+        if (!m || /^Script error\.?$/i.test(m)) return;
+        var file = null;
+        if (src) {
+          var su = new URL(String(src), loc.href);
+          if (!/^https?:$/.test(su.protocol)) return;
+          file = (su.origin === loc.origin ? "" : su.hostname + "/") + (su.pathname.split("/").pop() || su.pathname);
+          file = file.slice(0, 80);
+        }
+        var key = m + "|" + file + "|" + line;
+        if (errorsSeen[key]) return;
+        errorsSeen[key] = true;
+        errorsSent++;
+        window.iasharkTrack("js_error", { msg: m, src: file, line: typeof line === "number" ? line : null, pv: PAGE_VIEW_ID });
+      } catch (e) {}
+    };
+    window.addEventListener("error", function (ev) {
+      if (!ev) return;
+      reportError(ev.message || (ev.error && ev.error.message), ev.filename, ev.lineno);
+    });
+    window.addEventListener("unhandledrejection", function (ev) {
+      var r = ev && ev.reason;
+      reportError("Promesse rejetee : " + (r && r.message ? r.message : String(r)), null, null);
+    });
+  } catch (e) {}
 
   // ---------- page_leave : temps actif sur la page + profondeur de scroll ----------
   try {
@@ -758,6 +874,8 @@
         sec: Math.min(14400, Math.round(engagedMs / 1000)),
         scroll: maxScroll,
       };
+      if (contentMs !== null) leave.content_ms = contentMs;
+      for (var vk in vitals) if (vitals[vk] !== null) leave[vk] = vitals[vk];
       if (lateGeo) {
         leave.geo_country = lateGeo.country;
         if (lateGeo.region) leave.geo_region = lateGeo.region;

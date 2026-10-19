@@ -14,6 +14,7 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), "utf8");
 const H = require("../admin-dashboard.js");
 const sql = read("supabase/migrations/0019_admin_dashboard_v2.sql");
 const sql22 = read("supabase/migrations/0022_admin_geo_city.sql");
+const sql52 = read("supabase/migrations/0052_admin_diagnostics.sql");
 const html = read("admin.html");
 const js = read("admin-dashboard.js");
 const PREFS_KEY_TEST = "iashark_admin_prefs_v3";
@@ -69,8 +70,8 @@ test("sourceGroup : Google, TikTok, Instagram, Facebook, X, WhatsApp, Bing, Dire
   assert.equal(H.sourceLabel("direct"), "Direct");
 });
 
-test("parite : memes regles de sources dans admin-dashboard.js et admin_source_group (SQL 0019)", () => {
-  const block = fnBlock(sql, "admin_source_group");
+test("parite : memes regles de sources dans admin-dashboard.js et admin_source_group (SQL 0052, dernier etat)", () => {
+  const block = fnBlock(sql52, "admin_source_group");
   const rules = [...block.matchAll(/when x\.s ~ '([^']+)' then '(\w+)'/g)].map((m) => [m[2], m[1]]);
   assert.deepEqual(rules, H.SOURCE_RULES);
 });
@@ -469,7 +470,9 @@ test("0022 (non appliquee) : villes / regions / fuseau, memes signatures, admin 
 // admin.html
 // ---------------------------------------------------------------------------
 test("admin.html : sections dans l'ordre, periodes, aide i reliee, Exclure cet appareil, Details replies", () => {
-  const order = ["heroText", "cards", "health", "funnel", "sources", "countries", "cities", "live", "pages", "matches", "bots", "deviceBtn", "details", "visits", "signups"];
+  // Ordre des 9 ecrans (19/10/2026) : chaque ecran garde ses blocs d'avant.
+  const order = ["todo", "heroText", "cards", "health", "speed", "errors", "shown", "funnel", "signupFlow", "payFlow", "channels", "posts", "sources",
+    "countries", "cities", "live", "landing", "langs", "unlockClicks", "pages", "matches", "signups", "money", "quality", "bots", "deviceBtn", "details", "visits"];
   let last = -1;
   for (const id of order) {
     const at = html.indexOf('id="' + id + '"');
@@ -479,7 +482,7 @@ test("admin.html : sections dans l'ordre, periodes, aide i reliee, Exclure cet a
   assert.deepEqual([...html.matchAll(/data-period="(\w+)"/g)].map((m) => m[1]), ["today", "yesterday", "7", "15", "30"]);
   // Suivi jour par jour (19/09/2026) : fleches et tableau.
   ["dayNav", "dayPrev", "dayNext", "dayNavLabel", "dailySection", "daily"].forEach((id) => assert.match(html, new RegExp('id="' + id + '"'), id));
-  assert.match(html, /<details class="details section" id="details">/, "Details replies par defaut");
+  assert.match(html, /<details class="details section" id="details" data-screen="fiabilite">/, "Details replies par defaut");
   assert.ok(!/<details[^>]* open/.test(html));
   for (const m of html.matchAll(/class="info" aria-expanded="false" aria-controls="(\w+)"/g)) {
     assert.match(html, new RegExp('id="' + m[1] + '" hidden'), "aide " + m[1] + " reliee et repliee");
@@ -561,4 +564,73 @@ test("rendu : 7 jours -> tableau « Jour par jour » cliquable, pas de fleches ;
   const y = await renderDashboard("nogeo", { period: "yesterday" });
   assert.equal(y.els.dayNavLabel.textContent, "Hier");
   assert.equal(y.els.dayNext.disabled, false);
+});
+
+// ---------- Admin en 9 écrans (19/10/2026, migration 0052) ----------
+test("9 écrans : chaque écran a son lien et au moins un bloc dans admin.html", () => {
+  assert.equal(H.SCREENS.length, 9);
+  for (const s of H.SCREENS) {
+    assert.match(html, new RegExp('href="#ecran-' + s.key + '" data-screen-link="' + s.key + '"'), s.key + " : lien");
+    assert.match(html, new RegExp('data-screen="' + s.key + '"'), s.key + " : bloc");
+  }
+  const used = [...html.matchAll(/data-screen="([a-z]+)"/g)].map((m) => m[1]);
+  for (const k of used) assert.ok(H.SCREENS.some((s) => s.key === k), "écran inconnu : " + k);
+  assert.equal(H.screenKey("#ecran-argent"), "argent");
+  assert.equal(H.screenKey("#ecran-inconnu"), null);
+  assert.equal(H.screenKey("#maintenant"), null);
+});
+
+test("diagnostics : chaque bloc rempli par admin_diagnostics existe dans admin.html", () => {
+  for (const id of ["todo", "speed", "errors", "shown", "channels", "posts", "landing", "langs", "signupFlow", "payFlow", "money", "quality"]) {
+    assert.match(html, new RegExp('id="' + id + '"'), id);
+  }
+  assert.match(sql52, /create or replace function public\.admin_diagnostics\(/);
+  assert.match(sql52, /if not public\.admin_is_admin\(\) then/);
+  assert.match(sql52, /revoke all on function public\.admin_diagnostics\(date, date, boolean, text, text, text\) from public, anon;/);
+  for (const t of ["js_error", "signup_form_started", "signup_submitted", "signup_failed", "checkout_failed"]) assert.match(sql52, new RegExp("'" + t + "'"));
+});
+
+test("vitesse : seuils officiels et mots simples", () => {
+  assert.equal(H.vitalVerdict("lcp", 2400).word, "Rapide");
+  assert.equal(H.vitalVerdict("lcp", 3500).level, "mid");
+  assert.equal(H.vitalVerdict("lcp", 4100).word, "Lent");
+  assert.equal(H.vitalVerdict("inp", 150).word, "Réactif");
+  assert.equal(H.vitalVerdict("cls", 0.3).word, "La page saute");
+  assert.equal(H.vitalVerdict("lcp", null).level, "unknown");
+  assert.equal(H.msText(350), "350 ms");
+  assert.equal(H.msText(1800), "1,8 s");
+  assert.equal(H.vitalValue("cls", 0.123), "0,12");
+});
+
+test("noms lisibles : pages d'arrivée, langues, motifs d'échec", () => {
+  assert.equal(H.landingName("/", "fr"), "Accueil, adresse iashark.com");
+  assert.equal(H.landingName("/en/", "en"), "Accueil (EN)");
+  assert.equal(H.landingName("/en/", null), "Accueil (EN)");
+  assert.equal(H.landingName("/fr/match.html", "fr"), "Page match (FR)");
+  assert.match(H.landingName("/match/", "fr"), /adresse courte/);
+  assert.equal(H.langName("ar"), "arabe");
+  assert.equal(H.langName("xx"), "langue « xx »");
+  assert.equal(H.failReason("deja_inscrit"), "compte déjà existant");
+  assert.equal(H.failReason("http_502"), "erreur du serveur (502)");
+});
+
+test("à faire en premier : paiement bloqué d'abord, puis pannes, puis fuites ; 3 au plus", () => {
+  const d = {
+    totals: { sessions: 329, with_error: 4, lang_mismatch: 47, content_known: 0, before_content: 0 },
+    sources: [{ source: "snapchat", sessions: 171, useful: 3 }, { source: "google", sessions: 40, useful: 27 }],
+    landing: [{ page: "/", site: "fr", sessions: 178, one_page: 174 }],
+    payment: { failed: 2, offer: 9, click: 1 },
+    signup: { page: 15, completed: 9 },
+    vitals: []
+  };
+  const a = H.todoActions(d);
+  assert.equal(a.length, 3);
+  assert.equal(a[0].level, "urgent");
+  assert.match(a[0].title, /voulu payer/);
+  assert.match(a[1].title, /plante/);
+  assert.equal(a[2].screen, "provenance");
+  assert.match(a[2].title, /^Snapchat : 171 visites, seulement 3 utiles$/);
+  // Peu de visiteurs : rien n'est affirmé.
+  assert.deepEqual(H.todoActions({ totals: { sessions: 8 }, sources: [{ source: "x", sessions: 8, useful: 0 }], landing: [], payment: {}, signup: {}, vitals: [] }), []);
+  assert.deepEqual(H.todoActions(null), []);
 });

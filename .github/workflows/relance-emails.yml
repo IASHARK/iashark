@@ -28,16 +28,20 @@ jobs:
       - name: Installation de la fonction
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: npx -y supabase@2 functions deploy relance-emails --project-ref ksvjraqitxouwiabecai --use-api
+          RELANCE_SECRET: ${{ secrets.RELANCE_SECRET }}
+        run: |
+          npx -y supabase@2 secrets set "RELANCE_SECRET=$RELANCE_SECRET" --project-ref ksvjraqitxouwiabecai > /dev/null
+          npx -y supabase@2 functions deploy relance-emails --project-ref ksvjraqitxouwiabecai --use-api
       - name: Appel de la fonction
         env:
           KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RELANCE_SECRET: ${{ secrets.RELANCE_SECRET }}
           MODE: ${{ inputs.mode }}
           CONFIRMATION: ${{ inputs.confirmation }}
         run: |
           KEY=$(printf %s "$KEY" | tr -d '\r\n ')
           corps=$(jq -nc --arg m "$MODE" --arg c "$CONFIRMATION" '{mode:$m, confirmation:$c}')
           code=$(curl -sS -o reponse.json -w "%{http_code}" -X POST "https://ksvjraqitxouwiabecai.supabase.co/functions/v1/relance-emails" \
-            -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H "Content-Type: application/json" --max-time 600 -d "$corps")
+            -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H "x-relance-secret: $RELANCE_SECRET" -H "Content-Type: application/json" --max-time 600 -d "$corps")
           echo "HTTP $code"; jq . reponse.json || cat reponse.json
           [ "$code" = "200" ]

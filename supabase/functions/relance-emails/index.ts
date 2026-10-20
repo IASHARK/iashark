@@ -2,8 +2,7 @@
 // Un e-mail par type de personne (accord, Pro, ancien abonne, sans accord) et par langue (fr/en/es),
 // textes et gabarits dans paquet.ts (fabrique par emails/relance-2026-10-20/fabriquer.py).
 //
-// APPEL SERVEUR UNIQUEMENT : deploiement avec verification JWT, et la fonction refuse tout jeton
-// qui n'est pas la cle service (workflow relance-emails.yml, secret SUPABASE_SERVICE_ROLE_KEY).
+// APPEL SERVEUR UNIQUEMENT : en-tete x-relance-secret = RELANCE_SECRET (workflow relance-emails.yml).
 //
 // Corps JSON :
 //   { mode: "etat" }   -> qui recevrait quoi (comptes par type et langue), fournisseur configure. N'envoie RIEN.
@@ -34,6 +33,11 @@ function roleDuJeton(req: Request): string | null {
   const p = t.split(".")[1];
   if (!p) return null;
   try { return JSON.parse(atob(p.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((p.length + 3) % 4))).role ?? null; } catch { return null; }
+}
+
+function timingSafe(a: string, b: string) {
+  let d = 0; for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return d === 0;
 }
 
 function b64url(bytes: Uint8Array) {
@@ -129,7 +133,12 @@ async function envoyer(p: Personne, variante: string, cfg: { brevo: string; secr
 
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json(405, { ok: false });
-  if (roleDuJeton(req) !== "service_role") return json(403, { ok: false, raison: "cle service obligatoire" });
+  // Secret partage avec le workflow relance-emails.yml (GitHub RELANCE_SECRET, pose dans les secrets
+  // des fonctions par ce meme workflow). Repli : jeton JWT de role service.
+  const attendu = env("RELANCE_SECRET");
+  const recu = req.headers.get("x-relance-secret") || "";
+  const okSecret = !!attendu && attendu.length >= 32 && recu.length === attendu.length && timingSafe(recu, attendu);
+  if (!okSecret && roleDuJeton(req) !== "service_role") return json(403, { ok: false, raison: "acces refuse" });
   const base = env("SUPABASE_URL"), service = env("SUPABASE_SERVICE_ROLE_KEY");
   if (!base || !service) return json(503, { ok: false, raison: "base non configuree" });
   const sb = createClient(base, service, { auth: { persistSession: false, autoRefreshToken: false } });

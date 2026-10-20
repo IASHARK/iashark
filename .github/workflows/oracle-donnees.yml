@@ -1,0 +1,25 @@
+# Collecte ponctuelle API-Football (mission Oracle du 20/10/2026), lancée par un push sur cette branche.
+name: Oracle donnees
+on:
+  push:
+    branches: [oracle-donnees]
+permissions:
+  contents: read
+jobs:
+  collecte:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Collecte
+        env:
+          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
+          OUT: oracle-out
+        run: node scripts/oracle/collecte.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oracle-donnees
+          path: oracle-out
+          retention-days: 3

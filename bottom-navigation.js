@@ -348,6 +348,8 @@
     window.addEventListener('scroll',plusTard,{passive:true});
     window.addEventListener('resize',plusTard);
     [300,1200,3000,6000].forEach(function(ms){setTimeout(plusTard,ms);});
+    // Le bouton du match offert arrive apres la reponse du serveur : on suit aussi l'affichage.
+    if(window.MutationObserver)new MutationObserver(plusTard).observe(document.body,{childList:true,subtree:true});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',poser);else poser();
 })();

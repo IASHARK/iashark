@@ -316,3 +316,42 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', poser); else poser();
 })();
+
+/* Bulle « Rejoins-nous sur Telegram » (27/09/2026, choix B de Clement).
+   Remise le 20/10/2026 a l'identique, sur toutes les pages et toutes les langues (Clement).
+   Posee au-dessus de la barre du bas, jamais sur les pages ou l'on paie
+   (pro, abonnement, checkout) pour ne pas detourner un visiteur qui achete.
+   Clic compte dans funnel_events (click, kind cta, label telegram_bubble).
+   Apres un clic, elle se cache 7 jours sur ce navigateur. */
+(function(){
+  if(/(^|\/)(pro|abonnement|checkout-[a-z]+|admin|connexion|inscription)\.html$/.test(location.pathname))return;
+  var CLE='ias-tg-bulle', SEPT_JOURS=7*24*3600*1000;
+  try{var vu=+localStorage.getItem(CLE);if(vu&&Date.now()-vu<SEPT_JOURS)return;}catch(_e){}
+  function poser(){
+    if(document.getElementById('ias-tg'))return;
+    var st=document.createElement('style');
+    st.textContent='#ias-tg{position:fixed;z-index:999;right:16px;bottom:calc(98px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;padding:7px 16px 7px 7px;border-radius:999px;background:rgba(13,25,38,.94);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid rgba(32,213,239,.35);box-shadow:0 10px 28px rgba(0,0,0,.45);font-family:Inter,system-ui,sans-serif;text-decoration:none;-webkit-tap-highlight-color:transparent;transition:transform .12s ease,border-color .18s ease}'
+      +'#ias-tg:hover{border-color:rgba(32,213,239,.7)}#ias-tg:active{transform:scale(.97)}'
+      +'#ias-tg:focus-visible{outline:2px solid #20d5ef;outline-offset:2px}'
+      +'#ias-tg .ias-tg-i{flex:none;width:36px;height:36px;border-radius:50%;background:#20d5ef;display:flex;align-items:center;justify-content:center}'
+      +'#ias-tg .ias-tg-1{display:block;color:#f4f7fb;font-size:13.5px;font-weight:700;line-height:1.15}'
+      +'#ias-tg .ias-tg-2{display:block;color:#91a0b3;font-size:11.5px;font-weight:500;margin-top:2px}'
+      +'@media print{#ias-tg{display:none}}';
+    document.head.appendChild(st);
+    var a=document.createElement('a');
+    a.id='ias-tg';
+    a.href='https://t.me/iasharkdata';
+    a.target='_blank';
+    a.rel='noopener';
+    a.setAttribute('data-track','telegram_bubble');
+    a.setAttribute('aria-label','Rejoins-nous sur Telegram : match du jour, actu, résultats');
+    a.innerHTML='<span class="ias-tg-i" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#060b12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></span>'
+      +'<span><span class="ias-tg-1">Rejoins-nous sur Telegram</span><span class="ias-tg-2">Match du jour, actu, résultats</span></span>';
+    a.addEventListener('click',function(){
+      try{localStorage.setItem(CLE,String(Date.now()));}catch(_e){}
+      setTimeout(function(){a.remove();},300);
+    });
+    document.body.appendChild(a);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',poser);else poser();
+})();

@@ -74,7 +74,7 @@ async function classer(sb: ReturnType<typeof createClient>): Promise<{ liste: Pe
     users.push(...data.users);
     if (data.users.length < 1000) break;
   }
-  const { data: prefs, error: e1 } = await sb.from("email_preferences").select("user_id,marketing_opt_in,unsubscribed_at,locale");
+  const { data: prefs, error: e1 } = await sb.from("email_preferences").select("user_id,marketing_opt_in,unsubscribed_at,unsubscribe_source,locale");
   if (e1) throw new Error("email_preferences: " + e1.message);
   const { data: abos, error: e2 } = await sb.from("subscriptions").select("user_id,status,updated_at");
   if (e2) throw new Error("subscriptions: " + e2.message);
@@ -90,7 +90,7 @@ async function classer(sb: ReturnType<typeof createClient>): Promise<{ liste: Pe
     const email = String(u.email || "").trim();
     if (!adresseValide(email)) { ecartes.adresse_invalide++; continue; }
     const pref: any = prefDe.get(u.id) ?? null;
-    if (pref?.unsubscribed_at) { ecartes.desinscrit++; continue; }
+    if (pref?.unsubscribed_at || pref?.unsubscribe_source) { ecartes.desinscrit++; continue; }
     const abo = aboDe.get(u.id);
     const segment = abo && ["active", "trialing"].includes(abo.status) ? "pro"
       : abo ? "ancien"

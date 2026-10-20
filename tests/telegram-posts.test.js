@@ -226,7 +226,7 @@ test('match gratuit : plus aucun chiffre « selon la cote », ni marge, ni « Su
   const fs = require('node:fs'), path = require('node:path');
   const tpl = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'telegram', 'card.tpl'), 'utf8');
   assert.ok(!/MARGE|\{\{DIT\}\}|Ce que dit la cote/.test(tpl), 'card.tpl : plus de « ce que dit la cote »');
-  assert.match(tpl, /Chance calculée par IASHARK/);
+  assert.match(tpl, /MATCH GRATUIT DU JOUR/);
 });
 
 // Contre-controle ronde 4 (30/09/2026) : « Sur 100 matchs comme celui-ci… » s'affichait

@@ -85,12 +85,11 @@ async function carte(c) {
   const {chromium} = await import("@playwright/test");
   const e = P.esc;
   const html = fs.readFileSync(path.join(ROOT, "scripts/telegram/card.tpl"), "utf8")
-    .replace("{{EQUIPES}}", e(c.equipes)).replace("{{LONG}}", c.equipes.length > 20 ? " long" : "")
-    .replace("{{BOX}}", c.pari ? "" : "display:none").replace("{{ALT}}", c.pari ? "display:none" : "")
-    .replace("{{QUAND}}", e(c.quand)).replaceAll("{{ESTIMATION}}", String(c.estimation ?? "")).replace("{{PARI}}", e(c.pari || ""))
-    .replace("{{COTE}}", e(c.coteTxt || "")).replace("{{COTE_LIBELLE}}", e(c.coteLibelle || "Cote")).replace("{{PHRASE}}", e(c.phrase));
+    .replace("{{EQUIPES}}", e(c.equipes)).replace("{{LONG}}", c.equipes.length > 22 ? " long" : "")
+    .replace("{{LOGOS}}", c.logoDom && c.logoExt ? "" : "display:none").replace("{{LOGO_DOM}}", e(c.logoDom || "")).replace("{{LOGO_EXT}}", e(c.logoExt || ""))
+    .replace("{{QUAND}}", e(c.quand));
   const b = await chromium.launch(process.env.CHROMIUM_PATH ? {executablePath: process.env.CHROMIUM_PATH} : {});
-  const page = await b.newPage({viewport: {width: 1080, height: 1350}});
+  const page = await b.newPage({viewport: {width: 1080, height: 740}});
   await page.setContent(html, {waitUntil: "networkidle"});
   await page.evaluate(() => document.fonts.ready);
   const file = path.join(OUT, "match-gratuit.png");

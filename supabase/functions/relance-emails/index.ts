@@ -155,6 +155,21 @@ Deno.serve(async (req: Request) => {
   };
   const pret = { brevo: !!brevo, desinscription: !!secret && secret.length >= 32, resend_present: !!env("RESEND_API_KEY") };
 
+  // Suivi : ce que Brevo a fait des e-mails de la campagne (remis, en attente, bloques...), sans adresse entiere.
+  if (mode === "suivi") {
+    if (!brevo) return json(503, { ok: false, raison: "BREVO_API_KEY manquant" });
+    const r = await fetch(`https://api.brevo.com/v3/smtp/statistics/events?limit=500&days=1&tags=${encodeURIComponent(CAMPAGNE + "-" + CLE)}`,
+      { headers: { "api-key": brevo, accept: "application/json" } });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) return json(200, { ok: false, mode, brevo_http: r.status, brevo: JSON.stringify(d).slice(0, 300) });
+    const evts = ((d as any).events ?? []) as Array<Record<string, string>>;
+    const parType: Record<string, number> = {};
+    for (const e of evts) parType[e.event] = (parType[e.event] || 0) + 1;
+    const problemes = evts.filter((e) => !["requests", "delivered", "opened", "clicks", "uniqueOpened", "loadedByProxy"].includes(e.event))
+      .slice(0, 15).map((e) => `${masque(String(e.email || ""))} ${e.event} ${String(e.reason || "").slice(0, 120)}`);
+    const admin = evts.filter((e) => /^yar/i.test(String(e.email || ""))).map((e) => `${e.event} ${e.date || ""} ${String(e.reason || "").slice(0, 100)}`);
+    return json(200, { ok: true, mode, evenements: evts.length, par_type: parType, problemes, compte_pro: admin });
+  }
   const tout = await classer(sb);
   // Personnes a ne pas relancer (choix de Clement), par identifiant de compte.
   const exclure = new Set((Array.isArray(corps.exclure) ? corps.exclure : String(corps.exclure || "").split(","))

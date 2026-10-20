@@ -322,6 +322,32 @@
     a.innerHTML='<span class="ias-tg-i" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#060b12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></span>'
       +'<span><span class="ias-tg-1">Rejoins-nous sur Telegram</span><span class="ias-tg-2">Match du jour, actu, résultats</span></span>';
     document.body.appendChild(a);
+    // Jamais par-dessus un bouton d'action (21/10/2026 : elle cachait « Ouvrir l'analyse » du
+    // match offert sur telephone). Elle reste visible : en rond seul, posee juste au-dessus
+    // du bouton tant qu'elle le chevaucherait, puis reprend sa place.
+    var st2=document.createElement('style');
+    st2.textContent='#ias-tg.ias-tg--mini{padding:7px}#ias-tg.ias-tg--mini>span:last-child{display:none}';
+    document.head.appendChild(st2);
+    var attente=false;
+    function eviter(){
+      attente=false;
+      a.classList.remove('ias-tg--mini');a.style.bottom='';
+      var r=a.getBoundingClientRect(),h=window.innerHeight||document.documentElement.clientHeight;
+      var boutons=document.querySelectorAll('.op-cta,.mu-shimmer');
+      for(var i=0;i<boutons.length;i++){
+        var c=boutons[i].getBoundingClientRect();
+        if(c.width===0||c.bottom<0||c.top>h)continue;
+        if(c.left<r.right&&c.right>r.left&&c.top<r.bottom&&c.bottom>r.top){
+          a.classList.add('ias-tg--mini');
+          a.style.bottom=Math.max(0,Math.round(h-c.top+10))+'px';
+          return;
+        }
+      }
+    }
+    function plusTard(){if(!attente){attente=true;requestAnimationFrame(eviter);}}
+    window.addEventListener('scroll',plusTard,{passive:true});
+    window.addEventListener('resize',plusTard);
+    [300,1200,3000,6000].forEach(function(ms){setTimeout(plusTard,ms);});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',poser);else poser();
 })();

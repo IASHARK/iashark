@@ -1247,7 +1247,7 @@ function renderAuthWall(raw,appel){
   const pari=appel?carteAppel(vm,appel):'';
   const titre=pari?t('match_v4.appel_title','Pourquoi ce pari ?'):t('match_v4.free_title','Ce match est offert aujourd’hui');
   const texte=pari?t('match_v4.appel_sub','Ton compte gratuit ouvre l’analyse complète de ce match : le pourquoi, le film du match et le Petit combiné du soir. Sans carte bancaire.'):t('match_v4.free_sub','Crée ton compte gratuit pour ouvrir l’analyse de ce match. Sans carte bancaire.');
-  const bouton=pari?t('match_v4.appel_cta','Ouvrir l’analyse complète, gratuitement'):t('match_v4.free_cta','Créer mon compte gratuit');
+  const bouton=pari?t('match_v4.appel_cta','Ouvrir l’analyse gratuite'):t('match_v4.free_cta','Créer mon compte gratuit');
   const lignePro=pari?`<a class="op-alt op-pro" href="${esc(lien('abonnement.html?duree=month&next='+retour))}"${suivi('match_appel_pro')}>${esc(t('match_v4.appel_pro','Les autres matchs du jour, le Grand combiné et la Sélection en or sont dans Pro : 7 jours d’essai.'))}</a>`:'';
   const carte=`<section class="op op--vitrine gate" aria-labelledby="opCompteT">
     <div class="op-head"><span class="op-lock" aria-hidden="true">${lucide('lock','')}</span><h2 class="op-title" id="opCompteT">${esc(titre)}</h2>${sous&&!pari?`<div class="op-sub">${sous}</div>`:''}<p class="op-from">${esc(texte)}</p></div>

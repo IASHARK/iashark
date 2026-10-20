@@ -2283,6 +2283,24 @@
       renderDiag();
     });
   }
+  // Sondage « VIP Telegram ou site ? » (migration 0053) : totaux depuis le debut.
+  function loadPoll() {
+    var el = $("pollVotes");
+    if (!el || !sb) return Promise.resolve();
+    return rpc("admin_poll_votes", { p_poll: "vip-telegram-1" }).then(function (x) {
+      if (x.kind === "missing") { el.innerHTML = '<p class="soft-msg"><b>Mise à jour de la base à appliquer</b>Le sondage s\'affichera quand la mise à jour 0053 sera appliquée.</p>'; return; }
+      if (x.error) { blockError(el, x, "Sondage"); return; }
+      var rows = x.data || [];
+      var tot = { telegram: 0, site: 0 }, all = 0;
+      rows.forEach(function (r) { var n = Number(r.votes) || 0; tot[r.choice] = (tot[r.choice] || 0) + n; all += n; });
+      if (!all) { el.innerHTML = emptyHtml("Aucun vote pour l'instant", "Le bloc est en bas de l'accueil, dans toutes les langues."); return; }
+      var cols = [{ label: "Réponse" }, { label: "Langue" }, { label: "Site", num: false }, { label: "Votes", num: true }];
+      el.innerHTML = '<p class="err-sum">' + esc(H.fmtInt(all) + " vote" + (all > 1 ? "s" : "") + " : VIP Telegram " + pctTxt(tot.telegram, all) + ", directement sur le site " + pctTxt(tot.site, all) + ".") + "</p>"
+        + tableHtml(cols, rows.slice(0, 20).map(function (r) {
+          return { cells: [esc(r.choice === "telegram" ? "VIP Telegram" : "Sur le site"), esc(r.lang && r.lang !== "?" ? H.langName(r.lang) : "inconnue"), esc(r.site || "?"), cnt(Number(r.votes) || 0)] };
+        }));
+    });
+  }
   function diagMissing(el) {
     el.innerHTML = '<p class="soft-msg"><b>Mise à jour de la base à appliquer</b>Cette partie s\'affichera quand la mise à jour ' + esc(H.DIAG_FILE) + " sera appliquée dans Supabase. Le reste du tableau de bord fonctionne normalement.</p>";
   }
@@ -2684,6 +2702,7 @@
       loadUnlocks();
       loadDrop();
       loadDiag();
+      loadPoll();
       loadRevenue();
       if (!opts.silent) return loadLive().then(startTimers);
     }).catch(function (e) {

@@ -7,11 +7,11 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "etat, test ou envoi"
+        description: "etat, suivi, test ou envoi"
         required: true
         default: etat
         type: choice
-        options: [etat, test, envoi]
+        options: [etat, suivi, test, envoi]
       confirmation:
         description: "Pour l'envoi reel : ENVOYER LA RELANCE"
         required: false

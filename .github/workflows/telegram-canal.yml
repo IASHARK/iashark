@@ -1,10 +1,9 @@
 name: Canal Telegram IASHARK
 
 # Messages du canal t.me/iasharkdata (27/09/2026, valide par Clement).
-# - Des que les analyses du jour sont publiees (Update IASHARK Daily, vers
-#   13h Paris) : resultats d'hier + image du match gratuit.
-# - 9h Paris : le guide du jour (blog). 15h : sondage sur l'affiche du soir.
-#   18h : l'actu foot.
+# Programme du 20/10/2026 (Clement) : 9h le match du jour (meme match que le site,
+# avec image et lien) + resultats d'hier ; 13h le guide du jour ; 15h sondage sur
+# l'affiche du soir ; 16h30 l'actu foot ; 18h30 les gros matchs du soir avec liens.
 # Les crons tournent aux 2 heures UTC possibles (ete / hiver) ; le script ne
 # garde que celle qui tombe a la bonne heure de Paris.
 #
@@ -22,15 +21,17 @@ on:
     types: [completed]
     branches: [main]
   schedule:
-    - cron: '5 7,8 * * *'    # guide, 9h Paris
+    - cron: '5 7,8 * * *'    # match du jour (+ resultats), 9h Paris
+    - cron: '5 11,12 * * *'  # guide, 13h Paris
     - cron: '5 13,14 * * *'  # sondage, 15h Paris
-    - cron: '5 16,17 * * *'  # actu, 18h Paris
+    - cron: '35 14,15 * * *' # actu, 16h30 Paris
+    - cron: '35 16,17 * * *' # gros matchs du soir, 18h30 Paris
   workflow_dispatch:
     inputs:
       slot:
         description: "Quels messages"
         type: choice
-        options: [tout, apres-maj, sondage, actu, guide]
+        options: [tout, apres-maj, sondage, soir, actu, guide]
         default: tout
       test:
         description: "Test : envoyer dans ma conversation privee, pas sur le canal"
@@ -75,7 +76,7 @@ jobs:
               # le run suivant de la journee enverra.
               if [ "$H" -ge 8 ] && [ "$H" -lt 21 ]; then SLOT=apres-maj; fi ;;
             schedule)
-              case "$H" in 9) SLOT=guide ;; 15) SLOT=sondage ;; 18) SLOT=actu ;; esac ;;
+              case "$H" in 9) SLOT=apres-maj ;; 13) SLOT=guide ;; 15) SLOT=sondage ;; 16) SLOT=actu ;; 18) SLOT=soir ;; esac ;;
             workflow_dispatch)
               SLOT="$INPUT_SLOT"; [ "$INPUT_TEST" = "true" ] && TEST=1 ;;
             push)

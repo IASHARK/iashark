@@ -51,6 +51,13 @@ if (veut("sondage")) {
     p ? posts.push(p) : note("sondage : pas d'affiche ce soir, pas de message");
   }
 }
+if (veut("soir")) {
+  if (!frais) note("soir : donnees du jour pas encore pretes, pas de message");
+  else {
+    const p = P.soir(home, TODAY, SLOT === "tout" ? "00:00" : NOW_HM);
+    p ? posts.push(p) : note("soir : pas de match ce soir, pas de message");
+  }
+}
 if (veut("actu")) {
   const p = P.actu(lire("actus.json"), now.getTime());
   p ? posts.push(p) : note("actu : pas assez de titres fiables des dernieres 24 h, pas de message");
@@ -79,8 +86,9 @@ async function carte(c) {
   const e = P.esc;
   const html = fs.readFileSync(path.join(ROOT, "scripts/telegram/card.tpl"), "utf8")
     .replace("{{EQUIPES}}", e(c.equipes)).replace("{{LONG}}", c.equipes.length > 20 ? " long" : "")
-    .replace("{{QUAND}}", e(c.quand)).replaceAll("{{ESTIMATION}}", String(c.estimation)).replace("{{PARI}}", e(c.pari))
-    .replace("{{COTE}}", e(c.coteTxt)).replace("{{COTE_LIBELLE}}", e(c.coteLibelle || "Cote")).replace("{{PHRASE}}", e(c.phrase));
+    .replace("{{BOX}}", c.pari ? "" : "display:none").replace("{{ALT}}", c.pari ? "display:none" : "")
+    .replace("{{QUAND}}", e(c.quand)).replaceAll("{{ESTIMATION}}", String(c.estimation ?? "")).replace("{{PARI}}", e(c.pari || ""))
+    .replace("{{COTE}}", e(c.coteTxt || "")).replace("{{COTE_LIBELLE}}", e(c.coteLibelle || "Cote")).replace("{{PHRASE}}", e(c.phrase));
   const b = await chromium.launch(process.env.CHROMIUM_PATH ? {executablePath: process.env.CHROMIUM_PATH} : {});
   const page = await b.newPage({viewport: {width: 1080, height: 1350}});
   await page.setContent(html, {waitUntil: "networkidle"});

@@ -1,0 +1,67 @@
+name: Canal Telegram - image a valider
+
+# Envoie une ou plusieurs images deja publiees (ex. combines du soir, release
+# IASHARK/iashark-medias) dans la conversation privee de Clement, chacune avec
+# les boutons « Publier sur le canal » / « Ne pas publier » (meme circuit que
+# telegram-canal.yml : scripts/telegram/send-posts.mjs, clic traite par
+# supabase/functions/telegram-bot). Rien ne part sur le canal sans son clic.
+
+on:
+  workflow_dispatch:
+    inputs:
+      images:
+        description: "Adresses des images (https), separees par des virgules"
+        required: true
+        type: string
+      legende:
+        description: "Texte sous la premiere image"
+        required: true
+        type: string
+
+jobs:
+  envoi:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Preparation
+        env:
+          IMAGES: ${{ inputs.images }}
+          LEGENDE: ${{ inputs.legende }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/telegram"
+          node -e '
+            const fs = require("fs"), path = require("path");
+            const dir = process.env.RUNNER_TEMP + "/telegram";
+            const urls = process.env.IMAGES.split(",").map((s) => s.trim()).filter(Boolean);
+            (async () => {
+              const posts = [];
+              for (const [i, u] of urls.entries()) {
+                if (!/^https:\/\/(github\.com\/IASHARK\/|objects\.githubusercontent\.com\/|release-assets\.githubusercontent\.com\/)/.test(u)) throw new Error("adresse refusee : " + u);
+                const r = await fetch(u);
+                if (!r.ok) throw new Error("image introuvable : " + u + " " + r.status);
+                const f = path.join(dir, "image-" + i + ".png");
+                fs.writeFileSync(f, Buffer.from(await r.arrayBuffer()));
+                const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                posts.push({type: "photo", slot: "image-" + i, image: f, html: i === 0 ? esc(process.env.LEGENDE) : "",
+                  boutons: [{text: "Voir les matchs du soir", url: "https://iashark.com/?utm_source=telegram&utm_campaign=canal"}]});
+              }
+              fs.writeFileSync(path.join(dir, "posts.json"), JSON.stringify({posts, date: new Date().toISOString().slice(0, 10)}));
+              console.log(posts.length + " image(s) prete(s)");
+            })().catch((e) => { console.error(e.message); process.exit(1); });
+          '
+
+      - name: Envoi a Clement (a valider)
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node scripts/telegram/send-posts.mjs "$RUNNER_TEMP/telegram"

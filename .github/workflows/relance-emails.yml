@@ -31,13 +31,13 @@ jobs:
         run: npx -y supabase@2 functions deploy relance-emails --project-ref ksvjraqitxouwiabecai --use-api
       - name: Appel de la fonction
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           MODE: ${{ inputs.mode }}
           CONFIRMATION: ${{ inputs.confirmation }}
         run: |
+          KEY=$(printf %s "$KEY" | tr -d '\r\n ')
           corps=$(jq -nc --arg m "$MODE" --arg c "$CONFIRMATION" '{mode:$m, confirmation:$c}')
-          code=$(curl -sS -o reponse.json -w "%{http_code}" -X POST "$SUPABASE_URL/functions/v1/relance-emails" \
+          code=$(curl -sS -o reponse.json -w "%{http_code}" -X POST "https://ksvjraqitxouwiabecai.supabase.co/functions/v1/relance-emails" \
             -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H "Content-Type: application/json" --max-time 600 -d "$corps")
           echo "HTTP $code"; jq . reponse.json || cat reponse.json
           [ "$code" = "200" ]

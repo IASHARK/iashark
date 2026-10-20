@@ -732,3 +732,7 @@ a{color:inherit}
 @media(max-width:640px){.match-recovery{margin:20px auto 16px;padding:26px 16px 22px}}
 @media(prefers-reduced-motion:reduce){.mrec-btn{transition:none}}
 .legal-footer .foot-nofin{font-size:11px;color:#8796a8}
+/* Match offert, visiteur sans compte (21/10/2026, passe impeccable) : sur ordinateur, le pari offert,
+   la demande de compte et l'apercu tiennent dans une colonne lisible au lieu de toute la largeur. */
+.secs:has(> .sec[data-sec="appel"]) > .sec{max-width:780px;margin-left:auto;margin-right:auto;width:100%}
+.appel .sig2-plain b{color:var(--cyan,#22d3ee);font-weight:800;font-variant-numeric:tabular-nums}

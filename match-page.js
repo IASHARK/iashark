@@ -1199,7 +1199,7 @@ function carteAppel(vm,appel){
       </div>
       ${cote!==null?`<div class="sig-odds-box"><span>${esc(t('match_page.sig_odds_used','Cote utilisée'))}</span><b>${odds(cote)}</b></div>`:''}
     </div>
-    ${p!==null?`<p class="sig2-plain">${esc(tf('match_v4.appel_chance','Chance calculée par IASHARK : {p} %',{p:Math.round(p)}))}</p>`:''}
+    ${p!==null?`<p class="sig2-plain">${esc(tf('match_v4.appel_chance','Chance calculée par IASHARK : {p} %',{p:'\u0000'})).replace('\u0000','<b>'+Math.round(p)+'</b>')}</p>`:''}
     <p class="sig-legal">${esc(t('match_page.sig_legal','Estimation statistique, pas une garantie.'))}</p>
   </section>`;
 }

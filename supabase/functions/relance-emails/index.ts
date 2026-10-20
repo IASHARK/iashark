@@ -165,10 +165,24 @@ Deno.serve(async (req: Request) => {
     const evts = ((d as any).events ?? []) as Array<Record<string, string>>;
     const parType: Record<string, number> = {};
     for (const e of evts) parType[e.event] = (parType[e.event] || 0) + 1;
-    const problemes = evts.filter((e) => !["requests", "delivered", "opened", "clicks", "uniqueOpened", "loadedByProxy"].includes(e.event))
-      .slice(0, 15).map((e) => `${masque(String(e.email || ""))} ${e.event} ${String(e.reason || "").slice(0, 120)}`);
-    const admin = evts.filter((e) => /^yar/i.test(String(e.email || ""))).map((e) => `${e.event} ${e.date || ""} ${String(e.reason || "").slice(0, 100)}`);
-    return json(200, { ok: true, mode, evenements: evts.length, par_type: parType, problemes, compte_pro: admin });
+    // Le journal du workflow est PUBLIC (depot public) : aucune adresse, aucun identifiant dans la reponse.
+    // Les ouvertures et clics vont dans la base privee (email_sends.opened_at / clicked_at).
+    const { liste: tous } = await classer(sb);
+    const idDe = new Map(tous.map((p) => [p.email.toLowerCase(), p.id]));
+    let ouverts = 0, cliques = 0;
+    for (const e of evts) {
+      const id = idDe.get(String(e.email || "").toLowerCase());
+      if (!id) continue;
+      const quand = e.date ? new Date(e.date).toISOString() : new Date().toISOString();
+      if (e.event === "opened" || e.event === "uniqueOpened") {
+        const { data } = await sb.from("email_sends").update({ opened_at: quand }).eq("user_id", id).eq("campaign", CAMPAGNE).eq("campaign_key", CLE).is("opened_at", null).select("id");
+        ouverts += (data ?? []).length;
+      } else if (e.event === "clicks") {
+        const { data } = await sb.from("email_sends").update({ clicked_at: quand }).eq("user_id", id).eq("campaign", CAMPAGNE).eq("campaign_key", CLE).is("clicked_at", null).select("id");
+        cliques += (data ?? []).length;
+      }
+    }
+    return json(200, { ok: true, mode, evenements: evts.length, par_type: parType, nouvelles_ouvertures_notees: ouverts, nouveaux_clics_notes: cliques });
   }
   const tout = await classer(sb);
   // Personnes a ne pas relancer (choix de Clement), par identifiant de compte.
@@ -189,11 +203,11 @@ Deno.serve(async (req: Request) => {
       for (const variante of Object.keys(PAQUET)) {
         const l = variante.split("-").pop() as string;
         await envoyer({ ...c, langue: l }, variante, cfg, "[TEST] ");
-        faits.push(`${masque(c.email)} ${variante}`);
+        faits.push(variante);
         await new Promise((r) => setTimeout(r, 400));
       }
     }
-    return json(200, { ok: true, mode, envoyes: faits.length, a: [...new Set(cibles.map((c) => masque(c.email)))] });
+    return json(200, { ok: true, mode, envoyes: faits.length, comptes: cibles.length });
   }
 
   if (mode === "envoi") {
@@ -204,7 +218,7 @@ Deno.serve(async (req: Request) => {
     for (const p of liste) {
       const variante = `${p.segment}-${p.langue}`;
       const { data: id, error } = await sb.rpc("email_reserve_send", { p_user_id: p.id, p_campaign: CAMPAGNE, p_campaign_key: CLE, p_market: p.langue });
-      if (error) { bilan.echec++; erreurs.push(`${masque(p.email)} reserve: ${error.message}`); continue; }
+      if (error) { bilan.echec++; erreurs.push(`reserve: ${error.message}`); continue; }
       if (id == null) { bilan.deja++; continue; }
       try {
         const msg = await envoyer(p, variante, cfg);
@@ -213,7 +227,7 @@ Deno.serve(async (req: Request) => {
       } catch (e) {
         const m = (e as Error).message.slice(0, 300);
         await sb.rpc("email_complete_send", { p_id: id, p_status: "failed", p_message_id: null, p_error: m });
-        bilan.echec++; erreurs.push(`${masque(p.email)} ${variante}: ${m}`);
+        bilan.echec++; erreurs.push(`${variante}: ${m}`);
         console.error(`${TAG} ${masque(p.email)} ${m}`);
       }
       await new Promise((r) => setTimeout(r, 400));

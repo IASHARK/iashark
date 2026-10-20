@@ -350,6 +350,9 @@
     [300,1200,3000,6000].forEach(function(ms){setTimeout(plusTard,ms);});
     // Le bouton du match offert arrive apres la reponse du serveur : on suit aussi l'affichage.
     if(window.MutationObserver)new MutationObserver(plusTard).observe(document.body,{childList:true,subtree:true});
+    // Et quand la page change de hauteur sans changer de contenu (logos, polices chargees).
+    if(window.ResizeObserver)new ResizeObserver(plusTard).observe(document.body);
+    window.addEventListener('load',plusTard);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',poser);else poser();
 })();

@@ -19,16 +19,18 @@
 .v1{font-size:80px;font-weight:700;color:#20d5ef;line-height:.9}.v2{font-size:56px;font-weight:700;color:#c9d3de;line-height:.9}
 .tr{height:22px;border-radius:12px;background:#1a2634;overflow:hidden}.f{height:100%;border-radius:12px}
 .p{margin-top:34px;padding-top:30px;border-top:2px solid rgba(141,179,211,.14);font-size:31px;line-height:1.45;color:#c9d3de}.p span{color:#91a0b3}
+.alt{margin-top:60px;font-size:46px;font-weight:700;line-height:1.25;color:#20d5ef}
 .ft{margin-top:auto;padding-top:28px;display:flex;justify-content:space-between;align-items:center;font-size:30px;color:#91a0b3}.ft b{color:#20d5ef;font-size:36px}
 </style></head><body><div class="c">
 <div class="logo">IA<span>SHARK</span></div>
 <div class="lbl">MATCH GRATUIT DU JOUR</div>
 <div class="t{{LONG}}">{{EQUIPES}}</div><div class="w">{{QUAND}}</div>
-<div class="box">
+<div class="box" style="{{BOX}}">
  <div class="h">Pari : {{PARI}}</div>
  <div class="row"><div class="l"><span class="k">Chance calculée par IASHARK</span><span class="v1">{{ESTIMATION}} %</span></div><div class="tr"><div class="f" style="width:{{ESTIMATION}}%;background:linear-gradient(90deg,#06b6d4,#20d5ef)"></div></div></div>
  <div class="row"><div class="l"><span class="k">{{COTE_LIBELLE}}</span><span class="v2">{{COTE}}</span></div></div>
  <div class="p">{{PHRASE}}</div>
 </div>
+<div class="alt" style="{{ALT}}">Toute l'analyse du match, gratuite avec un compte</div>
 <div class="ft"><span>L'analyse complète, gratuite avec un compte</span><b>iashark.com</b></div>
 </div></body></html>

@@ -55,9 +55,10 @@ test('match gratuit : seulement la chance calculee et la cote, aucun ecart ni ch
 
 test('match gratuit : donnee absente = aucun chiffre (jamais 0 %)', () => {
   const p = P.matchGratuit({matchs: [{...libre, chance_iashark: null}]}, null, MATIN);
-  assert.strictEqual(p.type, 'text');
+  assert.strictEqual(p.type, 'photo'); assert.strictEqual(p.carte.pari, null);
   assert.ok(!/%/.test(p.html));
-  assert.strictEqual(P.matchGratuit({matchs: [payant]}, null, MATIN), null);
+  // Une designation existe (un autre jour) : jamais un match payant non designe.
+  assert.strictEqual(P.matchGratuit({matchs: [payant, {...libre, id: 'autre-jour', date: '2026-09-28 20:00'}]}, null, MATIN), null);
 });
 
 test('match gratuit : jamais un match deja commence ou joue', () => {
@@ -89,13 +90,13 @@ test('match gratuit : seulement celui du jour, avec sa date (contre-controle, 30
 
 test('match gratuit non fiable : publie SANS aucun pourcentage', () => {
   const nonVerifie = P.matchGratuit({matchs: [{...libre, analysis_tier: 'UNVERIFIED'}]}, null, MATIN);
-  assert.strictEqual(nonVerifie.type, 'text');
+  assert.strictEqual(nonVerifie.carte.pari, null);
   assert.ok(!/%/.test(nonVerifie.html), 'aucun pourcentage');
   assert.match(nonVerifie.html, /les scores exacts les plus probables/);
   // Favori inverse par rapport au marche, gros ecart (cas Autriche-Kosovo) : pas de chiffre.
   const inverse = {...libre, p1: 33.1, pn: 28.2, p2: 38.6, market_consensus_p1: 62, market_consensus_pN: 24, market_consensus_p2: 14};
   assert.strictEqual(P.chiffresFiables(inverse), false);
-  assert.strictEqual(P.matchGratuit({matchs: [inverse]}, null, MATIN).type, 'text');
+  assert.strictEqual(P.matchGratuit({matchs: [inverse]}, null, MATIN).carte.pari, null);
   // Meme favori : chiffres publies.
   assert.strictEqual(P.chiffresFiables({...libre, p1: 55, pn: 25, p2: 20, market_consensus_p1: 60, market_consensus_pN: 24, market_consensus_p2: 16}), true);
 });
@@ -233,7 +234,7 @@ test('match gratuit : plus aucun chiffre « selon la cote », ni marge, ni « Su
 test('match gratuit : pari et pourcentage seulement avec un pari v3 calibre', () => {
   const sansChiffre = (m, pourquoi) => {
     const p = P.matchGratuit({matchs: [m]}, null, MATIN);
-    assert.strictEqual(p.type, 'text', pourquoi);
+    assert.strictEqual(p.carte.pari, null, pourquoi);
     assert.ok(!/%|Sur 100 matchs|Pari :|mi-temps/.test(JSON.stringify(p)), pourquoi + ' : ni pari ni pourcentage');
   };
   const {moteur_v3, v3_pari, ...ancien} = libre;
@@ -266,7 +267,7 @@ test('match gratuit : modele seul au-dessus de la cote sans marge, aucun pourcen
   const sansChiffre = (m, pourquoi) => {
     assert.strictEqual(P.pariV3Calibre(m), false, pourquoi);
     const p = P.matchGratuit({matchs: [m]}, {matchs: [m]}, JOUR);
-    assert.strictEqual(p.type, 'text', pourquoi);
+    assert.strictEqual(p.carte.pari, null, pourquoi);
     assert.ok(!/%|Sur 100 matchs|plus de chances|points/.test(JSON.stringify(p)), pourquoi);
   };
   sansChiffre(mls, 'preuve de l\'avocat : modele seul 80 % > cote sans marge 72 %');
@@ -298,4 +299,30 @@ test('canal : aucun mot « valeur » ou « avantage », aucun taux de reussite d
     assert.ok(!/valeur|avantage|\bvalue\b|taux de réussite|réussite/i.test(t), t);
   }
   assert.ok(!/%/.test(r.html), 'resultats : jamais de pourcentage de reussite');
+});
+
+// 20/10/2026 : sans aucune designation is_free, le match du jour est celui que le site
+// met en avant (lib/free-match.js) ; avec une designation, jamais un autre match.
+test('match du jour : sans designation, meme match que le site ; avec designation, rien d\'autre', () => {
+  const base = {id: 9001, date: '2026-10-20 21:00', status: 'NS', league: 'UEFA Champions League', home: {n: 'Paris Saint Germain'}, away: {n: 'Barcelona'}, has_signal: true};
+  const autre = {id: 9002, date: '2026-10-20 18:45', status: 'NS', league: 'UEFA Champions League', home: {n: 'Fenerbahçe'}, away: {n: 'Slavia Praha'}};
+  const p = P.matchGratuit({matchs: [base, autre]}, null, '2026-10-20 08:00');
+  assert.ok(p, 'un match du jour sans designation');
+  assert.strictEqual(p.carte.pari, null);
+  assert.ok(!/%/.test(p.html), 'aucun pourcentage');
+  const designeHier = {...autre, id: 9003, date: '2026-10-19 20:00', is_free: true};
+  assert.strictEqual(P.matchGratuit({matchs: [base, designeHier]}, null, '2026-10-20 08:00'), null);
+});
+
+test('gros matchs du soir : seulement ceux qui n\'ont pas commence, avec un lien chacun, sans chiffre', () => {
+  const ms = [
+    {id: 1, date: '2026-10-20 21:00', status: 'NS', league: 'UEFA Champions League', league_key: 'ucl', home: {n: 'Paris Saint Germain'}, away: {n: 'Barcelona'}},
+    {id: 2, date: '2026-10-20 18:45', status: '1H', league: 'UEFA Champions League', league_key: 'ucl', home: {n: 'Fenerbahçe'}, away: {n: 'Slavia Praha'}},
+    {id: 3, date: '2026-10-21 21:00', status: 'NS', league: 'UEFA Champions League', league_key: 'ucl', home: {n: 'Real Madrid'}, away: {n: 'Juventus'}}
+  ];
+  const p = P.soir({matchs: ms}, '2026-10-20', '18:30');
+  assert.ok(p);
+  assert.ok(/PSG|Paris/.test(p.html) && /match\.html\?id=1/.test(p.html));
+  assert.ok(!/Fenerbah/.test(p.html) && !/Real Madrid/.test(p.html));
+  assert.ok(!/%/.test(p.html));
 });

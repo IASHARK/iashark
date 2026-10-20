@@ -294,12 +294,10 @@
 
 /* Petit lien Telegram dans le pied de page (20/10/2026, choix de Clement) :
    logo + « Telegram » a cote des mentions legales, vers la chaine gratuite
-   t.me/iasharkdata (en francais, donc seulement sur les pages francaises).
+   t.me/iasharkdata, sur toutes les pages et toutes les langues (choix de Clement).
    Clic compte dans funnel_events comme les autres liens suivis (data-track). */
 (function(){
   if (typeof document === 'undefined') return;
-  var seg = (location.pathname.split('/')[1] || '').toLowerCase();
-  if (['en', 'gb', 'es', 'de', 'it', 'pt', 'mx', 'za'].indexOf(seg) !== -1) return;
   function poser(){
     var footer = document.querySelector('footer.responsible-footer');
     if (!footer || footer.querySelector('.tg-foot')) return;

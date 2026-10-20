@@ -27,25 +27,25 @@ MATCHS = [  # heure de Paris, id, domicile, exterieur (fr), domicile, exterieur 
 T = {
  "fr": {
   "date": "Mardi 20 octobre", "soir": "Ce soir en Ligue des champions", "offert": "OFFERT",
-  "heure_en": "", "tg_t": "La chaîne Telegram gratuite",
+  "heure_en": "", "tg_t": "Rejoins-nous gratuitement sur Telegram",
   "tg_p": "Chaque jour : le match offert, les résultats de la veille, gagnés et perdus, et un sondage sur l'affiche du soir.",
-  "tg_b": "Rejoindre la chaîne", "sig": "À ce soir,", "nom": "Clément, IASHARK",
+  "tg_b": "Rejoindre IASHARK sur Telegram", "suivre": "Suis IASHARK partout", "sig": "À ce soir,", "nom": "Clément, IASHARK",
   "rep": "Une question ? Réponds simplement à cet e-mail, c'est moi qui lis.",
   "desinscr": "Se désinscrire", "voir": "Voir le match",
  },
  "es": {
   "date": "Martes 20 de octubre", "soir": "Esta noche en la Champions League", "offert": "GRATIS",
-  "heure_en": "", "tg_t": "El canal de Telegram gratuito",
+  "heure_en": "", "tg_t": "Únete gratis a nuestro Telegram",
   "tg_p": "Cada día: el partido gratis, los resultados del día anterior, ganados y perdidos, y una encuesta sobre el partido de la noche.",
-  "tg_b": "Unirme al canal", "sig": "Hasta esta noche,", "nom": "Clément, IASHARK",
+  "tg_b": "Unirme a IASHARK en Telegram", "suivre": "Sigue a IASHARK", "sig": "Hasta esta noche,", "nom": "Clément, IASHARK",
   "rep": "¿Alguna pregunta? Responde a este correo, lo leo yo.",
   "desinscr": "Darse de baja", "voir": "Ver el partido",
  },
  "en": {
   "date": "Tuesday 20 October", "soir": "Tonight in the Champions League", "offert": "FREE",
-  "heure_en": " (Paris time)", "tg_t": "The free Telegram channel",
+  "heure_en": " (Paris time)", "tg_t": "Join us for free on Telegram",
   "tg_p": "Every day: the free match, yesterday's results, won and lost, and a poll on the evening's big game.",
-  "tg_b": "Join the channel", "sig": "See you tonight,", "nom": "Clément, IASHARK",
+  "tg_b": "Join IASHARK on Telegram", "suivre": "Follow IASHARK", "sig": "See you tonight,", "nom": "Clément, IASHARK",
   "rep": "Any question? Just reply to this email, I read every one.",
   "desinscr": "Unsubscribe", "voir": "See the match",
  },
@@ -137,7 +137,7 @@ SEG = {
     corps=["Tu as créé un compte sur IASHARK. Ce soir, PSG – FC Barcelone et 8 autres matchs de Ligue des champions, avec leur analyse complète.",
            "Chaque jour, un match est offert. Aujourd'hui : <b>Fenerbahçe – Slavia Prague</b>, 18h45."],
     cta="Voir les matchs du soir", lien="/fr/",
-    bonus=("Recevoir les analyses par e-mail ?", "Active-les en un clic dans ton compte. Sinon, tu ne recevras plus rien de notre part.", "Activer les e-mails", "/fr/compte.html"),
+    bonus=None,
     pied="Tu reçois ce message parce que tu as un compte IASHARK."),
   "es": dict(sujet="Tu cuenta IASHARK: esta noche, PSG – Barcelona",
     pre="Tu cuenta sigue activa. Esta noche, 9 partidos de Champions League y un partido gratis.",
@@ -145,7 +145,7 @@ SEG = {
     corps=["Creaste una cuenta en IASHARK. Esta noche, PSG – Barcelona y 8 partidos más de Champions League, cada uno con su análisis completo.",
            "Cada día, un partido es gratis. Hoy: <b>Fenerbahçe – Slavia Praga</b>, 18:45."],
     cta="Ver los partidos de esta noche", lien="/es/",
-    bonus=("¿Recibir los análisis por correo?", "Actívalos con un clic en tu cuenta. Si no, no volverás a saber de nosotros.", "Activar los correos", "/es/compte.html"),
+    bonus=None,
     pied="Recibes este mensaje porque tienes una cuenta IASHARK."),
   "en": dict(sujet="Your IASHARK account: PSG vs Barcelona tonight",
     pre="Your account is still active. Tonight, 9 Champions League games and one free match.",
@@ -153,13 +153,29 @@ SEG = {
     corps=["You created an account on IASHARK. Tonight, PSG vs Barcelona and 8 more Champions League games, each with its full analysis.",
            "Every day, one match is free. Today: <b>Fenerbahce vs Slavia Prague</b>, 6:45pm (Paris)."],
     cta="See tonight's games", lien="/en/",
-    bonus=("Want the analysis by email?", "Turn it on in one click in your account. Otherwise you will not hear from us again.", "Turn on emails", "/en/compte.html"),
+    bonus=None,
     pied="You are receiving this message because you have an IASHARK account."),
  },
 }
 
 C = dict(fond="#060b12", carte="#0a1420", bord="#16222f", cyan="#20d5ef", blanc="#f4f7fb", gris="#91a0b3", gris2="#c9d3de")
 POLICE = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
+
+
+ICONES = SITE + "/assets/emails/icones"
+RESEAUX = [("youtube", "YouTube", "@IASHARK", "https://www.youtube.com/@IASHARK"),
+           ("x", "X", "@IASHARK1", "https://x.com/IASHARK1"),
+           ("instagram", "Instagram", "@IASHARK", "https://www.instagram.com/iashark/"),
+           ("tiktok", "TikTok", "@iashark_data", "https://www.tiktok.com/@iashark_data"),
+           ("tiktok", "TikTok", "@iasharkdata", "https://www.tiktok.com/@iasharkdata")]
+
+
+def reseaux():
+    return "".join(
+        f'<td align="center" style="padding:0 7px;vertical-align:top;width:72px;"><a href="{u}" target="_blank" style="text-decoration:none;">'
+        f'<img src="{ICONES}/{i}.png" width="36" height="36" alt="{n}" style="display:block;margin:0 auto 6px;border:0;"></a>'
+        f'<a href="{u}" target="_blank" style="font-family:{POLICE};font-size:10px;line-height:1.3;color:{C["gris"]};text-decoration:none;">{h}</a></td>'
+        for i, n, h, u in RESEAUX)
 
 
 def bouton(texte, url, plein=True):
@@ -221,13 +237,17 @@ def rendre(seg, l, desinscr):
 <p style="margin:10px 0 0;font-family:{POLICE};font-size:12px;color:{C["gris"]};">{ {'fr': 'Heures de Paris.', 'en': 'Paris time.', 'es': 'Hora de París.'}[l] }</p></td></tr>
 {bonus}
 <tr><td class="pad" style="padding:0 32px 30px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid {C["bord"]};"><tr><td style="padding-top:24px;">
-<p style="margin:0 0 6px;font-family:{POLICE};font-size:16px;font-weight:700;color:{C["blanc"]};">{t["tg_t"]}</p>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 10px;"><tr><td style="padding-right:12px;vertical-align:middle;"><a href="{TG}" target="_blank"><img src="{ICONES}/telegram.png" width="40" height="40" alt="Telegram" style="display:block;border:0;"></a></td>
+<td style="vertical-align:middle;font-family:{POLICE};font-size:17px;font-weight:700;line-height:1.3;color:{C["blanc"]};">{t["tg_t"]}</td></tr></table>
 <p style="margin:0 0 16px;font-family:{POLICE};font-size:14px;line-height:1.55;color:{C["gris"]};">{t["tg_p"]}</p>
 {bouton(t["tg_b"], TG, plein=False)}</td></tr></table></td></tr>
 <tr><td class="pad" style="padding:0 32px 32px;">
 <p style="margin:0;font-family:{POLICE};font-size:15px;line-height:1.6;color:{C["gris2"]};">{t["sig"]}<br><b style="color:{C["blanc"]};">{t["nom"]}</b></p>
 <p style="margin:12px 0 0;font-family:{POLICE};font-size:13px;line-height:1.55;color:{C["gris"]};">{t["rep"]}</p></td></tr>
 </table></td></tr>
+<tr><td class="pad" align="center" style="padding:28px 20px 4px;">
+<p style="margin:0 0 14px;font-family:{POLICE};font-size:13px;font-weight:700;color:{C["gris2"]};">{t["suivre"]}</p>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>{reseaux()}</tr></table></td></tr>
 <tr><td class="pad" style="padding:22px 32px 0;font-family:{POLICE};font-size:12px;line-height:1.6;color:{C["gris"]};text-align:center;">
 {html.escape(s["pied"])}<br><a href="{desinscr}" style="color:{C["gris"]};text-decoration:underline;">{t["desinscr"]}</a> &nbsp;·&nbsp; <a href="{SITE}/{l}/?{u}" style="color:{C["gris"]};text-decoration:underline;">iashark.com</a></td></tr>
 </table></td></tr></table></body></html>'''

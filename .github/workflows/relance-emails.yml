@@ -35,8 +35,13 @@ jobs:
           RELANCE_SECRET: ${{ secrets.RELANCE_SECRET }}
           # Meme secret pour signer (relance-emails) et verifier (email-unsubscribe) les liens de desinscription.
           EMAIL_UNSUBSCRIBE_SECRET: ${{ secrets.EMAIL_UNSUBSCRIBE_SECRET }}
+          # Cle API Brevo collee par Clement dans les secrets GitHub (gh secret set BREVO_API_KEY).
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
         run: |
           npx -y supabase@2 secrets set "RELANCE_SECRET=$RELANCE_SECRET" "EMAIL_UNSUBSCRIBE_SECRET=$EMAIL_UNSUBSCRIBE_SECRET" --project-ref ksvjraqitxouwiabecai > /dev/null
+          if [ -n "$BREVO_API_KEY" ]; then
+            npx -y supabase@2 secrets set "BREVO_API_KEY=$(printf %s "$BREVO_API_KEY" | tr -d '\r\n ')" --project-ref ksvjraqitxouwiabecai > /dev/null
+          fi
           npx -y supabase@2 functions deploy relance-emails --project-ref ksvjraqitxouwiabecai --use-api
       - name: Appel de la fonction
         env:

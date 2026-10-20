@@ -1,0 +1,60 @@
+name: Outils Telegram (chaine gratuite)
+
+# Lance a la main. « verifier » : nom du robot et son role sur la chaine @iasharkdata.
+# « bienvenue » : poste puis epingle le message de bienvenue sur la chaine (le robot
+# doit etre administrateur avec le droit de publier et d'epingler).
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Quoi faire"
+        type: choice
+        options: [verifier, bienvenue]
+        default: verifier
+
+permissions:
+  contents: read
+
+jobs:
+  outil:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Robot et chaine
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          ACTION: ${{ inputs.action }}
+        run: |
+          set -euo pipefail
+          API="https://api.telegram.org/bot${TOKEN}"
+          ME=$(curl -sS "$API/getMe")
+          BOT_ID=$(echo "$ME" | jq -r '.result.id'); BOT_USER=$(echo "$ME" | jq -r '.result.username')
+          echo "Robot : @${BOT_USER}"
+          ROLE=$(curl -sS "$API/getChatMember?chat_id=@iasharkdata&user_id=${BOT_ID}" | jq -r '.result.status // .description')
+          echo "Role du robot sur @iasharkdata : ${ROLE}"
+          if [ "$ACTION" != "bienvenue" ]; then exit 0; fi
+          if [ "$ROLE" != "administrator" ] && [ "$ROLE" != "creator" ]; then
+            echo "::error::Le robot @${BOT_USER} n'est pas administrateur de @iasharkdata : rien n'est poste."; exit 1
+          fi
+          TEXTE=$(cat <<'MSG'
+          🦈 <b>Bienvenue sur IASHARK</b>
+          Le foot en probabilités : chaque jour, des matchs analysés avec des chiffres, pas au feeling.
+
+          <b>Ici, gratuitement :</b>
+          • le ticket gratuit du jour
+          • les résultats de la veille, gagnés ET perdus
+          • le guide foot du jour et l'actu
+          • un sondage sur l'affiche du soir
+
+          👉 Toutes les analyses sur <a href="https://iashark.com/?utm_source=telegram&amp;utm_medium=social&amp;utm_campaign=bienvenue">iashark.com</a>, compte gratuit, sans carte.
+          🔒 Bientôt : le <b>VIP Telegram</b>, tes pronos en privé selon tes championnats.
+          💬 Une question, envie de t'inscrire ? Écris-moi : @IASHARK
+          MSG
+          )
+          TEXTE=$(echo "$TEXTE" | sed 's/^          //')
+          R=$(curl -sS -X POST "$API/sendMessage" --data-urlencode "chat_id=@iasharkdata" --data-urlencode "text=${TEXTE}" -d parse_mode=HTML -d disable_web_page_preview=true)
+          echo "$R" | jq -r '.ok, (.description // "")'
+          MID=$(echo "$R" | jq -r '.result.message_id // empty')
+          [ -n "$MID" ] || { echo "::error::Message non poste"; exit 1; }
+          P=$(curl -sS -X POST "$API/pinChatMessage" -d "chat_id=@iasharkdata" -d "message_id=${MID}" -d disable_notification=true)
+          echo "Epingle : $(echo "$P" | jq -r '.ok, (.description // "")')"

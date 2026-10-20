@@ -37,7 +37,16 @@ if (veut("resultats")) {
 if (veut("match")) {
   if (!frais) note("match : donnees du jour pas encore pretes, pas de message");
   else {
-    const p = P.matchGratuit(home, lire("data.json"), `${TODAY} ${NOW_HM}`);
+    const full = lire("data.json");
+    let p = P.matchGratuit(home, full, `${TODAY} ${NOW_HM}`);
+    // Sans designation du jour (is_free), le pari, sa cote et la chance du match restent dans
+    // la base protegee (match_premium_data, 03/09/2026) : on les y lit pour ce seul match.
+    if (p && !p.carte.pari) {
+      const prot = await chiffresProteges(p.matchId);
+      const base = ((full && (full.matchs || full)) || []).find((x) => x && String(x.id) === String(p.matchId))
+        || (home.matchs || []).find((x) => x && String(x.id) === String(p.matchId));
+      if (prot && base) p = P.matchGratuit(home, {matchs: [{...base, ...prot}]}, `${TODAY} ${NOW_HM}`) || p;
+    }
     if (!p) note(`match : pas de match gratuit a venir ce jour (${TODAY}), pas de message`);
     else { p.image = await carte(p.carte); posts.push(p); }
   }
@@ -80,6 +89,22 @@ if (veut("guide")) {
 
 fs.writeFileSync(path.join(OUT, "posts.json"), JSON.stringify({date: TODAY, slot: SLOT, posts}, null, 2));
 console.log(`${posts.length} message(s) prets : ${posts.map((p) => p.slot).join(", ") || "aucun"}`);
+
+async function chiffresProteges(id) {
+  const url = process.env.SUPABASE_URL, key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key || id == null) { note("match : base protegee non configuree, message sans chiffres"); return null; }
+  try {
+    const r = await fetch(`${url}/rest/v1/match_premium_data?fixture_id=eq.${encodeURIComponent(id)}&select=pari_rec,cote_rec,model_probability,market_id,markets_compared,premium_fields`,
+      {headers: {apikey: key, Authorization: `Bearer ${key}`}});
+    if (!r.ok) { note(`match : base protegee ${r.status}, message sans chiffres`); return null; }
+    const [row] = await r.json();
+    if (!row) return null;
+    const pf = row.premium_fields || {};
+    const out = {pari_rec: row.pari_rec, cote_rec: row.cote_rec, model_probability: row.model_probability, market_id: row.market_id,
+      markets_compared: row.markets_compared, chance_iashark: pf.chance_iashark, cote_source: pf.cote_source, cote_bookmaker: pf.cote_bookmaker, sans_marge_anj: pf.sans_marge_anj};
+    return Object.fromEntries(Object.entries(out).filter(([, v]) => v !== null && v !== undefined));
+  } catch (err) { note(`match : base protegee injoignable (${err.message}), message sans chiffres`); return null; }
+}
 
 async function carte(c) {
   const {chromium} = await import("@playwright/test");

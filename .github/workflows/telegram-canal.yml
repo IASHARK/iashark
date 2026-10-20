@@ -179,6 +179,9 @@ jobs:
         if: ${{ steps.afaire.outputs.slot != '' }}
         env:
           SLOT: ${{ steps.afaire.outputs.slot }}
+          # Lecture seule du pari, de sa cote et de la chance du match du jour (match_premium_data).
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node scripts/telegram/build-posts.mjs --slot "$SLOT" --out "$RUNNER_TEMP/telegram"
 
       - name: Envoi Telegram

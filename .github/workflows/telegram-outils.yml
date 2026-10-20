@@ -9,7 +9,7 @@ on:
       action:
         description: "Quoi faire"
         type: choice
-        options: [verifier, bienvenue]
+        options: [verifier, bienvenue, corriger-bienvenue]
         default: verifier
 
 permissions:
@@ -34,26 +34,30 @@ jobs:
           ROLE=$(curl -sS "$API/getChatMember?chat_id=@iasharkdata&user_id=${BOT_ID}" | jq -r '.result.status // .description')
           echo "Role du robot sur @iasharkdata : ${ROLE}"
           if [ -n "${TOKEN_CONTACT:-}" ]; then echo "Robot contact : @$(curl -sS "https://api.telegram.org/bot${TOKEN_CONTACT}/getMe" | jq -r '.result.username')"; fi
-          if [ "$ACTION" != "bienvenue" ]; then exit 0; fi
+          if [ "$ACTION" = "verifier" ]; then exit 0; fi
           if [ "$ROLE" != "administrator" ] && [ "$ROLE" != "creator" ]; then
             echo "::error::Le robot @${BOT_USER} n'est pas administrateur de @iasharkdata : rien n'est poste."; exit 1
           fi
           TEXTE=$(cat <<'MSG'
-          🦈 <b>Bienvenue sur IASHARK</b>
+          <b>Bienvenue sur IASHARK</b>
           Le foot en probabilités : chaque jour, des matchs analysés avec des chiffres, pas au feeling.
 
           <b>Ici, gratuitement :</b>
-          • le ticket gratuit du jour
-          • les résultats de la veille, gagnés ET perdus
-          • le guide foot du jour et l'actu
-          • un sondage sur l'affiche du soir
+          - le match gratuit du jour
+          - les résultats de la veille, gagnés ET perdus
+          - le guide foot du jour et l'actu
+          - un sondage sur l'affiche du soir
 
-          👉 Toutes les analyses sur <a href="https://iashark.com/?utm_source=telegram&amp;utm_medium=social&amp;utm_campaign=bienvenue">iashark.com</a>, compte gratuit, sans carte.
-          🔒 Bientôt : le <b>VIP Telegram</b>, tes pronos en privé selon tes championnats.
-          💬 Envie de t'abonner ou une question ? Écris-moi directement : @IASHARK
+          Toutes les analyses sur <a href="https://iashark.com/?utm_source=telegram&amp;utm_medium=social&amp;utm_campaign=bienvenue">iashark.com</a>, compte gratuit, sans carte.
+          Bientôt : le <b>VIP Telegram</b>, tes pronos en privé selon tes championnats.
+          Envie de t'abonner ou une question ? Écris-moi directement : @IASHARK
           MSG
           )
           TEXTE=$(echo "$TEXTE" | sed 's/^          //')
+          if [ "$ACTION" = "corriger-bienvenue" ]; then
+            E=$(curl -sS -X POST "$API/editMessageText" -d "chat_id=@iasharkdata" -d "message_id=27" --data-urlencode "text=${TEXTE}" -d parse_mode=HTML -d disable_web_page_preview=true)
+            echo "Message de bienvenue corrige : $(echo "$E" | jq -r '.ok, (.description // "")')"; exit 0
+          fi
           R=$(curl -sS -X POST "$API/sendMessage" --data-urlencode "chat_id=@iasharkdata" --data-urlencode "text=${TEXTE}" -d parse_mode=HTML -d disable_web_page_preview=true)
           echo "$R" | jq -r '.ok, (.description // "")'
           MID=$(echo "$R" | jq -r '.result.message_id // empty')

@@ -49,6 +49,15 @@ for (const p of posts) {
     if (clavier(p)) form.append("reply_markup", JSON.stringify(clavier(p)));
     form.append("photo", new Blob([fs.readFileSync(p.image)], {type: "image/png"}), "match-gratuit.png");
     await call("sendPhoto", form);
+  } else if (p.type === "video") {
+    const form = new FormData();
+    form.append("chat_id", chatId);
+    form.append("caption", (prefixe + p.html).slice(0, 1024));
+    form.append("parse_mode", "HTML");
+    form.append("supports_streaming", "true");
+    if (clavier(p)) form.append("reply_markup", JSON.stringify(clavier(p)));
+    form.append("video", new Blob([fs.readFileSync(p.image)], {type: "video/mp4"}), "video.mp4");
+    await call("sendVideo", form);
   } else if (p.type === "poll") {
     if (test) await call("sendMessage", {chat_id: chatId, text: prefixe + "Sondage ci-dessous :", parse_mode: "HTML"});
     await call("sendPoll", {chat_id: chatId, question: p.question.slice(0, 300), options: p.options.map((t) => ({text: t.slice(0, 100)})),

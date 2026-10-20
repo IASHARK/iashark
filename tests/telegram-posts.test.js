@@ -32,10 +32,11 @@ test('match gratuit : le match, le pari, la cote et la chance calculee par IASHA
   assert.match(libellePage, /^1re mi-temps\s?: moins de 1,5\sbut$/);
   assert.strictEqual(p.carte.dit, undefined, 'plus de « ce que dit la cote sans la marge »');
   // Une seule cote (lib/cote-anj.js, 01/10/2026) : sans cote d'un agree ANJ, la cote est « indicative », sans bookmaker.
-  assert.ok(p.html.includes('Pari : <b>' + libellePage + '</b>\nChance calculée par IASHARK : <b>64 %</b>\nCote indicative : 1,47'), p.html);
+  // Format du 20/10/2026 (Clement) : ce que dit le modele, ce que disent les bookmakers (1/cote).
+  assert.ok(p.html.includes('Pari : <b>' + libellePage + '</b>\nNotre modèle dit : <b>64 %</b>\nLes bookmakers disent : 68 % (cote 1,47)'), p.html);
   // Avec la cote d'un agree ANJ : son nom, la meme cote dans le message et sur l'image.
   const anj = P.matchGratuit(home, {matchs: [Object.assign({}, libre, {cote_rec: '1.52', cote_source: 'anj', cote_bookmaker: 'Winamax'})]}, MATIN);
-  assert.ok(anj.html.includes('Cote chez Winamax : 1,52'), anj.html);
+  assert.ok(anj.html.includes('Les bookmakers disent : 66 % (cote 1,52 chez Winamax)'), anj.html);
   assert.deepEqual([anj.carte.coteTxt, anj.carte.coteLibelle], ['1,52', 'Cote chez Winamax']);
   assert.ok(!/points|plus de chances|en suppose|sans la marge|selon la cote|Sur 100 matchs|mise|il faut gagner/.test(JSON.stringify(p)));
   assert.ok(!/le plus attendu/.test(p.html));
@@ -93,10 +94,11 @@ test('match gratuit non fiable : publie SANS aucun pourcentage', () => {
   assert.strictEqual(nonVerifie.carte.pari, null);
   assert.ok(!/%/.test(nonVerifie.html), 'aucun pourcentage');
   assert.match(nonVerifie.html, /les scores exacts les plus probables/);
-  // Favori inverse par rapport au marche, gros ecart (cas Autriche-Kosovo) : pas de chiffre.
+  const limite = P.matchGratuit({matchs: [{...libre, analysis_tier: 'LIMITED_DATA'}]}, null, MATIN);
+  assert.strictEqual(limite.carte.pari, null);
+  // Favori inverse par rapport au marche (cas Autriche-Kosovo) : chiffresFiables le signale toujours.
   const inverse = {...libre, p1: 33.1, pn: 28.2, p2: 38.6, market_consensus_p1: 62, market_consensus_pN: 24, market_consensus_p2: 14};
   assert.strictEqual(P.chiffresFiables(inverse), false);
-  assert.strictEqual(P.matchGratuit({matchs: [inverse]}, null, MATIN).carte.pari, null);
   // Meme favori : chiffres publies.
   assert.strictEqual(P.chiffresFiables({...libre, p1: 55, pn: 25, p2: 20, market_consensus_p1: 60, market_consensus_pN: 24, market_consensus_p2: 16}), true);
 });
@@ -229,27 +231,24 @@ test('match gratuit : plus aucun chiffre « selon la cote », ni marge, ni « Su
   assert.match(tpl, /MATCH GRATUIT DU JOUR/);
 });
 
-// Contre-controle ronde 4 (30/09/2026) : « Sur 100 matchs comme celui-ci… » s'affichait
-// avec l'ancien moteur, trop sur de lui (6,1 a 9,5 points d'ecart au 1N2).
-test('match gratuit : pari et pourcentage seulement avec un pari v3 calibre', () => {
+// Decision de Clement (20/10/2026) : le pari du jour part avec ses chiffres, ancien moteur
+// compris (chance_iashark est deja bornee par la cote sans marge) ; jamais pour une
+// competition « en test », jamais un pourcentage du modele au-dessus de celui de la cote.
+test('match gratuit : pari et pourcentages avec chance_iashark, jamais au-dessus de la cote', () => {
   const sansChiffre = (m, pourquoi) => {
     const p = P.matchGratuit({matchs: [m]}, null, MATIN);
     assert.strictEqual(p.carte.pari, null, pourquoi);
     assert.ok(!/%|Sur 100 matchs|Pari :|mi-temps/.test(JSON.stringify(p)), pourquoi + ' : ni pari ni pourcentage');
   };
-  const {moteur_v3, v3_pari, ...ancien} = libre;
-  sansChiffre(ancien, 'ancien moteur (aucun pari v3)');
-  sansChiffre({...libre, moteur_v3: {source: 'ancien moteur (repli)'}}, 'repli sur l\'ancien moteur');
-  sansChiffre({...libre, v3_pari: {...libre.v3_pari, market_id: 'home-win'}}, 'pari v3 sur un autre marche');
-  sansChiffre({...libre, v3_pari: {...libre.v3_pari, etiquette: 'logique installée, pas encore vérifié'}}, 'marche v3 pas encore verifie');
-  sansChiffre({...libre, v3_pari: {...libre.v3_pari, fiabilite_marche: 'non vérifié sur le passé / données limitées'}}, 'competition non verifiee');
   sansChiffre({...libre, league_reliability: 'en_test'}, 'competition « Fiabilité : en test » (config/leagues.json#fiabilite)');
   sansChiffre({...libre, market_id: null}, 'marche du pari absent');
   sansChiffre({...libre, pari_rec: ''}, 'libelle du pari absent');
-  const ok = P.matchGratuit({matchs: [libre]}, null, MATIN);
+  sansChiffre({...libre, chance_iashark: 70}, 'modele (70 %) au-dessus de la cote (1,47 = 68 %)');
+  const {moteur_v3, v3_pari, ...ancien} = libre;
+  const ok = P.matchGratuit({matchs: [ancien]}, null, MATIN);
   assert.strictEqual(ok.type, 'photo');
-  assert.match(ok.carte.phrase, /^Chance calculée par IASHARK/);
-  assert.strictEqual(P.pariV3Calibre(libre), true);
+  assert.deepStrictEqual([ok.carte.estimation, ok.carte.bookmakers], [64, 68]);
+  assert.match(ok.html, /Notre modèle dit : <b>64 %<\/b>\nLes bookmakers disent : 68 % \(cote 1,47\)/);
 });
 
 // Condition 1 du mathematicien et de l'avocat du diable (30/09/2026). Preuve rejouee

@@ -10,11 +10,12 @@ on:
   workflow_dispatch:
     inputs:
       images:
-        description: "Adresses des images ou videos .mp4 (https), separees par des virgules"
-        required: true
+        description: "Adresses des images ou videos .mp4 (https), separees par des virgules (vide = texte seul)"
+        required: false
+        default: ""
         type: string
       legende:
-        description: "Texte sous la premiere image"
+        description: "Texte sous la premiere image (ou message seul si aucune image)"
         required: true
         type: string
 
@@ -55,6 +56,11 @@ jobs:
                 const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
                 posts.push({type: video ? "video" : "photo", slot: "image-" + i, image: f, html: i === 0 ? esc(process.env.LEGENDE) : "",
                   boutons: [{text: "Voir les matchs du soir", url: "https://iashark.com/?utm_source=telegram&utm_campaign=canal"}]});
+              }
+              if (!urls.length) {
+                const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                posts.push({type: "text", slot: "texte", html: esc(process.env.LEGENDE),
+                  boutons: [{text: "Voir les matchs du jour", url: "https://iashark.com/?utm_source=telegram&utm_campaign=canal"}]});
               }
               fs.writeFileSync(path.join(dir, "posts.json"), JSON.stringify({posts, date: new Date().toISOString().slice(0, 10)}));
               console.log(posts.length + " image(s) prete(s)");

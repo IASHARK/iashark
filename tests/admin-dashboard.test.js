@@ -566,9 +566,9 @@ test("rendu : 7 jours -> tableau « Jour par jour » cliquable, pas de fleches ;
   assert.equal(y.els.dayNext.disabled, false);
 });
 
-// ---------- Admin en 9 écrans (19/10/2026, migration 0052) ----------
-test("9 écrans : chaque écran a son lien et au moins un bloc dans admin.html", () => {
-  assert.equal(H.SCREENS.length, 9);
+// ---------- Admin en 10 écrans (9 le 19/10/2026, migration 0052 ; Partenaires le 20/10/2026) ----------
+test("10 écrans : chaque écran a son lien et au moins un bloc dans admin.html", () => {
+  assert.equal(H.SCREENS.length, 10);
   for (const s of H.SCREENS) {
     assert.match(html, new RegExp('href="#ecran-' + s.key + '" data-screen-link="' + s.key + '"'), s.key + " : lien");
     assert.match(html, new RegExp('data-screen="' + s.key + '"'), s.key + " : bloc");

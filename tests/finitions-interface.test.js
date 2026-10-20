@@ -58,7 +58,7 @@ test("match offert : compte gratuit = toutes les sections sauf le panneau Marche
   assert.match(mp, /if\(o\.vuePro\)\{const p=MS\.panneau\(c\);/, "vrai panneau : Pro seulement");
   assert.match(mp, /else if\(o\.verrouPro&&estFr\(\)&&n\(raw\.nb_marches\)>0\)\{[\s\S]{0,300}MS\.panneauFlou\(raw\.nb_marches,cta\)/, "panneau flou (cadenas Pro) pour le compte gratuit");
   assert.match(mp, /render\(raw,\{vuePro,verrouPro:!vuePro&&isFree&&!termine,/);
-  assert.match(mp, /if\(isFree&&!ctx\.session\)\{renderAuthWall\(raw\);return;\}/, "sans compte : apercu flou");
+  assert.match(mp, /if\(isFree&&!ctx\.session\)\{\n\s*\/\/ Le pari du match offert[\s\S]{0,700}renderAuthWall\(raw,appel\);return;/, "sans compte : pari offert puis apercu flou");
 });
 
 test("« Ce site ne fournit aucun conseil financier. » : sous le bloc Aujourd'hui et dans les pieds de page, dans les 7 langues", () => {

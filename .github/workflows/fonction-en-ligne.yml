@@ -1,0 +1,34 @@
+name: Fonction serveur - mise en ligne
+
+# Met en ligne une fonction Supabase depuis la branche main, apres ses tests.
+# Liste fermee de fonctions (choix) ; match-data garde verify_jwt desactive
+# (elle verifie elle-meme le jeton : visiteur sans compte, compte, Pro).
+on:
+  workflow_dispatch:
+    inputs:
+      fonction:
+        description: "Fonction a mettre en ligne"
+        type: choice
+        options: [match-data]
+        default: match-data
+
+jobs:
+  deployer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Tests de la fonction
+        run: node --test tests/match-data-offert.test.js tests/match-data-repli-offert.test.js
+      - name: Mise en ligne
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          FONCTION: ${{ inputs.fonction }}
+        run: npx -y supabase@2 functions deploy "$FONCTION" --project-ref ksvjraqitxouwiabecai --use-api --no-verify-jwt

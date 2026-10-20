@@ -119,6 +119,42 @@ function estGratuit(m: Record<string, unknown>): boolean {
   return m && m.is_free === true;
 }
 
+// REPLI (21/10/2026) : depuis le 05/10/2026, le pipeline ne designe plus aucun match offert
+// (aucun is_free dans data-home.json : filtres « selection du jour + fourchette + creneau »
+// trop stricts). Le site retombe alors sur l'heuristique de lib/free-match.js et AFFICHE un
+// match offert que ce serveur ne reconnaissait pas : un compte gratuit cree pour ce match
+// ne recevait rien. Meme regle ici, heure de Paris : sans designation du jour (ou a venir),
+// le match offert est celui que montre le site (a venir aujourd'hui, avec pari, meilleur
+// data_quality_score ; puis a venir, puis sans pari). COPIE de lib/free-match.js#pickFreeMatch
+// (branche repli) : tests/match-data-repli-offert.test.js verifie qu'ils choisissent le meme.
+function horlogeParis(d: Date): { day: string; now: string } {
+  const r: Record<string, string> = {};
+  new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false })
+    .formatToParts(d).forEach((x) => { r[x.type] = x.value; });
+  const day = r.year + "-" + r.month + "-" + r.day;
+  return { day, now: day + " " + r.hour + ":" + r.minute };
+}
+export function idOffertRepli(matchs: Record<string, unknown>[], d: Date = new Date()): string | null {
+  const t = horlogeParis(d);
+  const jour = (m: Record<string, unknown>) => String((m && m.date) || "").slice(0, 10);
+  const jourDesigne = (m: Record<string, unknown>) => {
+    const fd = typeof m.free_day === "string" && /^\d{4}-\d{2}-\d{2}$/.test(m.free_day) ? m.free_day : null;
+    return fd && fd !== jour(m) ? fd : jour(m);
+  };
+  // Une designation du pipeline (jour ou a venir) fait autorite : pas de repli.
+  if (matchs.some((m) => m && m.is_free === true && jourDesigne(m) >= t.day)) return null;
+  const score = (m: Record<string, unknown>) => { const q = parseFloat(String(m && m.data_quality_score)); return isNaN(q) ? 0 : q; };
+  const meilleur = (l: Record<string, unknown>[]) => l.length ? l.reduce((b, m) => score(m) > score(b) ? m : b, l[0]) : null;
+  const duJour = matchs.filter((m) => m && jour(m) === t.day);
+  const aVenir = (l: Record<string, unknown>[]) => l.filter((m) => String(m.date || "") > t.now);
+  const avecSignal = (l: Record<string, unknown>[]) => l.filter((m) => !!(m && (m.pari_rec || m.has_signal)) && !m.no_signal);
+  for (const etage of [avecSignal(aVenir(duJour)), avecSignal(aVenir(matchs)), aVenir(duJour), aVenir(matchs)]) {
+    const g = meilleur(etage);
+    if (g && g.id != null) return String(g.id);
+  }
+  return null;
+}
+
 // Reserves aux Pro SANS EXCEPTION, meme sur le match offert. Copie de
 // lib/premium-fields.js#PRO_ONLY_FIELDS (tests/premium-fields-sync.test.js,
 // tests/tickets-du-jour-contrat.test.js : meme liste). Decision de Clement du 04/10/2026 :
@@ -128,6 +164,16 @@ function estGratuit(m: Record<string, unknown>): boolean {
 // du match offert (sim_15min, stats_iashark, lecture_match, premier_but, v3_premiers_buteurs,
 // sim_resume, jumeaux) lui sont rendus. mise, kelly, vbet : jamais (NEVER_PUBLIC_FIELDS).
 const CHAMPS_PRO_SEULEMENT = ["marches_panneau", "v3_marches", "marches_flux"];
+// Decision de Clement du 21/10/2026 (revue du parcours : « l'echantillon, puis la demande ») :
+// sur le match offert, un visiteur SANS COMPTE recoit le pari, sa cote et sa chance, rien d'autre.
+// Le « pourquoi », les sections et le Petit combine restent au compte gratuit.
+const CHAMPS_APPEL_SANS_COMPTE = ["pari_rec", "cote_rec", "model_probability", "market_id", "marche"];
+function appelSansCompte(m: Record<string, unknown>, premium: Record<string, unknown>): Record<string, unknown> {
+  const copy: Record<string, unknown> = { ...m };
+  for (const f of CHAMPS_APPEL_SANS_COMPTE) copy[f] = premium[f] ?? null;
+  copy.appel_sans_compte = true;
+  return copy;
+}
 const JAMAIS_HORS_PRO = ["mise", "kelly", "vbet"];
 function sansChampsPro(m: Record<string, unknown>): Record<string, unknown> {
   const copy = { ...m };
@@ -337,8 +383,14 @@ Deno.serve(async (req: Request) => {
     const ouvert = false && !!(demande && estTermine(demande));
     // Match offert, COMPTE CONNECTE seulement (04/10/2026) : son analyse complete relue dans
     // match_premium_data (jamais dans un fichier public), sans les champs Pro seulement.
-    // Visiteur sans compte : rien de payant, meme sur le match offert (apercu flou).
-    const offerts = connecte ? matchs.filter(estGratuit).map((m) => m.id).filter((id) => id != null) : [];
+    // Visiteur sans compte (21/10/2026) : sur le match offert DEMANDE, le pari, sa cote et sa chance.
+    // Sans compte : seulement le match offert explicitement demande (page match), jamais la liste.
+    // Match offert : designation du pipeline, sinon le repli que montre le site (21/10/2026).
+    const repli = idOffertRepli(matchs);
+    const estOffert = (m: Record<string, unknown>) => estGratuit(m) || (repli != null && String(m.id) === repli);
+    const offerts = matchs.filter(estOffert)
+      .filter((m) => connecte || (portee.id != null && String(m.id) === portee.id))
+      .map((m) => m.id).filter((id) => id != null);
     const premiumOffert = await lirePremium(supabase, offerts);
     let premiumTermine: Record<string, Record<string, unknown>> = {};
     if (ouvert && demande) {
@@ -348,10 +400,12 @@ Deno.serve(async (req: Request) => {
       else premiumTermine = Object.fromEntries(((q.data ?? []) as Record<string, unknown>[]).map((r) => [String(r.fixture_id), r]));
     }
     data.matchs = matchs.map((m) => {
-      if (estGratuit(m)) {
+      if (estOffert(m)) {
         const premium = premiumOffert[String(m.id)];
-        // Sans compte, ou sans ligne premium : aucune analyse, jamais reconstituee depuis un fichier public.
-        if (!connecte || !premium) return retirerPremium(m);
+        // Sans ligne premium : aucune analyse, jamais reconstituee depuis un fichier public.
+        if (!premium) return retirerPremium(m);
+        // Sans compte : le pari, sa cote et sa chance seulement (decision du 21/10/2026).
+        if (!connecte) return appelSansCompte(retirerPremium(m), premium);
         return sansChampsPro(avecPremium(retirerPremium(m), premium, detailFields));
       }
       if (ouvert && String(m.id) === portee.id) {

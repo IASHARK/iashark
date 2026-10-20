@@ -156,8 +156,10 @@ test("decoupage, script local et pages SEO utilisent la liste unique", () => {
 
 test("fonction Edge : non-abonne sans champ premium ni run_output detaille, abonne servi depuis la table", () => {
   const fn = read("supabase/functions/match-data/index.ts");
-  // 04/10/2026 : match offert servi seulement a un compte connecte, depuis la table, sans le panneau Marches.
-  assert.match(fn, /if \(!connecte \|\| !premium\) return retirerPremium\(m\);/);
+  // 04/10/2026 : match offert servi a un compte connecte, depuis la table, sans le panneau Marches.
+  // 21/10/2026 (decision de Clement) : sans compte, le pari, sa cote et sa chance seulement (appelSansCompte).
+  assert.match(fn, /if \(!premium\) return retirerPremium\(m\);/);
+  assert.match(fn, /if \(!connecte\) return appelSansCompte\(retirerPremium\(m\), premium\);/);
   assert.match(fn, /return sansChampsPro\(avecPremium\(retirerPremium\(m\), premium, detailFields\)\);/);
   assert.match(fn, /return retirerPremium\(m\);/);
   assert.match(fn, /data\.run_output = runOutputPublic\(data\.run_output, matchs\)/);

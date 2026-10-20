@@ -152,6 +152,22 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', propagerNext); else propagerNext();
 
+  /* ---------- Inscription venue d'un match (21/10/2026, revue cro + signup) ----------
+     Le visiteur arrive du match offert : le titre reprend ce qu'il est venu chercher
+     (son analyse s'ouvre juste apres) au lieu d'un « Commence gratuitement » general.
+     La cle data-i18n est changee AVANT l'application du dictionnaire, et le texte est
+     pose tout de suite si le dictionnaire est deja la. */
+  function titreVenuDunMatch() {
+    if (!/\/inscription(\.html)?$/.test(location.pathname)) return;
+    var next = new URLSearchParams(location.search).get('next') || '';
+    if (next.charAt(0) !== '/' || next.indexOf('match.html') === -1) return;
+    var poser = function (el, cle, texte) { if (!el) return; el.setAttribute('data-i18n', cle); el.textContent = t(cle, texte); };
+    poser(document.querySelector('[data-i18n="auth.signup_h1"]'), 'auth.signup_h1_match', 'Ton analyse s’ouvre juste après.');
+    poser(document.querySelector('[data-i18n="auth.signup_intro"]'), 'auth.signup_intro_match', 'Compte gratuit, sans carte bancaire. Email et mot de passe, puis tu reviens directement sur le match, analyse ouverte.');
+    poser(document.querySelector('[data-i18n="auth.signup_submit"]'), 'auth.signup_submit_match', 'Créer mon compte et voir l’analyse');
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', titreVenuDunMatch); else titreVenuDunMatch();
+
   /* ---------- Chemin de paiement : etape 1 sur 2 (controle UX du 04/10/2026, tour 2) ----------
      Sans compte, « Continuer avec l'annee » (lib/offre-pro.js) passe par l'inscription puis
      revient sur l'abonnement : ?next=/abonnement.html?duree=year... La page d'inscription le
@@ -293,7 +309,7 @@
   if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') document.addEventListener('input', function (ev) {
     if (saisieSignalee || !/\/inscription(\.html)?$/.test(location.pathname)) return;
     var f = ev.target && ev.target.form;
-    if (!f || !f.querySelector('#password2')) return;
+    if (!f || f.id !== 'form') return;
     saisieSignalee = true;
     suivre('signup_form_started', {});
   }, true);
@@ -301,15 +317,14 @@
   /* ---------- Inscription ---------- */
   async function inscription(e) {
     if (e) e.preventDefault();
-    viderChamps(['email', 'password', 'password2']);
+    viderChamps(['email', 'password']);
     global('formMsg', '');
-    var email = $('email').value.trim(), pwd = $('password').value, pwd2 = $('password2').value;
+    var email = $('email').value.trim(), pwd = $('password').value;
     var faute = null;
     if (!EMAIL_RE.test(email)) { champ('email', t('auth.err_enter_valid_email', 'Entrez une adresse email valide.')); faute = faute || 'email'; }
     if (pwd.length < MIN_PASSWORD) { champ('password', t('auth.password_hint_min_chars', MIN_PASSWORD + ' caractères minimum.')); faute = faute || 'password'; }
-    if (pwd2 !== pwd) { champ('password2', t('auth.err_passwords_mismatch', 'Les deux mots de passe ne correspondent pas.')); faute = faute || 'password2'; }
     if (faute) {
-      suivre('signup_failed', { code: { email: 'champ_email', password: 'champ_mdp', password2: 'champ_mdp_confirmation' }[faute] });
+      suivre('signup_failed', { code: { email: 'champ_email', password: 'champ_mdp' }[faute] });
       $(faute).focus();
       return;
     }

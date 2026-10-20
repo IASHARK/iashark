@@ -297,11 +297,10 @@
    Posee au-dessus de la barre du bas, jamais sur les pages ou l'on paie
    (pro, abonnement, checkout) pour ne pas detourner un visiteur qui achete.
    Clic compte dans funnel_events (click, kind cta, label telegram_bubble).
-   Apres un clic, elle se cache 7 jours sur ce navigateur. */
+   Toujours visible, meme apres un clic (Clement, 20/10/2026 : elle ne doit jamais disparaitre). */
 (function(){
   if(/(^|\/)(pro|abonnement|checkout-[a-z]+|admin|connexion|inscription)\.html$/.test(location.pathname))return;
-  var CLE='ias-tg-bulle', SEPT_JOURS=7*24*3600*1000;
-  try{var vu=+localStorage.getItem(CLE);if(vu&&Date.now()-vu<SEPT_JOURS)return;}catch(_e){}
+  try{localStorage.removeItem('ias-tg-bulle');}catch(_e){}
   function poser(){
     if(document.getElementById('ias-tg'))return;
     var st=document.createElement('style');
@@ -322,10 +321,6 @@
     a.setAttribute('aria-label','Rejoins-nous sur Telegram : match du jour, actu, résultats');
     a.innerHTML='<span class="ias-tg-i" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#060b12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></span>'
       +'<span><span class="ias-tg-1">Rejoins-nous sur Telegram</span><span class="ias-tg-2">Match du jour, actu, résultats</span></span>';
-    a.addEventListener('click',function(){
-      try{localStorage.setItem(CLE,String(Date.now()));}catch(_e){}
-      setTimeout(function(){a.remove();},300);
-    });
     document.body.appendChild(a);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',poser);else poser();

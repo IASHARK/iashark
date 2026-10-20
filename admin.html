@@ -85,8 +85,9 @@
       </div>
     </div>
 
-    <!-- Les 9 écrans (19/10/2026) : une question par écran. Les liens changent
-         l'ancre (#ecran-...), le bouton « retour » du téléphone fonctionne. -->
+    <!-- Les 10 écrans (9 le 19/10/2026, Partenaires le 20/10/2026) : une question
+         par écran. Les liens changent l'ancre (#ecran-...), le bouton « retour »
+         du téléphone fonctionne. -->
     <nav class="screens" id="screens" aria-label="Écrans du tableau de bord">
       <ol class="screens-track">
         <li><a href="#ecran-aujourdhui" data-screen-link="aujourdhui" aria-current="page">Aujourd'hui</a></li>
@@ -97,6 +98,7 @@
         <li><a href="#ecran-envie" data-screen-link="envie">Envie</a></li>
         <li><a href="#ecran-inscrits" data-screen-link="inscrits">Inscrits</a></li>
         <li><a href="#ecran-argent" data-screen-link="argent">Argent</a></li>
+        <li><a href="#ecran-partenaires" data-screen-link="partenaires">Partenaires<span class="tab-count tnum" id="partnersTabCount" hidden></span></a></li>
         <li><a href="#ecran-fiabilite" data-screen-link="fiabilite">Fiabilité</a></li>
       </ol>
     </nav>
@@ -112,6 +114,7 @@
         <button type="button" class="info" aria-expanded="false" aria-controls="helpTodo" aria-label="Aide : à faire en premier">i</button>
       </div>
       <p class="help" id="helpTodo" hidden>Trois problèmes au plus, les plus graves d'abord : paiement qui échoue, site qui plante, puis les endroits où tu perds le plus de visiteurs. Chaque ligne t'emmène vers l'écran qui donne le détail. Rien ne s'affiche quand il n'y a pas assez de visiteurs pour être sûr (moins de 20 sur une page ou une source).</p>
+      <div class="todo-pa" id="partnersTodo" hidden></div>
       <div id="todo"><div class="skel skel-block"></div></div>
     </section>
 
@@ -403,6 +406,16 @@
       <div id="money"><div class="skel skel-block"></div></div>
     </section>
 
+    <!-- Écran Partenaires (20/10/2026) : admin_affiliates, admin_affiliate_set_status -->
+    <section class="card section" data-screen="partenaires" aria-labelledby="partnersTitle">
+      <div class="card-head">
+        <div><h2 class="card-title" id="partnersTitle">Candidatures au programme Partenaires</h2><p class="card-sub">Les dossiers à valider d'abord, du plus récent au plus ancien</p></div>
+        <button type="button" class="info" aria-expanded="false" aria-controls="helpPartners" aria-label="Aide : candidatures partenaires">i</button>
+      </div>
+      <p class="help" id="helpPartners" hidden>Chaque dossier vient du formulaire de la page Partenaires. <b>Accepter</b> ouvre au partenaire son espace et son lien. <b>Refuser</b> ou <b>Suspendre</b> : il ne gagne plus de commission, et ses commissions pas encore versées sont annulées. Le message que tu écris en refusant ou en suspendant s'affiche dans son espace partenaire. Les liens des réseaux s'ouvrent dans un nouvel onglet : vérifie le compte avant d'accepter. Commissions « En attente » = moins de 30 jours après le paiement de l'abonné ; « À verser » = prêtes pour le prochain versement.</p>
+      <div id="partners"><div class="skel skel-block"></div></div>
+    </section>
+
     <!-- Écran 9 : fiabilité -->
     <section class="card section" data-screen="fiabilite" aria-labelledby="qualityTitle">
       <div class="card-head">
@@ -505,6 +518,16 @@
   <div class="dialog-actions">
     <button type="button" class="btn btn-ghost" id="confirmCancel">Annuler</button>
     <button type="button" class="btn btn-danger" id="confirmOk">Retirer</button>
+  </div>
+</dialog>
+<dialog class="confirm" id="partnerDialog" aria-labelledby="partnerDialogTitle">
+  <h2 id="partnerDialogTitle">Refuser ce dossier ?</h2>
+  <p id="partnerDialogText"></p>
+  <label class="field pa-note"><span>Message pour la personne (facultatif)</span><textarea id="partnerNote" rows="3" maxlength="500"></textarea></label>
+  <p class="pa-note-help">Il s'affiche dans son espace partenaire. Laisse vide si tu ne veux rien dire.</p>
+  <div class="dialog-actions">
+    <button type="button" class="btn btn-ghost" id="partnerCancel">Annuler</button>
+    <button type="button" class="btn" id="partnerOk">Refuser</button>
   </div>
 </dialog>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>

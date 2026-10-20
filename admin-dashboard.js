@@ -15,9 +15,15 @@
  *    0031_admin_conversion_funnel.sql est appliquee, sinon message « a
  *    appliquer »), rendu, rafraichissement.
  *
+ * Ecran « Partenaires » (20/10/2026) : candidatures au programme
+ * d'affiliation (RPC admin_affiliates), accepter / refuser / suspendre /
+ * remettre a valider (RPC admin_affiliate_set_status), pastille sur
+ * l'onglet et ligne dans « A faire en premier ».
+ *
  * SECURITE : toute valeur issue de funnel_events (ecrite par la cle anon
- * publique, donc controlee par le visiteur) passe par esc() avant d'entrer
- * dans le HTML. Aucun innerHTML n'est construit sans esc() sur les donnees.
+ * publique, donc controlee par le visiteur) ou d'une candidature partenaire
+ * passe par esc() avant d'entrer dans le HTML. Aucun innerHTML n'est
+ * construit sans esc() sur les donnees.
  */
 (function (root, factory) {
   var api = factory();
@@ -972,7 +978,7 @@
     });
   }
 
-  // ---------- 9 écrans (19/10/2026) ----------
+  // ---------- 10 écrans (9 le 19/10/2026, Partenaires le 20/10/2026) ----------
   // Une question par écran, dans l'ordre où le propriétaire doit les lire.
   // key = ancre (#ecran-<key>) et valeur de data-screen dans admin.html.
   var SCREENS = [
@@ -984,6 +990,7 @@
     { key: "envie", label: "Envie", title: "Qu'est-ce qui donne envie de payer ?", sub: "Les boutons « Débloquer » cliqués, les pages et les matchs les plus regardés." },
     { key: "inscrits", label: "Inscrits", title: "Les inscrits reviennent-ils ?", sub: "Ce que font les personnes qui ont créé un compte, et qui relancer." },
     { key: "argent", label: "Argent", title: "Combien ça rapporte ?", sub: "Abonnements en cours, argent encaissé, nouveaux abonnés et résiliations, d'après Stripe et les comptes." },
+    { key: "partenaires", label: "Partenaires", title: "Qui accepter comme partenaire ?", sub: "Les candidatures déposées sur la page Partenaires, à accepter ou à refuser, puis ce que rapporte chaque partenaire accepté." },
     { key: "fiabilite", label: "Fiabilité", title: "Peut-on croire ces chiffres ?", sub: "Ce qui est mesuré, ce qui manque, ce qui est retiré (robots, tests, ton appareil), et tous les filtres." }
   ];
   function screenKey(hash) {
@@ -1144,7 +1151,116 @@
     return out.slice(0, 3);
   }
 
+  // ---------- Partenaires (admin_affiliates, 20/10/2026) ----------
+  // Candidatures au programme d'affiliation : textes en français, liens
+  // sûrs (http/https seulement), tri « À valider » d'abord, commissions.
+  var PARTNER_STATUS = {
+    pending: { label: "À valider", cls: "nudge", group: "À valider" },
+    approved: { label: "Accepté", cls: "new", group: "Acceptés" },
+    suspended: { label: "Suspendu", cls: "gone", group: "Suspendus" },
+    refused: { label: "Refusé", cls: "gone", group: "Refusés" }
+  };
+  var PARTNER_ORDER = ["pending", "approved", "suspended", "refused"];
+  var PARTNER_STYLES = { analysis: "Analyse", tips: "Pronostics", entertainment: "Divertissement", education: "Éducation", community: "Communauté", other: "Autre" };
+  var PARTNER_LEGAL = { individual: "Particulier", professional: "Professionnel" };
+  function partnerStatus(s) {
+    return PARTNER_STATUS[s] || { label: "Statut inconnu", cls: "gone", group: "Autres" };
+  }
+  function partnerStyle(s) { return PARTNER_STYLES[s] || "Style non précisé"; }
+  function partnerLegal(s) { return PARTNER_LEGAL[s] || "Statut non précisé"; }
+  // Boutons proposés selon le statut actuel. confirm = demande avant d'agir.
+  function partnerActions(status) {
+    var A = { approved: "Accepter", refused: "Refuser", suspended: "Suspendre", pending: "Remettre à valider" };
+    var to = status === "pending" ? ["approved", "refused"]
+      : status === "approved" ? ["suspended"]
+      : status === "suspended" || status === "refused" ? ["approved", "pending"]
+      : ["pending"];
+    return to.map(function (t) { return { to: t, label: A[t], confirm: t === "refused" || t === "suspended", primary: t === "approved" }; });
+  }
+  // Lien cliquable seulement pour une vraie adresse web (http ou https) ;
+  // « tiktok.com/@x » devient https://tiktok.com/@x ; « @x » reste du texte.
+  function partnerUrl(raw) {
+    var s = String(raw == null ? "" : raw).trim();
+    if (!s || s.length > 500 || /\s/.test(s)) return null;
+    if (!/^https?:\/\//i.test(s)) {
+      if (!/^(www\.)?[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}([/?#]\S*)?$/i.test(s)) return null;
+      s = "https://" + s;
+    }
+    try {
+      var u = new URL(s);
+      if ((u.protocol !== "http:" && u.protocol !== "https:") || u.username || u.password) return null;
+      return u.href;
+    } catch (e) {
+      return null;
+    }
+  }
+  function partnerLinks(networks) {
+    var list = networks;
+    if (typeof list === "string") { try { list = JSON.parse(list); } catch (e) { list = [list]; } }
+    if (list && typeof list === "object" && !Array.isArray(list)) {
+      list = Object.keys(list).map(function (k) { var v = list[k]; return typeof v === "string" ? { network: k, url: v } : v; });
+    }
+    if (!Array.isArray(list)) list = list == null ? [] : [list];
+    var out = [];
+    list.forEach(function (it) {
+      var raw = null, name = null;
+      if (typeof it === "string" || typeof it === "number") raw = String(it);
+      else if (it && typeof it === "object") {
+        raw = it.url || it.link || it.href || it.handle || it.value || null;
+        name = typeof (it.network || it.name || it.platform) === "string" ? (it.network || it.name || it.platform) : null;
+      }
+      raw = raw == null ? "" : String(raw).trim();
+      if (!raw) return;
+      var href = partnerUrl(raw);
+      var text = href ? raw.replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/$/, "") : raw;
+      out.push({ text: (name ? name + " : " : "") + text, href: href });
+    });
+    return out.slice(0, 20);
+  }
+  function partnerRank(s) {
+    var i = PARTNER_ORDER.indexOf(s);
+    return i === -1 ? PARTNER_ORDER.length : i;
+  }
+  // « À valider » d'abord, puis acceptés, suspendus, refusés ; du plus récent au plus ancien.
+  function partnerSort(list) {
+    return (Array.isArray(list) ? list : []).filter(function (a) { return a && typeof a === "object"; }).sort(function (a, b) {
+      return partnerRank(a.status) - partnerRank(b.status) || (msOf(b.created_at) || 0) - (msOf(a.created_at) || 0);
+    });
+  }
+  function partnerCounts(list) {
+    var c = { pending: 0, approved: 0, closed: 0, total: 0 };
+    (Array.isArray(list) ? list : []).forEach(function (a) {
+      if (!a) return;
+      c.total += 1;
+      if (a.status === "pending") c.pending += 1;
+      else if (a.status === "approved") c.approved += 1;
+      else if (a.status === "refused" || a.status === "suspended") c.closed += 1;
+    });
+    return c;
+  }
+  // Commissions en centimes, par devise : « 12,50 € » (+ « 3,00 $US » si autre devise).
+  // open = en attente + à verser, c'est-à-dire ce qu'un refus ou une suspension annule.
+  function partnerMoney(balances) {
+    var b = balances && typeof balances === "object" && !Array.isArray(balances) ? balances : {};
+    var cur = Object.keys(b).filter(function (c) { return /^[a-z]{3}$/i.test(c) && b[c] && typeof b[c] === "object"; })
+      .sort(function (x, y) { return (x.toLowerCase() === "eur" ? 0 : 1) - (y.toLowerCase() === "eur" ? 0 : 1) || x.localeCompare(y); });
+    var parts = { pending: [], payable: [], paid: [], open: [] };
+    cur.forEach(function (c) {
+      var v = b[c];
+      ["pending", "payable", "paid"].forEach(function (k) { var n = num(v[k]); if (n) parts[k].push(fmtMoney(n, c)); });
+      var o = (num(v.pending) || 0) + (num(v.payable) || 0);
+      if (o > 0) parts.open.push(fmtMoney(o, c));
+    });
+    var zero = fmtMoney(0, "eur");
+    return {
+      pending: parts.pending.join(" + ") || zero, payable: parts.payable.join(" + ") || zero, paid: parts.paid.join(" + ") || zero,
+      open: parts.open.join(" + ") || zero, hasOpen: parts.open.length > 0
+    };
+  }
+
   return {
+    PARTNER_STATUS: PARTNER_STATUS, PARTNER_STYLES: PARTNER_STYLES, partnerStatus: partnerStatus, partnerStyle: partnerStyle, partnerLegal: partnerLegal,
+    partnerActions: partnerActions, partnerUrl: partnerUrl, partnerLinks: partnerLinks, partnerSort: partnerSort, partnerCounts: partnerCounts, partnerMoney: partnerMoney,
     SCREENS: SCREENS, screenKey: screenKey, DIAG_FILE: DIAG_FILE, pctOf: pctOf, msText: msText, VITALS: VITALS, vitalVerdict: vitalVerdict,
     vitalValue: vitalValue, langName: langName, siteLangText: siteLangText, landingName: landingName, failReason: failReason, todoActions: todoActions,
     DROP_FILE: DROP_FILE, DROP_STEPS: DROP_STEPS, DROP_SOURCES: DROP_SOURCES, DROP_DEVICES: DROP_DEVICES,
@@ -1196,7 +1312,8 @@
     members: null, retention: null, membersLoading: false, showEmails: false, openMember: null, journeys: {}, memberLimit: 25,
     unlocks: null,
     drop: { country: "", device: "", source: "" }, dropRes: null, dropSeq: 0,
-    screen: "aujourdhui", diag: null, diagSeq: 0
+    screen: "aujourdhui", diag: null, diagSeq: 0,
+    partners: null, partnersLoading: false, partnersAgain: false, partnerBusy: null
   };
 
   function $(id) { return document.getElementById(id); }
@@ -2233,7 +2350,198 @@
     if (ids.some(function (id) { return !S.names[id]; })) loadMissingNames(ids).then(function (changed) { if (changed) renderDrop(); });
   }
 
-  // ---------- Les 9 écrans ----------
+  // ---------- Partenaires (admin_affiliates, admin_affiliate_set_status) ----------
+  // Tout texte venant d'un candidat (code, e-mail, réseaux, « à propos »)
+  // passe par esc() ; les liens ne sont cliquables qu'en http/https.
+  function partnersList() {
+    var r = S.partners;
+    if (!r || r.error) return null;
+    var d = r.data;
+    if (typeof d === "string") { try { d = JSON.parse(d); } catch (e) { d = null; } }
+    return H.partnerSort(d && d.affiliates);
+  }
+  function partnerById(id) {
+    return (partnersList() || []).filter(function (a) { return String(a.id) === String(id); })[0] || null;
+  }
+  function loadPartners() {
+    if (!sb) return Promise.resolve();
+    if (S.partnersLoading) { S.partnersAgain = true; return Promise.resolve(); }
+    S.partnersLoading = true;
+    return rpc("admin_affiliates").then(function (r) {
+      S.partnersLoading = false;
+      if (r.kind === "denied") { showState("denied"); return; }
+      S.partners = r;
+      renderPartners();
+      if (S.partnersAgain) { S.partnersAgain = false; return loadPartners(); }
+    });
+  }
+  // « aujourd'hui », « hier », « le 18 oct. »
+  function onDay(iso) {
+    var d = fmtDay(iso);
+    return d === "—" ? null : d === "Aujourd'hui" ? "aujourd'hui" : d === "Hier" ? "hier" : "le " + d;
+  }
+  // Pastille sur l'onglet + ligne dans « À faire en premier ».
+  function renderPartnersFlag(list) {
+    var n = list ? H.partnerCounts(list).pending : 0;
+    var b = $("partnersTabCount");
+    b.hidden = !n;
+    b.innerHTML = n ? esc(H.fmtInt(n)) + '<span class="sr-only"> ' + esc(plural(n, "dossier à valider", "dossiers à valider")) + "</span>" : "";
+    var t = $("partnersTodo");
+    t.hidden = !n;
+    t.innerHTML = n ? '<span class="badge warn">Partenaires</span><b>' + esc(H.fmtInt(n) + " " + plural(n, "candidature partenaire à valider", "candidatures partenaire à valider"))
+      + '</b><a class="todo-link" href="#ecran-partenaires">Ouvrir l\'écran Partenaires ›</a>' : "";
+  }
+  function partnerStats(a) {
+    var m = H.partnerMoney(a.balances);
+    var cell = function (label, value) { return "<div><dt>" + esc(label) + '</dt><dd class="tnum">' + esc(value) + "</dd></div>"; };
+    return '<dl class="pa-stats">' + cell("Clics", H.fmtInt(a.clicks)) + cell("Inscrits", H.fmtInt(a.signups)) + cell("Abonnés payants", H.fmtInt(a.active_paying)) + "</dl>"
+      + '<p class="pa-cap">Commissions</p><dl class="pa-stats">' + cell("En attente", m.pending) + cell("À verser", m.payable) + cell("Déjà versées", m.paid) + "</dl>"
+      + (a.status === "approved" && a.payout_ready === false
+        ? '<p class="pa-review">' + esc(a.has_stripe_account ? "Compte de versement commencé, pas encore prêt." : "Compte de versement pas encore créé par le partenaire.") + "</p>" : "");
+  }
+  function partnerReview(a) {
+    var when = onDay(a.reviewed_at);
+    if (!when) return "";
+    var verb = { approved: "Accepté", refused: "Refusé", suspended: "Suspendu", pending: "Remis à valider" }[a.status] || "Modifié";
+    var note = a.reviewed_note ? String(a.reviewed_note).trim() : "";
+    return '<p class="pa-review">' + esc(verb + " " + when + (note ? " · message envoyé : « " + note + " »" : "")) + "</p>";
+  }
+  function partnerButtons(a, id) {
+    if (!UUID_RE.test(id)) return '<p class="pa-review">Identifiant du dossier illisible : aucune action possible ici.</p>';
+    var busy = S.partnerBusy;
+    return '<div class="pa-actions">' + H.partnerActions(a.status).map(function (x) {
+      var mine = busy && busy.id === id && busy.to === x.to;
+      return '<button type="button" class="btn btn-sm' + (x.primary ? "" : " btn-ghost") + '" data-pa-id="' + esc(id) + '" data-pa-to="' + esc(x.to) + '"'
+        + (busy ? " disabled" : "") + ">" + esc(mine ? "Enregistrement…" : x.label) + "</button>";
+    }).join("") + "</div>";
+  }
+  function partnerRow(a) {
+    var st = H.partnerStatus(a.status);
+    var id = String(a.id == null ? "" : a.id);
+    var when = onDay(a.created_at);
+    var country = String(a.country || "").toUpperCase();
+    var aud = H.num(a.audience);
+    var facts = [
+      H.isCountry(country) ? H.countryName(country) : "Pays non précisé",
+      H.partnerLegal(a.legal_status),
+      H.partnerStyle(a.content_style),
+      aud === null ? "audience non précisée" : H.fmtInt(aud) + " " + plural(aud, "abonné", "abonnés")
+    ];
+    var links = H.partnerLinks(a.networks);
+    var about = a.about ? String(a.about).trim() : "";
+    return '<li class="pa"' + (S.partnerBusy && S.partnerBusy.id === id ? ' aria-busy="true"' : "") + ">"
+      + '<div class="pa-top"><b class="pa-code">' + esc(a.code || "Sans code") + '</b><span class="mstatus st-' + esc(st.cls) + '">' + esc(st.label) + "</span>"
+      + '<span class="pa-date">' + esc(when ? "Déposé " + when + " à " + fmtTime(a.created_at) : "Date de dépôt inconnue") + "</span></div>"
+      + '<p class="pa-mail">' + esc(a.email || "E-mail inconnu") + "</p>"
+      + '<p class="pa-facts">' + esc(facts.join(" · ")) + "</p>"
+      + (links.length ? '<ul class="pa-links" aria-label="Réseaux et liens">' + links.map(function (l) {
+        return "<li>" + (l.href
+          ? '<a href="' + esc(l.href) + '" target="_blank" rel="noopener noreferrer" title="' + esc(l.text) + '">' + esc(l.text) + "</a>"
+          : '<span title="' + esc(l.text) + '">' + esc(l.text) + "</span>") + "</li>";
+      }).join("") + "</ul>" : '<p class="pa-review">Aucun réseau indiqué.</p>')
+      + (about ? '<p class="pa-about">' + esc(about) + "</p>" : "")
+      + (a.status === "approved" || a.status === "suspended" ? partnerStats(a) : "")
+      + partnerReview(a)
+      + partnerButtons(a, id)
+      + "</li>";
+  }
+  function renderPartners() {
+    var el = $("partners"), r = S.partners;
+    if (!r) return;
+    var list = partnersList();
+    renderPartnersFlag(list);
+    if (!list) {
+      if (r.kind === "missing") {
+        el.innerHTML = '<p class="soft-msg"><b>Programme Partenaires pas encore branché</b>La liste s\'affichera quand la fonction admin_affiliates sera en place dans Supabase. Préviens ton développeur.</p>';
+      } else blockError(el, r, "Partenaires");
+      return;
+    }
+    if (!list.length) {
+      el.innerHTML = emptyHtml("Aucune candidature pour l'instant.", "Les dossiers déposés sur la page Partenaires apparaîtront ici.");
+      return;
+    }
+    var c = H.partnerCounts(list);
+    var cell = function (n, label, todo) { return "<div" + (todo ? ' class="is-todo"' : "") + '><b class="tnum">' + esc(H.fmtInt(n)) + "</b><span>" + esc(label) + "</span></div>"; };
+    var html = '<div class="pa-sum">' + cell(c.pending, "À valider", c.pending > 0) + cell(c.approved, "Acceptés") + cell(c.closed, "Refusés ou suspendus") + "</div>";
+    var group = null;
+    list.forEach(function (a) {
+      var g = H.partnerStatus(a.status).group;
+      if (g !== group) {
+        var n = list.filter(function (x) { return H.partnerStatus(x.status).group === g; }).length;
+        html += (group === null ? "" : "</ul>") + '<h3 class="pa-group">' + esc(g) + ' <span class="tnum">(' + esc(H.fmtInt(n)) + ')</span></h3><ul class="pa-list">';
+        group = g;
+      }
+      html += partnerRow(a);
+    });
+    el.innerHTML = html + "</ul>";
+  }
+
+  // Accepter / remettre à valider : tout de suite. Refuser / suspendre :
+  // confirmation, avec un message facultatif (le partenaire le voit).
+  var pendingPartner = null;
+  function askPartner(id, to) {
+    if (S.partnerBusy || !UUID_RE.test(String(id || "")) || ["approved", "refused", "suspended", "pending"].indexOf(to) === -1) return;
+    if (to !== "refused" && to !== "suspended") { setPartnerStatus(id, to, null); return; }
+    var a = partnerById(id), code = a && a.code ? String(a.code) : "ce dossier";
+    var money = H.partnerMoney(a && a.balances);
+    pendingPartner = { id: id, to: to };
+    $("partnerDialogTitle").textContent = to === "refused" ? "Refuser " + code + " ?" : "Suspendre " + code + " ?";
+    $("partnerDialogText").textContent = (to === "refused"
+      ? "La personne verra dans son espace que sa candidature n'est pas retenue."
+      : "Ce partenaire ne gagnera plus de commission tant qu'il est suspendu.")
+      + (money.hasOpen ? " Ses commissions pas encore versées (" + money.open + ") seront annulées, même si tu changes d'avis ensuite." : "")
+      + " Tu pourras revenir sur ta décision avec « Remettre à valider ».";
+    $("partnerOk").textContent = to === "refused" ? "Refuser" : "Suspendre";
+    $("partnerNote").value = "";
+    var dlg = $("partnerDialog");
+    if (dlg && typeof dlg.showModal === "function") {
+      dlg.showModal();
+      $("partnerCancel").focus();
+    } else if (window.confirm($("partnerDialogText").textContent)) {
+      runPartner();
+    } else pendingPartner = null;
+  }
+  function runPartner() {
+    var p = pendingPartner;
+    pendingPartner = null;
+    var note = String($("partnerNote").value || "").trim().slice(0, 500);
+    var dlg = $("partnerDialog");
+    if (dlg && dlg.open) dlg.close();
+    if (p) setPartnerStatus(p.id, p.to, note || null);
+  }
+  function partnerErrorText(r) {
+    if (r.kind === "network") return "Pas de connexion au serveur : la décision n'est pas enregistrée. Vérifie ta connexion, puis réessaie.";
+    if (r.kind === "timeout") return "Le serveur ne répond pas assez vite. Touche Actualiser pour voir si la décision est passée.";
+    if (r.kind === "invalid") return "Ce dossier n'a pas été trouvé, il a peut-être déjà changé. La liste vient d'être rechargée.";
+    if (r.kind === "missing") return "La décision ne peut pas être enregistrée : la fonction admin_affiliate_set_status manque dans Supabase. Préviens ton développeur.";
+    var code = r.error && r.error.code ? " (code " + r.error.code + ")" : "";
+    return "La décision n'a pas pu être enregistrée" + code + ". Réessaie ; si ça continue, envoie ce message à ton développeur.";
+  }
+  function setPartnerStatus(id, to, note) {
+    if (S.partnerBusy) return;
+    var a = partnerById(id), code = a && a.code ? String(a.code) : "";
+    S.partnerBusy = { id: id, to: to };
+    renderPartners();
+    rpc("admin_affiliate_set_status", { p_id: id, p_status: to, p_note: note }).then(function (r) {
+      S.partnerBusy = null;
+      if (r.kind === "denied") { showState("denied"); return; }
+      var d = r.data;
+      if (!r.error && (!d || d.ok !== true)) r = { error: { message: "réponse inattendue" }, kind: "error" };
+      if (r.error) {
+        toast(partnerErrorText(r));
+        renderPartners();
+        if (r.kind === "invalid") loadPartners();
+        return;
+      }
+      var done = { approved: "accepté", refused: "refusé", suspended: "suspendu", pending: "remis à valider" }[to];
+      var n = H.num(d.commissions_refused) || 0;
+      toast("Dossier " + (code ? code + " " : "") + done + "."
+        + (n > 0 ? " " + H.fmtInt(n) + " " + plural(n, "commission pas encore versée a été annulée.", "commissions pas encore versées ont été annulées.") : ""));
+      return loadPartners();
+    });
+  }
+
+  // ---------- Les 10 écrans ----------
   // L'ancre #ecran-<cle> choisit l'écran ; une ancre vers un bloc (#maintenant,
   // #inscrits...) ouvre l'écran qui le contient puis y descend.
   function screenOf(hash) {
@@ -2685,6 +2993,7 @@
       loadDrop();
       loadDiag();
       loadRevenue();
+      loadPartners();
       if (!opts.silent) return loadLive().then(startTimers);
     }).catch(function (e) {
       setBusy(false);
@@ -2822,6 +3131,8 @@
       var t = ev.target;
       if (!t.closest) return;
       if (t.closest("button[data-retry]")) { loadAll({ silent: true }); loadLive(); return; }
+      var pa = t.closest("button[data-pa-to]");
+      if (pa) { if (!pa.disabled) askPartner(pa.getAttribute("data-pa-id"), pa.getAttribute("data-pa-to")); return; }
       var info = t.closest("button.info");
       if (info) {
         var id = info.getAttribute("aria-controls"), panel = id && document.getElementById(id);
@@ -2854,6 +3165,9 @@
     $("confirmOk").addEventListener("click", runExclusion);
     $("confirmCancel").addEventListener("click", function () { pending = null; $("confirmDialog").close(); });
     $("confirmDialog").addEventListener("close", function () { pending = null; });
+    $("partnerOk").addEventListener("click", runPartner);
+    $("partnerCancel").addEventListener("click", function () { pendingPartner = null; $("partnerDialog").close(); });
+    $("partnerDialog").addEventListener("close", function () { pendingPartner = null; });
     document.addEventListener("visibilitychange", function () { if (!document.hidden && S.liveTimer) loadLive(); });
     if (typeof window.addEventListener === "function") window.addEventListener("hashchange", function () { applyScreen(window.location.hash); });
   }

@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       images:
-        description: "Adresses des images (https), separees par des virgules"
+        description: "Adresses des images ou videos .mp4 (https), separees par des virgules"
         required: true
         type: string
       legende:
@@ -49,10 +49,11 @@ jobs:
                 if (!/^https:\/\/(github\.com\/IASHARK\/|objects\.githubusercontent\.com\/|release-assets\.githubusercontent\.com\/)/.test(u)) throw new Error("adresse refusee : " + u);
                 const r = await fetch(u);
                 if (!r.ok) throw new Error("image introuvable : " + u + " " + r.status);
-                const f = path.join(dir, "image-" + i + ".png");
+                const video = /\.mp4(\?|$)/i.test(u);
+                const f = path.join(dir, "image-" + i + (video ? ".mp4" : ".png"));
                 fs.writeFileSync(f, Buffer.from(await r.arrayBuffer()));
                 const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                posts.push({type: "photo", slot: "image-" + i, image: f, html: i === 0 ? esc(process.env.LEGENDE) : "",
+                posts.push({type: video ? "video" : "photo", slot: "image-" + i, image: f, html: i === 0 ? esc(process.env.LEGENDE) : "",
                   boutons: [{text: "Voir les matchs du soir", url: "https://iashark.com/?utm_source=telegram&utm_campaign=canal"}]});
               }
               fs.writeFileSync(path.join(dir, "posts.json"), JSON.stringify({posts, date: new Date().toISOString().slice(0, 10)}));

@@ -912,7 +912,7 @@
       // d'analyse (mur Pro, 19/09/2026), de l'avis, du rappel apres les stats,
       // de l'analyse fermee, des reponses FAQ fermees et de la barre mobile
       // (tableau de bord : admin_unlock_clicks, 0025 puis 0029).
-      match_gate_unlock: true, match_avis_unlock: true, match_recall_unlock: true, match_analysis_unlock: true, match_faq_unlock: true, match_bar_unlock: true,
+      match_gate_unlock: true, match_avis_unlock: true, match_appel_pro: true, match_recall_unlock: true, match_analysis_unlock: true, match_faq_unlock: true, match_bar_unlock: true,
       // Buteurs du jour de l'accueil (home-scorers.js) : bouton « Debloquer »
       // du panneau, ligne floutee, carte d'un buteur (avant le 19/09/2026 :
       // kind cta, label = meme valeur).

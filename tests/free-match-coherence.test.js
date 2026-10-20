@@ -32,12 +32,14 @@ test("le match gratuit vient d'une seule source, partagee par les deux pages", (
 // gratuit » sans aucun prix.
 test("match offert : le panneau « compte gratuit » ne montre aucun prix, le mur Pro seul le montre", () => {
   const js = read("match-page.js");
-  const auth = js.slice(js.indexOf("function renderAuthWall(raw)"), js.indexOf("function renderApercu"));
-  const mur = js.slice(js.indexOf("function renderProWall(raw,ctx)"), js.indexOf("function renderAuthWall(raw)"));
+  const auth = js.slice(js.indexOf("function renderAuthWall(raw,appel)"), js.indexOf("function renderApercu"));
+  const mur = js.slice(js.indexOf("function renderProWall(raw,ctx)"), js.indexOf("function renderAuthWall(raw,appel)"));
   assert.ok(auth.length > 500 && mur.length > 500);
-  assert.doesNotMatch(auth, /prix|price|proOffer|IASHARK_MARKET|abonnement\.html|IasharkOffrePro/, "prix ou offre dans le panneau du match offert");
+  // 21/10/2026 : une seule ligne texte vers Pro (essai, sans prix) sous la demande de compte.
+  assert.doesNotMatch(auth, /prix|price|proOffer|IASHARK_MARKET|IasharkOffrePro/, "prix ou offre dans le panneau du match offert");
+  assert.equal((auth.match(/abonnement\.html/g) || []).length, 1, "une seule ligne vers Pro, sans prix");
   assert.match(mur, /IasharkOffrePro\.mount\(box,\{mode:'vitrine',contexte:'match'/);
-  assert.match(js, /if\(isFree&&!ctx\.session\)\{renderAuthWall\(raw\);return;\}/, "match offert -> carte compte gratuit, jamais le mur Pro");
+  assert.match(js, /if\(isFree&&!ctx\.session\)\{\n\s*\/\/ Le pari du match offert[\s\S]{0,700}renderAuthWall\(raw,appel\);return;/, "match offert -> carte compte gratuit, jamais le mur Pro");
   assert.match(js, /if\(!isFree&&!termine&&!vuePro\)\{renderProWall\(raw,ctx\);return;\}/);
   assert.match(auth, /lien\('inscription\.html\?next='\+retour\)/);
 });
@@ -190,7 +192,7 @@ test("match offert : celui du jour jusqu'a minuit, jamais un jour passe ni un ma
 
 test("match offert sans compte : l'accueil suit la regle de la page match (compte gratuit exige)", () => {
   const accueil = read("index.html");
-  assert.match(read("match-page.js"), /if\(isFree&&!ctx\.session\)\{renderAuthWall\(raw\);return;\}/);
+  assert.match(read("match-page.js"), /if\(isFree&&!ctx\.session\)\{\n\s*\/\/ Le pari du match offert[\s\S]{0,700}renderAuthWall\(raw,appel\);return;/);
   assert.match(accueil, /var ouvert=!!\(authCtx&&authCtx\.session\);/);
   assert.match(accueil, /home_app\.free_gate_text/);
   assert.match(read("home-list.js"), /if\(free&&!ctx\.isPro&&!ctx\.hasAccount\)return \{state:'gated',free:true\};/);

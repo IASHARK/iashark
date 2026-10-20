@@ -1177,6 +1177,32 @@ function render(raw,o){
   paint(vm,secs,{panneau,sticky:signalSticky(vm)});
 }
 
+// « L'echantillon, puis la demande » (decision de Clement du 21/10/2026) : sur le match offert,
+// le visiteur sans compte voit le pari, sa cote et sa chance (servis par match-data, champ
+// appel_sans_compte) ; le pourquoi et le reste de l'analyse demandent un compte gratuit.
+// Hors de la tranche des murs visiteur (tests/match-page-structure.test.js) : elle ne lit QUE
+// l'objet appel renvoye par le serveur, jamais la copie publique du match.
+function carteAppel(vm,appel){
+  let r=null,cote=null;
+  try{const va=IasharkMatchViewModel.buildMatchViewModel(appel);r=va.model.recommendation;cote=n(va.model.recommendedOdds);}catch(e){r=null;}
+  const marche=r&&r.market?r.market:appel.pari_rec;
+  if(!marche)return '';
+  const p=n(appel.model_probability)!==null&&Number(appel.model_probability)>0?Number(appel.model_probability):(r&&n(r.probability)>0?n(r.probability):null);
+  if(cote===null)cote=n(appel.cote_rec);
+  return `<section class="signal-card avis sig2 appel" aria-labelledby="appelMarche">
+    <div class="sig-head"><span class="sig-eyebrow">${cardIcon('target')}${esc(t('match_v4.appel_eyebrow','Le pari offert du jour'))}</span></div>
+    <div class="sig-slip">
+      <div class="sig-slip-main">
+        <p class="sig-kicker">${esc(t('match_page.sig_bet_label','Pari recommandé'))}</p>
+        <h2 class="sig-market" id="appelMarche">${esc(marcheFr(vm,marche))}</h2>
+        <p class="sig-fixture">${esc(tf('match_page.sig_match_line','{home} – {away}',{home:vm.identity.home.name,away:vm.identity.away.name}))}</p>
+      </div>
+      ${cote!==null?`<div class="sig-odds-box"><span>${esc(t('match_page.sig_odds_used','Cote utilisée'))}</span><b>${odds(cote)}</b></div>`:''}
+    </div>
+    ${p!==null?`<p class="sig2-plain">${esc(tf('match_v4.appel_chance','Chance calculée par IASHARK : {p} %',{p:Math.round(p)}))}</p>`:''}
+    <p class="sig-legal">${esc(t('match_page.sig_legal','Estimation statistique, pas une garantie.'))}</p>
+  </section>`;
+}
 // VUE VISITEUR. Le serveur decide ce qu'il envoie (match-data, fichiers publics
 // sans champ premium) ; ici, copie sans aucun champ premium AVANT tout calcul,
 // et seulement des champs PUBLICS (has_signal, no_signal, prob_band, nb_marches).
@@ -1213,17 +1239,23 @@ function renderProWall(raw,ctx){
 // MATCH OFFERT, SANS COMPTE : meme dessin que le composant de paiement, un seul
 // bouton « Creer mon compte gratuit » (retour sur ce match), lien discret
 // « J'ai deja un compte ». Aucun panneau Marches (un seul bouton par page).
-function renderAuthWall(raw){
+function renderAuthWall(raw,appel){
   const vm=viewModel(publicCopy(raw));
   const MS=window.IasharkMatchSections;
   const retour=encodeURIComponent(cheminMatch(raw));
   const sous=enTeteOffre(vm._raw);
+  const pari=appel?carteAppel(vm,appel):'';
+  const titre=pari?t('match_v4.appel_title','Pourquoi ce pari ?'):t('match_v4.free_title','Ce match est offert aujourd’hui');
+  const texte=pari?t('match_v4.appel_sub','Ton compte gratuit ouvre l’analyse complète de ce match : le pourquoi, le film du match et le Petit combiné du soir. Sans carte bancaire.'):t('match_v4.free_sub','Crée ton compte gratuit pour ouvrir l’analyse de ce match. Sans carte bancaire.');
+  const bouton=pari?t('match_v4.appel_cta','Ouvrir l’analyse complète, gratuitement'):t('match_v4.free_cta','Créer mon compte gratuit');
+  const lignePro=pari?`<a class="op-alt op-pro" href="${esc(lien('abonnement.html?duree=month&next='+retour))}"${suivi('match_appel_pro')}>${esc(t('match_v4.appel_pro','Les autres matchs du jour, le Grand combiné et la Sélection en or sont dans Pro : 7 jours d’essai.'))}</a>`:'';
   const carte=`<section class="op op--vitrine gate" aria-labelledby="opCompteT">
-    <div class="op-head"><span class="op-lock" aria-hidden="true">${lucide('lock','')}</span><h2 class="op-title" id="opCompteT">${esc(t('match_v4.free_title','Ce match est offert aujourd’hui'))}</h2>${sous?`<div class="op-sub">${sous}</div>`:''}<p class="op-from">${esc(t('match_v4.free_sub','Crée ton compte gratuit pour ouvrir l’analyse de ce match. Sans carte bancaire.'))}</p></div>
-    ${boutonAction(lien('inscription.html?next='+retour),t('match_v4.free_cta','Créer mon compte gratuit'),suivi('match_avis_unlock').trim())}
+    <div class="op-head"><span class="op-lock" aria-hidden="true">${lucide('lock','')}</span><h2 class="op-title" id="opCompteT">${esc(titre)}</h2>${sous&&!pari?`<div class="op-sub">${sous}</div>`:''}<p class="op-from">${esc(texte)}</p></div>
+    ${boutonAction(lien('inscription.html?next='+retour),bouton,suivi('match_avis_unlock').trim())}
     <a class="op-alt" href="${esc(lien('connexion.html?next='+retour))}">${esc(t('match_v4.free_login','J’ai déjà un compte'))}</a>
+    ${lignePro}
   </section>`;
-  const secs=[['offre',carte,null,true]];
+  const secs=pari?[['appel',pari,null,true],['offre',carte,null,true]]:[['offre',carte,null,true]];
   // Apercu de ce que voit un COMPTE GRATUIT sur ce match : toutes les sections sauf le panneau
   // Marches (decision de Clement du 04/10/2026), donc la liste publique pro_sections (ce qui existe
   // vraiment sur ce match, aucun chiffre) ; repli : ce que montre la copie publique. Faux chiffres
@@ -1388,7 +1420,18 @@ async function init(){
     const termine=matchTermine(raw);
     const vuePro=!!ctx.isPro&&serveurPro!==false;
     await modules;
-    if(isFree&&!ctx.session){renderAuthWall(raw);return;}
+    if(isFree&&!ctx.session){
+      // Le pari du match offert (pari, cote, chance) : servi par match-data au visiteur sans compte.
+      let appel=null;
+      try{
+        if(window.IasharkApp&&window.IasharkApp.supabase){
+          const r=await window.IasharkApp.supabase.functions.invoke('match-data',{body:{id:String(id)}});
+          const x=r&&r.data&&!r.error&&Array.isArray(r.data.matchs)?r.data.matchs.find(m=>String(m.id)===String(id)):null;
+          if(x&&x.appel_sans_compte===true&&x.pari_rec)appel=x;
+        }
+      }catch(e){appel=null;}
+      renderAuthWall(raw,appel);return;
+    }
     if(!isFree&&!termine&&!vuePro){renderProWall(raw,ctx);return;}
     // Compte gratuit sur le match offert : toutes les sections, panneau Marches flou
     // (cadenas Pro sur le panneau seulement). Match termine : aucun panneau (plus rien a jouer).

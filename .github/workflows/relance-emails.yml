@@ -1,0 +1,37 @@
+# Relance par e-mail des inscrits (supabase/functions/relance-emails), lancee a la main.
+#   etat  : qui recevrait quoi (comptes par type et langue), rien n'est envoye
+#   test  : les 12 e-mails aux seuls comptes administrateurs
+#   envoi : l'envoi reel, une fois par personne (phrase « ENVOYER LA RELANCE »)
+name: Relance e-mails
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "etat, test ou envoi"
+        required: true
+        default: etat
+        type: choice
+        options: [etat, test, envoi]
+      confirmation:
+        description: "Pour l'envoi reel : ENVOYER LA RELANCE"
+        required: false
+        default: ""
+permissions:
+  contents: read
+jobs:
+  relance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Appel de la fonction
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          MODE: ${{ inputs.mode }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          corps=$(jq -nc --arg m "$MODE" --arg c "$CONFIRMATION" '{mode:$m, confirmation:$c}')
+          code=$(curl -sS -o reponse.json -w "%{http_code}" -X POST "$SUPABASE_URL/functions/v1/relance-emails" \
+            -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H "Content-Type: application/json" --max-time 600 -d "$corps")
+          echo "HTTP $code"; jq . reponse.json || cat reponse.json
+          [ "$code" = "200" ]

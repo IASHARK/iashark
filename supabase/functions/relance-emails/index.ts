@@ -155,7 +155,12 @@ Deno.serve(async (req: Request) => {
   };
   const pret = { brevo: !!brevo, desinscription: !!secret && secret.length >= 32, resend_present: !!env("RESEND_API_KEY") };
 
-  const { liste, ecartes } = await classer(sb);
+  const tout = await classer(sb);
+  // Personnes a ne pas relancer (choix de Clement), par identifiant de compte.
+  const exclure = new Set((Array.isArray(corps.exclure) ? corps.exclure : String(corps.exclure || "").split(","))
+    .map((x: unknown) => String(x).trim().toLowerCase()).filter(Boolean));
+  const liste = tout.liste.filter((p) => !exclure.has(p.id.toLowerCase()));
+  const ecartes = { ...tout.ecartes, exclus: tout.liste.length - liste.length };
   if (mode === "etat") return json(200, { ok: true, mode, pret, destinataires: liste.length, par_type_et_langue: compter(liste), ecartes });
   if (!pret.brevo || !pret.desinscription) return json(503, { ok: false, mode, pret, raison: "BREVO_API_KEY ou EMAIL_UNSUBSCRIBE_SECRET manquant : rien n'est parti" });
 

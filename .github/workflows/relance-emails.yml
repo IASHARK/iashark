@@ -16,6 +16,10 @@ on:
         description: "Pour l'envoi reel : ENVOYER LA RELANCE"
         required: false
         default: ""
+      exclure:
+        description: "Comptes a ne pas relancer (identifiants separes par des virgules)"
+        required: false
+        default: ""
 permissions:
   contents: read
 jobs:
@@ -29,8 +33,10 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           RELANCE_SECRET: ${{ secrets.RELANCE_SECRET }}
+          # Meme secret pour signer (relance-emails) et verifier (email-unsubscribe) les liens de desinscription.
+          EMAIL_UNSUBSCRIBE_SECRET: ${{ secrets.EMAIL_UNSUBSCRIBE_SECRET }}
         run: |
-          npx -y supabase@2 secrets set "RELANCE_SECRET=$RELANCE_SECRET" --project-ref ksvjraqitxouwiabecai > /dev/null
+          npx -y supabase@2 secrets set "RELANCE_SECRET=$RELANCE_SECRET" "EMAIL_UNSUBSCRIBE_SECRET=$EMAIL_UNSUBSCRIBE_SECRET" --project-ref ksvjraqitxouwiabecai > /dev/null
           npx -y supabase@2 functions deploy relance-emails --project-ref ksvjraqitxouwiabecai --use-api
       - name: Appel de la fonction
         env:
@@ -38,9 +44,10 @@ jobs:
           RELANCE_SECRET: ${{ secrets.RELANCE_SECRET }}
           MODE: ${{ inputs.mode }}
           CONFIRMATION: ${{ inputs.confirmation }}
+          EXCLURE: ${{ inputs.exclure }}
         run: |
           KEY=$(printf %s "$KEY" | tr -d '\r\n ')
-          corps=$(jq -nc --arg m "$MODE" --arg c "$CONFIRMATION" '{mode:$m, confirmation:$c}')
+          corps=$(jq -nc --arg m "$MODE" --arg c "$CONFIRMATION" --arg x "$EXCLURE" '{mode:$m, confirmation:$c, exclure:$x}')
           code=$(curl -sS -o reponse.json -w "%{http_code}" -X POST "https://ksvjraqitxouwiabecai.supabase.co/functions/v1/relance-emails" \
             -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H "x-relance-secret: $RELANCE_SECRET" -H "Content-Type: application/json" --max-time 600 -d "$corps")
           echo "HTTP $code"; jq . reponse.json || cat reponse.json

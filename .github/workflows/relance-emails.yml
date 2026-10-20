@@ -23,6 +23,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - uses: actions/checkout@v4
+      # La fonction est installee depuis ce depot a chaque lancement (meme version que le test).
+      - name: Installation de la fonction
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: npx -y supabase@2 functions deploy relance-emails --project-ref ksvjraqitxouwiabecai --use-api
       - name: Appel de la fonction
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

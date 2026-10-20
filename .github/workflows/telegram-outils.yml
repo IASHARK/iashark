@@ -23,6 +23,7 @@ jobs:
       - name: Robot et chaine
         env:
           TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TOKEN_CONTACT: ${{ secrets.TELEGRAM_CONTACT_BOT_TOKEN }}
           ACTION: ${{ inputs.action }}
         run: |
           set -euo pipefail
@@ -32,6 +33,7 @@ jobs:
           echo "Robot : @${BOT_USER}"
           ROLE=$(curl -sS "$API/getChatMember?chat_id=@iasharkdata&user_id=${BOT_ID}" | jq -r '.result.status // .description')
           echo "Role du robot sur @iasharkdata : ${ROLE}"
+          if [ -n "${TOKEN_CONTACT:-}" ]; then echo "Robot contact : @$(curl -sS "https://api.telegram.org/bot${TOKEN_CONTACT}/getMe" | jq -r '.result.username')"; fi
           if [ "$ACTION" != "bienvenue" ]; then exit 0; fi
           if [ "$ROLE" != "administrator" ] && [ "$ROLE" != "creator" ]; then
             echo "::error::Le robot @${BOT_USER} n'est pas administrateur de @iasharkdata : rien n'est poste."; exit 1

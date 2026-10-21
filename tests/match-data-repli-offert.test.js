@@ -29,7 +29,9 @@ const m = (id, date, extra) => Object.assign({ id, date, has_signal: true, is_fr
 const CAS = {
   "le meilleur du jour avec pari": [m(1, "2026-10-21 21:00", { data_quality_score: 90 }), m(2, "2026-10-21 18:45", { data_quality_score: 70 }), m(3, "2026-10-22 21:00", { data_quality_score: 99 })],
   "sans pari du jour : a venir avec pari": [m(1, "2026-10-21 21:00", { has_signal: false, no_signal: true }), m(2, "2026-10-22 21:00", { data_quality_score: 60 })],
-  "match du jour deja commence exclu": [m(1, "2026-10-21 00:10", { data_quality_score: 99 }), m(2, "2026-10-21 21:00", { data_quality_score: 40 })],
+  // Regle du 04/10 (« le meme match de 00 h a 23 h 59 ») : le match du jour reste offert une fois commence.
+  "match du jour deja commence garde": [m(1, "2026-10-21 00:10", { data_quality_score: 99 }), m(2, "2026-10-21 21:00", { data_quality_score: 40 })],
+  "le soir, apres son coup d'envoi : toujours le meme": [m(1, "2026-10-21 21:00", { data_quality_score: 90 }), m(2, "2026-10-21 23:30", { data_quality_score: 60 })],
   "rien d'analyse : a venir quand meme": [m(1, "2026-10-21 21:00", { has_signal: false, no_signal: true, data_quality_score: 30 }), m(2, "2026-10-21 20:00", { has_signal: false, no_signal: true, data_quality_score: 80 })],
 };
 
@@ -41,6 +43,15 @@ test("match-data#idOffertRepli choisit le meme match que le site (lib/free-match
     assert.ok(site != null, nom + " : le site choisit un match");
     assert.equal(repli(liste, MAINTENANT), String(site), nom);
   }
+});
+
+test("match-data#idOffertRepli : le soir, apres le coup d'envoi, toujours le meme match que le site", async (t) => {
+  const repli = await chargerRepli();
+  if (!repli) { t.skip("node:module#stripTypeScriptTypes indisponible"); return; }
+  const soir = new Date("2026-10-21T20:30:00Z"); // 22 h 30 a Paris
+  const liste = [m(1, "2026-10-21 21:00", { data_quality_score: 90 }), m(2, "2026-10-21 23:30", { data_quality_score: 60 }), m(3, "2026-10-22 21:00", { data_quality_score: 99 })];
+  assert.equal(FREE.pickFreeMatchId(liste, { day: "2026-10-21", now: "2026-10-21 22:30" }), 1);
+  assert.equal(repli(liste, soir), "1");
 });
 
 test("match-data#idOffertRepli : une designation du pipeline (jour ou a venir) garde l'autorite", async (t) => {

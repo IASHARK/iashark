@@ -124,8 +124,8 @@ function estGratuit(m: Record<string, unknown>): boolean {
 // trop stricts). Le site retombe alors sur l'heuristique de lib/free-match.js et AFFICHE un
 // match offert que ce serveur ne reconnaissait pas : un compte gratuit cree pour ce match
 // ne recevait rien. Meme regle ici, heure de Paris : sans designation du jour (ou a venir),
-// le match offert est celui que montre le site (a venir aujourd'hui, avec pari, meilleur
-// data_quality_score ; puis a venir, puis sans pari). COPIE de lib/free-match.js#pickFreeMatch
+// le match offert est celui que montre le site (aujourd'hui, avec pari, meilleur
+// data_quality_score, meme commence ; puis a venir, puis sans pari). COPIE de lib/free-match.js#pickFreeMatch
 // (branche repli) : tests/match-data-repli-offert.test.js verifie qu'ils choisissent le meme.
 function horlogeParis(d: Date): { day: string; now: string } {
   const r: Record<string, string> = {};
@@ -148,7 +148,8 @@ export function idOffertRepli(matchs: Record<string, unknown>[], d: Date = new D
   const duJour = matchs.filter((m) => m && jour(m) === t.day);
   const aVenir = (l: Record<string, unknown>[]) => l.filter((m) => String(m.date || "") > t.now);
   const avecSignal = (l: Record<string, unknown>[]) => l.filter((m) => !!(m && (m.pari_rec || m.has_signal)) && !m.no_signal);
-  for (const etage of [avecSignal(aVenir(duJour)), avecSignal(aVenir(matchs)), aVenir(duJour), aVenir(matchs)]) {
+  // Le jour meme : le meme match toute la journee, meme commence (regle du 04/10, lib/free-match.js).
+  for (const etage of [avecSignal(duJour), avecSignal(aVenir(duJour)), avecSignal(aVenir(matchs)), aVenir(duJour), aVenir(matchs)]) {
     const g = meilleur(etage);
     if (g && g.id != null) return String(g.id);
   }

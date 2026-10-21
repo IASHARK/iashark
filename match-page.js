@@ -1382,6 +1382,16 @@ async function init(){
     // Plan confirme par le SERVEUR (reponse match-data) : un plan lu cote client
     // ne suffit jamais a montrer la vue Pro.
     let serveurPro=null;
+    // VITESSE (21/10/2026, audit landing-page-conversion-audit : le pari offert mettait 3 a 7 s a
+    // s'afficher sur telephone) : sur le match offert (connu des data-home.json), l'appel a
+    // match-data part TOUT DE SUITE, en parallele de la lecture de la session. functions.invoke
+    // joint le jeton s'il y a une session : la meme reponse sert au visiteur et au compte.
+    const listePub=liste&&Array.isArray(liste.matchs)?liste.matchs:null;
+    let offertPublic=false;
+    try{offertPublic=!!(listePub&&raw&&window.IasharkFreeMatch&&String(raw.id)===String(IasharkFreeMatch.pickFreeMatchId(listePub,null,(window.IASHARK_MARKET&&window.IASHARK_MARKET.code)||null)));}catch(e){offertPublic=false;}
+    const appelTot=window.IasharkApp&&window.IasharkApp.supabase&&offertPublic
+      ?window.IasharkApp.supabase.functions.invoke('match-data',{body:{id:String(id)}}).catch(()=>null)
+      :null;
     if(window.IasharkApp){
       ctx=await window.IasharkApp.context();
       // On interroge match-data des qu'il peut avoir quelque chose a rendre :
@@ -1392,7 +1402,7 @@ async function init(){
       // C'est ce qui permet a un visiteur venu de l'onglet « Hier » d'ouvrir un
       // match joue et de voir l'analyse qu'il portait : la preuve, sans compte.
       if(ctx.session||matchTermine(raw)){
-        const result=await window.IasharkApp.supabase.functions.invoke('match-data',{body:{id:String(id)}});
+        const result=(appelTot&&await appelTot)||await window.IasharkApp.supabase.functions.invoke('match-data',{body:{id:String(id)}});
         if(result.data&&!result.error){
           list=result.data.matchs||[];
           if(typeof result.data.isPro==='boolean')serveurPro=result.data.isPro;
@@ -1425,7 +1435,7 @@ async function init(){
       let appel=null;
       try{
         if(window.IasharkApp&&window.IasharkApp.supabase){
-          const r=await window.IasharkApp.supabase.functions.invoke('match-data',{body:{id:String(id)}});
+          const r=(appelTot&&await appelTot)||await window.IasharkApp.supabase.functions.invoke('match-data',{body:{id:String(id)}});
           const x=r&&r.data&&!r.error&&Array.isArray(r.data.matchs)?r.data.matchs.find(m=>String(m.id)===String(id)):null;
           if(x&&x.appel_sans_compte===true&&x.pari_rec)appel=x;
         }

@@ -12,10 +12,13 @@ test("aucun nom d'outil n'est reste en anglais", () => {
     assert.ok(!html.includes(anglais), `"${anglais}" est encore affiche sur la page`);
     assert.ok(!js.includes(anglais), `"${anglais}" est encore affiche dans un panneau`);
   }
-  for (const francais of ["Détecteur d’écarts", "Cote juste", "Calculateur de mise",
-                          "Simulateur de capital", "Analyse de combiné", "Journal des décisions"]) {
+  for (const francais of ["Détecteur d’écarts", "Cote juste", "Analyse de combiné", "Journal des décisions"]) {
     assert.ok(html.includes(francais), `nom francais manquant dans la navigation : ${francais}`);
     assert.ok(js.includes(francais), `nom francais manquant dans le panneau : ${francais}`);
+  }
+  // 21/10/2026 : calculateur de mise et simulateur de capital retires (ni mise, ni capital).
+  for (const retire of ["Calculateur de mise", "Simulateur de capital", ">DIMENSIONNER<", ">SIMULER<"]) {
+    assert.ok(!html.includes(retire) && !js.includes(retire), `outil retire encore present : ${retire}`);
   }
 });
 
@@ -23,7 +26,7 @@ test("les libelles courts de la navigation sont en francais", () => {
   for (const anglais of [">SCAN<", ">CALCULATE<", ">SIZE<", ">SIMULATE<", ">COMBINE<", ">TRACK<"]) {
     assert.ok(!html.includes(anglais), `libelle anglais restant : ${anglais}`);
   }
-  for (const francais of [">DÉTECTER<", ">ÉVALUER<", ">DIMENSIONNER<", ">SIMULER<", ">COMBINER<", ">MESURER<"]) {
+  for (const francais of [">DÉTECTER<", ">ÉVALUER<", ">COMBINER<", ">MESURER<"]) {
     assert.ok(html.includes(francais), `libelle francais manquant : ${francais}`);
   }
 });
@@ -31,25 +34,21 @@ test("les libelles courts de la navigation sont en francais", () => {
 test("chaque outil est accompagne d'une phrase qui dit a quoi il sert", () => {
   // Une phrase courte dans la navigation, une phrase complete dans le panneau.
   const courtes = [...html.matchAll(/text-\[12px\] leading-snug text-soft">([^<]+)</g)].map((m) => m[1]);
-  assert.equal(courtes.length, 6, "il faut une phrase par outil dans la navigation");
+  assert.equal(courtes.length, 4, "il faut une phrase par outil dans la navigation");
   for (const p of courtes) assert.ok(p.length >= 25, `phrase trop courte pour etre utile : "${p}"`);
 
   const longues = [...js.matchAll(/enTete\('[^']+', '([^']+)'\)/g)].map((m) => m[1]);
-  assert.equal(longues.length, 6, "il faut une description par panneau");
+  assert.equal(longues.length, 4, "il faut une description par panneau");
   for (const p of longues) assert.ok(p.length >= 40, `description trop courte : "${p}"`);
 });
 
 test("les marches affiches par les outils sont traduits", () => {
   assert.match(js, /function marcheLisible/);
   assert.match(html, /lib\/market-labels\.js/);
-  // Les exemples de demonstration suivent le format des libelles traduits
-  // (lib/market-labels.js, 14/09/2026) : ligne a la francaise ("1,5"), jamais
-  // le point decimal du moteur.
-  const demos = [...js.matchAll(/market: '([^']+)'/g)].map((m) => m[1]);
-  assert.ok(demos.length >= 3);
-  for (const d of demos) assert.ok(!/\d\.\d/.test(d), `exemple avec un point decimal : "${d}"`);
-  // Chaque exemple porte son identifiant moteur et s'affiche via marketIdLabel.
-  assert.ok((js.match(/marketId: '/g) || []).length >= demos.length, "marketId manquant sur un exemple");
+  // Plus d'exemples de demonstration (21/10/2026 : un non-abonne voit la page de
+  // vente) ; chaque ligne reelle s'affiche via marketIdLabel quand le moteur donne
+  // son identifiant (lib/market-labels.js).
+  assert.doesNotMatch(js, /market: '[^']+', marketId: '/, "plus de ligne de demonstration");
   assert.match(js, /if \(r\.marketId && labels && labels\.marketIdLabel\) return labels\.marketIdLabel\(r\.marketId\);/);
 });
 

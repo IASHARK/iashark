@@ -1,5 +1,5 @@
 'use strict';
-// Page Outils : aucune donnee premium sans Pro ; resultats reels pour un Pro simule.
+// Page Pro : page de vente sans Pro (21/10/2026), aucune donnee premium ; outils reels pour un Pro simule.
 const { test, expect, pathOf } = require('./helpers/fixtures');
 const { VERSIONS } = require('./helpers/versions');
 const { tr } = require('./helpers/site-data');
@@ -11,14 +11,16 @@ async function realTeamNames(siteData) {
 for (const v of VERSIONS) {
   test.describe(`outils /${v.dir}/`, () => {
     for (const persona of ['anonymous', 'free']) {
-      test(`${persona === 'free' ? 'compte gratuit' : 'anonyme'} : demonstration uniquement, aucune donnee de match`, async ({ page, supa, siteData, dictFor, baseURL }) => {
+      test(`${persona === 'free' ? 'compte gratuit' : 'anonyme'} : page de vente, aucun outil, aucune donnee de match`, async ({ page, supa, siteData, dictFor, baseURL }) => {
         const dict = await dictFor(v.locale);
         if (persona === 'free') await supa.as('free');
         await page.goto(`/${v.dir}/pro.html`);
-        const panel = page.locator('[data-panel="scanner"]');
-        await expect(panel).toContainText(tr(dict, 'tools_page.scan_demo_text'));
-        const cta = panel.locator(`a[href$="abonnement.html"]`).first();
-        expect(pathOf(await cta.getAttribute('href'), baseURL)).toBe(`/${v.dir}/abonnement.html`);
+        await expect(page.locator('#proVente h1')).toContainText(tr(dict, 'pro_vente.hero_title_pre'));
+        await expect(page.locator('#proOutils')).toBeHidden();
+        const exemple = page.locator('#proVente a[data-track="pro_vente_exemple"]');
+        expect(pathOf(await exemple.getAttribute('href'), baseURL)).toBe(`/${v.dir}/exemple-analyse.html`);
+        // Le composant de paiement unique est monte (ou sa ligne « pas encore ouvert »).
+        await expect(page.locator('#offrePro .op-title')).toHaveText(tr(dict, 'offre_pro.title_general'));
         await page.waitForLoadState('networkidle').catch(() => {});
         expect(supa.callsTo('match-data'), 'match-data appele sans abonnement').toHaveLength(0);
         const text = await page.locator('main').innerText();
@@ -65,7 +67,7 @@ for (const v of VERSIONS) {
       expect(call.body).toEqual({ scope: 'list' });
       const rows = page.locator('#scanBox li');
       await expect(rows.first()).toBeVisible();
-      await expect(page.locator('[data-panel="scanner"]')).not.toContainText(tr(dict, 'tools_page.scan_demo_text'));
+      await expect(page.locator('#proVente')).toBeHidden();
       const first = await rows.first().innerText();
       const names = siteData.matchs.flatMap((m) => [m.home && m.home.n, m.away && m.away.n]).filter(Boolean);
       expect(names.some((n) => first.includes(n)), `ligne du scanner sans equipe reelle : ${first}`).toBe(true);

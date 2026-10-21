@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="iashark-market" content="za">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IASHARK Tools: Model Selections &amp; Bet Tracking | SA</title>
-<meta name="description" content="High model-probability selections, automatic bet tracking and a one-click odds check: the IASHARK Tools space for PSL and international soccer.">
+<title>IASHARK Pro SA: every bet of the day, before kick-off</title>
+<meta name="description" content="Every match of the day open: the pick, its calculated chance and why, published before kick-off. Cancel online at any time.">
 <link rel="canonical" href="https://iashark.com/za/pro.html">
 <link rel="alternate" hreflang="fr" href="https://iashark.com/fr/pro.html">
 <link rel="alternate" hreflang="en-GB" href="https://iashark.com/gb/pro.html">
@@ -17,17 +17,24 @@
 <link rel="icon" href="/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<!-- Session Supabase presente (compte connecte, peut-etre Pro) : la page de vente
+     attend la reponse du serveur avant de s'afficher, pour qu'un abonne ne la voie
+     pas passer avant ses outils. Sans session : la page de vente s'affiche tout de suite. -->
+<script>try{for(var i=0;i<localStorage.length;i++){if(/^sb-.+-auth-token$/.test(localStorage.key(i)||'')){document.documentElement.setAttribute('data-pro-etat','attente');break}}}catch(e){}</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" defer></script>
 <link rel="stylesheet" href="/assets/tailwind.css">
 <link rel="stylesheet" href="/assets/tools-page.css">
+<link rel="stylesheet" href="/assets/composants.css">
+<link rel="stylesheet" href="/assets/offre-pro.css">
+<link rel="stylesheet" href="/assets/pro-vente.css">
 <link rel="stylesheet" href="/assets/lang-switcher.css">
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="IASHARK">
 <meta property="og:locale" content="en_ZA">
-<meta property="og:title" content="IASHARK Tools: Model Selections &amp; Bet Tracking | SA">
-<meta property="og:description" content="High model-probability selections, automatic bet tracking and a one-click odds check: the IASHARK Tools space for PSL and international soccer.">
+<meta property="og:title" content="IASHARK Pro SA: every bet of the day, before kick-off">
+<meta property="og:description" content="Every match of the day open: the pick, its calculated chance and why, published before kick-off. Cancel online at any time.">
 <meta property="og:url" content="https://iashark.com/za/pro.html">
 <meta property="og:image" content="https://iashark.com/icon-512.png">
 <meta name="twitter:card" content="summary">
@@ -45,13 +52,102 @@
 
 <main class="mx-auto w-full max-w-[1440px] px-4 pb-24 sm:px-6">
 
-  <div class="border-b border-hairline py-7 sm:py-9">
-    <p class="mb-2.5 inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] text-soft">
-      <span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span><span data-i18n="tools_page.static_kicker">TOOL CENTER</span>
-    </p>
-    <h1 class="text-[clamp(26px,3.4vw,38px)] font-extrabold leading-[1.1] tracking-[-0.035em] text-ink"><span data-i18n="tools_page.static_hero_title_pre">Your tools. </span><span class="text-cyan" data-i18n="tools_page.static_hero_title_hl">Our probabilities.</span></h1>
-    <p class="mt-3 max-w-2xl text-[15px] leading-relaxed text-soft" data-i18n="tools_page.static_hero_sub">Six tools that turn the model's probabilities into measurable decisions: detect, evaluate, size, simulate, combine, measure.</p>
-  </div>
+<!-- PAGE DE VENTE (visiteur sans compte ou compte gratuit, 21/10/2026) : la promesse,
+     ce que recoit un abonne chaque jour, l'exemple d'analyse, comment ca marche, le
+     prix et le bouton (LE composant de paiement, lib/offre-pro.js), les questions.
+     Branchement : lib/pro-vente.js. Les lignes [data-pv-si] ne s'affichent que si
+     elles sont vraies en ligne pour ce visiteur (marche, langue, interrupteurs). -->
+<div id="proVente" class="pv">
+
+  <section class="pv-hero" aria-labelledby="pvTitre">
+    <h1 id="pvTitre" class="pv-h1"><span data-i18n="pro_vente.hero_title_pre">Every bet of the day,</span> <span class="pv-hl" data-i18n="pro_vente.hero_title_hl">published before kick-off.</span></h1>
+    <p class="pv-lead" data-i18n="pro_vente.hero_sub">Every match of the day open: the pick, its calculated chance and why. You compare it with your odds, then you decide.</p>
+    <div class="pv-hero-cta">
+      <a class="mu-shimmer pv-cta" href="#offre" data-track="pro_vente_hero"><span class="mu-shimmer-spark-c" aria-hidden="true"><span class="mu-shimmer-spark"><span class="mu-shimmer-spark-b"></span></span></span><span data-i18n="pro_vente.hero_cta">See the Pro offer</span><span class="mu-shimmer-hl" aria-hidden="true"></span><span class="mu-shimmer-bd" aria-hidden="true"></span></a>
+      <p class="pv-reassure"><span class="pv-ico" data-pv-ico="rotate-ccw" aria-hidden="true"></span><span data-i18n="offre_pro.pay_cancel">Cancel online at any time</span></p>
+    </div>
+  </section>
+
+  <section class="pv-section pv-recu" aria-labelledby="pvRecu">
+    <div class="pv-recu-tete">
+      <h2 id="pvRecu" class="pv-h2" data-i18n="pro_vente.daily_title">What you get every day</h2>
+      <p class="pv-texte" data-i18n="pro_vente.daily_sub">Everything is published before kick-off, and nothing is changed once the match has started.</p>
+    </div>
+    <div class="pv-recu-corps">
+      <article class="pv-fiche" data-pv-fiche aria-labelledby="pvFiche">
+        <h3 id="pvFiche" class="pv-fiche-titre"><span class="pv-ico pv-ico--accent" data-pv-ico="chart-column" aria-hidden="true"></span><span data-i18n="pro_vente.item_all_title">Every match of the day, open</span></h3>
+        <ol class="pv-anatomie">
+          <li><span class="pv-point" aria-hidden="true"></span><b data-i18n="pro_vente.anat_pick_title">The pick</b><span data-i18n="pro_vente.anat_pick_text">Only one per match, chosen by a fixed rule.</span></li>
+          <li><span class="pv-point" aria-hidden="true"></span><b data-i18n="pro_vente.anat_chance_title">Its calculated chance</b><span data-i18n="pro_vente.anat_chance_text">As a percentage, to compare with your operator’s odds.</span></li>
+          <li><span class="pv-point" aria-hidden="true"></span><b data-i18n="pro_vente.anat_why_title">Why</b><span data-i18n="pro_vente.anat_why_text">The reasons for the choice, in plain words.</span></li>
+        </ol>
+      </article>
+      <ul class="pv-liste">
+        <li data-pv-si="tickets" hidden><span class="pv-ico pv-ico--accent" data-pv-ico="ticket" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_combos_title">The day’s Small and Big combo</h3><p data-i18n="pro_vente.item_combos_text">The small one has 4 or 5 matches, the big one 7 or 8. When no combination meets our rules, we don’t publish one.</p></div></li>
+        <li data-pv-si="tickets" hidden><span class="pv-ico pv-ico--accent" data-pv-ico="award" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_gold_title">The Gold Selection</h3><p data-i18n="pro_vente.item_gold_text">3 higher-odds picks chosen by IASHARK. Published only when 3 picks meet our rules.</p></div></li>
+        <li data-pv-si="tickets" hidden><span class="pv-ico pv-ico--accent" data-pv-ico="user-round" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_scorer_title">The scorer of the day</h3><p data-i18n="pro_vente.item_scorer_text">The player most likely to score among the probable starters, once he reaches a 10% chance.</p></div></li>
+        <li data-pv-si="marches" hidden><span class="pv-ico pv-ico--accent" data-pv-ico="list-checks" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_markets_title">Every market of the match</h3><p data-i18n="pro_vente.item_markets_text">Each market of the match with its calculated chance, to compare with your operator’s odds.</p></div></li>
+        <li><span class="pv-ico pv-ico--accent" data-pv-ico="clapperboard" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_film_title">The match timeline</h3><p data-i18n="pro_vente.item_film_text">The match split into six quarter-hours, and the two teams compared.</p></div></li>
+        <li><span class="pv-ico pv-ico--accent" data-pv-ico="goal" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_scores_title">The most likely scorelines</h3><p data-i18n="pro_vente.item_scores_text">In the best-measured leagues: the most likely scorelines and who scores first.</p></div></li>
+        <li data-pv-si="telegram" hidden><span class="pv-ico pv-ico--accent" data-pv-ico="signal-high" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_telegram_title">Private messages from the Telegram bot</h3><p data-i18n="pro_vente.item_telegram_text">Your daily programme sent as a private message, in your language.</p></div></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pv-section pv-exemple" aria-labelledby="pvExemple">
+    <div class="pv-exemple-texte">
+      <h2 id="pvExemple" class="pv-h2" data-i18n="pro_vente.example_title">See an analysis before you pay</h2>
+      <p class="pv-texte" data-i18n="pro_vente.example_text">A real, complete analysis, open to all with no account: the pick, its chance, the match timeline and the two teams compared.</p>
+    </div>
+    <a class="pv-btn-ligne" href="/za/exemple-analyse.html" data-track="pro_vente_exemple"><span data-i18n="pro_vente.example_cta">See the sample analysis</span><span class="pv-ico" data-pv-ico="arrow-right" aria-hidden="true"></span></a>
+  </section>
+
+  <section class="pv-section pv-etapes" aria-labelledby="pvEtapes">
+    <h2 id="pvEtapes" class="pv-h2" data-i18n="pro_vente.how_title">How it works</h2>
+    <ol class="pv-etapes-liste">
+      <li><span class="pv-num" aria-hidden="true">1</span><h3 data-i18n="pro_vente.how_1_title">Choose your plan length</h3><p data-i18n="pro_vente.how_1_text">Create your account, then pay by card. Payment is secured by Stripe.</p></li>
+      <li><span class="pv-num" aria-hidden="true">2</span><h3 data-i18n="pro_vente.how_2_title">Open the day’s matches</h3><p data-i18n="pro_vente.how_2_text">Every pick is published before kick-off, with its calculated chance and why.</p></li>
+      <li><span class="pv-num" aria-hidden="true">3</span><h3 data-i18n="pro_vente.how_3_title">Compare and decide</h3><p data-i18n="pro_vente.how_3_text">Put the calculated chance against your licensed operator’s odds. You make the call.</p></li>
+    </ol>
+  </section>
+
+  <section class="pv-section pv-offre" id="offre" aria-label="Pro offer" data-i18n-attr="aria-label:pro_vente.offer_aria">
+    <!-- LE composant de paiement (lib/offre-pro.js, mode vitrine) : durees et prix du
+         marche (config/markets.json), un bouton, comment on paie. Repli sans JS : un
+         lien vers la page abonnement, aucun prix ecrit ici. -->
+    <div id="offrePro"><section class="op op--vitrine"><h2 class="op-title" data-i18n="offre_pro.title_general">Go Pro: every match of the day, open</h2><a class="mu-shimmer op-cta" href="/za/abonnement.html" data-i18n="pro_vente.offer_fallback_cta">See prices</a></section></div>
+    <p class="pv-gratuit" id="pvGratuit" data-i18n="offre_pro.free_line">Free: the analysis of the match of the day, with an account.</p>
+  </section>
+
+  <section class="pv-section pv-faq" aria-labelledby="pvFaq">
+    <h2 id="pvFaq" class="pv-h2" data-i18n="pro_vente.faq_title">Frequently asked questions</h2>
+    <div class="pv-faq-liste">
+      <details class="pv-q">
+        <summary><span data-i18n="pro_vente.faq_cancel_q">Can I cancel whenever I want?</span><span class="pv-ico pv-chevron" data-pv-ico="chevron-down" aria-hidden="true"></span></summary>
+        <div class="pv-r"><p data-i18n="pro_vente.faq_cancel_a">Yes. You cancel at any time, free of charge and online, from “My account”. Nothing more is charged after you cancel.</p><p><a class="pv-lien" href="/za/cgv.html" data-i18n="pro_vente.faq_cancel_link">The details for each plan length are in the Terms</a></p></div>
+      </details>
+      <details class="pv-q" data-pv-essai hidden>
+        <summary><span data-i18n="pro_vente.faq_trial_q">Is there a trial?</span><span class="pv-ico pv-chevron" data-pv-ico="chevron-down" aria-hidden="true"></span></summary>
+        <div class="pv-r"><p data-pv-essai-texte></p></div>
+      </details>
+      <details class="pv-q">
+        <summary><span data-i18n="pro_vente.faq_where_q">Where do I place my bets?</span><span class="pv-ico pv-chevron" data-pv-ico="chevron-down" aria-hidden="true"></span></summary>
+        <div class="pv-r"><p data-i18n="pro_vente.faq_where_a">With your licensed operator. IASHARK takes no bets and manages no player accounts: we publish analyses.</p><p data-pv-si="anj" hidden data-i18n="pro_vente.faq_where_anj">In France, the odds shown are taken from operators licensed by the ANJ. When none of them offers the match, the odds are marked indicative and no operator is named.</p></div>
+      </details>
+      <details class="pv-q">
+        <summary><span data-i18n="pro_vente.faq_age_q">How old do I need to be?</span><span class="pv-ico pv-chevron" data-pv-ico="chevron-down" aria-hidden="true"></span></summary>
+        <div class="pv-r"><p data-i18n="pro_vente.faq_age_a">18 or over. The service is for adults only, like sports betting.</p></div>
+      </details>
+    </div>
+    <a class="pv-btn-ligne pv-faq-cta" href="#offre" data-track="pro_vente_faq"><span data-i18n="pro_vente.faq_cta">Choose my plan length</span><span class="pv-ico" data-pv-ico="arrow-up" aria-hidden="true"></span></a>
+  </section>
+</div>
+
+<!-- OUTILS PRO (abonne Pro seulement, tools-page.js) : quatre outils. Les outils de
+     mise et de capital sont retires depuis le 21/10/2026 (regle de Clement : ni mise,
+     ni capital, ni esperance affiches). -->
+<div id="proOutils" hidden>
+  <div id="outilsTete" class="border-b border-hairline py-7 sm:py-9"></div>
 
   <div class="grid grid-cols-1 gap-6 py-6 lg:grid-cols-[248px_minmax(0,1fr)] lg:gap-8">
 
@@ -61,7 +157,7 @@
         class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
         <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14Z"/><path d="m16.5 16.5 4 4"/></svg>
         <span class="min-w-0">
-          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_scan">DETECT</span>
+          <span class="block text-[11px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_scan">DETECT</span>
           <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.scan_title">Edge Detector</span>
           <span data-i18n="tools_page.static_desc_scan" class="mt-0.5 block text-[12px] leading-snug text-soft">Where the market strays furthest from our probabilities.</span>
         </span>
@@ -70,34 +166,16 @@
         class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
         <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M12 4v16"/><path d="M5 8h14"/><path d="m5 8-2.5 6h5L5 8Z"/><path d="m19 8-2.5 6h5L19 8Z"/></svg>
         <span class="min-w-0">
-          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_fair">EVALUATE</span>
+          <span class="block text-[11px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_fair">EVALUATE</span>
           <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.fair_title">Fair Odds</span>
           <span data-i18n="tools_page.static_desc_fair" class="mt-0.5 block text-[12px] leading-snug text-soft">The odds a probability deserves, against the price on offer.</span>
-        </span>
-      </button>
-      <button type="button" role="tab" id="tab-stake" aria-controls="panel-stake" aria-selected="false" data-tool="stake"
-        class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
-        <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M3 17V7"/><path d="M9 17V11"/><path d="M15 17V9"/><path d="M21 17V5"/></svg>
-        <span class="min-w-0">
-          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_stake">SIZE</span>
-          <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.stake_title">Stake Calculator</span>
-          <span data-i18n="tools_page.static_desc_stake" class="mt-0.5 block text-[12px] leading-snug text-soft">How much to stake based on your bankroll and the odds.</span>
-        </span>
-      </button>
-      <button type="button" role="tab" id="tab-bankroll" aria-controls="panel-bankroll" aria-selected="false" data-tool="bankroll"
-        class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
-        <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M3 15c3-8 6 4 9-2s6 3 9-5"/><path d="M3 20h18"/></svg>
-        <span class="min-w-0">
-          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_bankroll">SIMULATE</span>
-          <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.bankroll_title">Bankroll Simulator</span>
-          <span data-i18n="tools_page.static_desc_bankroll" class="mt-0.5 block text-[12px] leading-snug text-soft">How far your bankroll can drop before it recovers.</span>
         </span>
       </button>
       <button type="button" role="tab" id="tab-combo" aria-controls="panel-combo" aria-selected="false" data-tool="combo"
         class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
         <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M7 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M17 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M11 12h2"/></svg>
         <span class="min-w-0">
-          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_combo">COMBINE</span>
+          <span class="block text-[11px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_combo">COMBINE</span>
           <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.combo_title">Combo Bet Analysis</span>
           <span data-i18n="tools_page.static_desc_combo" class="mt-0.5 block text-[12px] leading-snug text-soft">What a combo bet really costs your expected value.</span>
         </span>
@@ -106,12 +184,11 @@
         class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
         <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M5 4h11l3 3v13H5z"/><path d="M9 10h6"/><path d="M9 14h6"/></svg>
         <span class="min-w-0">
-          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_journal">MEASURE</span>
+          <span class="block text-[11px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_journal">MEASURE</span>
           <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.journal_title">Decision Journal</span>
           <span data-i18n="tools_page.static_desc_journal" class="mt-0.5 block text-[12px] leading-snug text-soft">What your logged bets have actually returned.</span>
         </span>
       </button>
-        <div id="sidebarFoot" class="mt-4 border-t border-hairline pt-4"></div>
       </div>
     </nav>
 
@@ -121,10 +198,6 @@
         class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan" data-i18n="tools_page.scan_title">Edge Detector</button>
       <button type="button" role="tab" id="mtab-fair" aria-controls="panel-fair" aria-selected="false" data-tool="fair"
         class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan" data-i18n="tools_page.fair_title">Fair Odds</button>
-      <button type="button" role="tab" id="mtab-stake" aria-controls="panel-stake" aria-selected="false" data-tool="stake"
-        class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan" data-i18n="tools_page.stake_title">Stake Calculator</button>
-      <button type="button" role="tab" id="mtab-bankroll" aria-controls="panel-bankroll" aria-selected="false" data-tool="bankroll"
-        class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan" data-i18n="tools_page.bankroll_title">Bankroll Simulator</button>
       <button type="button" role="tab" id="mtab-combo" aria-controls="panel-combo" aria-selected="false" data-tool="combo"
         class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan" data-i18n="tools_page.combo_title">Combo Bet Analysis</button>
       <button type="button" role="tab" id="mtab-journal" aria-controls="panel-journal" aria-selected="false" data-tool="journal"
@@ -135,17 +208,15 @@
     <div class="min-w-0">
     <section role="tabpanel" id="panel-scanner" aria-labelledby="tab-scanner" data-panel="scanner" hidden class="tool-panel"></section>
     <section role="tabpanel" id="panel-fair" aria-labelledby="tab-fair" data-panel="fair" hidden class="tool-panel"></section>
-    <section role="tabpanel" id="panel-stake" aria-labelledby="tab-stake" data-panel="stake" hidden class="tool-panel"></section>
-    <section role="tabpanel" id="panel-bankroll" aria-labelledby="tab-bankroll" data-panel="bankroll" hidden class="tool-panel"></section>
     <section role="tabpanel" id="panel-combo" aria-labelledby="tab-combo" data-panel="combo" hidden class="tool-panel"></section>
     <section role="tabpanel" id="panel-journal" aria-labelledby="tab-journal" data-panel="journal" hidden class="tool-panel"></section>
     </div>
   </div>
+</div>
 </main>
 
-<!-- Mention 18+ / jeu responsable (audit QA 14/09/2026 : absente des outils,
-     calculateur de mise compris). Ligne d'aide du repertoire via
-     lib/market-config.js (ecrite aussi dans le HTML par build-locales). -->
+<!-- Mention 18+ / jeu responsable (audit QA 14/09/2026). Ligne d'aide du repertoire
+     via lib/market-config.js (ecrite aussi dans le HTML par build-locales). -->
 <footer class="mx-auto w-full max-w-[1440px] border-t border-hairline px-4 pb-28 pt-6 sm:px-6">
   <p class="max-w-[80ch] text-[12.5px] leading-relaxed text-soft"><span data-i18n="player_page.footer_disclaimer">Statistical information, never a guaranteed result. Sports betting carries a risk of financial loss and addiction. Over-18s only.</span> <span data-helpline-row><span data-i18n="match_page.shell_help_label">Help:</span> <a data-market-helpline="url" href="https://www.responsiblegambling.org.za" class="text-cyan hover:underline">responsiblegambling.org.za</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">0800 006 008</span></span></span></p>
 </footer>
@@ -161,7 +232,9 @@
 <script src="/app-client.js" defer></script>
 <script src="/i18n/i18n.js"></script>
 <script src="/lib/tools-domain.js"></script>
-<script src="/lib/market-labels.js"></script><script src="/lib/market-config.js"></script><script src="/tools-page.js"></script>
+<script src="/lib/market-labels.js"></script><script src="/lib/market-config.js"></script>
+<script src="/lib/icones.js"></script><script src="/lib/composants.js"></script><script src="/lib/offre-pro.js"></script><script src="/lib/pro-vente.js"></script>
+<script src="/tools-page.js"></script>
 <script src="/auth-header.js"></script>
 <script>document.addEventListener('DOMContentLoaded',function(){IasharkAuthHeader.mount('#authHeaderSlot');});</script>
 <script src="/lang-switcher.js"></script>

@@ -39,7 +39,6 @@ for (const v of VERSIONS) {
       const texts = (await items.allTextContents()).map(squash);
       PRO_LIST_KEYS.forEach((k, i) => expect(texts[i], k).toContain(squash(tr(dict, k))));
       await expect(page.locator('#panneau')).toContainText(tr(dict, 'pro_offer.free_matches'));
-      await expect(page.locator('#panneau')).toContainText(tr(dict, 'pro_offer.free_tools'));
       for (const k of ['benefit_pro_six_tools', 'benefit_pro_bankroll']) await expect(page.locator('#panneau')).not.toContainText(tr(dict, 'compte_page.' + k));
       if (!payableOf(v).length) {
         // Marche pas encore ouvert : ligne « pas encore ouvert », aucun bouton mort.

@@ -1,7 +1,4 @@
 const test=require('node:test'),assert=require('node:assert/strict'),d=require('../lib/tools-domain');
-test('le calculateur refuse les entrées invalides',()=>assert.equal(d.calculateStake({bankroll:0,odds:2,probability:60}),null));
-test('Kelly fractionné est plafonné à 5% de bankroll',()=>{const r=d.calculateStake({bankroll:1000,odds:4,probability:80,fraction:1});assert.equal(r.stake,50);assert.equal(r.bankrollPct,5)});
-test('sans edge la mise recommandée vaut zéro',()=>{const r=d.calculateStake({bankroll:1000,odds:2,probability:40});assert.equal(r.stake,0);assert.equal(r.hasEdge,false)});
 test('le P&L et le résumé utilisent uniquement les décisions réglées',()=>{const rows=[{stake:20,odds:2,status:'won'},{stake:10,odds:3,status:'lost'},{stake:99,odds:2,status:'pending'}];assert.equal(d.pnl(rows[0]),20);assert.deepEqual(d.summarize(1000,rows),{bankroll:1000,profit:10,roi:33.33,winRate:50,settled:2,total:3})});
 
 test('scanValue aplatit les ecarts modele/marche deja calcules et les trie, sans rien recalculer', () => {
@@ -46,14 +43,9 @@ test('combo signale quand le combine est moins interessant que le meilleur pari 
   assert.equal(c.worseThanSingle, true);
 });
 
-test('simulateVariance est deterministe et montre la dispersion, pas une moyenne rassurante', () => {
-  const params = { bankroll: 1000, stakePct: 3, bets: 200, winRate: 54, odds: 1.8, runs: 2000 };
-  const a = d.simulateVariance(params);
-  const b = d.simulateVariance(params);
-  assert.deepEqual(a, b, 'memes entrees -> memes resultats, l\'utilisateur ne voit pas les chiffres bouger sans raison');
-  assert.ok(a.p05 < a.median && a.median < a.p95, 'les percentiles sont ordonnes');
-  assert.ok(a.drawdown30Probability >= 0 && a.drawdown30Probability <= 100);
-  assert.equal(d.simulateVariance({ bankroll: 0 }), null, 'entrees invalides -> null, jamais un chiffre invente');
+test('calculateur de mise et simulateur de capital retires (21/10/2026 : ni mise, ni capital)', () => {
+  assert.equal(d.calculateStake, undefined);
+  assert.equal(d.simulateVariance, undefined);
 });
 
 // ---------------------------------------------------------------------------

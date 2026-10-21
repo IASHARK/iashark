@@ -48,8 +48,8 @@ function choisir(matchs, opts) {
 
 test("la regle est ecrite en clair dans le bloc du pipeline", () => {
   assert.match(BLOC, /REGLE COMPLETE, dans cet ordre/);
-  assert.match(BLOC, /ligue « fiable » \(analysis_tier FULL ou\s*\/\/\s*STANDARD\)/);
-  assert.match(BLOC, /entre 12 h et 22 h 59, heure de Paris/);
+  assert.match(BLOC, /les grands championnats d'abord/);
+  assert.match(BLOC, /Ligue fiable et creneau 12 h-22 h 59 : retires le 21\/10\/2026/);
   assert.match(BLOC, /le plus petit numero de match/);
 });
 
@@ -83,13 +83,14 @@ test("egalites : le plus tot, puis le plus petit numero de match (ordre fixe)", 
   assert.deepEqual(choisir([v3(5, 80, TODAY + " 18:00"), v3(9, 80, TODAY + " 18:00")]), [5]);
 });
 
-test("filtres gardes (decision de Clement) : ligue fiable, puis creneau 12 h-22 h 59, avant la probabilite", () => {
-  // 83 % a 3 h du matin contre 74 % a 20 h : le creneau passe avant.
-  assert.deepEqual(choisir([v3(1, 83, TODAY + " 03:00"), v3(2, 74, TODAY + " 20:00")]), [2]);
-  // 83 % en ligue non verifiee contre 74 % en ligue fiable : la ligue passe avant.
-  assert.deepEqual(choisir([v3(1, 83, null, { analysis_tier: "UNVERIFIED" }), v3(2, 74)]), [2]);
-  // Aucun match dans le creneau : le plus probable quand meme.
-  assert.deepEqual(choisir([v3(1, 83, TODAY + " 03:00"), v3(2, 74, TODAY + " 02:00")]), [1]);
+test("simplification du 21/10 : le plus probable, sans tri par ligue fiable ni par creneau", () => {
+  // 83 % a 3 h du matin contre 74 % a 20 h : le plus probable.
+  assert.deepEqual(choisir([v3(1, 83, TODAY + " 03:00"), v3(2, 74, TODAY + " 20:00")]), [1]);
+  // 83 % en ligue non verifiee (tier) contre 74 % en ligue fiable : le plus probable.
+  assert.deepEqual(choisir([v3(1, 83, null, { analysis_tier: "UNVERIFIED" }), v3(2, 74)]), [1]);
+  // Mais jamais une competition « en test », ni une cote sous la fourchette.
+  assert.deepEqual(choisir([v3(1, 83, null, { league_reliability: "en_test" }), v3(2, 74)]), [2]);
+  assert.deepEqual(choisir([v3(1, 83, null, { cote_rec: "1.20" }), v3(2, 74)]), [2]);
 });
 
 test("jamais un match deja commence ; aujourd'hui et demain, un chacun", () => {

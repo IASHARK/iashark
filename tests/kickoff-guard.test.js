@@ -138,7 +138,8 @@ test("pipeline : second passage juste avant la selection canonique, le match off
   assert.match(source, /var estSelectionDuJour=function\(m\)\{ return !!\(m&&m\.pronostic&&m\.pronostic\.selection===true&&m\.pari_rec&&!m\.no_signal\); \};/);
   // Fourchette du 04/10/2026 (dansFourchetteOffert) : le match offert a une cote entre les bornes de la config.
   assert.match(source, /var analysable=function\(m\)\{ return m && m\.pari_rec && !m\.no_signal && \(!SELECTIONS\.estSelectionNationale\(m\) \|\| estSelectionDuJour\(m\)\) && competitionOffrable\(m\) && dansFourchetteOffert\(m\) && eligibleForFree\(FIXTURE_BY_ID\[String\(m\.id\)\],OFFRE_MS\); \};/);
-  assert.match(source, /var creneau=duJour\.filter\(function\(m\)\{ return reasonableParisSlot\(m\); \}\);/);
+  // 21/10/2026 (simplification de Clement) : plus de tri par creneau ; le plus probable des grands championnats.
+  assert.match(source, /var choisi=meilleur\(duJour\);/);
 });
 
 // 16/09/2026 : match offert du jour jamais commence, creneau raisonnable prefere.

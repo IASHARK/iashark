@@ -13,13 +13,15 @@ function charger() {
   vm.runInNewContext(fs.readFileSync(path.join(ROOT, "lib/preuve-hier.js"), "utf8"), G);
   return G.IasharkPreuveHier;
 }
-const NOW = Date.parse("2026-10-23T06:30:00Z"); // 8 h 30 a Paris : la veille est le 22/10
+const NOW = new Date(2026, 9, 23, 8, 30).getTime(); // 8 h 30 chez le visiteur : sa veille est le 22/10
 const bilan = (o) => Object.assign({ version: 1, jour: "2026-10-22", offert: null, selection_or: null }, o);
 
-test("veille a Paris, meme juste apres minuit", () => {
+test("veille du visiteur, jour calendaire : juste apres minuit et le jour du changement d'heure", () => {
   const P = charger();
-  assert.equal(P.hierParis(NOW), "2026-10-22");
-  assert.equal(P.hierParis(Date.parse("2026-10-22T22:30:00Z")), "2026-10-22", "0 h 30 a Paris le 23/10");
+  assert.equal(P.hierLocal(new Date(2026, 9, 23, 8, 30).getTime()), "2026-10-22");
+  assert.equal(P.hierLocal(new Date(2026, 9, 23, 0, 30).getTime()), "2026-10-22");
+  assert.equal(P.hierLocal(new Date(2027, 2, 29, 0, 30).getTime()), "2027-03-28", "lundi 29/03/2027 0 h 30 : la veille est le 28, pas le 27");
+  assert.equal(P.hierLocal(new Date(2026, 0, 1, 10, 0).getTime()), "2025-12-31");
 });
 
 test("gagne et perdu dits pareil ; Selection en or en « gagnes sur regles » ; rien a regler : pas de ligne", () => {
@@ -30,7 +32,14 @@ test("gagne et perdu dits pareil ; Selection en or en « gagnes sur regles » ; 
     "Hier, le pari offert sur Bayern Munich - Arsenal (cote 1,62) n’est pas passé. Sélection en or : 1 sur 3.");
   assert.equal(P.texte(bilan({ selection_or: { gagnes: 2, regles: 3, total: 3 } })), "Hier, Sélection en or : 2 sur 3.");
   assert.equal(P.texte(bilan({ offert: Object.assign({}, o, { resultat: "en_attente" }), selection_or: { gagnes: 0, regles: 0, total: 3 } })), "");
+  assert.equal(P.texte(bilan({ selection_or: { gagnes: 2, regles: 2, annules: 1, total: 3 } })), "Hier, Sélection en or : 2 sur 2, 1 match annulé.");
   assert.equal(P.texte(bilan({ offert: Object.assign({}, o, { match: "<b>x</b>" }) })), "Hier, le pari offert sur &lt;b&gt;x&lt;/b&gt; (cote 1,62) est passé.");
+});
+
+test("traductions chargees avant d'ecrire la ligne (jamais une ligne en francais sur les autres versions)", () => {
+  const js = fs.readFileSync(path.join(ROOT, "lib/preuve-hier.js"), "utf8");
+  assert.match(js, /G\.I18N\.init\(\)/);
+  assert.match(js, /Promise\.all\(\[bilan, dico\]\)/);
 });
 
 test("jamais un vieux bilan : seulement le fichier de la veille", () => {
@@ -54,7 +63,8 @@ test("accueil et page Pro, toutes les versions : un emplacement cache et le scri
   });
   ["fr", "en", "es", "es-mx", "de", "it", "pt"].forEach((l) => {
     const d = require("../i18n/dict/" + l + ".json").preuve_hier;
-    ["offert_gagne", "offert_perdu", "or", "or_seule"].forEach((k) => assert.ok(d && typeof d[k] === "string" && d[k].includes("{"), l + " " + k));
-    assert.doesNotMatch(JSON.stringify(d), /\bX\b|twitter|garanti|mise/i, l);
+    ["offert_gagne", "offert_perdu", "or", "or_seule", "or_annules", "or_seule_annules", "annule_n"].forEach((k) => assert.ok(d && typeof d[k] === "string" && d[k].includes("{"), l + " " + k));
+    assert.ok(typeof d.annule_1 === "string" && d.annule_1.length > 3, l + " annule_1");
+    assert.doesNotMatch(JSON.stringify(d), /\bX\b|twitter|garanti|mise|apuesta gratis|scommessa gratuita|aposta gr[aá]tis|free bet/i, l);
   });
 });

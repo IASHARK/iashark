@@ -2646,7 +2646,9 @@ jobs:
               try{
                 var fichierHier=null; try{ fichierHier=JSON.parse(fs.readFileSync(RESULTS_DIR+'/'+HIER+'.json','utf8')); }catch(e){}
                 var registreOfferts=null; try{ registreOfferts=JSON.parse(fs.readFileSync('preuves/matchs-offerts.json','utf8')); }catch(e){}
-                var bilanHier=BILAN_HIER.construireBilan({jour:HIER,registre:registreOfferts,ticketOr:TICKET_OR_HIER,resultats:fichierHier,parisPublies:PARIS_PUBLIES_BILAN,genereLe:genere});
+                var bilanPrecedent=null; try{ bilanPrecedent=JSON.parse(fs.readFileSync('preuves/bilan-hier.json','utf8')); }catch(e){}
+                // Jamais un bilan du jour remplace par un plus pauvre (passage sans acces a la base) : fusion avec le precedent.
+                var bilanHier=BILAN_HIER.fusionnerAvecPrecedent(BILAN_HIER.construireBilan({jour:HIER,registre:registreOfferts,ticketOr:TICKET_OR_HIER,resultats:fichierHier,parisPublies:PARIS_PUBLIES_BILAN,genereLe:genere}),bilanPrecedent);
                 if(!fs.existsSync('preuves')) fs.mkdirSync('preuves',{recursive:true});
                 fs.writeFileSync('preuves/bilan-hier.json',JSON.stringify(bilanHier,null,2));
                 console.log('  [bilan hier] '+HIER+' : pari offert '+(bilanHier.offert?bilanHier.offert.resultat:'aucun')+', Selection en or '+(bilanHier.selection_or?bilanHier.selection_or.gagnes+'/'+bilanHier.selection_or.regles:'aucune')+'.');

@@ -301,78 +301,11 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
   box-shadow:0 14px 34px -16px rgba(32,213,239,.75);transition:transform .18s,filter .18s;}
 .hero-cta:hover{filter:brightness(1.07);}
 .hero-cta:active{transform:translateY(1px);}
-
-
-
-  border:1px solid rgba(32,213,239,.28);background:rgba(32,213,239,.08);
-  color:var(--cyan);font-size:14px;font-weight:800;letter-spacing:.04em;}
-
-.plan{position:relative;padding:28px 26px;border:1px solid var(--line);border-radius:16px;background:var(--surface);
-  display:flex;flex-direction:column;}
-/* Le plan payant est la seule surface mise en avant : une bordure cyan et
-   une lueur, pas une couleur de fond differente qui casserait le theme. */
-  background:linear-gradient(165deg,rgba(32,213,239,.07),var(--surface) 58%);
-  box-shadow:0 26px 60px -34px rgba(32,213,239,.55);}
-  background:var(--cyan);color:#04121a;font-size:10px;font-weight:800;letter-spacing:.12em;}
-  border-left:2px solid var(--cyan);border-bottom:2px solid var(--cyan);transform:rotate(-45deg);opacity:.85;}
-  font-size:12.5px;font-weight:800;letter-spacing:.06em;transition:filter .18s,background .18s;}
-
-
-@media(max-width:900px){
-  .model-grid{grid-template-columns:repeat(2,1fr);}
-  .step-list{grid-template-columns:1fr;gap:18px;}
-}
-@media(max-width:640px){
-  .sell-wrap{padding:46px 18px;}
-  .sell-final .sell-wrap{padding:52px 18px 60px;}
-  .model-grid{grid-template-columns:1fr;}
-  .plan-grid{grid-template-columns:1fr;}
-  .hero-offer{margin:20px 0 16px;}
-  .hero-offer b{font-size:30px;}
-  .hero-cta{width:100%;}
-  .hero-actions{gap:14px;}
-}
-
-/* ================= PREMIER ECRAN — le seul que tout le monde voit =========
-   Motif retenu (ui-ux-pro-max) : "Social Proof-Focused" — marqueurs de
-   credibilite et chiffres, plutot qu'une promesse. Anti-motif signale par
-   le meme skill et corrige ici : "couleurs ternes, basse energie".
-   Palette inchangee : cyan #20d5ef sur fond sombre.
-   ========================================================================= */
-  padding:7px 14px 7px 11px;border-radius:999px;
-  border:1px solid rgba(32,213,239,.24);background:rgba(32,213,239,.07);
-  font-size:12.5px;color:var(--soft);letter-spacing:.01em;}
-  width:7px;height:7px;border-radius:50%;background:var(--cyan);
-  box-shadow:0 0 0 0 rgba(32,213,239,.7);animation:heroPulse 2.4s ease-out infinite;}
-@keyframes heroPulse{0%{box-shadow:0 0 0 0 rgba(32,213,239,.55)}
-  70%{box-shadow:0 0 0 9px rgba(32,213,239,0)}100%{box-shadow:0 0 0 0 rgba(32,213,239,0)}}
-@media(prefers-reduced-motion:reduce){.hero-dot{animation:none}}
-
-/* Le titre devient l'element dominant de la page, et la seconde ligne
-   porte l'accent : c'est la promesse, elle doit se detacher. */
-
-/* Chiffres verifiables, jamais un taux de reussite : 13 championnats et
-   4 modeles sont lisibles dans config/leagues.json et lib/models.js. */
-  color:var(--cyan);font-variant-numeric:tabular-nums;order:1;}
-
-/* La carte du match gratuit est notre demo produit : elle doit avoir le
-   poids d'un ecran d'application, pas d'une vignette. */
-  background:radial-gradient(60% 55% at 60% 40%,rgba(32,213,239,.14),transparent 70%);
-  filter:blur(14px);pointer-events:none;}
-.feature-card{position:relative;z-index:1;
-  box-shadow:0 40px 90px -50px rgba(0,0,0,.95),0 0 0 1px rgba(32,213,239,.1);}
-
-@media(max-width:900px){
-  .hero-stats>div{padding-right:12px;}
-  .hero-stats>div+div{padding-left:12px;}
-  .hero-stats dd{font-size:25px;}
-  .hero-stats dt{font-size:11px;}
-}
-@media(max-width:640px){
-  .hero-title{font-size:38px;letter-spacing:-1.6px;}
-  .hero-badge{font-size:11.5px;padding:6px 12px 6px 10px;}
-  .hero-stats{margin:20px 0 2px;}
-}
+/* Fragments orphelins et regles mortes retires le 21/10/2026 (passe
+   « impeccable ») : des declarations sans selecteur avalaient la regle
+   suivante, et les autres visaient des blocs disparus de la page (.plan,
+   .model-grid, .hero-stats, .hero-badge...). Rien ne change a l'ecran. */
+@media(max-width:640px){.hero-cta{width:100%;}}
 
 /* =======================================================================
    CARTES "DECISIONS DU JOUR" — v2 CRO
@@ -498,8 +431,29 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 @media (prefers-reduced-motion:reduce){.hero-stade-layer{transform:none!important}}
 /* Bandeau des chiffres (3 colonnes) et composant de paiement (#acces, 600 px au plus) : regles
    ecrites ici, pas en classes Tailwind non compilees (controle UX du 04/10, tour 2). */
-.kpi-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.kpi-2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .acces-in{max-width:600px}
+/* Passe « impeccable » (21/10/2026) : listes a filets au lieu de cartes
+   identiques, pied de page lisible (12 px, plus de chasse fixe a 8 px), bloc
+   « Aujourd'hui » aligne sur la liste des matchs. */
+.hs-points{display:grid;margin:28px 0 0;padding:0;list-style:none;max-width:68ch}
+.hs-points>li{padding:18px 0;border-top:1px solid var(--line)}
+.hs-points>li:first-child{padding-top:0;border-top:0}
+.hs-points h3{margin:0 0 6px;font-size:17px;font-weight:700;line-height:1.3;letter-spacing:-.01em}
+.hs-points p{margin:0;font-size:14.5px;line-height:1.6;color:var(--soft)}
+@media(min-width:768px){
+  .hs-points{grid-template-columns:repeat(3,minmax(0,1fr));max-width:none;margin-top:36px}
+  .hs-points>li{padding:0 28px;border-top:0;border-left:1px solid var(--line)}
+  .hs-points>li:first-child{padding-left:0;border-left:0}
+}
+.hs-steps{margin:0;padding:0;list-style:none}
+.hs-steps>li{padding:16px 0;border-top:1px solid var(--line)}
+.hs-steps>li:first-child{padding-top:0;border-top:0}
+.hs-steps>li>div{font-size:15.5px;font-weight:700;line-height:1.3}
+.hs-steps>li>p{margin:5px 0 0;font-size:14px;line-height:1.55;color:var(--soft)}
+#aujourdhui.aj{width:min(860px,calc(100% - 36px))}
+.rf-in{font-family:'Inter',system-ui,sans-serif;font-size:12px;line-height:1.85;letter-spacing:.03em;color:#8a9bb0}
+.rf-in a{display:inline-block;padding:6px 0}
 </style>
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
 <link rel="stylesheet" href="/assets/home-list.css">
@@ -547,7 +501,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 </section>
 
 <section class="relative border-y border-hairline bg-surface/40 py-7">
-  <p class="mb-4 text-center text-[9.5px] font-bold tracking-[0.2em] text-cyan/70">19 COMPÉTITIONS COUVERTES</p>
+  <p class="mb-4 text-center text-[11px] font-bold tracking-[0.14em] text-cyan/70">19 COMPÉTITIONS COUVERTES</p>
   <div class="group relative flex overflow-hidden mask-fade-x">
     <div class="flex w-max animate-marquee items-center group-hover:[animation-play-state:paused]" aria-hidden="true">
       <div class="flex items-center"><span class="flex shrink-0 items-center gap-3 px-7 opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"><img src="https://media.api-sports.io/football/leagues/61.png" alt="" width="48" height="48" loading="lazy" class="league-badge-img h-12 w-12 shrink-0 rounded-lg border border-white/70 bg-[#f4f7fa] p-1 object-contain shadow-[0_5px_14px_rgba(0,0,0,.28)]"><span class="whitespace-nowrap text-[15px] font-semibold tracking-wide text-ink">Ligue 1</span></span><span class="flex shrink-0 items-center gap-3 px-7 opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"><img src="https://media.api-sports.io/football/leagues/39.png" alt="" width="48" height="48" loading="lazy" class="league-badge-img h-12 w-12 shrink-0 rounded-lg border border-white/70 bg-[#f4f7fa] p-1 object-contain shadow-[0_5px_14px_rgba(0,0,0,.28)]"><span class="whitespace-nowrap text-[15px] font-semibold tracking-wide text-ink">Premier League</span></span><span class="flex shrink-0 items-center gap-3 px-7 opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"><img src="https://media.api-sports.io/football/leagues/2.png" alt="" width="48" height="48" loading="lazy" class="league-badge-img h-12 w-12 shrink-0 rounded-lg border border-white/70 bg-[#f4f7fa] p-1 object-contain shadow-[0_5px_14px_rgba(0,0,0,.28)]"><span class="whitespace-nowrap text-[15px] font-semibold tracking-wide text-ink">Champions League</span></span><span class="flex shrink-0 items-center gap-3 px-7 opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"><img src="https://media.api-sports.io/football/leagues/140.png" alt="" width="48" height="48" loading="lazy" class="league-badge-img h-12 w-12 shrink-0 rounded-lg border border-white/70 bg-[#f4f7fa] p-1 object-contain shadow-[0_5px_14px_rgba(0,0,0,.28)]"><span class="whitespace-nowrap text-[15px] font-semibold tracking-wide text-ink">La Liga</span></span><span class="flex shrink-0 items-center gap-3 px-7 opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"><img src="https://media.api-sports.io/football/leagues/135.png" alt="" width="48" height="48" loading="lazy" class="league-badge-img h-12 w-12 shrink-0 rounded-lg border border-white/70 bg-[#f4f7fa] p-1 object-contain shadow-[0_5px_14px_rgba(0,0,0,.28)]"><span class="whitespace-nowrap text-[15px] font-semibold tracking-wide text-ink">Serie A</span></span><span class="flex shrink-0 items-center gap-3 px-7 opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"><img src="https://media.api-sports.io/football/leagues/78.png" alt="" width="48" height="48" loading="lazy" class="league-badge-img h-12 w-12 shrink-0 rounded-lg border border-white/70 bg-[#f4f7fa] p-1 object-contain shadow-[0_5px_14px_rgba(0,0,0,.28)]"><span class="whitespace-nowrap text-[15px] font-semibold tracking-wide text-ink">Bundesliga</span></span><span class="flex shrink-0 items-center gap-3 px-7 opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"><img src="https://media.api-sports.io/football/leagues/3.png" alt="" width="48" height="48" loading="lazy" class="league-badge-img h-12 w-12 shrink-0 rounded-lg border border-white/70 bg-[#f4f7fa] p-1 object-contain shadow-[0_5px_14px_rgba(0,0,0,.28)]"><span class="whitespace-nowrap text-[15px] font-semibold tracking-wide text-ink">Europa League</span></span><span class="flex shrink-0 items-center gap-3 px-7 opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"><img src="https://media.api-sports.io/football/leagues/848.png" alt="" width="48" height="48" loading="lazy" class="league-badge-img h-12 w-12 shrink-0 rounded-lg border border-white/70 bg-[#f4f7fa] p-1 object-contain shadow-[0_5px_14px_rgba(0,0,0,.28)]"><span class="whitespace-nowrap text-[15px] font-semibold tracking-wide text-ink">Conference League</span></span><span class="flex shrink-0 items-center gap-3 px-7 opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"><img src="https://media.api-sports.io/football/leagues/88.png" alt="" width="48" height="48" loading="lazy" class="league-badge-img h-12 w-12 shrink-0 rounded-lg border border-white/70 bg-[#f4f7fa] p-1 object-contain shadow-[0_5px_14px_rgba(0,0,0,.28)]"><span class="whitespace-nowrap text-[15px] font-semibold tracking-wide text-ink">Eredivisie</span></span><span class="flex shrink-0 items-center gap-3 px-7 opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"><img src="https://media.api-sports.io/football/leagues/94.png" alt="" width="48" height="48" loading="lazy" class="league-badge-img h-12 w-12 shrink-0 rounded-lg border border-white/70 bg-[#f4f7fa] p-1 object-contain shadow-[0_5px_14px_rgba(0,0,0,.28)]"><span class="whitespace-nowrap text-[15px] font-semibold tracking-wide text-ink">Liga Portugal</span></span><span class="flex shrink-0 items-center gap-3 px-7 opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"><img src="https://media.api-sports.io/football/leagues/253.png" alt="" width="48" height="48" loading="lazy" class="league-badge-img h-12 w-12 shrink-0 rounded-lg border border-white/70 bg-[#f4f7fa] p-1 object-contain shadow-[0_5px_14px_rgba(0,0,0,.28)]"><span class="whitespace-nowrap text-[15px] font-semibold tracking-wide text-ink">MLS</span></span><span class="flex shrink-0 items-center gap-3 px-7 opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"><img src="https://media.api-sports.io/football/leagues/113.png" alt="" width="48" height="48" loading="lazy" class="league-badge-img h-12 w-12 shrink-0 rounded-lg border border-white/70 bg-[#f4f7fa] p-1 object-contain shadow-[0_5px_14px_rgba(0,0,0,.28)]"><span class="whitespace-nowrap text-[15px] font-semibold tracking-wide text-ink">Allsvenskan</span></span><span class="flex shrink-0 items-center gap-3 px-7 opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"><img src="https://media.api-sports.io/football/leagues/98.png" alt="" width="48" height="48" loading="lazy" class="league-badge-img h-12 w-12 shrink-0 rounded-lg border border-white/70 bg-[#f4f7fa] p-1 object-contain shadow-[0_5px_14px_rgba(0,0,0,.28)]"><span class="whitespace-nowrap text-[15px] font-semibold tracking-wide text-ink">J1 League</span></span><span class="flex shrink-0 items-center gap-3 px-7 opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"><img src="https://media.api-sports.io/football/leagues/262.png" alt="" width="48" height="48" loading="lazy" class="league-badge-img h-12 w-12 shrink-0 rounded-lg border border-white/70 bg-[#f4f7fa] p-1 object-contain shadow-[0_5px_14px_rgba(0,0,0,.28)]"><span class="whitespace-nowrap text-[15px] font-semibold tracking-wide text-ink">Liga MX</span></span><span class="flex shrink-0 items-center gap-3 px-7 opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"><img src="https://media.api-sports.io/football/leagues/288.png" alt="" width="48" height="48" loading="lazy" class="league-badge-img h-12 w-12 shrink-0 rounded-lg border border-white/70 bg-[#f4f7fa] p-1 object-contain shadow-[0_5px_14px_rgba(0,0,0,.28)]"><span class="whitespace-nowrap text-[15px] font-semibold tracking-wide text-ink">Premier Soccer League</span></span><span class="flex shrink-0 items-center gap-3 px-7 opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"><img src="https://media.api-sports.io/football/leagues/128.png" alt="" width="48" height="48" loading="lazy" class="league-badge-img h-12 w-12 shrink-0 rounded-lg border border-white/70 bg-[#f4f7fa] p-1 object-contain shadow-[0_5px_14px_rgba(0,0,0,.28)]"><span class="whitespace-nowrap text-[15px] font-semibold tracking-wide text-ink">Liga Profesional Argentina</span></span><span class="flex shrink-0 items-center gap-3 px-7 opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"><img src="https://media.api-sports.io/football/leagues/239.png" alt="" width="48" height="48" loading="lazy" class="league-badge-img h-12 w-12 shrink-0 rounded-lg border border-white/70 bg-[#f4f7fa] p-1 object-contain shadow-[0_5px_14px_rgba(0,0,0,.28)]"><span class="whitespace-nowrap text-[15px] font-semibold tracking-wide text-ink">Primera A Colombia</span></span><span class="flex shrink-0 items-center gap-3 px-7 opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"><img src="https://media.api-sports.io/football/leagues/281.png" alt="" width="48" height="48" loading="lazy" class="league-badge-img h-12 w-12 shrink-0 rounded-lg border border-white/70 bg-[#f4f7fa] p-1 object-contain shadow-[0_5px_14px_rgba(0,0,0,.28)]"><span class="whitespace-nowrap text-[15px] font-semibold tracking-wide text-ink">Liga 1 Peru</span></span><span class="flex shrink-0 items-center gap-3 px-7 opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"><img src="https://media.api-sports.io/football/leagues/265.png" alt="" width="48" height="48" loading="lazy" class="league-badge-img h-12 w-12 shrink-0 rounded-lg border border-white/70 bg-[#f4f7fa] p-1 object-contain shadow-[0_5px_14px_rgba(0,0,0,.28)]"><span class="whitespace-nowrap text-[15px] font-semibold tracking-wide text-ink">Primera Division Chile</span></span></div>
@@ -603,21 +557,23 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 
 <section id="analyse" class="relative border-t border-hairline">
   <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-16 sm:py-24">
-    <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>CE QUE TU REÇOIS</div>
     <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">Une analyse, <span class="text-cyan">pas un pronostic</span> balancé sans explication.</h2>
-    <div class="mt-8 grid grid-cols-1 gap-5 md:grid-cols-3">
-      <article class="spot rounded-2xl border border-hairline bg-surface/60 p-7 transition hover:border-cyan/25"><div class="mb-4 text-[12px] font-bold tracking-[0.16em] text-cyan/70">01</div><h3 class="mb-2.5 text-[19px] font-bold text-ink">Le signal</h3><p class="text-[14px] leading-relaxed text-soft">Le marché le plus probable parmi ceux qui sont cotés, avec l’écart entre notre estimation et la cote, favorable ou non.</p></article>
-      <article class="spot rounded-2xl border border-hairline bg-surface/60 p-7 transition hover:border-cyan/25"><div class="mb-4 text-[12px] font-bold tracking-[0.16em] text-cyan/70">02</div><h3 class="mb-2.5 text-[19px] font-bold text-ink">L’explication</h3><p class="text-[14px] leading-relaxed text-soft">Les données et les facteurs qui ont conduit le modèle à cette conclusion, écrits en clair.</p></article>
-      <article class="spot rounded-2xl border border-hairline bg-surface/60 p-7 transition hover:border-cyan/25"><div class="mb-4 text-[12px] font-bold tracking-[0.16em] text-cyan/70">03</div><h3 class="mb-2.5 text-[19px] font-bold text-ink">L’incertitude</h3><p class="text-[14px] leading-relaxed text-soft">Chaque analyse indique la fiabilité de ses données. Un échantillon mince est écrit, pas caché.</p></article>
-    </div>
+    <!-- Trois points de texte separes par un filet (21/10/2026) : plus de grille
+         de trois cartes identiques numerotees 01-02-03 sans ordre a lire. -->
+    <ul class="hs-points">
+      <li><h3 class="text-ink">Le signal</h3><p>Le marché le plus probable parmi ceux qui sont cotés, avec l’écart entre notre estimation et la cote, favorable ou non.</p></li>
+      <li><h3 class="text-ink">L’explication</h3><p>Les données et les facteurs qui ont conduit le modèle à cette conclusion, écrits en clair.</p></li>
+      <li><h3 class="text-ink">L’incertitude</h3><p>Chaque analyse indique la fiabilité de ses données. Un échantillon mince est écrit, pas caché.</p></li>
+    </ul>
   </div>
 </section>
 
 <section class="relative border-t border-hairline">
   <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-10 sm:py-14">
-    <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>CE QUE LE MOTEUR A DÉJÀ TRAITÉ</div>
-    <div class="mt-6 grid kpi-3 divide-hairline md:divide-x">
-      <div class="flex flex-col gap-1.5 px-2 py-4 text-center sm:px-4"><b id="kpiAnalyses" class="text-[clamp(30px,4vw,44px)] font-extrabold leading-none tracking-[-0.04em] text-ink tabular-nums">—</b><span class="text-[12.5px] leading-snug text-soft">Analyses publiées</span></div>
+    <!-- « Analyses publiees » retire le 21/10/2026 : le chiffre n'etait plus
+         jamais rempli (historique.json n'est plus publie) et affichait un tiret.
+         Restent deux comptages reels, jamais un resultat. -->
+    <div class="grid kpi-2 divide-hairline md:divide-x">
       <div class="flex flex-col gap-1.5 px-2 py-4 text-center sm:px-4"><b id="kpiLigues" class="text-[clamp(30px,4vw,44px)] font-extrabold leading-none tracking-[-0.04em] text-ink tabular-nums">19</b><span class="text-[12.5px] leading-snug text-soft">Compétitions couvertes</span></div>
       <div class="flex flex-col gap-1.5 px-2 py-4 text-center sm:px-4"><b id="kpiJour" class="text-[clamp(30px,4vw,44px)] font-extrabold leading-none tracking-[-0.04em] text-ink tabular-nums">—</b><span class="text-[12.5px] leading-snug text-soft">Matchs analysés sur 3 jours</span></div>
     </div>
@@ -627,7 +583,6 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 <section class="relative border-t border-hairline bg-surface/30">
   <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-16 sm:py-24 grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
     <div class="lg:col-span-5">
-      <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>CE QU’ON NE FERA PAS</div>
       <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">On préfère te dire <span class="text-cyan">quand on ne sait pas.</span></h2>
       <p class="mt-4 max-w-2xl text-[15.5px] leading-relaxed text-soft">Une probabilité ne vaut que par sa fiabilité : on affiche les deux, même quand elles sont modestes.</p>
     </div>
@@ -652,18 +607,18 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 
 <section id="methode" class="relative border-t border-hairline">
   <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-16 sm:py-24">
-    <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>LA MÉTHODE</div>
     <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">Quatre étapes,<span class="text-cyan">un seul signal</span> par match.</h2>
     <p class="mt-4 max-w-2xl text-[15.5px] leading-relaxed text-soft">Chaque étape répond à une question différente. Un seul marché en sort, choisi par une règle fixe.</p>
     <div class="mt-8 grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_260px]">
-      <ul class="flex list-none flex-col gap-3 p-0">
-        <li class="rounded-xl border border-hairline bg-surface/60 px-5 py-4"><div class="text-[15px] font-bold text-ink">Forces en présence</div><p class="mt-1 text-[12.5px] leading-snug text-soft">Ce que chaque équipe produit et concède, à domicile ou à l’extérieur.</p></li>
-        <li class="rounded-xl border border-hairline bg-surface/60 px-5 py-4"><div class="text-[15px] font-bold text-ink">Prudence en début de saison</div><p class="mt-1 text-[12.5px] leading-snug text-soft">Avec peu de matchs joués, la saison précédente pèse davantage.</p></li>
-        <li class="rounded-xl border border-hairline bg-surface/60 px-5 py-4"><div class="text-[15px] font-bold text-ink">Probabilité de chaque marché</div><p class="mt-1 text-[12.5px] leading-snug text-soft">Des buts attendus à la probabilité de chaque score, puis de chaque marché.</p></li>
-        <li class="rounded-xl border border-hairline bg-surface/60 px-5 py-4"><div class="text-[15px] font-bold text-ink">Les scores les plus probables</div><p class="mt-1 text-[12.5px] leading-snug text-soft">Les chances de chaque score, classées pour faire ressortir les plus probables.</p></li>
+      <!-- Quatre etapes en liste a filets (21/10/2026), plus quatre cartes identiques. -->
+      <ul class="hs-steps">
+        <li><div class="text-ink">Forces en présence</div><p>Ce que chaque équipe produit et concède, à domicile ou à l’extérieur.</p></li>
+        <li><div class="text-ink">Prudence en début de saison</div><p>Avec peu de matchs joués, la saison précédente pèse davantage.</p></li>
+        <li><div class="text-ink">Probabilité de chaque marché</div><p>Des buts attendus à la probabilité de chaque score, puis de chaque marché.</p></li>
+        <li><div class="text-ink">Les scores les plus probables</div><p>Les chances de chaque score, classées pour faire ressortir les plus probables.</p></li>
       </ul>
       <div class="rounded-2xl border border-cyan/25 bg-cyan/[0.05] p-6">
-        <div class="text-[11px] font-bold uppercase tracking-[0.18em] text-cyan/80">Signal IASHARK</div>
+        <div class="text-[15px] font-bold text-cyan">Signal IASHARK</div>
         <p class="mt-2.5 text-[14px] leading-relaxed text-soft">Un marché prioritaire, une probabilité, et l’écart mesuré avec le prix du marché.</p>
       </div>
     </div>
@@ -672,7 +627,6 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 
 <section class="relative border-t border-hairline bg-surface/30">
   <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-12 sm:py-16">
-    <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>EN PRATIQUE</div>
     <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">De la donnée brute au <span class="text-cyan">signal exploitable.</span></h2>
     <ol class="mt-7 flex list-none flex-col gap-6 p-0 md:flex-row md:items-start md:gap-6">
       <li class="flex flex-1 items-start gap-4 md:flex-col md:items-stretch md:gap-3"><span class="shrink-0 text-[12px] font-extrabold tracking-[0.14em] text-cyan/70">01</span><div><h3 class="text-[15.5px] font-bold text-ink">On ingère la donnée</h3><p class="mt-1.5 text-[13.5px] leading-relaxed text-soft">Calendriers, classements, résultats récents, confrontations directes et absences annoncées, championnat par championnat.</p></div></li><span aria-hidden="true" class="hidden text-[18px] text-soft/40 md:block">→</span>
@@ -684,7 +638,6 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 
 <section class="relative border-t border-hairline">
   <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-16 sm:py-20">
-    <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>QUESTIONS FRÉQUENTES</div>
     <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">Ce que tu te demandes <span class="text-cyan">avant de payer.</span></h2>
     <div class="mt-7 max-w-3xl">
       <details class="group border-b border-hairline"><summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-[15.5px] font-semibold text-ink transition hover:text-cyan focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"><span>Je peux essayer avant de payer ?</span><span aria-hidden="true" class="shrink-0 text-[20px] font-normal leading-none text-cyan transition-transform duration-200 group-open:rotate-45">+</span></summary><p class="max-w-2xl pb-5 text-[14px] leading-relaxed text-soft">Oui. Une analyse complète est offerte chaque jour avec un compte gratuit, sans carte bancaire : le même contenu que pour un abonné. Elle est choisie parmi les écarts les plus favorables du jour ; les autres analyses ne le sont pas toutes.</p></details>
@@ -712,8 +665,8 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 </main>
 
 <footer class="responsible-footer" style="max-width:1100px;margin:24px auto 0;padding:0 20px 20px;text-align:center;">
-  <div style="font-family:'Space Mono',monospace;font-size:8px;color:#8a9bb0;line-height:2;letter-spacing:1px;">
-    <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>
+  <div class="rf-in">
+    <div>LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>
     <div>Aide : <a data-market-helpline="url" href="https://www.joueurs-info-service.fr" style="color:#22d3ee;text-decoration:none;">joueurs-info-service.fr</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">09 74 75 13 13</span></span></div>
     <div style="margin-top:8px;">
       <a href="/fr/mentions-legales.html" style="color:#22d3ee;text-decoration:underline;margin:0 8px;">Mentions légales</a>

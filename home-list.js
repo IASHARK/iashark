@@ -177,6 +177,11 @@ function analysisFor(m,ctx,H){
   // croire que le modele avait choisi de ne pas parier (20/09/2026). Un match
   // ferme AVEC pari publie garde son analyse (lib/pick-freeze.js
   // FROZEN_CLOSED) et ne passe pas par cet etat.
+  // Match reporte (lib/pick-freeze.js POSTPONED_CLOSED) : « Match reporté », jamais
+  // « apres le coup d'envoi » pour un match qui ne s'est pas encore joue (libelle de
+  // 9d61c28fb, perdu au retour du 03/10, remis le 21/10/2026 : Levante - Athletic
+  // affichait « Pronostic fermé » avec « dans 12 h 33 »).
+  if(!hasSignal(m)&&String(m.no_signal_reason||'')==='KICKOFF_POSTPONED')return {state:'closed',postponed:true,free:false};
   if(!hasSignal(m)&&/^(KICKOFF_|FIXTURE_NOT_UPCOMING)/.test(String(m.no_signal_reason||'')))return {state:'closed',free:false};
   if(!hasSignal(m))return {state:'none',free:free,label:m.no_signal_label||t('home_app.no_signal_label','Aucun signal clair sur ce match')};
   // Match offert sans compte : la page match exige un compte gratuit ; ici non
@@ -285,6 +290,9 @@ function matchStarHtml(m,ctx){
   return '<button type="button" class="hl-mstar'+(on?' is-on':'')+'" data-hl-mfav="'+esc(m.id)+'" aria-pressed="'+on+'" aria-label="'+esc(lbl)+'" title="'+esc(lbl)+'">'+ICON.star+'</button>';
 }
 
+// Ligne fermee : « Pronostic fermé » apres le coup d'envoi, « Match reporté » pour un match reporte.
+function closedShort(a){return a.postponed?t('home_list.postponed_short','Match reporté'):t('home_list.closed_short','Pronostic fermé');}
+function closedSub(a){return a.postponed?t('home_list.postponed_sub','Aucun pronostic sur ce match'):t('home_list.closed_sub','L’analyse n’est plus proposée après le coup d’envoi');}
 function renderMatchRow(m,ctx,H,index){
   var a=analysisFor(m,ctx,H),ts=H.matchTimestamp(m),cd=countdown(m,H,ctx.nowTs);
   var home=m.home||{},away=m.away||{},heure=H.heure(m),derby=derbyName(m),q=qualityFor(m),sig=hasSignal(m);
@@ -330,8 +338,8 @@ function renderMatchRow(m,ctx,H,index){
   }else if(a.state==='pending'){
     zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'+esc(t('home_app.analysis_in_progress','Analyse en cours'))+'</span></span>';
   }else if(a.state==='closed'){
-    zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'+esc(t('home_list.closed_short','Pronostic fermé'))+'</span>'
-      +'<span class="hl-none-s">'+esc(t('home_list.closed_sub','L’analyse n’est plus proposée après le coup d’envoi'))+'</span></span>';
+    zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'+esc(closedShort(a))+'</span>'
+      +'<span class="hl-none-s">'+esc(closedSub(a))+'</span></span>';
   }else{
     zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'+esc(t('home_list.no_signal_short','Pas de signal clair'))+'</span>'
       +'<span class="hl-none-s">'+esc(t('home_list.no_signal_sub','Aucun pari forcé'))+'</span></span>';
@@ -344,7 +352,7 @@ function renderMatchRow(m,ctx,H,index){
       +(a.free?' '+t('home_list.aria_free','Analyse offerte.'):'')
     :a.state==='gated'?t('home_list.aria_free_gated','Analyse offerte avec un compte gratuit.')
     :a.state==='pending'?t('home_app.analysis_in_progress','Analyse en cours')+'.'
-    :a.state==='closed'?t('home_list.closed_short','Pronostic fermé')+'. '+t('home_list.closed_sub','L’analyse n’est plus proposée après le coup d’envoi')+'.':a.label+'.';
+    :a.state==='closed'?closedShort(a)+'. '+closedSub(a)+'.':a.label+'.';
   var extra=[derby?tf('home_list.aria_derby','Derby : {name}',{name:derby}):'',cd?cd.text+(cd.estimated?' ('+t('home_list.estimated','estimé')+')':''):'',q?q.text:''].filter(Boolean).join(', ');
   var aria=tf('home_list.row_aria','{home} contre {away}, {time}. {extra}. {analysis}',{home:home.n||'',away:away.n||'',time:heure,extra:extra,analysis:anaAria}).replace(/\.\s\./g,'.');
   // Suivi du tunnel (funnel-track.js) : ligne verrouillee = kind dedie, sans donnee personnelle.

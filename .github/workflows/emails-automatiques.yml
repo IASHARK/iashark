@@ -1,0 +1,81 @@
+# E-mails automatiques (supabase/functions/send-lifecycle-emails et trial-reminder),
+# lances a la main, envoi par Brevo dans la region us-east-2 (comme relance-emails.yml).
+#   apercu : rien n'est envoye. Chaque e-mail rendu dans les 9 versions du site
+#            (artefact « emails-apercu » du lancement) et, sans aucune adresse,
+#            combien de clients seraient concernes si l'envoi reel etait lance.
+#   test   : un exemplaire de chaque e-mail, en francais, a la SEULE adresse du
+#            patron (fixee dans lib/lifecycle-email.js, jamais saisie ici).
+#            Aucun client ne recoit rien.
+# Ni envoi reel aux clients ni programmation horaire dans ce workflow : etape
+# suivante, apres l'accord de Clement (plan dans
+# supabase/migrations/0055_emails_relances_paiement.sql).
+name: E-mails automatiques
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "apercu (rien n'est envoye) ou test (un exemplaire de chaque e-mail au patron)"
+        required: true
+        default: apercu
+        type: choice
+        options: [apercu, test]
+permissions:
+  contents: read
+jobs:
+  emails:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      # Les fonctions ne sont installees que si leurs tests passent.
+      - name: Tests des e-mails
+        run: node --test tests/email-lifecycle.test.js tests/email-lifecycle-edge.test.js tests/email-lifecycle-migration.test.js tests/email-relances-paiement.test.js tests/trial-reminder.test.js
+      # Installees depuis ce depot a chaque lancement (meme version que les tests).
+      # Secrets : les memes que relance-emails.yml. LIFECYCLE_SENDING_ENABLED n'est
+      # JAMAIS pose ici : sans lui, aucun e-mail ne part vers un client.
+      - name: Installation des fonctions
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          RELANCE_SECRET: ${{ secrets.RELANCE_SECRET }}
+          EMAIL_UNSUBSCRIBE_SECRET: ${{ secrets.EMAIL_UNSUBSCRIBE_SECRET }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+        run: |
+          npx -y supabase@2 secrets set "RELANCE_SECRET=$RELANCE_SECRET" "EMAIL_UNSUBSCRIBE_SECRET=$EMAIL_UNSUBSCRIBE_SECRET" --project-ref ksvjraqitxouwiabecai > /dev/null
+          if [ -n "$BREVO_API_KEY" ]; then
+            npx -y supabase@2 secrets set "BREVO_API_KEY=$(printf %s "$BREVO_API_KEY" | tr -d '\r\n ')" --project-ref ksvjraqitxouwiabecai > /dev/null
+          fi
+          for fonction in send-lifecycle-emails trial-reminder; do
+            npx -y supabase@2 functions deploy "$fonction" --project-ref ksvjraqitxouwiabecai --use-api --no-verify-jwt
+          done
+      # Region fixe (Ohio, us-east-2) : Brevo n'accepte que les adresses autorisees par Clement
+      # (plage IPv6 2600:1f16::/32) ; sans region fixe, l'adresse de depart change a chaque appel.
+      - name: Appel des fonctions
+        env:
+          KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RELANCE_SECRET: ${{ secrets.RELANCE_SECRET }}
+          MODE: ${{ inputs.mode }}
+        run: |
+          KEY=$(printf %s "$KEY" | tr -d '\r\n ')
+          mkdir -p reponses
+          ok=1
+          for fonction in send-lifecycle-emails trial-reminder; do
+            corps=$(jq -nc --arg m "$MODE" '{mode:$m}')
+            code=$(curl -sS -o "reponses/$fonction.json" -w "%{http_code}" -X POST "https://ksvjraqitxouwiabecai.supabase.co/functions/v1/$fonction" \
+              -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H "x-relance-secret: $RELANCE_SECRET" -H "x-region: us-east-2" \
+              -H "Content-Type: application/json" --max-time 300 -d "$corps")
+            echo "$fonction : HTTP $code"
+            [ "$code" = "200" ] || ok=0
+          done
+          node scripts/emails-apercu.js --reponses reponses --sortie apercus || ok=0
+          [ "$ok" = "1" ]
+      - name: Apercus dans les artefacts
+        if: always() && inputs.mode == 'apercu'
+        uses: actions/upload-artifact@v4
+        with:
+          name: emails-apercu
+          path: apercus/
+          if-no-files-found: warn
+          retention-days: 14

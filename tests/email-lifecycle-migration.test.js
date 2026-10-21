@@ -1,7 +1,8 @@
 "use strict";
-// Analyse statique de supabase/migrations/0024_email_preferences.sql (non
-// appliquee) : RLS, aucun acces anon, fonctions reservees au role service,
-// regles de selection alignees sur lib/lifecycle-email.js.
+// Analyse statique de supabase/migrations/0024_email_preferences.sql : RLS,
+// aucun acces anon, fonctions reservees au role service, regles de selection
+// alignees sur lib/lifecycle-email.js (derniere definition de chaque fonction :
+// lifecycle_email_candidates est redefinie par 0055_emails_relances_paiement.sql).
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -9,13 +10,22 @@ const path = require("node:path");
 
 const L = require("../lib/lifecycle-email.js");
 const ROOT = path.join(__dirname, "..");
-const RAW = fs.readFileSync(path.join(ROOT, "supabase", "migrations", "0024_email_preferences.sql"), "utf8");
+const MIGRATIONS = path.join(ROOT, "supabase", "migrations");
+const RAW = fs.readFileSync(path.join(MIGRATIONS, "0024_email_preferences.sql"), "utf8");
 // Commentaires retires (le plan pg_cron commente ne doit jamais s'executer).
-const SQL = RAW.split("\n").map((l) => l.replace(/--.*$/, "")).join("\n");
+const strip = (raw) => raw.split("\n").map((l) => l.replace(/--.*$/, "")).join("\n");
+const SQL = strip(RAW);
+// Derniere migration (ordre des fichiers) qui (re)definit la fonction.
 const fnBody = (name) => {
-  const start = SQL.indexOf("create or replace function public." + name + "(");
-  assert.ok(start !== -1, "fonction " + name);
-  return SQL.slice(start, SQL.indexOf("$$;", start) + 3);
+  const files = fs.readdirSync(MIGRATIONS).filter((f) => f.endsWith(".sql")).sort();
+  let body = null;
+  for (const f of files) {
+    const sql = strip(fs.readFileSync(path.join(MIGRATIONS, f), "utf8"));
+    const m = new RegExp("create (or replace )?function public\\." + name + "\\(").exec(sql);
+    if (m) body = sql.slice(m.index, sql.indexOf("$$;", m.index) + 3);
+  }
+  assert.ok(body, "fonction " + name);
+  return body;
 };
 
 test("tables email_preferences et email_sends : RLS active, consentement faux par defaut, unicite des envois", () => {
@@ -28,8 +38,10 @@ test("tables email_preferences et email_sends : RLS active, consentement faux pa
   assert.match(SQL, /user_id uuid not null references auth\.users\(id\) on delete cascade/);
   assert.match(SQL, /unique \(user_id, campaign, campaign_key\)/);
   for (const col of ["opt_in_at", "opt_in_source", "unsubscribed_at", "locale", "market", "sent_at", "message_id", "status"]) assert.ok(SQL.includes(col + " "), col);
+  // Liste fermee d'origine (0024) ; la liste actuelle (0054 relance, 0055 paiement
+  // abandonne) est verifiee par tests/email-relances-paiement.test.js.
   const campaigns = SQL.match(/campaign text not null check \(campaign in \(([^)]+)\)\)/)[1].split(",").map((s) => s.trim().replace(/'/g, ""));
-  assert.deepEqual(campaigns.sort(), Object.keys(L.CAMPAIGNS).sort());
+  assert.deepEqual(campaigns.sort(), ["free_match", "inactive_30d", "inactive_7d", "pro_features", "pro_weekly_summary", "welcome"]);
 });
 
 test("aucun acces anon ; l'utilisateur lit et modifie SA preference ; seul le role service ecrit les envois", () => {

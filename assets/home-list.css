@@ -111,7 +111,7 @@
 .hl-tag-derby{background:rgba(239,68,68,.13);color:#fca5a5;font-weight:750;letter-spacing:.03em;}
 .hl-tag-time.is-soon{background:rgba(32,213,239,.12);color:var(--cyan,#20d5ef);}
 .hl-tag-time.is-live{background:rgba(245,158,11,.12);color:var(--amber,#f59e0b);}
-.hl-tag-time.is-live::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;animation:hlBlink 1.6s ease-in-out infinite;}
+.hl-tag-time.is-live::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;animation:none;}
 @keyframes hlBlink{50%{transform:scale(.55)}}
 /* Qualite des donnees : point cyan (le vert est reserve aux ecarts chiffres : controle UX du 04/10/2026, tour 2). */
 .hl-tag-q i{width:6px;height:6px;border-radius:50%;background:var(--cyan,#20d5ef);}

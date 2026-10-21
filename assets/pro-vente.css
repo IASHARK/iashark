@@ -83,7 +83,7 @@ html{scrollbar-color:rgba(141,179,211,.32) #060b12}
 .pv-liste{display:grid;margin-top:14px}
 .pv-liste li{display:grid;grid-template-columns:22px minmax(0,1fr);gap:14px;padding:20px 0;border-top:1px solid var(--pv-line)}
 .pv-liste li .pv-ico{width:22px;height:22px;margin-top:1px}
-.pv-liste h3{font-size:16px;font-weight:700;line-height:1.35;color:var(--pv-ink)}
+.pv-liste h3{font-size:18px;font-weight:700;line-height:1.3;letter-spacing:-.01em;color:var(--pv-ink)}
 .pv-liste p{margin-top:4px;font-size:14.5px;line-height:1.55;color:var(--pv-soft)}
 
 /* ---------- (c) Exemple d'analyse ---------- */
@@ -97,7 +97,7 @@ html{scrollbar-color:rgba(141,179,211,.32) #060b12}
 .pv-num{position:absolute;left:0;top:-2px;display:flex;align-items:center;justify-content:center;width:38px;height:38px;
   border:1px solid rgba(32,213,239,.45);border-radius:50%;color:var(--pv-cyan);font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
 .pv-etapes-liste li:not(:last-child)::after{content:"";position:absolute;left:18.5px;top:44px;bottom:-22px;width:1px;background:var(--pv-line2)}
-.pv-etapes-liste h3{font-size:17px;font-weight:700;line-height:1.3;color:var(--pv-ink)}
+.pv-etapes-liste h3{font-size:19px;font-weight:700;line-height:1.25;letter-spacing:-.01em;color:var(--pv-ink)}
 .pv-etapes-liste p{margin-top:6px;max-width:40ch;font-size:14.5px;line-height:1.55;color:var(--pv-soft)}
 
 /* ---------- (e) Le prix et le bouton (composant de paiement) ---------- */

@@ -1,0 +1,28 @@
+name: Reveil du serveur (match offert)
+
+# La fonction match-data « s'endort » quand personne ne vient : le premier visiteur
+# attendait jusqu'a 7 s le pari offert (audit du 21/10/2026). Un appel leger toutes
+# les 5 minutes, de 7 h a minuit (heure de Paris environ), la garde eveillee.
+# Cle publique (anon) : la meme que celle du site (app-client.js), aucun secret.
+on:
+  schedule:
+    - cron: '*/5 5-22 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  reveil:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: app-client.js
+          sparse-checkout-cone-mode: false
+      - name: Appel leger de match-data
+        run: |
+          K=$(grep -o -E "eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+" app-client.js | head -1)
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 -X POST "https://ksvjraqitxouwiabecai.supabase.co/functions/v1/match-data" -H "apikey: $K" -H "Authorization: Bearer $K" -H "Content-Type: application/json" -d '{"scope":"list"}')
+          echo "match-data : HTTP $code"

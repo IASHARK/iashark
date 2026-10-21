@@ -975,6 +975,7 @@ var PAGES = [
   {file: "reinitialiser-mot-de-passe.html", noSitemap: true},
   {file: "a-propos.html"},
   {file: "abonnement.html"},
+  {file: "combines.html"},
   {file: "exemple-analyse.html"},
   {file: "checkout-annule.html", noSitemap: true},
   {file: "checkout-succes.html", noSitemap: true},

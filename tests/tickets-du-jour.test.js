@@ -78,10 +78,16 @@ test("2. jambe exclue : sans pari, no_signal, en test, chance illisible, cote no
     match(14, { pronostic: { market_id: "away-win", publie: true, fiabilite: "vérifiée" } }), // pronostic d'un autre marche
     match(15, { pronostic: { market_id: "home-win", publie: false, fiabilite: "vérifiée" } }),
   ];
-  const r = jambesDe(ms, { statuts: { 11: "PST", 12: "CANC" } });
+  // Regle sans « en test » (jambe.accepter_en_test absent) : le pari en test reste hors des tickets.
+  const TK = require("../config/tickets.json");
+  const sansEnTest = Object.assign({}, TK, { jambe: Object.assign({}, TK.jambe, { accepter_en_test: false }) });
+  const r = jambesDe(ms, { statuts: { 11: "PST", 12: "CANC" }, regles: sansEnTest });
   assert.deepEqual(r.jambes.map((j) => j.fixture_id), [1]);
   assert.equal(r.exclus.sans_pari_publie, 4);
   assert.equal(r.exclus.en_test, 1);
+  // Regle du 21/10 au soir (valeur du depot) : tout pari affiche sur sa page, meme en test, peut etre une jambe.
+  assert.equal(TK.jambe.accepter_en_test, true);
+  assert.deepEqual(jambesDe(ms, { statuts: { 11: "PST", 12: "CANC" } }).jambes.map((j) => j.fixture_id), [1, 4]);
   assert.equal(r.exclus.chance_illisible, 1);
   assert.equal(r.exclus.cote_non_agreee, 3);
   assert.equal(r.exclus.coup_envoi, 4);
@@ -393,20 +399,24 @@ test("calcul complet du jour (regle du 21/10) : Selection en or, x5, x10 et bute
   assert.equal(T.premierCoupEnvoi("x5", c.x5.contenu), "2026-10-04T16:00:00.000Z");
 });
 
-test("verdict du mathematicien (04/10) : pas de coupe, de tournoi ni de coupe d'Europe ; pas de double chance d'Argentine", () => {
+test("competitions et familles : l'ancienne regle (04/10) excluait coupes, tournois, coupes d'Europe et la DC d'Argentine ; depuis le 21/10 au soir, plus aucune exclusion", () => {
   const V = require("../config/verdicts-maths.json");
   const dc = { market_id: "dc-1x", pronostic: { market_id: "dc-1x", publie: true, fiabilite: "vérifiée" } };
   const ms = [match(1), match(2, { league_key: "coupe_de_france" }), match(3, { league_key: "ldc" }), match(4, { league_key: "libertadores" }),
     match(5, { league_key: "nations_league" }), match(6, Object.assign({ league_key: "argentina_liga_profesional" }, dc)), match(7, { league_key: "argentina_liga_profesional" })];
-  const r = jambesDe(ms, { categoriesNoGo: V.categories_no_go, competitions: V.competitions_jambes });
+  // Le mecanisme reste : avec l'ancienne regle (gardee dans le fichier), memes exclusions qu'avant.
+  const r = jambesDe(ms, { categoriesNoGo: V.categories_no_go_retirees_21_10, competitions: V.competitions_jambes_retirees_21_10 });
   assert.deepEqual(r.jambes.map((j) => j.fixture_id), [1, 5, 7]);
   assert.equal(r.exclus.competition_non_mesuree, 3);
   assert.equal(r.exclus.categorie_no_go, 1);
-  // Valeurs du depot (lues par defaut) : memes exclusions de competitions.
-  assert.deepEqual(jambesDe(ms).jambes.map((j) => j.fixture_id), [1, 5, 6, 7]);
+  // Regle du depot : Ligue des champions, coupes, tournois et DC d'Argentine entrent dans les tickets.
+  assert.deepEqual(V.competitions_jambes.exclure_ligues, []);
+  assert.deepEqual(V.competitions_jambes.exclure_types, []);
+  assert.deepEqual(V.categories_no_go, []);
+  assert.deepEqual(jambesDe(ms, { categoriesNoGo: V.categories_no_go, competitions: V.competitions_jambes }).jambes.map((j) => j.fixture_id), [1, 2, 3, 4, 5, 6, 7]);
   const w = monde(ms);
   const c = T.calculerDuJour(ms, { jour: "2026-10-04", nowMs: NOW, fixtureById: w.fixtureById, configLigues: LIGUES, categoriesNoGo: V.categories_no_go, competitions: V.competitions_jambes });
-  assert.ok(!c.or || c.or.contenu.paris.every((p) => [1, 5, 7].includes(p.fixture_id)));
+  assert.ok(c.or && c.or.contenu.paris.length === 3);
   // Aucun facteur de dependance : chance = produit exact des chances affichees.
   assert.equal(require("node:fs").readFileSync(require.resolve("../lib/run-output/combo-math.js"), "utf8").includes("0.985"), false);
 });

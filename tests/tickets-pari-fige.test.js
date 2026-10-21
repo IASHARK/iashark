@@ -75,13 +75,17 @@ test("un pari fige d'un autre marche que le pari affiche, ou jamais publie, n'es
   assert.notEqual(jamais.pronostic.publie, true);
 });
 
-test("familles non mesurees (plus/moins 1,5 et 3,5, les deux marquent) : hors des tickets et de la Selection en or", () => {
-  const fam = VERDICTS.categories_no_go.filter((c) => c.famille && !c.ligue).map((c) => c.famille).sort();
+test("toutes les familles affichees (plus/moins 1,5 et 3,5, les deux marquent compris) entrent dans les tickets depuis le 21/10 au soir", () => {
+  // Ancienne regle (04/10), gardee dans le fichier : ces familles etaient exclues.
+  const fam = VERDICTS.categories_no_go_retirees_21_10.filter((c) => c.famille && !c.ligue).map((c) => c.famille).sort();
   assert.deepEqual(fam, ["BTTS", "OU1.5", "OU3.5"]);
+  assert.deepEqual(VERDICTS.categories_no_go, []);
   const ms = [["home-win", 1], ["over-15", 2], ["under-15", 3], ["over-35", 4], ["under-35", 5], ["btts-yes", 6], ["btts-no", 7], ["over-25", 8], ["dc-1x", 9]].map(([mk, id]) =>
     fige(id, { market_id: mk, pronostic: Object.assign({}, fige(id).pronostic, { market_id: mk }) }));
   const r = J.jambesDuJour(ms, opts(ms));
-  assert.deepEqual(r.jambes.map((x) => x.fixture_id), [1, 8, 9]);
-  assert.equal(r.exclus.categorie_no_go, 6);
+  assert.deepEqual(r.jambes.map((x) => x.fixture_id), [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  assert.equal(r.exclus.categorie_no_go, undefined);
+  const ancien = J.jambesDuJour(ms, Object.assign(opts(ms), { categoriesNoGo: VERDICTS.categories_no_go_retirees_21_10 }));
+  assert.deepEqual(ancien.jambes.map((x) => x.fixture_id), [1, 8, 9]);
   assert.equal(J.selectionEnOr(r.jambes).length, 3);
 });

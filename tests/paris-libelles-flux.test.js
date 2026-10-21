@@ -164,9 +164,11 @@ test("jumeaux de la correction « petits scores » : deux issues equivalentes po
     .forEach(([a, b]) => assert.equal(FP.petitScore(a), FP.petitScore(b), a + " / " + b));
 });
 
-test("combines et Selection en or : exclusions plus/moins 1,5 et 3,5 et « les deux marquent » remises ; jamais un autre marche des bookmakers", () => {
-  const fam = VERDICTS.categories_no_go.filter((c) => c.famille && !c.ligue).map((c) => c.famille).sort();
+test("combines et Selection en or : toutes les familles affichees y entrent depuis le 21/10 au soir ; jamais un autre marche des bookmakers", () => {
+  // Ancienne exclusion (04/10) gardee pour la trace, plus appliquee (regle du 21/10 au soir).
+  const fam = VERDICTS.categories_no_go_retirees_21_10.filter((c) => c.famille && !c.ligue).map((c) => c.famille).sort();
   assert.deepEqual(fam, ["BTTS", "OU1.5", "OU3.5"]);
+  assert.deepEqual(VERDICTS.categories_no_go, []);
   const J = require("../lib/run-output/jambes-du-jour.js");
   const NOW = Date.parse("2026-10-07T04:00:00Z");
   const m = { id: 1, home: { n: "A" }, away: { n: "B" }, date: "2026-10-07 20:00", league_key: "ligue1", league_id: 61, league: "Ligue 1",

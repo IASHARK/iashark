@@ -137,7 +137,7 @@ test("pipeline : second passage juste avant la selection canonique, le match off
   // offrable (jamais « en test », jamais une selection nationale : decision du 30/09), fixture ouverte.
   assert.match(source, /var estSelectionDuJour=function\(m\)\{ return !!\(m&&m\.pronostic&&m\.pronostic\.selection===true&&m\.pari_rec&&!m\.no_signal\); \};/);
   // Fourchette du 04/10/2026 (dansFourchetteOffert) : le match offert a une cote entre les bornes de la config.
-  assert.match(source, /var analysable=function\(m\)\{ return m && m\.pari_rec && !m\.no_signal && estSelectionDuJour\(m\) && competitionOffrable\(m\) && dansFourchetteOffert\(m\) && eligibleForFree\(FIXTURE_BY_ID\[String\(m\.id\)\],OFFRE_MS\); \};/);
+  assert.match(source, /var analysable=function\(m\)\{ return m && m\.pari_rec && !m\.no_signal && \(!SELECTIONS\.estSelectionNationale\(m\) \|\| estSelectionDuJour\(m\)\) && competitionOffrable\(m\) && dansFourchetteOffert\(m\) && eligibleForFree\(FIXTURE_BY_ID\[String\(m\.id\)\],OFFRE_MS\); \};/);
   assert.match(source, /var creneau=duJour\.filter\(function\(m\)\{ return reasonableParisSlot\(m\); \}\);/);
 });
 

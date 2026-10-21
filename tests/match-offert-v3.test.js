@@ -59,7 +59,7 @@ test("le plus probable des paris v3, jamais un pari de l'ancien moteur ni la « 
   assert.deepEqual(choisir([v3(1, 83, null, { cote_rec: "1.40" }), v3(2, 70, null, { cote_rec: "1.70" })]), [1]);
 });
 
-test("repli sans selection : hors fourchette jamais ; demain aussi ; une designation deja publiee reste", () => {
+test("sans selection (simplification du 21/10) : hors fourchette jamais ; demain aussi ; une designation gardee ne se double pas", () => {
   const sansSel = (id, prob, date, extra) => ancien(id, prob, date, Object.assign({ pronostic: { market_id: "over-15", chance: prob, selection: false } }, extra || {}));
   assert.deepEqual(choisir([sansSel(1, 90, null, { cote_rec: "3.50" }), sansSel(2, 70)]), [2], "cote hors fourchette : jamais offerte");
   const demain = "2026-10-04";
@@ -100,8 +100,8 @@ test("jamais un match deja commence ; aujourd'hui et demain, un chacun", () => {
 test("aucun pari v3 ce jour-la : repli sur une Selection IASHARK verifiee (decision de Clement, 03/10) ; sans selection, aucun match offert", () => {
   assert.deepEqual(choisir([ancien(1, 90), ancien(2, 80)]), [1], "jour sans pari v3 (treve) : la Selection IASHARK la plus probable d'une competition verifiee");
   assert.deepEqual(choisir([ancien(1, 90), v3(2, 60)]), [2], "un pari v3 ce jour-la : il reste prioritaire");
-  // 21/10/2026 (« il faut un match offert chaque jour ») : sans Selection IASHARK offrable, repli sur le
-  // pronostic publie le plus probable d'une competition verifiee ; jamais une competition « en test ».
+  // 21/10/2026 (simplification de Clement) : plus besoin d'une Selection IASHARK ; le pronostic publie
+  // le plus probable d'une competition verifiee ; jamais une competition « en test ».
   assert.deepEqual(choisir([ancien(1, 90, null, { pronostic: { market_id: "over-15", chance: 90, selection: false } }), ancien(2, 95, null, { league_reliability: "en_test", pronostic: { market_id: "over-15", chance: 95, selection: false } })]), [1],
     "sans selection : le pronostic le plus probable d'une competition verifiee");
   const liste = [ancien(1, 90, null, { league_reliability: "en_test", pronostic: { market_id: "over-15", chance: 90, selection: false } }), ancien(2, 80, null, { league_reliability: "en_test" })];

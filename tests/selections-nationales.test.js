@@ -60,7 +60,7 @@ test("pipeline : match offert = Selection IASHARK ; selections nationales hors l
   const wf = fs.readFileSync(path.join(root, ".github", "workflows", "update-data.yml"), "utf8");
   assert.match(wf, /var SELECTIONS=require\('\.\/lib\/selections-nationales\.js'\);/);
   assert.match(wf, /if\(SELECTIONS\.estSelectionNationale\(m\)\) return SEL_OFFRABLES\.indexOf\(String\(m\.league_key\|\|''\)\)!==-1;/);
-  assert.match(wf, /var analysable=function\(m\)\{ return m && m\.pari_rec && !m\.no_signal && estSelectionDuJour\(m\) && competitionOffrable\(m\) &&/);
+  assert.match(wf, /var analysable=function\(m\)\{ return m && m\.pari_rec && !m\.no_signal && \(!SELECTIONS\.estSelectionNationale\(m\) \|\| estSelectionDuJour\(m\)\) && competitionOffrable\(m\) &&/);
   assert.doesNotMatch(wf, /selectionsNationalesEligibles/);
   assert.match(wf, /creerBranchement\(\{env:process\.env\}\)/);
 });

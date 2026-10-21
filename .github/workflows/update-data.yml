@@ -4665,7 +4665,11 @@ jobs:
               // une designation deja publiee reste, elle, jusqu'a minuit : regle du 04/10/2026, 20 h, plus bas).
               var FOURCHETTE_OFFERT=PRONOSTIC.fourchettePari(LEAGUES_CONFIG);
               var dansFourchetteOffert=function(m){ return !!m && PRONOSTIC.dansFourchette(m.cote_rec,FOURCHETTE_OFFERT); };
-              var analysable=function(m){ return m && m.pari_rec && !m.no_signal && estSelectionDuJour(m) && competitionOffrable(m) && dansFourchetteOffert(m) && eligibleForFree(FIXTURE_BY_ID[String(m.id)],OFFRE_MS); };
+              // SIMPLIFICATION (Clement, 21/10/2026 : « si c'est trop strict, simplifier ») : la condition « Selection
+              // IASHARK » (03/10) est retiree. Avec 2 selections par jour, aucun match n'etait plus offert depuis le 05/10.
+              // Le match offert : un pronostic publie, competition verifiee, cote dans la fourchette, coup d'envoi a venir.
+              // Equipes nationales : toujours une Selection IASHARK (decision du 03/10, inchangee).
+              var analysable=function(m){ return m && m.pari_rec && !m.no_signal && (!SELECTIONS.estSelectionNationale(m) || estSelectionDuJour(m)) && competitionOffrable(m) && dansFourchetteOffert(m) && eligibleForFree(FIXTURE_BY_ID[String(m.id)],OFFRE_MS); };
               // Competition connue d'abord : Ligue des nations / eliminatoires (treve), puis coupes
               // d'Europe et grands championnats, puis le reste (0 = la plus connue).
               var GRANDES_COMPETITIONS=['ldc','el','ecl','premier','laliga','seriea','bundesliga','ligue1'];
@@ -4717,6 +4721,16 @@ jobs:
                 var jp=/^\d{4}-\d{2}-\d{2}$/.test(String(p.free_day||''))?String(p.free_day):jourDe(p);
                 if(jp&&jp>=TODAY) joursDejaOfferts[jp]=true;
               });
+              // AUJOURD'HUI SANS DESIGNATION (21/10/2026, regle du 04/10 : « le meme de 00 h a 23 h 59 ») : le match
+              // que le site affiche deja comme offert depuis minuit (lib/free-match.js sur le data.json precedent) est garde.
+              var FM_REPLI=(typeof FREE_MATCH!=='undefined'&&FREE_MATCH)?FREE_MATCH:null;
+              if(!gardes[TODAY]&&!joursDejaOfferts[TODAY]&&FM_REPLI){
+                var prevListe=Object.keys(prevByFixture).map(function(k){ return prevByFixture[k]; });
+                var dejaDesigne=prevListe.some(function(p){ return p&&p.is_free===true&&String(p.free_day||jourDe(p))>=TODAY; });
+                var affiche=dejaDesigne?null:FM_REPLI.pickFreeMatch(prevListe,{day:TODAY,now:TODAY+' 00:00'});
+                var actuel=affiche&&jourDe(affiche)===TODAY?allMatchsData.filter(function(m){ return m&&String(m.id)===String(affiche.id); })[0]:null;
+                if(actuel&&actuel.pari_rec&&!actuel.no_signal){ gardes[TODAY]=actuel; console.log('  [ACCES] '+TODAY+' : match deja affiche comme offert par le site depuis minuit, garde ('+actuel.id+').'); }
+              }
               // MOTEUR_V3:DEBUT - match offert (avocat du diable C3 ; mathematicien et decision
               // de Clement du 29/09/2026). REGLE COMPLETE, dans cet ordre, pour chaque jour :
               //  1. seulement les paris PUBLIES par le moteur v3, dont le coup d'envoi n'est
@@ -4793,36 +4807,6 @@ jobs:
                 var creneau=duJour.filter(function(m){ return reasonableParisSlot(m); });
                 var choisi=meilleur(creneau.length?creneau:duJour);
                 if(choisi) elus[j]=choisi;
-              });
-              // REPLI SANS SELECTION (21/10/2026, regle de Clement du 03/10 : « il faut un match offert chaque
-              // jour »). Depuis le 05/10, aucun jour n'avait de Selection IASHARK dans la fourchette (2 selections
-              // par jour) : aucun match offert designe, et le site retombait sur son heuristique. Pour aujourd'hui
-              // et demain, sans designation :
-              //  a) AUJOURD'HUI, le match que le site affiche deja comme offert depuis minuit (lib/free-match.js
-              //     sur le data.json precedent) est GARDE : « le meme de 00 h a 23 h 59 » (regle du 04/10) ;
-              //  b) sinon, parmi les pronostics publies (pas seulement les selections) d'une competition
-              //     verifiee, dans la fourchette, coup d'envoi a venir : memes filtres et meme ordre que
-              //     ci-dessus (competition la plus connue, ligue fiable, creneau 12 h-22 h 59, le plus probable).
-              var DEMAIN=(function(){ var d=new Date(TODAY+'T12:00:00Z'); d.setUTCDate(d.getUTCDate()+1); return d.toISOString().slice(0,10); })();
-              var FM_REPLI=(typeof FREE_MATCH!=='undefined'&&FREE_MATCH)?FREE_MATCH:null;
-              if(!elus[TODAY]&&!joursDejaOfferts[TODAY]&&FM_REPLI){
-                var prevListe=Object.keys(prevByFixture).map(function(k){ return prevByFixture[k]; });
-                var dejaDesigne=prevListe.some(function(p){ return p&&p.is_free===true&&String(p.free_day||jourDe(p))>=TODAY; });
-                var affiche=dejaDesigne?null:FM_REPLI.pickFreeMatch(prevListe,{day:TODAY,now:TODAY+' 00:00'});
-                var actuel=affiche&&jourDe(affiche)===TODAY?allMatchsData.filter(function(m){ return m&&String(m.id)===String(affiche.id); })[0]:null;
-                if(actuel&&actuel.pari_rec&&!actuel.no_signal){ elus[TODAY]=actuel; console.log('  [ACCES] '+TODAY+' : match deja affiche comme offert par le site depuis minuit, garde ('+actuel.id+').'); }
-              }
-              var analysableSansSelection=function(m){ return m && m.pari_rec && !m.no_signal && competitionOffrable(m) && dansFourchetteOffert(m) && eligibleForFree(FIXTURE_BY_ID[String(m.id)],OFFRE_MS); };
-              [TODAY,DEMAIN].forEach(function(j){
-                if(elus[j]||joursDejaOfferts[j]) return;
-                var duJourR=allMatchsData.filter(function(m){ return analysableSansSelection(m) && jourDe(m)===j; });
-                if(!duJourR.length) return;
-                var rangMinR=Math.min.apply(null,duJourR.map(rangCompetition));
-                duJourR=duJourR.filter(function(m){ return rangCompetition(m)===rangMinR; });
-                var fiablesR=duJourR.filter(tierFiable); if(fiablesR.length) duJourR=fiablesR;
-                var creneauR=duJourR.filter(function(m){ return reasonableParisSlot(m); });
-                var choisiR=meilleur(creneauR.length?creneauR:duJourR);
-                if(choisiR){ elus[j]=choisiR; console.log('  [ACCES] '+j+' : aucune Selection IASHARK offrable, repli sur le pronostic le plus probable ('+choisiR.id+').'); }
               });
               if(!Object.keys(elus).length){
                 var tousAnalysables=allMatchsData.filter(function(m){ return analysable(m) && !joursDejaOfferts[jourDe(m)]; }), tousFiables=tousAnalysables.filter(tierFiable);

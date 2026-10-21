@@ -25,7 +25,7 @@ const BLOC = WF.slice(debut, fin);
 const SELECTIONS = require("../lib/selections-nationales.js");
 const LEAGUES_CONFIG = require("../config/leagues.json");
 const PRONOSTIC = require("../lib/pronostic.js");
-const designer = new Function("eligibleForFree", "FIXTURE_BY_ID", "PICK_FREEZE", "prevByFixture", "allMatchsData", "TODAY", "MOTEUR_V3", "reasonableParisSlot", "console", "SELECTIONS", "LEAGUES_CONFIG", "PRONOSTIC", BLOC);
+const designer = new Function("eligibleForFree", "FIXTURE_BY_ID", "PICK_FREEZE", "prevByFixture", "allMatchsData", "TODAY", "MOTEUR_V3", "reasonableParisSlot", "console", "SELECTIONS", "LEAGUES_CONFIG", "PRONOSTIC", "FREE_MATCH", BLOC);
 
 const TODAY = "2026-10-03";
 function v3(id, prob, date, extra) {
@@ -42,14 +42,14 @@ function choisir(matchs, opts) {
   const fx = {};
   matchs.forEach((m) => { fx[String(m.id)] = { started: !!m._commence }; });
   designer((f) => !!f && !f.started, fx, { keptFreeDesignations: () => opts.gardes || {} }, opts.prev || {}, matchs, TODAY,
-    { actif: opts.eteint ? false : true }, reasonableParisSlot, { log: () => {} }, SELECTIONS, LEAGUES_CONFIG, PRONOSTIC);
+    { actif: opts.eteint ? false : true }, reasonableParisSlot, { log: () => {} }, SELECTIONS, LEAGUES_CONFIG, PRONOSTIC, opts.sansRepliSite ? null : FM);
   return matchs.filter((m) => m.is_free).map((m) => m.id);
 }
 
 test("la regle est ecrite en clair dans le bloc du pipeline", () => {
   assert.match(BLOC, /REGLE COMPLETE, dans cet ordre/);
-  assert.match(BLOC, /ligue « fiable » \(analysis_tier FULL ou\s*\/\/\s*STANDARD\)/);
-  assert.match(BLOC, /entre 12 h et 22 h 59, heure de Paris/);
+  assert.match(BLOC, /les grands championnats d'abord/);
+  assert.match(BLOC, /Ligue fiable et creneau 12 h-22 h 59 : retires le 21\/10\/2026/);
   assert.match(BLOC, /le plus petit numero de match/);
 });
 
@@ -59,19 +59,38 @@ test("le plus probable des paris v3, jamais un pari de l'ancien moteur ni la « 
   assert.deepEqual(choisir([v3(1, 83, null, { cote_rec: "1.40" }), v3(2, 70, null, { cote_rec: "1.70" })]), [1]);
 });
 
+test("sans selection (simplification du 21/10) : hors fourchette jamais ; demain aussi ; une designation gardee ne se double pas", () => {
+  const sansSel = (id, prob, date, extra) => ancien(id, prob, date, Object.assign({ pronostic: { market_id: "over-15", chance: prob, selection: false } }, extra || {}));
+  assert.deepEqual(choisir([sansSel(1, 90, null, { cote_rec: "3.50" }), sansSel(2, 70)]), [2], "cote hors fourchette : jamais offerte");
+  const demain = "2026-10-04";
+  assert.deepEqual(choisir([sansSel(1, 70), sansSel(2, 80, demain + " 20:00"), sansSel(3, 60, demain + " 21:00")]).sort(), [1, 2], "aujourd'hui et demain");
+  assert.deepEqual(choisir([sansSel(1, 70), sansSel(2, 90)], { gardes: { [TODAY]: sansSel(1, 70) } }).length, 1, "une designation gardee ne se double pas");
+});
+
+test("aujourd'hui sans designation : le match deja affiche par le site depuis minuit est garde", () => {
+  const sansSel = (id, prob, date, extra) => ancien(id, prob, date, Object.assign({ pronostic: { market_id: "over-15", chance: prob, selection: false } }, extra || {}));
+  // Le site (lib/free-match.js) montrait le 7 (meilleur data_quality_score) ; le moteur aurait prefere le 8 (plus probable).
+  const prev = { 7: { id: 7, date: TODAY + " 21:00", has_signal: true, data_quality_score: 95, is_free: false }, 8: { id: 8, date: TODAY + " 20:00", has_signal: true, data_quality_score: 40, is_free: false } };
+  assert.deepEqual(choisir([sansSel(7, 60), sansSel(8, 85)], { prev }), [7], "le match affiche depuis minuit reste offert");
+  assert.deepEqual(choisir([sansSel(7, 60), sansSel(8, 85)], { prev, sansRepliSite: true }), [8], "sans la regle du site : le plus probable");
+  const prevDesigne = { 9: { id: 9, date: TODAY + " 19:00", has_signal: true, data_quality_score: 10, is_free: true, free_day: TODAY } };
+  assert.deepEqual(choisir([sansSel(7, 60), sansSel(8, 85)], { prev: Object.assign({}, prev, prevDesigne) }), [], "jour deja pourvu par un run precedent (match disparu) : jamais un autre match ce jour-la (regle existante)");
+});
+
 test("egalites : le plus tot, puis le plus petit numero de match (ordre fixe)", () => {
   assert.deepEqual(choisir([v3(5, 80, TODAY + " 21:00"), v3(9, 80, TODAY + " 18:00")]), [9]);
   assert.deepEqual(choisir([v3(9, 80, TODAY + " 18:00"), v3(5, 80, TODAY + " 18:00")]), [5]);
   assert.deepEqual(choisir([v3(5, 80, TODAY + " 18:00"), v3(9, 80, TODAY + " 18:00")]), [5]);
 });
 
-test("filtres gardes (decision de Clement) : ligue fiable, puis creneau 12 h-22 h 59, avant la probabilite", () => {
-  // 83 % a 3 h du matin contre 74 % a 20 h : le creneau passe avant.
-  assert.deepEqual(choisir([v3(1, 83, TODAY + " 03:00"), v3(2, 74, TODAY + " 20:00")]), [2]);
-  // 83 % en ligue non verifiee contre 74 % en ligue fiable : la ligue passe avant.
-  assert.deepEqual(choisir([v3(1, 83, null, { analysis_tier: "UNVERIFIED" }), v3(2, 74)]), [2]);
-  // Aucun match dans le creneau : le plus probable quand meme.
-  assert.deepEqual(choisir([v3(1, 83, TODAY + " 03:00"), v3(2, 74, TODAY + " 02:00")]), [1]);
+test("simplification du 21/10 : le plus probable, sans tri par ligue fiable ni par creneau", () => {
+  // 83 % a 3 h du matin contre 74 % a 20 h : le plus probable.
+  assert.deepEqual(choisir([v3(1, 83, TODAY + " 03:00"), v3(2, 74, TODAY + " 20:00")]), [1]);
+  // 83 % en ligue non verifiee (tier) contre 74 % en ligue fiable : le plus probable.
+  assert.deepEqual(choisir([v3(1, 83, null, { analysis_tier: "UNVERIFIED" }), v3(2, 74)]), [1]);
+  // Mais jamais une competition « en test », ni une cote sous la fourchette.
+  assert.deepEqual(choisir([v3(1, 83, null, { league_reliability: "en_test" }), v3(2, 74)]), [2]);
+  assert.deepEqual(choisir([v3(1, 83, null, { cote_rec: "1.20" }), v3(2, 74)]), [2]);
 });
 
 test("jamais un match deja commence ; aujourd'hui et demain, un chacun", () => {
@@ -82,7 +101,11 @@ test("jamais un match deja commence ; aujourd'hui et demain, un chacun", () => {
 test("aucun pari v3 ce jour-la : repli sur une Selection IASHARK verifiee (decision de Clement, 03/10) ; sans selection, aucun match offert", () => {
   assert.deepEqual(choisir([ancien(1, 90), ancien(2, 80)]), [1], "jour sans pari v3 (treve) : la Selection IASHARK la plus probable d'une competition verifiee");
   assert.deepEqual(choisir([ancien(1, 90), v3(2, 60)]), [2], "un pari v3 ce jour-la : il reste prioritaire");
-  const liste = [ancien(1, 90, null, { pronostic: { market_id: "over-15", chance: 90, selection: false } }), ancien(2, 80, null, { league_reliability: "en_test" })];
+  // 21/10/2026 (simplification de Clement) : plus besoin d'une Selection IASHARK ; le pronostic publie
+  // le plus probable d'une competition verifiee ; jamais une competition « en test ».
+  assert.deepEqual(choisir([ancien(1, 90, null, { pronostic: { market_id: "over-15", chance: 90, selection: false } }), ancien(2, 95, null, { league_reliability: "en_test", pronostic: { market_id: "over-15", chance: 95, selection: false } })]), [1],
+    "sans selection : le pronostic le plus probable d'une competition verifiee");
+  const liste = [ancien(1, 90, null, { league_reliability: "en_test", pronostic: { market_id: "over-15", chance: 90, selection: false } }), ancien(2, 80, null, { league_reliability: "en_test" })];
   assert.deepEqual(choisir(liste), [], "ni selection ni competition verifiee : aucun match offert");
   assert.ok(liste.every((m) => m.is_free === false), "is_free pose a false sur chaque match");
   const h = { day: TODAY, now: TODAY + " 10:00" };

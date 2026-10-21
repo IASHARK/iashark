@@ -192,6 +192,8 @@ jobs:
           // sa cote et ses textes jusqu'au coup d'envoi ; le match offert d'un jour
           // deja designe le reste ; l'historique suit le pari publie.
           var PICK_FREEZE=require('./lib/pick-freeze.js');
+          // Repli du match offert (21/10/2026) : la regle du site, pour garder le match qu'il affiche depuis minuit.
+          var FREE_MATCH=require('./lib/free-match.js');
           // MOTEUR_V3:DEBUT - branchement du moteur IASHARK v3 (lib/moteur-v3.js).
           // ETEINT par defaut : sans MOTEUR_V3=1, MOTEUR_V3.actif est false et aucun
           // bloc "if(MOTEUR_V3.actif)" ci-dessous ne s'execute (sortie identique,
@@ -4663,14 +4665,22 @@ jobs:
               // une designation deja publiee reste, elle, jusqu'a minuit : regle du 04/10/2026, 20 h, plus bas).
               var FOURCHETTE_OFFERT=PRONOSTIC.fourchettePari(LEAGUES_CONFIG);
               var dansFourchetteOffert=function(m){ return !!m && PRONOSTIC.dansFourchette(m.cote_rec,FOURCHETTE_OFFERT); };
-              var analysable=function(m){ return m && m.pari_rec && !m.no_signal && estSelectionDuJour(m) && competitionOffrable(m) && dansFourchetteOffert(m) && eligibleForFree(FIXTURE_BY_ID[String(m.id)],OFFRE_MS); };
+              // SIMPLIFICATION (Clement, 21/10/2026 : « si c'est trop strict, simplifier ») : la condition « Selection
+              // IASHARK » (03/10) est retiree. Avec 2 selections par jour, aucun match n'etait plus offert depuis le 05/10.
+              // Le match offert : un pronostic publie, competition verifiee, cote dans la fourchette, coup d'envoi a venir.
+              // Equipes nationales : toujours une Selection IASHARK (decision du 03/10, inchangee).
+              var analysable=function(m){ return m && m.pari_rec && !m.no_signal && (!SELECTIONS.estSelectionNationale(m) || estSelectionDuJour(m)) && competitionOffrable(m) && dansFourchetteOffert(m) && eligibleForFree(FIXTURE_BY_ID[String(m.id)],OFFRE_MS); };
               // Competition connue d'abord : Ligue des nations / eliminatoires (treve), puis coupes
               // d'Europe et grands championnats, puis le reste (0 = la plus connue).
               var GRANDES_COMPETITIONS=['ldc','el','ecl','premier','laliga','seriea','bundesliga','ligue1'];
+              // 21/10/2026 : un ordre reel entre les grandes competitions (avant : toutes au meme rang, et le
+              // plus probable d'une Conference League passait devant un match d'Europa League connu) :
+              // Ligue des champions, puis Europa League, puis Conference League, puis les 5 grands championnats.
+              var RANG_GRANDES={ldc:1,el:2,ecl:3,premier:4,laliga:4,seriea:4,bundesliga:4,ligue1:4};
               var rangCompetition=function(m){
                 var k=String(m&&m.league_key||'');
                 if(SEL_OFFRABLES.indexOf(k)!==-1) return 0;
-                return GRANDES_COMPETITIONS.indexOf(k)!==-1?1:2;
+                return RANG_GRANDES[k]||5;
               };
               // Selection nationale verifiee (cotes du marche, lib/pronostic.js#poserSelectionsNationales).
               var selectionNationaleCotes=function(m){ return !!(m&&m.pronostic&&m.pronostic.selection===true&&m.pronostic.moteur==='cotes_marche'); };
@@ -4715,16 +4725,24 @@ jobs:
                 var jp=/^\d{4}-\d{2}-\d{2}$/.test(String(p.free_day||''))?String(p.free_day):jourDe(p);
                 if(jp&&jp>=TODAY) joursDejaOfferts[jp]=true;
               });
+              // AUJOURD'HUI SANS DESIGNATION (21/10/2026, regle du 04/10 : « le meme de 00 h a 23 h 59 ») : le match
+              // que le site affiche deja comme offert depuis minuit (lib/free-match.js sur le data.json precedent) est garde.
+              var FM_REPLI=(typeof FREE_MATCH!=='undefined'&&FREE_MATCH)?FREE_MATCH:null;
+              if(!gardes[TODAY]&&!joursDejaOfferts[TODAY]&&FM_REPLI){
+                var prevListe=Object.keys(prevByFixture).map(function(k){ return prevByFixture[k]; });
+                var dejaDesigne=prevListe.some(function(p){ return p&&p.is_free===true&&String(p.free_day||jourDe(p))>=TODAY; });
+                var affiche=dejaDesigne?null:FM_REPLI.pickFreeMatch(prevListe,{day:TODAY,now:TODAY+' 00:00'});
+                var actuel=affiche&&jourDe(affiche)===TODAY?allMatchsData.filter(function(m){ return m&&String(m.id)===String(affiche.id); })[0]:null;
+                if(actuel&&actuel.pari_rec&&!actuel.no_signal){ gardes[TODAY]=actuel; console.log('  [ACCES] '+TODAY+' : match deja affiche comme offert par le site depuis minuit, garde ('+actuel.id+').'); }
+              }
               // MOTEUR_V3:DEBUT - match offert (avocat du diable C3 ; mathematicien et decision
-              // de Clement du 29/09/2026). REGLE COMPLETE, dans cet ordre, pour chaque jour :
-              //  1. seulement les paris PUBLIES par le moteur v3, dont le coup d'envoi n'est
-              //     pas passe (analysable) ;
-              //  2. s'il y en a, seulement ceux d'une ligue « fiable » (analysis_tier FULL ou
-              //     STANDARD) - filtre garde par decision de Clement ;
-              //  3. s'il y en a, seulement ceux joues entre 12 h et 22 h 59, heure de Paris
-              //     (reasonableParisSlot) - filtre garde par decision de Clement ;
-              //  4. le plus probable (model_probability) ; a egalite le plus tot ; a egalite
+              // de Clement du 29/09/2026, simplifiee le 21/10/2026). REGLE COMPLETE, dans cet ordre, pour chaque jour :
+              //  1. les paris v3 publies d'abord (s'il y en a), sinon les pronostics publies ; coup
+              //     d'envoi a venir, cote dans la fourchette (jamais sous 1,40), competition verifiee ;
+              //  2. les grands championnats d'abord (rangCompetition) ;
+              //  3. le plus probable (chance affichee) ; a egalite le plus tot ; a egalite
               //     encore, le plus petit numero de match (ordre fixe).
+              //  (Ligue fiable et creneau 12 h-22 h 59 : retires le 21/10/2026, simplification de Clement.)
               // JAMAIS sur la « valeur » (rejetee : CLV -5 %). Une designation precedente reste
               // jusqu'a minuit, meme si elle ne passe plus ces filtres (regle du 04/10/2026, 20 h).
               // Verifie en executant ce bloc : tests/match-offert-v3.test.js.
@@ -4781,15 +4799,10 @@ jobs:
                   var rangMin=Math.min.apply(null,duJour.map(rangCompetition));
                   duJour=duJour.filter(function(m){ return rangCompetition(m)===rangMin; });
                 }
-                // Audit du 28/09/2026 : les 5 derniers matchs offerts etaient des matchs
-                // UNVERIFIED (Ligue des nations), la ou le moteur se trompe le plus et
-                // affiche donc la plus grosse « valeur ». Un match analyse (FULL ou
-                // STANDARD) passe toujours avant ; les autres ne servent qu'a defaut.
-                var fiablesDuJour=duJour.filter(tierFiable);
-                if(fiablesDuJour.length) duJour=fiablesDuJour;
-                // Creneau raisonnable en heure de Paris (12:00-22:59) de preference.
-                var creneau=duJour.filter(function(m){ return reasonableParisSlot(m); });
-                var choisi=meilleur(creneau.length?creneau:duJour);
+                // SIMPLIFICATION (Clement, 21/10/2026 : « le match avec la plus grande probabilite de la
+                // journee ») : plus de tri par ligue fiable ni par creneau horaire. Seulement les grands
+                // championnats d'abord (ci-dessus), puis le plus probable (cote dans la fourchette).
+                var choisi=meilleur(duJour);
                 if(choisi) elus[j]=choisi;
               });
               if(!Object.keys(elus).length){

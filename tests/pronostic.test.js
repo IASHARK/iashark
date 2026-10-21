@@ -136,7 +136,7 @@ test("pipeline : pronostics poses apres la chance IASHARK, avant le match offert
   assert.ok(i < script.indexOf("var matchsPublics="));
   assert.ok(i < script.indexOf("PREMIUM_FIELDS_LIB.premiumPayload("));
   // Le match offert est une selection (pronostic.selection) : jamais un match sans selection.
-  assert.match(script, /var analysable=function\(m\)\{ return m && .*estSelectionDuJour\(m\) && competitionOffrable\(m\)/);
+  assert.match(script, /var analysable=function\(m\)\{ return m && .*\(!SELECTIONS\.estSelectionNationale\(m\) \|\| estSelectionDuJour\(m\)\) && competitionOffrable\(m\)/);
   // Journal : compteurs seulement.
   assert.match(script, /console\.log\('  \[PRONOSTIC\] '\+rapportProno\.avec\+/);
 });

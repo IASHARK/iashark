@@ -157,9 +157,12 @@ test("le tableau des marches ne duplique pas le pari du signal",()=>{
 // Methodologie et mentions 18+ / jeu responsable retires de la page match -
 // outil d'analyse, pas un bookmaker. La mention 18+ reste au pied de page.
 test("l'avis IASHARK montre pari, cote, deux barres, ecart, fiabilite, raisons et risques",()=>{
-  // 04/10/2026 : l'Avis ne change pas d'un caractere (demande de Clement).
+  // 04/10/2026 : l'Avis ne change pas d'un caractere (demande de Clement). 21/10/2026 : etape 5 du
+  // plan valide par Clement (« des analyses claires, justes, sans jargon ») - la chance n'est plus
+  // ecrite quatre fois (note /10 retiree), libelles simples, « Pourquoi » = faits pour le pari et
+  // « A surveiller » = faits contre (lib/insights.js#faitsDuPari). Empreinte mise a jour ci-dessous.
   const bloc=js.slice(js.indexOf("function signalCard(vm)"),js.indexOf("function texteRisque("));
-  for(const attendu of ["sig-market","Cote utilisée","duoBars(","sig2-cmp","Nos chances face à la cote","relBadge(info)","Pourquoi ce pari","À surveiller",
+  for(const attendu of ["sig-market","'Cote'","duoBars(","sig2-cmp","Nos chances face à la cote","relBadge(info)","Pourquoi ce pari","À surveiller",
     "Estimation statistique, pas une garantie."]){
     assert.ok(bloc.includes(attendu),`element de l'avis manquant : ${attendu}`);
   }
@@ -167,17 +170,20 @@ test("l'avis IASHARK montre pari, cote, deux barres, ecart, fiabilite, raisons e
     assert.ok(!bloc.includes(absent),`retire le 21/09/2026, toujours present : ${absent}`);
   }
   assert.match(bloc,/r\.probability>0/);
-  for(const attendu of ["sig-slip","sig-odds-box","confMeter(r.confidence)","riskStat(vm.editorial.riskCode)","raisons.slice(0,3)"]){
+  for(const attendu of ["sig-slip","sig-odds-box","riskStat(vm.editorial.riskCode)","map(texteRaison).filter(Boolean).slice(0,3)","sig2_plain"]){
     assert.ok(bloc.includes(attendu),`element de l'avis manquant : ${attendu}`);
   }
-  assert.match(js,/function confMeter\(conf\)[\s\S]*role="meter"[\s\S]*aria-valuemax="10"/);
-  assert.match(js,/t\('match_page\.sig_conf_label','Probabilité estimée'\)/);
+  // La chance une seule fois : plus de note « /10 », plus de texte libre du pipeline dans « Pourquoi ».
+  for(const absent of ["confMeter","decisiveFactor","Marché retenu par le modèle","Cote utilisée"]){
+    assert.ok(!bloc.includes(absent),`retire le 21/10/2026, toujours present : ${absent}`);
+  }
+  assert.doesNotMatch(js,/function confMeter\(/);
   assert.match(bloc,/raw\.has_signal===true&&raw\.no_signal!==true/);
   // A l'octet pres : la fonction est celle de la version d'origine (29/09).
   const crypto=require("node:crypto");
   const debut=js.indexOf("function signalCard(vm){");let p=0,fin=-1;
   for(let i=js.indexOf("{",debut);i<js.length;i++){if(js[i]==="{")p++;else if(js[i]==="}"){p--;if(!p){fin=i+1;break;}}}
-  assert.equal(crypto.createHash("sha256").update(js.slice(debut,fin)).digest("hex"),"fce71ea0c37fadb1ed60d79d274daeac974bac3c54badcd1706d4569a33b827a");
+  assert.equal(crypto.createHash("sha256").update(js.slice(debut,fin)).digest("hex"),"a50925e3f1b887dfc79fea061f71b3081bbacba9c3c81b3554d4d4c916a555a3");
 });
 
 // REGLE DU PROPRIETAIRE (16/09/2026) : tout ce que l'IA donne est FERME pour le

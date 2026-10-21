@@ -427,6 +427,35 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 .hero-stade-h1{margin:0;display:flex;flex-direction:column}
 .hero-stade-brand{font-family:'Anton',Impact,'Arial Narrow Bold',sans-serif;font-weight:400;font-size:clamp(84px,10.5vw,150px);line-height:.86;letter-spacing:.005em;text-transform:uppercase;color:#f4f7fb;text-shadow:0 10px 40px rgba(0,0,0,.55)}
 .hero-stade-tagline{margin-top:clamp(22px,4vh,40px);font-family:'Inter',sans-serif;font-weight:700;font-size:clamp(13px,1.4vw,16px);letter-spacing:.18em;text-transform:uppercase;color:#dfe6ee}
+/* Haut de l'accueil (etape 4 du plan du 21/10/2026) : la promesse, le pari offert du jour (pari, cote, chance), la
+   preuve d'hier, un seul bouton. */
+.hero-pronos{margin:0;font-family:'Inter',sans-serif;font-weight:800;font-size:clamp(30px,4.6vw,52px);line-height:1.08;letter-spacing:-.025em;color:#f4f7fb;text-wrap:balance;text-shadow:0 8px 30px rgba(0,0,0,.5)}
+.hero-pronos-sub{margin:-6px 0 0;font-size:clamp(15px,1.5vw,17px);line-height:1.5;color:#c9d4dd;text-wrap:pretty;max-width:34em}
+.hero-pari{width:100%;max-width:520px}
+.hero-pari[hidden]{display:none}
+.hp-carte{display:block;padding:16px 18px 18px;border-radius:16px;border:1px solid rgba(34,211,238,.32);background:rgba(7,13,20,.86);color:inherit;text-decoration:none;text-align:left;box-shadow:0 18px 40px -18px rgba(0,0,0,.7);transition:border-color .2s ease}
+.hp-carte:hover{border-color:rgba(34,211,238,.6)}
+.hp-carte:focus-visible{outline:2px solid #22d3ee;outline-offset:3px}
+.hp-tete{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:12.5px;color:#9fb0bd;text-transform:none;letter-spacing:0}
+.hp-tete *{text-transform:none;letter-spacing:0}
+.hp-tete .hp-ligue{display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.hp-tete img{width:16px;height:16px;object-fit:contain}
+.hp-heure{flex:none;white-space:nowrap}
+.hp-equipes{display:flex;align-items:center;gap:12px;margin-top:12px;font-weight:700;font-size:16px;line-height:1.3;color:#f2f6f8}
+.hp-logos{flex:none;display:flex;gap:4px}
+.hp-logos img{width:28px;height:28px;object-fit:contain}
+.hp-noms{min-width:0;text-wrap:balance}
+.hp-vs{color:#6f7f8c;font-weight:600}
+.hp-pari{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:4px}
+.hp-lib{font-size:13px;color:#9fb0bd}
+.hp-marche{font-size:22px;line-height:1.2;font-weight:800;color:#f4f7fb}
+.hp-chiffres{font-size:15px;color:#d5dde3}
+.hp-chiffres b{color:#22d3ee;font-weight:800;font-variant-numeric:tabular-nums}
+.hp-attente{font-size:15px;color:#c9d4dd}
+.hp-pari--charge .hp-attente{animation:hp-pulse 1.4s ease-in-out infinite}
+@keyframes hp-pulse{50%{opacity:.45}}
+@media (prefers-reduced-motion:reduce){.hp-pari--charge .hp-attente{animation:none}.hp-carte{transition:none}}
+@media (max-width:1023px){.hero-stade-title{min-height:0;padding-top:8px}.hero-pari{max-width:100%}}
 @media (max-width:1023px){.hero-stade-bg{bottom:auto;height:calc(100svh - 110px)}.hero-stade-layer img{object-position:center 55%}.hero-stade-title{text-align:center;align-items:center;min-height:calc(100svh - 260px)}.hero-stade-bg::after{background:linear-gradient(180deg,rgba(6,11,18,.25) 0%,rgba(6,11,18,.45) 60%,rgba(6,11,18,.85) 100%)}}
 @media (prefers-reduced-motion:reduce){.hero-stade-layer{transform:none!important}}
 /* Bandeau des chiffres (3 colonnes) et composant de paiement (#acces, 600 px au plus) : regles
@@ -490,10 +519,11 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
   </div>
 <div class="relative z-10 mx-auto w-full max-w-[1200px] px-5 sm:px-8 grid grid-cols-1 items-center gap-12 pb-6 pt-12 lg:min-h-[72vh] lg:grid-cols-12 lg:gap-12 lg:pb-16 lg:pt-16">
   <div class="hero-stade-title flex flex-col justify-center gap-6 lg:col-span-6">
-    <h1 class="animate-fade-in d2 hero-stade-h1"><span class="hero-stade-brand">IA<span class="text-cyan">SHARK</span></span><span class="hero-stade-tagline">Football, in probabilities</span></h1>
+    <h1 class="animate-fade-in d2 hero-stade-h1 hero-pronos" data-i18n="home_hero.title">Today's football picks, published before kick-off.</h1>
+    <p class="animate-fade-in d2 hero-pronos-sub" data-i18n="home_hero.sub">One free pick every day, no account needed. Wins and losses shown.</p>
+    <div id="heroFeature" class="hero-pari animate-fade-in d3" aria-live="polite" hidden></div>
     <div class="animate-fade-in d4 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-      <a href="#decisions" class="hero-cta group inline-flex items-center justify-center gap-2.5 rounded-xl bg-cyan px-7 py-4 text-[14px] font-extrabold tracking-[0.02em] text-page shadow-[0_16px_40px_-16px_rgba(32,213,239,.8)] transition hover:brightness-110 active:scale-[.985]">See today's free analysis<span aria-hidden="true" class="transition-transform group-hover:translate-x-1">→</span></a>
-      <a href="/za/exemple-analyse.html" class="inline-flex items-center justify-center gap-2 rounded-xl border border-hairline px-6 py-4 text-[14px] font-semibold text-ink transition hover:border-cyan/40 hover:bg-white/[0.04]">See a sample analysis</a>
+      <a href="#decisions" class="hero-cta group inline-flex items-center justify-center gap-2.5 rounded-xl bg-cyan px-7 py-4 text-[14px] font-extrabold tracking-[0.02em] text-page shadow-[0_16px_40px_-16px_rgba(32,213,239,.8)] transition hover:brightness-110 active:scale-[.985]"><span data-i18n="home_hero.cta">See the free pick's analysis</span><span aria-hidden="true" class="transition-transform group-hover:translate-x-1">→</span></a>
     </div>
     <p class="preuve-hier preuve-hier--hero" data-preuve-hier hidden></p>
   </div>
@@ -961,6 +991,51 @@ function buildHeroFeature(m){
 // de la page. Mieux vaut montrer un match d'un autre jour, correctement
 // date, que le vide.
 
+// HAUT DE L'ACCUEIL (etape 4 du plan du 21/10/2026, Clement : « le premier ecran montre le pari offert du jour, la
+// preuve d'hier et un seul bouton ») : le pari offert (pari, cote, chance) est servi a tous par la fonction match-data
+// (appel_sans_compte, la meme reponse que la page match, cle publique anon), une seule fois par match ; en attendant,
+// le match et « Le pari arrive… » ; sans reponse, le lien vers la page du match. Aucun champ payant d'un autre match.
+var PARI_HERO={id:null,appel:null,etat:'vide'};
+function logoHero(tm,nom){var u=tm&&(tm.photo||tm.logo||(tm.id?'https://media.api-sports.io/football/teams/'+tm.id+'.png':''));return u?'<img src="'+esc(u)+'" width="28" height="28" alt="" loading="eager" decoding="async">':'';}
+function carteHero(m,p){
+  var hn=m.home&&m.home.n||'',an=m.away&&m.away.n||'';
+  var lib='<span class="hp-lib">'+esc(t('home_hero.pari_label','Le pari offert du jour'))+'</span>';
+  var pari;
+  if(p.etat==='ok'&&p.appel){
+    var a=p.appel,k=Number(String(a.cote_rec).replace(',','.')),ch=Math.round(Number(a.model_probability));
+    var marche=translateMarket(a.pari_rec)||a.pari_rec;
+    pari='<div class="hp-pari">'+lib+'<strong class="hp-marche">'+esc(marche)+'</strong><span class="hp-chiffres"><b>'+esc(tf('home_hero.cote','cote {cote}',{cote:k.toLocaleString(localeTag(),{minimumFractionDigits:2,maximumFractionDigits:2})}))+'</b> · '+esc(tf('home_hero.chance','{n} % de chance calculée',{n:ch}))+'</span></div>';
+  }else if(p.etat==='charge'){
+    pari='<div class="hp-pari hp-pari--charge">'+lib+'<span class="hp-attente">'+esc(t('home_hero.loading','Le pari arrive…'))+'</span></div>';
+  }else{
+    pari='<div class="hp-pari">'+lib+'<span class="hp-attente">'+esc(t('home_hero.fallback','Le pari est sur la page du match'))+'</span></div>';
+  }
+  return '<a class="hp-carte" href="'+esc(lien('match.html?id='+encodeURIComponent(m.id)))+'" data-track="accueil_pari_offert">'
+    +'<div class="hp-tete"><span class="hp-ligue">'+leagueHeader(m)+'</span><span class="hp-heure">'+dayLabel(m)+' · '+esc(heureLocale(m))+'</span></div>'
+    +'<div class="hp-equipes"><span class="hp-logos">'+logoHero(m.home,hn)+logoHero(m.away,an)+'</span><span class="hp-noms">'+esc(hn)+' <span class="hp-vs">–</span> '+esc(an)+'</span></div>'
+    +pari+'</a>';
+}
+function chargerPariHero(el,m){
+  var id=String(m.id),u='https://ksvjraqitxouwiabecai.supabase.co',k='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzdmpyYXFpdHhvdXdpYWJlY2FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODcwMjMsImV4cCI6MjA4ODM2MzAyM30.Eh3qk4tATM40hoYxdErAllLEo1y8KNt4BSCET_fAgT8';
+  fetch(u+'/functions/v1/match-data',{method:'POST',headers:{'Content-Type':'application/json',apikey:k,Authorization:'Bearer '+k},body:JSON.stringify({id:id})})
+    .then(function(r){return r&&r.ok?r.json():null;})
+    .then(function(d){
+      if(PARI_HERO.id!==id)return;
+      var x=d&&Array.isArray(d.matchs)?d.matchs.find(function(z){return z&&String(z.id)===id;}):null;
+      PARI_HERO.appel=x&&x.appel_sans_compte===true&&x.pari_rec&&x.cote_rec&&x.model_probability!=null?x:null;
+      PARI_HERO.etat=PARI_HERO.appel?'ok':'absent';
+      el.innerHTML=carteHero(m,PARI_HERO);
+    })
+    .catch(function(){if(PARI_HERO.id!==id)return;PARI_HERO.etat='absent';el.innerHTML=carteHero(m,PARI_HERO);});
+}
+function montrerPariHero(el,m){
+  if(!el)return;
+  if(!m){el.innerHTML='';el.hidden=true;return;}
+  el.hidden=false;
+  if(PARI_HERO.id!==String(m.id)){PARI_HERO={id:String(m.id),appel:null,etat:'charge'};chargerPariHero(el,m);}
+  el.innerHTML=carteHero(m,PARI_HERO);
+}
+
 function renderMatchs(){
   var hero=document.getElementById('heroFeature');
   // La vitrine EST le match gratuit du jour : meme module que la page match
@@ -968,7 +1043,7 @@ function renderMatchs(){
   // bouton "Voir le match gratuit du jour" ouvrait un match payant.
   var featured=IasharkFreeMatch.pickFreeMatch(getSportMatchs(),null,(window.IASHARK_MARKET&&window.IASHARK_MARKET.code)||null);
   freeMatchId=featured?featured.id:null;
-  if(hero)hero.innerHTML=featured?buildHeroFeature(featured):'<div class="feature-loading">NO MATCH AVAILABLE</div>';
+  montrerPariHero(hero,featured);
   // PARCOURS. Le bouton principal promet l'analyse gratuite du jour : il
   // l'ouvre vraiment. Tant que le match n'est pas resolu, le lien reste
   // l'ancre #decisions : jamais de lien mort.

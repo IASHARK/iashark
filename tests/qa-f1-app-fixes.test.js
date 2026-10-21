@@ -68,7 +68,8 @@ test("free-match : jour LOCAL du visiteur, mode historique (Paris) inchange", ()
 test("accueil / outils : les cartes de match restent dans le repertoire (match.html?id=)", () => {
   const home = read("index.html");
   assert.doesNotMatch(home, /lien\('match\/'/, "plus aucun lien vers la page statique FR /match/<id>.html");
-  assert.equal((home.match(/lien\('match\.html\?id='\+encodeURIComponent\(/g) || []).length, 2);
+  // 3 depuis le 21/10/2026 : la carte du pari offert en haut de l'accueil (carteHero) s'ajoute aux deux liens d'avant.
+  assert.equal((home.match(/lien\('match\.html\?id='\+encodeURIComponent\(/g) || []).length, 3);
   // Lignes de la liste des matchs (home-list.js) : lien() d'index.html, page match du repertoire.
   assert.match(read("home-list.js"), /H\.lien\('match\.html\?id='\+encodeURIComponent\(m\.id\)\)/);
   assert.doesNotMatch(read("home-list.js"), /lien\('match\/'/);

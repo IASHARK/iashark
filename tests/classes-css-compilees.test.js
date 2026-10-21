@@ -55,10 +55,13 @@ for (const page of PAGES) {
   });
 }
 
-test("accueil : bloc de paiement limite a 600 px, chiffres sur 3 colonnes (regles du <style>)", () => {
+// 21/10/2026 (passe « impeccable ») : le chiffre « Analyses publiees », jamais rempli depuis le
+// retrait de historique.json, est retire ; restent deux comptages reels sur 2 colonnes.
+test("accueil : bloc de paiement limite a 600 px, chiffres sur 2 colonnes (regles du <style>)", () => {
   for (const l of LANGUES) {
     const html = lire(l + "index.html");
-    assert.match(html, /\.kpi-3\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)\}/, l + "index.html");
+    assert.match(html, /\.kpi-2\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)\}/, l + "index.html");
+    assert.doesNotMatch(html, /id="kpiAnalyses"/, l + "index.html : chiffre jamais rempli");
     assert.match(html, /\.acces-in\{max-width:600px\}/, l + "index.html");
     assert.match(html, /<section id="acces"[^>]*>[\s\S]{0,400}class="acces-in /, l + "index.html");
     assert.doesNotMatch(html, /max-w-\[600px\]|\bgrid-cols-3 divide/, l + "index.html");

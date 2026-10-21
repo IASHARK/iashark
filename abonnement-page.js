@@ -84,6 +84,8 @@
       connecte:!!ctx.user,
       contexteMatch:label?texteContexte(label):'',
       focusConsent:etapeCompte,
+      // Seul titre de la page : h1 (le repli sans JS en a deja un).
+      titreBalise:'h1',
       onRetour:memoriserRetour
     });
   }

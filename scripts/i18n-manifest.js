@@ -246,11 +246,9 @@ var PAGES = [
       {find: '<a href="/blog.html">Guides</a>', build: function(d,l){ return '<a href="/blog.html">' + HOME_V2[l].guides + '</a>'; }},
       {find: '<a href="#decisions" class="btn-start">Commencer</a>', build: function(d,l){ return '<a href="#decisions" class="btn-start">' + HOME_V2[l].start + '</a>'; }},
       {find: "19 COMPÉTITIONS COUVERTES", build: function(d,l){ return HOME_V3[l].railLbl; }},
-      {find: "CE QUE TU REÇOIS", build: function(d,l){ return HOME_V3[l].anaLbl; }},
       {find: "Une analyse, ", build: function(d,l){ return HOME_V3[l].anaT1; }},
       {find: "pas un pronostic", build: function(d,l){ return HOME_V3[l].anaT2; }},
       {find: " balancé sans explication.", build: function(d,l){ return HOME_V3[l].anaT3; }},
-      {find: "CE QU’ON NE FERA PAS", build: function(d,l){ return HOME_V3[l].trLbl; }},
       {find: "On préfère te dire ", build: function(d,l){ return HOME_V3[l].trT1; }},
       {find: "quand on ne sait pas.", build: function(d,l){ return HOME_V3[l].trT2; }},
       {find: "Aucune promesse de gain", build: function(d,l){ return HOME_V3[l].t1t; }},
@@ -260,13 +258,12 @@ var PAGES = [
       {find: "Rien ne change après le coup d’envoi", build: function(d,l){ return HOME_V3[l].t3t; }},
       {find: "Recalculée chaque jour tant que le match n’a pas commencé, l’analyse n’est plus modifiée après le coup d’envoi.", build: function(d,l){ return HOME_V3[l].t3d; }},
       {find: "La fiabilité affichée", build: function(d,l){ return HOME_V3[l].t4t; }},
-      {find: "Chaque analyse indique la fiabilité de ses données : un échantillon mince est signalé comme tel.", build: function(d,l){ return HOME_V3[l].t4d; }},
-      {find: "QUESTIONS FRÉQUENTES", build: function(d,l){ return HOME_V3[l].faqLbl; }},
+      {find: "Chaque analyse indique la fiabilité de ses données : un échantillon mince est signalé comme tel.", build: function(d,l){ return HOME_V3[l].t4d; }},
       {find: "Ce que tu te demandes ", build: function(d,l){ return HOME_V3[l].faqT1; }},
       {find: "avant de payer.", build: function(d,l){ return HOME_V3[l].faqT2; }},
-      {find: "Je peux essayer avant de payer ?", build: function(d,l){ return HOME_V3[l].q1; }},
-      {find: "Oui. Une analyse complète est offerte chaque jour avec un compte gratuit, sans carte bancaire : le même contenu que pour un abonné. Elle est choisie parmi les écarts les plus favorables du jour ; les autres analyses ne le sont pas toutes.", build: function(d,l){ return HOME_V3[l].a1; }},
-      {find: "Je peux résilier quand je veux ?", build: function(d,l){ return HOME_V3[l].q3; }},
+      {find: "Je peux essayer avant de payer ?", build: function(d,l){ return HOME_V3[l].q1; }},
+      {find: "Oui. Une analyse complète est offerte chaque jour avec un compte gratuit, sans carte bancaire : le même contenu que pour un abonné. Elle est choisie parmi les écarts les plus favorables du jour ; les autres analyses ne le sont pas toutes.", build: function(d,l){ return HOME_V3[l].a1; }},
+      {find: "Je peux résilier quand je veux ?", build: function(d,l){ return HOME_V3[l].q3; }},
       {find: "Oui, en ligne depuis ton compte, à tout moment. Sans engagement, sans préavis, sans justification.", build: function(d,l){ return HOME_V3[l].a3; }},
       {find: "Voir l'analyse gratuite du jour", build: function(d,l){ return HOME_V4[l].cta1; }},
       {find: "Voir un exemple d'analyse", build: function(d,l){ return HOME_V4[l].cta2; }},
@@ -277,11 +274,9 @@ var PAGES = [
       {find: "Les données et les facteurs qui ont conduit le modèle à cette conclusion, écrits en clair.", build: function(d,l){ return HOME_V4[l].b2d; }},
       {find: "L’incertitude", build: function(d,l){ return HOME_V4[l].b3t; }},
       {find: "Chaque analyse indique la fiabilité de ses données. Un échantillon mince est écrit, pas caché.", build: function(d,l){ return HOME_V4[l].b3d; }},
-      {find: "CE QUE LE MOTEUR A DÉJÀ TRAITÉ", build: function(d,l){ return HOME_V4[l].kpiEye; }},
-      {find: "Analyses publiées", build: function(d,l){ return HOME_V4[l].kpi1; }},
       {find: "Simulations par match", build: function(d,l){ return HOME_V4[l].kpi3; }},
       {find: "Matchs analysés sur 3 jours", build: function(d,l){ return HOME_V4[l].kpi4; }},
-      {find: "Une probabilité ne vaut que par sa fiabilité : on affiche les deux, même quand elles sont modestes.", build: function(d,l){ return HOME_V4[l].trLead; }},
+      {find: "Une probabilité ne vaut que par sa fiabilité : on affiche les deux, même quand elles sont modestes.", build: function(d,l){ return HOME_V4[l].trLead; }},
       {find: "quand tu veux tout voir.", build: function(d,l){ return HOME_V4[l].acc3; }},
       {find: "text-soft\">Gratuit</h3>", build: function(d,l){ return HOME_V4[l].pfName; }},
       {find: "Pour juger le produit sur pièce : compte gratuit, sans carte bancaire.", build: function(d,l){ return HOME_V4[l].pfDesc; }},
@@ -308,16 +303,16 @@ var PAGES = [
       {find: "Calendriers, classements, résultats récents, confrontations directes et absences annoncées, championnat par championnat.", build: function(d,l){ return HOME_V4[l].s1d; }},
       {find: ">Le modèle calcule</h3>", build: function(d,l){ return ">" + HOME_V4[l].s2t + "</h3>"; }},
       {find: "Buts attendus, probabilité de chaque score, puis de chaque marché — sans les cotes.", build: function(d,l){ return HOME_V4[l].s2d; }},
-      {find: "Une fiche claire : probabilité, fiabilité, et l’écart détecté avec le marché réel.", build: function(d,l){ return HOME_V4[l].s3d; }},
-      {find: "Est-ce que IASHARK garantit des gains ?", build: function(d,l){ return HOME_V4[l].q2; }},
+      {find: "Une fiche claire : probabilité, fiabilité, et l’écart détecté avec le marché réel.", build: function(d,l){ return HOME_V4[l].s3d; }},
+      {find: "Est-ce que IASHARK garantit des gains ?", build: function(d,l){ return HOME_V4[l].q2; }},
       {find: "Non, et personne ne le peut. Le modèle estime des probabilités puis les compare aux cotes. C’est une méthode, pas une garantie.", build: function(d,l){ return HOME_V4[l].a2; }},
-      {find: "Comment le signal est-il calculé ?", build: function(d,l){ return HOME_V4[l].q3; }},
+      {find: "Comment le signal est-il calculé ?", build: function(d,l){ return HOME_V4[l].q3; }},
       {find: "Le système estime les buts attendus de chaque équipe, en déduit la probabilité de chaque score puis de chaque marché, et retient le marché le plus probable, sous une cote minimale et un plafond de probabilité. L’écart avec le prix du marché est calculé ensuite et affiché à part.", build: function(d,l){ return HOME_V4[l].a3; }},
-      {find: "Que se passe-t-il quand les données ne suffisent pas ?", build: function(d,l){ return HOME_V4[l].q4; }},
+      {find: "Que se passe-t-il quand les données ne suffisent pas ?", build: function(d,l){ return HOME_V4[l].q4; }},
       {find: "Aucun signal n’est publié sur ce match. C’est affiché explicitement plutôt que remplacé par un pari de remplissage.", build: function(d,l){ return HOME_V4[l].a4; }},
-      {find: "Quels championnats sont couverts ?", build: function(d,l){ return HOME_V4[l].q5; }},
+      {find: "Quels championnats sont couverts ?", build: function(d,l){ return HOME_V4[l].q5; }},
       {find: "Dix-neuf compétitions, dont la Ligue 1, la Premier League, la Liga, la Serie A, la Bundesliga, la Champions League, la Liga MX, la Premier Soccer League et les championnats d’Argentine, de Colombie, du Pérou et du Chili. La liste complète défile en haut de cette page.", build: function(d,l){ return HOME_V4[l].a5; }},
-      {find: "À quelle fréquence les analyses sont-elles mises à jour ?", build: function(d,l){ return HOME_V4[l].q7; }},
+      {find: "À quelle fréquence les analyses sont-elles mises à jour ?", build: function(d,l){ return HOME_V4[l].q7; }},
       {find: "Chaque jour, tant que le match n’a pas commencé. Après le coup d’envoi, l’analyse n’est plus modifiée.", build: function(d,l){ return HOME_V4[l].a7; }},
       // Accueil « stade » du 25/09/2026 : seule phrase sous le titre IASHARK.
       {find: 'Le football, en probabilités', build: function(d,l){ return HOME_V2[l].heroTagline; }},
@@ -325,12 +320,10 @@ var PAGES = [
       // dans les 6 langues, plutot que d'inventer une seconde version du
       // meme discours. Seules 4 chaines sont nouvelles (HOME_V2).
       {find: 'Compétitions couvertes', build: function(d,l){ return HOME_V2[l].statLeagues; }},
-      {find: 'LA MÉTHODE', build: function(d){ return d.landing_page.lbl_method; }},
       
       {find: 'Quatre étapes, ', build: function(d){ return d.landing_page.title_method_pre; }},
       {find: 'un seul signal', build: function(d){ return d.landing_page.title_method_b; }},
       
-      {find: 'EN PRATIQUE', build: function(d){ return d.landing_page.lbl_practice; }},
       
       {find: 'De la donnée brute au ', build: function(d){ return d.landing_page.title_practice_pre; }},
       {find: 'signal exploitable.', build: function(d){ return d.landing_page.title_practice_b; }},
@@ -360,11 +353,15 @@ var PAGES = [
       
       
       {find: 'SÉLECTION DU MATCH À SUIVRE…', build: function(d,l){ return HOME_V2[l].featureLoading; }},
+      // (21/10/2026, passe « impeccable ») Regles retirees avec leurs libelles : « CE QUE TU
+      // REÇOIS », « CE QU’ON NE FERA PAS », « LA MÉTHODE », « EN PRATIQUE », « QUESTIONS
+      // FRÉQUENTES », « CE QUE LE MOTEUR A DÉJÀ TRAITÉ » (sur-titres supprimes) et « Analyses
+      // publiées » (chiffre jamais rempli). Pied de page : plus d'emoticone.
       // (04/10/2026) Les regles du bloc « Buteurs du jour » sont retirees : le bloc
       // a quitte l'accueil, remplace par « Aujourd'hui » (lib/aujourdhui.js, textes
       // via I18N.t et data-i18n).
       {find:
-        '    <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>\n' +
+        '    <div>LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>\n' +
         '    <div>Aide : <a data-market-helpline="url" href="https://www.joueurs-info-service.fr" style="color:#22d3ee;text-decoration:none;">joueurs-info-service.fr</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">09 74 75 13 13</span></span></div>\n' +
         '    <div style="margin-top:8px;">\n' +
         '      <a href="/mentions-legales.html" style="color:#22d3ee;text-decoration:underline;margin:0 8px;">Mentions légales</a>\n' +
@@ -374,7 +371,7 @@ var PAGES = [
         '    </div>',
        build: function(d){
         var f = d.footer;
-        return '    <div>⚠️ ' + f.disclaimer_warning + '</div>\n' +
+        return '    <div>' + f.disclaimer_warning + '</div>\n' +
           '    <div>' + f.disclaimer_help_label + ' <a data-market-helpline="url" href="https://www.joueurs-info-service.fr" style="color:#22d3ee;text-decoration:none;">' + f.disclaimer_help_site + '</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">' + f.disclaimer_help_phone + '</span></span></div>\n' +
           '    <div style="margin-top:8px;">\n' +
           '      <a href="/mentions-legales.html" style="color:#22d3ee;text-decoration:underline;margin:0 8px;">' + f.mentions_legales + '</a>\n' +

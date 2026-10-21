@@ -74,7 +74,10 @@
 .hl-rows{list-style:none;margin:0;padding:0;}
 
 /* ---------- Ligne match ---------- */
-.hl-grid{display:grid;grid-template-columns:40px minmax(0,1fr) 128px;column-gap:8px;}
+/* Telephone : la zone droite prend la largeur de son contenu (21/10/2026). Fixee a
+   128 px, la pastille « Débloquer avec Pro » (~139 px) debordait sur le nom de
+   l'equipe (« Shakhtar Done… » colle au bord de la pastille). */
+.hl-grid{display:grid;grid-template-columns:40px minmax(0,1fr) auto;column-gap:8px;}
 .hl-item{position:relative;}
 .hl-row{grid-template-areas:"time teams zone" "time meta meta";align-items:center;min-height:64px;padding:7px 10px;
   border-top:1px solid var(--line,rgba(141,179,211,.14));color:inherit;text-decoration:none;position:relative;transition:background .18s;}

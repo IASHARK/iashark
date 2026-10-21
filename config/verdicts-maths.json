@@ -154,7 +154,8 @@
     "source": "04/10/2026 (nuit), decision de Clement : tous les marches possibles ouverts, chance juste. Le moteur v3 (H-022) juge chaque marche championnat par championnat sur les matchs jamais vus (walk-forward + zone gelee) : juste a +-3 points, sinon chance corrigee (apprise sur la 1re moitie, verifiee sur la 2e) ; un marche encore faux reste cache (v3_marches[].panneau = false, lib/marches-panneau.js). Restent toujours caches : les doublons (moins de 0,5 but = 0-0, aucun but, premier but avant la 45e, handicaps 0,5 et 1) et l'equipe qui marque en premier (non mesurable). Remplace le verdict du mathematicien du 04/10/2026 (verdicts-maths-tickets.md §2 (f) : 71 marches) ; tirs : cotes API-Football sans marge (config/marches-valides.json).",
     "date": "2026-10-04"
   },
-  "categories_no_go": [
+  "categories_no_go": [],
+  "categories_no_go_retirees_21_10": [
     {
       "ligue": "argentina_liga_profesional",
       "famille": "DC",
@@ -174,6 +175,11 @@
     }
   ],
   "competitions_jambes": {
+    "exclure_types": [],
+    "exclure_ligues": [],
+    "source": "21/10/2026 au soir (Clement : « pourquoi la Ligue des champions exclue, enleve cette regle ») : aucune competition exclue des combines ; tout pari affiche sur sa page peut y entrer. Ancienne regle : competitions_jambes_retirees_21_10 (et categories_no_go_retirees_21_10 pour les familles)."
+  },
+  "competitions_jambes_retirees_21_10": {
     "exclure_types": [
       "cup",
       "tournoi"

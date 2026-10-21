@@ -806,17 +806,22 @@ test("home-scorers.js : exports du tunnel (cleanEntry, renderTeaser, renderGate)
 // (ancien calcul scorerModel) est remplace par le bloc « Aujourd'hui » (tickets x5 /
 // x10, Selection en or, buteur du jour du moteur v3 : lib/aujourdhui.js). Le module
 // home-scorers.js reste teste ci-dessus mais n'est plus charge par l'accueil.
-test("accueil (index.html) : bloc « Aujourd'hui » a la place de « Buteurs du jour », masque sans reponse, scripts et styles charges", () => {
-  const html = read("index.html");
-  assert.doesNotMatch(html, /id="buteurs-du-jour"|<script src="\/home-scorers\.js">|assets\/home-scorers\.css/, "ancien bloc retire");
-  const sec = (html.match(/<section class="aj" id="aujourdhui"[^>]*><\/section>/) || [])[0];
+// 21/10/2026 (demande de Clement) : les combines quittent l'accueil pour leur page (combines.html) ;
+// l'accueil garde un lien, la page porte LE bloc « Aujourd'hui » avec ses scripts et ses styles.
+test("accueil : lien vers la page Combines ; combines.html : bloc « Aujourd'hui », masque sans reponse, scripts et styles charges", () => {
+  const accueil = read("index.html");
+  assert.doesNotMatch(accueil, /id="buteurs-du-jour"|<script src="\/home-scorers\.js">|assets\/home-scorers\.css/, "ancien bloc retire");
+  assert.doesNotMatch(accueil, /<section class="aj" id="aujourdhui"/, "plus de bloc des combines sur l'accueil");
+  assert.match(accueil, /<a class="cb-lien-a" href="\/combines\.html" data-href="combines\.html">/);
+  assert.ok(accueil.indexOf('id="heroStade"') < accueil.indexOf('class="cb-lien"') && accueil.indexOf('class="cb-lien"') < accueil.indexOf('id="decisions"'), "entre le haut de page et la liste des matchs");
+  const html = read("combines.html");
+  const sec = (html.match(/<section class="aj aj--page" id="aujourdhui"[^>]*><\/section>/) || [])[0];
   assert.ok(sec, "section Aujourd'hui");
   assert.match(sec, / hidden>/, "masquee tant qu'aucune reponse lisible : aucun trou");
-  assert.ok(html.indexOf('id="heroStade"') < html.indexOf('id="aujourdhui"'), "apres le haut de page");
-  assert.ok(html.indexOf('id="aujourdhui"') < html.indexOf('id="decisions"'), "avant la liste des matchs");
   const pos = (s) => html.indexOf(s);
   ["/lib/icones.js", "/lib/composants.js", "/lib/offre-pro.js", "/lib/aujourdhui.js"].forEach((src) => assert.ok(pos('<script src="' + src + '">') > 0, src));
   assert.ok(pos('<script src="/lib/composants.js">') < pos('<script src="/lib/aujourdhui.js">'));
+  assert.ok(pos('<script src="/lib/offre-pro.js">') < pos('<script src="/lib/aujourdhui.js">'), "interrupteur OUVERT.tickets lu avant le bloc");
   assert.match(html, /<link rel="stylesheet" href="\/assets\/composants\.css">/);
   assert.match(html, /<link rel="stylesheet" href="\/assets\/aujourdhui\.css">/);
   assert.match(html, /IasharkAujourdhui\.mount\(el,\{\}\)/);

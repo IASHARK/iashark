@@ -49,9 +49,12 @@ test('toutes les pages publiques chargent la navigation inférieure partagée',(
 
 test('la navigation partagée contient exactement les quatre destinations validées',()=>{
   const js=fs.readFileSync(path.join(root,'bottom-navigation.js'),'utf8');
-  for(const label of ['Accueil','Outils','Blog','Compte'])assert.match(js,new RegExp("label:'"+label+"'"));
+  // 21/10/2026 : l'onglet « Outils » devient « Combinés » et ouvre la page des combinés du jour.
+  for(const label of ['Accueil','Combinés','Blog','Compte'])assert.match(js,new RegExp("label:'"+label+"'"));
   assert.doesNotMatch(js,/label:'Marchés'/);
   assert.match(js,/aria-current/);
+  assert.match(js,/href:href\('combines\.html'\)/);
+  assert.doesNotMatch(js,/item\.id==='tools'\?'pro\.html'/,"le relibelle ne remet jamais l'ancienne page");
 });
 
 // Audit QA 14/09/2026 : sur /en/blog/guides/*, /abonnement et /404 la barre

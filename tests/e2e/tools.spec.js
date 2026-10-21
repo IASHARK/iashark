@@ -33,7 +33,10 @@ for (const v of VERSIONS) {
     // Journal Pro (fonction vendue) : la base exige estimated_probability (0010).
     // Avant le 18/09/2026, le formulaire ne l'envoyait pas : chaque enregistrement
     // echouait avec l'erreur brute de la base, en anglais.
-    test('Pro simule : le journal enregistre une decision avec sa probabilite estimee', async ({ page, supa, dictFor }) => {
+    // 21/10/2026 (regle de Clement : ni mise, ni ROI, ni profit/perte) : plus de champ
+    // Mise. La colonne stake reste obligatoire en base : valeur technique fixe (1),
+    // jamais saisie ni affichee.
+    test('Pro simule : le journal enregistre une decision avec sa probabilite estimee, sans mise', async ({ page, supa, dictFor }) => {
       const dict = await dictFor(v.locale);
       await supa.as('pro');
       await page.goto(`/${v.dir}/pro.html#journal`);
@@ -45,14 +48,17 @@ for (const v of VERSIONS) {
       await expect(page.locator('#jrProb'), 'suit la cote tant qu\'elle n\'est pas modifiee').toHaveValue('40');
       await page.locator('#jrMatch').fill('PSG – Marseille');
       await page.locator('#jrMarket').fill('Plus de 2,5 buts');
-      await page.locator('#jrStake').fill('10');
+      await expect(page.locator('#jrStake'), 'plus de champ Mise').toHaveCount(0);
       await page.locator('#jrSave').click();
       await expect(page.locator('#jrDlg')).not.toBeVisible();
       const insert = supa.calls.find((c) => c.kind === 'rest' && c.method === 'POST' && /betting_decisions/.test(c.path));
       expect(insert, 'insertion dans betting_decisions').toBeTruthy();
       const row = Array.isArray(insert.body) ? insert.body[0] : insert.body;
-      expect(row).toMatchObject({ match_label: 'PSG – Marseille', market: 'Plus de 2,5 buts', odds: 2.5, stake: 10, estimated_probability: 40 });
+      expect(row).toMatchObject({ match_label: 'PSG – Marseille', market: 'Plus de 2,5 buts', odds: 2.5, stake: 1, estimated_probability: 40 });
       await expect(page.locator('body')).not.toContainText('violates not-null');
+      // La decision s'affiche avec son statut, sans montant ni ROI.
+      await expect(page.locator('#panel-journal li').first()).toContainText(tr(dict, 'tools_page.journal_status_pending'));
+      await expect(page.locator('#panel-journal')).not.toContainText(/\bROI\b|P\/L/);
       expect(tr(dict, 'tools_page.journal_save_error')).toBeTruthy();
     });
 

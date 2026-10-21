@@ -3,7 +3,9 @@
    Visiteur sans compte ou compte gratuit : la page de VENTE (lib/pro-vente.js,
    21/10/2026). Abonne Pro : ses outils, quatre depuis le 21/10/2026 : detecter,
    evaluer, combiner, mesurer. Le calculateur de mise et le simulateur de capital
-   sont retires (regle de Clement : ni mise, ni capital, ni esperance affiches).
+   sont retires (regle de Clement : ni mise, ni capital, ni esperance affiches),
+   et avec eux l'esperance de la cote juste et du combine, la mise, le ROI et le
+   profit / perte du journal : aucun montant ni aucune esperance sur cette page.
 
    SECURITE — regle centrale de ce fichier.
    Cette page ne lit JAMAIS /data.json. Les donnees de match arrivent
@@ -35,21 +37,6 @@
   // Lien interne dans le repertoire de langue/marche courant (/gb/, /mx/...).
   function lien(p) { return (window.I18N && window.I18N.href) ? window.I18N.href(p) : '/' + p; }
   function estFr() { return !(window.I18N && window.I18N.locale) || window.I18N.locale === 'fr'; }
-  // Devise du marche courant (lib/market-config.js -> window.IASHARK_MARKET),
-  // EUR par defaut. Les montants saisis ici sont ceux de l'utilisateur.
-  function devise() { return (window.IASHARK_MARKET && window.IASHARK_MARKET.currency) || 'EUR'; }
-  function symboleDevise() {
-    try {
-      var parts = new Intl.NumberFormat(localeTag(), { style: 'currency', currency: devise() }).formatToParts(0);
-      for (var i = 0; i < parts.length; i++) if (parts[i].type === 'currency') return parts[i].value;
-    } catch (e) {}
-    return devise() === 'EUR' ? '€' : devise();
-  }
-  function euros(v) {
-    try { return Number(v).toLocaleString(localeTag(), { style: 'currency', currency: devise(), minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
-    catch (e) { return num(v, 0) + ' ' + symboleDevise(); }
-  }
-  function eurosSigne(v) { return (v >= 0 ? '+' : '') + euros(v); }
   function signe(v, d) { return (v >= 0 ? '+' : '') + num(v, d == null ? 1 : d); }
   function points() { return t('tools_page.unit_points', 'pts'); }
 
@@ -276,20 +263,23 @@
       if (ko) { out.innerHTML = vide(t('tools_page.fair_empty_title', 'Résultat indisponible'), t('tools_page.msg_fix_highlighted_fields_calc', 'Corrige les champs signalés pour lancer le calcul.')); return; }
 
       var r = D.fairOdds({ probability: vp, odds: vo });
-      var note = r.favourable
-        ? t('tools_page.fair_note_favourable', 'La cote proposée est <b class="text-ink">plus généreuse</b> que ta probabilité ne le justifie : c’est un écart en ta faveur.')
-        : t('tools_page.fair_note_unfavourable', 'La cote proposée est <b class="text-ink">moins intéressante</b> que ta probabilité ne le justifie. Le pari est défavorable sur la durée.');
+      // Ecart arrondi a 0,0 point : on ne parle ni de faveur ni de defaveur.
+      var aucunEcart = r.edgePoints === 0;
+      var note = aucunEcart
+        ? t('tools_page.note_no_gap', 'La cote proposée correspond à la cote juste : aucun écart.')
+        : r.favourable
+          ? t('tools_page.fair_note_favourable', 'La cote proposée est <b class="text-ink">plus généreuse</b> que ta probabilité ne le justifie : c’est un écart en ta faveur.')
+          : t('tools_page.fair_note_unfavourable', 'La cote proposée est <b class="text-ink">moins intéressante</b> que ta probabilité ne le justifie : c’est un écart en ta défaveur.');
       var largeurMax = Math.max(r.estimatedProbability, r.impliedProbability, 1);
-      out.innerHTML = resultat(t('tools_page.fair_result_label_gap', 'Écart'), signe(r.edgePoints, 1) + ' ' + esc(points()), note, r.favourable ? 'pos' : 'neg')
+      out.innerHTML = resultat(t('tools_page.fair_result_label_gap', 'Écart'), signe(r.edgePoints, 1) + ' ' + esc(points()), note, aucunEcart ? 'neutre' : r.favourable ? 'pos' : 'neg')
         + '<div class="' + S.carte + ' mt-4">'
         + barreProb(t('tools_page.fair_bar_your_prob', 'Ta probabilité estimée'), r.estimatedProbability, r.estimatedProbability / largeurMax * 100, true)
         + barreProb(t('tools_page.fair_bar_implied_prob', 'Probabilité implicite de la cote'), r.impliedProbability, r.impliedProbability / largeurMax * 100, false)
         + '<p class="mt-3 border-t border-hairline pt-3 text-[13px] leading-relaxed text-soft">' + esc(t('tools_page.fair_note_static', 'Un écart positif signifie que tu estimes l’événement plus probable que ne le fait le prix affiché.')) + '</p>'
         + '</div>'
-        + '<div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">'
+        + '<div class="mt-4 grid grid-cols-2 gap-3">'
         + kpi(num(r.fairOdds, 2), t('tools_page.fair_kpi_fair_odds', 'Cote juste'))
         + kpi(num(r.marketOdds, 2), t('tools_page.fair_odds_label', 'Cote disponible'))
-        + kpi(signe(r.expectedValue, 1) + '%', t('tools_page.fair_kpi_ev', 'Espérance théorique'), r.expectedValue >= 0 ? 'pos' : 'neg')
         + '</div>';
     }
     ['foProb', 'foOdds'].forEach(function (id) {
@@ -300,10 +290,12 @@
   }
 
   /* =====================================================================
-     03 — COMBO AUDITOR   "Ce combine est-il coherent mathematiquement ?"
+     03 — COMBO AUDITOR   "Quelle est la vraie probabilite de ce combine ?"
+     Probabilite combinee, cote juste du combine, cote totale proposee.
+     Ni esperance ni montant (21/10/2026).
      ===================================================================== */
   function rendreCombo(panneau) {
-    panneau.innerHTML = enTete('Analyse de combiné', 'Mesure ce qu’un combiné retire réellement à l’espérance de gain.')
+    panneau.innerHTML = enTete('Analyse de combiné', 'Multiplie les probabilités de chaque sélection et compare la cote juste du combiné à la cote proposée.')
       + '<div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">'
       + '<div><div id="cbList" class="' + S.carte + '"><p class="py-6 text-center text-[13.5px] text-soft">' + esc(t('tools_page.combo_loading', 'Chargement…')) + '</p></div>'
       + '<div class="' + S.carte + ' mt-4"><p class="mb-3 text-[13px] font-semibold text-ink">' + esc(t('tools_page.combo_manual_add_title', 'Ajouter une sélection manuelle')) + '</p>'
@@ -360,16 +352,17 @@
       var r = D.combo(picks.map(function (s) { return { probability: s.probability, odds: s.odds, label: s.market }; }));
       var risque = D.comboRisk(picks);
       if (!r) { out.innerHTML = vide(t('tools_page.title_calc_impossible', 'Calcul impossible'), t('tools_page.combo_calc_impossible_text', 'Vérifie les probabilités et les cotes.')); return; }
-      var note = r.worseThanSingle
-        ? t('tools_page.combo_worse_prefix', 'Ce combiné rapporte <b class="text-ink">moins</b> que le meilleur de ces paris joué seul (') + signe(r.bestSingleEv, 1) + t('tools_page.combo_worse_suffix', ' % d’espérance).')
-        : t('tools_page.combo_better_prefix', 'Espérance du meilleur pari joué seul : ') + signe(r.bestSingleEv, 1) + t('tools_page.combo_better_suffix', ' %. Un combiné reste plus volatil : toutes les sélections doivent passer.');
-      out.innerHTML = resultat(t('tools_page.combo_result_label', 'Espérance du combiné'), signe(r.expectedValue, 1) + '%', note, r.expectedValue >= 0 ? 'pos' : 'neg')
+      var note = r.comparison === 'above'
+        ? t('tools_page.combo_note_favourable', 'La cote du combiné est <b class="text-ink">plus généreuse</b> que la probabilité combinée ne le justifie : c’est un écart en ta faveur.')
+        : r.comparison === 'below'
+          ? t('tools_page.combo_note_unfavourable', 'La cote du combiné est <b class="text-ink">moins intéressante</b> que la probabilité combinée ne le justifie : c’est un écart en ta défaveur.')
+          : t('tools_page.note_no_gap', 'La cote proposée correspond à la cote juste : aucun écart.');
+      out.innerHTML = resultat(t('tools_page.combo_kpi_prob', 'Probabilité combinée'), num(r.probability, 1) + '%', note, 'neutre')
         + '<div class="mt-4 grid grid-cols-2 gap-3">'
-        + kpi(num(r.probability, 1) + '%', t('tools_page.combo_kpi_prob', 'Probabilité combinée'))
         + kpi(num(r.fairOdds, 2), t('tools_page.combo_kpi_fair_odds', 'Cote juste estimée'))
         + kpi(num(r.bookOdds, 2), t('tools_page.combo_kpi_book_odds', 'Cote du combiné'))
-        + kpi(String(picks.length), t('tools_page.combo_kpi_selections', 'Sélections'))
         + '</div>'
+        + '<p class="mt-3 text-[13px] leading-relaxed text-soft">' + esc(t('tools_page.combo_note_multiply', 'Toutes les sélections doivent passer : leurs probabilités se multiplient.')) + '</p>'
         + (risque.correlated
           ? '<div class="mt-4 rounded-xl border border-[#f5a524]/30 bg-[#f5a524]/[0.07] px-4 py-3 text-[13px] leading-relaxed text-soft">' + t('tools_page.combo_correlation_warning', '<b class="text-ink">Ces sélections peuvent être corrélées.</b> Plusieurs portent sur le même match. Le calcul suppose des événements indépendants : il peut surestimer ou sous-estimer la probabilité réelle. Nous ne disposons pas de mesure de dépendance entre marchés.') + '</div>'
           : '');
@@ -396,44 +389,59 @@
   }
 
   /* =====================================================================
-     04 — JOURNAL / PERFORMANCE   "Mes decisions sont-elles bonnes ?"
+     04 — JOURNAL   "Combien de mes paris sont passes ?"
+     Paris notes, gagnes, perdus, taux de reussite. Aucun montant : ni mise,
+     ni ROI, ni profit / perte (21/10/2026). La table betting_decisions exige
+     toujours une colonne stake > 0 (migration 0010) : on y ecrit une valeur
+     technique fixe (STAKE_TECHNIQUE), jamais saisie, jamais lue, jamais affichee.
      ===================================================================== */
+  var STAKE_TECHNIQUE = 1;
+  var STATUTS = {
+    won: ['tools_page.journal_status_won', 'Gagné', 'text-cyan'],
+    lost: ['tools_page.journal_status_lost', 'Perdu', 'text-[#ff8f85]'],
+    void: ['tools_page.journal_status_void', 'Annulé', 'text-soft'],
+    pending: ['tools_page.journal_status_pending', 'En attente', 'text-soft']
+  };
+  function ligneJournal(d) {
+    // Ancienne ligne sans statut connu : « En attente », jamais une erreur.
+    var st = d && Object.prototype.hasOwnProperty.call(STATUTS, d.status) ? STATUTS[d.status] : STATUTS.pending;
+    var cote = Number(d && d.odds) > 1 ? num(d.odds, 2) : '—';
+    return '<li class="flex items-center gap-3 border-t border-hairline py-3 first:border-t-0 sm:gap-4">'
+      + '<div class="min-w-0 flex-1"><div class="truncate text-[14px] font-semibold text-ink">' + esc(d && d.match_label) + '</div>'
+      + '<div class="truncate text-[12.5px] text-soft">' + esc(marcheLisible(d && d.market)) + '</div></div>'
+      + '<div class="hidden w-[76px] shrink-0 text-right text-[13.5px] text-soft tabular-nums sm:block">' + cote + '</div>'
+      // Sur mobile, la cote passe sous le resultat : un nom de marche long ne la masque jamais.
+      + '<div class="w-[104px] shrink-0 text-right"><div class="text-[14px] font-bold ' + st[2] + '">' + esc(t(st[0], st[1])) + '</div>'
+      + '<div class="text-[12px] text-soft tabular-nums sm:hidden">' + esc(t('tools_page.label_odds', 'Cote')) + ' ' + cote + '</div></div></li>';
+  }
   function rendreJournal(panneau) {
     var head = enTete('Journal des décisions', 'Mesure les décisions enregistrées dans la durée : rien n’est calculé sur des données de démonstration.');
 
     if (!ctx.user) {
       panneau.innerHTML = head + vide(t('tools_page.journal_login_title', 'Connecte-toi pour ouvrir ton journal'),
-        t('tools_page.journal_login_text', 'Le journal enregistre tes décisions et calcule ta performance réelle. Il ne contient que tes propres données.'),
+        t('tools_page.journal_login_text', 'Le journal enregistre tes décisions et calcule ton taux de réussite. Il ne contient que tes propres données.'),
         '<a href="' + esc(lien('compte.html')) + '" class="mt-5 inline-flex rounded-xl bg-cyan px-6 py-3 text-[13px] font-extrabold text-page transition hover:brightness-110">' + esc(t('tools_page.journal_login_cta', 'Créer un compte')) + '</a>');
       return;
     }
 
-    var s = D.summarize(null, etat.decisions);
+    var s = D.summarize(etat.decisions);
     var bloc;
     if (!etat.decisions.length) {
       bloc = vide(t('tools_page.journal_empty_title', 'Aucune décision enregistrée'),
-        t('tools_page.journal_empty_text', 'Ajoute ta première décision pour commencer à mesurer ta performance. Aucun chiffre n’est affiché tant qu’il n’y a rien à mesurer.'),
+        t('tools_page.journal_empty_text', 'Ajoute ta première décision pour commencer à suivre ton taux de réussite. Aucun chiffre n’est affiché tant qu’il n’y a rien à mesurer.'),
         '<button id="jrAdd" type="button" class="mt-5 inline-flex rounded-xl bg-cyan px-6 py-3 text-[13px] font-extrabold text-page transition hover:brightness-110">' + esc(t('tools_page.journal_add_btn_first', 'Ajouter une décision')) + '</button>');
     } else {
-      var lignes = etat.decisions.map(function (d) {
-        var pl = d.result_pnl == null ? D.pnl(d) : Number(d.result_pnl);
-        var badge = d.status === 'won' ? 'text-cyan' : d.status === 'lost' ? 'text-[#ff8f85]' : 'text-soft';
-        return '<li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-t border-hairline py-3 first:border-t-0 sm:grid-cols-[minmax(0,1fr)_80px_80px_90px]">'
-          + '<div class="min-w-0"><div class="truncate text-[14px] font-semibold text-ink">' + esc(d.match_label) + '</div>'
-          + '<div class="truncate text-[12.5px] text-soft">' + esc(marcheLisible(d.market)) + '</div></div>'
-          + '<div class="hidden text-right text-[13.5px] text-soft tabular-nums sm:block">' + num(d.odds, 2) + '</div>'
-          + '<div class="hidden text-right text-[13.5px] text-soft tabular-nums sm:block">' + euros(d.stake) + '</div>'
-          + '<div class="text-right text-[14px] font-bold ' + badge + ' tabular-nums">' + (d.status === 'pending' ? '—' : eurosSigne(pl)) + '</div></li>';
-      }).join('');
+      var lignes = etat.decisions.map(ligneJournal).join('');
       bloc = '<div class="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">'
         + kpi(String(s.total), t('tools_page.journal_kpi_count', 'Décisions'))
-        + kpi(signe(s.roi, 1) + '%', t('tools_page.journal_kpi_roi', 'ROI'), s.roi >= 0 ? 'pos' : 'neg')
-        + kpi(eurosSigne(s.profit), t('tools_page.journal_kpi_profit', 'Profit / perte'), s.profit >= 0 ? 'pos' : 'neg')
-        + kpi(num(s.winRate, 1) + '%', t('tools_page.journal_kpi_winrate', 'Taux de réussite'))
+        + kpi(String(s.won), t('tools_page.journal_kpi_won', 'Gagnés'))
+        + kpi(String(s.lost), t('tools_page.journal_kpi_lost', 'Perdus'))
+        // Aucun pari gagne ou perdu : pas de taux, un tiret (jamais un 0 % trompeur).
+        + kpi(s.winRate == null ? '—' : num(s.winRate, 1) + '%', t('tools_page.journal_kpi_winrate', 'Taux de réussite'))
         + '</div>'
         + '<div class="' + S.carte + '">'
-        + '<div class="mb-2 hidden grid-cols-[minmax(0,1fr)_80px_80px_90px] gap-3 border-b border-hairline pb-2 text-[11px] font-bold tracking-[0.1em] text-soft sm:grid">'
-        + '<span>' + esc(t('tools_page.journal_th_match_market', 'MATCH / MARCHÉ')) + '</span><span class="text-right">' + esc(t('tools_page.journal_th_odds', 'COTE')) + '</span><span class="text-right">' + esc(t('tools_page.journal_th_stake', 'MISE')) + '</span><span class="text-right">' + esc(t('tools_page.journal_th_pl', 'P/L')) + '</span></div>'
+        + '<div class="mb-2 hidden items-center gap-3 border-b border-hairline pb-2 text-[11px] font-bold tracking-[0.1em] text-soft sm:flex sm:gap-4">'
+        + '<span class="min-w-0 flex-1">' + esc(t('tools_page.journal_th_match_market', 'MATCH / MARCHÉ')) + '</span><span class="w-[76px] shrink-0 text-right">' + esc(t('tools_page.journal_th_odds', 'COTE')) + '</span><span class="w-[104px] shrink-0 text-right">' + esc(t('tools_page.journal_th_result', 'RÉSULTAT')) + '</span></div>'
         + '<ul class="list-none p-0">' + lignes + '</ul></div>'
         + '<button id="jrAdd" type="button" class="mt-4 rounded-xl border border-hairline px-4 py-2.5 text-[13px] font-semibold text-ink transition hover:border-cyan/40">' + esc(t('tools_page.journal_add_btn', '+ Ajouter une décision')) + '</button>';
     }
@@ -451,7 +459,6 @@
       // enregistrement du journal Pro echouait. Pre-remplie avec la probabilite
       // de la cote (100 / cote), modifiable ; suit la cote tant qu'elle n'est pas modifiee.
       + champ('jrProb', t('tools_page.journal_prob_label', 'Ta probabilité estimée'), { unit: '%', min: 1, max: 99, step: 0.1, value: 52.6, help: t('tools_page.journal_prob_help', 'Par défaut : la probabilité correspondant à la cote.') })
-      + champ('jrStake', t('tools_page.journal_stake_label', 'Mise'), { unit: symboleDevise(), min: 0.01, step: 0.01 })
       + '</div><p id="jrMsg" class="mt-3 text-[12.5px] text-soft"></p>'
       + '<div class="mt-5 flex gap-3"><button value="cancel" class="flex-1 rounded-xl border border-hairline px-4 py-2.5 text-[13px] font-semibold text-ink">' + esc(t('tools_page.journal_cancel_btn', 'Annuler')) + '</button>'
       + '<button id="jrSave" type="button" class="flex-1 rounded-xl bg-cyan px-4 py-2.5 text-[13px] font-extrabold text-page">' + esc(t('tools_page.journal_save_btn', 'Enregistrer')) + '</button></div>'
@@ -475,11 +482,11 @@
         match_label: (($('#jrMatch') || {}).value || '').trim(),
         market: (($('#jrMarket') || {}).value || '').trim(),
         odds: Number(($('#jrOdds') || {}).value),
-        stake: Number(($('#jrStake') || {}).value),
-        estimated_probability: Number(($('#jrProb') || {}).value)
+        estimated_probability: Number(($('#jrProb') || {}).value),
+        stake: STAKE_TECHNIQUE
       };
-      if (!row.match_label || !row.market || !(row.stake > 0) || !(row.odds > 1) || !(row.estimated_probability > 0 && row.estimated_probability < 100)) {
-        if (msg) msg.textContent = t('tools_page.journal_form_incomplete_prob_msg', 'Complète le match, le marché, une cote > 1, une mise > 0 et une probabilité entre 1 et 99 %.');
+      if (!row.match_label || !row.market || !(row.odds > 1) || !(row.estimated_probability > 0 && row.estimated_probability < 100)) {
+        if (msg) msg.textContent = t('tools_page.journal_form_incomplete_prob_msg', 'Complète le match, le marché, une cote supérieure à 1 et une probabilité entre 1 et 99 %.');
         return;
       }
       window.IasharkApp.supabase.from('betting_decisions').insert(row).select().single().then(function (q) {

@@ -1,5 +1,28 @@
 const test=require('node:test'),assert=require('node:assert/strict'),d=require('../lib/tools-domain');
-test('le P&L et le résumé utilisent uniquement les décisions réglées',()=>{const rows=[{stake:20,odds:2,status:'won'},{stake:10,odds:3,status:'lost'},{stake:99,odds:2,status:'pending'}];assert.equal(d.pnl(rows[0]),20);assert.deepEqual(d.summarize(1000,rows),{bankroll:1000,profit:10,roi:33.33,winRate:50,settled:2,total:3})});
+// 21/10/2026 (regle de Clement : ni mise, ni ROI, ni profit/perte) : le journal compte des
+// paris, jamais des montants. Les anciennes lignes gardent stake / result_pnl : ignorees.
+test('journal : paris notes, gagnes, perdus et taux de reussite, sans aucun montant', () => {
+  const rows = [
+    { stake: 20, odds: 2, status: 'won', result_pnl: 20 },
+    { stake: 10, odds: 3, status: 'lost', result_pnl: -10 },
+    { stake: 99, odds: 2, status: 'pending' },
+    { stake: 5, odds: 1.9, status: 'void', result_pnl: 0 },
+    { odds: 1.7, status: 'won' }
+  ];
+  const s = d.summarize(rows);
+  assert.deepEqual(s, { total: 5, won: 2, lost: 1, void: 1, pending: 1, decided: 3, winRate: 66.7 });
+  for (const champ of ['profit', 'roi', 'bankroll', 'stake', 'pnl']) assert.ok(!(champ in s), 'aucun montant : ' + champ);
+  assert.equal(d.pnl, undefined, 'plus de calcul de profit / perte');
+});
+
+test('journal : aucune decision tranchee -> pas de taux (null, jamais un 0 % trompeur), anciennes donnees sans planter', () => {
+  assert.equal(d.summarize([{ status: 'pending' }, { status: 'void' }]).winRate, null);
+  assert.deepEqual(d.summarize(null), { total: 0, won: 0, lost: 0, void: 0, pending: 0, decided: 0, winRate: null });
+  const anciennes = d.summarize([null, 'x', { status: null, stake: 'abc' }, { status: 'inconnu' }, { status: 'lost', result_pnl: 'n/a' }]);
+  assert.equal(anciennes.total, 3, 'les lignes qui ne sont pas des objets sont ignorees');
+  assert.equal(anciennes.pending, 2);
+  assert.equal(anciennes.winRate, 0);
+});
 
 test('scanValue aplatit les ecarts modele/marche deja calcules et les trie, sans rien recalculer', () => {
   const matchs = [
@@ -20,7 +43,7 @@ test('scanValue aplatit les ecarts modele/marche deja calcules et les trie, sans
   assert.deepEqual(d.scanValue(null), [], 'aucune donnee -> aucune ligne, jamais une erreur');
 });
 
-test('combo multiplie reellement les probabilites et expose l\'esperance, meme defavorable', () => {
+test('combo multiplie reellement les probabilites : probabilite combinee, cote juste et cote proposee, sans esperance', () => {
   const c = d.combo([
     { probability: 70, odds: 1.5 },
     { probability: 70, odds: 1.5 }
@@ -28,19 +51,21 @@ test('combo multiplie reellement les probabilites et expose l\'esperance, meme d
   assert.equal(c.probability, 49, 'deux paris a 70% donnent 49%, jamais 70%');
   assert.equal(c.bookOdds, 2.25);
   assert.equal(c.fairOdds, 2.04);
-  assert.equal(c.expectedValue, 10.25);
-  assert.equal(c.bestSingleEv, 5, 'esperance de chaque pari joue seul');
+  assert.equal(c.comparison, 'above', 'cote proposee plus haute que la cote juste');
+  assert.deepEqual(Object.keys(c).sort(), ['bookOdds', 'comparison', 'fairOdds', 'legs', 'probability']);
   assert.equal(d.combo([{ probability: 70, odds: 1.5 }]), null, 'un combine exige au moins deux selections');
 });
 
-test('combo signale quand le combine est moins interessant que le meilleur pari seul', () => {
-  const c = d.combo([
+test('combo : cote proposee plus basse que la cote juste, ou egale, dite telle quelle', () => {
+  const bas = d.combo([
     { probability: 60, odds: 1.8 },
     { probability: 40, odds: 2.0 }
   ]);
-  assert.equal(c.probability, 24);
-  assert.ok(c.expectedValue < c.bestSingleEv);
-  assert.equal(c.worseThanSingle, true);
+  assert.equal(bas.probability, 24);
+  assert.equal(bas.fairOdds, 4.17);
+  assert.equal(bas.bookOdds, 3.6);
+  assert.equal(bas.comparison, 'below');
+  assert.equal(d.combo([{ probability: 50, odds: 2 }, { probability: 50, odds: 2 }]).comparison, 'equal');
 });
 
 test('calculateur de mise et simulateur de capital retires (21/10/2026 : ni mise, ni capital)', () => {
@@ -63,7 +88,7 @@ test("fairOdds : une cote defavorable donne un ecart negatif, jamais masque", ()
   const r = d.fairOdds({ probability: 45, odds: 1.8 });
   assert.ok(r.edgePoints < 0, "45% a 1.80 est defavorable");
   assert.equal(r.favourable, false);
-  assert.ok(r.expectedValue < 0);
+  assert.ok(!('expectedValue' in r), 'aucune esperance (21/10/2026)');
 });
 
 test("fairOdds : entrees invalides -> null, jamais un resultat invente", () => {
@@ -77,7 +102,7 @@ test("fairOdds : entrees invalides -> null, jamais un resultat invente", () => {
 test("fairOdds : a la cote juste exacte, l'ecart est nul", () => {
   const r = d.fairOdds({ probability: 50, odds: 2 });
   assert.equal(r.edgePoints, 0);
-  assert.equal(r.expectedValue, 0);
+  assert.equal(r.favourable, false);
 });
 
 // ---------------------------------------------------------------------------

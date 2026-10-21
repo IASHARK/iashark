@@ -6,7 +6,11 @@
 *,*::before,*::after{box-sizing:border-box}
 html,body{margin:0}
 body{font-family:'Inter',system-ui,sans-serif}
-h1,h2,h3,p,ul,ol,figure,dialog{margin:0}
+h1,h2,h3,p,ul,ol,figure{margin:0}
+/* La fenetre « Nouvelle decision » du journal : sans la marge automatique du
+   navigateur (retiree ici jusqu'au 21/10/2026), elle s'ouvrait collee en haut a
+   gauche de l'ecran au lieu d'etre centree. */
+dialog{margin:auto}
 ul,ol{list-style:none;padding:0}
 /* Sans preflight, un <button> garde le fond gris clair du navigateur
    (buttonface). Sur fond sombre, le texte blanc devenait illisible et les

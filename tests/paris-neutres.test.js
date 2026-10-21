@@ -88,7 +88,8 @@ test("correction « petits scores » : -3 points, toutes competitions et toutes 
   assert.equal(o.chance_affichee, o.chance);
   assert.ok(u.chance > o.chance && u.chance_affichee < o.chance_affichee);
   P.publierPronostics([m], [], { configLigues: LIGUES, figes: {}, fluxPar: { 510: { raw: raw(bets) } } });
-  assert.equal(m.market_id, "fh-over-05");
+  // 21/10/2026 (Clement) : le pari se choisit parmi les marches connus seulement : jamais « plus de 0,5 but en 1re mi-temps ».
+  assert.equal(m.market_id, "under-25");
   // La chance affichee d'un pari « moins de » publie garde la correction (alignerChancesAffichees).
   const m2 = Object.assign({}, M, { id: 511, pari_rec: "Under 2.5", market_id: "under-25", no_signal: false, chance_iashark: 60, cote_rec: "1.6" });
   P.alignerChancesAffichees([m2], [], { configLigues: LIGUES });
@@ -105,18 +106,20 @@ test("choix neutre : le plus probable dans 1,40-2,20, toutes familles, aucun bon
   const m = Object.assign({}, M, { id: 502 });
   const r = P.publierPronostics([m], [], { configLigues: LIGUES, figes: {}, fluxPar: { 502: { raw: raw(bets) } } });
   assert.equal(r.publies, 1);
-  assert.equal(m.market_id, "F4:Home +0.5", "le plus probable dans la fourchette (handicap a 1,42), jamais les corners a 1,40");
-  assert.deepEqual([m.cote_rec, m.cote_source, m.cote_bookmaker, m.marche], ["1.42", "indicative", null, "AUTRE_MARCHE"]);
-  assert.equal(m.pari_rec, "Lens +0,5 (handicap)");
-  assert.equal(P.motifExceptionGel({ pari_rec: m.pari_rec, market_id: m.market_id, cote_rec: 1.42 }), null);
+  // 21/10/2026 (Clement : « le meilleur marche a partir d'une cote a 1,40 », marches connus) : la victoire a 1,80, jamais le
+  // handicap a 1,42 ni les corners a 1,40.
+  assert.equal(m.market_id, "home-win", "le plus probable des marches connus dans la fourchette");
+  assert.deepEqual([m.cote_rec, m.cote_source, m.cote_bookmaker], ["1.80", "indicative", null]);
+  // Un pari deja publie sur un autre marche (avant le 21/10) reste fige jusqu'au coup d'envoi.
+  assert.equal(P.motifExceptionGel({ pari_rec: "Lens +0,5 (handicap)", market_id: "F4:Home +0.5", cote_rec: 1.42 }), null);
   const m2 = Object.assign({}, M, { id: 503 });
   P.publierPronostics([m2], [], { configLigues: LIGUES, figes: {}, fluxPar: { 503: { raw: raw(bets.slice().reverse()) } } });
   assert.equal(m2.market_id, m.market_id, "l'ordre des marches ne change rien");
-  // Rien dans 1,40-2,20 : le plus proche, jamais sous 1,20.
+  // Rien dans 1,40-2,20 sur un marche connu : pas de pari (21/10/2026 : jamais sous 1,40, plus de « cote la plus proche »).
   const serre = [{ id: 1, name: "Match Winner", values: v([["Home", 1.25], ["Draw", 6], ["Away", 12]]) }, { id: 8, name: "Both Teams Score", values: v([["Yes", 2.6], ["No", 1.45]]) }];
   const m3 = Object.assign({}, M, { id: 505 });
   P.publierPronostics([m3], [], { configLigues: LIGUES, figes: {}, fluxPar: { 505: { raw: raw(serre) } } });
-  assert.ok(m3.market_id && Number(m3.cote_rec) >= 1.2 && m3.market_id !== "btts-no");
+  assert.deepEqual([m3.market_id, m3.cote_rec, m3.no_signal_reason], [null, "", P.RAISON_HORS_FOURCHETTE]);
 });
 
 test("chance du moteur v3 juste = le plus bas entre le v3 et la cote sans marge", () => {
@@ -172,14 +175,15 @@ test("coherence : handicaps et nouveaux marches dans le catalogue de coherence (
   assert.ok(MP.coherent(m, "F18:Home -1", "fh-home-win", MP.NIVEAU.JAMBE, 0.8).ok, "europeen de 1re mi-temps");
   assert.equal(MP.definition("F4:Home -1.5").ft, true); assert.equal(MP.definition("F7:Home/Home").ft, false);
   assert.ok(!MP.coherent(m, "F144:Yes", "over-15", MP.NIVEAU.JAMBE, 0.8).ok, "evenements : seulement le meme marche");
-  // Combines : un pari affiche sur un handicap europeen n'empeche plus une jambe coherente sur le meme match.
+  // Combines (regle du 21/10/2026) : seul le pari AFFICHE de chaque match est une jambe ; un pari affiche sur un autre marche
+  // (codes « F… », publie avant le 21/10) n'est jamais une jambe, et les candidats d'autres marches sont ignores.
   const NOW = Date.parse("2026-10-07T04:00:00Z");
   const mt = { id: 601, home: { n: "A" }, away: { n: "B" }, date: "2026-10-07 20:00", league_key: "ligue1", league_id: 61, league: "Ligue 1", v3_marches: g,
     pari_rec: "A (−1)", market_id: "F9:Home -1", no_signal: false, cote_rec: "1.90", chance_iashark: 50, pronostic: { market_id: "F9:Home -1", publie: true, fiabilite: "vérifiée" } };
   const cp = { 601: [{ market_id: "dc-1x", famille: "DC", cote: 1.3, cote_anj: false, bookmaker: null, chance: 75, chance_affichee: 75, fiabilite: "vérifiée", p_modele: 80, q: 75 },
     { market_id: "dc-x2", famille: "DC", cote: 1.3, cote_anj: false, bookmaker: null, chance: 75, chance_affichee: 75, fiabilite: "vérifiée", p_modele: 80, q: 75 }] };
   const c = T.calculerDuJour([mt], { jour: "2026-10-07", nowMs: NOW, fixtureById: { 601: { fixture: { timestamp: Date.parse("2026-10-07T18:00:00Z") / 1000, status: { short: "NS" } } } }, configLigues: LIGUES, candidatsPar: cp });
-  assert.equal(c.nb_jambes, 1, "« A ou nul » va avec « A gagne par 2 buts ou plus » ; « nul ou B » non");
+  assert.equal(c.nb_jambes, 0, "le handicap affiche n'est pas une jambe ; « A ou nul » (autre marche) n'est plus candidat");
 });
 
 test("pipeline : reglement des autres marches par les faits d'API-Football ; releve gardé en memoire", () => {

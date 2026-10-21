@@ -4547,24 +4547,18 @@ jobs:
             console.log('  [BUTEURS] listes deja servies gardees : '+rapportButeurs.figes+' ; joueurs absents remplaces : '+rapportButeurs.remplaces+', retires sans remplacant : '+rapportButeurs.retires+'.');
           }catch(e){ console.log('::warning title=Buteurs figes::listes non figees ('+(e&&e.message)+') : les buteurs de la page match peuvent changer a ce run.'); }
           // ================= TICKETS DU JOUR, SELECTION EN OR, BUTEUR DU JOUR (demande de Clement, 04/10/2026) =================
-          // Juste APRES la publication des paris. Regle du 06/10/2026 (config/tickets.json) : Selection en or = 3 paris
-          // « valeur » du moteur v3 (cote 1,70-2,50, classement interne par ecart modele / cote sans marge) ; petit
-          // combine (4-5 jambes, cote 4,00-6,00) et grand combine (7-8 jambes, cote 8,50-12,00) = jambes sures (1,20-1,45)
-          // de tous les marches justes, une par match, coherentes avec le pari affiche ; la plus grande chance
+          // Juste APRES la publication des paris. Regle du 21/10/2026 (config/tickets.json, demande de Clement : « faut pas se
+          // casser la tete ») : jambes et Selection en or = SEULEMENT le pari affiche de chaque match (meme pari, meme cote,
+          // meme chance que la page). Selection en or = les 3 paris les plus probables du jour ; petit combine (3-5 jambes,
+          // cote 4,00-6,00) et grand combine (5-7 jambes, cote 8,50-12,00) = la plus grande chance parmi ces paris
           // (lib/run-output/combos.js#meilleurCombine), jamais force. Gele a sa publication dans la table tickets_du_jour (migration 0050,
           // lib/tickets-du-jour.js) : un ticket publie ne se recalcule plus. Rien sans le feu vert du mathematicien
           // (config/verdicts-maths.json). Table ou cle absente : simple avertissement, le calcul quotidien continue.
           // data.json : statut de chaque ticket seulement (lib/public-run-output.js). Journal : statuts et compteurs seulement.
-          // 06/10/2026 (demande de Clement : « plein de marches ») : les combines et la Selection en or prennent TOUS les
-          // marches justes de chaque match (lib/pronostic.js#marchesCandidats, memes chances et memes cotes que le choix du
-          // pari), coherents avec le pari affiche (lib/marches-paris.js#coherent). Candidats en memoire seulement.
           try{
             var TICKETS_DU_JOUR=require('./lib/tickets-du-jour.js');
-            var CANDIDATS_DU_JOUR=null;
-            try{ CANDIDATS_DU_JOUR=PRONOSTIC.marchesCandidats(allMatchsData,{configLigues:LEAGUES_CONFIG,chancesV3Par:CHANCES_V3_PRONO,cotesAnjPar:LIVRES_ANJ,fluxPar:FLUX_PARIS}); }
-            catch(e){ CANDIDATS_DU_JOUR=null; console.log('::warning title=Tickets::candidats des combines non calcules ('+(e&&e.message)+') : seuls les paris affiches servent.'); }
             var rapportTickets=await TICKETS_DU_JOUR.publierTicketsDuJour({
-              matchs:allMatchsData, fixtureById:FIXTURE_BY_ID, nowMs:Date.now(), configLigues:LEAGUES_CONFIG, candidatsPar:CANDIDATS_DU_JOUR,
+              matchs:allMatchsData, fixtureById:FIXTURE_BY_ID, nowMs:Date.now(), configLigues:LEAGUES_CONFIG,
               supabase:(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY)?{url:SUPA_URL_PIPELINE,cle:SUPA_SERVICE_KEY}:null,
               pipelineSha:process.env.GITHUB_SHA||null, snapshotTime:runOutput.snapshot_time,
               avertir:function(t){ console.log('::warning title=Tickets::'+t); },

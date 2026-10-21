@@ -219,9 +219,14 @@ test("4. departage deterministe : entree melangee -> meme ticket ; egalite : moi
 });
 
 // ------------------------------------------------------------ 5. bornes (apres arrondi)
-test("5. bornes (06/10/2026) : 4-5 jambes et 4,00-6,00 pour le petit combine ; 7-8 et 8,50-12,00 pour le grand ; cote testee apres arrondi", () => {
-  assert.deepEqual([REGLES.x5.jambes, REGLES.x5.cote_min, REGLES.x5.cote_max], [[4, 5], 4, 6]);
-  assert.deepEqual([REGLES.x10.jambes, REGLES.x10.cote_min, REGLES.x10.cote_max], [[7, 8], 8.5, 12]);
+test("5. bornes (21/10/2026) : 3-5 jambes et 4,00-6,00 pour le petit combine ; 5-7 et 8,50-12,00 pour le grand ; cote testee apres arrondi", () => {
+  assert.deepEqual([REGLES.x5.jambes, REGLES.x5.cote_min, REGLES.x5.cote_max], [[3, 4, 5], 4, 6]);
+  assert.deepEqual([REGLES.x10.jambes, REGLES.x10.cote_min, REGLES.x10.cote_max], [[5, 6, 7], 8.5, 12]);
+  // Jambes = paris affiches (1,40 au moins) : 1,58^3 = 3,94 refuse ; 1,59^3 = 4,02 accepte (3 matchs).
+  const trois = (c) => [1, 2, 3].map((i) => leg(i, c, 60));
+  assert.equal(generateDailyCombos({ jambes: trois(1.58), snapshotTime: SNAP }).combos[0].status, "NO_QUALIFYING_COMBINATION");
+  const t3 = generateDailyCombos({ jambes: trois(1.59), snapshotTime: SNAP }).combos[0];
+  assert.deepEqual([t3.nb_matchs, t3.cote_totale], [3, 4.02]);
   // 1,41^4 = 3,95 refuse ; 1,42^4 = 4,07 accepte ; 1,44^5 = 6,19 refuse ; 1,43^5 = 5,98 accepte.
   const quatre = (c) => [1, 2, 3, 4].map((i) => leg(i, c, 66));
   assert.equal(generateDailyCombos({ jambes: quatre(1.41), snapshotTime: SNAP }).combos[0].status, "NO_QUALIFYING_COMBINATION");
@@ -230,10 +235,12 @@ test("5. bornes (06/10/2026) : 4-5 jambes et 4,00-6,00 pour le petit combine ; 7
   assert.equal(generateDailyCombos({ jambes: cinq(1.44), snapshotTime: SNAP }).combos[0].nb_matchs, 4, "5 jambes a 1,44 = 6,19 : hors ; 4 jambes = 4,30");
   assert.equal(generateDailyCombos({ jambes: cinq(1.31), snapshotTime: SNAP }).combos[0].status, "NO_QUALIFYING_COMBINATION", "1,31^5 = 3,86 : sous 4,00");
   assert.equal(generateDailyCombos({ jambes: cinq(1.43), snapshotTime: SNAP }).combos[0].cote_totale, 4.18, "4 jambes (4,18) plutot que 5 (5,98) : plus grande chance");
-  // Grand combine : 7 jambes a 1,36 = 8,6 ; jamais 6 ni 9 jambes.
-  const sept = []; for (let i = 0; i < 9; i++) sept.push(leg(200 + i, 1.36, 75));
-  const g = generateDailyCombos({ jambes: sept, snapshotTime: SNAP }).combos[1];
-  assert.equal(g.status, "GENERATED"); assert.ok([7, 8].includes(g.nb_matchs)); assert.ok(g.cote_totale >= 8.5 && g.cote_totale <= 12);
+  // Grand combine : 7 jambes a 1,36 = 8,6 (8 jambes = 11,7 : plus permis) ; 5 jambes a 1,55 = 8,95.
+  const neuf = []; for (let i = 0; i < 9; i++) neuf.push(leg(200 + i, 1.36, 75));
+  const g = generateDailyCombos({ jambes: neuf, snapshotTime: SNAP }).combos[1];
+  assert.deepEqual([g.status, g.nb_matchs], ["GENERATED", 7]); assert.ok(g.cote_totale >= 8.5 && g.cote_totale <= 12);
+  const g5 = generateDailyCombos({ jambes: [1, 2, 3, 4, 5].map((i) => leg(300 + i, 1.55, 62)), snapshotTime: SNAP }).combos[1];
+  assert.deepEqual([g5.status, g5.nb_matchs, g5.cote_totale], ["GENERATED", 5, 8.95]);
 });
 
 test("5 (regle du 04/10, regles passees en parametre) : arrondi au centime aux bornes", () => {
@@ -355,22 +362,15 @@ test("11. match reporte apres publication : etat reporte, ticket inchange, « sa
   assert.deepEqual(T.etatsDe("buteur", { fixture_id: 7, joueur_id: 1, joueur: "Parti Joueur", cote: "home" }, { fixtureById: fx7, matchParId: { 7: incertain } }), {}, "incertain : reste");
 });
 
-test("calcul complet du jour (regle du 06/10) : x5, x10, Selection en or et buteur a partir des candidats de chaque match", () => {
+test("calcul complet du jour (regle du 21/10) : Selection en or, x5, x10 et buteur a partir du SEUL pari affiche de chaque match", () => {
   const ms = [];
   const candidatsPar = {};
-  // Grille des scores du moteur v3 (Poisson 1,8 / 0,9) : sert a la coherence entre le pari affiche et les selections.
-  const pois = (l, k) => { let p = Math.exp(-l); for (let x = 1; x <= k; x++) p *= l / x; return p; };
-  const grille = [];
-  for (let h = 0; h <= 6; h++) for (let a = 0; a <= 6; a++) grille.push({ cle: "SCORE:" + h + "-" + a, probabilite: Math.round(pois(1.8, h) * pois(0.9, a) * 10000) / 100 });
   for (let i = 1; i <= 10; i++) {
-    ms.push(match(i, { cote_rec: "1.55", chance_iashark: 62, v3_marches: grille }));
-    // Jambe sure impliquee par le pari affiche (« Dom gagne » -> « Dom ou nul ») ; pari « valeur » qui va dans le meme
-    // sens que lui (« plus de 2,5 buts » : plus probable quand Dom gagne, d'apres la grille).
+    ms.push(match(i, { cote_rec: "1.55", chance_iashark: 55 + i }));
+    // Candidats d'autres marches (regle du 06/10) : ignores depuis le 21/10, jamais une jambe ni la Selection en or.
     candidatsPar[String(i)] = [
-      { market_id: "dc-1x", famille: "DC", cote: 1.25 + (i % 5) * 0.03, cote_anj: true, bookmaker: "Winamax", chance: 78, chance_affichee: 78 - (i % 3), fiabilite: "vérifiée", p_modele: 80, q: 78 },
+      { market_id: "dc-1x", famille: "DC", cote: 1.25 + (i % 5) * 0.03, cote_anj: true, bookmaker: "Winamax", chance: 78, chance_affichee: 78, fiabilite: "vérifiée", p_modele: 80, q: 78 },
       { market_id: "over-25", famille: "OU2.5", cote: 1.8 + i * 0.02, cote_anj: false, bookmaker: null, chance: 52, chance_affichee: 52, fiabilite: "vérifiée", p_modele: 52 + i, q: 52 },
-      // Contraire du pari affiche (« Ext ou nul ») : jamais retenu.
-      { market_id: "dc-x2", famille: "DC", cote: 1.3, cote_anj: true, bookmaker: "Winamax", chance: 75, chance_affichee: 75, fiabilite: "vérifiée", p_modele: 90, q: 75 },
     ];
   }
   ms[0].v3_buteurs = [{ joueur_id: 3, joueur: "Z", cote: "away", p_marque: 0.33 }];
@@ -380,16 +380,15 @@ test("calcul complet du jour (regle du 06/10) : x5, x10, Selection en or et bute
   assert.deepEqual(Object.keys(c.x5.meta).sort(), ["cote_totale", "nb_matchs"]);
   assert.deepEqual(Object.keys(c.or.meta), ["nb_paris"]);
   assert.deepEqual(c.buteur.meta, {});
-  // Selection en or : les 3 plus grands ecarts (modele - cote sans marge), jamais l'ecart publie.
-  assert.deepEqual(c.or.contenu.paris.map((p) => p.fixture_id), [10, 9, 8]);
-  assert.ok(c.or.contenu.paris.every((p) => !("ecart" in p) && p.market_id === "over-25" && p.cote >= 1.7 && p.cote <= 2.5 && p.operateur === null && p.chance === 52));
-  assert.equal(c.exclus.incoherent_pari_affiche, 10, "« Ext ou nul » contredit « Dom gagne » : jamais une jambe");
-  // Combines : jambes sures (1,20-1,45), une par match.
+  // Selection en or : les 3 paris affiches les plus probables du jour, avec la cote et la chance de leur page.
+  assert.deepEqual(c.or.contenu.paris.map((p) => [p.fixture_id, p.market_id, p.cote, p.chance, p.rang]), [[10, "home-win", 1.55, 65, 1], [9, "home-win", 1.55, 64, 2], [8, "home-win", 1.55, 63, 3]]);
+  // Combines : les paris affiches les plus probables, une jambe par match, jamais un autre marche.
   [c.x5, c.x10].forEach((t) => {
-    assert.ok(t.contenu.jambes.every((j) => j.market_id === "dc-1x" && j.cote >= 1.2 && j.cote <= 1.45));
+    assert.ok(t.contenu.jambes.every((j) => j.market_id === "home-win" && j.cote === 1.55));
     assert.equal(new Set(t.contenu.jambes.map((j) => j.fixture_id)).size, t.contenu.jambes.length);
   });
-  assert.ok([4, 5].includes(c.x5.contenu.nb_matchs)); assert.ok([7, 8].includes(c.x10.contenu.nb_matchs));
+  assert.deepEqual(c.x5.contenu.jambes.map((j) => j.fixture_id).sort((a, b) => a - b), [7, 8, 9, 10], "1,55^4 = 5,77 : les 4 plus probables");
+  assert.deepEqual(c.x10.contenu.jambes.map((j) => j.fixture_id).sort((a, b) => a - b), [6, 7, 8, 9, 10], "1,55^5 = 8,95 : les 5 plus probables");
   assert.equal(c.buteur.contenu.chance, 30);
   assert.equal(T.premierCoupEnvoi("x5", c.x5.contenu), "2026-10-04T16:00:00.000Z");
 });

@@ -181,8 +181,8 @@ test("candidats des combines : chaque match ouvert (fige compris), jamais un mat
   assert.match(WF, /var FLUX_PARIS=\{\};/);
   assert.match(WF, /FLUX_PARIS\[String\(m\.id\)\]=\{selections:r\.selections,toutes:FLUX_MOD\.toutesLesCotes\(raw,\{config:CFG_FLUX\}\),raw:raw\};/);
   assert.match(WF, /releveAnjA:RELEVE_ANJ_A,fluxPar:FLUX_PARIS\}\);/);
-  assert.match(WF, /CANDIDATS_DU_JOUR=PRONOSTIC\.marchesCandidats\(allMatchsData,\{configLigues:LEAGUES_CONFIG,chancesV3Par:CHANCES_V3_PRONO,cotesAnjPar:LIVRES_ANJ,fluxPar:FLUX_PARIS\}\)/);
-  assert.match(WF, /candidatsPar:CANDIDATS_DU_JOUR,/);
+  // 21/10/2026 : les tickets ne prennent plus que le pari affiche ; le calcul quotidien ne calcule plus ces candidats.
+  assert.doesNotMatch(WF, /CANDIDATS_DU_JOUR/);
   assert.doesNotMatch(WF, /writeFileSync\([^)]*(FLUX_PARIS|CANDIDATS_DU_JOUR)/);
   assert.doesNotMatch(WF, /console\.log\([^)]*(FLUX_PARIS|CANDIDATS_DU_JOUR)/);
   // Les champs premium et publics ne changent pas : les candidats ne sont jamais poses sur le match.
@@ -251,23 +251,19 @@ function matchJour(id, o) {
 function fixtures(ms) { const o = {}; ms.forEach((m) => { o[String(m.id)] = { fixture: { timestamp: Date.parse("2026-10-07T18:00:00Z") / 1000, status: { short: "NS" } } }; }); return o; }
 const cand = (id, cote, chance, extra) => Object.assign({ market_id: id, famille: (P.MARCHE[id] || {}).famille, cote, cote_anj: false, bookmaker: null, chance, chance_affichee: chance, fiabilite: "vérifiée", p_modele: null, q: chance }, extra || {});
 
-test("Selection en or : ecart modele / cote sans marge (interne), cote 1,70-2,50, un pari par match, jamais contre le pari affiche", () => {
-  assert.deepEqual([REGLES.selection_or.cote_min, REGLES.selection_or.cote_max, REGLES.selection_or.nb], [1.7, 2.5, 3]);
-  const ms = [1, 2, 3, 4, 5].map((i) => matchJour(i));
-  const cp = {
-    1: [cand("btts-yes", 1.9, 51, { p_modele: 58, q: 51 }), cand("over-35", 2.4, 40, { p_modele: 49, q: 40 })],
-    2: [cand("under-25", 2.2, 44, { p_modele: 60, q: 44 })], // contraire du pari affiche (plus de 2,5) : jamais
-    3: [cand("btts-yes", 1.85, 52, { p_modele: 55, q: 52 })],
-    4: [cand("home-team-over-15", 2.0, 48, { p_modele: 50, q: 48 })],
-    5: [cand("over-35", 2.6, 38, { p_modele: 50, q: 38 }), cand("btts-yes", 1.75, 55)], // cote trop haute ; pas de modele
-  };
+test("Selection en or (regle du 21/10/2026) : les 3 paris affiches les plus probables du jour, un par match ; autres marches ignores", () => {
+  assert.deepEqual(REGLES.selection_or, { nb: 3 });
+  const dom = { pari_rec: "Victoire Domicile", market_id: "home-win", cote_rec: "1.45", pronostic: { market_id: "home-win", publie: true, fiabilite: "vérifiée" } };
+  const ms = [matchJour(1, { chance_iashark: 58 }), matchJour(2, Object.assign({ chance_iashark: 66 }, dom)), matchJour(3, { chance_iashark: 63 }),
+    matchJour(4, { chance_iashark: 61 }), matchJour(5, { chance_iashark: 70, cote_rec: "1.30" })]; // 5 : pari d'avant le 21/10 sous 1,40, jamais
+  const cp = { 1: [cand("btts-yes", 1.9, 80, { p_modele: 85, q: 80 })] }; // ignore : seul le pari affiche compte
   const c = T.calculerDuJour(ms, { jour: "2026-10-07", nowMs: NOW, fixtureById: fixtures(ms), configLigues: LIGUES, candidatsPar: cp });
   assert.ok(c.or);
-  assert.deepEqual(c.or.contenu.paris.map((p) => [p.fixture_id, p.market_id]), [[1, "over-35"], [3, "btts-yes"], [4, "home-team-over-15"]]);
+  assert.deepEqual(c.or.contenu.paris.map((p) => [p.fixture_id, p.market_id, p.cote, p.chance, p.rang]), [[2, "home-win", 1.45, 66, 1], [3, "over-25", 1.62, 63, 2], [4, "over-25", 1.62, 61, 3]]);
   c.or.contenu.paris.forEach((p) => {
     assert.deepEqual(Object.keys(p).sort(), ["chance", "chance_calculee", "cote", "coup_envoi", "coup_envoi_ms", "domicile", "exterieur", "famille", "fixture_id", "ligue", "ligue_id", "ligue_key", "market_id", "operateur", "pari", "rang"]);
   });
-  assert.equal(c.exclus_or.incoherent_pari_affiche, 1);
+  assert.equal(c.exclus.jambe_hors_cote, 1);
   // Moins de 3 paris possibles : pas de Selection en or (jamais completee).
   const c2 = T.calculerDuJour(ms.slice(0, 2), { jour: "2026-10-07", nowMs: NOW, fixtureById: fixtures(ms), configLigues: LIGUES, candidatsPar: cp });
   assert.equal(c2.or, null);
@@ -314,9 +310,9 @@ test("panneau Marches : un pari publie sur un nouveau marche porte exactement la
 
 test("combines : aucun pourcentage de chance affiche ; noms « Petit combiné » / « Grand combiné » ; textes des nouvelles regles", () => {
   const fr = require("../i18n/dict/fr.json").aujourdhui;
-  assert.match(fr.none_x5, /4 ou 5 matchs, cote totale entre 4 et 6/);
-  assert.match(fr.none_x10, /7 ou 8 matchs, cote totale entre 8,50 et 12/);
-  assert.equal(fr.gold_sub, "3 paris à cote plus haute, choisis par IASHARK");
+  assert.match(fr.none_x5, /3 à 5 matchs, cote totale entre 4 et 6/);
+  assert.match(fr.none_x10, /5 à 7 matchs, cote totale entre 8,50 et 12/);
+  assert.equal(fr.gold_sub, "Les 3 paris les plus probables du jour"); // regle du 21/10/2026 : les 3 plus probables
   const src = fs.readFileSync(path.join(ROOT, "lib/aujourdhui.js"), "utf8");
   assert.match(src, /Petit combiné/); assert.match(src, /Grand combiné/);
   assert.match(src, /aucun pourcentage de chance sur les combines/);

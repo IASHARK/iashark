@@ -38,11 +38,13 @@ test("jamais « 2 sur 2 » : un pari de la Selection en or absent de results/ (p
   const sansLe3 = { matches: [{ id: 2, result: "win" }, { id: 3, result: "win" }] };
   const b = B.construireBilan({ jour: JOUR, registre, ticketOr: or([p(2, "dc-1x", 1.45), p(3, "home-win", 1.5), p(4, "under-35", 1.44)]), resultats: sansLe3, parisPublies: publies });
   assert.equal(b.selection_or, null);
+  assert.equal(b.selection_or_absente, "pari_non_regle", "raison ecrite dans le journal du calcul");
 });
 
 test("jamais un chiffre faux : autre marche que le pari publie, ou paris publies illisibles ce passage = rien", () => {
   const b = B.construireBilan({ jour: JOUR, registre, ticketOr: or([p(2, "dc-1x", 1.45), p(3, "over-25", 1.9)]), resultats, parisPublies: publies });
   assert.equal(b.selection_or, null);
+  assert.equal(b.selection_or_absente, "autre_marche");
   assert.ok(b.offert, "le pari offert reste");
   const devoile = { matchs: [{ jour: JOUR, fixture_id: 1, match: "Bayern Munich - Arsenal", pari: "Over 2.5", market_id: "over-25", cote_affichee: 1.62 }] };
   assert.equal(B.construireBilan({ jour: JOUR, registre: devoile, resultats, parisPublies: {} }).offert, null, "base illisible : rien");

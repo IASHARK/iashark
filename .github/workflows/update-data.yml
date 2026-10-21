@@ -2651,7 +2651,7 @@ jobs:
                 var bilanHier=BILAN_HIER.fusionnerAvecPrecedent(BILAN_HIER.construireBilan({jour:HIER,registre:registreOfferts,ticketOr:TICKET_OR_HIER,resultats:fichierHier,parisPublies:PARIS_PUBLIES_BILAN,genereLe:genere}),bilanPrecedent);
                 if(!fs.existsSync('preuves')) fs.mkdirSync('preuves',{recursive:true});
                 fs.writeFileSync('preuves/bilan-hier.json',JSON.stringify(bilanHier,null,2));
-                console.log('  [bilan hier] '+HIER+' : pari offert '+(bilanHier.offert?bilanHier.offert.resultat:'aucun')+', Selection en or '+(bilanHier.selection_or?bilanHier.selection_or.gagnes+'/'+bilanHier.selection_or.regles:'aucune')+'.');
+                console.log('  [bilan hier] '+HIER+' : pari offert '+(bilanHier.offert?bilanHier.offert.resultat:'aucun')+', Selection en or '+(bilanHier.selection_or?bilanHier.selection_or.gagnes+'/'+bilanHier.selection_or.regles:'aucune ('+(bilanHier.selection_or_absente||'?')+')')+'.');
               }catch(e){ console.log('::warning title=Bilan hier::preuves/bilan-hier.json non ecrit ('+(e&&e.message)+').'); }
               // Fenetre glissante : les journees sorties des 60 jours sont retirees
               // du depot (rien d'autre ne vit dans results/).

@@ -1,21 +1,21 @@
 {
   "_readme": [
-    "TICKETS DU JOUR, SELECTION EN OR, BUTEUR DU JOUR. Regle du 06/10/2026 (demande de Clement : « Je veux plein de marches, il choisit le meilleur » ; « Selection en or different des combines ») ; remplace la regle du 04/10/2026 (jambes = seulement le pari affiche de chaque match, 1,40-1,70).",
-    "Candidats : TOUS les marches de chaque match du jour dont la chance est juste (lib/pronostic.js#marchesCandidats : moteur v3 juste ou recalibre dans le championnat, cotes du marche sans marge, flux API-Football de la liste blanche du mathematicien, tirs cadres compris), meme chance et meme cote que le choix du pari. Conditions communes : pari « verifie », cote reelle (agreee d'abord, sinon celle d'API-Football, sans nom de bookmaker), match du jour J de Paris a plus de marge_coup_envoi_min minutes de son coup d'envoi, competition mesuree (config/verdicts-maths.json#competitions_jambes), categorie non NO-GO (categories_no_go).",
-    "COHERENCE (exigence de Clement : jamais une selection qui contredit le pari affiche ni une autre selection du jour) : lib/marches-paris.js#coherent. Jambe : P(jambe | pari affiche gagne) >= coherence.seuil_jambe (grille des scores du moteur v3), ou implication exacte (« plus de 2,5 » -> « plus de 1,5 ») ; Selection en or : aucune dependance negative (P(or | pari affiche) >= P(or)). Sans grille ni implication : refuse.",
-    "Petit combine (x5) : jambes surs (jambe.cote_min-jambe.cote_max, chance affichee >= jambe.chance_min), 4 ou 5 jambes, cote totale (arrondie au centime) entre 4,00 et 6,00. Grand combine (x10) : 7 ou 8 jambes, cote totale entre 8,50 et 12,00. Une jambe par match dans un combine ; la plus grande chance (produit des chances affichees, jamais affiche) ; egalite : moins de jambes, cote la plus proche du centre, numeros de match. Le petit est cherche d'abord, ses jambes sont engagees pour le grand. Aucune combinaison : pas de combine (jamais force). Recherche : lib/run-output/combos.js#meilleurCombine.",
-    "Selection en or (selection_or) : paris ou la chance du modele depasse le plus la cote sans marge, marches chiffres par le moteur v3, cote entre selection_or.cote_min et selection_or.cote_max ; classement INTERNE par ecart (chance du modele moins cote sans marge du meme marche, > ecart_min_points), jamais affiche ; 3 paris de 3 matchs differents, sinon rien. Affiche : match, pari, cote, chance IASHARK (le plus bas entre le modele et la cote sans marge, la regle de tout le site). Cherchee AVANT les combines (ses paris sont engages pour eux).",
-    "Buteur du jour : le plus probable du calcul buteur du moteur v3 (v3_buteurs), chance lib/chance-iashark.js#chanceButeur.",
+    "TICKETS DU JOUR, SELECTION EN OR, BUTEUR DU JOUR. Regle du 21/10/2026 (Clement : « les 3 Selection en or c'est les 3 matchs simples les mieux de la journee ; le petit combine les matchs les plus logiques, le grand pareil ; le buteur comme d'hab » ; « faut pas se casser la tete ») ; remplace la regle du 06/10/2026 (tous les marches, Selection en or a 1,70-2,50, jambes 1,20-1,45).",
+    "Candidats : SEULEMENT le pari affiche de chaque match du jour (lib/tickets-du-jour.js#calculerDuJour : meme pari, meme cote, meme chance que la page, une seule source). Conditions communes : pari publie et « verifie », jamais un repli, cote dans jambe.cote_min-jambe.cote_max (celle du pari affiche), chance affichee >= jambe.chance_min, match du jour J de Paris a plus de marge_coup_envoi_min minutes de son coup d'envoi, competition mesuree (config/verdicts-maths.json#competitions_jambes), categorie non NO-GO (categories_no_go).",
+    "Selection en or (selection_or) : les nb (3) paris les plus probables du jour (chance affichee, puis chance calculee, coup d'envoi, numero de match), 3 matchs differents, sinon rien (lib/run-output/jambes-du-jour.js#selectionEnOr). Cherchee AVANT les combines.",
+    "Petit combine (x5) : 3 a 5 jambes, cote totale (arrondie au centime) entre 4,00 et 6,00. Grand combine (x10) : 5 a 7 jambes, cote totale entre 8,50 et 12,00. Une jambe par match ; la plus grande chance (produit des chances affichees, jamais affiche) ; egalite : moins de jambes, cote la plus proche du centre, numeros de match. Ils peuvent reprendre des matchs de la Selection en or. Aucune combinaison : pas de combine (jamais force). Recherche : lib/run-output/combos.js#meilleurCombine.",
+    "Rejoue sur les paris archives du 04/10 au 20/10/2026 (regle simple) : Selection en or 13 jours sur 17, 26 paris gagnes sur 39 ; petit combine 6 jours gagnes sur 13 ; grand combine 1 sur 10.",
+    "Buteur du jour : le plus probable du calcul buteur du moteur v3 (v3_buteurs), chance lib/chance-iashark.js#chanceButeur (inchange).",
     "Un ticket publie ne change plus (table tickets_du_jour, migration 0050) : la regle vaut a partir du prochain calcul, jamais retroactivement. Rien n'est produit sans le feu vert du mathematicien (config/verdicts-maths.json).",
     "fichier_buteurs_public : « retire » depuis le 04/10/2026 = buteurs-du-jour.json sans aucune entree."
   ],
-  "regle_version": "tickets-2026-10-06",
-  "x5": { "jambes": [4, 5], "cote_min": 4.0, "cote_max": 6.0, "centre": 5 },
-  "x10": { "jambes": [7, 8], "cote_min": 8.5, "cote_max": 12, "centre": 10 },
-  "jambe": { "cote_min": 1.2, "cote_max": 1.45, "chance_min": 65 },
+  "regle_version": "tickets-2026-10-21",
+  "x5": { "jambes": [3, 4, 5], "cote_min": 4.0, "cote_max": 6.0, "centre": 5 },
+  "x10": { "jambes": [5, 6, 7], "cote_min": 8.5, "cote_max": 12, "centre": 10 },
+  "jambe": { "cote_min": 1.4, "cote_max": 2.2, "chance_min": 50 },
   "coherence": { "seuil_jambe": 0.8 },
   "marge_coup_envoi_min": 15,
   "operateurs": "agrees_sinon_api_football",
-  "selection_or": { "nb": 3, "cote_min": 1.7, "cote_max": 2.5, "ecart_min_points": 0 },
+  "selection_or": { "nb": 3 },
   "fichier_buteurs_public": "retire"
 }

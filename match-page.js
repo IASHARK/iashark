@@ -1389,9 +1389,14 @@ async function init(){
     const listePub=liste&&Array.isArray(liste.matchs)?liste.matchs:null;
     let offertPublic=false;
     try{offertPublic=!!(listePub&&raw&&window.IasharkFreeMatch&&String(raw.id)===String(IasharkFreeMatch.pickFreeMatchId(listePub,null,(window.IASHARK_MARKET&&window.IASHARK_MARKET.code)||null)));}catch(e){offertPublic=false;}
-    const appelTot=window.IasharkApp&&window.IasharkApp.supabase&&offertPublic
-      ?window.IasharkApp.supabase.functions.invoke('match-data',{body:{id:String(id)}}).catch(()=>null)
-      :null;
+    // VITESSE (21/10/2026, etape 3) : la reponse de match-data est souvent deja en route depuis la premiere ligne
+    // de la page (script APPEL_TOT de match.html, lance avant supabase-js, { data, error } ou null en cas d'echec).
+    // Reprise seulement pour CE match, et seulement si elle a ete demandee avec la meme session (sans compte ou
+    // avec le jeton du compte) ; sinon l'appel habituel ci-dessous.
+    const appelPage=window.__IASHARK_APPEL&&String(window.__IASHARK_APPEL.id)===String(id)?window.__IASHARK_APPEL:null;
+    const appelInvoke=()=>window.IasharkApp.supabase.functions.invoke('match-data',{body:{id:String(id)}}).catch(()=>null);
+    const appelTot=appelPage?null:(window.IasharkApp&&window.IasharkApp.supabase&&offertPublic?appelInvoke():null);
+    const appelPour=(avecSession)=>appelPage&&appelPage.session===!!avecSession?appelPage.p:appelTot;
     if(window.IasharkApp){
       ctx=await window.IasharkApp.context();
       // On interroge match-data des qu'il peut avoir quelque chose a rendre :
@@ -1402,8 +1407,9 @@ async function init(){
       // C'est ce qui permet a un visiteur venu de l'onglet « Hier » d'ouvrir un
       // match joue et de voir l'analyse qu'il portait : la preuve, sans compte.
       if(ctx.session||matchTermine(raw)){
-        const result=(appelTot&&await appelTot)||await window.IasharkApp.supabase.functions.invoke('match-data',{body:{id:String(id)}});
-        if(result.data&&!result.error){
+        const tot=appelPour(ctx.session);
+        const result=(tot&&await tot)||await window.IasharkApp.supabase.functions.invoke('match-data',{body:{id:String(id)}});
+        if(result&&result.data&&!result.error){
           list=result.data.matchs||[];
           if(typeof result.data.isPro==='boolean')serveurPro=result.data.isPro;
           raw=avecBande(list.find(x=>String(x.id)===String(id))||raw);
@@ -1435,7 +1441,8 @@ async function init(){
       let appel=null;
       try{
         if(window.IasharkApp&&window.IasharkApp.supabase){
-          const r=(appelTot&&await appelTot)||await window.IasharkApp.supabase.functions.invoke('match-data',{body:{id:String(id)}});
+          const tot=appelPour(false);
+          const r=(tot&&await tot)||await window.IasharkApp.supabase.functions.invoke('match-data',{body:{id:String(id)}});
           const x=r&&r.data&&!r.error&&Array.isArray(r.data.matchs)?r.data.matchs.find(m=>String(m.id)===String(id)):null;
           if(x&&x.appel_sans_compte===true&&x.pari_rec)appel=x;
         }

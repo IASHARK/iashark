@@ -57,3 +57,37 @@ test("les titres de la page outils sont accentues", () => {
     assert.ok(!html.includes(sansAccent), `texte non accentue visible : "${sansAccent}"`);
   }
 });
+
+// 21/10/2026 (regle de Clement : ni mise, ni capital, ni esperance, ni ROI, ni profit / perte,
+// nulle part). La cote juste garde cote juste, cote disponible et ecart en points ; le combine,
+// sa probabilite combinee, sa cote juste et la cote proposee ; le journal, des paris notes,
+// gagnes, perdus et un taux de reussite. Aucun montant.
+test("outils Pro : ni esperance, ni mise, ni ROI, ni profit / perte, dans le code et les 7 langues", () => {
+  const code = js.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  assert.doesNotMatch(code, /jrStake|expectedValue|bestSingleEv|worseThanSingle|euros(Signe)?\(|symboleDevise|\.roi\b|\.profit\b|D\.pnl/,
+    "champ de mise ou calcul de montant encore present");
+  assert.doesNotMatch(code, /[Ee]spérance|'Mise'|'MISE'|\bROI\b|Profit|P\/L/, "texte de repli interdit");
+  assert.doesNotMatch(html, /espérance|ont réellement rapporté/i, "description de navigation interdite");
+
+  const utilisees = new Set();
+  for (const src of [js, html]) for (const m of src.matchAll(/tools_page\.([a-z0-9_]+)/g)) utilisees.add(m[1]);
+  const INTERDITS = {
+    fr: /esp[ée]rance|\bmises?\b|\bROI\b|profit|bankroll|capital|P\/L|rapport/i,
+    en: /expected (value|return)|\bstakes?\b|\bROI\b|profit|bankroll|P\/L|returned/i,
+    es: /esperanza|\bROI\b|ganancia|beneficio|bankroll|P\/L|rendido/i,
+    "es-mx": /esperanza|\bROI\b|ganancia|beneficio|bankroll|P\/L|rendido/i,
+    de: /Erwartungswert|Einsatz|\bROI\b|Gewinn\b|Bankroll|eingebracht/i,
+    it: /valore atteso|puntata|\bROI\b|profitto|guadagno|bankroll|\breso\b/i,
+    pt: /valor esperado|esperança|\bROI\b|lucro|\bganho\b|bankroll|renderam/i
+  };
+  for (const [langue, motif] of Object.entries(INTERDITS)) {
+    const tp = JSON.parse(lire("i18n/dict/" + langue + ".json")).tools_page;
+    for (const cle of utilisees) {
+      assert.equal(typeof tp[cle], "string", langue + " : tools_page." + cle + " manquant");
+      assert.doesNotMatch(tp[cle], motif, langue + " : tools_page." + cle);
+    }
+    for (const retiree of ["fair_kpi_ev", "combo_result_label", "journal_kpi_roi", "journal_kpi_profit", "journal_th_stake", "journal_th_pl", "journal_stake_label"]) {
+      assert.equal(tp[retiree], undefined, langue + " : cle retiree encore presente : " + retiree);
+    }
+  }
+});

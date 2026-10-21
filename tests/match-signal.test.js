@@ -35,11 +35,65 @@ test("h2hOutcome : rejoue le pari sur les vrais scores, du point de vue du match
 
 test("signalReasons / signalRisks : 3 raisons au plus, uniquement sur donnees presentes", () => {
   const reasons = insights.signalReasons({ family: labels.marketFamily("over-25"), homeName: "A", awayName: "B", expectedGoals: { home: 1.6, away: 1.2 } });
-  assert.deepEqual(reasons.map((r) => r.key), ["xg"]);
+  assert.deepEqual(reasons.map((r) => r.key), ["xg_total"]);
   assert.deepEqual(insights.signalReasons({ family: labels.marketFamily("over-25"), homeName: "A", awayName: "B" }), []);
+  // « A surveiller » : absences du camp soutenu et desaccord des calculs avant l'ecart (deja ecrit
+  // sous les deux barres de l'avis).
   const risks = insights.signalRisks({ family: labels.marketFamily("home-win"), edge: -2, odds: 1.3, homeName: "A", awayName: "B", absences: { home: ["x", "y"], away: [] }, reliability: { model_agreement: "Faible" } });
-  assert.equal(risks.length, 2);
-  assert.equal(risks[0].key, "negative_edge");
+  assert.deepEqual(risks.map((r) => r.key), ["backed_absences", "models_disagree"]);
+  assert.deepEqual(insights.signalRisks({ family: labels.marketFamily("home-win"), edge: -2, homeName: "A", awayName: "B" }).map((r) => r.key), ["negative_edge"]);
+});
+
+// ETAPE 5 DU PLAN DU 21/10/2026 : un fait CONTRE le pari n'est jamais range dans « Pourquoi ce pari »
+// (constate sur l'analyse exemple : « moins de 1,5 but en 1re mi-temps » explique par 3,3 buts
+// attendus sur le match) ; il passe dans « A surveiller ».
+const recent = {
+  home: [{ score: "2-1", opponent: "X", date: "1" }, { score: "3-1", opponent: "Y", date: "2" }, { score: "0-0", opponent: "B", date: "3" }, { score: "1-2", opponent: "Z", date: "4" }, { score: "2-2", opponent: "W", date: "5" }],
+  away: [{ score: "0-0", opponent: "A", date: "3" }, { score: "4-0", opponent: "K", date: "6" }, { score: "1-1", opponent: "M", date: "7" }, { score: "2-0", opponent: "N", date: "8" }, { score: "0-1", opponent: "P", date: "9" }]
+};
+const base = { homeName: "A", awayName: "B", expectedGoals: { home: 1.6, away: 1.2 }, recent, eventsHome: { goals_avg: 1.5, conceded_avg: 1.2 }, eventsAway: { goals_avg: 1.1, conceded_avg: 0.9 } };
+test("faits du pari : rejoue le pari sur les 10 derniers matchs, le face-a-face commun compte une fois", () => {
+  assert.deepEqual(insights.recentOutcome(labels.marketFamily("over-25"), recent, "A", "B"), { wins: 5, sample: 9 });
+  assert.deepEqual(insights.recentOutcome(labels.marketFamily("btts-yes"), recent, "A", "B"), { wins: 5, sample: 9 });
+  assert.equal(insights.recentOutcome(labels.marketFamily("home-win"), recent, "A", "B"), null, "un resultat ne se rejoue pas sans le sens du score");
+  assert.equal(insights.recentOutcome(labels.marketFamily("over-25"), { home: recent.home.slice(0, 2), away: recent.away.slice(0, 3) }, "A", "B"), null, "moins de 6 matchs : rien");
+});
+test("faits du pari : le meme chiffre est POUR un « plus de » et CONTRE un « moins de »", () => {
+  const over = insights.faitsDuPari(Object.assign({ family: labels.marketFamily("over-25") }, base));
+  const under = insights.faitsDuPari(Object.assign({ family: labels.marketFamily("under-25") }, base));
+  assert.equal(over.find((f) => f.key === "xg_total").sens, 1);
+  assert.equal(under.find((f) => f.key === "xg_total").sens, -1);
+  const pourquoi = insights.signalReasons(Object.assign({ family: labels.marketFamily("under-25") }, base)).map((r) => r.key);
+  const surveiller = insights.signalRisks(Object.assign({ family: labels.marketFamily("under-25"), edge: 4 }, base)).map((r) => r.key);
+  assert.ok(!pourquoi.includes("xg_total"), "2,8 buts attendus n'expliquent jamais un « moins de 2,5 buts »");
+  assert.ok(surveiller.includes("xg_total"), "le fait contre est dit dans « A surveiller »");
+  for (const id of ["over-15", "under-15", "over-25", "under-25", "over-35", "under-35", "btts-yes", "btts-no", "home-win", "away-win", "dc-1x", "dc-x2", "dc-12"]) {
+    const o = Object.assign({ family: labels.marketFamily(id), form: { home: ["W", "W", "D", "L", "W"], away: ["L", "L", "W", "D", "L"] }, h2h: [{ home: "A", away: "B", score: "2-0" }, { home: "B", away: "A", score: "1-1" }, { home: "A", away: "B", score: "3-1" }] }, base);
+    const contre = insights.faitsDuPari(o).filter((f) => f.sens === -1).map((f) => f.key + JSON.stringify(f.vars));
+    for (const r of insights.signalReasons(o)) assert.ok(!contre.includes(r.key + JSON.stringify(r.vars)), id + " : fait contre dans les raisons");
+  }
+});
+test("faits du pari : double chance, 1re mi-temps, et jamais les buts attendus du match pour la mi-temps", () => {
+  const dc = insights.signalReasons({ family: labels.marketFamily("dc-1x"), homeName: "A", awayName: "B", expectedGoals: { home: 1.6, away: 1.0 }, form: { home: ["W", "D", "W", "L", "W"], away: ["L", "L", "D", "W", "L"] } });
+  assert.deepEqual(dc.map((r) => r.key), ["form_unbeaten", "xg_edge"]);
+  assert.equal(dc[1].vars.team, "A");
+  const contreDc = insights.signalRisks({ family: labels.marketFamily("dc-x2"), homeName: "A", awayName: "B", expectedGoals: { home: 1.9, away: 1.0 }, form: { home: ["W", "W", "W", "D", "W"], away: ["L", "L", "L", "D", "W"] } });
+  assert.deepEqual(contreDc.map((r) => r.key), ["form_losses", "xg_edge"]);
+  const slots = (n) => [n, n, n, 1, 1, 1].map((x) => ({ n: x }));
+  const fh = insights.faitsDuPari({ family: labels.marketFamily("fh-under-15"), homeName: "A", awayName: "B", expectedGoals: { home: 1.9, away: 1.4 },
+    eventsHome: { games: 10, slots: slots(1), slots_against: slots(1) }, eventsAway: { games: 10, slots: slots(2), slots_against: slots(1) } });
+  assert.deepEqual(fh.map((f) => [f.key, f.sens]), [["fh_goals_avg", 1]]);
+  assert.deepEqual(fh[0].vars, { home: "A", away: "B", homeFh: 0.6, awayFh: 0.9 });
+});
+test("faits du pari : textes dans les 7 langues, sans « modele » ni « marche »", () => {
+  const cles = ["recent_hits", "xg_total", "xg_both", "xg_weak_side", "xg_edge", "xg_close", "xg_team", "goals_match_avg", "goals_for", "fh_goals_avg", "form_unbeaten_all", "form_unbeaten", "form_losses", "h2h_hits", "form_wins", "absences"];
+  for (const l of ["fr", "en", "es", "es-mx", "de", "it", "pt"]) {
+    const d = dict(l).match_page;
+    for (const k of cles) assert.ok(typeof d["sig_reason_" + k] === "string" && /[.]$/.test(d["sig_reason_" + k]), l + " " + k);
+    for (const k of ["sig_bet_label", "sig_odds_used", "proba_gap_pos", "proba_gap_neg", "sig2_plain", "sig_risk_small_edge", "sig_risk_models_disagree", "sig_rel_reason_mixed"]) {
+      assert.doesNotMatch(d[k].replace(/\{\w+\}/g, ""), /mod[eè]l|model|modell|mercado|march[eé]|market|markt|mercato/i, l + " " + k);
+    }
+  }
 });
 
 test("vue du match reel 1557402 : signal, tableau modele/marche et raisons coherents", () => {

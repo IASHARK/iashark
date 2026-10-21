@@ -93,8 +93,8 @@ function ecart(model,market,edge){
   if(r===0)return{cls:'flat',text:t('match_page.proba_gap_flat','Notre estimation et la cote disent la même chose.'),gap:''};
   const gap=`${e>0?'+':'−'}${r} ${r===1?t('match_page.proba_point_one','point'):t('match_page.proba_point_other','points')}`;
   return e>0
-    ?{cls:'pos',text:t('match_page.proba_gap_pos','Le modèle voit plus de chances que le bookmaker'),gap}
-    :{cls:'neg',text:t('match_page.proba_gap_neg','Le modèle voit moins de chances que le bookmaker'),gap};
+    ?{cls:'pos',text:t('match_page.proba_gap_pos','Nous voyons plus de chances que le bookmaker'),gap}
+    :{cls:'neg',text:t('match_page.proba_gap_neg','Nous voyons moins de chances que le bookmaker'),gap};
 }
 function duoBars(o){
   const m=n(o.model),k=marcheValide(o.market),c=n(o.odds);
@@ -264,9 +264,9 @@ function relBadge(info){
 function relRaison(info){
   if(!info)return '';
   if(info.reason==='thin_sample')return n(info.sampleSize)!==null
-    ?tf('match_page.sig_rel_reason_thin_sample','peu de données récentes ({n} matchs cette saison)',{n:info.sampleSize})
-    :t('match_page.sig_rel_reason_thin_sample_nonum','peu de données récentes');
-  const map={models_disagree:'les modèles ne sont pas d’accord entre eux',weak_data:'données incomplètes sur ce match',solid:'modèles d’accord et données complètes',mixed:'signaux partagés entre les modèles et les données'};
+    ?tf('match_page.sig_rel_reason_thin_sample','peu de matchs joués cette saison ({n})',{n:info.sampleSize})
+    :t('match_page.sig_rel_reason_thin_sample_nonum','peu de matchs joués cette saison');
+  const map={models_disagree:'nos calculs ne disent pas tous la même chose',weak_data:'il manque des données sur ce match',solid:'calculs d’accord et données complètes',mixed:'les données ne vont pas toutes dans le même sens'};
   return map[info.reason]?t('match_page.sig_rel_reason_'+info.reason,map[info.reason]):'';
 }
 function relLigne(info){
@@ -275,7 +275,23 @@ function relLigne(info){
   return `${t(REL_NIVEAUX[info.level][0],REL_NIVEAUX[info.level][1])}${raison?t('match_page.label_colon',' :')+' '+raison:''}.`;
 }
 
+// Faits du pari (lib/insights.js#faitsDuPari, 21/10/2026) : une meme phrase sert dans « Pourquoi ce
+// pari » (fait pour) et dans « À surveiller » (fait contre) ; sa place dit le sens. Les nombres
+// viennent apres le nom (« Buts attendus : 1,8 ») : jamais d'accord faux (« 1,8 buts »).
 const RAISONS={
+  recent_hits:'Ce pari serait passé dans {wins} de leurs {sample} derniers matchs.',
+  xg_total:'Buts attendus dans ce match selon notre calcul : {totalXg} ({home} {homeXg}, {away} {awayXg}).',
+  xg_both:'Buts attendus selon notre calcul : {homeXg} pour {home}, {awayXg} pour {away}.',
+  xg_weak_side:'Buts attendus pour {team} selon notre calcul : seulement {xg}.',
+  xg_edge:'Avantage {team} selon notre calcul, en buts attendus : {teamXg} contre {otherXg}.',
+  xg_close:'Deux équipes très proches selon notre calcul, en buts attendus : {homeXg} pour {home}, {awayXg} pour {away}.',
+  xg_team:'Buts attendus pour {team} selon notre calcul : {xg}.',
+  goals_match_avg:'Buts par match dans leurs derniers matchs : {homeTot} pour {home}, {awayTot} pour {away}.',
+  goals_for:'Buts marqués par match : {homeFor} pour {home}, {awayFor} pour {away}.',
+  fh_goals_avg:'Buts en 1re mi-temps par match, sur leurs derniers matchs : {homeFh} pour {home}, {awayFh} pour {away}.',
+  form_unbeaten_all:'{team} n’a perdu aucun de ses {n} derniers matchs.',
+  form_unbeaten:'{team} n’a perdu qu’un seul de ses {n} derniers matchs.',
+  form_losses:'{team} a perdu {losses} de ses {n} derniers matchs.',
   xg:'Buts attendus par le modèle : {home} {homeXg} – {awayXg} {away}.',
   goals_avg:'Cette saison par match : {home} marque {homeFor} et encaisse {homeAgainst}, {away} marque {awayFor} et encaisse {awayAgainst}.',
   h2h_hits:'Ce pari serait passé dans {wins} des {sample} derniers face-à-face.',
@@ -286,7 +302,7 @@ const RAISONS={
   count_corners:'Corners par match : {home} {homeValue}, {away} {awayValue} (total {total}).',
   count_cards:'Cartons jaunes par match : {home} {homeValue}, {away} {awayValue} (total {total}).'
 };
-const NUM_VARS=['homeXg','awayXg','totalXg','homeFor','homeAgainst','awayFor','awayAgainst','homeValue','awayValue','total'];
+const NUM_VARS=['xg','teamXg','otherXg','homeTot','awayTot','homeFh','awayFh','homeXg','awayXg','totalXg','homeFor','homeAgainst','awayFor','awayAgainst','homeValue','awayValue','total'];
 function texteRaison(item){
   if(!item||!RAISONS[item.key])return null;
   const v=Object.assign({},item.vars);
@@ -294,34 +310,29 @@ function texteRaison(item){
   return tf('match_page.sig_reason_'+item.key,RAISONS[item.key],v);
 }
 const RISQUES={
-  negative_edge:'cote moins intéressante que notre estimation ({gap} pts en défaveur)',
-  small_edge:'écart faible avec le marché ({gap} pts)',
-  models_disagree:'les modèles divergent sur ce match',
+  negative_edge:'le bookmaker y croit plus que nous ({gap} pts d’écart)',
+  small_edge:'notre chance est proche de celle du bookmaker ({gap} pts d’écart)',
+  models_disagree:'nos calculs ne disent pas tous la même chose sur ce match',
   backed_absences:'{team} privé de {n} joueurs',
   low_odds:'cote basse ({odds}) : gain limité'
 };
+function phrase(x){
+  const s=String(x==null?'':x).trim();
+  if(!s)return '';
+  const p=s.charAt(0).toLocaleUpperCase(localeTag())+s.slice(1);
+  return /[.!?…]$/.test(p)?p:p+'.';
+}
 function texteRisqueSignal(item){
+  if(item&&item.fait)return texteRaison(item);
   if(!item||!RISQUES[item.key])return null;
   const v=Object.assign({},item.vars);
   if(v.gap!=null)v.gap=fmt(v.gap);
   if(v.odds!=null)v.odds=odds(v.odds);
-  return tf('match_page.sig_risk_'+item.key,RISQUES[item.key],v);
+  return phrase(tf('match_page.sig_risk_'+item.key,RISQUES[item.key],v));
 }
 
-// Probabilite estimee : conf 0-10 = probabilite du modele pour le marche retenu
-// divisee par 10 (pipeline). C'est une probabilite : affichee uniquement dans le
-// signal servi (match offert ou abonne), jamais sur un mur d'acces. 10 segments.
-function confMeter(conf){
-  const c=n(conf);
-  if(c===null||c<0||c>10)return '';
-  const v=Math.round(c*10)/10,pleins=Math.round(v);
-  const txt=v.toLocaleString(localeTag(),{maximumFractionDigits:1});
-  const aria=tf('match_page.sig_conf_aria','Probabilité estimée : {value} sur 10',{value:txt});
-  return `<div class="sig-stat sig-conf">
-      <span class="sig-stat-label">${esc(t('match_page.sig_conf_label','Probabilité estimée'))}</span>
-      <div class="sig-stat-row"><b class="sig-conf-val">${esc(txt)}<small>/10</small></b><span class="sig-conf-bar" role="meter" aria-valuemin="0" aria-valuemax="10" aria-valuenow="${v}" aria-valuetext="${esc(txt)}/10" aria-label="${esc(aria)}">${Array.from({length:10},(_,i)=>`<i${i<pleins?' class="on"':''}></i>`).join('')}</span></div>
-    </div>`;
-}
+// (La note « probabilité estimée sur 10 » n'est plus montrée : c'était la chance du pari écrite une
+// deuxième fois, divisée par 10. Étape 5 du plan du 21/10/2026.)
 // Niveau de risque : code deterministe du pipeline (risque = FAIBLE/MODERE/
 // ELEVE, lib/decision.js#computeRiskLabel), champ premium. Absent : rien.
 const RISQUE_NIVEAUX={FAIBLE:['low','Faible',1],MODERE:['medium','Modéré',2],ELEVE:['high','Élevé',3]};
@@ -381,40 +392,39 @@ function signalCard(vm){
   const cote=n(vm.model.recommendedOdds),implied=n(vm.model.recommendedImplied);
   const edge=prob!==null?n(vm.model.recommendedEdge):null;
   const info=vm.model.reliabilityInfo;
-  const raisons=(vm.editorial.signalReasons||[]).map(texteRaison).filter(Boolean);
-  // facteur_x/conseil_public : texte du pipeline ; hors FR, sa traduction
-  // validee, sinon masque. Cite tel quel, en complement des raisons chiffrees.
-  const lecture=narratif(vm.editorial.decisiveFactor,vm.editorial.decisiveFactorI18n);
+  // ETAPE 5 DU PLAN DU 21/10/2026 (des analyses claires et justes) : chaque chiffre une seule fois
+  // (avant : la chance du pari ecrite quatre fois, dont « 6,4/10 »), aucun mot technique, et
+  // « Pourquoi ce pari » ne cite que des faits POUR le pari ; les faits CONTRE vont dans
+  // « A surveiller » (lib/insights.js#faitsDuPari). Le texte libre du pipeline (facteur_x,
+  // conseil_public : « marche le mieux soutenu », « probabilite modele ») n'est plus cite ici.
+  const puces=(vm.editorial.signalReasons||[]).map(texteRaison).filter(Boolean).slice(0,3);
   const risques=(vm.editorial.signalRisks||[]).map(texteRisqueSignal).filter(Boolean);
   const alerte=vm.editorial.risk&&!['FAIBLE','MODERE','ELEVE'].includes(vm.editorial.risk)?texteRisque(vm,vm.editorial.risk):null;
-  if(alerte)risques.unshift(texteLisible(vm,alerte));
-  const aSurveiller=risques.length?risques.slice(0,2).join(' · '):t('match_page.sig_risk_default','un seul match reste très aléatoire, même avec un écart favorable');
-  // "Pourquoi" : 2 a 3 puces. Raisons chiffrees d'abord, puis la lecture du
-  // pipeline si une place reste.
-  const puces=raisons.slice(0,3);
-  if(puces.length<3&&lecture)puces.push(texteLisible(vm,lecture));
+  if(alerte)risques.unshift(phrase(texteLisible(vm,alerte)));
+  const aSurveiller=risques.length?risques.slice(0,2):[phrase(t('match_page.sig_risk_default','un seul match reste très aléatoire, même avec un écart favorable'))];
+  // « Sur 100 matchs » garde la chance en frequence (la forme la mieux comprise) ; la mention
+  // « pas une garantie » n'est ecrite qu'une fois, en bas de l'avis.
   const plain=prob!==null&&implied!==null
-    ?tf('match_page.sig2_plain','Sur 100 matchs comme celui-ci, notre modèle s’attend à voir ce pari passer environ {model} fois ; la cote en suppose {market}.',{model:Math.round(prob),market:Math.round(implied)}):'';
+    ?tf('match_page.sig2_plain','Sur 100 matchs comme celui-ci, ce pari passerait environ {model} fois selon notre calcul ; la cote en suppose {market}.',{model:Math.round(prob),market:Math.round(implied)}):'';
   const compare=prob===null?'':`<div class="sig2-cmp tip-host">
       <div class="sig2-cmp-head"><h3>${esc(t('match_page.sig2_compare_title','Nos chances face à la cote'))}</h3>${aide(texteAideCote(),labelAideCote())}</div>
       ${duoBars({model:prob,market:implied,odds:cote,edge,kind:'odds'})}
-      ${plain?`<p class="sig2-plain">${esc(plain)} <span>${esc(t('match_page.sig2_not_guarantee','Estimation statistique, pas une garantie.'))}</span></p>`:''}
+      ${plain?`<p class="sig2-plain">${esc(plain)}</p>`:''}
     </div>`;
   const risque=riskStat(vm.editorial.riskCode);
   return `<section class="signal-card avis sig2 reveal" aria-labelledby="sigMarket">
     <div class="sig-head"><span class="sig-eyebrow">${cardIcon('target')}${esc(titre)}</span>${relBadge(info)}</div>
     <div class="sig-slip">
       <div class="sig-slip-main">
-        <p class="sig-kicker">${esc(t('match_page.sig_bet_label','Pari recommandé'))}</p>
+        <p class="sig-kicker">${esc(t('match_page.sig_bet_label','Notre pari'))}</p>
         <h2 class="sig-market" id="sigMarket">${esc(marcheFr(vm,r.market))}</h2>
         <p class="sig-fixture">${esc(tf('match_page.sig_match_line','{home} – {away}',{home:vm.identity.home.name,away:vm.identity.away.name}))}</p>
       </div>
-      ${cote!==null?`<div class="sig-odds-box"><span>${esc(t('match_page.sig_odds_used','Cote utilisée'))}</span><b>${odds(cote)}</b></div>`:''}
+      ${cote!==null?`<div class="sig-odds-box"><span>${esc(t('match_page.sig_odds_used','Cote'))}</span><b>${odds(cote)}</b></div>`:''}
     </div>
     ${compare}
     ${puces.length?`<div class="sig-why"><h3>${esc(t('match_page.sig_why_title','Pourquoi ce pari'))}</h3><ul>${puces.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
-    <p class="sig-watch"><b>${esc(t('match_page.sig_watch_title','À surveiller'))}</b> ${esc(aSurveiller)}</p>
-    ${confMeter(r.confidence)}
+    <div class="sig-watch"><b>${esc(t('match_page.sig_watch_title','À surveiller'))}</b><ul>${aSurveiller.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
     ${risque||info?`<div class="sig2-meta">${risque}${info?`<p class="sig-rel-note">${esc(relLigne(info))}</p>`:''}</div>`:''}
     <p class="sig-legal">${esc(t('match_page.sig_legal','Estimation statistique, pas une garantie.'))}</p>
   </section>`;

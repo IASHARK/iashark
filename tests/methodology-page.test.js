@@ -271,10 +271,11 @@ test("ce que la page affirme est vrai dans le code (sans en publier les valeurs)
   assert.match(pipeline, /if\(!pickedMarket&&modelDataAvailable\)/, "l'abstention sur donnees insuffisantes n'existe plus");
   // « Les textes sont traduits automatiquement, par un outil d'IA. »
   assert.match(pipeline, /async function translateNarratives\(jobs\)/, "la traduction automatique annoncee n'existe plus");
-  // « la probabilite estimee s'affiche aussi sur 10 : 6,4/10 correspond a 64 % ».
-  assert.match(pipeline, /conf:pickedMarket\?Math\.round\(\(pickedMarket\.prob\/10\)\*10\)\/10/);
-  // 03/10/2026 : l'accueil affiche « Analyse 64 % » ; la note sur 10 reste sur la page match.
-  assert.match(read("match-page.js"), /<small>\/10<\/small>/);
+  // 21/10/2026 (etape 5, des analyses claires) : la note « /10 » n'est plus affichee nulle part (c'etait
+  // la chance du pari ecrite une deuxieme fois) ; la page ne l'annonce donc plus, dans aucune version.
+  assert.doesNotMatch(read("match-page.js"), /<small>\/10<\/small>/);
+  ["en", "es", "fr", "gb", "mx", "za"].map((d) => d + "/methodologie.html").concat(["de", "en", "es", "fr", "gb", "it", "mx", "pt", "za"].map((d) => "legal/" + d + "/methodologie.html"))
+    .forEach((f) => assert.doesNotMatch(read(f), /6[,.]4\s?\/\s?10/, f + " annonce encore la note sur 10"));
 });
 
 test("page courte et transparente : outil d'IA annonce (sans le nommer), longueur bornee", () => {

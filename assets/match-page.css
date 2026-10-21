@@ -155,6 +155,9 @@ a{color:inherit}
 .sig-quote{margin:10px 0 0;padding-left:12px;border-left:2px solid var(--line2);color:var(--muted);font-size:14px;line-height:1.6}
 .sig-watch{margin:16px 0 0;padding-top:14px;border-top:1px solid var(--line);color:var(--soft);font-size:14px;line-height:1.5}
 .sig-watch b{margin-right:6px;color:#fcd34d;font-weight:700}
+.sig-watch ul{display:grid;gap:6px;margin:8px 0 0;padding:0;list-style:none}
+.sig-watch li{position:relative;padding-left:18px}
+.sig-watch li:before{content:"";position:absolute;left:2px;top:.55em;width:7px;height:7px;border-radius:2px;background:#fcd34d}
 .sig-legal{margin:12px 0 0;color:var(--muted);font-size:12.5px}
 .sig-method{margin:12px 0 0;font-size:13px}.sig-method a{color:var(--cyan,#22d3ee);text-decoration:underline;text-underline-offset:3px}
 

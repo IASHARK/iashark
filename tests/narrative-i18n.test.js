@@ -245,7 +245,8 @@ test("le pipeline traduit apres le FILET, avant toute copie publique, sans ecrir
 test("les pages affichent la traduction du texte hors FR, jamais le francais", () => {
   const mp = read("match-page.js");
   assert.match(mp, /localizedNarrative\(v,i18n,window\.I18N\.locale\)/);
-  assert.match(mp, /narratif\(vm\.editorial\.decisiveFactor,vm\.editorial\.decisiveFactorI18n\)/);
+  // 21/10/2026 (etape 5) : le texte libre du pipeline n'est plus cite dans l'avis (jargon).
+  assert.doesNotMatch(mp, /vm\.editorial\.decisiveFactor/);
   const pp = read("player-page.js");
   assert.match(pp, /narratif\(ts\.analyse, ts\.analyse_i18n\)/);
   assert.doesNotMatch(pp, /ts\.analyse && estFr\(\)/);

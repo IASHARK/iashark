@@ -27,7 +27,7 @@ const LEAGUES = JSON.parse(read("config/leagues.json")).leagues;
 const DICTS = Object.fromEntries(LOCALES.map((l) => [l, JSON.parse(read("i18n/dict/" + l + ".json"))]));
 const MATCH_KEYS = ["pro_gate_item_bet", "pro_gate_item_scorer", "pro_gate_item_scenario", "pro_gate_item_scores", "pro_gate_item_odds", "pro_gate_item_stats", "pro_gate_item_faq"];
 const OFFER_KEYS = ["list_title", "group_match", "group_daily", "group_tools", "daily_all_matches", "daily_scorers", "badge_new", "tool_scanner", "tool_journal", "tool_combo",
-  "free_matches", "free_tools", "match_more", "price_month", "price_week_month"];
+  "free_matches", "match_more", "price_month", "price_week_month"];
 const escHtml = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 test("i18n : pro_offer.* complet et identique dans les 7 dictionnaires et leurs parts, sans promesse ni « pari conseille »", () => {
@@ -53,13 +53,13 @@ test("i18n : pro_offer.* complet et identique dans les 7 dictionnaires et leurs 
     assert.doesNotMatch(all, /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u, l + " : aucun emoji");
     assert.doesNotMatch(all, /\bEdge\b/, l);
   }
-  // Suivi de bankroll : simulateur de capital, calculateur de mise et capital
-  // enregistre sont GRATUITS (tools-page.js, sans verrou Pro) ; seul le journal
-  // synchronise (insertion reservee au plan pro, migration 0010) est Pro.
-  assert.match(DICTS.fr.pro_offer.free_tools, /Calculateur de mise, cote juste, simulateur de capital/);
-  assert.doesNotMatch(JSON.stringify(DICTS.fr.pro_offer), /Suivi de bankroll/i);
+  // 21/10/2026 (regle de Clement : ni mise, ni capital, ni esperance) : calculateur de
+  // mise et simulateur de capital retires du site, avec leur texte pro_offer.free_tools ;
+  // le journal synchronise (insertion reservee au plan pro, migration 0010) reste Pro.
+  for (const l of LOCALES) assert.ok(!("free_tools" in DICTS[l].pro_offer), l + " : pro_offer.free_tools retire");
+  assert.doesNotMatch(JSON.stringify(DICTS.fr.pro_offer), /Suivi de bankroll|Calculateur de mise|simulateur de capital/i);
   assert.match(read("supabase/migrations/0010_user_workspace.sql"), /create policy betting_decisions_insert_pro[\s\S]{0,200}u\.plan='pro'/);
-  assert.doesNotMatch(read("tools-page.js").slice(read("tools-page.js").indexOf("function rendreBankroll"), read("tools-page.js").indexOf("05 — COMBO AUDITOR")), /ctx\.isPro/, "le simulateur de capital n'est pas verrouille");
+  assert.doesNotMatch(read("tools-page.js"), /function rendre(Stake|Bankroll)/, "outils de mise et de capital retires");
 });
 
 // ------------------------------------------------------------------------

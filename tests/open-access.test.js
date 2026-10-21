@@ -15,32 +15,43 @@ test("la page match n’insère plus de mur PRO", () => {
 });
 
 // Decision produit revisee le 02/09/2026 : les outils qui exploitent le
-// modele (scanner de value, combine, variance) deviennent reserves aux
-// abonnes, un visiteur gratuit devant les VOIR sans pouvoir s'en servir.
-// Le calculateur de mise, lui, reste ouvert a tous - c'est ce que ce test
-// continue de garantir, avec le fait qu'aucun outil n'est cache purement
-// et simplement (le visiteur doit comprendre ce qu'on lui propose).
-// Refonte du 03/09/2026 : la page Outils devient un TOOL CENTER. L'ancien
+// modele deviennent reserves aux abonnes. Refonte du 03/09/2026 : l'ancien
 // verrou etait un voile CSS pose PAR-DESSUS de vraies donnees premium chargees
-// dans le navigateur - c'etait une protection de facade. Ce test verifie
-// desormais la vraie propriete : un visiteur gratuit voit et comprend les six
-// outils, mais le client ne recoit AUCUNE donnee de match premium.
-test("la page Outils expose les six outils sans mur, et sans donnee premium cote client", () => {
+// dans le navigateur - c'etait une protection de facade.
+// 21/10/2026 (36 visites en 5 semaines, 2 abonnes ; carte blanche de Clement pour
+// vendre) : un visiteur non abonne voit une PAGE DE VENTE (lib/pro-vente.js), plus
+// aucun outil ni ligne fictive « Club A – Club B » ; un abonne voit QUATRE outils.
+// Le calculateur de mise et le simulateur de capital sont retires (regle de Clement :
+// ni mise, ni capital, ni esperance). La vraie propriete reste verifiee : le client
+// non abonne ne recoit AUCUNE donnee de match premium.
+test("page Pro : vente pour un non-abonne, quatre outils pour un abonne, aucune donnee premium cote client", () => {
   const source = read("pro.html");
   const script = read("tools-page.js");
 
-  // 1. Les six outils sont accessibles : personne ne doit rester devant un cadenas.
-  for (const outil of ["scanner", "fair", "stake", "bankroll", "combo", "journal"]) {
+  // 1. Quatre outils pour l'abonne ; calculateur de mise et simulateur de capital retires.
+  for (const outil of ["scanner", "fair", "combo", "journal"]) {
     assert.match(source, new RegExp('data-tool="' + outil + '"'), outil + " doit etre atteignable");
     assert.match(source, new RegExp('data-panel="' + outil + '"'), outil + " doit avoir son espace de travail");
   }
+  for (const outil of ["stake", "bankroll"]) {
+    assert.doesNotMatch(source, new RegExp('data-(tool|panel)="' + outil + '"'), outil + " retire");
+  }
+  assert.doesNotMatch(script, /rendreStake|rendreBankroll|calculateStake|simulateVariance|sidebarFoot/);
+  assert.doesNotMatch(read("lib/tools-domain.js"), /function (calculateStake|simulateVariance)|return\{[^}]*(calculateStake|simulateVariance)/);
 
-  // 2. L'ancien verrou de facade ne revient pas.
+  // 2. Les outils sont caches tant que le serveur n'a pas dit « Pro » ; la vente est
+  //    visible par defaut (sans JS aussi).
+  assert.match(source, /<div id="proOutils" hidden>/);
+  assert.match(source, /<div id="proVente" class="pv">/);
+  assert.match(script, /if \(ctx\.isPro\) \{\s*montrer\('outils'\);/);
+  assert.match(script, /window\.IasharkProVente\.mount\(document\.getElementById\('proVente'\)/);
+
+  // 3. L'ancien verrou de facade ne revient pas.
   assert.doesNotMatch(source, /pro-veil/, "le voile CSS pose sur de vraies donnees ne doit pas revenir");
   assert.doesNotMatch(source, /data-locked/, "le verrou par attribut ne doit pas revenir");
   assert.doesNotMatch(script, /pro-veil/);
 
-  // 3. SECURITE : la page ne lit jamais le data.json public. Les donnees de
+  // 4. SECURITE : la page ne lit jamais le data.json public. Les donnees de
   //    match passent uniquement par la fonction Edge qui applique
   //    l'autorisation cote serveur.
   // On vise l'APPEL, pas la chaine : le fichier contient un commentaire qui
@@ -54,11 +65,8 @@ test("la page Outils expose les six outils sans mur, et sans donnee premium cote
   assert.match(script, /if \(!ctx\.isPro\) return Promise\.resolve\(null\)/,
     "un visiteur non-abonne ne doit declencher aucun chargement de match");
 
-  // 4. Les donnees de demonstration sont explicitement identifiees comme telles.
-  assert.match(script, /MODE D\u00c9MONSTRATION|MODE DÉMONSTRATION/,
-    "les donnees de demonstration doivent etre signalees");
-  assert.match(script, /Club A – Club B/,
-    "les exemples doivent etre fictifs et reconnaissables comme tels");
+  // 5. Plus aucune ligne de demonstration fictive.
+  assert.doesNotMatch(script, /MODE D\u00c9MONSTRATION|MODE DÉMONSTRATION|Club A – Club B|DEMO_SCAN|DEMO_COMBO/);
 });
 
 test("la page Outils n'annonce pas de fonctionnalite dont la donnee n'existe pas", () => {

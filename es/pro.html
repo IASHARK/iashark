@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="iashark-market" content="fr">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Herramientas IASHARK: selecciones y seguimiento de apuestas</title>
-<meta name="description" content="Selecciones con alta probabilidad del modelo, seguimiento automático de apuestas y verificación de cuotas en un clic: las herramientas de IASHARK.">
+<title>IASHARK Pro: todas las apuestas del día, antes del partido</title>
+<meta name="description" content="Todos los partidos del día abiertos: la apuesta elegida, su probabilidad calculada y por qué, publicadas antes del inicio. Cancelable en línea.">
 <link rel="canonical" href="https://iashark.com/es/pro.html">
 <link rel="alternate" hreflang="fr" href="https://iashark.com/fr/pro.html">
 <link rel="alternate" hreflang="en-GB" href="https://iashark.com/gb/pro.html">
@@ -17,17 +17,24 @@
 <link rel="icon" href="/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<!-- Session Supabase presente (compte connecte, peut-etre Pro) : la page de vente
+     attend la reponse du serveur avant de s'afficher, pour qu'un abonne ne la voie
+     pas passer avant ses outils. Sans session : la page de vente s'affiche tout de suite. -->
+<script>try{for(var i=0;i<localStorage.length;i++){if(/^sb-.+-auth-token$/.test(localStorage.key(i)||'')){document.documentElement.setAttribute('data-pro-etat','attente');break}}}catch(e){}</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" defer></script>
 <link rel="stylesheet" href="/assets/tailwind.css">
 <link rel="stylesheet" href="/assets/tools-page.css">
+<link rel="stylesheet" href="/assets/composants.css">
+<link rel="stylesheet" href="/assets/offre-pro.css">
+<link rel="stylesheet" href="/assets/pro-vente.css">
 <link rel="stylesheet" href="/assets/lang-switcher.css">
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="IASHARK">
 <meta property="og:locale" content="es_ES">
-<meta property="og:title" content="Herramientas IASHARK: selecciones y seguimiento de apuestas">
-<meta property="og:description" content="Selecciones con alta probabilidad del modelo, seguimiento automático de apuestas y verificación de cuotas en un clic: las herramientas de IASHARK.">
+<meta property="og:title" content="IASHARK Pro: todas las apuestas del día, antes del partido">
+<meta property="og:description" content="Todos los partidos del día abiertos: la apuesta elegida, su probabilidad calculada y por qué, publicadas antes del inicio. Cancelable en línea.">
 <meta property="og:url" content="https://iashark.com/es/pro.html">
 <meta property="og:image" content="https://iashark.com/icon-512.png">
 <meta name="twitter:card" content="summary">
@@ -45,13 +52,102 @@
 
 <main class="mx-auto w-full max-w-[1440px] px-4 pb-24 sm:px-6">
 
-  <div class="border-b border-hairline py-7 sm:py-9">
-    <p class="mb-2.5 inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] text-soft">
-      <span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span><span data-i18n="tools_page.static_kicker">TOOL CENTER</span>
-    </p>
-    <h1 class="text-[clamp(26px,3.4vw,38px)] font-extrabold leading-[1.1] tracking-[-0.035em] text-ink"><span data-i18n="tools_page.static_hero_title_pre">Tus herramientas. </span><span class="text-cyan" data-i18n="tools_page.static_hero_title_hl">Nuestras probabilidades.</span></h1>
-    <p class="mt-3 max-w-2xl text-[15px] leading-relaxed text-soft" data-i18n="tools_page.static_hero_sub">Seis herramientas que convierten las probabilidades del modelo en decisiones medibles: detectar, evaluar, dimensionar, simular, combinar, medir.</p>
-  </div>
+<!-- PAGE DE VENTE (visiteur sans compte ou compte gratuit, 21/10/2026) : la promesse,
+     ce que recoit un abonne chaque jour, l'exemple d'analyse, comment ca marche, le
+     prix et le bouton (LE composant de paiement, lib/offre-pro.js), les questions.
+     Branchement : lib/pro-vente.js. Les lignes [data-pv-si] ne s'affichent que si
+     elles sont vraies en ligne pour ce visiteur (marche, langue, interrupteurs). -->
+<div id="proVente" class="pv">
+
+  <section class="pv-hero" aria-labelledby="pvTitre">
+    <h1 id="pvTitre" class="pv-h1"><span data-i18n="pro_vente.hero_title_pre">Todas las apuestas del día,</span> <span class="pv-hl" data-i18n="pro_vente.hero_title_hl">publicadas antes de los partidos.</span></h1>
+    <p class="pv-lead" data-i18n="pro_vente.hero_sub">Cada partido del día abierto: la apuesta elegida, su probabilidad calculada y por qué. Comparas con tu cuota y decides.</p>
+    <div class="pv-hero-cta">
+      <a class="mu-shimmer pv-cta" href="#offre" data-track="pro_vente_hero"><span class="mu-shimmer-spark-c" aria-hidden="true"><span class="mu-shimmer-spark"><span class="mu-shimmer-spark-b"></span></span></span><span data-i18n="pro_vente.hero_cta">Ver la oferta Pro</span><span class="mu-shimmer-hl" aria-hidden="true"></span><span class="mu-shimmer-bd" aria-hidden="true"></span></a>
+      <p class="pv-reassure"><span class="pv-ico" data-pv-ico="rotate-ccw" aria-hidden="true"></span><span data-i18n="offre_pro.pay_cancel">Cancelable en línea en cualquier momento</span></p>
+    </div>
+  </section>
+
+  <section class="pv-section pv-recu" aria-labelledby="pvRecu">
+    <div class="pv-recu-tete">
+      <h2 id="pvRecu" class="pv-h2" data-i18n="pro_vente.daily_title">Lo que recibes cada día</h2>
+      <p class="pv-texte" data-i18n="pro_vente.daily_sub">Todo se publica antes del inicio, y nada se modifica una vez empezado el partido.</p>
+    </div>
+    <div class="pv-recu-corps">
+      <article class="pv-fiche" data-pv-fiche aria-labelledby="pvFiche">
+        <h3 id="pvFiche" class="pv-fiche-titre"><span class="pv-ico pv-ico--accent" data-pv-ico="chart-column" aria-hidden="true"></span><span data-i18n="pro_vente.item_all_title">Todos los partidos del día, abiertos</span></h3>
+        <ol class="pv-anatomie">
+          <li><span class="pv-point" aria-hidden="true"></span><b data-i18n="pro_vente.anat_pick_title">La apuesta elegida</b><span data-i18n="pro_vente.anat_pick_text">Una sola por partido, elegida con una regla fija.</span></li>
+          <li><span class="pv-point" aria-hidden="true"></span><b data-i18n="pro_vente.anat_chance_title">Su probabilidad calculada</b><span data-i18n="pro_vente.anat_chance_text">En porcentaje, para compararla con la cuota de tu operador.</span></li>
+          <li><span class="pv-point" aria-hidden="true"></span><b data-i18n="pro_vente.anat_why_title">Por qué</b><span data-i18n="pro_vente.anat_why_text">Las razones de la elección, explicadas con claridad.</span></li>
+        </ol>
+      </article>
+      <ul class="pv-liste">
+        <li data-pv-si="tickets" hidden><span class="pv-ico pv-ico--accent" data-pv-ico="ticket" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_combos_title">La combinada pequeña y la grande del día</h3><p data-i18n="pro_vente.item_combos_text">La pequeña reúne 4 o 5 partidos, la grande 7 u 8. Si ninguna combinación cumple nuestras reglas, no publicamos ninguna.</p></div></li>
+        <li data-pv-si="tickets" hidden><span class="pv-ico pv-ico--accent" data-pv-ico="award" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_gold_title">La Selección de oro</h3><p data-i18n="pro_vente.item_gold_text">3 apuestas con cuota más alta elegidas por IASHARK. Solo se publica cuando 3 apuestas cumplen nuestras reglas.</p></div></li>
+        <li data-pv-si="tickets" hidden><span class="pv-ico pv-ico--accent" data-pv-ico="user-round" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_scorer_title">El goleador del día</h3><p data-i18n="pro_vente.item_scorer_text">El jugador con más probabilidades de marcar entre los titulares probables, en cuanto alcanza un 10 % de probabilidad.</p></div></li>
+        <li data-pv-si="marches" hidden><span class="pv-ico pv-ico--accent" data-pv-ico="list-checks" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_markets_title">Todos los mercados del partido</h3><p data-i18n="pro_vente.item_markets_text">Cada mercado del partido con su probabilidad calculada, para compararlo con las cuotas de tu operador.</p></div></li>
+        <li><span class="pv-ico pv-ico--accent" data-pv-ico="clapperboard" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_film_title">La película del partido</h3><p data-i18n="pro_vente.item_film_text">El partido dividido en seis cuartos de hora, y los dos equipos comparados.</p></div></li>
+        <li><span class="pv-ico pv-ico--accent" data-pv-ico="goal" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_scores_title">Los marcadores más probables</h3><p data-i18n="pro_vente.item_scores_text">En las ligas mejor medidas: los marcadores más probables y quién abre el marcador.</p></div></li>
+        <li data-pv-si="telegram" hidden><span class="pv-ico pv-ico--accent" data-pv-ico="signal-high" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_telegram_title">Los mensajes privados del bot de Telegram</h3><p data-i18n="pro_vente.item_telegram_text">Tu programa del día enviado por mensaje privado, en tu idioma.</p></div></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pv-section pv-exemple" aria-labelledby="pvExemple">
+    <div class="pv-exemple-texte">
+      <h2 id="pvExemple" class="pv-h2" data-i18n="pro_vente.example_title">Mira un análisis antes de pagar</h2>
+      <p class="pv-texte" data-i18n="pro_vente.example_text">Un análisis completo y real, de acceso libre y sin cuenta: la apuesta elegida, su probabilidad, la película del partido y los equipos comparados.</p>
+    </div>
+    <a class="pv-btn-ligne" href="/es/exemple-analyse.html" data-track="pro_vente_exemple"><span data-i18n="pro_vente.example_cta">Ver el análisis de ejemplo</span><span class="pv-ico" data-pv-ico="arrow-right" aria-hidden="true"></span></a>
+  </section>
+
+  <section class="pv-section pv-etapes" aria-labelledby="pvEtapes">
+    <h2 id="pvEtapes" class="pv-h2" data-i18n="pro_vente.how_title">Cómo funciona</h2>
+    <ol class="pv-etapes-liste">
+      <li><span class="pv-num" aria-hidden="true">1</span><h3 data-i18n="pro_vente.how_1_title">Elige tu duración</h3><p data-i18n="pro_vente.how_1_text">Crea tu cuenta y paga con tarjeta. El pago está protegido por Stripe.</p></li>
+      <li><span class="pv-num" aria-hidden="true">2</span><h3 data-i18n="pro_vente.how_2_title">Abre los partidos del día</h3><p data-i18n="pro_vente.how_2_text">Cada apuesta se publica antes del inicio, con su probabilidad calculada y por qué.</p></li>
+      <li><span class="pv-num" aria-hidden="true">3</span><h3 data-i18n="pro_vente.how_3_title">Compara y decide</h3><p data-i18n="pro_vente.how_3_text">Pon la probabilidad calculada frente a la cuota de tu operador autorizado. Tú decides.</p></li>
+    </ol>
+  </section>
+
+  <section class="pv-section pv-offre" id="offre" aria-label="Oferta Pro" data-i18n-attr="aria-label:pro_vente.offer_aria">
+    <!-- LE composant de paiement (lib/offre-pro.js, mode vitrine) : durees et prix du
+         marche (config/markets.json), un bouton, comment on paie. Repli sans JS : un
+         lien vers la page abonnement, aucun prix ecrit ici. -->
+    <div id="offrePro"><section class="op op--vitrine"><h2 class="op-title" data-i18n="offre_pro.title_general">Hazte Pro: todos los partidos del día, abiertos</h2><a class="mu-shimmer op-cta" href="/es/abonnement.html" data-i18n="pro_vente.offer_fallback_cta">Ver precios</a></section></div>
+    <p class="pv-gratuit" id="pvGratuit" data-i18n="offre_pro.free_line">Gratis: el análisis del partido del día, con una cuenta.</p>
+  </section>
+
+  <section class="pv-section pv-faq" aria-labelledby="pvFaq">
+    <h2 id="pvFaq" class="pv-h2" data-i18n="pro_vente.faq_title">Preguntas frecuentes</h2>
+    <div class="pv-faq-liste">
+      <details class="pv-q">
+        <summary><span data-i18n="pro_vente.faq_cancel_q">¿Puedo cancelar cuando quiera?</span><span class="pv-ico pv-chevron" data-pv-ico="chevron-down" aria-hidden="true"></span></summary>
+        <div class="pv-r"><p data-i18n="pro_vente.faq_cancel_a">Sí. Cancelas en cualquier momento, gratis y en línea, desde «Mi cuenta». No se cobra nada más después de la cancelación.</p><p><a class="pv-lien" href="/es/cgv.html" data-i18n="pro_vente.faq_cancel_link">El detalle de cada duración está en los Términos</a></p></div>
+      </details>
+      <details class="pv-q" data-pv-essai hidden>
+        <summary><span data-i18n="pro_vente.faq_trial_q">¿Hay un periodo de prueba?</span><span class="pv-ico pv-chevron" data-pv-ico="chevron-down" aria-hidden="true"></span></summary>
+        <div class="pv-r"><p data-pv-essai-texte></p></div>
+      </details>
+      <details class="pv-q">
+        <summary><span data-i18n="pro_vente.faq_where_q">¿Dónde apuesto?</span><span class="pv-ico pv-chevron" data-pv-ico="chevron-down" aria-hidden="true"></span></summary>
+        <div class="pv-r"><p data-i18n="pro_vente.faq_where_a">En tu operador autorizado. IASHARK no acepta apuestas ni gestiona cuentas de jugador: publicamos análisis.</p><p data-pv-si="anj" hidden data-i18n="pro_vente.faq_where_anj">En Francia, las cuotas mostradas se toman de los operadores autorizados por la ANJ. Cuando ninguno ofrece el partido, la cuota se marca como indicativa y no se cita ningún operador.</p></div>
+      </details>
+      <details class="pv-q">
+        <summary><span data-i18n="pro_vente.faq_age_q">¿A partir de qué edad?</span><span class="pv-ico pv-chevron" data-pv-ico="chevron-down" aria-hidden="true"></span></summary>
+        <div class="pv-r"><p data-i18n="pro_vente.faq_age_a">18 años o más. El servicio está reservado a personas mayores de edad, como las apuestas deportivas.</p></div>
+      </details>
+    </div>
+    <a class="pv-btn-ligne pv-faq-cta" href="#offre" data-track="pro_vente_faq"><span data-i18n="pro_vente.faq_cta">Elegir mi duración</span><span class="pv-ico" data-pv-ico="arrow-up" aria-hidden="true"></span></a>
+  </section>
+</div>
+
+<!-- OUTILS PRO (abonne Pro seulement, tools-page.js) : quatre outils. Les outils de
+     mise et de capital sont retires depuis le 21/10/2026 (regle de Clement : ni mise,
+     ni capital, ni esperance affiches). -->
+<div id="proOutils" hidden>
+  <div id="outilsTete" class="border-b border-hairline py-7 sm:py-9"></div>
 
   <div class="grid grid-cols-1 gap-6 py-6 lg:grid-cols-[248px_minmax(0,1fr)] lg:gap-8">
 
@@ -61,7 +157,7 @@
         class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
         <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14Z"/><path d="m16.5 16.5 4 4"/></svg>
         <span class="min-w-0">
-          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_scan">DETECTAR</span>
+          <span class="block text-[11px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_scan">DETECTAR</span>
           <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.scan_title">Detector de ventajas</span>
           <span data-i18n="tools_page.static_desc_scan" class="mt-0.5 block text-[12px] leading-snug text-soft">Dónde el mercado se aleja más de nuestras probabilidades.</span>
         </span>
@@ -70,34 +166,16 @@
         class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
         <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M12 4v16"/><path d="M5 8h14"/><path d="m5 8-2.5 6h5L5 8Z"/><path d="m19 8-2.5 6h5L19 8Z"/></svg>
         <span class="min-w-0">
-          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_fair">EVALUAR</span>
+          <span class="block text-[11px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_fair">EVALUAR</span>
           <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.fair_title">Cuota justa</span>
           <span data-i18n="tools_page.static_desc_fair" class="mt-0.5 block text-[12px] leading-snug text-soft">La cuota que merece una probabilidad, frente al precio ofrecido.</span>
-        </span>
-      </button>
-      <button type="button" role="tab" id="tab-stake" aria-controls="panel-stake" aria-selected="false" data-tool="stake"
-        class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
-        <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M3 17V7"/><path d="M9 17V11"/><path d="M15 17V9"/><path d="M21 17V5"/></svg>
-        <span class="min-w-0">
-          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_stake">DIMENSIONAR</span>
-          <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.stake_title">Calculadora de apuesta</span>
-          <span data-i18n="tools_page.static_desc_stake" class="mt-0.5 block text-[12px] leading-snug text-soft">Cuánto apostar según el capital y la cuota.</span>
-        </span>
-      </button>
-      <button type="button" role="tab" id="tab-bankroll" aria-controls="panel-bankroll" aria-selected="false" data-tool="bankroll"
-        class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
-        <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M3 15c3-8 6 4 9-2s6 3 9-5"/><path d="M3 20h18"/></svg>
-        <span class="min-w-0">
-          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_bankroll">SIMULAR</span>
-          <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.bankroll_title">Simulador de capital</span>
-          <span data-i18n="tools_page.static_desc_bankroll" class="mt-0.5 block text-[12px] leading-snug text-soft">Hasta dónde puede bajar el capital antes de recuperarse.</span>
         </span>
       </button>
       <button type="button" role="tab" id="tab-combo" aria-controls="panel-combo" aria-selected="false" data-tool="combo"
         class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
         <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M7 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M17 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M11 12h2"/></svg>
         <span class="min-w-0">
-          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_combo">COMBINAR</span>
+          <span class="block text-[11px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_combo">COMBINAR</span>
           <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.combo_title">Análisis de combinada</span>
           <span data-i18n="tools_page.static_desc_combo" class="mt-0.5 block text-[12px] leading-snug text-soft">Lo que una combinada le resta realmente a la esperanza de ganancia.</span>
         </span>
@@ -106,12 +184,11 @@
         class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
         <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M5 4h11l3 3v13H5z"/><path d="M9 10h6"/><path d="M9 14h6"/></svg>
         <span class="min-w-0">
-          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_journal">MEDIR</span>
+          <span class="block text-[11px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_journal">MEDIR</span>
           <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.journal_title">Diario de decisiones</span>
           <span data-i18n="tools_page.static_desc_journal" class="mt-0.5 block text-[12px] leading-snug text-soft">Lo que las apuestas registradas han rendido realmente.</span>
         </span>
       </button>
-        <div id="sidebarFoot" class="mt-4 border-t border-hairline pt-4"></div>
       </div>
     </nav>
 
@@ -121,10 +198,6 @@
         class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan" data-i18n="tools_page.scan_title">Detector de ventajas</button>
       <button type="button" role="tab" id="mtab-fair" aria-controls="panel-fair" aria-selected="false" data-tool="fair"
         class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan" data-i18n="tools_page.fair_title">Cuota justa</button>
-      <button type="button" role="tab" id="mtab-stake" aria-controls="panel-stake" aria-selected="false" data-tool="stake"
-        class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan" data-i18n="tools_page.stake_title">Calculadora de apuesta</button>
-      <button type="button" role="tab" id="mtab-bankroll" aria-controls="panel-bankroll" aria-selected="false" data-tool="bankroll"
-        class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan" data-i18n="tools_page.bankroll_title">Simulador de capital</button>
       <button type="button" role="tab" id="mtab-combo" aria-controls="panel-combo" aria-selected="false" data-tool="combo"
         class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan" data-i18n="tools_page.combo_title">Análisis de combinada</button>
       <button type="button" role="tab" id="mtab-journal" aria-controls="panel-journal" aria-selected="false" data-tool="journal"
@@ -135,17 +208,15 @@
     <div class="min-w-0">
     <section role="tabpanel" id="panel-scanner" aria-labelledby="tab-scanner" data-panel="scanner" hidden class="tool-panel"></section>
     <section role="tabpanel" id="panel-fair" aria-labelledby="tab-fair" data-panel="fair" hidden class="tool-panel"></section>
-    <section role="tabpanel" id="panel-stake" aria-labelledby="tab-stake" data-panel="stake" hidden class="tool-panel"></section>
-    <section role="tabpanel" id="panel-bankroll" aria-labelledby="tab-bankroll" data-panel="bankroll" hidden class="tool-panel"></section>
     <section role="tabpanel" id="panel-combo" aria-labelledby="tab-combo" data-panel="combo" hidden class="tool-panel"></section>
     <section role="tabpanel" id="panel-journal" aria-labelledby="tab-journal" data-panel="journal" hidden class="tool-panel"></section>
     </div>
   </div>
+</div>
 </main>
 
-<!-- Mention 18+ / jeu responsable (audit QA 14/09/2026 : absente des outils,
-     calculateur de mise compris). Ligne d'aide du repertoire via
-     lib/market-config.js (ecrite aussi dans le HTML par build-locales). -->
+<!-- Mention 18+ / jeu responsable (audit QA 14/09/2026). Ligne d'aide du repertoire
+     via lib/market-config.js (ecrite aussi dans le HTML par build-locales). -->
 <footer class="mx-auto w-full max-w-[1440px] border-t border-hairline px-4 pb-28 pt-6 sm:px-6">
   <p class="max-w-[80ch] text-[12.5px] leading-relaxed text-soft"><span data-i18n="player_page.footer_disclaimer">Información estadística, nunca una garantía de resultado. Las apuestas deportivas conllevan riesgo de pérdidas económicas y de adicción. Prohibido a menores.</span> <span data-helpline-row><span data-i18n="match_page.shell_help_label">Ayuda:</span> <a data-market-helpline="url" href="https://www.gamblingtherapy.org" class="text-cyan hover:underline">gamblingtherapy.org</a><span data-market-helpline-if="phone" hidden> · <span data-market-helpline="phone" hidden></span></span></span></p>
 </footer>
@@ -161,7 +232,9 @@
 <script src="/app-client.js" defer></script>
 <script src="/i18n/i18n.js"></script>
 <script src="/lib/tools-domain.js"></script>
-<script src="/lib/market-labels.js"></script><script src="/lib/market-config.js"></script><script src="/tools-page.js"></script>
+<script src="/lib/market-labels.js"></script><script src="/lib/market-config.js"></script>
+<script src="/lib/icones.js"></script><script src="/lib/composants.js"></script><script src="/lib/offre-pro.js"></script><script src="/lib/pro-vente.js"></script>
+<script src="/tools-page.js"></script>
 <script src="/auth-header.js"></script>
 <script>document.addEventListener('DOMContentLoaded',function(){IasharkAuthHeader.mount('#authHeaderSlot');});</script>
 <script src="/lang-switcher.js"></script>

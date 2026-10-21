@@ -1,0 +1,155 @@
+/* IASHARK — page Pro pour un visiteur non abonne (21/10/2026, lib/pro-vente.js).
+   Meme monde que le reste du site : fond nuit, cyan et gris, Inter, filets fins.
+   Telephone d'abord. Aucun libelle en majuscules a chasse fixe, aucune grille de
+   cartes identiques, aucun vert ni rouge (reserves aux ecarts chiffres).
+   Le prix et le bouton de paiement viennent du composant unique (assets/offre-pro.css,
+   assets/composants.css) ; ce fichier ne fait que la mise en page autour. */
+
+.pv{
+  --pv-ink:#f4f7fb;--pv-soft:#91a0b3;--pv-cyan:#20d5ef;--pv-page:#060b12;--pv-surface:#0a1420;
+  --pv-line:rgba(141,179,211,.14);--pv-line2:rgba(141,179,211,.3);
+  --pv-ease:cubic-bezier(.23,1,.32,1);
+  color:var(--pv-ink)
+}
+.pv [hidden]{display:none!important}
+
+/* Attente de la reponse du serveur quand une session existe (script du <head>) ;
+   un abonne Pro ne voit jamais la page de vente passer avant ses outils. */
+html[data-pro-etat="attente"] #proVente{visibility:hidden}
+html[data-pro-etat="outils"] #proVente{display:none}
+
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+#offre{scroll-margin-top:72px}
+::selection{background:rgba(32,213,239,.3);color:#fff}
+html{scrollbar-color:rgba(141,179,211,.32) #060b12}
+
+/* ---------- Icones (Lucide, lib/icones.js) ---------- */
+.pv-ico{display:inline-flex;flex:none;width:20px;height:20px;color:var(--pv-soft)}
+.pv-ico svg{width:100%;height:100%}
+.pv-ico--accent{color:var(--pv-cyan)}
+
+/* ---------- Typographie ---------- */
+.pv-h1{max-width:20ch;font-size:clamp(34px,9.4vw,66px);font-weight:800;line-height:1.04;letter-spacing:-.035em;color:var(--pv-ink);text-wrap:balance}
+.pv-hl{color:var(--pv-cyan)}
+.pv-h2{font-size:clamp(25px,6.2vw,38px);font-weight:800;line-height:1.1;letter-spacing:-.03em;color:var(--pv-ink);text-wrap:balance}
+.pv-texte{margin-top:12px;max-width:54ch;font-size:15.5px;line-height:1.6;color:var(--pv-soft)}
+
+/* ---------- Boutons ---------- */
+.pv-cta{width:100%;font-family:Inter,system-ui,sans-serif;transition:transform .16s var(--pv-ease)}
+.pv-cta:active{transform:scale(.97)}
+.pv-btn-ligne{display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:50px;padding:0 22px;
+  border:1px solid var(--pv-line2);border-radius:12px;color:var(--pv-ink);font-size:15px;font-weight:700;text-decoration:none;
+  transition:border-color .2s ease,background-color .2s ease,transform .16s var(--pv-ease)}
+.pv-btn-ligne .pv-ico{width:18px;height:18px;color:var(--pv-cyan)}
+.pv-btn-ligne:active{transform:scale(.97)}
+.pv-btn-ligne:focus-visible,.pv-lien:focus-visible{outline:2px solid var(--pv-cyan);outline-offset:3px}
+@media (hover:hover) and (pointer:fine){
+  .pv-btn-ligne:hover{border-color:rgba(32,213,239,.5);background-color:rgba(255,255,255,.03)}
+}
+
+/* ---------- (a) La promesse ---------- */
+.pv-hero{padding:40px 0 44px}
+.pv-lead{margin-top:18px;max-width:52ch;font-size:16.5px;line-height:1.55;color:var(--pv-soft)}
+.pv-hero-cta{display:flex;flex-direction:column;gap:14px;margin-top:28px}
+.pv-reassure{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--pv-soft);font-size:13.5px}
+.pv-reassure .pv-ico{width:16px;height:16px}
+
+/* ---------- Sections ---------- */
+.pv-section{padding:52px 0 56px;border-top:1px solid var(--pv-line)}
+
+/* ---------- (b) Ce que tu recois ---------- */
+.pv-recu-corps{margin-top:28px}
+.pv-fiche{position:relative;padding:22px 20px 24px;border:1px solid rgba(32,213,239,.28);border-radius:16px;background:rgba(32,213,239,.05)}
+.pv-fiche-titre{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:800;line-height:1.25;letter-spacing:-.02em;color:var(--pv-ink)}
+.pv-fiche-titre .pv-ico{width:22px;height:22px}
+.pv-anatomie{position:relative;display:grid;gap:18px;margin-top:20px;padding-left:30px}
+.pv-anatomie li{position:relative;display:grid;align-content:start;gap:3px}
+.pv-anatomie li:not(:last-child)::before{content:"";position:absolute;left:-24px;top:18px;bottom:-20px;width:2px;border-radius:2px;
+  background:linear-gradient(var(--pv-cyan),rgba(32,213,239,.35));transform-origin:top center}
+.pv-anatomie b{font-size:16px;font-weight:700;color:var(--pv-ink)}
+.pv-anatomie li>span:not(.pv-point){font-size:14.5px;line-height:1.5;color:var(--pv-soft)}
+.pv-point{position:absolute;left:-30px;top:4px;width:14px;height:14px;border:2px solid var(--pv-cyan);border-radius:50%;background:var(--pv-page)}
+
+/* Seul mouvement de la page : la fiche se trace a son entree a l'ecran (visible par
+   defaut ; lib/pro-vente.js#animerFiche pose l'etat d'attente). */
+.pv-fiche--attente .pv-anatomie li::before{transform:scaleY(0)}
+.pv-fiche--attente .pv-anatomie li{opacity:0;transform:translateY(8px)}
+.pv-fiche--vue .pv-anatomie li::before{transform:none;transition:transform .5s var(--pv-ease) .1s}
+.pv-fiche--vue .pv-anatomie li{opacity:1;transform:none;transition:opacity .45s var(--pv-ease),transform .45s var(--pv-ease)}
+.pv-fiche--vue .pv-anatomie li:nth-child(2){transition-delay:.12s}
+.pv-fiche--vue .pv-anatomie li:nth-child(2)::before{transition-delay:.22s}
+.pv-fiche--vue .pv-anatomie li:nth-child(3){transition-delay:.24s}
+
+.pv-liste{display:grid;margin-top:14px}
+.pv-liste li{display:grid;grid-template-columns:22px minmax(0,1fr);gap:14px;padding:20px 0;border-top:1px solid var(--pv-line)}
+.pv-liste li .pv-ico{width:22px;height:22px;margin-top:1px}
+.pv-liste h3{font-size:16px;font-weight:700;line-height:1.35;color:var(--pv-ink)}
+.pv-liste p{margin-top:4px;font-size:14.5px;line-height:1.55;color:var(--pv-soft)}
+
+/* ---------- (c) Exemple d'analyse ---------- */
+.pv-exemple{display:grid;gap:22px}
+.pv-exemple-texte{min-width:0}
+.pv-exemple .pv-texte{max-width:48ch}
+
+/* ---------- (d) Comment ca marche ---------- */
+.pv-etapes-liste{display:grid;gap:26px;margin-top:28px}
+.pv-etapes-liste li{position:relative;padding-left:54px;min-height:38px}
+.pv-num{position:absolute;left:0;top:-2px;display:flex;align-items:center;justify-content:center;width:38px;height:38px;
+  border:1px solid rgba(32,213,239,.45);border-radius:50%;color:var(--pv-cyan);font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.pv-etapes-liste li:not(:last-child)::after{content:"";position:absolute;left:18.5px;top:44px;bottom:-22px;width:1px;background:var(--pv-line2)}
+.pv-etapes-liste h3{font-size:17px;font-weight:700;line-height:1.3;color:var(--pv-ink)}
+.pv-etapes-liste p{margin-top:6px;max-width:40ch;font-size:14.5px;line-height:1.55;color:var(--pv-soft)}
+
+/* ---------- (e) Le prix et le bouton (composant de paiement) ---------- */
+.pv-offre{display:grid;justify-items:center}
+#offrePro{width:min(560px,100%)}
+.pv-gratuit{margin-top:14px;text-align:center;color:var(--pv-soft);font-size:13.5px;line-height:1.45}
+
+/* ---------- (f) Questions ---------- */
+.pv-faq{padding-bottom:16px}
+.pv-faq-liste{max-width:760px;margin-top:22px;border-bottom:1px solid var(--pv-line)}
+.pv-q{border-top:1px solid var(--pv-line)}
+.pv-q summary{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;padding:16px 0;
+  list-style:none;cursor:pointer;color:var(--pv-ink);font-size:16.5px;font-weight:600;line-height:1.35}
+.pv-q summary::-webkit-details-marker{display:none}
+.pv-q summary:focus-visible{outline:2px solid var(--pv-cyan);outline-offset:4px;border-radius:6px}
+.pv-chevron{transition:transform .22s var(--pv-ease)}
+.pv-q[open] .pv-chevron{transform:rotate(180deg)}
+.pv-r{max-width:62ch;padding:0 0 22px;color:var(--pv-soft);font-size:15px;line-height:1.6}
+.pv-r p+p{margin-top:10px}
+.pv-lien{color:var(--pv-cyan);text-decoration:underline;text-underline-offset:3px}
+.pv-faq-cta{margin-top:30px}
+
+/* ---------- Grands ecrans ---------- */
+@media (min-width:640px){
+  .pv-hero-cta{flex-direction:row;align-items:center;gap:22px}
+  .pv-cta{width:auto;padding-left:34px;padding-right:34px}
+  .pv-reassure{justify-content:flex-start}
+  .pv-btn-ligne{width:auto}
+  .pv-liste{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:32px}
+}
+@media (min-width:960px){
+  .pv-hero{padding:88px 0 76px}
+  .pv-h1{max-width:none}
+  .pv-hl{display:block}
+  .pv-lead{margin-top:22px;font-size:19px}
+  .pv-hero-cta{margin-top:34px}
+  .pv-section{padding:84px 0 88px}
+  .pv-faq{padding-bottom:24px}
+  .pv-recu{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,7fr);gap:56px;align-items:start}
+  .pv-recu-tete{position:sticky;top:96px}
+  .pv-recu-corps{margin-top:6px}
+  .pv-fiche{padding:28px 28px 30px}
+  .pv-anatomie{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:26px;padding-left:0;padding-top:32px}
+  .pv-anatomie li:not(:last-child)::before{left:20px;right:-18px;top:-26px;bottom:auto;width:auto;height:2px;
+    background:linear-gradient(90deg,var(--pv-cyan),rgba(32,213,239,.35));transform-origin:left center}
+  .pv-fiche--attente .pv-anatomie li::before{transform:scaleX(0)}
+  .pv-point{left:0;top:-32px}
+  .pv-exemple{grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:40px;margin:0;padding:44px 40px;
+    border:1px solid var(--pv-line);border-radius:16px;background:var(--pv-surface)}
+  .pv-exemple+.pv-etapes{border-top:0}
+  .pv-etapes-liste{grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;margin-top:36px}
+  .pv-etapes-liste li{padding-left:0;padding-top:58px}
+  .pv-num{top:0}
+  .pv-etapes-liste li:not(:last-child)::after{left:52px;right:-18px;top:19px;bottom:auto;width:auto;height:1px}
+}

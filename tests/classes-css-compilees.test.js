@@ -36,7 +36,7 @@ const HOOKS = new Set(["league-badge-img", "op--vitrine", "feature-gate", "seo-f
 const TAILWIND = classesDefinies(lire("assets/tailwind.css"));
 
 const LANGUES = ["", "fr/", "en/", "es/", "gb/", "mx/", "za/"];
-const PAGES = ["index.html", "abonnement.html", "match.html", "compte.html", "inscription.html", "connexion.html", "mot-de-passe-oublie.html", "reinitialiser-mot-de-passe.html"];
+const PAGES = ["index.html", "abonnement.html", "match.html", "compte.html", "inscription.html", "connexion.html", "mot-de-passe-oublie.html", "reinitialiser-mot-de-passe.html", "pro.html"];
 
 for (const page of PAGES) {
   test("classes CSS definies : " + page + " et ses copies traduites", () => {

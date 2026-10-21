@@ -728,8 +728,10 @@
   // (#homeList, accueil) ou l'analyse (#matchRoot, page match) remplace son
   // squelette de chargement ; -1 = toujours pas affiche au depart du
   // visiteur ; absent sur les autres pages (pas de detecteur).
+  // pari_ms (vitesse, 21/10/2026) : delai avant la carte « Le pari offert du jour » (#matchRoot [data-sec="appel"]),
+  // le seul chiffre qui compte pour un visiteur venu de X ; absent si la carte n'est pas apparue.
   var vitals = { lcp: null, fcp: null, ttfb: null, cls: null, inp: null };
-  var contentMs = null;
+  var contentMs = null, pariMs = null;
   try {
     if (typeof window.PerformanceObserver === "function") {
       var supported = window.PerformanceObserver.supportedEntryTypes || [];
@@ -785,8 +787,9 @@
       if (contentMs === null) contentMs = -1;
       var ok = (home && home.childElementCount > 0 && !home.querySelector(".hl-skel"))
         || (match && match.childElementCount > 0 && !match.querySelector(".loading-card"));
-      if (ok) contentMs = Math.round(window.performance && performance.now ? performance.now() : 0);
-      return ok;
+      if (ok && contentMs === -1) contentMs = Math.round(window.performance && performance.now ? performance.now() : 0); // une seule fois
+      if (match && pariMs === null && match.querySelector('[data-sec="appel"]')) pariMs = Math.round(window.performance && performance.now ? performance.now() : 0);
+      return ok && (!match || pariMs !== null || contentTries > 120);
     };
     var pollContent = function () {
       if (contentReady() || ++contentTries > 240) return;
@@ -875,6 +878,7 @@
         scroll: maxScroll,
       };
       if (contentMs !== null) leave.content_ms = contentMs;
+      if (pariMs !== null) leave.pari_ms = pariMs;
       for (var vk in vitals) if (vitals[vk] !== null) leave[vk] = vitals[vk];
       if (lateGeo) {
         leave.geo_country = lateGeo.country;

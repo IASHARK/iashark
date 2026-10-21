@@ -209,7 +209,9 @@
 /* Apercu flou du match bloque : constantes dessinees par les memes composants */
 .ap{display:grid;gap:10px}
 .ap-t{margin:0;color:var(--muted);font:600 13.5px var(--body)}
-.ap-body{display:grid;gap:12px;padding:14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);filter:blur(5px);opacity:.7;user-select:none;-webkit-user-select:none;pointer-events:none}
+.ap-body{display:grid;gap:12px;padding:14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);user-select:none;-webkit-user-select:none;pointer-events:none}
+.ap-cap{margin:0 0 8px;color:var(--text);font:700 14px var(--body)}
+.ap-flou{filter:blur(4px);opacity:.75;user-select:none;-webkit-user-select:none;pointer-events:none}
 .ap-slip{display:flex!important;justify-content:space-between;align-items:center;gap:10px}
 .ap-slip span{display:grid}
 .ap-slip small{color:var(--muted)}

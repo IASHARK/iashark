@@ -28,31 +28,31 @@
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/tailwind.css">
 <style>
-:root{--bg:#080c12;--card:#0d1520;--card2:#0f1a28;--cyan:#22d3ee;--cyan2:#06b6d4;--amber:#f59e0b;--green:#10b981;--red:#ef4444;--text:#e2e8f0;--muted:#4a6580;--border:rgba(255,255,255,0.06);--border-cyan:rgba(34,211,238,0.18);}
+:root{--bg:#080c12;--card:#0d1520;--card2:#0f1a28;--cyan:#22d3ee;--cyan2:#06b6d4;--amber:#f59e0b;--green:#10b981;--red:#ef4444;--text:#e2e8f0;--muted:#6f88a0;--border:rgba(255,255,255,0.06);--border-cyan:rgba(34,211,238,0.18);}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:90px;}
 body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(ellipse,rgba(34,211,238,0.03) 0%,transparent 65%);pointer-events:none;z-index:0;}
 .hdr{position:sticky;top:0;z-index:99;background:rgba(8,12,18,0.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--text);text-decoration:none;}
 .logo span{color:var(--cyan);}
-.btn-login{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:6px 14px;border-radius:8px;border:1px solid rgba(34,211,238,0.3);background:rgba(34,211,238,0.06);color:var(--cyan);cursor:pointer;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;}
+.btn-login{font-family:'DM Sans',Inter,sans-serif;font-size:11.5px;letter-spacing:.04em;padding:6px 14px;border-radius:8px;border:1px solid rgba(34,211,238,0.3);background:rgba(34,211,238,0.06);color:var(--cyan);cursor:pointer;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;}
 .btn-login:hover{background:rgba(34,211,238,0.12);}
 .hp-eyebrow .line{width:24px;height:1px;background:var(--amber);opacity:0.4;}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.sport-btn{display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;}
+.sport-btn{display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;font-family:'DM Sans',Inter,sans-serif;font-size:11.5px;letter-spacing:.04em;}
 .sport-btn .sport-icon{font-size:18px;}
 .sport-btn.active-foot{background:rgba(34,211,238,0.08);border-color:var(--border-cyan);color:var(--cyan);}
 .sport-btn:hover{opacity:0.85;}
 .sport-btn.disabled{opacity:0.4;cursor:not-allowed;position:relative;}
 .sport-btn.disabled .soon-tag{font-size:6px;letter-spacing:1px;position:absolute;top:-7px;right:2px;background:var(--card);padding:1px 5px;border-radius:6px;border:1px solid rgba(245,158,11,0.4);color:var(--amber);}
 .filters{max-width:720px;margin:0 auto 12px;padding:0 20px;position:relative;z-index:50;}
-.filter-btn{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;white-space:nowrap;flex-shrink:0;}
+.filter-btn{font-family:'DM Sans',Inter,sans-serif;font-size:11px;letter-spacing:.04em;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;white-space:nowrap;flex-shrink:0;}
 .filter-btn:hover,.filter-btn.active{background:rgba(34,211,238,0.1);border-color:var(--border-cyan);color:var(--cyan);}
 
 
 .champ-dropdown{position:relative;}
-.champ-dropdown-btn{width:100%;display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.5px;padding:10px 12px;cursor:pointer;}
+.champ-dropdown-btn{width:100%;display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',Inter,sans-serif;font-size:12px;letter-spacing:.5px;padding:10px 12px;cursor:pointer;}
 .champ-dropdown-btn:hover{border-color:rgba(255,255,255,0.15);}
 .champ-dropdown-panel{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:6px;max-height:260px;overflow-y:auto;z-index:30;}
 .champ-item{padding:9px 10px;border-radius:8px;font-size:13px;cursor:pointer;color:var(--text);font-family:'DM Sans',sans-serif;}
@@ -91,7 +91,7 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .res-summary b{display:block;font-size:19px;font-weight:700;color:var(--text);}
 .res-summary span{font-size:10.5px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;}
 .day-tabs{max-width:720px;margin:0 auto 14px;padding:0 20px;display:flex;gap:8px;position:relative;z-index:1;}
-.day-tab{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;padding:8px 20px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;}
+.day-tab{font-family:'DM Sans',Inter,sans-serif;font-size:11.5px;letter-spacing:.04em;padding:8px 20px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;}
 .day-tab.active{background:rgba(34,211,238,0.1);border-color:var(--border-cyan);color:var(--cyan);}
 .day-tab .tab-count{font-size:7px;background:rgba(34,211,238,0.15);border-radius:10px;padding:1px 6px;margin-left:6px;}
 .cards-list{max-width:720px;margin:0 auto;padding:0 20px;display:flex;flex-direction:column;gap:10px;position:relative;z-index:1;}
@@ -104,9 +104,9 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .mc.hot:hover{border-color:rgba(245,158,11,0.45);}
 .mc.worldcup{border-color:rgba(245,158,11,0.2);}
 .mc-top{padding:8px 14px;background:rgba(0,0,0,0.18);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
-.mc-league{display:flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;}
+.mc-league{display:flex;align-items:center;gap:6px;font-family:'DM Sans',Inter,sans-serif;font-size:11px;color:var(--muted);letter-spacing:.04em;}
 .mc-league-country{color:rgba(74,101,128,0.7);}
-.badge{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;padding:3px 8px;border-radius:20px;}
+.badge{font-family:'DM Sans',Inter,sans-serif;font-size:11px;letter-spacing:.04em;padding:3px 8px;border-radius:20px;}
 .badge-free{background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);color:var(--green);}
 .mc-teams{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
 .mc-team{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;}
@@ -117,19 +117,19 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .mc-teams-sep{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;}
 .mc-vs{font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--muted);}
 .mc-pari{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.mc-pari-label{font-family:'Space Mono',monospace;font-size:7px;color:var(--amber);letter-spacing:1px;}
+.mc-pari-label{font-family:'DM Sans',Inter,sans-serif;font-size:11px;color:var(--amber);letter-spacing:.04em;}
 .mc-pari-bet{font-size:13px;font-weight:600;color:var(--text);}
 .conf-circle.high{border-color:rgba(245,158,11,0.4);background:rgba(245,158,11,0.06);}
 .conf-circle.med{border-color:rgba(34,211,238,0.35);background:rgba(34,211,238,0.05);}
 .conf-circle.med .conf-num{color:var(--cyan);}
 .conf-circle.low .conf-num{color:var(--muted);}
-.mc-cta{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:5px 10px;border-radius:8px;border:1px solid var(--border-cyan);background:rgba(34,211,238,0.08);color:var(--cyan);cursor:pointer;transition:.2s;white-space:nowrap;}
+.mc-cta{font-family:'DM Sans',Inter,sans-serif;font-size:11px;letter-spacing:.04em;padding:5px 10px;border-radius:8px;border:1px solid var(--border-cyan);background:rgba(34,211,238,0.08);color:var(--cyan);cursor:pointer;transition:.2s;white-space:nowrap;}
 .mc.locked{border-color:rgba(245,158,11,0.25);}
 .mc-cta-locked{border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.08);color:var(--amber);}
 .loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px;}
 .loading-spinner{width:40px;height:40px;border:2px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin 1s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;}
+.loading-text{font-family:'DM Sans',Inter,sans-serif;font-size:11.5px;color:var(--muted);letter-spacing:.04em;}
 .empty-state{text-align:center;padding:48px 20px;}
 .empty-state h3{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--muted);margin-bottom:6px;}
 .empty-state p{font-size:13px;color:var(--muted);}
@@ -137,7 +137,7 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 8px;gap:5px;cursor:pointer;transition:.2s;-webkit-tap-highlight-color:transparent;text-decoration:none;}
 .nav-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;}
 .nav-icon svg{width:20px;height:20px;stroke:var(--muted);transition:.2s;}
-.nav-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;}
+.nav-lbl{font-family:'DM Sans',Inter,sans-serif;font-size:11px;color:var(--muted);letter-spacing:.04em;}
 .nav-item.active .nav-lbl{color:var(--cyan);}
 .nav-item.active .nav-icon svg{stroke:var(--cyan);filter:drop-shadow(0 0 6px rgba(34,211,238,0.5));}
 
@@ -201,15 +201,15 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 .feature-card:hover{transform:translateY(-3px);border-color:rgba(32,213,239,.48);}
 .feature-meta{display:flex;align-items:center;justify-content:space-between;color:#8393a7;font-size:11px;position:relative;}
 .feature-meta-right{display:flex;align-items:center;gap:10px;}
-.feature-free{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;color:var(--green);border:1px solid rgba(16,185,129,.24);background:rgba(16,185,129,.06);border-radius:999px;padding:5px 8px;text-transform:uppercase;}
-.feature-league{display:flex;align-items:center;gap:9px;text-transform:uppercase;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.3px;color:#a9bdd0;}
+.feature-free{font-family:'DM Sans',Inter,sans-serif;font-size:11px;letter-spacing:.04em;color:var(--green);border:1px solid rgba(16,185,129,.24);background:rgba(16,185,129,.06);border-radius:999px;padding:5px 8px;text-transform:uppercase;}
+.feature-league{display:flex;align-items:center;gap:9px;text-transform:uppercase;font-family:'DM Sans',Inter,sans-serif;font-size:11.5px;letter-spacing:.04em;color:#a9bdd0;}
 .feature-league img{width:27px;height:27px;object-fit:contain;}
 .feature-teams{display:grid;grid-template-columns:1fr 54px 1fr;align-items:center;margin:22px 0 20px;position:relative;}
 .feature-team{text-align:center;font-size:13px;font-weight:700;text-transform:uppercase;}
 .feature-team img{display:block;width:72px;height:72px;object-fit:contain;margin:0 auto 10px;filter:drop-shadow(0 8px 18px rgba(0,0,0,.4));}
 .feature-vs{width:38px;height:38px;border:1px solid var(--line);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:auto;font-size:11px;font-weight:800;color:#a0adbd;}
 .feature-signal{border-top:1px solid var(--line);padding-top:18px;text-align:center;position:relative;}
-.signal-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.6px;color:var(--cyan);text-transform:uppercase;}
+.signal-label{font-family:'DM Sans',Inter,sans-serif;font-size:11.5px;letter-spacing:.04em;color:var(--cyan);text-transform:uppercase;}
 .signal-market{font-size:25px;line-height:1.2;font-weight:800;margin:7px 0 17px;}
 .signal-market.signal-gate{font-size:19px;line-height:1.35;font-weight:700;color:var(--text);}
 /* Marche retenu et probabilite sur une seule ligne : l'ancienne mise en page
@@ -218,7 +218,7 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 .signal-row{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;text-align:left;}
 .signal-pick{min-width:0;}
 .signal-prob{flex:none;text-align:right;}
-.signal-prob span{display:block;color:#708197;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;}
+.signal-prob span{display:block;color:#708197;font-family:'DM Sans',Inter,sans-serif;font-size:11px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:3px;}
 .signal-prob strong{font-size:27px;line-height:1;color:var(--cyan);}
 /* L'invitation a cliquer manquait : la carte etait une grande surface muette.
    Ce n'est pas un bouton (toute la carte est deja un lien) mais un repere
@@ -230,7 +230,7 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 .feature-card:hover .feature-cta{background:rgba(32,213,239,.14);border-color:rgba(32,213,239,.55);}
 .feature-card:hover .feature-cta i{transform:translateX(3px);}
 @media(prefers-reduced-motion:reduce){.feature-cta,.feature-cta i{transition:none;}.feature-card:hover .feature-cta i{transform:none;}}
-.feature-loading{height:370px;border:1px solid var(--line);border-radius:18px;display:grid;place-items:center;color:#6d7d90;font-family:'Space Mono',monospace;font-size:10px;}
+.feature-loading{height:370px;border:1px solid var(--line);border-radius:18px;display:grid;place-items:center;color:#6d7d90;font-family:'DM Sans',Inter,sans-serif;font-size:12px;}
 .league-badge{height:72px;min-width:210px;padding:0 30px;display:flex;align-items:center;justify-content:center;gap:12px;color:#9eabba;font-size:11px;font-weight:700;text-transform:uppercase;position:relative;white-space:nowrap;}
 .league-badge::after{content:'';position:absolute;right:0;width:1px;height:26px;background:var(--line);}
 .league-badge img{width:40px;height:40px;box-sizing:border-box;padding:5px;object-fit:contain;border:1px solid rgba(255,255,255,.72);border-radius:9px;background:#f4f7fa;box-shadow:0 5px 14px rgba(0,0,0,.28);filter:none}
@@ -298,7 +298,7 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
    ======================================================================= */
 .hero-cta{display:inline-flex;align-items:center;justify-content:center;padding:15px 26px;border-radius:12px;
   background:var(--cyan);color:#04121a;font-size:13px;font-weight:800;letter-spacing:.06em;text-decoration:none;
-  box-shadow:0 14px 34px -16px rgba(32,213,239,.75);transition:transform .18s,filter .18s;}
+  box-shadow:0 14px 30px -16px rgba(0,0,0,.7);transition:transform .18s,filter .18s;}
 .hero-cta:hover{filter:brightness(1.07);}
 .hero-cta:active{transform:translateY(1px);}
 /* Fragments orphelins et regles mortes retires le 21/10/2026 (passe
@@ -399,20 +399,20 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 /* Classes injectees a l'execution par lang-switcher.js, auth-header.js,
    site-prefs.js et bottom-navigation.js : elles n'apparaissent jamais dans
    ce fichier, il ne faut donc pas les considerer comme du CSS mort. */
-.btn-login{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:6px 14px;border-radius:8px;border:1px solid rgba(34,211,238,0.3);background:rgba(34,211,238,0.06);color:var(--cyan);cursor:pointer;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;}
+.btn-login{font-family:'DM Sans',Inter,sans-serif;font-size:11.5px;letter-spacing:.04em;padding:6px 14px;border-radius:8px;border:1px solid rgba(34,211,238,0.3);background:rgba(34,211,238,0.06);color:var(--cyan);cursor:pointer;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;}
 .btn-login:hover{background:rgba(34,211,238,0.12);}
 .lang-switch{position:relative;}
-.lang-switch-btn{display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:#8fa3b8;background:transparent;border:1px solid var(--border);padding:6px 9px;border-radius:8px;cursor:pointer;transition:.2s;}
+.lang-switch-btn{display:flex;align-items:center;gap:5px;font-family:'DM Sans',Inter,sans-serif;font-size:11.5px;letter-spacing:.04em;color:#8fa3b8;background:transparent;border:1px solid var(--border);padding:6px 9px;border-radius:8px;cursor:pointer;transition:.2s;}
 .lang-switch-btn:hover{border-color:rgba(34,211,238,0.3);color:var(--cyan);}
 .lang-switch-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:170px;z-index:200;box-shadow:0 10px 30px rgba(0,0,0,0.45);}
 .lang-switch-menu.open{display:block;}
 .lang-switch-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;color:var(--text);text-decoration:none;font-size:13px;transition:.15s;}
 .lang-switch-item:hover{background:rgba(34,211,238,0.08);}
 .lang-switch-item.active{color:var(--cyan);}
-.lang-switch-code{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);width:22px;flex-shrink:0;}
+.lang-switch-code{font-family:'DM Sans',Inter,sans-serif;font-size:11.5px;color:var(--muted);width:22px;flex-shrink:0;}
 .lang-switch-item.active .lang-switch-code{color:var(--cyan);}
 .lang-switch-name{flex:1;}
-.lang-switch-check{color:var(--cyan);font-family:'Space Mono',monospace;font-size:10px;}
+.lang-switch-check{color:var(--cyan);font-family:'DM Sans',Inter,sans-serif;font-size:12px;}
 .btn-login{height:38px;padding:0 16px;border:0;background:transparent;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#d7dee8;}
 .btn-login:hover{color:var(--cyan);background:transparent;}
 
@@ -523,7 +523,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
     <p class="animate-fade-in d2 hero-pronos-sub" data-i18n="home_hero.sub">One free pick every day, no account needed. Wins and losses shown.</p>
     <div id="heroFeature" class="hero-pari animate-fade-in d3" aria-live="polite" hidden></div>
     <div class="animate-fade-in d4 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-      <a href="#decisions" class="hero-cta group inline-flex items-center justify-center gap-2.5 rounded-xl bg-cyan px-7 py-4 text-[14px] font-extrabold tracking-[0.02em] text-page shadow-[0_16px_40px_-16px_rgba(32,213,239,.8)] transition hover:brightness-110 active:scale-[.985]"><span data-i18n="home_hero.cta">See the free pick's analysis</span><span aria-hidden="true" class="transition-transform group-hover:translate-x-1">→</span></a>
+      <a href="#decisions" class="hero-cta group inline-flex items-center justify-center gap-2.5 rounded-xl bg-cyan px-7 py-4 text-[14px] font-extrabold tracking-[0.02em] text-page shadow-[0_5px_14px_rgba(0,0,0,.28)] transition hover:brightness-110 active:scale-[.985]"><span data-i18n="home_hero.cta">See the free pick's analysis</span><span aria-hidden="true" class="transition-transform group-hover:translate-x-1">→</span></a>
     </div>
     <p class="preuve-hier preuve-hier--hero" data-preuve-hier hidden></p>
   </div>
@@ -552,7 +552,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
        bande de dates, « Mes compétitions » puis A→Z, lignes par competition.
        Le resume SEO et l'etat de chargement ci-dessous sont remplaces au montage. -->
   <div id="homeList">
-  <!--SEO_MATCHES_SUMMARY--><div style="padding:4px 0 12px"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px"><span data-i18n="home_app.seo_summary_title">Today&#39;s AI analyses</span> — <time data-seo-date datetime="2026-10-19">19 October 2026</time> <small style="font-family:'DM Sans',sans-serif;font-size:11px;color:#64748b">(<span data-i18n="home_app.seo_times_paris">Paris time</span>)</small></h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8"><li>00:30 — <strong>Remo vs RB Bragantino</strong> (Brasileirao Serie A)</li><li>01:15 — <strong>Belgrano Cordoba vs River Plate</strong> (Liga Profesional Argentina)</li><li>03:00 — <strong>Monterrey vs CF Pachuca</strong> (Liga MX)</li><li>17:05 — <strong>Al-Fayha vs Al-Ahli Jeddah</strong> (Saudi Pro League)</li><li>17:20 — <strong>Abha vs Al Kholood</strong> (Saudi Pro League)</li><li>18:30 — <strong>Monza vs Cagliari</strong> (Serie A)</li><li>19:00 — <strong>Degerfors IF vs Kalmar FF</strong> (Allsvenskan)</li><li>19:00 — <strong>Viborg vs FC Midtjylland</strong> (Danish Superliga)</li><li>19:00 — <strong>Wisla Plock vs Radomiak Radom</strong> (Ekstraklasa)</li><li>19:00 — <strong>Trabzonspor vs Beşiktaş</strong> (Super Lig)</li><li>20:00 — <strong>Al-Hilal Saudi FC vs Al-Hazm</strong> (Saudi Pro League)</li><li>20:00 — <strong>Al Shabab vs Al-Faisaly FC</strong> (Saudi Pro League)</li><li>20:30 — <strong>Celta de Vigo II vs Tenerife</strong> (Segunda Division)</li><li>20:45 — <strong>Parma vs Torino</strong> (Serie A)</li><li>20:45 — <strong>Rodez vs Montpellier</strong> (Ligue 2)</li><li>21:00 — <strong><a href="/gb/match/1557436.html" style="color:inherit">Tottenham vs Coventry</a></strong> (Premier League)</li><li>21:00 — <strong>Getafe vs Rayo Vallecano</strong> (La Liga)</li><li>21:15 — <strong>SC Braga vs GIL Vicente</strong> (Liga Portugal)</li></ul></div><!--/SEO_MATCHES_SUMMARY-->
+  <!--SEO_MATCHES_SUMMARY--><div style="padding:4px 0 12px"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px"><span data-i18n="home_app.seo_summary_title">Today&#39;s AI analyses</span> — <time data-seo-date datetime="2026-10-19">19 October 2026</time> <small style="font-family:'DM Sans',sans-serif;font-size:12px;color:#8193a8">(<span data-i18n="home_app.seo_times_paris">Paris time</span>)</small></h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8"><li>00:30 — <strong>Remo vs RB Bragantino</strong> (Brasileirao Serie A)</li><li>01:15 — <strong>Belgrano Cordoba vs River Plate</strong> (Liga Profesional Argentina)</li><li>03:00 — <strong>Monterrey vs CF Pachuca</strong> (Liga MX)</li><li>17:05 — <strong>Al-Fayha vs Al-Ahli Jeddah</strong> (Saudi Pro League)</li><li>17:20 — <strong>Abha vs Al Kholood</strong> (Saudi Pro League)</li><li>18:30 — <strong>Monza vs Cagliari</strong> (Serie A)</li><li>19:00 — <strong>Degerfors IF vs Kalmar FF</strong> (Allsvenskan)</li><li>19:00 — <strong>Viborg vs FC Midtjylland</strong> (Danish Superliga)</li><li>19:00 — <strong>Wisla Plock vs Radomiak Radom</strong> (Ekstraklasa)</li><li>19:00 — <strong>Trabzonspor vs Beşiktaş</strong> (Super Lig)</li><li>20:00 — <strong>Al-Hilal Saudi FC vs Al-Hazm</strong> (Saudi Pro League)</li><li>20:00 — <strong>Al Shabab vs Al-Faisaly FC</strong> (Saudi Pro League)</li><li>20:30 — <strong>Celta de Vigo II vs Tenerife</strong> (Segunda Division)</li><li>20:45 — <strong>Parma vs Torino</strong> (Serie A)</li><li>20:45 — <strong>Rodez vs Montpellier</strong> (Ligue 2)</li><li>21:00 — <strong><a href="/gb/match/1557436.html" style="color:inherit">Tottenham vs Coventry</a></strong> (Premier League)</li><li>21:00 — <strong>Getafe vs Rayo Vallecano</strong> (La Liga)</li><li>21:15 — <strong>SC Braga vs GIL Vicente</strong> (Liga Portugal)</li></ul></div><!--/SEO_MATCHES_SUMMARY-->
   <div class="loading-state">
     <div class="loading-spinner"></div>
     <div class="loading-text" data-i18n="home_page.loading_analyses">LOADING ANALYSES...</div>
@@ -569,7 +569,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 .home-partner-hook{margin:12px 0 0;font-size:17px;font-weight:700;line-height:1.35;color:#f4f7fb}
 .home-partner-hook b{display:inline-block;padding:1px 8px;border-radius:8px;background:#20d5ef;color:#04141b;font-weight:800}
 .home-partner-text{margin:10px 0 0;max-width:52ch;font-size:14.5px;line-height:1.55;color:#a6b4c6}
-.home-partner-cta{margin-top:18px;display:inline-flex;gap:10px;align-items:center;height:48px;padding:0 22px;border-radius:12px;background:#20d5ef;color:#04141b;font-size:14.5px;font-weight:800;text-decoration:none;box-shadow:0 14px 34px -16px rgba(32,213,239,.85);transition:filter .15s}
+.home-partner-cta{margin-top:18px;display:inline-flex;gap:10px;align-items:center;height:48px;padding:0 22px;border-radius:12px;background:#20d5ef;color:#04141b;font-size:14.5px;font-weight:800;text-decoration:none;box-shadow:0 14px 30px -16px rgba(0,0,0,.7);transition:filter .15s}
 .home-partner-cta:hover{filter:brightness(1.08)}
 @media (min-width:768px){.home-partner{padding:12px 32px 40px}.home-partner-in{grid-template-columns:minmax(0,1fr);align-items:center}.home-partner-txt{padding:30px 34px}}
 </style>

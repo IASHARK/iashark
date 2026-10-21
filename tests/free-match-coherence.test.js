@@ -186,8 +186,12 @@ test("match offert : celui du jour jusqu'a minuit, jamais un jour passe ni un ma
   assert.equal(pickFreeMatchId([m(1, "2026-09-02 00:00", { is_free: true, pari_rec: "A" })], h), 1, "designation du jour deja jouee : offerte jusqu'a minuit");
   assert.equal(pickFreeMatchId([m(1, "2026-09-01 21:00", { is_free: true, pari_rec: "A" })], h), null, "designation de la veille : plus offerte");
   assert.equal(pickFreeMatchId([m(1, "2026-09-02 00:00", { is_free: true, pari_rec: "A" }), m(3, "2026-09-02 22:00", { pari_rec: "C", data_quality_score: 99 })], h), 1, "jamais un match non designe a la place");
-  assert.equal(pickFreeMatchId([m(1, "2026-09-02 21:00", { pari_rec: "A", data_quality_score: 90 }), m(2, "2026-09-02 22:00", { pari_rec: "B", data_quality_score: 10 })], h), 2, "repli : match a venir seulement");
-  assert.equal(pickFreeMatchId([m(1, "2026-09-02 21:00", { pari_rec: "A" })], h), null);
+  // 21/10/2026 : sans designation, le repli du jour garde le MEME match toute la journee, meme
+  // commence (regle de Clement du 04/10 : « le meme de 00 h a 23 h 59 ») ; avant, il passait au
+  // match suivant des le coup d'envoi.
+  assert.equal(pickFreeMatchId([m(1, "2026-09-02 21:00", { pari_rec: "A", data_quality_score: 90 }), m(2, "2026-09-02 22:00", { pari_rec: "B", data_quality_score: 10 })], h), 1, "repli : le meme match du jour, meme commence");
+  assert.equal(pickFreeMatchId([m(1, "2026-09-02 21:00", { pari_rec: "A" })], h), 1, "repli : le match du jour reste offert apres son coup d'envoi");
+  assert.equal(pickFreeMatchId([m(1, "2026-09-01 21:00", { pari_rec: "A" })], h), null, "repli : jamais un match d'un jour passe");
 });
 
 test("match offert sans compte : l'accueil suit la regle de la page match (compte gratuit exige)", () => {

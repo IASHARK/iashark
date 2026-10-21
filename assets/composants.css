@@ -300,3 +300,12 @@ body.fb-no-scroll{overflow:hidden}
 .ch-box{position:relative;width:100%}
 .ch-box canvas{display:block}
 .fb-drawer:focus{outline:none}
+
+/* Preuve « Hier » (lib/preuve-hier.js, 21/10/2026) : une ligne sobre sur l'accueil et la page Pro, gagne ou perdu,
+   aucune couleur de resultat (le vert et le rouge restent aux ecarts chiffres). */
+.preuve-hier{display:flex;align-items:baseline;gap:10px;margin:14px auto 0;max-width:720px;padding:11px 16px;border-radius:12px;
+  background:rgba(34,211,238,.07);color:#d5dde3;font-size:14.5px;line-height:1.5;text-align:left;text-wrap:pretty}
+.preuve-hier[hidden]{display:none}
+.preuve-hier .ph-point{flex:none;width:8px;height:8px;border-radius:50%;background:#22d3ee;transform:translateY(-1px)}
+.preuve-hier--hero{margin:2px 0 0;max-width:520px;background:rgba(8,14,20,.78);border:1px solid rgba(34,211,238,.18)}
+.preuve-hier--pro{margin:18px 0 0;max-width:560px}

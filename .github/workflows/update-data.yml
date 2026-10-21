@@ -120,6 +120,7 @@ jobs:
           // construction des fichiers publics results/<date>.json. Module pur, teste
           // par tests/match-results.test.js - aucune regle de marche reecrite ici.
           var MATCH_RESULTS=require('./lib/match-results.js');
+          var BILAN_HIER=require('./lib/bilan-hier.js');
           const I18N_LOCALES = require('./i18n/locales.json');
           const I18N_PAGES = require('./scripts/i18n-manifest.js');
           const { generateLocalizedSitemaps, writeSitemapIndex } = require('./scripts/i18n-sitemaps.js');
@@ -2523,7 +2524,8 @@ jobs:
               var depuis=jours[jours.length-1];
               // Version complete des paris (le depot public masque les paris en
               // attente) et verdicts deja etablis par le job de resolution.
-              var archive=[], resultats=[];
+              var archive=[], resultats=[], PARIS_PUBLIES_BILAN={}, TICKET_OR_HIER=null;
+              var HIER=MATCH_RESULTS.ajouterJours(TODAY,-1);
               if(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY){
                 var entetes={'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY};
                 var base=SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/';
@@ -2564,6 +2566,7 @@ jobs:
                 var repP=await rawHttpGetJson(base+'match_premium_data?select=fixture_id,pari_rec,cote_rec,market_id&pari_rec=not.is.null&limit=20000',entetes);
                 if(Array.isArray(repP)){
                   var publies={};
+                  repP.forEach(function(r){ if(r&&r.fixture_id!=null&&r.pari_rec) PARIS_PUBLIES_BILAN[String(r.fixture_id)]={pari:r.pari_rec,cote:r.cote_rec,market:r.market_id}; });
                   repP.forEach(function(r){ if(r&&r.fixture_id!=null&&r.pari_rec) publies[String(r.fixture_id)]=r; });
                   var remplaces=0;
                   archive=archive.map(function(a){
@@ -2581,6 +2584,9 @@ jobs:
                   });
                   if(remplaces) console.log('  [resultats] '+remplaces+' pari(s) de l archive remplace(s) par le pari PUBLIE (gele).');
                 } else console.log('::warning title=Resultats::match_premium_data illisible : les paris publies ne peuvent pas primer sur l archive ce run.');
+                // Selection en or de la veille (bilan d'hier, lib/bilan-hier.js) : ligne publiee, lue seulement.
+                var repT=await rawHttpGetJson(base+'tickets_du_jour?select=jour,type,regle_version,contenu&type=eq.or&jour=eq.'+HIER,entetes);
+                if(Array.isArray(repT)&&repT.length) TICKET_OR_HIER=repT[0];
                 var repR=await rawHttpGetJson(base+'match_results?select=fixture_id,day,kickoff,score,result,scorer_player,scorer_goals,scorer_result&day=gte.'+depuis+'&limit=20000',entetes);
                 if(Array.isArray(repR)) resultats=repR;
                 else console.log('::warning title=Resultats::match_results illisible : les fichiers results/ ne refletent que ce que le pipeline a regle.');
@@ -2633,6 +2639,20 @@ jobs:
                 if(alerte) console.log(alerte);
               });
               fs.writeFileSync(RESULTS_DIR+'/index.json',JSON.stringify(MATCH_RESULTS.buildIndexFile(index,genere),null,2));
+              // BILAN D'HIER (etape 2 du plan de Clement du 21/10/2026) : pari offert et Selection en or de la veille,
+              // gagnes ET perdus, tires du site seulement (registre des matchs offerts, paris publies, results/ de la
+              // veille). Fichier public preuves/bilan-hier.json, reecrit chaque jour (meme vide). Journal : resultats et
+              // compteurs seulement.
+              try{
+                var fichierHier=null; try{ fichierHier=JSON.parse(fs.readFileSync(RESULTS_DIR+'/'+HIER+'.json','utf8')); }catch(e){}
+                var registreOfferts=null; try{ registreOfferts=JSON.parse(fs.readFileSync('preuves/matchs-offerts.json','utf8')); }catch(e){}
+                var bilanPrecedent=null; try{ bilanPrecedent=JSON.parse(fs.readFileSync('preuves/bilan-hier.json','utf8')); }catch(e){}
+                // Jamais un bilan du jour remplace par un plus pauvre (passage sans acces a la base) : fusion avec le precedent.
+                var bilanHier=BILAN_HIER.fusionnerAvecPrecedent(BILAN_HIER.construireBilan({jour:HIER,registre:registreOfferts,ticketOr:TICKET_OR_HIER,resultats:fichierHier,parisPublies:PARIS_PUBLIES_BILAN,genereLe:genere}),bilanPrecedent);
+                if(!fs.existsSync('preuves')) fs.mkdirSync('preuves',{recursive:true});
+                fs.writeFileSync('preuves/bilan-hier.json',JSON.stringify(bilanHier,null,2));
+                console.log('  [bilan hier] '+HIER+' : pari offert '+(bilanHier.offert?bilanHier.offert.resultat:'aucun')+', Selection en or '+(bilanHier.selection_or?bilanHier.selection_or.gagnes+'/'+bilanHier.selection_or.regles:'aucune ('+(bilanHier.selection_or_absente||'?')+')')+'.');
+              }catch(e){ console.log('::warning title=Bilan hier::preuves/bilan-hier.json non ecrit ('+(e&&e.message)+').'); }
               // Fenetre glissante : les journees sorties des 60 jours sont retirees
               // du depot (rien d'autre ne vit dans results/).
               fs.readdirSync(RESULTS_DIR).forEach(function(f){

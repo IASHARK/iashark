@@ -798,7 +798,10 @@ function lien(p){return (window.I18N&&window.I18N.href)?window.I18N.href(p):'/'+
 // Lien d'un match : sa vraie page indexable (/match/<id>.html ou /<version>/match/<id>.html,
 // home-list.js#matchHref, d'apres le champ page_dirs de data-home.json), sinon match.html?id=
 // (noindex). Chantier GEO/SEO du 23/10/2026 : l'accueil ne doit lier aucune page en noindex.
-function lienMatch(m){return (window.IasharkHomeList&&IasharkHomeList.matchHref)?IasharkHomeList.matchHref(m):lien('match.html?id='+encodeURIComponent(m.id));}
+// 23/10/2026, 19 h 30 (Clement) : les visiteurs vont de nouveau sur la page match habituelle
+// (match.html?id=). Les pages /match/<id>.html restent publiees pour les moteurs de recherche,
+// mais l'accueil n'y envoie plus personne.
+function lienMatch(m){return lien('match.html?id='+encodeURIComponent(m.id));}
 // Prices of the current GEO market (lib/market-config.js). Without a GEO
 // market (historic FR/EUR site) the static prices of the page stay as they are.
 function prixProMarche(){

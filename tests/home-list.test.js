@@ -318,8 +318,10 @@ test("lien d'une ligne : vraie page indexable de la version (page_dirs), sinon m
   assert.equal(HL.staticMatchPath(base({ id: "12a", page_dirs: ["fr"] }), "fr"), null, "identifiant invalide");
   assert.equal(HL.staticMatchPath(m, null), null, "version inconnue : repli");
   const H = (dir) => Object.assign(helpers(), { versionDir: () => dir, lien: (p) => "/" + (dir || "fr") + "/" + p });
-  assert.match(HL.renderMatchRow(m, ctx(), H("gb"), 0), /href="\/gb\/match\/1570383\.html"/);
-  assert.match(HL.renderMatchRow(m, ctx(), H("fr"), 0), /href="\/match\/1570383\.html"/);
+  // 23/10/2026, 19 h 30 (Clement) : les lignes de l'accueil menent de nouveau a la page match
+  // habituelle (match.html?id=), meme quand la page statique pour les moteurs existe.
+  assert.match(HL.renderMatchRow(m, ctx(), H("gb"), 0), /href="\/gb\/match\.html\?id=1570383"/);
+  assert.match(HL.renderMatchRow(m, ctx(), H("fr"), 0), /href="\/fr\/match\.html\?id=1570383"/);
   assert.match(HL.renderMatchRow(m, ctx(), H("mx"), 0), /href="\/mx\/match\.html\?id=1570383"/);
   // Ligne verrouillee avec lockedHref « abonnement » : toujours la page d'abonnement.
   assert.match(HL.renderMatchRow(m, ctx({ lockedHref: "abonnement" }), H("gb"), 0), /href="\/gb\/abonnement\.html"/);

@@ -50,7 +50,7 @@ test("llms.txt : limites reprises mot pour mot de la page Methodologie validee",
     // 23/10/2026 : exception des buteurs (.github/workflows/buteurs-jour-de-match.yml, depuis le 04/10) :
     // un joueur absent de la composition officielle est retire, chances et option mise en avant inchangees.
     "Une blessure de dernière minute, une composition inattendue ou tout autre imprévu ne change ni les chances calculées ni l'option mise en avant.",
-    "Exception : le jour du match, les buteurs proposés sont revus quand la composition officielle est connue à temps, et un joueur absent en est retiré.",
+    "Exception : le jour du match, les buteurs proposés peuvent être revus si la composition officielle est connue à temps ; un joueur absent en est alors retiré.",
     "ne sont pas relus un par un avant publication et peuvent contenir des erreurs d'interprétation.",
     "En cas de différence, ce sont les chiffres affichés qui font foi.",
   ].forEach(function (phrase) {

@@ -219,13 +219,14 @@ test("ce que la page affirme est vrai dans le code (sans en publier les valeurs)
   assert.match(pipeline, /if\(!pickedMarket&&modelDataAvailable\)/, "l'abstention sur donnees insuffisantes n'existe plus");
   // « Les textes sont traduits automatiquement, par un outil d'IA. »
   assert.match(pipeline, /async function translateNarratives\(jobs\)/, "la traduction automatique annoncee n'existe plus");
-  // 23/10/2026 : « Exception : le jour du match, les buteurs proposes sont revus quand la composition
-  // officielle est connue a temps, et un joueur absent en est retire. » (section Limites).
+  // 23/10/2026 : « Exception : le jour du match, les buteurs proposes peuvent etre revus si la composition
+  // officielle est connue a temps ; un joueur absent en est alors retire. » (section Limites). Formulation
+  // prudente : la mise a jour depend de l'heure de publication de la composition officielle.
   const buteurs = read(".github/workflows/buteurs-jour-de-match.yml");
   assert.match(buteurs, /- cron: '[^']+'/, "la mise a jour des buteurs le jour du match n'est plus planifiee");
   assert.match(buteurs, /run: node scripts\/buteurs-jour-de-match\.js/);
   assert.ok(exists("scripts/buteurs-jour-de-match.js"), "script des buteurs du jour de match absent");
-  // « Seul le resultat de la veille est rappele, gagne ou perdu » (section 4) : la ligne « Hier » de
+  // « Seul le resultat de la veille y est rappele, gagne ou perdu » (section 4) : la ligne « Hier » de
   // lib/preuve-hier.js, et aucun historique publie (results/ hors de dist/, scripts/build-public.js).
   assert.match(read("lib/preuve-hier.js"), /function hierLocal\(/, "rappel de la veille absent");
   assert.doesNotMatch(BUILD_PUBLIC.match(/const PUBLIC_DIRS = \[[^\]]*\]/)[0], /"results"/, "un historique de resultats est publie");
@@ -238,6 +239,41 @@ test("ce que la page affirme est vrai dans le code (sans en publier les valeurs)
   assert.doesNotMatch(read("match-page.js"), /<small>\/10<\/small>/);
   ["en", "es", "fr", "gb", "mx", "za"].map((d) => d + "/methodologie.html").concat(["de", "en", "es", "fr", "gb", "it", "mx", "pt", "za"].map((d) => "legal/" + d + "/methodologie.html"))
     .forEach((f) => assert.doesNotMatch(read(f), /6[,.]4\s?\/\s?10/, f + " annonce encore la note sur 10"));
+});
+
+// 23/10/2026 : formulations prudentes, mot pour mot, dans les 9 sources (et donc dans les pages generees).
+// Buteurs : « peuvent etre revus si ... a temps » (jamais « sont revus », qui promettrait une mise a jour
+// systematique). Veille : « Le site ne publie aucun historique » (sans le mot interdit par le test exactitude).
+const PRUDENT = {
+  fr: ["Exception : le jour du match, les buteurs proposés peuvent être revus si la composition officielle est connue à temps ; un joueur absent en est alors retiré.",
+    "Le site ne publie aucun historique de résultats ni aucun chiffre de rentabilité, et ne promet aucun gain. Seul le résultat de la veille y est rappelé, gagné ou perdu."],
+  en: ["Exception: on matchday, the suggested scorers may be reviewed if the official line-up is known in time; an absent player is then removed from them.",
+    "The site publishes no results history and no profitability figures, and promises no winnings. Only the previous day's result is mentioned there, won or lost."],
+  es: ["Excepción: el día del partido, los goleadores propuestos pueden revisarse si la alineación oficial se conoce a tiempo; en ese caso, se retira a cualquier jugador ausente.",
+    "El sitio no publica ningún historial de resultados ni ninguna cifra de rentabilidad, y no promete ninguna ganancia. Solo se recuerda en él el resultado del día anterior, ganado o perdido."],
+  de: ["Ausnahme: Am Spieltag können die vorgeschlagenen Torschützen überprüft werden, wenn die offizielle Aufstellung rechtzeitig bekannt ist; ein fehlender Spieler wird dann daraus entfernt.",
+    "Die Website veröffentlicht weder eine Ergebnishistorie noch Rentabilitätszahlen und verspricht keine Gewinne. Nur das Ergebnis des Vortags wird dort genannt, ob gewonnen oder verloren."],
+  it: ["Eccezione: il giorno della partita, i marcatori proposti possono essere rivisti se la formazione ufficiale è nota in tempo; un giocatore assente ne viene allora tolto.",
+    "Il sito non pubblica alcuno storico dei risultati né alcun dato di redditività, e non promette alcuna vincita. Vi viene ricordato solo il risultato del giorno prima, vinto o perso."],
+  pt: ["Exceção: no dia do jogo, os marcadores propostos podem ser revistos se o onze oficial for conhecido a tempo; um jogador ausente é então retirado.",
+    "O site não publica qualquer histórico de resultados nem qualquer número de rentabilidade, e não promete qualquer ganho. Apenas o resultado da véspera é aí recordado, ganho ou perdido."],
+};
+const PRUDENT_FAMILY = { fr: "fr", en: "en", gb: "en", za: "en", es: "es", mx: "es", de: "de", it: "it", pt: "pt" };
+
+test("formulations prudentes : buteurs revus si la composition est connue a temps, seul le resultat de la veille", () => {
+  ALL_DIRS.forEach(function (d) {
+    const src = read("legal/" + d + "/methodologie.html");
+    PRUDENT[PRUDENT_FAMILY[d]].forEach(function (phrase) {
+      assert.ok(src.includes(phrase), "legal/" + d + " : phrase absente : " + phrase);
+    });
+    assert.doesNotMatch(src, /buteurs proposés sont revus|suggested scorers are reviewed|goleadores propuestos se revisan|Torschützen überprüft, wenn|marcatori proposti vengono rivisti|marcadores propostos são revistos/, "legal/" + d + " : ancienne formulation des buteurs");
+  });
+  DIRS.forEach(function (d) {
+    const txt = read(d + "/methodologie.html");
+    PRUDENT[PRUDENT_FAMILY[d]].forEach(function (phrase) {
+      assert.ok(txt.includes(phrase), d + "/methodologie.html : phrase absente (relancer scripts/build-locales.js) : " + phrase);
+    });
+  });
 });
 
 test("page courte et transparente : outil d'IA annonce (sans le nommer), longueur bornee", () => {

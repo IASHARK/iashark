@@ -47,7 +47,10 @@ test("llms.txt : limites reprises mot pour mot de la page Methodologie validee",
   // Formulations deja validees (legal/fr/methodologie.html, section Limites).
   [
     "Les analyses sont calculées à l'avance, une fois par jour, et ne sont pas refaites juste avant le coup d'envoi.",
-    "Une blessure de dernière minute, une composition inattendue ou tout autre imprévu n'est pas pris en compte.",
+    // 23/10/2026 : exception des buteurs (.github/workflows/buteurs-jour-de-match.yml, depuis le 04/10) :
+    // un joueur absent de la composition officielle est retire, chances et option mise en avant inchangees.
+    "Une blessure de dernière minute, une composition inattendue ou tout autre imprévu ne change ni les chances calculées ni l'option mise en avant.",
+    "Exception : le jour du match, les buteurs proposés sont revus quand la composition officielle est connue à temps, et un joueur absent en est retiré.",
     "ne sont pas relus un par un avant publication et peuvent contenir des erreurs d'interprétation.",
     "En cas de différence, ce sont les chiffres affichés qui font foi.",
   ].forEach(function (phrase) {
@@ -55,6 +58,8 @@ test("llms.txt : limites reprises mot pour mot de la page Methodologie validee",
     assert.ok(methodo.includes(phrase), "methodologie : phrase introuvable (formulation modifiee ?) : " + phrase);
   });
   assert.match(txt, /Les textes rédigés par IA ne sont pas relus un par un avant publication/);
+  // Faux depuis le 04/10/2026 : les buteurs absents de la composition officielle sont retires.
+  assert.doesNotMatch(txt + methodo, /n'est pas pris en compte/, "phrase « composition inattendue non prise en compte » revenue");
   // Le plan du site ne liste que les pages a indexer, pas « toutes les pages publiques ».
   assert.match(txt, /\(https:\/\/iashark\.com\/sitemap\.xml\) : les pages à indexer/);
   assert.doesNotMatch(txt, /toutes les pages publiques/);

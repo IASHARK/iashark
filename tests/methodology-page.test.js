@@ -219,6 +219,20 @@ test("ce que la page affirme est vrai dans le code (sans en publier les valeurs)
   assert.match(pipeline, /if\(!pickedMarket&&modelDataAvailable\)/, "l'abstention sur donnees insuffisantes n'existe plus");
   // « Les textes sont traduits automatiquement, par un outil d'IA. »
   assert.match(pipeline, /async function translateNarratives\(jobs\)/, "la traduction automatique annoncee n'existe plus");
+  // 23/10/2026 : « Exception : le jour du match, les buteurs proposes sont revus quand la composition
+  // officielle est connue a temps, et un joueur absent en est retire. » (section Limites).
+  const buteurs = read(".github/workflows/buteurs-jour-de-match.yml");
+  assert.match(buteurs, /- cron: '[^']+'/, "la mise a jour des buteurs le jour du match n'est plus planifiee");
+  assert.match(buteurs, /run: node scripts\/buteurs-jour-de-match\.js/);
+  assert.ok(exists("scripts/buteurs-jour-de-match.js"), "script des buteurs du jour de match absent");
+  // « Seul le resultat de la veille est rappele, gagne ou perdu » (section 4) : la ligne « Hier » de
+  // lib/preuve-hier.js, et aucun historique publie (results/ hors de dist/, scripts/build-public.js).
+  assert.match(read("lib/preuve-hier.js"), /function hierLocal\(/, "rappel de la veille absent");
+  assert.doesNotMatch(BUILD_PUBLIC.match(/const PUBLIC_DIRS = \[[^\]]*\]/)[0], /"results"/, "un historique de resultats est publie");
+  DIRS.forEach(function (d) {
+    const txt = visibleText(read(d + "/methodologie.html"));
+    assert.doesNotMatch(txt, /n'est pas pris en compte|is not taken into account|no se tienen en cuenta/, d + " : imprevus sans l'exception des buteurs");
+  });
   // 21/10/2026 (etape 5, des analyses claires) : la note « /10 » n'est plus affichee nulle part (c'etait
   // la chance du pari ecrite une deuxieme fois) ; la page ne l'annonce donc plus, dans aucune version.
   assert.doesNotMatch(read("match-page.js"), /<small>\/10<\/small>/);

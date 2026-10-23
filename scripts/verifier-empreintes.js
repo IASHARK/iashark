@@ -4,7 +4,10 @@
 //
 // Refait, avec les seuls fichiers publics du depot, le calcul de chaque maillon de
 // preuves/empreintes-paris.json dont le sel est revele :
-//  - paris : historique.json + journees figees dans preuves/paris-scelles/ ;
+//  - paris : historique.json + journees figees dans preuves/paris-scelles/, FUSION PAR JOURNEE
+//    (lib/empreintes-paris.js#fusionnerFigees) : une journee figee n'est relue que si elle n'a plus
+//    aucun pari dans historique.json (le bilan se calcule sur historique.json seul) ; retiree alors
+//    qu'une journee figee plus ancienne y est encore = ecart ;
 //  - corrections : preuves/corrections.json (journal public, ajout seulement) ;
 //  - journees documentees comme non verifiables, et paris ajoutes apres coup expliques :
 //    notes de preuves/corrections.json.
@@ -31,32 +34,28 @@ function donneesPubliques(racine) {
   const registre = lireJson(path.join(racine, "preuves/empreintes-paris.json"), E.vide());
   const journal = lireJson(path.join(racine, C.CHEMIN), C.journalVide());
   const historique = lireJson(path.join(racine, "historique.json"), { predictions: [] });
-  const vus = {};
-  const paris = [];
-  (historique.predictions || []).forEach(function (p) {
-    if (p && p.fixture_id != null) vus[String(p.fixture_id) + "|" + String(p.date || "").slice(0, 10)] = true;
-    paris.push(p);
-  });
+  const figees = {};
   const dossier = path.join(racine, "preuves/paris-scelles");
   if (fs.existsSync(dossier)) {
     fs.readdirSync(dossier).filter(function (f) { return /^\d{4}-\d{2}-\d{2}\.json$/.test(f); }).sort().forEach(function (f) {
-      (lireJson(path.join(dossier, f), {}).paris || []).forEach(function (p) {
-        const k = String(p.fixture_id) + "|" + String(p.date || "").slice(0, 10);
-        if (!vus[k]) { vus[k] = true; paris.push(p); }
-      });
+      figees[f.slice(0, 10)] = lireJson(path.join(dossier, f), {}).paris || [];
     });
   }
-  return { registre: registre, journal: journal, paris: paris };
+  const fusion = E.fusionnerFigees(historique.predictions || [], figees);
+  return { registre: registre, journal: journal, paris: fusion.paris, erreursFigees: fusion.erreurs };
 }
 
 function verifierDepot(racine, nowMs) {
   const d = donneesPubliques(racine);
-  return E.verifier(d.registre, d.paris, {
+  const v = E.verifier(d.registre, d.paris, {
     corrections: C.pourVerification(d.journal),
     journeesNonVerifiables: C.journeesNonVerifiables(d.journal),
     parisNonScellesExpliques: C.parisNonScellesExpliques(d.journal),
     nowMs: nowMs,
   });
+  // M3 : journee figee retiree de historique.json alors qu'une plus ancienne y reste = ecart.
+  if (d.erreursFigees.length) { v.erreurs = d.erreursFigees.concat(v.erreurs); v.ok = false; }
+  return v;
 }
 
 if (require.main === module) {

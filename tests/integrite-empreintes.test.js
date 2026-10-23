@@ -993,13 +993,150 @@ test("10. retouches : registre mal forme sans exception, delai du curl Telegram,
   const etape = WF.slice(WF.indexOf("- name: Alerte empreintes des paris"), WF.indexOf("- name: Alerte moteur v3"));
   assert.match(etape, /curl -sS --max-time 20 -X POST "https:\/\/api\.telegram\.org\/bot/);
   // Texte public : limites N1 et N5 ecrites, plus de « retirer ou retoucher un maillon casse la chaine » sans reserve.
+  // Tour 6 : N'IMPORTE QUEL maillon peut etre reecrit sans secret (16/10 retire au milieu : ok=true) ; dit honnetement.
   assert.match(E.EXPLICATION, /l'heure du coup d'envoi vient du pipeline et n'est pas recoupee avec l'heure reelle du match/);
-  assert.match(E.EXPLICATION, /Seuls les maillons suivis d'un maillon deja publie sont proteges par la chaine/);
-  assert.match(E.EXPLICATION, /Les derniers maillons peuvent etre retires ou reecrits/);
+  assert.match(E.EXPLICATION, /La chaine seule ne protege pas contre une reecriture du fichier : n'importe quel maillon, ancien ou recent, peut etre retire ou reecrit \(sel revele compris\) et les suivants rechaines, sans aucun secret/);
+  assert.match(E.EXPLICATION, /Seules les versions deja publiees \(historique Git du depot, copies gardees par chacun\) montrent un tel changement/);
+  assert.doesNotMatch(E.EXPLICATION, /Seuls les maillons suivis d'un maillon deja publie sont proteges/);
+  assert.doesNotMatch(E.EXPLICATION, /Les derniers maillons peuvent etre retires ou reecrits/);
   assert.doesNotMatch(E.EXPLICATION, /: retirer ou retoucher un maillon casse la chaine/);
   assert.match(E.EXPLICATION, /pari hors chaine/);
   assert.match(E.EXPLICATION, /un pari encore masque est une erreur/);
   assert.doesNotMatch(E.EXPLICATION, /garanti|%/);
   // Fichier public : texte a jour des la fusion (la chaine n'est pas touchee).
   assert.equal(JSON.parse(read("preuves/empreintes-paris.json")).explication, E.EXPLICATION);
+});
+
+// ---------------------------------------------------------------- 11. tour 6 (mathematicien, 23/10) : M1, M2, M3
+const jourP = (id, jour, extra) => pari(id, Object.assign({ date: jour, published_at: jour + "T06:10:00.000Z", kickoff_at: jour + "T19:00:00.000Z" }, extra || {}));
+// Chaine d'ancien format (avant le format 3) : un maillon par journee, sel revele sauf sansSel.
+const chaineAncienne = (journees) => {
+  const chaine = [];
+  journees.forEach(({ jour, paris, sansSel }) => {
+    const s = E.sel("s", jour);
+    const m = { n: chaine.length + 1, jour: jour, genere_le: jour + "T06:00:00.000Z", nb_paris: paris.length, empreinte_paris: E.empreinteParis(E.parisDuJour(paris, jour, { format: 2 }).paris, s), precedente: chaine.length ? chaine[chaine.length - 1].empreinte : E.GENESE };
+    if (!sansSel) m.sel_revele = s;
+    m.empreinte = E.empreinteMaillon(m);
+    chaine.push(m);
+  });
+  return { version: 2, chaine: chaine };
+};
+// Fichier fige comme l'ecrit le pipeline (update-data.yml) : champs de l'empreinte + date, type, corrections.
+const figer = (p) => { const o = {}; E.CHAMPS.concat(["date", "type", "corrections"]).forEach((k) => { if (p[k] !== undefined) o[k] = p[k]; }); return o; };
+const depotTemp = (registre, historique, figees) => {
+  const d = fs.mkdtempSync(path.join(require("node:os").tmpdir(), "iashark-empreintes-"));
+  fs.mkdirSync(path.join(d, "preuves/paris-scelles"), { recursive: true });
+  fs.writeFileSync(path.join(d, "preuves/empreintes-paris.json"), JSON.stringify(registre));
+  fs.writeFileSync(path.join(d, "historique.json"), JSON.stringify({ predictions: historique }));
+  Object.keys(figees).forEach((j) => fs.writeFileSync(path.join(d, "preuves/paris-scelles", j + ".json"), JSON.stringify({ jour: j, paris: figees[j].map(figer) })));
+  return d;
+};
+
+test("11. M3 : journees figees fusionnees par JOURNEE (script public et pipeline) ; perdants ou journee retires = erreur", () => {
+  const A = "2026-10-03", B = "2026-10-04", D = "2026-10-05";
+  const pa = [jourP(1, A, { result: "win" }), jourP(2, A, { result: "loss" }), jourP(3, A, { result: "loss" })];
+  const pb = [jourP(4, B, { result: "win" }), jourP(5, B, { result: "loss" })];
+  const pd = [jourP(6, D, { result: "loss" }), jourP(7, D, { result: "win" })];
+  const reg = chaineAncienne([{ jour: A, paris: pa }, { jour: B, paris: pb }, { jour: D, paris: pd }]);
+  const figees = { [A]: pa, [B]: pb, [D]: pd };
+  const tous = pd.concat(pb, pa); // historique.json : le plus recent d'abord
+  const now = Date.parse("2026-10-08T06:00:00Z");
+  const S = require("../scripts/verifier-empreintes.js");
+  const essai = (histo) => { const d = depotTemp(reg, histo, figees); try { return S.verifierDepot(d, now); } finally { fs.rmSync(d, { recursive: true, force: true }); } };
+  const t = essai(tous);
+  assert.deepEqual([t.ok, t.verifies], [true, [1, 2, 3]], "temoin");
+  // M3 : perdants des journees figees retires de historique.json (le bilan monte) -> erreur pour chaque journee.
+  const v = essai(tous.filter((p) => p.result !== "loss"));
+  assert.equal(v.ok, false);
+  assert.match(v.erreurs.join("\n"), /maillon 1 \(2026-10-03\) : 1 paris dans les donnees pour 3 scelles/);
+  assert.match(v.erreurs.join("\n"), /maillon 3 \(2026-10-05\) : 1 paris dans les donnees pour 2 scelles/);
+  // M3b : journee figee B retiree en entier alors que A, plus ancienne, est encore la -> erreur.
+  const vb = essai(tous.filter((p) => p.date !== B));
+  assert.equal(vb.ok, false);
+  assert.match(vb.erreurs.join("\n"), /journee 2026-10-04 figee \(preuves\/paris-scelles\/\) mais retiree de historique\.json alors que des journees figees plus anciennes y restent \(2026-10-03\)/);
+  // Glissement normal (les plus anciennes sortent d'abord) : aucune fausse alerte, journees relues dans les fichiers figes.
+  [tous.filter((p) => p.date !== A), pd, []].forEach((h, i) => assert.deepEqual([essai(h).ok, essai(h).verifies], [true, [1, 2, 3]], "glissement " + i));
+  // Regle partagee (lib) : une ligne combinee ne rend pas une journee « presente ».
+  const f = E.fusionnerFigees(tous.filter((p) => p.date !== B), figees);
+  assert.deepEqual([f.presentes, f.absentes, f.paris.length], [[A, D], [B], 7]);
+  assert.deepEqual(E.fusionnerFigees([{ type: "combi", date: A }], { [A]: pa }).absentes, [A]);
+  // Pipeline : meme regle (code du workflow execute tel quel), alerte dediee.
+  const bloc = WF.slice(WF.indexOf("var erreursFigees=[];"), WF.indexOf("var optsVerif=function()"));
+  assert.match(bloc, /var fusion=EMPREINTES\.fusionnerFigees\(histo\.predictions,figees\);/);
+  assert.match(WF, /if\(erreursFigees\.length\) alerteEmpreintes\('Journee figee retiree',/);
+  assert.doesNotMatch(WF, /if\(!vus\[k\]\)\{ vus\[k\]=true; out\.push\(p\); \}/);
+  assert.doesNotMatch(read("scripts/verifier-empreintes.js"), /if \(!vus\[k\]\)/);
+  const d = depotTemp(reg, [], figees);
+  try {
+    const pipeline = (histo) => new Function("fs", "DOSSIER_SCELLES", "histo", "EMPREINTES", bloc + "\nreturn { paris: parisPourVerif(), erreurs: erreursFigees };")(fs, path.join(d, "preuves/paris-scelles"), { predictions: histo }, E);
+    const m3 = pipeline(tous.filter((p) => p.result !== "loss"));
+    assert.equal(m3.paris.length, 3);
+    assert.equal(E.verifier(reg, m3.paris, { secret: "s", nowMs: now }).ok, false);
+    const m3b = pipeline(tous.filter((p) => p.date !== B));
+    assert.equal(m3b.paris.length, 7);
+    assert.match(m3b.erreurs.join("\n"), /journee 2026-10-04 figee/);
+    const normal = pipeline(pd);
+    assert.deepEqual([normal.erreurs, E.verifier(reg, normal.paris, { secret: "s", nowMs: now }).verifies], [[], [1, 2, 3]]);
+  } finally { fs.rmSync(d, { recursive: true, force: true }); }
+  assert.match(E.EXPLICATION, /une journee figee dans preuves\/paris-scelles\/ n'est relue que si elle n'a plus aucun pari dans historique\.json/);
+  assert.match(E.EXPLICATION, /Une journee figee retiree de historique\.json alors que des journees figees plus anciennes y restent est une erreur/);
+});
+
+test("11. M1 : pari regle (gagne ou perdu) au pronostic masque = ERREUR, quel que soit le format", () => {
+  const A = "2026-10-03";
+  const pa = [jourP(1, A, { result: "loss" }), jourP(2, A, { result: "loss" })];
+  const reg = chaineAncienne([{ jour: A, paris: pa }]);
+  const now = { nowMs: Date.parse("2026-10-05T06:00:00Z") };
+  assert.deepEqual([E.verifier(reg, pa, now).ok, E.verifier(reg, pa, now).verifies], [true, [1]], "temoin");
+  // Ancien format, sel revele : perdant remasque (pronostic retire) et passe gagne -> erreur (avant : « non verifiable »).
+  const a = pa.map((x) => Object.assign({}, x));
+  a[0].redacted = true; delete a[0].prediction; delete a[0].cote; delete a[0].model_probability; delete a[0].market; a[0].result = "win";
+  const va = E.verifier(reg, a, now);
+  assert.equal(va.ok, false);
+  assert.match(va.erreurs.join("\n"), /pari 1 \(2026-10-03\) : regle \(win\) mais pronostic masque/);
+  // redacted: true seul, ou pronostic vide : erreur aussi.
+  assert.equal(E.verifier(reg, [Object.assign({}, pa[0], { redacted: true }), pa[1]], now).ok, false);
+  assert.equal(E.verifier(reg, [Object.assign({}, pa[0], { prediction: "" }), pa[1]], now).ok, false);
+  // Format 3, sel pas encore revele (pipeline, avec le secret) : erreur, plus « non verifiable ».
+  const p2 = base5(); const reg2 = scelle5(p2);
+  p2[0].redacted = true; delete p2[0].prediction; p2[0].result = "loss";
+  assert.match(E.verifier(reg2, p2, { secret: "s", nowMs: Date.parse("2026-11-02T22:00:00Z") }).erreurs.join("\n"), /pari 1 \(2026-11-02\) : regle \(loss\) mais pronostic masque/);
+  // Pari masque PAS encore regle : toujours « non verifiable » (jamais une fausse alerte).
+  const v3 = E.verifier(reg, [Object.assign({}, pa[0], { redacted: true, result: "scheduled" }), pa[1]], now);
+  assert.deepEqual([v3.ok, v3.non_verifiables.map((x) => x.raison)], [true, ["pari encore masque"]]);
+  assert.match(E.EXPLICATION, /Un pari regle \(gagne ou perdu\) dont le pronostic est masque est une erreur, quel que soit le format/);
+  // Donnees du depot : aucun pari regle masque (le masquage ne touche jamais un pari regle).
+  assert.deepEqual(JSON.parse(read("historique.json")).predictions.filter((p) => (p.result === "win" || p.result === "loss") && (p.redacted === true || !p.prediction)).map((p) => p.fixture_id), []);
+});
+
+test("11. M2 : sel en retard pour TOUT format ; historique.json garde les journees au sel pas encore revele", () => {
+  const J = "2026-10-22";
+  const pj = [jourP(1, J), jourP(2, J)];
+  const reg = chaineAncienne([{ jour: J, paris: pj, sansSel: true }]);
+  // Ancien format, sel jamais revele : « non verifiable » jusqu'au 29/10 a 23 h 59 UTC, puis ERREUR.
+  const v1 = E.verifier(reg, pj, { nowMs: Date.parse("2026-10-29T23:59:59Z") });
+  assert.deepEqual([v1.ok, v1.non_verifiables.map((x) => x.raison)], [true, ["sel pas encore revele"]]);
+  const v2 = E.verifier(reg, pj, { nowMs: Date.parse("2026-10-30T00:00:00Z") });
+  assert.equal(v2.ok, false);
+  assert.match(v2.erreurs.join("\n"), /maillon 1 \(2026-10-22\) : sel en retard \(pas revele 7 jours apres la fin de sa journee\)/);
+  assert.equal(E.verifier(reg, pj, { secret: "s", nowMs: Date.parse("2026-11-30T12:00:00Z") }).ok, false, "pipeline aussi");
+  // Fenetre : journee au sel pas revele (ancien format, pas figee) gardee entiere ; sel revele ou journee figee : elle peut sortir.
+  const liste = [jourP(9, "2026-10-24"), jourP(8, "2026-10-23")].concat(pj);
+  assert.deepEqual(E.fenetreJourneesEntieres(liste, 2, { registre: reg, figees: [] }).map((p) => p.fixture_id), [9, 8, 1, 2]);
+  assert.deepEqual(E.fenetreJourneesEntieres(liste, 2, { registre: chaineAncienne([{ jour: J, paris: pj }]), figees: [] }).map((p) => p.fixture_id), [9, 8]);
+  assert.deepEqual(E.fenetreJourneesEntieres(liste, 2, { registre: reg, figees: [J] }).map((p) => p.fixture_id), [9, 8]);
+  assert.match(E.EXPLICATION, /un sel, tout format, pas revele 7 jours apres la fin de sa journee aussi \(sel en retard\)/);
+  assert.doesNotMatch(E.EXPLICATION, /un sel au format 3 pas revele/);
+});
+
+test("11. pari deja regle au coup d'envoi ecrit dans le futur (2099), jour passe au format 3 = ERREUR ; texte « depuis le format 3 »", () => {
+  const { p, reg } = regle5("loss", "loss");
+  const faux = Object.assign(p5(77, "Victoire exterieur", 1.5, "2099-01-01T19:00:00.000Z"), { result: "win" });
+  const v = E.verifier(reg, p.concat([faux]), plusTard5);
+  assert.equal(v.ok, false);
+  assert.match(v.erreurs.join("\n"), /pari 77 \(2026-11-02\) : ni scelle ni declare non scelle/);
+  // Pas encore regle : « non verifiable (coup d'envoi a venir) », comme avant.
+  const va = E.verifier(reg, p.concat([Object.assign({}, faux, { result: "scheduled" })]), plusTard5);
+  assert.deepEqual([va.ok, va.non_verifiables.map((x) => x.raison)], [true, ["pari 77 pas encore scelle (coup d'envoi a venir)"]]);
+  assert.match(E.EXPLICATION, /Depuis le format 3, le sel d'un jour est revele 3 heures apres/);
 });

@@ -2455,19 +2455,28 @@ jobs:
               var journalCorr=lectCorr.valeur;
               // Paris complets pour la verification : historique en memoire (avant la fenetre de
               // historique.json) + journees deja figees dans preuves/paris-scelles/ (jamais coupees).
+              // FUSION PAR JOURNEE (M3, mathematicien 23/10, tour 6), meme regle que le script public
+              // (lib/empreintes-paris.js#fusionnerFigees) : un fichier fige n'est ajoute que si sa journee
+              // n'a AUCUN pari dans histo.predictions (avant : pari par pari, des perdants retires de
+              // historique.json etaient combles par le fichier fige et la verification ne voyait rien).
+              // Journee figee retiree alors qu'une plus ancienne reste : alerte « Journee figee retiree ».
+              var erreursFigees=[];
               var parisPourVerif=function(){
-                var vus={}, out=[];
-                histo.predictions.forEach(function(p){ if(p&&p.fixture_id!=null){ vus[String(p.fixture_id)+'|'+String(p.date||'').slice(0,10)]=true; } out.push(p); });
+                var figees={};
                 try{
                   fs.readdirSync(DOSSIER_SCELLES).filter(function(f){return /^\d{4}-\d{2}-\d{2}\.json$/.test(f);}).forEach(function(f){
-                    var fichier=JSON.parse(fs.readFileSync(DOSSIER_SCELLES+'/'+f,'utf8'));
-                    (fichier.paris||[]).forEach(function(p){ var k=String(p.fixture_id)+'|'+String(p.date||'').slice(0,10); if(!vus[k]){ vus[k]=true; out.push(p); } });
+                    var paris=[];
+                    try{ paris=JSON.parse(fs.readFileSync(DOSSIER_SCELLES+'/'+f,'utf8')).paris||[]; }catch(e){}
+                    figees[f.slice(0,10)]=paris;
                   });
                 }catch(e){}
-                return out;
+                var fusion=EMPREINTES.fusionnerFigees(histo.predictions,figees);
+                erreursFigees=fusion.erreurs;
+                return fusion.paris;
               };
               var optsVerif=function(){ return {secret:SECRET_EMPREINTE,corrections:CORRECTIONS.pourVerification(journalCorr),journeesNonVerifiables:CORRECTIONS.journeesNonVerifiables(journalCorr),parisNonScellesExpliques:CORRECTIONS.parisNonScellesExpliques(journalCorr),nowMs:Date.now()}; };
               var verif=EMPREINTES.verifier(registreEmp,parisPourVerif(),optsVerif());
+              if(erreursFigees.length) alerteEmpreintes('Journee figee retiree',erreursFigees.slice(0,5).join(' ; ')+'. Le bilan se calcule sur historique.json : une journee figee ne sort du fichier qu apres les plus anciennes.');
               console.log('  [empreinte] verification avant scelle : '+verif.verifies.length+' maillon(s) verifie(s), '+verif.non_verifiables.length+' non verifiable(s), '+verif.erreurs.length+' ecart(s).');
               if(!verif.ok) alerteEmpreintes('Ecart','ecart avant le scelle du jour : '+verif.erreurs.slice(0,5).join(' ; '));
               var chaineIntacte=!verif.erreurs.some(function(e){ return /chaine rompue|empreinte fausse|numero|heure anterieure/.test(e); });

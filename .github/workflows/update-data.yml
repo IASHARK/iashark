@@ -2423,9 +2423,13 @@ jobs:
             // AJOUT SEULEMENT (controles du 23/10) : fichier de preuves illisible ou supprime =
             // alerte et rien n'est ecrit (jamais une chaine repartie de zero) ; la nouvelle chaine
             // doit prolonger celle du dernier commit, et le journal ne fait que s'allonger.
-            var alerteEmpreintes=function(msg){
-              console.log('::error title=Empreintes des paris::'+msg);
-              try{ fs.appendFileSync((process.env.RUNNER_TEMP||'.')+'/iashark-empreintes-alerte.txt', msg+'\n'); }catch(e){}
+            // ALERTES DIFFERENCIEES (controle du 23/10) : un titre par cause (ecart, secret absent,
+            // scelle incomplet...), une ligne « titre<TAB>message » par alerte, relue par l'etape
+            // « Alerte empreintes des paris » (avant, toute alerte disait « ne correspondent plus »).
+            var alerteEmpreintes=function(titre,msg){
+              var ligne=String(msg).replace(/[\r\n\t]+/g,' ');
+              console.log('::error title=Empreintes des paris : '+titre+'::'+ligne);
+              try{ fs.appendFileSync((process.env.RUNNER_TEMP||'.')+'/iashark-empreintes-alerte.txt', titre+'\t'+ligne+'\n'); }catch(e){}
             };
             try{
               var SECRET_EMPREINTE=process.env.EMPREINTE_SECRET||SUPA_SERVICE_KEY||'';
@@ -2445,7 +2449,7 @@ jobs:
               var lectReg=lirePreuve(REG_CHEMIN,EMPREINTES.vide);
               var lectCorr=lirePreuve(CORRECTIONS.CHEMIN,CORRECTIONS.journalVide);
               if(!lectReg.ok||!lectCorr.ok){
-                alerteEmpreintes('fichier de preuves illisible : '+[lectReg.raison,lectCorr.raison].filter(Boolean).join(' ; ')+'. Rien n est ecrit ce run.');
+                alerteEmpreintes('Preuves illisibles','fichier de preuves illisible : '+[lectReg.raison,lectCorr.raison].filter(Boolean).join(' ; ')+'. Rien n est ecrit ce run.');
               } else {
               var registreEmp=lectReg.valeur;
               var journalCorr=lectCorr.valeur;
@@ -2462,27 +2466,36 @@ jobs:
                 }catch(e){}
                 return out;
               };
-              var optsVerif=function(){ return {secret:SECRET_EMPREINTE,corrections:CORRECTIONS.pourVerification(journalCorr),journeesNonVerifiables:CORRECTIONS.journeesNonVerifiables(journalCorr),nowMs:Date.now()}; };
+              var optsVerif=function(){ return {secret:SECRET_EMPREINTE,corrections:CORRECTIONS.pourVerification(journalCorr),journeesNonVerifiables:CORRECTIONS.journeesNonVerifiables(journalCorr),parisNonScellesExpliques:CORRECTIONS.parisNonScellesExpliques(journalCorr),nowMs:Date.now()}; };
               var verif=EMPREINTES.verifier(registreEmp,parisPourVerif(),optsVerif());
               console.log('  [empreinte] verification avant scelle : '+verif.verifies.length+' maillon(s) verifie(s), '+verif.non_verifiables.length+' non verifiable(s), '+verif.erreurs.length+' ecart(s).');
-              if(!verif.ok) alerteEmpreintes('ecart avant le scelle du jour : '+verif.erreurs.slice(0,5).join(' ; '));
+              if(!verif.ok) alerteEmpreintes('Ecart','ecart avant le scelle du jour : '+verif.erreurs.slice(0,5).join(' ; '));
               var chaineIntacte=!verif.erreurs.some(function(e){ return /chaine rompue|empreinte fausse|numero|heure anterieure/.test(e); });
-              if(!SECRET_EMPREINTE) alerteEmpreintes('aucun secret (EMPREINTE_SECRET ou cle service) : aucun pari scelle ce run.');
+              if(!SECRET_EMPREINTE) alerteEmpreintes('Secret absent','aucun secret (EMPREINTE_SECRET ou cle service) : aucun pari scelle ce run.');
               else if(chaineIntacte){
                 var maintenantEmp=new Date().toISOString();
                 // Vraies corrections de ce run (pari deja scelle qui change avant son coup d'envoi) : maillon « correction ».
                 CORRECTIONS_DU_RUN.forEach(function(x){
                   var c=EMPREINTES.corriger(registreEmp,String(x.prediction.date||'').slice(0,10),histo.predictions,SECRET_EMPREINTE,maintenantEmp,{fixture_id:x.prediction.fixture_id,motif:x.correction.motif,le:x.correction.le,ancien:x.correction.ancien});
                   console.log('  [empreinte] correction '+x.prediction.fixture_id+' : '+(c.ajoute?'maillon '+c.maillon.n:c.raison));
-                  if(!c.ajoute&&!/pas encore scelle/.test(c.raison)) alerteEmpreintes('correction du pari '+x.prediction.fixture_id+' non scellee : '+c.raison);
+                  // Alerte sauf pari d'aujourd'hui pas encore scelle (le scelle du jour portera la valeur corrigee) :
+                  // pari scelle a l'ancien format, pari d'un jour passe, sel revele, coup d'envoi passe.
+                  var jourCorr=String(x.prediction.date||'').slice(0,10);
+                  if(!c.ajoute&&!(/pas encore scelle/.test(c.raison)&&jourCorr===TODAY)) alerteEmpreintes('Correction non scellee','correction du pari '+x.prediction.fixture_id+' ('+jourCorr+') non scellee : '+c.raison);
                 });
                 var a=EMPREINTES.ajouter(registreEmp,TODAY,histo.predictions,SECRET_EMPREINTE,maintenantEmp,{aujourdhui:TODAY});
                 console.log('  [empreinte] '+TODAY+' : '+(a.ajoute?'maillon '+a.maillon.n+' ('+a.raison+', '+a.maillon.nb_paris+' paris)':a.raison));
                 // Scelle du jour incomplet : alerte (pari masque non relu, coup d'envoi deja passe, sel deja revele).
-                if(a.en_attente.length) alerteEmpreintes('scelle du jour incomplet : '+a.en_attente.length+' pari(s) masque(s) non relu(s) ('+a.en_attente.map(function(x){return x.fixture_id;}).join(', ')+')');
-                if(a.non_scelles.length) alerteEmpreintes(a.non_scelles.length+' pari(s) du jour declare(s) non scelle(s) : '+a.non_scelles.map(function(x){return x.fixture_id+' ('+x.raison+')';}).join(', '));
+                if(a.en_attente.length) alerteEmpreintes('Scelle incomplet','scelle du jour incomplet : '+a.en_attente.length+' pari(s) masque(s) non relu(s) ('+a.en_attente.map(function(x){return x.fixture_id;}).join(', ')+')');
+                if(a.non_scelles.length) alerteEmpreintes('Scelle incomplet',a.non_scelles.length+' pari(s) du jour declare(s) non scelle(s) : '+a.non_scelles.map(function(x){return x.fixture_id+' ('+x.raison+')';}).join(', '));
                 var decl=EMPREINTES.declarerNonScelles(registreEmp,histo.predictions,maintenantEmp,{aujourdhui:TODAY});
-                if(decl.declares) alerteEmpreintes(decl.declares+' pari(s) de jours passes jamais scelle(s), declare(s) non scelle(s) (maillons '+decl.maillons.map(function(m){return m.n;}).join(', ')+')');
+                if(decl.declares){
+                  var apresCoup=[];
+                  decl.maillons.forEach(function(m){ (m.non_scelles||[]).forEach(function(x){ if(x.apres_coup) apresCoup.push(x.fixture_id+' ('+m.jour+')'); }); });
+                  alerteEmpreintes('Scelle incomplet',decl.declares+' pari(s) de jours passes jamais scelle(s), declare(s) non scelle(s) (maillons '+decl.maillons.map(function(m){return m.n;}).join(', ')+')');
+                  // Declare apres son jour ET apres son coup d'envoi : erreur permanente de la verification, sauf note publique.
+                  if(apresCoup.length) alerteEmpreintes('Pari ajoute apres coup',apresCoup.length+' pari(s) declare(s) apres leur jour et leur coup d envoi : '+apresCoup.join(', ')+'. Erreur permanente sauf note « pari_non_scelle » dans '+CORRECTIONS.CHEMIN+'.');
+                }
                 var reveles=EMPREINTES.revelerSels(registreEmp,SECRET_EMPREINTE,{predictions:histo.predictions,nowMs:Date.now()});
                 if(reveles) console.log('  [empreinte] '+reveles+' sel(s) revele(s) (dernier match scelle de leur journee commence depuis 3 h).');
                 // Journal public des corrections : nouvelles traces ajoutees, valeurs completees au reglement.
@@ -2490,7 +2503,7 @@ jobs:
                 if(majCorr.ajoutees||majCorr.completees) console.log('  [corrections] '+majCorr.ajoutees+' ajoutee(s), '+majCorr.completees+' completee(s) dans '+CORRECTIONS.CHEMIN+'.');
                 // Ajout seulement : la chaine prolonge celle du dernier commit, le journal aussi.
                 var reecritures=EMPREINTES.prolonge(lectReg.avant,registreEmp).concat(CORRECTIONS.ajoutSeulement(lectCorr.avant,journalCorr));
-                if(reecritures.length) alerteEmpreintes('reecriture des preuves refusee : '+reecritures.slice(0,5).join(' ; ')+'. Rien n est ecrit ce run.');
+                if(reecritures.length) alerteEmpreintes('Reecriture refusee','reecriture des preuves refusee : '+reecritures.slice(0,5).join(' ; ')+'. Rien n est ecrit ce run.');
                 else {
                 if(!fs.existsSync('preuves')) fs.mkdirSync('preuves',{recursive:true});
                 fs.writeFileSync(REG_CHEMIN,JSON.stringify(registreEmp,null,2));
@@ -2498,16 +2511,20 @@ jobs:
                 // Verification apres scelle, puis journees verifiees et revelees figees dans
                 // preuves/paris-scelles/AAAA-MM-JJ.json (ecrit une fois, jamais coupe par la
                 // fenetre de historique.json) : tout le monde peut y refaire le calcul.
+                // JAMAIS AVANT LE REGLEMENT (avocat du diable, 23/10) : une journee n'est figee en clair
+                // que si CHAQUE pari de ce jour est regle (lib/empreintes-paris.js#journeeAFiger,
+                // CORRECTIONS.pariPublic) ; on se fonde sur le reglement, pas sur l'heure (match decale,
+                // kickoff_at jamais mis a jour ; journee du 21/10 dont le sel est deja public).
                 var verifApres=EMPREINTES.verifier(registreEmp,parisPourVerif(),optsVerif());
-                if(!verifApres.ok) alerteEmpreintes('ecart apres le scelle du jour : '+verifApres.erreurs.slice(0,5).join(' ; '));
+                if(!verifApres.ok) alerteEmpreintes('Ecart','ecart apres le scelle du jour : '+verifApres.erreurs.slice(0,5).join(' ; '));
                 var parJourEmp={};
                 registreEmp.chaine.forEach(function(m){ (parJourEmp[m.jour]=parJourEmp[m.jour]||[]).push(m); });
                 Object.keys(parJourEmp).forEach(function(jour){
-                  var ms=parJourEmp[jour].filter(function(m){return m.type!=='non_scelle';}), chemin=DOSSIER_SCELLES+'/'+jour+'.json';
-                  if(!ms.length||fs.existsSync(chemin)||ms.some(function(m){return !m.sel_revele;})) return;
-                  if(!ms.every(function(m){return verifApres.verifies.indexOf(m.n)!==-1;})) return;
+                  var chemin=DOSSIER_SCELLES+'/'+jour+'.json';
+                  if(fs.existsSync(chemin)) return;
+                  if(!EMPREINTES.journeeAFiger(registreEmp,histo.predictions,jour,verifApres.verifies,Date.now()).ok) return;
                   var paris=histo.predictions.filter(function(p){return p&&p.fixture_id!=null&&(p.type||'single')==='single'&&String(p.date||'').slice(0,10)===jour;});
-                  if(!paris.length||paris.some(function(p){return p.redacted||!p.prediction;})) return;
+                  if(!paris.length||paris.some(function(p){return p.redacted||!p.prediction||!CORRECTIONS.pariPublic(p,Date.now());})) return;
                   var champs=EMPREINTES.CHAMPS.concat(['date','type','corrections']);
                   if(!fs.existsSync(DOSSIER_SCELLES)) fs.mkdirSync(DOSSIER_SCELLES,{recursive:true});
                   fs.writeFileSync(chemin,JSON.stringify({jour:jour,ecrit_le:new Date().toISOString(),maillons:parJourEmp[jour].map(function(m){return m.n;}),paris:paris.map(function(p){ var o={}; champs.forEach(function(k){ if(p[k]!==undefined) o[k]=p[k]; }); return o; })},null,2));
@@ -2515,9 +2532,9 @@ jobs:
                 });
                 }
               }
-              else alerteEmpreintes('chaine des empreintes rompue : aucun nouveau maillon ce run.');
+              else alerteEmpreintes('Chaine rompue','chaine des empreintes rompue : aucun nouveau maillon ce run.');
               }
-            }catch(e){ alerteEmpreintes('erreur pendant le scelle ou la verification : '+(e&&e.message)); }
+            }catch(e){ alerteEmpreintes('Erreur du pipeline','erreur pendant le scelle ou la verification : '+(e&&e.message)); }
             // Cache JSON local : fenetre recente bornee pour la taille de page
             // (§33), plus genereuse que l'ancien plafond (500 au lieu de 300) - ce
             // n'est plus destructif puisque l'historique complet vit desormais dans
@@ -5373,6 +5390,14 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             for f in $OUTPUTS; do
+              # preuves/ : fichiers publics en ajout seulement (corrections.json, paris-scelles/...).
+              # Jamais supprime en bloc : un fichier present seulement sur main (ajoute par une PR
+              # fusionnee pendant le run) est garde ; nos fichiers du run sont reposes par-dessus.
+              if [ "$f" = "preuves" ]; then
+                mkdir -p preuves
+                if [ -d "$SAVE/preuves" ]; then cp -R "$SAVE/preuves/." preuves/; fi
+                continue
+              fi
               rm -rf "$f"
               [ -e "$SAVE/$f" ] && cp -R "$SAVE/$f" .
             done
@@ -5413,16 +5438,19 @@ jobs:
           echo "Ecritures Supabase : aucun echec signale."
 
       - name: Alerte empreintes des paris
-        # Ecart entre les paris et leurs empreintes publiees (preuves/empreintes-paris.json), ou
-        # chaine rompue (fichier ecrit par le pipeline, lib/empreintes-paris.js#verifier). APRES la
-        # publication : le run passe au rouge et GitHub envoie son e-mail d'echec.
+        # Ecart entre les paris et leurs empreintes publiees (preuves/empreintes-paris.json), chaine
+        # rompue, secret absent, scelle incomplet, pari ajoute apres coup... (fichier ecrit par le
+        # pipeline : une ligne « titre<TAB>message » par alerte, chaque cause avec son propre titre).
+        # APRES la publication : le run passe au rouge et GitHub envoie son e-mail d'echec.
         if: always()
         run: |
           F="$RUNNER_TEMP/iashark-empreintes-alerte.txt"
           if [ -s "$F" ]; then
-            echo "::error title=Empreintes des paris::Les paris ne correspondent plus a leurs empreintes publiees :"
-            cat "$F"
-            echo "### Empreintes des paris : ecart detecte (detail dans le journal du run)" >> "$GITHUB_STEP_SUMMARY"
+            echo "### Empreintes des paris : alerte(s)" >> "$GITHUB_STEP_SUMMARY"
+            while IFS=$'\t' read -r titre msg; do
+              echo "::error title=Empreintes des paris : $titre::$msg"
+              echo "- $titre : $msg" >> "$GITHUB_STEP_SUMMARY"
+            done < "$F"
             exit 1
           fi
           echo "Empreintes des paris : chaque maillon verifiable correspond aux paris."

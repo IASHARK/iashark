@@ -6,7 +6,8 @@
 // preuves/empreintes-paris.json dont le sel est revele :
 //  - paris : historique.json + journees figees dans preuves/paris-scelles/ ;
 //  - corrections : preuves/corrections.json (journal public, ajout seulement) ;
-//  - journees documentees comme non verifiables : notes de preuves/corrections.json.
+//  - journees documentees comme non verifiables, et paris ajoutes apres coup expliques :
+//    notes de preuves/corrections.json.
 // Appele seul sur historique.json, sans le journal, le verificateur signalerait a tort les
 // maillons dont une correction publique explique l'ecart : ce script charge tout par defaut.
 //
@@ -50,6 +51,7 @@ function verifierDepot(racine, nowMs) {
   return E.verifier(d.registre, d.paris, {
     corrections: C.pourVerification(d.journal),
     journeesNonVerifiables: C.journeesNonVerifiables(d.journal),
+    parisNonScellesExpliques: C.parisNonScellesExpliques(d.journal),
     nowMs: nowMs,
   });
 }

@@ -182,6 +182,7 @@ test("3. scelle partiel : un pari deja commence n'empeche plus de sceller les au
   assert.deepEqual([v.ok, v.verifies], [true, [1, 2, 3]], "maillon 4 = declaration, sans empreinte");
   assert.match(v.avertissements.join("\n"), /pari 3 \(2026-10-03\) : non scelle \(coup d'envoi passe avant le scelle\)/);
   // Sel du jour deja revele : un pari ajoute ensuite n'est jamais sale avec un sel public.
+  preds.forEach((p) => { p.result = "loss"; });
   E.revelerSels(reg, "s", { predictions: preds, nowMs: Date.parse("2026-10-04T01:00:00Z") });
   assert.ok(reg.chaine[0].sel_revele);
   preds.push(pari(5, { kickoff_at: "2026-10-04T02:00:00.000Z", published_at: "2026-10-03T23:30:00.000Z" }));
@@ -264,6 +265,8 @@ test("4bis. sel revele seulement 3 h apres le dernier coup d'envoi de la journee
   const preds = [pari(1), pari(2, { kickoff_at: "2026-10-05T19:00:00.000Z" })];
   E.ajouter(reg, JOUR, preds, "s", "2026-10-03T06:00:00Z", opts);
   assert.equal(E.revelerSels(reg, "s", { predictions: preds, nowMs: Date.parse("2026-10-05T12:00:00Z") }), 0, "J+2 mais un match pas joue : rien");
+  assert.equal(E.revelerSels(reg, "s", { predictions: preds, nowMs: Date.parse("2026-10-05T22:00:00Z") }), 0, "3 h passees mais paris pas regles : rien");
+  preds.forEach((p) => { p.result = "win"; });
   assert.equal(E.revelerSels(reg, "s", { predictions: preds, nowMs: Date.parse("2026-10-05T22:00:00Z") }), 1);
   assert.equal(reg.chaine[0].sel_revele, E.sel("s", JOUR));
 });
@@ -407,6 +410,7 @@ test("5. sel jamais revele si un pari scelle du jour manque des donnees", () => 
   assert.equal(E.revelerSels(reg, "s", { predictions: p, nowMs: Date.parse("2026-11-03T12:00:00Z") }), 0);
   // Le pari du 04/11 absent : avant, le sel sortait le 03/11 (avant son match).
   assert.equal(E.revelerSels(reg, "s", { predictions: p.filter((x) => x.fixture_id !== 5), nowMs: Date.parse("2026-11-03T12:00:00Z") }), 0);
+  p.forEach((x) => { x.result = "loss"; });
   assert.equal(E.revelerSels(reg, "s", { predictions: p, nowMs: Date.parse("2026-11-04T22:01:00Z") }), 1);
 });
 
@@ -449,7 +453,7 @@ test("6. chaine et journal : ajout seulement (jamais repartis de zero ni reecrit
 test("6. pipeline : fichier illisible = alerte sans ecriture, scelle rate = alerte, ajout seulement controle", () => {
   assert.match(WF, /var lirePreuve=function\(chemin,vide\)\{/);
   assert.match(WF, /execSync\('git show HEAD:'\+chemin/);
-  assert.match(WF, /if\(!lectReg\.ok\|\|!lectCorr\.ok\)\{\n\s+alerteEmpreintes\('fichier de preuves illisible : '/);
+  assert.match(WF, /if\(!lectReg\.ok\|\|!lectCorr\.ok\)\{\n\s+alerteEmpreintes\('Preuves illisibles','fichier de preuves illisible : '/);
   assert.doesNotMatch(WF, /try\{ registreEmp=JSON\.parse\(fs\.readFileSync\(REG_CHEMIN,'utf8'\)\); \}catch\(e\)\{\}/, "plus jamais de repli silencieux sur vide()");
   assert.doesNotMatch(WF, /try\{ journalCorr=JSON\.parse\(fs\.readFileSync\(CORRECTIONS\.CHEMIN,'utf8'\)\); \}catch\(e\)\{\}/);
   assert.match(WF, /var reecritures=EMPREINTES\.prolonge\(lectReg\.avant,registreEmp\)\.concat\(CORRECTIONS\.ajoutSeulement\(lectCorr\.avant,journalCorr\)\);/);
@@ -458,7 +462,7 @@ test("6. pipeline : fichier illisible = alerte sans ecriture, scelle rate = aler
   assert.match(WF, /if\(a\.non_scelles\.length\) alerteEmpreintes\(/);
   assert.match(WF, /var decl=EMPREINTES\.declarerNonScelles\(registreEmp,histo\.predictions,maintenantEmp,\{aujourdhui:TODAY\}\);/);
   assert.match(WF, /if\(!SECRET_EMPREINTE\) alerteEmpreintes\(/);
-  assert.match(WF, /\}catch\(e\)\{ alerteEmpreintes\('erreur pendant le scelle ou la verification : '/);
+  assert.match(WF, /\}catch\(e\)\{ alerteEmpreintes\('Erreur du pipeline','erreur pendant le scelle ou la verification : '/);
 });
 
 // ---------------------------------------------------------------- 7. textes publics et verification par tous
@@ -487,4 +491,144 @@ test("7. pari masque complete depuis la page : trace visible", () => {
   const m = { fixture_id: 6, type: "single", result: "scheduled", redacted: true, kickoff_at: "2026-10-03T19:00:00.000Z" };
   PICK_FREEZE.alignPendingPrediction(m, { id: 6, pari_rec: "X", cote_rec: "1.5", model_probability: 60, market_id: "m" }, { nowMs: Date.parse("2026-10-03T10:00:00Z") });
   assert.equal(m.complete_depuis_la_page, "2026-10-03T10:00:00.000Z");
+});
+
+// ---------------------------------------------------------------- 8. contre-verification finale (avocat du diable, 23/10)
+// Scenarios de scratchpad/avocat-final-emp/attaques2.js (S1 a S4) : chacun doit etre refuse.
+test("8. B1 : sel jamais revele ni journee figee en clair tant qu'un pari du jour n'est pas regle (match decale)", () => {
+  const p = base5(); const reg = scelle5(p);
+  p[0].result = "win";
+  // Match 2 decale au 03/11 13 h : kickoff_at garde l'heure d'origine (21 h le 02/11).
+  const run = Date.parse("2026-11-03T05:30:00Z");
+  assert.equal(E.revelerSels(reg, "s", { predictions: p, nowMs: run }), 0, "heure passee mais pari 2 pas regle");
+  assert.deepEqual(E.journeeReglee(p, J5, run), { ok: false, en_attente: [2] });
+  // Cas du 21/10 : sel deja public, un pari encore en attente -> rien en clair.
+  reg.chaine[0].sel_revele = E.sel("s", J5);
+  const v = E.verifier(reg, p, { secret: "s", nowMs: run });
+  assert.deepEqual(v.verifies, [1]);
+  assert.deepEqual(E.journeeAFiger(reg, p, J5, v.verifies, run), { ok: false, raison: "pari(s) pas encore regle(s) : 2" });
+  // Pari d'un match reporte : public (donc figeable) seulement une fois l'heure d'origine passee.
+  p[1].result = "void"; p[1].reporte = true; p[1].kickoff_at = "2026-11-03T13:00:00.000Z";
+  assert.equal(E.journeeReglee(p, J5, run).ok, false);
+  assert.equal(E.journeeReglee(p, J5, Date.parse("2026-11-03T13:00:00Z")).ok, true);
+  // Pari sans resultat : jamais tenu pour regle.
+  assert.equal(E.journeeReglee([Object.assign({}, p[0], { result: undefined })], J5, run).ok, false);
+  // Tout regle : sel revele et journee figeable.
+  const q = base5(); const r2 = scelle5(q);
+  q.forEach((x) => { x.result = "loss"; });
+  assert.equal(E.revelerSels(r2, "s", { predictions: q, nowMs: run }), 1);
+  assert.deepEqual(E.journeeAFiger(r2, q, J5, E.verifier(r2, q, { nowMs: run }).verifies, run), { ok: true, raison: "" });
+  // Pipeline : le gel passe par journeeAFiger (reglement), plus par l'heure seule.
+  assert.match(WF, /if\(!EMPREINTES\.journeeAFiger\(registreEmp,histo\.predictions,jour,verifApres\.verifies,Date\.now\(\)\)\.ok\) return;/);
+  assert.match(WF, /paris\.some\(function\(p\)\{return p\.redacted\|\|!p\.prediction\|\|!CORRECTIONS\.pariPublic\(p,Date\.now\(\)\);\}\)/);
+  assert.match(WF, /var reveles=EMPREINTES\.revelerSels\(registreEmp,SECRET_EMPREINTE,\{predictions:histo\.predictions,nowMs:Date\.now\(\)\}\);/);
+});
+
+test("8. B2 : pari declare apres son jour ET apres son coup d'envoi = erreur permanente, sauf note publique", () => {
+  const p = base5(); const reg = scelle5(p);
+  p.forEach((x) => { x.result = "loss"; });
+  p.push(Object.assign(p5(3, "Victoire exterieur", 2.1, "2026-11-02T19:00:00.000Z"), { result: "win" }));
+  const now = Date.parse("2026-11-04T05:30:00Z");
+  const d = E.declarerNonScelles(reg, p, "2026-11-04T05:30:00.000Z", { aujourdhui: "2026-11-04" });
+  assert.deepEqual(d.maillons[0].non_scelles, [{ fixture_id: 3, raison: E.RAISON_APRES_COUP, apres_coup: true }]);
+  const v = E.verifier(reg, p, { secret: "s", nowMs: now });
+  assert.equal(v.ok, false);
+  assert.match(v.erreurs.join("\n"), /pari 3 \(2026-11-02\) : declare non scelle apres son jour de publication et apres son coup d'envoi \(ajoute apres coup \?\), sans note publique/);
+  // Permanent : runs suivants, sel revele, kickoff_at retouche ensuite.
+  assert.equal(E.declarerNonScelles(reg, p, "2026-11-05T05:30:00.000Z", { aujourdhui: "2026-11-05" }).declares, 0);
+  E.revelerSels(reg, "s", { predictions: p, nowMs: now });
+  const retouche = p.map((x) => (x.fixture_id === 3 ? Object.assign({}, x, { kickoff_at: "2026-11-09T19:00:00.000Z" }) : x));
+  assert.equal(E.verifier(reg, retouche, { nowMs: now }).ok, false);
+  // Note publique explicite (preuves/corrections.json) : avertissement, pas d'erreur.
+  const journal = { notes: [{ type: "pari_non_scelle", jour: J5, fixture_id: 3, texte: "Run du 02/11 en panne : pari publie mais jamais scelle." }] };
+  assert.deepEqual(C.parisNonScellesExpliques(journal), [J5 + "|3"]);
+  assert.deepEqual(C.parisNonScellesExpliques({ notes: [{ type: "pari_non_scelle", jour: J5, fixture_id: 3, texte: " " }] }), [], "texte obligatoire");
+  const w = E.verifier(reg, p, { nowMs: now, parisNonScellesExpliques: C.parisNonScellesExpliques(journal) });
+  assert.equal(w.ok, true);
+  assert.match(w.avertissements.join("\n"), /pari 3 \(2026-11-02\) : ajoute apres coup, non scelle \(note publique/);
+  // Declare un jour plus tard mais AVANT son coup d'envoi : simple avertissement.
+  const q = base5(); const r2 = scelle5(q);
+  q.push(p5(4, "X", 1.5, "2026-11-03T19:00:00.000Z"));
+  const d2 = E.declarerNonScelles(r2, q, "2026-11-03T05:30:00.000Z", { aujourdhui: "2026-11-03" });
+  assert.equal(d2.maillons[0].non_scelles[0].raison, "non scelle le jour de sa publication");
+  const w2 = E.verifier(r2, q, { secret: "s", nowMs: Date.parse("2026-11-04T00:00:00Z") });
+  assert.equal(w2.ok, true);
+  assert.match(w2.avertissements.join("\n"), /pari 4 \(2026-11-02\) : non scelle/);
+  // Script public et pipeline : la note est lue.
+  assert.match(read("scripts/verifier-empreintes.js"), /parisNonScellesExpliques: C\.parisNonScellesExpliques\(d\.journal\)/);
+  assert.match(WF, /parisNonScellesExpliques:CORRECTIONS\.parisNonScellesExpliques\(journalCorr\)/);
+});
+
+test("8. B3 : exception « version_moteur » limitee aux 8 reecritures connues, champs moteur et moteur_version seulement", () => {
+  const jour = "2026-10-19";
+  const mk = (fid, pred, extra) => Object.assign(p5(fid, pred, 1.5, "2026-10-21T19:00:00.000Z"), { date: jour, published_at: "2026-10-19T05:00:00.000Z", result: "loss" }, extra || {});
+  const scelle = (preds) => {
+    const sel = E.sel("s", jour);
+    const m = { n: 1, jour: jour, genere_le: "2026-10-20T05:38:23.000Z", nb_paris: preds.length, empreinte_paris: E.empreinteParis(E.parisDuJour(preds, jour, { format: 2 }).paris, sel), precedente: E.GENESE, sel_revele: sel };
+    m.empreinte = E.empreinteMaillon(m);
+    return { chaine: [m] };
+  };
+  const T = "2026-10-21T05:39:51.616Z";
+  const entree = (fid, champs, ancien, nouveau, t) => ({ id: fid + "|" + (t || T), type: "version_moteur", jour: jour, fixture_id: fid, au_plus_tard: t || T, champs: champs, ancien: ancien, nouveau: nouveau, source: "commits" });
+  // Legitime : pari 1635672, moteur reecrit (connu).
+  const ok = [mk(1635672, "Victoire domicile", { moteur: "v3", moteur_version: "3.0.0+60ce47f" })];
+  const reg = scelle(ok);
+  const reecrit = [Object.assign({}, ok[0], { moteur: "ancien", moteur_version: "score-matrix-dc-early-season-v2" })];
+  const legit = [entree(1635672, ["moteur", "moteur_version"], { moteur: "v3", moteur_version: "3.0.0+60ce47f" }, { moteur: "ancien", moteur_version: "score-matrix-dc-early-season-v2" })];
+  assert.deepEqual(E.verifier(reg, reecrit, { corrections: legit }).verifies, [1]);
+  assert.equal(E.verifier(reg, reecrit, { corrections: legit }).ok, true);
+  // Attaque S2 : pronostic reecrit avec une entree « version_moteur » (champ prediction).
+  const triche = [Object.assign({}, ok[0], { prediction: "Match nul", result: "win" })];
+  const faux = [entree(1635672, ["moteur"], { prediction: "Victoire domicile" }, { prediction: "Match nul" })];
+  assert.equal(E.verifier(reg, triche, { corrections: faux }).ok, false);
+  // Champs annonces moteur mais ancien/nouveau avec un autre champ : refuse.
+  const melange = [entree(1635672, ["moteur", "moteur_version"], { moteur: "v3", moteur_version: "3.0.0+60ce47f", prediction: "Victoire domicile" }, { moteur: "ancien", moteur_version: "x", prediction: "Match nul" })];
+  assert.equal(E.verifier(reg, triche, { corrections: melange }).ok, false);
+  // Match ou heure hors de la liste des 8 : refuse, meme sur le seul moteur.
+  const autre = [mk(999, "Victoire domicile", { moteur: "v3", moteur_version: "3.0.0+60ce47f" })];
+  const regAutre = scelle(autre);
+  const autreReecrit = [Object.assign({}, autre[0], { moteur: "ancien", moteur_version: "y" })];
+  assert.equal(E.verifier(regAutre, autreReecrit, { corrections: [entree(999, ["moteur", "moteur_version"], { moteur: "v3", moteur_version: "3.0.0+60ce47f" }, { moteur: "ancien", moteur_version: "y" })] }).ok, false);
+  assert.equal(E.verifier(reg, reecrit, { corrections: [entree(1635672, ["moteur", "moteur_version"], legit[0].ancien, legit[0].nouveau, "2026-10-21T05:39:52.000Z")] }).ok, false);
+  // Les 8 entrees publiees sont exactement la liste connue.
+  const j = JSON.parse(read("preuves/corrections.json"));
+  assert.deepEqual(j.corrections.filter((e) => e.type === "version_moteur").map((e) => e.fixture_id + "|" + e.au_plus_tard).sort(), E.REECRITURES_MOTEUR_CONNUES.slice().sort());
+});
+
+test("8. pari scelle a l'ancien format vraiment corrige : raison explicite et alerte du pipeline", () => {
+  const jour = "2026-10-23";
+  const p = [Object.assign(p5(20, "Buteur : X", 2.1, "2026-10-25T19:00:00.000Z"), { date: jour, published_at: "2026-10-23T06:10:00.000Z", market: "F1:buteur" })];
+  const sel = E.sel("s", jour);
+  const m = { n: 1, jour: jour, genere_le: "2026-10-23T06:10:56.350Z", nb_paris: 1, empreinte_paris: E.empreinteParis(E.parisDuJour(p, jour, { format: 2 }).paris, sel), precedente: E.GENESE };
+  m.empreinte = E.empreinteMaillon(m);
+  const reg = { chaine: [m] };
+  const ko = Date.parse("2026-10-25T19:00:00Z");
+  PICK_FREEZE.alignPendingPrediction(p[0], { id: 20, pari_rec: "Buteur : Y", cote_rec: "2.3", model_probability: 41, market_id: "F1:buteur" }, { nowMs: ko - 3600000, kickoffMs: ko, motif: "buteur absent" });
+  const tr = p[0].corrections[0];
+  const c = E.corriger(reg, jour, p, "s", new Date(ko - 3500000).toISOString(), { fixture_id: 20, motif: tr.motif, le: tr.le, ancien: tr.ancien });
+  assert.deepEqual([c.ajoute, c.raison], [false, "pari scelle a l'ancien format : correction impossible a sceller"]);
+  // Pari d'aujourd'hui pas encore scelle : pas d'alerte (le scelle du jour porte la valeur corrigee).
+  const q = base5();
+  const c2 = E.corriger(E.vide(), J5, q, "s", "2026-11-02T04:00:00.000Z", { fixture_id: 1, motif: "x", le: "2026-11-02T03:59:30.000Z", ancien: { prediction: "Y" } });
+  assert.match(c2.raison, /pas encore scelle/);
+  assert.match(WF, /if\(!c\.ajoute&&!\(\/pas encore scelle\/\.test\(c\.raison\)&&jourCorr===TODAY\)\) alerteEmpreintes\('Correction non scellee',/);
+});
+
+test("8. textes et alertes : journal aligne, commentaire des reports, alertes differenciees, preuves/ jamais supprime en bloc", () => {
+  // Explication du fichier public = celle du code (valeurs publiees au reglement).
+  assert.equal(JSON.parse(read("preuves/corrections.json")).explication, C.journalVide().explication);
+  assert.match(C.journalVide().explication, /ajoutees au reglement/);
+  // Commentaire des matchs reportes : masque seulement jusqu'a l'heure d'origine.
+  const pf = read("lib/pick-freeze.js");
+  assert.doesNotMatch(pf, /son pari reste masque dans\n\/\/ historique\.json \(lib\/premium-fields\.js#redactPendingPredictions\) : le match peut encore se jouer\./);
+  assert.match(pf, /tant que l'heure d'origine\n\/\/ de son coup d'envoi n'est pas passee/);
+  // Un titre par cause.
+  ["Ecart", "Secret absent", "Scelle incomplet", "Preuves illisibles", "Reecriture refusee", "Chaine rompue", "Correction non scellee", "Pari ajoute apres coup", "Erreur du pipeline"].forEach((t) => {
+    assert.ok(WF.indexOf("alerteEmpreintes('" + t + "',") !== -1, t);
+  });
+  assert.doesNotMatch(WF, /alerteEmpreintes\('[a-z]/, "plus d'alerte sans titre");
+  assert.match(WF, /while IFS=\$'\\t' read -r titre msg; do\n\s+echo "::error title=Empreintes des paris : \$titre::\$msg"/);
+  assert.doesNotMatch(WF, /Les paris ne correspondent plus a leurs empreintes publiees :"/);
+  // Reprise apres push refuse : preuves/ n'est jamais supprime en bloc (corrections.json garde).
+  assert.match(WF, /if \[ "\$f" = "preuves" \]; then\n\s+mkdir -p preuves\n\s+if \[ -d "\$SAVE\/preuves" \]; then cp -R "\$SAVE\/preuves\/\." preuves\/; fi\n\s+continue\n\s+fi\n\s+rm -rf "\$f"/);
 });

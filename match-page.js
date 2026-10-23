@@ -850,7 +850,7 @@ function libelleSource(x){
 // QUESTIONS FREQUENTES — en dernier (aussi lues par les moteurs de recherche). Faits
 // publics (quand / ou, forme), statistiques brutes des deux equipes
 // (vm.editorial.exclusiveFacts) et reponses du modele (pronostic : les chiffres de l'Avis ;
-// chances de chaque equipe : les MEMES nombres que « Si ce match se jouait 10 000 fois »,
+// chances de chaque equipe : les MEMES nombres que « Ce match ramené à 10 000 matchs »,
 // sim_resume, jamais p1/pn/p2 a cote ; 15 premieres minutes ; sur quoi repose l'analyse).
 // Le face-a-face n'y revient pas (bloc des face-a-face retire expres par Clement).
 function faqCarte(vm){
@@ -904,7 +904,7 @@ function faqCarte(vm){
       :esc(t('match_page.faq_pick_none','Le modèle n’a retenu aucun pari sur ce match.'))]);
     if(g&&g.slots.length&&g.totalGoals)modele.push([t('match_page.faq_q_first15','Que peut-il se passer dans les 15 premières minutes ?'),
       tf('match_page.faq_first15_answer','Sur les matchs de la saison de ces deux équipes, {share} % des buts sont tombés dans le premier quart d’heure ({n} sur {total}). Fréquence observée, pas une prévision.',{share:Math.round(g.slots[0].share),n:g.slots[0].home+g.slots[0].away,total:g.totalGoals})]);
-    // Une seule source : les nombres de « Si ce match se jouait 10 000 fois » (sim_resume).
+    // Une seule source : les nombres de « Ce match ramené à 10 000 matchs » (sim_resume).
     const MS=window.IasharkMatchSections,iss=MS&&MS.issuesAffichees?MS.issuesAffichees(raw):null;
     if(iss){
       const marche=raw.sim_resume&&raw.sim_resume.source==='cotes';
@@ -913,14 +913,18 @@ function faqCarte(vm){
         ?[t('match_v4.faq_q_outcomes_market','Quelles chances les cotes donnent-elles à chaque équipe ?'),tf('match_v4.faq_outcomes_answer_market','D’après les cotes des bookmakers, marge retirée : victoire {home} {p1} · match nul {pn} · victoire {away} {p2}. Estimation statistique, pas une garantie.',v)]
         :[t('match_page.faq_q_outcomes','Quelles chances le modèle donne-t-il à chaque équipe ?'),tf('match_page.faq_outcomes_answer','Victoire {home} : {p1} · match nul : {pn} · victoire {away} : {p2}. Estimation statistique, pas une garantie.',v)]);
     }
+    // 24/10/2026 : plus aucun nombre de tirages ici (le compteur de l'ancien moteur n'est plus
+    // lu). Les chances affichees ne viennent pas de ces tirages : sources et qualite seulement.
     const sources=Array.isArray(vm.model.sources)?vm.model.sources.filter(Boolean):[];
-    const sims=n(vm.model.simulationCount),qualite=n(vm.model.quality);
-    if(sims!==null||sources.length||qualite!==null){
+    const qualite=n(vm.model.quality);
+    if(sources.length||qualite!==null){
       const bits=[];
-      if(sims!==null)bits.push(tf('match_page.faq_basis_sims','{n} simulations de Monte-Carlo',{n:sims.toLocaleString(localeTag())}));
       if(sources.length)bits.push(tf('match_page.faq_basis_sources','les données {sources}',{sources:sources.map(x=>esc(libelleSource(String(x)))).join(', ')}));
       if(qualite!==null)bits.push(tf('match_page.faq_basis_quality','un score de qualité des données de {score}/100',{score:fmt(qualite)}));
-      fin.push([t('match_page.faq_q_basis','Sur quoi repose cette analyse ?'),tf('match_page.faq_basis_answer','L’analyse s’appuie sur {bits}. Les probabilités décrivent une fréquence attendue sur un grand nombre de matchs semblables, jamais une certitude sur celui-ci.',{bits:bits.join(', ')})]);
+      // « A et B » dans la langue de la page (et, and, y, e, und).
+      let liste=bits.join(', ');
+      try{if(bits.length>1&&typeof Intl!=='undefined'&&Intl.ListFormat)liste=new Intl.ListFormat(localeTag(),{style:'long',type:'conjunction'}).format(bits);}catch(e){}
+      fin.push([t('match_page.faq_q_basis','Sur quoi repose cette analyse ?'),tf('match_page.faq_basis_answer','L’analyse s’appuie sur {bits}. Les probabilités décrivent une fréquence attendue sur un grand nombre de matchs semblables, jamais une certitude sur celui-ci.',{bits:liste})]);
     }
   }
   const toutes=[...faits,...modele,...stats,...fin];

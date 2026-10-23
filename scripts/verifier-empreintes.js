@@ -8,6 +8,9 @@
 //  - corrections : preuves/corrections.json (journal public, ajout seulement) ;
 //  - journees documentees comme non verifiables, et paris ajoutes apres coup expliques :
 //    notes de preuves/corrections.json.
+// Maillons au format 3 : leurs paris doivent etre dans ces fichiers (sinon ecart), meme avant la
+// revelation du sel ; un maillon dont le sel n'est pas encore revele est liste « non verifiable
+// (sel pas encore revele) », et devient un ecart 7 jours apres la fin de sa journee (sel en retard).
 // Appele seul sur historique.json, sans le journal, le verificateur signalerait a tort les
 // maillons dont une correction publique explique l'ecart : ce script charge tout par defaut.
 //

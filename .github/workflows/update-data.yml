@@ -2488,6 +2488,12 @@ jobs:
                 // Scelle du jour incomplet : alerte (pari masque non relu, coup d'envoi deja passe, sel deja revele).
                 if(a.en_attente.length) alerteEmpreintes('Scelle incomplet','scelle du jour incomplet : '+a.en_attente.length+' pari(s) masque(s) non relu(s) ('+a.en_attente.map(function(x){return x.fixture_id;}).join(', ')+')');
                 if(a.non_scelles.length) alerteEmpreintes('Scelle incomplet',a.non_scelles.length+' pari(s) du jour declare(s) non scelle(s) : '+a.non_scelles.map(function(x){return x.fixture_id+' ('+x.raison+')';}).join(', '));
+                // D (23/10) : declare a l'heure de son coup d'envoi ou apres = erreur permanente de la verification, sauf note publique.
+                var apresCoupJour=a.non_scelles.filter(function(x){return x.apres_coup;});
+                if(apresCoupJour.length) alerteEmpreintes('Pari ajoute apres coup',apresCoupJour.length+' pari(s) du jour declare(s) a l heure de leur coup d envoi ou apres : '+apresCoupJour.map(function(x){return x.fixture_id;}).join(', ')+'. Erreur permanente sauf note « pari_non_scelle » dans '+CORRECTIONS.CHEMIN+'.');
+                // K1 (23/10) : pari sans heure de coup d'envoi, jamais scelle : anteriorite non prouvee.
+                var sansHeure=a.non_scelles.filter(function(x){return x.anteriorite_non_prouvee;});
+                if(sansHeure.length) alerteEmpreintes('Anteriorite non prouvee',sansHeure.length+' pari(s) sans heure de coup d envoi, non scelle(s) : '+sansHeure.map(function(x){return x.fixture_id;}).join(', '));
                 var decl=EMPREINTES.declarerNonScelles(registreEmp,histo.predictions,maintenantEmp,{aujourdhui:TODAY});
                 if(decl.declares){
                   var apresCoup=[];
@@ -2502,7 +2508,15 @@ jobs:
                 var majCorr=CORRECTIONS.mettreAJourJournal(journalCorr,histo.predictions,Date.now());
                 if(majCorr.ajoutees||majCorr.completees) console.log('  [corrections] '+majCorr.ajoutees+' ajoutee(s), '+majCorr.completees+' completee(s) dans '+CORRECTIONS.CHEMIN+'.');
                 // Ajout seulement : la chaine prolonge celle du dernier commit, le journal aussi.
-                var reecritures=EMPREINTES.prolonge(lectReg.avant,registreEmp).concat(CORRECTIONS.ajoutSeulement(lectCorr.avant,journalCorr));
+                // preuves/paris-scelles/ aussi (A2, 23/10) : un fichier du dernier commit supprime ou modifie = alerte, rien n'est ecrit.
+                var scellesHead={}, scellesIci={};
+                try{
+                  require('child_process').execSync('git ls-tree --name-only HEAD '+DOSSIER_SCELLES+'/',{encoding:'utf8',stdio:['ignore','pipe','ignore']}).split('\n').filter(Boolean).forEach(function(chemin){
+                    var f=chemin.split('/').pop(); var t=versionCommitee(chemin); if(t!==null) scellesHead[f]=t;
+                  });
+                }catch(e){}
+                try{ fs.readdirSync(DOSSIER_SCELLES).forEach(function(f){ scellesIci[f]=fs.readFileSync(DOSSIER_SCELLES+'/'+f,'utf8'); }); }catch(e){}
+                var reecritures=EMPREINTES.prolonge(lectReg.avant,registreEmp).concat(CORRECTIONS.ajoutSeulement(lectCorr.avant,journalCorr)).concat(EMPREINTES.dossierAjoutSeulement(scellesHead,scellesIci));
                 if(reecritures.length) alerteEmpreintes('Reecriture refusee','reecriture des preuves refusee : '+reecritures.slice(0,5).join(' ; ')+'. Rien n est ecrit ce run.');
                 else {
                 if(!fs.existsSync('preuves')) fs.mkdirSync('preuves',{recursive:true});
@@ -2543,7 +2557,12 @@ jobs:
             // deux (le 14/10 avait perdu une partie de ses paris dans ce fichier, et sa verification
             // publique tombait en « ne correspond plus » chaque matin). Une journee est gardee entiere
             // ou retiree entiere ; les journees verifiees restent dans preuves/paris-scelles/.
-            histo.predictions=EMPREINTES.fenetreJourneesEntieres(histo.predictions,500);
+            // A2 (23/10) : toute journee au format 3 pas encore figee dans preuves/paris-scelles/ reste entiere
+            // dans historique.json (sinon ses paris sortiraient des donnees publiques). Registre illisible : rien n'est coupe.
+            var registreFenetre=null, joursFiges=[];
+            try{ registreFenetre=JSON.parse(fs.readFileSync('preuves/empreintes-paris.json','utf8')); }catch(e){}
+            try{ joursFiges=fs.readdirSync('preuves/paris-scelles').filter(function(f){return /^\d{4}-\d{2}-\d{2}\.json$/.test(f);}).map(function(f){return f.slice(0,10);}); }catch(e){}
+            histo.predictions=EMPREINTES.fenetreJourneesEntieres(histo.predictions,500,{registre:registreFenetre,figees:joursFiges});
             var beforeClean=histo.predictions.length;
             histo.predictions=histo.predictions.filter(function(p){return p.type!=='combi';});
             var cleaned=beforeClean-histo.predictions.length;
@@ -5441,8 +5460,15 @@ jobs:
         # Ecart entre les paris et leurs empreintes publiees (preuves/empreintes-paris.json), chaine
         # rompue, secret absent, scelle incomplet, pari ajoute apres coup... (fichier ecrit par le
         # pipeline : une ligne « titre<TAB>message » par alerte, chaque cause avec son propre titre).
-        # APRES la publication : le run passe au rouge et GitHub envoie son e-mail d'echec.
+        # NON BLOQUANTE (23/10) : le run du calcul du matin ne passe PAS au rouge pour une alerte
+        # empreintes (« Videos IASHARK du jour » exige conclusion == success, et « Canal Telegram »
+        # annoncerait « Le calcul du matin a echoue »). L'alerte part a part : resume du run, annotations
+        # et message Telegram dedie « Alerte empreintes » dans la conversation privee de Clement.
         if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           F="$RUNNER_TEMP/iashark-empreintes-alerte.txt"
           if [ -s "$F" ]; then
@@ -5451,9 +5477,16 @@ jobs:
               echo "::error title=Empreintes des paris : $titre::$msg"
               echo "- $titre : $msg" >> "$GITHUB_STEP_SUMMARY"
             done < "$F"
-            exit 1
+            if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+              TITRES=$(cut -f1 "$F" | sort -u | paste -sd ',' - | sed 's/,/, /g')
+              N=$(wc -l < "$F" | tr -d ' ')
+              curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+                --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+                --data-urlencode "text=Alerte empreintes : ${N} alerte(s) sur les empreintes des paris (${TITRES}). Cette alerte ne bloque pas le calcul du matin. Detail : ${RUN_URL}" > /dev/null || true
+            fi
+          else
+            echo "Empreintes des paris : chaque maillon verifiable correspond aux paris."
           fi
-          echo "Empreintes des paris : chaque maillon verifiable correspond aux paris."
 
       - name: Alerte moteur v3
         # Moteur v3 allume (variable MOTEUR_V3=1) mais indisponible ce run : etape Python

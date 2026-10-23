@@ -74,10 +74,11 @@ test("accueil / outils : les cartes de match restent dans le repertoire (vraie p
   // sinon match.html?id= du repertoire (un seul repli, dans lienMatch).
   assert.equal((home.match(/esc\(lienMatch\(m\)\)|lienMatch\(featured\)/g) || []).length, 3);
   assert.equal((home.match(/lien\('match\.html\?id='\+encodeURIComponent\(/g) || []).length, 1);
-  assert.match(home, /function lienMatch\(m\)\{return \(window\.IasharkHomeList&&IasharkHomeList\.matchHref\)\?IasharkHomeList\.matchHref\(m\):lien\('match\.html\?id='/);
+  // 23/10/2026, 19 h 30 (Clement) : retour a la page match habituelle pour les visiteurs.
+  assert.match(home, /function lienMatch\(m\)\{return lien\('match\.html\?id='\+encodeURIComponent\(m\.id\)\);\}/);
   // Lignes de la liste des matchs (home-list.js) : meme regle, repli lien() du repertoire.
   const hl = read("home-list.js");
-  assert.match(hl, /:matchHref\(m,H\);/);
+  assert.match(hl, /:H\.lien\('match\.html\?id='\+encodeURIComponent\(m\.id\)\);/);
   assert.match(hl, /\(\(H&&H\.lien\)\|\|lien\)\('match\.html\?id='\+encodeURIComponent\(m\.id\)\)/);
   assert.match(hl, /m\.page_dirs\.indexOf\(dir\)===-1\)return null;/, "page d'une autre version jamais liee");
   assert.doesNotMatch(hl, /lien\('match\/'/);

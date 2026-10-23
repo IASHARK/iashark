@@ -321,7 +321,7 @@ function renderMatchRow(m,ctx,H,index){
   // Rien si le match n'a pas encore ete regle.
   var verdict=m&&m.verdict==='win'?' hl-win':m&&m.verdict==='loss'?' hl-loss':'';
   var cls='hl-row hl-grid is-'+a.state+(a.free?' is-free':'')+(cd?' cd-'+cd.kind:'')+verdict;
-  var href=(a.state==='locked'&&ctx.lockedHref==='abonnement')?H.lien('abonnement.html'):matchHref(m,H);
+  var href=(a.state==='locked'&&ctx.lockedHref==='abonnement')?H.lien('abonnement.html'):H.lien('match.html?id='+encodeURIComponent(m.id));
 
   // Indicateurs PUBLICS reels uniquement.
   var tags=[];

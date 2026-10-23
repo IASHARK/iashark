@@ -33,6 +33,10 @@ const INTERDITS = [
   // seule une mise maximale chiffree (« mise max 4 € ») est un conseil de mise.
   ["mise conseillee", /\b(?:mises?|stakes?|importe|monto)\s+(?:max(?:imum|imale)?\.?\s*(?:de\s+|of\s+)?\d|recommand\w*|conseill\w*|optimal\w*|sugerid\w*|recomendad\w*|suggested|recommended)/i],
   ["mise conseillee", /\b(?:suggested|recommended|optimal) stakes?\b|\bmise optimale\b/i],
+  // Gain en argent par somme misee = esperance affichee (avocat du diable, 23/10).
+  ["gain par somme misee", /\+\s*\d+\s*(?:€|pesos|euros?)?\s*(?:pour (?:chaque )?|for (?:every )?|por (?:cada )?)\d+\s*(?:€|pesos|euros?)?\s*(?:mis|stak|apost)/i],
+  // Le site affiche « Écart favorable » (match-page.js, proba_tag_favorable) : aucune etiquette « value ».
+  ["etiquette value", /(?:étiquette|etiqueta|label)\s*[«“"]\s*value\s*[»”"]|[«“"]\s*value\s*[»”"]\s*label/i],
 ];
 
 // Dette connue, a solder dans un chantier dedie (traduction fidele du guide
@@ -96,6 +100,24 @@ test("guides value bet et debutant : l'exemple de la cote 3.00 est juste (40 %, 
     assert.match(texte(html), re, d);
     assert.doesNotMatch(texte(html), /7 (fois sur|times out of|veces de cada) 10/, d + " : ancien exemple faux");
   });
+});
+
+test("guides : combine de 5 selections a 65 % = environ 12 % ; cote 1.60 a 70 % = 12 % au-dessus de la cote juste", () => {
+  // 0,65^5 = 0,116 : environ 12 % (et non 11 %). 1 / 0,70 = 1,43 ; 1,60 / 1,4286 = 1,12.
+  assert.ok(Math.abs(Math.pow(0.65, 5) - 0.116) < 0.001);
+  assert.ok(Math.abs(0.70 * 1.60 - 1 - 0.12) < 1e-9);
+  const combine = {
+    "blog/guides/": /n'a qu'environ 12 % de chances de passer/,
+    "en/blog/guides/": /has only about a 12% chance of coming in/,
+    "es/blog/guides/": /solo tiene alrededor de un 12 % de probabilidades/,
+    "mx/blog/guides/": /solo tiene alrededor de un 12 % de probabilidades/,
+  };
+  Object.entries(combine).forEach(([d, re]) => {
+    const t = texte(read(d + "guide-paris-sportifs-debutant-complet.html"));
+    assert.match(t, re, d);
+    assert.doesNotMatch(t, /\b11\s*%/, d + " : ancien 11 %");
+  });
+  DIRS.forEach((d) => assert.match(texte(read(d + "value-bet-guide-complet-2026.html")), /1 ÷ 0\.70 = 1\.43/, d));
 });
 
 test("page exemple d'analyse : aucune mise ni pourcentage de bankroll (demo_data.stake)", () => {

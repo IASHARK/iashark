@@ -1,3 +1,56 @@
+# Robots des moteurs de recherche et des assistants IA : autorises a lire les
+# pages publiques (recherche, citation et lecture a la demande d'un utilisateur).
+# Un groupe nomme remplace le groupe * pour son robot : chacun repete donc
+# l'interdiction de /admin.html.
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin.html
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /admin.html
+
+User-agent: GPTBot
+Allow: /
+Disallow: /admin.html
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin.html
+
+User-agent: Perplexity-User
+Allow: /
+Disallow: /admin.html
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin.html
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /admin.html
+
+User-agent: Claude-User
+Allow: /
+Disallow: /admin.html
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin.html
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin.html
+
+User-agent: Applebot
+Allow: /
+Disallow: /admin.html
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /admin.html
+
 User-agent: *
 Allow: /
 Disallow: /admin.html

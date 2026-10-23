@@ -232,6 +232,15 @@ test("le resume SEO n'est pas masque, n'est plus supprime et la page garde un se
   assert.match(js,/<h1 class="hero-teams">/);
 });
 
+// GEO/SEO (23/10/2026) : sur /match/<id>.html, le <title> statique (« X vs Y :
+// pronostic et stats », scripts/seo-pages.js) n'est plus remplace au rendu ;
+// seul match.html?id= (noindex, sans resume statique) prend le titre de l'application.
+test("le titre statique des pages match indexables n'est pas reecrit au rendu",()=>{
+  const sets=js.match(/document\.title\s*=/g)||[];
+  assert.equal(sets.length,1,"une seule ecriture de document.title");
+  assert.match(js,/if\(!resumeSeoStatique\(\)\)document\.title=`\$\{vm\.identity\.home\.name\} vs \$\{vm\.identity\.away\.name\} — IASHARK`;/);
+});
+
 // PERF (audit 15/09/2026) : logos de l'en-tete sans lazy, dimensionnes et
 // prioritaires (element LCP) ; aucun repli sur /data.json (~25 Mo).
 test("en-tete : logos dimensionnes, charges en priorite ; pas de repli data.json",()=>{

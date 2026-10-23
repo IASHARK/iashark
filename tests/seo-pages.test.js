@@ -181,6 +181,32 @@ test("page championnat : indexable sur contenu stable (classement, clubs, 14 jou
   assert.match(none.html, /No J1 League fixture is scheduled in the next 14 days/);
 });
 
+test("page championnat : « En tête » = rang 1 seulement, « Clubs » = classement complet seulement (23/10/2026)", () => {
+  // Le classement publie avec les matchs du run (source « matchs ») est souvent un
+  // EXTRAIT (ex. rangs 9 a 18) : sa premiere ligne n'est pas le leader et son nombre
+  // de lignes n'est pas le nombre de clubs. Les deux chiffres faux sont retires.
+  const today = new Date().toISOString().slice(0, 10);
+  const row = (rank) => ({ rank: rank, team_id: 9000 + rank, name: "Club " + rank, played: 9, won: 4, drawn: 2, lost: 3, gd: 0, pts: 40 - rank });
+  const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => row(a + i));
+  const kpis = (st) => {
+    const html = SEO.renderLeagueHub("ligue1", "fr", [], { data: Object.assign({}, EMPTY_HUB, { standings: st }) }).html;
+    return (html.match(/<dl class="kpis">[\s\S]*?<\/dl>/) || [""])[0];
+  };
+  const extrait = kpis({ as_of: today, source: "matchs", season: null, groups: [{ name: "Ligue 1", rows: range(9, 18) }] });
+  assert.doesNotMatch(extrait, /En tête/, "extrait sans le rang 1 : aucun leader affiche");
+  assert.doesNotMatch(extrait, /<dt>Clubs<\/dt>/, "extrait : aucun nombre de clubs");
+  const haut = kpis({ as_of: today, source: "matchs", season: null, groups: [{ name: "Ligue 1", rows: range(1, 13) }] });
+  assert.match(haut, /<dt>En tête<\/dt><dd>Club 1 · 39 pts<\/dd>/, "rang 1 present : leader exact");
+  assert.doesNotMatch(haut, /<dt>Clubs<\/dt>/, "haut de classement (13 lignes) : pas le nombre de clubs");
+  const complet = kpis({ as_of: today, source: "api-football", season: 2026, groups: [{ name: "Ligue 1", rows: range(1, 18) }] });
+  assert.match(complet, /<dt>Clubs<\/dt><dd>18<\/dd>/, "classement complet : nombre de clubs");
+  const trou = kpis({ as_of: today, source: "api-football", season: 2026, groups: [{ name: "Ligue 1", rows: range(1, 10).concat(range(12, 18)) }] });
+  assert.doesNotMatch(trou, /<dt>Clubs<\/dt>/, "rang manquant : pas de nombre de clubs");
+  const g = (n) => ({ name: "Group " + n, rows: range(1, 4) });
+  const troisGroupes = kpis({ as_of: today, source: "api-football", season: 2026, groups: [g("A"), g("B"), g("C")] });
+  assert.doesNotMatch(troisGroupes, /<dt>Clubs<\/dt>/, "3 groupes affiches : phase peut-etre tronquee, pas de nombre de clubs");
+});
+
 test("sitemaps SEO : uniquement des fichiers existants et indexables", () => {
   for (const f of ["sitemap-leagues.xml", "sitemap-matches-i18n.xml"]) {
     if (!fs.existsSync(path.join(ROOT, f))) continue;

@@ -327,8 +327,9 @@ function homeJsonLd(dir, meta) {
     "@graph": [
       { "@type": "Organization", "@id": org, name: "IASHARK", url: SITE_URL + "/",
         logo: { "@type": "ImageObject", url: SITE_URL + "/icon-512.png", width: 512, height: 512 },
-        // Comptes officiels : relient la marque a ses profils (22/09/2026).
-        sameAs: ["https://www.tiktok.com/@iashark_data", "https://t.me/iasharkdata"],
+        // Comptes officiels : relient la marque a ses profils (22/09/2026 ; X
+        // ajoute le 23/10/2026, chantier GEO : compte des e-mails du 20/10).
+        sameAs: ["https://www.tiktok.com/@iashark_data", "https://t.me/iasharkdata", "https://x.com/IASHARK1"],
         description: s.org_description },
       { "@type": "WebSite", "@id": site, name: "IASHARK", url: SITE_URL + "/", publisher: { "@id": org },
         inLanguage: DIR_CODES.map(function (d) { return DIRS[d].htmlLang; }) },

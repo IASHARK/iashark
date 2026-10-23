@@ -472,6 +472,18 @@ function hubSeason(st, L) {
   return phase;
 }
 
+// Classement complet : source api-football (jamais l'extrait publie avec un
+// match) et, dans chaque groupe affiche, des rangs 1, 2, ... n sans trou.
+// Deux groupes au plus : au-dela, les groupes affiches peuvent n'etre qu'une
+// partie de la phase (league-hub-data.js#displayGroups en garde 3).
+function hubStandingsComplete(st) {
+  if (!st || st.source !== "api-football" || !Array.isArray(st.groups) || !st.groups.length || st.groups.length > 2) return false;
+  return st.groups.every(function (g) {
+    var ranks = (g.rows || []).map(function (r) { return r && r.rank; }).sort(function (a, b) { return a - b; });
+    return ranks.length > 0 && ranks.every(function (r, i) { return r === i + 1; });
+  });
+}
+
 // renderLeagueHub(key, dir, matches, opts) : matches = matchs du run de la
 // competition ; opts = { root, now, registry, store, data } ; opts.data
 // (facultatif) remplace une partie des donnees collectees (tests).
@@ -498,7 +510,14 @@ function renderLeagueHub(key, dir, matches, opts) {
   var rgPath = fs.existsSync(path.join(C.ROOT, "legal", dir, "jeu-responsable.html")) ? "/" + dir + "/jeu-responsable.html" : null;
   var country = (L.countries || {})[key] || "", season = standingRows ? hubSeason(data.standings, L) : null;
   var groups = standingRows ? data.standings.groups : [];
-  var leader = groups.length === 1 && groups[0].rows[0] ? groups[0].rows[0] : null;
+  // Indicateurs « En tete » et « Clubs » (audit GEO/SEO du 23/10/2026) : le
+  // classement publie avec les matchs du run (source « matchs ») n'est souvent
+  // qu'un EXTRAIT autour des equipes du match (ex. rangs 9 a 18). Sa premiere
+  // ligne n'est pas le leader et son nombre de lignes n'est pas le nombre de
+  // clubs. Leader : seulement la ligne de rang 1. Clubs : seulement un
+  // classement complet (api-football, chaque groupe classe de 1 a n sans trou).
+  var leader = groups.length === 1 && groups[0].rows[0] && groups[0].rows[0].rank === 1 ? groups[0].rows[0] : null;
+  var clubCount = standingRows && hubStandingsComplete(data.standings) ? standingRows : null;
   var next = data.upcoming[0] ? new Date(data.upcoming[0].t) : null;
   var hero = '<div class="hero"><div class="hero-top">' + HUBUI.leagueLogo(lg.apiFootballId) +
     '<div class="chips">' + (country ? HUBUI.chip(country) : "") + (season ? HUBUI.chip(season) : "") + HUBUI.chip("18+", rgPath, "chip-18") + "</div></div>\n" +
@@ -507,7 +526,7 @@ function renderLeagueHub(key, dir, matches, opts) {
     '<p class="intro">' + esc(C.fill(L.scope, hubVars(key, dir))) + "</p>\n" +
     HUBUI.kpis([
       [L.kpi.leader, leader ? esc(leader.name + " · " + leader.pts + " " + L.pts) : null],
-      [L.kpi.clubs, standingRows || null],
+      [L.kpi.clubs, clubCount],
       [L.kpi.upcoming, data.upcoming.length || null],
       [L.kpi.next, next ? '<time datetime="' + isoInstant(next) + '">' + esc(hubDay(next, dir)) + "</time>" : null]
     ]) + "</div>\n";

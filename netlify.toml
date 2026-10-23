@@ -10,6 +10,15 @@
   # compte coupe pour « usage_exceeded » le 15/09).
   ignore = "bash scripts/netlify-ignore.sh"
 
+# « Pretty URLs » COUPE (audit GEO/SEO du 23/10/2026) : ce traitement de
+# Netlify reecrivait apres le build les liens du HTML publie (href="/fr/x.html"
+# devenait href='/fr/x'), alors que les canonical, les hreflang et les sitemaps
+# donnent les adresses completes en .html. Les moteurs voyaient deux adresses
+# par page. Ne PAS ajouter de 301 /x -> /x.html dans _redirects : Netlify
+# confond /x et /x.html, risque de boucle de redirections.
+[build.processing.html]
+  pretty_urls = false
+
 # /api/geo : pays / region / ville APPROXIMATIFS deduits du reseau par Netlify
 # pour les statistiques anonymes (funnel-track.js). Aucune adresse IP n'est
 # renvoyee ni stockee. Code : netlify/edge-functions/geo.ts (hors dist/).

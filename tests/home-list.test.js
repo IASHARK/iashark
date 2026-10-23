@@ -305,3 +305,24 @@ test("match offert epingle en tete tant que le visiteur n'est pas Pro (26/09/202
   const pro = HL.renderDayBody(list, ctx({ freeMatchId: 1570383, isPro: true, hasAccount: true }), helpers());
   assert.doesNotMatch(pro, /hl-offer/, "Pro : plus rien d'epingle");
 });
+
+test("lien d'une ligne : vraie page indexable de la version (page_dirs), sinon match.html?id= (23/10/2026, chantier GEO/SEO)", () => {
+  // Le pipeline pose page_dirs (scripts/match-lifecycle.js#annotateHomePages) d'apres
+  // les pages reellement ecrites. L'accueil ne lie plus match.html?id= (noindex)
+  // quand la vraie page existe, et jamais la page d'une autre version.
+  const m = base({ id: 1570383, page_dirs: ["fr", "gb", "en"] });
+  assert.equal(HL.staticMatchPath(m, "fr"), "/match/1570383.html");
+  assert.equal(HL.staticMatchPath(m, "gb"), "/gb/match/1570383.html");
+  assert.equal(HL.staticMatchPath(m, "mx"), null, "pas de page /mx/ : repli");
+  assert.equal(HL.staticMatchPath(base({ id: 1570383 }), "fr"), null, "sans page_dirs : repli");
+  assert.equal(HL.staticMatchPath(base({ id: "12a", page_dirs: ["fr"] }), "fr"), null, "identifiant invalide");
+  assert.equal(HL.staticMatchPath(m, null), null, "version inconnue : repli");
+  const H = (dir) => Object.assign(helpers(), { versionDir: () => dir, lien: (p) => "/" + (dir || "fr") + "/" + p });
+  assert.match(HL.renderMatchRow(m, ctx(), H("gb"), 0), /href="\/gb\/match\/1570383\.html"/);
+  assert.match(HL.renderMatchRow(m, ctx(), H("fr"), 0), /href="\/match\/1570383\.html"/);
+  assert.match(HL.renderMatchRow(m, ctx(), H("mx"), 0), /href="\/mx\/match\.html\?id=1570383"/);
+  // Ligne verrouillee avec lockedHref « abonnement » : toujours la page d'abonnement.
+  assert.match(HL.renderMatchRow(m, ctx({ lockedHref: "abonnement" }), H("gb"), 0), /href="\/gb\/abonnement\.html"/);
+  // Sans I18N (Node) et sans versionDir injecte : repli sur match.html?id=.
+  assert.equal(HL.matchHref(m, { lien: (p) => "/za/" + p }), "/za/match.html?id=1570383");
+});

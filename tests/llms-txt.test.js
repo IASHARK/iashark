@@ -1,0 +1,82 @@
+"use strict";
+// Chantier GEO/SEO du 23/10/2026 (actions A2 et A3), verifie sur le site
+// CONSTRUIT par scripts/build-public.js (repertoire temporaire) :
+//   - /llms.txt publie : presentation courte d'IASHARK pour les assistants IA,
+//     liens internes existants, aucun chiffre (hors adresses et « 18+ »),
+//     aucun element de la recette (memes termes interdits que la page
+//     Methodologie, tests/helpers/recette-interdite.js), aucune promesse ;
+//   - cle IndexNow publiee a la racine ;
+//   - X-Robots-Tag: noindex sur chaque match/*.json (donnees lues par les
+//     pages, jamais des documents a indexer), sans toucher aux pages match ;
+//   - netlify.toml : « Pretty URLs » coupe (liens .html conserves).
+const { test, before, after } = require("node:test");
+const assert = require("node:assert/strict");
+const fs = require("fs");
+const path = require("path");
+
+const { ROOT, buildSite } = require("./helpers/built-site.js");
+const { INTERDITS } = require("./helpers/recette-interdite.js");
+const src = (rel) => fs.readFileSync(path.join(ROOT, rel), "utf8");
+
+let site;
+before(() => { site = buildSite(); });
+after(() => { if (site) site.cleanup(); });
+const built = (rel) => fs.readFileSync(path.join(site.dir, rel), "utf8");
+const builtExists = (rel) => fs.existsSync(path.join(site.dir, rel));
+
+test("llms.txt : publie, titre IASHARK, resume, pas un bookmaker, 18+ et jeu responsable", () => {
+  assert.ok(builtExists("llms.txt"), "llms.txt absent de dist/");
+  const txt = built("llms.txt");
+  assert.equal(txt, src("llms.txt"), "copie publiee differente de la source");
+  assert.match(txt, /^# IASHARK\n\n> /, "format llms.txt : titre H1 puis resume en citation");
+  assert.match(txt, /publiées avant le coup d'envoi/);
+  assert.match(txt, /pas un bookmaker/);
+  assert.match(txt, /18\+/);
+  assert.match(txt, /https:\/\/iashark\.com\/fr\/jeu-responsable\.html/);
+  assert.match(txt, /contact@iashark\.com/);
+  assert.doesNotMatch(txt, /IAShark/, "nom de marque unique : IASHARK");
+});
+
+test("llms.txt : chaque lien interne existe dans le site construit", () => {
+  const links = Array.from(built("llms.txt").matchAll(/https:\/\/iashark\.com(\/[^\s)]*)/g)).map((m) => m[1]);
+  assert.ok(links.length >= 10, "trop peu de liens");
+  links.forEach((p) => {
+    const rel = p === "/" ? "index.html" : p.endsWith("/") ? p.slice(1) + "index.html" : p.slice(1);
+    assert.ok(builtExists(rel), p + " : page absente du site construit");
+    if (rel.endsWith(".html")) assert.doesNotMatch(built(rel).split("</head>")[0], /<meta name="robots" content="[^"]*noindex/, p + " : page en noindex");
+  });
+});
+
+test("llms.txt : aucun chiffre hors adresses, aucune recette, aucune promesse ni mise", () => {
+  const txt = built("llms.txt");
+  // Seules exceptions : adresses, e-mail, « 18+ » et le nom propre « Ligue 1 ».
+  const prose = txt.replace(/https?:\/\/[^\s)]+/g, " ").replace(/[\w.+-]+@[\w.-]+/g, " ").replace(/18\+/g, " ").replace(/\bLigue 1\b/g, " ");
+  assert.doesNotMatch(prose, /\d/, "chiffre publie dans llms.txt");
+  INTERDITS.forEach(function (pair) { assert.doesNotMatch(txt, pair[0], "llms.txt : " + pair[1]); });
+  assert.doesNotMatch(txt, /gains? garantis?|r[ée]sultats? garantis?|gagnant|prono s[uû]r|\bROI\b|rentabilit|taux de r[ée]ussite|bankroll|esp[ée]rance|\bmises? (de|conseill)|value bet|bonus/i);
+});
+
+test("cle IndexNow publiee a la racine du site construit", () => {
+  const IN = require("../scripts/indexnow-ping.js");
+  assert.ok(builtExists(IN.KEY_FILE), IN.KEY_FILE + " absent de dist/");
+  assert.equal(built(IN.KEY_FILE).trim(), IN.KEY);
+});
+
+test("_headers construit : X-Robots-Tag noindex sur chaque match/*.json, jamais sur les pages match", () => {
+  const headers = built("_headers");
+  const jsons = fs.readdirSync(path.join(site.dir, "match")).filter((f) => f.endsWith(".json"));
+  assert.ok(jsons.length > 0, "aucun match/*.json publie");
+  jsons.forEach((f) => {
+    assert.ok(headers.includes("\n/match/" + f + "\n  X-Robots-Tag: noindex\n"), f + " : noindex absent");
+  });
+  // La regle large /match/* couvre aussi les pages HTML : elle ne porte que le cache.
+  const large = headers.split("\n/match/*\n")[1].split(/\n(?=\S)/)[0];
+  assert.doesNotMatch(large, /X-Robots-Tag/);
+  assert.doesNotMatch(headers, /\n\/match\/[^\n]*\.html\n  X-Robots-Tag/);
+  // Source intacte : la regle est ajoutee a la copie publiee seulement.
+  assert.doesNotMatch(src("_headers"), /\/match\/\d+\.json/);
+});
+
+test("netlify.toml : « Pretty URLs » coupe (liens .html conserves, comme les canonical)", () => {
+  assert.match(src("netlify.toml"), /\[build\.processing\.html\]\s*\n\s*pretty_urls = false/);
+});

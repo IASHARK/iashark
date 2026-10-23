@@ -1,0 +1,57 @@
+name: indexnow
+
+# IndexNow (23/10/2026, chantier GEO/SEO) : une fois par jour, signale a Bing
+# et aux autres moteurs IndexNow les pages du site modifiees ce jour-la
+# (scripts/indexnow-ping.js : <lastmod> du jour dans les sitemaps, chaque
+# adresse verifiee en 200 en ligne avant l'envoi).
+#
+# Horaire : 06:45 UTC, apres la derniere tentative du pipeline du matin
+# (update-data.yml, 05:17 UTC) et la mise en ligne Netlify qui suit.
+# N'ecrit JAMAIS dans le depot (contents: read), ne declenche aucun
+# deploiement, ne touche pas a update-data.yml. Aucun secret : la cle IndexNow
+# est publique par conception (fichier <cle>.txt a la racine du site).
+
+on:
+  schedule:
+    - cron: '45 6 * * *'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Jour a signaler (AAAA-MM-JJ, vide = aujourd'hui UTC)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: indexnow
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout (sitemaps, script et cle uniquement)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            /sitemap*.xml
+            /scripts/indexnow-ping.js
+            /6942b659d16a7efdcdd4336da549f112.txt
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Signaler les pages du jour
+        env:
+          JOUR: ${{ github.event.inputs.date }}
+        run: |
+          if [ -n "$JOUR" ]; then
+            node scripts/indexnow-ping.js --date "$JOUR"
+          else
+            node scripts/indexnow-ping.js
+          fi

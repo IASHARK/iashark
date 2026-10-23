@@ -168,7 +168,7 @@ footer p{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--muted)
 <div class="stat-row">
   <div class="stat-box"><div class="stat-val">19</div><div class="stat-lbl">COMPÉTITIONS COUVERTES</div></div>
   <div class="stat-box"><div class="stat-val">1×</div><div class="stat-lbl">CALCUL PAR JOUR</div></div>
-  <div class="stat-box"><div class="stat-val">3 PTS</div><div class="stat-lbl">ÉCART MINIMUM POUR L'ÉTIQUETTE « VALUE »</div></div>
+  <div class="stat-box"><div class="stat-val">3 PTS</div><div class="stat-lbl">ÉCART MINIMUM POUR L'ÉTIQUETTE « ÉCART FAVORABLE »</div></div>
 </div>
 
 <h2>Ce qu'un traitement statistique <em>apporte</em></h2>
@@ -186,7 +186,7 @@ footer p{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--muted)
 <p>Le modèle estime le potentiel offensif et défensif de chaque équipe par rapport au niveau moyen de la compétition, en tempérant la saison en cours par la précédente tant que peu de matchs ont été joués. Il en déduit la probabilité de chaque score, puis de chaque marché : résultat, double chance, nombre de buts, BTTS, etc. Une correction apprise sur les saisons passées réduit les excès de confiance sur une partie des marchés. Les cotes n'entrent jamais dans ce calcul. Un modèle de langage rédige ensuite le texte d'explication : il ne calcule, ne choisit ni ne modifie aucune probabilité, cote ou marché.</p>
 
 <h3>3. Marché Retenu et Écart avec la Cote</h3>
-<p>Pour chaque match, le marché retenu est le plus probable selon le modèle parmi ceux qui atteignent une cote minimale, pas celui qui présente le plus grand écart. La probabilité du modèle est ensuite comparée à la probabilité implicite de la cote. L'étiquette « value » n'apparaît qu'à partir d'un écart de 3 points. Aucune mise n'est proposée.</p>
+<p>Pour chaque match, le marché retenu est le plus probable selon le modèle parmi ceux qui atteignent une cote minimale, pas celui qui présente le plus grand écart. La probabilité du modèle est ensuite comparée à la probabilité implicite de la cote. L'étiquette « Écart favorable » n'apparaît qu'à partir d'un écart de 3 points. Aucune mise n'est proposée.</p>
 
 <h3>4. Probabilité et Fiabilité</h3>
 <p>Chaque marché retenu affiche sa <strong>probabilité modèle</strong> (jamais calculée par l'IA générative) et, séparément, un indicateur de <strong>fiabilité</strong> (Élevée / Moyenne / Faible) : accord entre plusieurs calculs de la même issue, qualité des données disponibles et taille de l'échantillon. Une fiabilité élevée n'augmente pas la probabilité que le pari passe.</p>

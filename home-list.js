@@ -38,6 +38,26 @@ function tf(key,fb,vars){var s=String(t(key,fb));return vars?s.replace(/\{(\w+)\
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function localeTag(){return (root.I18N&&root.I18N.localeTag)?root.I18N.localeTag():'fr-FR';}
 function lien(p){return (root.I18N&&root.I18N.href)?root.I18N.href(p):'/'+p;}
+// Vraie page d'un match (audit SEO du 29/09/2026, action A1 ; remise le
+// 23/10/2026, chantier GEO : perdue au retour du site au 29/09, l'accueil liait
+// de nouveau match.html?id=, en noindex) : /match/<id>.html (francais) ou
+// /<version>/match/<id>.html, SEULEMENT si le pipeline l'a ecrite pour la
+// version du visiteur (champ public page_dirs de data-home.json, pose d'apres
+// les fichiers reellement presents : scripts/match-lifecycle.js
+// #annotateHomePages). Sinon null : l'appelant garde match.html?id=, jamais un
+// lien vers la page d'une autre version.
+function versionDir(){var I=root.I18N;try{return I?(I.linkDir?I.linkDir():I.dir)||null:null;}catch(e){return null;}}
+function staticMatchPath(m,dir){
+  if(dir===undefined)dir=versionDir();
+  if(!m||m.id==null||!/^\d{1,12}$/.test(String(m.id))||!dir||!/^[a-z]{2}$/.test(dir))return null;
+  if(!Array.isArray(m.page_dirs)||m.page_dirs.indexOf(dir)===-1)return null;
+  return dir==='fr'?'/match/'+m.id+'.html':'/'+dir+'/match/'+m.id+'.html';
+}
+// Lien d'une carte match : vraie page si elle existe, sinon match.html?id= de la version.
+function matchHref(m,H){
+  var dir=(H&&typeof H.versionDir==='function')?H.versionDir():undefined;
+  return staticMatchPath(m,dir)||((H&&H.lien)||lien)('match.html?id='+encodeURIComponent(m.id));
+}
 function reducedMotion(){return !!(root.matchMedia&&root.matchMedia('(prefers-reduced-motion: reduce)').matches);}
 
 /* ---------- Icones : jeu LUCIDE (lib/icones.js, ISC), trace d'origine, jamais
@@ -78,7 +98,8 @@ function defaultHelpers(){
     marketIdLabel:function(m){return (m&&m.market_id&&ML)?(ML.marketIdLabel||ML.marketIdLabelFr)(m.market_id,{home:m.home&&m.home.n,away:m.away&&m.away.n}):null;},
     hasReliableModelOutput:function(m){return DD?DD.hasReliableModelOutput(m):true;},
     pickFreeMatch:function(list){return FM?FM.pickFreeMatch(list,null,(root.IASHARK_MARKET&&root.IASHARK_MARKET.code)||null):null;},
-    lien:lien
+    lien:lien,
+    versionDir:versionDir
   };
 }
 // Store vide (tests, ou lib/fav-leagues.js absent) : aucune etoile allumee.
@@ -300,7 +321,7 @@ function renderMatchRow(m,ctx,H,index){
   // Rien si le match n'a pas encore ete regle.
   var verdict=m&&m.verdict==='win'?' hl-win':m&&m.verdict==='loss'?' hl-loss':'';
   var cls='hl-row hl-grid is-'+a.state+(a.free?' is-free':'')+(cd?' cd-'+cd.kind:'')+verdict;
-  var href=(a.state==='locked'&&ctx.lockedHref==='abonnement')?H.lien('abonnement.html'):H.lien('match.html?id='+encodeURIComponent(m.id));
+  var href=(a.state==='locked'&&ctx.lockedHref==='abonnement')?H.lien('abonnement.html'):matchHref(m,H);
 
   // Indicateurs PUBLICS reels uniquement.
   var tags=[];
@@ -665,5 +686,6 @@ function mount(rootEl,options){
 return {mount:mount,veilleListe:veilleListe,veilleAppel:veilleAppel,renderDateStrip:renderDateStrip,groupByLeague:groupByLeague,renderLeagueBlock:renderLeagueBlock,renderMatchRow:renderMatchRow,
   renderMine:renderMine,renderDayBody:renderDayBody,matchStarHtml:matchStarHtml,
   analysisFor:analysisFor,hasSignal:hasSignal,buildDays:buildDays,countdown:countdown,matchStatus:matchStatus,derbyName:derbyName,
-  probBandOf:probBandOf,PROB_BANDS:PROB_BANDS,defaultHelpers:defaultHelpers};
+  probBandOf:probBandOf,PROB_BANDS:PROB_BANDS,defaultHelpers:defaultHelpers,
+  staticMatchPath:staticMatchPath,matchHref:matchHref};
 });

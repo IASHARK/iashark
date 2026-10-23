@@ -1055,7 +1055,12 @@ function resumeSeoStatique(){
 function viewModel(raw){
   const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
   vm._raw=raw;
-  document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
+  // Pages statiques /match/<id>.html : leur <title> (« X vs Y : pronostic et
+  // stats », scripts/seo-pages.js) est celui que les moteurs indexent. Le
+  // reecrire au rendu remplacait ce titre pour les robots qui executent le JS
+  // (audit GEO/SEO du 23/10/2026). Seul match.html?id= (noindex) prend le titre
+  // de l'application.
+  if(!resumeSeoStatique())document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
   return vm;
 }
 

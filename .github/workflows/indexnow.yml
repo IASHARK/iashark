@@ -1,0 +1,59 @@
+name: indexnow
+
+# IndexNow (23/10/2026, chantier GEO/SEO) : une fois par jour, signale a Bing
+# et aux autres moteurs IndexNow les pages du site modifiees le jour meme ET la
+# veille (scripts/indexnow-ping.js : lit le plan du site EN LIGNE, index
+# sitemap.xml puis chaque sous-sitemap, une douzaine de requetes ; <lastmod>
+# du jour ou de la veille ; lots de 1 000 adresses au plus).
+#
+# Horaire : 09:15 UTC, bien apres la derniere tentative du pipeline du matin
+# (update-data.yml, 05:17 UTC) et la mise en ligne Netlify qui suit. La veille
+# est signalee aussi : un retard de GitHub sur ce workflow ou une mise en ligne
+# tardive ne fait perdre aucune page.
+# N'ecrit JAMAIS dans le depot (contents: read), ne declenche aucun
+# deploiement, ne touche pas a update-data.yml. Aucun secret : la cle IndexNow
+# est publique par conception (fichier <cle>.txt a la racine du site).
+
+on:
+  schedule:
+    - cron: '15 9 * * *'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Jour a signaler, avec la veille (AAAA-MM-JJ, vide = aujourd'hui UTC)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: indexnow
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout (script et cle uniquement, le plan du site est lu en ligne)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            /scripts/indexnow-ping.js
+            /6942b659d16a7efdcdd4336da549f112.txt
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Signaler les pages du jour et de la veille
+        env:
+          JOUR: ${{ github.event.inputs.date }}
+        run: |
+          if [ -n "$JOUR" ]; then
+            node scripts/indexnow-ping.js --date "$JOUR"
+          else
+            node scripts/indexnow-ping.js
+          fi

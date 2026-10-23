@@ -65,14 +65,22 @@ test("free-match : jour LOCAL du visiteur, mode historique (Paris) inchange", ()
 });
 
 // ---------------------------------------------------------------------------
-test("accueil / outils : les cartes de match restent dans le repertoire (match.html?id=)", () => {
+test("accueil / outils : les cartes de match restent dans le repertoire (vraie page de la version, sinon match.html?id=)", () => {
   const home = read("index.html");
-  assert.doesNotMatch(home, /lien\('match\/'/, "plus aucun lien vers la page statique FR /match/<id>.html");
-  // 3 depuis le 21/10/2026 : la carte du pari offert en haut de l'accueil (carteHero) s'ajoute aux deux liens d'avant.
-  assert.equal((home.match(/lien\('match\.html\?id='\+encodeURIComponent\(/g) || []).length, 3);
-  // Lignes de la liste des matchs (home-list.js) : lien() d'index.html, page match du repertoire.
-  assert.match(read("home-list.js"), /H\.lien\('match\.html\?id='\+encodeURIComponent\(m\.id\)\)/);
-  assert.doesNotMatch(read("home-list.js"), /lien\('match\/'/);
+  assert.doesNotMatch(home, /lien\('match\/'/, "jamais un lien construit vers la page statique FR /match/<id>.html");
+  // 23/10/2026 (chantier GEO/SEO) : les 3 cartes (vitrine, pari offert en haut de
+  // l'accueil, bouton principal) passent par lienMatch() -> home-list.js#matchHref :
+  // la vraie page de LA version du visiteur si le pipeline l'a ecrite (page_dirs),
+  // sinon match.html?id= du repertoire (un seul repli, dans lienMatch).
+  assert.equal((home.match(/esc\(lienMatch\(m\)\)|lienMatch\(featured\)/g) || []).length, 3);
+  assert.equal((home.match(/lien\('match\.html\?id='\+encodeURIComponent\(/g) || []).length, 1);
+  assert.match(home, /function lienMatch\(m\)\{return \(window\.IasharkHomeList&&IasharkHomeList\.matchHref\)\?IasharkHomeList\.matchHref\(m\):lien\('match\.html\?id='/);
+  // Lignes de la liste des matchs (home-list.js) : meme regle, repli lien() du repertoire.
+  const hl = read("home-list.js");
+  assert.match(hl, /:matchHref\(m,H\);/);
+  assert.match(hl, /\(\(H&&H\.lien\)\|\|lien\)\('match\.html\?id='\+encodeURIComponent\(m\.id\)\)/);
+  assert.match(hl, /m\.page_dirs\.indexOf\(dir\)===-1\)return null;/, "page d'une autre version jamais liee");
+  assert.doesNotMatch(hl, /lien\('match\/'/);
   assert.doesNotMatch(read("tools-page.js"), /lien\('match\/'/);
   ["gb", "za", "mx", "en", "fr"].forEach((d) => {
     const html = read(d + "/index.html");

@@ -27,7 +27,9 @@ const squash = (s) => String(s).replace(/[\s\u00a0\u202f\u2009]+/g, ' ').trim();
 async function freeMatchIdFromHome(page, dir) {
   await page.goto(`/${dir}/`);
   const href = await page.locator('#homeList .hl-offer a.hl-row').first().getAttribute('href');
-  return new URL(href, 'http://x').searchParams.get('id');
+  // Lien sous la forme /match/<id>.html (pages match statiques) ou match.html?id=<id>.
+  const m = String(href).match(/\/match\/(\d+)\.html/);
+  return m ? m[1] : new URL(href, 'http://x').searchParams.get('id');
 }
 // Offre Pro avec retour a ce match apres paiement (abonnement-page.js#contexteMatch).
 const proHref = (dir, id) => `/${dir}/abonnement.html?next=${encodeURIComponent(`/${dir}/match.html?id=${id}`)}`;
@@ -145,7 +147,8 @@ for (const v of VERSIONS) {
       const dict = await dictFor(v.locale);
       await page.goto(`/${v.dir}/`);
       await page.locator('#homeList .hl-offer a.hl-row').first().click();
-      await expect(page).toHaveURL(new RegExp(`/${v.dir}/match\\.html\\?id=\\d+$`));
+      // Page indexable du match (/match/<id>.html, /<version>/match/<id>.html) ou match.html?id=.
+      await expect(page).toHaveURL(new RegExp(`^[a-z]+://[^/]+(/${v.dir}/match\\.html\\?id=\\d+|${v.dir === 'fr' ? '' : '/' + v.dir}/match/\\d+\\.html)$`));
       const gate = page.locator('#matchRoot .gate');
       await expect(gate).toBeVisible();
       await expect(gate.locator('h2')).toHaveText(tr(dict, 'match_page.gate_free_title'));

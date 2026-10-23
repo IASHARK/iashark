@@ -35,6 +35,10 @@ const PUBLIC_ROOT_FILES = [
   // Preuve de propriete Google Search Console (21/09/2026) : ne jamais retirer,
   // sinon le site perd son statut de proprietaire confirme.
   "google3ed1ac764f4bc741.html",
+  // Chantier GEO/SEO du 23/10/2026 : presentation du site pour les assistants
+  // IA (llms.txt, format llmstxt.org) et cle IndexNow (publique par
+  // conception, lue par Bing ; scripts/indexnow-ping.js).
+  "llms.txt", "6942b659d16a7efdcdd4336da549f112.txt",
   "favicon.ico", "favicon-32x32.png", "favicon-512.png", "icon-192.png", "icon-512.png", "apple-touch-icon.png",
   // data.json (~13 Mo) n'est plus publie (16/09/2026, quota Netlify depasse le
   // 15/09) : aucune page, aucun script, aucune fonction ne le lit en ligne
@@ -138,7 +142,23 @@ if (CHECK_ONLY) {
     }
   }
   console.log("dist/ : " + files.size + " fichier(s) publics copies.");
+  noindexMatchJson(OUT, files);
   optimizeDist(OUT, files);
+}
+
+// Donnees JSON des pages match (match/<id>.json, lues par match-page.js) :
+// jamais indexees comme documents (audit GEO/SEO du 23/10/2026), comme
+// data-home.json. Une regle PAR FICHIER, ajoutee a dist/_headers : la regle
+// large /match/* couvre aussi les pages HTML indexables, elle ne porte que le
+// cache. Netlify applique toutes les regles qui correspondent a une adresse.
+function noindexMatchJson(outDir, published) {
+  if (!published.has("_headers")) return;
+  const jsons = Array.from(published).filter(function (r) { return /^match\/[^/]+\.json$/.test(r); }).sort();
+  if (!jsons.length) return;
+  const block = ["", "# --- GENERE par scripts/build-public.js : donnees JSON des pages match, jamais indexees."];
+  jsons.forEach(function (r) { block.push("/" + r, "  X-Robots-Tag: noindex"); });
+  fs.appendFileSync(path.join(outDir, "_headers"), block.join("\n") + "\n");
+  console.log("_headers : noindex sur " + jsons.length + " fichier(s) match/*.json.");
 }
 
 // ---------------------------------------------------------------------------

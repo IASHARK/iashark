@@ -42,9 +42,9 @@ const { PUBLIC_DIRS, RETIRED_DIRS } = require("./helpers/public-dirs.js");
 const DIRS = ALL_DIRS.filter(function (d) { return PUBLIC_DIRS.includes(d); });
 const FAMILY = { fr: "fr", en: "en", gb: "en", za: "en", es: "es", mx: "es" };
 const TITLES = {
-  fr: "Méthodologie IAShark : données, modèle, limites",
-  en: "IAShark methodology: data, model and limits",
-  es: "Metodología de IAShark: datos, modelo y límites",
+  fr: "Méthodologie IASHARK : données, modèle, limites",
+  en: "IASHARK methodology: data, model and limits",
+  es: "Metodología de IASHARK: datos, modelo y límites",
 };
 
 // Meme expression que scripts/build-public.js (notes internes retirees du HTML servi).
@@ -77,65 +77,11 @@ test("sources et pages generees : sources des 9 repertoires de _dirs, pages des 
 // plus vues du site (a-propos, accueil, landing, exemple d'analyse), verifiees
 // par le test "pages vitrine" plus bas. Assainir la seule page Methodologie ne
 // sert a rien tant que ces pages-la nomment les modeles (constat du 16/09/2026).
-const VITRINE = true;
-// Quatrieme element PARTOUT : regle appliquee aussi a l'interieur des <script>
-// de ces pages (exemple-analyse.html embarque la charge utile d'un match, dont
-// le texte redige nommait la methode de simulation). Reservee aux noms de
-// modeles et de methodes : les noms de fournisseurs apparaissent legitimement
-// dans un commentaire de code et dans l'URL du CDN qui sert les logos de
-// championnat (media.api-sports.io), qui relevent de l'infrastructure.
-const PARTOUT = true;
-const INTERDITS = [
-  // Fournisseurs de donnees / API / prestataires techniques.
-  [/API-?Football/i, "fournisseur de donnees", VITRINE],
-  [/API-?SPORTS/i, "fournisseur de donnees", VITRINE],
-  [/The Odds API/i, "fournisseur de cotes", VITRINE],
-  [/ClubElo/i, "fournisseur de donnees", VITRINE],
-  [/OpenWeatherMap/i, "fournisseur de donnees", VITRINE],
-  [/NewsAPI/i, "fournisseur de donnees", VITRINE],
-  [/Anthropic/i, "prestataire IA nomme", VITRINE],
-  [/\bClaude\b/, "modele IA nomme", VITRINE],
-  [/\bGPT\b|OpenAI/i, "modele IA nomme", VITRINE],
-  [/Supabase|Netlify|GitHub Actions/i, "brique d'infrastructure", VITRINE],
-  // Bookmakers cites comme source.
-  // « Betway Premiership » est le nom commercial du championnat sud-africain
-  // (i18n/seo/za.json), pas un bookmaker cite comme source : seule exception.
-  [/Pinnacle|Bet ?365|Betclic|Winamax|Unibet|Betway(?! Premiership)|Bwin|William Hill/i, "bookmaker source", VITRINE],
-  // Modeles et methodes statistiques.
-  [/Dixon-?Coles/i, "modele statistique nomme", VITRINE, PARTOUT],
-  [/\bPoisson\b/i, "modele statistique nomme", VITRINE, PARTOUT],
-  [/Monte[- ]?Carlo/i, "methode nommee", VITRINE, PARTOUT],
-  [/\bShin\b/, "methode nommee", VITRINE, PARTOUT],
-  [/\bKelly\b/, "methode nommee", VITRINE, PARTOUT],
-  [/\bElo\b/, "composant du moteur", VITRINE, PARTOUT],
-  // Pas VITRINE : le xG est un chiffre affiche sur toutes les pages match
-  // (match_page.unit_xg_*) ; l'interdiction vise la page qui decrit le moteur.
-  [/\bxG\b/, "feature nommee"],
-  [/isoton|isotonic|isotónic|isotonisch/i, "methode de calibration nommee", VITRINE, PARTOUT],
-  [/r[ée]gression logistique|logistic regression/i, "methode nommee", VITRINE, PARTOUT],
-  // Version du modele / identifiants techniques.
-  // Pas VITRINE : exemple-analyse.html embarque la charge utile publique reelle
-  // d'un match, dont les noms de champs (model_probability...) sont ceux de
-  // data.json. Ce sont des donnees publiees, pas la recette.
-  [/score-matrix|early-season-v\d|model_probability|pickMarketDeterministic/i, "identifiant technique"],
-  // Parametres operationnels exacts.
-  [/06:00 UTC|0 6 \* \* \*/i, "heure exacte du calcul", VITRINE],
-  [/5[  .,]?000 (simulations|fois|veces|times|volte|mal|vezes)/i, "nombre de simulations", VITRINE],
-  // Decision du 19/09/2026 (page courte et vague). Pas VITRINE : ces termes ne
-  // sont interdits que sur la page Methodologie (Stripe, par exemple, est
-  // legitimement nomme sur les pages de paiement).
-  [/Stripe/i, "prestataire de paiement nomme"],
-  [/\b(Sonnet|Haiku)\b/, "modele IA nomme"],
-  [/Dixon/i, "modele statistique nomme"],
-  [/sans marge|marge (du bookmaker )?(retir|inclus)|without (the )?(bookmaker'?s? )?margin|margin (removed|included)|sin (el )?margen|margen (retirad|incluid)|ohne (die )?Marge|margenfrei|Marge (entfernt|abgezogen|herausgerechnet)|Abzug der (Buchmacher)?[Mm]arge|senza (il )?margine|margine (rimoss|inclus)|tolto il margine|sem (a )?margem|margem (retirad|inclu[íi]d)|retirada a margem/i, "detail : marge du bookmaker retiree"],
-  [/[ck]alibr/i, "detail : calibration"],
-  [/fourchette de cotes|cote (minimale|maximale)|odds range|(minimum|maximum) (odds|price)|horquilla de cuotas|rango de momios|cuota (m[íi]nima|m[áa]xima)|momio (m[íi]nimo|m[áa]ximo)|Mindestquote|H[öo]chstquote|Quotenspanne|quota (minima|massima)|forchetta di quote|intervallo di quote|odd (m[íi]nima|m[áa]xima)|intervalo de odds/i, "detail : fourchette de cotes"],
-  [/plafond de probabilit|probability cap|tope de probabilidad|Wahrscheinlichkeitsobergrenze|Obergrenze f[üu]r die Wahrscheinlichkeit|tetto (massimo )?(di|della) probabilit|teto de probabilidade|limite m[áa]ximo de probabilidade/i, "detail : plafond de probabilite"],
-  [/s[ée]lection renforc[ée]e|stricter selection|selecci[óo]n reforzada|verst[äa]rkte Auswahl|strengere Auswahl|selezione ra?inforzata|selezione pi[ùu] esigente|sele[çc][ãa]o refor[çc]ada/i, "detail : selection renforcee"],
-  [/valeur estim[ée]e|estimated value|valor estimado|gesch[äa]tzte[nr]? Wert|valore stimato/i, "detail : regle du match offert"],
-  [/part minoritaire|minority share|parte minoritaria|parte minorit[áa]ria|quota minoritaria|Minderheitsanteil|kleineren Anteil/i, "detail : poids du modele"],
-  [/Accord des calculs|agreement between (the )?calculations|acuerdo (de|entre) (los )?c[áa]lculos|[ÜU]bereinstimmung der Berechnungen|Accordo tra i calcoli|Concord[âa]ncia dos c[áa]lculos/i, "detail : signaux de fiabilite"],
-];
+// Le troisieme element (VITRINE) etend la regle aux pages les plus vues ; le
+// quatrieme (PARTOUT) l'applique aussi a l'interieur de leurs <script>.
+// Liste dans tests/helpers/recette-interdite.js (23/10/2026 : partagee avec
+// tests/llms-txt.test.js, meme regle pour /llms.txt).
+const { INTERDITS } = require("./helpers/recette-interdite.js");
 
 test("aucun terme de la recette : fournisseurs, bookmakers, modeles, formules, parametres", () => {
   DIRS.forEach(function (d) {
@@ -206,7 +152,9 @@ test("title/meta, canonical du repertoire, JSON-LD AboutPage + Organization sans
     assert.ok(types.includes("Organization"), d + " Organization");
     assert.ok(!types.includes("Person"), d + " : aucun noeud Person");
     const org = nodes.find((n) => n["@type"] === "Organization");
-    assert.equal(org.name, "IAShark");
+    assert.equal(org.name, "IASHARK"); // nom de marque unique (23/10/2026)
+    // Chantier GEO/SEO du 23/10/2026 : une seule graphie de la marque, aucune emoticone.
+    assert.doesNotMatch(served(html), /IAShark|⚠/, d + " : ancienne graphie IAShark ou emoticone");
     assert.ok(!("legalName" in org), "legalName bloque");
     assert.doesNotMatch(JSON.stringify(blocks), /BLOCKED_DECISION/);
     assert.doesNotMatch(title + " " + desc, /prono s[uû]r|gagnant|bonus|garanti|\bsure\b|winner|guarantee|seguro|ganador|garantizado/i);
@@ -239,7 +187,7 @@ test("decisions bloquees et notes internes : en commentaire seulement, retirees 
     assert.doesNotMatch(visibleText(html), /BLOCKED_DECISION|NOTE INTERNE|\[À VALIDER|\[SUBJECT TO|\[PENDIENTE/, d);
     assert.doesNotMatch(served(html), /BLOCKED_DECISION|LEGAL REVIEW|NOTE INTERNE/, d + " : note interne restante apres build-public");
     // Editeur affiche + lien de contact existant.
-    assert.match(visibleText(html), /IAShark/);
+    assert.match(visibleText(html), /IASHARK/);
     assert.match(html, /href="mailto:contact@iashark\.com"/);
     assert.match(html, /href="mentions-legales\.html"/);
   });
@@ -271,11 +219,62 @@ test("ce que la page affirme est vrai dans le code (sans en publier les valeurs)
   assert.match(pipeline, /if\(!pickedMarket&&modelDataAvailable\)/, "l'abstention sur donnees insuffisantes n'existe plus");
   // « Les textes sont traduits automatiquement, par un outil d'IA. »
   assert.match(pipeline, /async function translateNarratives\(jobs\)/, "la traduction automatique annoncee n'existe plus");
+  // 23/10/2026 : « Exception : le jour du match, les buteurs proposes peuvent etre revus pour certains
+  // matchs : un joueur annonce absent, ou absent de la composition officielle si elle est connue a temps,
+  // en est alors retire. » (section Limites). Formulation prudente : la mise a jour depend des absences
+  // annoncees et de l'heure de publication de la composition officielle (scripts/buteurs-jour-de-match.js).
+  const buteurs = read(".github/workflows/buteurs-jour-de-match.yml");
+  assert.match(buteurs, /- cron: '[^']+'/, "la mise a jour des buteurs le jour du match n'est plus planifiee");
+  assert.match(buteurs, /run: node scripts\/buteurs-jour-de-match\.js/);
+  assert.ok(exists("scripts/buteurs-jour-de-match.js"), "script des buteurs du jour de match absent");
+  // « Seul le resultat de la veille y est rappele, gagne ou perdu » (section 4) : la ligne « Hier » de
+  // lib/preuve-hier.js, et aucun historique publie (results/ hors de dist/, scripts/build-public.js).
+  assert.match(read("lib/preuve-hier.js"), /function hierLocal\(/, "rappel de la veille absent");
+  assert.doesNotMatch(BUILD_PUBLIC.match(/const PUBLIC_DIRS = \[[^\]]*\]/)[0], /"results"/, "un historique de resultats est publie");
+  DIRS.forEach(function (d) {
+    const txt = visibleText(read(d + "/methodologie.html"));
+    assert.doesNotMatch(txt, /n'est pas pris en compte|is not taken into account|no se tienen en cuenta/, d + " : imprevus sans l'exception des buteurs");
+  });
   // 21/10/2026 (etape 5, des analyses claires) : la note « /10 » n'est plus affichee nulle part (c'etait
   // la chance du pari ecrite une deuxieme fois) ; la page ne l'annonce donc plus, dans aucune version.
   assert.doesNotMatch(read("match-page.js"), /<small>\/10<\/small>/);
   ["en", "es", "fr", "gb", "mx", "za"].map((d) => d + "/methodologie.html").concat(["de", "en", "es", "fr", "gb", "it", "mx", "pt", "za"].map((d) => "legal/" + d + "/methodologie.html"))
     .forEach((f) => assert.doesNotMatch(read(f), /6[,.]4\s?\/\s?10/, f + " annonce encore la note sur 10"));
+});
+
+// 23/10/2026 : formulations prudentes, mot pour mot, dans les 9 sources (et donc dans les pages generees).
+// Buteurs : « peuvent etre revus pour certains matchs » (jamais « sont revus », qui promettrait une mise a jour
+// systematique). Veille : « Le site ne publie aucun historique » (sans le mot interdit par le test exactitude).
+const PRUDENT = {
+  fr: ["Exception : le jour du match, les buteurs proposés peuvent être revus pour certains matchs : un joueur annoncé absent, ou absent de la composition officielle si elle est connue à temps, en est alors retiré.",
+    "Le site ne publie aucun historique de résultats ni aucun chiffre de rentabilité, et ne promet aucun gain. Seul le résultat de la veille y est rappelé, gagné ou perdu."],
+  en: ["Exception: on matchday, the suggested scorers may be reviewed for some matches: a player announced as absent, or absent from the official line-up if it is known in time, is then removed from them.",
+    "The site publishes no results history and no profitability figures, and promises no winnings. Only the previous day's result is mentioned there, won or lost."],
+  es: ["Excepción: el día del partido, los goleadores propuestos pueden revisarse en algunos partidos: un jugador anunciado como ausente, o ausente de la alineación oficial si esta se conoce a tiempo, se retira entonces de ellos.",
+    "El sitio no publica ningún historial de resultados ni ninguna cifra de rentabilidad, y no promete ninguna ganancia. Solo se recuerda en él el resultado del día anterior, ganado o perdido."],
+  de: ["Ausnahme: Am Spieltag können die vorgeschlagenen Torschützen bei einigen Spielen überprüft werden: Ein als fehlend gemeldeter Spieler oder ein Spieler, der in der offiziellen Aufstellung fehlt, sofern diese rechtzeitig bekannt ist, wird dann daraus entfernt.",
+    "Die Website veröffentlicht weder eine Ergebnishistorie noch Rentabilitätszahlen und verspricht keine Gewinne. Nur das Ergebnis des Vortags wird dort genannt, ob gewonnen oder verloren."],
+  it: ["Eccezione: il giorno della partita, i marcatori proposti possono essere rivisti per alcune partite: un giocatore annunciato assente, o assente dalla formazione ufficiale se è nota in tempo, ne viene allora tolto.",
+    "Il sito non pubblica alcuno storico dei risultati né alcun dato di redditività, e non promette alcuna vincita. Vi viene ricordato solo il risultato del giorno prima, vinto o perso."],
+  pt: ["Exceção: no dia do jogo, os marcadores propostos podem ser revistos em alguns jogos: um jogador anunciado como ausente, ou ausente do onze oficial se este for conhecido a tempo, é então retirado.",
+    "O site não publica qualquer histórico de resultados nem qualquer número de rentabilidade, e não promete qualquer ganho. Apenas o resultado da véspera é aí recordado, ganho ou perdido."],
+};
+const PRUDENT_FAMILY = { fr: "fr", en: "en", gb: "en", za: "en", es: "es", mx: "es", de: "de", it: "it", pt: "pt" };
+
+test("formulations prudentes : buteurs revus si la composition est connue a temps, seul le resultat de la veille", () => {
+  ALL_DIRS.forEach(function (d) {
+    const src = read("legal/" + d + "/methodologie.html");
+    PRUDENT[PRUDENT_FAMILY[d]].forEach(function (phrase) {
+      assert.ok(src.includes(phrase), "legal/" + d + " : phrase absente : " + phrase);
+    });
+    assert.doesNotMatch(src, /buteurs proposés sont revus|suggested scorers are reviewed|goleadores propuestos se revisan|Torschützen überprüft, wenn|marcatori proposti vengono rivisti|marcadores propostos são revistos/, "legal/" + d + " : ancienne formulation des buteurs");
+  });
+  DIRS.forEach(function (d) {
+    const txt = read(d + "/methodologie.html");
+    PRUDENT[PRUDENT_FAMILY[d]].forEach(function (phrase) {
+      assert.ok(txt.includes(phrase), d + "/methodologie.html : phrase absente (relancer scripts/build-locales.js) : " + phrase);
+    });
+  });
 });
 
 test("page courte et transparente : outil d'IA annonce (sans le nommer), longueur bornee", () => {

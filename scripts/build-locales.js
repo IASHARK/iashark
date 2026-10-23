@@ -328,6 +328,8 @@ function homeJsonLd(dir, meta) {
       { "@type": "Organization", "@id": org, name: "IASHARK", url: SITE_URL + "/",
         logo: { "@type": "ImageObject", url: SITE_URL + "/icon-512.png", width: 512, height: 512 },
         // Comptes officiels : relient la marque a ses profils (22/09/2026).
+        // Pas de compte X ici sans l'accord de Clement (21/10/2026 : « pourquoi
+        // parler de X sur le site, il ne faut pas tout melanger »).
         sameAs: ["https://www.tiktok.com/@iashark_data", "https://t.me/iasharkdata"],
         description: s.org_description },
       { "@type": "WebSite", "@id": site, name: "IASHARK", url: SITE_URL + "/", publisher: { "@id": org },

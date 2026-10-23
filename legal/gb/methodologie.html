@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IAShark methodology: data, model and limits</title>
-<meta name="description" content="Who publishes IAShark, what data is used, how the analyses work in principle, what the probabilities mean, their limits and gambling support. 18+ only.">
-<meta property="og:title" content="IAShark methodology: data, model and limits">
-<meta property="og:description" content="Who publishes IAShark, what data is used, how the analyses work in principle, what the probabilities mean, their limits and gambling support. 18+ only.">
+<title>IASHARK methodology: data, model and limits</title>
+<meta name="description" content="Who publishes IASHARK, what data is used, how the analyses work in principle, what the probabilities mean, their limits and gambling support. 18+ only.">
+<meta property="og:title" content="IASHARK methodology: data, model and limits">
+<meta property="og:description" content="Who publishes IASHARK, what data is used, how the analyses work in principle, what the probabilities mean, their limits and gambling support. 18+ only.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="en_GB">
 <link rel="canonical" href="https://iashark.com/gb/methodologie.html">
@@ -119,10 +119,10 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
   .warn-box,.highlight,.tbl-wrap,.legal-foot{background:none;box-shadow:none;border-color:#999;}
 }
 </style>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://iashark.com/#organization","name":"IAShark","alternateName":"IASHARK","url":"https://iashark.com/","logo":{"@type":"ImageObject","url":"https://iashark.com/icon-512.png","width":512,"height":512},"email":"contact@iashark.com","contactPoint":{"@type":"ContactPoint","contactType":"customer support","email":"contact@iashark.com"}},{"@type":"AboutPage","@id":"https://iashark.com/gb/methodologie.html#page","url":"https://iashark.com/gb/methodologie.html","name":"IAShark methodology: data, model and limits","description":"Who publishes IAShark, what data is used, how the analyses work in principle, what the probabilities mean, their limits and gambling support. 18+ only.","inLanguage":"en-GB","about":{"@id":"https://iashark.com/#organization"},"publisher":{"@id":"https://iashark.com/#organization"},"author":{"@id":"https://iashark.com/#organization"},"dateModified":"2026-09-19"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://iashark.com/#organization","name":"IASHARK","url":"https://iashark.com/","logo":{"@type":"ImageObject","url":"https://iashark.com/icon-512.png","width":512,"height":512},"email":"contact@iashark.com","contactPoint":{"@type":"ContactPoint","contactType":"customer support","email":"contact@iashark.com"}},{"@type":"AboutPage","@id":"https://iashark.com/gb/methodologie.html#page","url":"https://iashark.com/gb/methodologie.html","name":"IASHARK methodology: data, model and limits","description":"Who publishes IASHARK, what data is used, how the analyses work in principle, what the probabilities mean, their limits and gambling support. 18+ only.","inLanguage":"en-GB","about":{"@id":"https://iashark.com/#organization"},"publisher":{"@id":"https://iashark.com/#organization"},"author":{"@id":"https://iashark.com/#organization"},"dateModified":"2026-10-23"}]}</script>
 <link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
 <body>
-<!-- BLOCKED_DECISION: IDENTITE_LEGALE. Publisher legal name, company number and address not published yet (legal/README.md). Shown meanwhile: "IAShark" and the existing contact address. No legalName in JSON-LD. -->
+<!-- BLOCKED_DECISION: IDENTITE_LEGALE. Publisher legal name, company number and address not published yet (legal/README.md). Shown meanwhile: "IASHARK" and the existing contact address. No legalName in JSON-LD. -->
 <!-- BLOCKED_DECISION: NOM_RESPONSABLE_EDITORIAL. Name of the editor in charge not decided. No Person node in JSON-LD until decided. -->
 <!-- NOTE INTERNE: NIVEAU_DE_DIVULGATION. Owner decision of 19/09/2026 (following the one of 16/09/2026: the principle, never the recipe): this page is deliberately SHORT and VAGUE. Never republish here the names of data providers, source bookmakers, the AI tool or other suppliers, names of statistical models or methods, formulas, weights, thresholds, odds ranges, window sizes, calibration details, the stricter-selection or free-match rules, or the reliability signals. It must always state: who publishes; that texts are written and translated with an AI tool; that probabilities are estimates, never guarantees; 18+ and a help resource. Actual implementation: lib/decision.js, lib/engine.js, .github/workflows/update-data.yml. Automatic guard: tests/methodology-page.test.js. -->
 <!-- LEGAL REVIEW: content in REVIEW, not APPROVED. To check: AI tool mentioned without naming the supplier, and the sentence about texts not being reviewed one by one before publication (AI transparency); market-specific gambling messages. No results section and no performance figures (owner decision: no public record). -->
@@ -142,20 +142,20 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="methodologie.html" aria-current="page">Methodology</a>
   </nav>
   <h1 class="page-title">Methodology</h1>
-  <div class="page-date">Last updated: 19 September 2026</div>
+  <div class="page-date">Last updated: 23 October 2026</div>
 
   <div class="warn-box">
-    <p>⚠️ IASHARK IS NOT A BOOKMAKER: WE DO NOT ACCEPT, PLACE OR TAKE BETS. OUR ANALYSES ARE STATISTICAL ESTIMATES — NO OUTCOME OR WINNINGS ARE GUARANTEED.<br>GAMBLING CAN CAUSE HARM. FREE, CONFIDENTIAL SUPPORT 24/7: NATIONAL GAMBLING HELPLINE <a href="tel:+448088020133">0808 8020 133</a>.<br>18+ ONLY.</p>
+    <p>IASHARK IS NOT A BOOKMAKER: WE DO NOT ACCEPT, PLACE OR TAKE BETS. OUR ANALYSES ARE STATISTICAL ESTIMATES — NO OUTCOME OR WINNINGS ARE GUARANTEED.<br>GAMBLING CAN CAUSE HARM. FREE, CONFIDENTIAL SUPPORT 24/7: NATIONAL GAMBLING HELPLINE <a href="tel:+448088020133">0808 8020 133</a>.<br>18+ ONLY.</p>
   </div>
 
   <section class="section">
-    <p>IAShark publishes statistical analyses of football matches that are produced automatically. This page explains the principle: who publishes them, what data they use, how to read the figures and what their limits are. Details of sources, calculations and settings are not published.</p>
+    <p>IASHARK publishes statistical analyses of football matches that are produced automatically. This page explains the principle: who publishes them, what data they use, how to read the figures and what their limits are. Details of sources, calculations and settings are not published.</p>
     <p><strong>For information only.</strong> The service is for people aged 18 and over. Betting carries financial risk and can become addictive.</p>
   </section>
   <section class="section">
-    <h2>1. Who publishes IAShark</h2>
-    <ul><li><strong>Website:</strong> iashark.com</li><li><strong>Publisher:</strong> IAShark</li><li><strong>Contact:</strong> <a href="mailto:contact@iashark.com">contact@iashark.com</a></li><li><strong>Legal information:</strong> <a href="mentions-legales.html">Legal notice</a></li></ul>
-    <p>IAShark is not a betting operator or a bookmaker. The site takes no bets, runs no player accounts and pays out no winnings. IAShark holds no gambling licence of any kind. The analyses are statistical estimates published for information. They are not financial advice and not an invitation to bet.</p>
+    <h2>1. Who publishes IASHARK</h2>
+    <ul><li><strong>Website:</strong> iashark.com</li><li><strong>Publisher:</strong> IASHARK</li><li><strong>Contact:</strong> <a href="mailto:contact@iashark.com">contact@iashark.com</a></li><li><strong>Legal information:</strong> <a href="mentions-legales.html">Legal notice</a></li></ul>
+    <p>IASHARK is not a betting operator or a bookmaker. The site takes no bets, runs no player accounts and pays out no winnings. IASHARK holds no gambling licence of any kind. The analyses are statistical estimates published for information. They are not financial advice and not an invitation to bet.</p>
   </section>
   <section class="section">
     <h2>2. The data we use</h2>
@@ -169,11 +169,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
   <section class="section">
     <h2>4. What the figures mean</h2>
     <p>A probability is an estimate, never a promise. 60% means that, over a large number of comparable matches, the outcome should happen about 6 times in 10, and so fail to happen about 4 times in 10.</p>
-    <p>IAShark publishes no results history and no profitability figures, and promises no winnings.</p>
+    <p>The site publishes no results history and no profitability figures, and promises no winnings. Only the previous day's result is mentioned there, won or lost.</p>
   </section>
   <section class="section">
     <h2>5. Limits</h2>
-    <ul><li><strong>The unexpected.</strong> Analyses are calculated in advance, once a day, and are not rerun just before kick-off. A late injury, an unexpected line-up or any other surprise is not taken into account. Always check the official line-ups.</li><li><strong>Small samples.</strong> Early in the season, or for a newly promoted team, few matches are available, so the estimates are less certain.</li><li><strong>No call.</strong> No option is highlighted for a match that has already started or when the data is insufficient.</li><li><strong>AI-written texts.</strong> They are not reviewed one by one before publication and may contain errors of interpretation. If they differ from the figures shown, the figures prevail.</li><li><strong>Chance.</strong> Football remains highly unpredictable: losing runs happen even when the estimates are right. Never stake money you need.</li><li><strong>No betting on this site.</strong> IAShark publishes analyses: the site takes no bets.</li></ul>
+    <ul><li><strong>The unexpected.</strong> Analyses are calculated in advance, once a day, and are not rerun just before kick-off. A late injury, an unexpected line-up or any other surprise changes neither the calculated chances nor the highlighted option. Exception: on matchday, the suggested scorers may be reviewed for some matches: a player announced as absent, or absent from the official line-up if it is known in time, is then removed from them. Always check the official line-ups.</li><li><strong>Small samples.</strong> Early in the season, or for a newly promoted team, few matches are available, so the estimates are less certain.</li><li><strong>No call.</strong> No option is highlighted for a match that has already started or when the data is insufficient.</li><li><strong>AI-written texts.</strong> They are not reviewed one by one before publication and may contain errors of interpretation. If they differ from the figures shown, the figures prevail.</li><li><strong>Chance.</strong> Football remains highly unpredictable: losing runs happen even when the estimates are right. Never stake money you need.</li><li><strong>No betting on this site.</strong> IASHARK publishes analyses: the site takes no bets.</li></ul>
   </section>
   <section class="section">
     <h2>6. Safer gambling</h2>

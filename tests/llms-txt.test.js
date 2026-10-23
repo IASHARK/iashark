@@ -5,6 +5,9 @@
 //     liens internes existants, aucun chiffre (hors adresses et « 18+ »),
 //     aucun element de la recette (memes termes interdits que la page
 //     Methodologie, tests/helpers/recette-interdite.js), aucune promesse ;
+//     calendrier et limites repris mot pour mot de la Methodologie validee
+//     (« calculees a l'avance, une fois par jour », textes IA non relus un
+//     par un) ;
 //   - cle IndexNow publiee a la racine ;
 //   - X-Robots-Tag: noindex sur chaque match/*.json (donnees lues par les
 //     pages, jamais des documents a indexer), sans toucher aux pages match ;
@@ -29,12 +32,32 @@ test("llms.txt : publie, titre IASHARK, resume, pas un bookmaker, 18+ et jeu res
   const txt = built("llms.txt");
   assert.equal(txt, src("llms.txt"), "copie publiee differente de la source");
   assert.match(txt, /^# IASHARK\n\n> /, "format llms.txt : titre H1 puis resume en citation");
-  assert.match(txt, /publiées avant le coup d'envoi/);
+  assert.match(txt, /calculées à l'avance, une fois par jour/);
+  assert.doesNotMatch(txt, /publi[ée]e?s? avant (le coup d'envoi|les matchs)/, "formulation remplacee par celle de la methodologie");
   assert.match(txt, /pas un bookmaker/);
   assert.match(txt, /18\+/);
   assert.match(txt, /https:\/\/iashark\.com\/fr\/jeu-responsable\.html/);
   assert.match(txt, /contact@iashark\.com/);
   assert.doesNotMatch(txt, /IAShark/, "nom de marque unique : IASHARK");
+});
+
+test("llms.txt : limites reprises mot pour mot de la page Methodologie validee", () => {
+  const txt = built("llms.txt");
+  const methodo = src("legal/fr/methodologie.html");
+  // Formulations deja validees (legal/fr/methodologie.html, section Limites).
+  [
+    "Les analyses sont calculées à l'avance, une fois par jour, et ne sont pas refaites juste avant le coup d'envoi.",
+    "Une blessure de dernière minute, une composition inattendue ou tout autre imprévu n'est pas pris en compte.",
+    "ne sont pas relus un par un avant publication et peuvent contenir des erreurs d'interprétation.",
+    "En cas de différence, ce sont les chiffres affichés qui font foi.",
+  ].forEach(function (phrase) {
+    assert.ok(txt.includes(phrase), "llms.txt : limite absente : " + phrase);
+    assert.ok(methodo.includes(phrase), "methodologie : phrase introuvable (formulation modifiee ?) : " + phrase);
+  });
+  assert.match(txt, /Les textes rédigés par IA ne sont pas relus un par un avant publication/);
+  // Le plan du site ne liste que les pages a indexer, pas « toutes les pages publiques ».
+  assert.match(txt, /\(https:\/\/iashark\.com\/sitemap\.xml\) : les pages à indexer/);
+  assert.doesNotMatch(txt, /toutes les pages publiques/);
 });
 
 test("llms.txt : chaque lien interne existe dans le site construit", () => {

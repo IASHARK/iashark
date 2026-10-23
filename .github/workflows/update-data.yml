@@ -5464,6 +5464,7 @@ jobs:
         # empreintes (« Videos IASHARK du jour » exige conclusion == success, et « Canal Telegram »
         # annoncerait « Le calcul du matin a echoue »). L'alerte part a part : resume du run, annotations
         # et message Telegram dedie « Alerte empreintes » dans la conversation privee de Clement.
+        # curl --max-time 20 : une API Telegram figee ne garde plus le job jusqu'a son annulation.
         if: always()
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -5480,7 +5481,7 @@ jobs:
             if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
               TITRES=$(cut -f1 "$F" | sort -u | paste -sd ',' - | sed 's/,/, /g')
               N=$(wc -l < "$F" | tr -d ' ')
-              curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              curl -sS --max-time 20 -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
                 --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
                 --data-urlencode "text=Alerte empreintes : ${N} alerte(s) sur les empreintes des paris (${TITRES}). Cette alerte ne bloque pas le calcul du matin. Detail : ${RUN_URL}" > /dev/null || true
             fi

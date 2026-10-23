@@ -90,14 +90,20 @@ test("empreinte : chainee, stable, scellee une fois, jamais sur des paris masque
   // Sel : sans lui, l'empreinte ne se recalcule pas ; revele, elle se verifie sur les paris.
   assert.equal(reg.chaine[0].sel_revele, undefined);
   assert.equal(E.revelerSels(reg, "secret", "2026-10-03"), 1);
-  assert.equal(E.verifier(reg, preds).ok, true);
-  assert.deepEqual(E.verifier(reg, preds).verifies, [1]);
+  // Pari du 02/10 : aucun maillon ce jour-la, avant le premier jour au format 3 -> pari hors chaine
+  // (controle du mathematicien du 23/10, N3 : avant, il etait ignore en silence).
+  const v = E.verifier(reg, preds);
+  assert.equal(v.ok, false);
+  assert.deepEqual(v.erreurs, ["pari hors chaine 9 (2026-10-02) : aucun maillon ce jour-la, avant le premier jour au format 3 (2026-10-03), jamais scelle"]);
+  const duJour = preds.filter((p) => p.date === "2026-10-03");
+  assert.equal(E.verifier(reg, duJour).ok, true);
+  assert.deepEqual(E.verifier(reg, duJour).verifies, [1]);
   // Pari modifie apres coup : detecte.
-  const triche = preds.map((p) => Object.assign({}, p)); triche[1].cote = 1.9;
+  const triche = duJour.map((p) => Object.assign({}, p)); triche[1].cote = 1.9;
   assert.equal(E.verifier(reg, triche).ok, false);
   // Probabilite annoncee retouchee apres coup (contre-controle, 30/09/2026) : detectee aussi.
   assert.ok(E.CHAMPS.includes("model_probability"));
-  const proba = preds.map((p) => Object.assign({}, p)); proba[1].model_probability = 71;
+  const proba = duJour.map((p) => Object.assign({}, p)); proba[1].model_probability = 71;
   assert.equal(E.verifier(reg, proba).ok, false);
   // Maillon retouche : chaine rompue.
   const casse = JSON.parse(JSON.stringify(reg)); casse.chaine[0].nb_paris = 5;

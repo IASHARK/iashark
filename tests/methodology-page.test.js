@@ -219,9 +219,10 @@ test("ce que la page affirme est vrai dans le code (sans en publier les valeurs)
   assert.match(pipeline, /if\(!pickedMarket&&modelDataAvailable\)/, "l'abstention sur donnees insuffisantes n'existe plus");
   // « Les textes sont traduits automatiquement, par un outil d'IA. »
   assert.match(pipeline, /async function translateNarratives\(jobs\)/, "la traduction automatique annoncee n'existe plus");
-  // 23/10/2026 : « Exception : le jour du match, les buteurs proposes peuvent etre revus si la composition
-  // officielle est connue a temps ; un joueur absent en est alors retire. » (section Limites). Formulation
-  // prudente : la mise a jour depend de l'heure de publication de la composition officielle.
+  // 23/10/2026 : « Exception : le jour du match, les buteurs proposes peuvent etre revus pour certains
+  // matchs : un joueur annonce absent, ou absent de la composition officielle si elle est connue a temps,
+  // en est alors retire. » (section Limites). Formulation prudente : la mise a jour depend des absences
+  // annoncees et de l'heure de publication de la composition officielle (scripts/buteurs-jour-de-match.js).
   const buteurs = read(".github/workflows/buteurs-jour-de-match.yml");
   assert.match(buteurs, /- cron: '[^']+'/, "la mise a jour des buteurs le jour du match n'est plus planifiee");
   assert.match(buteurs, /run: node scripts\/buteurs-jour-de-match\.js/);
@@ -242,20 +243,20 @@ test("ce que la page affirme est vrai dans le code (sans en publier les valeurs)
 });
 
 // 23/10/2026 : formulations prudentes, mot pour mot, dans les 9 sources (et donc dans les pages generees).
-// Buteurs : « peuvent etre revus si ... a temps » (jamais « sont revus », qui promettrait une mise a jour
+// Buteurs : « peuvent etre revus pour certains matchs » (jamais « sont revus », qui promettrait une mise a jour
 // systematique). Veille : « Le site ne publie aucun historique » (sans le mot interdit par le test exactitude).
 const PRUDENT = {
-  fr: ["Exception : le jour du match, les buteurs proposés peuvent être revus si la composition officielle est connue à temps ; un joueur absent en est alors retiré.",
+  fr: ["Exception : le jour du match, les buteurs proposés peuvent être revus pour certains matchs : un joueur annoncé absent, ou absent de la composition officielle si elle est connue à temps, en est alors retiré.",
     "Le site ne publie aucun historique de résultats ni aucun chiffre de rentabilité, et ne promet aucun gain. Seul le résultat de la veille y est rappelé, gagné ou perdu."],
-  en: ["Exception: on matchday, the suggested scorers may be reviewed if the official line-up is known in time; an absent player is then removed from them.",
+  en: ["Exception: on matchday, the suggested scorers may be reviewed for some matches: a player announced as absent, or absent from the official line-up if it is known in time, is then removed from them.",
     "The site publishes no results history and no profitability figures, and promises no winnings. Only the previous day's result is mentioned there, won or lost."],
-  es: ["Excepción: el día del partido, los goleadores propuestos pueden revisarse si la alineación oficial se conoce a tiempo; en ese caso, se retira a cualquier jugador ausente.",
+  es: ["Excepción: el día del partido, los goleadores propuestos pueden revisarse en algunos partidos: un jugador anunciado como ausente, o ausente de la alineación oficial si esta se conoce a tiempo, se retira entonces de ellos.",
     "El sitio no publica ningún historial de resultados ni ninguna cifra de rentabilidad, y no promete ninguna ganancia. Solo se recuerda en él el resultado del día anterior, ganado o perdido."],
-  de: ["Ausnahme: Am Spieltag können die vorgeschlagenen Torschützen überprüft werden, wenn die offizielle Aufstellung rechtzeitig bekannt ist; ein fehlender Spieler wird dann daraus entfernt.",
+  de: ["Ausnahme: Am Spieltag können die vorgeschlagenen Torschützen bei einigen Spielen überprüft werden: Ein als fehlend gemeldeter Spieler oder ein Spieler, der in der offiziellen Aufstellung fehlt, sofern diese rechtzeitig bekannt ist, wird dann daraus entfernt.",
     "Die Website veröffentlicht weder eine Ergebnishistorie noch Rentabilitätszahlen und verspricht keine Gewinne. Nur das Ergebnis des Vortags wird dort genannt, ob gewonnen oder verloren."],
-  it: ["Eccezione: il giorno della partita, i marcatori proposti possono essere rivisti se la formazione ufficiale è nota in tempo; un giocatore assente ne viene allora tolto.",
+  it: ["Eccezione: il giorno della partita, i marcatori proposti possono essere rivisti per alcune partite: un giocatore annunciato assente, o assente dalla formazione ufficiale se è nota in tempo, ne viene allora tolto.",
     "Il sito non pubblica alcuno storico dei risultati né alcun dato di redditività, e non promette alcuna vincita. Vi viene ricordato solo il risultato del giorno prima, vinto o perso."],
-  pt: ["Exceção: no dia do jogo, os marcadores propostos podem ser revistos se o onze oficial for conhecido a tempo; um jogador ausente é então retirado.",
+  pt: ["Exceção: no dia do jogo, os marcadores propostos podem ser revistos em alguns jogos: um jogador anunciado como ausente, ou ausente do onze oficial se este for conhecido a tempo, é então retirado.",
     "O site não publica qualquer histórico de resultados nem qualquer número de rentabilidade, e não promete qualquer ganho. Apenas o resultado da véspera é aí recordado, ganho ou perdido."],
 };
 const PRUDENT_FAMILY = { fr: "fr", en: "en", gb: "en", za: "en", es: "es", mx: "es", de: "de", it: "it", pt: "pt" };

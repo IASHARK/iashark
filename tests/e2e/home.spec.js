@@ -9,6 +9,10 @@ const { tr } = require('./helpers/site-data');
 
 const FAV_KEY = 'iashark.favLeagues.v1';
 const FAV_MATCHES_KEY = 'iashark.favMatches.v1';
+// Lien d'un match dans la version : sa page indexable (/match/<id>.html pour fr,
+// /<version>/match/<id>.html ailleurs, home-list.js#staticMatchPath) ou, a defaut,
+// <version>/match.html?id=<id> (chantier GEO/SEO du 23/10/2026).
+const matchPathRe = (dir) => new RegExp(`^(/${dir}/match\\.html\\?id=\\d+|${dir === 'fr' ? '' : '/' + dir}/match/\\d+\\.html)$`);
 
 // Ligne verrouillee : aucun chiffre, aucune jauge, aucun marche, aucune note.
 async function expectLockedRowsClean(page) {
@@ -41,10 +45,10 @@ for (const v of VERSIONS) {
       await test.step('match offert : epingle en tete de la liste, lien dans la version', async () => {
         const offer = page.locator('#homeList .hl-offer a.hl-row');
         await expect(offer).toHaveCount(1);
-        expect(pathOf(await offer.getAttribute('href'), baseURL)).toMatch(new RegExp(`^/${v.dir}/match\\.html\\?id=\\d+$`));
+        expect(pathOf(await offer.getAttribute('href'), baseURL)).toMatch(matchPathRe(v.dir));
         await expect(page.locator('#heroFeature')).toHaveCount(0);
         const cta = page.locator('a.hero-cta').first();
-        await expect(cta).toHaveAttribute('href', new RegExp(`^/${v.dir}/match\\.html\\?id=\\d+$`));
+        await expect(cta).toHaveAttribute('href', matchPathRe(v.dir));
       });
 
       await test.step('liste des matchs : titre traduit, lignes rendues, liens dans la version', async () => {
@@ -52,7 +56,7 @@ for (const v of VERSIONS) {
         const rows = page.locator('#homeList a.hl-row');
         await expect(rows.first()).toBeVisible();
         const hrefs = await rows.evaluateAll((els) => els.map((a) => a.getAttribute('href')));
-        for (const h of hrefs) expect(pathOf(h, baseURL), 'lien de ligne hors version').toMatch(new RegExp(`^/${v.dir}/match\\.html\\?id=\\d+$`));
+        for (const h of hrefs) expect(pathOf(h, baseURL), 'lien de ligne hors version').toMatch(matchPathRe(v.dir));
         await expectLockedRowsClean(page);
         // conf et tout champ premium : absents des donnees chargees par la page (match non offert).
         const leaked = await page.evaluate(() => (window.allMatchs || []).filter((m) => m && m.is_free !== true && ('conf' in m || 'pari_rec' in m || 'model_probability' in m)).map((m) => m.id));
@@ -118,7 +122,7 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb', 'mx'].includes(x.dir))) {
       await expect(row.locator('.hl-lockpill')).toBeAttached();
       expect(await row.getAttribute('aria-label'), 'etat verrouille annonce au lecteur d\'ecran').toContain(tr(dict, 'home_list.aria_locked'));
       await expect(row).toHaveAttribute('data-track-kind', 'home_row_lock');
-      expect(pathOf(await row.getAttribute('href'), baseURL), 'ligne verrouillee -> page match (mur Pro)').toMatch(new RegExp(`^/${v.dir}/match\\.html\\?id=\\d+$`));
+      expect(pathOf(await row.getAttribute('href'), baseURL), 'ligne verrouillee -> page match (mur Pro)').toMatch(matchPathRe(v.dir));
       // Accueil simplifie : ni banniere « X analyses pretes », ni recherche, ni filtres, ni bloc favoris separe.
       await expect(page.locator('#homeList .hl-banner, #homeList .hl-search, #homeList .hl-chips, #homeList .hl-block')).toHaveCount(0);
       // Etoile sur chaque competition et sur chaque match.
@@ -132,7 +136,7 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb', 'mx'].includes(x.dir))) {
       // de la page match) : « Analyse offerte · Compte gratuit », ni pari ni note, et
       // la vitrine invite a creer un compte gratuit.
       const freeId = await page.evaluate(() => window.freeMatchId);
-      const freeRow = page.locator(`#homeList a.hl-row[href$="match.html?id=${freeId}"]`);
+      const freeRow = page.locator(`#homeList a.hl-row[href$="match.html?id=${freeId}"], #homeList a.hl-row[href$="/match/${freeId}.html"]`);
       if (await freeRow.count()) {
         await expect(freeRow.first()).toHaveClass(/is-free/);
         await expect(freeRow.first()).toHaveClass(/is-gated/);

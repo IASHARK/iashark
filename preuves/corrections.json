@@ -5,12 +5,18 @@
     {
       "jour": "2026-10-19",
       "ecrit_le": "2026-10-23",
-      "texte": "Journee du 19/10/2026 : la version du moteur inscrite sur 3 paris publies ce jour-la (Inter - Shakhtar Donetsk, Real Madrid - RB Leipzig, Sporting CP - Lask Linz) a ete reecrite deux fois le 21/10, avant leur coup d'envoi, par le programme qui realigne un pari en attente sur le pari publie. Le pronostic, la cote, la chance et le marche de ces paris n'ont pas change : en remettant la version du moteur d'origine (entrees ci-dessous), les deux empreintes de cette journee (maillons 40 et 41 de preuves/empreintes-paris.json) correspondent aux paris publies. Le maillon 41 avait ete calcule avec la cote ecrite en texte au lieu d'un nombre ; la valeur est la meme. Le meme programme a reecrit de la meme facon la version du moteur du pari FC Midtjylland - St. Truiden, publie le 20/10 : sa journee pourra etre verifiee de la meme maniere quand tous ses paris seront regles et publics. Depuis le 23/10/2026, la version du moteur est figee a la premiere publication d'un pari."
+      "texte": "Journee du 19/10/2026 : la version du moteur inscrite sur 3 paris publies ce jour-la (Inter - Shakhtar Donetsk, Real Madrid - RB Leipzig, Sporting CP - Lask Linz) a ete reecrite deux fois le 21/10, avant leur coup d'envoi, par le programme qui realigne un pari en attente sur le pari publie. Le pronostic, la cote, la chance et le marche de ces paris n'ont pas change : en remettant la version du moteur d'origine (entrees ci-dessous), les deux empreintes de cette journee (maillons 40 et 41 de preuves/empreintes-paris.json) correspondent aux paris publies. Le maillon 41 avait ete calcule avec la cote ecrite en texte au lieu d'un nombre ; la valeur est la meme. Le meme programme a aussi reecrit la version du moteur du pari FC Midtjylland - St. Truiden, publie le 20/10 (entrees ci-dessous). Que le reste de ce pari n'ait pas change n'est pas encore prouve publiquement : sa journee du 20/10 ne pourra etre verifiee que lorsque tous ses paris seront publics. Depuis la mise en service du format 3 des empreintes (premier maillon portant format: 3 dans preuves/empreintes-paris.json), la version du moteur est figee a la premiere publication d'un pari."
     },
     {
       "jour": "2026-10-14",
       "ecrit_le": "2026-10-23",
-      "texte": "Journee du 14/10/2026 : deux paris annules (matchs reportes) sont restes masques dans historique.json, puis la limite de 500 paris de ce fichier en a retire une partie. Les empreintes de cette journee (maillons 30 et 31) n'ont donc pas pu etre verifiees publiquement : cela ne prouve ni une modification de ces paris, ni leur integrite. Depuis le 23/10/2026, le pari d'un match reporte redevient public apres l'heure prevue du match, la limite de historique.json ne coupe plus une journee en deux, et chaque journee verifiee est figee dans preuves/paris-scelles/."
+      "texte": "Journee du 14/10/2026 : deux paris annules (matchs reportes) sont restes masques dans historique.json, puis la limite de 500 paris de ce fichier en a retire une partie. Les empreintes de cette journee (maillons 30 et 31) n'ont donc pas pu etre verifiees publiquement : cela ne prouve ni une modification de ces paris, ni leur integrite. Depuis la mise en service du format 3 des empreintes (premier maillon portant format: 3), le pari d'un match reporte redevient public apres l'heure prevue du match, la limite de historique.json ne coupe plus une journee en deux, et chaque journee verifiee est figee dans preuves/paris-scelles/.",
+      "journee_non_verifiable": true
+    },
+    {
+      "jour": "2026-10-03",
+      "ecrit_le": "2026-10-23",
+      "texte": "Perimetre verifiable : les maillons 1 a 29 de preuves/empreintes-paris.json (journees du 03/10 au 13/10/2026) ne peuvent plus etre verifies publiquement, car les paris de ces journees ne sont plus dans historique.json ni dans preuves/paris-scelles/. Cela ne prouve ni une modification de ces paris, ni leur integrite. La verification publique porte sur les journees encore presentes dans ces fichiers (a partir du 15/10/2026), une fois leurs paris regles et le sel de la journee revele. Le maillon 30 et le maillon 31 (14/10) sont expliques par la note du 14/10."
     }
   ],
   "corrections": [
@@ -166,7 +172,7 @@
       "match": "FC Midtjylland - St. Truiden",
       "apres": "2026-10-20T05:38:23Z",
       "au_plus_tard": "2026-10-21T05:39:51.616Z",
-      "motif": "version du moteur reecrite avant le coup d'envoi par le realignement d'un pari en attente (lib/pick-freeze.js#alignPendingPrediction), pari inchange",
+      "motif": "version du moteur reecrite avant le coup d'envoi par le realignement d'un pari en attente (lib/pick-freeze.js#alignPendingPrediction)",
       "champs": [
         "moteur",
         "moteur_version"
@@ -190,7 +196,7 @@
       "match": "FC Midtjylland - St. Truiden",
       "apres": "2026-10-21T05:41:00Z",
       "au_plus_tard": "2026-10-21T15:02:45.530Z",
-      "motif": "version du moteur reecrite avant le coup d'envoi par le realignement d'un pari en attente (lib/pick-freeze.js#alignPendingPrediction), pari inchange",
+      "motif": "version du moteur reecrite avant le coup d'envoi par le realignement d'un pari en attente (lib/pick-freeze.js#alignPendingPrediction)",
       "champs": [
         "moteur",
         "moteur_version"

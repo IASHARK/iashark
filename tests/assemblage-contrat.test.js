@@ -130,8 +130,9 @@ test("qui ouvre le score, avant la pause, minute mediane, premiers buteurs, Et s
 test("film du match : tr, tr_dom, tr_ext du pipeline en pourcentages entiers", () => {
   const v = AVEC_GRILLE[0];
   const m = matchPipeline(v, null);
-  m.events_home = { games: 20, slots: [3, 4, 3, 8, 1, 6].map((n) => ({ n })), slots_against: [4, 2, 3, 7, 7, 5].map((n) => ({ n })) };
-  m.events_away = { games: 20, slots: [2, 3, 3, 4, 5, 6].map((n) => ({ n })), slots_against: [3, 3, 4, 4, 4, 5].map((n) => ({ n })) };
+  // Comptes controles par le pipeline (lib/film-du-match.js, 24/10/2026) : seuls ceux-la font un film.
+  m.events_home = { games: 20, controle_score: true, perimetre: "championnat", slots: [3, 4, 3, 8, 1, 6].map((n) => ({ n })), slots_against: [4, 2, 3, 7, 7, 5].map((n) => ({ n })) };
+  m.events_away = { games: 20, controle_score: true, perimetre: "championnat", slots: [2, 3, 3, 4, 5, 6].map((n) => ({ n })), slots_against: [3, 3, 4, 4, 4, 5].map((n) => ({ n })) };
   const h = rendre(m).secs.film;
   // La courbe a son propre graphique (avec son echelle), sous les barres (controle UX du 04/10).
   const sp = specs(h);

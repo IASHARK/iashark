@@ -706,9 +706,15 @@ function scenarioCarte(vm){
     options:{layout:{padding:{top:20}},scales:{x:{grid:{display:false},border:{display:false},ticks:{color:'#a3b1c2'}},y:{display:false,beginAtZero:true,grace:'15%'}}},etiquettes:{format:'pct',ancre:'end',alignement:'top',taille:11,extra:{display:true}}},
     {hauteur:150,aria:g.slots.map((sl,i)=>`${sl.label} : ${parts[i]} %`).join(' ; ')}):'';
   const gh=g.games&&g.games.home,ga=g.games&&g.games.away;
+  // Perimetre des derniers matchs (controle du 24/10/2026 : « 20 derniers matchs » = 20 derniers
+  // matchs de championnat) ; goalTiming n'existe que sur des comptes verifies (lib/match-view-model.js).
+  const SC={championnat:[['match_page.scenario_source_games_same',' lors de leurs {n} derniers matchs de championnat.'],['match_page.scenario_source_games_each',' lors de leurs {home} et {away} derniers matchs de championnat.']],
+    competition:[['match_page.scenario_source_comp_same',' lors de leurs {n} derniers matchs dans cette compétition.'],['match_page.scenario_source_comp_each',' lors de leurs {home} et {away} derniers matchs dans cette compétition.']],
+    toutes:[['match_page.scenario_source_all_same',' lors de leurs {n} derniers matchs, toutes compétitions.'],['match_page.scenario_source_all_each',' lors de leurs {home} et {away} derniers matchs, toutes compétitions.']]};
+  const sc=SC[g.perimetre]||SC.competition;
   const periode=(gh>0&&ga>0)
-    ?(gh===ga?tf('match_page.scenario_source_games_same',' lors de leurs {n} derniers matchs.',{n:gh})
-      :tf('match_page.scenario_source_games_each',' lors de leurs {home} et {away} derniers matchs.',{home:gh,away:ga}))
+    ?(gh===ga?tf(sc[0][0],sc[0][1],{n:gh})
+      :tf(sc[1][0],sc[1][1],{home:gh,away:ga}))
       +t('match_page.scenario_source_note',' Fréquence observée, pas une prévision pour celui-ci.')
     :t('match_page.scenario_source_suffix',' sur leurs derniers matchs. Fréquence observée, pas une prévision pour celui-ci.');
   return carteX('scenario','clock',t('match_page.scenario_title','Scénario probable du match'),`${graphe}

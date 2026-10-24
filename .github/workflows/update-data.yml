@@ -3363,6 +3363,9 @@ jobs:
                 if(!r.events.length) return null;
                 var p=calcEventsPattern(r.events,teamId);
                 p.games=r.events.length;
+                // Matchs regardes (retenus + ecartes) : la page ecrit « sur 19 de leurs 20 derniers
+                // matchs » quand un match de la serie est ecarte (controle du 24/10/2026).
+                p.regardes=fixtures.length;
                 p.controle_score=true;
                 p.perimetre=FILM_DU_MATCH.perimetre({selection:selection,ligue:ligueFilm});
                 p.ecartes=ec;
@@ -3902,7 +3905,10 @@ jobs:
                 lineup_away_formation:lineups&&lineups.away?lineups.away.formation:null,
                 streakH,streakA,forme5H,forme5A,
                 evPatH,evPatA,motivH,motivA,matchup,keyAbsenceAlerts,disciplineRisk,topScorersH,topScorersA,
-                slotSummary:calcSlotSummary(evPatH,evPatA),
+                // Consigne du texte IA (controle du 24/10/2026) : seulement les tranches CONTROLEES
+                // (evPubH/evPubA), avec le meme seuil que la page (10 matchs controles par equipe,
+                // meme perimetre : lib/film-du-match.js#paireAffichable) ; sinon rien sur les tranches.
+                slotSummary:FILM_DU_MATCH.paireAffichable(evPubH,evPubA)?calcSlotSummary(evPubH,evPubA):null,
                 eloH,eloA,eloStats,droppingOdds,
                 xgH_xga:xgH.xga_avg,xgA_xga:xgA.xga_avg,
                 xgH_defense_surchauffe:xgH.defense_surchauffe,xgA_defense_surchauffe:xgA.defense_surchauffe,

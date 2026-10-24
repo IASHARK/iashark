@@ -836,8 +836,18 @@ function bindSticky(){
 }
 
 // Sources de donnees (lib/display-data.js#sourceLabels, libelles francais) : premier
-// segment traduit, nom de fournisseur conserve.
-const SOURCES_CLES={'Calendrier et équipes':'source_fixtures','Statistiques équipes':'source_team_stats','Événements historiques':'source_events','Blessures et suspensions':'source_injuries','Marché':'source_market'};
+// segment traduit, nom de fournisseur conserve. 24/10/2026 (avocat du diable) : les
+// libelles ECRITS par sourceLabels (« Statistiques des équipes », « Événements des
+// matchs précédents », « Cotes du marché ») manquaient : ils restaient en francais
+// sur les pages des 6 autres langues. Anciens libelles gardes (donnees deja publiees).
+// tests/match-faq-sources-langues.test.js verifie chaque libelle de sourceLabels.
+const SOURCES_CLES={
+  'Calendrier et équipes':'source_fixtures',
+  'Statistiques des équipes':'source_team_stats','Statistiques équipes':'source_team_stats',
+  'Événements des matchs précédents':'source_events','Événements historiques':'source_events',
+  'Blessures et suspensions':'source_injuries',
+  'Cotes du marché':'source_market','Marché':'source_market'
+};
 function libelleSource(x){
   const parts=String(x).split(' · ');
   const k=SOURCES_CLES[parts[0]];
@@ -915,16 +925,16 @@ function faqCarte(vm){
     }
     // 24/10/2026 : plus aucun nombre de tirages ici (le compteur de l'ancien moteur n'est plus
     // lu). Les chances affichees ne viennent pas de ces tirages : sources et qualite seulement.
+    // 24/10/2026 (avocat du diable) : la qualite passe entre parentheses, et seulement si
+    // elle est connue et positive (absente, nulle ou 0 : pas de parenthese).
     const sources=Array.isArray(vm.model.sources)?vm.model.sources.filter(Boolean):[];
     const qualite=n(vm.model.quality);
-    if(sources.length||qualite!==null){
-      const bits=[];
-      if(sources.length)bits.push(tf('match_page.faq_basis_sources','les données {sources}',{sources:sources.map(x=>esc(libelleSource(String(x)))).join(', ')}));
-      if(qualite!==null)bits.push(tf('match_page.faq_basis_quality','un score de qualité des données de {score}/100',{score:fmt(qualite)}));
-      // « A et B » dans la langue de la page (et, and, y, e, und).
-      let liste=bits.join(', ');
-      try{if(bits.length>1&&typeof Intl!=='undefined'&&Intl.ListFormat)liste=new Intl.ListFormat(localeTag(),{style:'long',type:'conjunction'}).format(bits);}catch(e){}
-      fin.push([t('match_page.faq_q_basis','Sur quoi repose cette analyse ?'),tf('match_page.faq_basis_answer','L’analyse s’appuie sur {bits}. Les probabilités décrivent une fréquence attendue sur un grand nombre de matchs semblables, jamais une certitude sur celui-ci.',{bits:liste})]);
+    if(sources.length){
+      const v={sources:sources.map(x=>esc(libelleSource(String(x)))).join(', ')};
+      const reponse=qualite!==null&&qualite>0
+        ?tf('match_page.faq_basis_with_quality','L’analyse s’appuie sur les données {sources} (qualité des données : {score}/100). Les probabilités décrivent une fréquence attendue sur un grand nombre de matchs semblables, jamais une certitude sur celui-ci.',Object.assign(v,{score:fmt(qualite)}))
+        :tf('match_page.faq_basis_no_quality','L’analyse s’appuie sur les données {sources}. Les probabilités décrivent une fréquence attendue sur un grand nombre de matchs semblables, jamais une certitude sur celui-ci.',v);
+      fin.push([t('match_page.faq_q_basis','Sur quoi repose cette analyse ?'),reponse]);
     }
   }
   const toutes=[...faits,...modele,...stats,...fin];

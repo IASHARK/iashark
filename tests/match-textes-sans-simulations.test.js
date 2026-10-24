@@ -98,8 +98,9 @@ test("questions frequentes : le nombre de simulations n'est plus lu ni ecrit", (
   assert.ok(debut >= 0, "faqCarte introuvable");
   const faq = js.slice(debut, js.indexOf("\n}\n", debut));
   assert.doesNotMatch(faq, /simulationCount|simulation_count|faq_basis_sims|Monte/i);
-  assert.match(faq, /faq_basis_sources/);
-  assert.match(faq, /faq_basis_quality/);
+  // Sources, puis qualite entre parentheses (tests/match-faq-sources-langues.test.js).
+  assert.match(faq, /faq_basis_with_quality/);
+  assert.match(faq, /faq_basis_no_quality/);
   for (const l of LOCALES) {
     const dict = JSON.parse(read("i18n/dict/" + l + ".json"));
     const part = JSON.parse(read("i18n/parts/app." + l + ".json"));

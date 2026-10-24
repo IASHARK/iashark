@@ -3423,7 +3423,15 @@ jobs:
               ]);
               var playerHistoryH=playerDataBatch[0],playerHistoryA=playerDataBatch[1],currentSquadH=playerDataBatch[2],currentSquadA=playerDataBatch[3];
           
+              // Nombre de matchs derriere ces moyennes (comparatif de la page, controle du 24/10/2026,
+              // tour 3) : la page ecrivait « Moyennes par match sur 19 rencontres » (matchs des
+              // evenements) alors que tirs, possession, corners, fautes, hors-jeu et arrets viennent
+              // d'au plus 10 matchs (getWeightedXGStats). games = matchs dont les statistiques sont
+              // arrivees, regardes = derniers matchs demandes (10 au plus), perimetre = meme libelle
+              // que le film (championnat, competition, toutes). Affichage seulement : aucune valeur
+              // lue par le moteur ne change.
               var matchStatsH={
+                games:xgH.n||0, regardes:last10IdsH_xg.length, perimetre:FILM_DU_MATCH.perimetre({selection:selMatchsH.length>0,ligue:ligueFilm}),
                 possession:xgH.possession_avg, shots_total:xgH.shots_total_avg?parseFloat(xgH.shots_total_avg):null,
                 shots_on:xgH.shots_on_avg?parseFloat(xgH.shots_on_avg):null, shots_off:xgH.shots_off_avg,
                 shots_blocked:xgH.shots_blocked_avg, corners:xgH.corners_avg, fouls:xgH.fouls_avg?parseFloat(xgH.fouls_avg):null,
@@ -3431,6 +3439,7 @@ jobs:
                 xg:xgH.xg_avg, xga:xgH.xga_avg,
               };
               var matchStatsA={
+                games:xgA.n||0, regardes:last10IdsA_xg.length, perimetre:FILM_DU_MATCH.perimetre({selection:selMatchsA.length>0,ligue:ligueFilm}),
                 possession:xgA.possession_avg, shots_total:xgA.shots_total_avg?parseFloat(xgA.shots_total_avg):null,
                 shots_on:xgA.shots_on_avg?parseFloat(xgA.shots_on_avg):null, shots_off:xgA.shots_off_avg,
                 shots_blocked:xgA.shots_blocked_avg, corners:xgA.corners_avg, fouls:xgA.fouls_avg?parseFloat(xgA.fouls_avg):null,

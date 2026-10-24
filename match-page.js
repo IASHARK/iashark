@@ -6,7 +6,18 @@ function t(key,fallback){return (window.I18N&&window.I18N.t)?window.I18N.t(key,f
 function localeTag(){return (window.I18N&&window.I18N.localeTag)?window.I18N.localeTag():'fr-FR';}
 // Gabarit a variables {nom} (remplacement en une passe : une valeur qui
 // contient elle-meme des accolades n'est jamais re-substituee).
-function tf(key,fallback,vars){const s=String(t(key,fallback));return vars?s.replace(/\{(\w+)\}/g,(m,k)=>vars[k]!=null?vars[k]:m):s;}
+function tf(key,fallback,vars){const s=String(t(key,fallback));return vars?(estFr()?elisionFr(s,vars):s).replace(/\{(\w+)\}/g,(m,k)=>vars[k]!=null?vars[k]:m):s;}
+// Elision du francais devant un nom (controle du 24/10/2026, tour 3) : « de Arsenal » ->
+// « d’Arsenal », « que Everton » -> « qu’Everton ». Voyelle (accents compris) ; h muet : trois
+// noms seulement (Hoffenheim, Heidenheim, Hellas), les autres h restent aspires (« de Hambourg »).
+// Meme regle dans lib/match-sections.js#tf (tests/film-du-match.test.js verifie qu'elles s'accordent).
+const ELISION_FR=/^(?:[aeiouàâäéèêëîïôöùûüœæ]|h(?:offenheim|eidenheim|ellas)\b)/i;
+function elisionFr(s,vars){
+  return s.replace(/(^|[^A-Za-zÀ-ÖØ-öø-ÿ])(de|De|que|Que) \{(\w+)\}/g,(m,av,mot,k)=>{
+    const v=Object.prototype.hasOwnProperty.call(vars,k)?vars[k]:null;
+    return typeof v==='string'&&ELISION_FR.test(v.trim())?av+mot.slice(0,-1)+'\u2019{'+k+'}':m;
+  });
+}
 // Lien interne qui garde le visiteur dans son repertoire de langue/marche.
 function lien(p){return (window.I18N&&window.I18N.href)?window.I18N.href(p):'/'+p;}
 function estFr(){return !(window.I18N&&window.I18N.locale)||window.I18N.locale==='fr';}
@@ -837,9 +848,28 @@ function comparatifCarte(vm){
       ?`<b>${esc(meneur)}</b>${esc(t('match_page.comparison_leads_middle',' est devant sur '))}${compte}${esc(t('match_page.comparison_leads_of',' des '))}${total}${esc(t('match_page.comparison_leads_suffix',' mesures comparables.'))}`
       :`${esc(t('match_page.comparison_tie_prefix','Les deux équipes se partagent les '))}${total}${esc(t('match_page.comparison_leads_suffix',' mesures comparables.'))}`;
   }
-  const note=n(c.sampleSize)!==null
-    ?`${t('match_page.comparison_note_with_sample_prefix','Moyennes par match sur ')}${c.sampleSize} ${c.sampleSize>1?t('match_page.comparison_note_match_plural','rencontres'):t('match_page.comparison_note_match_singular','rencontre')}${c.sampleSize<5?t('match_page.comparison_note_thin_sample_suffix',' — échantillon encore court'):''}.`
-    :t('match_page.comparison_note_simple','Moyennes par match.');
+  // Note sous le tableau (controle du 24/10/2026, tour 3) : elle disait « Moyennes par match sur
+  // 19 rencontres » pour tout le tableau, alors que tirs, tirs cadres, possession, corners, fautes,
+  // hors-jeu et arrets viennent d'au plus 10 matchs. Chaque groupe de lignes dit maintenant SON
+  // nombre de matchs, avec le libelle du film (periodeButs) : buts = matchs controles (« lors de
+  // 19 de leurs 20 derniers matchs de championnat »), autres lignes = matchs des statistiques
+  // (« lors de leurs 10 derniers matchs de championnat »). Nombre inconnu (donnees d'avant le
+  // 24/10, pages d'exemple) : « Moyennes par match. », jamais un nombre devine ni celui de
+  // l'autre groupe.
+  const ech=c.samples||{};
+  const estBut=r=>r.label==='Buts marqués'||r.label==='Buts concédés';
+  const aButs=c.rows.some(estBut),aStats=c.rows.some(r=>!estBut(r));
+  const phraseNote=(prefixe,e)=>{
+    const pb=e?periodeButs(e,dom,ext):'';
+    if(!pb)return prefixe+'.';
+    const court=Math.min(n(e.games.home),n(e.games.away))<5;
+    return prefixe+(court?pb.replace(/\.\s*$/,'')+t('match_page.comparison_note_thin_sample_suffix',' — échantillon encore court')+'.':pb);
+  };
+  const moyennes=t('match_page.comparison_note_avg_prefix','Moyennes par match');
+  const note=[
+    aButs?phraseNote(aStats?t('match_page.comparison_note_goals_prefix','Buts marqués et concédés : moyennes par match'):moyennes,ech.goals):'',
+    aStats?phraseNote(aButs?t('match_page.comparison_note_stats_prefix','Autres statistiques : moyennes par match'):moyennes,ech.stats):''
+  ].filter(Boolean).join(' ');
   const table=`<div class="cmp-scroll"><table class="cmp-table">
       <thead><tr>
         <th scope="col">${esc(t('match_page.comparison_table_header','Par match'))}</th>

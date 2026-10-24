@@ -124,8 +124,9 @@ test("film : un match aux evenements vides ou incoherents n'entre pas dans le co
   // Tour 2 : 3 matchs ecartes sur 20 -> « 17 des 20 derniers », jamais « les 17 derniers ».
   assert.equal(eh.regardes, 20);
   assert.deepEqual(vm.editorial.goalTiming.regardes, { home: 20, away: 20 });
-  assert.match(texte, /Buts par match, sur 17 des 20 derniers matchs de championnat de Arsenal et 20 des 20 de Everton\./);
-  assert.ok(texte.includes("Sur " + butsAffiches + " buts marqués par Arsenal et Everton lors de 17 des 20 derniers matchs de championnat de Arsenal et 20 des 20 de Everton."), texte);
+  // Tour 3 : elision (« d’Arsenal », « d’Everton »), jamais « de Arsenal ».
+  assert.match(texte, /Buts par match, sur 17 des 20 derniers matchs de championnat d’Arsenal et 20 des 20 d’Everton\./);
+  assert.ok(texte.includes("Sur " + butsAffiches + " buts marqués par Arsenal et Everton lors de 17 des 20 derniers matchs de championnat d’Arsenal et 20 des 20 d’Everton."), texte);
   assert.doesNotMatch(texte, /lors de leurs 20 derniers matchs\./, "plus jamais « 20 derniers matchs » sans le perimetre");
   assert.doesNotMatch(texte, /les 17 derniers|leurs 17 et 20 derniers/, "17 matchs retenus ne sont pas « les 17 derniers »");
 });
@@ -307,8 +308,10 @@ const CODE_MP = [
   // Libelles partages (tour 2) ; absents de l'ancien code : la carte et la FAQ tournent quand meme.
   MP.indexOf("const PERIODE_BUTS") >= 0 ? morceau("const PERIODE_BUTS", "function scenarioCarte(vm)") : "",
   fonctionMP("scenarioCarte"),
+  // Comparatif des deux equipes (tour 3 : note avec le nombre de matchs de chaque groupe de lignes).
+  fonctionMP("logoEquipe"), morceau("const CMP_SENS", "function comparatifCarte(vm)"), fonctionMP("comparatifCarte"),
   morceau("const SOURCES_CLES", "function faqCarte(vm)") + fonctionMP("faqCarte"),
-  "globalThis.__faq=faqCarte;globalThis.__sc=scenarioCarte;",
+  "globalThis.__faq=faqCarte;globalThis.__sc=scenarioCarte;globalThis.__cmp=comparatifCarte;",
 ].join("\n");
 const decoder = (s) => s.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&").replace(/&nbsp;/g, " ");
 const enTexte = (h) => decoder(h.replace(/<\/?(b|span|small|em|strong|i)\b[^>]*>/g, "").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
@@ -325,9 +328,12 @@ function pageMatch(raw, l) {
     const ctx = vmNode.createContext({ __win: { I18N: globalThis.I18N, IasharkComposants: null } });
     vmNode.runInContext(CODE_MP, ctx);
     const scenario = ctx.__sc(vm);
+    const comparatifHtml = ctx.__cmp(vm);
     const faqH = ctx.__faq(Object.assign({}, vm, { model: Object.assign({}, vm.model, { recommendation: null, sources: [] }) }));
     const faq = [...faqH.matchAll(/<summary><span>(.*?)<\/span><\/summary><p>(.*?)<\/p>/g)].map((m) => [decoder(m[1]), enTexte(m[2])]);
-    return { vm, film: enTexte(film), filmHtml: film, equipes: enTexte(equipes), scenario: enTexte(scenario), scenarioHtml: scenario, faq };
+    const note = (comparatifHtml.match(/<p class="cmp-note">([\s\S]*?)<\/p>/) || [])[1];
+    return { vm, film: enTexte(film), filmHtml: film, equipes: enTexte(equipes), equipesHtml: equipes, scenario: enTexte(scenario), scenarioHtml: scenario, faq,
+      comparatif: enTexte(comparatifHtml), comparatifNote: note == null ? null : enTexte(note) };
   } finally { delete globalThis.I18N; }
 }
 const slots6 = (l) => l.map((x, i) => ({ t: ["0-15", "15-30", "30-45", "45-60", "60-75", "75-90"][i], n: x }));
@@ -530,4 +536,180 @@ test("pages d'exemple (7 langues, donnees figees non controlees) : film, scenari
     assert.equal(p.vm.comparison.rows.find((r) => r.label === "Buts marqués"), undefined, f);
     assert.equal(p.vm.comparison.sampleSize, null, f);
   }
+});
+
+// =============================================================== tour 3 (24/10/2026)
+// Avocat du diable ORANGE sur la PR #200 : regle VAR sans limite de temps, nombre de matchs de la note
+// du comparatif, elision du francais (« de Arsenal »), description des pages d'exemple.
+const lireFichier = (rel) => fs.readFileSync(path.join(ROOT, rel), "utf8");
+
+test("VAR (tour 3) : un but n'est retire que s'il est du MEME joueur et marque dans les 5 minutes AVANT l'annulation", () => {
+  const fx = { fixture: { id: 7, status: { short: "FT" } }, teams: { home: { id: 1 }, away: { id: 2 } }, goals: { home: 1, away: 0 }, score: { fulltime: { home: 1, away: 0 } } };
+  const P = { id: 77, name: "P" }, Q = { id: 88, name: "Q" };
+  const but = (min, joueur, extra) => ({ time: { elapsed: min, extra: extra == null ? null : extra }, team: { id: 1 }, player: joueur, type: "Goal", detail: "Normal Goal" });
+  const annul = (min, extra) => ({ time: { elapsed: min, extra: extra == null ? null : extra }, team: { id: 1 }, player: P, type: "Var", detail: "Goal cancelled" });
+  assert.equal(FILM.FENETRE_VAR, 5);
+  // Match invente par l'avocat : but sans joueur (10e), but valable de P (70e), but de P annule par la
+  // VAR (85e), score 1-0. Avant : le but VALABLE de la 70e etait retire et le « fantome » de la 10e
+  // gardait le match dans le compte. Maintenant : rien n'est retire, le controle du score l'ecarte.
+  const invente = [but(10, null), but(70, P), annul(85)];
+  assert.equal(FILM.sansButsAnnules(invente, fx).length, invente.length, "le but de la 70e (15 minutes avant) n'est pas retire");
+  assert.equal(FILM.controlerMatch(fx, invente).raison, "score_different", "le match est ecarte, pas compte avec une minute fausse");
+  // Dans la fenetre (3 minutes avant) : le but de P est retire, celui de Q reste.
+  const dans = FILM.controlerMatch(fx, [but(10, Q), but(82, P), annul(85)]);
+  assert.equal(dans.ok, true);
+  assert.deepEqual(dans.events.filter((e) => e.type === "Goal").map((e) => e.time.elapsed), [10]);
+  // Bornes : 5 minutes avant -> retire ; 6 minutes avant -> rien ; APRES l'annulation -> rien.
+  assert.equal(FILM.controlerMatch(fx, [but(10, Q), but(80, P), annul(85)]).ok, true);
+  assert.equal(FILM.controlerMatch(fx, [but(10, Q), but(79, P), annul(85)]).raison, "score_different");
+  assert.equal(FILM.controlerMatch(fx, [but(10, Q), but(86, P), annul(85)]).raison, "score_different");
+  // Arrets de jeu comptes : 90e+1 puis annulation 90e+4 (3 minutes) -> retire ; 90e+1 puis 90e+8
+  // (7 minutes, alors que la « minute » vaut 90 des deux cotes) -> rien.
+  assert.equal(FILM.controlerMatch(fx, [but(10, Q), but(90, P, 1), annul(90, 4)]).ok, true);
+  assert.equal(FILM.controlerMatch(fx, [but(10, Q), but(90, P, 1), annul(90, 8)]).raison, "score_different");
+  // Autre mi-temps (but a la 44e, annulation a la 46e) ou annulation sans minute : rien.
+  assert.equal(FILM.controlerMatch(fx, [but(10, Q), but(44, P), annul(46)]).raison, "score_different");
+  assert.equal(FILM.controlerMatch(fx, [but(10, Q), but(44, P), { team: { id: 1 }, player: P, type: "Var", detail: "Goal cancelled" }]).raison, "score_different");
+});
+
+// Statistiques de match (tirs, possession...) telles que le VRAI pipeline les publie : getWeightedXGStats
+// et le bloc matchStatsH / matchStatsA de update-data.yml, avec une fausse API (statistics vides pour
+// les matchs de `sansStats`).
+async function statsDuPipeline(nbMatchs, sansStatsH, sansStatsA) {
+  const code = SCRIPT.slice(SCRIPT.indexOf("async function getWeightedXGStats("), SCRIPT.indexOf("var clubEloCache=null;"));
+  const d = SCRIPT.indexOf("var matchStatsH={");
+  const bloc = SCRIPT.slice(d, SCRIPT.indexOf("await sleep(300);", d));
+  assert.ok(code.length > 1000 && d > 0 && bloc.length > 300, "code du pipeline introuvable");
+  const bloc1 = (team, adv) => [
+    { team: { id: team }, statistics: [{ type: "Total Shots", value: 14 }, { type: "Shots on Goal", value: 5 }, { type: "Ball Possession", value: "55%" }, { type: "Corner Kicks", value: 6 },
+      { type: "Fouls", value: 11 }, { type: "Offsides", value: 2 }, { type: "Goalkeeper Saves", value: 3 }, { type: "Passes %", value: "85%" }, { type: "expected_goals", value: "1.40" }] },
+    { team: { id: adv }, statistics: [{ type: "Total Shots", value: 9 }, { type: "Shots on Goal", value: 3 }, { type: "expected_goals", value: "0.90" }] }];
+  const fabrique = (team, sans) => new Function("get", "APS", "ttl", "sleep", code + "\nreturn getWeightedXGStats;")(
+    async (url) => { const id = Number(url.split("fixture=")[1]); return { response: sans.includes(id) ? [] : bloc1(team, 999) }; }, {}, () => 0, async () => {});
+  const ids = Array.from({ length: nbMatchs }, (_, i) => 9000 + i);
+  const fixtures = (team) => ids.map((id) => ({ fixture: { id }, teams: { home: { id: team }, away: { id: 999 } } }));
+  const xgH = await fabrique(ARSENAL, sansStatsH || [])(ARSENAL, ids.slice(0, 10), fixtures(ARSENAL), {});
+  const xgA = await fabrique(EVERTON, sansStatsA || [])(EVERTON, ids.slice(0, 10), fixtures(EVERTON), {});
+  const ligue = LEAGUES_CONFIG.leagues.find((l) => l.apiFootballId === 39);
+  return new Function("xgH", "xgA", "last10IdsH_xg", "last10IdsA_xg", "FILM_DU_MATCH", "selMatchsH", "selMatchsA", "ligueFilm", bloc + "\nreturn { matchStatsH, matchStatsA };")(
+    xgH, xgA, ids.slice(0, 10), ids.slice(0, 10), FILM, [], [], ligue);
+}
+
+test("comparatif (tour 3) : chaque groupe de lignes dit SON nombre de matchs (buts : matchs controles ; tirs, possession... : 10 au plus), jamais « sur 19 rencontres », 7 langues", async () => {
+  // Pipeline : 20 matchs de championnat regardes, statistiques demandees pour les 10 derniers.
+  const s = await statsDuPipeline(20);
+  assert.deepEqual([s.matchStatsH.games, s.matchStatsH.regardes, s.matchStatsH.perimetre], [10, 10, "championnat"]);
+  assert.equal(s.matchStatsH.shots_total, 14);
+  // Les valeurs lues par le moteur et la page ne changent pas (seulement des champs en plus).
+  assert.deepEqual(Object.keys(s.matchStatsH).slice(3), ["possession", "shots_total", "shots_on", "shots_off", "shots_blocked", "corners", "fouls", "offsides", "saves", "passes_pct", "xg", "xga"]);
+  // Un match sans statistiques : 9 sur 10.
+  const s9 = await statsDuPipeline(20, [9003]);
+  assert.deepEqual([s9.matchStatsH.games, s9.matchStatsH.regardes, s9.matchStatsA.games], [9, 10, 10]);
+
+  // Arsenal : buts sur 19 de ses 20 derniers matchs (un ecarte) ; Everton : 20 sur 20.
+  const eh = comptes([2, 3, 3, 4, 4, 5], [1, 2, 2, 3, 4, 5], 19, 20), ea = comptes([2, 1, 5, 4, 4, 6], [3, 2, 5, 4, 5, 3], 20);
+  const raw = rawPage(eh, ea, { match_stats_home: s.matchStatsH, match_stats_away: s.matchStatsA });
+  const fr = pageMatch(raw, "fr");
+  assert.equal(fr.comparatifNote,
+    "Buts marqués et concédés : moyennes par match lors de 19 des 20 derniers matchs de championnat d’Arsenal et 20 des 20 d’Everton. "
+    + "Autres statistiques : moyennes par match lors de leurs 10 derniers matchs de championnat. "
+    + "Hors-jeu et arrêts sont donnés sans verdict : plus d'arrêts signifie surtout plus de tirs subis.");
+  assert.doesNotMatch(fr.comparatifNote, /rencontre/);
+  assert.deepEqual(fr.vm.comparison.samples.stats, { games: { home: 10, away: 10 }, regardes: { home: 10, away: 10 }, perimetre: "championnat" });
+  for (const l of LANGUES) {
+    const p = pageMatch(raw, l), d = DICTS[l].match_page;
+    const remplir = (gabarit, v) => gabarit.replace(/\{(\w+)\}/g, (m, k) => (v[k] != null ? v[k] : m));
+    const buts = d.comparison_note_goals_prefix + remplir(d.scenario_source_games_each_part, { h: 19, hm: 20, a: 20, am: 20, home: "Arsenal", away: "Everton" });
+    const stats = d.comparison_note_stats_prefix + remplir(d.scenario_source_games_same, { n: 10 });
+    if (l !== "fr") assert.ok(p.comparatifNote.startsWith(buts + " " + stats), l + " : " + p.comparatifNote);
+    else assert.ok(p.comparatifNote.includes(stats), p.comparatifNote);
+    for (const x of ["19", "20"]) assert.ok(!p.comparatifNote.includes(d.comparison_note_with_sample_prefix + x), l + " : ancien libelle « sur " + x + " rencontres »");
+  }
+  // 9 statistiques sur 10 pour Arsenal : « 9 des 10 », jamais « leurs 9 derniers ».
+  const p9 = pageMatch(rawPage(eh, ea, { match_stats_home: s9.matchStatsH, match_stats_away: s9.matchStatsA }), "fr");
+  assert.ok(p9.comparatifNote.includes("Autres statistiques : moyennes par match lors de 9 des 10 derniers matchs de championnat d’Arsenal et 10 des 10 d’Everton."), p9.comparatifNote);
+  // Donnees d'avant le 24/10 (statistiques sans compteur) : aucun nombre pour ces lignes, jamais
+  // celui des buts.
+  const sansCompteur = (ms) => { const c = Object.assign({}, ms); delete c.games; delete c.regardes; delete c.perimetre; return c; };
+  const pv = pageMatch(rawPage(eh, ea, { match_stats_home: sansCompteur(s.matchStatsH), match_stats_away: sansCompteur(s.matchStatsA) }), "fr");
+  assert.ok(pv.comparatifNote.includes(" Autres statistiques : moyennes par match. Hors-jeu"), pv.comparatifNote);
+  assert.equal(pv.vm.comparison.samples.stats, null);
+  // Sans buts controles : une seule phrase, celle des statistiques.
+  const ps = pageMatch(rawPage(null, null, { match_stats_home: s.matchStatsH, match_stats_away: s.matchStatsA }), "fr");
+  assert.ok(ps.comparatifNote.startsWith("Moyennes par match lors de leurs 10 derniers matchs de championnat. Hors-jeu"), ps.comparatifNote);
+  // Echantillon court (4 matchs) : signale.
+  const court = Object.assign({}, s.matchStatsH, { games: 4, regardes: 4 });
+  const pc = pageMatch(rawPage(null, null, { match_stats_home: court, match_stats_away: court }), "fr");
+  assert.ok(pc.comparatifNote.startsWith("Moyennes par match lors de leurs 4 derniers matchs de championnat — échantillon encore court."), pc.comparatifNote);
+});
+
+test("francais (tour 3) : elision devant voyelle ou h muet (« d’Arsenal », « d’Everton ») dans le film, la carte scenario, la FAQ et le comparatif ; rien ne change dans les autres langues", async () => {
+  const s = await statsDuPipeline(20, [9003]);
+  const eh = comptes([2, 3, 3, 4, 4, 5], [1, 2, 2, 3, 4, 5], 19, 20), ea = comptes([2, 1, 5, 4, 4, 6], [3, 2, 5, 4, 5, 3], 20);
+  const raw = rawPage(eh, ea, { match_stats_home: s.matchStatsH, match_stats_away: s.matchStatsA });
+  const p = pageMatch(raw, "fr");
+  const tout = [p.film, decoder(p.filmHtml), p.scenario, p.comparatif, p.equipes, decoder(p.equipesHtml)].concat(p.faq.map((x) => x.join(" "))).join(" \n ");
+  assert.doesNotMatch(tout, /(^|[^A-Za-zÀ-ÿ])(de|De|que|Que) (Arsenal|Everton)\b/, "plus jamais « de Arsenal » ni « de Everton »");
+  const phrase = "lors de 19 des 20 derniers matchs de championnat d’Arsenal et 20 des 20 d’Everton.";
+  assert.ok(p.film.includes("Buts par match, sur 19 des 20 derniers matchs de championnat d’Arsenal et 20 des 20 d’Everton."), p.film);
+  assert.ok(p.film.includes(phrase), p.film);
+  assert.ok(p.scenario.includes(phrase), p.scenario);
+  const q15 = p.faq.find((x) => x[0] === DICTS.fr.match_page.faq_q_first15);
+  assert.ok(q15 && q15[1].includes(phrase), q15 && q15[1]);
+  assert.ok(p.comparatifNote.includes(phrase), p.comparatifNote);
+  assert.ok(p.comparatifNote.includes("lors de 9 des 10 derniers matchs de championnat d’Arsenal et 10 des 10 d’Everton."), p.comparatifNote);
+  // Meme regle dans les deux fonctions tf (lib/match-sections.js : film ; match-page.js : carte et
+  // FAQ) : voyelle et accent elides, h muet de la liste elide, h aspire et consonne gardes.
+  for (const [nom, attendu] of [["Arsenal", "d’Arsenal"], ["Olympique Lyonnais", "d’Olympique Lyonnais"], ["Énergie Cottbus", "d’Énergie Cottbus"], ["Inter", "d’Inter"],
+    ["Hoffenheim", "d’Hoffenheim"], ["Hambourg", "de Hambourg"], ["Chelsea", "de Chelsea"], ["Young Boys", "de Young Boys"], ["1. FC Köln", "de 1. FC Köln"]]) {
+    const r = rawPage(eh, ea);
+    r.home = { id: ARSENAL, n: nom };
+    const q = pageMatch(r, "fr");
+    const attenduPhrase = "lors de 19 des 20 derniers matchs de championnat " + attendu + " et 20 des 20 d’Everton.";
+    assert.ok(q.film.includes(attenduPhrase), nom + " (film, lib/match-sections.js) : " + q.film);
+    assert.ok(q.scenario.includes(attenduPhrase), nom + " (carte, match-page.js) : " + q.scenario);
+  }
+  // Autres langues : texte inchange (« de Arsenal » est juste en espagnol).
+  for (const l of LANGUES.filter((x) => x !== "fr")) {
+    const x = pageMatch(raw, l), d = DICTS[l].match_page;
+    const attendu = d.scenario_source_games_each_part.replace("{h}", "19").replace("{hm}", "20").replace("{a}", "20").replace("{am}", "20").replace("{home}", "Arsenal").replace("{away}", "Everton").trim();
+    assert.ok(x.scenario.includes(attendu), l + " : " + x.scenario);
+    assert.doesNotMatch(x.film + x.scenario, /’Arsenal|’Everton/, l);
+  }
+});
+
+test("pages d'exemple (tour 3) : la description n'annonce plus le « scénario du match » (absent de la page), elle decrit ce qui reste, 7 langues", () => {
+  const SCEN = /sc[ée]nario|escenario|cen[áa]rio|szenario/i;
+  const PAGES = { "exemple-analyse.html": "fr", "fr/exemple-analyse.html": "fr", "en/exemple-analyse.html": "en", "gb/exemple-analyse.html": "en", "es/exemple-analyse.html": "es", "mx/exemple-analyse.html": "es-mx", "za/exemple-analyse.html": "en" };
+  for (const [f, l] of Object.entries(PAGES)) {
+    const html = lireFichier(f);
+    const metas = [...html.matchAll(/<meta (?:name="description"|property="og:description") content="([^"]*)"/g)].map((m) => m[1]);
+    assert.equal(metas.length, 2, f + " : meta description et og:description");
+    for (const m of metas) assert.doesNotMatch(m, SCEN, f + " : « " + m + " »");
+    // Ce que la description annonce est vraiment sur la page : comparatif des equipes et forme recente.
+    const raw = JSON.parse(html.match(/var PRELOADED_MATCH = (\{.*?\});\n/s)[1]);
+    const p = pageMatch(raw, l);
+    assert.ok(p.vm.comparison && p.vm.comparison.rows.length >= 3 && p.comparatifNote, f + " : comparatif");
+    assert.ok(p.vm.form && p.vm.form.home && p.vm.form.home.length && p.vm.form.away && p.vm.form.away.length, f + " : forme recente");
+    assert.ok(p.comparatifNote.startsWith(DICTS[l].match_page.comparison_note_avg_prefix + ". "), f + " : note sans nombre devine : " + p.comparatifNote);
+    assert.equal(p.scenarioHtml, "", f + " : la carte « Scenario » n'y est pas");
+  }
+  // Textes traduits de la page racine (geo.meta), demo_page et textes SEO par repertoire.
+  for (const l of LANGUES) {
+    const d = DICTS[l];
+    assert.doesNotMatch(d.geo.meta["exemple-analyse"].description, SCEN, l + " : geo.meta");
+    assert.doesNotMatch(d.demo_page.meta_description, SCEN, l + " : demo_page.meta_description");
+    assert.equal(JSON.parse(lireFichier("i18n/parts/geo." + l + ".json")).geo.meta["exemple-analyse"].description, d.geo.meta["exemple-analyse"].description, l + " : dict et parts (geo)");
+    assert.equal(JSON.parse(lireFichier("i18n/parts/site." + l + ".json")).demo_page.meta_description, d.demo_page.meta_description, l + " : dict et parts (site)");
+  }
+  for (const f of fs.readdirSync(path.join(ROOT, "i18n", "seo"))) {
+    const s = JSON.parse(lireFichier("i18n/seo/" + f));
+    assert.doesNotMatch(s.meta["exemple-analyse"].description, SCEN, "i18n/seo/" + f);
+  }
+  // Pages deja generees = texte SEO de leur repertoire (scripts/seo-pages.js).
+  for (const dir of ["fr", "en", "gb", "es", "mx", "za"]) {
+    const s = JSON.parse(lireFichier("i18n/seo/" + dir + ".json"));
+    assert.ok(lireFichier(dir + "/exemple-analyse.html").includes('<meta name="description" content="' + s.meta["exemple-analyse"].description + '">'), dir);
+  }
+  assert.ok(lireFichier("exemple-analyse.html").includes('<meta name="description" content="' + DICTS.fr.geo.meta["exemple-analyse"].description + '"'), "page racine");
 });

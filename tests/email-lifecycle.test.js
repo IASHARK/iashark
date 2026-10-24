@@ -41,7 +41,8 @@ async function renderAll(extra) {
     const data = Object.assign({
       freeMatch: L.pickFreeMatch(RAW_MATCHES, NOW, ctx),
       weekendMatches: L.weekendMatches(RAW_MATCHES, NOW, ctx),
-      marketingOptIn: true
+      marketingOptIn: true,
+      trial: L.sampleTrial(ctx, NOW)
     }, extra || {});
     const unsubscribeUrl = await unsubUrl(dir);
     for (const campaign of Object.keys(L.CAMPAIGNS)) {
@@ -105,7 +106,7 @@ test("pages de methodologie absentes : liste a jour avec le depot", () => {
   }
 });
 
-test("chaque email (6 campagnes x 9 versions du site, 7 langues) : liens absolus du bon repertoire et existants", async () => {
+test("chaque email (8 campagnes x 9 versions du site, 7 langues) : liens absolus du bon repertoire et existants", async () => {
   const EXTERNAL = new Set(Object.values(CONFIG._helplines).concat(["fr", "gb", "mx", "za"].map((k) => CONFIG[k].helpline)).map((h) => h.url));
   for (const { dir, campaign, r } of await renderAll()) {
     const hrefs = [...r.html.matchAll(/href="([^"]*)"/g)].map((m) => m[1].replace(/&amp;/g, "&"));
@@ -186,7 +187,7 @@ test("aucune donnee payante : seuls noms, competition, horaire et lien des match
 
 test("textes des 7 langues : meme structure, statut REVIEW, liste Pro alignee sur Mon compte", () => {
   const ref = BUNDLE.copy.fr;
-  const shape = (c) => Object.keys(c.campaigns).map((k) => k + ":" + c.campaigns[k].blocks.map((b) => b.type + (b.if || "") + (b.link || "") + (b.items ? b.items.length : "")).join(","));
+  const shape = (c) => Object.keys(c.campaigns).map((k) => k + ":" + (c.campaigns[k].reply ? "reply:" : "") + c.campaigns[k].blocks.map((b) => b.type + (b.if || "") + (b.unless ? "!" + b.unless : "") + (b.link || "") + (b.items ? b.items.length : "")).join(","));
   for (const loc of build.LOCALES) {
     const c = BUNDLE.copy[loc];
     assert.equal(c.locale, loc);
@@ -221,10 +222,14 @@ test("campagnes par langue : sujet, prix de la version, consentement absent, ech
 
   const unsubscribeUrl = await unsubUrl("fr");
   const welcomeNo = L.renderLifecycleEmail(BUNDLE, "welcome", "fr", { marketingOptIn: false, freeMatch: null }, { unsubscribeUrl });
-  assert.ok(welcomeNo.text.includes("vous ne recevrez de notre part que les emails liés à votre compte"));
+  assert.ok(welcomeNo.text.includes("tu ne recevras que ceux liés à ton compte"));
   assert.ok(!welcomeNo.text.includes("Le match offert en ce moment"), "pas de match publie : bloc omis, rien d'invente");
+  assert.equal(welcomeNo.subject, "Bienvenue sur IASHARK : par où commencer");
+  assert.ok(welcomeNo.text.includes("Voir les matchs du jour : https://iashark.com/fr/"), "sans match offert : un seul bouton, vers les matchs du jour");
   const welcomeYes = L.renderLifecycleEmail(BUNDLE, "welcome", "fr", { marketingOptIn: true, freeMatch: L.publicMatch(RAW_MATCHES[0], L.siteContext(BUNDLE.markets, "fr")) }, { unsubscribeUrl });
-  assert.ok(!welcomeYes.text.includes("que les emails liés à votre compte") && welcomeYes.text.includes("Barcelona"));
+  assert.ok(!welcomeYes.text.includes("que ceux liés à ton compte") && welcomeYes.text.includes("Barcelona"));
+  assert.equal(welcomeYes.subject, "Bienvenue sur IASHARK : ton match offert t'attend");
+  assert.ok(!welcomeYes.text.includes("Voir les matchs du jour"), "avec match offert : le bouton mene au match offert");
 
   const evil = L.publicMatch({ id: 9, home: { n: "<b>A&B</b>" }, away: { n: "C" }, date: "2026-09-19 20:00", league: "L" }, L.siteContext(BUNDLE.markets, "fr"));
   const esc = L.renderLifecycleEmail(BUNDLE, "free_match", "fr", { freeMatch: evil }, { unsubscribeUrl });
@@ -260,13 +265,17 @@ test("refus explicites : contenu manquant jamais remplace par du texte generique
 
 // ------------------------------------------------------------ matchs publics
 
-test("match offert : designation du pipeline, pas commence, designation pays pour mx", () => {
+test("match offert : designation du pipeline, pas commence, designation pays pour mx, sinon le meme repli que le site", () => {
   const fr = L.siteContext(BUNDLE.markets, "fr");
   const mx = L.siteContext(BUNDLE.markets, "mx");
   assert.equal(L.pickFreeMatch(RAW_MATCHES, NOW, fr).id, 1570385);
   assert.equal(L.pickFreeMatch(RAW_MATCHES, NOW, mx).id, 2004);
-  assert.equal(L.pickFreeMatch(RAW_MATCHES, new Date("2026-09-17T19:31:00Z"), fr), null, "coup d'envoi passe");
-  assert.equal(L.pickFreeMatch(RAW_MATCHES.map((m) => Object.assign({}, m, { is_free: false })), NOW, fr), null);
+  assert.equal(L.pickFreeMatch(RAW_MATCHES, new Date("2026-09-17T19:31:00Z"), fr), null, "coup d'envoi passe : l'email attend le match offert suivant");
+  // 21/10/2026 : sans designation (aucun is_free depuis le 05/10), le site et match-data
+  // choisissent un match par repli (lib/free-match.js) ; l'email prend le meme.
+  const sansDesignation = RAW_MATCHES.map((m) => Object.assign({}, m, { is_free: false }));
+  assert.equal(L.pickFreeMatch(sansDesignation, NOW, fr).id, 1570385, "repli : match du jour avec pari");
+  assert.equal(L.serverFreeMatchId(sansDesignation, NOW), "1570385");
   assert.equal(L.pickFreeMatch(null, NOW, fr), null);
   const m = L.pickFreeMatch(RAW_MATCHES, NOW, fr);
   assert.equal(m.url, "https://iashark.com/fr/match.html?id=1570385");

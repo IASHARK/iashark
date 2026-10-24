@@ -17,7 +17,8 @@ const PREMIUM = require("../lib/premium-fields.js");
 
 const VM = { identity: { home: { name: "Reading" }, away: { name: "Bradford" } }, model: null, editorial: {} };
 function ctx(raw, o) { return Object.assign({ raw, vm: VM, vuePro: false, verrouPro: true, dit: MS.registre(), contenus: [] }, o || {}); }
-const EV = (n) => ({ games: 10, slots: [1, 2, 3, 2, 3, 4].map((x) => ({ n: x * n })), slots_against: [1, 1, 2, 2, 2, 3].map((x) => ({ n: x })) });
+// Comptes controles par le pipeline (lib/film-du-match.js, 24/10/2026) : seuls ceux-la font un film.
+const EV = (n) => ({ games: 10, controle_score: true, perimetre: "championnat", slots: [1, 2, 3, 2, 3, 4].map((x) => ({ n: x * n })), slots_against: [1, 1, 2, 2, 2, 3].map((x) => ({ n: x })) });
 const PUBLIC = { events_home: EV(1), events_away: EV(1) };
 const RESUME = { v: "grille-v3-1", base: 10000, issues: { dom: 4500, nul: 2700, ext: 2800 }, scores: [{ score: "1-0", n: 1100 }], total_buts: null };
 const TR = [0.31, 0.34, 0.41, 0.38, 0.39, 0.5];

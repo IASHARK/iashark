@@ -6,7 +6,18 @@ function t(key,fallback){return (window.I18N&&window.I18N.t)?window.I18N.t(key,f
 function localeTag(){return (window.I18N&&window.I18N.localeTag)?window.I18N.localeTag():'fr-FR';}
 // Gabarit a variables {nom} (remplacement en une passe : une valeur qui
 // contient elle-meme des accolades n'est jamais re-substituee).
-function tf(key,fallback,vars){const s=String(t(key,fallback));return vars?s.replace(/\{(\w+)\}/g,(m,k)=>vars[k]!=null?vars[k]:m):s;}
+function tf(key,fallback,vars){const s=String(t(key,fallback));return vars?(estFr()?elisionFr(s,vars):s).replace(/\{(\w+)\}/g,(m,k)=>vars[k]!=null?vars[k]:m):s;}
+// Elision du francais devant un nom (controle du 24/10/2026, tour 3) : « de Arsenal » ->
+// « d’Arsenal », « que Everton » -> « qu’Everton ». Voyelle (accents compris) ; h muet : trois
+// noms seulement (Hoffenheim, Heidenheim, Hellas), les autres h restent aspires (« de Hambourg »).
+// Meme regle dans lib/match-sections.js#tf (tests/film-du-match.test.js verifie qu'elles s'accordent).
+const ELISION_FR=/^(?:[aeiouàâäéèêëîïôöùûüœæ]|h(?:offenheim|eidenheim|ellas)\b)/i;
+function elisionFr(s,vars){
+  return s.replace(/(^|[^A-Za-zÀ-ÖØ-öø-ÿ])(de|De|que|Que) \{(\w+)\}/g,(m,av,mot,k)=>{
+    const v=Object.prototype.hasOwnProperty.call(vars,k)?vars[k]:null;
+    return typeof v==='string'&&ELISION_FR.test(v.trim())?av+mot.slice(0,-1)+'\u2019{'+k+'}':m;
+  });
+}
 // Lien interne qui garde le visiteur dans son repertoire de langue/marche.
 function lien(p){return (window.I18N&&window.I18N.href)?window.I18N.href(p):'/'+p;}
 function estFr(){return !(window.I18N&&window.I18N.locale)||window.I18N.locale==='fr';}
@@ -698,6 +709,47 @@ function probasCarte(vm){
 // la plus fournie, nombre de buts et de matchs) sont repris dans « Le film du match »
 // (lib/match-sections.js#film). Cette carte ne sert que si le film manque (donnees de buts
 // encaisses absentes) : graphique Chart.js (lib/composants.js), jamais un dessin fait main.
+// Echantillon des buts par tranche (« lors de leurs 20 derniers matchs de championnat. »). Memes
+// cles et memes regles que lib/match-sections.js#periodeButs (tests/film-du-match.test.js verifie
+// qu'ils ecrivent le meme texte) : « _part » quand un match de la serie est ecarte, « sur 19 de
+// leurs 20 derniers matchs » (controle du 24/10/2026, tour 2). "" si le nombre de matchs manque.
+const PERIODE_BUTS={
+  championnat:{same:['match_page.scenario_source_games_same',' lors de leurs {n} derniers matchs de championnat.'],each:['match_page.scenario_source_games_each',' lors de leurs {home} et {away} derniers matchs de championnat.'],
+    sameP:['match_page.scenario_source_games_same_part',' lors de {n} de leurs {m} derniers matchs de championnat.'],eachP:['match_page.scenario_source_games_each_part',' lors de {h} des {hm} derniers matchs de championnat de {home} et {a} des {am} de {away}.']},
+  competition:{same:['match_page.scenario_source_comp_same',' lors de leurs {n} derniers matchs dans cette compétition.'],each:['match_page.scenario_source_comp_each',' lors de leurs {home} et {away} derniers matchs dans cette compétition.'],
+    sameP:['match_page.scenario_source_comp_same_part',' lors de {n} de leurs {m} derniers matchs dans cette compétition.'],eachP:['match_page.scenario_source_comp_each_part',' lors de {h} des {hm} derniers matchs de {home} dans cette compétition et {a} des {am} de {away}.']},
+  toutes:{same:['match_page.scenario_source_all_same',' lors de leurs {n} derniers matchs, toutes compétitions.'],each:['match_page.scenario_source_all_each',' lors de leurs {home} et {away} derniers matchs, toutes compétitions.'],
+    sameP:['match_page.scenario_source_all_same_part',' lors de {n} de leurs {m} derniers matchs, toutes compétitions.'],eachP:['match_page.scenario_source_all_each_part',' lors de {h} des {hm} derniers matchs de {home} et {a} des {am} de {away}, toutes compétitions.']}
+};
+function periodeButs(g,dom,ext){
+  const gh=n(g&&g.games&&g.games.home),ga=n(g&&g.games&&g.games.away);
+  if(!(gh>0&&ga>0))return '';
+  const rg=g.regardes||{};
+  let hm=n(rg.home),am=n(rg.away);
+  hm=hm!==null&&hm>=gh?hm:gh;am=am!==null&&am>=ga?am:ga;
+  const part=hm>gh||am>ga,lib=PERIODE_BUTS[g.perimetre]||PERIODE_BUTS.competition;
+  if(gh===ga&&hm===am)return part?tf(lib.sameP[0],lib.sameP[1],{n:gh,m:hm}):tf(lib.same[0],lib.same[1],{n:gh});
+  return part?tf(lib.eachP[0],lib.eachP[1],{h:gh,hm,a:ga,am,home:dom,away:ext}):tf(lib.each[0],lib.each[1],{home:gh,away:ga});
+}
+// Tranche(s) la(les) plus fournie(s) (vm.editorial.goalTiming.peaks), avec les noms de tranche du
+// film (« 1-15 », « 31-45+ »). Egalite (controle du 24/10/2026 : Chelsea - Tottenham, 1-15 et
+// 31-45+ a 10 buts chacune) : toutes, « à égalité », jamais une seule « tranche la plus fournie ».
+// Rend { prefixe, gras, suite } en texte brut (a echapper), ou null.
+const TRANCHES_FILM=['1-15','16-30','31-45+','46-60','61-75','76-90+'];
+function lignePic(g){
+  if(!g||!Array.isArray(g.slots))return null;
+  const pics=Array.isArray(g.peaks)&&g.peaks.length?g.peaks:(g.peak?[g.peak]:[]);
+  const ip=pics.map(p=>g.slots.indexOf(p)).filter(i=>i>=0);
+  if(!ip.length)return null;
+  const noms=ip.map(i=>g.slots.length===6?TRANCHES_FILM[i]:String(g.slots[i].label||''));
+  const liste=noms.length>1?noms.slice(0,-1).join(', ')+t('match_page.scenario_source_and',' et ')+noms[noms.length-1]:noms[0];
+  const part=Math.round(n(g.slots[ip[0]].share));
+  const min=t('match_page.scenario_peak_middle',' min');
+  if(ip.length>1)return {prefixe:t('match_page.scenario_peak_tie_prefix','Tranches les plus fournies : '),gras:liste+min,
+    suite:tf('match_page.scenario_peak_tie_suffix',', à égalité — {pct} % des buts des deux équipes sont tombés dans chacune.',{pct:part})};
+  return {prefixe:t('match_page.scenario_peak_prefix','Tranche la plus fournie : '),gras:liste+min,
+    suite:' — '+part+t('match_page.scenario_peak_suffix',' % des buts des deux équipes y sont tombés.')};
+}
 function scenarioCarte(vm){
   const g=vm.editorial.goalTiming,C=window.IasharkComposants;
   if(!g||!g.slots.length)return '';
@@ -705,14 +757,15 @@ function scenarioCarte(vm){
   const graphe=C&&C.canvas?C.canvas({type:'line',data:{labels:g.slots.map(sl=>String(sl.label||'').replace('min','')),datasets:[{data:parts,borderColor:'#20d5ef',backgroundColor:'#20d5ef',borderWidth:2,pointRadius:3,tension:.35,fill:false}]},
     options:{layout:{padding:{top:20}},scales:{x:{grid:{display:false},border:{display:false},ticks:{color:'#a3b1c2'}},y:{display:false,beginAtZero:true,grace:'15%'}}},etiquettes:{format:'pct',ancre:'end',alignement:'top',taille:11,extra:{display:true}}},
     {hauteur:150,aria:g.slots.map((sl,i)=>`${sl.label} : ${parts[i]} %`).join(' ; ')}):'';
-  const gh=g.games&&g.games.home,ga=g.games&&g.games.away;
-  const periode=(gh>0&&ga>0)
-    ?(gh===ga?tf('match_page.scenario_source_games_same',' lors de leurs {n} derniers matchs.',{n:gh})
-      :tf('match_page.scenario_source_games_each',' lors de leurs {home} et {away} derniers matchs.',{home:gh,away:ga}))
-      +t('match_page.scenario_source_note',' Fréquence observée, pas une prévision pour celui-ci.')
+  // Perimetre des derniers matchs (controle du 24/10/2026 : « 20 derniers matchs » = 20 derniers
+  // matchs de championnat) ; goalTiming n'existe que sur des comptes verifies (lib/match-view-model.js).
+  const pb=periodeButs(g,vm.identity.home.name,vm.identity.away.name);
+  const periode=pb
+    ?pb+t('match_page.scenario_source_note',' Fréquence observée, pas une prévision pour celui-ci.')
     :t('match_page.scenario_source_suffix',' sur leurs derniers matchs. Fréquence observée, pas une prévision pour celui-ci.');
+  const pic=lignePic(g);
   return carteX('scenario','clock',t('match_page.scenario_title','Scénario probable du match'),`${graphe}
-    <div class="scenario-insight"><b aria-hidden="true">!</b><span>${esc(t('match_page.scenario_peak_prefix','Tranche la plus fournie : '))}<b>${esc(g.peak.label)}${esc(t('match_page.scenario_peak_middle',' min'))}</b> — ${Math.round(g.peak.share)}${esc(t('match_page.scenario_peak_suffix',' % des buts des deux équipes y sont tombés.'))}</span></div>
+    ${pic?`<div class="scenario-insight"><b aria-hidden="true">!</b><span>${esc(pic.prefixe)}<b>${esc(pic.gras)}</b>${esc(pic.suite)}</span></div>`:''}
     <p class="scenario-source">${esc(t('match_page.scenario_source_prefix','Sur '))}${g.totalGoals}${esc(t('match_page.scenario_source_middle',' buts marqués par '))}${esc(vm.identity.home.name)}${esc(t('match_page.scenario_source_and',' et '))}${esc(vm.identity.away.name)}${esc(periode)}</p>`,
     esc(t('match_page.scenario_sub','Quand les buts tombent, par tranche de 15 minutes')));
 }
@@ -795,9 +848,28 @@ function comparatifCarte(vm){
       ?`<b>${esc(meneur)}</b>${esc(t('match_page.comparison_leads_middle',' est devant sur '))}${compte}${esc(t('match_page.comparison_leads_of',' des '))}${total}${esc(t('match_page.comparison_leads_suffix',' mesures comparables.'))}`
       :`${esc(t('match_page.comparison_tie_prefix','Les deux équipes se partagent les '))}${total}${esc(t('match_page.comparison_leads_suffix',' mesures comparables.'))}`;
   }
-  const note=n(c.sampleSize)!==null
-    ?`${t('match_page.comparison_note_with_sample_prefix','Moyennes par match sur ')}${c.sampleSize} ${c.sampleSize>1?t('match_page.comparison_note_match_plural','rencontres'):t('match_page.comparison_note_match_singular','rencontre')}${c.sampleSize<5?t('match_page.comparison_note_thin_sample_suffix',' — échantillon encore court'):''}.`
-    :t('match_page.comparison_note_simple','Moyennes par match.');
+  // Note sous le tableau (controle du 24/10/2026, tour 3) : elle disait « Moyennes par match sur
+  // 19 rencontres » pour tout le tableau, alors que tirs, tirs cadres, possession, corners, fautes,
+  // hors-jeu et arrets viennent d'au plus 10 matchs. Chaque groupe de lignes dit maintenant SON
+  // nombre de matchs, avec le libelle du film (periodeButs) : buts = matchs controles (« lors de
+  // 19 de leurs 20 derniers matchs de championnat »), autres lignes = matchs des statistiques
+  // (« lors de leurs 10 derniers matchs de championnat »). Nombre inconnu (donnees d'avant le
+  // 24/10, pages d'exemple) : « Moyennes par match. », jamais un nombre devine ni celui de
+  // l'autre groupe.
+  const ech=c.samples||{};
+  const estBut=r=>r.label==='Buts marqués'||r.label==='Buts concédés';
+  const aButs=c.rows.some(estBut),aStats=c.rows.some(r=>!estBut(r));
+  const phraseNote=(prefixe,e)=>{
+    const pb=e?periodeButs(e,dom,ext):'';
+    if(!pb)return prefixe+'.';
+    const court=Math.min(n(e.games.home),n(e.games.away))<5;
+    return prefixe+(court?pb.replace(/\.\s*$/,'')+t('match_page.comparison_note_thin_sample_suffix',' — échantillon encore court')+'.':pb);
+  };
+  const moyennes=t('match_page.comparison_note_avg_prefix','Moyennes par match');
+  const note=[
+    aButs?phraseNote(aStats?t('match_page.comparison_note_goals_prefix','Buts marqués et concédés : moyennes par match'):moyennes,ech.goals):'',
+    aStats?phraseNote(aButs?t('match_page.comparison_note_stats_prefix','Autres statistiques : moyennes par match'):moyennes,ech.stats):''
+  ].filter(Boolean).join(' ');
   const table=`<div class="cmp-scroll"><table class="cmp-table">
       <thead><tr>
         <th scope="col">${esc(t('match_page.comparison_table_header','Par match'))}</th>
@@ -912,8 +984,12 @@ function faqCarte(vm){
     if(r||etat==='none')modele.push([t('match_page.faq_q_pick','Quel est le pronostic IASHARK pour ce match ?'),r
       ?tf('match_page.faq_pick_answer','Pari conseillé : {market}, cote {odds}, probabilité estimée {prob}. Estimation statistique, pas une garantie.',{market:esc(marcheFr(vm,r.market)),odds:esc(odds(vm.model.recommendedOdds)),prob:esc(pct(r.probability,0))})
       :esc(t('match_page.faq_pick_none','Le modèle n’a retenu aucun pari sur ce match.'))]);
-    if(g&&g.slots.length&&g.totalGoals)modele.push([t('match_page.faq_q_first15','Que peut-il se passer dans les 15 premières minutes ?'),
-      tf('match_page.faq_first15_answer','Sur les matchs de la saison de ces deux équipes, {share} % des buts sont tombés dans le premier quart d’heure ({n} sur {total}). Fréquence observée, pas une prévision.',{share:Math.round(g.slots[0].share),n:g.slots[0].home+g.slots[0].away,total:g.totalGoals})]);
+    // 15 premieres minutes (controle du 24/10/2026, tour 2) : l'echantillon couvre les derniers
+    // matchs (deux saisons possibles), pas « les matchs de la saison » : meme libelle que le film
+    // (periodeButs). goalTiming n'existe que sur au moins 10 matchs controles par equipe.
+    const periode15=g&&g.slots.length&&g.totalGoals?periodeButs(g,dom,ext):'';
+    if(periode15)modele.push([t('match_page.faq_q_first15','Que peut-il se passer dans les 15 premières minutes ?'),
+      tf('match_page.faq_first15_answer','{share} % des buts marqués par ces deux équipes sont tombés dans le premier quart d’heure ({n} sur {total}){periode} Fréquence observée, pas une prévision.',{share:Math.round(g.slots[0].share),n:g.slots[0].home+g.slots[0].away,total:g.totalGoals,periode:esc(periode15)})]);
     // Une seule source : les nombres de « Ce match ramené à 10 000 matchs » (sim_resume).
     const MS=window.IasharkMatchSections,iss=MS&&MS.issuesAffichees?MS.issuesAffichees(raw):null;
     if(iss){

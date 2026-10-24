@@ -134,6 +134,9 @@ jobs:
           const { oddsSportKeyFor, usesApiFootballPinnacleFallback, pinnacleOddsFromApiFootball } = require('./lib/pinnacle-odds.js');
           const { calcFinalProbs, calcLambdas, calcCriteres, calcFatigue } = require('./lib/engine.js');
           const INTL_STATS = require('./lib/international-team-stats.js');
+          // Film du match (24/10/2026) : seuls les matchs dont les evenements sont arrives et
+          // collent au score a 90 minutes entrent dans les chiffres affiches (lib/film-du-match.js).
+          const FILM_DU_MATCH = require('./lib/film-du-match.js');
           const SHEET_FALLBACK = require('./lib/fixture-sheet-fallback.js');
           const { classifyApiResponse, decideSeasonFallback, decideCurrentSeasonGate, createThrottledFetcher, createDiskCache } = require('./lib/api-fetch-policy.js');
           // MODE ECONOMIE (03/10/2026) : plafonds, compteurs et alertes des 2 abonnements payants
@@ -3346,7 +3349,31 @@ jobs:
               }
               var evPatH=calcEventsPattern(eventsH_raw,home.id);
               var evPatA=calcEventsPattern(eventsA_raw,away.id);
-          
+              // CHIFFRES AFFICHES (film du match, tranche la plus fournie, FAQ, comparatif) :
+              // evPatH/evPatA ci-dessus restent tels quels pour le moteur (part de buts en
+              // 1re mi-temps) ; la page lit evPubH/evPubA, comptes UNIQUEMENT sur les matchs
+              // dont les evenements sont arrives et redonnent le score a 90 minutes
+              // (lib/film-du-match.js). Avant (controle du 24/10/2026), un match aux evenements
+              // vides comptait quand meme, avec zero but : « 51 buts » affiches pour 61 reels.
+              var ligueFilm=LEAGUES_CONFIG.leagues.find(function(l){return l.apiFootballId===lg.id;})||null;
+              function evenementsPublics(fixtures,eventsArr,teamId,selection,nom){
+                var r=FILM_DU_MATCH.matchsRetenus(fixtures,eventsArr);
+                var ec=r.ecartes,nbEcartes=ec.sans_evenements+ec.sans_score+ec.score_different;
+                if(nbEcartes) console.log('  [FILM] '+nom+' : '+r.events.length+'/'+fixtures.length+' matchs retenus ('+ec.sans_evenements+' sans evenements, '+ec.score_different+' buts differents du score, '+ec.sans_score+' sans score)');
+                if(!r.events.length) return null;
+                var p=calcEventsPattern(r.events,teamId);
+                p.games=r.events.length;
+                // Matchs regardes (retenus + ecartes) : la page ecrit « sur 19 de leurs 20 derniers
+                // matchs » quand un match de la serie est ecarte (controle du 24/10/2026).
+                p.regardes=fixtures.length;
+                p.controle_score=true;
+                p.perimetre=FILM_DU_MATCH.perimetre({selection:selection,ligue:ligueFilm});
+                p.ecartes=ec;
+                return p;
+              }
+              var evPubH=evenementsPublics(modelFixturesH,eventsH_raw,home.id,selMatchsH.length>0,home.name);
+              var evPubA=evenementsPublics(modelFixturesA,eventsA_raw,away.id,selMatchsA.length>0,away.name);
+
               function calcHotPlayers(eventsArr,teamId,seasonTop){
                 var last10Events=eventsArr.slice(0,10);
                 var allEvts=[].concat.apply([],last10Events);
@@ -3396,7 +3423,15 @@ jobs:
               ]);
               var playerHistoryH=playerDataBatch[0],playerHistoryA=playerDataBatch[1],currentSquadH=playerDataBatch[2],currentSquadA=playerDataBatch[3];
           
+              // Nombre de matchs derriere ces moyennes (comparatif de la page, controle du 24/10/2026,
+              // tour 3) : la page ecrivait « Moyennes par match sur 19 rencontres » (matchs des
+              // evenements) alors que tirs, possession, corners, fautes, hors-jeu et arrets viennent
+              // d'au plus 10 matchs (getWeightedXGStats). games = matchs dont les statistiques sont
+              // arrivees, regardes = derniers matchs demandes (10 au plus), perimetre = meme libelle
+              // que le film (championnat, competition, toutes). Affichage seulement : aucune valeur
+              // lue par le moteur ne change.
               var matchStatsH={
+                games:xgH.n||0, regardes:last10IdsH_xg.length, perimetre:FILM_DU_MATCH.perimetre({selection:selMatchsH.length>0,ligue:ligueFilm}),
                 possession:xgH.possession_avg, shots_total:xgH.shots_total_avg?parseFloat(xgH.shots_total_avg):null,
                 shots_on:xgH.shots_on_avg?parseFloat(xgH.shots_on_avg):null, shots_off:xgH.shots_off_avg,
                 shots_blocked:xgH.shots_blocked_avg, corners:xgH.corners_avg, fouls:xgH.fouls_avg?parseFloat(xgH.fouls_avg):null,
@@ -3404,6 +3439,7 @@ jobs:
                 xg:xgH.xg_avg, xga:xgH.xga_avg,
               };
               var matchStatsA={
+                games:xgA.n||0, regardes:last10IdsA_xg.length, perimetre:FILM_DU_MATCH.perimetre({selection:selMatchsA.length>0,ligue:ligueFilm}),
                 possession:xgA.possession_avg, shots_total:xgA.shots_total_avg?parseFloat(xgA.shots_total_avg):null,
                 shots_on:xgA.shots_on_avg?parseFloat(xgA.shots_on_avg):null, shots_off:xgA.shots_off_avg,
                 shots_blocked:xgA.shots_blocked_avg, corners:xgA.corners_avg, fouls:xgA.fouls_avg?parseFloat(xgA.fouls_avg):null,
@@ -3878,7 +3914,10 @@ jobs:
                 lineup_away_formation:lineups&&lineups.away?lineups.away.formation:null,
                 streakH,streakA,forme5H,forme5A,
                 evPatH,evPatA,motivH,motivA,matchup,keyAbsenceAlerts,disciplineRisk,topScorersH,topScorersA,
-                slotSummary:calcSlotSummary(evPatH,evPatA),
+                // Consigne du texte IA (controle du 24/10/2026) : seulement les tranches CONTROLEES
+                // (evPubH/evPubA), avec le meme seuil que la page (10 matchs controles par equipe,
+                // meme perimetre : lib/film-du-match.js#paireAffichable) ; sinon rien sur les tranches.
+                slotSummary:FILM_DU_MATCH.paireAffichable(evPubH,evPubA)?calcSlotSummary(evPubH,evPubA):null,
                 eloH,eloA,eloStats,droppingOdds,
                 xgH_xga:xgH.xga_avg,xgA_xga:xgA.xga_avg,
                 xgH_defense_surchauffe:xgH.defense_surchauffe,xgA_defense_surchauffe:xgA.defense_surchauffe,
@@ -4071,12 +4110,12 @@ jobs:
                   var ts=WC_TEAM_STATS_CACHE['tournoi_'+home.id];
                   if(ts&&ts.slots) return {slots:ts.slots,slots_against:ts.slots_against||null,goals_avg:ts.xg_for||null,conceded_avg:ts.xg_against||null,games:ts.games||0};
                   return null;
-                })():(evPatH||null),
+                })():(evPubH||null),
                 events_away:(isInternationalMatch&&!selMatchsA.length)?(function(){
                   var ts=WC_TEAM_STATS_CACHE['tournoi_'+away.id];
                   if(ts&&ts.slots) return {slots:ts.slots,slots_against:ts.slots_against||null,goals_avg:ts.xg_for||null,conceded_avg:ts.xg_against||null,games:ts.games||0};
                   return null;
-                })():(evPatA||null),
+                })():(evPubA||null),
                 top_scorers_home:topScorersH||[],top_scorers_away:topScorersA||[],
                 hot_scorer_home:hotH.scorer,hot_assist_home:hotH.assist,
                 hot_scorer_away:hotA.scorer,hot_assist_away:hotA.assist,

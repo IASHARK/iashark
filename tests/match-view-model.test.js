@@ -46,8 +46,10 @@ test('les données fiables alimentent les cartes avancées', () => {
     simulation_count: 5000,
     crit_home: { source: 'api-sports-team-statistics', sample_size: 8, att: 58, def: 63, fr: 60 },
     crit_away: { source: 'api-sports-team-statistics', sample_size: 9, att: 54, def: 59, fr: 47 },
-    events_home: { goals_avg: 1.6, conceded_avg: 1.1 },
-    events_away: { goals_avg: 1.2, conceded_avg: 1.4 },
+    // Buts marques / concedes : comptes d'evenements CONTROLES par le pipeline, au moins 10 matchs
+    // par equipe (lib/film-du-match.js, controle du 24/10/2026, tour 2).
+    events_home: { goals_avg: 1.6, conceded_avg: 1.1, games: 10, controle_score: true, perimetre: 'championnat' },
+    events_away: { goals_avg: 1.2, conceded_avg: 1.4, games: 12, controle_score: true, perimetre: 'championnat' },
     match_stats_home: { xg: 1.4, possession: 53, shots_total: 12, shots_on: 5, corners: 6 },
     match_stats_away: { xg: 1.1, possession: 47, shots_total: 9, shots_on: 3, corners: 4 }
   }));
@@ -55,6 +57,7 @@ test('les données fiables alimentent les cartes avancées', () => {
   assert.deepEqual(vm.model.expectedGoals, { home: 1.4, away: 1.1 });
   assert.equal(vm.model.simulationCount, 5000);
   assert.equal(vm.comparison.rows.length, 6);
+  assert.equal(vm.comparison.sampleSize, 10);
 });
 
 test('Comparatif : corners/fautes/hors-jeu/arrets ne s\'affichent que si les deux equipes ont la valeur reelle', () => {

@@ -77,53 +77,62 @@ test("migration 0035 : published_at pose par la base, kickoff_at jamais remis a 
   assert.match(essai, /Jamais sur la vraie base/);
 });
 
-test("empreinte : chainee, stable, revision visible, jamais sur des paris masques", () => {
+test("empreinte : chainee, stable, scellee une fois, jamais sur des paris masques", () => {
+  // Format 3 (23/10/2026, tests/integrite-empreintes.test.js) : un pari deja scelle n'est
+  // plus re-scelle ; une vraie correction ajoute un maillon « correction ».
   const reg = E.vide();
   const preds = [pari(2), pari(1), pari(9, { date: "2026-10-02" })];
-  const a = E.ajouter(reg, "2026-10-03", preds, "secret", "2026-10-03T06:20:00Z");
+  const a = E.ajouter(reg, "2026-10-03", preds, "secret", "2026-10-03T06:20:00Z", { aujourdhui: "2026-10-03" });
   assert.equal(a.ajoute, true); assert.equal(a.maillon.nb_paris, 2); assert.equal(a.maillon.precedente, E.GENESE);
-  assert.equal(E.ajouter(reg, "2026-10-03", preds, "secret").raison, "inchange");
-  // Un pari realigne avant son coup d'envoi : nouveau maillon, l'ancien reste.
-  preds[0].prediction = "Victoire Domicile";
-  const b = E.ajouter(reg, "2026-10-03", preds, "secret", "2026-10-03T12:00:00Z");
-  assert.equal(b.raison, "revision"); assert.equal(reg.chaine.length, 2); assert.equal(b.maillon.precedente, a.maillon.empreinte);
-  assert.deepEqual(E.verifier(reg), { ok: true, erreurs: [] });
+  assert.deepEqual(a.maillon.fixtures, [1, 2]);
+  assert.equal(E.ajouter(reg, "2026-10-03", preds, "secret", "2026-10-03T07:00:00Z", { aujourdhui: "2026-10-03" }).raison, "inchange");
+  assert.equal(E.verifier(reg).ok, true);
   // Sel : sans lui, l'empreinte ne se recalcule pas ; revele, elle se verifie sur les paris.
   assert.equal(reg.chaine[0].sel_revele, undefined);
-  assert.equal(E.revelerSels(reg, "secret", "2026-10-03"), 2);
-  assert.deepEqual(E.verifier(reg, preds), { ok: true, erreurs: [] });
+  assert.equal(E.revelerSels(reg, "secret", "2026-10-03"), 1);
+  // Pari du 02/10 : aucun maillon ce jour-la, avant le premier jour au format 3 -> pari hors chaine
+  // (controle du mathematicien du 23/10, N3 : avant, il etait ignore en silence).
+  const v = E.verifier(reg, preds);
+  assert.equal(v.ok, false);
+  assert.deepEqual(v.erreurs, ["pari hors chaine 9 (2026-10-02) : aucun maillon ce jour-la, avant le premier jour au format 3 (2026-10-03), jamais scelle"]);
+  const duJour = preds.filter((p) => p.date === "2026-10-03");
+  assert.equal(E.verifier(reg, duJour).ok, true);
+  assert.deepEqual(E.verifier(reg, duJour).verifies, [1]);
   // Pari modifie apres coup : detecte.
-  const triche = preds.map((p) => Object.assign({}, p)); triche[1].cote = 1.9;
+  const triche = duJour.map((p) => Object.assign({}, p)); triche[1].cote = 1.9;
   assert.equal(E.verifier(reg, triche).ok, false);
   // Probabilite annoncee retouchee apres coup (contre-controle, 30/09/2026) : detectee aussi.
   assert.ok(E.CHAMPS.includes("model_probability"));
-  const proba = preds.map((p) => Object.assign({}, p)); proba[1].model_probability = 71;
+  const proba = duJour.map((p) => Object.assign({}, p)); proba[1].model_probability = 71;
   assert.equal(E.verifier(reg, proba).ok, false);
   // Maillon retouche : chaine rompue.
   const casse = JSON.parse(JSON.stringify(reg)); casse.chaine[0].nb_paris = 5;
   assert.equal(E.verifier(casse).ok, false);
   // Paris masques non relus, ou aucun secret : pas d'empreinte.
-  assert.equal(E.ajouter(E.vide(), "2026-10-03", [pari(3, { redacted: true, prediction: undefined })], "secret").raison, "pari masque non relu");
+  assert.equal(E.ajouter(E.vide(), "2026-10-03", [pari(3, { redacted: true, prediction: undefined })], "secret", "2026-10-03T06:20:00Z").raison, "pari masque non relu");
   assert.equal(E.ajouter(E.vide(), "2026-10-03", preds, "").raison, "secret absent");
-  // Pipeline : fichier public commite, sel revele a J+2, deux derniers jours empreints.
+  // Pipeline : fichier public commite, un seul jour scelle (aujourd'hui), sel revele apres les matchs.
   assert.match(WF, /OUTPUTS="preuves /);
-  assert.match(WF, /EMPREINTES\.revelerSels\(registreEmp,SECRET_EMPREINTE,avant2\)/);
-  assert.match(WF, /\[hierEmp,TODAY\]\.forEach/);
+  assert.match(WF, /EMPREINTES\.revelerSels\(registreEmp,SECRET_EMPREINTE,\{predictions:histo\.predictions,nowMs:Date\.now\(\)\}\)/);
+  assert.match(WF, /EMPREINTES\.ajouter\(registreEmp,TODAY,histo\.predictions,SECRET_EMPREINTE,maintenantEmp,\{aujourdhui:TODAY\}\)/);
+  assert.doesNotMatch(WF, /\[hierEmp,TODAY\]\.forEach/, "plus jamais de re-scelle de la veille");
 });
 
-test("realignement : le moteur suit le pari publie, jamais apres le coup d'envoi", () => {
+test("realignement : moteur fige a la premiere publication, jamais apres le coup d'envoi", () => {
   const match = { id: 7, pari_rec: "Victoire Domicile", cote_rec: "1.6", model_probability: 66, conf: 6.6, market_id: "home-win" };
   const p = pari(7, { moteur: "ancien", moteur_version: "score-matrix", prediction: "Over 1.5" });
   const ko = Date.parse("2026-10-03T19:00:00Z");
   assert.equal(PICK_FREEZE.alignPendingPrediction(Object.assign({}, p), match, { moteur: "v3", moteur_version: "3.0.0", kickoffMs: ko, nowMs: ko + 1 }), false, "coup d'envoi passe");
+  // Pari qui change vraiment avant le coup d'envoi : le moteur suit le nouveau pari, la trace est gardee.
   const q = Object.assign({}, p);
   assert.equal(PICK_FREEZE.alignPendingPrediction(q, match, { moteur: "v3", moteur_version: "3.0.0", kickoffMs: ko, nowMs: ko - 3600000 }), true);
   assert.equal(q.prediction, "Victoire Domicile"); assert.equal(q.moteur, "v3"); assert.equal(q.moteur_version, "3.0.0");
-  // Meme pari, seul le moteur differe : realigne quand meme (l'etiquette suit).
-  const r = Object.assign({}, q, { moteur: "v3" });
-  assert.equal(PICK_FREEZE.alignPendingPrediction(r, match, { moteur: "ancien", moteur_version: "score-matrix", nowMs: 0 }), true);
-  assert.equal(r.moteur, "ancien");
-  assert.equal(PICK_FREEZE.alignPendingPrediction(r, match, { moteur: "ancien", moteur_version: "score-matrix", nowMs: 0 }), false, "rien a changer");
+  assert.equal(q.corrections.length, 1);
+  assert.deepEqual([q.corrections[0].ancien.prediction, q.corrections[0].nouveau.prediction], ["Over 1.5", "Victoire Domicile"]);
+  // Meme pari, seul le moteur differe : plus rien ne bouge (constat du 19/10/2026).
+  const r = Object.assign({}, q, { moteur: "v3", corrections: q.corrections.slice() });
+  assert.equal(PICK_FREEZE.alignPendingPrediction(r, match, { moteur: "ancien", moteur_version: "score-matrix", nowMs: 0 }), false);
+  assert.equal(r.moteur, "v3"); assert.equal(r.moteur_version, "3.0.0"); assert.equal(r.corrections.length, 1);
 });
 
 // Avocat du diable, ronde 4.2 (30/09/2026), rejeu avocat-r41/report-realign.js : match

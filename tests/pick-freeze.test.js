@@ -525,6 +525,10 @@ test("historique : une prediction en attente suit le pari publie (fige), jamais 
   const publie = { id: 1001, pari_rec: "Over 2.5", cote_rec: "1.85", model_probability: 57.4, conf: 5.7, market_id: "over-25", reliability: { label: "Élevée" }, no_signal: false };
   const p = { fixture_id: 1001, type: "single", result: "scheduled", prediction: "Victoire Domicile", cote: 1.62, model_probability: 64.1, conf: 6.4, conf_bucket: "6-7", market: "home-win", date: "2026-09-18" };
   assert.equal(F.alignPendingPrediction(p, publie), true);
+  // Vrai changement de pari : trace gardee (integrite des empreintes, 23/10/2026), rien n'est ecrase en silence.
+  assert.equal(p.corrections.length, 1);
+  assert.deepEqual([p.corrections[0].ancien.prediction, p.corrections[0].nouveau.prediction], ["Victoire Domicile", "Over 2.5"]);
+  delete p.corrections;
   assert.deepEqual(p, { fixture_id: 1001, type: "single", result: "scheduled", prediction: "Over 2.5", cote: 1.85, model_probability: 57.4, conf: 5.7, conf_bucket: "<6", market: "over-25", reliability: { label: "Élevée" }, date: "2026-09-18" });
   assert.equal(F.alignPendingPrediction(p, publie), false, "deja aligne : rien a faire");
   const masquee = { fixture_id: 1001, type: "single", result: "scheduled", redacted: true, date: "2026-09-18" };
@@ -643,10 +647,13 @@ test("motifAnnulation : reporte (PST ou reprogramme), annule (CANC, ABD), sinon 
   assert.equal(PF.motifAnnulation(pari, fx("FT", "2026-09-28T20:00:00Z")), null);
   // Ligne ancienne sans heure d'origine : seul le statut compte (la date de la ligne est celle de l'enregistrement).
   assert.equal(PF.motifAnnulation(Object.assign({}, pari, { kickoff_at: undefined }), fx("FT", "2026-10-02T22:00:00Z")), null);
-  // Annule pour report : marque reporte et masque dans le fichier public (le match peut encore se jouer).
+  // Annule pour report : marque reporte et masque dans le fichier public jusqu'a l'heure d'origine du match ;
+  // ensuite public (23/10/2026 : sinon sa journee ne pouvait plus etre verifiee, tests/integrite-empreintes.test.js).
   const ligne = Object.assign({}, pari, { result: "void", score: null, reporte: true });
-  const pub = PREM.redactPendingPredictions([ligne])[0];
+  const pub = PREM.redactPendingPredictions([ligne], null, { nowMs: Date.parse("2026-09-28T19:00:00Z") })[0];
   assert.deepEqual([pub.prediction, pub.cote, pub.redacted, pub.reporte, pub.result], [undefined, undefined, true, true, "void"]);
+  const apres = PREM.redactPendingPredictions([ligne], null, { nowMs: Date.parse("2026-09-28T20:00:00Z") })[0];
+  assert.deepEqual([apres.prediction, apres.cote, apres.redacted, apres.reporte, apres.result], ["Over 2.5", 1.41, undefined, true, "void"]);
   // POSTPONED_CLOSED (pick-freeze) marque aussi le report.
   const p2 = Object.assign({}, pari);
   assert.equal(PF.voidPostponedPrediction(p2, { id: 7, no_signal_reason: PF.POSTPONED_REASON }, { today: "2026-10-04" }), true);

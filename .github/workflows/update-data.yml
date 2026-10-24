@@ -169,6 +169,8 @@ jobs:
           // Preuve (historique-public, 29/09/2026) : empreinte SHA-256 chainee des paris
           // du jour (preuves/empreintes-paris.json) et retraits motives et publics.
           var EMPREINTES=require('./lib/empreintes-paris.js');
+          // Journal des corrections des paris (integrite des empreintes, 23/10/2026) : preuves/corrections.json.
+          var CORRECTIONS=require('./lib/journal-corrections.js');
           var MOTS_INTERDITS=require('./lib/analyse-mots-interdits.js');
           var RETRAITS=require('./lib/results-exclusions.js');
           var MATCHS_OFFERTS=require('./lib/matchs-offerts.js');
@@ -2128,7 +2130,8 @@ jobs:
           // Sans cle service role, rien n'est masque : le pari ne pourrait plus etre regle.
           function historiquePublic(h,matchsData){ // eslint-disable-line no-unused-vars
             if(!SUPA_URL_PIPELINE||!SUPA_SERVICE_KEY) return h;
-            return Object.assign({},h,{predictions:PREMIUM_FIELDS_LIB.redactPendingPredictions(h.predictions)});
+            // Corrections d'un pari encore masque : valeurs chiffrees avec le secret des empreintes (relues au run suivant).
+            return Object.assign({},h,{predictions:PREMIUM_FIELDS_LIB.redactPendingPredictions(h.predictions,null,{nowMs:Date.now(),secret:process.env.EMPREINTE_SECRET||SUPA_SERVICE_KEY||''})});
           }
           // Hotfix du 14/09/2026 : historique.json a ete masque a la main alors que
           // predictions_archive ne recevait plus de nouvelle prediction depuis le
@@ -2138,6 +2141,9 @@ jobs:
           // equipes, meme date), puis archivee au meme run. Jamais de pari invente.
           var HISTORIQUE_COMPLET_URL='https://raw.githubusercontent.com/IASHARK/iashark/403802257108c83278d0f71e2b0ff6767833b064/historique.json';
           async function rehydraterPredictionsMasquees(predictions){
+            // Trace des corrections d'un pari encore masque (lib/journal-corrections.js) : dechiffree, jamais perdue.
+            var nCorr=CORRECTIONS.dechiffrerCorrections(predictions,process.env.EMPREINTE_SECRET||SUPA_SERVICE_KEY||'');
+            if(nCorr) console.log('  [historique] '+nCorr+' correction(s) de pari masquee(s) relue(s).');
             // Ancien pari d'une exception au gel (remplacement.ancien, masque dans le fichier public) : relu dans
             // la ligne premium du match (raw_response.remplacement), jamais invente (04/10/2026).
             var remplaces=(predictions||[]).filter(function(p){return p&&p.fixture_id!=null&&p.remplacement&&p.remplacement.ancien_masque===true;})
@@ -2321,6 +2327,7 @@ jobs:
               }
             }catch(e){console.log('  Resultats hier erreur:',e.message);}
             var realignees=0;
+            var CORRECTIONS_DU_RUN=[];
             for(var mi=0;mi<matchsData.length;mi++){
               var m=matchsData[mi];
               var alreadyExists=histo.predictions.find(function(p){return p.fixture_id===m.id||(p.home===m.home.n&&p.away===m.away.n&&p.date&&p.date.substring(0,10)===TODAY);});
@@ -2344,8 +2351,12 @@ jobs:
               if(alreadyExists&&m.remplacement_gel&&(alreadyExists.result==='scheduled'||alreadyExists.result==='pending')&&!alreadyExists.remplacement){
                 alreadyExists.remplacement=JSON.parse(JSON.stringify(m.remplacement_gel));
               }
+              // MOTEUR FIGE (23/10/2026) : un pari identique ne change plus rien (ni moteur ni version) ; un pari qui
+              // change vraiment garde la trace (alreadyExists.corrections), scellee par un maillon « correction ».
+              var nCorrAvant=alreadyExists&&Array.isArray(alreadyExists.corrections)?alreadyExists.corrections.length:0;
               try{ if(alreadyExists&&m.pari_rec&&PICK_FREEZE.alignPendingPrediction(alreadyExists,m,{moteur:moteurPari,moteur_version:moteurVersion,kickoffMs:koMs,nowMs:Date.now()})) realignees++; }
               catch(e){ console.log('  [GEL] prediction non realignee : '+(e&&e.message)); }
+              if(alreadyExists&&Array.isArray(alreadyExists.corrections)&&alreadyExists.corrections.length>nCorrAvant) CORRECTIONS_DU_RUN.push({prediction:alreadyExists,correction:alreadyExists.corrections[alreadyExists.corrections.length-1]});
               // Deuxieme barriere : jamais un pari publie pour la premiere fois apres le coup d'envoi.
               if(!alreadyExists&&m.pari_rec&&!publishedBeforeKickoff(m,Date.now())){
                 console.log('  [KICKOFF] historique : '+m.home.n+' vs '+m.away.n+' non ajoute (pas publie avant le coup d\'envoi)');
@@ -2399,35 +2410,168 @@ jobs:
             // des 300 plus recentes, a chaque run, sans aucune archive).
             if(realignees) console.log('  [GEL] '+realignees+' prediction(s) en attente realignee(s) sur le pari publie.');
             await writePredictionsArchive(histo.predictions);
-            // EMPREINTE DU JOUR (historique-public, 29/09/2026) : SHA-256 des paris publies
-            // aujourd'hui et hier (ceux d'hier peuvent encore etre realignes avant leur
-            // coup d'envoi : toute revision ajoute un maillon, rien n'est remplace),
-            // chainee a la precedente. Sel revele deux jours plus tard (matchs joues).
+            // EMPREINTE DU JOUR (historique-public, 29/09/2026 ; format 3 le 23/10/2026,
+            // lib/empreintes-paris.js) : SHA-256 des paris publies AUJOURD'HUI, chainee a la
+            // precedente. Chaque pari est scelle une seule fois, le jour de sa publication,
+            // avant le coup d'envoi (jamais re-scelle la veille ou le lendemain) ; un pari qui
+            // n'a pas pu l'etre est declare « non_scelle » (alerte) ; une vraie correction avant
+            // le coup d'envoi ajoute un maillon « correction », detail dans preuves/corrections.json.
+            // Sel revele 3 h apres le dernier coup d'envoi des paris scelles du jour.
+            // VERIFICATION A CHAQUE RUN : chaque maillon est recalcule (avec le secret, meme
+            // avant la revelation) sur les paris complets (historique en memoire + fichiers
+            // preuves/paris-scelles/), etat a l'heure du maillon. Un ecart met le run au rouge.
+            // AJOUT SEULEMENT (controles du 23/10) : fichier de preuves illisible ou supprime =
+            // alerte et rien n'est ecrit (jamais une chaine repartie de zero) ; la nouvelle chaine
+            // doit prolonger celle du dernier commit, et le journal ne fait que s'allonger.
+            // ALERTES DIFFERENCIEES (controle du 23/10) : un titre par cause (ecart, secret absent,
+            // scelle incomplet...), une ligne « titre<TAB>message » par alerte, relue par l'etape
+            // « Alerte empreintes des paris » (avant, toute alerte disait « ne correspondent plus »).
+            var alerteEmpreintes=function(titre,msg){
+              var ligne=String(msg).replace(/[\r\n\t]+/g,' ');
+              console.log('::error title=Empreintes des paris : '+titre+'::'+ligne);
+              try{ fs.appendFileSync((process.env.RUNNER_TEMP||'.')+'/iashark-empreintes-alerte.txt', titre+'\t'+ligne+'\n'); }catch(e){}
+            };
             try{
               var SECRET_EMPREINTE=process.env.EMPREINTE_SECRET||SUPA_SERVICE_KEY||'';
               var REG_CHEMIN='preuves/empreintes-paris.json';
-              var registreEmp=EMPREINTES.vide();
-              try{ registreEmp=JSON.parse(fs.readFileSync(REG_CHEMIN,'utf8')); }catch(e){}
-              var verif=EMPREINTES.verifier(registreEmp);
-              if(!verif.ok) console.log('::error title=Empreintes des paris::chaine existante invalide : '+verif.erreurs.slice(0,3).join(' ; '));
-              if(!SECRET_EMPREINTE) console.log('::warning title=Empreintes des paris::aucun secret (EMPREINTE_SECRET ou cle service) : pas d empreinte ce run.');
-              else if(verif.ok){
-                var hierEmp=new Date(Date.parse(TODAY+'T12:00:00Z')-86400000).toISOString().slice(0,10);
-                var avant2=new Date(Date.parse(TODAY+'T12:00:00Z')-2*86400000).toISOString().slice(0,10);
-                [hierEmp,TODAY].forEach(function(j){
-                  var a=EMPREINTES.ajouter(registreEmp,j,histo.predictions,SECRET_EMPREINTE,new Date().toISOString());
-                  console.log('  [empreinte] '+j+' : '+(a.ajoute?'maillon '+a.maillon.n+' ('+a.raison+', '+a.maillon.nb_paris+' paris)':a.raison));
+              var DOSSIER_SCELLES='preuves/paris-scelles';
+              var versionCommitee=function(chemin){
+                try{ return require('child_process').execSync('git show HEAD:'+chemin,{encoding:'utf8',stdio:['ignore','pipe','ignore'],maxBuffer:64*1024*1024}); }catch(e){ return null; }
+              };
+              // -> { ok, valeur, avant (version du dernier commit, ou null), raison }
+              var lirePreuve=function(chemin,vide){
+                var avant=null, texteHead=versionCommitee(chemin);
+                if(texteHead!==null){ try{ avant=JSON.parse(texteHead); }catch(e){ return {ok:false,raison:chemin+' illisible dans le dernier commit'}; } }
+                if(!fs.existsSync(chemin)) return avant?{ok:false,raison:chemin+' supprime'}:{ok:true,valeur:vide(),avant:null};
+                try{ return {ok:true,valeur:JSON.parse(fs.readFileSync(chemin,'utf8')),avant:avant}; }
+                catch(e){ return {ok:false,raison:chemin+' illisible ('+(e&&e.message)+')'}; }
+              };
+              var lectReg=lirePreuve(REG_CHEMIN,EMPREINTES.vide);
+              var lectCorr=lirePreuve(CORRECTIONS.CHEMIN,CORRECTIONS.journalVide);
+              if(!lectReg.ok||!lectCorr.ok){
+                alerteEmpreintes('Preuves illisibles','fichier de preuves illisible : '+[lectReg.raison,lectCorr.raison].filter(Boolean).join(' ; ')+'. Rien n est ecrit ce run.');
+              } else {
+              var registreEmp=lectReg.valeur;
+              var journalCorr=lectCorr.valeur;
+              // Paris complets pour la verification : historique en memoire (avant la fenetre de
+              // historique.json) + journees deja figees dans preuves/paris-scelles/ (jamais coupees).
+              // FUSION PAR JOURNEE (M3, mathematicien 23/10, tour 6), meme regle que le script public
+              // (lib/empreintes-paris.js#fusionnerFigees) : un fichier fige n'est ajoute que si sa journee
+              // n'a AUCUN pari dans histo.predictions (avant : pari par pari, des perdants retires de
+              // historique.json etaient combles par le fichier fige et la verification ne voyait rien).
+              // Journee figee retiree alors qu'une plus ancienne reste : alerte « Journee figee retiree ».
+              var erreursFigees=[];
+              var parisPourVerif=function(){
+                var figees={};
+                try{
+                  fs.readdirSync(DOSSIER_SCELLES).filter(function(f){return /^\d{4}-\d{2}-\d{2}\.json$/.test(f);}).forEach(function(f){
+                    var paris=[];
+                    try{ paris=JSON.parse(fs.readFileSync(DOSSIER_SCELLES+'/'+f,'utf8')).paris||[]; }catch(e){}
+                    figees[f.slice(0,10)]=paris;
+                  });
+                }catch(e){}
+                var fusion=EMPREINTES.fusionnerFigees(histo.predictions,figees);
+                erreursFigees=fusion.erreurs;
+                return fusion.paris;
+              };
+              var optsVerif=function(){ return {secret:SECRET_EMPREINTE,corrections:CORRECTIONS.pourVerification(journalCorr),journeesNonVerifiables:CORRECTIONS.journeesNonVerifiables(journalCorr),parisNonScellesExpliques:CORRECTIONS.parisNonScellesExpliques(journalCorr),nowMs:Date.now()}; };
+              var verif=EMPREINTES.verifier(registreEmp,parisPourVerif(),optsVerif());
+              if(erreursFigees.length) alerteEmpreintes('Journee figee retiree',erreursFigees.slice(0,5).join(' ; ')+'. Le bilan se calcule sur historique.json : une journee figee ne sort du fichier qu apres les plus anciennes.');
+              console.log('  [empreinte] verification avant scelle : '+verif.verifies.length+' maillon(s) verifie(s), '+verif.non_verifiables.length+' non verifiable(s), '+verif.erreurs.length+' ecart(s).');
+              if(!verif.ok) alerteEmpreintes('Ecart','ecart avant le scelle du jour : '+verif.erreurs.slice(0,5).join(' ; '));
+              var chaineIntacte=!verif.erreurs.some(function(e){ return /chaine rompue|empreinte fausse|numero|heure anterieure/.test(e); });
+              if(!SECRET_EMPREINTE) alerteEmpreintes('Secret absent','aucun secret (EMPREINTE_SECRET ou cle service) : aucun pari scelle ce run.');
+              else if(chaineIntacte){
+                var maintenantEmp=new Date().toISOString();
+                // Vraies corrections de ce run (pari deja scelle qui change avant son coup d'envoi) : maillon « correction ».
+                CORRECTIONS_DU_RUN.forEach(function(x){
+                  var c=EMPREINTES.corriger(registreEmp,String(x.prediction.date||'').slice(0,10),histo.predictions,SECRET_EMPREINTE,maintenantEmp,{fixture_id:x.prediction.fixture_id,motif:x.correction.motif,le:x.correction.le,ancien:x.correction.ancien});
+                  console.log('  [empreinte] correction '+x.prediction.fixture_id+' : '+(c.ajoute?'maillon '+c.maillon.n:c.raison));
+                  // Alerte sauf pari d'aujourd'hui pas encore scelle (le scelle du jour portera la valeur corrigee) :
+                  // pari scelle a l'ancien format, pari d'un jour passe, sel revele, coup d'envoi passe.
+                  var jourCorr=String(x.prediction.date||'').slice(0,10);
+                  if(!c.ajoute&&!(/pas encore scelle/.test(c.raison)&&jourCorr===TODAY)) alerteEmpreintes('Correction non scellee','correction du pari '+x.prediction.fixture_id+' ('+jourCorr+') non scellee : '+c.raison);
                 });
-                EMPREINTES.revelerSels(registreEmp,SECRET_EMPREINTE,avant2);
+                var a=EMPREINTES.ajouter(registreEmp,TODAY,histo.predictions,SECRET_EMPREINTE,maintenantEmp,{aujourdhui:TODAY});
+                console.log('  [empreinte] '+TODAY+' : '+(a.ajoute?'maillon '+a.maillon.n+' ('+a.raison+', '+a.maillon.nb_paris+' paris)':a.raison));
+                // Scelle du jour incomplet : alerte (pari masque non relu, coup d'envoi deja passe, sel deja revele).
+                if(a.en_attente.length) alerteEmpreintes('Scelle incomplet','scelle du jour incomplet : '+a.en_attente.length+' pari(s) masque(s) non relu(s) ('+a.en_attente.map(function(x){return x.fixture_id;}).join(', ')+')');
+                if(a.non_scelles.length) alerteEmpreintes('Scelle incomplet',a.non_scelles.length+' pari(s) du jour declare(s) non scelle(s) : '+a.non_scelles.map(function(x){return x.fixture_id+' ('+x.raison+')';}).join(', '));
+                // D (23/10) : declare a l'heure de son coup d'envoi ou apres = erreur permanente de la verification, sauf note publique.
+                var apresCoupJour=a.non_scelles.filter(function(x){return x.apres_coup;});
+                if(apresCoupJour.length) alerteEmpreintes('Pari ajoute apres coup',apresCoupJour.length+' pari(s) du jour declare(s) a l heure de leur coup d envoi ou apres : '+apresCoupJour.map(function(x){return x.fixture_id;}).join(', ')+'. Erreur permanente sauf note « pari_non_scelle » dans '+CORRECTIONS.CHEMIN+'.');
+                // K1 (23/10) : pari sans heure de coup d'envoi, jamais scelle : anteriorite non prouvee.
+                var sansHeure=a.non_scelles.filter(function(x){return x.anteriorite_non_prouvee;});
+                if(sansHeure.length) alerteEmpreintes('Anteriorite non prouvee',sansHeure.length+' pari(s) sans heure de coup d envoi, non scelle(s) : '+sansHeure.map(function(x){return x.fixture_id;}).join(', '));
+                var decl=EMPREINTES.declarerNonScelles(registreEmp,histo.predictions,maintenantEmp,{aujourdhui:TODAY});
+                if(decl.declares){
+                  var apresCoup=[];
+                  decl.maillons.forEach(function(m){ (m.non_scelles||[]).forEach(function(x){ if(x.apres_coup) apresCoup.push(x.fixture_id+' ('+m.jour+')'); }); });
+                  alerteEmpreintes('Scelle incomplet',decl.declares+' pari(s) de jours passes jamais scelle(s), declare(s) non scelle(s) (maillons '+decl.maillons.map(function(m){return m.n;}).join(', ')+')');
+                  // Declare apres son jour ET apres son coup d'envoi : erreur permanente de la verification, sauf note publique.
+                  if(apresCoup.length) alerteEmpreintes('Pari ajoute apres coup',apresCoup.length+' pari(s) declare(s) apres leur jour et leur coup d envoi : '+apresCoup.join(', ')+'. Erreur permanente sauf note « pari_non_scelle » dans '+CORRECTIONS.CHEMIN+'.');
+                }
+                var reveles=EMPREINTES.revelerSels(registreEmp,SECRET_EMPREINTE,{predictions:histo.predictions,nowMs:Date.now()});
+                if(reveles) console.log('  [empreinte] '+reveles+' sel(s) revele(s) (dernier match scelle de leur journee commence depuis 3 h).');
+                // Journal public des corrections : nouvelles traces ajoutees, valeurs completees au reglement.
+                var majCorr=CORRECTIONS.mettreAJourJournal(journalCorr,histo.predictions,Date.now());
+                if(majCorr.ajoutees||majCorr.completees) console.log('  [corrections] '+majCorr.ajoutees+' ajoutee(s), '+majCorr.completees+' completee(s) dans '+CORRECTIONS.CHEMIN+'.');
+                // Ajout seulement : la chaine prolonge celle du dernier commit, le journal aussi.
+                // preuves/paris-scelles/ aussi (A2, 23/10) : un fichier du dernier commit supprime ou modifie = alerte, rien n'est ecrit.
+                var scellesHead={}, scellesIci={};
+                try{
+                  require('child_process').execSync('git ls-tree --name-only HEAD '+DOSSIER_SCELLES+'/',{encoding:'utf8',stdio:['ignore','pipe','ignore']}).split('\n').filter(Boolean).forEach(function(chemin){
+                    var f=chemin.split('/').pop(); var t=versionCommitee(chemin); if(t!==null) scellesHead[f]=t;
+                  });
+                }catch(e){}
+                try{ fs.readdirSync(DOSSIER_SCELLES).forEach(function(f){ scellesIci[f]=fs.readFileSync(DOSSIER_SCELLES+'/'+f,'utf8'); }); }catch(e){}
+                var reecritures=EMPREINTES.prolonge(lectReg.avant,registreEmp).concat(CORRECTIONS.ajoutSeulement(lectCorr.avant,journalCorr)).concat(EMPREINTES.dossierAjoutSeulement(scellesHead,scellesIci));
+                if(reecritures.length) alerteEmpreintes('Reecriture refusee','reecriture des preuves refusee : '+reecritures.slice(0,5).join(' ; ')+'. Rien n est ecrit ce run.');
+                else {
                 if(!fs.existsSync('preuves')) fs.mkdirSync('preuves',{recursive:true});
                 fs.writeFileSync(REG_CHEMIN,JSON.stringify(registreEmp,null,2));
+                fs.writeFileSync(CORRECTIONS.CHEMIN,JSON.stringify(journalCorr,null,2));
+                // Verification apres scelle, puis journees verifiees et revelees figees dans
+                // preuves/paris-scelles/AAAA-MM-JJ.json (ecrit une fois, jamais coupe par la
+                // fenetre de historique.json) : tout le monde peut y refaire le calcul.
+                // JAMAIS AVANT LE REGLEMENT (avocat du diable, 23/10) : une journee n'est figee en clair
+                // que si CHAQUE pari de ce jour est regle (lib/empreintes-paris.js#journeeAFiger,
+                // CORRECTIONS.pariPublic) ; on se fonde sur le reglement, pas sur l'heure (match decale,
+                // kickoff_at jamais mis a jour ; journee du 21/10 dont le sel est deja public).
+                var verifApres=EMPREINTES.verifier(registreEmp,parisPourVerif(),optsVerif());
+                if(!verifApres.ok) alerteEmpreintes('Ecart','ecart apres le scelle du jour : '+verifApres.erreurs.slice(0,5).join(' ; '));
+                var parJourEmp={};
+                registreEmp.chaine.forEach(function(m){ (parJourEmp[m.jour]=parJourEmp[m.jour]||[]).push(m); });
+                Object.keys(parJourEmp).forEach(function(jour){
+                  var chemin=DOSSIER_SCELLES+'/'+jour+'.json';
+                  if(fs.existsSync(chemin)) return;
+                  if(!EMPREINTES.journeeAFiger(registreEmp,histo.predictions,jour,verifApres.verifies,Date.now()).ok) return;
+                  var paris=histo.predictions.filter(function(p){return p&&p.fixture_id!=null&&(p.type||'single')==='single'&&String(p.date||'').slice(0,10)===jour;});
+                  if(!paris.length||paris.some(function(p){return p.redacted||!p.prediction||!CORRECTIONS.pariPublic(p,Date.now());})) return;
+                  var champs=EMPREINTES.CHAMPS.concat(['date','type','corrections']);
+                  if(!fs.existsSync(DOSSIER_SCELLES)) fs.mkdirSync(DOSSIER_SCELLES,{recursive:true});
+                  fs.writeFileSync(chemin,JSON.stringify({jour:jour,ecrit_le:new Date().toISOString(),maillons:parJourEmp[jour].map(function(m){return m.n;}),paris:paris.map(function(p){ var o={}; champs.forEach(function(k){ if(p[k]!==undefined) o[k]=p[k]; }); return o; })},null,2));
+                  console.log('  [empreinte] journee '+jour+' verifiee et figee dans '+chemin+' ('+paris.length+' paris).');
+                });
+                }
               }
-            }catch(e){ console.log('::warning title=Empreintes des paris::'+(e&&e.message)); }
+              else alerteEmpreintes('Chaine rompue','chaine des empreintes rompue : aucun nouveau maillon ce run.');
+              }
+            }catch(e){ alerteEmpreintes('Erreur du pipeline','erreur pendant le scelle ou la verification : '+(e&&e.message)); }
             // Cache JSON local : fenetre recente bornee pour la taille de page
             // (§33), plus genereuse que l'ancien plafond (500 au lieu de 300) - ce
             // n'est plus destructif puisque l'historique complet vit desormais dans
             // Supabase.
-            histo.predictions=histo.predictions.slice(0,500);
+            // JOURNEES ENTIERES (23/10/2026) : la limite de 500 paris ne coupe plus une journee en
+            // deux (le 14/10 avait perdu une partie de ses paris dans ce fichier, et sa verification
+            // publique tombait en « ne correspond plus » chaque matin). Une journee est gardee entiere
+            // ou retiree entiere ; les journees verifiees restent dans preuves/paris-scelles/.
+            // A2 (23/10) : toute journee au format 3 pas encore figee dans preuves/paris-scelles/ reste entiere
+            // dans historique.json (sinon ses paris sortiraient des donnees publiques). Registre illisible : rien n'est coupe.
+            var registreFenetre=null, joursFiges=[];
+            try{ registreFenetre=JSON.parse(fs.readFileSync('preuves/empreintes-paris.json','utf8')); }catch(e){}
+            try{ joursFiges=fs.readdirSync('preuves/paris-scelles').filter(function(f){return /^\d{4}-\d{2}-\d{2}\.json$/.test(f);}).map(function(f){return f.slice(0,10);}); }catch(e){}
+            histo.predictions=EMPREINTES.fenetreJourneesEntieres(histo.predictions,500,{registre:registreFenetre,figees:joursFiges});
             var beforeClean=histo.predictions.length;
             histo.predictions=histo.predictions.filter(function(p){return p.type!=='combi';});
             var cleaned=beforeClean-histo.predictions.length;
@@ -5274,6 +5418,14 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             for f in $OUTPUTS; do
+              # preuves/ : fichiers publics en ajout seulement (corrections.json, paris-scelles/...).
+              # Jamais supprime en bloc : un fichier present seulement sur main (ajoute par une PR
+              # fusionnee pendant le run) est garde ; nos fichiers du run sont reposes par-dessus.
+              if [ "$f" = "preuves" ]; then
+                mkdir -p preuves
+                if [ -d "$SAVE/preuves" ]; then cp -R "$SAVE/preuves/." preuves/; fi
+                continue
+              fi
               rm -rf "$f"
               [ -e "$SAVE/$f" ] && cp -R "$SAVE/$f" .
             done
@@ -5312,6 +5464,39 @@ jobs:
             exit 1
           fi
           echo "Ecritures Supabase : aucun echec signale."
+
+      - name: Alerte empreintes des paris
+        # Ecart entre les paris et leurs empreintes publiees (preuves/empreintes-paris.json), chaine
+        # rompue, secret absent, scelle incomplet, pari ajoute apres coup... (fichier ecrit par le
+        # pipeline : une ligne « titre<TAB>message » par alerte, chaque cause avec son propre titre).
+        # NON BLOQUANTE (23/10) : le run du calcul du matin ne passe PAS au rouge pour une alerte
+        # empreintes (« Videos IASHARK du jour » exige conclusion == success, et « Canal Telegram »
+        # annoncerait « Le calcul du matin a echoue »). L'alerte part a part : resume du run, annotations
+        # et message Telegram dedie « Alerte empreintes » dans la conversation privee de Clement.
+        # curl --max-time 20 : une API Telegram figee ne garde plus le job jusqu'a son annulation.
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          F="$RUNNER_TEMP/iashark-empreintes-alerte.txt"
+          if [ -s "$F" ]; then
+            echo "### Empreintes des paris : alerte(s)" >> "$GITHUB_STEP_SUMMARY"
+            while IFS=$'\t' read -r titre msg; do
+              echo "::error title=Empreintes des paris : $titre::$msg"
+              echo "- $titre : $msg" >> "$GITHUB_STEP_SUMMARY"
+            done < "$F"
+            if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+              TITRES=$(cut -f1 "$F" | sort -u | paste -sd ',' - | sed 's/,/, /g')
+              N=$(wc -l < "$F" | tr -d ' ')
+              curl -sS --max-time 20 -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+                --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+                --data-urlencode "text=Alerte empreintes : ${N} alerte(s) sur les empreintes des paris (${TITRES}). Cette alerte ne bloque pas le calcul du matin. Detail : ${RUN_URL}" > /dev/null || true
+            fi
+          else
+            echo "Empreintes des paris : chaque maillon verifiable correspond aux paris."
+          fi
 
       - name: Alerte moteur v3
         # Moteur v3 allume (variable MOTEUR_V3=1) mais indisponible ce run : etape Python

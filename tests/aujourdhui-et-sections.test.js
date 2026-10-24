@@ -6,7 +6,7 @@
 //    en contenait (faux chiffres constants sous le flou) ;
 //  - un cadenas, une ligne « Ce que tu debloques », UN bouton ;
 //  - aucun mot interdit (sur, garanti, gagnant, mise, gain...) ;
-//  - « Si ce match se jouait 10 000 fois » : comptes = pourcentage entier x 100,
+//  - « Ce match ramené à 10 000 matchs » : comptes = pourcentage entier x 100,
 //    jamais « rejoue » ni « tires au sort » ; pas de zone chaude (NO-GO) ;
 //  - « Et si » arrondi a 5 points ; premier but cache dans les tranches fausses ;
 //  - jumeaux : au moins 200, comptes bruts ;
@@ -164,11 +164,11 @@ const RESUME = { v: "grille-v3-1", base: 10000, issues: { dom: 6000, nul: 2400, 
   total_buts: [{ buts: "0", n: 700 }, { buts: "1", n: 2000 }, { buts: "2", n: 2900 }, { buts: "3", n: 2200 }, { buts: "4+", n: 2200 }] };
 const specs = (h) => [...h.matchAll(/data-ch="([^"]*)"/g)].map((m) => JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&")));
 
-test("« Si ce match se jouait 10 000 fois » : sim_resume seulement (% entier x 100), jamais de tirage annonce, l'issue de l'Avis renvoie a l'Avis", () => {
+test("« Ce match ramené à 10 000 matchs » : sim_resume seulement (% entier x 100), jamais de tirage annonce, l'issue de l'Avis renvoie a l'Avis", () => {
   const raw = { market_id: "home-win", chance_iashark: 60, p1: 58.9, pn: 24.3, p2: 16.8, sim_resume: RESUME, marches_panneau: PANNEAU };
   const c = ctx(raw);
   const h = MS.simulation(c);
-  assert.match(h, /Si ce match se jouait 10 000 fois/);
+  assert.match(h, /Ce match ramené à 10 000 matchs/);
   assert.doesNotMatch(h, /rejoué|tirés au sort|simulations/i);
   assert.match(h, /≈ 2\s400 fois/);
   assert.match(h, /≈ 1\s600 fois/);

@@ -34,7 +34,7 @@ test("garde vuePro : « 10 000 fois » et les jumeaux, comme le film et le premi
   const vm = { identity: { home: { name: "A" }, away: { name: "B" } }, model: {} };
   const raw = { sim_resume: { base: 10000, issues: { dom: 4500, nul: 2800, ext: 2700 }, scores: [], total_buts: [] } };
   assert.equal(MS.simulation({ raw, vm, vuePro: false, verrouPro: false, dit: MS.registre() }), "");
-  assert.match(MS.simulation({ raw, vm, vuePro: true, verrouPro: false, dit: MS.registre() }), /Si ce match se jouait 10 000 fois/);
+  assert.match(MS.simulation({ raw, vm, vuePro: true, verrouPro: false, dit: MS.registre() }), /Ce match ramené à 10 000 matchs/);
   assert.equal(MS.jumeaux({ raw: { jumeaux: { resultat: { n: 300, depuis: "2019", niveau: "meme", dom: 150, nul: 80, ext: 70 } } }, vm, vuePro: false, verrouPro: false, dit: MS.registre() }), "");
 });
 

@@ -18,7 +18,7 @@ test("la page simple expose une seule colonne de sections réelles, sans onglets
   const ms=read("lib/match-sections.js");
   assert.doesNotMatch(js,/data-tab=/);assert.doesNotMatch(js,/role="tablist"/);
   for(const value of ['L’avis IASHARK','Pari recommandé'])assert.match(js,new RegExp(value));
-  for(const value of ['Si ce match se jouait 10 000 fois','Le film du match','Qui ouvre le score ?','Les jumeaux du match','Les deux équipes','Les joueurs','L’arbitre','Marchés'])assert.match(ms,new RegExp(value.replace(/[?]/g,'\\?')));
+  for(const value of ['Ce match ramené à 10 000 matchs','Le film du match','Qui ouvre le score ?','Les jumeaux du match','Les deux équipes','Les joueurs','L’arbitre','Marchés'])assert.match(ms,new RegExp(value.replace(/[?]/g,'\\?')));
   for(const retire of ['Confrontations directes','function h2hFold','h2h_title','faq_q_h2h'])assert.ok(!js.includes(retire)&&!ms.includes(retire),retire+" reintroduit");
   // Blocs de l'ancienne page remis (version du commit c7d727c54), au format des sections V4.
   for(const remis of ['Forme récente','Classement','Compositions','Marchés joueurs','Questions fréquentes','Ce que dit le modèle','Probabilités et cotes','Comparatif des deux équipes','Scénario probable du match'])assert.ok(js.includes(remis),remis+" absent");
@@ -373,7 +373,7 @@ test("la page match affiche les marches traduits, jamais le libelle brut",()=>{
 test("la FAQ revient en fin de page, sans face-a-face, avec les chiffres de la page",()=>{
   // 04/10/2026, soir (Clement : rien de l'ancienne page ne doit manquer, sauf « Confrontations
   // directes ») : questions frequentes remises, a la fin. Pas de question sur le face-a-face ;
-  // les chances de chaque equipe sont celles de « Si ce match se jouait 10 000 fois »
+  // les chances de chaque equipe sont celles de « Ce match ramené à 10 000 matchs »
   // (sim_resume), jamais p1/pn/p2 a cote (une seule source).
   const faq=blocDe("function faqCarte(vm)","\n}\n");
   assert.match(faq,/faq_section_title/);

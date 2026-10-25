@@ -1,5 +1,5 @@
 {
-  "_status": "REVIEW - da far rivedere (giurista + madrelingua) prima dell'attivazione. Nessuna promessa di vincita. La pagina Metodologia non esiste ancora in italiano (link alla pagina inglese).",
+  "_status": "REVIEW - testi rivisti il 25/10/2026 (contenuti Pro e prezzi attuali, pronostico gratuito con l'account gratuito). Nessuna promessa di vincita, nessuna puntata, nessuna emoji.",
   "locale": "it",
   "common": {
     "greeting": "Ciao,",
@@ -7,11 +7,11 @@
     "kickoff_label": "Calcio d'inizio",
     "match_link": "Vedi la partita",
     "rg_title": "Gioco responsabile · 18+",
-    "rg_body": "IASHARK pubblica analisi statistiche sul calcio. Non è un sito di scommesse: non accetta puntate, e una probabilità non è mai una certezza. Scommettere comporta rischi (perdita di denaro, dipendenza). Servizio riservato ai maggiori di 18 anni.",
+    "rg_body": "IASHARK pubblica analisi di calcio e non accetta scommesse. Una probabilità calcolata non è mai una certezza. Le scommesse sportive comportano un rischio di perdita di denaro e di dipendenza. Riservato ai maggiori di 18 anni.",
     "rg_help_phone": "Hai bisogno di aiuto? {{helplineName}}: {{helplinePhone}}.",
     "rg_help_nophone": "Hai bisogno di aiuto? {{helplineName}}:",
-    "rg_more": "Le nostre risorse sul gioco responsabile",
-    "footer_reason_marketing": "Ricevi questa email perché hai accettato di ricevere le analisi gratuite e i consigli d'uso di IASHARK.",
+    "rg_more": "I nostri consigli sul gioco responsabile",
+    "footer_reason_marketing": "Ricevi questa email perché hai accettato di ricevere le email di IASHARK.",
     "footer_reason_welcome": "Email inviata dopo la creazione del tuo account IASHARK.",
     "unsubscribe": "Annulla l'iscrizione con un clic",
     "manage": "Gestisci le email in Il mio account",
@@ -22,83 +22,230 @@
   "campaigns": {
     "welcome": {
       "subject": "Benvenuto su IASHARK: da dove iniziare",
-      "preheader": "Come usare il sito, la partita gratuita e la metodologia.",
+      "preheader": "Il tuo account gratuito è pronto: ogni giorno, il pronostico di una partita è gratis.",
       "title": "Benvenuto su IASHARK",
       "blocks": [
-        { "type": "p", "text": "Il tuo account gratuito IASHARK è pronto. Ecco come usare il sito in pochi minuti." },
-        { "type": "list", "ordered": true, "items": [
-          "Ogni giorno l'analisi completa di una partita è gratuita: la trovi in evidenza nella pagina iniziale.",
-          "Nella pagina di una partita leggi le probabilità stimate dal modello, i fattori considerati e i loro limiti.",
-          "La pagina Metodologia spiega da dove vengono questi numeri e come leggerli."
-        ] },
-        { "type": "p", "if": "hasFreeMatch", "text": "La partita gratuita del momento:" },
-        { "type": "match", "if": "hasFreeMatch" },
-        { "type": "cta", "label": "Leggi la metodologia (pagina in inglese)", "link": "methodology" },
-        { "type": "link", "label": "Vai al mio account", "link": "account" },
-        { "type": "p", "if": "notOptedIn", "text": "Non hai chiesto di ricevere via email le nostre analisi gratuite e i consigli: ti invieremo solo le email relative al tuo account. Puoi cambiare idea in qualsiasi momento in Il mio account, sezione Notifiche." }
+        {
+          "type": "p",
+          "text": "Il tuo account gratuito è pronto. Ecco come usarlo:"
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "Ogni giorno, una partita è gratis. Con il tuo account gratuito vedi il suo pronostico, la sua probabilità calcolata e il perché.",
+            "Confronti questa probabilità con la quota del tuo operatore autorizzato, poi decidi tu.",
+            "La pagina Metodologia spiega come vengono calcolate queste probabilità."
+          ]
+        },
+        {
+          "type": "p",
+          "if": "hasFreeMatch",
+          "text": "La partita gratuita in questo momento:"
+        },
+        {
+          "type": "match",
+          "if": "hasFreeMatch"
+        },
+        {
+          "type": "cta",
+          "if": "hasFreeMatch",
+          "label": "Vedi il pronostico gratuito",
+          "link": "freeMatch"
+        },
+        {
+          "type": "cta",
+          "if": "noFreeMatch",
+          "label": "Vedi le partite del giorno",
+          "link": "home"
+        },
+        {
+          "type": "link",
+          "label": "Leggi la metodologia",
+          "link": "methodology"
+        },
+        {
+          "type": "p",
+          "if": "notOptedIn",
+          "text": "Non hai chiesto di ricevere le nostre email: ti invieremo solo le email relative al tuo account. Puoi cambiare idea in qualsiasi momento in Il mio account, sezione Notifiche."
+        }
       ]
     },
     "free_match": {
-      "subject": "La partita gratuita del giorno: {{freeMatchHome}} – {{freeMatchAway}}",
-      "preheader": "L'analisi completa di questa partita è aperta gratis con il tuo account.",
-      "title": "La tua analisi gratuita del giorno",
+      "subject": "La tua partita gratuita: {{freeMatchHome}} – {{freeMatchAway}}",
+      "preheader": "Il pronostico di questa partita si apre con il tuo account gratuito.",
+      "title": "La tua partita gratuita",
       "blocks": [
-        { "type": "p", "text": "Ogni giorno IASHARK apre gratis a tutti gli account l'analisi completa di una partita. Ecco quella di oggi:" },
-        { "type": "match" },
-        { "type": "p", "text": "Troverai le probabilità stimate, i fattori usati dal modello e i punti di attenzione. Sono stime statistiche: l'esito di una partita resta incerto." },
-        { "type": "cta", "label": "Vedi l'analisi gratuita", "link": "freeMatch" }
+        {
+          "type": "p",
+          "text": "Ogni giorno, IASHARK regala il pronostico di una partita a tutti gli account gratuiti. Eccolo:"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "p",
+          "text": "Accedi dalla pagina della partita: vedi il pronostico scelto, la sua probabilità calcolata e il perché. Lo confronti con la quota del tuo operatore autorizzato e decidi."
+        },
+        {
+          "type": "cta",
+          "label": "Vedi il pronostico gratuito",
+          "link": "freeMatch"
+        },
+        {
+          "type": "p",
+          "if": "hasTrial",
+          "text": "Per aprire tutte le partite del giorno: Pro, con {{trialDays}} giorni di prova per un primo abbonamento mensile."
+        },
+        {
+          "type": "link",
+          "if": "hasTrial",
+          "label": "Vedi l'offerta Pro",
+          "link": "pro"
+        }
       ]
     },
     "pro_features": {
       "subject": "Cosa sblocca IASHARK Pro",
-      "preheader": "L'elenco dei contenuti Pro e il loro prezzo, senza giri di parole.",
+      "preheader": "Tutte le partite del giorno aperte, e i prezzi esatti.",
       "title": "Cosa aggiunge Pro al tuo account gratuito",
       "blocks": [
-        { "type": "p", "text": "Il tuo account gratuito dà accesso all'analisi completa di una partita al giorno, al blog e agli strumenti in prova. Ecco cosa aggiunge Pro:" },
-        { "type": "list", "items": [
-          "L'analisi completa su tutte le partite",
-          "I sei strumenti collegati alle probabilità del modello",
-          "Il diario delle decisioni sincronizzato",
-          "Il monitoraggio della bankroll collegato all'account"
-        ] },
-        { "type": "p", "if": "hasProYear", "text": "Prezzi sulla versione {{siteVersion}} del sito: {{proWeekPrice}} a settimana, {{proPrice}} al mese o {{proYearPrice}} all'anno. Lo stesso accesso Pro per ogni durata, disdicibile in qualsiasi momento da Il mio account." },
-        { "type": "p", "if": "hasNoProYear", "text": "Prezzi sulla versione {{siteVersion}} del sito: {{proWeekPrice}} a settimana o {{proPrice}} al mese. Lo stesso accesso Pro per ogni durata, disdicibile in qualsiasi momento da Il mio account." },
-        { "type": "p", "if": "hasOnlyProMonth", "text": "Prezzo sulla versione {{siteVersion}} del sito: {{proPrice}} al mese, disdicibile in qualsiasi momento da Il mio account." },
-        { "type": "p", "text": "Pro dà accesso a più analisi e strumenti; non rende nessuna partita più prevedibile." },
-        { "type": "cta", "label": "Vedi i dettagli dell'offerta", "link": "pricing" },
-        { "type": "p", "text": "Se l'account gratuito ti basta, non devi fare nulla." }
+        {
+          "type": "p",
+          "text": "Con il tuo account gratuito hai ogni giorno il pronostico di una partita gratis. Pro apre tutte le altre:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Tutte le partite del giorno: il pronostico scelto, la sua probabilità calcolata e il perché",
+            "Il film della partita: sei quarti d'ora, e le due squadre a confronto",
+            "I risultati più probabili, nei campionati misurati meglio"
+          ]
+        },
+        {
+          "type": "list",
+          "if": "hasTickets",
+          "items": [
+            "La multipla piccola e quella grande del giorno, la Selezione d'oro e il marcatore del giorno"
+          ]
+        },
+        {
+          "type": "p",
+          "if": "hasProYear",
+          "text": "Prezzi sulla versione {{siteVersion}} del sito: {{proWeekPrice}} a settimana, {{proPrice}} al mese o {{proYearPrice}} all'anno. Lo stesso accesso Pro per ogni durata, disdicibile in qualsiasi momento da Il mio account."
+        },
+        {
+          "type": "p",
+          "if": "hasNoProYear",
+          "text": "Prezzi sulla versione {{siteVersion}} del sito: {{proWeekPrice}} a settimana o {{proPrice}} al mese. Lo stesso accesso Pro per ogni durata, disdicibile in qualsiasi momento da Il mio account."
+        },
+        {
+          "type": "p",
+          "if": "hasOnlyProMonth",
+          "text": "Prezzo sulla versione {{siteVersion}} del sito: {{proPrice}} al mese, disdicibile in qualsiasi momento da Il mio account."
+        },
+        {
+          "type": "p",
+          "if": "hasTrial",
+          "text": "{{trialDays}} giorni di prova per un primo abbonamento mensile: la carta viene richiesta, nulla viene addebitato durante la prova. Poi {{proPrice}} al mese, addebitati automaticamente salvo disdetta prima della fine della prova."
+        },
+        {
+          "type": "cta",
+          "label": "Vedi l'offerta Pro",
+          "link": "pro"
+        },
+        {
+          "type": "p",
+          "text": "Se l'account gratuito ti basta, non devi fare nulla."
+        }
       ]
     },
     "inactive_7d": {
-      "subject": "Le partite di questo fine settimana su IASHARK",
-      "preheader": "Alcune partite del fine settimana seguite da IASHARK.",
-      "title": "Ecco le partite di questo fine settimana",
+      "subject": "Le partite di questo weekend su IASHARK",
+      "preheader": "Le partite del weekend, e la tua partita gratuita ogni giorno.",
+      "title": "Le partite di questo weekend",
       "blocks": [
-        { "type": "p", "text": "Ecco alcune partite di questo fine settimana seguite da IASHARK:" },
-        { "type": "matches" },
-        { "type": "p", "text": "L'analisi completa di una partita resta gratuita ogni giorno con il tuo account." },
-        { "type": "cta", "label": "Vedi tutte le partite", "link": "home" }
+        {
+          "type": "p",
+          "text": "Ecco alcune partite di questo weekend su IASHARK:"
+        },
+        {
+          "type": "matches"
+        },
+        {
+          "type": "p",
+          "text": "Ogni giorno, il pronostico di una partita resta gratuito con il tuo account gratuito."
+        },
+        {
+          "type": "cta",
+          "label": "Vedi tutte le partite",
+          "link": "home"
+        },
+        {
+          "type": "p",
+          "if": "hasTrial",
+          "text": "Per aprire tutte le partite del giorno: Pro, con {{trialDays}} giorni di prova per un primo abbonamento mensile."
+        },
+        {
+          "type": "link",
+          "if": "hasTrial",
+          "label": "Vedi l'offerta Pro",
+          "link": "pro"
+        }
       ]
     },
     "inactive_30d": {
       "subject": "Il tuo account IASHARK è ancora attivo",
-      "preheader": "L'analisi gratuita del giorno resta disponibile con il tuo account.",
+      "preheader": "Ogni giorno, il pronostico di una partita resta gratuito con il tuo account gratuito.",
       "title": "Il tuo account è ancora qui",
       "blocks": [
-        { "type": "p", "text": "È da un po' che non torni su IASHARK. Il tuo account gratuito è ancora attivo e l'analisi completa di una partita resta gratuita ogni giorno." },
-        { "type": "cta", "label": "Torna su IASHARK", "link": "home" },
-        { "type": "p", "text": "Se queste email non ti sono più utili, annulla l'iscrizione con un clic dal link in fondo a questo messaggio. Se non visiti il sito e non apri le nostre email, smetteremo comunque di scriverti tra 30 giorni." }
+        {
+          "type": "p",
+          "text": "Non torni su IASHARK da un po'. Il tuo account gratuito è ancora attivo, e ogni giorno il pronostico di una partita resta gratuito."
+        },
+        {
+          "type": "cta",
+          "label": "Torna su IASHARK",
+          "link": "home"
+        },
+        {
+          "type": "p",
+          "if": "hasTrial",
+          "text": "Per aprire tutte le partite del giorno: Pro, con {{trialDays}} giorni di prova per un primo abbonamento mensile."
+        },
+        {
+          "type": "link",
+          "if": "hasTrial",
+          "label": "Vedi l'offerta Pro",
+          "link": "pro"
+        },
+        {
+          "type": "p",
+          "text": "Se queste email non ti servono più, annulla l'iscrizione con un clic dal link in fondo a questo messaggio. Senza visite né aperture delle nostre email per 60 giorni, smettiamo comunque di scriverti."
+        }
       ]
     },
     "pro_weekly_summary": {
-      "subject": "Il tuo riepilogo IASHARK: le partite del fine settimana",
-      "preheader": "Le partite del fine settimana seguite da IASHARK.",
-      "title": "Riepilogo della settimana",
+      "subject": "Il tuo riepilogo IASHARK: le partite del weekend",
+      "preheader": "Le partite del weekend, pronte nel tuo spazio Pro.",
+      "title": "Le partite del weekend",
       "blocks": [
-        { "type": "p", "text": "Ecco alcune partite del fine settimana seguite da IASHARK. I tuoi strumenti Pro sono disponibili dalla pagina Strumenti." },
-        { "type": "matches" },
-        { "type": "cta", "label": "Apri gli strumenti", "link": "tools" },
-        { "type": "p", "text": "Puoi disattivare questo riepilogo in Il mio account, sezione Notifiche." }
+        {
+          "type": "p",
+          "text": "Ecco alcune partite di questo weekend. Il pronostico di ogni partita è pubblicato prima del calcio d'inizio nel tuo spazio Pro."
+        },
+        {
+          "type": "matches"
+        },
+        {
+          "type": "cta",
+          "label": "Apri il mio spazio Pro",
+          "link": "pro"
+        },
+        {
+          "type": "p",
+          "text": "Puoi disattivare questo riepilogo in Il mio account, sezione Notifiche."
+        }
       ]
     }
   }

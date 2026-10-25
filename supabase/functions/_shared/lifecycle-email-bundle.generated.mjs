@@ -938,6 +938,19 @@ const require = function () { return Render; };
 
   var LOCALES = ["fr", "en", "es", "es-mx", "de", "it", "pt"];
   var DIRS = ["fr", "en", "es", "de", "it", "pt", "gb", "za", "mx"];
+  // Langue du compte (public.user_preferences.language, 02/10/2026) : la SEULE
+  // source de la langue des e-mails. Repertoire du rendu = celui de la version
+  // du site ou il s'est inscrit (email_preferences.market) s'il parle deja
+  // cette langue (gb/za : en ; mx : es), sinon celui de la langue elle-meme.
+  // Langue absente ou inconnue : le repertoire d'inscription, inchange.
+  // (Repris de la version en ligne depuis le 03/10, absente de main.)
+  var DIR_LANGUAGE = { fr: "fr", en: "en", gb: "en", za: "en", es: "es", mx: "es", de: "de", it: "it", pt: "pt" };
+  function dirForLanguage(language, market) {
+    var dir = DIRS.indexOf(String(market)) !== -1 ? String(market) : "fr";
+    var l = String(language == null ? "" : language).toLowerCase().split(/[-_]/)[0];
+    if (["fr", "en", "es", "de", "it", "pt"].indexOf(l) === -1) return dir;
+    return DIR_LANGUAGE[dir] === l ? dir : l;
+  }
 
   // Fuseau de reference de chaque marche (heure locale du marche : jamais
   // d'email marketing la nuit). Les repertoires de langue en/es/de/it/pt
@@ -1177,26 +1190,68 @@ const require = function () { return Render; };
       league: league,
       kickoffAt: kickoff.toISOString(),
       kickoff: new Intl.DateTimeFormat(ctx.intlLocale, { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: ctx.timeZone, timeZoneName: "short" }).format(kickoff),
-      url: SITE_URL + "/" + ctx.dir + "/match.html?id=" + id
+      url: matchUrl(m, id, ctx.dir)
     };
+  }
+
+  // Lien du match (audit SEO du 29/09/2026, action A1) : vraie page de la version
+  // du destinataire (/match/<id>.html en francais, /<dir>/match/<id>.html sinon)
+  // quand data-home.json dit qu'elle existe (champ public page_dirs, pose par le
+  // pipeline d'apres les fichiers ecrits) ; sinon /<dir>/match.html?id= (repli).
+  function matchUrl(m, id, dir) {
+    var pages = m && Array.isArray(m.page_dirs) ? m.page_dirs : [];
+    if (/^[a-z]{2}$/.test(String(dir)) && pages.indexOf(dir) !== -1) {
+      return SITE_URL + (dir === "fr" ? "" : "/" + dir) + "/match/" + id + ".html";
+    }
+    return SITE_URL + "/" + dir + "/match.html?id=" + id;
   }
 
   function isFootball(m) { return !m.sport || m.sport === "football"; }
 
-  // Analyse offerte designee par le pipeline (is_free), pas encore commencee.
-  // Marches pays (mx, za) : designation du marche prioritaire, comme
-  // lib/free-match.js. Aucun match designe = null (jamais invente).
+  // Match offert : le MEME que celui affiche par le site (lib/free-match.js,
+  // branche « designation du pipeline ») pour l'heure locale du marche, et
+  // seulement s'il n'a pas encore commence (un e-mail n'annonce jamais un match
+  // deja joue). Regles reprises du site :
+  // - seuls les matchs designes is_free comptent (jamais un match non designe) ;
+  // - le match offert d'un jour le reste de 00 h a 23 h 59 (free_day quand le
+  //   match a ete reporte, sinon le jour local du coup d'envoi) ;
+  // - marche pays (mx, za...) : sa designation d'abord (jour meme, puis a venir) ;
+  // - sinon l'offre generale (sans free_markets ou avec "default") : jour meme,
+  //   puis le prochain jour designe.
+  // Le match du jour deja commence = null : l'e-mail attend le match du lendemain.
+  function freeDayOf(m, ctx) {
+    var fd = m && typeof m.free_day === "string" && /^\d{4}-\d{2}-\d{2}$/.test(m.free_day) ? m.free_day : null;
+    if (fd && fd !== String(m.date || "").slice(0, 10)) return fd;
+    return localClock(parisDate(m.date), ctx.timeZone).date;
+  }
   function pickFreeMatch(list, now, ctx) {
     var n = toDate(now);
     if (!Array.isArray(list) || !n) return null;
-    var upcoming = list.filter(function (m) {
-      var k = m && m.is_free === true && isFootball(m) ? parisDate(m.date) : null;
-      return k && k.getTime() > n.getTime();
-    }).sort(function (a, b) { return parisDate(a.date) - parisDate(b.date); });
-    var country = upcoming.filter(function (m) { return Array.isArray(m.free_markets) && m.free_markets.indexOf(ctx.market) !== -1; });
-    var general = upcoming.filter(function (m) { return !Array.isArray(m.free_markets) || m.free_markets.indexOf("default") !== -1; });
-    var pick = (ctx.market !== "fr" && country[0]) || general[0] || null;
-    return pick ? publicMatch(pick, ctx) : null;
+    var today = localClock(n, ctx.timeZone).date;
+    var byKickoff = function (a, b) { return parisDate(a.date) - parisDate(b.date); };
+    var designated = list.filter(function (m) {
+      return m && m.is_free === true && isFootball(m) && parisDate(m.date) && freeDayOf(m, ctx) >= today;
+    });
+    var firstOfDay = function (src) {
+      var upcoming = src.filter(function (m) { return parisDate(m.date).getTime() >= n.getTime(); }).sort(byKickoff);
+      return upcoming.length ? upcoming[0] : src.slice().sort(byKickoff)[src.length - 1];
+    };
+    var choose = function (src) {
+      var ofToday = src.filter(function (m) { return freeDayOf(m, ctx) === today; });
+      if (ofToday.length) return firstOfDay(ofToday);
+      var later = src.filter(function (m) { return freeDayOf(m, ctx) > today; }).sort(byKickoff);
+      return later.length ? later[0] : null;
+    };
+    var pick = null;
+    if (ctx.market !== "fr") {
+      pick = choose(designated.filter(function (m) { return Array.isArray(m.free_markets) && m.free_markets.indexOf(ctx.market) !== -1; }));
+    }
+    if (!pick) {
+      var general = designated.filter(function (m) { return !Array.isArray(m.free_markets) || m.free_markets.indexOf("default") !== -1; });
+      pick = choose(general.length ? general : designated);
+    }
+    if (!pick || parisDate(pick.date).getTime() <= n.getTime()) return null;
+    return publicMatch(pick, ctx);
   }
 
   // Matchs du prochain week-end (samedi et dimanche, heure locale du marche).
@@ -1325,6 +1380,7 @@ const require = function () { return Render; };
       methodology: METHODOLOGY_MISSING_DIRS.indexOf(ctx.dir) !== -1 ? SITE_URL + "/en/methodologie.html" : page("methodologie.html"),
       pricing: page("abonnement.html"),
       tools: page("pro.html"),
+      pro: page("pro.html"),
       responsible: page("jeu-responsable.html"),
       privacy: page("confidentialite.html"),
       legal: page("mentions-legales.html"),
@@ -1351,7 +1407,7 @@ const require = function () { return Render; };
         var items = b.items.map(function (it) { return text(it, view); });
         html.push('<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;margin:0 0 18px;">'
           + items.map(function (it, i) {
-            return '<tr><td class="tx" style="width:26px;vertical-align:top;padding:4px 0;font-size:15px;line-height:23px;font-weight:bold;color:#0a6d8f;">' + (b.ordered ? (i + 1) + "." : "✓") + '</td><td class="tx" style="padding:4px 0;font-size:15px;line-height:23px;color:#1f2d3a;">' + R.escapeHtml(it) + "</td></tr>";
+            return '<tr><td class="tx" style="width:26px;vertical-align:top;padding:4px 0;font-size:15px;line-height:23px;font-weight:bold;color:#0a6d8f;">' + (b.ordered ? (i + 1) + "." : "–") + '</td><td class="tx" style="padding:4px 0;font-size:15px;line-height:23px;color:#1f2d3a;">' + R.escapeHtml(it) + "</td></tr>";
           }).join("") + "</table>");
         txt.push(items.map(function (it, i) { return (b.ordered ? (i + 1) + ". " : "- ") + it; }).join("\n"));
       } else if (b.type === "match" || b.type === "matches") {
@@ -1388,8 +1444,12 @@ const require = function () { return Render; };
   var BLOCKS_MARKER = "<!--LIFECYCLE_BLOCKS-->";
 
   // bundle = { layout: {html, text}, copy: {<locale>: {...}}, markets: config/markets.json }
-  // data   = { freeMatch, weekendMatches, marketingOptIn }
+  // data   = { freeMatch, weekendMatches, marketingOptIn, trialDays }
   // options = { company, unsubscribeUrl, now }
+  function trialDaysOf(data, ctx) {
+    var n = data && typeof data.trialDays === "number" && isFinite(data.trialDays) ? Math.round(data.trialDays) : 0;
+    return n > 0 && ctx && ctx.proPriceMinor != null ? n : 0;
+  }
   function renderLifecycleEmail(bundle, campaign, dir, data, options) {
     options = options || {};
     data = data || {};
@@ -1427,6 +1487,18 @@ const require = function () { return Render; };
       hasProYear: hasWeek && hasYear,
       hasNoProYear: hasWeek && !hasYear,
       hasOnlyProMonth: !hasWeek && !hasYear,
+      // Essai Pro gratuit : ABONNEMENT MENSUEL seulement, premier abonnement
+      // (create-checkout-session en ligne : 7 jours, mois seulement). Annonce
+      // seulement si l'expediteur l'a confirme pour CE compte (data.trialDays > 0 :
+      // TRIAL_DAYS ouvert et compte qui n'a jamais eu d'abonnement) ET si le mois
+      // est payable dans ce marche. Meme texte que le site (offre_pro.trial_detail).
+      trialDays: trialDaysOf(data, ctx),
+      hasTrial: trialDaysOf(data, ctx) > 0,
+      // Petit et Grand combine, Selection en or, buteur du jour : vendus sur le
+      // marche francais seulement (lib/pro-vente.js#conditions, cotes d'operateurs
+      // agrees en France).
+      hasTickets: ctx.market === "fr",
+      noFreeMatch: !data.freeMatch,
       freeMatchHome: data.freeMatch ? data.freeMatch.home : null,
       freeMatchAway: data.freeMatch ? data.freeMatch.away : null,
       companyOperatorName: typeof company.operatorName === "string" && company.operatorName.trim() ? company.operatorName.trim() : "[BLOCKED_DECISION: COMPANY_OPERATOR_NAME]",
@@ -1496,6 +1568,7 @@ const require = function () { return Render; };
     MIN_SECRET_LENGTH: MIN_SECRET_LENGTH,
     BLOCKS_MARKER: BLOCKS_MARKER,
     siteContext: siteContext,
+    dirForLanguage: dirForLanguage,
     localClock: localClock,
     parisDate: parisDate,
     factsFromRow: factsFromRow,
@@ -1516,12 +1589,12 @@ return module.exports;
 })();
 export const BUNDLE = {
   "layout": {
-    "html": "{{! Gabarit commun des emails de relance (lib/lifecycle-email.js). Meme charte que emails/templates/* : CSS inline, bloc <style> reserve au mode sombre et au mobile. Le marqueur LIFECYCLE_BLOCKS recoit le corps (textes emails/lifecycle/copy.<locale>.json). Lien de desinscription en 1 clic, mention 18+ et aide du pays dans CHAQUE email. STATUT : REVIEW. }}<!DOCTYPE html>\n<html lang=\"{{htmlLang}}\" xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<meta name=\"x-apple-disable-message-reformatting\">\n<meta name=\"format-detection\" content=\"telephone=no, date=no, address=no, email=no\">\n<meta name=\"color-scheme\" content=\"light dark\">\n<meta name=\"supported-color-schemes\" content=\"light dark\">\n<title>{{subject}}</title>\n<style>\n:root { color-scheme: light dark; supported-color-schemes: light dark; }\n@media (prefers-color-scheme: dark) {\n  .bg-page { background-color: #0b1118 !important; }\n  .bg-card { background-color: #131c27 !important; border-color: #263444 !important; }\n  .bg-soft { background-color: #18232f !important; border-color: #2f6f86 !important; }\n  .bg-warn { background-color: #2a2213 !important; border-color: #6b5320 !important; }\n  .tx { color: #e9eef4 !important; }\n  .tx-soft { color: #a9b6c4 !important; }\n  .bd { border-color: #263444 !important; }\n  .lnk { color: #62d6ec !important; }\n}\n[data-ogsc] .bg-page { background-color: #0b1118 !important; }\n[data-ogsc] .bg-card { background-color: #131c27 !important; }\n[data-ogsc] .bg-soft { background-color: #18232f !important; }\n[data-ogsc] .bg-warn { background-color: #2a2213 !important; }\n[data-ogsc] .tx { color: #e9eef4 !important; }\n[data-ogsc] .tx-soft { color: #a9b6c4 !important; }\n[data-ogsc] .lnk { color: #62d6ec !important; }\n@media only screen and (max-width: 620px) {\n  .container { width: 100% !important; }\n  .pad { padding: 20px !important; }\n}\n</style>\n</head>\n<body class=\"bg-page\" style=\"margin:0;padding:0;background-color:#f2f4f7;-webkit-text-size-adjust:100%;\">\n<div style=\"display:none;max-height:0;max-width:0;overflow:hidden;opacity:0;mso-hide:all;font-size:1px;line-height:1px;color:#f2f4f7;\">{{preheader}}</div>\n<table role=\"presentation\" class=\"bg-page\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"width:100%;background-color:#f2f4f7;border-collapse:collapse;\">\n<tr>\n<td align=\"center\" style=\"padding:24px 12px;\">\n<table role=\"presentation\" class=\"container\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"width:600px;max-width:600px;border-collapse:collapse;\">\n<tr>\n<td class=\"tx\" style=\"padding:4px 4px 16px;font-family:Arial,Helvetica,sans-serif;font-size:20px;line-height:24px;font-weight:bold;letter-spacing:3px;color:#0b1a2a;\">IASHARK</td>\n</tr>\n<tr>\n<td class=\"bg-card pad\" style=\"padding:32px;background-color:#ffffff;border:1px solid #dfe4ea;border-radius:12px;font-family:Arial,Helvetica,sans-serif;\">\n\n<h1 class=\"tx\" style=\"margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:24px;line-height:31px;font-weight:bold;color:#0b1a2a;\">{{title}}</h1>\n<p class=\"tx\" style=\"margin:0 0 14px;font-size:15px;line-height:24px;color:#1f2d3a;\">{{greeting}}</p>\n<!--LIFECYCLE_BLOCKS-->\n\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"width:100%;border-collapse:collapse;margin:10px 0 0;\">\n<tr><td class=\"bg-warn\" style=\"padding:16px 18px;background-color:#fff8eb;border:1px solid #f0d49c;border-radius:8px;font-family:Arial,Helvetica,sans-serif;\">\n<p class=\"tx\" style=\"margin:0 0 8px;font-size:14px;line-height:21px;font-weight:bold;color:#3a2a0c;\">{{rgTitle}}</p>\n<p class=\"tx\" style=\"margin:0 0 8px;font-size:14px;line-height:21px;color:#3a2a0c;\">{{rgBody}}</p>\n<p class=\"tx\" style=\"margin:0;font-size:14px;line-height:21px;color:#3a2a0c;\">{{rgHelp}} <a class=\"lnk\" href=\"{{helplineUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">{{helplineUrl}}</a> · <a class=\"lnk\" href=\"{{responsibleUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">{{rgMore}}</a></p>\n</td></tr>\n</table>\n\n</td>\n</tr>\n<tr>\n<td class=\"tx-soft\" style=\"padding:18px 8px 6px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#5d6b79;\">\n{{footerReason}}<br>\n<a class=\"lnk\" href=\"{{unsubscribeUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;font-weight:bold;\">{{unsubscribeLabel}}</a> · <a class=\"lnk\" href=\"{{manageUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">{{manageLabel}}</a><br>\n{{senderLabel}}{{sep}}IASHARK · {{companyOperatorName}} · {{companyAddress}}<br>\n<a class=\"lnk\" href=\"{{privacyUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">{{privacyLabel}}</a> · <a class=\"lnk\" href=\"{{legalUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">{{legalLabel}}</a> · <a class=\"lnk\" href=\"{{homeUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">iashark.com</a>\n</td>\n</tr>\n</table>\n</td>\n</tr>\n</table>\n</body>\n</html>\n",
-    "text": "Subject: {{subject}}\n{{! Version texte du gabarit commun (emails/lifecycle/layout.html) : meme contenu, rien en moins. sep = separateur \"libelle : valeur\" de la langue. }}IASHARK\n\n{{title}}\n\n{{greeting}}\n\n<!--LIFECYCLE_BLOCKS-->\n\n{{rgTitle}}\n{{rgBody}}\n{{rgHelp}} {{helplineUrl}}\n{{rgMore}}{{sep}}{{responsibleUrl}}\n\n--\n{{footerReason}}\n{{unsubscribeLabel}}{{sep}}{{unsubscribeUrl}}\n{{manageLabel}}{{sep}}{{manageUrl}}\n{{senderLabel}}{{sep}}IASHARK · {{companyOperatorName}} · {{companyAddress}}\n{{privacyLabel}}{{sep}}{{privacyUrl}}\n{{legalLabel}}{{sep}}{{legalUrl}}\n"
+    "html": "{{! Gabarit commun des emails de relance (lib/lifecycle-email.js). Meme charte que emails/templates/* : CSS inline, bloc <style> reserve au mode sombre et au mobile. Le marqueur LIFECYCLE_BLOCKS recoit le corps (textes emails/lifecycle/copy.<locale>.json). Lien de desinscription en 1 clic, mention 18+ et aide du pays dans CHAQUE email. STATUT : REVIEW. }}<!DOCTYPE html>\n<html lang=\"{{htmlLang}}\" xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<meta name=\"x-apple-disable-message-reformatting\">\n<meta name=\"format-detection\" content=\"telephone=no, date=no, address=no, email=no\">\n<meta name=\"color-scheme\" content=\"light dark\">\n<meta name=\"supported-color-schemes\" content=\"light dark\">\n<title>{{subject}}</title>\n<style>\n:root { color-scheme: light dark; supported-color-schemes: light dark; }\n@media (prefers-color-scheme: dark) {\n  .bg-page { background-color: #0b1118 !important; }\n  .bg-card { background-color: #131c27 !important; border-color: #263444 !important; }\n  .bg-soft { background-color: #18232f !important; border-color: #2f6f86 !important; }\n  .bg-warn { background-color: #2a2213 !important; border-color: #6b5320 !important; }\n  .tx { color: #e9eef4 !important; }\n  .tx-soft { color: #a9b6c4 !important; }\n  .bd { border-color: #263444 !important; }\n  .lnk { color: #62d6ec !important; }\n}\n[data-ogsc] .bg-page { background-color: #0b1118 !important; }\n[data-ogsc] .bg-card { background-color: #131c27 !important; }\n[data-ogsc] .bg-soft { background-color: #18232f !important; }\n[data-ogsc] .bg-warn { background-color: #2a2213 !important; }\n[data-ogsc] .tx { color: #e9eef4 !important; }\n[data-ogsc] .tx-soft { color: #a9b6c4 !important; }\n[data-ogsc] .lnk { color: #62d6ec !important; }\n@media only screen and (max-width: 620px) {\n  .container { width: 100% !important; }\n  .pad { padding: 20px !important; }\n}\n</style>\n</head>\n<body class=\"bg-page\" style=\"margin:0;padding:0;background-color:#f2f4f7;-webkit-text-size-adjust:100%;\">\n<div style=\"display:none;max-height:0;max-width:0;overflow:hidden;opacity:0;mso-hide:all;font-size:1px;line-height:1px;color:#f2f4f7;\">{{preheader}}</div>\n<table role=\"presentation\" class=\"bg-page\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"width:100%;background-color:#f2f4f7;border-collapse:collapse;\">\n<tr>\n<td align=\"center\" style=\"padding:24px 12px;\">\n<table role=\"presentation\" class=\"container\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"width:600px;max-width:600px;border-collapse:collapse;\">\n<tr>\n<td class=\"tx\" style=\"padding:4px 4px 16px;font-family:Arial,Helvetica,sans-serif;font-size:20px;line-height:24px;font-weight:bold;letter-spacing:3px;color:#0b1a2a;\">IASHARK</td>\n</tr>\n<tr>\n<td class=\"bg-card pad\" style=\"padding:32px;background-color:#ffffff;border:1px solid #dfe4ea;border-radius:12px;font-family:Arial,Helvetica,sans-serif;\">\n\n<h1 class=\"tx\" style=\"margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:24px;line-height:31px;font-weight:bold;color:#0b1a2a;\">{{title}}</h1>\n<p class=\"tx\" style=\"margin:0 0 14px;font-size:15px;line-height:24px;color:#1f2d3a;\">{{greeting}}</p>\n<!--LIFECYCLE_BLOCKS-->\n\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"width:100%;border-collapse:collapse;margin:10px 0 0;\">\n<tr><td class=\"bg-warn\" style=\"padding:16px 18px;background-color:#fff8eb;border:1px solid #f0d49c;border-radius:8px;font-family:Arial,Helvetica,sans-serif;\">\n<p class=\"tx\" style=\"margin:0 0 8px;font-size:14px;line-height:21px;font-weight:bold;color:#3a2a0c;\">{{rgTitle}}</p>\n<p class=\"tx\" style=\"margin:0 0 8px;font-size:14px;line-height:21px;color:#3a2a0c;\">{{rgBody}}</p>\n<p class=\"tx\" style=\"margin:0;font-size:14px;line-height:21px;color:#3a2a0c;\">{{rgHelp}} <a class=\"lnk\" href=\"{{helplineUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">{{helplineUrl}}</a> · <a class=\"lnk\" href=\"{{responsibleUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">{{rgMore}}</a></p>\n</td></tr>\n</table>\n\n</td>\n</tr>\n<tr>\n<td class=\"tx-soft\" style=\"padding:18px 8px 6px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#5d6b79;\">\n{{footerReason}}<br>\n<a class=\"lnk\" href=\"{{unsubscribeUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;font-weight:bold;\">{{unsubscribeLabel}}</a> · <a class=\"lnk\" href=\"{{manageUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">{{manageLabel}}</a><br>\n{{senderLabel}}{{sep}}{{companyOperatorName}} · {{companyAddress}}<br>\n<a class=\"lnk\" href=\"{{privacyUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">{{privacyLabel}}</a> · <a class=\"lnk\" href=\"{{legalUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">{{legalLabel}}</a> · <a class=\"lnk\" href=\"{{homeUrl}}\" target=\"_blank\" style=\"color:#0a6d8f;text-decoration:underline;\">iashark.com</a>\n</td>\n</tr>\n</table>\n</td>\n</tr>\n</table>\n</body>\n</html>\n",
+    "text": "Subject: {{subject}}\n{{! Version texte du gabarit commun (emails/lifecycle/layout.html) : meme contenu, rien en moins. sep = separateur \"libelle : valeur\" de la langue. }}IASHARK\n\n{{title}}\n\n{{greeting}}\n\n<!--LIFECYCLE_BLOCKS-->\n\n{{rgTitle}}\n{{rgBody}}\n{{rgHelp}} {{helplineUrl}}\n{{rgMore}}{{sep}}{{responsibleUrl}}\n\n--\n{{footerReason}}\n{{unsubscribeLabel}}{{sep}}{{unsubscribeUrl}}\n{{manageLabel}}{{sep}}{{manageUrl}}\n{{senderLabel}}{{sep}}{{companyOperatorName}} · {{companyAddress}}\n{{privacyLabel}}{{sep}}{{privacyUrl}}\n{{legalLabel}}{{sep}}{{legalUrl}}\n"
   },
   "copy": {
     "fr": {
-      "_status": "REVIEW - textes a faire relire (juriste + relecture native) avant activation. Aucune promesse de gain.",
+      "_status": "REVIEW - textes revus le 25/10/2026 (tutoiement comme le site, prix et contenus Pro actuels, pari offert avec le compte gratuit). Aucune promesse de gain, aucune mise, aucun emoji.",
       "locale": "fr",
       "common": {
         "greeting": "Bonjour,",
@@ -1529,14 +1602,14 @@ export const BUNDLE = {
         "kickoff_label": "Coup d'envoi",
         "match_link": "Voir le match",
         "rg_title": "Jeu responsable · 18+",
-        "rg_body": "IASHARK publie des analyses statistiques de football. Ce n'est pas un site de paris : aucune mise n'est prise, et une probabilité n'est jamais une certitude. Les paris comportent des risques (perte d'argent, dépendance). Service réservé aux personnes de 18 ans et plus.",
+        "rg_body": "IASHARK publie des analyses de football et ne prend aucun pari. Une chance calculée n'est jamais une certitude. Les paris sportifs comportent un risque de perte d'argent et de dépendance. Réservé aux personnes de 18 ans et plus.",
         "rg_help_phone": "Besoin d'aide ? {{helplineName}} : {{helplinePhone}}.",
         "rg_help_nophone": "Besoin d'aide ? {{helplineName}} :",
-        "rg_more": "Nos ressources jeu responsable",
-        "footer_reason_marketing": "Vous recevez cet email car vous avez accepté de recevoir les analyses offertes et conseils d'utilisation d'IASHARK.",
-        "footer_reason_welcome": "Email envoyé à la suite de la création de votre compte IASHARK.",
+        "rg_more": "Nos conseils de jeu responsable",
+        "footer_reason_marketing": "Tu reçois cet e-mail parce que tu as accepté de recevoir les e-mails d'IASHARK.",
+        "footer_reason_welcome": "E-mail envoyé après la création de ton compte IASHARK.",
         "unsubscribe": "Se désinscrire en 1 clic",
-        "manage": "Gérer mes emails dans Mon compte",
+        "manage": "Gérer mes e-mails dans Mon compte",
         "privacy": "Confidentialité",
         "legal": "Mentions légales",
         "sender": "Expéditeur"
@@ -1544,20 +1617,20 @@ export const BUNDLE = {
       "campaigns": {
         "welcome": {
           "subject": "Bienvenue sur IASHARK : par où commencer",
-          "preheader": "Comment utiliser le site, le match offert et la méthodologie.",
+          "preheader": "Ton compte gratuit est prêt : chaque jour, le pari d'un match est offert.",
           "title": "Bienvenue sur IASHARK",
           "blocks": [
             {
               "type": "p",
-              "text": "Votre compte gratuit IASHARK est créé. Voici comment utiliser le site en quelques minutes."
+              "text": "Ton compte gratuit est prêt. Voici comment t'en servir :"
             },
             {
               "type": "list",
               "ordered": true,
               "items": [
-                "Chaque jour, l'analyse complète d'un match est offerte : elle est signalée sur la page d'accueil.",
-                "Sur la page d'un match, lisez les probabilités estimées par le modèle, les facteurs pris en compte et leurs limites.",
-                "La page Méthodologie explique d'où viennent ces chiffres et comment les lire."
+                "Chaque jour, un match est offert. Avec ton compte gratuit, tu vois son pari, sa chance calculée et pourquoi.",
+                "Tu compares cette chance avec la cote de ton opérateur agréé, puis c'est toi qui décides.",
+                "La page Méthodologie explique comment ces chances sont calculées."
               ]
             },
             {
@@ -1571,60 +1644,84 @@ export const BUNDLE = {
             },
             {
               "type": "cta",
+              "if": "hasFreeMatch",
+              "label": "Voir le pari offert",
+              "link": "freeMatch"
+            },
+            {
+              "type": "cta",
+              "if": "noFreeMatch",
+              "label": "Voir les matchs du jour",
+              "link": "home"
+            },
+            {
+              "type": "link",
               "label": "Lire la méthodologie",
               "link": "methodology"
             },
             {
-              "type": "link",
-              "label": "Accéder à mon compte",
-              "link": "account"
-            },
-            {
               "type": "p",
               "if": "notOptedIn",
-              "text": "Vous n'avez pas demandé à recevoir nos analyses offertes et conseils d'utilisation par email : vous ne recevrez de notre part que les emails liés à votre compte. Vous pouvez changer d'avis à tout moment dans Mon compte, rubrique Notifications."
+              "text": "Tu n'as pas demandé à recevoir nos e-mails : tu ne recevras de notre part que les e-mails liés à ton compte. Tu peux changer d'avis à tout moment dans Mon compte, rubrique Notifications."
             }
           ]
         },
         "free_match": {
-          "subject": "Le match offert du jour : {{freeMatchHome}} – {{freeMatchAway}}",
-          "preheader": "L'analyse complète de ce match est ouverte gratuitement avec votre compte.",
-          "title": "Votre analyse offerte du jour",
+          "subject": "Ton match offert : {{freeMatchHome}} – {{freeMatchAway}}",
+          "preheader": "Le pari de ce match s'ouvre avec ton compte gratuit.",
+          "title": "Ton match offert",
           "blocks": [
             {
               "type": "p",
-              "text": "Chaque jour, IASHARK ouvre gratuitement l'analyse complète d'un match à tous les comptes. Voici celle du jour :"
+              "text": "Chaque jour, IASHARK offre le pari d'un match à tous les comptes gratuits. Le voici :"
             },
             {
               "type": "match"
             },
             {
               "type": "p",
-              "text": "Vous y trouverez les probabilités estimées, les facteurs retenus par le modèle et les points de vigilance. Ce sont des estimations statistiques : l'issue d'un match reste incertaine."
+              "text": "Connecte-toi sur la page du match : tu vois le pari retenu, sa chance calculée et pourquoi. Tu compares avec la cote de ton opérateur agréé, puis tu décides."
             },
             {
               "type": "cta",
-              "label": "Voir l'analyse offerte",
+              "label": "Voir le pari offert",
               "link": "freeMatch"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Pour ouvrir tous les matchs du jour : Pro, avec {{trialDays}} jours d'essai pour un premier abonnement au mois."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Voir l'offre Pro",
+              "link": "pro"
             }
           ]
         },
         "pro_features": {
           "subject": "Ce que débloque IASHARK Pro",
-          "preheader": "La liste des contenus Pro et leur prix, sans détour.",
-          "title": "Ce que Pro ajoute à votre compte gratuit",
+          "preheader": "Tous les matchs du jour ouverts, et les prix exacts.",
+          "title": "Ce que Pro ajoute à ton compte gratuit",
           "blocks": [
             {
               "type": "p",
-              "text": "Votre compte gratuit donne accès à l'analyse complète d'un match par jour, au blog et aux outils en découverte. Voici ce que Pro ajoute :"
+              "text": "Avec ton compte gratuit, tu as chaque jour le pari d'un match offert. Pro ouvre tous les autres :"
             },
             {
               "type": "list",
               "items": [
-                "L'analyse complète sur tous les matchs",
-                "Les six outils branchés sur les probabilités du modèle",
-                "Le journal des décisions synchronisé",
-                "Le suivi de bankroll lié au compte"
+                "Tous les matchs du jour : le pari retenu, sa chance calculée et pourquoi",
+                "Le film du match : six quarts d'heure, et les deux équipes comparées",
+                "Les scores les plus probables, sur les championnats les mieux mesurés"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasTickets",
+              "items": [
+                "Le Petit et le Grand combiné du jour, la Sélection en or et le buteur du jour"
               ]
             },
             {
@@ -1644,50 +1741,62 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "text": "Pro donne accès à davantage d'analyses et d'outils ; il ne rend aucun match plus prévisible."
+              "if": "hasTrial",
+              "text": "{{trialDays}} jours d'essai pour un premier abonnement au mois : ta carte est demandée, rien n'est prélevé pendant l'essai. Ensuite {{proPrice}} par mois, prélevés automatiquement sauf résiliation avant la fin de l'essai."
             },
             {
               "type": "cta",
-              "label": "Voir le détail de l'offre",
-              "link": "pricing"
+              "label": "Voir l'offre Pro",
+              "link": "pro"
             },
             {
               "type": "p",
-              "text": "Si le compte gratuit vous suffit, vous n'avez rien à faire."
+              "text": "Si le compte gratuit te suffit, tu n'as rien à faire."
             }
           ]
         },
         "inactive_7d": {
           "subject": "Les matchs de ce week-end sur IASHARK",
-          "preheader": "Des affiches du week-end couvertes par IASHARK.",
-          "title": "Voici les matchs de ce week-end",
+          "preheader": "Les affiches du week-end, et ton match offert chaque jour.",
+          "title": "Les matchs de ce week-end",
           "blocks": [
             {
               "type": "p",
-              "text": "Voici des affiches de ce week-end couvertes par IASHARK :"
+              "text": "Voici des affiches de ce week-end sur IASHARK :"
             },
             {
               "type": "matches"
             },
             {
               "type": "p",
-              "text": "L'analyse complète d'un match reste offerte chaque jour avec votre compte gratuit."
+              "text": "Chaque jour, le pari d'un match reste offert avec ton compte gratuit."
             },
             {
               "type": "cta",
               "label": "Voir tous les matchs",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Pour ouvrir tous les matchs du jour : Pro, avec {{trialDays}} jours d'essai pour un premier abonnement au mois."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Voir l'offre Pro",
+              "link": "pro"
             }
           ]
         },
         "inactive_30d": {
-          "subject": "Votre compte IASHARK est toujours actif",
-          "preheader": "L'analyse offerte du jour reste accessible avec votre compte gratuit.",
-          "title": "Votre compte est toujours là",
+          "subject": "Ton compte IASHARK est toujours actif",
+          "preheader": "Chaque jour, le pari d'un match reste offert avec ton compte gratuit.",
+          "title": "Ton compte est toujours là",
           "blocks": [
             {
               "type": "p",
-              "text": "Vous n'êtes pas revenu sur IASHARK depuis un moment. Votre compte gratuit est toujours actif, et l'analyse complète d'un match reste offerte chaque jour."
+              "text": "Tu n'es pas revenu sur IASHARK depuis un moment. Ton compte gratuit est toujours actif, et chaque jour le pari d'un match reste offert."
             },
             {
               "type": "cta",
@@ -1696,37 +1805,48 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "text": "Si ces emails ne vous sont plus utiles, désinscrivez-vous en un clic avec le lien en bas de ce message. Sans visite ni ouverture de votre part, nous arrêterons de toute façon de vous écrire dans 30 jours."
+              "if": "hasTrial",
+              "text": "Pour ouvrir tous les matchs du jour : Pro, avec {{trialDays}} jours d'essai pour un premier abonnement au mois."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Voir l'offre Pro",
+              "link": "pro"
+            },
+            {
+              "type": "p",
+              "text": "Si ces e-mails ne te servent plus, désinscris-toi en un clic avec le lien en bas de ce message. Sans visite ni ouverture de nos e-mails pendant 60 jours, nous arrêtons de toute façon de t'écrire."
             }
           ]
         },
         "pro_weekly_summary": {
-          "subject": "Votre résumé IASHARK : les matchs du week-end",
-          "preheader": "Les affiches du week-end couvertes par IASHARK.",
-          "title": "Résumé de la semaine",
+          "subject": "Ton résumé IASHARK : les matchs du week-end",
+          "preheader": "Les affiches du week-end, à ouvrir dans ton espace Pro.",
+          "title": "Les matchs du week-end",
           "blocks": [
             {
               "type": "p",
-              "text": "Voici des affiches du week-end couvertes par IASHARK. Vos outils Pro sont accessibles depuis la page Outils."
+              "text": "Voici des affiches de ce week-end. Le pari de chaque match est publié avant le coup d'envoi dans ton espace Pro."
             },
             {
               "type": "matches"
             },
             {
               "type": "cta",
-              "label": "Ouvrir les outils",
-              "link": "tools"
+              "label": "Ouvrir mon espace Pro",
+              "link": "pro"
             },
             {
               "type": "p",
-              "text": "Vous pouvez désactiver ce résumé dans Mon compte, rubrique Notifications."
+              "text": "Tu peux désactiver ce résumé dans Mon compte, rubrique Notifications."
             }
           ]
         }
       }
     },
     "en": {
-      "_status": "REVIEW - to be reviewed (lawyer + native speaker) before activation. Used by /en/, /gb/ and /za/. No promise of winnings.",
+      "_status": "REVIEW - copy reviewed on 25/10/2026 (current Pro content and prices, free pick with the free account). Used by /en/ (international), /gb/ and /za/. No promise of winnings, no stakes, no emoji.",
       "locale": "en",
       "common": {
         "greeting": "Hello,",
@@ -1734,11 +1854,11 @@ export const BUNDLE = {
         "kickoff_label": "Kick-off",
         "match_link": "View the match",
         "rg_title": "Safer gambling · 18+",
-        "rg_body": "IASHARK publishes statistical football analysis. We are not a bookmaker and we do not take bets, and a probability is never a certainty. Betting involves risks (losing money, addiction). You must be 18 or over.",
+        "rg_body": "IASHARK publishes football analysis and does not take bets. A calculated chance is never a certainty. Betting carries a risk of losing money and of addiction. For people aged 18 and over.",
         "rg_help_phone": "Need help? {{helplineName}}: {{helplinePhone}}.",
         "rg_help_nophone": "Need help? {{helplineName}}:",
-        "rg_more": "Our safer gambling resources",
-        "footer_reason_marketing": "You are receiving this email because you agreed to receive IASHARK's free analyses and tips on using the site.",
+        "rg_more": "Our safer gambling advice",
+        "footer_reason_marketing": "You are receiving this email because you agreed to receive emails from IASHARK.",
         "footer_reason_welcome": "Sent after you created your IASHARK account.",
         "unsubscribe": "Unsubscribe in one click",
         "manage": "Manage my emails in My account",
@@ -1749,26 +1869,26 @@ export const BUNDLE = {
       "campaigns": {
         "welcome": {
           "subject": "Welcome to IASHARK: where to start",
-          "preheader": "How to use the site, the free match and our methodology.",
+          "preheader": "Your free account is ready: one free pick every day.",
           "title": "Welcome to IASHARK",
           "blocks": [
             {
               "type": "p",
-              "text": "Your free IASHARK account is ready. Here is how to use the site in a few minutes."
+              "text": "Your free account is ready. Here is how to use it:"
             },
             {
               "type": "list",
               "ordered": true,
               "items": [
-                "Every day, the full analysis of one match is free: it is highlighted on the home page.",
-                "On a match page, read the probabilities estimated by the model, the factors it takes into account and their limits.",
-                "The Methodology page explains where these figures come from and how to read them."
+                "Every day, one match is free. With your free account, you see its pick, its calculated chance and why.",
+                "Compare that chance with the odds at your licensed bookmaker, then you decide.",
+                "The Methodology page explains how these chances are calculated."
               ]
             },
             {
               "type": "p",
               "if": "hasFreeMatch",
-              "text": "The current free match:"
+              "text": "The free match right now:"
             },
             {
               "type": "match",
@@ -1776,60 +1896,84 @@ export const BUNDLE = {
             },
             {
               "type": "cta",
+              "if": "hasFreeMatch",
+              "label": "See the free pick",
+              "link": "freeMatch"
+            },
+            {
+              "type": "cta",
+              "if": "noFreeMatch",
+              "label": "See today's matches",
+              "link": "home"
+            },
+            {
+              "type": "link",
               "label": "Read the methodology",
               "link": "methodology"
             },
             {
-              "type": "link",
-              "label": "Go to my account",
-              "link": "account"
-            },
-            {
               "type": "p",
               "if": "notOptedIn",
-              "text": "You did not ask to receive our free analyses and tips by email, so we will only send you emails about your account. You can change your mind at any time in My account, under Notifications."
+              "text": "You did not ask to receive our emails, so we will only send you emails about your account. You can change your mind at any time in My account, under Notifications."
             }
           ]
         },
         "free_match": {
-          "subject": "Today's free match: {{freeMatchHome}} – {{freeMatchAway}}",
-          "preheader": "The full analysis of this match is open for free with your account.",
-          "title": "Your free analysis of the day",
+          "subject": "Your free match: {{freeMatchHome}} – {{freeMatchAway}}",
+          "preheader": "The pick for this match opens with your free account.",
+          "title": "Your free match",
           "blocks": [
             {
               "type": "p",
-              "text": "Every day, IASHARK opens the full analysis of one match to every account, free of charge. Here is today's:"
+              "text": "Every day, IASHARK gives every free account the pick for one match. Here it is:"
             },
             {
               "type": "match"
             },
             {
               "type": "p",
-              "text": "You will find the estimated probabilities, the factors used by the model and the points to watch. These are statistical estimates: the outcome of a match remains uncertain."
+              "text": "Sign in on the match page to see the pick, its calculated chance and why. Compare it with the odds at your licensed bookmaker, then you decide."
             },
             {
               "type": "cta",
-              "label": "View the free analysis",
+              "label": "See the free pick",
               "link": "freeMatch"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "To open every match of the day: Pro, with a {{trialDays}}-day trial for a first monthly subscription."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "See the Pro offer",
+              "link": "pro"
             }
           ]
         },
         "pro_features": {
           "subject": "What IASHARK Pro unlocks",
-          "preheader": "The list of Pro content and its price, plainly.",
+          "preheader": "Every match of the day open, and the exact prices.",
           "title": "What Pro adds to your free account",
           "blocks": [
             {
               "type": "p",
-              "text": "Your free account gives you the full analysis of one match a day, the blog and a preview of the tools. Here is what Pro adds:"
+              "text": "Your free account gives you the pick for one free match every day. Pro opens all the others:"
             },
             {
               "type": "list",
               "items": [
-                "The full analysis on every match",
-                "The six tools connected to the model's probabilities",
-                "The synced decisions journal",
-                "Bankroll tracking linked to your account"
+                "Every match of the day: the pick, its calculated chance and why",
+                "The match timeline: six 15-minute periods, and both teams compared",
+                "The most likely scorelines, in the best-measured leagues"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasTickets",
+              "items": [
+                "The day's Small and Big combo, the Gold Selection and the scorer of the day"
               ]
             },
             {
@@ -1849,12 +1993,13 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "text": "Pro gives you more analyses and tools; it does not make any match more predictable."
+              "if": "hasTrial",
+              "text": "{{trialDays}}-day trial for a first monthly subscription: your card is requested, nothing is charged during the trial. Then {{proPrice}} per month, charged automatically unless you cancel before the trial ends."
             },
             {
               "type": "cta",
-              "label": "See the plan details",
-              "link": "pricing"
+              "label": "See the Pro offer",
+              "link": "pro"
             },
             {
               "type": "p",
@@ -1864,35 +2009,46 @@ export const BUNDLE = {
         },
         "inactive_7d": {
           "subject": "This weekend's matches on IASHARK",
-          "preheader": "Some of the weekend fixtures covered by IASHARK.",
-          "title": "Here are this weekend's matches",
+          "preheader": "The weekend's big games, and your free match every day.",
+          "title": "This weekend's matches",
           "blocks": [
             {
               "type": "p",
-              "text": "Here are some of this weekend's fixtures covered by IASHARK:"
+              "text": "Here are some of this weekend's games on IASHARK:"
             },
             {
               "type": "matches"
             },
             {
               "type": "p",
-              "text": "The full analysis of one match is still free every day with your account."
+              "text": "Every day, the pick for one match is still free with your free account."
             },
             {
               "type": "cta",
               "label": "See all matches",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "To open every match of the day: Pro, with a {{trialDays}}-day trial for a first monthly subscription."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "See the Pro offer",
+              "link": "pro"
             }
           ]
         },
         "inactive_30d": {
           "subject": "Your IASHARK account is still active",
-          "preheader": "The free analysis of the day is still available with your account.",
+          "preheader": "Every day, the pick for one match is still free with your free account.",
           "title": "Your account is still here",
           "blocks": [
             {
               "type": "p",
-              "text": "You have not been back to IASHARK for a while. Your free account is still active, and the full analysis of one match is still free every day."
+              "text": "You have not been back to IASHARK for a while. Your free account is still active, and every day the pick for one match is still free."
             },
             {
               "type": "cta",
@@ -1901,26 +2057,37 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "text": "If these emails are no longer useful, unsubscribe in one click with the link at the bottom of this message. If you neither visit nor open our emails, we will stop writing to you in 30 days anyway."
+              "if": "hasTrial",
+              "text": "To open every match of the day: Pro, with a {{trialDays}}-day trial for a first monthly subscription."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "See the Pro offer",
+              "link": "pro"
+            },
+            {
+              "type": "p",
+              "text": "If these emails are no longer useful to you, unsubscribe in one click with the link at the bottom of this message. If you neither visit nor open our emails for 60 days, we stop writing to you anyway."
             }
           ]
         },
         "pro_weekly_summary": {
           "subject": "Your IASHARK summary: this weekend's matches",
-          "preheader": "The weekend fixtures covered by IASHARK.",
-          "title": "Weekly summary",
+          "preheader": "The weekend's big games, ready in your Pro space.",
+          "title": "This weekend's matches",
           "blocks": [
             {
               "type": "p",
-              "text": "Here are some of the weekend fixtures covered by IASHARK. Your Pro tools are available from the Tools page."
+              "text": "Here are some of this weekend's games. The pick for every match is published before kick-off in your Pro space."
             },
             {
               "type": "matches"
             },
             {
               "type": "cta",
-              "label": "Open the tools",
-              "link": "tools"
+              "label": "Open my Pro space",
+              "link": "pro"
             },
             {
               "type": "p",
@@ -1931,7 +2098,7 @@ export const BUNDLE = {
       }
     },
     "es": {
-      "_status": "REVIEW - textos pendientes de revisión (jurista + nativo) antes de activar. Sin promesa de ganancias.",
+      "_status": "REVIEW - textos revisados el 25/10/2026 (contenido Pro y precios actuales, pronóstico gratis con la cuenta gratuita). Sin promesa de ganancias, sin importes de apuesta, sin emoji.",
       "locale": "es",
       "common": {
         "greeting": "Hola:",
@@ -1939,11 +2106,11 @@ export const BUNDLE = {
         "kickoff_label": "Inicio",
         "match_link": "Ver el partido",
         "rg_title": "Juego responsable · 18+",
-        "rg_body": "IASHARK publica análisis estadísticos de fútbol. No es una casa de apuestas: no acepta apuestas, y una probabilidad nunca es una certeza. Apostar conlleva riesgos (pérdida de dinero, adicción). Servicio reservado a mayores de 18 años.",
+        "rg_body": "IASHARK publica análisis de fútbol y no acepta apuestas. Una probabilidad calculada nunca es una certeza. Las apuestas deportivas conllevan un riesgo de pérdida de dinero y de adicción. Solo para mayores de 18 años.",
         "rg_help_phone": "¿Necesitas ayuda? {{helplineName}}: {{helplinePhone}}.",
         "rg_help_nophone": "¿Necesitas ayuda? {{helplineName}}:",
-        "rg_more": "Nuestros recursos de juego responsable",
-        "footer_reason_marketing": "Recibes este correo porque aceptaste recibir los análisis gratuitos y los consejos de uso de IASHARK.",
+        "rg_more": "Nuestros consejos de juego responsable",
+        "footer_reason_marketing": "Recibes este correo porque aceptaste recibir los correos de IASHARK.",
         "footer_reason_welcome": "Correo enviado tras la creación de tu cuenta IASHARK.",
         "unsubscribe": "Darse de baja con un clic",
         "manage": "Gestionar mis correos en Mi cuenta",
@@ -1954,26 +2121,26 @@ export const BUNDLE = {
       "campaigns": {
         "welcome": {
           "subject": "Bienvenido a IASHARK: por dónde empezar",
-          "preheader": "Cómo usar el sitio, el partido gratuito y la metodología.",
+          "preheader": "Tu cuenta gratuita está lista: cada día, el pronóstico de un partido es gratis.",
           "title": "Bienvenido a IASHARK",
           "blocks": [
             {
               "type": "p",
-              "text": "Tu cuenta gratuita de IASHARK ya está creada. Así puedes usar el sitio en pocos minutos."
+              "text": "Tu cuenta gratuita está lista. Así se usa:"
             },
             {
               "type": "list",
               "ordered": true,
               "items": [
-                "Cada día, el análisis completo de un partido es gratuito: aparece destacado en la página de inicio.",
-                "En la página de un partido, consulta las probabilidades estimadas por el modelo, los factores que tiene en cuenta y sus límites.",
-                "La página Metodología explica de dónde salen estas cifras y cómo leerlas."
+                "Cada día, un partido es gratis. Con tu cuenta gratuita ves su pronóstico, su probabilidad calculada y el porqué.",
+                "Comparas esa probabilidad con la cuota de tu operador autorizado y luego decides tú.",
+                "La página Metodología explica cómo se calculan estas probabilidades."
               ]
             },
             {
               "type": "p",
               "if": "hasFreeMatch",
-              "text": "El partido gratuito del momento:"
+              "text": "El partido gratis ahora mismo:"
             },
             {
               "type": "match",
@@ -1981,60 +2148,84 @@ export const BUNDLE = {
             },
             {
               "type": "cta",
+              "if": "hasFreeMatch",
+              "label": "Ver el pronóstico gratis",
+              "link": "freeMatch"
+            },
+            {
+              "type": "cta",
+              "if": "noFreeMatch",
+              "label": "Ver los partidos del día",
+              "link": "home"
+            },
+            {
+              "type": "link",
               "label": "Leer la metodología",
               "link": "methodology"
             },
             {
-              "type": "link",
-              "label": "Ir a mi cuenta",
-              "link": "account"
-            },
-            {
               "type": "p",
               "if": "notOptedIn",
-              "text": "No pediste recibir nuestros análisis gratuitos y consejos por correo: solo te enviaremos los correos relacionados con tu cuenta. Puedes cambiar de opinión en cualquier momento en Mi cuenta, apartado Notificaciones."
+              "text": "No pediste recibir nuestros correos: solo te enviaremos los correos relacionados con tu cuenta. Puedes cambiar de opinión en cualquier momento en Mi cuenta, apartado Notificaciones."
             }
           ]
         },
         "free_match": {
-          "subject": "El partido gratuito del día: {{freeMatchHome}} – {{freeMatchAway}}",
-          "preheader": "El análisis completo de este partido está abierto gratis con tu cuenta.",
-          "title": "Tu análisis gratuito del día",
+          "subject": "Tu partido gratis: {{freeMatchHome}} – {{freeMatchAway}}",
+          "preheader": "El pronóstico de este partido se abre con tu cuenta gratuita.",
+          "title": "Tu partido gratis",
           "blocks": [
             {
               "type": "p",
-              "text": "Cada día, IASHARK abre gratis a todas las cuentas el análisis completo de un partido. Este es el de hoy:"
+              "text": "Cada día, IASHARK regala el pronóstico de un partido a todas las cuentas gratuitas. Aquí lo tienes:"
             },
             {
               "type": "match"
             },
             {
               "type": "p",
-              "text": "Encontrarás las probabilidades estimadas, los factores que usa el modelo y los puntos de atención. Son estimaciones estadísticas: el resultado de un partido sigue siendo incierto."
+              "text": "Inicia sesión en la página del partido: verás el pronóstico elegido, su probabilidad calculada y el porqué. Lo comparas con la cuota de tu operador autorizado y decides."
             },
             {
               "type": "cta",
-              "label": "Ver el análisis gratuito",
+              "label": "Ver el pronóstico gratis",
               "link": "freeMatch"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Para abrir todos los partidos del día: Pro, con {{trialDays}} días de prueba en una primera suscripción mensual."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Ver la oferta Pro",
+              "link": "pro"
             }
           ]
         },
         "pro_features": {
           "subject": "Lo que desbloquea IASHARK Pro",
-          "preheader": "La lista de contenidos Pro y su precio, sin rodeos.",
+          "preheader": "Todos los partidos del día abiertos, y los precios exactos.",
           "title": "Lo que Pro añade a tu cuenta gratuita",
           "blocks": [
             {
               "type": "p",
-              "text": "Tu cuenta gratuita da acceso al análisis completo de un partido al día, al blog y a las herramientas en modo descubrimiento. Esto es lo que añade Pro:"
+              "text": "Con tu cuenta gratuita tienes cada día el pronóstico de un partido gratis. Pro abre todos los demás:"
             },
             {
               "type": "list",
               "items": [
-                "El análisis completo en todos los partidos",
-                "Las seis herramientas conectadas a las probabilidades del modelo",
-                "El diario de decisiones sincronizado",
-                "El seguimiento de bankroll vinculado a la cuenta"
+                "Todos los partidos del día: el pronóstico elegido, su probabilidad calculada y el porqué",
+                "La película del partido: seis cuartos de hora, y los dos equipos comparados",
+                "Los marcadores más probables, en las ligas mejor medidas"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasTickets",
+              "items": [
+                "La combinada pequeña y la grande del día, la Selección de oro y el goleador del día"
               ]
             },
             {
@@ -2054,12 +2245,13 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "text": "Pro da acceso a más análisis y herramientas; no hace que ningún partido sea más previsible."
+              "if": "hasTrial",
+              "text": "{{trialDays}} días de prueba en una primera suscripción mensual: se pide tu tarjeta, no se cobra nada durante la prueba. Después {{proPrice}} al mes, cobrados automáticamente salvo que canceles antes del final de la prueba."
             },
             {
               "type": "cta",
-              "label": "Ver el detalle de la oferta",
-              "link": "pricing"
+              "label": "Ver la oferta Pro",
+              "link": "pro"
             },
             {
               "type": "p",
@@ -2069,35 +2261,46 @@ export const BUNDLE = {
         },
         "inactive_7d": {
           "subject": "Los partidos de este fin de semana en IASHARK",
-          "preheader": "Algunos partidos del fin de semana que cubre IASHARK.",
-          "title": "Estos son los partidos de este fin de semana",
+          "preheader": "Los partidos del fin de semana, y tu partido gratis cada día.",
+          "title": "Los partidos de este fin de semana",
           "blocks": [
             {
               "type": "p",
-              "text": "Estos son algunos partidos de este fin de semana que cubre IASHARK:"
+              "text": "Estos son algunos partidos de este fin de semana en IASHARK:"
             },
             {
               "type": "matches"
             },
             {
               "type": "p",
-              "text": "El análisis completo de un partido sigue siendo gratuito cada día con tu cuenta."
+              "text": "Cada día, el pronóstico de un partido sigue siendo gratis con tu cuenta gratuita."
             },
             {
               "type": "cta",
               "label": "Ver todos los partidos",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Para abrir todos los partidos del día: Pro, con {{trialDays}} días de prueba en una primera suscripción mensual."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Ver la oferta Pro",
+              "link": "pro"
             }
           ]
         },
         "inactive_30d": {
           "subject": "Tu cuenta IASHARK sigue activa",
-          "preheader": "El análisis gratuito del día sigue disponible con tu cuenta.",
+          "preheader": "Cada día, el pronóstico de un partido sigue siendo gratis con tu cuenta gratuita.",
           "title": "Tu cuenta sigue aquí",
           "blocks": [
             {
               "type": "p",
-              "text": "Hace tiempo que no vuelves a IASHARK. Tu cuenta gratuita sigue activa y el análisis completo de un partido sigue siendo gratuito cada día."
+              "text": "Hace tiempo que no vuelves a IASHARK. Tu cuenta gratuita sigue activa, y cada día el pronóstico de un partido sigue siendo gratis."
             },
             {
               "type": "cta",
@@ -2106,26 +2309,37 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "text": "Si estos correos ya no te son útiles, date de baja con un clic en el enlace al final de este mensaje. Si no visitas el sitio ni abres nuestros correos, dejaremos de escribirte en 30 días de todos modos."
+              "if": "hasTrial",
+              "text": "Para abrir todos los partidos del día: Pro, con {{trialDays}} días de prueba en una primera suscripción mensual."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Ver la oferta Pro",
+              "link": "pro"
+            },
+            {
+              "type": "p",
+              "text": "Si estos correos ya no te sirven, date de baja con un clic con el enlace al final de este mensaje. Sin visitas ni aperturas de nuestros correos durante 60 días, dejamos de escribirte de todos modos."
             }
           ]
         },
         "pro_weekly_summary": {
           "subject": "Tu resumen IASHARK: los partidos del fin de semana",
-          "preheader": "Los partidos del fin de semana que cubre IASHARK.",
-          "title": "Resumen de la semana",
+          "preheader": "Los partidos del fin de semana, listos en tu espacio Pro.",
+          "title": "Los partidos del fin de semana",
           "blocks": [
             {
               "type": "p",
-              "text": "Estos son algunos partidos del fin de semana que cubre IASHARK. Tus herramientas Pro están disponibles en la página Herramientas."
+              "text": "Estos son algunos partidos de este fin de semana. El pronóstico de cada partido se publica antes del inicio en tu espacio Pro."
             },
             {
               "type": "matches"
             },
             {
               "type": "cta",
-              "label": "Abrir las herramientas",
-              "link": "tools"
+              "label": "Abrir mi espacio Pro",
+              "link": "pro"
             },
             {
               "type": "p",
@@ -2136,7 +2350,7 @@ export const BUNDLE = {
       }
     },
     "es-mx": {
-      "_status": "REVIEW - textos pendientes de revisión (abogado en México + nativo) antes de activar. Sin promesa de ganancias.",
+      "_status": "REVIEW - textos revisados el 25/10/2026 (contenido Pro y precios actuales, pronóstico gratis con la cuenta gratuita). Versión México. Sin promesa de ganancias, sin montos de apuesta, sin emoji.",
       "locale": "es-mx",
       "common": {
         "greeting": "Hola:",
@@ -2144,11 +2358,11 @@ export const BUNDLE = {
         "kickoff_label": "Inicio",
         "match_link": "Ver el partido",
         "rg_title": "Juego responsable · 18+",
-        "rg_body": "IASHARK ofrece análisis estadísticos de futbol. No es una casa de apuestas: no recibe apuestas, y una probabilidad nunca es una certeza. Apostar implica riesgos (pérdida de dinero, adicción). Prohibido para menores de 18 años.",
+        "rg_body": "IASHARK publica análisis de futbol y no recibe apuestas. Una probabilidad calculada nunca es una certeza. Las apuestas deportivas implican un riesgo de pérdida de dinero y de adicción. Prohibido para menores de 18 años.",
         "rg_help_phone": "¿Necesitas orientación? {{helplineName}}: {{helplinePhone}}.",
         "rg_help_nophone": "¿Necesitas orientación? {{helplineName}}:",
-        "rg_more": "Nuestros recursos de juego responsable",
-        "footer_reason_marketing": "Recibes este correo porque aceptaste recibir los análisis gratuitos y los consejos de uso de IASHARK.",
+        "rg_more": "Nuestros consejos de juego responsable",
+        "footer_reason_marketing": "Recibes este correo porque aceptaste recibir los correos de IASHARK.",
         "footer_reason_welcome": "Correo enviado después de crear tu cuenta IASHARK.",
         "unsubscribe": "Darte de baja con un clic",
         "manage": "Administrar mis correos en Mi cuenta",
@@ -2159,26 +2373,26 @@ export const BUNDLE = {
       "campaigns": {
         "welcome": {
           "subject": "Bienvenido a IASHARK: por dónde empezar",
-          "preheader": "Cómo usar el sitio, el partido gratuito y la metodología.",
+          "preheader": "Tu cuenta gratuita está lista: cada día, el pronóstico de un partido es gratis.",
           "title": "Bienvenido a IASHARK",
           "blocks": [
             {
               "type": "p",
-              "text": "Tu cuenta gratuita de IASHARK ya está lista. Así puedes usar el sitio en unos minutos."
+              "text": "Tu cuenta gratuita está lista. Así se usa:"
             },
             {
               "type": "list",
               "ordered": true,
               "items": [
-                "Cada día, el análisis completo de un partido es gratuito: aparece destacado en la página de inicio.",
-                "En la página de un partido, revisa las probabilidades estimadas por el modelo, los factores que considera y sus límites.",
-                "La página Metodología explica de dónde salen estas cifras y cómo leerlas."
+                "Cada día, un partido es gratis. Con tu cuenta gratuita ves su pronóstico, su probabilidad calculada y el porqué.",
+                "Comparas esa probabilidad con el momio de tu operador autorizado y luego decides tú.",
+                "La página Metodología explica cómo se calculan estas probabilidades."
               ]
             },
             {
               "type": "p",
               "if": "hasFreeMatch",
-              "text": "El partido gratuito del momento:"
+              "text": "El partido gratis ahora mismo:"
             },
             {
               "type": "match",
@@ -2186,60 +2400,84 @@ export const BUNDLE = {
             },
             {
               "type": "cta",
+              "if": "hasFreeMatch",
+              "label": "Ver el pronóstico gratis",
+              "link": "freeMatch"
+            },
+            {
+              "type": "cta",
+              "if": "noFreeMatch",
+              "label": "Ver los partidos del día",
+              "link": "home"
+            },
+            {
+              "type": "link",
               "label": "Leer la metodología",
               "link": "methodology"
             },
             {
-              "type": "link",
-              "label": "Ir a Mi cuenta",
-              "link": "account"
-            },
-            {
               "type": "p",
               "if": "notOptedIn",
-              "text": "No pediste recibir nuestros análisis gratuitos y consejos por correo: solo te enviaremos los correos relacionados con tu cuenta. Puedes cambiar de opinión cuando quieras en Mi cuenta, sección Notificaciones."
+              "text": "No pediste recibir nuestros correos: solo te enviaremos los correos relacionados con tu cuenta. Puedes cambiar de opinión cuando quieras en Mi cuenta, sección Notificaciones."
             }
           ]
         },
         "free_match": {
-          "subject": "El partido gratuito del día: {{freeMatchHome}} – {{freeMatchAway}}",
-          "preheader": "El análisis completo de este partido está abierto gratis con tu cuenta.",
-          "title": "Tu análisis gratuito del día",
+          "subject": "Tu partido gratis: {{freeMatchHome}} – {{freeMatchAway}}",
+          "preheader": "El pronóstico de este partido se abre con tu cuenta gratuita.",
+          "title": "Tu partido gratis",
           "blocks": [
             {
               "type": "p",
-              "text": "Cada día, IASHARK abre gratis a todas las cuentas el análisis completo de un partido. Este es el de hoy:"
+              "text": "Cada día, IASHARK regala el pronóstico de un partido a todas las cuentas gratuitas. Aquí lo tienes:"
             },
             {
               "type": "match"
             },
             {
               "type": "p",
-              "text": "Ahí encontrarás las probabilidades estimadas, los factores que usa el modelo y los puntos a vigilar. Son estimaciones estadísticas: el resultado de un partido sigue siendo incierto."
+              "text": "Inicia sesión en la página del partido: verás el pronóstico elegido, su probabilidad calculada y el porqué. Lo comparas con el momio de tu operador autorizado y decides."
             },
             {
               "type": "cta",
-              "label": "Ver el análisis gratuito",
+              "label": "Ver el pronóstico gratis",
               "link": "freeMatch"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Para abrir todos los partidos del día: Pro, con {{trialDays}} días de prueba en una primera suscripción mensual."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Ver la oferta Pro",
+              "link": "pro"
             }
           ]
         },
         "pro_features": {
           "subject": "Lo que desbloquea IASHARK Pro",
-          "preheader": "La lista de contenidos Pro y su precio, sin rodeos.",
-          "title": "Lo que Pro agrega a tu cuenta gratuita",
+          "preheader": "Todos los partidos del día abiertos, y los precios exactos.",
+          "title": "Lo que Pro añade a tu cuenta gratuita",
           "blocks": [
             {
               "type": "p",
-              "text": "Tu cuenta gratuita da acceso al análisis completo de un partido al día, al blog y a las herramientas en modo de prueba. Esto es lo que agrega Pro:"
+              "text": "Con tu cuenta gratuita tienes cada día el pronóstico de un partido gratis. Pro abre todos los demás:"
             },
             {
               "type": "list",
               "items": [
-                "El análisis completo en todos los partidos",
-                "Las seis herramientas conectadas a las probabilidades del modelo",
-                "El diario de decisiones sincronizado",
-                "El seguimiento de bankroll vinculado a la cuenta"
+                "Todos los partidos del día: el pronóstico elegido, su probabilidad calculada y el porqué",
+                "La película del partido: seis cuartos de hora, y los dos equipos comparados",
+                "Los marcadores más probables, en las ligas mejor medidas"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasTickets",
+              "items": [
+                "El parlay chico y el grande del día, la Selección de oro y el goleador del día"
               ]
             },
             {
@@ -2259,12 +2497,13 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "text": "Pro da acceso a más análisis y herramientas; no hace que ningún partido sea más predecible."
+              "if": "hasTrial",
+              "text": "{{trialDays}} días de prueba en una primera suscripción mensual: se pide tu tarjeta, no se cobra nada durante la prueba. Después {{proPrice}} al mes, cobrados automáticamente salvo que canceles antes del final de la prueba."
             },
             {
               "type": "cta",
-              "label": "Ver el detalle del plan",
-              "link": "pricing"
+              "label": "Ver la oferta Pro",
+              "link": "pro"
             },
             {
               "type": "p",
@@ -2274,63 +2513,85 @@ export const BUNDLE = {
         },
         "inactive_7d": {
           "subject": "Los partidos de este fin de semana en IASHARK",
-          "preheader": "Algunos partidos del fin de semana que cubre IASHARK.",
-          "title": "Estos son los partidos de este fin de semana",
+          "preheader": "Los partidos del fin de semana, y tu partido gratis cada día.",
+          "title": "Los partidos de este fin de semana",
           "blocks": [
             {
               "type": "p",
-              "text": "Estos son algunos partidos de este fin de semana que cubre IASHARK:"
+              "text": "Estos son algunos partidos de este fin de semana en IASHARK:"
             },
             {
               "type": "matches"
             },
             {
               "type": "p",
-              "text": "El análisis completo de un partido sigue siendo gratuito cada día con tu cuenta."
+              "text": "Cada día, el pronóstico de un partido sigue siendo gratis con tu cuenta gratuita."
             },
             {
               "type": "cta",
               "label": "Ver todos los partidos",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Para abrir todos los partidos del día: Pro, con {{trialDays}} días de prueba en una primera suscripción mensual."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Ver la oferta Pro",
+              "link": "pro"
             }
           ]
         },
         "inactive_30d": {
           "subject": "Tu cuenta IASHARK sigue activa",
-          "preheader": "El análisis gratuito del día sigue disponible con tu cuenta.",
+          "preheader": "Cada día, el pronóstico de un partido sigue siendo gratis con tu cuenta gratuita.",
           "title": "Tu cuenta sigue aquí",
           "blocks": [
             {
               "type": "p",
-              "text": "Hace tiempo que no regresas a IASHARK. Tu cuenta gratuita sigue activa y el análisis completo de un partido sigue siendo gratuito cada día."
+              "text": "Hace tiempo que no vuelves a IASHARK. Tu cuenta gratuita sigue activa, y cada día el pronóstico de un partido sigue siendo gratis."
             },
             {
               "type": "cta",
-              "label": "Regresar a IASHARK",
+              "label": "Volver a IASHARK",
               "link": "home"
             },
             {
               "type": "p",
-              "text": "Si estos correos ya no te sirven, date de baja con un clic en el enlace al final de este mensaje. Si no visitas el sitio ni abres nuestros correos, de todos modos dejaremos de escribirte en 30 días."
+              "if": "hasTrial",
+              "text": "Para abrir todos los partidos del día: Pro, con {{trialDays}} días de prueba en una primera suscripción mensual."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Ver la oferta Pro",
+              "link": "pro"
+            },
+            {
+              "type": "p",
+              "text": "Si estos correos ya no te sirven, date de baja con un clic con el enlace al final de este mensaje. Sin visitas ni aperturas de nuestros correos durante 60 días, dejamos de escribirte de todas formas."
             }
           ]
         },
         "pro_weekly_summary": {
           "subject": "Tu resumen IASHARK: los partidos del fin de semana",
-          "preheader": "Los partidos del fin de semana que cubre IASHARK.",
-          "title": "Resumen de la semana",
+          "preheader": "Los partidos del fin de semana, listos en tu espacio Pro.",
+          "title": "Los partidos del fin de semana",
           "blocks": [
             {
               "type": "p",
-              "text": "Estos son algunos partidos del fin de semana que cubre IASHARK. Tus herramientas Pro están disponibles en la página Herramientas."
+              "text": "Estos son algunos partidos de este fin de semana. El pronóstico de cada partido se publica antes del inicio en tu espacio Pro."
             },
             {
               "type": "matches"
             },
             {
               "type": "cta",
-              "label": "Abrir las herramientas",
-              "link": "tools"
+              "label": "Abrir mi espacio Pro",
+              "link": "pro"
             },
             {
               "type": "p",
@@ -2341,7 +2602,7 @@ export const BUNDLE = {
       }
     },
     "de": {
-      "_status": "REVIEW - vor der Aktivierung prüfen lassen (Jurist + Muttersprachler). Kein Gewinnversprechen. Methodik-Seite existiert noch nicht auf Deutsch (Link auf die englische Seite).",
+      "_status": "REVIEW - Texte überarbeitet am 25/10/2026 (aktuelle Pro-Inhalte und Preise, Gratis-Tipp mit kostenlosem Konto). Kein Gewinnversprechen, keine Einsätze, keine Emojis.",
       "locale": "de",
       "common": {
         "greeting": "Hallo,",
@@ -2349,12 +2610,12 @@ export const BUNDLE = {
         "kickoff_label": "Anstoß",
         "match_link": "Zum Spiel",
         "rg_title": "Verantwortungsvolles Spielen · 18+",
-        "rg_body": "IASHARK veröffentlicht statistische Fußballanalysen. Wir sind kein Wettanbieter und nehmen keine Wetten an, und eine Wahrscheinlichkeit ist nie eine Gewissheit. Wetten ist mit Risiken verbunden (Geldverlust, Sucht). Nur für Personen ab 18 Jahren.",
-        "rg_help_phone": "Brauchen Sie Hilfe? {{helplineName}}: {{helplinePhone}}.",
-        "rg_help_nophone": "Brauchen Sie Hilfe? {{helplineName}}:",
+        "rg_body": "IASHARK veröffentlicht Fußballanalysen und nimmt keine Wetten an. Eine berechnete Chance ist nie eine Gewissheit. Sportwetten bergen das Risiko von Geldverlust und Sucht. Nur für Personen ab 18 Jahren.",
+        "rg_help_phone": "Brauchst du Hilfe? {{helplineName}}: {{helplinePhone}}.",
+        "rg_help_nophone": "Brauchst du Hilfe? {{helplineName}}:",
         "rg_more": "Unsere Hinweise zum verantwortungsvollen Spielen",
-        "footer_reason_marketing": "Sie erhalten diese E-Mail, weil Sie zugestimmt haben, die kostenlosen Analysen und Nutzungstipps von IASHARK zu erhalten.",
-        "footer_reason_welcome": "Gesendet nach der Erstellung Ihres IASHARK-Kontos.",
+        "footer_reason_marketing": "Du erhältst diese E-Mail, weil du zugestimmt hast, E-Mails von IASHARK zu erhalten.",
+        "footer_reason_welcome": "Gesendet nach der Erstellung deines IASHARK-Kontos.",
         "unsubscribe": "Mit einem Klick abmelden",
         "manage": "E-Mails in Mein Konto verwalten",
         "privacy": "Datenschutz",
@@ -2363,27 +2624,27 @@ export const BUNDLE = {
       },
       "campaigns": {
         "welcome": {
-          "subject": "Willkommen bei IASHARK: so fangen Sie an",
-          "preheader": "So nutzen Sie die Website, das kostenlose Spiel und die Methodik.",
+          "subject": "Willkommen bei IASHARK: so fängst du an",
+          "preheader": "Dein kostenloses Konto ist bereit: jeden Tag ein Gratis-Tipp.",
           "title": "Willkommen bei IASHARK",
           "blocks": [
             {
               "type": "p",
-              "text": "Ihr kostenloses IASHARK-Konto ist eingerichtet. So nutzen Sie die Website in wenigen Minuten."
+              "text": "Dein kostenloses Konto ist bereit. So nutzt du es:"
             },
             {
               "type": "list",
               "ordered": true,
               "items": [
-                "Jeden Tag ist die vollständige Analyse eines Spiels kostenlos: Sie ist auf der Startseite hervorgehoben.",
-                "Auf der Seite eines Spiels lesen Sie die vom Modell geschätzten Wahrscheinlichkeiten, die berücksichtigten Faktoren und ihre Grenzen.",
-                "Die Methodik-Seite erklärt, woher diese Zahlen kommen und wie man sie liest."
+                "Jeden Tag ist ein Spiel gratis. Mit deinem kostenlosen Konto siehst du seinen Tipp, seine berechnete Chance und die Begründung.",
+                "Du vergleichst diese Chance mit der Quote deines zugelassenen Anbieters und entscheidest dann selbst.",
+                "Die Seite Methodik erklärt, wie diese Chancen berechnet werden."
               ]
             },
             {
               "type": "p",
               "if": "hasFreeMatch",
-              "text": "Das aktuelle kostenlose Spiel:"
+              "text": "Das Gratis-Spiel im Moment:"
             },
             {
               "type": "match",
@@ -2391,60 +2652,84 @@ export const BUNDLE = {
             },
             {
               "type": "cta",
-              "label": "Zur Methodik (Seite auf Englisch)",
-              "link": "methodology"
+              "if": "hasFreeMatch",
+              "label": "Zum Gratis-Tipp",
+              "link": "freeMatch"
+            },
+            {
+              "type": "cta",
+              "if": "noFreeMatch",
+              "label": "Spiele des Tages ansehen",
+              "link": "home"
             },
             {
               "type": "link",
-              "label": "Zu meinem Konto",
-              "link": "account"
+              "label": "Methodik lesen",
+              "link": "methodology"
             },
             {
               "type": "p",
               "if": "notOptedIn",
-              "text": "Sie haben keine kostenlosen Analysen und Tipps per E-Mail angefordert: Wir senden Ihnen nur E-Mails zu Ihrem Konto. Sie können Ihre Wahl jederzeit in Mein Konto unter Benachrichtigungen ändern."
+              "text": "Du hast keine E-Mails von uns angefordert: Wir senden dir nur E-Mails zu deinem Konto. Du kannst deine Wahl jederzeit in Mein Konto unter Benachrichtigungen ändern."
             }
           ]
         },
         "free_match": {
-          "subject": "Das kostenlose Spiel des Tages: {{freeMatchHome}} – {{freeMatchAway}}",
-          "preheader": "Die vollständige Analyse dieses Spiels ist mit Ihrem Konto kostenlos freigeschaltet.",
-          "title": "Ihre kostenlose Analyse des Tages",
+          "subject": "Dein Gratis-Spiel: {{freeMatchHome}} – {{freeMatchAway}}",
+          "preheader": "Der Tipp zu diesem Spiel öffnet sich mit deinem kostenlosen Konto.",
+          "title": "Dein Gratis-Spiel",
           "blocks": [
             {
               "type": "p",
-              "text": "Jeden Tag schaltet IASHARK die vollständige Analyse eines Spiels für alle Konten kostenlos frei. Das ist die heutige:"
+              "text": "Jeden Tag schenkt IASHARK allen kostenlosen Konten den Tipp zu einem Spiel. Hier ist er:"
             },
             {
               "type": "match"
             },
             {
               "type": "p",
-              "text": "Sie finden dort die geschätzten Wahrscheinlichkeiten, die Faktoren des Modells und die Punkte, auf die zu achten ist. Es sind statistische Schätzungen: Der Ausgang eines Spiels bleibt ungewiss."
+              "text": "Melde dich auf der Spielseite an: Du siehst den gewählten Tipp, seine berechnete Chance und die Begründung. Du vergleichst mit der Quote deines zugelassenen Anbieters und entscheidest."
             },
             {
               "type": "cta",
-              "label": "Kostenlose Analyse ansehen",
+              "label": "Zum Gratis-Tipp",
               "link": "freeMatch"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Um alle Spiele des Tages zu öffnen: Pro, mit {{trialDays}} Tagen Testphase beim ersten Monatsabo."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Pro-Angebot ansehen",
+              "link": "pro"
             }
           ]
         },
         "pro_features": {
           "subject": "Was IASHARK Pro freischaltet",
-          "preheader": "Die Pro-Inhalte und ihr Preis, ohne Umschweife.",
-          "title": "Was Pro Ihrem kostenlosen Konto hinzufügt",
+          "preheader": "Alle Spiele des Tages offen, und die genauen Preise.",
+          "title": "Was Pro deinem kostenlosen Konto hinzufügt",
           "blocks": [
             {
               "type": "p",
-              "text": "Ihr kostenloses Konto bietet die vollständige Analyse eines Spiels pro Tag, den Blog und die Tools zum Kennenlernen. Das fügt Pro hinzu:"
+              "text": "Mit deinem kostenlosen Konto hast du jeden Tag den Tipp zu einem Gratis-Spiel. Pro öffnet alle anderen:"
             },
             {
               "type": "list",
               "items": [
-                "Die vollständige Analyse zu allen Spielen",
-                "Die sechs Tools, verbunden mit den Wahrscheinlichkeiten des Modells",
-                "Das synchronisierte Entscheidungsjournal",
-                "Die Bankroll-Verfolgung, verknüpft mit dem Konto"
+                "Alle Spiele des Tages: der gewählte Tipp, seine berechnete Chance und die Begründung",
+                "Der Spielfilm: sechs Viertelstunden, und beide Mannschaften im Vergleich",
+                "Die wahrscheinlichsten Ergebnisse, in den am besten gemessenen Ligen"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasTickets",
+              "items": [
+                "Die kleine und die große Kombi des Tages, die Gold-Auswahl und der Torschütze des Tages"
               ]
             },
             {
@@ -2464,50 +2749,62 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "text": "Pro bietet mehr Analysen und Tools; es macht kein Spiel vorhersehbarer."
+              "if": "hasTrial",
+              "text": "{{trialDays}} Tage Testphase beim ersten Monatsabo: Deine Karte wird abgefragt, während der Testphase wird nichts abgebucht. Danach {{proPrice}} pro Monat, automatisch abgebucht, außer du kündigst vor Ende der Testphase."
             },
             {
               "type": "cta",
-              "label": "Details zum Angebot",
-              "link": "pricing"
+              "label": "Pro-Angebot ansehen",
+              "link": "pro"
             },
             {
               "type": "p",
-              "text": "Wenn Ihnen das kostenlose Konto genügt, müssen Sie nichts tun."
+              "text": "Wenn dir das kostenlose Konto reicht, musst du nichts tun."
             }
           ]
         },
         "inactive_7d": {
-          "subject": "Die Spiele dieses Wochenendes bei IASHARK",
-          "preheader": "Einige Begegnungen des Wochenendes, die IASHARK abdeckt.",
-          "title": "Das sind die Spiele dieses Wochenendes",
+          "subject": "Die Spiele dieses Wochenendes auf IASHARK",
+          "preheader": "Die Spiele des Wochenendes, und jeden Tag dein Gratis-Spiel.",
+          "title": "Die Spiele dieses Wochenendes",
           "blocks": [
             {
               "type": "p",
-              "text": "Hier einige Begegnungen dieses Wochenendes, die IASHARK abdeckt:"
+              "text": "Hier einige Spiele dieses Wochenendes auf IASHARK:"
             },
             {
               "type": "matches"
             },
             {
               "type": "p",
-              "text": "Die vollständige Analyse eines Spiels bleibt mit Ihrem Konto jeden Tag kostenlos."
+              "text": "Jeden Tag bleibt der Tipp zu einem Spiel mit deinem kostenlosen Konto gratis."
             },
             {
               "type": "cta",
               "label": "Alle Spiele ansehen",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Um alle Spiele des Tages zu öffnen: Pro, mit {{trialDays}} Tagen Testphase beim ersten Monatsabo."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Pro-Angebot ansehen",
+              "link": "pro"
             }
           ]
         },
         "inactive_30d": {
-          "subject": "Ihr IASHARK-Konto ist weiterhin aktiv",
-          "preheader": "Die kostenlose Analyse des Tages ist mit Ihrem Konto weiterhin verfügbar.",
-          "title": "Ihr Konto ist noch da",
+          "subject": "Dein IASHARK-Konto ist weiterhin aktiv",
+          "preheader": "Jeden Tag bleibt der Tipp zu einem Spiel mit deinem kostenlosen Konto gratis.",
+          "title": "Dein Konto ist noch da",
           "blocks": [
             {
               "type": "p",
-              "text": "Sie waren eine Weile nicht mehr bei IASHARK. Ihr kostenloses Konto ist weiterhin aktiv, und die vollständige Analyse eines Spiels bleibt jeden Tag kostenlos."
+              "text": "Du warst eine Weile nicht mehr auf IASHARK. Dein kostenloses Konto ist weiterhin aktiv, und jeden Tag bleibt der Tipp zu einem Spiel gratis."
             },
             {
               "type": "cta",
@@ -2516,37 +2813,48 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "text": "Wenn Ihnen diese E-Mails nicht mehr nützen, melden Sie sich mit dem Link am Ende dieser Nachricht mit einem Klick ab. Ohne Besuch oder Öffnen unserer E-Mails schreiben wir Ihnen ohnehin in 30 Tagen nicht mehr."
+              "if": "hasTrial",
+              "text": "Um alle Spiele des Tages zu öffnen: Pro, mit {{trialDays}} Tagen Testphase beim ersten Monatsabo."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Pro-Angebot ansehen",
+              "link": "pro"
+            },
+            {
+              "type": "p",
+              "text": "Wenn dir diese E-Mails nichts mehr bringen, melde dich mit dem Link unten in dieser Nachricht mit einem Klick ab. Ohne Besuch und ohne Öffnen unserer E-Mails während 60 Tagen schreiben wir dir ohnehin nicht mehr."
             }
           ]
         },
         "pro_weekly_summary": {
-          "subject": "Ihre IASHARK-Zusammenfassung: die Spiele des Wochenendes",
-          "preheader": "Die Begegnungen des Wochenendes, die IASHARK abdeckt.",
-          "title": "Zusammenfassung der Woche",
+          "subject": "Deine IASHARK-Übersicht: die Spiele des Wochenendes",
+          "preheader": "Die Spiele des Wochenendes, bereit in deinem Pro-Bereich.",
+          "title": "Die Spiele des Wochenendes",
           "blocks": [
             {
               "type": "p",
-              "text": "Hier einige Begegnungen des Wochenendes, die IASHARK abdeckt. Ihre Pro-Tools finden Sie auf der Seite Tools."
+              "text": "Hier einige Spiele dieses Wochenendes. Der Tipp zu jedem Spiel wird vor dem Anstoß in deinem Pro-Bereich veröffentlicht."
             },
             {
               "type": "matches"
             },
             {
               "type": "cta",
-              "label": "Tools öffnen",
-              "link": "tools"
+              "label": "Meinen Pro-Bereich öffnen",
+              "link": "pro"
             },
             {
               "type": "p",
-              "text": "Sie können diese Zusammenfassung in Mein Konto unter Benachrichtigungen abschalten."
+              "text": "Du kannst diese Übersicht in Mein Konto unter Benachrichtigungen abschalten."
             }
           ]
         }
       }
     },
     "it": {
-      "_status": "REVIEW - da far rivedere (giurista + madrelingua) prima dell'attivazione. Nessuna promessa di vincita. La pagina Metodologia non esiste ancora in italiano (link alla pagina inglese).",
+      "_status": "REVIEW - testi rivisti il 25/10/2026 (contenuti Pro e prezzi attuali, pronostico gratuito con l'account gratuito). Nessuna promessa di vincita, nessuna puntata, nessuna emoji.",
       "locale": "it",
       "common": {
         "greeting": "Ciao,",
@@ -2554,11 +2862,11 @@ export const BUNDLE = {
         "kickoff_label": "Calcio d'inizio",
         "match_link": "Vedi la partita",
         "rg_title": "Gioco responsabile · 18+",
-        "rg_body": "IASHARK pubblica analisi statistiche sul calcio. Non è un sito di scommesse: non accetta puntate, e una probabilità non è mai una certezza. Scommettere comporta rischi (perdita di denaro, dipendenza). Servizio riservato ai maggiori di 18 anni.",
+        "rg_body": "IASHARK pubblica analisi di calcio e non accetta scommesse. Una probabilità calcolata non è mai una certezza. Le scommesse sportive comportano un rischio di perdita di denaro e di dipendenza. Riservato ai maggiori di 18 anni.",
         "rg_help_phone": "Hai bisogno di aiuto? {{helplineName}}: {{helplinePhone}}.",
         "rg_help_nophone": "Hai bisogno di aiuto? {{helplineName}}:",
-        "rg_more": "Le nostre risorse sul gioco responsabile",
-        "footer_reason_marketing": "Ricevi questa email perché hai accettato di ricevere le analisi gratuite e i consigli d'uso di IASHARK.",
+        "rg_more": "I nostri consigli sul gioco responsabile",
+        "footer_reason_marketing": "Ricevi questa email perché hai accettato di ricevere le email di IASHARK.",
         "footer_reason_welcome": "Email inviata dopo la creazione del tuo account IASHARK.",
         "unsubscribe": "Annulla l'iscrizione con un clic",
         "manage": "Gestisci le email in Il mio account",
@@ -2569,26 +2877,26 @@ export const BUNDLE = {
       "campaigns": {
         "welcome": {
           "subject": "Benvenuto su IASHARK: da dove iniziare",
-          "preheader": "Come usare il sito, la partita gratuita e la metodologia.",
+          "preheader": "Il tuo account gratuito è pronto: ogni giorno, il pronostico di una partita è gratis.",
           "title": "Benvenuto su IASHARK",
           "blocks": [
             {
               "type": "p",
-              "text": "Il tuo account gratuito IASHARK è pronto. Ecco come usare il sito in pochi minuti."
+              "text": "Il tuo account gratuito è pronto. Ecco come usarlo:"
             },
             {
               "type": "list",
               "ordered": true,
               "items": [
-                "Ogni giorno l'analisi completa di una partita è gratuita: la trovi in evidenza nella pagina iniziale.",
-                "Nella pagina di una partita leggi le probabilità stimate dal modello, i fattori considerati e i loro limiti.",
-                "La pagina Metodologia spiega da dove vengono questi numeri e come leggerli."
+                "Ogni giorno, una partita è gratis. Con il tuo account gratuito vedi il suo pronostico, la sua probabilità calcolata e il perché.",
+                "Confronti questa probabilità con la quota del tuo operatore autorizzato, poi decidi tu.",
+                "La pagina Metodologia spiega come vengono calcolate queste probabilità."
               ]
             },
             {
               "type": "p",
               "if": "hasFreeMatch",
-              "text": "La partita gratuita del momento:"
+              "text": "La partita gratuita in questo momento:"
             },
             {
               "type": "match",
@@ -2596,60 +2904,84 @@ export const BUNDLE = {
             },
             {
               "type": "cta",
-              "label": "Leggi la metodologia (pagina in inglese)",
-              "link": "methodology"
+              "if": "hasFreeMatch",
+              "label": "Vedi il pronostico gratuito",
+              "link": "freeMatch"
+            },
+            {
+              "type": "cta",
+              "if": "noFreeMatch",
+              "label": "Vedi le partite del giorno",
+              "link": "home"
             },
             {
               "type": "link",
-              "label": "Vai al mio account",
-              "link": "account"
+              "label": "Leggi la metodologia",
+              "link": "methodology"
             },
             {
               "type": "p",
               "if": "notOptedIn",
-              "text": "Non hai chiesto di ricevere via email le nostre analisi gratuite e i consigli: ti invieremo solo le email relative al tuo account. Puoi cambiare idea in qualsiasi momento in Il mio account, sezione Notifiche."
+              "text": "Non hai chiesto di ricevere le nostre email: ti invieremo solo le email relative al tuo account. Puoi cambiare idea in qualsiasi momento in Il mio account, sezione Notifiche."
             }
           ]
         },
         "free_match": {
-          "subject": "La partita gratuita del giorno: {{freeMatchHome}} – {{freeMatchAway}}",
-          "preheader": "L'analisi completa di questa partita è aperta gratis con il tuo account.",
-          "title": "La tua analisi gratuita del giorno",
+          "subject": "La tua partita gratuita: {{freeMatchHome}} – {{freeMatchAway}}",
+          "preheader": "Il pronostico di questa partita si apre con il tuo account gratuito.",
+          "title": "La tua partita gratuita",
           "blocks": [
             {
               "type": "p",
-              "text": "Ogni giorno IASHARK apre gratis a tutti gli account l'analisi completa di una partita. Ecco quella di oggi:"
+              "text": "Ogni giorno, IASHARK regala il pronostico di una partita a tutti gli account gratuiti. Eccolo:"
             },
             {
               "type": "match"
             },
             {
               "type": "p",
-              "text": "Troverai le probabilità stimate, i fattori usati dal modello e i punti di attenzione. Sono stime statistiche: l'esito di una partita resta incerto."
+              "text": "Accedi dalla pagina della partita: vedi il pronostico scelto, la sua probabilità calcolata e il perché. Lo confronti con la quota del tuo operatore autorizzato e decidi."
             },
             {
               "type": "cta",
-              "label": "Vedi l'analisi gratuita",
+              "label": "Vedi il pronostico gratuito",
               "link": "freeMatch"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Per aprire tutte le partite del giorno: Pro, con {{trialDays}} giorni di prova per un primo abbonamento mensile."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Vedi l'offerta Pro",
+              "link": "pro"
             }
           ]
         },
         "pro_features": {
           "subject": "Cosa sblocca IASHARK Pro",
-          "preheader": "L'elenco dei contenuti Pro e il loro prezzo, senza giri di parole.",
+          "preheader": "Tutte le partite del giorno aperte, e i prezzi esatti.",
           "title": "Cosa aggiunge Pro al tuo account gratuito",
           "blocks": [
             {
               "type": "p",
-              "text": "Il tuo account gratuito dà accesso all'analisi completa di una partita al giorno, al blog e agli strumenti in prova. Ecco cosa aggiunge Pro:"
+              "text": "Con il tuo account gratuito hai ogni giorno il pronostico di una partita gratis. Pro apre tutte le altre:"
             },
             {
               "type": "list",
               "items": [
-                "L'analisi completa su tutte le partite",
-                "I sei strumenti collegati alle probabilità del modello",
-                "Il diario delle decisioni sincronizzato",
-                "Il monitoraggio della bankroll collegato all'account"
+                "Tutte le partite del giorno: il pronostico scelto, la sua probabilità calcolata e il perché",
+                "Il film della partita: sei quarti d'ora, e le due squadre a confronto",
+                "I risultati più probabili, nei campionati misurati meglio"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasTickets",
+              "items": [
+                "La multipla piccola e quella grande del giorno, la Selezione d'oro e il marcatore del giorno"
               ]
             },
             {
@@ -2669,12 +3001,13 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "text": "Pro dà accesso a più analisi e strumenti; non rende nessuna partita più prevedibile."
+              "if": "hasTrial",
+              "text": "{{trialDays}} giorni di prova per un primo abbonamento mensile: la carta viene richiesta, nulla viene addebitato durante la prova. Poi {{proPrice}} al mese, addebitati automaticamente salvo disdetta prima della fine della prova."
             },
             {
               "type": "cta",
-              "label": "Vedi i dettagli dell'offerta",
-              "link": "pricing"
+              "label": "Vedi l'offerta Pro",
+              "link": "pro"
             },
             {
               "type": "p",
@@ -2683,36 +3016,47 @@ export const BUNDLE = {
           ]
         },
         "inactive_7d": {
-          "subject": "Le partite di questo fine settimana su IASHARK",
-          "preheader": "Alcune partite del fine settimana seguite da IASHARK.",
-          "title": "Ecco le partite di questo fine settimana",
+          "subject": "Le partite di questo weekend su IASHARK",
+          "preheader": "Le partite del weekend, e la tua partita gratuita ogni giorno.",
+          "title": "Le partite di questo weekend",
           "blocks": [
             {
               "type": "p",
-              "text": "Ecco alcune partite di questo fine settimana seguite da IASHARK:"
+              "text": "Ecco alcune partite di questo weekend su IASHARK:"
             },
             {
               "type": "matches"
             },
             {
               "type": "p",
-              "text": "L'analisi completa di una partita resta gratuita ogni giorno con il tuo account."
+              "text": "Ogni giorno, il pronostico di una partita resta gratuito con il tuo account gratuito."
             },
             {
               "type": "cta",
               "label": "Vedi tutte le partite",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Per aprire tutte le partite del giorno: Pro, con {{trialDays}} giorni di prova per un primo abbonamento mensile."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Vedi l'offerta Pro",
+              "link": "pro"
             }
           ]
         },
         "inactive_30d": {
           "subject": "Il tuo account IASHARK è ancora attivo",
-          "preheader": "L'analisi gratuita del giorno resta disponibile con il tuo account.",
+          "preheader": "Ogni giorno, il pronostico di una partita resta gratuito con il tuo account gratuito.",
           "title": "Il tuo account è ancora qui",
           "blocks": [
             {
               "type": "p",
-              "text": "È da un po' che non torni su IASHARK. Il tuo account gratuito è ancora attivo e l'analisi completa di una partita resta gratuita ogni giorno."
+              "text": "Non torni su IASHARK da un po'. Il tuo account gratuito è ancora attivo, e ogni giorno il pronostico di una partita resta gratuito."
             },
             {
               "type": "cta",
@@ -2721,26 +3065,37 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "text": "Se queste email non ti sono più utili, annulla l'iscrizione con un clic dal link in fondo a questo messaggio. Se non visiti il sito e non apri le nostre email, smetteremo comunque di scriverti tra 30 giorni."
+              "if": "hasTrial",
+              "text": "Per aprire tutte le partite del giorno: Pro, con {{trialDays}} giorni di prova per un primo abbonamento mensile."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Vedi l'offerta Pro",
+              "link": "pro"
+            },
+            {
+              "type": "p",
+              "text": "Se queste email non ti servono più, annulla l'iscrizione con un clic dal link in fondo a questo messaggio. Senza visite né aperture delle nostre email per 60 giorni, smettiamo comunque di scriverti."
             }
           ]
         },
         "pro_weekly_summary": {
-          "subject": "Il tuo riepilogo IASHARK: le partite del fine settimana",
-          "preheader": "Le partite del fine settimana seguite da IASHARK.",
-          "title": "Riepilogo della settimana",
+          "subject": "Il tuo riepilogo IASHARK: le partite del weekend",
+          "preheader": "Le partite del weekend, pronte nel tuo spazio Pro.",
+          "title": "Le partite del weekend",
           "blocks": [
             {
               "type": "p",
-              "text": "Ecco alcune partite del fine settimana seguite da IASHARK. I tuoi strumenti Pro sono disponibili dalla pagina Strumenti."
+              "text": "Ecco alcune partite di questo weekend. Il pronostico di ogni partita è pubblicato prima del calcio d'inizio nel tuo spazio Pro."
             },
             {
               "type": "matches"
             },
             {
               "type": "cta",
-              "label": "Apri gli strumenti",
-              "link": "tools"
+              "label": "Apri il mio spazio Pro",
+              "link": "pro"
             },
             {
               "type": "p",
@@ -2751,7 +3106,7 @@ export const BUNDLE = {
       }
     },
     "pt": {
-      "_status": "REVIEW - rever (jurista + falante nativo) antes da ativação. Sem promessa de ganhos. A página Metodologia ainda não existe em português (ligação para a página em inglês).",
+      "_status": "REVIEW - textos revistos a 25/10/2026 (conteúdos Pro e preços atuais, palpite grátis com a conta gratuita). Sem promessa de ganhos, sem montantes de aposta, sem emoji.",
       "locale": "pt",
       "common": {
         "greeting": "Olá,",
@@ -2759,12 +3114,12 @@ export const BUNDLE = {
         "kickoff_label": "Início do jogo",
         "match_link": "Ver o jogo",
         "rg_title": "Jogo responsável · 18+",
-        "rg_body": "O IASHARK publica análises estatísticas de futebol. Não é um site de apostas: não aceita apostas, e uma probabilidade nunca é uma certeza. Apostar envolve riscos (perda de dinheiro, dependência). Serviço reservado a maiores de 18 anos.",
-        "rg_help_phone": "Precisa de ajuda? {{helplineName}}: {{helplinePhone}}.",
-        "rg_help_nophone": "Precisa de ajuda? {{helplineName}}:",
-        "rg_more": "Os nossos recursos de jogo responsável",
-        "footer_reason_marketing": "Recebe este email porque aceitou receber as análises gratuitas e as dicas de utilização do IASHARK.",
-        "footer_reason_welcome": "Email enviado após a criação da sua conta IASHARK.",
+        "rg_body": "O IASHARK publica análises de futebol e não aceita apostas. Uma probabilidade calculada nunca é uma certeza. As apostas desportivas envolvem um risco de perda de dinheiro e de dependência. Reservado a maiores de 18 anos.",
+        "rg_help_phone": "Precisas de ajuda? {{helplineName}}: {{helplinePhone}}.",
+        "rg_help_nophone": "Precisas de ajuda? {{helplineName}}:",
+        "rg_more": "Os nossos conselhos de jogo responsável",
+        "footer_reason_marketing": "Recebes este email porque aceitaste receber os emails do IASHARK.",
+        "footer_reason_welcome": "Email enviado após a criação da tua conta IASHARK.",
         "unsubscribe": "Cancelar a subscrição com um clique",
         "manage": "Gerir os meus emails em A minha conta",
         "privacy": "Privacidade",
@@ -2774,26 +3129,26 @@ export const BUNDLE = {
       "campaigns": {
         "welcome": {
           "subject": "Bem-vindo ao IASHARK: por onde começar",
-          "preheader": "Como usar o site, o jogo gratuito e a metodologia.",
+          "preheader": "A tua conta gratuita está pronta: todos os dias, o palpite de um jogo é grátis.",
           "title": "Bem-vindo ao IASHARK",
           "blocks": [
             {
               "type": "p",
-              "text": "A sua conta gratuita IASHARK está criada. Veja como usar o site em poucos minutos."
+              "text": "A tua conta gratuita está pronta. Eis como a usar:"
             },
             {
               "type": "list",
               "ordered": true,
               "items": [
-                "Todos os dias, a análise completa de um jogo é gratuita: está em destaque na página inicial.",
-                "Na página de um jogo, leia as probabilidades estimadas pelo modelo, os fatores considerados e os seus limites.",
-                "A página Metodologia explica de onde vêm estes números e como os ler."
+                "Todos os dias, um jogo é grátis. Com a tua conta gratuita vês o seu palpite, a sua probabilidade calculada e o porquê.",
+                "Comparas essa probabilidade com a odd do teu operador licenciado e depois decides tu.",
+                "A página Metodologia explica como estas probabilidades são calculadas."
               ]
             },
             {
               "type": "p",
               "if": "hasFreeMatch",
-              "text": "O jogo gratuito do momento:"
+              "text": "O jogo grátis neste momento:"
             },
             {
               "type": "match",
@@ -2801,60 +3156,84 @@ export const BUNDLE = {
             },
             {
               "type": "cta",
-              "label": "Ler a metodologia (página em inglês)",
-              "link": "methodology"
+              "if": "hasFreeMatch",
+              "label": "Ver o palpite grátis",
+              "link": "freeMatch"
+            },
+            {
+              "type": "cta",
+              "if": "noFreeMatch",
+              "label": "Ver os jogos do dia",
+              "link": "home"
             },
             {
               "type": "link",
-              "label": "Aceder à minha conta",
-              "link": "account"
+              "label": "Ler a metodologia",
+              "link": "methodology"
             },
             {
               "type": "p",
               "if": "notOptedIn",
-              "text": "Não pediu para receber as nossas análises gratuitas e dicas por email: só lhe enviaremos emails relacionados com a sua conta. Pode mudar de ideias a qualquer momento em A minha conta, secção Notificações."
+              "text": "Não pediste para receber os nossos emails: só te enviaremos emails relacionados com a tua conta. Podes mudar de ideias a qualquer momento em A minha conta, secção Notificações."
             }
           ]
         },
         "free_match": {
-          "subject": "O jogo gratuito do dia: {{freeMatchHome}} – {{freeMatchAway}}",
-          "preheader": "A análise completa deste jogo está aberta gratuitamente com a sua conta.",
-          "title": "A sua análise gratuita do dia",
+          "subject": "O teu jogo grátis: {{freeMatchHome}} – {{freeMatchAway}}",
+          "preheader": "O palpite deste jogo abre com a tua conta gratuita.",
+          "title": "O teu jogo grátis",
           "blocks": [
             {
               "type": "p",
-              "text": "Todos os dias, o IASHARK abre gratuitamente a todas as contas a análise completa de um jogo. Esta é a de hoje:"
+              "text": "Todos os dias, o IASHARK oferece o palpite de um jogo a todas as contas gratuitas. Aqui está:"
             },
             {
               "type": "match"
             },
             {
               "type": "p",
-              "text": "Vai encontrar as probabilidades estimadas, os fatores usados pelo modelo e os pontos de atenção. São estimativas estatísticas: o resultado de um jogo continua incerto."
+              "text": "Inicia sessão na página do jogo: vês o palpite escolhido, a sua probabilidade calculada e o porquê. Comparas com a odd do teu operador licenciado e decides."
             },
             {
               "type": "cta",
-              "label": "Ver a análise gratuita",
+              "label": "Ver o palpite grátis",
               "link": "freeMatch"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Para abrir todos os jogos do dia: Pro, com {{trialDays}} dias de teste numa primeira subscrição mensal."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Ver a oferta Pro",
+              "link": "pro"
             }
           ]
         },
         "pro_features": {
           "subject": "O que o IASHARK Pro desbloqueia",
-          "preheader": "A lista de conteúdos Pro e o seu preço, sem rodeios.",
-          "title": "O que o Pro acrescenta à sua conta gratuita",
+          "preheader": "Todos os jogos do dia abertos, e os preços exatos.",
+          "title": "O que o Pro acrescenta à tua conta gratuita",
           "blocks": [
             {
               "type": "p",
-              "text": "A sua conta gratuita dá acesso à análise completa de um jogo por dia, ao blog e às ferramentas em modo de descoberta. Isto é o que o Pro acrescenta:"
+              "text": "Com a tua conta gratuita tens todos os dias o palpite de um jogo grátis. O Pro abre todos os outros:"
             },
             {
               "type": "list",
               "items": [
-                "A análise completa em todos os jogos",
-                "As seis ferramentas ligadas às probabilidades do modelo",
-                "O diário de decisões sincronizado",
-                "O acompanhamento da bankroll ligado à conta"
+                "Todos os jogos do dia: o palpite escolhido, a sua probabilidade calculada e o porquê",
+                "O filme do jogo: seis quartos de hora, e as duas equipas comparadas",
+                "Os resultados mais prováveis, nos campeonatos melhor medidos"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasTickets",
+              "items": [
+                "A múltipla pequena e a grande do dia, a Seleção de ouro e o marcador do dia"
               ]
             },
             {
@@ -2874,50 +3253,62 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "text": "O Pro dá acesso a mais análises e ferramentas; não torna nenhum jogo mais previsível."
+              "if": "hasTrial",
+              "text": "{{trialDays}} dias de teste numa primeira subscrição mensal: o teu cartão é pedido, nada é cobrado durante o teste. Depois {{proPrice}} por mês, cobrados automaticamente salvo cancelamento antes do fim do teste."
             },
             {
               "type": "cta",
-              "label": "Ver os detalhes da oferta",
-              "link": "pricing"
+              "label": "Ver a oferta Pro",
+              "link": "pro"
             },
             {
               "type": "p",
-              "text": "Se a conta gratuita lhe basta, não tem de fazer nada."
+              "text": "Se a conta gratuita te basta, não tens nada a fazer."
             }
           ]
         },
         "inactive_7d": {
           "subject": "Os jogos deste fim de semana no IASHARK",
-          "preheader": "Alguns jogos do fim de semana acompanhados pelo IASHARK.",
-          "title": "Estes são os jogos deste fim de semana",
+          "preheader": "Os jogos do fim de semana, e o teu jogo grátis todos os dias.",
+          "title": "Os jogos deste fim de semana",
           "blocks": [
             {
               "type": "p",
-              "text": "Estes são alguns jogos deste fim de semana acompanhados pelo IASHARK:"
+              "text": "Eis alguns jogos deste fim de semana no IASHARK:"
             },
             {
               "type": "matches"
             },
             {
               "type": "p",
-              "text": "A análise completa de um jogo continua gratuita todos os dias com a sua conta."
+              "text": "Todos os dias, o palpite de um jogo continua grátis com a tua conta gratuita."
             },
             {
               "type": "cta",
               "label": "Ver todos os jogos",
               "link": "home"
+            },
+            {
+              "type": "p",
+              "if": "hasTrial",
+              "text": "Para abrir todos os jogos do dia: Pro, com {{trialDays}} dias de teste numa primeira subscrição mensal."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Ver a oferta Pro",
+              "link": "pro"
             }
           ]
         },
         "inactive_30d": {
-          "subject": "A sua conta IASHARK continua ativa",
-          "preheader": "A análise gratuita do dia continua disponível com a sua conta.",
-          "title": "A sua conta continua aqui",
+          "subject": "A tua conta IASHARK continua ativa",
+          "preheader": "Todos os dias, o palpite de um jogo continua grátis com a tua conta gratuita.",
+          "title": "A tua conta continua aqui",
           "blocks": [
             {
               "type": "p",
-              "text": "Há algum tempo que não volta ao IASHARK. A sua conta gratuita continua ativa e a análise completa de um jogo continua gratuita todos os dias."
+              "text": "Há algum tempo que não voltas ao IASHARK. A tua conta gratuita continua ativa, e todos os dias o palpite de um jogo continua grátis."
             },
             {
               "type": "cta",
@@ -2926,30 +3317,41 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "text": "Se estes emails já não lhe são úteis, cancele a subscrição com um clique na ligação no fim desta mensagem. Sem visitas nem aberturas dos nossos emails, deixaremos de lhe escrever dentro de 30 dias de qualquer forma."
+              "if": "hasTrial",
+              "text": "Para abrir todos os jogos do dia: Pro, com {{trialDays}} dias de teste numa primeira subscrição mensal."
+            },
+            {
+              "type": "link",
+              "if": "hasTrial",
+              "label": "Ver a oferta Pro",
+              "link": "pro"
+            },
+            {
+              "type": "p",
+              "text": "Se estes emails já não te servem, cancela a subscrição com um clique no link no fim desta mensagem. Sem visitas nem aberturas dos nossos emails durante 60 dias, deixamos de te escrever de qualquer forma."
             }
           ]
         },
         "pro_weekly_summary": {
-          "subject": "O seu resumo IASHARK: os jogos do fim de semana",
-          "preheader": "Os jogos do fim de semana acompanhados pelo IASHARK.",
-          "title": "Resumo da semana",
+          "subject": "O teu resumo IASHARK: os jogos do fim de semana",
+          "preheader": "Os jogos do fim de semana, prontos no teu espaço Pro.",
+          "title": "Os jogos do fim de semana",
           "blocks": [
             {
               "type": "p",
-              "text": "Estes são alguns jogos do fim de semana acompanhados pelo IASHARK. As suas ferramentas Pro estão disponíveis na página Ferramentas."
+              "text": "Eis alguns jogos deste fim de semana. O palpite de cada jogo é publicado antes do início no teu espaço Pro."
             },
             {
               "type": "matches"
             },
             {
               "type": "cta",
-              "label": "Abrir as ferramentas",
-              "link": "tools"
+              "label": "Abrir o meu espaço Pro",
+              "link": "pro"
             },
             {
               "type": "p",
-              "text": "Pode desativar este resumo em A minha conta, secção Notificações."
+              "text": "Podes desativar este resumo em A minha conta, secção Notificações."
             }
           ]
         }

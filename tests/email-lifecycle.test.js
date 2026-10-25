@@ -184,7 +184,7 @@ test("aucune donnee payante : seuls noms, competition, horaire et lien des match
   assert.deepEqual(Object.keys(m).sort(), ["away", "home", "id", "kickoff", "kickoffAt", "league", "url"]);
 });
 
-test("textes des 7 langues : meme structure, statut REVIEW, liste Pro alignee sur Mon compte", () => {
+test("textes des 7 langues : meme structure, statut REVIEW, liste Pro alignee sur la page Pro", () => {
   const ref = BUNDLE.copy.fr;
   const shape = (c) => Object.keys(c.campaigns).map((k) => k + ":" + c.campaigns[k].blocks.map((b) => b.type + (b.if || "") + (b.link || "") + (b.items ? b.items.length : "")).join(","));
   for (const loc of build.LOCALES) {
@@ -193,8 +193,16 @@ test("textes des 7 langues : meme structure, statut REVIEW, liste Pro alignee su
     assert.match(c._status, /^REVIEW/);
     assert.deepEqual(Object.keys(c.common).sort(), Object.keys(ref.common).sort(), loc);
     assert.deepEqual(shape(c), shape(ref), loc);
-    const dict = JSON.parse(fs.readFileSync(path.join(ROOT, "i18n", "dict", loc + ".json"), "utf8")).compte_page;
-    for (const k of ["benefit_pro_all_matches", "benefit_pro_six_tools", "benefit_pro_decisions_log", "benefit_pro_bankroll"]) assert.ok(dict[k], loc + " " + k);
+    // 25/10/2026 : liste Pro = lignes vraies partout de la page Pro (lib/pro-vente.js : tous les
+    // matchs, film du match, scores les plus probables) ; combines, Selection en or et buteur
+    // seulement sur le marche francais (hasTickets). Plus d'outils, de journal ni de bankroll.
+    const dict = JSON.parse(fs.readFileSync(path.join(ROOT, "i18n", "dict", loc + ".json"), "utf8")).pro_vente;
+    for (const k of ["item_all_title", "item_film_title", "item_scores_title", "item_combos_title", "item_gold_title", "item_scorer_title"]) assert.ok(dict[k], loc + " " + k);
+    const pro = c.campaigns.pro_features.blocks.filter((b) => b.type === "list");
+    assert.deepEqual(pro.map((b) => [b.if || "", b.items.length]), [["", 3], ["hasTickets", 1]], loc);
+    const all = JSON.stringify(c);
+    assert.doesNotMatch(all, /bankroll|capital|esp[ée]rance|expected value|\bROI\b|journal|six (outils|tools)|seis herramientas/i, loc + " : ni mise, ni capital, ni esperance");
+    assert.doesNotMatch(all, /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u, loc + " : aucun emoji");
   }
   assert.deepEqual(Object.keys(ref.campaigns).sort(), Object.keys(L.CAMPAIGNS).sort());
 });
@@ -202,15 +210,22 @@ test("textes des 7 langues : meme structure, statut REVIEW, liste Pro alignee su
 test("campagnes par langue : sujet, prix de la version, consentement absent, echappement", async () => {
   const fr = (await renderAll()).filter((x) => x.dir === "fr");
   const by = (c) => fr.find((x) => x.campaign === c).r;
-  assert.equal(by("free_match").subject, "Le match offert du jour : Barcelona – Racing Santander");
+  assert.equal(by("free_match").subject, "Ton match offert : Barcelona – Racing Santander");
   const j5 = by("pro_features").text.replace(/[  ]/g, " ");
-  assert.ok(j5.includes("6,99 € par semaine, 19,95 € par mois ou 199,00 € par an"), "J5 : les 3 durees et leurs prix");
+  // Prix lus dans config/markets.json (meme source que le site et le paiement) : une baisse
+  // de prix = changer config/markets.json puis `node lib/lifecycle-email-build.js`, rien d'autre.
+  const fmt = (iv) => R.formatMoney(Math.round(CONFIG.fr.prices.pro[iv].amount * 100), "EUR", "fr-FR").replace(/\s/g, " ");
+  assert.ok(j5.includes(fmt("week") + " par semaine, " + fmt("month") + " par mois ou " + fmt("year") + " par an"), "J5 : les 3 durees et leurs prix");
   assert.ok(by("pro_features").text.includes("Français"));
+  assert.ok(j5.includes("Le Petit et le Grand combiné du jour"), "marche francais : combines, Selection en or, buteur");
+  assert.ok(!j5.includes("jours d'essai"), "essai jamais annonce sans confirmation de l'expediteur");
+  assert.ok(by("free_match").text.includes("Chaque jour, IASHARK offre le pari d'un match à tous les comptes gratuits"));
   assert.ok(by("inactive_7d").text.includes("Paris SG – Marseille") && by("inactive_7d").text.includes("Arsenal – Chelsea"));
   assert.ok(!by("inactive_7d").text.includes("Monaco"), "match hors week-end");
   const gb = (await renderAll()).find((x) => x.dir === "gb" && x.campaign === "pro_features").r;
   // /gb/ : mensuel seul payable (19/09/2026) -> ligne « mois seul », jamais la semaine ni l'annee.
   assert.ok(gb.text.includes("Price on the English (UK) version of the site: £14.99 per month") && gb.text.includes("English (UK)"));
+  assert.ok(!gb.text.includes("Small and Big combo"), "hors marche francais : pas de combines annonces");
   assert.doesNotMatch(gb.text + gb.html, /£4\.99|£149|per week|per year/, "GB : aucune duree non payable annoncee");
   const mx = (await renderAll()).find((x) => x.dir === "mx" && x.campaign === "pro_features").r;
   assert.ok(mx.text.includes("$69.00 MXN a la semana, $199.00 MXN al mes o $1,990.00 MXN al año"));
@@ -221,10 +236,18 @@ test("campagnes par langue : sujet, prix de la version, consentement absent, ech
 
   const unsubscribeUrl = await unsubUrl("fr");
   const welcomeNo = L.renderLifecycleEmail(BUNDLE, "welcome", "fr", { marketingOptIn: false, freeMatch: null }, { unsubscribeUrl });
-  assert.ok(welcomeNo.text.includes("vous ne recevrez de notre part que les emails liés à votre compte"));
+  assert.ok(welcomeNo.text.includes("tu ne recevras de notre part que les e-mails liés à ton compte"));
   assert.ok(!welcomeNo.text.includes("Le match offert en ce moment"), "pas de match publie : bloc omis, rien d'invente");
+  assert.ok(welcomeNo.text.includes("Voir les matchs du jour: https://iashark.com/fr/") || welcomeNo.text.includes("Voir les matchs du jour : https://iashark.com/fr/"), "sans match offert : bouton vers les matchs du jour");
   const welcomeYes = L.renderLifecycleEmail(BUNDLE, "welcome", "fr", { marketingOptIn: true, freeMatch: L.publicMatch(RAW_MATCHES[0], L.siteContext(BUNDLE.markets, "fr")) }, { unsubscribeUrl });
-  assert.ok(!welcomeYes.text.includes("que les emails liés à votre compte") && welcomeYes.text.includes("Barcelona"));
+  assert.ok(!welcomeYes.text.includes("que les e-mails liés à ton compte") && welcomeYes.text.includes("Barcelona"));
+  assert.ok(welcomeYes.text.includes("Voir le pari offert : https://iashark.com/fr/match.html?id=1570385"));
+
+  // Essai Pro : seulement si l'expediteur l'a confirme pour ce compte (trialDays > 0), meme texte que le site.
+  const trial = L.renderLifecycleEmail(BUNDLE, "pro_features", "fr", { trialDays: 7 }, { unsubscribeUrl }).text.replace(/[  ]/g, " ");
+  assert.ok(trial.includes("7 jours d'essai pour un premier abonnement au mois : ta carte est demandée, rien n'est prélevé pendant l'essai. Ensuite " + fmt("month") + " par mois"), trial);
+  const fmTrial = L.renderLifecycleEmail(BUNDLE, "free_match", "fr", { trialDays: 7, freeMatch: L.publicMatch(RAW_MATCHES[0], L.siteContext(BUNDLE.markets, "fr")) }, { unsubscribeUrl }).text;
+  assert.ok(fmTrial.includes("7 jours d'essai pour un premier abonnement au mois") && fmTrial.includes("Voir l'offre Pro : https://iashark.com/fr/pro.html"));
 
   const evil = L.publicMatch({ id: 9, home: { n: "<b>A&B</b>" }, away: { n: "C" }, date: "2026-09-19 20:00", league: "L" }, L.siteContext(BUNDLE.markets, "fr"));
   const esc = L.renderLifecycleEmail(BUNDLE, "free_match", "fr", { freeMatch: evil }, { unsubscribeUrl });
@@ -259,6 +282,38 @@ test("refus explicites : contenu manquant jamais remplace par du texte generique
 });
 
 // ------------------------------------------------------------ matchs publics
+
+test("match offert : le meme que le site (jour local, free_day) et jamais un match deja commence", () => {
+  const fr = L.siteContext(BUNDLE.markets, "fr");
+  const list = [
+    { id: 11, home: { n: "A" }, away: { n: "B" }, date: "2026-10-25 15:00", is_free: true },
+    { id: 12, home: { n: "C" }, away: { n: "D" }, date: "2026-10-26 20:30", is_free: true },
+    { id: 13, home: { n: "E" }, away: { n: "F" }, date: "2026-10-25 21:00" }
+  ];
+  assert.equal(L.pickFreeMatch(list, new Date("2026-10-25T08:00:00Z"), fr).id, 11, "matin : le match offert du jour");
+  // Le site garde le match du jour jusqu'a minuit : l'e-mail n'annonce ni ce match deja
+  // commence, ni celui du lendemain (qui n'est pas encore le match offert du site).
+  assert.equal(L.pickFreeMatch(list, new Date("2026-10-25T14:30:00Z"), fr), null);
+  assert.equal(L.pickFreeMatch(list, new Date("2026-10-26T08:00:00Z"), fr).id, 12, "lendemain : le nouveau match offert");
+  // Match reporte : free_day (jour de la designation) fait foi.
+  const moved = [Object.assign({}, list[1], { date: "2026-10-27 20:30", free_day: "2026-10-26" })];
+  assert.equal(L.pickFreeMatch(moved, new Date("2026-10-26T08:00:00Z"), fr).id, 12);
+  assert.equal(L.pickFreeMatch(moved, new Date("2026-10-27T08:00:00Z"), fr), null, "designation d'un jour passe : jamais offerte");
+  // Lien : vraie page du match quand le pipeline l'a ecrite (page_dirs).
+  const withPage = L.pickFreeMatch([Object.assign({}, list[0], { page_dirs: ["fr", "en"] })], new Date("2026-10-25T08:00:00Z"), fr);
+  assert.equal(withPage.url, "https://iashark.com/match/11.html");
+  assert.equal(L.pickFreeMatch([Object.assign({}, list[0], { page_dirs: ["fr"] })], new Date("2026-10-25T08:00:00Z"), L.siteContext(BUNDLE.markets, "gb")).url, "https://iashark.com/gb/match.html?id=11");
+});
+
+test("langue du compte : repertoire du rendu (user_preferences.language d'abord)", () => {
+  assert.equal(L.dirForLanguage(null, "gb"), "gb");
+  assert.equal(L.dirForLanguage("en", "gb"), "gb");
+  assert.equal(L.dirForLanguage("es", "fr"), "es");
+  assert.equal(L.dirForLanguage("es-MX", "mx"), "mx");
+  assert.equal(L.dirForLanguage("fr", "za"), "fr");
+  assert.equal(L.dirForLanguage("nl", "de"), "de");
+  assert.equal(L.dirForLanguage("en", "inconnu"), "en");
+});
 
 test("match offert : designation du pipeline, pas commence, designation pays pour mx", () => {
   const fr = L.siteContext(BUNDLE.markets, "fr");

@@ -1,5 +1,5 @@
 {
-  "_status": "REVIEW - to be reviewed (lawyer + native speaker) before activation. Used by /en/, /gb/ and /za/. No promise of winnings.",
+  "_status": "REVIEW - copy reviewed on 25/10/2026 (current Pro content and prices, free pick with the free account). Used by /en/ (international), /gb/ and /za/. No promise of winnings, no stakes, no emoji.",
   "locale": "en",
   "common": {
     "greeting": "Hello,",
@@ -7,11 +7,11 @@
     "kickoff_label": "Kick-off",
     "match_link": "View the match",
     "rg_title": "Safer gambling · 18+",
-    "rg_body": "IASHARK publishes statistical football analysis. We are not a bookmaker and we do not take bets, and a probability is never a certainty. Betting involves risks (losing money, addiction). You must be 18 or over.",
+    "rg_body": "IASHARK publishes football analysis and does not take bets. A calculated chance is never a certainty. Betting carries a risk of losing money and of addiction. For people aged 18 and over.",
     "rg_help_phone": "Need help? {{helplineName}}: {{helplinePhone}}.",
     "rg_help_nophone": "Need help? {{helplineName}}:",
-    "rg_more": "Our safer gambling resources",
-    "footer_reason_marketing": "You are receiving this email because you agreed to receive IASHARK's free analyses and tips on using the site.",
+    "rg_more": "Our safer gambling advice",
+    "footer_reason_marketing": "You are receiving this email because you agreed to receive emails from IASHARK.",
     "footer_reason_welcome": "Sent after you created your IASHARK account.",
     "unsubscribe": "Unsubscribe in one click",
     "manage": "Manage my emails in My account",
@@ -22,83 +22,230 @@
   "campaigns": {
     "welcome": {
       "subject": "Welcome to IASHARK: where to start",
-      "preheader": "How to use the site, the free match and our methodology.",
+      "preheader": "Your free account is ready: one free pick every day.",
       "title": "Welcome to IASHARK",
       "blocks": [
-        { "type": "p", "text": "Your free IASHARK account is ready. Here is how to use the site in a few minutes." },
-        { "type": "list", "ordered": true, "items": [
-          "Every day, the full analysis of one match is free: it is highlighted on the home page.",
-          "On a match page, read the probabilities estimated by the model, the factors it takes into account and their limits.",
-          "The Methodology page explains where these figures come from and how to read them."
-        ] },
-        { "type": "p", "if": "hasFreeMatch", "text": "The current free match:" },
-        { "type": "match", "if": "hasFreeMatch" },
-        { "type": "cta", "label": "Read the methodology", "link": "methodology" },
-        { "type": "link", "label": "Go to my account", "link": "account" },
-        { "type": "p", "if": "notOptedIn", "text": "You did not ask to receive our free analyses and tips by email, so we will only send you emails about your account. You can change your mind at any time in My account, under Notifications." }
+        {
+          "type": "p",
+          "text": "Your free account is ready. Here is how to use it:"
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "Every day, one match is free. With your free account, you see its pick, its calculated chance and why.",
+            "Compare that chance with the odds at your licensed bookmaker, then you decide.",
+            "The Methodology page explains how these chances are calculated."
+          ]
+        },
+        {
+          "type": "p",
+          "if": "hasFreeMatch",
+          "text": "The free match right now:"
+        },
+        {
+          "type": "match",
+          "if": "hasFreeMatch"
+        },
+        {
+          "type": "cta",
+          "if": "hasFreeMatch",
+          "label": "See the free pick",
+          "link": "freeMatch"
+        },
+        {
+          "type": "cta",
+          "if": "noFreeMatch",
+          "label": "See today's matches",
+          "link": "home"
+        },
+        {
+          "type": "link",
+          "label": "Read the methodology",
+          "link": "methodology"
+        },
+        {
+          "type": "p",
+          "if": "notOptedIn",
+          "text": "You did not ask to receive our emails, so we will only send you emails about your account. You can change your mind at any time in My account, under Notifications."
+        }
       ]
     },
     "free_match": {
-      "subject": "Today's free match: {{freeMatchHome}} – {{freeMatchAway}}",
-      "preheader": "The full analysis of this match is open for free with your account.",
-      "title": "Your free analysis of the day",
+      "subject": "Your free match: {{freeMatchHome}} – {{freeMatchAway}}",
+      "preheader": "The pick for this match opens with your free account.",
+      "title": "Your free match",
       "blocks": [
-        { "type": "p", "text": "Every day, IASHARK opens the full analysis of one match to every account, free of charge. Here is today's:" },
-        { "type": "match" },
-        { "type": "p", "text": "You will find the estimated probabilities, the factors used by the model and the points to watch. These are statistical estimates: the outcome of a match remains uncertain." },
-        { "type": "cta", "label": "View the free analysis", "link": "freeMatch" }
+        {
+          "type": "p",
+          "text": "Every day, IASHARK gives every free account the pick for one match. Here it is:"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "p",
+          "text": "Sign in on the match page to see the pick, its calculated chance and why. Compare it with the odds at your licensed bookmaker, then you decide."
+        },
+        {
+          "type": "cta",
+          "label": "See the free pick",
+          "link": "freeMatch"
+        },
+        {
+          "type": "p",
+          "if": "hasTrial",
+          "text": "To open every match of the day: Pro, with a {{trialDays}}-day trial for a first monthly subscription."
+        },
+        {
+          "type": "link",
+          "if": "hasTrial",
+          "label": "See the Pro offer",
+          "link": "pro"
+        }
       ]
     },
     "pro_features": {
       "subject": "What IASHARK Pro unlocks",
-      "preheader": "The list of Pro content and its price, plainly.",
+      "preheader": "Every match of the day open, and the exact prices.",
       "title": "What Pro adds to your free account",
       "blocks": [
-        { "type": "p", "text": "Your free account gives you the full analysis of one match a day, the blog and a preview of the tools. Here is what Pro adds:" },
-        { "type": "list", "items": [
-          "The full analysis on every match",
-          "The six tools connected to the model's probabilities",
-          "The synced decisions journal",
-          "Bankroll tracking linked to your account"
-        ] },
-        { "type": "p", "if": "hasProYear", "text": "Prices on the {{siteVersion}} version of the site: {{proWeekPrice}} per week, {{proPrice}} per month or {{proYearPrice}} per year. The same Pro access whichever period you choose, cancel at any time from My account." },
-        { "type": "p", "if": "hasNoProYear", "text": "Prices on the {{siteVersion}} version of the site: {{proWeekPrice}} per week or {{proPrice}} per month. The same Pro access whichever period you choose, cancel at any time from My account." },
-        { "type": "p", "if": "hasOnlyProMonth", "text": "Price on the {{siteVersion}} version of the site: {{proPrice}} per month, cancel at any time from My account." },
-        { "type": "p", "text": "Pro gives you more analyses and tools; it does not make any match more predictable." },
-        { "type": "cta", "label": "See the plan details", "link": "pricing" },
-        { "type": "p", "text": "If the free account is enough for you, there is nothing to do." }
+        {
+          "type": "p",
+          "text": "Your free account gives you the pick for one free match every day. Pro opens all the others:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Every match of the day: the pick, its calculated chance and why",
+            "The match timeline: six 15-minute periods, and both teams compared",
+            "The most likely scorelines, in the best-measured leagues"
+          ]
+        },
+        {
+          "type": "list",
+          "if": "hasTickets",
+          "items": [
+            "The day's Small and Big combo, the Gold Selection and the scorer of the day"
+          ]
+        },
+        {
+          "type": "p",
+          "if": "hasProYear",
+          "text": "Prices on the {{siteVersion}} version of the site: {{proWeekPrice}} per week, {{proPrice}} per month or {{proYearPrice}} per year. The same Pro access whichever period you choose, cancel at any time from My account."
+        },
+        {
+          "type": "p",
+          "if": "hasNoProYear",
+          "text": "Prices on the {{siteVersion}} version of the site: {{proWeekPrice}} per week or {{proPrice}} per month. The same Pro access whichever period you choose, cancel at any time from My account."
+        },
+        {
+          "type": "p",
+          "if": "hasOnlyProMonth",
+          "text": "Price on the {{siteVersion}} version of the site: {{proPrice}} per month, cancel at any time from My account."
+        },
+        {
+          "type": "p",
+          "if": "hasTrial",
+          "text": "{{trialDays}}-day trial for a first monthly subscription: your card is requested, nothing is charged during the trial. Then {{proPrice}} per month, charged automatically unless you cancel before the trial ends."
+        },
+        {
+          "type": "cta",
+          "label": "See the Pro offer",
+          "link": "pro"
+        },
+        {
+          "type": "p",
+          "text": "If the free account is enough for you, there is nothing to do."
+        }
       ]
     },
     "inactive_7d": {
       "subject": "This weekend's matches on IASHARK",
-      "preheader": "Some of the weekend fixtures covered by IASHARK.",
-      "title": "Here are this weekend's matches",
+      "preheader": "The weekend's big games, and your free match every day.",
+      "title": "This weekend's matches",
       "blocks": [
-        { "type": "p", "text": "Here are some of this weekend's fixtures covered by IASHARK:" },
-        { "type": "matches" },
-        { "type": "p", "text": "The full analysis of one match is still free every day with your account." },
-        { "type": "cta", "label": "See all matches", "link": "home" }
+        {
+          "type": "p",
+          "text": "Here are some of this weekend's games on IASHARK:"
+        },
+        {
+          "type": "matches"
+        },
+        {
+          "type": "p",
+          "text": "Every day, the pick for one match is still free with your free account."
+        },
+        {
+          "type": "cta",
+          "label": "See all matches",
+          "link": "home"
+        },
+        {
+          "type": "p",
+          "if": "hasTrial",
+          "text": "To open every match of the day: Pro, with a {{trialDays}}-day trial for a first monthly subscription."
+        },
+        {
+          "type": "link",
+          "if": "hasTrial",
+          "label": "See the Pro offer",
+          "link": "pro"
+        }
       ]
     },
     "inactive_30d": {
       "subject": "Your IASHARK account is still active",
-      "preheader": "The free analysis of the day is still available with your account.",
+      "preheader": "Every day, the pick for one match is still free with your free account.",
       "title": "Your account is still here",
       "blocks": [
-        { "type": "p", "text": "You have not been back to IASHARK for a while. Your free account is still active, and the full analysis of one match is still free every day." },
-        { "type": "cta", "label": "Back to IASHARK", "link": "home" },
-        { "type": "p", "text": "If these emails are no longer useful, unsubscribe in one click with the link at the bottom of this message. If you neither visit nor open our emails, we will stop writing to you in 30 days anyway." }
+        {
+          "type": "p",
+          "text": "You have not been back to IASHARK for a while. Your free account is still active, and every day the pick for one match is still free."
+        },
+        {
+          "type": "cta",
+          "label": "Back to IASHARK",
+          "link": "home"
+        },
+        {
+          "type": "p",
+          "if": "hasTrial",
+          "text": "To open every match of the day: Pro, with a {{trialDays}}-day trial for a first monthly subscription."
+        },
+        {
+          "type": "link",
+          "if": "hasTrial",
+          "label": "See the Pro offer",
+          "link": "pro"
+        },
+        {
+          "type": "p",
+          "text": "If these emails are no longer useful to you, unsubscribe in one click with the link at the bottom of this message. If you neither visit nor open our emails for 60 days, we stop writing to you anyway."
+        }
       ]
     },
     "pro_weekly_summary": {
       "subject": "Your IASHARK summary: this weekend's matches",
-      "preheader": "The weekend fixtures covered by IASHARK.",
-      "title": "Weekly summary",
+      "preheader": "The weekend's big games, ready in your Pro space.",
+      "title": "This weekend's matches",
       "blocks": [
-        { "type": "p", "text": "Here are some of the weekend fixtures covered by IASHARK. Your Pro tools are available from the Tools page." },
-        { "type": "matches" },
-        { "type": "cta", "label": "Open the tools", "link": "tools" },
-        { "type": "p", "text": "You can turn off this summary in My account, under Notifications." }
+        {
+          "type": "p",
+          "text": "Here are some of this weekend's games. The pick for every match is published before kick-off in your Pro space."
+        },
+        {
+          "type": "matches"
+        },
+        {
+          "type": "cta",
+          "label": "Open my Pro space",
+          "link": "pro"
+        },
+        {
+          "type": "p",
+          "text": "You can turn off this summary in My account, under Notifications."
+        }
       ]
     }
   }

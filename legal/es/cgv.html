@@ -136,7 +136,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Juego responsable</a>
   </nav>
   <h1 class="page-title">Condiciones generales de venta</h1>
-  <div class="page-date">Última actualización: 4 de octubre de 2026</div>
+  <div class="page-date">Última actualización: 25 de octubre de 2026</div>
   <!-- LEGAL REVIEW: 19/09/2026 - owner decisions: weekly, monthly and annual plans payable on the EUR market (config/markets.json#fr.checkoutOpen, Stripe Prices in fr.stripePriceIds); 'VAT included' replaced in article 6 by the French VAT franchise mention (art. 293 B CGI). Prices, billing periods, renewal, withdrawal and cancellation rules unchanged from the 16/09/2026 text and aligned with the French terms of 19/09/2026 (legal/fr/cgv.html). Previous version archived in legal/es/archives/cgv-2026-09-16.html. Status: REVIEW. -->
 
   <div class="warn-box">
@@ -188,16 +188,17 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
 
   <section class="section">
     <h2>Artículo 6 — Precios y duraciones</h2>
+    <!-- LEGAL REVIEW: 25/10/2026 - owner decision: price reduction (weekly 4.99 EUR, monthly 14.99 EUR with the 7-day trial unchanged, annual 99 EUR). New Stripe Prices on the same product; existing subscriptions keep their price (old Prices neither archived nor modified): no increase, so no notice is due under the price-change paragraph. Version of 04/10/2026 archived in archives/cgv-2026-10-04.html. Status: REVIEW. -->
     <div class="highlight">
-      <p><strong>Semanal: 6,99 € por semana.</strong> Se cobra al suscribirse y después cada semana el mismo día. Renovación automática cada semana hasta su cancelación, sin compromiso de permanencia.</p>
-      <p><strong>Mensual: 19,95 € al mes.</strong> Se cobra al suscribirse y después cada mes en la misma fecha. Renovación automática cada mes hasta su cancelación, sin compromiso de permanencia.</p>
-      <p><strong>Anual: 199 € al año.</strong> Se cobra una sola vez al suscribirse y después en cada fecha de aniversario. Periodo pagado por doce meses y renovado automáticamente por un año salvo cancelación antes del vencimiento (artículo 9).</p>
+      <p><strong>Semanal: 4,99 € por semana.</strong> Se cobra al suscribirse y después cada semana el mismo día. Renovación automática cada semana hasta su cancelación, sin compromiso de permanencia.</p>
+      <p><strong>Mensual: 14,99 € al mes.</strong> Se cobra al suscribirse y después cada mes en la misma fecha. Renovación automática cada mes hasta su cancelación, sin compromiso de permanencia.</p>
+      <p><strong>Anual: 99 € al año.</strong> Se cobra una sola vez al suscribirse y después en cada fecha de aniversario. Periodo pagado por doce meses y renovado automáticamente por un año salvo cancelación antes del vencimiento (artículo 9).</p>
       <p>IVA no aplicable, artículo 293 B del Código General de Impuestos francés (CGI).</p>
     </div>
-    <p>A título informativo, 199 € al año equivalen a 16,59 € al mes, es decir, un 16 % menos que doce meses con la tarifa mensual (239,40 €).</p>
+    <p>A título informativo, 99 € al año equivalen a 8,25 € al mes, es decir, un 44 % menos que doce meses con la tarifa mensual (179,88 €).</p>
     <p>El precio aplicable es el que se muestra en la página Suscripción para el periodo elegido y se resume en la página de pago antes de que usted confirme su pedido. Cualquier modificación del precio se le notificará antes de su entrada en vigor; solo se aplicará a partir del siguiente periodo de facturación y usted podrá cancelar su suscripción antes de esa fecha.</p>
     <!-- LEGAL REVIEW: 04/10/2026 - owner decision: 7-day free trial kept and shown (monthly plan only, first subscription, card required, automatic charge at the end of the trial unless cancelled). Matches the live create-checkout-session function (v23, trial.ts, read on 04/10/2026: TRIAL_DAYS absent = 7, monthly only, once per account and per Stripe customer, subscription stopped if no card at the end). No reminder before the end of the trial is promised: the trial-reminder function exists but its scheduled job (0042) is not applied in the database. To be checked by a lawyer: how the trial interacts with the withdrawal/cancellation period. Previous version archived in archives/cgv-2026-09-19.html. Status: REVIEW. -->
-    <p><strong>Prueba de 7 días (solo con la modalidad mensual).</strong> En una primera suscripción mensual, los 7 primeros días son gratuitos. Se le pide su tarjeta al suscribirse; no se cobra ningún importe durante la prueba. Al final de la prueba, la suscripción mensual empieza automáticamente: se cobran 19,95 € y después cada mes en la misma fecha, salvo que usted cancele antes del final de la prueba desde «Mi cuenta», lo que impide cualquier cobro. Si no hay ningún medio de pago válido al final de la prueba, la suscripción termina. La prueba se concede una sola vez: una cuenta, o un cliente de nuestro proveedor de pagos, que ya haya tenido una suscripción no tiene derecho a ella. Las modalidades semanal y anual no tienen prueba: se cobran desde la suscripción. La prueba puede modificarse o retirarse para nuevas suscripciones; su duración se indica antes del pago.</p>
+    <p><strong>Prueba de 7 días (solo con la modalidad mensual).</strong> En una primera suscripción mensual, los 7 primeros días son gratuitos. Se le pide su tarjeta al suscribirse; no se cobra ningún importe durante la prueba. Al final de la prueba, la suscripción mensual empieza automáticamente: se cobran 14,99 € y después cada mes en la misma fecha, salvo que usted cancele antes del final de la prueba desde «Mi cuenta», lo que impide cualquier cobro. Si no hay ningún medio de pago válido al final de la prueba, la suscripción termina. La prueba se concede una sola vez: una cuenta, o un cliente de nuestro proveedor de pagos, que ya haya tenido una suscripción no tiene derecho a ella. Las modalidades semanal y anual no tienen prueba: se cobran desde la suscripción. La prueba puede modificarse o retirarse para nuevas suscripciones; su duración se indica antes del pago.</p>
   </section>
 
   <section class="section">

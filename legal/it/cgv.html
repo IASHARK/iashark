@@ -136,7 +136,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Gioco responsabile</a>
   </nav>
   <h1 class="page-title">Condizioni generali di vendita</h1>
-  <div class="page-date">Ultimo aggiornamento: 4 ottobre 2026</div>
+  <div class="page-date">Ultimo aggiornamento: 25 ottobre 2026</div>
   <!-- LEGAL REVIEW: 19/09/2026 - owner decisions: weekly, monthly and annual plans payable on the EUR market (config/markets.json#fr.checkoutOpen, Stripe Prices in fr.stripePriceIds); 'VAT included' replaced in article 6 by the French VAT franchise mention (art. 293 B CGI). Prices, billing periods, renewal, withdrawal and cancellation rules unchanged from the 16/09/2026 text and aligned with the French terms of 19/09/2026 (legal/fr/cgv.html). Previous version archived in legal/it/archives/cgv-2026-09-16.html. Status: REVIEW. -->
 
   <div class="warn-box">
@@ -188,16 +188,17 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
 
   <section class="section">
     <h2>Articolo 6 — Prezzi e durate</h2>
+    <!-- LEGAL REVIEW: 25/10/2026 - owner decision: price reduction (weekly 4.99 EUR, monthly 14.99 EUR with the 7-day trial unchanged, annual 99 EUR). New Stripe Prices on the same product; existing subscriptions keep their price (old Prices neither archived nor modified): no increase, so no notice is due under the price-change paragraph. Version of 04/10/2026 archived in archives/cgv-2026-10-04.html. Status: REVIEW. -->
     <div class="highlight">
-      <p><strong>Settimanale: 6,99 € a settimana.</strong> Addebito alla sottoscrizione, poi ogni settimana nello stesso giorno. Rinnovo automatico ogni settimana fino alla disdetta, senza vincolo di durata.</p>
-      <p><strong>Mensile: 19,95 € al mese.</strong> Addebito alla sottoscrizione, poi ogni mese alla stessa data. Rinnovo automatico ogni mese fino alla disdetta, senza vincolo di durata.</p>
-      <p><strong>Annuale: 199 € all'anno.</strong> Addebito unico alla sottoscrizione, poi a ogni data di anniversario. Periodo pagato per dodici mesi e rinnovato automaticamente per un anno salvo disdetta prima della scadenza (articolo 9).</p>
+      <p><strong>Settimanale: 4,99 € a settimana.</strong> Addebito alla sottoscrizione, poi ogni settimana nello stesso giorno. Rinnovo automatico ogni settimana fino alla disdetta, senza vincolo di durata.</p>
+      <p><strong>Mensile: 14,99 € al mese.</strong> Addebito alla sottoscrizione, poi ogni mese alla stessa data. Rinnovo automatico ogni mese fino alla disdetta, senza vincolo di durata.</p>
+      <p><strong>Annuale: 99 € all'anno.</strong> Addebito unico alla sottoscrizione, poi a ogni data di anniversario. Periodo pagato per dodici mesi e rinnovato automaticamente per un anno salvo disdetta prima della scadenza (articolo 9).</p>
       <p>IVA non applicabile, articolo 293 B del Codice generale delle imposte francese (CGI).</p>
     </div>
-    <p>A titolo informativo, 199 € all'anno corrispondono a 16,59 € al mese, ossia il 16% in meno rispetto a dodici mesi con la tariffa mensile (239,40 €).</p>
+    <p>A titolo informativo, 99 € all'anno corrispondono a 8,25 € al mese, ossia il 44% in meno rispetto a dodici mesi con la tariffa mensile (179,88 €).</p>
     <p>Il prezzo applicabile è quello indicato nella pagina Abbonamento per il periodo scelto e riepilogato nella pagina di pagamento prima della conferma dell'ordine. Qualsiasi modifica del prezzo Le sarà comunicata prima della sua entrata in vigore; si applicherà soltanto a partire dal periodo di fatturazione successivo e Lei potrà disdire l'abbonamento prima di tale data.</p>
     <!-- LEGAL REVIEW: 04/10/2026 - owner decision: 7-day free trial kept and shown (monthly plan only, first subscription, card required, automatic charge at the end of the trial unless cancelled). Matches the live create-checkout-session function (v23, trial.ts, read on 04/10/2026: TRIAL_DAYS absent = 7, monthly only, once per account and per Stripe customer, subscription stopped if no card at the end). No reminder before the end of the trial is promised: the trial-reminder function exists but its scheduled job (0042) is not applied in the database. To be checked by a lawyer: how the trial interacts with the withdrawal/cancellation period. Previous version archived in archives/cgv-2026-09-19.html. Status: REVIEW. -->
-    <p><strong>Prova di 7 giorni (solo formula mensile).</strong> Per un primo abbonamento mensile, i primi 7 giorni sono gratuiti. La carta di pagamento Le viene richiesta alla sottoscrizione; durante la prova non viene addebitato alcun importo. Alla fine della prova l'abbonamento mensile inizia automaticamente: vengono addebitati 19,95 €, poi ogni mese alla stessa data, salvo disdetta prima della fine della prova da «Il mio account», che impedisce qualsiasi addebito. Se alla fine della prova non è disponibile un mezzo di pagamento valido, l'abbonamento termina. La prova è concessa una sola volta: un account, o un cliente del nostro fornitore di pagamento, che ha già avuto un abbonamento non vi ha diritto. Le formule settimanale e annuale non prevedono prova: sono addebitate dalla sottoscrizione. La prova può essere modificata o ritirata per le nuove sottoscrizioni; la sua durata è indicata prima del pagamento.</p>
+    <p><strong>Prova di 7 giorni (solo formula mensile).</strong> Per un primo abbonamento mensile, i primi 7 giorni sono gratuiti. La carta di pagamento Le viene richiesta alla sottoscrizione; durante la prova non viene addebitato alcun importo. Alla fine della prova l'abbonamento mensile inizia automaticamente: vengono addebitati 14,99 €, poi ogni mese alla stessa data, salvo disdetta prima della fine della prova da «Il mio account», che impedisce qualsiasi addebito. Se alla fine della prova non è disponibile un mezzo di pagamento valido, l'abbonamento termina. La prova è concessa una sola volta: un account, o un cliente del nostro fornitore di pagamento, che ha già avuto un abbonamento non vi ha diritto. Le formule settimanale e annuale non prevedono prova: sono addebitate dalla sottoscrizione. La prova può essere modificata o ritirata per le nuove sottoscrizioni; la sua durata è indicata prima del pagamento.</p>
   </section>
 
   <section class="section">

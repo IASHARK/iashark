@@ -72,7 +72,7 @@
     if (typeof v === 'number' && isFinite(v)) {
       try { return v.toLocaleString(localeTag(), { style: 'currency', currency: devise() }); } catch (_e) {}
     }
-    return '19,95 €';
+    return '14,99 €';
   }
   // Lien interne dans le repertoire de langue/marche courant (/gb/, /mx/...).
   function lien(p) { return (window.I18N && window.I18N.href) ? window.I18N.href(p) : '/' + p; }

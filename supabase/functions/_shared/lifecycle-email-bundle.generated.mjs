@@ -3453,13 +3453,13 @@ export const BUNDLE = {
       "prices": {
         "pro": {
           "week": {
-            "amount": 6.99
+            "amount": 4.99
           },
           "month": {
-            "amount": 19.95
+            "amount": 14.99
           },
           "year": {
-            "amount": 199
+            "amount": 99
           }
         }
       },

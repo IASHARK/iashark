@@ -1,4 +1,4 @@
-{{! Gabarit commun des emails de relance (lib/lifecycle-email.js). Meme charte que emails/templates/* : CSS inline, bloc <style> reserve au mode sombre et au mobile. Le marqueur LIFECYCLE_BLOCKS recoit le corps (textes emails/lifecycle/copy.<locale>.json). Lien de desinscription en 1 clic, mention 18+ et aide du pays dans CHAQUE email. STATUT : REVIEW. }}<!DOCTYPE html>
+{{! Gabarit commun des emails de relance (lib/lifecycle-email.js). Meme charte que emails/templates/* : CSS inline, bloc <style> reserve au mode sombre et au mobile. Le marqueur LIFECYCLE_BLOCKS recoit le corps (textes emails/lifecycle/copy.<locale>.json). Lien de desinscription en 1 clic, mention 18+ et aide du pays dans CHAQUE email, signature de Clement (21/10/2026). STATUT : REVIEW. }}<!DOCTYPE html>
 <html lang="{{htmlLang}}" xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta charset="utf-8">
@@ -14,7 +14,7 @@
   .bg-page { background-color: #0b1118 !important; }
   .bg-card { background-color: #131c27 !important; border-color: #263444 !important; }
   .bg-soft { background-color: #18232f !important; border-color: #2f6f86 !important; }
-  .bg-warn { background-color: #2a2213 !important; border-color: #6b5320 !important; }
+  .bg-note { background-color: #131c27 !important; border-color: #263444 !important; }
   .tx { color: #e9eef4 !important; }
   .tx-soft { color: #a9b6c4 !important; }
   .bd { border-color: #263444 !important; }
@@ -23,7 +23,7 @@
 [data-ogsc] .bg-page { background-color: #0b1118 !important; }
 [data-ogsc] .bg-card { background-color: #131c27 !important; }
 [data-ogsc] .bg-soft { background-color: #18232f !important; }
-[data-ogsc] .bg-warn { background-color: #2a2213 !important; }
+[data-ogsc] .bg-note { background-color: #131c27 !important; }
 [data-ogsc] .tx { color: #e9eef4 !important; }
 [data-ogsc] .tx-soft { color: #a9b6c4 !important; }
 [data-ogsc] .lnk { color: #62d6ec !important; }
@@ -49,11 +49,14 @@
 <p class="tx" style="margin:0 0 14px;font-size:15px;line-height:24px;color:#1f2d3a;">{{greeting}}</p>
 <!--LIFECYCLE_BLOCKS-->
 
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;margin:10px 0 0;">
-<tr><td class="bg-warn" style="padding:16px 18px;background-color:#fff8eb;border:1px solid #f0d49c;border-radius:8px;font-family:Arial,Helvetica,sans-serif;">
-<p class="tx" style="margin:0 0 8px;font-size:14px;line-height:21px;font-weight:bold;color:#3a2a0c;">{{rgTitle}}</p>
-<p class="tx" style="margin:0 0 8px;font-size:14px;line-height:21px;color:#3a2a0c;">{{rgBody}}</p>
-<p class="tx" style="margin:0;font-size:14px;line-height:21px;color:#3a2a0c;">{{rgHelp}} <a class="lnk" href="{{helplineUrl}}" target="_blank" style="color:#0a6d8f;text-decoration:underline;">{{helplineUrl}}</a> · <a class="lnk" href="{{responsibleUrl}}" target="_blank" style="color:#0a6d8f;text-decoration:underline;">{{rgMore}}</a></p>
+<p class="tx" style="margin:6px 0 4px;font-size:15px;line-height:24px;color:#1f2d3a;">{{signoff}}<br><strong>{{signature}}</strong></p>
+<p class="tx-soft" style="margin:0 0 22px;font-size:13px;line-height:20px;color:#5d6b79;">{{replyNote}}</p>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;margin:0;">
+<tr><td class="bg-note" style="padding:14px 16px;background-color:#f4f7fa;border:1px solid #dfe4ea;border-radius:8px;font-family:Arial,Helvetica,sans-serif;">
+<p class="tx-soft" style="margin:0 0 6px;font-size:13px;line-height:19px;font-weight:bold;color:#4b5a69;">{{rgTitle}}</p>
+<p class="tx-soft" style="margin:0 0 6px;font-size:13px;line-height:19px;color:#4b5a69;">{{rgBody}}</p>
+<p class="tx-soft" style="margin:0;font-size:13px;line-height:19px;color:#4b5a69;">{{rgHelp}} <a class="lnk" href="{{helplineUrl}}" target="_blank" style="color:#0a6d8f;text-decoration:underline;">{{helplineUrl}}</a> · <a class="lnk" href="{{responsibleUrl}}" target="_blank" style="color:#0a6d8f;text-decoration:underline;">{{rgMore}}</a></p>
 </td></tr>
 </table>
 

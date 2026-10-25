@@ -165,16 +165,9 @@ export function idOffertRepli(matchs: Record<string, unknown>[], d: Date = new D
 // du match offert (sim_15min, stats_iashark, lecture_match, premier_but, v3_premiers_buteurs,
 // sim_resume, jumeaux) lui sont rendus. mise, kelly, vbet : jamais (NEVER_PUBLIC_FIELDS).
 const CHAMPS_PRO_SEULEMENT = ["marches_panneau", "v3_marches", "marches_flux"];
-// Decision de Clement du 21/10/2026 (revue du parcours : « l'echantillon, puis la demande ») :
-// sur le match offert, un visiteur SANS COMPTE recoit le pari, sa cote et sa chance, rien d'autre.
-// Le « pourquoi », les sections et le Petit combine restent au compte gratuit.
-const CHAMPS_APPEL_SANS_COMPTE = ["pari_rec", "cote_rec", "model_probability", "market_id", "marche"];
-function appelSansCompte(m: Record<string, unknown>, premium: Record<string, unknown>): Record<string, unknown> {
-  const copy: Record<string, unknown> = { ...m };
-  for (const f of CHAMPS_APPEL_SANS_COMPTE) copy[f] = premium[f] ?? null;
-  copy.appel_sans_compte = true;
-  return copy;
-}
+// Decision de Clement du 25/10/2026 : le pari du match offert repasse derriere l'inscription.
+// Du 21 au 25/10, un visiteur sans compte recevait le pari, sa cote et sa chance (appel_sans_compte) :
+// 18-20/10, 5 inscriptions pour 193 visites ; 21-25/10, 3 pour 332. Sans compte : plus rien de payant.
 const JAMAIS_HORS_PRO = ["mise", "kelly", "vbet"];
 function sansChampsPro(m: Record<string, unknown>): Record<string, unknown> {
   const copy = { ...m };
@@ -384,14 +377,11 @@ Deno.serve(async (req: Request) => {
     const ouvert = false && !!(demande && estTermine(demande));
     // Match offert, COMPTE CONNECTE seulement (04/10/2026) : son analyse complete relue dans
     // match_premium_data (jamais dans un fichier public), sans les champs Pro seulement.
-    // Visiteur sans compte (21/10/2026) : sur le match offert DEMANDE, le pari, sa cote et sa chance.
-    // Sans compte : seulement le match offert explicitement demande (page match), jamais la liste.
+    // Visiteur sans compte (25/10/2026) : rien de payant, meme sur le match offert (inscription demandee).
     // Match offert : designation du pipeline, sinon le repli que montre le site (21/10/2026).
     const repli = idOffertRepli(matchs);
     const estOffert = (m: Record<string, unknown>) => estGratuit(m) || (repli != null && String(m.id) === repli);
-    const offerts = matchs.filter(estOffert)
-      .filter((m) => connecte || (portee.id != null && String(m.id) === portee.id))
-      .map((m) => m.id).filter((id) => id != null);
+    const offerts = connecte ? matchs.filter(estOffert).map((m) => m.id).filter((id) => id != null) : [];
     const premiumOffert = await lirePremium(supabase, offerts);
     let premiumTermine: Record<string, Record<string, unknown>> = {};
     if (ouvert && demande) {
@@ -403,10 +393,8 @@ Deno.serve(async (req: Request) => {
     data.matchs = matchs.map((m) => {
       if (estOffert(m)) {
         const premium = premiumOffert[String(m.id)];
-        // Sans ligne premium : aucune analyse, jamais reconstituee depuis un fichier public.
-        if (!premium) return retirerPremium(m);
-        // Sans compte : le pari, sa cote et sa chance seulement (decision du 21/10/2026).
-        if (!connecte) return appelSansCompte(retirerPremium(m), premium);
+        // Sans compte, ou sans ligne premium : aucune analyse, jamais reconstituee depuis un fichier public.
+        if (!connecte || !premium) return retirerPremium(m);
         return sansChampsPro(avecPremium(retirerPremium(m), premium, detailFields));
       }
       if (ouvert && String(m.id) === portee.id) {

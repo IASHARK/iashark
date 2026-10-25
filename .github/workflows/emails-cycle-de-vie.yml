@@ -1,0 +1,119 @@
+# E-mails automatiques aux inscrits (supabase/functions/send-lifecycle-emails), envoyes par Brevo :
+# bienvenue (J0, a tous), match offert (J2), ce que debloque Pro (J5), relances 7 j et 30 j,
+# resume du week-end Pro. Les e-mails de vente ne partent qu'aux inscrits qui ont donne leur accord.
+#
+# Lancements :
+#   - toutes les heures (a la minute 11) : ENVOI REEL, seulement si la variable du depot
+#     EMAILS_CYCLE_ACTIF vaut "true". Activer :  gh variable set EMAILS_CYCLE_ACTIF --body true --repo IASHARK/iashark
+#                                       Couper :   gh variable set EMAILS_CYCLE_ACTIF --body false --repo IASHARK/iashark
+#   - a chaque modification de la fonction ou de ses textes sur main : installation + essai a blanc ;
+#   - a la main (Actions > E-mails cycle de vie) :
+#       essai     : qui recevrait quel e-mail, en nombres ; rien n'est envoye
+#       installer : pose les secrets, installe la fonction, puis essai a blanc
+#       envoi     : un passage d'envoi reel (taper ENVOYER dans « confirmation »)
+#
+# Le journal de ce workflow est PUBLIC (depot public) : nombres seulement, jamais une adresse.
+# Region fixe us-east-2 : Brevo n'accepte que les adresses IP autorisees par Clement (AWS Ohio),
+# comme relance-emails.yml.
+name: E-mails cycle de vie
+on:
+  schedule:
+    - cron: "11 * * * *"
+  push:
+    branches: [main]
+    paths:
+      - supabase/functions/send-lifecycle-emails/**
+      - supabase/functions/_shared/lifecycle-email-bundle.generated.mjs
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "essai (rien n'est envoye), installer (secrets + fonction, puis essai) ou envoi (un passage reel)"
+        required: true
+        default: essai
+        type: choice
+        options: [essai, installer, envoi]
+      confirmation:
+        description: "Pour un envoi reel a la main : ENVOYER"
+        required: false
+        default: ""
+permissions:
+  contents: read
+concurrency:
+  group: emails-cycle-de-vie
+  cancel-in-progress: false
+env:
+  PROJECT_REF: ksvjraqitxouwiabecai
+jobs:
+  emails:
+    # Planifie : rien ne demarre tant que Clement n'a pas active l'envoi.
+    if: github.event_name != 'schedule' || vars.EMAILS_CYCLE_ACTIF == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Choix du passage
+        id: choix
+        env:
+          EVENT: ${{ github.event_name }}
+          MODE: ${{ inputs.mode }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          installer=false; dry=true
+          case "$EVENT" in
+            schedule) dry=false ;;
+            push) installer=true ;;
+            *)
+              if [ "$MODE" = "envoi" ]; then
+                [ "$CONFIRMATION" = "ENVOYER" ] || { echo "Envoi reel : taper ENVOYER dans « confirmation »."; exit 1; }
+                dry=false
+              elif [ "$MODE" = "installer" ]; then
+                installer=true
+              fi ;;
+          esac
+          echo "installer=$installer" >> "$GITHUB_OUTPUT"
+          echo "dry=$dry" >> "$GITHUB_OUTPUT"
+          echo "Passage : installation=$installer, essai a blanc=$dry"
+      - uses: actions/checkout@v4
+        if: steps.choix.outputs.installer == 'true'
+      - name: Installation (secrets + fonction)
+        if: steps.choix.outputs.installer == 'true'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          # Secret interne de l'appel (genere aleatoirement, jamais affiche).
+          EMAIL_INTERNAL_SECRET: ${{ secrets.EMAIL_INTERNAL_SECRET }}
+          # Meme secret pour signer (ici) et verifier (email-unsubscribe) les liens de desinscription.
+          EMAIL_UNSUBSCRIBE_SECRET: ${{ secrets.EMAIL_UNSUBSCRIBE_SECRET }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+        run: |
+          set -e
+          [ "${#EMAIL_INTERNAL_SECRET}" -ge 32 ] || { echo "Secret GitHub EMAIL_INTERNAL_SECRET absent ou trop court."; exit 1; }
+          [ "${#EMAIL_UNSUBSCRIBE_SECRET}" -ge 32 ] || { echo "Secret GitHub EMAIL_UNSUBSCRIBE_SECRET absent ou trop court."; exit 1; }
+          BREVO=$(printf %s "$BREVO_API_KEY" | tr -d '\r\n ')
+          [ -n "$BREVO" ] || { echo "Secret GitHub BREVO_API_KEY absent."; exit 1; }
+          # Expediteur : nom de l'editeur publie dans les mentions legales ; aucune adresse postale
+          # n'y figure, le contact publie (contact@iashark.com) la remplace, comme relance-emails.
+          npx -y supabase@2 secrets set \
+            "EMAIL_INTERNAL_SECRET=$EMAIL_INTERNAL_SECRET" \
+            "EMAIL_UNSUBSCRIBE_SECRET=$EMAIL_UNSUBSCRIBE_SECRET" \
+            "BREVO_API_KEY=$BREVO" \
+            "EMAIL_PROVIDER=brevo" \
+            "EMAIL_FROM=IASHARK <news@iashark.com>" \
+            "EMAIL_REPLY_TO=contact@iashark.com" \
+            "COMPANY_OPERATOR_NAME=IASHARK, entrepreneur individuel" \
+            "LIFECYCLE_SENDER_CONTACT=contact@iashark.com" \
+            --project-ref "$PROJECT_REF" > /dev/null
+          npx -y supabase@2 functions deploy send-lifecycle-emails --project-ref "$PROJECT_REF" --use-api --no-verify-jwt
+      - name: Appel de la fonction
+        env:
+          KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          EMAIL_INTERNAL_SECRET: ${{ secrets.EMAIL_INTERNAL_SECRET }}
+          DRY: ${{ steps.choix.outputs.dry }}
+        run: |
+          KEY=$(printf %s "$KEY" | tr -d '\r\n ')
+          corps=$(jq -nc --argjson d "$DRY" '{dryRun: $d}')
+          code=$(curl -sS -o reponse.json -w "%{http_code}" -X POST "https://$PROJECT_REF.supabase.co/functions/v1/send-lifecycle-emails" \
+            -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H "x-internal-secret: $EMAIL_INTERNAL_SECRET" \
+            -H "x-region: us-east-2" -H "Content-Type: application/json" --max-time 300 -d "$corps")
+          echo "HTTP $code"
+          # Nombres seulement (journal public) : jamais d'adresse, meme masquee.
+          jq '{ok, processed, reason, missing, dryRun, provider, checked, sent, notSent, skipped, failed, byCampaign}' reponse.json || echo "reponse illisible"
+          [ "$code" = "200" ]

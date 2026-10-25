@@ -24,6 +24,7 @@ const DAY = 86400000;
 const USER = "0f8fad5b-d9cb-469f-a165-70867728950e";
 const EMAIL = "client.relance@example.com";
 const RESEND = "https://api.resend.com/emails";
+const BREVO = "https://api.brevo.com/v3/smtp/email";
 const DATA = "https://iashark.com/data-home.json";
 const COMPANY = { COMPANY_OPERATOR_NAME: "Exploitant Test", COMPANY_ADDRESS: "1 rue de Test, Paris" };
 const ago = (d) => new Date(NOW - d * DAY).toISOString();
@@ -50,7 +51,8 @@ function makeDeps(opts) {
   const store = opts.db === null ? null : {
     listCandidates: async (args) => { db.listed++; db.args = args; return opts.rows || [row()]; },
     reserveSend: async (args) => { db.reserved.push(args); return opts.reserve === null ? null : nextId++; },
-    completeSend: async (args) => { db.completed.push(args); }
+    completeSend: async (args) => { db.completed.push(args); },
+    listTestRecipients: async () => opts.admins || []
   };
   const routes = Object.assign({ [DATA]: { body: { matchs: MATCHS } } }, opts.routes || {});
   const deps = {
@@ -94,12 +96,12 @@ test("send-lifecycle-emails : POST serveur avec secret interne uniquement, aucun
   assert.equal(t.db.listed, 0);
 });
 
-test("RESEND_API_KEY absent : no-op propre, aucune lecture de la base, aucun appel reseau", async () => {
+test("aucun fournisseur (ni RESEND_API_KEY ni BREVO_API_KEY) : no-op propre, aucune lecture de la base, aucun appel reseau", async () => {
   const { handleRequest } = await loadSend();
   const t = makeDeps();
   const res = await handleRequest(post({}), t.deps);
   assert.equal(res.status, 200);
-  assert.deepEqual(await res.json(), { ok: true, processed: false, reason: "resend_not_configured" });
+  assert.deepEqual(await res.json(), { ok: true, processed: false, reason: "provider_not_configured" });
   assert.equal(t.db.listed, 0);
   assert.equal(t.calls.length, 0);
   assert.ok(t.logs.some((l) => /RESEND_API_KEY absent/.test(l[1])));
@@ -145,7 +147,7 @@ test("envoi : reservation puis Resend (idempotence, List-Unsubscribe en 1 clic) 
   const payload = JSON.parse(call.init.body);
   assert.deepEqual(payload.to, [EMAIL]);
   assert.equal(payload.from, "IASHARK <news@iashark.com>");
-  assert.equal(payload.subject, "Le match offert du jour : Barcelona – Racing Santander");
+  assert.equal(payload.subject, "Ton match offert : Barcelona – Racing Santander");
   assert.match(payload.headers["List-Unsubscribe"], /^<https:\/\/example\.supabase\.co\/functions\/v1\/email-unsubscribe\?t=v1\.[^>]+>$/);
   assert.equal(payload.headers["List-Unsubscribe-Post"], "List-Unsubscribe=One-Click");
   const token = decodeURIComponent(payload.headers["List-Unsubscribe"].match(/t=([^>]+)>/)[1]);
@@ -213,13 +215,122 @@ test("bienvenue : envoyee meme sans match publie ; erreurs Resend journalisees e
   let t = makeDeps({ env: SENDING, rows: [welcome], routes: { [DATA]: { throws: true }, [RESEND]: { body: { id: "w1" } } } });
   let body = await (await handleRequest(post({}), t.deps)).json();
   assert.equal(body.sent, 1);
-  assert.ok(JSON.parse(t.calls.find((c) => c.url === RESEND).init.body).text.includes("que les emails liés à votre compte"));
+  assert.ok(JSON.parse(t.calls.find((c) => c.url === RESEND).init.body).text.includes("que les e-mails liés à ton compte"));
 
   t = makeDeps({ env: SENDING, routes: { [RESEND]: { status: 500, body: { message: "boom" } } } });
   const res = await handleRequest(post({}), t.deps);
   body = await res.json();
   assert.deepEqual([res.status, body.failed], [207, 1]);
   assert.deepEqual(t.db.completed, [{ id: 1, status: "failed", messageId: null, error: "resend_http_500" }]);
+});
+
+const BREVO_ENV = Object.assign({ BREVO_API_KEY: " xkeysib-test \n", EMAIL_FROM: "IASHARK <news@iashark.com>" }, COMPANY);
+
+test("Brevo (sans Resend) : reservation, envoi api.brevo.com avec List-Unsubscribe, journal 'sent' avec messageId", async () => {
+  const { handleRequest } = await loadSend();
+  const t = makeDeps({ env: BREVO_ENV, routes: { [BREVO]: { status: 201, body: { messageId: "<brevo-1@smtp>" } } } });
+  const res = await handleRequest(post({}), t.deps);
+  const body = await res.json();
+  assert.deepEqual([res.status, body.sent, body.failed, body.provider], [200, 1, 0, "brevo"]);
+  assert.deepEqual(t.db.reserved, [{ userId: USER, campaign: "free_match", key: "", market: "fr" }]);
+  assert.deepEqual(t.db.completed, [{ id: 1, status: "sent", messageId: "<brevo-1@smtp>", error: null }]);
+  assert.ok(!t.calls.some((c) => c.url === RESEND));
+  const call = t.calls.find((c) => c.url === BREVO);
+  assert.equal(call.init.headers["api-key"], "xkeysib-test", "cle nettoyee (espaces, retours a la ligne)");
+  const p = JSON.parse(call.init.body);
+  assert.deepEqual(p.sender, { name: "IASHARK", email: "news@iashark.com" });
+  assert.deepEqual(p.to, [{ email: EMAIL }]);
+  assert.deepEqual(p.replyTo, { email: "contact@iashark.com" });
+  assert.equal(p.subject, "Ton match offert : Barcelona – Racing Santander");
+  assert.ok(p.htmlContent.includes("<html") && p.textContent.includes("https://iashark.com/fr/desinscription-email.html#t="));
+  assert.match(p.headers["List-Unsubscribe"], /^<https:\/\/example\.supabase\.co\/functions\/v1\/email-unsubscribe\?t=v1\.[^>]+>$/);
+  assert.equal(p.headers["List-Unsubscribe-Post"], "List-Unsubscribe=One-Click");
+  assert.deepEqual(p.tags, ["lifecycle_free_match", "market_fr"]);
+  assert.ok(p.textContent.includes("IASHARK, entrepreneur individuel") === false && p.textContent.includes("Exploitant Test"));
+});
+
+test("Brevo refuse (HTTP 401) : journal 'failed' (207), jamais de doublon ; EMAIL_PROVIDER force le fournisseur", async () => {
+  const { handleRequest } = await loadSend();
+  let t = makeDeps({ env: BREVO_ENV, routes: { [BREVO]: { status: 401, body: { code: "unauthorized" } } } });
+  let res = await handleRequest(post({}), t.deps);
+  let body = await res.json();
+  assert.deepEqual([res.status, body.failed, body.results[0].reason], [207, 1, "brevo_http_401"]);
+  assert.deepEqual(t.db.completed, [{ id: 1, status: "failed", messageId: null, error: "brevo_http_401" }]);
+  t = makeDeps({ env: Object.assign({}, BREVO_ENV, { RESEND_API_KEY: "re_old", EMAIL_PROVIDER: "brevo" }), routes: { [BREVO]: { status: 201, body: { messageId: "m" } } } });
+  body = await (await handleRequest(post({}), t.deps)).json();
+  assert.equal(body.provider, "brevo");
+  assert.ok(!t.calls.some((c) => c.url === RESEND));
+  t = makeDeps({ env: Object.assign({}, BREVO_ENV, { EMAIL_FROM: "pas une adresse" }) });
+  body = await (await handleRequest(post({}), t.deps)).json();
+  assert.deepEqual(body.missing, ["EMAIL_FROM"]);
+});
+
+test("essai a blanc : nombres par campagne sans adresse ; details = adresses masquees seulement", async () => {
+  const { handleRequest } = await loadSend();
+  const welcome = row({ created_at: ago(0.1), last_sign_in_at: ago(0.1), sent_keys: [], marketing_opt_in: false, campaign: "welcome", email: "autre.personne@example.org" });
+  let t = makeDeps({ env: BREVO_ENV, rows: [row(), welcome] });
+  let body = await (await handleRequest(post({ dryRun: true }), t.deps)).json();
+  assert.deepEqual(body.byCampaign, { free_match: { would_send: 1 }, welcome: { would_send: 1 } });
+  assert.equal(body.preview, undefined);
+  assert.equal(t.db.reserved.length, 0);
+  assert.ok(!t.calls.some((c) => c.url === BREVO));
+  assert.ok(!JSON.stringify(body).includes("example"), "aucune adresse sans details");
+  t = makeDeps({ env: BREVO_ENV, rows: [row(), welcome] });
+  body = await (await handleRequest(post({ dryRun: true, details: true }), t.deps)).json();
+  assert.deepEqual(body.preview.map((p) => [p.campaign, p.to]), [["free_match", "c***@example.com"], ["welcome", "a***@example.org"]]);
+  assert.ok(!JSON.stringify(body).includes(EMAIL) && !JSON.stringify(body).includes(USER));
+});
+
+test("langue du compte et essai Pro : repertoire de la langue, essai seulement si jamais abonne", async () => {
+  const { handleRequest } = await loadSend();
+  const routes = { [BREVO]: { status: 201, body: { messageId: "m" } } };
+  let t = makeDeps({ env: BREVO_ENV, rows: [row({ language: "es", ever_subscribed: false })], routes });
+  await handleRequest(post({}), t.deps);
+  let p = JSON.parse(t.calls.find((c) => c.url === BREVO).init.body);
+  assert.equal(p.subject, "Tu partido gratis: Barcelona – Racing Santander");
+  assert.ok(p.textContent.includes("7 días de prueba en una primera suscripción mensual"));
+  assert.deepEqual(t.db.reserved[0].market, "es");
+  t = makeDeps({ env: BREVO_ENV, rows: [row({ ever_subscribed: true })], routes });
+  await handleRequest(post({}), t.deps);
+  p = JSON.parse(t.calls.find((c) => c.url === BREVO).init.body);
+  assert.ok(!p.textContent.includes("jours d'essai"), "ancien abonne : pas d'essai annonce");
+  t = makeDeps({ env: Object.assign({}, BREVO_ENV, { TRIAL_DAYS: "0" }), rows: [row({ ever_subscribed: false })], routes });
+  await handleRequest(post({}), t.deps);
+  p = JSON.parse(t.calls.find((c) => c.url === BREVO).init.body);
+  assert.ok(!p.textContent.includes("jours d'essai"), "TRIAL_DAYS=0 : essai coupe");
+});
+
+test("identite : COMPANY_ADDRESS absente -> LIFECYCLE_SENDER_CONTACT (contact publie), jamais inventee", async () => {
+  const { handleRequest } = await loadSend();
+  const env = { BREVO_API_KEY: "k", EMAIL_FROM: "IASHARK <news@iashark.com>", COMPANY_OPERATOR_NAME: "IASHARK, entrepreneur individuel", LIFECYCLE_SENDER_CONTACT: "contact@iashark.com" };
+  const t = makeDeps({ env, routes: { [BREVO]: { status: 201, body: { messageId: "m" } } } });
+  const body = await (await handleRequest(post({}), t.deps)).json();
+  assert.equal(body.sent, 1);
+  const p = JSON.parse(t.calls.find((c) => c.url === BREVO).init.body);
+  assert.ok(p.textContent.includes("Expéditeur : IASHARK, entrepreneur individuel · contact@iashark.com"));
+  const t2 = makeDeps({ env: { BREVO_API_KEY: "k", EMAIL_FROM: "IASHARK <news@iashark.com>", COMPANY_OPERATOR_NAME: "IASHARK, entrepreneur individuel" } });
+  const b2 = await (await handleRequest(post({}), t2.deps)).json();
+  assert.equal(b2.results[0].reason, "blocked_decision_placeholders");
+});
+
+test("envoi de test : un seul e-mail [TEST] au premier administrateur, sans reservation ni journal", async () => {
+  const { handleRequest } = await loadSend();
+  const admins = [{ user_id: USER, email: "admin.equipe@example.com" }, { user_id: "1f8fad5b-d9cb-469f-a165-70867728950e", email: "second@example.com" }];
+  let t = makeDeps({ env: BREVO_ENV, admins, routes: { [BREVO]: { status: 201, body: { messageId: "t1" } } } });
+  let res = await handleRequest(post({ test: { campaign: "welcome", dir: "fr" } }), t.deps);
+  let body = await res.json();
+  assert.deepEqual([res.status, body.sent, body.test, body.messageId], [200, 1, true, "t1"]);
+  assert.equal(t.calls.filter((c) => c.url === BREVO).length, 1, "un seul envoi");
+  const p = JSON.parse(t.calls.find((c) => c.url === BREVO).init.body);
+  assert.deepEqual(p.to, [{ email: "admin.equipe@example.com" }]);
+  assert.match(p.subject, /^\[TEST\] Bienvenue sur IASHARK/);
+  assert.equal(t.db.listed, 0);
+  assert.deepEqual([t.db.reserved.length, t.db.completed.length], [0, 0]);
+  assert.ok(!JSON.stringify(body).includes("admin.equipe"), "aucune adresse dans la reponse");
+  t = makeDeps({ env: BREVO_ENV, admins: [] });
+  body = await (await handleRequest(post({ test: true }), t.deps)).json();
+  assert.equal(body.reason, "no_test_recipient");
+  assert.equal((await handleRequest(post({ test: { campaign: "promo" } }), makeDeps({ env: BREVO_ENV, admins }).deps)).status, 400);
 });
 
 // ---------------------------------------------------------- email-unsubscribe

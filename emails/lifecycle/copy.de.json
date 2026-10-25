@@ -1,5 +1,5 @@
 {
-  "_status": "REVIEW - vor der Aktivierung prüfen lassen (Jurist + Muttersprachler). Kein Gewinnversprechen. Methodik-Seite existiert noch nicht auf Deutsch (Link auf die englische Seite).",
+  "_status": "REVIEW - Texte überarbeitet am 25/10/2026 (aktuelle Pro-Inhalte und Preise, Gratis-Tipp mit kostenlosem Konto). Kein Gewinnversprechen, keine Einsätze, keine Emojis.",
   "locale": "de",
   "common": {
     "greeting": "Hallo,",
@@ -7,12 +7,12 @@
     "kickoff_label": "Anstoß",
     "match_link": "Zum Spiel",
     "rg_title": "Verantwortungsvolles Spielen · 18+",
-    "rg_body": "IASHARK veröffentlicht statistische Fußballanalysen. Wir sind kein Wettanbieter und nehmen keine Wetten an, und eine Wahrscheinlichkeit ist nie eine Gewissheit. Wetten ist mit Risiken verbunden (Geldverlust, Sucht). Nur für Personen ab 18 Jahren.",
-    "rg_help_phone": "Brauchen Sie Hilfe? {{helplineName}}: {{helplinePhone}}.",
-    "rg_help_nophone": "Brauchen Sie Hilfe? {{helplineName}}:",
+    "rg_body": "IASHARK veröffentlicht Fußballanalysen und nimmt keine Wetten an. Eine berechnete Chance ist nie eine Gewissheit. Sportwetten bergen das Risiko von Geldverlust und Sucht. Nur für Personen ab 18 Jahren.",
+    "rg_help_phone": "Brauchst du Hilfe? {{helplineName}}: {{helplinePhone}}.",
+    "rg_help_nophone": "Brauchst du Hilfe? {{helplineName}}:",
     "rg_more": "Unsere Hinweise zum verantwortungsvollen Spielen",
-    "footer_reason_marketing": "Sie erhalten diese E-Mail, weil Sie zugestimmt haben, die kostenlosen Analysen und Nutzungstipps von IASHARK zu erhalten.",
-    "footer_reason_welcome": "Gesendet nach der Erstellung Ihres IASHARK-Kontos.",
+    "footer_reason_marketing": "Du erhältst diese E-Mail, weil du zugestimmt hast, E-Mails von IASHARK zu erhalten.",
+    "footer_reason_welcome": "Gesendet nach der Erstellung deines IASHARK-Kontos.",
     "unsubscribe": "Mit einem Klick abmelden",
     "manage": "E-Mails in Mein Konto verwalten",
     "privacy": "Datenschutz",
@@ -21,84 +21,231 @@
   },
   "campaigns": {
     "welcome": {
-      "subject": "Willkommen bei IASHARK: so fangen Sie an",
-      "preheader": "So nutzen Sie die Website, das kostenlose Spiel und die Methodik.",
+      "subject": "Willkommen bei IASHARK: so fängst du an",
+      "preheader": "Dein kostenloses Konto ist bereit: jeden Tag ein Gratis-Tipp.",
       "title": "Willkommen bei IASHARK",
       "blocks": [
-        { "type": "p", "text": "Ihr kostenloses IASHARK-Konto ist eingerichtet. So nutzen Sie die Website in wenigen Minuten." },
-        { "type": "list", "ordered": true, "items": [
-          "Jeden Tag ist die vollständige Analyse eines Spiels kostenlos: Sie ist auf der Startseite hervorgehoben.",
-          "Auf der Seite eines Spiels lesen Sie die vom Modell geschätzten Wahrscheinlichkeiten, die berücksichtigten Faktoren und ihre Grenzen.",
-          "Die Methodik-Seite erklärt, woher diese Zahlen kommen und wie man sie liest."
-        ] },
-        { "type": "p", "if": "hasFreeMatch", "text": "Das aktuelle kostenlose Spiel:" },
-        { "type": "match", "if": "hasFreeMatch" },
-        { "type": "cta", "label": "Zur Methodik (Seite auf Englisch)", "link": "methodology" },
-        { "type": "link", "label": "Zu meinem Konto", "link": "account" },
-        { "type": "p", "if": "notOptedIn", "text": "Sie haben keine kostenlosen Analysen und Tipps per E-Mail angefordert: Wir senden Ihnen nur E-Mails zu Ihrem Konto. Sie können Ihre Wahl jederzeit in Mein Konto unter Benachrichtigungen ändern." }
+        {
+          "type": "p",
+          "text": "Dein kostenloses Konto ist bereit. So nutzt du es:"
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "Jeden Tag ist ein Spiel gratis. Mit deinem kostenlosen Konto siehst du seinen Tipp, seine berechnete Chance und die Begründung.",
+            "Du vergleichst diese Chance mit der Quote deines zugelassenen Anbieters und entscheidest dann selbst.",
+            "Die Seite Methodik erklärt, wie diese Chancen berechnet werden."
+          ]
+        },
+        {
+          "type": "p",
+          "if": "hasFreeMatch",
+          "text": "Das Gratis-Spiel im Moment:"
+        },
+        {
+          "type": "match",
+          "if": "hasFreeMatch"
+        },
+        {
+          "type": "cta",
+          "if": "hasFreeMatch",
+          "label": "Zum Gratis-Tipp",
+          "link": "freeMatch"
+        },
+        {
+          "type": "cta",
+          "if": "noFreeMatch",
+          "label": "Spiele des Tages ansehen",
+          "link": "home"
+        },
+        {
+          "type": "link",
+          "label": "Methodik lesen",
+          "link": "methodology"
+        },
+        {
+          "type": "p",
+          "if": "notOptedIn",
+          "text": "Du hast keine E-Mails von uns angefordert: Wir senden dir nur E-Mails zu deinem Konto. Du kannst deine Wahl jederzeit in Mein Konto unter Benachrichtigungen ändern."
+        }
       ]
     },
     "free_match": {
-      "subject": "Das kostenlose Spiel des Tages: {{freeMatchHome}} – {{freeMatchAway}}",
-      "preheader": "Die vollständige Analyse dieses Spiels ist mit Ihrem Konto kostenlos freigeschaltet.",
-      "title": "Ihre kostenlose Analyse des Tages",
+      "subject": "Dein Gratis-Spiel: {{freeMatchHome}} – {{freeMatchAway}}",
+      "preheader": "Der Tipp zu diesem Spiel öffnet sich mit deinem kostenlosen Konto.",
+      "title": "Dein Gratis-Spiel",
       "blocks": [
-        { "type": "p", "text": "Jeden Tag schaltet IASHARK die vollständige Analyse eines Spiels für alle Konten kostenlos frei. Das ist die heutige:" },
-        { "type": "match" },
-        { "type": "p", "text": "Sie finden dort die geschätzten Wahrscheinlichkeiten, die Faktoren des Modells und die Punkte, auf die zu achten ist. Es sind statistische Schätzungen: Der Ausgang eines Spiels bleibt ungewiss." },
-        { "type": "cta", "label": "Kostenlose Analyse ansehen", "link": "freeMatch" }
+        {
+          "type": "p",
+          "text": "Jeden Tag schenkt IASHARK allen kostenlosen Konten den Tipp zu einem Spiel. Hier ist er:"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "p",
+          "text": "Melde dich auf der Spielseite an: Du siehst den gewählten Tipp, seine berechnete Chance und die Begründung. Du vergleichst mit der Quote deines zugelassenen Anbieters und entscheidest."
+        },
+        {
+          "type": "cta",
+          "label": "Zum Gratis-Tipp",
+          "link": "freeMatch"
+        },
+        {
+          "type": "p",
+          "if": "hasTrial",
+          "text": "Um alle Spiele des Tages zu öffnen: Pro, mit {{trialDays}} Tagen Testphase beim ersten Monatsabo."
+        },
+        {
+          "type": "link",
+          "if": "hasTrial",
+          "label": "Pro-Angebot ansehen",
+          "link": "pro"
+        }
       ]
     },
     "pro_features": {
       "subject": "Was IASHARK Pro freischaltet",
-      "preheader": "Die Pro-Inhalte und ihr Preis, ohne Umschweife.",
-      "title": "Was Pro Ihrem kostenlosen Konto hinzufügt",
+      "preheader": "Alle Spiele des Tages offen, und die genauen Preise.",
+      "title": "Was Pro deinem kostenlosen Konto hinzufügt",
       "blocks": [
-        { "type": "p", "text": "Ihr kostenloses Konto bietet die vollständige Analyse eines Spiels pro Tag, den Blog und die Tools zum Kennenlernen. Das fügt Pro hinzu:" },
-        { "type": "list", "items": [
-          "Die vollständige Analyse zu allen Spielen",
-          "Die sechs Tools, verbunden mit den Wahrscheinlichkeiten des Modells",
-          "Das synchronisierte Entscheidungsjournal",
-          "Die Bankroll-Verfolgung, verknüpft mit dem Konto"
-        ] },
-        { "type": "p", "if": "hasProYear", "text": "Preise auf der Version {{siteVersion}} der Website: {{proWeekPrice}} pro Woche, {{proPrice}} pro Monat oder {{proYearPrice}} pro Jahr. Derselbe Pro-Zugang bei jeder Laufzeit, jederzeit in Mein Konto kündbar." },
-        { "type": "p", "if": "hasNoProYear", "text": "Preise auf der Version {{siteVersion}} der Website: {{proWeekPrice}} pro Woche oder {{proPrice}} pro Monat. Derselbe Pro-Zugang bei jeder Laufzeit, jederzeit in Mein Konto kündbar." },
-        { "type": "p", "if": "hasOnlyProMonth", "text": "Preis auf der Version {{siteVersion}} der Website: {{proPrice}} pro Monat, jederzeit in Mein Konto kündbar." },
-        { "type": "p", "text": "Pro bietet mehr Analysen und Tools; es macht kein Spiel vorhersehbarer." },
-        { "type": "cta", "label": "Details zum Angebot", "link": "pricing" },
-        { "type": "p", "text": "Wenn Ihnen das kostenlose Konto genügt, müssen Sie nichts tun." }
+        {
+          "type": "p",
+          "text": "Mit deinem kostenlosen Konto hast du jeden Tag den Tipp zu einem Gratis-Spiel. Pro öffnet alle anderen:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Alle Spiele des Tages: der gewählte Tipp, seine berechnete Chance und die Begründung",
+            "Der Spielfilm: sechs Viertelstunden, und beide Mannschaften im Vergleich",
+            "Die wahrscheinlichsten Ergebnisse, in den am besten gemessenen Ligen"
+          ]
+        },
+        {
+          "type": "list",
+          "if": "hasTickets",
+          "items": [
+            "Die kleine und die große Kombi des Tages, die Gold-Auswahl und der Torschütze des Tages"
+          ]
+        },
+        {
+          "type": "p",
+          "if": "hasProYear",
+          "text": "Preise auf der Version {{siteVersion}} der Website: {{proWeekPrice}} pro Woche, {{proPrice}} pro Monat oder {{proYearPrice}} pro Jahr. Derselbe Pro-Zugang bei jeder Laufzeit, jederzeit in Mein Konto kündbar."
+        },
+        {
+          "type": "p",
+          "if": "hasNoProYear",
+          "text": "Preise auf der Version {{siteVersion}} der Website: {{proWeekPrice}} pro Woche oder {{proPrice}} pro Monat. Derselbe Pro-Zugang bei jeder Laufzeit, jederzeit in Mein Konto kündbar."
+        },
+        {
+          "type": "p",
+          "if": "hasOnlyProMonth",
+          "text": "Preis auf der Version {{siteVersion}} der Website: {{proPrice}} pro Monat, jederzeit in Mein Konto kündbar."
+        },
+        {
+          "type": "p",
+          "if": "hasTrial",
+          "text": "{{trialDays}} Tage Testphase beim ersten Monatsabo: Deine Karte wird abgefragt, während der Testphase wird nichts abgebucht. Danach {{proPrice}} pro Monat, automatisch abgebucht, außer du kündigst vor Ende der Testphase."
+        },
+        {
+          "type": "cta",
+          "label": "Pro-Angebot ansehen",
+          "link": "pro"
+        },
+        {
+          "type": "p",
+          "text": "Wenn dir das kostenlose Konto reicht, musst du nichts tun."
+        }
       ]
     },
     "inactive_7d": {
-      "subject": "Die Spiele dieses Wochenendes bei IASHARK",
-      "preheader": "Einige Begegnungen des Wochenendes, die IASHARK abdeckt.",
-      "title": "Das sind die Spiele dieses Wochenendes",
+      "subject": "Die Spiele dieses Wochenendes auf IASHARK",
+      "preheader": "Die Spiele des Wochenendes, und jeden Tag dein Gratis-Spiel.",
+      "title": "Die Spiele dieses Wochenendes",
       "blocks": [
-        { "type": "p", "text": "Hier einige Begegnungen dieses Wochenendes, die IASHARK abdeckt:" },
-        { "type": "matches" },
-        { "type": "p", "text": "Die vollständige Analyse eines Spiels bleibt mit Ihrem Konto jeden Tag kostenlos." },
-        { "type": "cta", "label": "Alle Spiele ansehen", "link": "home" }
+        {
+          "type": "p",
+          "text": "Hier einige Spiele dieses Wochenendes auf IASHARK:"
+        },
+        {
+          "type": "matches"
+        },
+        {
+          "type": "p",
+          "text": "Jeden Tag bleibt der Tipp zu einem Spiel mit deinem kostenlosen Konto gratis."
+        },
+        {
+          "type": "cta",
+          "label": "Alle Spiele ansehen",
+          "link": "home"
+        },
+        {
+          "type": "p",
+          "if": "hasTrial",
+          "text": "Um alle Spiele des Tages zu öffnen: Pro, mit {{trialDays}} Tagen Testphase beim ersten Monatsabo."
+        },
+        {
+          "type": "link",
+          "if": "hasTrial",
+          "label": "Pro-Angebot ansehen",
+          "link": "pro"
+        }
       ]
     },
     "inactive_30d": {
-      "subject": "Ihr IASHARK-Konto ist weiterhin aktiv",
-      "preheader": "Die kostenlose Analyse des Tages ist mit Ihrem Konto weiterhin verfügbar.",
-      "title": "Ihr Konto ist noch da",
+      "subject": "Dein IASHARK-Konto ist weiterhin aktiv",
+      "preheader": "Jeden Tag bleibt der Tipp zu einem Spiel mit deinem kostenlosen Konto gratis.",
+      "title": "Dein Konto ist noch da",
       "blocks": [
-        { "type": "p", "text": "Sie waren eine Weile nicht mehr bei IASHARK. Ihr kostenloses Konto ist weiterhin aktiv, und die vollständige Analyse eines Spiels bleibt jeden Tag kostenlos." },
-        { "type": "cta", "label": "Zurück zu IASHARK", "link": "home" },
-        { "type": "p", "text": "Wenn Ihnen diese E-Mails nicht mehr nützen, melden Sie sich mit dem Link am Ende dieser Nachricht mit einem Klick ab. Ohne Besuch oder Öffnen unserer E-Mails schreiben wir Ihnen ohnehin in 30 Tagen nicht mehr." }
+        {
+          "type": "p",
+          "text": "Du warst eine Weile nicht mehr auf IASHARK. Dein kostenloses Konto ist weiterhin aktiv, und jeden Tag bleibt der Tipp zu einem Spiel gratis."
+        },
+        {
+          "type": "cta",
+          "label": "Zurück zu IASHARK",
+          "link": "home"
+        },
+        {
+          "type": "p",
+          "if": "hasTrial",
+          "text": "Um alle Spiele des Tages zu öffnen: Pro, mit {{trialDays}} Tagen Testphase beim ersten Monatsabo."
+        },
+        {
+          "type": "link",
+          "if": "hasTrial",
+          "label": "Pro-Angebot ansehen",
+          "link": "pro"
+        },
+        {
+          "type": "p",
+          "text": "Wenn dir diese E-Mails nichts mehr bringen, melde dich mit dem Link unten in dieser Nachricht mit einem Klick ab. Ohne Besuch und ohne Öffnen unserer E-Mails während 60 Tagen schreiben wir dir ohnehin nicht mehr."
+        }
       ]
     },
     "pro_weekly_summary": {
-      "subject": "Ihre IASHARK-Zusammenfassung: die Spiele des Wochenendes",
-      "preheader": "Die Begegnungen des Wochenendes, die IASHARK abdeckt.",
-      "title": "Zusammenfassung der Woche",
+      "subject": "Deine IASHARK-Übersicht: die Spiele des Wochenendes",
+      "preheader": "Die Spiele des Wochenendes, bereit in deinem Pro-Bereich.",
+      "title": "Die Spiele des Wochenendes",
       "blocks": [
-        { "type": "p", "text": "Hier einige Begegnungen des Wochenendes, die IASHARK abdeckt. Ihre Pro-Tools finden Sie auf der Seite Tools." },
-        { "type": "matches" },
-        { "type": "cta", "label": "Tools öffnen", "link": "tools" },
-        { "type": "p", "text": "Sie können diese Zusammenfassung in Mein Konto unter Benachrichtigungen abschalten." }
+        {
+          "type": "p",
+          "text": "Hier einige Spiele dieses Wochenendes. Der Tipp zu jedem Spiel wird vor dem Anstoß in deinem Pro-Bereich veröffentlicht."
+        },
+        {
+          "type": "matches"
+        },
+        {
+          "type": "cta",
+          "label": "Meinen Pro-Bereich öffnen",
+          "link": "pro"
+        },
+        {
+          "type": "p",
+          "text": "Du kannst diese Übersicht in Mein Konto unter Benachrichtigungen abschalten."
+        }
       ]
     }
   }

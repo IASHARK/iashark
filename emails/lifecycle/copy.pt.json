@@ -1,5 +1,5 @@
 {
-  "_status": "REVIEW - rever (jurista + falante nativo) antes da ativação. Sem promessa de ganhos. A página Metodologia ainda não existe em português (ligação para a página em inglês).",
+  "_status": "REVIEW - textos revistos a 25/10/2026 (conteúdos Pro e preços atuais, palpite grátis com a conta gratuita). Sem promessa de ganhos, sem montantes de aposta, sem emoji.",
   "locale": "pt",
   "common": {
     "greeting": "Olá,",
@@ -7,12 +7,12 @@
     "kickoff_label": "Início do jogo",
     "match_link": "Ver o jogo",
     "rg_title": "Jogo responsável · 18+",
-    "rg_body": "O IASHARK publica análises estatísticas de futebol. Não é um site de apostas: não aceita apostas, e uma probabilidade nunca é uma certeza. Apostar envolve riscos (perda de dinheiro, dependência). Serviço reservado a maiores de 18 anos.",
-    "rg_help_phone": "Precisa de ajuda? {{helplineName}}: {{helplinePhone}}.",
-    "rg_help_nophone": "Precisa de ajuda? {{helplineName}}:",
-    "rg_more": "Os nossos recursos de jogo responsável",
-    "footer_reason_marketing": "Recebe este email porque aceitou receber as análises gratuitas e as dicas de utilização do IASHARK.",
-    "footer_reason_welcome": "Email enviado após a criação da sua conta IASHARK.",
+    "rg_body": "O IASHARK publica análises de futebol e não aceita apostas. Uma probabilidade calculada nunca é uma certeza. As apostas desportivas envolvem um risco de perda de dinheiro e de dependência. Reservado a maiores de 18 anos.",
+    "rg_help_phone": "Precisas de ajuda? {{helplineName}}: {{helplinePhone}}.",
+    "rg_help_nophone": "Precisas de ajuda? {{helplineName}}:",
+    "rg_more": "Os nossos conselhos de jogo responsável",
+    "footer_reason_marketing": "Recebes este email porque aceitaste receber os emails do IASHARK.",
+    "footer_reason_welcome": "Email enviado após a criação da tua conta IASHARK.",
     "unsubscribe": "Cancelar a subscrição com um clique",
     "manage": "Gerir os meus emails em A minha conta",
     "privacy": "Privacidade",
@@ -22,83 +22,230 @@
   "campaigns": {
     "welcome": {
       "subject": "Bem-vindo ao IASHARK: por onde começar",
-      "preheader": "Como usar o site, o jogo gratuito e a metodologia.",
+      "preheader": "A tua conta gratuita está pronta: todos os dias, o palpite de um jogo é grátis.",
       "title": "Bem-vindo ao IASHARK",
       "blocks": [
-        { "type": "p", "text": "A sua conta gratuita IASHARK está criada. Veja como usar o site em poucos minutos." },
-        { "type": "list", "ordered": true, "items": [
-          "Todos os dias, a análise completa de um jogo é gratuita: está em destaque na página inicial.",
-          "Na página de um jogo, leia as probabilidades estimadas pelo modelo, os fatores considerados e os seus limites.",
-          "A página Metodologia explica de onde vêm estes números e como os ler."
-        ] },
-        { "type": "p", "if": "hasFreeMatch", "text": "O jogo gratuito do momento:" },
-        { "type": "match", "if": "hasFreeMatch" },
-        { "type": "cta", "label": "Ler a metodologia (página em inglês)", "link": "methodology" },
-        { "type": "link", "label": "Aceder à minha conta", "link": "account" },
-        { "type": "p", "if": "notOptedIn", "text": "Não pediu para receber as nossas análises gratuitas e dicas por email: só lhe enviaremos emails relacionados com a sua conta. Pode mudar de ideias a qualquer momento em A minha conta, secção Notificações." }
+        {
+          "type": "p",
+          "text": "A tua conta gratuita está pronta. Eis como a usar:"
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "Todos os dias, um jogo é grátis. Com a tua conta gratuita vês o seu palpite, a sua probabilidade calculada e o porquê.",
+            "Comparas essa probabilidade com a odd do teu operador licenciado e depois decides tu.",
+            "A página Metodologia explica como estas probabilidades são calculadas."
+          ]
+        },
+        {
+          "type": "p",
+          "if": "hasFreeMatch",
+          "text": "O jogo grátis neste momento:"
+        },
+        {
+          "type": "match",
+          "if": "hasFreeMatch"
+        },
+        {
+          "type": "cta",
+          "if": "hasFreeMatch",
+          "label": "Ver o palpite grátis",
+          "link": "freeMatch"
+        },
+        {
+          "type": "cta",
+          "if": "noFreeMatch",
+          "label": "Ver os jogos do dia",
+          "link": "home"
+        },
+        {
+          "type": "link",
+          "label": "Ler a metodologia",
+          "link": "methodology"
+        },
+        {
+          "type": "p",
+          "if": "notOptedIn",
+          "text": "Não pediste para receber os nossos emails: só te enviaremos emails relacionados com a tua conta. Podes mudar de ideias a qualquer momento em A minha conta, secção Notificações."
+        }
       ]
     },
     "free_match": {
-      "subject": "O jogo gratuito do dia: {{freeMatchHome}} – {{freeMatchAway}}",
-      "preheader": "A análise completa deste jogo está aberta gratuitamente com a sua conta.",
-      "title": "A sua análise gratuita do dia",
+      "subject": "O teu jogo grátis: {{freeMatchHome}} – {{freeMatchAway}}",
+      "preheader": "O palpite deste jogo abre com a tua conta gratuita.",
+      "title": "O teu jogo grátis",
       "blocks": [
-        { "type": "p", "text": "Todos os dias, o IASHARK abre gratuitamente a todas as contas a análise completa de um jogo. Esta é a de hoje:" },
-        { "type": "match" },
-        { "type": "p", "text": "Vai encontrar as probabilidades estimadas, os fatores usados pelo modelo e os pontos de atenção. São estimativas estatísticas: o resultado de um jogo continua incerto." },
-        { "type": "cta", "label": "Ver a análise gratuita", "link": "freeMatch" }
+        {
+          "type": "p",
+          "text": "Todos os dias, o IASHARK oferece o palpite de um jogo a todas as contas gratuitas. Aqui está:"
+        },
+        {
+          "type": "match"
+        },
+        {
+          "type": "p",
+          "text": "Inicia sessão na página do jogo: vês o palpite escolhido, a sua probabilidade calculada e o porquê. Comparas com a odd do teu operador licenciado e decides."
+        },
+        {
+          "type": "cta",
+          "label": "Ver o palpite grátis",
+          "link": "freeMatch"
+        },
+        {
+          "type": "p",
+          "if": "hasTrial",
+          "text": "Para abrir todos os jogos do dia: Pro, com {{trialDays}} dias de teste numa primeira subscrição mensal."
+        },
+        {
+          "type": "link",
+          "if": "hasTrial",
+          "label": "Ver a oferta Pro",
+          "link": "pro"
+        }
       ]
     },
     "pro_features": {
       "subject": "O que o IASHARK Pro desbloqueia",
-      "preheader": "A lista de conteúdos Pro e o seu preço, sem rodeios.",
-      "title": "O que o Pro acrescenta à sua conta gratuita",
+      "preheader": "Todos os jogos do dia abertos, e os preços exatos.",
+      "title": "O que o Pro acrescenta à tua conta gratuita",
       "blocks": [
-        { "type": "p", "text": "A sua conta gratuita dá acesso à análise completa de um jogo por dia, ao blog e às ferramentas em modo de descoberta. Isto é o que o Pro acrescenta:" },
-        { "type": "list", "items": [
-          "A análise completa em todos os jogos",
-          "As seis ferramentas ligadas às probabilidades do modelo",
-          "O diário de decisões sincronizado",
-          "O acompanhamento da bankroll ligado à conta"
-        ] },
-        { "type": "p", "if": "hasProYear", "text": "Preços na versão {{siteVersion}} do site: {{proWeekPrice}} por semana, {{proPrice}} por mês ou {{proYearPrice}} por ano. O mesmo acesso Pro em qualquer duração, cancelável a qualquer momento em A minha conta." },
-        { "type": "p", "if": "hasNoProYear", "text": "Preços na versão {{siteVersion}} do site: {{proWeekPrice}} por semana ou {{proPrice}} por mês. O mesmo acesso Pro em qualquer duração, cancelável a qualquer momento em A minha conta." },
-        { "type": "p", "if": "hasOnlyProMonth", "text": "Preço na versão {{siteVersion}} do site: {{proPrice}} por mês, cancelável a qualquer momento em A minha conta." },
-        { "type": "p", "text": "O Pro dá acesso a mais análises e ferramentas; não torna nenhum jogo mais previsível." },
-        { "type": "cta", "label": "Ver os detalhes da oferta", "link": "pricing" },
-        { "type": "p", "text": "Se a conta gratuita lhe basta, não tem de fazer nada." }
+        {
+          "type": "p",
+          "text": "Com a tua conta gratuita tens todos os dias o palpite de um jogo grátis. O Pro abre todos os outros:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Todos os jogos do dia: o palpite escolhido, a sua probabilidade calculada e o porquê",
+            "O filme do jogo: seis quartos de hora, e as duas equipas comparadas",
+            "Os resultados mais prováveis, nos campeonatos melhor medidos"
+          ]
+        },
+        {
+          "type": "list",
+          "if": "hasTickets",
+          "items": [
+            "A múltipla pequena e a grande do dia, a Seleção de ouro e o marcador do dia"
+          ]
+        },
+        {
+          "type": "p",
+          "if": "hasProYear",
+          "text": "Preços na versão {{siteVersion}} do site: {{proWeekPrice}} por semana, {{proPrice}} por mês ou {{proYearPrice}} por ano. O mesmo acesso Pro em qualquer duração, cancelável a qualquer momento em A minha conta."
+        },
+        {
+          "type": "p",
+          "if": "hasNoProYear",
+          "text": "Preços na versão {{siteVersion}} do site: {{proWeekPrice}} por semana ou {{proPrice}} por mês. O mesmo acesso Pro em qualquer duração, cancelável a qualquer momento em A minha conta."
+        },
+        {
+          "type": "p",
+          "if": "hasOnlyProMonth",
+          "text": "Preço na versão {{siteVersion}} do site: {{proPrice}} por mês, cancelável a qualquer momento em A minha conta."
+        },
+        {
+          "type": "p",
+          "if": "hasTrial",
+          "text": "{{trialDays}} dias de teste numa primeira subscrição mensal: o teu cartão é pedido, nada é cobrado durante o teste. Depois {{proPrice}} por mês, cobrados automaticamente salvo cancelamento antes do fim do teste."
+        },
+        {
+          "type": "cta",
+          "label": "Ver a oferta Pro",
+          "link": "pro"
+        },
+        {
+          "type": "p",
+          "text": "Se a conta gratuita te basta, não tens nada a fazer."
+        }
       ]
     },
     "inactive_7d": {
       "subject": "Os jogos deste fim de semana no IASHARK",
-      "preheader": "Alguns jogos do fim de semana acompanhados pelo IASHARK.",
-      "title": "Estes são os jogos deste fim de semana",
+      "preheader": "Os jogos do fim de semana, e o teu jogo grátis todos os dias.",
+      "title": "Os jogos deste fim de semana",
       "blocks": [
-        { "type": "p", "text": "Estes são alguns jogos deste fim de semana acompanhados pelo IASHARK:" },
-        { "type": "matches" },
-        { "type": "p", "text": "A análise completa de um jogo continua gratuita todos os dias com a sua conta." },
-        { "type": "cta", "label": "Ver todos os jogos", "link": "home" }
+        {
+          "type": "p",
+          "text": "Eis alguns jogos deste fim de semana no IASHARK:"
+        },
+        {
+          "type": "matches"
+        },
+        {
+          "type": "p",
+          "text": "Todos os dias, o palpite de um jogo continua grátis com a tua conta gratuita."
+        },
+        {
+          "type": "cta",
+          "label": "Ver todos os jogos",
+          "link": "home"
+        },
+        {
+          "type": "p",
+          "if": "hasTrial",
+          "text": "Para abrir todos os jogos do dia: Pro, com {{trialDays}} dias de teste numa primeira subscrição mensal."
+        },
+        {
+          "type": "link",
+          "if": "hasTrial",
+          "label": "Ver a oferta Pro",
+          "link": "pro"
+        }
       ]
     },
     "inactive_30d": {
-      "subject": "A sua conta IASHARK continua ativa",
-      "preheader": "A análise gratuita do dia continua disponível com a sua conta.",
-      "title": "A sua conta continua aqui",
+      "subject": "A tua conta IASHARK continua ativa",
+      "preheader": "Todos os dias, o palpite de um jogo continua grátis com a tua conta gratuita.",
+      "title": "A tua conta continua aqui",
       "blocks": [
-        { "type": "p", "text": "Há algum tempo que não volta ao IASHARK. A sua conta gratuita continua ativa e a análise completa de um jogo continua gratuita todos os dias." },
-        { "type": "cta", "label": "Voltar ao IASHARK", "link": "home" },
-        { "type": "p", "text": "Se estes emails já não lhe são úteis, cancele a subscrição com um clique na ligação no fim desta mensagem. Sem visitas nem aberturas dos nossos emails, deixaremos de lhe escrever dentro de 30 dias de qualquer forma." }
+        {
+          "type": "p",
+          "text": "Há algum tempo que não voltas ao IASHARK. A tua conta gratuita continua ativa, e todos os dias o palpite de um jogo continua grátis."
+        },
+        {
+          "type": "cta",
+          "label": "Voltar ao IASHARK",
+          "link": "home"
+        },
+        {
+          "type": "p",
+          "if": "hasTrial",
+          "text": "Para abrir todos os jogos do dia: Pro, com {{trialDays}} dias de teste numa primeira subscrição mensal."
+        },
+        {
+          "type": "link",
+          "if": "hasTrial",
+          "label": "Ver a oferta Pro",
+          "link": "pro"
+        },
+        {
+          "type": "p",
+          "text": "Se estes emails já não te servem, cancela a subscrição com um clique no link no fim desta mensagem. Sem visitas nem aberturas dos nossos emails durante 60 dias, deixamos de te escrever de qualquer forma."
+        }
       ]
     },
     "pro_weekly_summary": {
-      "subject": "O seu resumo IASHARK: os jogos do fim de semana",
-      "preheader": "Os jogos do fim de semana acompanhados pelo IASHARK.",
-      "title": "Resumo da semana",
+      "subject": "O teu resumo IASHARK: os jogos do fim de semana",
+      "preheader": "Os jogos do fim de semana, prontos no teu espaço Pro.",
+      "title": "Os jogos do fim de semana",
       "blocks": [
-        { "type": "p", "text": "Estes são alguns jogos do fim de semana acompanhados pelo IASHARK. As suas ferramentas Pro estão disponíveis na página Ferramentas." },
-        { "type": "matches" },
-        { "type": "cta", "label": "Abrir as ferramentas", "link": "tools" },
-        { "type": "p", "text": "Pode desativar este resumo em A minha conta, secção Notificações." }
+        {
+          "type": "p",
+          "text": "Eis alguns jogos deste fim de semana. O palpite de cada jogo é publicado antes do início no teu espaço Pro."
+        },
+        {
+          "type": "matches"
+        },
+        {
+          "type": "cta",
+          "label": "Abrir o meu espaço Pro",
+          "link": "pro"
+        },
+        {
+          "type": "p",
+          "text": "Podes desativar este resumo em A minha conta, secção Notificações."
+        }
       ]
     }
   }

@@ -30,11 +30,11 @@ test("la fonction Edge sert l'analyse offerte du jour aux seuls comptes connecte
   assert.match(fn, /is_free === true/, "le match offert doit etre reconnu");
   // 04/10/2026 (decision de Clement) : plus rien de payant dans les fichiers publics ; un compte connecte
   // recoit l'analyse depuis match_premium_data, sauf marches_panneau, v3_marches et marches_flux (Pro).
-  // 21/10/2026 (decision de Clement, « l'echantillon, puis la demande ») : sans compte, sur le match
-  // offert DEMANDE seulement, le pari, sa cote et sa chance ; jamais la liste, jamais le reste.
-  assert.match(fn, /const offerts = matchs\.filter\(estOffert\)\s*\.filter\(\(m\) => connecte \|\| \(portee\.id != null && String\(m\.id\) === portee\.id\)\)/);
-  assert.match(fn, /const CHAMPS_APPEL_SANS_COMPTE = \["pari_rec", "cote_rec", "model_probability", "market_id", "marche"\];/);
-  assert.match(fn, /if \(!connecte\) return appelSansCompte\(retirerPremium\(m\), premium\);/, "visiteur sans compte : pari, cote et chance seulement");
+  // 25/10/2026 (decision de Clement) : le pari du match offert repasse derriere l'inscription ;
+  // sans compte, aucune lecture de la table et aucun champ payant, meme sur le match offert.
+  assert.match(fn, /const offerts = connecte \? matchs\.filter\(estOffert\)/);
+  assert.match(fn, /if \(!connecte \|\| !premium\) return retirerPremium\(m\);/, "visiteur sans compte : rien de payant");
+  assert.doesNotMatch(fn, /appel_sans_compte = true/);
   assert.match(fn, /return sansChampsPro\(avecPremium\(retirerPremium\(m\), premium, detailFields\)\);/);
 });
 

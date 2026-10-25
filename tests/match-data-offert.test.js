@@ -75,20 +75,18 @@ test("match-data : match offert sans compte = pari, cote et chance seulement ; c
   const f = await chargerFonction();
   if (!f) { t.skip("node:module#stripTypeScriptTypes indisponible (Node < 22.13)"); return; }
   try {
-    // Visiteur sans compte (decision de Clement du 21/10/2026, « l'echantillon, puis la demande ») :
-    // sur le match offert DEMANDE, le pari, sa cote et sa chance seulement ; rien d'autre, rien
-    // sur un match payant. Liste sans id : rien du tout, aucune lecture de la table.
+    // Visiteur sans compte (decision de Clement du 25/10/2026) : rien de payant, meme sur le match
+    // offert demande (le pari repasse derriere l'inscription). Aucune lecture de la table.
     const liste = await appeler(f, null, { list: true });
     for (const m of liste.matchs) assert.deepEqual(PREMIUM.premiumLeaks(m), [], "anonyme, liste, match " + m.id);
     assert.deepEqual(f.lus, [], "liste sans compte : match_premium_data jamais lu");
     const anonyme = await appeler(f, null);
     assert.equal(anonyme.isPro, false);
     const appel = anonyme.matchs.find((m) => m.id === 1);
-    assert.deepEqual(PREMIUM.premiumLeaks(appel).sort(), ["cote_rec", "marche", "market_id", "model_probability", "pari_rec"]);
-    assert.deepEqual([appel.pari_rec, appel.cote_rec, appel.model_probability, appel.appel_sans_compte], ["Victoire Domicile", 1.62, 58, true]);
-    for (const k of ["sim_resume", "sim_15min", "premier_but", "stats_iashark", "jumeaux", "lecture_match", "conf", "verdict_shark", "facteur_x", "kelly"]) assert.equal(appel[k], undefined, "sans compte, jamais : " + k);
+    assert.deepEqual(PREMIUM.premiumLeaks(appel), [], "anonyme, match offert : aucun champ payant");
+    assert.equal(appel.appel_sans_compte, undefined);
     assert.deepEqual(PREMIUM.premiumLeaks(anonyme.matchs.find((m) => m.id === 2)), [], "anonyme, match payant");
-    assert.deepEqual(f.lus, [["1"]], "sans compte : seule la ligne du match offert demande est lue");
+    assert.deepEqual(f.lus, [], "sans compte : match_premium_data jamais lu");
     f.lus.length = 0;
 
     // Compte gratuit connecte : le match offert complet (10 000 fois, film, qui ouvre le score, jumeaux,

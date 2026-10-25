@@ -120,15 +120,25 @@ test("CGV : date de mise a jour = version du consentement, texte en REVIEW, dure
   }
   // 04/10/2026 : de nouveau une seule version des CGV (9 versions, pages racine comprises) :
   // essai de 7 jours sur le mois (decision de Clement), prelevement automatique a la fin.
-  assert.equal(TERMS_VERSION, "2026-10-04");
+  // 25/10/2026 : baisse des prix en euros (decision de Clement) : CGV des versions en euros
+  // (racine, fr, es, de, it, pt) au 25/10/2026, versions du 04/10 archivees ; /en/ (USD),
+  // /gb/, /za/, /mx/ gardent celles du 04/10/2026.
+  const EURO = ["", "fr", "es", "de", "it", "pt"];
+  assert.equal(TERMS_VERSION, "2026-10-25");
   for (const d of DIRS.concat([""])) {
-    assert.equal(versionFor(d), "2026-10-04", (d || "racine") + " : version des CGV envoyee avec le consentement");
+    assert.equal(versionFor(d), EURO.includes(d) ? "2026-10-25" : "2026-10-04", (d || "racine") + " : version des CGV envoyee avec le consentement");
     if (!d) continue;
     const html = read("legal/" + d + "/cgv.html");
     assert.match(html, /<!-- LEGAL REVIEW: 04\/10\/2026 - [^>]*REVIEW\. -->/, d + " : note de revue du 04/10/2026");
     // L'essai : 7 jours, le mois seulement, prelevement automatique a la fin sauf resiliation.
     assert.match(visible(html), /(7 jours|7-day|7 días|7 Tage|7 giorni|7 dias)/, d + " : essai de 7 jours");
   }
+  for (const d of EURO.filter(Boolean)) {
+    const html = read("legal/" + d + "/cgv.html");
+    assert.match(html, /<!-- LEGAL REVIEW: 25\/10\/2026 - [^>]*archives\/cgv-2026-10-04\.html\. (Statut : |Status: )REVIEW\. -->/, d + " : note de revue du 25/10/2026");
+    assert.ok(fs.existsSync(path.join(ROOT, "legal", d, "archives", "cgv-2026-10-04.html")), d + " : version du 04/10/2026 archivee");
+  }
+  assert.equal(read("cgv.html"), read("legal/fr/cgv.html"), "CGV racine = CGV francaises");
   // Versions precedentes archivees (regle 4 de CLAUDE.md).
   for (const d of DIRS) assert.ok(require("node:fs").existsSync(require("node:path").join(__dirname, "..", "legal", d, "archives", d === "en" ? "cgv-2026-09-21.html" : "cgv-2026-09-19.html")), d + " : version precedente archivee");
 
@@ -158,7 +168,7 @@ test("CGV : date de mise a jour = version du consentement, texte en REVIEW, dure
 });
 
 test("CGV : versions precedentes archivees (non publiees), chacune a la date de son nom", () => {
-  const ARCHIVES = { fr: ["2026-09-16", "2026-09-18"] };
+  const ARCHIVES = { fr: ["2026-09-16", "2026-09-18", "2026-10-04"], es: ["2026-09-16", "2026-10-04"], de: ["2026-09-16", "2026-10-04"], it: ["2026-09-16", "2026-10-04"], pt: ["2026-09-16", "2026-10-04"] };
   for (const d of DIRS) {
     for (const date of ARCHIVES[d] || ["2026-09-16"]) {
       const f = "legal/" + d + "/archives/cgv-" + date + ".html";

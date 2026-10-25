@@ -136,7 +136,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
     <a href="jeu-responsable.html">Jogo responsável</a>
   </nav>
   <h1 class="page-title">Condições gerais de venda</h1>
-  <div class="page-date">Última atualização: 4 de outubro de 2026</div>
+  <div class="page-date">Última atualização: 25 de outubro de 2026</div>
   <!-- LEGAL REVIEW: 19/09/2026 - owner decisions: weekly, monthly and annual plans payable on the EUR market (config/markets.json#fr.checkoutOpen, Stripe Prices in fr.stripePriceIds); 'VAT included' replaced in article 6 by the French VAT franchise mention (art. 293 B CGI). Prices, billing periods, renewal, withdrawal and cancellation rules unchanged from the 16/09/2026 text and aligned with the French terms of 19/09/2026 (legal/fr/cgv.html). Previous version archived in legal/pt/archives/cgv-2026-09-16.html. Status: REVIEW. -->
 
   <div class="warn-box">
@@ -188,16 +188,17 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
 
   <section class="section">
     <h2>Artigo 6.º — Preços e durações</h2>
+    <!-- LEGAL REVIEW: 25/10/2026 - owner decision: price reduction (weekly 4.99 EUR, monthly 14.99 EUR with the 7-day trial unchanged, annual 99 EUR). New Stripe Prices on the same product; existing subscriptions keep their price (old Prices neither archived nor modified): no increase, so no notice is due under the price-change paragraph. Version of 04/10/2026 archived in archives/cgv-2026-10-04.html. Status: REVIEW. -->
     <div class="highlight">
-      <p><strong>Semanal: 6,99 € por semana.</strong> Cobrado na subscrição e depois todas as semanas no mesmo dia. Renovação automática todas as semanas até ao cancelamento, sem período mínimo.</p>
-      <p><strong>Mensal: 19,95 € por mês.</strong> Cobrado na subscrição e depois todos os meses na mesma data. Renovação automática todos os meses até ao cancelamento, sem período mínimo.</p>
-      <p><strong>Anual: 199 € por ano.</strong> Cobrado uma única vez na subscrição e depois em cada data de aniversário. Período pago por doze meses e renovado automaticamente por um ano salvo cancelamento antes do vencimento (artigo 9.º).</p>
+      <p><strong>Semanal: 4,99 € por semana.</strong> Cobrado na subscrição e depois todas as semanas no mesmo dia. Renovação automática todas as semanas até ao cancelamento, sem período mínimo.</p>
+      <p><strong>Mensal: 14,99 € por mês.</strong> Cobrado na subscrição e depois todos os meses na mesma data. Renovação automática todos os meses até ao cancelamento, sem período mínimo.</p>
+      <p><strong>Anual: 99 € por ano.</strong> Cobrado uma única vez na subscrição e depois em cada data de aniversário. Período pago por doze meses e renovado automaticamente por um ano salvo cancelamento antes do vencimento (artigo 9.º).</p>
       <p>IVA não aplicável, artigo 293 B do Código Geral dos Impostos francês (CGI).</p>
     </div>
-    <p>A título informativo, 199 € por ano correspondem a 16,59 € por mês, ou seja, menos 16% do que doze meses ao preço mensal (239,40 €).</p>
+    <p>A título informativo, 99 € por ano correspondem a 8,25 € por mês, ou seja, menos 44% do que doze meses ao preço mensal (179,88 €).</p>
     <p>O preço aplicável é o apresentado na página Subscrição para o período escolhido e resumido na página de pagamento antes da confirmação da encomenda. Qualquer alteração de preço ser-lhe-á notificada antes da sua entrada em vigor; só se aplicará a partir do período de faturação seguinte e poderá cancelar a sua subscrição antes dessa data.</p>
     <!-- LEGAL REVIEW: 04/10/2026 - owner decision: 7-day free trial kept and shown (monthly plan only, first subscription, card required, automatic charge at the end of the trial unless cancelled). Matches the live create-checkout-session function (v23, trial.ts, read on 04/10/2026: TRIAL_DAYS absent = 7, monthly only, once per account and per Stripe customer, subscription stopped if no card at the end). No reminder before the end of the trial is promised: the trial-reminder function exists but its scheduled job (0042) is not applied in the database. To be checked by a lawyer: how the trial interacts with the withdrawal/cancellation period. Previous version archived in archives/cgv-2026-09-19.html. Status: REVIEW. -->
-    <p><strong>Teste de 7 dias (apenas na modalidade mensal).</strong> Numa primeira subscrição mensal, os 7 primeiros dias são gratuitos. O seu cartão é pedido na subscrição; durante o teste não é cobrado qualquer montante. No fim do teste, a subscrição mensal começa automaticamente: são cobrados 19,95 € e depois todos os meses na mesma data, salvo se cancelar antes do fim do teste em «A minha conta», o que impede qualquer cobrança. Se no fim do teste não existir um meio de pagamento válido, a subscrição termina. O teste é concedido uma única vez: uma conta, ou um cliente do nosso prestador de pagamentos, que já tenha tido uma subscrição não tem direito a ele. As modalidades semanal e anual não têm teste: são cobradas desde a subscrição. O teste pode ser alterado ou retirado para novas subscrições; a sua duração é indicada antes do pagamento.</p>
+    <p><strong>Teste de 7 dias (apenas na modalidade mensal).</strong> Numa primeira subscrição mensal, os 7 primeiros dias são gratuitos. O seu cartão é pedido na subscrição; durante o teste não é cobrado qualquer montante. No fim do teste, a subscrição mensal começa automaticamente: são cobrados 14,99 € e depois todos os meses na mesma data, salvo se cancelar antes do fim do teste em «A minha conta», o que impede qualquer cobrança. Se no fim do teste não existir um meio de pagamento válido, a subscrição termina. O teste é concedido uma única vez: uma conta, ou um cliente do nosso prestador de pagamentos, que já tenha tido uma subscrição não tem direito a ele. As modalidades semanal e anual não têm teste: são cobradas desde a subscrição. O teste pode ser alterado ou retirado para novas subscrições; a sua duração é indicada antes do pagamento.</p>
   </section>
 
   <section class="section">

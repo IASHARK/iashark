@@ -196,9 +196,9 @@ test("(b) bascule appliquee, build complet en memoire : /en/ en USD partout, che
   assert.match(cgv, /Weekly: \$4\.99 per week/, "CGV : hebdomadaire vendu depuis le 21/09/2026");
   assert.doesNotMatch(cgv, /Annual: |For information, /, "CGV : annuel non vendu, masque");
   // Autres versions : prix de leur marche, inchanges.
-  assert.match(files["fr/abonnement.html"], />19,95\s€</);
+  assert.match(files["fr/abonnement.html"], />14,99\s€</);
   // 25/09/2026 : /de/ retire (301 vers /en/), plus de page generee.
-  for (const d of ["es"]) assert.match(files[d + "/abonnement.html"], /19,95\s€/, d);
+  for (const d of ["es"]) assert.match(files[d + "/abonnement.html"], /14,99\s€/, d);
   assert.equal(files["de/abonnement.html"], null, "version retiree jamais regeneree");
   assert.match(files["gb/abonnement.html"], /£14\.99/);
   assert.match(files["za/abonnement.html"], /<meta name="iashark-market" content="za">/);
@@ -220,7 +220,7 @@ test("(b) bascule appliquee, build complet en memoire : /en/ en USD partout, che
   assert.deepEqual(M.proOffer().intervals.filter((i) => i.amount != null).map((i) => i.interval), ["week", "month"]);
   assert.equal(M.isPayable("pro"), true);
   assert.equal(M.helpline.name, "Gambling Therapy");
-  assert.equal(norm(loadMarketLib(src, "/es/").IASHARK_MARKET.formatPrice("pro")), "19,95 €");
+  assert.equal(norm(loadMarketLib(src, "/es/").IASHARK_MARKET.formatPrice("pro")), "14,99 €");
   assert.equal(loadMarketLib(src, "/gb/").IASHARK_MARKET.formatPrice("pro"), "£14.99");
   assert.match(files["i18n/i18n.js"], /\{dir:"en",[^}\n]*market:"us"/);
   assert.match(files["i18n/i18n.js"], /\{dir:"es",[^}\n]*market:"fr"/);

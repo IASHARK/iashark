@@ -78,7 +78,7 @@ test("config : repertoires publics et prix des marches conformes aux docs 06/07/
   assert.deepEqual(amounts("gb"), [0, 4.99, 14.99, 149]);
   assert.deepEqual(amounts("mx"), [0, 69, 199, 1990]);
   assert.deepEqual(amounts("za"), [0, 69, 199, null], "ZA : annuel non ouvert au lancement");
-  assert.deepEqual(amounts("fr"), [0, 6.99, 19.95, 199]);
+  assert.deepEqual(amounts("fr"), [0, 4.99, 14.99, 99], "baisse du 25/10/2026");
   assert.deepEqual([MARKETS.gb.currency, MARKETS.mx.currency, MARKETS.za.currency, MARKETS.fr.currency], ["GBP", "MXN", "ZAR", "EUR"]);
   assert.equal(MARKETS.mx.helpline.phone, "800 911 2000", "MX : Línea de la Vida (CONASAMA), verifiee par l'agent juridique (legal/README.md)");
 });

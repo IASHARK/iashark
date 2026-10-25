@@ -83,10 +83,13 @@ test("sans les cases, le paiement est bloque ; le payload suit le regime", () =>
   // surcharge par repertoire, les 8 autres versions gardent celle du 19/09.
   // 04/10/2026 : les 9 versions changent ensemble (essai de 7 jours sur le mois, decision de
   // Clement) -> de nouveau une seule version, sans surcharge par repertoire.
-  assert.equal(lib.TERMS_VERSION, "2026-10-04");
-  assert.deepEqual({ ...lib.TERMS_VERSIONS }, {});
-  for (const d of ["", "fr", "es", "de", "it", "pt", "gb", "za", "mx", "en"]) assert.equal(lib.termsVersionFor(d), "2026-10-04", d || "racine");
-  assert.equal(lib.buildPayload({ terms: true, waiver: true }, eu, { dir: "fr" }).terms_version, "2026-10-04");
+  // 25/10/2026 : baisse des prix en euros -> CGV des versions en euros (racine, fr, es, de,
+  // it, pt) au 25/10 ; /en/ (USD), /gb/, /za/, /mx/ gardent celles du 04/10.
+  assert.equal(lib.TERMS_VERSION, "2026-10-25");
+  assert.deepEqual({ ...lib.TERMS_VERSIONS }, { en: "2026-10-04", gb: "2026-10-04", za: "2026-10-04", mx: "2026-10-04" });
+  for (const d of ["", "fr", "es", "de", "it", "pt"]) assert.equal(lib.termsVersionFor(d), "2026-10-25", d || "racine");
+  for (const d of ["gb", "za", "mx", "en"]) assert.equal(lib.termsVersionFor(d), "2026-10-04", d);
+  assert.equal(lib.buildPayload({ terms: true, waiver: true }, eu, { dir: "fr" }).terms_version, "2026-10-25");
   assert.equal(lib.buildPayload({ terms: true, waiver: true }, lib.regimeFor("us"), { dir: "en" }).terms_version, "2026-10-04", "/en/ (marche us)");
   assert.equal(lib.buildPayload({ terms: true, waiver: true }, mx, {}).waiver, null, "mx : aucune renonciation envoyee");
   assert.match(lib.TERMS_VERSION, /^\d{4}-\d{2}-\d{2}$/);
@@ -208,7 +211,7 @@ test("serveur : refuse sans CGV, refuse sans 2e case hors MX, accepte MX sans re
   for (const [market, dir] of [[undefined, ""], [undefined, "fr"], ["us", "en"], ["gb", "gb"], ["za", "za"], ["mx", "mx"]]) {
     const payload = lib.buildPayload({ terms: true, waiver: true }, lib.regimeFor(market || "fr"), { dir, locale: "fr", ts });
     const r = srv.validateConsent(JSON.parse(JSON.stringify(payload)), market, ts);
-    const attendue = "2026-10-04";
+    const attendue = lib.termsVersionFor(dir);
     assert.equal(r.ok, true, (market || "defaut") + " : consentement de la version " + attendue + " refuse");
     assert.equal(r.metadata.consent_terms_version, attendue, market || "defaut");
   }
@@ -227,7 +230,7 @@ test("create-checkout-session : 400 consent_required traduit, consentement stock
   assert.match(refus, /status: 400/);
   assert.match(refus, /code: consent\.code/);
   assert.match(refus, /msg\(MESSAGES, "consent_required", pickLocale\(req, requestedLocale\)\)/);
-  const bloc = src.slice(sessionAt, sessionAt + 900);
+  const bloc = src.slice(src.indexOf("const baseSession"), sessionAt);
   assert.match(bloc, /metadata: \{ market: usedMarket, plan: "pro", interval: usedInterval, \.\.\.consent\.metadata \}/);
   assert.match(bloc, /subscription_data: \{ metadata: \{ market: usedMarket, plan: "pro", interval: usedInterval, \.\.\.consent\.metadata \} \}/);
   const table = src.slice(src.indexOf("consent_required: {"), src.indexOf("consent_required: {") + 1500);

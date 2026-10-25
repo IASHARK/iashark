@@ -8,22 +8,22 @@ export const PRO_PRICES: Record<string, { currency: string; intervals: Partial<R
     "currency": "EUR",
     "intervals": {
       "week": {
-        "unitAmount": 699,
+        "unitAmount": 499,
         "envKey": "STRIPE_PRICE_ID_FR_WEEK",
         "legacyEnvKey": null,
-        "priceId": "price_1UHPKzCz0CerLuxwrFe5hklH"
+        "priceId": "price_1UUSrtCz0CerLuxwQrsfqMCT"
       },
       "month": {
-        "unitAmount": 1995,
+        "unitAmount": 1499,
         "envKey": "STRIPE_PRICE_ID_FR_MONTH",
         "legacyEnvKey": "STRIPE_PRICE_ID",
-        "priceId": "price_1UB7tpCz0CerLuxwNxsTsMRM"
+        "priceId": "price_1UUSrtCz0CerLuxwBRfjYjZB"
       },
       "year": {
-        "unitAmount": 19900,
+        "unitAmount": 9900,
         "envKey": "STRIPE_PRICE_ID_FR_YEAR",
         "legacyEnvKey": null,
-        "priceId": "price_1UHPL0Cz0CerLuxw26Kh72BF"
+        "priceId": "price_1UUSruCz0CerLuxwdaafXZTc"
       }
     }
   },

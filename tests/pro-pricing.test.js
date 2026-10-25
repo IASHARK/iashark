@@ -18,7 +18,8 @@ const INTERVALS = ["week", "month", "year"];
 const LOCALES = ["fr", "en", "es", "es-mx", "de", "it", "pt"];
 // Prix TTC valides par le proprietaire (null = duree non vendue dans ce marche).
 const EXPECTED = {
-  fr: { currency: "EUR", week: 6.99, month: 19.95, year: 199 },
+  // 25/10/2026 : baisse des prix en euros (decision de Clement).
+  fr: { currency: "EUR", week: 4.99, month: 14.99, year: 99 },
   gb: { currency: "GBP", week: 4.99, month: 14.99, year: 149 },
   mx: { currency: "MXN", week: 69, month: 199, year: 1990 },
   za: { currency: "ZAR", week: 69, month: 199, year: null },
@@ -105,8 +106,8 @@ test("equivalent mensuel et economie de l'annuel : calcules, jamais surestimes ;
     assert.ok(year.savingsPct <= real && year.savingsPct > real - 1, k + " economie " + year.savingsPct + " vs " + real);
   }
   const offerOf = (k) => lib.proOffer(MARKETS[k].prices, MARKETS[k].currency, MARKETS[k].intlLocale);
-  assert.deepEqual(["fr", "gb", "mx", "za"].map((k) => offerOf(k).intervals[2].savingsPct), [16, 17, 16, null]);
-  assert.deepEqual(["fr", "gb", "mx"].map((k) => offerOf(k).intervals[2].monthlyEquivalent), [16.59, 12.42, 165.84]);
+  assert.deepEqual(["fr", "gb", "mx", "za"].map((k) => offerOf(k).intervals[2].savingsPct), [44, 17, 16, null]);
+  assert.deepEqual(["fr", "gb", "mx"].map((k) => offerOf(k).intervals[2].monthlyEquivalent), [8.25, 12.42, 165.84]);
   const noSave = lib.proOffer({ pro: { week: { amount: 1 }, month: { amount: 10 }, year: { amount: 120 } } }, "EUR", "fr-FR");
   assert.equal(noSave.intervals[2].savingsPct, null, "aucune economie si l'annuel n'est pas moins cher que 12 mois");
 });
@@ -120,9 +121,9 @@ test("apply() : prix par duree, equivalent, economie, element masque si la duree
   const root = (els) => ({ querySelectorAll(sel) { const a = sel.replace(/^\[|\]$/g, ""); return els.filter((e) => a in e.attrs); } });
   const fr = [el({ "data-market-price": "pro.year" }), el({ "data-market-price-equiv": "year" }), el({ "data-market-savings": "year" }), el({ "data-market-price": "edge" }), el({ "data-market-price-if": "pro.year" })];
   lib.build("fr").apply(root(fr));
-  assert.match(fr[0].textContent, /199/);
-  assert.match(norm(fr[1].textContent), /16,59/);
-  assert.equal(fr[2].textContent, "16");
+  assert.match(norm(fr[0].textContent), /^99 €$/);
+  assert.match(norm(fr[1].textContent), /8,25/);
+  assert.equal(fr[2].textContent, "44");
   assert.equal(fr[3].textContent, "orig");
   assert.ok("data-market-price-unavailable" in fr[3].attrs);
   assert.equal(fr[4].hidden, false);
@@ -184,7 +185,7 @@ test("create-checkout-session (pricing.ts) : duree validee, secret absent = bien
   const T0 = builder.checkoutPriceTable(noIds);
   const R = (e, m, iv) => pricing.resolvePriceId(env(e), m, iv, T0);
 
-  assert.deepEqual({ ...R(all, undefined, undefined) }, { ok: true, priceId: "price_fr_month", usedMarket: "fr", interval: "month", currency: "EUR", unitAmount: 1995 }, "defaut = mensuel FR");
+  assert.deepEqual({ ...R(all, undefined, undefined) }, { ok: true, priceId: "price_fr_month", usedMarket: "fr", interval: "month", currency: "EUR", unitAmount: 1499 }, "defaut = mensuel FR");
   assert.equal(R(all, "gb", "year").priceId, "price_gb_year");
   assert.equal(R(all, "mx", "WEEK").unitAmount, 6900);
   assert.equal(R(all, undefined, "quarter").reason, "invalid_interval");
@@ -225,14 +226,17 @@ test("create-checkout-session : id de Price de la configuration en dernier recou
   const builder = require(path.join(ROOT, "scripts/build-locales.js"));
   const pricing = await import(pathToFileURL(path.join(ROOT, "supabase/functions/create-checkout-session/pricing.ts")).href);
   const env = (o) => (k) => o[k];
-  // FR mensuel comme aujourd'hui : le secret historique STRIPE_PRICE_ID, table generee reelle.
-  const today = pricing.resolvePriceId(env({ STRIPE_PRICE_ID: "price_1UB7tpCz0CerLuxwNxsTsMRM" }), undefined, "month");
-  assert.deepEqual({ ...today }, { ok: true, priceId: "price_1UB7tpCz0CerLuxwNxsTsMRM", usedMarket: "fr", interval: "month", currency: "EUR", unitAmount: 1995 });
+  // FR mensuel : le secret historique STRIPE_PRICE_ID pointe encore vers l'ancien Price a
+  // 19,95 EUR (garde pour les abonnes deja souscrits) ; depuis la baisse du 25/10/2026,
+  // STRIPE_PRICE_ID_FR_MONTH (nouveau Price a 14,99 EUR) passe toujours avant lui.
+  const today = pricing.resolvePriceId(env({ STRIPE_PRICE_ID: "price_1UB7tpCz0CerLuxwNxsTsMRM", STRIPE_PRICE_ID_FR_MONTH: "price_1UUSrtCz0CerLuxwBRfjYjZB" }), undefined, "month");
+  assert.deepEqual({ ...today }, { ok: true, priceId: "price_1UUSrtCz0CerLuxwBRfjYjZB", usedMarket: "fr", interval: "month", currency: "EUR", unitAmount: 1499 });
   // Configuration reelle du 19/09/2026 (decisions du proprietaire) : un id de
   // Price par duree PAYABLE, jamais pour une duree fermee ; sans aucun secret,
   // les durees payables de chaque marche sont resolues par ces ids.
   const PAYABLE_IDS = {
-    fr: { week: "price_1UHPKzCz0CerLuxwrFe5hklH", month: "price_1UB7tpCz0CerLuxwNxsTsMRM", year: "price_1UHPL0Cz0CerLuxw26Kh72BF" },
+    // fr : nouveaux Price de la baisse du 25/10/2026 (4,99 / 14,99 / 99 EUR, meme produit).
+    fr: { week: "price_1UUSrtCz0CerLuxwQrsfqMCT", month: "price_1UUSrtCz0CerLuxwBRfjYjZB", year: "price_1UUSruCz0CerLuxwdaafXZTc" },
     gb: { month: "price_1UHPIRCz0CerLuxwwMv0zpmY" },
     mx: { week: "price_1UHPKuCz0CerLuxwIFBrhhxf", month: "price_1UHPKtCz0CerLuxwQHegdC33", year: "price_1UHPKvCz0CerLuxwMfX8KdmC" },
     za: { week: "price_1UHPKyCz0CerLuxwOHUtjn4i", month: "price_1UHPKxCz0CerLuxw9cieICvO" },
@@ -294,7 +298,9 @@ test("create-checkout-session (source) : disponibilites sans auth, controles ava
   const sessionAt = at("stripe.checkout.sessions.create");
   assert.ok(at('requestedMode === "availability"') > 0 && at('requestedMode === "availability"') < at("auth.getUser()"), "disponibilites avant authentification, sans id de Price");
   assert.ok(at("resolvePriceId(getEnv, requestedMarket, requestedInterval)") > 0);
-  assert.match(src, /const LIVE_STATUSES = \["active", "trialing", "past_due"\];/);
+  // Statuts vivants (actif, essai, impaye) : trial.ts, la meme liste que pour l'essai de 7 jours.
+  assert.match(read("supabase/functions/create-checkout-session/trial.ts"), /export const LIVE_STATUSES = \["active", "trialing", "past_due"\];/);
+  assert.match(src, /statuses\.some\(isLiveStatus\)/);
   assert.ok(at('reason: "already_subscribed"') > at("auth.getUser()") && at('reason: "already_subscribed"') < sessionAt, "abonnement vivant verifie avant la session");
   assert.ok(at("stripe.prices.retrieve") > 0 && at("stripe.prices.retrieve") < sessionAt, "Price relu avant la session");
   assert.ok(at("priceMatches(") > 0 && at("priceMatches(") < sessionAt);

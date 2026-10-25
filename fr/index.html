@@ -528,7 +528,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 <div class="relative z-10 mx-auto w-full max-w-[1200px] px-5 sm:px-8 grid grid-cols-1 items-center gap-12 pb-6 pt-12 lg:min-h-[72vh] lg:grid-cols-12 lg:gap-12 lg:pb-16 lg:pt-16">
   <div class="hero-stade-title flex flex-col justify-center gap-6 lg:col-span-6">
     <h1 class="animate-fade-in d2 hero-stade-h1 hero-pronos" data-i18n="home_hero.title">Les pronos foot du jour, publiés avant les matchs.</h1>
-    <p class="animate-fade-in d2 hero-pronos-sub" data-i18n="home_hero.sub">Un pari offert chaque jour, sans compte. Gagnés et perdus montrés.</p>
+    <p class="animate-fade-in d2 hero-pronos-sub" data-i18n="home_hero.sub">Un pari offert chaque jour avec ton compte gratuit. Gagnés et perdus montrés.</p>
     <div id="heroFeature" class="hero-pari animate-fade-in d3" aria-live="polite" hidden></div>
     <div class="animate-fade-in d4 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
       <a href="#decisions" class="hero-cta group inline-flex items-center justify-center gap-2.5 rounded-xl bg-cyan px-7 py-4 text-[14px] font-extrabold tracking-[0.02em] text-page shadow-[0_5px_14px_rgba(0,0,0,.28)] transition hover:brightness-110 active:scale-[.985]"><span data-i18n="home_hero.cta">Voir l’analyse du pari offert</span><span aria-hidden="true" class="transition-transform group-hover:translate-x-1">→</span></a>
@@ -1020,7 +1020,7 @@ function carteHero(m,p){
   }else if(p.etat==='charge'){
     pari='<div class="hp-pari hp-pari--charge">'+lib+'<span class="hp-attente">'+esc(t('home_hero.loading','Le pari arrive…'))+'</span></div>';
   }else{
-    pari='<div class="hp-pari">'+lib+'<span class="hp-attente">'+esc(t('home_hero.fallback','Le pari est sur la page du match'))+'</span></div>';
+    pari='<div class="hp-pari">'+lib+'<span class="hp-attente">'+esc(t('home_hero.fallback','Le pari s’ouvre avec ton compte gratuit'))+'</span></div>';
   }
   return '<a class="hp-carte" href="'+esc(lienMatch(m))+'" data-track="accueil_pari_offert">'
     +'<div class="hp-tete"><span class="hp-ligue">'+leagueHeader(m)+'</span><span class="hp-heure">'+dayLabel(m)+' · '+esc(heureLocale(m))+'</span></div>'

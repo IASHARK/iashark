@@ -1,0 +1,68 @@
+name: Stripe - prix Pro
+
+# Prix de l'abonnement Pro (baisse decidee par Clement le 25/10/2026).
+# Declenchement manuel uniquement. Script : scripts/stripe-prix-pro.mjs.
+#   verifier        lecture seule (Price actuels, abonnements comptes, secrets, portail) ;
+#   creer           cree les nouveaux Price (memes produits), n'archive jamais les anciens ;
+#   mettre-en-ligne depuis main : controle config <-> Stripe, pose les secrets
+#                   STRIPE_PRICE_ID_<MARCHE>_<DUREE>, met en ligne create-checkout-session,
+#                   puis controle final (montant et duree seulement).
+on:
+  workflow_dispatch:
+    inputs:
+      etape:
+        description: "verifier | creer | mettre-en-ligne"
+        type: choice
+        options: [verifier, creer, mettre-en-ligne]
+        default: verifier
+      marches:
+        description: "Marches (cles de config/markets.json, separees par des virgules)"
+        type: string
+        default: "fr"
+      cibles:
+        description: "Etape creer : montants en centimes (ex. fr.week=499,fr.month=1499,fr.year=9900)"
+        type: string
+        default: "fr.week=499,fr.month=1499,fr.year=9900"
+
+concurrency:
+  group: stripe-prix-pro
+  cancel-in-progress: false
+
+jobs:
+  prix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Tests de la fonction
+        if: inputs.etape == 'mettre-en-ligne'
+        run: node --test tests/pro-pricing.test.js tests/checkout-consent.test.js
+      - name: Stripe et secrets
+        env:
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          ETAPE: ${{ inputs.etape }}
+          MARCHES: ${{ inputs.marches }}
+          CIBLES: ${{ inputs.cibles }}
+        run: node scripts/stripe-prix-pro.mjs "$ETAPE"
+      - name: Mise en ligne de create-checkout-session
+        if: inputs.etape == 'mettre-en-ligne'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: npx -y supabase@2 functions deploy create-checkout-session --project-ref ksvjraqitxouwiabecai --use-api --no-verify-jwt
+      - name: Controle final
+        if: inputs.etape == 'mettre-en-ligne'
+        env:
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          MARCHES: ${{ inputs.marches }}
+        run: |
+          sleep 20
+          node scripts/stripe-prix-pro.mjs controle-final

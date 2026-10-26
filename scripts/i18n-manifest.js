@@ -321,7 +321,9 @@ var PAGES = [
       // meme discours. Seules 4 chaines sont nouvelles (HOME_V2).
       {find: 'Compétitions couvertes', build: function(d,l){ return HOME_V2[l].statLeagues; }},
       
-      {find: 'Quatre étapes, ', build: function(d){ return d.landing_page.title_method_pre; }},
+      // L'espace apres la virgule : les dictionnaires s'arretent a la virgule, et le titre
+      // s'affichait « Quatre étapes,un seul signal » (26/10/2026).
+      {find: 'Quatre étapes, ', build: function(d){ return d.landing_page.title_method_pre.replace(/\s*$/, ' '); }},
       {find: 'un seul signal', build: function(d){ return d.landing_page.title_method_b; }},
       
       

@@ -296,8 +296,11 @@ function fmtInt(n){return Number(n).toLocaleString(localeTag());}
 // .hu-badge) avec les icones Lucide « signal » et « info » ; libelle court sur mobile,
 // complet sur desktop.
 var BAND_ICON={high:'signal-high',good:'signal-medium',moderate:'signal-low'};
+// 26/10/2026 : l'icone du niveau est posee sur la jauge complete en sourdine (meme icone
+// Lucide « signal-high »). Seule, « signal-low » se lisait comme deux points (« ., »).
 function bandHtml(b){
-  return '<span class="hu-badge hl-band is-'+b+'" title="'+esc(bandNote())+'">'+ico(BAND_ICON[b],'hl-ico')
+  return '<span class="hu-badge hl-band is-'+b+'" title="'+esc(bandNote())+'">'
+    +'<span class="hl-sig">'+ico('signal-high','hl-ico hl-sig-piste')+ico(BAND_ICON[b],'hl-ico hl-sig-niv')+'</span>'
     +'<span class="hl-band-txt"><span class="hl-m">'+esc(t(BAND_LABEL[b][0]+'_short',BAND_SHORT[b]))+'</span><span class="hl-d">'+esc(bandLabel(b))+'</span></span>'
     +ico('info','hl-ico hl-band-i')+'</span>';
 }

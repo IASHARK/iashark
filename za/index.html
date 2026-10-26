@@ -455,7 +455,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 .hp-pari--charge .hp-attente{animation:hp-pulse 1.4s ease-in-out infinite}
 @keyframes hp-pulse{50%{opacity:.45}}
 @media (prefers-reduced-motion:reduce){.hp-pari--charge .hp-attente{animation:none}.hp-carte{transition:none}}
-@media (max-width:1023px){.hero-stade-title{min-height:0;padding-top:8px}.hero-pari{max-width:100%}}
+@media (max-width:1023px){.hero-pari{max-width:100%}}
 @media (max-width:1023px){.hero-stade-bg{bottom:auto;height:calc(100svh - 110px)}.hero-stade-layer img{object-position:center 55%}.hero-stade-title{text-align:center;align-items:center;min-height:calc(100svh - 260px)}.hero-stade-bg::after{background:linear-gradient(180deg,rgba(6,11,18,.25) 0%,rgba(6,11,18,.45) 60%,rgba(6,11,18,.85) 100%)}}
 @media (prefers-reduced-motion:reduce){.hero-stade-layer{transform:none!important}}
 /* Bandeau des chiffres (3 colonnes) et composant de paiement (#acces, 600 px au plus) : regles
@@ -529,11 +529,10 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
   </div>
 <div class="relative z-10 mx-auto w-full max-w-[1200px] px-5 sm:px-8 grid grid-cols-1 items-center gap-12 pb-6 pt-12 lg:min-h-[72vh] lg:grid-cols-12 lg:gap-12 lg:pb-16 lg:pt-16">
   <div class="hero-stade-title flex flex-col justify-center gap-6 lg:col-span-6">
-    <h1 class="animate-fade-in d2 hero-stade-h1 hero-pronos" data-i18n="home_hero.title">Today's football picks, published before kick-off.</h1>
-    <p class="animate-fade-in d2 hero-pronos-sub" data-i18n="home_hero.sub">One free pick every day with a free account. Wins and losses shown.</p>
-    <div id="heroFeature" class="hero-pari animate-fade-in d3" aria-live="polite" hidden></div>
+    <h1 class="animate-fade-in d2 hero-stade-h1"><span class="hero-stade-brand">IA<span class="text-cyan">SHARK</span></span><span class="hero-stade-tagline">Football, in probabilities</span></h1>
     <div class="animate-fade-in d4 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-      <a href="#decisions" class="hero-cta group inline-flex items-center justify-center gap-2.5 rounded-xl bg-cyan px-7 py-4 text-[14px] font-extrabold tracking-[0.02em] text-page shadow-[0_5px_14px_rgba(0,0,0,.28)] transition hover:brightness-110 active:scale-[.985]"><span data-i18n="home_hero.cta">See the free pick's analysis</span><span aria-hidden="true" class="transition-transform group-hover:translate-x-1">→</span></a>
+      <a href="#decisions" class="hero-cta group inline-flex items-center justify-center gap-2.5 rounded-xl bg-cyan px-7 py-4 text-[14px] font-extrabold tracking-[0.02em] text-page shadow-[0_16px_40px_-16px_rgba(32,213,239,.8)] transition hover:brightness-110 active:scale-[.985]">See today's free analysis<span aria-hidden="true" class="transition-transform group-hover:translate-x-1">→</span></a>
+      <a href="/za/exemple-analyse.html" class="inline-flex items-center justify-center gap-2 rounded-xl border border-hairline px-6 py-4 text-[14px] font-semibold text-ink transition hover:border-cyan/40 hover:bg-white/[0.04]">See a sample analysis</a>
     </div>
     <p class="preuve-hier preuve-hier--hero" data-preuve-hier hidden></p>
   </div>

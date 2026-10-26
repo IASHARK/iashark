@@ -514,8 +514,8 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
     <a href="#decisions" class="btn-start">Commencer</a>
   </div>
 </header>
-<!-- Bandeau des vrais resultats (lib/bandeau-preuves.js, 26/10/2026) : derniers paris regles, gagnes et perdus, dans l'ordre. Hauteur reservee (pas de saut de page). -->
-<div id="bandeauPreuves" class="bp" role="region" aria-label="Derniers résultats" data-i18n-attr="aria-label:bandeau_preuves.region" style="min-height:90px;background:#0a1420;border-bottom:1px solid rgba(141,179,211,.14)"></div>
+<!-- Bandeau des vrais resultats (lib/bandeau-preuves.js, 26/10/2026) : compte des paris simples depuis le 04/10, defile des 40 derniers, dans l'ordre. Hauteur reservee par la balise style (pas de saut de page). -->
+<style>#bandeauPreuves{min-height:124px}@media (min-width:600px){#bandeauPreuves{min-height:90px}}</style><div id="bandeauPreuves" class="bp" role="region" aria-label="Derniers résultats" data-i18n-attr="aria-label:bandeau_preuves.region" style="background:#0a1420;border-bottom:1px solid rgba(141,179,211,.14)"></div>
 
 <main>
 <section class="hero-stade" id="heroStade">

@@ -1,8 +1,9 @@
 "use strict";
 // Bandeau des vrais resultats (lib/bandeau-preuves.js, 26/10/2026), regles validees par historique-public et
-// l'avocat du diable : compte sur une periode longue, fixe et datee (depuis le 04/10/2026) ; defile des 40 derniers
-// paris simples dans l'ordre ; aucun pari publie apres le coup d'envoi ; combines et Selection en or jamais retires en
-// silence (« resultat en verification ») ; aucune phrase de gain.
+// l'avocat du diable : defile des 40 derniers paris simples dans l'ordre ; aucun pari publie apres le coup d'envoi ;
+// combines et Selection en or jamais retires en silence (« resultat en verification ») ; aucune phrase de gain.
+// Affichage (decision de Clement du 26/10/2026) : la bande seule, sans ligne de texte au-dessus, 44 px de haut ;
+// le compte depuis le 04/10 reste calcule dans preuves/bandeau.json.
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -79,21 +80,35 @@ test("logos : identifiants lus dans les matchs du run et gardes d'un passage a l
   assert.deepEqual([it[22].hi, it[22].ai], [null, null]);
 });
 
-test("affichage : compte date en tete, titre du defile avec sa periode, cote sur chaque ligne, aucune phrase de gain", () => {
+test("affichage : la bande seule (aucune ligne de texte), cote sur chaque ligne, aucune phrase de gain", () => {
   const simples = [pari(31, 3, "win"), pari(32, 2, "loss"), pari(33, 1, "win")];
   const d = B.construireBandeau({ simples, tickets: [], jambes: [], matchs: [], maintenant: MAINTENANT, genereLe: "2026-10-26T10:33:33.000Z" });
   const h = B.html(d);
-  assert.match(h.tete, /Paris simples depuis le 04\/10<\/b> : <b class="bp-w">2 gagnés<\/b>, <b class="bp-l">1 perdus<\/b>/);
-  assert.match(h.tete, /Défilé : les 3 derniers paris simples \(25\/10\)/);
-  assert.match(h.tete, /mis à jour le 26\/10/);
+  assert.equal(h.tete, undefined, "plus de ligne de texte au-dessus de la bande");
+  assert.doesNotMatch(h.rail, /depuis le|Défilé|derniers paris simples|mis à jour/, "ni compte ni titre dans la bande");
   assert.equal((h.rail.match(/class="bp-c">1,50</g) || []).length, 3, "la cote sur chaque ligne");
   assert.equal((h.rail.match(/bp-it bp-win/g) || []).length, 2);
   assert.equal((h.rail.match(/bp-it bp-loss/g) || []).length, 1);
+  // Ordre des coups d'envoi, gagnes et perdus melanges (jamais trie par resultat).
+  assert.deepEqual([...h.rail.matchAll(/bp-it bp-(win|loss)/g)].map((m) => m[1]), ["win", "loss", "win"]);
   // Code de la consommation L121-2 a L121-4 : aucun argument de gain, aucune promesse, aucun taux presente comme tel.
-  const tout = h.rail + h.tete;
+  const tout = h.rail + h.aria;
   assert.doesNotMatch(tout, /mise|gains?\b|garanti|€|esp[ée]rance|taux|r[ée]ussite|%|rentab|profit|b[ée]n[ée]fice/i);
+  assert.match(h.aria, /^Derniers résultats, gagnés et perdus · mis à jour le 26\/10/, "date de mise a jour pour les lecteurs d'ecran");
   assert.equal(B.html({ simples: { n: 0, items: [] }, compte: { depuis: "2026-10-04", gagnes: 0, perdus: 0 } }), null, "sans pari regle : rien (bandeau replie)");
-  assert.equal(B.html({ simples: d.simples }), null, "sans compte : rien");
+  // Le fichier publie garde son compte (historique), meme s'il n'est plus affiche.
+  assert.deepEqual([d.compte.gagnes, d.compte.perdus], [2, 1]);
+});
+
+test("affichage : style de la bande (44 px, defile regulier, pause au survol et au toucher, sans animation si demande)", () => {
+  const src = fs.readFileSync(path.join(__dirname, "..", "lib", "bandeau-preuves.js"), "utf8");
+  assert.match(src, /\.bp\{box-sizing:border-box;height:44px;/);
+  assert.match(src, /\.bp-it\{[^}]*height:30px;/, "cartes de 30 px centrees dans la bande");
+  assert.match(src, /animation-play-state:paused/);
+  assert.match(src, /prefers-reduced-motion:reduce\)\{\.bp-rail\{animation:none\}/);
+  assert.match(src, /\.bp-double\{display:none!important\}/, "copie de la boucle masquee sans animation (le style en ligne ne la remontre pas)");
+  assert.match(src, /var VITESSE = 45;/);
+  assert.doesNotMatch(src, /bp-tete|bp-sous|summary_since|rail_title/, "plus aucune ligne de texte");
 });
 
 test("date de mise a jour : tiree de genere_le (jamais de l'horloge du visiteur) ; sans date lisible, rien", () => {
@@ -132,11 +147,11 @@ test("fichier publie preuves/bandeau.json : conforme (compte depuis le 04/10, de
   assert.ok(d.combines.every((c) => ["win", "loss", "verif", "void"].includes(c.r)));
 });
 
-test("pages : bandeau sur l'accueil et la page match des 6 versions, hauteur reservee, script differe", () => {
+test("pages : bandeau sur l'accueil et la page match des 6 versions, hauteur de 44 px reservee, script differe", () => {
   const ROOT = path.join(__dirname, "..");
   for (const v of ["", "fr/", "en/", "es/", "gb/", "mx/", "za/"]) for (const p of ["index.html", "match.html"]) {
     const html = fs.readFileSync(path.join(ROOT, v + p), "utf8");
-    assert.match(html, /<style>#bandeauPreuves\{min-height:124px\}@media \(min-width:600px\)\{#bandeauPreuves\{min-height:90px\}\}<\/style><div id="bandeauPreuves"/, v + p + " : place reservee (pas de saut de page)");
+    assert.match(html, /<style>#bandeauPreuves\{box-sizing:border-box;height:44px;overflow:hidden\}<\/style><div id="bandeauPreuves"/, v + p + " : place reservee (pas de saut de page)");
     assert.match(html, /<script src="\/lib\/bandeau-preuves\.js" defer><\/script>/, v + p + " : script differe");
   }
 });

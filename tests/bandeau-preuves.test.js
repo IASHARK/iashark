@@ -95,7 +95,35 @@ test("pages : le bandeau est sur l'accueil et la page match de chaque version, c
   const ROOT = path.join(__dirname, "..");
   for (const p of ["index.html", "match.html", "fr/index.html", "fr/match.html", "en/index.html", "en/match.html", "gb/match.html"]) {
     const html = fs.readFileSync(path.join(ROOT, p), "utf8");
-    assert.match(html, /id="bandeauPreuves"[^>]*min-height:68px/, p + " : place reservee (pas de saut de page)");
+    assert.match(html, /id="bandeauPreuves"[^>]*min-height:90px/, p + " : place reservee (pas de saut de page)");
     assert.match(html, /<script src="\/lib\/bandeau-preuves\.js" defer><\/script>/, p + " : script differe");
   }
+});
+
+test("date de mise a jour : tiree de genere_le du fichier (jamais de l'horloge du visiteur) ; sans date lisible, rien", () => {
+  const simples = [pari(41, 3, "win"), pari(42, 2, "loss")];
+  const d = B.construireBandeau({ simples, tickets: [], jambes: [], matchs: [], maintenant: MAINTENANT, genereLe: "2026-10-26T10:33:33.000Z" });
+  assert.equal(d.genere_le, "2026-10-26T10:33:33.000Z");
+  const h = B.html(d);
+  assert.ok(h.maj, "date presente");
+  assert.match(h.tete, /bp-maj">mis à jour le /);
+  assert.match(h.maj, /26\/10/);
+  // Un fichier reste ancien (lecture de l'archive en echec) : sa vieille date s'affiche telle quelle.
+  const ancien = B.html(Object.assign({}, d, { genere_le: "2026-10-20T05:00:00.000Z" }));
+  assert.match(ancien.maj, /20\/10/);
+  assert.equal(B.html(Object.assign({}, d, { genere_le: "pas une date" })).maj, null);
+});
+
+test("calcul quotidien : en cas d'echec de lecture, preuves/bandeau.json n'est pas reecrit (genere_le garde sa date)", () => {
+  const yml = fs.readFileSync(path.join(__dirname, "..", ".github", "workflows", "update-data.yml"), "utf8");
+  const debut = yml.indexOf("// BANDEAU DES VRAIS RESULTATS");
+  const fin = yml.indexOf("::warning title=Bandeau::preuves/bandeau.json non ecrit", debut);
+  assert.ok(debut > 0 && fin > debut, "bloc du bandeau present");
+  const bloc = yml.slice(debut, fin);
+  const ecriture = bloc.indexOf("fs.writeFileSync('preuves/bandeau.json'");
+  assert.equal(bloc.split("fs.writeFileSync('preuves/bandeau.json'").length - 1, 1, "une seule ecriture");
+  const garde = bloc.indexOf("if(Array.isArray(simplesB)&&Array.isArray(ticketsB)&&Array.isArray(jambesB)){");
+  const nonVide = bloc.indexOf("if(bandeau.simples.n>0){");
+  assert.ok(garde > 0 && nonVide > garde && ecriture > nonVide, "ecriture seulement apres lectures reussies et bandeau non vide");
+  assert.match(bloc, /genereLe:genere\b/, "date du passage qui a reellement lu l'archive");
 });

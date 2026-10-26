@@ -314,7 +314,7 @@
     document.head.appendChild(st);
     var a=document.createElement('a');
     a.id='ias-tg';
-    a.href='https://t.me/iasharkdata';
+    a.href='https://t.me/+qCEr2JFPDDBlZTFk'; // canal passe en prive le 26/10/2026
     a.target='_blank';
     a.rel='noopener';
     a.setAttribute('data-track','telegram_bubble');
@@ -322,34 +322,112 @@
     a.innerHTML='<span class="ias-tg-i" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#060b12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></span>'
       +'<span><span class="ias-tg-1">Rejoins-nous sur Telegram</span><span class="ias-tg-2">Match du jour, actu, résultats</span></span>';
     document.body.appendChild(a);
-    // Jamais par-dessus un bouton d'action (21/10/2026 : elle cachait « Ouvrir l'analyse » du
-    // match offert sur telephone). Elle reste visible : en rond seul, posee juste au-dessus
-    // du bouton tant qu'elle le chevaucherait, puis reprend sa place.
+    // JAMAIS par-dessus un bouton ou un prix (26/10/2026). L'ancienne garde ne surveillait que
+    // deux sortes de boutons (.op-cta, .mu-shimmer) : sur telephone la bulle couvrait l'offre
+    // a 99 €, le choix de l'offre annuelle, « Les combinés du jour », les onglets des jours, la
+    // carte du match offert. Desormais, a chaque defilement, on regarde TOUT ce qui se clique
+    // ou se coche, et chaque prix ecrit dans la page :
+    //   1. la bulle entiere ne gene rien : elle reste entiere ;
+    //   2. sinon, en rond seul (l'icone) si le rond ne gene rien ;
+    //   3. sinon elle s'efface le temps de passer, et revient des que la place est libre.
+    // Elle ne bouge jamais de son coin : rien ne saute sous le doigt.
     var st2=document.createElement('style');
-    st2.textContent='#ias-tg.ias-tg--mini{padding:7px}#ias-tg.ias-tg--mini>span:last-child{display:none}';
+    st2.textContent='#ias-tg.ias-tg--mini{padding:7px}#ias-tg.ias-tg--mini>span:last-child{display:none}'
+      +'#ias-tg{transition:transform .12s ease,border-color .18s ease,opacity .16s ease,visibility 0s}'
+      +'#ias-tg.ias-tg--cache{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .16s ease,visibility 0s linear .16s}'
+      +'@media (prefers-reduced-motion:reduce){#ias-tg,#ias-tg.ias-tg--cache{transition:none}}';
     document.head.appendChild(st2);
-    var attente=false;
-    function eviter(){
-      attente=false;
-      a.classList.remove('ias-tg--mini');a.style.bottom='';
-      var r=a.getBoundingClientRect(),h=window.innerHeight||document.documentElement.clientHeight;
-      var boutons=document.querySelectorAll('.op-cta,.mu-shimmer');
-      for(var i=0;i<boutons.length;i++){
-        var c=boutons[i].getBoundingClientRect();
-        if(c.width===0||c.bottom<0||c.top>h)continue;
-        if(c.left<r.right&&c.right>r.left&&c.top<r.bottom&&c.bottom>r.top){
-          a.classList.add('ias-tg--mini');
-          a.style.bottom=Math.max(0,Math.round(h-c.top+10))+'px';
-          return;
+    var CLIQUABLE='a[href],button,summary,input:not([type=hidden]),select,textarea,label,[role=button],[role=tab],[role=link],[role=radio],[role=checkbox],[role=switch],[onclick],[tabindex]:not([tabindex="-1"])';
+    // Un prix : un nombre colle a une monnaie (4,99 €, 99 €, $4.99, £4.99, R 99, MX$ 99).
+    var PRIX=/\d\s?(€|\$|£)|(€|\$|£|\bR)\s?\d/g;
+    var MARGE=8;
+    var prix=[],prixAJour=false;
+    function indexerPrix(){
+      prix=[];prixAJour=true;
+      if(!document.createTreeWalker)return;
+      var w=document.createTreeWalker(document.body,4,null),n;
+      while((n=w.nextNode())){
+        var s=n.nodeValue;
+        if(!s||s.length>400||!/\d/.test(s))continue;
+        var p=n.parentNode;
+        if(!p||p===a||a.contains(p)||/^(SCRIPT|STYLE|NOSCRIPT|TEMPLATE)$/.test(p.nodeName))continue;
+        PRIX.lastIndex=0;var m;
+        while((m=PRIX.exec(s))){
+          // On etend au nombre entier autour de la monnaie (« 14,99 € », pas « 9 € »).
+          var debut=m.index,fin=m.index+m[0].length;
+          while(debut>0&&/[\d.,\s]/.test(s.charAt(debut-1)))debut--;
+          while(fin<s.length&&/[\d.,]/.test(s.charAt(fin)))fin++;
+          prix.push({n:n,d:debut,f:fin});
         }
       }
     }
+    function croise(c,z){return c.width>0&&c.height>0&&c.left<z.r&&c.right>z.l&&c.top<z.b&&c.bottom>z.t;}
+    // Vraiment visible a cet endroit : ni masque, ni coupe par un parent, ni sous la barre du haut.
+    function visibleEn(el,x,y){
+      if(!document.elementsFromPoint)return true;
+      var pile=document.elementsFromPoint(x,y);
+      for(var i=0;i<pile.length;i++){
+        var h=pile[i];
+        if(h===a||a.contains(h))continue;
+        return h===el||el.contains(h)||h.contains(el);
+      }
+      return false;
+    }
+    function gene(z){
+      var els=document.querySelectorAll(CLIQUABLE),i,el,c;
+      for(i=0;i<els.length;i++){
+        el=els[i];
+        if(el===a||a.contains(el))continue;
+        c=el.getBoundingClientRect();
+        if(!croise(c,z))continue;
+        if(el.closest('.site-bottom-nav,[inert],[hidden]'))continue;
+        var cs=getComputedStyle(el);
+        if(cs.visibility==='hidden'||cs.display==='none')continue;
+        if(visibleEn(el,(Math.max(c.left,z.l)+Math.min(c.right,z.r))/2,(Math.max(c.top,z.t)+Math.min(c.bottom,z.b))/2))return true;
+      }
+      if(!prixAJour)indexerPrix();
+      for(i=0;i<prix.length;i++){
+        var p=prix[i];
+        if(!p.n.isConnected||p.f>p.n.nodeValue.length){prixAJour=false;continue;}
+        var rg=document.createRange();
+        try{rg.setStart(p.n,p.d);rg.setEnd(p.n,p.f);}catch(e){continue;}
+        c=rg.getBoundingClientRect();
+        if(!croise(c,z))continue;
+        var par=p.n.parentNode;
+        if(par.closest&&par.closest('[inert],[hidden]'))continue;
+        if(visibleEn(par,(Math.max(c.left,z.l)+Math.min(c.right,z.r))/2,(Math.max(c.top,z.t)+Math.min(c.bottom,z.b))/2))return true;
+      }
+      return false;
+    }
+    // Place qu'occuperait la bulle, entiere ou en rond (meme coin, rien ne bouge a l'ecran :
+    // les classes changent puis la page est peinte une seule fois, avec l'etat retenu).
+    function zone(mini){
+      a.classList.toggle('ias-tg--mini',mini);
+      var r=a.getBoundingClientRect();
+      return {l:r.left-MARGE,t:r.top-MARGE,r:r.right+MARGE,b:r.bottom+MARGE};
+    }
+    var attente=false;
+    function eviter(){
+      attente=false;
+      var etat='entiere';
+      if(gene(zone(false)))etat=gene(zone(true))?'cachee':'rond';
+      // Bulle atteinte au clavier : elle reste (en rond), le focus ne se perd pas.
+      if(etat==='cachee'&&document.activeElement===a)etat='rond';
+      a.classList.toggle('ias-tg--mini',etat!=='entiere');
+      a.classList.toggle('ias-tg--cache',etat==='cachee');
+    }
     function plusTard(){if(!attente){attente=true;requestAnimationFrame(eviter);}}
-    window.addEventListener('scroll',plusTard,{passive:true});
+    // capture : suit aussi les zones qui defilent a l'interieur de la page.
+    window.addEventListener('scroll',plusTard,{passive:true,capture:true});
     window.addEventListener('resize',plusTard);
+    document.addEventListener('toggle',plusTard,true);
     [300,1200,3000,6000].forEach(function(ms){setTimeout(plusTard,ms);});
-    // Le bouton du match offert arrive apres la reponse du serveur : on suit aussi l'affichage.
-    if(window.MutationObserver)new MutationObserver(plusTard).observe(document.body,{childList:true,subtree:true});
+    // Le contenu arrive apres la reponse du serveur (match offert, offre, prix) : on suit
+    // l'affichage, et l'index des prix est refait au prochain controle.
+    if(window.MutationObserver)new MutationObserver(function(liste){
+      for(var i=0;i<liste.length;i++){if(liste[i].target!==a&&!a.contains(liste[i].target)){prixAJour=false;break;}}
+      plusTard();
+    }).observe(document.body,{childList:true,subtree:true,characterData:true});
     // Et quand la page change de hauteur sans changer de contenu (logos, polices chargees).
     if(window.ResizeObserver)new ResizeObserver(plusTard).observe(document.body);
     window.addEventListener('load',plusTard);

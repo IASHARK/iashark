@@ -491,6 +491,30 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 .cb-lien-a svg{flex:none;color:#22d3ee}
 .rf-in{font-family:'Inter',system-ui,sans-serif;font-size:12px;line-height:1.85;letter-spacing:.03em;color:#8a9bb0}
 .rf-in a{display:inline-block;padding:6px 0}
+/* Finition de l'accueil (26/10/2026), telephone d'abord. Le haut (IASHARK, le slogan, les
+   deux boutons) et la bande des resultats ne sont pas touches : seules la couleur de
+   selection du texte et la barre de defilement valent pour toute la page. */
+html{color-scheme:dark;scrollbar-color:rgba(141,179,211,.32) #060b12}
+::selection{background:rgba(32,213,239,.28);color:#fff}
+/* Titres en lignes equilibrees, pas de mot seul sur la derniere ligne. (Pas de « pretty »
+   sur les paragraphes : en francais il renvoyait le « : » en debut de ligne.) */
+main>section:not(.hero-stade) h2{text-wrap:balance}
+.kpi-2 span{text-wrap:balance}
+/* Focus clavier : le filet de <main> (plus haut) s'arrete au pied de page ; ses liens l'ont aussi. */
+.responsible-footer a:focus-visible,.seo-foot-nav a:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:4px}
+/* Index des championnats et des guides : soulignement discret, la liste se lit comme un
+   index et plus comme un mur de liens ; plein au survol. */
+section[aria-labelledby="seo-intro-title"] ul a{text-decoration-color:rgba(32,213,239,.38)!important;text-decoration-thickness:1px!important}
+section[aria-labelledby="seo-intro-title"] ul a:hover{text-decoration-color:currentColor!important}
+.seo-foot-nav a{text-decoration-color:rgba(145,160,179,.4)!important}
+.seo-foot-nav a:hover{color:#c3ccd8!important;text-decoration-color:currentColor!important}
+/* Rythme vertical sur telephone : 128 px de vide entre deux blocs, c'etait un ecran de
+   trop a faire defiler. Les ecarts restent nets, le bandeau des chiffres ne flotte plus. */
+@media (max-width:639px){
+  main>section.border-t>div.py-16{padding-top:48px;padding-bottom:48px}
+  main>section.border-t>div.py-20{padding-top:56px;padding-bottom:56px}
+  main>section.border-t>div.py-10{padding-top:24px;padding-bottom:24px}
+}
 </style>
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
 <link rel="stylesheet" href="/assets/home-list.css">
@@ -646,7 +670,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 
 <section id="methode" class="relative border-t border-hairline">
   <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-16 sm:py-24">
-    <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">Quatre étapes,<span class="text-cyan">un seul signal</span> par match.</h2>
+    <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">Quatre étapes, <span class="text-cyan">un seul signal</span> par match.</h2>
     <p class="mt-4 max-w-2xl text-[15.5px] leading-relaxed text-soft">Chaque étape répond à une question différente. Un seul marché en sort, choisi par une règle fixe.</p>
     <div class="mt-8 grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_260px]">
       <!-- Quatre etapes en liste a filets (21/10/2026), plus quatre cartes identiques. -->
@@ -925,8 +949,9 @@ var LEAGUE_LABELS={
 
 // UN nom par competition : config/leagues.json (lib/league-names.js), puis
 // LEAGUE_LABELS, puis le nom brut des donnees. ligue_icon ("FB") n'est
-// jamais un drapeau.
-var LEAGUE_FLAGS_EXTRA={jleague:'🇯🇵',ecl:'🏆',liga_mx:'🇲🇽',south_africa_premiership:'🇿🇦',argentina_liga_profesional:'🇦🇷',colombia_primera_a:'🇨🇴',peru_primera:'🇵🇪',chile_primera:'🇨🇱'};
+// jamais un drapeau. Plus aucun drapeau-emoticone dans la liste (26/10/2026) : le logo
+// de la competition et le nom du pays suffisent, et le repli (un trophee) s'affichait devant
+// le Bresil, la Turquie ou le Danemark.
 function leagueName(m){
   var k=leagueKey(m),l=LEAGUE_LABELS[k];
   var officiel=window.IasharkLeagueNames?IasharkLeagueNames.displayName(k):null;
@@ -935,7 +960,6 @@ function leagueName(m){
   if(k==='other'&&m.league)return m.league;
   return officiel||(l?l.name:(m.league||k));
 }
-function leagueFlag(k){var l=LEAGUE_LABELS[k];return l?l.flag:(LEAGUE_FLAGS_EXTRA[k]||'🏆');}
 // Pays (ou zone) de la competition, traduit : home_list.country.<league_key>, repli LEAGUE_LABELS.
 function leagueCountry(m){var k=leagueKey(m),l=LEAGUE_LABELS[k];return t('home_list.country.'+k,(l&&l.country)||'')||'';}
 // Note sur 10 (conf = probabilite du modele pour le pari recommande / 10) :
@@ -1109,7 +1133,7 @@ function monterListe(){
     isPro:false,favorites:homeFavorites,favMatches:homeFavMatches,
     helpers:{
       heure:heureLocale,matchDay:matchDayStr,compareMatches:compareMatchs,
-      leagueName:leagueName,leagueFlag:leagueFlag,leagueLogoUrl:leagueLogoUrl,leagueCountry:leagueCountry,
+      leagueName:leagueName,leagueLogoUrl:leagueLogoUrl,leagueCountry:leagueCountry,
       translateMarket:translateMarket,marketIdLabel:marketIdLabel,lien:lien,
       pickFreeMatch:function(list){return IasharkFreeMatch.pickFreeMatch(list,null,(window.IASHARK_MARKET&&window.IASHARK_MARKET.code)||null);}
     }

@@ -20,7 +20,9 @@
 .hl-sub{margin:4px 0 0;font-size:12.5px;color:var(--soft,#a6b4c6);}
 
 /* ---------- Jours : Aujourd'hui / Demain / Apres-demain ---------- */
-.hl-days{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0 0 12px;}
+/* Autant de colonnes que d'onglets (26/10/2026) : deux onglets depuis le retrait de « Hier »,
+   qui laissaient un tiers vide a droite. Ils prennent maintenant toute la largeur de la liste. */
+.hl-days{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px;margin:0 0 12px;}
 .hl-day{min-width:0;min-height:52px;padding:6px 4px;border-radius:11px;border:1px solid var(--line,rgba(141,179,211,.14));background:rgba(10,20,32,.6);
   color:var(--soft,#a6b4c6);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;cursor:pointer;transition:color .15s,background .15s,border-color .15s;}
 .hl-day-name{max-width:100%;font-size:13px;font-weight:700;line-height:1.15;overflow-wrap:anywhere;}
@@ -138,6 +140,10 @@
 .hu-badge.hl-band.is-good{background:rgba(32,213,239,.07);color:rgba(143,227,241,.92);}
 .hu-badge.hl-band.is-moderate{background:rgba(141,179,211,.08);color:var(--soft,#a6b4c6);}
 .hu-badge.hl-band .hl-band-i{width:10px;height:10px;opacity:.7;}
+/* Jauge du niveau : les quatre barres en sourdine, le niveau allume par-dessus. */
+.hl-sig{flex:none;display:inline-grid;}
+.hl-sig>svg{grid-area:1/1;}
+.hl-sig .hl-sig-piste{opacity:.3;}
 .hl-band-note{margin:8px 0 0;display:flex;align-items:center;gap:7px;font-size:11.5px;line-height:1.4;color:var(--soft,#a6b4c6);}
 .hl-band-note .hl-ico{width:13px;height:13px;}
 

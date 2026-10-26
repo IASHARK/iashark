@@ -1,0 +1,43 @@
+name: Canal Telegram - adresse du canal prive
+
+# Le canal gratuit IASHARK est passe en prive le 26/10/2026 (decision de Clement) :
+# l'ancienne adresse @iasharkdata appartient maintenant a un petit canal de renvoi.
+# Le robot (supabase/functions/telegram-bot) publie sur TELEGRAM_PUBLIC_CHANNEL, qui
+# valait @iasharkdata par defaut : on lui donne le numero du canal prive.
+# Lance a la main ; puis verification : le robot doit etre administrateur du canal.
+
+on:
+  workflow_dispatch:
+    inputs:
+      canal:
+        description: "Numero du canal prive (commence par -100)"
+        required: true
+        default: "-1004332224331"
+        type: string
+
+jobs:
+  canal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Adresse du canal pour le robot
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          CANAL: ${{ inputs.canal }}
+        run: |
+          case "$CANAL" in -100[0-9]*) ;; *) echo "::error::Numero de canal invalide : $CANAL"; exit 1;; esac
+          npx -y supabase@2 secrets set "TELEGRAM_PUBLIC_CHANNEL=$CANAL" --project-ref ksvjraqitxouwiabecai > /dev/null
+          echo "Reglage pose : TELEGRAM_PUBLIC_CHANNEL=$CANAL"
+      - name: Le robot est-il administrateur du canal ?
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CANAL: ${{ inputs.canal }}
+        run: |
+          API="https://api.telegram.org/bot${TOKEN}"
+          BOT_ID=$(curl -sS "$API/getMe" | jq -r '.result.id')
+          ROLE=$(curl -sS "$API/getChatMember?chat_id=${CANAL}&user_id=${BOT_ID}" | jq -r '.result.status // .description')
+          TITRE=$(curl -sS "$API/getChat?chat_id=${CANAL}" | jq -r '.result.title // .description')
+          echo "Canal : ${TITRE} ; role du robot : ${ROLE}"
+          if [ "$ROLE" != "administrator" ] && [ "$ROLE" != "creator" ]; then
+            echo "::error::Le robot n'est pas administrateur de ce canal : il ne pourra pas y publier."; exit 1
+          fi

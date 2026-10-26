@@ -121,6 +121,8 @@ jobs:
           // par tests/match-results.test.js - aucune regle de marche reecrite ici.
           var MATCH_RESULTS=require('./lib/match-results.js');
           var BILAN_HIER=require('./lib/bilan-hier.js');
+          // Bandeau des vrais resultats (accueil et pages match, 26/10/2026) : module pur, tests/bandeau-preuves.test.js.
+          var BANDEAU_PREUVES=require('./lib/bandeau-preuves.js');
           const I18N_LOCALES = require('./i18n/locales.json');
           const I18N_PAGES = require('./scripts/i18n-manifest.js');
           const { generateLocalizedSitemaps, writeSitemapIndex } = require('./scripts/i18n-sitemaps.js');
@@ -2656,6 +2658,36 @@ jobs:
                 fs.writeFileSync('preuves/bilan-hier.json',JSON.stringify(bilanHier,null,2));
                 console.log('  [bilan hier] '+HIER+' : pari offert '+(bilanHier.offert?bilanHier.offert.resultat:'aucun')+', Selection en or '+(bilanHier.selection_or?bilanHier.selection_or.gagnes+'/'+bilanHier.selection_or.regles:'aucune ('+(bilanHier.selection_or_absente||'?')+')')+'.');
               }catch(e){ console.log('::warning title=Bilan hier::preuves/bilan-hier.json non ecrit ('+(e&&e.message)+').'); }
+              // BANDEAU DES VRAIS RESULTATS (demande de Clement du 26/10/2026) : les 40 derniers paris regles de
+              // predictions_archive, publies avant le coup d'envoi, dans l'ordre (aucun tri par resultat), + Petit / Grand
+              // combine et Selection en or regles des 7 derniers jours (tous leurs matchs regles par l'archive, meme marche).
+              // Fichier public preuves/bandeau.json (lu par lib/bandeau-preuves.js). Lecture impossible : le fichier
+              // precedent reste en place (jamais un bandeau vide ou partiel ecrit a sa place).
+              try{
+                if(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY){
+                  var entB={'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY};
+                  var baseB=SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/';
+                  var depuisB=MATCH_RESULTS.ajouterJours(TODAY,-10);
+                  var simplesB=await rawHttpGetJson(baseB+'predictions_archive?select=fixture_id,home,away,prediction,cote,market,result,score,league,published_at,kickoff_at&type=eq.single&result=in.(win,loss)&published_at=not.is.null&kickoff_at=gte.'+depuisB+'&order=kickoff_at.desc,fixture_id.desc&limit=300',entB);
+                  var ticketsB=await rawHttpGetJson(baseB+'tickets_du_jour?select=jour,type,contenu,meta&type=in.(x5,x10,or)&jour=gte.'+depuisB,entB);
+                  var idsB={};
+                  (Array.isArray(ticketsB)?ticketsB:[]).forEach(function(t){
+                    var l=t&&t.contenu&&(t.contenu.jambes||t.contenu.paris);
+                    (Array.isArray(l)?l:[]).forEach(function(j){ if(j&&/^\d{1,12}$/.test(String(j.fixture_id))) idsB[String(j.fixture_id)]=true; });
+                  });
+                  var listeIdsB=Object.keys(idsB);
+                  var jambesB=listeIdsB.length?await rawHttpGetJson(baseB+'predictions_archive?select=fixture_id,market,result,published_at,kickoff_at&fixture_id=in.('+listeIdsB.join(',')+')',entB):[];
+                  if(Array.isArray(simplesB)&&Array.isArray(ticketsB)&&Array.isArray(jambesB)){
+                    var precB=null; try{ precB=JSON.parse(fs.readFileSync('preuves/bandeau.json','utf8')); }catch(e){}
+                    var bandeau=BANDEAU_PREUVES.construireBandeau({simples:simplesB,tickets:ticketsB,jambes:jambesB,matchs:matchsDuRun,precedent:precB,genereLe:genere});
+                    if(bandeau.simples.n>0){
+                      if(!fs.existsSync('preuves')) fs.mkdirSync('preuves',{recursive:true});
+                      fs.writeFileSync('preuves/bandeau.json',JSON.stringify(bandeau));
+                      console.log('  [bandeau] '+bandeau.simples.n+' derniers paris : '+bandeau.simples.gagnes+' gagnes, '+bandeau.simples.perdus+' perdus ; '+bandeau.combines.length+' combine(s), '+bandeau.or.length+' Selection(s) en or.');
+                    }else console.log('::warning title=Bandeau::aucun pari regle lu, preuves/bandeau.json garde.');
+                  }else console.log('::warning title=Bandeau::archive ou tickets illisibles, preuves/bandeau.json garde.');
+                }
+              }catch(e){ console.log('::warning title=Bandeau::preuves/bandeau.json non ecrit ('+(e&&e.message)+').'); }
               // Fenetre glissante : les journees sorties des 60 jours sont retirees
               // du depot (rien d'autre ne vit dans results/).
               fs.readdirSync(RESULTS_DIR).forEach(function(f){

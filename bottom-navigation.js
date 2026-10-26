@@ -314,7 +314,7 @@
     document.head.appendChild(st);
     var a=document.createElement('a');
     a.id='ias-tg';
-    a.href='https://t.me/iasharkdata';
+    a.href='https://t.me/+qCEr2JFPDDBlZTFk'; // canal passe en prive le 26/10/2026
     a.target='_blank';
     a.rel='noopener';
     a.setAttribute('data-track','telegram_bubble');

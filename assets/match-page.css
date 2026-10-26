@@ -109,9 +109,11 @@ a{color:inherit}
 .sig-eyebrow svg{color:var(--accent)}
 .sig-rel{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:999px;border:1px solid;font:600 12.5px var(--body)}
 .sig-rel i{width:8px;height:8px;border-radius:50%;background:currentColor}
-.sig-rel--high{color:#6ee7b7;border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.08)}
-.sig-rel--medium{color:#fcd34d;border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.08)}
-.sig-rel--low{color:#fca5a5;border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.08)}
+/* Fiabilite et risque en cyan et gris (26/10/2026) : le vert et le rouge restent reserves a
+   gagne / perdu et aux ecarts chiffres. Meme echelle que la pastille de niveau (.band). */
+.sig-rel--high{color:var(--accent);border-color:rgba(34,211,238,.42);background:rgba(34,211,238,.1)}
+.sig-rel--medium{color:#8fe3f1;border-color:rgba(34,211,238,.24);background:rgba(34,211,238,.05)}
+.sig-rel--low{color:var(--soft);border-color:rgba(141,179,211,.26);background:rgba(141,179,211,.07)}
 /* Ticket du pari : le libelle bookmaker en grand, la cote a droite. */
 .sig-slip{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px 18px;margin-top:16px;padding:16px 18px;border:1px solid var(--accent-border);border-radius:14px;background:rgba(3,10,17,.45)}
 .sig-slip-main{min-width:0}
@@ -134,12 +136,8 @@ a{color:inherit}
 .sig-conf-bar i.on{background:linear-gradient(180deg,var(--accent),var(--cyan2))}
 .sig-risk-steps{display:flex;gap:4px}
 .sig-risk-steps i{width:16px;height:9px;border-radius:2px;background:rgba(255,255,255,.1)}
-.sig-risk--low .sig-risk-steps i.on{background:var(--green)}
-.sig-risk--medium .sig-risk-steps i.on{background:var(--orange)}
-.sig-risk--high .sig-risk-steps i.on{background:var(--red)}
-.sig-risk--low b{color:#6ee7b7}
-.sig-risk--medium b{color:#fcd34d}
-.sig-risk--high b{color:#fca5a5}
+.sig-risk-steps i.on{background:var(--accent)}
+.sig-risk--high .sig-risk-steps i.on{background:var(--soft)}
 .sig-rel-note{margin:12px 0 0;color:var(--soft);font-size:14px;line-height:1.5}
 .sig-figures{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:0;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.2)}
 .sig-figures>div{min-width:0;padding:12px 14px}
@@ -155,10 +153,10 @@ a{color:inherit}
 .sig-why li:before{content:"";position:absolute;left:2px;top:.55em;width:7px;height:7px;border-radius:2px;background:var(--accent)}
 .sig-quote{margin:10px 0 0;padding-left:12px;border-left:1px solid var(--line2);color:var(--muted);font-size:14px;line-height:1.6}
 .sig-watch{margin:16px 0 0;padding-top:14px;border-top:1px solid var(--line);color:var(--soft);font-size:14px;line-height:1.5}
-.sig-watch b{margin-right:6px;color:#fcd34d;font-weight:700}
+.sig-watch b{margin-right:6px;color:var(--text);font-weight:700}
 .sig-watch ul{display:grid;gap:6px;margin:8px 0 0;padding:0;list-style:none}
 .sig-watch li{position:relative;padding-left:18px}
-.sig-watch li:before{content:"";position:absolute;left:2px;top:.55em;width:7px;height:7px;border-radius:2px;background:#fcd34d}
+.sig-watch li:before{content:"";position:absolute;left:2px;top:.55em;width:7px;height:7px;border-radius:2px;background:var(--muted)}
 .sig-legal{margin:12px 0 0;color:var(--muted);font-size:12.5px}
 .sig-method{margin:12px 0 0;font-size:13px}.sig-method a{color:var(--cyan,#22d3ee);text-decoration:underline;text-underline-offset:3px}
 
@@ -503,6 +501,10 @@ a{color:inherit}
 .band b{font-weight:700}
 /* Niveau : icones Lucide signal-low / signal-medium / signal-high (lib/icones.js). */
 .band-ico{width:16px;height:16px;flex:none}
+/* Jauge : les quatre barres en sourdine, le niveau allume par-dessus (26/10/2026). */
+.band-sig{display:inline-grid;flex:none}
+.band-sig>svg{grid-area:1/1}
+.band-sig .band-piste{opacity:.3}
 .band.is-good{color:#8fe3f1;background:rgba(34,211,238,.05)}
 .band.is-moderate{color:var(--soft);border-color:rgba(141,179,211,.22);background:rgba(141,179,211,.07)}
 

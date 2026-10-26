@@ -560,7 +560,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
        bande de dates, « Mes compétitions » puis A→Z, lignes par competition.
        Le resume SEO et l'etat de chargement ci-dessous sont remplaces au montage. -->
   <div id="homeList">
-  <!--SEO_MATCHES_SUMMARY--><div style="padding:4px 0 12px"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px"><span data-i18n="home_app.seo_summary_title">Today&#39;s AI analyses</span> — <time data-seo-date datetime="2026-10-26">26 October 2026</time> <small style="font-family:'DM Sans',sans-serif;font-size:11px;color:#64748b">(<span data-i18n="home_app.seo_times_paris">Paris time</span>)</small></h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8"><li>00:00 — <strong>Universidad de Concepcion vs Deportes Limache</strong> (Primera Division Chile)</li><li>00:00 — <strong>Atlas vs Puebla</strong> (Liga MX)</li><li>01:30 — <strong>Barracas Central vs Estudiantes de Rio Cuarto</strong> (Liga Profesional Argentina)</li><li>01:30 — <strong>Central Cordoba de Santiago vs Velez Sarsfield</strong> (Liga Profesional Argentina)</li><li>02:00 — <strong>Los Angeles FC vs Los Angeles Galaxy</strong> (MLS)</li><li>02:00 — <strong>Club Queretaro vs Cruz Azul</strong> (Liga MX)</li><li>02:05 — <strong>Club America vs CF Pachuca</strong> (Liga MX)</li><li>04:10 — <strong>Club Tijuana vs Santos Laguna</strong> (Liga MX)</li><li>17:00 — <strong>Beşiktaş vs Başakşehir</strong> (Super Lig)</li><li>17:00 — <strong>Rizespor vs Trabzonspor</strong> (Super Lig)</li><li>19:00 — <strong>FC Copenhagen vs Odense</strong> (Danish Superliga)</li><li>19:30 — <strong>Galatasaray vs Fenerbahçe</strong> (Super Lig)</li><li>19:45 — <strong>Santa Clara vs Benfica</strong> (Liga Portugal)</li><li>20:30 — <strong>Paris Saint Germain vs Lyon</strong> (Ligue 1)</li><li>20:30 — <strong>FC Andorra vs Burgos</strong> (Segunda Division)</li><li>20:45 — <strong>Boulogne vs Reims</strong> (Ligue 2)</li><li>20:45 — <strong>Montpellier vs RED Star FC 93</strong> (Ligue 2)</li><li>21:00 — <strong>Sevilla vs Osasuna</strong> (La Liga)</li><li>22:00 — <strong>Universidad de Chile vs Everton de Vina</strong> (Primera Division Chile)</li><li>23:00 — <strong>Union Santa Fe vs Estudiantes L.P.</strong> (Liga Profesional Argentina)</li><li>23:30 — <strong>Coritiba vs Gremio</strong> (Brasileirao Serie A)</li></ul></div><!--/SEO_MATCHES_SUMMARY-->
+  <!--SEO_MATCHES_SUMMARY--><div style="padding:4px 0 12px"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px"><span data-i18n="home_app.seo_summary_title">Today's AI analyses</span> — <time data-seo-date datetime="2026-10-26">26 October 2026</time> <small style="font-family:'DM Sans',sans-serif;font-size:11px;color:#64748b">(<span data-i18n="home_app.seo_times_paris">Paris time</span>)</small></h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8"><li>00:00 — <strong>Universidad de Concepcion vs Deportes Limache</strong> (Primera Division Chile)</li><li>00:00 — <strong>Atlas vs Puebla</strong> (Liga MX)</li><li>01:30 — <strong>Barracas Central vs Estudiantes de Rio Cuarto</strong> (Liga Profesional Argentina)</li><li>01:30 — <strong>Central Cordoba de Santiago vs Velez Sarsfield</strong> (Liga Profesional Argentina)</li><li>02:00 — <strong>Los Angeles FC vs Los Angeles Galaxy</strong> (MLS)</li><li>02:00 — <strong>Club Queretaro vs Cruz Azul</strong> (Liga MX)</li><li>02:05 — <strong>Club America vs CF Pachuca</strong> (Liga MX)</li><li>04:10 — <strong>Club Tijuana vs Santos Laguna</strong> (Liga MX)</li><li>17:00 — <strong>Beşiktaş vs Başakşehir</strong> (Super Lig)</li><li>17:00 — <strong>Rizespor vs Trabzonspor</strong> (Super Lig)</li><li>19:00 — <strong>FC Copenhagen vs Odense</strong> (Danish Superliga)</li><li>19:30 — <strong>Galatasaray vs Fenerbahçe</strong> (Super Lig)</li><li>19:45 — <strong>Santa Clara vs Benfica</strong> (Liga Portugal)</li><li>20:30 — <strong>Paris Saint Germain vs Lyon</strong> (Ligue 1)</li><li>20:30 — <strong>FC Andorra vs Burgos</strong> (Segunda Division)</li><li>20:45 — <strong>Boulogne vs Reims</strong> (Ligue 2)</li><li>20:45 — <strong>Montpellier vs RED Star FC 93</strong> (Ligue 2)</li><li>21:00 — <strong>Sevilla vs Osasuna</strong> (La Liga)</li><li>22:00 — <strong>Universidad de Chile vs Everton de Vina</strong> (Primera Division Chile)</li><li>23:00 — <strong>Union Santa Fe vs Estudiantes L.P.</strong> (Liga Profesional Argentina)</li><li>23:30 — <strong>Coritiba vs Gremio</strong> (Brasileirao Serie A)</li></ul></div><!--/SEO_MATCHES_SUMMARY-->
   <div class="loading-state">
     <div class="loading-spinner"></div>
     <div class="loading-text" data-i18n="home_page.loading_analyses">LOADING ANALYSES...</div>
@@ -805,7 +805,10 @@ function lien(p){return (window.I18N&&window.I18N.href)?window.I18N.href(p):'/'+
 // Lien d'un match : sa vraie page indexable (/match/<id>.html ou /<version>/match/<id>.html,
 // home-list.js#matchHref, d'apres le champ page_dirs de data-home.json), sinon match.html?id=
 // (noindex). Chantier GEO/SEO du 23/10/2026 : l'accueil ne doit lier aucune page en noindex.
-function lienMatch(m){return (window.IasharkHomeList&&IasharkHomeList.matchHref)?IasharkHomeList.matchHref(m):lien('match.html?id='+encodeURIComponent(m.id));}
+// 23/10/2026, 19 h 30 (Clement) : les visiteurs vont de nouveau sur la page match habituelle
+// (match.html?id=). Les pages /match/<id>.html restent publiees pour les moteurs de recherche,
+// mais l'accueil n'y envoie plus personne.
+function lienMatch(m){return lien('match.html?id='+encodeURIComponent(m.id));}
 // Prices of the current GEO market (lib/market-config.js). Without a GEO
 // market (historic FR/EUR site) the static prices of the page stay as they are.
 function prixProMarche(){
@@ -1019,6 +1022,8 @@ function carteHero(m,p){
     pari='<div class="hp-pari">'+lib+'<strong class="hp-marche">'+esc(marche)+'</strong><span class="hp-chiffres"><b>'+esc(tf('home_hero.cote','cote {cote}',{cote:k.toLocaleString(localeTag(),{minimumFractionDigits:2,maximumFractionDigits:2})}))+'</b> · '+esc(tf('home_hero.chance','{n} % de chance calculée',{n:ch}))+'</span></div>';
   }else if(p.etat==='charge'){
     pari='<div class="hp-pari hp-pari--charge">'+lib+'<span class="hp-attente">'+esc(t('home_hero.loading','Le pari arrive…'))+'</span></div>';
+  }else if(p.etat==='compte'){
+    pari='<div class="hp-pari">'+lib+'<span class="hp-attente">'+esc(t('home_hero.open_match','Le pari est sur la page du match'))+'</span></div>';
   }else{
     pari='<div class="hp-pari">'+lib+'<span class="hp-attente">'+esc(t('home_hero.fallback','Le pari s’ouvre avec ton compte gratuit'))+'</span></div>';
   }
@@ -1040,11 +1045,26 @@ function chargerPariHero(el,m){
     })
     .catch(function(){if(PARI_HERO.id!==id)return;PARI_HERO.etat='absent';el.innerHTML=carteHero(m,PARI_HERO);});
 }
+// PANNE DU 26/10/2026 (constat de Clement, connecte en Pro : « Le pari arrive… » sur PSG - Lyon) : la carte
+// appelait TOUJOURS match-data sans compte. Depuis le 25/10 (PR #202, pari derriere l'inscription) cette reponse
+// anonyme n'a plus de pari : un abonne Pro ou un compte gratuit restait sur « Le pari arrive… », puis lisait
+// « Le pari s'ouvre avec ton compte gratuit ». Desormais :
+//  - compte connecte (gratuit ou Pro) : la liste lue avec SON jeton (loadData, match-data) porte deja le pari du
+//    match offert (pari_rec, cote_rec, model_probability) : il s'affiche tout de suite, sans second appel ;
+//  - connecte mais sans pari dans la liste (ligne premium absente, liste de secours) : lien vers la page du match ;
+//  - sans compte : plus d'appel inutile (la reponse ne contient plus jamais le pari), le message du compte
+//    gratuit s'affiche directement. chargerPariHero reste pour le cas ou le pari redeviendrait visible sans compte.
+function pariDuCompte(m){
+  return authCtx&&authCtx.session&&m&&m.pari_rec&&m.cote_rec!=null&&m.model_probability!=null?m:null;
+}
 function montrerPariHero(el,m){
   if(!el)return;
   if(!m){el.innerHTML='';el.hidden=true;return;}
   el.hidden=false;
-  if(PARI_HERO.id!==String(m.id)){PARI_HERO={id:String(m.id),appel:null,etat:'charge'};chargerPariHero(el,m);}
+  var id=String(m.id),compte=pariDuCompte(m);
+  if(compte)PARI_HERO={id:id,appel:compte,etat:'ok'};
+  else if(authCtx&&authCtx.session)PARI_HERO={id:id,appel:null,etat:'compte'};
+  else PARI_HERO={id:id,appel:null,etat:'absent'};
   el.innerHTML=carteHero(m,PARI_HERO);
 }
 

@@ -38,10 +38,34 @@ async function lirePortee(req: Request): Promise<{ id: string | null; list: bool
   return { id: /^\d{1,12}$/.test(idStr) ? idStr : null, list: scope === "list" };
 }
 
+// Match inconnu (fichier de detail absent : match trop ancien, retire du site) :
+// 404 « match_introuvable », plus un 502 (constat du 26/10/2026 : les 502 de la
+// fonction venaient tous de robots - Applebot, Googlebot, meta-externalagent -
+// sur d'anciennes pages match ; une vraie panne reste un 502).
+class MatchIntrouvable extends Error {}
+
 async function lireJson(url: string): Promise<Record<string, unknown>> {
   const resp = await fetch(url);
+  if (resp.status === 404 && url !== LIST_URL) throw new MatchIntrouvable(url);
   if (!resp.ok) throw new Error(url + " fetch failed: " + resp.status);
   return await resp.json();
+}
+
+// Jeton anonyme (cle publique « anon » envoyee par le site quand personne n'est
+// connecte) : inutile de le faire verifier par le service d'authentification,
+// qui repond toujours 403 « missing sub claim » (198 appels perdus le 25/10/2026,
+// un aller-retour de plus avant chaque pari offert). Lecture du role seulement :
+// un jeton qui se dit « anon » ne peut que PERDRE des droits, jamais en gagner.
+function estJetonAnonyme(jwt: string): boolean {
+  try {
+    const partie = jwt.split(".")[1];
+    if (!partie) return false;
+    const b64 = partie.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((partie.length + 3) % 4);
+    const charge = JSON.parse(atob(b64));
+    return !!charge && charge.role === "anon" && !charge.sub;
+  } catch (_e) {
+    return false;
+  }
 }
 
 async function chargerDonnees(portee: { id: string | null; list: boolean }): Promise<Record<string, unknown>> {
@@ -323,7 +347,17 @@ Deno.serve(async (req: Request) => {
   const jwt = authHeader.replace(/^Bearer\s+/i, "");
   const supabase = createClient(SUPA_URL, SERVICE_KEY);
 
-  if (jwt) {
+  // Vitesse (26/10/2026) : les fichiers publics sont lus PENDANT la verification
+  // du compte (avant : l'un apres l'autre), et le jeton anonyme n'est plus
+  // verifie (voir estJetonAnonyme). Memes droits qu'avant, dans tous les cas.
+  let porteeDemandee: { id: string | null; list: boolean } | null = null;
+  const chargement = lirePortee(req).then((p) => {
+    porteeDemandee = p;
+    return chargerDonnees(p);
+  });
+  chargement.catch(() => {}); // erreur traitee plus bas, jamais « non geree »
+
+  if (jwt && !estJetonAnonyme(jwt)) {
     try {
       const { data: userData } = await supabase.auth.getUser(jwt);
       if (userData?.user) {
@@ -347,11 +381,15 @@ Deno.serve(async (req: Request) => {
   // colonne non modifiable par le client : migration 0001).
 
   let data: Record<string, unknown>;
-  let porteeDemandee: { id: string | null; list: boolean } | null = null;
   try {
-    porteeDemandee = await lirePortee(req);
-    data = await chargerDonnees(porteeDemandee);
+    data = await chargement;
   } catch (e) {
+    if (e instanceof MatchIntrouvable) {
+      return new Response(
+        JSON.stringify({ error: "match_introuvable" }),
+        { status: 404, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
+      );
+    }
     return new Response(
       JSON.stringify({ error: "Impossible de charger les donnees", details: String(e) }),
       { status: 502, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },

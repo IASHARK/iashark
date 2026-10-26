@@ -673,3 +673,19 @@ test("parrainage : window.iasharkAffiliate() lisible par les pages, sans effet d
   const vide = run({ pathname: "/fr/" });
   assert.equal(vide.ctx.iasharkAffiliate(), null);
 });
+
+test("js_error : echec reseau au depart de la page (page masquee) ignore ; page visible ou autre erreur comptee", () => {
+  const b = run({ pathname: "/fr/match.html", search: "?id=1" });
+  const erreurs = () => b.events().filter((e) => e.event_type === "js_error").map((e) => e.metadata.msg);
+  // Balise envoyee au masquage de la page (mesure Netlify, fetch sans .catch) : rien de casse.
+  b.ctx.document.visibilityState = "hidden";
+  b.fireWin("unhandledrejection", { reason: { message: "Failed to fetch" } });
+  b.fireWin("unhandledrejection", { reason: { message: "Load failed" } });
+  assert.deepEqual(erreurs(), [], "echec reseau page masquee : ignore");
+  // Une vraie erreur, meme page masquee, reste comptee.
+  b.fireWin("unhandledrejection", { reason: { message: "Cannot read properties of null" } });
+  // Page visible : un echec reseau peut empecher l'affichage, il reste compte.
+  b.ctx.document.visibilityState = "visible";
+  b.fireWin("unhandledrejection", { reason: { message: "Failed to fetch" } });
+  assert.deepEqual(erreurs(), ["Promesse rejetee : Cannot read properties of null", "Promesse rejetee : Failed to fetch"]);
+});

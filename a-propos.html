@@ -35,13 +35,13 @@ a{color:inherit;text-decoration:none;}
 .wrap{max-width:720px;margin:0 auto;padding:0 20px;}
 
 .hero{padding:44px 0 8px;}
-.hero-eyebrow{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--cyan);margin-bottom:16px;}
+.hero-eyebrow{font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:600;letter-spacing:.14em;color:var(--cyan);margin-bottom:14px;}
 .hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,6vw,42px);line-height:1.1;letter-spacing:0.5px;margin-bottom:16px;}
 .hero h1 b{color:var(--cyan);}
 .hero p{font-size:14.5px;color:#94a3b8;line-height:1.75;max-width:560px;}
 
 .sec{padding:36px 0;border-top:1px solid var(--border);}
-.sec-lbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2.5px;color:var(--muted);margin-bottom:14px;}
+.sec-lbl{font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:600;letter-spacing:.14em;color:#8fa1b5;margin-bottom:12px;}
 .sec h2{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:0.5px;margin-bottom:14px;}
 .sec p{font-size:14px;line-height:1.75;color:#cbd5e1;margin-bottom:14px;}
 .sec p:last-child{margin-bottom:0;}
@@ -49,8 +49,8 @@ a{color:inherit;text-decoration:none;}
 
 .model-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0;}
 .model-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
-.model-card .mtitle{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--cyan);margin-bottom:6px;}
-.model-card .mdesc{font-size:12px;color:var(--muted);line-height:1.6;}
+.model-card .mtitle{font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:700;letter-spacing:.08em;color:var(--cyan);margin-bottom:6px;}
+.model-card .mdesc{font-size:13px;color:#a3b1c2;line-height:1.6;}
 
 .callout{background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.25);border-radius:14px;padding:18px 20px;margin:18px 0;}
 .callout .ctitle{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--amber);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
@@ -87,16 +87,22 @@ a{color:inherit;text-decoration:none;}
 .legal-list li::before{content:'—';position:absolute;left:0;color:var(--muted);}
 .legal-list b{color:var(--text);}
 
-.help-box{background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.25);border-radius:14px;padding:20px;margin-top:18px;text-align:center;}
-.help-box .htitle{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--green);margin-bottom:8px;}
-.help-box p{font-size:13px;color:#a7d9c4;margin-bottom:10px;}
-.help-box .phone{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--green);letter-spacing:1px;}
-.help-box .sub{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:6px;}
+/* Aide au jeu : cyan et gris comme le reste du site (26/10/2026) ; le vert reste reserve a
+   gagne / perdu. Textes lisibles sur telephone (9 px et 8 px auparavant). */
+.help-box{background:rgba(34,211,238,0.05);border:1px solid var(--border-cyan);border-radius:14px;padding:20px;margin-top:18px;text-align:center;}
+.help-box .htitle{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.5px;color:var(--cyan);margin-bottom:8px;}
+.help-box p{font-size:13.5px;color:#c3d1de;margin-bottom:10px;line-height:1.6;}
+.help-box .phone{font-family:'DM Sans',sans-serif;font-size:22px;font-weight:700;color:var(--text);letter-spacing:.04em;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.help-box .sub{font-family:'DM Sans',sans-serif;font-size:11.5px;letter-spacing:.06em;color:#8fa1b5;margin-top:6px;line-height:1.5;}
 
 footer{padding:30px 20px;text-align:center;}
-footer p{font-family:'Space Mono',monospace;font-size:8px;color:#8a9bb0;letter-spacing:1px;line-height:2;}
-footer .foot-links{margin-top:10px;}
-footer .foot-links a{color:#22d3ee;}
+footer p{font-family:'DM Sans',sans-serif;font-size:11.5px;color:#8a9bb0;letter-spacing:.03em;line-height:1.8;}
+footer .foot-links{display:flex;flex-wrap:wrap;justify-content:center;margin-top:10px;font-size:0;}
+footer .foot-links a{display:inline-block;padding:6px 0;font-size:11.5px;color:#22d3ee;white-space:nowrap;}
+/* Points de separation en fin de ligne, jamais au debut de la suivante. */
+footer .foot-links a:not(:last-child)::after{content:"\00B7";margin:0 6px;color:#8a9bb0;}
+footer a:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:3px;}
+footer [data-market-helpline="phone"],footer [data-market-helpline="url"]{white-space:nowrap;}
 
 .nav-bottom{position:fixed;bottom:0;left:0;right:0;background:rgba(8,12,18,0.97);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;z-index:100;}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 8px;gap:5px;text-decoration:none;}
@@ -178,7 +184,7 @@ footer .foot-links a{color:#22d3ee;}
     </ul>
 
     <div class="help-box">
-      <div class="htitle" data-i18n="about_page.help_title">🦈 Jouer doit rester un plaisir</div>
+      <div class="htitle" data-i18n="about_page.help_title">Jouer doit rester un plaisir</div>
       <p data-i18n="about_page.help_text">Si vous ou un proche rencontrez des difficultés avec le jeu, une aide gratuite et anonyme existe.</p>
       <div class="phone" data-market-helpline="phone">09 74 75 13 13</div>
       <div class="sub" id="helpNameMarket" data-market-helpline="name" hidden></div>
@@ -190,7 +196,7 @@ footer .foot-links a{color:#22d3ee;}
 </div>
 
 <footer>
-  <p><span data-i18n="about_page.footer_warning">⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</span><br>
+  <p><span data-i18n="about_page.footer_warning">LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</span><br>
   <span data-i18n="about_page.footer_note">IASHARK — Les analyses publiées sont à titre indicatif uniquement</span><br>
   <span data-i18n="match_page.shell_help_label">Aide :</span> <a data-market-helpline="url" href="https://www.joueurs-info-service.fr" style="color:#22d3ee">joueurs-info-service.fr</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">09 74 75 13 13</span></span></p>
   <p class="foot-links"><a href="/mentions-legales.html" data-href="mentions-legales.html" data-i18n="footer.mentions_legales">Mentions légales</a> · <a href="/cgv.html" data-href="cgv.html" data-i18n="footer.cgv">CGV</a> · <a href="/confidentialite.html" data-href="confidentialite.html" data-i18n="footer.confidentialite">Confidentialité</a> · <a href="/cookies.html" data-href="cookies.html" data-i18n="footer.cookies">Cookies</a> · <a href="/jeu-responsable.html" data-href="jeu-responsable.html" data-i18n="footer.responsible_gambling">Jeu responsable</a><span data-requires-page="methodologie.html"> · <a href="/methodologie.html" data-href="methodologie.html" data-i18n="footer.methodology">Méthodologie</a></span></p>

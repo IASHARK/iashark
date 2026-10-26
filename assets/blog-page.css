@@ -64,3 +64,8 @@ img,svg{display:block;max-width:100%}
 /* Cible tactile des filtres de sujet : 21 px de haut mesures sur mobile
    (QA visuelle 14/09/2026). */
 .sujet{min-height:36px;display:inline-flex;align-items:center}
+/* Liens legaux du pied de page (26/10/2026) : « Jeu responsable » n'est plus coupe en deux et
+   les points de separation restent en fin de ligne ; chaque lien a une zone de toucher. */
+footer p:has(>a[data-href="mentions-legales.html"]){display:flex;flex-wrap:wrap;font-size:0}
+footer p:has(>a[data-href="mentions-legales.html"])>a{display:inline-block;padding:6px 0;font-size:12.5px;white-space:nowrap}
+footer p:has(>a[data-href="mentions-legales.html"])>a:not(:last-child)::after{content:"\00B7";margin:0 6px}

@@ -11,3 +11,9 @@
 /* Texte .sr des pastilles de forme : contenu dans le tableau defilant (sinon il elargit la page sur mobile). */
 .tbl{position:relative}
 .hdr nav{min-width:0;flex-wrap:wrap;justify-content:flex-end;column-gap:12px;row-gap:0}
+
+/* Finition du 26/10/2026 : les liens de l'en-tete dans la meme casse (« ACCUEIL », « CLUBS ET
+   DERBIES », « BLOG » ; « Clubs et derbies » etait seul en minuscules), et un fil d'Ariane
+   assez haut pour le doigt sans rien deplacer. */
+.hdr nav a{text-transform:uppercase}
+.crumbs a{display:inline-block;padding:10px 0;margin:-10px 0}

@@ -28,8 +28,10 @@
     if(linkDir===dir&&window.I18N&&window.I18N.href)return window.I18N.href(page);
     return '/'+(linkDir||'fr')+'/'+(page==='index.html'?'':page);
   }
+  // Onglet « Combinés » allume sur combines.html seulement (26/10/2026) : il l'etait aussi sur
+  // pro.html, du temps ou cet onglet s'appelait « Outils » et menait a l'offre Pro.
   var rest=(dir?location.pathname.slice(dir.length+1):location.pathname).replace(/\/+$/,'')||'/';
-  var active=/^\/blog(\.html|\/|$)/.test(rest)?'blog':/\/(combines|pro)\.html$/.test(rest)?'tools':/\/compte\.html$/.test(rest)?'account':(rest==='/'||/^\/(index|landing)\.html$/.test(rest))?'home':'';
+  var active=/^\/blog(\.html|\/|$)/.test(rest)?'blog':/\/combines\.html$/.test(rest)?'tools':/\/compte\.html$/.test(rest)?'account':(rest==='/'||/^\/(index|landing)\.html$/.test(rest))?'home':'';
   // Libelles : les 4 valeurs label ci-dessous sont le repli FR. Cles
   // dictionnaire : nav.home/tools/guides/account et geo.nav.aria_label
   // (i18n/dict/*.json). Tant que i18n.js n'est pas charge (il l'est parfois

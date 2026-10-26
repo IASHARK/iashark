@@ -158,3 +158,10 @@ dialog{max-height:calc(100dvh - 2rem);overflow-y:auto}
 #proPlanPicker .iash-plans-single{margin:10px 0 0;text-align:left}
 #proPlanPicker .iash-plans-single .iash-plan-body{justify-items:start}
 #proPlanPicker .iash-plans-closed{margin:12px 0 0;text-align:left}
+/* Index des championnats en pied de page (meme reglage que assets/bottom-navigation.css,
+   que les pages de connexion ne chargent pas). */
+.seo-foot-nav a{text-decoration-color:rgba(145,160,179,.4)!important;text-decoration-thickness:1px!important}
+.seo-foot-nav a:hover{color:#c3ccd8!important;text-decoration-color:currentColor!important}
+.seo-foot-nav a:focus-visible{outline:2px solid #18d3ef;outline-offset:2px;border-radius:3px}
+/* « Mot de passe oublie ? » : zone de toucher de 35 px au lieu de 15, sans rien deplacer. */
+a[data-href="mot-de-passe-oublie.html"]{display:inline-block;padding:10px 0;margin:-10px 0}

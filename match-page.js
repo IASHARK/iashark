@@ -133,7 +133,10 @@ function bandBadge(b,court){
   if(!BANDES[b])return '';
   const [k,fb,niveau]=BANDES[b];
   const label=court?t(k+'_short',BANDES_COURTES[b]):t(k,fb);
-  return `<span class="band is-${b}">${lucide(['signal-low','signal-medium','signal-high'][niveau-1]||'signal-low','band-ico')}<b>${esc(label)}</b></span>`;
+  // Jauge lisible (26/10/2026, comme l'accueil) : les quatre barres en sourdine, le niveau allume
+  // par-dessus. Seule, l'icone « signal-low » se lisait comme deux points (« ., »).
+  const niv=lucide(['signal-low','signal-medium','signal-high'][niveau-1]||'signal-low','band-ico band-niv');
+  return `<span class="band is-${b}"><span class="band-sig">${lucide('signal-high','band-ico band-piste')}${niv}</span><b>${esc(label)}</b></span>`;
 }
 // Etat PUBLIC de l'analyse : 'ready' (has_signal / no_signal:false), 'none'
 // (no_signal:true), 'unknown'.
@@ -1338,7 +1341,7 @@ function renderProWall(raw,ctx){
   // ce match a un panneau pour Pro (nb_marches).
   paint(vm,secs,{sansStats:true,panneau:MS&&estFr()&&n(pub.nb_marches)>0?{html:MS.panneauFlou(pub.nb_marches,''),flou:true,fab:false}:null});
   const box=document.getElementById('offreMatch');
-  if(window.IasharkOffrePro&&box)IasharkOffrePro.mount(box,{mode:'vitrine',contexte:'match',next:cheminMatch(raw),connecte:!!(ctx&&ctx.session),sousTitre:enTeteOffre(pub),suivi:'match_gate_unlock',contenus,nbMarches:n(pub.nb_marches)});
+  if(window.IasharkOffrePro&&box)IasharkOffrePro.mount(box,{mode:'vitrine',contexte:'match',next:cheminMatch(raw),connecte:!!(ctx&&ctx.session),sousTitre:enTeteOffre(pub),suivi:'match_gate_unlock',contenus,nbMarches:n(pub.nb_marches),pari:etatAnalyse(pub)!=='none'});
 }
 // MATCH OFFERT, SANS COMPTE : meme dessin que le composant de paiement, un seul
 // bouton « Creer mon compte gratuit » (retour sur ce match), lien discret
@@ -1356,7 +1359,7 @@ function renderAuthWall(raw,appel){
   const carte=`<section class="op op--vitrine gate" aria-labelledby="opCompteT">
     <div class="op-head"><span class="op-lock" aria-hidden="true">${lucide('lock','')}</span><h2 class="op-title" id="opCompteT">${esc(titre)}</h2>${sous&&!pari?`<div class="op-sub">${sous}</div>`:''}<p class="op-from">${esc(texte)}</p></div>
     ${boutonAction(lien('inscription.html?next='+retour),bouton,suivi('match_avis_unlock').trim())}
-    <a class="op-alt" href="${esc(lien('connexion.html?next='+retour))}">${esc(t('match_v4.free_login','J’ai déjà un compte'))}</a>
+    <a class="op-alt op-login" href="${esc(lien('connexion.html?next='+retour))}">${esc(t('match_v4.free_login','J’ai déjà un compte'))}</a>
     ${lignePro}
   </section>`;
   const secs=pari?[['appel',pari,null,true],['offre',carte,null,true]]:[['offre',carte,null,true]];

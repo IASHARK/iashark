@@ -149,3 +149,17 @@ footer.art-foot p{color:var(--muted);font-size:11.5px;line-height:1.7;margin:0}
   .calc .row{grid-template-columns:1fr 78px}
   .art-hero{padding-top:22px}
 }
+
+/* ---- Finition du 26/10/2026 (telephone d'abord) ----
+   Les petites etiquettes en majuscules passent de la police a chasse fixe (8,5 a 10,5 px) a
+   DM Sans en 11 a 12 px : lisibles sur telephone, et plus de « costume technique ». Les chiffres
+   (tableaux, formule, calculette) gardent leur police de mesure. Le gris des mentions passe a
+   plus de 4,5:1 sur le fond. */
+:root{--muted:#7f98ae}
+.crumb,.meta{font:500 11.5px/1.45 "DM Sans",system-ui,sans-serif;letter-spacing:.06em}
+.tag,.toc h2,.box .box-t,.calc h3,.related span,.cta a.btn{font-family:"DM Sans",system-ui,sans-serif;font-size:11.5px;letter-spacing:.1em}
+.keyfig span,.calc .out div span{font:600 11px/1.35 "DM Sans",system-ui,sans-serif;letter-spacing:.06em}
+th{font-family:"DM Sans",system-ui,sans-serif;font-size:11px;letter-spacing:.08em}
+.toc li::before{font:600 12px/1.6 "DM Sans",system-ui,sans-serif;font-variant-numeric:tabular-nums}
+.toc li{margin:3px 0}
+.toc a{display:inline-block;padding:4px 0}

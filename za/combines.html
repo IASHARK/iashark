@@ -49,6 +49,12 @@
 .topbar .btn-login,.topbar .account-chip{min-height:44px;font:700 13px/1.2 "DM Sans",Inter,system-ui,sans-serif;letter-spacing:0}
 .legal-note{margin:28px auto 0;color:var(--soft);font-size:12px;line-height:1.7;text-align:center;text-wrap:balance}
 .legal-note a{color:var(--soft);text-decoration:none;display:inline-flex;align-items:center;min-height:44px;padding:0 2px}
+/* Liens legaux (26/10/2026) : les points de separation restent en fin de ligne, jamais
+   au debut de la ligne suivante (« · Cookies »). Les points du texte sont masques, chaque lien
+   sauf le dernier porte le sien. */
+.legal-links{display:flex;flex-wrap:wrap;justify-content:center;font-size:0}
+.legal-links a{font-size:12px}
+.legal-links a:not(:last-child)::after{content:"\00B7";margin:0 3px 0 6px;color:var(--soft)}
 </style>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="IASHARK">
@@ -83,7 +89,7 @@
   </section>
   <p class="legal-note" data-i18n="pricing_page.legal_note">Information for statistical purposes — Not betting advice · Prohibited for under-18s</p>
   <p class="legal-note" style="margin-top:6px"><span data-i18n="match_page.shell_help_label">Help:</span> <a data-market-helpline="url" href="https://www.responsiblegambling.org.za">responsiblegambling.org.za</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">0800 006 008</span></span></p>
-  <p class="legal-note" style="margin-top:10px"><a href="/za/mentions-legales.html" data-href="mentions-legales.html" data-i18n="footer.mentions_legales">Legal Notice</a> · <a href="/za/cgv.html" data-href="cgv.html" data-i18n="footer.cgv">Terms</a> · <a href="/za/confidentialite.html" data-href="confidentialite.html" data-i18n="footer.confidentialite">Privacy</a> · <a href="/za/jeu-responsable.html" data-href="jeu-responsable.html" data-i18n="footer.responsible_gambling">Responsible gambling</a></p>
+  <p class="legal-note legal-links" style="margin-top:10px"><a href="/za/mentions-legales.html" data-href="mentions-legales.html" data-i18n="footer.mentions_legales">Legal Notice</a> · <a href="/za/cgv.html" data-href="cgv.html" data-i18n="footer.cgv">Terms</a> · <a href="/za/confidentialite.html" data-href="confidentialite.html" data-i18n="footer.confidentialite">Privacy</a> · <a href="/za/jeu-responsable.html" data-href="jeu-responsable.html" data-i18n="footer.responsible_gambling">Responsible gambling</a></p>
 </main>
 <nav class="bottom-nav" aria-label="Main navigation" data-i18n-attr="aria-label:geo.nav.aria_label"><a href="/za/"><span>⌂</span><b data-i18n="nav.home">HOME</b></a><a href="/za/combines.html"><span>☆</span><b data-i18n="nav.tools">COMBOS</b></a><a href="/en/blog/"><span>▤</span><b data-i18n="nav.guides">BLOG</b></a><a href="/za/compte.html"><span>♙</span><b data-i18n="nav.account">ACCOUNT</b></a></nav>
 <script src="/i18n/i18n.js"></script><script src="/lib/market-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" defer></script><script src="/app-client.js" defer></script><script src="/auth-header.js"></script><script src="/lib/icones.js"></script><script src="/lib/composants.js"></script><script src="/lib/market-labels.js"></script><script src="/lib/checkout-consent.js"></script><script src="/lib/offre-pro.js"></script><script src="/lib/aujourdhui.js"></script><script src="/lib/preuve-hier.js" defer></script><script src="/site-prefs.js"></script>

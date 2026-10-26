@@ -100,3 +100,11 @@ html{scroll-padding-bottom:calc(96px + env(safe-area-inset-bottom))}
   .site-bottom-nav__item:active{transform:none}
   .site-bottom-nav__item[aria-current="page"] .site-bottom-nav__icon{transform:none}
 }
+/* Index des championnats en pied de page (scripts/seo-common.js#footerNavHtml, styles en
+   ligne) : soulignement discret, plein au survol, focus clavier visible. Meme reglage que
+   l'accueil (26/10/2026), cette fois sur toutes les pages. */
+.seo-foot-nav a{text-decoration-color:rgba(145,160,179,.4)!important;text-decoration-thickness:1px!important}
+.seo-foot-nav a:hover{color:#c3ccd8!important;text-decoration-color:currentColor!important}
+.seo-foot-nav a:focus-visible{outline:2px solid #18d3ef;outline-offset:2px;border-radius:3px}
+/* Numeros d'aide jamais coupes en fin de ligne (« 09 74 75 13 » puis « 13 »). */
+a[href^="tel:"],[data-market-helpline="phone"]{white-space:nowrap}

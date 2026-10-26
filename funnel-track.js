@@ -829,9 +829,20 @@
       if (!ev) return;
       reportError(ev.message || (ev.error && ev.error.message), ev.filename, ev.lineno);
     });
+    // Echec reseau d'un envoi fait AU DEPART de la page (page deja masquee) :
+    // ignore. Constat du 26/10/2026 : 34 des 38 « Failed to fetch » du mois
+    // arrivaient a la seconde du page_leave, sur toutes les pages (blog
+    // compris) - la mesure de vitesse injectee par Netlify
+    // (/.netlify/scripts/rum) envoie ses donnees au masquage de la page avec
+    // un fetch sans .catch. Rien n'etait casse pour le visiteur ; ces lignes
+    // noyaient les vraies pannes dans l'admin. Un echec reseau page VISIBLE
+    // reste compte.
+    var NETWORK_FAIL = /^(TypeError: )?(Failed to fetch|Load failed|NetworkError when attempting to fetch resource\.?|The network connection was lost\.?)$/i;
     window.addEventListener("unhandledrejection", function (ev) {
       var r = ev && ev.reason;
-      reportError("Promesse rejetee : " + (r && r.message ? r.message : String(r)), null, null);
+      var m = r && r.message ? r.message : String(r);
+      if (NETWORK_FAIL.test(String(m).trim()) && document.visibilityState === "hidden") return;
+      reportError("Promesse rejetee : " + m, null, null);
     });
   } catch (e) {}
 

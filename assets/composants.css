@@ -297,8 +297,12 @@ body.fb-no-scroll{overflow:hidden}
   .mu-sub.is-on,.mu-sub.is-on .mu-sub-b,.mu-sub.is-out .mu-sub-a{animation:none}
   .fb-drawer{transition:none}
 }
-.ch-box{position:relative;width:100%}
-.ch-box canvas{display:block}
+/* Graphique pas encore dessine (Chart.js charge a l'approche de l'ecran) : le canvas garde sa largeur par
+   defaut de 300 px. Dans la grille 120 px de l'apercu floute (page match bloquee), la page devenait plus
+   large que le telephone (457 px pour 390 px, constat du 26/10/2026 : page decalee, barre du bas hors
+   ecran, sur presque tous les telephones). Le canvas ne depasse plus jamais sa boite. */
+.ch-box{position:relative;width:100%;min-width:0}
+.ch-box canvas{display:block;max-width:100%}
 .fb-drawer:focus{outline:none}
 
 /* Preuve « Hier » (lib/preuve-hier.js, 21/10/2026) : une ligne sobre sur l'accueil et la page Pro, gagne ou perdu,

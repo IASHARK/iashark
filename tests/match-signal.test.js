@@ -105,9 +105,11 @@ test("vue du match reel 1557402 : signal, tableau modele/marche et raisons coher
   const vm = buildMatchViewModel(raw);
   const r = vm.model.recommendation;
   assert.ok(r && r.probability > 0);
-  const implied = Math.round((100 / raw.cote_rec) * 10) / 10;
+  // Correction C3 du 27/10/2026 : la cote marge retiree (lib/match-view-model.js#recommendedFair), jamais 1 / cote.
+  const { recommendedFair } = require("../lib/match-view-model.js");
+  const implied = recommendedFair(raw).value;
   assert.equal(vm.model.recommendedImplied, implied);
-  assert.equal(vm.model.recommendedEdge, Math.round((r.probability - implied) * 10) / 10);
+  assert.equal(vm.model.recommendedEdge, implied === null ? null : Math.round((r.probability - implied) * 10) / 10);
   assert.equal(vm.model.marketTable.filter((x) => x.recommended).length, 1);
   assert.ok(vm.editorial.signalReasons.length <= 3);
   for (const row of vm.model.marketTable) assert.ok(row.model > 0 && row.model < 100, "probabilite modele reelle sur chaque ligne");

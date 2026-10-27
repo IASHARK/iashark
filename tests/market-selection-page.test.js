@@ -30,15 +30,22 @@ test('carte : le pari retenu est compare a la probabilite juste (marge retiree),
   assert.equal(vm.model.recommendedEdge, 0.6);
 });
 
-test('carte : sans ligne pour le pari dans markets_compared (donnees anterieures), repli sur 1 / cote', () => {
+// Correction C3 du 27/10/2026 : plus jamais de repli sur 1 / cote (marge du bookmaker comprise) ; l'issue
+// opposee cotee du meme marche (plus / moins de 2,5 buts : co25 / cu25), sinon aucune comparaison.
+const pairePlus25 = Math.round((1 / 1.62) / (1 / 1.62 + 1 / 2.35) * 1000) / 10;
+test('carte : sans ligne pour le pari dans markets_compared, la cote marge retiree vient de l\'issue opposee (jamais 1 / cote)', () => {
   const vm = buildMatchViewModel(raw({ markets_compared: [] }));
-  assert.equal(vm.model.recommendedImplied, Math.round(1000 / 1.62) / 10);
+  assert.equal(vm.model.recommendedImplied, pairePlus25);
+  assert.notEqual(vm.model.recommendedImplied, Math.round(1000 / 1.62) / 10);
+  const seul = buildMatchViewModel(raw({ markets_compared: [], cu25: null }));
+  assert.equal(seul.model.recommendedImplied, null, 'issue opposee absente : aucune comparaison');
+  assert.equal(seul.model.recommendedEdge, null);
 });
 
 test('carte : une probabilite juste aberrante (0, 100, absente) n\'est jamais utilisee', () => {
   for (const consensus of [0, 100, null, '', 'abc']) {
     const vm = buildMatchViewModel(raw({ markets_compared: [{ id: 'over-25', market: 'Over 2.5', probability: 59.8, consensus, edge: null }] }));
-    assert.equal(vm.model.recommendedImplied, Math.round(1000 / 1.62) / 10, String(consensus));
+    assert.equal(vm.model.recommendedImplied, pairePlus25, String(consensus));
   }
 });
 

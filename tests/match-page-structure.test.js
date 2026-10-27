@@ -179,11 +179,13 @@ test("l'avis IASHARK montre pari, cote, deux barres, ecart, fiabilite, raisons e
   }
   assert.doesNotMatch(js,/function confMeter\(/);
   assert.match(bloc,/raw\.has_signal===true&&raw\.no_signal!==true/);
-  // A l'octet pres : la fonction est celle de la version d'origine (29/09).
+  // A l'octet pres : la fonction est celle de la version d'origine (29/09). 27/10/2026 : correction C3 du
+  // diagnostic CONVERSION-27-10 (notre chance comparee a la cote MARGE RETIREE, sinon aucune comparaison
+  // et la phrase « Elle contient sa marge ») ; empreinte mise a jour.
   const crypto=require("node:crypto");
   const debut=js.indexOf("function signalCard(vm){");let p=0,fin=-1;
   for(let i=js.indexOf("{",debut);i<js.length;i++){if(js[i]==="{")p++;else if(js[i]==="}"){p--;if(!p){fin=i+1;break;}}}
-  assert.equal(crypto.createHash("sha256").update(js.slice(debut,fin)).digest("hex"),"a50925e3f1b887dfc79fea061f71b3081bbacba9c3c81b3554d4d4c916a555a3");
+  assert.equal(crypto.createHash("sha256").update(js.slice(debut,fin)).digest("hex"),"7a55620a7d40ba9696a74fea34401cca3726dccd1ed807e0fd150fefb0965c18");
 });
 
 // REGLE DU PROPRIETAIRE (16/09/2026) : tout ce que l'IA donne est FERME pour le

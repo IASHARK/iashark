@@ -288,7 +288,10 @@ test("composant de paiement : textes sans mot interdit ni fausse urgence", () =>
     assert.doesNotMatch(h, /plus que|dernières heures|compte à rebours|expire/i, "aucune fausse urgence");
     assert.match(h, /Passe Pro pour ouvrir ce match/);
   }
-  assert.match(OP.html({ mode: "vitrine", contexte: "general", plans, choisi: "month", jours: 7, connecte: false, uid: "v" }), /Commencer mes 7 jours d’essai/);
+  // Correction C4 du 27/10/2026 : le montant d'aujourd'hui dans le bouton, la date du premier prelevement dessous.
+  const essai = OP.html({ mode: "vitrine", contexte: "general", plans, choisi: "month", jours: 7, connecte: false, uid: "v" });
+  assert.match(essai, /Essayer 7 jours : 0 € aujourd’hui/);
+  assert.match(essai, /Premier prélèvement : 19,95 € le \d{1,2} \S+, seulement si tu ne résilies pas avant\. Résiliation en ligne depuis Mon compte\./);
 });
 
 // Controle UX du 04/10/2026 : aucune repetition (le nombre de buts et le film), « Et si » ecrit

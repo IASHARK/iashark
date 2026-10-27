@@ -184,11 +184,14 @@ test("prix : MX$ pour le peso, prix du marche ecrit dans le HTML genere", () => 
   assert.doesNotMatch(read("gb/index.html"), /id="heroPrice"[^>]*>[^<]*€/);
 });
 
-test("accueil : 19 competitions partout, analyse gratuite honnete (compte gratuit)", () => {
+// Correction C6 du 27/10/2026 : UN seul nombre, celui de config/leagues.json (51 au 27/10), plus « 19 ».
+test("accueil : un seul nombre de competitions (config/leagues.json), analyse gratuite honnete (compte gratuit)", () => {
+  const nb = JSON.parse(read("config/leagues.json")).leagues.length;
   require("./helpers/public-dirs.js").PUBLIC_DIRS.forEach((d) => {
     const visible = read(d + "/index.html").replace(/<script[\s\S]*?<\/script>/g, "").replace(/<style[\s\S]*?<\/style>/g, "");
     assert.doesNotMatch(visible, /\b13\b[^<]{0,3}(championnats|compet|Wettbewerbe|competizioni|competições|competiciones)|Treize|Thirteen|Trece|Dreizehn|Tredici/i, d);
-    assert.match(visible, /tabular-nums">19<\/b>/, d);
+    assert.match(visible, new RegExp("tabular-nums\">" + nb + "</b>"), d);
+    assert.doesNotMatch(visible, /\b19\b[^<]{0,3}(COMP|compet|Wettbewerbe|competizioni|competições|competiciones)|Dix-neuf|Nineteen|Diecinueve|Neunzehn|Diciannove|Dezanove/i, d);
   });
   assert.match(read("gb/index.html"), /with a free account/);
   assert.match(read("fr/index.html"), /avec un compte gratuit/);

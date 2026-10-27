@@ -35,7 +35,7 @@
 .op-ico-s{width:16px;height:16px;color:var(--op-soft)}
 .op-pay{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0;padding:0;list-style:none;color:var(--op-soft);font-size:12.5px;line-height:1.4}
 .op-pay li{display:inline-flex;align-items:center;gap:6px}
-.op-trial{margin:-4px 0 0;color:var(--op-soft);font-size:12.5px}
+.op-trial{margin:-4px 0 0;color:var(--op-soft);font-size:13px;line-height:1.45}
 .op-trial[hidden]{display:none}
 .op-alt{justify-self:center;color:var(--op-soft);font-size:13.5px;text-decoration:underline;text-underline-offset:3px}
 .op-alt--start{justify-self:start;color:var(--op-cyan)}
@@ -47,3 +47,9 @@
   .op{padding:24px 24px 22px;gap:16px}
 }
 .op-pro{text-align:center;line-height:1.45;color:var(--op-cyan);max-width:34ch}
+/* Sortie gratuite du match bloque (correction C1 du 27/10/2026) : sous le bouton d'essai, bien
+   visible, cible de 44 px ; le nom du match offert en cyan (aucun vert, aucun rouge). */
+.op-sortie{display:block;min-height:44px;padding:11px 14px;border:1px solid var(--op-line2);border-radius:12px;background:rgba(32,213,239,.05);color:var(--op-text);font-size:14px;line-height:1.45;text-decoration:none}
+.op-sortie b{color:var(--op-cyan);font-weight:700}
+.op-sortie:hover{border-color:var(--op-cyan)}
+.op-sortie:focus-visible{outline:2px solid var(--op-cyan);outline-offset:2px}

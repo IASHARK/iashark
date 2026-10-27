@@ -1324,6 +1324,21 @@ function enTeteOffre(raw){
   if(etat==='none')return esc(t('match_page.avis_no_signal','Pas de pari retenu par le modèle sur ce match'));
   return '';
 }
+// Sortie gratuite du cadenas Pro (correction C1 du 27/10/2026) : le match offert DU JOUR, lu dans la
+// liste du jour par lib/free-match.js#offertDuJour (la meme source que l'accueil, jamais ecrit en dur).
+// Sans match offert ce jour, ou s'il s'agit de ce match : rien. listeDuJour : la liste lue au demarrage.
+let listeDuJour=null;
+function sortieGratuite(raw,list){
+  try{
+    if(!window.IasharkFreeMatch||!IasharkFreeMatch.offertDuJour||!Array.isArray(list)||!list.length)return null;
+    const m=IasharkFreeMatch.offertDuJour(list,null,(window.IASHARK_MARKET&&window.IASHARK_MARKET.code)||null);
+    if(!m||!/^\d+$/.test(String(m.id))||String(m.id)===String(raw&&raw.id))return null;
+    const nom=e=>e&&typeof e==='object'?String(e.n||e.name||'').trim():String(e||'').trim();
+    const h=nom(m.home),a=nom(m.away);
+    if(!h||!a)return null;
+    return {href:lien('match.html?id='+m.id),match:tf('match_page.sig_match_line','{home} – {away}',{home:h,away:a})};
+  }catch(e){return null;}
+}
 function renderProWall(raw,ctx){
   const vm=viewModel(publicCopy(raw));
   const pub=vm._raw;
@@ -1341,7 +1356,7 @@ function renderProWall(raw,ctx){
   // ce match a un panneau pour Pro (nb_marches).
   paint(vm,secs,{sansStats:true,panneau:MS&&estFr()&&n(pub.nb_marches)>0?{html:MS.panneauFlou(pub.nb_marches,''),flou:true,fab:false}:null});
   const box=document.getElementById('offreMatch');
-  if(window.IasharkOffrePro&&box)IasharkOffrePro.mount(box,{mode:'vitrine',contexte:'match',next:cheminMatch(raw),connecte:!!(ctx&&ctx.session),sousTitre:enTeteOffre(pub),suivi:'match_gate_unlock',contenus,nbMarches:n(pub.nb_marches),pari:etatAnalyse(pub)!=='none'});
+  if(window.IasharkOffrePro&&box)IasharkOffrePro.mount(box,{mode:'vitrine',contexte:'match',next:cheminMatch(raw),connecte:!!(ctx&&ctx.session),sousTitre:enTeteOffre(pub),suivi:'match_gate_unlock',contenus,nbMarches:n(pub.nb_marches),pari:etatAnalyse(pub)!=='none',sortie:sortieGratuite(raw,listeDuJour)});
 }
 // MATCH OFFERT, SANS COMPTE : meme dessin que le composant de paiement, un seul
 // bouton « Creer mon compte gratuit » (retour sur ce match), lien discret
@@ -1556,6 +1571,7 @@ async function init(){
       }catch(e){appel=null;}
       renderAuthWall(raw,appel);return;
     }
+    listeDuJour=list;
     if(!isFree&&!termine&&!vuePro){renderProWall(raw,ctx);return;}
     // Compte gratuit sur le match offert : toutes les sections, panneau Marches flou
     // (cadenas Pro sur le panneau seulement). Match termine : aucun panneau (plus rien a jouer).

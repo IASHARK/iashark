@@ -70,7 +70,7 @@ test("pastille de niveau : 3 libelles, icone Lucide signal (haut, moyen, bas), n
     assert.match(pill, new RegExp(expected[band][0]));
     assert.match(pill, new RegExp('lucide-' + expected[band][1] + ' hl-ico'));
     assert.doesNotMatch(pill, /<i class=/, "aucune barre dessinee");
-    assert.match(pill, /title="Estimation du modèle, pas une garantie\. Détail et pari réservés aux abonnés Pro\."/);
+    assert.match(pill, /title="Estimation du modèle, pas une garantie\. Le match offert s’ouvre avec un compte gratuit ; les autres matchs avec Pro\."/);
     assert.match(html, /aria-label="[^"]*Estimation du modèle, pas une garantie/);
     assert.doesNotMatch(pill, /confiance/i);
   }

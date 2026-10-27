@@ -313,7 +313,7 @@ test("C3 : chance abaissee par prudence (comme n° 1556693) : les deux chiffres,
   }
 });
 
-test("C3 : voie du moteur v3, « marche » seulement quand la chance publiee EST le chiffre sans marge de la cote", () => {
+test("C3 : voie du moteur v3 inchangee (controle trader 27/10 : le moteur ne bouge pas, c'est la page qui compare les chiffres)", () => {
   const P3 = require("../lib/pronostic.js");
   const CFG = JSON.parse(read("config/leagues.json"));
   const V = "vérifié sur le passé";
@@ -326,13 +326,15 @@ test("C3 : voie du moteur v3, « marche » seulement quand la chance publiee EST
     P3.publierPronostics([m], [], { configLigues: CFG, figes: {}, chancesV3Par: { 200: { marches: { "1N2:1": ch, "DC:1N": 84 } } } });
     return [m.market_id, m.model_probability, m.pronostic.moteur, m.pronostic.source_chance, m.pronostic.sans_marge];
   };
-  // Chance du Canal Pro 70 : plus haute que les cotes (68) -> avant « marche » (faux) ; maintenant « modele », comparee a 67,7.
-  assert.deepEqual(publier(70), ["home-win", 70, "v3", "modele", 67.7]);
+  // Chance du Canal Pro 70, cotes sans marge 67,7 : source_chance reste « marche » (regle du moteur inchangee : la passer a
+  // « modele » declenchait la correction Argentine double chance -13 et changeait le pari retenu). L'affichage
+  // (lib/match-view-model.js#comparaisonPari) voit 70 =/= 67,7 sans prudence et presente une chance calculee, comparee aux cotes.
+  assert.deepEqual(publier(70), ["home-win", 70, "v3", "marche", 67.7]);
   // Chance 68 = le chiffre des cotes (meme entier) : « marche ».
   assert.deepEqual(publier(68), ["home-win", 68, "v3", "marche", 67.7]);
   // Chance 66, sous les cotes : « modele » (inchange).
   assert.deepEqual(publier(66), ["home-win", 66, "v3", "modele", 67.7]);
-  assert.match(read("lib/pronostic.js"), /const sourceChance = q !== null && q > 0 && q < 100 && Math\.round\(q\) === Math\.round\(ch\) \? SOURCE_CHANCE\.MARCHE : SOURCE_CHANCE\.MODELE;/);
+  assert.match(read("lib/pronostic.js"), /const sourceChance = q !== null && q > 0 && q < 100 && Math\.round\(q\) <= Math\.round\(ch\) \? SOURCE_CHANCE\.MARCHE : SOURCE_CHANCE\.MODELE;/);
 });
 
 // ---------------------------------------------------------------------------------------------

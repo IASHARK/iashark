@@ -11,6 +11,10 @@
 #       essai     : qui recevrait quel e-mail, en nombres ; rien n'est envoye
 #       installer : pose les secrets, installe la fonction, puis essai a blanc
 #       envoi     : un passage d'envoi reel (taper ENVOYER dans « confirmation »)
+#       suivi     : relire chez Brevo les ouvertures, clics, rebonds et plaintes (aucun envoi)
+#
+# Chaque passage reel relit aussi les ouvertures et clics des 7 derniers jours chez Brevo
+# (27/10/2026 : sans cela, 0 ouverture etait comptee). Nombres seulement dans le journal.
 #
 # Le journal de ce workflow est PUBLIC (depot public) : nombres seulement, jamais une adresse.
 # Region fixe us-east-2 : Brevo n'accepte que les adresses IP autorisees par Clement (AWS Ohio),
@@ -27,11 +31,11 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "essai (rien n'est envoye), installer (secrets + fonction, puis essai) ou envoi (un passage reel)"
+        description: "essai (rien n'est envoye), installer (secrets + fonction, puis essai), envoi (un passage reel) ou suivi (ouvertures et clics, aucun envoi)"
         required: true
         default: essai
         type: choice
-        options: [essai, installer, envoi]
+        options: [essai, installer, envoi, suivi]
       confirmation:
         description: "Pour un envoi reel a la main : ENVOYER"
         required: false
@@ -57,7 +61,7 @@ jobs:
           MODE: ${{ inputs.mode }}
           CONFIRMATION: ${{ inputs.confirmation }}
         run: |
-          installer=false; dry=true
+          installer=false; dry=true; suivi=false
           case "$EVENT" in
             schedule) dry=false ;;
             push) installer=true ;;
@@ -67,10 +71,13 @@ jobs:
                 dry=false
               elif [ "$MODE" = "installer" ]; then
                 installer=true
+              elif [ "$MODE" = "suivi" ]; then
+                suivi=true
               fi ;;
           esac
           echo "installer=$installer" >> "$GITHUB_OUTPUT"
           echo "dry=$dry" >> "$GITHUB_OUTPUT"
+          echo "suivi=$suivi" >> "$GITHUB_OUTPUT"
           echo "Passage : installation=$installer, essai a blanc=$dry"
       - uses: actions/checkout@v4
         if: steps.choix.outputs.installer == 'true'
@@ -107,13 +114,14 @@ jobs:
           KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           EMAIL_INTERNAL_SECRET: ${{ secrets.EMAIL_INTERNAL_SECRET }}
           DRY: ${{ steps.choix.outputs.dry }}
+          SUIVI: ${{ steps.choix.outputs.suivi }}
         run: |
           KEY=$(printf %s "$KEY" | tr -d '\r\n ')
-          corps=$(jq -nc --argjson d "$DRY" '{dryRun: $d}')
+          if [ "$SUIVI" = "true" ]; then corps='{"suivi":true}'; else corps=$(jq -nc --argjson d "$DRY" '{dryRun: $d}'); fi
           code=$(curl -sS -o reponse.json -w "%{http_code}" -X POST "https://$PROJECT_REF.supabase.co/functions/v1/send-lifecycle-emails" \
             -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H "x-internal-secret: $EMAIL_INTERNAL_SECRET" \
             -H "x-region: us-east-2" -H "Content-Type: application/json" --max-time 300 -d "$corps")
           echo "HTTP $code"
           # Nombres seulement (journal public) : jamais d'adresse, meme masquee.
-          jq '{ok, processed, reason, missing, dryRun, provider, checked, sent, notSent, skipped, failed, byCampaign}' reponse.json || echo "reponse illisible"
+          jq '{ok, processed, reason, missing, dryRun, provider, checked, sent, notSent, skipped, failed, byCampaign, suivi}' reponse.json || echo "reponse illisible"
           [ "$code" = "200" ]

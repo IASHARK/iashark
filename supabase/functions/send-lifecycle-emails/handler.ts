@@ -24,6 +24,18 @@
 //                            (ne JAMAIS l'utiliser depuis un journal public)
 //   { test: { campaign, dir } }  UN seul e-mail « [TEST] » au premier compte administrateur
 //                            (users.role = 'admin'), sans reservation ni journal email_sends
+//   { suivi: true }          suivi seul : ouvertures, clics, rebonds et plaintes relus chez
+//                            Brevo et notes dans email_sends ; aucun e-mail envoye
+//
+// SUIVI DES OUVERTURES (27/10/2026) : 13 e-mails de bienvenue partis les 25 et 26/10, 0
+// ouverture comptee. Cause : opened_at / clicked_at ne sont ecrits que par
+// public.email_record_event, prevue pour un webhook Resend jamais branche ; l'envoi passe
+// par Brevo, et seule la fonction relance-emails (mode « suivi », lance a la main) relisait
+// les evenements Brevo, et seulement pour sa campagne du 20/10. Desormais, chaque passage
+// normal (et { suivi: true }) relit chez Brevo les evenements des 7 derniers jours
+// (opened, clicks, hardBounces, spam) et les note par identifiant de message (toutes
+// campagnes, relance comprise). Les ouvertures « chargees par un proxy » (Apple Mail)
+// sont comptees a part dans la reponse, jamais comme une ouverture.
 //
 // Etapes pour chaque destinataire :
 // 1. public.lifecycle_email_candidates (0024) propose une campagne ;
@@ -58,7 +70,13 @@ export type LifecycleStore = {
   completeSend: (args: { id: number; status: "sent" | "failed"; messageId?: string | null; error?: string | null }) => Promise<void>;
   // Comptes administrateurs (users.role = 'admin') : destinataires de l'envoi de test.
   listTestRecipients?: () => Promise<TestRecipient[]>;
+  // Suivi : envois recents (identifiant de message, etats deja notes) et ecriture d'un
+  // evenement (public.email_record_event). Absents = pas de suivi.
+  recentSends?: (args: { sinceIso: string }) => Promise<SentRow[]>;
+  recordEvent?: (args: { messageId: string; event: TrackedEvent; at: string }) => Promise<boolean>;
 };
+export type TrackedEvent = "opened" | "clicked" | "bounced" | "complained";
+export type SentRow = { message_id: string | null; opened_at: string | null; clicked_at: string | null; status: string | null };
 export type HandlerDeps = {
   env: GetEnv;
   fetch: typeof fetch;
@@ -71,6 +89,13 @@ export const RESEND_API_URL = "https://api.resend.com/emails";
 export const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 export const DEFAULT_PUBLIC_DATA_URL = "https://iashark.com/data-home.json";
 export const MAX_BODY_BYTES = 16 * 1024;
+export const BREVO_EVENTS_URL = "https://api.brevo.com/v3/smtp/statistics/events";
+// Evenements Brevo relus -> evenement note dans email_sends (public.email_record_event).
+// loadedByProxy (ouverture automatique d'Apple Mail) : compte a part, jamais une ouverture.
+export const BREVO_TRACKED: Record<string, TrackedEvent | "proxy"> = { opened: "opened", clicks: "clicked", hardBounces: "bounced", spam: "complained", loadedByProxy: "proxy" };
+export const TRACKING_DAYS = 7;
+const TRACKING_PAGE = 500;
+const TRACKING_MAX_PAGES = 5;
 // Essai Pro : meme regle que create-checkout-session/trial.ts (fonction en ligne) :
 // TRIAL_DAYS absent = 7 jours, "0" = coupe, borne a 1..30.
 export const TRIAL_DAYS_DEFAULT = 7;
@@ -186,6 +211,82 @@ async function loadPublicMatches(deps: HandlerDeps): Promise<unknown[] | null> {
   }
 }
 
+function messageKey(id: unknown): string {
+  return String(id == null ? "" : id).trim().replace(/^<|>$/g, "").toLowerCase();
+}
+
+// Suivi Brevo : relit les evenements des TRACKING_DAYS derniers jours et note ceux des
+// e-mails de email_sends (par identifiant de message). Nombres seulement dans le resultat.
+export async function syncBrevoEvents(deps: HandlerDeps, provider: Provider | null, now: Date): Promise<Json> {
+  if (!provider || provider.name !== "brevo") return { synced: false, reason: "provider_not_brevo" };
+  const store = deps.db;
+  if (!store || typeof store.recentSends !== "function" || typeof store.recordEvent !== "function") return { synced: false, reason: "store_without_tracking" };
+  let sends: SentRow[];
+  try {
+    sends = await store.recentSends({ sinceIso: new Date(now.getTime() - (TRACKING_DAYS + 1) * 86400000).toISOString() });
+  } catch (err) {
+    deps.log.error(TAG + " suivi : lecture des envois impossible : " + errorText(err));
+    return { synced: false, reason: "db_unavailable" };
+  }
+  const byId = new Map<string, SentRow>();
+  for (const r of sends || []) if (r && r.message_id) byId.set(messageKey(r.message_id), r);
+  const out: Record<string, number> = { opened: 0, clicked: 0, bounced: 0, complained: 0, proxy: 0, events: 0, unknown: 0 };
+  const errors: string[] = [];
+  if (!byId.size) return { synced: true, ...out, errors };
+  const note = async (row: SentRow, event: TrackedEvent, at: string) => {
+    const already = event === "opened" ? row.opened_at : event === "clicked" ? row.clicked_at : (row.status === event ? row.status : null);
+    if (already) return;
+    let ok = false;
+    try {
+      ok = await (store.recordEvent as NonNullable<LifecycleStore["recordEvent"]>)({ messageId: row.message_id as string, event, at });
+    } catch (err) {
+      errors.push(event + ":db");
+      deps.log.error(TAG + " suivi : evenement non note : " + errorText(err));
+      return;
+    }
+    if (!ok) return;
+    out[event]++;
+    if (event === "opened") row.opened_at = at;
+    else if (event === "clicked") row.clicked_at = at;
+    else row.status = event;
+  };
+  for (const brevoEvent of Object.keys(BREVO_TRACKED)) {
+    for (let page = 0; page < TRACKING_MAX_PAGES; page++) {
+      const q = new URLSearchParams({ limit: String(TRACKING_PAGE), offset: String(page * TRACKING_PAGE), days: String(TRACKING_DAYS), event: brevoEvent });
+      let list: Array<Record<string, unknown>> = [];
+      try {
+        const res = await deps.fetch(BREVO_EVENTS_URL + "?" + q.toString(), { headers: { "api-key": provider.key, "Accept": "application/json" }, signal: timeoutSignal(10000) });
+        if (!res.ok) {
+          errors.push(brevoEvent + ":http_" + res.status);
+          deps.log.warn(TAG + " suivi Brevo " + brevoEvent + " : HTTP " + res.status);
+          break;
+        }
+        const body = await res.json().catch(() => ({})) as { events?: Array<Record<string, unknown>> };
+        list = Array.isArray(body.events) ? body.events : [];
+      } catch (err) {
+        errors.push(brevoEvent + ":network");
+        deps.log.warn(TAG + " suivi Brevo " + brevoEvent + " injoignable : " + errorText(err));
+        break;
+      }
+      for (const e of list) {
+        out.events++;
+        const row = byId.get(messageKey(e.messageId));
+        if (!row) { out.unknown++; continue; }
+        const kind = BREVO_TRACKED[brevoEvent];
+        if (kind === "proxy") { out.proxy++; continue; }
+        const d = new Date(String(e.date || ""));
+        const at = isNaN(d.getTime()) ? now.toISOString() : d.toISOString();
+        await note(row, kind, at);
+        // Un clic prouve l'ouverture (images bloquees : pas de pixel charge).
+        if (kind === "clicked") await note(row, "opened", at);
+      }
+      if (list.length < TRACKING_PAGE) break;
+    }
+  }
+  deps.log.info(TAG + " suivi Brevo : " + JSON.stringify(out) + (errors.length ? " erreurs=" + errors.join(",") : ""));
+  return { synced: errors.length === 0, ...out, errors };
+}
+
 export async function handleRequest(req: Request, deps: HandlerDeps): Promise<Response> {
   if (req.method !== "POST") return json(405, { ok: false, error: "method_not_allowed" });
   const internal = envValue(deps, "EMAIL_INTERNAL_SECRET");
@@ -218,6 +319,11 @@ export async function handleRequest(req: Request, deps: HandlerDeps): Promise<Re
   if (!provider && !dryRun) {
     deps.log.info(TAG + " aucun fournisseur d'e-mail (RESEND_API_KEY absent, BREVO_API_KEY absent) - no-op, aucun email de relance traite.");
     return json(200, { ok: true, processed: false, reason: "provider_not_configured" });
+  }
+  // Suivi seul (ouvertures, clics, rebonds, plaintes) : aucun e-mail envoye.
+  if (body.suivi === true && !testMode) {
+    const suivi = await syncBrevoEvents(deps, provider, deps.now());
+    return json(200, { ok: suivi.synced === true, processed: false, suivi });
   }
   const unsubscribeSecret = envValue(deps, "EMAIL_UNSUBSCRIBE_SECRET");
   const supabaseUrl = envValue(deps, "SUPABASE_URL");
@@ -425,6 +531,9 @@ export async function handleRequest(req: Request, deps: HandlerDeps): Promise<Re
   }
   deps.log.info(TAG + " execution " + now.toISOString() + (dryRun ? " (dryRun)" : "") + " : " + JSON.stringify(summary));
   const out: Json = { ok: summary.failed === 0, processed: true, dryRun, provider: provider ? provider.name : null, ...summary, byCampaign, results };
+  // Passage reel : le suivi des ouvertures et clics suit l'envoi (jamais en essai a blanc,
+  // qui n'ecrit rien). Une panne du suivi ne change pas le resultat de l'envoi.
+  if (!dryRun) out.suivi = await syncBrevoEvents(deps, provider, now);
   if (dryRun && details) out.preview = preview;
   return json(summary.failed ? 207 : 200, out);
 }

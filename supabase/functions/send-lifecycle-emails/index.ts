@@ -76,6 +76,19 @@ const db: LifecycleStore | null = supabase
       if (error) throw new Error("email_reserve_send: " + error.message);
       return data == null ? null : Number(data);
     },
+    // Suivi (27/10/2026) : envois recents avec identifiant de message (toutes campagnes),
+    // puis public.email_record_event pour chaque ouverture, clic, rebond ou plainte.
+    async recentSends({ sinceIso }) {
+      const { data, error } = await supabase.from("email_sends").select("message_id,opened_at,clicked_at,status")
+        .gte("sent_at", sinceIso).not("message_id", "is", null).limit(5000);
+      if (error) throw new Error("email_sends: " + error.message);
+      return data ?? [];
+    },
+    async recordEvent({ messageId, event, at }) {
+      const { data, error } = await supabase.rpc("email_record_event", { p_message_id: messageId, p_event: event, p_at: at });
+      if (error) throw new Error("email_record_event: " + error.message);
+      return data === true;
+    },
     async completeSend({ id, status, messageId, error: sendError }) {
       const { error } = await supabase.rpc("email_complete_send", {
         p_id: id, p_status: status, p_message_id: messageId ?? null, p_error: sendError ?? null,

@@ -82,7 +82,7 @@ function aide(texte,label){
 }
 // Correction C3 du 27/10/2026 : notre chance est toujours comparee a la cote MARGE RETIREE
 // (lib/match-view-model.js#recommendedFair), jamais a 1 / cote.
-const texteAideCote=()=>t('match_page.proba_help_implied','« La cote, marge retirée » : la chance que suppose la cote du bookmaker une fois sa marge enlevée. On la calcule avec les cotes de toutes les issues du même marché (par exemple plus et moins de 2,5 buts). Sans ces cotes, on ne compare pas.');
+const texteAideCote=()=>t('match_page.proba_help_implied','« La cote, marge retirée » : la chance que suppose la cote une fois la marge du bookmaker enlevée. Quand notre chance vient du modèle, on la compare à ce chiffre tel qu’il était à la publication du pari. Quand elle vient des cotes du marché, il n’y a rien à comparer.');
 const labelAideCote=()=>t('match_page.proba_help_label','Que veut dire « la cote, marge retirée » ?');
 
 // Carte repliable : le titre EST le bouton, une ligne de resume reste visible.
@@ -111,19 +111,24 @@ function ecart(model,market,edge){
     ?{cls:'pos',text:t('match_page.proba_gap_pos','Nous voyons plus de chances que le bookmaker sur ce pari'),gap}
     :{cls:'neg',text:t('match_page.proba_gap_neg','Le bookmaker voit plus de chances que nous sur ce pari'),gap};
 }
+// o.source (pari retenu, controle trader-de-cotes du 27/10/2026) : « marche » = la chance vient des cotes, marge
+// retiree : une seule barre, aucune barre bookmaker, aucun ecart (la cote ne se compare pas a elle-meme) ;
+// « modele » = « Notre calcul » ; null = origine inconnue (« Chance calculee »). Ailleurs (tableau) : « Notre calcul ».
 function duoBars(o){
-  const m=n(o.model),k=marcheValide(o.market),c=n(o.odds);
+  const m=n(o.model),k=o.source==='marche'?null:marcheValide(o.market),c=n(o.odds);
   const g=ecart(m,k,k===null?null:o.edge);
+  const labelM=o.source==='marche'?t('match_page.proba_market_chance_label','Chance tirée des cotes du marché, marge retirée')
+    :o.source===null?t('match_page.proba_chance_label','Chance calculée'):t('match_page.proba_model_label','Notre calcul');
   const kLabel=o.kind==='consensus'&&c===null?t('match_page.proba_market_consensus','Les cotes, marge retirée'):t('match_page.proba_market_label','La cote, marge retirée');
   const coteTxt=c!==null&&!o.compact?` <em>${esc(odds(c))} →</em>`:'';
   const aria=k===null
-    ?tf('match_page.proba_aria_model_only','Notre calcul : {model}',{model:pct(m,0)})
+    ?(o.source==='marche'||o.source===null?`${labelM} : ${pct(m,0)}`:tf('match_page.proba_aria_model_only','Notre calcul : {model}',{model:pct(m,0)}))
     :tf('match_page.proba_aria','Notre calcul : {model}. La cote, marge retirée : {market}.',{model:pct(m,0),market:pct(k,0)});
   const ligne=(cls,label,val,part)=>`<div class="duo-line ${cls}"><span class="duo-k">${label}</span><b class="duo-v">${esc(val)}</b><span class="duo-track" aria-hidden="true"><i style="--s:${(part/100).toFixed(3)}"></i></span></div>`;
   return `<div class="duo${o.compact?' duo--compact':''}" role="group" aria-label="${esc(aria)}">
-    ${ligne('is-model',esc(t('match_page.proba_model_label','Notre calcul')),pct(m,0),clamp(m))}
+    ${ligne('is-model',esc(labelM),pct(m,0),clamp(m))}
     ${k!==null?ligne('is-market',esc(kLabel)+coteTxt,pct(k,0),clamp(k))
-      // Pas de chance sans marge (pari retenu) : aucune barre bookmaker, la phrase dit pourquoi (o.sansMarge).
+      // Pas de chiffre sans marge comparable (pari retenu) : aucune barre bookmaker, la phrase dit pourquoi (o.sansMarge).
       :o.sansMarge?''
       :`<div class="duo-line is-market is-na"><span class="duo-k">${esc(kLabel)}</span><span class="duo-na">${esc(t('match_page.proba_market_na','non disponible'))}</span></div>`}
     <p class="duo-gap is-${g.cls}"><i aria-hidden="true"></i><span>${k===null&&o.sansMarge?esc(o.sansMarge):`${esc(g.text)}${g.gap?`${esc(t('match_page.label_colon',' :'))} <b>${esc(g.gap)}</b>`:''}`}</span></p>
@@ -424,15 +429,20 @@ function signalCard(vm){
   const aSurveiller=risques.length?risques.slice(0,2):[phrase(t('match_page.sig_risk_default','un seul match reste très aléatoire, même avec un écart favorable'))];
   // « Sur 100 matchs » garde la chance en frequence (la forme la mieux comprise) ; la mention
   // « pas une garantie » n'est ecrite qu'une fois, en bas de l'avis.
-  // implied : chance de la cote MARGE RETIREE (lib/match-view-model.js#recommendedFair), ou null quand
-  // aucune issue opposee n'est cotee : on ne compare pas (correction C3 du 27/10/2026).
+  // Correction C3 du 27/10/2026 (controle trader-de-cotes) : source = d'ou vient la chance (lib/match-view-model.js
+  // #comparaisonPari) ; implied = chiffre sans marge utilise a la publication, seulement quand la chance vient du
+  // modele. Chance tiree des cotes : aucun ecart (la cote face a elle-meme). Sans chiffre publie : pas de comparaison.
+  const source=vm.model.chanceSource===undefined?null:vm.model.chanceSource;
   const plain=prob===null?''
+    :source==='marche'?tf('match_page.sig2_plain_market','Sur 100 matchs comme celui-ci, ce pari passerait environ {model} fois d’après les cotes du marché, marge retirée.',{model:Math.round(prob)})
+    :source===null?tf('match_page.sig2_plain_unknown','Sur 100 matchs comme celui-ci, ce pari passerait environ {model} fois.',{model:Math.round(prob)})
     :implied!==null?tf('match_page.sig2_plain','Sur 100 matchs comme celui-ci, ce pari passerait environ {model} fois selon notre calcul ; la cote, marge retirée, en suppose {market}.',{model:Math.round(prob),market:Math.round(implied)})
     :tf('match_page.sig2_plain_model','Sur 100 matchs comme celui-ci, ce pari passerait environ {model} fois selon notre calcul.',{model:Math.round(prob)});
-  const sansMarge=implied===null&&cote!==null?tf('match_page.sig2_no_fair','Cote du bookmaker : {odds}. Elle contient sa marge : on ne la compare pas à notre calcul.',{odds:odds(cote)}):'';
+  const sansMarge=source==='marche'?t('match_page.sig2_market_only','Cette chance vient des cotes du marché : pas d’écart à montrer.')
+    :implied===null&&cote!==null?tf('match_page.sig2_no_fair','Cote du bookmaker : {odds}. Elle contient sa marge : on ne la compare pas à notre calcul.',{odds:odds(cote)}):'';
   const compare=prob===null?'':`<div class="sig2-cmp tip-host">
       <div class="sig2-cmp-head"><h3>${esc(t('match_page.sig2_compare_title','Nos chances face à la cote'))}</h3>${aide(texteAideCote(),labelAideCote())}</div>
-      ${duoBars({model:prob,market:implied,odds:cote,edge,kind:'odds',sansMarge})}
+      ${duoBars({model:prob,market:implied,odds:cote,edge,kind:'odds',sansMarge,source})}
       ${plain?`<p class="sig2-plain">${esc(plain)}</p>`:''}
     </div>`;
   const risque=riskStat(vm.editorial.riskCode);
@@ -706,7 +716,7 @@ function probasCarte(vm){
     const tags=`${r.recommended?`<span class="mk-tag mk-tag--signal">${esc(t('match_page.proba_tag_signal','Pari conseillé'))}</span>`:''}${!r.recommended&&e!==null&&e>=3?`<span class="mk-tag mk-tag--value">${esc(t('match_page.proba_tag_favorable','Écart favorable'))}</span>`:''}`;
     return `<li class="pr-row${r.recommended?' is-signal':''}">
       <div class="pr-head"><span class="pr-label">${esc(libelleLigne(vm,r))}</span>${tags}${c!==null?`<span class="pr-odds">${esc(t('match_page.proba_odds_short','cote'))} <b>${odds(c)}</b></span>`:''}</div>
-      ${duoBars({model:r.model,market:r.market,odds:c,edge:r.edge,kind:c!==null?'odds':'consensus',compact:true})}
+      ${duoBars({model:r.model,market:r.market,odds:c,edge:r.edge,kind:c!==null?'odds':'consensus',compact:true,source:r.recommended?(r.chanceSource===undefined?null:r.chanceSource):'modele',sansMarge:r.recommended&&r.chanceSource==='marche'?t('match_page.sig2_market_only','Cette chance vient des cotes du marché : pas d’écart à montrer.'):''})}
     </li>`;
   };
   const liste=(part,avant)=>{let g0=avant;return part.map(x=>{const h=x.g!=='signal'&&x.g!==g0?`<li class="pr-group"><h4>${esc(nomGroupe(x.g))}</h4></li>`:'';g0=x.g;return h+ligne(x);}).join('');};

@@ -99,7 +99,9 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb'].includes(x.dir))) {
       await expect(page.locator('#authHeaderSlot')).toContainText('e2e.free', { timeout: 15000 });
     });
 
-    test('inscription directe (sans next) : accueil du compte avec le message de bienvenue', async ({ page, supa }) => {
+    // Correction C5 du 27/10/2026 : le bouton dit « Voir mon pari offert » ; sans ?next=, le nouveau compte
+    // arrive sur le match offert du jour (lib/free-match.js#offertDuJour) ; sans match offert ce jour, Mon compte.
+    test('inscription directe (sans next) : le match offert du jour, sinon accueil du compte avec le message de bienvenue', async ({ page, supa, siteData }) => {
       await page.goto(`/${v.dir}/inscription.html`);
       await page.waitForFunction(() => !!(window.I18N && window.I18N.dict));
       supa.signupSucceedsAs('free');
@@ -107,7 +109,8 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb'].includes(x.dir))) {
       await page.locator('#password').fill('mot-de-passe-e2e');
       await page.locator('#password2').fill('mot-de-passe-e2e');
       await page.locator('#submit').click();
-      await page.waitForURL(new RegExp(`/${v.dir}/compte\\.html\\?bienvenue=1`));
+      if (siteData.free) await page.waitForURL(new RegExp(`/${v.dir}/match\\.html\\?id=\\d+$`)); // offre du marche de la version
+      else await page.waitForURL(new RegExp(`/${v.dir}/compte\\.html\\?bienvenue=1`));
     });
   });
 }

@@ -1,6 +1,6 @@
 {
   "match_page": {
-    "proba_help_implied": "„Die Quote, ohne Marge“: die Chance, die die Quote des Buchmachers ohne seine Marge unterstellt. Wir berechnen sie aus den Quoten aller Ausgänge desselben Marktes (zum Beispiel über und unter 2,5 Tore). Ohne diese Quoten vergleichen wir nicht.",
+    "proba_help_implied": "„Die Quote, ohne Marge“: die Chance, die die Quote ohne die Marge des Buchmachers unterstellt. Kommt unsere Chance vom Modell, vergleichen wir sie mit diesem Wert zum Zeitpunkt der Veröffentlichung. Kommt sie aus den Marktquoten, gibt es nichts zu vergleichen.",
     "proba_help_label": "Was bedeutet „die Quote, ohne Marge“?",
     "proba_gap_none": "Keine vergleichbare Quote für diese Wette.",
     "proba_gap_flat": "Beide sagen dasselbe.",
@@ -130,6 +130,11 @@
     "recovery_home_cta": "Spiele des Tages ansehen",
     "sig2_plain_model": "Von 100 Spielen wie diesem ginge diese Wette laut unserer Berechnung etwa {model} Mal auf.",
     "sig2_no_fair": "Quote des Buchmachers: {odds}. Sie enthält seine Marge, deshalb vergleichen wir sie nicht mit unserer Berechnung.",
-    "label_colon": ":"
+    "label_colon": ":",
+    "proba_market_chance_label": "Chance aus den Marktquoten, ohne Marge",
+    "proba_chance_label": "Berechnete Chance",
+    "sig2_market_only": "Diese Chance stammt aus den Marktquoten: Es gibt keinen Abstand zu zeigen.",
+    "sig2_plain_market": "Von 100 Spielen wie diesem ginge diese Wette laut den Marktquoten ohne Marge etwa {model} Mal auf.",
+    "sig2_plain_unknown": "Von 100 Spielen wie diesem ginge diese Wette etwa {model} Mal auf."
   }
 }

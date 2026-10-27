@@ -1,6 +1,6 @@
 {
   "match_page": {
-    "proba_help_implied": "« La cote, marge retirée » : la chance que suppose la cote du bookmaker une fois sa marge enlevée. On la calcule avec les cotes de toutes les issues du même marché (par exemple plus et moins de 2,5 buts). Sans ces cotes, on ne compare pas.",
+    "proba_help_implied": "« La cote, marge retirée » : la chance que suppose la cote une fois la marge du bookmaker enlevée. Quand notre chance vient du modèle, on la compare à ce chiffre tel qu’il était à la publication du pari. Quand elle vient des cotes du marché, il n’y a rien à comparer.",
     "proba_help_label": "Que veut dire « la cote, marge retirée » ?",
     "proba_gap_none": "Pas de cote comparable pour ce pari.",
     "proba_gap_flat": "Les deux disent la même chose.",
@@ -130,6 +130,11 @@
     "recovery_home_cta": "Voir les matchs du jour",
     "sig2_plain_model": "Sur 100 matchs comme celui-ci, ce pari passerait environ {model} fois selon notre calcul.",
     "sig2_no_fair": "Cote du bookmaker : {odds}. Elle contient sa marge : on ne la compare pas à notre calcul.",
-    "label_colon": " :"
+    "label_colon": " :",
+    "proba_market_chance_label": "Chance tirée des cotes du marché, marge retirée",
+    "proba_chance_label": "Chance calculée",
+    "sig2_market_only": "Cette chance vient des cotes du marché : pas d’écart à montrer.",
+    "sig2_plain_market": "Sur 100 matchs comme celui-ci, ce pari passerait environ {model} fois d’après les cotes du marché, marge retirée.",
+    "sig2_plain_unknown": "Sur 100 matchs comme celui-ci, ce pari passerait environ {model} fois."
   }
 }

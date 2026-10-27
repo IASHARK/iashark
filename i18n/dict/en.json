@@ -752,7 +752,7 @@
     "sig_method_link": "How this figure is calculated: methodology",
     "match_ended_or_missing": "Match finished or not found",
     "league_matches_link": "See the competition’s matches",
-    "proba_help_implied": "“The odds, margin removed”: the chance implied by the bookmaker’s odds once their margin is taken out. We work it out from the odds of every outcome of the same market (for example over and under 2.5 goals). Without those odds, we don’t compare.",
+    "proba_help_implied": "“The odds, margin removed”: the chance implied by the odds once the bookmaker’s margin is taken out. When our chance comes from the model, we compare it with that figure as it was when the pick was published. When it comes from the market odds, there is nothing to compare.",
     "proba_help_label": "What does “the odds, margin removed” mean?",
     "proba_gap_none": "No comparable odds for this bet.",
     "proba_gap_flat": "Both say the same thing.",
@@ -908,7 +908,12 @@
     "sig_reason_form_unbeaten": "{team} has lost only one of its last {n} matches.",
     "sig_reason_form_losses": "{team} has lost {losses} of its last {n} matches.",
     "sig2_plain_model": "Out of 100 matches like this one, this bet would land about {model} times by our calculation.",
-    "sig2_no_fair": "Bookmaker odds: {odds}. They include the bookmaker’s margin, so we don’t compare them with our calculation."
+    "sig2_no_fair": "Bookmaker odds: {odds}. They include the bookmaker’s margin, so we don’t compare them with our calculation.",
+    "proba_market_chance_label": "Chance from the market odds, margin removed",
+    "proba_chance_label": "Calculated chance",
+    "sig2_market_only": "This chance comes from the market odds: there is no gap to show.",
+    "sig2_plain_market": "Out of 100 matches like this one, this bet would land about {model} times according to the market odds, margin removed.",
+    "sig2_plain_unknown": "Out of 100 matches like this one, this bet would land about {model} times."
   },
   "player_page": {
     "value_unavailable": "Data unavailable",
@@ -1596,9 +1601,9 @@
     "step1_title": "We ingest the data",
     "step1_desc": "Fixtures, standings, recent results, head-to-head history and announced absences, league by league.",
     "step2_title": "The model computes",
-    "step2_desc": "Expected goals and the probability of every scoreline, then of every market, compared with the market odds, margin removed.",
+    "step2_desc": "Expected goals and the probability of every scoreline, then of every market. The chance comes from the market odds, margin removed, or from the more cautious of the model and those odds.",
     "step3_title": "You get the signal",
-    "step3_desc": "A clear sheet per match: probability, reliability level, and the market where the model detects a gap with the real market.",
+    "step3_desc": "One clear sheet per match: the pick, its chance, where it comes from and its reliability level.",
     "lbl_access": "ACCESS",
     "title_access_pre": "Start for free. ",
     "title_access_b": "Upgrade to Pro",
@@ -2980,13 +2985,14 @@
     "pending_n": "{n} being checked"
   },
   "preuve_simples": {
-    "line": "Yesterday, published before kick-off: {won}, {lost}.",
-    "line_pending": "Yesterday, published before kick-off: {won}, {lost}, {pending}.",
+    "line": "Yesterday, published before kick-off: {list}.",
     "won_one": "{n} won",
     "won_other": "{n} won",
     "lost_one": "{n} lost",
     "lost_other": "{n} lost",
     "pending_one": "{n} awaiting result",
-    "pending_other": "{n} awaiting results"
+    "pending_other": "{n} awaiting results",
+    "void_one": "{n} void",
+    "void_other": "{n} void"
   }
 }

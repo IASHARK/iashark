@@ -2698,7 +2698,9 @@ jobs:
                     (Array.isArray(l)?l:[]).forEach(function(j){ if(j&&/^\d{1,12}$/.test(String(j.fixture_id))) idsB[String(j.fixture_id)]=true; });
                   });
                   var listeIdsB=Object.keys(idsB);
-                  var jambesB=listeIdsB.length?await rawHttpGetJson(baseB+'predictions_archive?select=fixture_id,market,result,published_at,kickoff_at&fixture_id=in.('+listeIdsB.join(',')+')',entB):[];
+                  // score : jambe sur un autre marche que le pari simple publie, reglee par le score final (controle
+                  // historique-public du 27/10/2026, lib/bandeau-preuves.js#reglerParScore).
+                  var jambesB=listeIdsB.length?await rawHttpGetJson(baseB+'predictions_archive?select=fixture_id,market,result,published_at,kickoff_at,score&fixture_id=in.('+listeIdsB.join(',')+')',entB):[];
                   if(Array.isArray(simplesB)&&Array.isArray(ticketsB)&&Array.isArray(jambesB)){
                     var precB=null; try{ precB=JSON.parse(fs.readFileSync('preuves/bandeau.json','utf8')); }catch(e){}
                     var bandeau=BANDEAU_PREUVES.construireBandeau({simples:simplesB,tickets:ticketsB,jambes:jambesB,matchs:matchsDuRun,precedent:precB,genereLe:genere});

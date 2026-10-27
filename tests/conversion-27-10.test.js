@@ -126,76 +126,91 @@ test("C7 : l'offre Pro juste apres la liste des matchs, le programme partenaires
 });
 
 // ---------------------------------------------------------------------------------------------
-// C3 : « Nos chances face a la cote » compare TOUJOURS a la cote marge retiree (affichage seulement).
+// C3 : « Nos chances face a la cote » (affichage seulement), avec le controle trader-de-cotes du 27/10/2026 : jamais
+// 1 / cote, jamais des cotes plus recentes que la publication, jamais la cote comparee a elle-meme.
 const VM = require("../lib/match-view-model.js");
-const CHANCE = require("../lib/chance-iashark.js");
+const P = require("../lib/pronostic.js");
 const LOCALES = ["fr", "en", "es", "es-mx", "de", "it", "pt"];
 
-test("C3 : le chiffre sans marge du calcul d'abord (meme regle que lib/chance-iashark.js#sansMargeDuPari)", () => {
-  const cas = [
-    { market_id: "under-25", cote_rec: "1.62", cote_source: "anj", sans_marge_anj: { "under-25": 55.4 }, markets_compared: [], co25: "2.4", cu25: "1.6" },
-    { market_id: "dc-x2", cote_rec: "1.4", cote_source: "indicative", markets_compared: [{ id: "dc-x2", consensus: 68.7 }], cdc2x: "1.4", c1: "3.2" },
-    { market_id: "home-win", cote_rec: "1.41", cote_source: "anj", sans_marge_anj: { "home-win": 65.5 }, markets_compared: [{ id: "home-win", consensus: 66 }] },
-  ];
-  for (const r of cas) {
-    assert.equal(VM.recommendedFair(r).value, CHANCE.sansMargeDuPari(r), r.market_id);
-    assert.equal(VM.recommendedFair(r).source, "calcul");
-  }
+test("C3 : chance tiree des cotes = rien a comparer ; chance du modele = comparee au chiffre sans marge de la publication", () => {
+  const pro = (src, sm, id) => ({ market_id: "under-25", cote_rec: "1.4", co25: "2.88", cu25: "1.40", pronostic: { market_id: id || "under-25", source_chance: src, sans_marge: sm } });
+  assert.deepEqual(VM.comparaisonPari(pro("marche", 67.3)), { source: "marche", sansMarge: null }, "la cote ne se compare pas a elle-meme");
+  assert.deepEqual(VM.comparaisonPari(pro("modele", 67.3)), { source: "modele", sansMarge: 67.3 });
+  assert.deepEqual(VM.comparaisonPari(pro("modele", null)), { source: "modele", sansMarge: null }, "publication plus ancienne : aucune comparaison (jamais les cotes du moment)");
+  assert.deepEqual(VM.comparaisonPari(pro("modele", 55, "over-25")), { source: null, sansMarge: null }, "pronostic d'un autre pari : jamais melange");
+  assert.deepEqual(VM.comparaisonPari({ market_id: "under-25", cote_rec: "1.4", co25: "2.88", cu25: "1.40" }), { source: null, sansMarge: null }, "origine inconnue : aucune comparaison");
+  // La page ne retire plus aucune marge elle-meme : ni 1 / cote, ni paire d'issues, ni proportionnelle.
+  const src = read("lib/match-view-model.js");
+  const bloc = src.slice(src.indexOf("function comparaisonPari(raw)"), src.indexOf("function marketTable("));
+  assert.doesNotMatch(bloc, /100 \/ |1 \/ |co25|cu25|cdc|sansMarge\(\[/);
+  const vm = VM.buildMatchViewModel({ id: 1, date: "2026-10-27 20:45", home: { id: 1, n: "A" }, away: { id: 2, n: "B" }, data_quality_score: 80, model_output_available: true,
+    p1: 48, pn: 27, p2: 25, market_id: "under-25", pari_rec: "Under 2.5", cote_rec: "1.4", model_probability: 64, co25: "2.88", cu25: "1.40",
+    pronostic: { market_id: "under-25", source_chance: "modele", sans_marge: 67.3 } });
+  assert.equal(vm.model.chanceSource, "modele");
+  assert.equal(vm.model.recommendedImplied, 67.3);
+  assert.equal(vm.model.recommendedEdge, -3.3);
+  const row = vm.model.marketTable.find((r) => r.recommended);
+  assert.deepEqual([row.market, row.chanceSource], [67.3, "modele"], "tableau : memes chiffres que la carte");
 });
 
-test("C3 : sinon l'issue opposee cotee du meme marche ; sinon aucune comparaison, jamais 1 / cote", () => {
-  const paire = (a, b) => Math.round((1 / a) / (1 / a + 1 / b) * 1000) / 10;
-  // Exemple du diagnostic (/fr/match.html?id=1493205) : moins de 2,5 buts a 1,40 ; 1 / 1,40 = 71,4 %.
-  const u25 = VM.recommendedFair({ market_id: "under-25", cote_rec: "1.4", co25: "2.88", cu25: "1.40" });
-  assert.deepEqual(u25, { value: paire(1.4, 2.88), source: "issues" });
-  assert.ok(u25.value < 71.4 - 3, "la marge n'est plus comptee comme une chance du bookmaker");
-  assert.equal(VM.recommendedFair({ market_id: "over-15", co15: "1.40", cu15: "2.75" }).value, paire(1.4, 2.75));
-  assert.equal(VM.recommendedFair({ market_id: "under-35", co35: "2.62", cu35: "1.50" }).value, paire(1.5, 2.62));
-  assert.equal(VM.recommendedFair({ market_id: "btts-no", cbtts: "1.67", cbtts_non: "2.05" }).value, paire(2.05, 1.67));
-  // Double chance face a l'issue restante du 1N2.
-  assert.equal(VM.recommendedFair({ market_id: "dc-1x", cdc1x: "1.40", c2: "2.79" }).value, paire(1.4, 2.79));
-  assert.equal(VM.recommendedFair({ market_id: "dc-x2", dc2x: "1.53", c1: "2.39" }).value, paire(1.53, 2.39));
-  // 1N2 : consensus sans marge du calcul, sinon les trois cotes.
-  assert.equal(VM.recommendedFair({ market_id: "home-win", market_consensus_p1: "64.1", c1: "1.5", cn: "4.2", c2: "6.5" }).value, 64.1);
-  const trois = [1.5, 4.2, 6.5].map((c) => 1 / c), s = trois[0] + trois[1] + trois[2];
-  assert.equal(VM.recommendedFair({ market_id: "home-win", c1: "1.5", cn: "4.2", c2: "6.5" }).value, Math.round(trois[0] / s * 1000) / 10);
-  // Aucune issue opposee cotee : null (la page dit que la cote contient sa marge).
-  for (const r of [{ market_id: "home-team-over-05", cote_rec: "1.4" }, { market_id: "under-25", cote_rec: "1.4", cu25: "1.4" }, { market_id: "F29:No", cote_rec: "1.5" }, { cote_rec: "1.5" }]) {
-    assert.equal(VM.recommendedFair(r).value, null, JSON.stringify(r));
-  }
-  const vm = VM.buildMatchViewModel({ id: 1, date: "2026-10-27 20:45", home: { id: 1, n: "A" }, away: { id: 2, n: "B" }, data_quality_score: 80, model_output_available: true,
-    p1: 48, pn: 27, p2: 25, market_id: "home-team-over-05", pari_rec: "Domicile plus de 0.5 but", cote_rec: "1.4", model_probability: 66 });
-  if (vm.model.recommendation) assert.equal(vm.model.recommendedImplied, null);
+test("C3 : le calcul enregistre a la publication le chiffre sans marge qu'il a utilise (un champ en plus, rien d'autre)", () => {
+  assert.equal(P.sansMargeUtilise({ q: 63.456, source_chance: "modele" }), 63.5);
+  assert.equal(P.sansMargeUtilise({ brute: 61.04, source_chance: "marche" }), 61);
+  assert.equal(P.sansMargeUtilise({ brute: 61, source_chance: "modele" }), null, "modele seul : aucun chiffre");
+  assert.equal(P.sansMargeUtilise({ q: 0 }), null);
+  const src = read("lib/pronostic.js");
+  assert.match(src, /source_chance: b\.source_chance \|\| SOURCE_CHANCE\.MARCHE,\n[\s\S]{0,400}sans_marge: sansMargeUtilise\(b\),\n    \};/);
 });
 
 test("C3 : textes de la carte, dans les 7 langues, sans mot interdit", () => {
   const js = read("match-page.js");
-  assert.doesNotMatch(js.slice(js.indexOf("function signalCard(vm)"), js.indexOf("// Alertes d'absence du pipeline")), /100\s*\/\s*cote|1\s*÷/);
+  const carte = js.slice(js.indexOf("function signalCard(vm)"), js.indexOf("// Alertes d'absence du pipeline"));
+  assert.doesNotMatch(carte, /100\s*\/\s*cote|1\s*÷/);
+  assert.match(carte, /const source=vm\.model\.chanceSource===undefined\?null:vm\.model\.chanceSource;/);
   assert.match(js, /if\(r<=1\)return\{cls:'flat'/);
-  assert.match(js, /tf\('match_page\.sig2_no_fair','Cote du bookmaker : \{odds\}\. Elle contient sa marge : on ne la compare pas à notre calcul\.'/);
+  assert.match(js, /const m=n\(o\.model\),k=o\.source==='marche'\?null:marcheValide\(o\.market\)/, "chance tiree des cotes : aucune barre bookmaker");
   const fr = JSON.parse(read("i18n/dict/fr.json")).match_page;
+  assert.equal(fr.proba_market_chance_label, "Chance tirée des cotes du marché, marge retirée");
   assert.equal(fr.proba_model_label, "Notre calcul");
-  assert.equal(fr.proba_market_label, "La cote, marge retirée");
-  assert.equal(fr.proba_gap_flat, "Les deux disent la même chose.");
-  assert.equal(fr.proba_gap_neg, "Le bookmaker voit plus de chances que nous sur ce pari");
+  assert.equal(fr.sig2_no_fair, "Cote du bookmaker : {odds}. Elle contient sa marge : on ne la compare pas à notre calcul.");
   for (const l of LOCALES) {
     const d = JSON.parse(read("i18n/dict/" + l + ".json")).match_page;
-    for (const k of ["proba_model_label", "proba_market_label", "proba_gap_flat", "proba_gap_pos", "proba_gap_neg", "proba_help_implied", "sig2_plain", "sig2_plain_model", "sig2_no_fair", "label_colon"]) {
+    for (const k of ["proba_model_label", "proba_market_label", "proba_market_chance_label", "proba_chance_label", "proba_gap_flat", "proba_gap_pos", "proba_gap_neg", "proba_help_implied",
+      "sig2_plain", "sig2_plain_model", "sig2_plain_market", "sig2_plain_unknown", "sig2_market_only", "sig2_no_fair", "label_colon"]) {
       assert.ok(typeof d[k] === "string" && d[k].length, l + " " + k);
       assert.doesNotMatch(d[k], /esp[ée]rance|\bvalue\b|\bmise\b|\bstake\b|garanti[ e]/i, l + " " + k);
     }
-    assert.match(d.sig2_no_fair, /\{odds\}/);
   }
 });
 
-test("C3 : plus aucune phrase « sans les cotes » ; la phrase vraie sur l'accueil, la landing et « La méthode en bref »", () => {
-  const faux = /sans les cotes|sans jamais utiliser les cotes|never us(es|ing) the odds|without the odds|nunca usa|sin usar nunca|nie die Quoten|ohne jemals|non usa mai|senza mai|sem nunca|nunca usa as odds/i;
+test("C3 : la phrase de methode du trader partout ; plus de « sans les cotes » ni de promesse d'ecart systematique", () => {
+  const faux = /sans les cotes|sans jamais utiliser les cotes|never us(es|ing) the odds|without the odds|nunca usa|sin usar nunca|nie die Quoten|ohne jemals|non usa mai|senza mai|sem nunca|L’écart s’affiche même quand il te dessert|l’écart mesuré avec le prix du marché|l’écart détecté avec le marché réel|The gap shows even when it hurts you|so any gap between the two is visible/i;
   for (const d of ["fr", "en", "es", "gb", "mx", "za"]) {
     for (const f of ["index.html", "landing.html"]) if (fs.existsSync(path.join(ROOT, d, f))) assert.doesNotMatch(read(d + "/" + f), faux, d + "/" + f);
   }
   for (const d of ["fr", "en", "es", "gb", "mx", "za", "de", "it", "pt"]) assert.doesNotMatch(read("i18n/seo/" + d + ".json"), faux, d);
-  assert.match(read("fr/index.html"), /on la compare à la probabilité des cotes, marge retirée, et on garde le chiffre le plus prudent\. Le pari retenu suit une règle fixe/);
-  assert.match(read("fr/index.html"), /Buts attendus et probabilité de chaque score, puis de chaque marché, comparée aux cotes du marché, marge retirée\./);
+  const phrase = "La chance vient des cotes du marché, marge retirée, ou du plus prudent entre le modèle et ces cotes ; le pari retenu est la plus forte chance dans la fourchette 1,40-2,20.";
+  assert.ok(read("fr/index.html").includes(phrase), "bloc « La méthode en bref » et FAQ");
+  assert.ok(JSON.parse(read("i18n/seo/fr.json")).home.paragraphs[0].endsWith(phrase));
+  // La fourchette citee est celle qui choisit le pari (lib/pronostic.js#choisirPariFourchette).
+  assert.deepEqual(JSON.parse(read("config/leagues.json")).fiabilite.fourchette_pari, { cote_min: 1.4, cote_max: 2.2, marge_sans_agree: 0 });
+  assert.match(read("lib/pronostic.js"), /const dedans = evalues\.filter\(function \(c\) \{ return c\.dedans; \}\)\.sort\(ordre\);/);
+});
+
+test("C3 : sur chaque marche du catalogue, meme regle (buteur, mi-temps et codes « F… » compris)", () => {
+  const MP = require("../lib/marches-paris.js");
+  const ids = Object.keys(MP.CATALOGUE).concat(["anytime-scorer-21393", "F29:No", "F5:Over 2.5"]);
+  assert.ok(ids.length > 150, ids.length + " marches");
+  // Cotes du releve presentes partout : la page ne s'en sert jamais pour comparer.
+  const releve = { co15: "1.30", cu15: "3.40", co25: "1.90", cu25: "1.95", co35: "3.1", cu35: "1.35", cbtts: "1.7", cbtts_non: "2.1", c1: "2.1", cn: "3.3", c2: "3.6", cdc1x: "1.3", cdc2x: "1.7", cdc12: "1.3" };
+  for (const id of ids) {
+    const r = (pro) => VM.comparaisonPari(Object.assign({ market_id: id, cote_rec: "1.6" }, releve, pro ? { pronostic: pro } : {}));
+    assert.deepEqual(r({ market_id: id, source_chance: "modele", sans_marge: 58.4 }), { source: "modele", sansMarge: 58.4 }, id + " : chiffre de la publication");
+    assert.deepEqual(r({ market_id: id, source_chance: "marche", sans_marge: 58.4 }), { source: "marche", sansMarge: null }, id + " : la cote ne se compare pas a elle-meme");
+    assert.deepEqual(r({ market_id: id, source_chance: "modele" }), { source: "modele", sansMarge: null }, id + " : sans chiffre publie, aucune comparaison");
+    assert.deepEqual(r(null), { source: null, sansMarge: null }, id + " : origine inconnue");
+    assert.deepEqual(r({ market_id: id === "over-25" ? "under-25" : "over-25", source_chance: "modele", sans_marge: 58.4 }), { source: null, sansMarge: null }, id + " : pronostic d'un autre pari");
+  }
 });
 
 // ---------------------------------------------------------------------------------------------
@@ -232,10 +247,13 @@ test("C2 : bilan des paris simples de la veille, calcule une fois (lib/bilan-hie
 
 test("C2 : la ligne « Hier » : veille a Paris et pour le visiteur, gagnes ET perdus, sans pourcentage ni lien", () => {
   const MARDI_MATIN = Date.parse("2026-10-27T10:00:00+01:00");
-  const b = (g, p, e, jour) => ({ jour: jour || "2026-10-26", paris_simples: { jour: jour || "2026-10-26", gagnes: g, perdus: p, annules: 0, en_attente: e || 0 } });
+  const b = (g, p, e, jour, a) => ({ jour: jour || "2026-10-26", paris_simples: { jour: jour || "2026-10-26", gagnes: g, perdus: p, annules: a || 0, en_attente: e || 0 } });
   assert.equal(OP.lignePreuve(b(7, 3), MARDI_MATIN), "Hier, publiés avant les matchs : <b>7 gagnés</b>, <b>3 perdus</b>.");
   assert.equal(OP.lignePreuve(b(1, 0), MARDI_MATIN), "Hier, publiés avant les matchs : <b>1 gagné</b>, <b>0 perdu</b>.");
   assert.equal(OP.lignePreuve(b(67, 32, 1), MARDI_MATIN), "Hier, publiés avant les matchs : <b>67 gagnés</b>, <b>32 perdus</b>, <b>1 en attente de résultat</b>.");
+  // Annules dits des qu'il y en a (controle historique-public du 27/10/2026).
+  assert.equal(OP.lignePreuve(b(64, 46, 0, null, 2), MARDI_MATIN), "Hier, publiés avant les matchs : <b>64 gagnés</b>, <b>46 perdus</b>, <b>2 annulés</b>.");
+  assert.equal(OP.lignePreuve(b(5, 2, 12, null, 1), MARDI_MATIN), "Hier, publiés avant les matchs : <b>5 gagnés</b>, <b>2 perdus</b>, <b>1 annulé</b>, <b>12 en attente de résultat</b>.");
   assert.equal(OP.lignePreuve(b(0, 0, 3), MARDI_MATIN), "", "aucun resultat : rien");
   assert.equal(OP.lignePreuve(b(7, 3, 0, "2026-10-25"), MARDI_MATIN), "", "vieux bilan : rien");
   assert.equal(OP.lignePreuve({ jour: "2026-10-26", offert: null }, MARDI_MATIN), "", "donnee absente : rien");
@@ -251,7 +269,8 @@ test("C2 : la ligne « Hier » : veille a Paris et pour le visiteur, gagnes ET p
   assert.match(src, /G\.fetch\("\/preuves\/bilan-hier\.json", \{ cache: "no-cache" \}\)/);
   for (const l of LOCALES) {
     const d = JSON.parse(read("i18n/dict/" + l + ".json")).preuve_simples;
-    for (const k of ["line", "line_pending", "won_one", "won_other", "lost_one", "lost_other", "pending_one", "pending_other"]) assert.ok(d && d[k], l + " " + k);
+    for (const k of ["line", "won_one", "won_other", "lost_one", "lost_other", "void_one", "void_other", "pending_one", "pending_other"]) assert.ok(d && d[k], l + " " + k);
+    assert.ok(d.line.includes("{list}"), l + " : gabarit");
     assert.doesNotMatch(JSON.stringify(d), /%|garanti|gain|esp[ée]rance/i, l);
   }
 });

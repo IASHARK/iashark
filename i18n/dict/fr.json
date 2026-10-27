@@ -752,7 +752,7 @@
     "sig_method_link": "Comment ce chiffre est calculé : méthodologie",
     "match_ended_or_missing": "Match terminé ou introuvable",
     "league_matches_link": "Voir les matchs de la compétition",
-    "proba_help_implied": "« La cote, marge retirée » : la chance que suppose la cote du bookmaker une fois sa marge enlevée. On la calcule avec les cotes de toutes les issues du même marché (par exemple plus et moins de 2,5 buts). Sans ces cotes, on ne compare pas.",
+    "proba_help_implied": "« La cote, marge retirée » : la chance que suppose la cote une fois la marge du bookmaker enlevée. Quand notre chance vient du modèle, on la compare à ce chiffre tel qu’il était à la publication du pari. Quand elle vient des cotes du marché, il n’y a rien à comparer.",
     "proba_help_label": "Que veut dire « la cote, marge retirée » ?",
     "proba_gap_none": "Pas de cote comparable pour ce pari.",
     "proba_gap_flat": "Les deux disent la même chose.",
@@ -908,7 +908,12 @@
     "sig_reason_form_unbeaten": "{team} n’a perdu qu’un seul de ses {n} derniers matchs.",
     "sig_reason_form_losses": "{team} a perdu {losses} de ses {n} derniers matchs.",
     "sig2_plain_model": "Sur 100 matchs comme celui-ci, ce pari passerait environ {model} fois selon notre calcul.",
-    "sig2_no_fair": "Cote du bookmaker : {odds}. Elle contient sa marge : on ne la compare pas à notre calcul."
+    "sig2_no_fair": "Cote du bookmaker : {odds}. Elle contient sa marge : on ne la compare pas à notre calcul.",
+    "proba_market_chance_label": "Chance tirée des cotes du marché, marge retirée",
+    "proba_chance_label": "Chance calculée",
+    "sig2_market_only": "Cette chance vient des cotes du marché : pas d’écart à montrer.",
+    "sig2_plain_market": "Sur 100 matchs comme celui-ci, ce pari passerait environ {model} fois d’après les cotes du marché, marge retirée.",
+    "sig2_plain_unknown": "Sur 100 matchs comme celui-ci, ce pari passerait environ {model} fois."
   },
   "player_page": {
     "value_unavailable": "Donnée indisponible",
@@ -1596,9 +1601,9 @@
     "step1_title": "On ingère la donnée",
     "step1_desc": "Calendriers, classements, résultats récents, confrontations directes et absences annoncées, championnat par championnat.",
     "step2_title": "Le modèle calcule",
-    "step2_desc": "Buts attendus et probabilité de chaque score, puis de chaque marché, comparée aux cotes du marché, marge retirée.",
+    "step2_desc": "Buts attendus et probabilité de chaque score, puis de chaque marché. La chance vient des cotes du marché, marge retirée, ou du plus prudent entre le modèle et ces cotes.",
     "step3_title": "Tu reçois le signal",
-    "step3_desc": "Une fiche claire par match : probabilité, niveau de fiabilité, et le marché où le modèle détecte un écart avec le marché réel.",
+    "step3_desc": "Une fiche claire par match : le pari, sa chance, d’où elle vient et son niveau de fiabilité.",
     "lbl_access": "L'ACCÈS",
     "title_access_pre": "Commence gratuitement. ",
     "title_access_b": "Passe à Pro",
@@ -2980,13 +2985,14 @@
     "pending_n": "{n} en vérification"
   },
   "preuve_simples": {
-    "line": "Hier, publiés avant les matchs : {won}, {lost}.",
-    "line_pending": "Hier, publiés avant les matchs : {won}, {lost}, {pending}.",
+    "line": "Hier, publiés avant les matchs : {list}.",
     "won_one": "{n} gagné",
     "won_other": "{n} gagnés",
     "lost_one": "{n} perdu",
     "lost_other": "{n} perdus",
     "pending_one": "{n} en attente de résultat",
-    "pending_other": "{n} en attente de résultat"
+    "pending_other": "{n} en attente de résultat",
+    "void_one": "{n} annulé",
+    "void_other": "{n} annulés"
   }
 }

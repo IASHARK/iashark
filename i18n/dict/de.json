@@ -752,7 +752,7 @@
     "sig_method_link": "Wie diese Zahl berechnet wird: Methodik",
     "match_ended_or_missing": "Spiel beendet oder nicht gefunden",
     "league_matches_link": "Spiele des Wettbewerbs ansehen",
-    "proba_help_implied": "„Die Quote, ohne Marge“: die Chance, die die Quote des Buchmachers ohne seine Marge unterstellt. Wir berechnen sie aus den Quoten aller Ausgänge desselben Marktes (zum Beispiel über und unter 2,5 Tore). Ohne diese Quoten vergleichen wir nicht.",
+    "proba_help_implied": "„Die Quote, ohne Marge“: die Chance, die die Quote ohne die Marge des Buchmachers unterstellt. Kommt unsere Chance vom Modell, vergleichen wir sie mit diesem Wert zum Zeitpunkt der Veröffentlichung. Kommt sie aus den Marktquoten, gibt es nichts zu vergleichen.",
     "proba_help_label": "Was bedeutet „die Quote, ohne Marge“?",
     "proba_gap_none": "Keine vergleichbare Quote für diese Wette.",
     "proba_gap_flat": "Beide sagen dasselbe.",
@@ -908,7 +908,12 @@
     "sig_reason_form_unbeaten": "{team} hat nur eines seiner letzten {n} Spiele verloren.",
     "sig_reason_form_losses": "{team} hat {losses} seiner letzten {n} Spiele verloren.",
     "sig2_plain_model": "Von 100 Spielen wie diesem ginge diese Wette laut unserer Berechnung etwa {model} Mal auf.",
-    "sig2_no_fair": "Quote des Buchmachers: {odds}. Sie enthält seine Marge, deshalb vergleichen wir sie nicht mit unserer Berechnung."
+    "sig2_no_fair": "Quote des Buchmachers: {odds}. Sie enthält seine Marge, deshalb vergleichen wir sie nicht mit unserer Berechnung.",
+    "proba_market_chance_label": "Chance aus den Marktquoten, ohne Marge",
+    "proba_chance_label": "Berechnete Chance",
+    "sig2_market_only": "Diese Chance stammt aus den Marktquoten: Es gibt keinen Abstand zu zeigen.",
+    "sig2_plain_market": "Von 100 Spielen wie diesem ginge diese Wette laut den Marktquoten ohne Marge etwa {model} Mal auf.",
+    "sig2_plain_unknown": "Von 100 Spielen wie diesem ginge diese Wette etwa {model} Mal auf."
   },
   "player_page": {
     "value_unavailable": "Daten nicht verfügbar",
@@ -1596,9 +1601,9 @@
     "step1_title": "Wir erfassen die Daten",
     "step1_desc": "Spielpläne, Tabellen, aktuelle Ergebnisse, direkte Vergleiche und gemeldete Ausfälle, Liga für Liga.",
     "step2_title": "Das Modell rechnet",
-    "step2_desc": "Erwartete Tore und Wahrscheinlichkeit jedes Ergebnisses und dann jedes Marktes, verglichen mit den Marktquoten ohne Marge.",
+    "step2_desc": "Erwartete Tore und Wahrscheinlichkeit jedes Ergebnisses und dann jedes Marktes. Die Chance stammt aus den Marktquoten ohne Marge oder aus dem vorsichtigeren Wert von Modell und diesen Quoten.",
     "step3_title": "Du erhältst das Signal",
-    "step3_desc": "Ein klares Datenblatt pro Spiel: Wahrscheinlichkeit, Zuverlässigkeitsstufe, und der Markt, bei dem das Modell eine Abweichung vom realen Markt erkennt.",
+    "step3_desc": "Ein klares Blatt pro Spiel: die Wette, ihre Chance, ihre Herkunft und ihre Zuverlässigkeit.",
     "lbl_access": "DER ZUGANG",
     "title_access_pre": "Starte kostenlos. ",
     "title_access_b": "Wechsle zu Pro",
@@ -2980,13 +2985,14 @@
     "pending_n": "{n} in Prüfung"
   },
   "preuve_simples": {
-    "line": "Gestern, vor den Spielen veröffentlicht: {won}, {lost}.",
-    "line_pending": "Gestern, vor den Spielen veröffentlicht: {won}, {lost}, {pending}.",
+    "line": "Gestern, vor den Spielen veröffentlicht: {list}.",
     "won_one": "{n} gewonnen",
     "won_other": "{n} gewonnen",
     "lost_one": "{n} verloren",
     "lost_other": "{n} verloren",
     "pending_one": "{n} noch ohne Ergebnis",
-    "pending_other": "{n} noch ohne Ergebnis"
+    "pending_other": "{n} noch ohne Ergebnis",
+    "void_one": "{n} annulliert",
+    "void_other": "{n} annulliert"
   }
 }

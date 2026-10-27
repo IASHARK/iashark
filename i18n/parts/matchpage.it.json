@@ -1,6 +1,6 @@
 {
   "match_page": {
-    "proba_help_implied": "«La quota, senza margine»: la probabilità che la quota del bookmaker presuppone una volta tolto il suo margine. La calcoliamo con le quote di tutti gli esiti dello stesso mercato (per esempio over e under 2,5 gol). Senza quelle quote, non confrontiamo.",
+    "proba_help_implied": "«La quota, senza margine»: la probabilità che la quota presuppone una volta tolto il margine del bookmaker. Quando la nostra probabilità viene dal modello, la confrontiamo con questa cifra com’era alla pubblicazione. Quando viene dalle quote del mercato, non c’è nulla da confrontare.",
     "proba_help_label": "Che cosa significa «la quota, senza margine»?",
     "proba_gap_none": "Nessuna quota confrontabile per questa scommessa.",
     "proba_gap_flat": "Dicono la stessa cosa.",
@@ -130,6 +130,11 @@
     "recovery_home_cta": "Vedi le partite del giorno",
     "sig2_plain_model": "Su 100 partite come questa, questa scommessa andrebbe a segno circa {model} volte secondo il nostro calcolo.",
     "sig2_no_fair": "Quota del bookmaker: {odds}. Contiene il suo margine: non la confrontiamo con il nostro calcolo.",
-    "label_colon": ":"
+    "label_colon": ":",
+    "proba_market_chance_label": "Probabilità ricavata dalle quote del mercato, senza margine",
+    "proba_chance_label": "Probabilità calcolata",
+    "sig2_market_only": "Questa probabilità viene dalle quote del mercato: nessuno scarto da mostrare.",
+    "sig2_plain_market": "Su 100 partite come questa, questa scommessa andrebbe a segno circa {model} volte secondo le quote del mercato, senza margine.",
+    "sig2_plain_unknown": "Su 100 partite come questa, questa scommessa andrebbe a segno circa {model} volte."
   }
 }

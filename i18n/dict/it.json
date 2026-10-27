@@ -752,7 +752,7 @@
     "sig_method_link": "Come viene calcolato questo dato: metodologia",
     "match_ended_or_missing": "Partita terminata o non trovata",
     "league_matches_link": "Vedi le partite della competizione",
-    "proba_help_implied": "«La quota, senza margine»: la probabilità che la quota del bookmaker presuppone una volta tolto il suo margine. La calcoliamo con le quote di tutti gli esiti dello stesso mercato (per esempio over e under 2,5 gol). Senza quelle quote, non confrontiamo.",
+    "proba_help_implied": "«La quota, senza margine»: la probabilità che la quota presuppone una volta tolto il margine del bookmaker. Quando la nostra probabilità viene dal modello, la confrontiamo con questa cifra com’era alla pubblicazione. Quando viene dalle quote del mercato, non c’è nulla da confrontare.",
     "proba_help_label": "Che cosa significa «la quota, senza margine»?",
     "proba_gap_none": "Nessuna quota confrontabile per questa scommessa.",
     "proba_gap_flat": "Dicono la stessa cosa.",
@@ -908,7 +908,12 @@
     "sig_reason_form_unbeaten": "{team} ha perso solo una delle sue ultime {n} partite.",
     "sig_reason_form_losses": "{team} ha perso {losses} delle sue ultime {n} partite.",
     "sig2_plain_model": "Su 100 partite come questa, questa scommessa andrebbe a segno circa {model} volte secondo il nostro calcolo.",
-    "sig2_no_fair": "Quota del bookmaker: {odds}. Contiene il suo margine: non la confrontiamo con il nostro calcolo."
+    "sig2_no_fair": "Quota del bookmaker: {odds}. Contiene il suo margine: non la confrontiamo con il nostro calcolo.",
+    "proba_market_chance_label": "Probabilità ricavata dalle quote del mercato, senza margine",
+    "proba_chance_label": "Probabilità calcolata",
+    "sig2_market_only": "Questa probabilità viene dalle quote del mercato: nessuno scarto da mostrare.",
+    "sig2_plain_market": "Su 100 partite come questa, questa scommessa andrebbe a segno circa {model} volte secondo le quote del mercato, senza margine.",
+    "sig2_plain_unknown": "Su 100 partite come questa, questa scommessa andrebbe a segno circa {model} volte."
   },
   "player_page": {
     "value_unavailable": "Dato non disponibile",
@@ -1596,9 +1601,9 @@
     "step1_title": "Acquisiamo i dati",
     "step1_desc": "Calendari, classifiche, risultati recenti, scontri diretti e assenze annunciate, campionato per campionato.",
     "step2_title": "Il modello calcola",
-    "step2_desc": "Gol attesi e probabilità di ogni risultato e poi di ogni mercato, confrontata con le quote del mercato senza margine.",
+    "step2_desc": "Gol attesi e probabilità di ogni risultato e poi di ogni mercato. La probabilità viene dalle quote del mercato, senza margine, o dalla più prudente tra il modello e queste quote.",
     "step3_title": "Ricevi il segnale",
-    "step3_desc": "Una scheda chiara per partita: probabilità, livello di affidabilità, e il mercato in cui il modello rileva uno scarto rispetto al mercato reale.",
+    "step3_desc": "Una scheda chiara per partita: la scommessa, la sua probabilità, da dove viene e il suo livello di affidabilità.",
     "lbl_access": "L'ACCESSO",
     "title_access_pre": "Inizia gratis. ",
     "title_access_b": "Passa a Pro",
@@ -2980,13 +2985,14 @@
     "pending_n": "{n} in verifica"
   },
   "preuve_simples": {
-    "line": "Ieri, pubblicate prima delle partite: {won}, {lost}.",
-    "line_pending": "Ieri, pubblicate prima delle partite: {won}, {lost}, {pending}.",
+    "line": "Ieri, pubblicate prima delle partite: {list}.",
     "won_one": "{n} vinta",
     "won_other": "{n} vinte",
     "lost_one": "{n} persa",
     "lost_other": "{n} perse",
     "pending_one": "{n} in attesa di risultato",
-    "pending_other": "{n} in attesa di risultato"
+    "pending_other": "{n} in attesa di risultato",
+    "void_one": "{n} annullata",
+    "void_other": "{n} annullate"
   }
 }

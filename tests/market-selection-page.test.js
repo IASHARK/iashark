@@ -24,33 +24,34 @@ function raw(overrides) {
   };
 }
 
-test('carte : le pari retenu est compare a la probabilite juste (marge retiree), pas a 1 / cote', () => {
-  const vm = buildMatchViewModel(raw({}));
+// Correction C3 du 27/10/2026 (controle trader-de-cotes) : la carte compare la chance du MODELE au chiffre sans marge
+// enregistre a la publication du pari (pronostic.sans_marge) ; jamais markets_compared, jamais 1 / cote, jamais des cotes
+// plus recentes ; chance tiree des cotes (source « marche ») ou origine inconnue : aucune comparaison.
+const PUBLIE = { pronostic: { market_id: 'over-25', source_chance: 'modele', sans_marge: 59.2 } };
+test('carte : le pari retenu est compare au chiffre sans marge de sa publication, pas a 1 / cote', () => {
+  const vm = buildMatchViewModel(raw(PUBLIE));
   assert.equal(vm.model.recommendedImplied, 59.2);
   assert.equal(vm.model.recommendedEdge, 0.6);
+  assert.equal(vm.model.chanceSource, 'modele');
 });
 
-// Correction C3 du 27/10/2026 : plus jamais de repli sur 1 / cote (marge du bookmaker comprise) ; l'issue
-// opposee cotee du meme marche (plus / moins de 2,5 buts : co25 / cu25), sinon aucune comparaison.
-const pairePlus25 = Math.round((1 / 1.62) / (1 / 1.62 + 1 / 2.35) * 1000) / 10;
-test('carte : sans ligne pour le pari dans markets_compared, la cote marge retiree vient de l\'issue opposee (jamais 1 / cote)', () => {
-  const vm = buildMatchViewModel(raw({ markets_compared: [] }));
-  assert.equal(vm.model.recommendedImplied, pairePlus25);
-  assert.notEqual(vm.model.recommendedImplied, Math.round(1000 / 1.62) / 10);
-  const seul = buildMatchViewModel(raw({ markets_compared: [], cu25: null }));
-  assert.equal(seul.model.recommendedImplied, null, 'issue opposee absente : aucune comparaison');
-  assert.equal(seul.model.recommendedEdge, null);
+test('carte : sans chiffre de la publication, ou chance tiree des cotes, aucune comparaison (jamais 1 / cote ni markets_compared)', () => {
+  for (const extra of [{}, { markets_compared: [] }, { pronostic: { market_id: 'over-25', source_chance: 'modele' } }, { pronostic: { market_id: 'over-25', source_chance: 'marche', sans_marge: 59.2 } }]) {
+    const vm = buildMatchViewModel(raw(extra));
+    assert.equal(vm.model.recommendedImplied, null, JSON.stringify(extra));
+    assert.equal(vm.model.recommendedEdge, null);
+  }
 });
 
-test('carte : une probabilite juste aberrante (0, 100, absente) n\'est jamais utilisee', () => {
-  for (const consensus of [0, 100, null, '', 'abc']) {
-    const vm = buildMatchViewModel(raw({ markets_compared: [{ id: 'over-25', market: 'Over 2.5', probability: 59.8, consensus, edge: null }] }));
-    assert.equal(vm.model.recommendedImplied, pairePlus25, String(consensus));
+test('carte : un chiffre sans marge aberrant (0, 100, absent) n\'est jamais utilise', () => {
+  for (const sans_marge of [0, 100, null, '', 'abc']) {
+    const vm = buildMatchViewModel(raw({ pronostic: { market_id: 'over-25', source_chance: 'modele', sans_marge } }));
+    assert.equal(vm.model.recommendedImplied, null, String(sans_marge));
   }
 });
 
 test('tableau : la ligne du pari retenu reprend exactement les chiffres de la carte', () => {
-  const vm = buildMatchViewModel(raw({}));
+  const vm = buildMatchViewModel(raw(PUBLIE));
   const row = vm.model.marketTable.find(r => r.recommended);
   assert.ok(row, 'ligne du pari retenu presente');
   assert.equal(row.model, vm.recommendation ? vm.recommendation.probability : 59.8);

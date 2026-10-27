@@ -25,7 +25,8 @@ const MARDI = Date.parse("2026-10-27T10:00:00+01:00");
 test("C4 : bouton d'essai « 0 € aujourd'hui », premier prelevement date juste dessous, sans rappel promis", () => {
   const h = OP.html({ mode: "vitrine", contexte: "match", plans: PLANS, choisi: "month", jours: 7, connecte: false, uid: "c4", maintenant: MARDI });
   assert.match(h, /Essayer 7 jours : 0 € aujourd’hui/);
-  assert.match(h, /Premier prélèvement : 14,99 € le 3 novembre, seulement si tu ne résilies pas avant\. Résiliation en ligne depuis Mon compte\./);
+  // Meme phrase que Mon compte (PR #222) : la date, puis le prix de chaque mois, la carte demandee.
+  assert.ok(h.includes("Premier prélèvement : 14,99 € le 3 novembre, puis 14,99 € chaque mois, seulement si tu ne résilies pas avant. Carte demandée ; résiliation en ligne depuis Mon compte."), h);
   // La ligne d'essai suit le bouton, avant la facon de payer et les avantages.
   assert.ok(h.indexOf("op-cta") < h.indexOf("data-op-trial") && h.indexOf("data-op-trial") < h.indexOf("data-op-pay"));
   // Aucun rappel par e-mail : aucune tache planifiee ne l'envoie (trial-reminder / 0042 absents).
@@ -42,6 +43,36 @@ test("C4 : bouton d'essai « 0 € aujourd'hui », premier prelevement date just
 test("C4 : date du premier prelevement = aujourd'hui + n jours, dans la langue de la page", () => {
   assert.equal(OP.datePrelevement(7, MARDI), "3 novembre");
   assert.equal(OP.datePrelevement(7, Date.parse("2026-12-28T12:00:00+01:00")), "4 janvier");
+});
+
+test("C4 : date dans le fuseau du visiteur, jamais avant le vrai prelevement Stripe ; meme phrase dans les 7 langues", () => {
+  const { spawnSync } = require("child_process");
+  // 27/10 23:30 UTC : deja le 28 a Paris, encore le 27 a Los Angeles.
+  const date = (tz, ms) => spawnSync(process.execPath, ["-e", "process.stdout.write(require(" + JSON.stringify(path.join(ROOT, "lib/offre-pro.js")) + ").datePrelevement(7," + ms + "))"], { env: Object.assign({}, process.env, { TZ: tz }) }).stdout.toString();
+  const T0 = Date.parse("2026-10-27T23:30:00Z");
+  assert.equal(date("Europe/Paris", T0), "4 novembre");
+  assert.equal(date("America/Los_Angeles", T0), "3 novembre");
+  assert.equal(date("Pacific/Auckland", T0), "4 novembre");
+  // Stripe commence l'essai au paiement (trial_period_days, jamais une date fixe) : le prelevement tombe au plus tot
+  // 7 x 24 h apres un paiement qui suit l'affichage, donc le jour affiche ou plus tard.
+  const trial = read("supabase/functions/create-checkout-session/trial.ts");
+  assert.match(trial, /trial_period_days: days/);
+  assert.doesNotMatch(trial, /trial_end\s*:/);
+  for (const tz of ["Europe/Paris", "America/Mexico_City", "Africa/Johannesburg", "Pacific/Auckland"]) {
+    for (const h of [0, 7, 13, 23.9]) {
+      const affiche = T0 + h * 3600000, paiement = affiche + 15 * 60000, prelevement = paiement + 7 * 86400000;
+      const jour = (ms) => new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(ms));
+      assert.ok(jour(affiche + 7 * 86400000) <= jour(prelevement), tz + " " + h);
+    }
+  }
+  // Meme phrase que Mon compte (PR #222), prix du mois deux fois, dans les 7 langues.
+  for (const l of ["fr", "en", "es", "es-mx", "de", "it", "pt"]) {
+    const v = JSON.parse(read("i18n/dict/" + l + ".json")).offre_pro.trial_first_charge;
+    assert.equal((v.match(/\{price\}/g) || []).length, 2, l);
+    assert.match(v, /\{date\}/, l);
+    assert.doesNotMatch(v, /rappel|reminder|recordatorio|Erinnerung|promemoria|lembrete/i, l);
+  }
+  assert.equal(JSON.parse(read("i18n/dict/en.json")).offre_pro.trial_first_charge, "First charge: {price} on {date}, then {price} every month, only if you don’t cancel before then. Card required; cancel online from your account.");
 });
 
 test("C1 : sortie gratuite sous le bouton d'essai, seulement avec un match offert du jour", () => {
@@ -133,12 +164,15 @@ const P = require("../lib/pronostic.js");
 const LOCALES = ["fr", "en", "es", "es-mx", "de", "it", "pt"];
 
 test("C3 : chance tiree des cotes = rien a comparer ; chance du modele = comparee au chiffre sans marge de la publication", () => {
-  const pro = (src, sm, id) => ({ market_id: "under-25", cote_rec: "1.4", co25: "2.88", cu25: "1.40", pronostic: { market_id: id || "under-25", source_chance: src, sans_marge: sm } });
-  assert.deepEqual(VM.comparaisonPari(pro("marche", 67.3)), { source: "marche", sansMarge: null }, "la cote ne se compare pas a elle-meme");
-  assert.deepEqual(VM.comparaisonPari(pro("modele", 67.3)), { source: "modele", sansMarge: 67.3 });
-  assert.deepEqual(VM.comparaisonPari(pro("modele", null)), { source: "modele", sansMarge: null }, "publication plus ancienne : aucune comparaison (jamais les cotes du moment)");
-  assert.deepEqual(VM.comparaisonPari(pro("modele", 55, "over-25")), { source: null, sansMarge: null }, "pronostic d'un autre pari : jamais melange");
-  assert.deepEqual(VM.comparaisonPari({ market_id: "under-25", cote_rec: "1.4", co25: "2.88", cu25: "1.40" }), { source: null, sansMarge: null }, "origine inconnue : aucune comparaison");
+  const pro = (src, sm, id, ch) => ({ market_id: "under-25", cote_rec: "1.4", model_probability: ch == null ? 67 : ch, co25: "2.88", cu25: "1.40", pronostic: { market_id: id || "under-25", source_chance: src, sans_marge: sm } });
+  const rien = { source: null, sansMarge: null, abaissee: null };
+  assert.deepEqual(VM.comparaisonPari(pro("marche", 67.3)), { source: "marche", sansMarge: null, abaissee: null }, "la cote ne se compare pas a elle-meme");
+  assert.deepEqual(VM.comparaisonPari(pro("marche", 67.3, null, 70)), { source: "modele", sansMarge: 67.3, abaissee: null }, "« marche » mais pas le chiffre des cotes : compare, jamais etiquete « tiree des cotes »");
+  assert.deepEqual(VM.comparaisonPari(pro("marche", null)), rien, "« marche » sans chiffre publie (voie inconnue) : rien d'affirme");
+  assert.deepEqual(VM.comparaisonPari(pro("modele", 67.3, null, 64)), { source: "modele", sansMarge: 67.3, abaissee: null });
+  assert.deepEqual(VM.comparaisonPari(pro("modele", null)), { source: "modele", sansMarge: null, abaissee: null }, "publication plus ancienne : aucune comparaison (jamais les cotes du moment)");
+  assert.deepEqual(VM.comparaisonPari(pro("modele", 55, "over-25")), rien, "pronostic d'un autre pari : jamais melange");
+  assert.deepEqual(VM.comparaisonPari({ market_id: "under-25", cote_rec: "1.4", co25: "2.88", cu25: "1.40" }), rien, "origine inconnue : aucune comparaison");
   // La page ne retire plus aucune marge elle-meme : ni 1 / cote, ni paire d'issues, ni proportionnelle.
   const src = read("lib/match-view-model.js");
   const bloc = src.slice(src.indexOf("function comparaisonPari(raw)"), src.indexOf("function marketTable("));
@@ -168,7 +202,7 @@ test("C3 : textes de la carte, dans les 7 langues, sans mot interdit", () => {
   assert.doesNotMatch(carte, /100\s*\/\s*cote|1\s*÷/);
   assert.match(carte, /const source=vm\.model\.chanceSource===undefined\?null:vm\.model\.chanceSource;/);
   assert.match(js, /if\(r<=1\)return\{cls:'flat'/);
-  assert.match(js, /const m=n\(o\.model\),k=o\.source==='marche'\?null:marcheValide\(o\.market\)/, "chance tiree des cotes : aucune barre bookmaker");
+  assert.match(js, /const m=n\(o\.model\),k=o\.source==='marche'&&!ab\?null:marcheValide\(o\.market\)/, "chance tiree des cotes (non abaissee) : aucune barre bookmaker");
   const fr = JSON.parse(read("i18n/dict/fr.json")).match_page;
   assert.equal(fr.proba_market_chance_label, "Chance tirée des cotes du marché, marge retirée");
   assert.equal(fr.proba_model_label, "Notre calcul");
@@ -204,13 +238,101 @@ test("C3 : sur chaque marche du catalogue, meme regle (buteur, mi-temps et codes
   // Cotes du releve presentes partout : la page ne s'en sert jamais pour comparer.
   const releve = { co15: "1.30", cu15: "3.40", co25: "1.90", cu25: "1.95", co35: "3.1", cu35: "1.35", cbtts: "1.7", cbtts_non: "2.1", c1: "2.1", cn: "3.3", c2: "3.6", cdc1x: "1.3", cdc2x: "1.7", cdc12: "1.3" };
   for (const id of ids) {
-    const r = (pro) => VM.comparaisonPari(Object.assign({ market_id: id, cote_rec: "1.6" }, releve, pro ? { pronostic: pro } : {}));
-    assert.deepEqual(r({ market_id: id, source_chance: "modele", sans_marge: 58.4 }), { source: "modele", sansMarge: 58.4 }, id + " : chiffre de la publication");
-    assert.deepEqual(r({ market_id: id, source_chance: "marche", sans_marge: 58.4 }), { source: "marche", sansMarge: null }, id + " : la cote ne se compare pas a elle-meme");
-    assert.deepEqual(r({ market_id: id, source_chance: "modele" }), { source: "modele", sansMarge: null }, id + " : sans chiffre publie, aucune comparaison");
-    assert.deepEqual(r(null), { source: null, sansMarge: null }, id + " : origine inconnue");
-    assert.deepEqual(r({ market_id: id === "over-25" ? "under-25" : "over-25", source_chance: "modele", sans_marge: 58.4 }), { source: null, sansMarge: null }, id + " : pronostic d'un autre pari");
+    const r = (pro, extra) => VM.comparaisonPari(Object.assign({ market_id: id, cote_rec: "1.6", model_probability: 58 }, releve, extra || {}, pro ? { pronostic: pro } : {}));
+    const rien = { source: null, sansMarge: null, abaissee: null };
+    assert.deepEqual(r({ market_id: id, source_chance: "modele", sans_marge: 58.4 }), { source: "modele", sansMarge: 58.4, abaissee: null }, id + " : chiffre de la publication");
+    assert.deepEqual(r({ market_id: id, source_chance: "marche", sans_marge: 58.4 }), { source: "marche", sansMarge: null, abaissee: null }, id + " : la cote ne se compare pas a elle-meme");
+    // Chance des cotes abaissee par prudence : les deux chiffres, jamais l'etiquette « tiree des cotes » sur 55.
+    assert.deepEqual(r({ market_id: id, source_chance: "marche", sans_marge: 58.4 }, { model_probability: 55, chance_correction: { calculee: 58, points: -3 } }), { source: "marche", sansMarge: 58.4, abaissee: { points: 3 } }, id + " : abaissee");
+    assert.deepEqual(r({ market_id: id, source_chance: "modele" }), { source: "modele", sansMarge: null, abaissee: null }, id + " : sans chiffre publie, aucune comparaison");
+    assert.deepEqual(r(null), rien, id + " : origine inconnue");
+    assert.deepEqual(r({ market_id: id === "over-25" ? "under-25" : "over-25", source_chance: "modele", sans_marge: 58.4 }), rien, id + " : pronostic d'un autre pari");
   }
+});
+
+// 2e controle trader-de-cotes du 27/10/2026 (ROUGE) : la chance des « moins de X buts » est abaissee de 3 points par
+// prudence (lib/pronostic.js#alignerChancesAffichees) ; la page ecrivait « Chance tiree des cotes du marche, marge
+// retiree : 62 % » alors que les cotes disaient 65 % (n° 1556693, moins de 3,5 buts a 1,50).
+const MP_JS = read("match-page.js");
+function duoBarsDeLaPage() {
+  // duoBars et ses aides, tels quels, avec des traductions de repli (francais).
+  const vmod = require("node:vm");
+  const code = MP_JS.slice(MP_JS.indexOf("const marcheValide="), MP_JS.indexOf("// ---- Niveau public prob_band"));
+  const n = (v) => v !== null && v !== undefined && v !== "" && Number.isFinite(Number(v)) ? Number(v) : null;
+  const ctx = { Math, Number, String, Object, n,
+    t: (k, fb) => fb,
+    tf: (k, fb, v) => String(fb).replace(/\{(\w+)\}/g, (m, x) => (v && v[x] != null ? v[x] : m)),
+    esc: (x) => String(x), pct: (v) => (v === null ? "—" : Math.round(v) + " %"), clamp: (v) => Math.max(0, Math.min(100, v || 0)),
+    odds: (c) => Number(c).toFixed(2).replace(".", ",") };
+  vmod.createContext(ctx);
+  vmod.runInContext(code + "\nthis.duoBars = duoBars;", ctx);
+  return ctx.duoBars;
+}
+const texteDe = (html) => html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+
+test("C3 : chance abaissee par prudence (comme n° 1556693) : les deux chiffres, jamais « tiree des cotes » sur le chiffre abaisse", () => {
+  // Donnees du 27/10 (match_premium_data) : moins de 3,5 buts a 1,50, chance 62, avant prudence 65, voie « cotes du marche ».
+  const raw = (pro) => ({ id: 1556693, date: "2026-10-27 20:45", home: { id: 1, n: "A" }, away: { id: 2, n: "B" }, data_quality_score: 80, model_output_available: true,
+    p1: 40, pn: 30, p2: 30, market_id: "under-35", pari_rec: "Under 3.5", cote_rec: "1.5", model_probability: 62, conf: 6.2,
+    chance_correction: { calculee: 65, points: -3, source: "Verdict du mathematicien du 06/10/2026" }, pronostic: Object.assign({ market_id: "under-35", source_chance: "marche", moteur: "cotes_marche", chance: 62 }, pro || {}) });
+  // Publication d'avant ce controle (sans pronostic.sans_marge) : le chiffre des cotes = la chance avant prudence (voie des cotes).
+  assert.deepEqual(VM.comparaisonPari(raw()), { source: "marche", sansMarge: 65, abaissee: { points: 3 } });
+  // Publication suivante (sans_marge enregistre) : le meme affichage, avec le chiffre publie.
+  assert.deepEqual(VM.comparaisonPari(raw({ sans_marge: 65.2 })), { source: "marche", sansMarge: 65.2, abaissee: { points: 3 } });
+  // Voie du moteur v3 sans chiffre publie : rien d'affirme sur l'origine, seulement la prudence.
+  assert.deepEqual(VM.comparaisonPari(raw({ moteur: "v3" })), { source: null, sansMarge: null, abaissee: { points: 3 } });
+  const vm = VM.buildMatchViewModel(raw());
+  assert.deepEqual([vm.model.chanceSource, vm.model.recommendedImplied, vm.model.chanceLowered], ["marche", 65, { points: 3 }]);
+  const row = vm.model.marketTable.find((r) => r.recommended);
+  assert.deepEqual([row.model, row.market, row.chanceSource, row.chanceLowered], [62, 65, "marche", { points: 3 }], "tableau : memes chiffres que la carte");
+  // Rendu de la carte (duoBars de match-page.js) : deux barres, la phrase de prudence, jamais « Chance tiree des cotes ».
+  const duo = duoBarsDeLaPage();
+  const carte = texteDe(duo({ model: 62, market: 65, odds: 1.5, edge: -3, kind: "odds", source: "marche", abaissee: { points: 3 } }));
+  assert.match(carte, /Notre chance, abaissée par prudence 62 %/);
+  assert.match(carte, /Cotes du marché, marge retirée 1,50 → 65 %/);
+  assert.match(carte, /Par prudence, nous affichons 3 points de moins que les cotes du marché sur ce type de pari\./);
+  assert.doesNotMatch(carte, /Chance tirée des cotes|Le bookmaker voit plus/);
+  // Sans prudence : une seule barre, « tiree des cotes » (chiffre egal a celui des cotes).
+  const seul = texteDe(duo({ model: 65, market: null, odds: 1.5, kind: "odds", source: "marche", sansMarge: "Cette chance vient des cotes du marché : pas d’écart à montrer." }));
+  assert.match(seul, /^Chance tirée des cotes du marché, marge retirée 65 %/);
+  assert.doesNotMatch(seul, /Cotes du marché, marge retirée/);
+  // Prudence sans chiffre des cotes : la barre le dit, aucune barre bookmaker inventee.
+  const sansChiffre = texteDe(duo({ model: 62, market: null, odds: 1.5, kind: "odds", source: null, abaissee: { points: 3 }, sansMarge: "Abaissée de 3 points par prudence sur ce type de pari." }));
+  assert.match(sansChiffre, /^Notre chance, abaissée par prudence 62 % Abaissée de 3 points par prudence sur ce type de pari\.$/);
+  // La phrase « Sur 100 matchs » nomme le chiffre qu'elle cite : la chance abaissee, puis celui des cotes.
+  const carteJs = MP_JS.slice(MP_JS.indexOf("function signalCard(vm)"), MP_JS.indexOf("// Alertes d'absence du pipeline"));
+  assert.match(carteJs, /const plain=prob===null\?''\n    :ab&&implied!==null\?tf\('match_page\.sig2_plain_lowered'/);
+  assert.match(carteJs, /:ab\?tf\('match_page\.sig2_plain_lowered_only'/);
+  const fr = JSON.parse(read("i18n/dict/fr.json")).match_page;
+  assert.equal(fr.sig2_plain_lowered.replace("{model}", 62).replace("{market}", 65), "Sur 100 matchs comme celui-ci, ce pari passerait environ 62 fois selon notre chance, abaissée par prudence ; les cotes du marché, marge retirée, en supposent 65.");
+  for (const l of ["fr", "en", "es", "es-mx", "de", "it", "pt"]) {
+    const d = JSON.parse(read("i18n/dict/" + l + ".json")).match_page;
+    for (const k of ["proba_lowered_label", "proba_market_odds_label", "proba_lowered_gap", "sig2_plain_lowered", "sig2_plain_lowered_only", "sig2_lowered_note"]) assert.ok(typeof d[k] === "string" && d[k].length, l + " " + k);
+    assert.match(d.sig2_plain_lowered, /\{model\}[\s\S]*\{market\}/, l);
+    assert.match(d.proba_lowered_gap, /\{gap\}/, l);
+  }
+});
+
+test("C3 : voie du moteur v3, « marche » seulement quand la chance publiee EST le chiffre sans marge de la cote", () => {
+  const P3 = require("../lib/pronostic.js");
+  const CFG = JSON.parse(read("config/leagues.json"));
+  const V = "vérifié sur le passé";
+  // Arsenal - Burnley a 1,45 / 4,60 / 7,50 : victoire d'Arsenal a 67,7 % sans marge (lib/pronostic.js#sansMargeDesCotes).
+  const publier = (ch) => {
+    const m = { id: 200, league_key: "premier", league_id: 39, league: "Premier League", league_reliability: "validee", date: "2026-10-30 20:45",
+      home: { n: "Arsenal", id: 42 }, away: { n: "Burnley", id: 44 }, c1: "1.45", cn: "4.60", c2: "7.50", cdc1x: "1.10", cdc2x: "3.00", cdc12: "1.20", co25: "1.30", cu25: "3.40",
+      pari_rec: "", market_id: null, no_signal: true, data_quality_score: 60, moteur_v3: { source: "v3" }, v3_fiabilite: { couverture: "vérifiée" },
+      v3_marches: [{ cle: "1N2:1", market_id: "home-win", probabilite: 72, fiabilite_marche: V, etiquette: V }, { cle: "DC:1N", market_id: "dc-1x", probabilite: 86.5, fiabilite_marche: V, etiquette: V }] };
+    P3.publierPronostics([m], [], { configLigues: CFG, figes: {}, chancesV3Par: { 200: { marches: { "1N2:1": ch, "DC:1N": 84 } } } });
+    return [m.market_id, m.model_probability, m.pronostic.moteur, m.pronostic.source_chance, m.pronostic.sans_marge];
+  };
+  // Chance du Canal Pro 70 : plus haute que les cotes (68) -> avant « marche » (faux) ; maintenant « modele », comparee a 67,7.
+  assert.deepEqual(publier(70), ["home-win", 70, "v3", "modele", 67.7]);
+  // Chance 68 = le chiffre des cotes (meme entier) : « marche ».
+  assert.deepEqual(publier(68), ["home-win", 68, "v3", "marche", 67.7]);
+  // Chance 66, sous les cotes : « modele » (inchange).
+  assert.deepEqual(publier(66), ["home-win", 66, "v3", "modele", 67.7]);
+  assert.match(read("lib/pronostic.js"), /const sourceChance = q !== null && q > 0 && q < 100 && Math\.round\(q\) === Math\.round\(ch\) \? SOURCE_CHANCE\.MARCHE : SOURCE_CHANCE\.MODELE;/);
 });
 
 // ---------------------------------------------------------------------------------------------

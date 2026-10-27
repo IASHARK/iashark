@@ -291,7 +291,7 @@ test("composant de paiement : textes sans mot interdit ni fausse urgence", () =>
   // Correction C4 du 27/10/2026 : le montant d'aujourd'hui dans le bouton, la date du premier prelevement dessous.
   const essai = OP.html({ mode: "vitrine", contexte: "general", plans, choisi: "month", jours: 7, connecte: false, uid: "v" });
   assert.match(essai, /Essayer 7 jours : 0 € aujourd’hui/);
-  assert.match(essai, /Premier prélèvement : 19,95 € le \d{1,2} \S+, seulement si tu ne résilies pas avant\. Résiliation en ligne depuis Mon compte\./);
+  assert.match(essai, /Premier prélèvement : 19,95 € le \d{1,2} \S+, puis 19,95 € chaque mois, seulement si tu ne résilies pas avant\. Carte demandée ; résiliation en ligne depuis Mon compte\./);
 });
 
 // Controle UX du 04/10/2026 : aucune repetition (le nombre de buts et le film), « Et si » ecrit

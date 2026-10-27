@@ -923,12 +923,12 @@ var PAGES = [
     file: "landing.html",
     noSitemap: true, // noindex (landing publicitaire)
     metas: {
-      fr: {title: "IASHARK — Le modèle qui lit le match avant qu'il commence", description: "Buts attendus, probabilité de chaque marché, écart avec la cote : IASHARK analyse chaque match avec un vrai modèle statistique. Un match gratuit chaque jour."},
-      en: {title: "IASHARK — The model that reads the match before kickoff", description: "Expected goals, probability of every market, gap with the odds: IASHARK analyses every match with a real statistical model. One free match every day."},
-      es: {title: "IASHARK — El modelo que lee el partido antes de que empiece", description: "Goles esperados, probabilidad de cada mercado, diferencia con la cuota: IASHARK analiza cada partido con un modelo estadístico real. Un partido gratis cada día."},
-      de: {title: "IASHARK — Das Modell, das das Spiel vor dem Anpfiff liest", description: "Erwartete Tore, Wahrscheinlichkeit jedes Marktes, Abstand zur Quote: IASHARK analysiert jedes Spiel mit einem echten statistischen Modell. Ein kostenloses Spiel jeden Tag."},
-      it: {title: "IASHARK — Il modello che legge la partita prima del fischio d'inizio", description: "Gol attesi, probabilità di ogni mercato, scarto con la quota: IASHARK analizza ogni partita con un vero modello statistico. Una partita gratis ogni giorno."},
-      pt: {title: "IASHARK — O modelo que lê o jogo antes do apito inicial", description: "Golos esperados, probabilidade de cada mercado, diferença face à odd: o IASHARK analisa cada jogo com um verdadeiro modelo estatístico. Um jogo grátis todos os dias."}
+      fr: {title: "IASHARK — Le modèle qui lit le match avant qu'il commence", description: "Pronostics foot : la chance calculée de chaque pari, publiée avant le match. Gagnés et perdus montrés."},
+      en: {title: "IASHARK — The model that reads the match before kickoff", description: "Football predictions: the calculated chance of every bet, published before kickoff. Wins and losses shown."},
+      es: {title: "IASHARK — El modelo que lee el partido antes de que empiece", description: "Pronósticos de fútbol: la probabilidad calculada de cada apuesta, publicada antes del partido. Aciertos y fallos, a la vista."},
+      de: {title: "IASHARK — Das Modell, das das Spiel vor dem Anpfiff liest", description: "Fußballtipps: die berechnete Chance jeder Wette, vor dem Anpfiff veröffentlicht. Gewonnene und verlorene Tipps werden gezeigt."},
+      it: {title: "IASHARK — Il modello che legge la partita prima del fischio d'inizio", description: "Pronostici di calcio: la probabilità calcolata di ogni scommessa, pubblicata prima della partita. Vinte e perse, in chiaro."},
+      pt: {title: "IASHARK — O modelo que lê o jogo antes do apito inicial", description: "Prognósticos de futebol: a probabilidade calculada de cada aposta, publicada antes do jogo. Ganhas e perdidas, à vista."}
     },
     replacements: [
       {find: '<a href="https://iashark.com" class="btn-nav">VOIR LE SITE →</a>', build: function(d){ return '<a href="https://iashark.com" class="btn-nav">' + d.landing_page.nav_cta + '</a>'; }},

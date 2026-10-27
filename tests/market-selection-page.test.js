@@ -36,11 +36,15 @@ test('carte : le pari retenu est compare au chiffre sans marge de sa publication
 });
 
 test('carte : sans chiffre de la publication, ou chance tiree des cotes, aucune comparaison (jamais 1 / cote ni markets_compared)', () => {
-  for (const extra of [{}, { markets_compared: [] }, { pronostic: { market_id: 'over-25', source_chance: 'modele' } }, { pronostic: { market_id: 'over-25', source_chance: 'marche', sans_marge: 59.2 } }]) {
+  for (const extra of [{}, { markets_compared: [] }, { pronostic: { market_id: 'over-25', source_chance: 'modele' } }, { model_probability: 59, pronostic: { market_id: 'over-25', source_chance: 'marche', sans_marge: 59.2 } }]) {
     const vm = buildMatchViewModel(raw(extra));
     assert.equal(vm.model.recommendedImplied, null, JSON.stringify(extra));
     assert.equal(vm.model.recommendedEdge, null);
   }
+  // 2e controle trader-de-cotes (27/10/2026) : « marche » mais la chance affichee (60) n'est pas le chiffre des cotes
+  // (59) : jamais etiquetee « tiree des cotes », comparee au chiffre de la publication.
+  const vm = buildMatchViewModel(raw({ pronostic: { market_id: 'over-25', source_chance: 'marche', sans_marge: 59.2 } }));
+  assert.deepEqual([vm.model.chanceSource, vm.model.recommendedImplied, vm.model.recommendedEdge], ['modele', 59.2, 0.6]);
 });
 
 test('carte : un chiffre sans marge aberrant (0, 100, absent) n\'est jamais utilise', () => {

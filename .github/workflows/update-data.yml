@@ -2691,7 +2691,9 @@ jobs:
                     if(repB.length<1000) break;
                     if(++pageB>=50){ simplesB=null; break; } // plafond de securite : jamais un compte tronque
                   }
-                  var ticketsB=await rawHttpGetJson(baseB+'tickets_du_jour?select=jour,type,contenu,meta&type=in.(x5,x10,or)&jour=gte.'+depuisB,entB);
+                  // publie_a et premier_coup_envoi (heures posees par la base) : un ticket publie apres son premier coup d'envoi
+                  // n'est jamais montre (controle historique-public du 27/10/2026, lib/bandeau-preuves.js).
+                  var ticketsB=await rawHttpGetJson(baseB+'tickets_du_jour?select=jour,type,contenu,meta,publie_a,premier_coup_envoi&type=in.(x5,x10,or)&jour=gte.'+depuisB,entB);
                   var idsB={};
                   (Array.isArray(ticketsB)?ticketsB:[]).forEach(function(t){
                     var l=t&&t.contenu&&(t.contenu.jambes||t.contenu.paris);

@@ -1896,14 +1896,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Pour ouvrir tous les matchs du jour : Pro, avec {{trialDays}} jours d'essai pour un premier abonnement au mois."
+              "if": "hasTrialOffer",
+              "text": "Pour ouvrir tous les autres matchs du jour : Pro, avec {{trialDays}} jours d'essai. Premier prélèvement : {{proPrice}} {{trialDays}} jours après le début de l'essai, puis {{proPrice}} chaque mois, seulement si tu ne résilies pas avant. Carte demandée ; résiliation en ligne depuis Mon compte."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Voir l'offre Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Essayer {{trialDays}} jours : {{zeroPrice}} aujourd'hui",
+              "link": "trial"
             }
           ]
         },
@@ -1923,14 +1923,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Pour ouvrir tous les matchs du jour : Pro, avec {{trialDays}} jours d'essai pour un premier abonnement au mois."
+              "if": "hasTrialOffer",
+              "text": "Pour ouvrir tous les autres matchs du jour : Pro, avec {{trialDays}} jours d'essai. Premier prélèvement : {{proPrice}} {{trialDays}} jours après le début de l'essai, puis {{proPrice}} chaque mois, seulement si tu ne résilies pas avant. Carte demandée ; résiliation en ligne depuis Mon compte."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Voir l'offre Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Essayer {{trialDays}} jours : {{zeroPrice}} aujourd'hui",
+              "link": "trial"
             },
             {
               "type": "p",
@@ -2231,14 +2231,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "To open every match of the day: Pro, with a {{trialDays}}-day trial for a first monthly subscription."
+              "if": "hasTrialOffer",
+              "text": "To open every other match of the day: Pro, with a {{trialDays}}-day trial. First charge: {{proPrice}} {{trialDays}} days after the trial starts, then {{proPrice}} every month, only if you don't cancel before then. Card required; cancel online from your account."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "See the Pro offer",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Try {{trialDays}} days: {{zeroPrice}} today",
+              "link": "trial"
             }
           ]
         },
@@ -2258,14 +2258,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "To open every match of the day: Pro, with a {{trialDays}}-day trial for a first monthly subscription."
+              "if": "hasTrialOffer",
+              "text": "To open every other match of the day: Pro, with a {{trialDays}}-day trial. First charge: {{proPrice}} {{trialDays}} days after the trial starts, then {{proPrice}} every month, only if you don't cancel before then. Card required; cancel online from your account."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "See the Pro offer",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Try {{trialDays}} days: {{zeroPrice}} today",
+              "link": "trial"
             },
             {
               "type": "p",
@@ -2566,14 +2566,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Para abrir todos los partidos del día: Pro, con {{trialDays}} días de prueba en una primera suscripción mensual."
+              "if": "hasTrialOffer",
+              "text": "Para abrir todos los demás partidos del día: Pro, con {{trialDays}} días de prueba. Primer cobro: {{proPrice}} {{trialDays}} días después del inicio de la prueba, luego {{proPrice}} cada mes, solo si no cancelas antes. Se pide tu tarjeta; cancelación en línea desde tu cuenta."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Ver la oferta Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Prueba {{trialDays}} días: {{zeroPrice}} hoy",
+              "link": "trial"
             }
           ]
         },
@@ -2593,14 +2593,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Para abrir todos los partidos del día: Pro, con {{trialDays}} días de prueba en una primera suscripción mensual."
+              "if": "hasTrialOffer",
+              "text": "Para abrir todos los demás partidos del día: Pro, con {{trialDays}} días de prueba. Primer cobro: {{proPrice}} {{trialDays}} días después del inicio de la prueba, luego {{proPrice}} cada mes, solo si no cancelas antes. Se pide tu tarjeta; cancelación en línea desde tu cuenta."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Ver la oferta Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Prueba {{trialDays}} días: {{zeroPrice}} hoy",
+              "link": "trial"
             },
             {
               "type": "p",
@@ -2901,14 +2901,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Para abrir todos los partidos del día: Pro, con {{trialDays}} días de prueba en una primera suscripción mensual."
+              "if": "hasTrialOffer",
+              "text": "Para abrir todos los demás partidos del día: Pro, con {{trialDays}} días de prueba. Primer cobro: {{proPrice}} {{trialDays}} días después del inicio de la prueba, luego {{proPrice}} cada mes, solo si no cancelas antes. Se pide tu tarjeta; cancelación en línea desde tu cuenta."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Ver la oferta Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Prueba {{trialDays}} días: {{zeroPrice}} hoy",
+              "link": "trial"
             }
           ]
         },
@@ -2928,14 +2928,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Para abrir todos los partidos del día: Pro, con {{trialDays}} días de prueba en una primera suscripción mensual."
+              "if": "hasTrialOffer",
+              "text": "Para abrir todos los demás partidos del día: Pro, con {{trialDays}} días de prueba. Primer cobro: {{proPrice}} {{trialDays}} días después del inicio de la prueba, luego {{proPrice}} cada mes, solo si no cancelas antes. Se pide tu tarjeta; cancelación en línea desde tu cuenta."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Ver la oferta Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Prueba {{trialDays}} días: {{zeroPrice}} hoy",
+              "link": "trial"
             },
             {
               "type": "p",
@@ -3236,14 +3236,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Um alle Spiele des Tages zu öffnen: Pro, mit {{trialDays}} Tagen Testphase beim ersten Monatsabo."
+              "if": "hasTrialOffer",
+              "text": "Alle anderen Spiele des Tages öffnen sich mit Pro, mit {{trialDays}} Tagen Testphase. Erste Abbuchung: {{proPrice}} {{trialDays}} Tage nach Beginn der Testphase, danach {{proPrice}} jeden Monat, nur wenn du nicht vorher kündigst. Karte erforderlich; online in deinem Konto kündbar."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Pro-Angebot ansehen",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "{{trialDays}} Tage testen: heute {{zeroPrice}}",
+              "link": "trial"
             }
           ]
         },
@@ -3263,14 +3263,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Um alle Spiele des Tages zu öffnen: Pro, mit {{trialDays}} Tagen Testphase beim ersten Monatsabo."
+              "if": "hasTrialOffer",
+              "text": "Alle anderen Spiele des Tages öffnen sich mit Pro, mit {{trialDays}} Tagen Testphase. Erste Abbuchung: {{proPrice}} {{trialDays}} Tage nach Beginn der Testphase, danach {{proPrice}} jeden Monat, nur wenn du nicht vorher kündigst. Karte erforderlich; online in deinem Konto kündbar."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Pro-Angebot ansehen",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "{{trialDays}} Tage testen: heute {{zeroPrice}}",
+              "link": "trial"
             },
             {
               "type": "p",
@@ -3571,14 +3571,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Per aprire tutte le partite del giorno: Pro, con {{trialDays}} giorni di prova per un primo abbonamento mensile."
+              "if": "hasTrialOffer",
+              "text": "Per aprire tutte le altre partite del giorno: Pro, con {{trialDays}} giorni di prova. Primo addebito: {{proPrice}} {{trialDays}} giorni dopo l'inizio della prova, poi {{proPrice}} ogni mese, solo se non disdici prima. Carta richiesta; disdetta online dal tuo account."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Vedi l'offerta Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Prova {{trialDays}} giorni: {{zeroPrice}} oggi",
+              "link": "trial"
             }
           ]
         },
@@ -3598,14 +3598,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Per aprire tutte le partite del giorno: Pro, con {{trialDays}} giorni di prova per un primo abbonamento mensile."
+              "if": "hasTrialOffer",
+              "text": "Per aprire tutte le altre partite del giorno: Pro, con {{trialDays}} giorni di prova. Primo addebito: {{proPrice}} {{trialDays}} giorni dopo l'inizio della prova, poi {{proPrice}} ogni mese, solo se non disdici prima. Carta richiesta; disdetta online dal tuo account."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Vedi l'offerta Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Prova {{trialDays}} giorni: {{zeroPrice}} oggi",
+              "link": "trial"
             },
             {
               "type": "p",
@@ -3906,14 +3906,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Para abrir todos os jogos do dia: Pro, com {{trialDays}} dias de teste numa primeira subscrição mensal."
+              "if": "hasTrialOffer",
+              "text": "Para abrir todos os outros jogos do dia: Pro, com {{trialDays}} dias de teste. Primeira cobrança: {{proPrice}} {{trialDays}} dias após o início do teste, depois {{proPrice}} todos os meses, só se não cancelares antes. Cartão pedido; cancelamento online na tua conta."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Ver a oferta Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Experimentar {{trialDays}} dias: {{zeroPrice}} hoje",
+              "link": "trial"
             }
           ]
         },
@@ -3933,14 +3933,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Para abrir todos os jogos do dia: Pro, com {{trialDays}} dias de teste numa primeira subscrição mensal."
+              "if": "hasTrialOffer",
+              "text": "Para abrir todos os outros jogos do dia: Pro, com {{trialDays}} dias de teste. Primeira cobrança: {{proPrice}} {{trialDays}} dias após o início do teste, depois {{proPrice}} todos os meses, só se não cancelares antes. Cartão pedido; cancelamento online na tua conta."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Ver a oferta Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Experimentar {{trialDays}} dias: {{zeroPrice}} hoje",
+              "link": "trial"
             },
             {
               "type": "p",

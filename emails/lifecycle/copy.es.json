@@ -202,14 +202,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "Para abrir todos los partidos del día: Pro, con {{trialDays}} días de prueba en una primera suscripción mensual."
+          "if": "hasTrialOffer",
+          "text": "Para abrir todos los demás partidos del día: Pro, con {{trialDays}} días de prueba. Primer cobro: {{proPrice}} {{trialDays}} días después del inicio de la prueba, luego {{proPrice}} cada mes, solo si no cancelas antes. Se pide tu tarjeta; cancelación en línea desde tu cuenta."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "Ver la oferta Pro",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "Prueba {{trialDays}} días: {{zeroPrice}} hoy",
+          "link": "trial"
         }
       ]
     },
@@ -229,14 +229,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "Para abrir todos los partidos del día: Pro, con {{trialDays}} días de prueba en una primera suscripción mensual."
+          "if": "hasTrialOffer",
+          "text": "Para abrir todos los demás partidos del día: Pro, con {{trialDays}} días de prueba. Primer cobro: {{proPrice}} {{trialDays}} días después del inicio de la prueba, luego {{proPrice}} cada mes, solo si no cancelas antes. Se pide tu tarjeta; cancelación en línea desde tu cuenta."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "Ver la oferta Pro",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "Prueba {{trialDays}} días: {{zeroPrice}} hoy",
+          "link": "trial"
         },
         {
           "type": "p",

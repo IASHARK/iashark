@@ -202,14 +202,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "To open every match of the day: Pro, with a {{trialDays}}-day trial for a first monthly subscription."
+          "if": "hasTrialOffer",
+          "text": "To open every other match of the day: Pro, with a {{trialDays}}-day trial. First charge: {{proPrice}} {{trialDays}} days after the trial starts, then {{proPrice}} every month, only if you don't cancel before then. Card required; cancel online from your account."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "See the Pro offer",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "Try {{trialDays}} days: {{zeroPrice}} today",
+          "link": "trial"
         }
       ]
     },
@@ -229,14 +229,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "To open every match of the day: Pro, with a {{trialDays}}-day trial for a first monthly subscription."
+          "if": "hasTrialOffer",
+          "text": "To open every other match of the day: Pro, with a {{trialDays}}-day trial. First charge: {{proPrice}} {{trialDays}} days after the trial starts, then {{proPrice}} every month, only if you don't cancel before then. Card required; cancel online from your account."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "See the Pro offer",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "Try {{trialDays}} days: {{zeroPrice}} today",
+          "link": "trial"
         },
         {
           "type": "p",

@@ -202,14 +202,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "Um alle Spiele des Tages zu öffnen: Pro, mit {{trialDays}} Tagen Testphase beim ersten Monatsabo."
+          "if": "hasTrialOffer",
+          "text": "Alle anderen Spiele des Tages öffnen sich mit Pro, mit {{trialDays}} Tagen Testphase. Erste Abbuchung: {{proPrice}} {{trialDays}} Tage nach Beginn der Testphase, danach {{proPrice}} jeden Monat, nur wenn du nicht vorher kündigst. Karte erforderlich; online in deinem Konto kündbar."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "Pro-Angebot ansehen",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "{{trialDays}} Tage testen: heute {{zeroPrice}}",
+          "link": "trial"
         }
       ]
     },
@@ -229,14 +229,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "Um alle Spiele des Tages zu öffnen: Pro, mit {{trialDays}} Tagen Testphase beim ersten Monatsabo."
+          "if": "hasTrialOffer",
+          "text": "Alle anderen Spiele des Tages öffnen sich mit Pro, mit {{trialDays}} Tagen Testphase. Erste Abbuchung: {{proPrice}} {{trialDays}} Tage nach Beginn der Testphase, danach {{proPrice}} jeden Monat, nur wenn du nicht vorher kündigst. Karte erforderlich; online in deinem Konto kündbar."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "Pro-Angebot ansehen",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "{{trialDays}} Tage testen: heute {{zeroPrice}}",
+          "link": "trial"
         },
         {
           "type": "p",

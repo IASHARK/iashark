@@ -202,14 +202,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "Per aprire tutte le partite del giorno: Pro, con {{trialDays}} giorni di prova per un primo abbonamento mensile."
+          "if": "hasTrialOffer",
+          "text": "Per aprire tutte le altre partite del giorno: Pro, con {{trialDays}} giorni di prova. Primo addebito: {{proPrice}} {{trialDays}} giorni dopo l'inizio della prova, poi {{proPrice}} ogni mese, solo se non disdici prima. Carta richiesta; disdetta online dal tuo account."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "Vedi l'offerta Pro",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "Prova {{trialDays}} giorni: {{zeroPrice}} oggi",
+          "link": "trial"
         }
       ]
     },
@@ -229,14 +229,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "Per aprire tutte le partite del giorno: Pro, con {{trialDays}} giorni di prova per un primo abbonamento mensile."
+          "if": "hasTrialOffer",
+          "text": "Per aprire tutte le altre partite del giorno: Pro, con {{trialDays}} giorni di prova. Primo addebito: {{proPrice}} {{trialDays}} giorni dopo l'inizio della prova, poi {{proPrice}} ogni mese, solo se non disdici prima. Carta richiesta; disdetta online dal tuo account."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "Vedi l'offerta Pro",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "Prova {{trialDays}} giorni: {{zeroPrice}} oggi",
+          "link": "trial"
         },
         {
           "type": "p",

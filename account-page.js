@@ -502,10 +502,11 @@
      distinct des deux interrupteurs ci-dessus (qui valent "oui" par defaut et
      ne sont donc pas un consentement). Table absente (migration pas encore
      appliquee) : reglage annonce indisponible, jamais un faux interrupteur. */
-  var EMAIL_CONSENT_TEXT_VERSION = '2026-09-15';
+  // 27/10/2026 : le texte de l'interrupteur annonce aussi « nos offres Pro » : nouvelle version.
+  var EMAIL_CONSENT_TEXT_VERSION = '2026-10-27';
   var emailPrefs = { etat: 'inconnu', optIn: false };
   function emailsRelance() {
-    var titre = tr('email_prefs.account_title', 'Analyses offertes et conseils par email');
+    var titre = tr('email_prefs.account_title', 'Analyses offertes, conseils et offres Pro par email');
     return '<div class="mt-6">' + carte(emailPrefs.etat === 'ok'
         ? interrupteur('emailMarketing', titre, tr('email_prefs.account_detail', 'Le match offert, les matchs du week-end et des conseils d’utilisation, au plus un email tous les 3 jours, désinscription en 1 clic dans chaque email. Les emails liés à votre compte (abonnement, sécurité) ne dépendent pas de ce réglage.'), emailPrefs.optIn)
         : '<p class="text-[14.5px] font-semibold">' + esc(titre) + '</p><p class="mt-1 text-[13px] leading-relaxed text-soft">' + esc(tr('email_prefs.account_unavailable', 'Ce réglage n’est pas encore disponible.')) + '</p>')

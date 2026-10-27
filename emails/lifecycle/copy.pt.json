@@ -202,14 +202,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "Para abrir todos os jogos do dia: Pro, com {{trialDays}} dias de teste numa primeira subscrição mensal."
+          "if": "hasTrialOffer",
+          "text": "Para abrir todos os outros jogos do dia: Pro, com {{trialDays}} dias de teste. Primeira cobrança: {{proPrice}} {{trialDays}} dias após o início do teste, depois {{proPrice}} todos os meses, só se não cancelares antes. Cartão pedido; cancelamento online na tua conta."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "Ver a oferta Pro",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "Experimentar {{trialDays}} dias: {{zeroPrice}} hoje",
+          "link": "trial"
         }
       ]
     },
@@ -229,14 +229,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "Para abrir todos os jogos do dia: Pro, com {{trialDays}} dias de teste numa primeira subscrição mensal."
+          "if": "hasTrialOffer",
+          "text": "Para abrir todos os outros jogos do dia: Pro, com {{trialDays}} dias de teste. Primeira cobrança: {{proPrice}} {{trialDays}} dias após o início do teste, depois {{proPrice}} todos os meses, só se não cancelares antes. Cartão pedido; cancelamento online na tua conta."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "Ver a oferta Pro",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "Experimentar {{trialDays}} dias: {{zeroPrice}} hoje",
+          "link": "trial"
         },
         {
           "type": "p",

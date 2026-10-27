@@ -202,14 +202,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "Pour ouvrir tous les matchs du jour : Pro, avec {{trialDays}} jours d'essai pour un premier abonnement au mois."
+          "if": "hasTrialOffer",
+          "text": "Pour ouvrir tous les autres matchs du jour : Pro, avec {{trialDays}} jours d'essai. Premier prélèvement : {{proPrice}} {{trialDays}} jours après le début de l'essai, puis {{proPrice}} chaque mois, seulement si tu ne résilies pas avant. Carte demandée ; résiliation en ligne depuis Mon compte."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "Voir l'offre Pro",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "Essayer {{trialDays}} jours : {{zeroPrice}} aujourd'hui",
+          "link": "trial"
         }
       ]
     },
@@ -229,14 +229,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "Pour ouvrir tous les matchs du jour : Pro, avec {{trialDays}} jours d'essai pour un premier abonnement au mois."
+          "if": "hasTrialOffer",
+          "text": "Pour ouvrir tous les autres matchs du jour : Pro, avec {{trialDays}} jours d'essai. Premier prélèvement : {{proPrice}} {{trialDays}} jours après le début de l'essai, puis {{proPrice}} chaque mois, seulement si tu ne résilies pas avant. Carte demandée ; résiliation en ligne depuis Mon compte."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "Voir l'offre Pro",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "Essayer {{trialDays}} jours : {{zeroPrice}} aujourd'hui",
+          "link": "trial"
         },
         {
           "type": "p",

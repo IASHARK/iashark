@@ -1,5 +1,5 @@
 {
-  "_status": "REVIEW - copy reviewed on 25/10/2026 (current Pro content and prices, free pick with the free account). Used by /en/ (international), /gb/ and /za/. No promise of winnings, no stakes, no emoji.",
+  "_status": "REVIEW - copy reviewed on 25/10/2026 (current Pro content and prices, free pick with the free account). Used by /en/ (international), /gb/ and /za/. No promise of winnings, no stakes, no emoji. 27/10/2026 : bienvenue reecrite (ce que le compte donne, match offert, essai avec la date du premier prelevement pour les comptes qui ont accepte nos e-mails), phrase de risque retiree du bloc 18+.",
   "locale": "en",
   "common": {
     "greeting": "Hello,",
@@ -7,7 +7,7 @@
     "kickoff_label": "Kick-off",
     "match_link": "View the match",
     "rg_title": "Safer gambling · 18+",
-    "rg_body": "IASHARK publishes football analysis and does not take bets. A calculated chance is never a certainty. Betting carries a risk of losing money and of addiction. For people aged 18 and over.",
+    "rg_body": "IASHARK publishes football analysis and does not take bets. A calculated chance is never a certainty. For people aged 18 and over.",
     "rg_help_phone": "Need help? {{helplineName}}: {{helplinePhone}}.",
     "rg_help_nophone": "Need help? {{helplineName}}:",
     "rg_more": "Our safer gambling advice",
@@ -21,27 +21,33 @@
   },
   "campaigns": {
     "welcome": {
-      "subject": "Welcome to IASHARK: where to start",
-      "preheader": "Your free account is ready: one free pick every day.",
-      "title": "Welcome to IASHARK",
+      "subject": "{{#hasFreeMatch}}Welcome: your free match, {{freeMatchHome}} – {{freeMatchAway}}{{/hasFreeMatch}}{{^hasFreeMatch}}Welcome: your IASHARK account is ready{{/hasFreeMatch}}",
+      "preheader": "Every day, the full analysis of one match is free with your account.",
+      "title": "Your free account is ready",
       "blocks": [
         {
           "type": "p",
-          "text": "Your free account is ready. Here is how to use it:"
+          "text": "Every day, your free account opens:"
         },
         {
           "type": "list",
-          "ordered": true,
+          "if": "hasTickets",
           "items": [
-            "Every day, one match is free. With your free account, you see its pick, its calculated chance and why.",
-            "Compare that chance with the odds at your licensed bookmaker, then you decide.",
-            "The Methodology page explains how these chances are calculated."
+            "the full analysis of the free match: the pick, its calculated chance and why;",
+            "the day's Small combo, when our rules find one."
+          ]
+        },
+        {
+          "type": "list",
+          "if": "noTickets",
+          "items": [
+            "the full analysis of the free match: the pick, its calculated chance and why."
           ]
         },
         {
           "type": "p",
           "if": "hasFreeMatch",
-          "text": "The free match right now:"
+          "text": "The free match:"
         },
         {
           "type": "match",
@@ -50,7 +56,7 @@
         {
           "type": "cta",
           "if": "hasFreeMatch",
-          "label": "See the free pick",
+          "label": "See the free analysis",
           "link": "freeMatch"
         },
         {
@@ -60,9 +66,15 @@
           "link": "home"
         },
         {
+          "type": "p",
+          "if": "noTrialOffer",
+          "text": "Every other match of the day opens with Pro: it's all explained in your account."
+        },
+        {
           "type": "link",
-          "label": "Read the methodology",
-          "link": "methodology"
+          "if": "noTrialOffer",
+          "label": "Open my account",
+          "link": "account"
         },
         {
           "type": "p",
@@ -94,14 +106,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "To open every match of the day: Pro, with a {{trialDays}}-day trial for a first monthly subscription."
+          "if": "hasTrialOffer",
+          "text": "To open every other match of the day: Pro, with a {{trialDays}}-day trial. First charge: {{proPrice}} {{trialDays}} days after the trial starts, then {{proPrice}} every month, only if you don't cancel before then. Card required; cancel online from your account."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "See the Pro offer",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "Try {{trialDays}} days: {{zeroPrice}} today",
+          "link": "trial"
         }
       ]
     },
@@ -126,7 +138,7 @@
           "type": "list",
           "if": "hasTickets",
           "items": [
-            "The day's Small and Big combo, the Gold Selection and the scorer of the day"
+            "The day's Big combo, the Gold Selection and the scorer of the day"
           ]
         },
         {
@@ -146,11 +158,18 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "{{trialDays}}-day trial for a first monthly subscription: your card is requested, nothing is charged during the trial. Then {{proPrice}} per month, charged automatically unless you cancel before the trial ends."
+          "if": "hasTrialOffer",
+          "text": "{{trialDays}}-day trial on the monthly subscription (first subscription): {{zeroPrice}} today. First charge: {{proPrice}} {{trialDays}} days after the trial starts, then {{proPrice}} every month, only if you don't cancel before then. Card required; cancel online from your account."
         },
         {
           "type": "cta",
+          "if": "hasTrialOffer",
+          "label": "Try {{trialDays}} days: {{zeroPrice}} today",
+          "link": "trial"
+        },
+        {
+          "type": "cta",
+          "if": "noTrialOffer",
           "label": "See the Pro offer",
           "link": "pro"
         },
@@ -183,14 +202,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "To open every match of the day: Pro, with a {{trialDays}}-day trial for a first monthly subscription."
+          "if": "hasTrialOffer",
+          "text": "To open every other match of the day: Pro, with a {{trialDays}}-day trial. First charge: {{proPrice}} {{trialDays}} days after the trial starts, then {{proPrice}} every month, only if you don't cancel before then. Card required; cancel online from your account."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "See the Pro offer",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "Try {{trialDays}} days: {{zeroPrice}} today",
+          "link": "trial"
         }
       ]
     },
@@ -210,14 +229,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "To open every match of the day: Pro, with a {{trialDays}}-day trial for a first monthly subscription."
+          "if": "hasTrialOffer",
+          "text": "To open every other match of the day: Pro, with a {{trialDays}}-day trial. First charge: {{proPrice}} {{trialDays}} days after the trial starts, then {{proPrice}} every month, only if you don't cancel before then. Card required; cancel online from your account."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "See the Pro offer",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "Try {{trialDays}} days: {{zeroPrice}} today",
+          "link": "trial"
         },
         {
           "type": "p",
@@ -245,6 +264,70 @@
         {
           "type": "p",
           "text": "You can turn off this summary in My account, under Notifications."
+        }
+      ]
+    },
+    "results_recap": {
+      "subject": "Yesterday's results: {{recapWonText}}, {{recapLostText}}",
+      "preheader": "The picks published before yesterday's matches, won and lost.",
+      "title": "Yesterday's results",
+      "counts": {
+        "won_one": "{n} won",
+        "won_many": "{n} won",
+        "lost_one": "{n} lost",
+        "lost_many": "{n} lost",
+        "void_one": "{n} void",
+        "void_many": "{n} void",
+        "pending_one": "{n} awaiting result",
+        "pending_many": "{n} awaiting results"
+      },
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Yesterday, {{recapDate}}{{#recapParisTime}} (Paris time){{/recapParisTime}}, here is how the single picks IASHARK published before kick-off ended:"
+        },
+        {
+          "type": "list",
+          "if": "noRecapVoid",
+          "items": [
+            "{{recapWonText}}",
+            "{{recapLostText}}"
+          ]
+        },
+        {
+          "type": "list",
+          "if": "hasRecapVoid",
+          "items": [
+            "{{recapWonText}}",
+            "{{recapLostText}}",
+            "{{recapVoidText}}"
+          ]
+        },
+        {
+          "type": "p",
+          "if": "hasRecapPending",
+          "text": "At the time of this email: {{recapPendingText}}."
+        },
+        {
+          "type": "p",
+          "text": "Your free account opens the free match every day. The picks for every other match of the day open with Pro."
+        },
+        {
+          "type": "p",
+          "if": "hasTrialOffer",
+          "text": "{{trialDays}}-day trial on the monthly subscription: {{zeroPrice}} today. First charge: {{proPrice}} {{trialDays}} days after the trial starts, then {{proPrice}} every month, only if you don't cancel before then. Card required; cancel online from your account."
+        },
+        {
+          "type": "cta",
+          "if": "hasTrialOffer",
+          "label": "Try {{trialDays}} days: {{zeroPrice}} today",
+          "link": "trial"
+        },
+        {
+          "type": "cta",
+          "if": "noTrialOffer",
+          "label": "See today's matches",
+          "link": "home"
         }
       ]
     }

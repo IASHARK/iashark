@@ -1,5 +1,5 @@
 {
-  "_status": "REVIEW - testi rivisti il 25/10/2026 (contenuti Pro e prezzi attuali, pronostico gratuito con l'account gratuito). Nessuna promessa di vincita, nessuna puntata, nessuna emoji.",
+  "_status": "REVIEW - testi rivisti il 25/10/2026 (contenuti Pro e prezzi attuali, pronostico gratuito con l'account gratuito). Nessuna promessa di vincita, nessuna puntata, nessuna emoji. 27/10/2026 : bienvenue reecrite (ce que le compte donne, match offert, essai avec la date du premier prelevement pour les comptes qui ont accepte nos e-mails), phrase de risque retiree du bloc 18+.",
   "locale": "it",
   "common": {
     "greeting": "Ciao,",
@@ -7,7 +7,7 @@
     "kickoff_label": "Calcio d'inizio",
     "match_link": "Vedi la partita",
     "rg_title": "Gioco responsabile · 18+",
-    "rg_body": "IASHARK pubblica analisi di calcio e non accetta scommesse. Una probabilità calcolata non è mai una certezza. Le scommesse sportive comportano un rischio di perdita di denaro e di dipendenza. Riservato ai maggiori di 18 anni.",
+    "rg_body": "IASHARK pubblica analisi di calcio e non accetta scommesse. Una probabilità calcolata non è mai una certezza. Riservato ai maggiori di 18 anni.",
     "rg_help_phone": "Hai bisogno di aiuto? {{helplineName}}: {{helplinePhone}}.",
     "rg_help_nophone": "Hai bisogno di aiuto? {{helplineName}}:",
     "rg_more": "I nostri consigli sul gioco responsabile",
@@ -21,27 +21,33 @@
   },
   "campaigns": {
     "welcome": {
-      "subject": "Benvenuto su IASHARK: da dove iniziare",
-      "preheader": "Il tuo account gratuito è pronto: ogni giorno, il pronostico di una partita è gratis.",
-      "title": "Benvenuto su IASHARK",
+      "subject": "{{#hasFreeMatch}}Benvenuto: la tua partita gratuita, {{freeMatchHome}} – {{freeMatchAway}}{{/hasFreeMatch}}{{^hasFreeMatch}}Benvenuto: il tuo account IASHARK è pronto{{/hasFreeMatch}}",
+      "preheader": "Ogni giorno, l'analisi completa di una partita è gratuita con il tuo account.",
+      "title": "Il tuo account gratuito è pronto",
       "blocks": [
         {
           "type": "p",
-          "text": "Il tuo account gratuito è pronto. Ecco come usarlo:"
+          "text": "Ogni giorno, il tuo account gratuito ti apre:"
         },
         {
           "type": "list",
-          "ordered": true,
+          "if": "hasTickets",
           "items": [
-            "Ogni giorno, una partita è gratis. Con il tuo account gratuito vedi il suo pronostico, la sua probabilità calcolata e il perché.",
-            "Confronti questa probabilità con la quota del tuo operatore autorizzato, poi decidi tu.",
-            "La pagina Metodologia spiega come vengono calcolate queste probabilità."
+            "l'analisi completa della partita gratuita: il pronostico scelto, la sua probabilità calcolata e il perché;",
+            "la multipla piccola del giorno, quando le nostre regole ne trovano una."
+          ]
+        },
+        {
+          "type": "list",
+          "if": "noTickets",
+          "items": [
+            "l'analisi completa della partita gratuita: il pronostico scelto, la sua probabilità calcolata e il perché."
           ]
         },
         {
           "type": "p",
           "if": "hasFreeMatch",
-          "text": "La partita gratuita in questo momento:"
+          "text": "La partita gratuita:"
         },
         {
           "type": "match",
@@ -50,7 +56,7 @@
         {
           "type": "cta",
           "if": "hasFreeMatch",
-          "label": "Vedi il pronostico gratuito",
+          "label": "Vedi l'analisi gratuita",
           "link": "freeMatch"
         },
         {
@@ -60,9 +66,15 @@
           "link": "home"
         },
         {
+          "type": "p",
+          "if": "noTrialOffer",
+          "text": "Le altre partite del giorno si aprono con Pro: è tutto spiegato nel tuo account."
+        },
+        {
           "type": "link",
-          "label": "Leggi la metodologia",
-          "link": "methodology"
+          "if": "noTrialOffer",
+          "label": "Apri il mio account",
+          "link": "account"
         },
         {
           "type": "p",
@@ -94,14 +106,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "Per aprire tutte le partite del giorno: Pro, con {{trialDays}} giorni di prova per un primo abbonamento mensile."
+          "if": "hasTrialOffer",
+          "text": "Per aprire tutte le altre partite del giorno: Pro, con {{trialDays}} giorni di prova. Primo addebito: {{proPrice}} {{trialDays}} giorni dopo l'inizio della prova, poi {{proPrice}} ogni mese, solo se non disdici prima. Carta richiesta; disdetta online dal tuo account."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "Vedi l'offerta Pro",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "Prova {{trialDays}} giorni: {{zeroPrice}} oggi",
+          "link": "trial"
         }
       ]
     },
@@ -126,7 +138,7 @@
           "type": "list",
           "if": "hasTickets",
           "items": [
-            "La multipla piccola e quella grande del giorno, la Selezione d'oro e il marcatore del giorno"
+            "La multipla grande del giorno, la Selezione d'oro e il marcatore del giorno"
           ]
         },
         {
@@ -146,11 +158,18 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "{{trialDays}} giorni di prova per un primo abbonamento mensile: la carta viene richiesta, nulla viene addebitato durante la prova. Poi {{proPrice}} al mese, addebitati automaticamente salvo disdetta prima della fine della prova."
+          "if": "hasTrialOffer",
+          "text": "Prova di {{trialDays}} giorni sull'abbonamento mensile (primo abbonamento): {{zeroPrice}} oggi. Primo addebito: {{proPrice}} {{trialDays}} giorni dopo l'inizio della prova, poi {{proPrice}} ogni mese, solo se non disdici prima. Carta richiesta; disdetta online dal tuo account."
         },
         {
           "type": "cta",
+          "if": "hasTrialOffer",
+          "label": "Prova {{trialDays}} giorni: {{zeroPrice}} oggi",
+          "link": "trial"
+        },
+        {
+          "type": "cta",
+          "if": "noTrialOffer",
           "label": "Vedi l'offerta Pro",
           "link": "pro"
         },
@@ -183,14 +202,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "Per aprire tutte le partite del giorno: Pro, con {{trialDays}} giorni di prova per un primo abbonamento mensile."
+          "if": "hasTrialOffer",
+          "text": "Per aprire tutte le altre partite del giorno: Pro, con {{trialDays}} giorni di prova. Primo addebito: {{proPrice}} {{trialDays}} giorni dopo l'inizio della prova, poi {{proPrice}} ogni mese, solo se non disdici prima. Carta richiesta; disdetta online dal tuo account."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "Vedi l'offerta Pro",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "Prova {{trialDays}} giorni: {{zeroPrice}} oggi",
+          "link": "trial"
         }
       ]
     },
@@ -210,14 +229,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "Per aprire tutte le partite del giorno: Pro, con {{trialDays}} giorni di prova per un primo abbonamento mensile."
+          "if": "hasTrialOffer",
+          "text": "Per aprire tutte le altre partite del giorno: Pro, con {{trialDays}} giorni di prova. Primo addebito: {{proPrice}} {{trialDays}} giorni dopo l'inizio della prova, poi {{proPrice}} ogni mese, solo se non disdici prima. Carta richiesta; disdetta online dal tuo account."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "Vedi l'offerta Pro",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "Prova {{trialDays}} giorni: {{zeroPrice}} oggi",
+          "link": "trial"
         },
         {
           "type": "p",
@@ -245,6 +264,70 @@
         {
           "type": "p",
           "text": "Puoi disattivare questo riepilogo in Il mio account, sezione Notifiche."
+        }
+      ]
+    },
+    "results_recap": {
+      "subject": "Il bilancio di ieri: {{recapWonText}}, {{recapLostText}}",
+      "preheader": "I pronostici pubblicati prima delle partite di ieri, vinti e persi.",
+      "title": "Il bilancio di ieri",
+      "counts": {
+        "won_one": "{n} vinta",
+        "won_many": "{n} vinte",
+        "lost_one": "{n} persa",
+        "lost_many": "{n} perse",
+        "void_one": "{n} annullata",
+        "void_many": "{n} annullate",
+        "pending_one": "{n} in attesa di risultato",
+        "pending_many": "{n} in attesa di risultato"
+      },
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Ieri, {{recapDate}}{{#recapParisTime}} (ora di Parigi){{/recapParisTime}}, ecco come sono andati i pronostici singoli pubblicati da IASHARK prima del calcio d'inizio:"
+        },
+        {
+          "type": "list",
+          "if": "noRecapVoid",
+          "items": [
+            "{{recapWonText}}",
+            "{{recapLostText}}"
+          ]
+        },
+        {
+          "type": "list",
+          "if": "hasRecapVoid",
+          "items": [
+            "{{recapWonText}}",
+            "{{recapLostText}}",
+            "{{recapVoidText}}"
+          ]
+        },
+        {
+          "type": "p",
+          "if": "hasRecapPending",
+          "text": "Al momento di questa email: {{recapPendingText}}."
+        },
+        {
+          "type": "p",
+          "text": "Il tuo account gratuito ti apre ogni giorno la partita gratuita. I pronostici di tutte le altre partite del giorno si aprono con Pro."
+        },
+        {
+          "type": "p",
+          "if": "hasTrialOffer",
+          "text": "Prova di {{trialDays}} giorni sull'abbonamento mensile: {{zeroPrice}} oggi. Primo addebito: {{proPrice}} {{trialDays}} giorni dopo l'inizio della prova, poi {{proPrice}} ogni mese, solo se non disdici prima. Carta richiesta; disdetta online dal tuo account."
+        },
+        {
+          "type": "cta",
+          "if": "hasTrialOffer",
+          "label": "Prova {{trialDays}} giorni: {{zeroPrice}} oggi",
+          "link": "trial"
+        },
+        {
+          "type": "cta",
+          "if": "noTrialOffer",
+          "label": "Vedi le partite del giorno",
+          "link": "home"
         }
       ]
     }

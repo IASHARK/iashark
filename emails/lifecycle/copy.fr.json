@@ -1,5 +1,5 @@
 {
-  "_status": "REVIEW - textes revus le 25/10/2026 (tutoiement comme le site, prix et contenus Pro actuels, pari offert avec le compte gratuit). Aucune promesse de gain, aucune mise, aucun emoji.",
+  "_status": "REVIEW - textes revus le 25/10/2026 (tutoiement comme le site, prix et contenus Pro actuels, pari offert avec le compte gratuit). Aucune promesse de gain, aucune mise, aucun emoji. 27/10/2026 : bienvenue reecrite (ce que le compte donne, match offert, essai avec la date du premier prelevement pour les comptes qui ont accepte nos e-mails), phrase de risque retiree du bloc 18+.",
   "locale": "fr",
   "common": {
     "greeting": "Bonjour,",
@@ -7,7 +7,7 @@
     "kickoff_label": "Coup d'envoi",
     "match_link": "Voir le match",
     "rg_title": "Jeu responsable · 18+",
-    "rg_body": "IASHARK publie des analyses de football et ne prend aucun pari. Une chance calculée n'est jamais une certitude. Les paris sportifs comportent un risque de perte d'argent et de dépendance. Réservé aux personnes de 18 ans et plus.",
+    "rg_body": "IASHARK publie des analyses de football et ne prend aucun pari. Une chance calculée n'est jamais une certitude. Réservé aux personnes de 18 ans et plus.",
     "rg_help_phone": "Besoin d'aide ? {{helplineName}} : {{helplinePhone}}.",
     "rg_help_nophone": "Besoin d'aide ? {{helplineName}} :",
     "rg_more": "Nos conseils de jeu responsable",
@@ -21,27 +21,33 @@
   },
   "campaigns": {
     "welcome": {
-      "subject": "Bienvenue sur IASHARK : par où commencer",
-      "preheader": "Ton compte gratuit est prêt : chaque jour, le pari d'un match est offert.",
-      "title": "Bienvenue sur IASHARK",
+      "subject": "{{#hasFreeMatch}}Bienvenue : ton match offert, {{freeMatchHome}} – {{freeMatchAway}}{{/hasFreeMatch}}{{^hasFreeMatch}}Bienvenue : ton compte IASHARK est prêt{{/hasFreeMatch}}",
+      "preheader": "Chaque jour, l'analyse complète d'un match t'est offerte avec ton compte gratuit.",
+      "title": "Ton compte gratuit est prêt",
       "blocks": [
         {
           "type": "p",
-          "text": "Ton compte gratuit est prêt. Voici comment t'en servir :"
+          "text": "Chaque jour, ton compte gratuit t'ouvre :"
         },
         {
           "type": "list",
-          "ordered": true,
+          "if": "hasTickets",
           "items": [
-            "Chaque jour, un match est offert. Avec ton compte gratuit, tu vois son pari, sa chance calculée et pourquoi.",
-            "Tu compares cette chance avec la cote de ton opérateur agréé, puis c'est toi qui décides.",
-            "La page Méthodologie explique comment ces chances sont calculées."
+            "l'analyse complète du match offert : le pari retenu, sa chance calculée et pourquoi ;",
+            "le Petit combiné du jour, quand nos règles en trouvent un."
+          ]
+        },
+        {
+          "type": "list",
+          "if": "noTickets",
+          "items": [
+            "l'analyse complète du match offert : le pari retenu, sa chance calculée et pourquoi."
           ]
         },
         {
           "type": "p",
           "if": "hasFreeMatch",
-          "text": "Le match offert en ce moment :"
+          "text": "Le match offert :"
         },
         {
           "type": "match",
@@ -50,7 +56,7 @@
         {
           "type": "cta",
           "if": "hasFreeMatch",
-          "label": "Voir le pari offert",
+          "label": "Voir l'analyse offerte",
           "link": "freeMatch"
         },
         {
@@ -60,9 +66,15 @@
           "link": "home"
         },
         {
+          "type": "p",
+          "if": "noTrialOffer",
+          "text": "Les autres matchs du jour s'ouvrent avec Pro : tout est détaillé dans ton compte."
+        },
+        {
           "type": "link",
-          "label": "Lire la méthodologie",
-          "link": "methodology"
+          "if": "noTrialOffer",
+          "label": "Ouvrir mon compte",
+          "link": "account"
         },
         {
           "type": "p",
@@ -94,14 +106,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "Pour ouvrir tous les matchs du jour : Pro, avec {{trialDays}} jours d'essai pour un premier abonnement au mois."
+          "if": "hasTrialOffer",
+          "text": "Pour ouvrir tous les autres matchs du jour : Pro, avec {{trialDays}} jours d'essai. Premier prélèvement : {{proPrice}} {{trialDays}} jours après le début de l'essai, puis {{proPrice}} chaque mois, seulement si tu ne résilies pas avant. Carte demandée ; résiliation en ligne depuis Mon compte."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "Voir l'offre Pro",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "Essayer {{trialDays}} jours : {{zeroPrice}} aujourd'hui",
+          "link": "trial"
         }
       ]
     },
@@ -126,7 +138,7 @@
           "type": "list",
           "if": "hasTickets",
           "items": [
-            "Le Petit et le Grand combiné du jour, la Sélection en or et le buteur du jour"
+            "Le Grand combiné du jour, la Sélection en or et le buteur du jour"
           ]
         },
         {
@@ -146,11 +158,18 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "{{trialDays}} jours d'essai pour un premier abonnement au mois : ta carte est demandée, rien n'est prélevé pendant l'essai. Ensuite {{proPrice}} par mois, prélevés automatiquement sauf résiliation avant la fin de l'essai."
+          "if": "hasTrialOffer",
+          "text": "Essai de {{trialDays}} jours sur l'abonnement au mois (premier abonnement) : {{zeroPrice}} aujourd'hui. Premier prélèvement : {{proPrice}} {{trialDays}} jours après le début de l'essai, puis {{proPrice}} chaque mois, seulement si tu ne résilies pas avant. Carte demandée ; résiliation en ligne depuis Mon compte."
         },
         {
           "type": "cta",
+          "if": "hasTrialOffer",
+          "label": "Essayer {{trialDays}} jours : {{zeroPrice}} aujourd'hui",
+          "link": "trial"
+        },
+        {
+          "type": "cta",
+          "if": "noTrialOffer",
           "label": "Voir l'offre Pro",
           "link": "pro"
         },
@@ -183,14 +202,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "Pour ouvrir tous les matchs du jour : Pro, avec {{trialDays}} jours d'essai pour un premier abonnement au mois."
+          "if": "hasTrialOffer",
+          "text": "Pour ouvrir tous les autres matchs du jour : Pro, avec {{trialDays}} jours d'essai. Premier prélèvement : {{proPrice}} {{trialDays}} jours après le début de l'essai, puis {{proPrice}} chaque mois, seulement si tu ne résilies pas avant. Carte demandée ; résiliation en ligne depuis Mon compte."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "Voir l'offre Pro",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "Essayer {{trialDays}} jours : {{zeroPrice}} aujourd'hui",
+          "link": "trial"
         }
       ]
     },
@@ -210,14 +229,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "Pour ouvrir tous les matchs du jour : Pro, avec {{trialDays}} jours d'essai pour un premier abonnement au mois."
+          "if": "hasTrialOffer",
+          "text": "Pour ouvrir tous les autres matchs du jour : Pro, avec {{trialDays}} jours d'essai. Premier prélèvement : {{proPrice}} {{trialDays}} jours après le début de l'essai, puis {{proPrice}} chaque mois, seulement si tu ne résilies pas avant. Carte demandée ; résiliation en ligne depuis Mon compte."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "Voir l'offre Pro",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "Essayer {{trialDays}} jours : {{zeroPrice}} aujourd'hui",
+          "link": "trial"
         },
         {
           "type": "p",
@@ -245,6 +264,70 @@
         {
           "type": "p",
           "text": "Tu peux désactiver ce résumé dans Mon compte, rubrique Notifications."
+        }
+      ]
+    },
+    "results_recap": {
+      "subject": "Le bilan d'hier : {{recapWonText}}, {{recapLostText}}",
+      "preheader": "Les paris publiés avant les matchs d'hier, gagnés et perdus.",
+      "title": "Le bilan d'hier",
+      "counts": {
+        "won_one": "{n} gagné",
+        "won_many": "{n} gagnés",
+        "lost_one": "{n} perdu",
+        "lost_many": "{n} perdus",
+        "void_one": "{n} annulé",
+        "void_many": "{n} annulés",
+        "pending_one": "{n} en attente de résultat",
+        "pending_many": "{n} en attente de résultat"
+      },
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Hier, {{recapDate}}{{#recapParisTime}} (heure de Paris){{/recapParisTime}}, voici le résultat des paris simples publiés par IASHARK avant le coup d'envoi :"
+        },
+        {
+          "type": "list",
+          "if": "noRecapVoid",
+          "items": [
+            "{{recapWonText}}",
+            "{{recapLostText}}"
+          ]
+        },
+        {
+          "type": "list",
+          "if": "hasRecapVoid",
+          "items": [
+            "{{recapWonText}}",
+            "{{recapLostText}}",
+            "{{recapVoidText}}"
+          ]
+        },
+        {
+          "type": "p",
+          "if": "hasRecapPending",
+          "text": "Au moment de cet e-mail : {{recapPendingText}}."
+        },
+        {
+          "type": "p",
+          "text": "Ton compte gratuit t'ouvre chaque jour le match offert. Les paris de tous les autres matchs du jour s'ouvrent avec Pro."
+        },
+        {
+          "type": "p",
+          "if": "hasTrialOffer",
+          "text": "Essai de {{trialDays}} jours sur l'abonnement au mois : {{zeroPrice}} aujourd'hui. Premier prélèvement : {{proPrice}} {{trialDays}} jours après le début de l'essai, puis {{proPrice}} chaque mois, seulement si tu ne résilies pas avant. Carte demandée ; résiliation en ligne depuis Mon compte."
+        },
+        {
+          "type": "cta",
+          "if": "hasTrialOffer",
+          "label": "Essayer {{trialDays}} jours : {{zeroPrice}} aujourd'hui",
+          "link": "trial"
+        },
+        {
+          "type": "cta",
+          "if": "noTrialOffer",
+          "label": "Voir les matchs du jour",
+          "link": "home"
         }
       ]
     }

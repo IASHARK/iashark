@@ -276,7 +276,9 @@
      alors a false). Metadonnees lues par le declencheur SQL
      handle_new_user_email_preferences (migration 0024), qui pose la date cote
      serveur. Version = date du texte de la case (preuve du consentement). */
-  var EMAIL_CONSENT_TEXT_VERSION = '2026-09-15';
+  // 27/10/2026 : le texte de la case ajoute « et nos offres Pro » (controle de l'avocat du diable) :
+  // nouvelle version, preuve du texte accepte (les accords d'avant gardent la leur).
+  var EMAIL_CONSENT_TEXT_VERSION = '2026-10-27';
   var LOCALE_DU_REPERTOIRE = { fr: 'fr', en: 'en', es: 'es', de: 'de', it: 'it', pt: 'pt', gb: 'en', za: 'en', mx: 'es-mx' };
   function donneesEmails(consenti) {
     var m = location.pathname.match(/^\/(fr|en|es|de|it|pt|gb|za|mx)(?:\/|$)/);

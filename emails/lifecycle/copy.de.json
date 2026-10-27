@@ -1,5 +1,5 @@
 {
-  "_status": "REVIEW - Texte überarbeitet am 25/10/2026 (aktuelle Pro-Inhalte und Preise, Gratis-Tipp mit kostenlosem Konto). Kein Gewinnversprechen, keine Einsätze, keine Emojis.",
+  "_status": "REVIEW - Texte überarbeitet am 25/10/2026 (aktuelle Pro-Inhalte und Preise, Gratis-Tipp mit kostenlosem Konto). Kein Gewinnversprechen, keine Einsätze, keine Emojis. 27/10/2026 : bienvenue reecrite (ce que le compte donne, match offert, essai avec la date du premier prelevement pour les comptes qui ont accepte nos e-mails), phrase de risque retiree du bloc 18+.",
   "locale": "de",
   "common": {
     "greeting": "Hallo,",
@@ -7,7 +7,7 @@
     "kickoff_label": "Anstoß",
     "match_link": "Zum Spiel",
     "rg_title": "Verantwortungsvolles Spielen · 18+",
-    "rg_body": "IASHARK veröffentlicht Fußballanalysen und nimmt keine Wetten an. Eine berechnete Chance ist nie eine Gewissheit. Sportwetten bergen das Risiko von Geldverlust und Sucht. Nur für Personen ab 18 Jahren.",
+    "rg_body": "IASHARK veröffentlicht Fußballanalysen und nimmt keine Wetten an. Eine berechnete Chance ist nie eine Gewissheit. Nur für Personen ab 18 Jahren.",
     "rg_help_phone": "Brauchst du Hilfe? {{helplineName}}: {{helplinePhone}}.",
     "rg_help_nophone": "Brauchst du Hilfe? {{helplineName}}:",
     "rg_more": "Unsere Hinweise zum verantwortungsvollen Spielen",
@@ -21,27 +21,33 @@
   },
   "campaigns": {
     "welcome": {
-      "subject": "Willkommen bei IASHARK: so fängst du an",
-      "preheader": "Dein kostenloses Konto ist bereit: jeden Tag ein Gratis-Tipp.",
-      "title": "Willkommen bei IASHARK",
+      "subject": "{{#hasFreeMatch}}Willkommen: dein Gratisspiel, {{freeMatchHome}} – {{freeMatchAway}}{{/hasFreeMatch}}{{^hasFreeMatch}}Willkommen: dein IASHARK-Konto ist bereit{{/hasFreeMatch}}",
+      "preheader": "Jeden Tag ist die vollständige Analyse eines Spiels mit deinem Konto gratis.",
+      "title": "Dein kostenloses Konto ist bereit",
       "blocks": [
         {
           "type": "p",
-          "text": "Dein kostenloses Konto ist bereit. So nutzt du es:"
+          "text": "Jeden Tag öffnet dir dein kostenloses Konto:"
         },
         {
           "type": "list",
-          "ordered": true,
+          "if": "hasTickets",
           "items": [
-            "Jeden Tag ist ein Spiel gratis. Mit deinem kostenlosen Konto siehst du seinen Tipp, seine berechnete Chance und die Begründung.",
-            "Du vergleichst diese Chance mit der Quote deines zugelassenen Anbieters und entscheidest dann selbst.",
-            "Die Seite Methodik erklärt, wie diese Chancen berechnet werden."
+            "die vollständige Analyse des Gratisspiels: der gewählte Tipp, seine berechnete Chance und die Begründung;",
+            "die kleine Kombi des Tages, wenn unsere Regeln eine finden."
+          ]
+        },
+        {
+          "type": "list",
+          "if": "noTickets",
+          "items": [
+            "die vollständige Analyse des Gratisspiels: der gewählte Tipp, seine berechnete Chance und die Begründung."
           ]
         },
         {
           "type": "p",
           "if": "hasFreeMatch",
-          "text": "Das Gratis-Spiel im Moment:"
+          "text": "Das Gratisspiel:"
         },
         {
           "type": "match",
@@ -50,7 +56,7 @@
         {
           "type": "cta",
           "if": "hasFreeMatch",
-          "label": "Zum Gratis-Tipp",
+          "label": "Gratis-Analyse ansehen",
           "link": "freeMatch"
         },
         {
@@ -60,9 +66,15 @@
           "link": "home"
         },
         {
+          "type": "p",
+          "if": "noTrialOffer",
+          "text": "Alle anderen Spiele des Tages öffnen sich mit Pro: Alles steht in deinem Konto."
+        },
+        {
           "type": "link",
-          "label": "Methodik lesen",
-          "link": "methodology"
+          "if": "noTrialOffer",
+          "label": "Mein Konto öffnen",
+          "link": "account"
         },
         {
           "type": "p",
@@ -94,14 +106,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "Um alle Spiele des Tages zu öffnen: Pro, mit {{trialDays}} Tagen Testphase beim ersten Monatsabo."
+          "if": "hasTrialOffer",
+          "text": "Alle anderen Spiele des Tages öffnen sich mit Pro, mit {{trialDays}} Tagen Testphase. Erste Abbuchung: {{proPrice}} {{trialDays}} Tage nach Beginn der Testphase, danach {{proPrice}} jeden Monat, nur wenn du nicht vorher kündigst. Karte erforderlich; online in deinem Konto kündbar."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "Pro-Angebot ansehen",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "{{trialDays}} Tage testen: heute {{zeroPrice}}",
+          "link": "trial"
         }
       ]
     },
@@ -126,7 +138,7 @@
           "type": "list",
           "if": "hasTickets",
           "items": [
-            "Die kleine und die große Kombi des Tages, die Gold-Auswahl und der Torschütze des Tages"
+            "Die große Kombi des Tages, die Gold-Auswahl und der Torschütze des Tages"
           ]
         },
         {
@@ -146,11 +158,18 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "{{trialDays}} Tage Testphase beim ersten Monatsabo: Deine Karte wird abgefragt, während der Testphase wird nichts abgebucht. Danach {{proPrice}} pro Monat, automatisch abgebucht, außer du kündigst vor Ende der Testphase."
+          "if": "hasTrialOffer",
+          "text": "{{trialDays}} Tage Testphase beim Monatsabo (erstes Abo): heute {{zeroPrice}}. Erste Abbuchung: {{proPrice}} {{trialDays}} Tage nach Beginn der Testphase, danach {{proPrice}} jeden Monat, nur wenn du nicht vorher kündigst. Karte erforderlich; online in deinem Konto kündbar."
         },
         {
           "type": "cta",
+          "if": "hasTrialOffer",
+          "label": "{{trialDays}} Tage testen: heute {{zeroPrice}}",
+          "link": "trial"
+        },
+        {
+          "type": "cta",
+          "if": "noTrialOffer",
           "label": "Pro-Angebot ansehen",
           "link": "pro"
         },
@@ -183,14 +202,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "Um alle Spiele des Tages zu öffnen: Pro, mit {{trialDays}} Tagen Testphase beim ersten Monatsabo."
+          "if": "hasTrialOffer",
+          "text": "Alle anderen Spiele des Tages öffnen sich mit Pro, mit {{trialDays}} Tagen Testphase. Erste Abbuchung: {{proPrice}} {{trialDays}} Tage nach Beginn der Testphase, danach {{proPrice}} jeden Monat, nur wenn du nicht vorher kündigst. Karte erforderlich; online in deinem Konto kündbar."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "Pro-Angebot ansehen",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "{{trialDays}} Tage testen: heute {{zeroPrice}}",
+          "link": "trial"
         }
       ]
     },
@@ -210,14 +229,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "Um alle Spiele des Tages zu öffnen: Pro, mit {{trialDays}} Tagen Testphase beim ersten Monatsabo."
+          "if": "hasTrialOffer",
+          "text": "Alle anderen Spiele des Tages öffnen sich mit Pro, mit {{trialDays}} Tagen Testphase. Erste Abbuchung: {{proPrice}} {{trialDays}} Tage nach Beginn der Testphase, danach {{proPrice}} jeden Monat, nur wenn du nicht vorher kündigst. Karte erforderlich; online in deinem Konto kündbar."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "Pro-Angebot ansehen",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "{{trialDays}} Tage testen: heute {{zeroPrice}}",
+          "link": "trial"
         },
         {
           "type": "p",
@@ -245,6 +264,70 @@
         {
           "type": "p",
           "text": "Du kannst diese Übersicht in Mein Konto unter Benachrichtigungen abschalten."
+        }
+      ]
+    },
+    "results_recap": {
+      "subject": "Die Bilanz von gestern: {{recapWonText}}, {{recapLostText}}",
+      "preheader": "Die vor den Spielen von gestern veröffentlichten Tipps, gewonnen und verloren.",
+      "title": "Die Bilanz von gestern",
+      "counts": {
+        "won_one": "{n} gewonnen",
+        "won_many": "{n} gewonnen",
+        "lost_one": "{n} verloren",
+        "lost_many": "{n} verloren",
+        "void_one": "{n} annulliert",
+        "void_many": "{n} annulliert",
+        "pending_one": "{n} noch ohne Ergebnis",
+        "pending_many": "{n} noch ohne Ergebnis"
+      },
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Gestern, {{recapDate}}{{#recapParisTime}} (Pariser Zeit){{/recapParisTime}}, so sind die Einzeltipps ausgegangen, die IASHARK vor dem Anpfiff veröffentlicht hat:"
+        },
+        {
+          "type": "list",
+          "if": "noRecapVoid",
+          "items": [
+            "{{recapWonText}}",
+            "{{recapLostText}}"
+          ]
+        },
+        {
+          "type": "list",
+          "if": "hasRecapVoid",
+          "items": [
+            "{{recapWonText}}",
+            "{{recapLostText}}",
+            "{{recapVoidText}}"
+          ]
+        },
+        {
+          "type": "p",
+          "if": "hasRecapPending",
+          "text": "Zum Zeitpunkt dieser E-Mail: {{recapPendingText}}."
+        },
+        {
+          "type": "p",
+          "text": "Dein kostenloses Konto öffnet dir jeden Tag das Gratisspiel. Die Tipps zu allen anderen Spielen des Tages öffnen sich mit Pro."
+        },
+        {
+          "type": "p",
+          "if": "hasTrialOffer",
+          "text": "{{trialDays}} Tage Testphase beim Monatsabo: heute {{zeroPrice}}. Erste Abbuchung: {{proPrice}} {{trialDays}} Tage nach Beginn der Testphase, danach {{proPrice}} jeden Monat, nur wenn du nicht vorher kündigst. Karte erforderlich; online in deinem Konto kündbar."
+        },
+        {
+          "type": "cta",
+          "if": "hasTrialOffer",
+          "label": "{{trialDays}} Tage testen: heute {{zeroPrice}}",
+          "link": "trial"
+        },
+        {
+          "type": "cta",
+          "if": "noTrialOffer",
+          "label": "Spiele des Tages ansehen",
+          "link": "home"
         }
       ]
     }

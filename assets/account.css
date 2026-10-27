@@ -165,3 +165,26 @@ dialog{max-height:calc(100dvh - 2rem);overflow-y:auto}
 .seo-foot-nav a:focus-visible{outline:2px solid #18d3ef;outline-offset:2px;border-radius:3px}
 /* « Mot de passe oublie ? » : zone de toucher de 35 px au lieu de 15, sans rien deplacer. */
 a[data-href="mot-de-passe-oublie.html"]{display:inline-block;padding:10px 0;margin:-10px 0}
+
+/* Haut de « Mon compte » d'un compte gratuit (lib/activation-compte.js, 27/10/2026) :
+   le match offert du jour, l'offre d'essai (composant .op de lib/offre-pro.js pour
+   le titre, le bouton et les avantages), le canal Telegram. Cyan et gris seulement. */
+.acv{display:grid;gap:12px}
+.acv-match{position:relative;display:grid;gap:3px;padding:14px 46px 14px 16px;border:1px solid rgba(32,213,239,.38);border-radius:16px;
+  background:linear-gradient(180deg,rgba(32,213,239,.07),rgba(32,213,239,.02));color:#f4f7fb;transition:border-color .15s,background .15s}
+.acv-match:hover{border-color:rgba(32,213,239,.7)}
+.acv-match-k{font-size:13px;font-weight:600;color:#9fdcea}
+.acv-match-v{font-size:17px;line-height:1.3;overflow-wrap:anywhere}
+.acv-match-v b{font-weight:800;color:#fff}
+.acv-match-h{color:#c3ccd8;font-weight:600}
+.acv-match-sub{font-size:12.5px;color:#91a0b3}
+.acv-match-go{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:20px;line-height:1;color:#20d5ef}
+.acv-offre{margin:0}
+.acv-charge{margin:-4px 0 0;color:#c3ccd8;font-size:13px;line-height:1.5}
+.acv-prix{margin:0;color:#c3ccd8;font-size:14px}
+.acv-autres{display:inline-flex;align-items:center;min-height:44px;margin:-10px 0 -8px;text-align:left}
+.acv-tg{position:relative;display:flex;align-items:center;gap:12px;min-height:52px;padding:10px 46px 10px 12px;border:1px solid rgba(141,179,211,.16);border-radius:14px;
+  color:#f4f7fb;font-size:14px;font-weight:600;line-height:1.35;transition:border-color .15s}
+.acv-tg:hover{border-color:rgba(32,213,239,.45)}
+.acv-tg-i{flex:none;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:#20d5ef;color:#060b12}
+.acv-match:focus-visible,.acv-tg:focus-visible{outline:2px solid #20d5ef;outline-offset:2px;border-radius:16px}

@@ -21,8 +21,15 @@ test("inscription : case facultative, jamais pre-cochee, libellee et traduisible
   assert.ok(input, "case absente");
   assert.match(input[0], /type="checkbox"/);
   assert.doesNotMatch(input[0], /\bchecked\b|\brequired\b/, "case pre-cochee ou obligatoire");
-  assert.match(html, /<label for="emailMarketing"[^>]*data-i18n="email_prefs\.signup_label">Recevoir les analyses offertes et conseils d’utilisation par email<\/label>/);
+  assert.match(html, /<label for="emailMarketing"[^>]*data-i18n="email_prefs\.signup_label">Recevoir les analyses offertes, conseils d’utilisation et nos offres Pro par email<\/label>/);
   assert.ok(html.includes(PARTS.fr.signup_label) && html.includes(PARTS.fr.signup_hint));
+  // Mon compte : meme annonce des offres Pro, meme version du texte (preuve du consentement).
+  for (const l of LOCALES) assert.match(PARTS[l].account_title + PARTS[l].account_detail, /Pro/, l + " : interrupteur de Mon compte");
+  assert.match(read("account-page.js"), /var EMAIL_CONSENT_TEXT_VERSION = '2026-10-27';/);
+  // 27/10/2026 (avocat du diable) : le texte de la case annonce aussi « nos offres Pro » ; il est
+  // affiche par la traduction (data-i18n) dans toutes les langues, avec une nouvelle version.
+  for (const l of LOCALES) assert.match(PARTS[l].signup_label, /Pro/, l + " : offres Pro annoncees dans la case");
+  assert.equal(PARTS.fr.signup_label, "Recevoir les analyses offertes, conseils d’utilisation et nos offres Pro par email");
 });
 
 test("inscription : seul un clic reel sur la case vaut consentement (metadonnees de signUp)", () => {
@@ -33,7 +40,7 @@ test("inscription : seul un clic reel sur la case vaut consentement (metadonnees
   // Execution reelle de la fonction, hors navigateur.
   const src = js.slice(js.indexOf("var EMAIL_CONSENT_TEXT_VERSION"), js.indexOf("/* ---------- Inscription ---------- */"));
   const make = (pathname) => Function("location", src + "\nreturn donneesEmails;")({ pathname });
-  assert.deepEqual(make("/mx/inscription.html")(true), { iashark_marketing_opt_in: "true", iashark_locale: "es-mx", iashark_market: "mx", iashark_marketing_text_version: "2026-09-15" });
+  assert.deepEqual(make("/mx/inscription.html")(true), { iashark_marketing_opt_in: "true", iashark_locale: "es-mx", iashark_market: "mx", iashark_marketing_text_version: "2026-10-27" });
   assert.deepEqual(make("/inscription.html")(false), { iashark_marketing_opt_in: "false", iashark_locale: "fr", iashark_market: "fr" });
   assert.equal(make("/gb/inscription.html")(false).iashark_locale, "en");
 });

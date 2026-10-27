@@ -966,7 +966,10 @@ const require = function () { return Render; };
     pro_features: { marketing: true, needs: "pro_price" },
     inactive_7d: { marketing: true, needs: "weekend_matches" },
     inactive_30d: { marketing: true, needs: null },
-    pro_weekly_summary: { marketing: true, needs: "weekend_matches" }
+    pro_weekly_summary: { marketing: true, needs: "weekend_matches" },
+    // Suite courte des comptes gratuits (27/10/2026, NON activee par defaut) : le bilan
+    // d'hier (gagnes ET perdus, fichier unique preuves/bilan-hier.json, aucun pourcentage) + l'essai.
+    results_recap: { marketing: true, needs: "results" }
   };
 
   var RULES = {
@@ -978,7 +981,12 @@ const require = function () { return Render; };
     freeMatchFromDays: 2, freeMatchUntilDays: 14,
     proFeaturesFromDays: 5, proFeaturesUntilDays: 21,
     inactive7Days: 7, inactive30Days: 30,
-    weekendDows: [4, 5, 6]       // jeudi, vendredi, samedi (ISO)
+    weekendDows: [4, 5, 6],      // jeudi, vendredi, samedi (ISO)
+    // Suite courte des comptes gratuits (options.sequence, 27/10/2026) : J+1 match offert,
+    // J+3 bilan d'hier + essai, J+6 offre Pro. La frequence max ci-dessus (1 e-mail
+    // marketing / 3 jours, promise par la case d'inscription du 15/09/2026) reste la regle :
+    // en pratique J+1, J+4, J+7. Fenetres = age du compte en jours [debut, fin).
+    sequence: { freeMatch: [1, 3], resultsRecap: [3, 8], proFeatures: [6, 12] }
   };
 
   var TOKEN_VERSION = "v1";
@@ -1130,8 +1138,12 @@ const require = function () { return Render; };
     };
   }
 
-  function decideCampaign(facts, now) {
+  // options.sequence (27/10/2026) : suite courte des comptes gratuits (RULES.sequence) au lieu
+  // de J2 match offert / J5 Pro. Miroir de lifecycle_email_candidates(p_sequence => true)
+  // (supabase/migrations/0055_email_suite_gratuite.sql, NON appliquee).
+  function decideCampaign(facts, now, options) {
     var n = toDate(now) || fail("invalid_now", "now obligatoire");
+    var sequence = !!(options && options.sequence === true);
     var created = toDate(facts && facts.createdAt);
     if (!created) return { campaign: null, key: "", reason: "invalid_facts" };
     var sent = facts.sentKeys || [];
@@ -1160,8 +1172,16 @@ const require = function () { return Render; };
       }
       return out(null, "", "nothing_due");
     }
-    if (age >= RULES.freeMatchFromDays && age < RULES.freeMatchUntilDays && !has("free_match:")) return out("free_match", "");
-    if (age >= RULES.proFeaturesFromDays && age < RULES.proFeaturesUntilDays && !has("pro_features:")) return out("pro_features", "");
+    var S = RULES.sequence;
+    var within = function (w) { return age >= w[0] && age < w[1]; };
+    if (sequence) {
+      if (within(S.freeMatch) && !has("free_match:")) return out("free_match", "");
+      if (within(S.resultsRecap) && !has("results_recap:")) return out("results_recap", "");
+      if (within(S.proFeatures) && !has("pro_features:")) return out("pro_features", "");
+    } else {
+      if (age >= RULES.freeMatchFromDays && age < RULES.freeMatchUntilDays && !has("free_match:")) return out("free_match", "");
+      if (age >= RULES.proFeaturesFromDays && age < RULES.proFeaturesUntilDays && !has("pro_features:")) return out("pro_features", "");
+    }
     var inactive = daysBetween(n, activity);
     var episode = activity.toISOString().slice(0, 10);
     if (inactive >= RULES.inactive30Days && inactive < RULES.stopAfterInactiveDays && !has("inactive_30d:" + episode)) return out("inactive_30d", episode);
@@ -1270,6 +1290,32 @@ const require = function () { return Render; };
       .slice(0, max || 8);
   }
 
+  // ------------------------------------------- bilan d'hier (fichier unique)
+
+  // Bilan d'hier = le MEME que le site (controle historique-public du 27/10/2026) : jamais
+  // recalcule ici. Lu dans le fichier public preuves/bilan-hier.json, champ paris_simples,
+  // ecrit une fois chaque matin par le calcul quotidien (lib/bilan-hier.js#bilanParisSimples :
+  // predictions_archive, paris simples publies avant le coup d'envoi, coup d'envoi la veille
+  // a l'heure de Paris ; « neutral » compte en annule). « Hier » = la veille a Paris pour
+  // tous les marches. Fichier absent, illisible, d'un autre jour, ou sans aucun gagne ni
+  // perdu : null (aucun bilan, donc aucun e-mail results_recap).
+  function parisYesterday(now) {
+    return addDays(localClock(now, "Europe/Paris").date, -1);
+  }
+  function entier(v) { return typeof v === "number" && isFinite(v) && v >= 0 && Math.floor(v) === v ? v : null; }
+  function recapFromFile(file, now) {
+    var s = file && typeof file === "object" ? file.paris_simples : null;
+    if (!s || typeof s !== "object" || typeof s.jour !== "string" || s.jour !== file.jour) return null;
+    if (!toDate(now) || s.jour !== parisYesterday(now)) return null;
+    var won = entier(s.gagnes), lost = entier(s.perdus);
+    var voided = s.annules == null ? 0 : entier(s.annules), pending = s.en_attente == null ? 0 : entier(s.en_attente);
+    if (won === null || lost === null || voided === null || pending === null || won + lost < 1) return null;
+    return { day: s.jour, won: won, lost: lost, voided: voided, pending: pending };
+  }
+  function recapValid(b) {
+    return !!b && typeof b.day === "string" && /^\d{4}-\d{2}-\d{2}$/.test(b.day) && entier(b.won) !== null && entier(b.lost) !== null && b.won + b.lost >= 1;
+  }
+
   // ------------------------------------------------------------ desinscription
 
   function bytesToB64url(bytes) {
@@ -1371,21 +1417,40 @@ const require = function () { return Render; };
     return out;
   }
 
-  function linkMap(ctx, data) {
+  // Liens vers le site marques ?utm_source=email (27/10/2026) : funnel-track.js note la
+  // source de la visite, donc chaque clic venu d'un e-mail se compte aussi cote site,
+  // meme quand le pixel d'ouverture est bloque. Jamais sur les pages legales, l'aide
+  // ni la desinscription.
+  function withUtm(url, campaign) {
+    if (!url) return url;
+    var hash = "", i = url.indexOf("#");
+    if (i !== -1) { hash = url.slice(i); url = url.slice(0, i); }
+    return url + (url.indexOf("?") === -1 ? "?" : "&") + "utm_source=email&utm_medium=email&utm_campaign=" + encodeURIComponent("lifecycle_" + campaign) + hash;
+  }
+  function linkMap(ctx, data, campaign) {
     var page = function (p) { return SITE_URL + "/" + ctx.dir + "/" + p; };
+    var u = function (url) { return campaign ? withUtm(url, campaign) : url; };
     return {
-      home: SITE_URL + "/" + ctx.dir + "/",
-      account: page("compte.html"),
-      notifications: page("compte.html#notifications"),
-      methodology: METHODOLOGY_MISSING_DIRS.indexOf(ctx.dir) !== -1 ? SITE_URL + "/en/methodologie.html" : page("methodologie.html"),
-      pricing: page("abonnement.html"),
-      tools: page("pro.html"),
-      pro: page("pro.html"),
+      home: u(SITE_URL + "/" + ctx.dir + "/"),
+      account: u(page("compte.html")),
+      notifications: u(page("compte.html#notifications")),
+      methodology: u(METHODOLOGY_MISSING_DIRS.indexOf(ctx.dir) !== -1 ? SITE_URL + "/en/methodologie.html" : page("methodologie.html")),
+      pricing: u(page("abonnement.html")),
+      // Essai : page abonnement, duree Mois choisie (lib/offre-pro.js#dureeValide).
+      trial: u(page("abonnement.html?duree=month")),
+      tools: u(page("pro.html")),
+      pro: u(page("pro.html")),
       responsible: page("jeu-responsable.html"),
       privacy: page("confidentialite.html"),
       legal: page("mentions-legales.html"),
-      freeMatch: data.freeMatch ? data.freeMatch.url : null
+      freeMatch: data.freeMatch ? u(data.freeMatch.url) : null
     };
+  }
+
+  // « 0 € », « $0 », « £0 » : zero dans la devise du marche, sans decimales.
+  function zeroPrice(ctx) {
+    var out = new Intl.NumberFormat(ctx.priceIntlLocale, { style: "currency", currency: ctx.currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(0);
+    return out.indexOf("$") !== -1 && ctx.currency !== "USD" ? out + " " + ctx.currency : out;
   }
 
   function text(str, view) { return R.renderTemplate(str, view, false).replace(/\s+/g, " ").trim(); }
@@ -1446,6 +1511,15 @@ const require = function () { return Render; };
   // bundle = { layout: {html, text}, copy: {<locale>: {...}}, markets: config/markets.json }
   // data   = { freeMatch, weekendMatches, marketingOptIn, trialDays }
   // options = { company, unsubscribeUrl, now }
+  // « 5 gagnés », « 1 gagné », « 0 perdu » : accord de la langue (Intl.PluralRules, comme
+  // la ligne « Hier » du site, lib/offre-pro.js#pluriel).
+  function countText(counts, key, n, intlLocale) {
+    if (!counts || typeof n !== "number" || !isFinite(n)) return null;
+    var one;
+    try { one = new Intl.PluralRules(intlLocale).select(n) === "one"; } catch (_e) { one = n === 1; }
+    var tpl = counts[key + (one ? "_one" : "_many")];
+    return typeof tpl === "string" ? tpl.replace("{n}", String(n)) : null;
+  }
   function trialDaysOf(data, ctx) {
     var n = data && typeof data.trialDays === "number" && isFinite(data.trialDays) ? Math.round(data.trialDays) : 0;
     return n > 0 && ctx && ctx.proPriceMinor != null ? n : 0;
@@ -1465,6 +1539,7 @@ const require = function () { return Render; };
     var need = CAMPAIGNS[campaign].needs;
     if (need === "free_match" && !data.freeMatch) fail("missing_free_match", "Aucun match offert publie");
     if (need === "weekend_matches" && !(data.weekendMatches && data.weekendMatches.length)) fail("missing_weekend_matches", "Aucun match du week-end publie");
+    if (need === "results" && !recapValid(data.bilan)) fail("missing_results", "Bilan d'hier absent (preuves/bilan-hier.json)");
     // Prix Pro : le mensuel toujours ; textes prevus pour semaine + mois (+ an)
     // ou pour le mois seul (us : offre USD de /en/, config/markets.json
     // #_usdSwitch). Mois + an sans semaine : aucun texte, jamais un prix invente.
@@ -1494,6 +1569,26 @@ const require = function () { return Render; };
       // est payable dans ce marche. Meme texte que le site (offre_pro.trial_detail).
       trialDays: trialDaysOf(data, ctx),
       hasTrial: trialDaysOf(data, ctx) > 0,
+      // Offre d'essai ecrite (« Essayer 7 jours : 0 € aujourd'hui », premier prelevement
+      // 7 jours apres le debut de l'essai) : essai confirme pour ce compte ET accord de
+      // recevoir nos e-mails. Jamais de date dans un e-mail (controle de l'avocat du diable du
+      // 27/10/2026 : l'e-mail ne connait ni le jour ni le fuseau de lecture) ; seul Mon compte
+      // calcule la vraie date, dans le fuseau du visiteur. La bienvenue n'annonce jamais l'essai.
+      zeroPrice: zeroPrice(ctx),
+      hasTrialOffer: campaign !== "welcome" && trialDaysOf(data, ctx) > 0 && data.marketingOptIn === true,
+      noTrialOffer: !(campaign !== "welcome" && trialDaysOf(data, ctx) > 0 && data.marketingOptIn === true),
+      noTickets: ctx.market !== "fr",
+      // Bilan d'hier (results_recap) : nombres seulement, accordes dans la langue (copy.counts).
+      recapDate: data.bilan && data.bilan.day ? new Intl.DateTimeFormat(ctx.intlLocale, { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(data.bilan.day + "T12:00:00Z")) : null,
+      recapWonText: countText(c.counts, "won", data.bilan && data.bilan.won, ctx.intlLocale),
+      recapLostText: countText(c.counts, "lost", data.bilan && data.bilan.lost, ctx.intlLocale),
+      recapVoidText: countText(c.counts, "void", data.bilan && data.bilan.voided, ctx.intlLocale),
+      recapPendingText: countText(c.counts, "pending", data.bilan && data.bilan.pending, ctx.intlLocale),
+      hasRecapVoid: !!(data.bilan && data.bilan.voided > 0),
+      noRecapVoid: !(data.bilan && data.bilan.voided > 0),
+      // Le bilan suit le jour de Paris : hors fuseau de Paris (gb, za, mx), on le dit.
+      recapParisTime: ctx.timeZone !== "Europe/Paris",
+      hasRecapPending: !!(data.bilan && data.bilan.pending > 0),
       // Petit et Grand combine, Selection en or, buteur du jour : vendus sur le
       // marche francais seulement (lib/pro-vente.js#conditions, cotes d'operateurs
       // agrees en France).
@@ -1504,7 +1599,7 @@ const require = function () { return Render; };
       companyOperatorName: typeof company.operatorName === "string" && company.operatorName.trim() ? company.operatorName.trim() : "[BLOCKED_DECISION: COMPANY_OPERATOR_NAME]",
       companyAddress: typeof company.address === "string" && company.address.trim() ? company.address.trim() : "[BLOCKED_DECISION: COMPANY_ADDRESS]"
     };
-    var links = linkMap(ctx, data);
+    var links = linkMap(ctx, data, campaign);
     var blocks = renderBlocks(c.blocks, view, links, data, common);
     var layoutView = {
       htmlLang: ctx.htmlLang,
@@ -1581,7 +1676,11 @@ const require = function () { return Render; };
     unsubscribeLinks: unsubscribeLinks,
     listUnsubscribeHeaders: listUnsubscribeHeaders,
     findForbiddenWords: findForbiddenWords,
-    renderLifecycleEmail: renderLifecycleEmail
+    renderLifecycleEmail: renderLifecycleEmail,
+    withUtm: withUtm,
+    parisYesterday: parisYesterday,
+    recapFromFile: recapFromFile,
+    zeroPrice: zeroPrice
   };
 });
 
@@ -1594,7 +1693,7 @@ export const BUNDLE = {
   },
   "copy": {
     "fr": {
-      "_status": "REVIEW - textes revus le 25/10/2026 (tutoiement comme le site, prix et contenus Pro actuels, pari offert avec le compte gratuit). Aucune promesse de gain, aucune mise, aucun emoji.",
+      "_status": "REVIEW - textes revus le 25/10/2026 (tutoiement comme le site, prix et contenus Pro actuels, pari offert avec le compte gratuit). Aucune promesse de gain, aucune mise, aucun emoji. 27/10/2026 : bienvenue reecrite (ce que le compte donne, match offert, essai avec la date du premier prelevement pour les comptes qui ont accepte nos e-mails), phrase de risque retiree du bloc 18+.",
       "locale": "fr",
       "common": {
         "greeting": "Bonjour,",
@@ -1602,7 +1701,7 @@ export const BUNDLE = {
         "kickoff_label": "Coup d'envoi",
         "match_link": "Voir le match",
         "rg_title": "Jeu responsable · 18+",
-        "rg_body": "IASHARK publie des analyses de football et ne prend aucun pari. Une chance calculée n'est jamais une certitude. Les paris sportifs comportent un risque de perte d'argent et de dépendance. Réservé aux personnes de 18 ans et plus.",
+        "rg_body": "IASHARK publie des analyses de football et ne prend aucun pari. Une chance calculée n'est jamais une certitude. Réservé aux personnes de 18 ans et plus.",
         "rg_help_phone": "Besoin d'aide ? {{helplineName}} : {{helplinePhone}}.",
         "rg_help_nophone": "Besoin d'aide ? {{helplineName}} :",
         "rg_more": "Nos conseils de jeu responsable",
@@ -1616,27 +1715,33 @@ export const BUNDLE = {
       },
       "campaigns": {
         "welcome": {
-          "subject": "Bienvenue sur IASHARK : par où commencer",
-          "preheader": "Ton compte gratuit est prêt : chaque jour, le pari d'un match est offert.",
-          "title": "Bienvenue sur IASHARK",
+          "subject": "{{#hasFreeMatch}}Bienvenue : ton match offert, {{freeMatchHome}} – {{freeMatchAway}}{{/hasFreeMatch}}{{^hasFreeMatch}}Bienvenue : ton compte IASHARK est prêt{{/hasFreeMatch}}",
+          "preheader": "Chaque jour, l'analyse complète d'un match t'est offerte avec ton compte gratuit.",
+          "title": "Ton compte gratuit est prêt",
           "blocks": [
             {
               "type": "p",
-              "text": "Ton compte gratuit est prêt. Voici comment t'en servir :"
+              "text": "Chaque jour, ton compte gratuit t'ouvre :"
             },
             {
               "type": "list",
-              "ordered": true,
+              "if": "hasTickets",
               "items": [
-                "Chaque jour, un match est offert. Avec ton compte gratuit, tu vois son pari, sa chance calculée et pourquoi.",
-                "Tu compares cette chance avec la cote de ton opérateur agréé, puis c'est toi qui décides.",
-                "La page Méthodologie explique comment ces chances sont calculées."
+                "l'analyse complète du match offert : le pari retenu, sa chance calculée et pourquoi ;",
+                "le Petit combiné du jour, quand nos règles en trouvent un."
+              ]
+            },
+            {
+              "type": "list",
+              "if": "noTickets",
+              "items": [
+                "l'analyse complète du match offert : le pari retenu, sa chance calculée et pourquoi."
               ]
             },
             {
               "type": "p",
               "if": "hasFreeMatch",
-              "text": "Le match offert en ce moment :"
+              "text": "Le match offert :"
             },
             {
               "type": "match",
@@ -1645,7 +1750,7 @@ export const BUNDLE = {
             {
               "type": "cta",
               "if": "hasFreeMatch",
-              "label": "Voir le pari offert",
+              "label": "Voir l'analyse offerte",
               "link": "freeMatch"
             },
             {
@@ -1655,9 +1760,15 @@ export const BUNDLE = {
               "link": "home"
             },
             {
+              "type": "p",
+              "if": "noTrialOffer",
+              "text": "Les autres matchs du jour s'ouvrent avec Pro : tout est détaillé dans ton compte."
+            },
+            {
               "type": "link",
-              "label": "Lire la méthodologie",
-              "link": "methodology"
+              "if": "noTrialOffer",
+              "label": "Ouvrir mon compte",
+              "link": "account"
             },
             {
               "type": "p",
@@ -1689,14 +1800,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Pour ouvrir tous les matchs du jour : Pro, avec {{trialDays}} jours d'essai pour un premier abonnement au mois."
+              "if": "hasTrialOffer",
+              "text": "Pour ouvrir tous les autres matchs du jour : Pro, avec {{trialDays}} jours d'essai. Premier prélèvement : {{proPrice}} {{trialDays}} jours après le début de l'essai, puis {{proPrice}} chaque mois, seulement si tu ne résilies pas avant. Carte demandée ; résiliation en ligne depuis Mon compte."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Voir l'offre Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Essayer {{trialDays}} jours : {{zeroPrice}} aujourd'hui",
+              "link": "trial"
             }
           ]
         },
@@ -1721,7 +1832,7 @@ export const BUNDLE = {
               "type": "list",
               "if": "hasTickets",
               "items": [
-                "Le Petit et le Grand combiné du jour, la Sélection en or et le buteur du jour"
+                "Le Grand combiné du jour, la Sélection en or et le buteur du jour"
               ]
             },
             {
@@ -1741,11 +1852,18 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "{{trialDays}} jours d'essai pour un premier abonnement au mois : ta carte est demandée, rien n'est prélevé pendant l'essai. Ensuite {{proPrice}} par mois, prélevés automatiquement sauf résiliation avant la fin de l'essai."
+              "if": "hasTrialOffer",
+              "text": "Essai de {{trialDays}} jours sur l'abonnement au mois (premier abonnement) : {{zeroPrice}} aujourd'hui. Premier prélèvement : {{proPrice}} {{trialDays}} jours après le début de l'essai, puis {{proPrice}} chaque mois, seulement si tu ne résilies pas avant. Carte demandée ; résiliation en ligne depuis Mon compte."
             },
             {
               "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "Essayer {{trialDays}} jours : {{zeroPrice}} aujourd'hui",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
               "label": "Voir l'offre Pro",
               "link": "pro"
             },
@@ -1778,14 +1896,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Pour ouvrir tous les matchs du jour : Pro, avec {{trialDays}} jours d'essai pour un premier abonnement au mois."
+              "if": "hasTrialOffer",
+              "text": "Pour ouvrir tous les autres matchs du jour : Pro, avec {{trialDays}} jours d'essai. Premier prélèvement : {{proPrice}} {{trialDays}} jours après le début de l'essai, puis {{proPrice}} chaque mois, seulement si tu ne résilies pas avant. Carte demandée ; résiliation en ligne depuis Mon compte."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Voir l'offre Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Essayer {{trialDays}} jours : {{zeroPrice}} aujourd'hui",
+              "link": "trial"
             }
           ]
         },
@@ -1805,14 +1923,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Pour ouvrir tous les matchs du jour : Pro, avec {{trialDays}} jours d'essai pour un premier abonnement au mois."
+              "if": "hasTrialOffer",
+              "text": "Pour ouvrir tous les autres matchs du jour : Pro, avec {{trialDays}} jours d'essai. Premier prélèvement : {{proPrice}} {{trialDays}} jours après le début de l'essai, puis {{proPrice}} chaque mois, seulement si tu ne résilies pas avant. Carte demandée ; résiliation en ligne depuis Mon compte."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Voir l'offre Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Essayer {{trialDays}} jours : {{zeroPrice}} aujourd'hui",
+              "link": "trial"
             },
             {
               "type": "p",
@@ -1842,11 +1960,75 @@ export const BUNDLE = {
               "text": "Tu peux désactiver ce résumé dans Mon compte, rubrique Notifications."
             }
           ]
+        },
+        "results_recap": {
+          "subject": "Le bilan d'hier : {{recapWonText}}, {{recapLostText}}",
+          "preheader": "Les paris publiés avant les matchs d'hier, gagnés et perdus.",
+          "title": "Le bilan d'hier",
+          "counts": {
+            "won_one": "{n} gagné",
+            "won_many": "{n} gagnés",
+            "lost_one": "{n} perdu",
+            "lost_many": "{n} perdus",
+            "void_one": "{n} annulé",
+            "void_many": "{n} annulés",
+            "pending_one": "{n} en attente de résultat",
+            "pending_many": "{n} en attente de résultat"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Hier, {{recapDate}}{{#recapParisTime}} (heure de Paris){{/recapParisTime}}, voici le résultat des paris simples publiés par IASHARK avant le coup d'envoi :"
+            },
+            {
+              "type": "list",
+              "if": "noRecapVoid",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasRecapVoid",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}",
+                "{{recapVoidText}}"
+              ]
+            },
+            {
+              "type": "p",
+              "if": "hasRecapPending",
+              "text": "Au moment de cet e-mail : {{recapPendingText}}."
+            },
+            {
+              "type": "p",
+              "text": "Ton compte gratuit t'ouvre chaque jour le match offert. Les paris de tous les autres matchs du jour s'ouvrent avec Pro."
+            },
+            {
+              "type": "p",
+              "if": "hasTrialOffer",
+              "text": "Essai de {{trialDays}} jours sur l'abonnement au mois : {{zeroPrice}} aujourd'hui. Premier prélèvement : {{proPrice}} {{trialDays}} jours après le début de l'essai, puis {{proPrice}} chaque mois, seulement si tu ne résilies pas avant. Carte demandée ; résiliation en ligne depuis Mon compte."
+            },
+            {
+              "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "Essayer {{trialDays}} jours : {{zeroPrice}} aujourd'hui",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
+              "label": "Voir les matchs du jour",
+              "link": "home"
+            }
+          ]
         }
       }
     },
     "en": {
-      "_status": "REVIEW - copy reviewed on 25/10/2026 (current Pro content and prices, free pick with the free account). Used by /en/ (international), /gb/ and /za/. No promise of winnings, no stakes, no emoji.",
+      "_status": "REVIEW - copy reviewed on 25/10/2026 (current Pro content and prices, free pick with the free account). Used by /en/ (international), /gb/ and /za/. No promise of winnings, no stakes, no emoji. 27/10/2026 : bienvenue reecrite (ce que le compte donne, match offert, essai avec la date du premier prelevement pour les comptes qui ont accepte nos e-mails), phrase de risque retiree du bloc 18+.",
       "locale": "en",
       "common": {
         "greeting": "Hello,",
@@ -1854,7 +2036,7 @@ export const BUNDLE = {
         "kickoff_label": "Kick-off",
         "match_link": "View the match",
         "rg_title": "Safer gambling · 18+",
-        "rg_body": "IASHARK publishes football analysis and does not take bets. A calculated chance is never a certainty. Betting carries a risk of losing money and of addiction. For people aged 18 and over.",
+        "rg_body": "IASHARK publishes football analysis and does not take bets. A calculated chance is never a certainty. For people aged 18 and over.",
         "rg_help_phone": "Need help? {{helplineName}}: {{helplinePhone}}.",
         "rg_help_nophone": "Need help? {{helplineName}}:",
         "rg_more": "Our safer gambling advice",
@@ -1868,27 +2050,33 @@ export const BUNDLE = {
       },
       "campaigns": {
         "welcome": {
-          "subject": "Welcome to IASHARK: where to start",
-          "preheader": "Your free account is ready: one free pick every day.",
-          "title": "Welcome to IASHARK",
+          "subject": "{{#hasFreeMatch}}Welcome: your free match, {{freeMatchHome}} – {{freeMatchAway}}{{/hasFreeMatch}}{{^hasFreeMatch}}Welcome: your IASHARK account is ready{{/hasFreeMatch}}",
+          "preheader": "Every day, the full analysis of one match is free with your account.",
+          "title": "Your free account is ready",
           "blocks": [
             {
               "type": "p",
-              "text": "Your free account is ready. Here is how to use it:"
+              "text": "Every day, your free account opens:"
             },
             {
               "type": "list",
-              "ordered": true,
+              "if": "hasTickets",
               "items": [
-                "Every day, one match is free. With your free account, you see its pick, its calculated chance and why.",
-                "Compare that chance with the odds at your licensed bookmaker, then you decide.",
-                "The Methodology page explains how these chances are calculated."
+                "the full analysis of the free match: the pick, its calculated chance and why;",
+                "the day's Small combo, when our rules find one."
+              ]
+            },
+            {
+              "type": "list",
+              "if": "noTickets",
+              "items": [
+                "the full analysis of the free match: the pick, its calculated chance and why."
               ]
             },
             {
               "type": "p",
               "if": "hasFreeMatch",
-              "text": "The free match right now:"
+              "text": "The free match:"
             },
             {
               "type": "match",
@@ -1897,7 +2085,7 @@ export const BUNDLE = {
             {
               "type": "cta",
               "if": "hasFreeMatch",
-              "label": "See the free pick",
+              "label": "See the free analysis",
               "link": "freeMatch"
             },
             {
@@ -1907,9 +2095,15 @@ export const BUNDLE = {
               "link": "home"
             },
             {
+              "type": "p",
+              "if": "noTrialOffer",
+              "text": "Every other match of the day opens with Pro: it's all explained in your account."
+            },
+            {
               "type": "link",
-              "label": "Read the methodology",
-              "link": "methodology"
+              "if": "noTrialOffer",
+              "label": "Open my account",
+              "link": "account"
             },
             {
               "type": "p",
@@ -1941,14 +2135,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "To open every match of the day: Pro, with a {{trialDays}}-day trial for a first monthly subscription."
+              "if": "hasTrialOffer",
+              "text": "To open every other match of the day: Pro, with a {{trialDays}}-day trial. First charge: {{proPrice}} {{trialDays}} days after the trial starts, then {{proPrice}} every month, only if you don't cancel before then. Card required; cancel online from your account."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "See the Pro offer",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Try {{trialDays}} days: {{zeroPrice}} today",
+              "link": "trial"
             }
           ]
         },
@@ -1973,7 +2167,7 @@ export const BUNDLE = {
               "type": "list",
               "if": "hasTickets",
               "items": [
-                "The day's Small and Big combo, the Gold Selection and the scorer of the day"
+                "The day's Big combo, the Gold Selection and the scorer of the day"
               ]
             },
             {
@@ -1993,11 +2187,18 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "{{trialDays}}-day trial for a first monthly subscription: your card is requested, nothing is charged during the trial. Then {{proPrice}} per month, charged automatically unless you cancel before the trial ends."
+              "if": "hasTrialOffer",
+              "text": "{{trialDays}}-day trial on the monthly subscription (first subscription): {{zeroPrice}} today. First charge: {{proPrice}} {{trialDays}} days after the trial starts, then {{proPrice}} every month, only if you don't cancel before then. Card required; cancel online from your account."
             },
             {
               "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "Try {{trialDays}} days: {{zeroPrice}} today",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
               "label": "See the Pro offer",
               "link": "pro"
             },
@@ -2030,14 +2231,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "To open every match of the day: Pro, with a {{trialDays}}-day trial for a first monthly subscription."
+              "if": "hasTrialOffer",
+              "text": "To open every other match of the day: Pro, with a {{trialDays}}-day trial. First charge: {{proPrice}} {{trialDays}} days after the trial starts, then {{proPrice}} every month, only if you don't cancel before then. Card required; cancel online from your account."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "See the Pro offer",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Try {{trialDays}} days: {{zeroPrice}} today",
+              "link": "trial"
             }
           ]
         },
@@ -2057,14 +2258,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "To open every match of the day: Pro, with a {{trialDays}}-day trial for a first monthly subscription."
+              "if": "hasTrialOffer",
+              "text": "To open every other match of the day: Pro, with a {{trialDays}}-day trial. First charge: {{proPrice}} {{trialDays}} days after the trial starts, then {{proPrice}} every month, only if you don't cancel before then. Card required; cancel online from your account."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "See the Pro offer",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Try {{trialDays}} days: {{zeroPrice}} today",
+              "link": "trial"
             },
             {
               "type": "p",
@@ -2094,11 +2295,75 @@ export const BUNDLE = {
               "text": "You can turn off this summary in My account, under Notifications."
             }
           ]
+        },
+        "results_recap": {
+          "subject": "Yesterday's results: {{recapWonText}}, {{recapLostText}}",
+          "preheader": "The picks published before yesterday's matches, won and lost.",
+          "title": "Yesterday's results",
+          "counts": {
+            "won_one": "{n} won",
+            "won_many": "{n} won",
+            "lost_one": "{n} lost",
+            "lost_many": "{n} lost",
+            "void_one": "{n} void",
+            "void_many": "{n} void",
+            "pending_one": "{n} awaiting result",
+            "pending_many": "{n} awaiting results"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Yesterday, {{recapDate}}{{#recapParisTime}} (Paris time){{/recapParisTime}}, here is how the single picks IASHARK published before kick-off ended:"
+            },
+            {
+              "type": "list",
+              "if": "noRecapVoid",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasRecapVoid",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}",
+                "{{recapVoidText}}"
+              ]
+            },
+            {
+              "type": "p",
+              "if": "hasRecapPending",
+              "text": "At the time of this email: {{recapPendingText}}."
+            },
+            {
+              "type": "p",
+              "text": "Your free account opens the free match every day. The picks for every other match of the day open with Pro."
+            },
+            {
+              "type": "p",
+              "if": "hasTrialOffer",
+              "text": "{{trialDays}}-day trial on the monthly subscription: {{zeroPrice}} today. First charge: {{proPrice}} {{trialDays}} days after the trial starts, then {{proPrice}} every month, only if you don't cancel before then. Card required; cancel online from your account."
+            },
+            {
+              "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "Try {{trialDays}} days: {{zeroPrice}} today",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
+              "label": "See today's matches",
+              "link": "home"
+            }
+          ]
         }
       }
     },
     "es": {
-      "_status": "REVIEW - textos revisados el 25/10/2026 (contenido Pro y precios actuales, pronóstico gratis con la cuenta gratuita). Sin promesa de ganancias, sin importes de apuesta, sin emoji.",
+      "_status": "REVIEW - textos revisados el 25/10/2026 (contenido Pro y precios actuales, pronóstico gratis con la cuenta gratuita). Sin promesa de ganancias, sin importes de apuesta, sin emoji. 27/10/2026 : bienvenue reecrite (ce que le compte donne, match offert, essai avec la date du premier prelevement pour les comptes qui ont accepte nos e-mails), phrase de risque retiree du bloc 18+.",
       "locale": "es",
       "common": {
         "greeting": "Hola:",
@@ -2106,7 +2371,7 @@ export const BUNDLE = {
         "kickoff_label": "Inicio",
         "match_link": "Ver el partido",
         "rg_title": "Juego responsable · 18+",
-        "rg_body": "IASHARK publica análisis de fútbol y no acepta apuestas. Una probabilidad calculada nunca es una certeza. Las apuestas deportivas conllevan un riesgo de pérdida de dinero y de adicción. Solo para mayores de 18 años.",
+        "rg_body": "IASHARK publica análisis de fútbol y no acepta apuestas. Una probabilidad calculada nunca es una certeza. Solo para mayores de 18 años.",
         "rg_help_phone": "¿Necesitas ayuda? {{helplineName}}: {{helplinePhone}}.",
         "rg_help_nophone": "¿Necesitas ayuda? {{helplineName}}:",
         "rg_more": "Nuestros consejos de juego responsable",
@@ -2120,27 +2385,33 @@ export const BUNDLE = {
       },
       "campaigns": {
         "welcome": {
-          "subject": "Bienvenido a IASHARK: por dónde empezar",
-          "preheader": "Tu cuenta gratuita está lista: cada día, el pronóstico de un partido es gratis.",
-          "title": "Bienvenido a IASHARK",
+          "subject": "{{#hasFreeMatch}}Bienvenido: tu partido gratis, {{freeMatchHome}} – {{freeMatchAway}}{{/hasFreeMatch}}{{^hasFreeMatch}}Bienvenido: tu cuenta de IASHARK está lista{{/hasFreeMatch}}",
+          "preheader": "Cada día, el análisis completo de un partido es gratis con tu cuenta.",
+          "title": "Tu cuenta gratuita está lista",
           "blocks": [
             {
               "type": "p",
-              "text": "Tu cuenta gratuita está lista. Así se usa:"
+              "text": "Cada día, tu cuenta gratuita te abre:"
             },
             {
               "type": "list",
-              "ordered": true,
+              "if": "hasTickets",
               "items": [
-                "Cada día, un partido es gratis. Con tu cuenta gratuita ves su pronóstico, su probabilidad calculada y el porqué.",
-                "Comparas esa probabilidad con la cuota de tu operador autorizado y luego decides tú.",
-                "La página Metodología explica cómo se calculan estas probabilidades."
+                "el análisis completo del partido gratis: el pronóstico elegido, su probabilidad calculada y el porqué;",
+                "la combinada pequeña del día, cuando nuestras reglas encuentran una."
+              ]
+            },
+            {
+              "type": "list",
+              "if": "noTickets",
+              "items": [
+                "el análisis completo del partido gratis: el pronóstico elegido, su probabilidad calculada y el porqué."
               ]
             },
             {
               "type": "p",
               "if": "hasFreeMatch",
-              "text": "El partido gratis ahora mismo:"
+              "text": "El partido gratis:"
             },
             {
               "type": "match",
@@ -2149,7 +2420,7 @@ export const BUNDLE = {
             {
               "type": "cta",
               "if": "hasFreeMatch",
-              "label": "Ver el pronóstico gratis",
+              "label": "Ver el análisis gratis",
               "link": "freeMatch"
             },
             {
@@ -2159,9 +2430,15 @@ export const BUNDLE = {
               "link": "home"
             },
             {
+              "type": "p",
+              "if": "noTrialOffer",
+              "text": "Los demás partidos del día se abren con Pro: lo encontrarás explicado en tu cuenta."
+            },
+            {
               "type": "link",
-              "label": "Leer la metodología",
-              "link": "methodology"
+              "if": "noTrialOffer",
+              "label": "Abrir mi cuenta",
+              "link": "account"
             },
             {
               "type": "p",
@@ -2193,14 +2470,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Para abrir todos los partidos del día: Pro, con {{trialDays}} días de prueba en una primera suscripción mensual."
+              "if": "hasTrialOffer",
+              "text": "Para abrir todos los demás partidos del día: Pro, con {{trialDays}} días de prueba. Primer cobro: {{proPrice}} {{trialDays}} días después del inicio de la prueba, luego {{proPrice}} cada mes, solo si no cancelas antes. Se pide tu tarjeta; cancelación en línea desde tu cuenta."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Ver la oferta Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Prueba {{trialDays}} días: {{zeroPrice}} hoy",
+              "link": "trial"
             }
           ]
         },
@@ -2225,7 +2502,7 @@ export const BUNDLE = {
               "type": "list",
               "if": "hasTickets",
               "items": [
-                "La combinada pequeña y la grande del día, la Selección de oro y el goleador del día"
+                "La combinada grande del día, la Selección de oro y el goleador del día"
               ]
             },
             {
@@ -2245,11 +2522,18 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "{{trialDays}} días de prueba en una primera suscripción mensual: se pide tu tarjeta, no se cobra nada durante la prueba. Después {{proPrice}} al mes, cobrados automáticamente salvo que canceles antes del final de la prueba."
+              "if": "hasTrialOffer",
+              "text": "Prueba de {{trialDays}} días en la suscripción mensual (primera suscripción): {{zeroPrice}} hoy. Primer cobro: {{proPrice}} {{trialDays}} días después del inicio de la prueba, luego {{proPrice}} cada mes, solo si no cancelas antes. Se pide tu tarjeta; cancelación en línea desde tu cuenta."
             },
             {
               "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "Prueba {{trialDays}} días: {{zeroPrice}} hoy",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
               "label": "Ver la oferta Pro",
               "link": "pro"
             },
@@ -2282,14 +2566,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Para abrir todos los partidos del día: Pro, con {{trialDays}} días de prueba en una primera suscripción mensual."
+              "if": "hasTrialOffer",
+              "text": "Para abrir todos los demás partidos del día: Pro, con {{trialDays}} días de prueba. Primer cobro: {{proPrice}} {{trialDays}} días después del inicio de la prueba, luego {{proPrice}} cada mes, solo si no cancelas antes. Se pide tu tarjeta; cancelación en línea desde tu cuenta."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Ver la oferta Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Prueba {{trialDays}} días: {{zeroPrice}} hoy",
+              "link": "trial"
             }
           ]
         },
@@ -2309,14 +2593,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Para abrir todos los partidos del día: Pro, con {{trialDays}} días de prueba en una primera suscripción mensual."
+              "if": "hasTrialOffer",
+              "text": "Para abrir todos los demás partidos del día: Pro, con {{trialDays}} días de prueba. Primer cobro: {{proPrice}} {{trialDays}} días después del inicio de la prueba, luego {{proPrice}} cada mes, solo si no cancelas antes. Se pide tu tarjeta; cancelación en línea desde tu cuenta."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Ver la oferta Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Prueba {{trialDays}} días: {{zeroPrice}} hoy",
+              "link": "trial"
             },
             {
               "type": "p",
@@ -2346,11 +2630,75 @@ export const BUNDLE = {
               "text": "Puedes desactivar este resumen en Mi cuenta, apartado Notificaciones."
             }
           ]
+        },
+        "results_recap": {
+          "subject": "El balance de ayer: {{recapWonText}}, {{recapLostText}}",
+          "preheader": "Los pronósticos publicados antes de los partidos de ayer, ganados y perdidos.",
+          "title": "El balance de ayer",
+          "counts": {
+            "won_one": "{n} ganada",
+            "won_many": "{n} ganadas",
+            "lost_one": "{n} perdida",
+            "lost_many": "{n} perdidas",
+            "void_one": "{n} anulada",
+            "void_many": "{n} anuladas",
+            "pending_one": "{n} pendiente de resultado",
+            "pending_many": "{n} pendientes de resultado"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Ayer, {{recapDate}}{{#recapParisTime}} (hora de París){{/recapParisTime}}, este es el resultado de los pronósticos simples publicados por IASHARK antes del inicio:"
+            },
+            {
+              "type": "list",
+              "if": "noRecapVoid",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasRecapVoid",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}",
+                "{{recapVoidText}}"
+              ]
+            },
+            {
+              "type": "p",
+              "if": "hasRecapPending",
+              "text": "En el momento de este correo: {{recapPendingText}}."
+            },
+            {
+              "type": "p",
+              "text": "Tu cuenta gratuita te abre cada día el partido gratis. Los pronósticos de todos los demás partidos del día se abren con Pro."
+            },
+            {
+              "type": "p",
+              "if": "hasTrialOffer",
+              "text": "Prueba de {{trialDays}} días en la suscripción mensual: {{zeroPrice}} hoy. Primer cobro: {{proPrice}} {{trialDays}} días después del inicio de la prueba, luego {{proPrice}} cada mes, solo si no cancelas antes. Se pide tu tarjeta; cancelación en línea desde tu cuenta."
+            },
+            {
+              "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "Prueba {{trialDays}} días: {{zeroPrice}} hoy",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
+              "label": "Ver los partidos del día",
+              "link": "home"
+            }
+          ]
         }
       }
     },
     "es-mx": {
-      "_status": "REVIEW - textos revisados el 25/10/2026 (contenido Pro y precios actuales, pronóstico gratis con la cuenta gratuita). Versión México. Sin promesa de ganancias, sin montos de apuesta, sin emoji.",
+      "_status": "REVIEW - textos revisados el 25/10/2026 (contenido Pro y precios actuales, pronóstico gratis con la cuenta gratuita). Versión México. Sin promesa de ganancias, sin montos de apuesta, sin emoji. 27/10/2026 : bienvenue reecrite (ce que le compte donne, match offert, essai avec la date du premier prelevement pour les comptes qui ont accepte nos e-mails), phrase de risque retiree du bloc 18+.",
       "locale": "es-mx",
       "common": {
         "greeting": "Hola:",
@@ -2358,7 +2706,7 @@ export const BUNDLE = {
         "kickoff_label": "Inicio",
         "match_link": "Ver el partido",
         "rg_title": "Juego responsable · 18+",
-        "rg_body": "IASHARK publica análisis de futbol y no recibe apuestas. Una probabilidad calculada nunca es una certeza. Las apuestas deportivas implican un riesgo de pérdida de dinero y de adicción. Prohibido para menores de 18 años.",
+        "rg_body": "IASHARK publica análisis de futbol y no recibe apuestas. Una probabilidad calculada nunca es una certeza. Prohibido para menores de 18 años.",
         "rg_help_phone": "¿Necesitas orientación? {{helplineName}}: {{helplinePhone}}.",
         "rg_help_nophone": "¿Necesitas orientación? {{helplineName}}:",
         "rg_more": "Nuestros consejos de juego responsable",
@@ -2372,27 +2720,33 @@ export const BUNDLE = {
       },
       "campaigns": {
         "welcome": {
-          "subject": "Bienvenido a IASHARK: por dónde empezar",
-          "preheader": "Tu cuenta gratuita está lista: cada día, el pronóstico de un partido es gratis.",
-          "title": "Bienvenido a IASHARK",
+          "subject": "{{#hasFreeMatch}}Bienvenido: tu partido gratis, {{freeMatchHome}} – {{freeMatchAway}}{{/hasFreeMatch}}{{^hasFreeMatch}}Bienvenido: tu cuenta de IASHARK está lista{{/hasFreeMatch}}",
+          "preheader": "Cada día, el análisis completo de un partido es gratis con tu cuenta.",
+          "title": "Tu cuenta gratis está lista",
           "blocks": [
             {
               "type": "p",
-              "text": "Tu cuenta gratuita está lista. Así se usa:"
+              "text": "Cada día, tu cuenta gratis te abre:"
             },
             {
               "type": "list",
-              "ordered": true,
+              "if": "hasTickets",
               "items": [
-                "Cada día, un partido es gratis. Con tu cuenta gratuita ves su pronóstico, su probabilidad calculada y el porqué.",
-                "Comparas esa probabilidad con el momio de tu operador autorizado y luego decides tú.",
-                "La página Metodología explica cómo se calculan estas probabilidades."
+                "el análisis completo del partido gratis: el pronóstico elegido, su probabilidad calculada y el porqué;",
+                "el parlay chico del día, cuando nuestras reglas encuentran uno."
+              ]
+            },
+            {
+              "type": "list",
+              "if": "noTickets",
+              "items": [
+                "el análisis completo del partido gratis: el pronóstico elegido, su probabilidad calculada y el porqué."
               ]
             },
             {
               "type": "p",
               "if": "hasFreeMatch",
-              "text": "El partido gratis ahora mismo:"
+              "text": "El partido gratis:"
             },
             {
               "type": "match",
@@ -2401,7 +2755,7 @@ export const BUNDLE = {
             {
               "type": "cta",
               "if": "hasFreeMatch",
-              "label": "Ver el pronóstico gratis",
+              "label": "Ver el análisis gratis",
               "link": "freeMatch"
             },
             {
@@ -2411,9 +2765,15 @@ export const BUNDLE = {
               "link": "home"
             },
             {
+              "type": "p",
+              "if": "noTrialOffer",
+              "text": "Los demás partidos del día se abren con Pro: lo encontrarás explicado en tu cuenta."
+            },
+            {
               "type": "link",
-              "label": "Leer la metodología",
-              "link": "methodology"
+              "if": "noTrialOffer",
+              "label": "Abrir mi cuenta",
+              "link": "account"
             },
             {
               "type": "p",
@@ -2445,14 +2805,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Para abrir todos los partidos del día: Pro, con {{trialDays}} días de prueba en una primera suscripción mensual."
+              "if": "hasTrialOffer",
+              "text": "Para abrir todos los demás partidos del día: Pro, con {{trialDays}} días de prueba. Primer cobro: {{proPrice}} {{trialDays}} días después del inicio de la prueba, luego {{proPrice}} cada mes, solo si no cancelas antes. Se pide tu tarjeta; cancelación en línea desde tu cuenta."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Ver la oferta Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Prueba {{trialDays}} días: {{zeroPrice}} hoy",
+              "link": "trial"
             }
           ]
         },
@@ -2477,7 +2837,7 @@ export const BUNDLE = {
               "type": "list",
               "if": "hasTickets",
               "items": [
-                "El parlay chico y el grande del día, la Selección de oro y el goleador del día"
+                "El parlay grande del día, la Selección de oro y el goleador del día"
               ]
             },
             {
@@ -2497,11 +2857,18 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "{{trialDays}} días de prueba en una primera suscripción mensual: se pide tu tarjeta, no se cobra nada durante la prueba. Después {{proPrice}} al mes, cobrados automáticamente salvo que canceles antes del final de la prueba."
+              "if": "hasTrialOffer",
+              "text": "Prueba de {{trialDays}} días en la suscripción mensual (primera suscripción): {{zeroPrice}} hoy. Primer cobro: {{proPrice}} {{trialDays}} días después del inicio de la prueba, luego {{proPrice}} cada mes, solo si no cancelas antes. Se pide tu tarjeta; cancelación en línea desde tu cuenta."
             },
             {
               "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "Prueba {{trialDays}} días: {{zeroPrice}} hoy",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
               "label": "Ver la oferta Pro",
               "link": "pro"
             },
@@ -2534,14 +2901,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Para abrir todos los partidos del día: Pro, con {{trialDays}} días de prueba en una primera suscripción mensual."
+              "if": "hasTrialOffer",
+              "text": "Para abrir todos los demás partidos del día: Pro, con {{trialDays}} días de prueba. Primer cobro: {{proPrice}} {{trialDays}} días después del inicio de la prueba, luego {{proPrice}} cada mes, solo si no cancelas antes. Se pide tu tarjeta; cancelación en línea desde tu cuenta."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Ver la oferta Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Prueba {{trialDays}} días: {{zeroPrice}} hoy",
+              "link": "trial"
             }
           ]
         },
@@ -2561,14 +2928,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Para abrir todos los partidos del día: Pro, con {{trialDays}} días de prueba en una primera suscripción mensual."
+              "if": "hasTrialOffer",
+              "text": "Para abrir todos los demás partidos del día: Pro, con {{trialDays}} días de prueba. Primer cobro: {{proPrice}} {{trialDays}} días después del inicio de la prueba, luego {{proPrice}} cada mes, solo si no cancelas antes. Se pide tu tarjeta; cancelación en línea desde tu cuenta."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Ver la oferta Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Prueba {{trialDays}} días: {{zeroPrice}} hoy",
+              "link": "trial"
             },
             {
               "type": "p",
@@ -2598,11 +2965,75 @@ export const BUNDLE = {
               "text": "Puedes desactivar este resumen en Mi cuenta, sección Notificaciones."
             }
           ]
+        },
+        "results_recap": {
+          "subject": "El balance de ayer: {{recapWonText}}, {{recapLostText}}",
+          "preheader": "Los pronósticos publicados antes de los partidos de ayer, ganados y perdidos.",
+          "title": "El balance de ayer",
+          "counts": {
+            "won_one": "{n} ganada",
+            "won_many": "{n} ganadas",
+            "lost_one": "{n} perdida",
+            "lost_many": "{n} perdidas",
+            "void_one": "{n} anulada",
+            "void_many": "{n} anuladas",
+            "pending_one": "{n} pendiente de resultado",
+            "pending_many": "{n} pendientes de resultado"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Ayer, {{recapDate}}{{#recapParisTime}} (hora de París){{/recapParisTime}}, este es el resultado de los pronósticos simples publicados por IASHARK antes del silbatazo inicial:"
+            },
+            {
+              "type": "list",
+              "if": "noRecapVoid",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasRecapVoid",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}",
+                "{{recapVoidText}}"
+              ]
+            },
+            {
+              "type": "p",
+              "if": "hasRecapPending",
+              "text": "Al momento de este correo: {{recapPendingText}}."
+            },
+            {
+              "type": "p",
+              "text": "Tu cuenta gratis te abre cada día el partido gratis. Los pronósticos de todos los demás partidos del día se abren con Pro."
+            },
+            {
+              "type": "p",
+              "if": "hasTrialOffer",
+              "text": "Prueba de {{trialDays}} días en la suscripción mensual: {{zeroPrice}} hoy. Primer cobro: {{proPrice}} {{trialDays}} días después del inicio de la prueba, luego {{proPrice}} cada mes, solo si no cancelas antes. Se pide tu tarjeta; cancelación en línea desde tu cuenta."
+            },
+            {
+              "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "Prueba {{trialDays}} días: {{zeroPrice}} hoy",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
+              "label": "Ver los partidos del día",
+              "link": "home"
+            }
+          ]
         }
       }
     },
     "de": {
-      "_status": "REVIEW - Texte überarbeitet am 25/10/2026 (aktuelle Pro-Inhalte und Preise, Gratis-Tipp mit kostenlosem Konto). Kein Gewinnversprechen, keine Einsätze, keine Emojis.",
+      "_status": "REVIEW - Texte überarbeitet am 25/10/2026 (aktuelle Pro-Inhalte und Preise, Gratis-Tipp mit kostenlosem Konto). Kein Gewinnversprechen, keine Einsätze, keine Emojis. 27/10/2026 : bienvenue reecrite (ce que le compte donne, match offert, essai avec la date du premier prelevement pour les comptes qui ont accepte nos e-mails), phrase de risque retiree du bloc 18+.",
       "locale": "de",
       "common": {
         "greeting": "Hallo,",
@@ -2610,7 +3041,7 @@ export const BUNDLE = {
         "kickoff_label": "Anstoß",
         "match_link": "Zum Spiel",
         "rg_title": "Verantwortungsvolles Spielen · 18+",
-        "rg_body": "IASHARK veröffentlicht Fußballanalysen und nimmt keine Wetten an. Eine berechnete Chance ist nie eine Gewissheit. Sportwetten bergen das Risiko von Geldverlust und Sucht. Nur für Personen ab 18 Jahren.",
+        "rg_body": "IASHARK veröffentlicht Fußballanalysen und nimmt keine Wetten an. Eine berechnete Chance ist nie eine Gewissheit. Nur für Personen ab 18 Jahren.",
         "rg_help_phone": "Brauchst du Hilfe? {{helplineName}}: {{helplinePhone}}.",
         "rg_help_nophone": "Brauchst du Hilfe? {{helplineName}}:",
         "rg_more": "Unsere Hinweise zum verantwortungsvollen Spielen",
@@ -2624,27 +3055,33 @@ export const BUNDLE = {
       },
       "campaigns": {
         "welcome": {
-          "subject": "Willkommen bei IASHARK: so fängst du an",
-          "preheader": "Dein kostenloses Konto ist bereit: jeden Tag ein Gratis-Tipp.",
-          "title": "Willkommen bei IASHARK",
+          "subject": "{{#hasFreeMatch}}Willkommen: dein Gratisspiel, {{freeMatchHome}} – {{freeMatchAway}}{{/hasFreeMatch}}{{^hasFreeMatch}}Willkommen: dein IASHARK-Konto ist bereit{{/hasFreeMatch}}",
+          "preheader": "Jeden Tag ist die vollständige Analyse eines Spiels mit deinem Konto gratis.",
+          "title": "Dein kostenloses Konto ist bereit",
           "blocks": [
             {
               "type": "p",
-              "text": "Dein kostenloses Konto ist bereit. So nutzt du es:"
+              "text": "Jeden Tag öffnet dir dein kostenloses Konto:"
             },
             {
               "type": "list",
-              "ordered": true,
+              "if": "hasTickets",
               "items": [
-                "Jeden Tag ist ein Spiel gratis. Mit deinem kostenlosen Konto siehst du seinen Tipp, seine berechnete Chance und die Begründung.",
-                "Du vergleichst diese Chance mit der Quote deines zugelassenen Anbieters und entscheidest dann selbst.",
-                "Die Seite Methodik erklärt, wie diese Chancen berechnet werden."
+                "die vollständige Analyse des Gratisspiels: der gewählte Tipp, seine berechnete Chance und die Begründung;",
+                "die kleine Kombi des Tages, wenn unsere Regeln eine finden."
+              ]
+            },
+            {
+              "type": "list",
+              "if": "noTickets",
+              "items": [
+                "die vollständige Analyse des Gratisspiels: der gewählte Tipp, seine berechnete Chance und die Begründung."
               ]
             },
             {
               "type": "p",
               "if": "hasFreeMatch",
-              "text": "Das Gratis-Spiel im Moment:"
+              "text": "Das Gratisspiel:"
             },
             {
               "type": "match",
@@ -2653,7 +3090,7 @@ export const BUNDLE = {
             {
               "type": "cta",
               "if": "hasFreeMatch",
-              "label": "Zum Gratis-Tipp",
+              "label": "Gratis-Analyse ansehen",
               "link": "freeMatch"
             },
             {
@@ -2663,9 +3100,15 @@ export const BUNDLE = {
               "link": "home"
             },
             {
+              "type": "p",
+              "if": "noTrialOffer",
+              "text": "Alle anderen Spiele des Tages öffnen sich mit Pro: Alles steht in deinem Konto."
+            },
+            {
               "type": "link",
-              "label": "Methodik lesen",
-              "link": "methodology"
+              "if": "noTrialOffer",
+              "label": "Mein Konto öffnen",
+              "link": "account"
             },
             {
               "type": "p",
@@ -2697,14 +3140,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Um alle Spiele des Tages zu öffnen: Pro, mit {{trialDays}} Tagen Testphase beim ersten Monatsabo."
+              "if": "hasTrialOffer",
+              "text": "Alle anderen Spiele des Tages öffnen sich mit Pro, mit {{trialDays}} Tagen Testphase. Erste Abbuchung: {{proPrice}} {{trialDays}} Tage nach Beginn der Testphase, danach {{proPrice}} jeden Monat, nur wenn du nicht vorher kündigst. Karte erforderlich; online in deinem Konto kündbar."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Pro-Angebot ansehen",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "{{trialDays}} Tage testen: heute {{zeroPrice}}",
+              "link": "trial"
             }
           ]
         },
@@ -2729,7 +3172,7 @@ export const BUNDLE = {
               "type": "list",
               "if": "hasTickets",
               "items": [
-                "Die kleine und die große Kombi des Tages, die Gold-Auswahl und der Torschütze des Tages"
+                "Die große Kombi des Tages, die Gold-Auswahl und der Torschütze des Tages"
               ]
             },
             {
@@ -2749,11 +3192,18 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "{{trialDays}} Tage Testphase beim ersten Monatsabo: Deine Karte wird abgefragt, während der Testphase wird nichts abgebucht. Danach {{proPrice}} pro Monat, automatisch abgebucht, außer du kündigst vor Ende der Testphase."
+              "if": "hasTrialOffer",
+              "text": "{{trialDays}} Tage Testphase beim Monatsabo (erstes Abo): heute {{zeroPrice}}. Erste Abbuchung: {{proPrice}} {{trialDays}} Tage nach Beginn der Testphase, danach {{proPrice}} jeden Monat, nur wenn du nicht vorher kündigst. Karte erforderlich; online in deinem Konto kündbar."
             },
             {
               "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "{{trialDays}} Tage testen: heute {{zeroPrice}}",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
               "label": "Pro-Angebot ansehen",
               "link": "pro"
             },
@@ -2786,14 +3236,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Um alle Spiele des Tages zu öffnen: Pro, mit {{trialDays}} Tagen Testphase beim ersten Monatsabo."
+              "if": "hasTrialOffer",
+              "text": "Alle anderen Spiele des Tages öffnen sich mit Pro, mit {{trialDays}} Tagen Testphase. Erste Abbuchung: {{proPrice}} {{trialDays}} Tage nach Beginn der Testphase, danach {{proPrice}} jeden Monat, nur wenn du nicht vorher kündigst. Karte erforderlich; online in deinem Konto kündbar."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Pro-Angebot ansehen",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "{{trialDays}} Tage testen: heute {{zeroPrice}}",
+              "link": "trial"
             }
           ]
         },
@@ -2813,14 +3263,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Um alle Spiele des Tages zu öffnen: Pro, mit {{trialDays}} Tagen Testphase beim ersten Monatsabo."
+              "if": "hasTrialOffer",
+              "text": "Alle anderen Spiele des Tages öffnen sich mit Pro, mit {{trialDays}} Tagen Testphase. Erste Abbuchung: {{proPrice}} {{trialDays}} Tage nach Beginn der Testphase, danach {{proPrice}} jeden Monat, nur wenn du nicht vorher kündigst. Karte erforderlich; online in deinem Konto kündbar."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Pro-Angebot ansehen",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "{{trialDays}} Tage testen: heute {{zeroPrice}}",
+              "link": "trial"
             },
             {
               "type": "p",
@@ -2850,11 +3300,75 @@ export const BUNDLE = {
               "text": "Du kannst diese Übersicht in Mein Konto unter Benachrichtigungen abschalten."
             }
           ]
+        },
+        "results_recap": {
+          "subject": "Die Bilanz von gestern: {{recapWonText}}, {{recapLostText}}",
+          "preheader": "Die vor den Spielen von gestern veröffentlichten Tipps, gewonnen und verloren.",
+          "title": "Die Bilanz von gestern",
+          "counts": {
+            "won_one": "{n} gewonnen",
+            "won_many": "{n} gewonnen",
+            "lost_one": "{n} verloren",
+            "lost_many": "{n} verloren",
+            "void_one": "{n} annulliert",
+            "void_many": "{n} annulliert",
+            "pending_one": "{n} noch ohne Ergebnis",
+            "pending_many": "{n} noch ohne Ergebnis"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Gestern, {{recapDate}}{{#recapParisTime}} (Pariser Zeit){{/recapParisTime}}, so sind die Einzeltipps ausgegangen, die IASHARK vor dem Anpfiff veröffentlicht hat:"
+            },
+            {
+              "type": "list",
+              "if": "noRecapVoid",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasRecapVoid",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}",
+                "{{recapVoidText}}"
+              ]
+            },
+            {
+              "type": "p",
+              "if": "hasRecapPending",
+              "text": "Zum Zeitpunkt dieser E-Mail: {{recapPendingText}}."
+            },
+            {
+              "type": "p",
+              "text": "Dein kostenloses Konto öffnet dir jeden Tag das Gratisspiel. Die Tipps zu allen anderen Spielen des Tages öffnen sich mit Pro."
+            },
+            {
+              "type": "p",
+              "if": "hasTrialOffer",
+              "text": "{{trialDays}} Tage Testphase beim Monatsabo: heute {{zeroPrice}}. Erste Abbuchung: {{proPrice}} {{trialDays}} Tage nach Beginn der Testphase, danach {{proPrice}} jeden Monat, nur wenn du nicht vorher kündigst. Karte erforderlich; online in deinem Konto kündbar."
+            },
+            {
+              "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "{{trialDays}} Tage testen: heute {{zeroPrice}}",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
+              "label": "Spiele des Tages ansehen",
+              "link": "home"
+            }
+          ]
         }
       }
     },
     "it": {
-      "_status": "REVIEW - testi rivisti il 25/10/2026 (contenuti Pro e prezzi attuali, pronostico gratuito con l'account gratuito). Nessuna promessa di vincita, nessuna puntata, nessuna emoji.",
+      "_status": "REVIEW - testi rivisti il 25/10/2026 (contenuti Pro e prezzi attuali, pronostico gratuito con l'account gratuito). Nessuna promessa di vincita, nessuna puntata, nessuna emoji. 27/10/2026 : bienvenue reecrite (ce que le compte donne, match offert, essai avec la date du premier prelevement pour les comptes qui ont accepte nos e-mails), phrase de risque retiree du bloc 18+.",
       "locale": "it",
       "common": {
         "greeting": "Ciao,",
@@ -2862,7 +3376,7 @@ export const BUNDLE = {
         "kickoff_label": "Calcio d'inizio",
         "match_link": "Vedi la partita",
         "rg_title": "Gioco responsabile · 18+",
-        "rg_body": "IASHARK pubblica analisi di calcio e non accetta scommesse. Una probabilità calcolata non è mai una certezza. Le scommesse sportive comportano un rischio di perdita di denaro e di dipendenza. Riservato ai maggiori di 18 anni.",
+        "rg_body": "IASHARK pubblica analisi di calcio e non accetta scommesse. Una probabilità calcolata non è mai una certezza. Riservato ai maggiori di 18 anni.",
         "rg_help_phone": "Hai bisogno di aiuto? {{helplineName}}: {{helplinePhone}}.",
         "rg_help_nophone": "Hai bisogno di aiuto? {{helplineName}}:",
         "rg_more": "I nostri consigli sul gioco responsabile",
@@ -2876,27 +3390,33 @@ export const BUNDLE = {
       },
       "campaigns": {
         "welcome": {
-          "subject": "Benvenuto su IASHARK: da dove iniziare",
-          "preheader": "Il tuo account gratuito è pronto: ogni giorno, il pronostico di una partita è gratis.",
-          "title": "Benvenuto su IASHARK",
+          "subject": "{{#hasFreeMatch}}Benvenuto: la tua partita gratuita, {{freeMatchHome}} – {{freeMatchAway}}{{/hasFreeMatch}}{{^hasFreeMatch}}Benvenuto: il tuo account IASHARK è pronto{{/hasFreeMatch}}",
+          "preheader": "Ogni giorno, l'analisi completa di una partita è gratuita con il tuo account.",
+          "title": "Il tuo account gratuito è pronto",
           "blocks": [
             {
               "type": "p",
-              "text": "Il tuo account gratuito è pronto. Ecco come usarlo:"
+              "text": "Ogni giorno, il tuo account gratuito ti apre:"
             },
             {
               "type": "list",
-              "ordered": true,
+              "if": "hasTickets",
               "items": [
-                "Ogni giorno, una partita è gratis. Con il tuo account gratuito vedi il suo pronostico, la sua probabilità calcolata e il perché.",
-                "Confronti questa probabilità con la quota del tuo operatore autorizzato, poi decidi tu.",
-                "La pagina Metodologia spiega come vengono calcolate queste probabilità."
+                "l'analisi completa della partita gratuita: il pronostico scelto, la sua probabilità calcolata e il perché;",
+                "la multipla piccola del giorno, quando le nostre regole ne trovano una."
+              ]
+            },
+            {
+              "type": "list",
+              "if": "noTickets",
+              "items": [
+                "l'analisi completa della partita gratuita: il pronostico scelto, la sua probabilità calcolata e il perché."
               ]
             },
             {
               "type": "p",
               "if": "hasFreeMatch",
-              "text": "La partita gratuita in questo momento:"
+              "text": "La partita gratuita:"
             },
             {
               "type": "match",
@@ -2905,7 +3425,7 @@ export const BUNDLE = {
             {
               "type": "cta",
               "if": "hasFreeMatch",
-              "label": "Vedi il pronostico gratuito",
+              "label": "Vedi l'analisi gratuita",
               "link": "freeMatch"
             },
             {
@@ -2915,9 +3435,15 @@ export const BUNDLE = {
               "link": "home"
             },
             {
+              "type": "p",
+              "if": "noTrialOffer",
+              "text": "Le altre partite del giorno si aprono con Pro: è tutto spiegato nel tuo account."
+            },
+            {
               "type": "link",
-              "label": "Leggi la metodologia",
-              "link": "methodology"
+              "if": "noTrialOffer",
+              "label": "Apri il mio account",
+              "link": "account"
             },
             {
               "type": "p",
@@ -2949,14 +3475,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Per aprire tutte le partite del giorno: Pro, con {{trialDays}} giorni di prova per un primo abbonamento mensile."
+              "if": "hasTrialOffer",
+              "text": "Per aprire tutte le altre partite del giorno: Pro, con {{trialDays}} giorni di prova. Primo addebito: {{proPrice}} {{trialDays}} giorni dopo l'inizio della prova, poi {{proPrice}} ogni mese, solo se non disdici prima. Carta richiesta; disdetta online dal tuo account."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Vedi l'offerta Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Prova {{trialDays}} giorni: {{zeroPrice}} oggi",
+              "link": "trial"
             }
           ]
         },
@@ -2981,7 +3507,7 @@ export const BUNDLE = {
               "type": "list",
               "if": "hasTickets",
               "items": [
-                "La multipla piccola e quella grande del giorno, la Selezione d'oro e il marcatore del giorno"
+                "La multipla grande del giorno, la Selezione d'oro e il marcatore del giorno"
               ]
             },
             {
@@ -3001,11 +3527,18 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "{{trialDays}} giorni di prova per un primo abbonamento mensile: la carta viene richiesta, nulla viene addebitato durante la prova. Poi {{proPrice}} al mese, addebitati automaticamente salvo disdetta prima della fine della prova."
+              "if": "hasTrialOffer",
+              "text": "Prova di {{trialDays}} giorni sull'abbonamento mensile (primo abbonamento): {{zeroPrice}} oggi. Primo addebito: {{proPrice}} {{trialDays}} giorni dopo l'inizio della prova, poi {{proPrice}} ogni mese, solo se non disdici prima. Carta richiesta; disdetta online dal tuo account."
             },
             {
               "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "Prova {{trialDays}} giorni: {{zeroPrice}} oggi",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
               "label": "Vedi l'offerta Pro",
               "link": "pro"
             },
@@ -3038,14 +3571,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Per aprire tutte le partite del giorno: Pro, con {{trialDays}} giorni di prova per un primo abbonamento mensile."
+              "if": "hasTrialOffer",
+              "text": "Per aprire tutte le altre partite del giorno: Pro, con {{trialDays}} giorni di prova. Primo addebito: {{proPrice}} {{trialDays}} giorni dopo l'inizio della prova, poi {{proPrice}} ogni mese, solo se non disdici prima. Carta richiesta; disdetta online dal tuo account."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Vedi l'offerta Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Prova {{trialDays}} giorni: {{zeroPrice}} oggi",
+              "link": "trial"
             }
           ]
         },
@@ -3065,14 +3598,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Per aprire tutte le partite del giorno: Pro, con {{trialDays}} giorni di prova per un primo abbonamento mensile."
+              "if": "hasTrialOffer",
+              "text": "Per aprire tutte le altre partite del giorno: Pro, con {{trialDays}} giorni di prova. Primo addebito: {{proPrice}} {{trialDays}} giorni dopo l'inizio della prova, poi {{proPrice}} ogni mese, solo se non disdici prima. Carta richiesta; disdetta online dal tuo account."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Vedi l'offerta Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Prova {{trialDays}} giorni: {{zeroPrice}} oggi",
+              "link": "trial"
             },
             {
               "type": "p",
@@ -3102,11 +3635,75 @@ export const BUNDLE = {
               "text": "Puoi disattivare questo riepilogo in Il mio account, sezione Notifiche."
             }
           ]
+        },
+        "results_recap": {
+          "subject": "Il bilancio di ieri: {{recapWonText}}, {{recapLostText}}",
+          "preheader": "I pronostici pubblicati prima delle partite di ieri, vinti e persi.",
+          "title": "Il bilancio di ieri",
+          "counts": {
+            "won_one": "{n} vinta",
+            "won_many": "{n} vinte",
+            "lost_one": "{n} persa",
+            "lost_many": "{n} perse",
+            "void_one": "{n} annullata",
+            "void_many": "{n} annullate",
+            "pending_one": "{n} in attesa di risultato",
+            "pending_many": "{n} in attesa di risultato"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Ieri, {{recapDate}}{{#recapParisTime}} (ora di Parigi){{/recapParisTime}}, ecco come sono andati i pronostici singoli pubblicati da IASHARK prima del calcio d'inizio:"
+            },
+            {
+              "type": "list",
+              "if": "noRecapVoid",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasRecapVoid",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}",
+                "{{recapVoidText}}"
+              ]
+            },
+            {
+              "type": "p",
+              "if": "hasRecapPending",
+              "text": "Al momento di questa email: {{recapPendingText}}."
+            },
+            {
+              "type": "p",
+              "text": "Il tuo account gratuito ti apre ogni giorno la partita gratuita. I pronostici di tutte le altre partite del giorno si aprono con Pro."
+            },
+            {
+              "type": "p",
+              "if": "hasTrialOffer",
+              "text": "Prova di {{trialDays}} giorni sull'abbonamento mensile: {{zeroPrice}} oggi. Primo addebito: {{proPrice}} {{trialDays}} giorni dopo l'inizio della prova, poi {{proPrice}} ogni mese, solo se non disdici prima. Carta richiesta; disdetta online dal tuo account."
+            },
+            {
+              "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "Prova {{trialDays}} giorni: {{zeroPrice}} oggi",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
+              "label": "Vedi le partite del giorno",
+              "link": "home"
+            }
+          ]
         }
       }
     },
     "pt": {
-      "_status": "REVIEW - textos revistos a 25/10/2026 (conteúdos Pro e preços atuais, palpite grátis com a conta gratuita). Sem promessa de ganhos, sem montantes de aposta, sem emoji.",
+      "_status": "REVIEW - textos revistos a 25/10/2026 (conteúdos Pro e preços atuais, palpite grátis com a conta gratuita). Sem promessa de ganhos, sem montantes de aposta, sem emoji. 27/10/2026 : bienvenue reecrite (ce que le compte donne, match offert, essai avec la date du premier prelevement pour les comptes qui ont accepte nos e-mails), phrase de risque retiree du bloc 18+.",
       "locale": "pt",
       "common": {
         "greeting": "Olá,",
@@ -3114,7 +3711,7 @@ export const BUNDLE = {
         "kickoff_label": "Início do jogo",
         "match_link": "Ver o jogo",
         "rg_title": "Jogo responsável · 18+",
-        "rg_body": "O IASHARK publica análises de futebol e não aceita apostas. Uma probabilidade calculada nunca é uma certeza. As apostas desportivas envolvem um risco de perda de dinheiro e de dependência. Reservado a maiores de 18 anos.",
+        "rg_body": "O IASHARK publica análises de futebol e não aceita apostas. Uma probabilidade calculada nunca é uma certeza. Reservado a maiores de 18 anos.",
         "rg_help_phone": "Precisas de ajuda? {{helplineName}}: {{helplinePhone}}.",
         "rg_help_nophone": "Precisas de ajuda? {{helplineName}}:",
         "rg_more": "Os nossos conselhos de jogo responsável",
@@ -3128,27 +3725,33 @@ export const BUNDLE = {
       },
       "campaigns": {
         "welcome": {
-          "subject": "Bem-vindo ao IASHARK: por onde começar",
-          "preheader": "A tua conta gratuita está pronta: todos os dias, o palpite de um jogo é grátis.",
-          "title": "Bem-vindo ao IASHARK",
+          "subject": "{{#hasFreeMatch}}Bem-vindo: o teu jogo oferecido, {{freeMatchHome}} – {{freeMatchAway}}{{/hasFreeMatch}}{{^hasFreeMatch}}Bem-vindo: a tua conta IASHARK está pronta{{/hasFreeMatch}}",
+          "preheader": "Todos os dias, a análise completa de um jogo é oferecida com a tua conta.",
+          "title": "A tua conta gratuita está pronta",
           "blocks": [
             {
               "type": "p",
-              "text": "A tua conta gratuita está pronta. Eis como a usar:"
+              "text": "Todos os dias, a tua conta gratuita abre-te:"
             },
             {
               "type": "list",
-              "ordered": true,
+              "if": "hasTickets",
               "items": [
-                "Todos os dias, um jogo é grátis. Com a tua conta gratuita vês o seu palpite, a sua probabilidade calculada e o porquê.",
-                "Comparas essa probabilidade com a odd do teu operador licenciado e depois decides tu.",
-                "A página Metodologia explica como estas probabilidades são calculadas."
+                "a análise completa do jogo oferecido: o palpite escolhido, a sua probabilidade calculada e o porquê;",
+                "a múltipla pequena do dia, quando as nossas regras encontram uma."
+              ]
+            },
+            {
+              "type": "list",
+              "if": "noTickets",
+              "items": [
+                "a análise completa do jogo oferecido: o palpite escolhido, a sua probabilidade calculada e o porquê."
               ]
             },
             {
               "type": "p",
               "if": "hasFreeMatch",
-              "text": "O jogo grátis neste momento:"
+              "text": "O jogo oferecido:"
             },
             {
               "type": "match",
@@ -3157,7 +3760,7 @@ export const BUNDLE = {
             {
               "type": "cta",
               "if": "hasFreeMatch",
-              "label": "Ver o palpite grátis",
+              "label": "Ver a análise oferecida",
               "link": "freeMatch"
             },
             {
@@ -3167,9 +3770,15 @@ export const BUNDLE = {
               "link": "home"
             },
             {
+              "type": "p",
+              "if": "noTrialOffer",
+              "text": "Os outros jogos do dia abrem-se com o Pro: está tudo explicado na tua conta."
+            },
+            {
               "type": "link",
-              "label": "Ler a metodologia",
-              "link": "methodology"
+              "if": "noTrialOffer",
+              "label": "Abrir a minha conta",
+              "link": "account"
             },
             {
               "type": "p",
@@ -3201,14 +3810,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Para abrir todos os jogos do dia: Pro, com {{trialDays}} dias de teste numa primeira subscrição mensal."
+              "if": "hasTrialOffer",
+              "text": "Para abrir todos os outros jogos do dia: Pro, com {{trialDays}} dias de teste. Primeira cobrança: {{proPrice}} {{trialDays}} dias após o início do teste, depois {{proPrice}} todos os meses, só se não cancelares antes. Cartão pedido; cancelamento online na tua conta."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Ver a oferta Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Experimentar {{trialDays}} dias: {{zeroPrice}} hoje",
+              "link": "trial"
             }
           ]
         },
@@ -3233,7 +3842,7 @@ export const BUNDLE = {
               "type": "list",
               "if": "hasTickets",
               "items": [
-                "A múltipla pequena e a grande do dia, a Seleção de ouro e o marcador do dia"
+                "A múltipla grande do dia, a Seleção de ouro e o marcador do dia"
               ]
             },
             {
@@ -3253,11 +3862,18 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "{{trialDays}} dias de teste numa primeira subscrição mensal: o teu cartão é pedido, nada é cobrado durante o teste. Depois {{proPrice}} por mês, cobrados automaticamente salvo cancelamento antes do fim do teste."
+              "if": "hasTrialOffer",
+              "text": "Teste de {{trialDays}} dias na subscrição mensal (primeira subscrição): {{zeroPrice}} hoje. Primeira cobrança: {{proPrice}} {{trialDays}} dias após o início do teste, depois {{proPrice}} todos os meses, só se não cancelares antes. Cartão pedido; cancelamento online na tua conta."
             },
             {
               "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "Experimentar {{trialDays}} dias: {{zeroPrice}} hoje",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
               "label": "Ver a oferta Pro",
               "link": "pro"
             },
@@ -3290,14 +3906,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Para abrir todos os jogos do dia: Pro, com {{trialDays}} dias de teste numa primeira subscrição mensal."
+              "if": "hasTrialOffer",
+              "text": "Para abrir todos os outros jogos do dia: Pro, com {{trialDays}} dias de teste. Primeira cobrança: {{proPrice}} {{trialDays}} dias após o início do teste, depois {{proPrice}} todos os meses, só se não cancelares antes. Cartão pedido; cancelamento online na tua conta."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Ver a oferta Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Experimentar {{trialDays}} dias: {{zeroPrice}} hoje",
+              "link": "trial"
             }
           ]
         },
@@ -3317,14 +3933,14 @@ export const BUNDLE = {
             },
             {
               "type": "p",
-              "if": "hasTrial",
-              "text": "Para abrir todos os jogos do dia: Pro, com {{trialDays}} dias de teste numa primeira subscrição mensal."
+              "if": "hasTrialOffer",
+              "text": "Para abrir todos os outros jogos do dia: Pro, com {{trialDays}} dias de teste. Primeira cobrança: {{proPrice}} {{trialDays}} dias após o início do teste, depois {{proPrice}} todos os meses, só se não cancelares antes. Cartão pedido; cancelamento online na tua conta."
             },
             {
               "type": "link",
-              "if": "hasTrial",
-              "label": "Ver a oferta Pro",
-              "link": "pro"
+              "if": "hasTrialOffer",
+              "label": "Experimentar {{trialDays}} dias: {{zeroPrice}} hoje",
+              "link": "trial"
             },
             {
               "type": "p",
@@ -3352,6 +3968,70 @@ export const BUNDLE = {
             {
               "type": "p",
               "text": "Podes desativar este resumo em A minha conta, secção Notificações."
+            }
+          ]
+        },
+        "results_recap": {
+          "subject": "O balanço de ontem: {{recapWonText}}, {{recapLostText}}",
+          "preheader": "Os palpites publicados antes dos jogos de ontem, ganhos e perdidos.",
+          "title": "O balanço de ontem",
+          "counts": {
+            "won_one": "{n} ganha",
+            "won_many": "{n} ganhas",
+            "lost_one": "{n} perdida",
+            "lost_many": "{n} perdidas",
+            "void_one": "{n} anulada",
+            "void_many": "{n} anuladas",
+            "pending_one": "{n} à espera de resultado",
+            "pending_many": "{n} à espera de resultado"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Ontem, {{recapDate}}{{#recapParisTime}} (hora de Paris){{/recapParisTime}}, eis o resultado dos palpites simples publicados pelo IASHARK antes do pontapé de saída:"
+            },
+            {
+              "type": "list",
+              "if": "noRecapVoid",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasRecapVoid",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}",
+                "{{recapVoidText}}"
+              ]
+            },
+            {
+              "type": "p",
+              "if": "hasRecapPending",
+              "text": "No momento deste email: {{recapPendingText}}."
+            },
+            {
+              "type": "p",
+              "text": "A tua conta gratuita abre-te todos os dias o jogo oferecido. Os palpites de todos os outros jogos do dia abrem-se com o Pro."
+            },
+            {
+              "type": "p",
+              "if": "hasTrialOffer",
+              "text": "Teste de {{trialDays}} dias na subscrição mensal: {{zeroPrice}} hoje. Primeira cobrança: {{proPrice}} {{trialDays}} dias após o início do teste, depois {{proPrice}} todos os meses, só se não cancelares antes. Cartão pedido; cancelamento online na tua conta."
+            },
+            {
+              "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "Experimentar {{trialDays}} dias: {{zeroPrice}} hoje",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
+              "label": "Ver os jogos do dia",
+              "link": "home"
             }
           ]
         }

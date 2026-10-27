@@ -29,7 +29,12 @@ test("tables email_preferences et email_sends : RLS active, consentement faux pa
   assert.match(SQL, /unique \(user_id, campaign, campaign_key\)/);
   for (const col of ["opt_in_at", "opt_in_source", "unsubscribed_at", "locale", "market", "sent_at", "message_id", "status"]) assert.ok(SQL.includes(col + " "), col);
   const campaigns = SQL.match(/campaign text not null check \(campaign in \(([^)]+)\)\)/)[1].split(",").map((s) => s.trim().replace(/'/g, ""));
-  assert.deepEqual(campaigns.sort(), Object.keys(L.CAMPAIGNS).sort());
+  // 0054 ajoute « relance » (fonction relance-emails), 0055 ajoute « results_recap » (suite
+  // courte des comptes gratuits, non appliquee) : la derniere contrainte couvre toutes les campagnes.
+  const latest = fs.readFileSync(path.join(ROOT, "supabase", "migrations", "0055_email_suite_gratuite.sql"), "utf8")
+    .match(/check \(campaign = any \(array\[([^\]]+)\]\)\)/)[1].split(",").map((s) => s.trim().replace(/'/g, ""));
+  assert.deepEqual(latest.filter((c) => c !== "relance").sort(), Object.keys(L.CAMPAIGNS).sort());
+  for (const c of campaigns) assert.ok(latest.includes(c), "0055 garde " + c);
 });
 
 test("aucun acces anon ; l'utilisateur lit et modifie SA preference ; seul le role service ecrit les envois", () => {

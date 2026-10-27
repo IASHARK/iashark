@@ -24,6 +24,7 @@
 //   EMAIL_ALLOW_BLOCKED_DECISION  "true" = envoyer malgre l'identite manquante
 //   TRIAL_DAYS                 essai Pro (absent = 7 jours, "0" = coupe), meme regle que create-checkout-session
 //   LIFECYCLE_PUBLIC_DATA_URL  optionnel (defaut https://iashark.com/data-home.json)
+//   LIFECYCLE_PUBLIC_BILAN_URL optionnel (defaut https://iashark.com/preuves/bilan-hier.json, bilan d'hier)
 //   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY  fournis par Supabase
 //
 // Apres modification d'un gabarit ou de lib/lifecycle-email.js :
@@ -41,8 +42,20 @@ const supabase = SUPA_URL && SERVICE_KEY
 
 const db: LifecycleStore | null = supabase
   ? {
-    async listCandidates({ nowIso, limit }) {
-      const { data, error } = await supabase.rpc("lifecycle_email_candidates", { p_now: nowIso, p_limit: limit });
+    async listCandidates({ nowIso, limit, sequence }) {
+      // p_sequence (suite courte des comptes gratuits) n'existe qu'apres la migration 0055 :
+      // il n'est envoye que si la suite est demandee, jamais sinon.
+      const args: Record<string, unknown> = { p_now: nowIso, p_limit: limit };
+      if (sequence === true) args.p_sequence = true;
+      let { data, error } = await supabase.rpc("lifecycle_email_candidates", args);
+      let fallback = false;
+      // Migration 0055 absente (p_sequence inconnu) : on relit SANS la suite, pour que la
+      // bienvenue et les e-mails d'avant ne soient jamais bloques.
+      if (error && sequence === true) {
+        console.warn("[send-lifecycle-emails] p_sequence refuse (" + error.message + ") : relecture sans la suite.");
+        ({ data, error } = await supabase.rpc("lifecycle_email_candidates", { p_now: nowIso, p_limit: limit }));
+        fallback = !error;
+      }
       if (error) throw new Error("lifecycle_email_candidates: " + error.message);
       const rows = data ?? [];
       // Langue du compte : user_preferences.language, la SEULE source (site, robot, e-mails).
@@ -61,6 +74,8 @@ const db: LifecycleStore | null = supabase
         const deja = subs.error ? null : new Set((subs.data || []).map((s: { user_id: string }) => s.user_id));
         for (const r of rows) (r as { ever_subscribed?: boolean | null }).ever_subscribed = deja ? deja.has(r.user_id) : null;
       }
+      // Signale au handler que la suite n'a pas pu etre lue (regles d'avant pour ce passage).
+      if (fallback) Object.defineProperty(rows, "sequenceFallback", { value: true, enumerable: false });
       return rows;
     },
     // Envoi de test : comptes administrateurs seulement (users.role = 'admin').
@@ -75,6 +90,19 @@ const db: LifecycleStore | null = supabase
       });
       if (error) throw new Error("email_reserve_send: " + error.message);
       return data == null ? null : Number(data);
+    },
+    // Suivi (27/10/2026) : envois recents avec identifiant de message (toutes campagnes),
+    // puis public.email_record_event pour chaque ouverture, clic, rebond ou plainte.
+    async recentSends({ sinceIso }) {
+      const { data, error } = await supabase.from("email_sends").select("message_id,opened_at,clicked_at,status")
+        .gte("sent_at", sinceIso).not("message_id", "is", null).limit(5000);
+      if (error) throw new Error("email_sends: " + error.message);
+      return data ?? [];
+    },
+    async recordEvent({ messageId, event, at }) {
+      const { data, error } = await supabase.rpc("email_record_event", { p_message_id: messageId, p_event: event, p_at: at });
+      if (error) throw new Error("email_record_event: " + error.message);
+      return data === true;
     },
     async completeSend({ id, status, messageId, error: sendError }) {
       const { error } = await supabase.rpc("email_complete_send", {

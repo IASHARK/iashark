@@ -99,7 +99,9 @@ const TRACKING_MAX_PAGES = 5;
 // Essai Pro : meme regle que create-checkout-session/trial.ts (fonction en ligne) :
 // TRIAL_DAYS absent = 7 jours, "0" = coupe, borne a 1..30.
 export const TRIAL_DAYS_DEFAULT = 7;
-const SALES_CAMPAIGNS = ["free_match", "pro_features", "inactive_7d", "inactive_30d"];
+// E-mails qui peuvent annoncer l'essai Pro. La bienvenue (27/10/2026) l'annonce seulement
+// aux comptes qui ont accepte nos e-mails (lib/lifecycle-email.js#hasTrialOffer).
+const SALES_CAMPAIGNS = ["welcome", "free_match", "pro_features", "inactive_7d", "inactive_30d"];
 const TAG = "[send-lifecycle-emails]";
 
 type Json = Record<string, unknown>;

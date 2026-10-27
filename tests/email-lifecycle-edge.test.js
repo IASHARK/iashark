@@ -288,7 +288,7 @@ test("langue du compte et essai Pro : repertoire de la langue, essai seulement s
   await handleRequest(post({}), t.deps);
   let p = JSON.parse(t.calls.find((c) => c.url === BREVO).init.body);
   assert.equal(p.subject, "Tu partido gratis: Barcelona – Racing Santander");
-  assert.ok(p.textContent.includes("7 días de prueba en una primera suscripción mensual"));
+  assert.ok(p.textContent.includes("Pro, con 7 días de prueba. Primer cobro:"), p.textContent);
   assert.deepEqual(t.db.reserved[0].market, "es");
   t = makeDeps({ env: BREVO_ENV, rows: [row({ ever_subscribed: true })], routes });
   await handleRequest(post({}), t.deps);
@@ -323,7 +323,7 @@ test("envoi de test : un seul e-mail [TEST] au premier administrateur, sans rese
   assert.equal(t.calls.filter((c) => c.url === BREVO).length, 1, "un seul envoi");
   const p = JSON.parse(t.calls.find((c) => c.url === BREVO).init.body);
   assert.deepEqual(p.to, [{ email: "admin.equipe@example.com" }]);
-  assert.match(p.subject, /^\[TEST\] Bienvenue sur IASHARK/);
+  assert.match(p.subject, /^\[TEST\] Bienvenue : ton match offert, Barcelona – Racing Santander$/);
   assert.equal(t.db.listed, 0);
   assert.deepEqual([t.db.reserved.length, t.db.completed.length], [0, 0]);
   assert.ok(!JSON.stringify(body).includes("admin.equipe"), "aucune adresse dans la reponse");

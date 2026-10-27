@@ -241,13 +241,27 @@ test("campagnes par langue : sujet, prix de la version, consentement absent, ech
   assert.ok(welcomeNo.text.includes("Voir les matchs du jour: https://iashark.com/fr/") || welcomeNo.text.includes("Voir les matchs du jour : https://iashark.com/fr/"), "sans match offert : bouton vers les matchs du jour");
   const welcomeYes = L.renderLifecycleEmail(BUNDLE, "welcome", "fr", { marketingOptIn: true, freeMatch: L.publicMatch(RAW_MATCHES[0], L.siteContext(BUNDLE.markets, "fr")) }, { unsubscribeUrl });
   assert.ok(!welcomeYes.text.includes("que les e-mails liés à ton compte") && welcomeYes.text.includes("Barcelona"));
-  assert.ok(welcomeYes.text.includes("Voir le pari offert : https://iashark.com/fr/match.html?id=1570385"));
+  // 27/10/2026 : liens du site marques utm_source=email (clic compte cote site aussi).
+  assert.ok(welcomeYes.text.includes("Voir l'analyse offerte : https://iashark.com/fr/match.html?id=1570385&utm_source=email&utm_medium=email&utm_campaign=lifecycle_welcome"), welcomeYes.text);
+  assert.equal(welcomeYes.subject, "Bienvenue : ton match offert, Barcelona – Racing Santander");
+  assert.equal(welcomeNo.subject, "Bienvenue : ton compte IASHARK est prêt");
+  assert.ok(welcomeYes.text.includes("l'analyse complète du match offert") && welcomeYes.text.includes("le Petit combiné du jour"), "ce que le compte donne chaque jour");
 
-  // Essai Pro : seulement si l'expediteur l'a confirme pour ce compte (trialDays > 0), meme texte que le site.
-  const trial = L.renderLifecycleEmail(BUNDLE, "pro_features", "fr", { trialDays: 7 }, { unsubscribeUrl }).text.replace(/[  ]/g, " ");
-  assert.ok(trial.includes("7 jours d'essai pour un premier abonnement au mois : ta carte est demandée, rien n'est prélevé pendant l'essai. Ensuite " + fmt("month") + " par mois"), trial);
-  const fmTrial = L.renderLifecycleEmail(BUNDLE, "free_match", "fr", { trialDays: 7, freeMatch: L.publicMatch(RAW_MATCHES[0], L.siteContext(BUNDLE.markets, "fr")) }, { unsubscribeUrl }).text;
-  assert.ok(fmTrial.includes("7 jours d'essai pour un premier abonnement au mois") && fmTrial.includes("Voir l'offre Pro : https://iashark.com/fr/pro.html"));
+  // Essai Pro : seulement si l'expediteur l'a confirme pour ce compte (trialDays > 0), avec la date du
+  // premier prelevement (maintenant + 7 jours), et jamais a un compte qui n'a pas accepte nos e-mails.
+  const trial = L.renderLifecycleEmail(BUNDLE, "pro_features", "fr", { trialDays: 7, marketingOptIn: true }, { unsubscribeUrl, now: NOW }).text.replace(/[  ]/g, " ");
+  assert.ok(trial.includes("Essai de 7 jours sur l'abonnement au mois (premier abonnement, carte demandée) : 0 € aujourd'hui. Premier prélèvement : " + fmt("month") + " le 24 septembre si tu commences aujourd'hui, seulement si tu ne résilies pas avant. Résiliation en ligne depuis Mon compte."), trial);
+  assert.ok(trial.includes("Essayer 7 jours : 0 € aujourd'hui : https://iashark.com/fr/abonnement.html?duree=month&utm_source=email"), trial);
+  assert.ok(!trial.includes("Voir l'offre Pro"), "un seul bouton");
+  const sansDate = L.renderLifecycleEmail(BUNDLE, "pro_features", "fr", { trialDays: 7, marketingOptIn: true }, { unsubscribeUrl }).text;
+  assert.ok(!sansDate.includes("Premier prélèvement") && sansDate.includes("Voir l'offre Pro"), "sans horloge : pas de date inventee, pas d'essai ecrit");
+  const fmTrial = L.renderLifecycleEmail(BUNDLE, "free_match", "fr", { trialDays: 7, marketingOptIn: true, freeMatch: L.publicMatch(RAW_MATCHES[0], L.siteContext(BUNDLE.markets, "fr")) }, { unsubscribeUrl, now: NOW }).text.replace(/[  ]/g, " ");
+  assert.ok(fmTrial.includes("Pro, avec 7 jours d'essai. Premier prélèvement : " + fmt("month") + " le 24 septembre si tu commences aujourd'hui") && fmTrial.includes("https://iashark.com/fr/abonnement.html?duree=month"), fmTrial);
+  const welcomeTrial = L.renderLifecycleEmail(BUNDLE, "welcome", "fr", { trialDays: 7, marketingOptIn: true, freeMatch: null }, { unsubscribeUrl, now: NOW }).text;
+  assert.ok(welcomeTrial.includes("Premier prélèvement") && welcomeTrial.includes("le 24 septembre"));
+  const welcomeNoConsent = L.renderLifecycleEmail(BUNDLE, "welcome", "fr", { trialDays: 7, marketingOptIn: false, freeMatch: null }, { unsubscribeUrl, now: NOW }).text;
+  assert.ok(!/Premier prélèvement|Essayer 7 jours|€/.test(welcomeNoConsent), "sans accord : aucune offre commerciale dans la bienvenue");
+  assert.ok(welcomeNoConsent.includes("Ouvrir mon compte : https://iashark.com/fr/compte.html?utm_source=email"), "renvoi vers Mon compte");
 
   const evil = L.publicMatch({ id: 9, home: { n: "<b>A&B</b>" }, away: { n: "C" }, date: "2026-09-19 20:00", league: "L" }, L.siteContext(BUNDLE.markets, "fr"));
   const esc = L.renderLifecycleEmail(BUNDLE, "free_match", "fr", { freeMatch: evil }, { unsubscribeUrl });

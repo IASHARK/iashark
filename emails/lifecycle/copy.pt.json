@@ -1,5 +1,5 @@
 {
-  "_status": "REVIEW - textos revistos a 25/10/2026 (conteúdos Pro e preços atuais, palpite grátis com a conta gratuita). Sem promessa de ganhos, sem montantes de aposta, sem emoji.",
+  "_status": "REVIEW - textos revistos a 25/10/2026 (conteúdos Pro e preços atuais, palpite grátis com a conta gratuita). Sem promessa de ganhos, sem montantes de aposta, sem emoji. 27/10/2026 : bienvenue reecrite (ce que le compte donne, match offert, essai avec la date du premier prelevement pour les comptes qui ont accepte nos e-mails), phrase de risque retiree du bloc 18+.",
   "locale": "pt",
   "common": {
     "greeting": "Olá,",
@@ -7,7 +7,7 @@
     "kickoff_label": "Início do jogo",
     "match_link": "Ver o jogo",
     "rg_title": "Jogo responsável · 18+",
-    "rg_body": "O IASHARK publica análises de futebol e não aceita apostas. Uma probabilidade calculada nunca é uma certeza. As apostas desportivas envolvem um risco de perda de dinheiro e de dependência. Reservado a maiores de 18 anos.",
+    "rg_body": "O IASHARK publica análises de futebol e não aceita apostas. Uma probabilidade calculada nunca é uma certeza. Reservado a maiores de 18 anos.",
     "rg_help_phone": "Precisas de ajuda? {{helplineName}}: {{helplinePhone}}.",
     "rg_help_nophone": "Precisas de ajuda? {{helplineName}}:",
     "rg_more": "Os nossos conselhos de jogo responsável",
@@ -21,27 +21,33 @@
   },
   "campaigns": {
     "welcome": {
-      "subject": "Bem-vindo ao IASHARK: por onde começar",
-      "preheader": "A tua conta gratuita está pronta: todos os dias, o palpite de um jogo é grátis.",
-      "title": "Bem-vindo ao IASHARK",
+      "subject": "{{#hasFreeMatch}}Bem-vindo: o teu jogo oferecido, {{freeMatchHome}} – {{freeMatchAway}}{{/hasFreeMatch}}{{^hasFreeMatch}}Bem-vindo: a tua conta IASHARK está pronta{{/hasFreeMatch}}",
+      "preheader": "Todos os dias, a análise completa de um jogo é oferecida com a tua conta.",
+      "title": "A tua conta gratuita está pronta",
       "blocks": [
         {
           "type": "p",
-          "text": "A tua conta gratuita está pronta. Eis como a usar:"
+          "text": "Todos os dias, a tua conta gratuita abre-te:"
         },
         {
           "type": "list",
-          "ordered": true,
+          "if": "hasTickets",
           "items": [
-            "Todos os dias, um jogo é grátis. Com a tua conta gratuita vês o seu palpite, a sua probabilidade calculada e o porquê.",
-            "Comparas essa probabilidade com a odd do teu operador licenciado e depois decides tu.",
-            "A página Metodologia explica como estas probabilidades são calculadas."
+            "a análise completa do jogo oferecido: o palpite escolhido, a sua probabilidade calculada e o porquê;",
+            "a múltipla pequena do dia, quando as nossas regras encontram uma."
+          ]
+        },
+        {
+          "type": "list",
+          "if": "noTickets",
+          "items": [
+            "a análise completa do jogo oferecido: o palpite escolhido, a sua probabilidade calculada e o porquê."
           ]
         },
         {
           "type": "p",
           "if": "hasFreeMatch",
-          "text": "O jogo grátis neste momento:"
+          "text": "O jogo oferecido:"
         },
         {
           "type": "match",
@@ -50,7 +56,7 @@
         {
           "type": "cta",
           "if": "hasFreeMatch",
-          "label": "Ver o palpite grátis",
+          "label": "Ver a análise oferecida",
           "link": "freeMatch"
         },
         {
@@ -60,9 +66,26 @@
           "link": "home"
         },
         {
+          "type": "p",
+          "if": "hasTrialOffer",
+          "text": "Para abrir todos os outros jogos do dia: Pro, com {{trialDays}} dias de teste. Primeira cobrança: {{proPrice}} a {{firstChargeDate}} se começares hoje, só se não cancelares antes. Cancelamento online na tua conta."
+        },
+        {
           "type": "link",
-          "label": "Ler a metodologia",
-          "link": "methodology"
+          "if": "hasTrialOffer",
+          "label": "Experimentar {{trialDays}} dias: {{zeroPrice}} hoje",
+          "link": "trial"
+        },
+        {
+          "type": "p",
+          "if": "notOptedIn",
+          "text": "Os outros jogos do dia abrem-se com o Pro: está tudo explicado na tua conta."
+        },
+        {
+          "type": "link",
+          "if": "notOptedIn",
+          "label": "Abrir a minha conta",
+          "link": "account"
         },
         {
           "type": "p",
@@ -94,14 +117,14 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "Para abrir todos os jogos do dia: Pro, com {{trialDays}} dias de teste numa primeira subscrição mensal."
+          "if": "hasTrialOffer",
+          "text": "Para abrir todos os outros jogos do dia: Pro, com {{trialDays}} dias de teste. Primeira cobrança: {{proPrice}} a {{firstChargeDate}} se começares hoje, só se não cancelares antes. Cancelamento online na tua conta."
         },
         {
           "type": "link",
-          "if": "hasTrial",
-          "label": "Ver a oferta Pro",
-          "link": "pro"
+          "if": "hasTrialOffer",
+          "label": "Experimentar {{trialDays}} dias: {{zeroPrice}} hoje",
+          "link": "trial"
         }
       ]
     },
@@ -146,11 +169,18 @@
         },
         {
           "type": "p",
-          "if": "hasTrial",
-          "text": "{{trialDays}} dias de teste numa primeira subscrição mensal: o teu cartão é pedido, nada é cobrado durante o teste. Depois {{proPrice}} por mês, cobrados automaticamente salvo cancelamento antes do fim do teste."
+          "if": "hasTrialOffer",
+          "text": "Teste de {{trialDays}} dias na subscrição mensal (primeira subscrição, cartão pedido): {{zeroPrice}} hoje. Primeira cobrança: {{proPrice}} a {{firstChargeDate}} se começares hoje, só se não cancelares antes. Cancelamento online na tua conta."
         },
         {
           "type": "cta",
+          "if": "hasTrialOffer",
+          "label": "Experimentar {{trialDays}} dias: {{zeroPrice}} hoje",
+          "link": "trial"
+        },
+        {
+          "type": "cta",
+          "if": "noTrialOffer",
           "label": "Ver a oferta Pro",
           "link": "pro"
         },

@@ -57,25 +57,22 @@ test("migration 0055 (non appliquee) : memes regles que decideCampaign, p_sequen
   assert.ok(sql.includes("grant execute on function public.lifecycle_email_candidates(timestamptz, integer, boolean) to service_role;"));
 });
 
-test("bilan d'hier : paris publies AVANT le coup d'envoi, gagnes et perdus, attente si l'archive n'est pas reglee", () => {
-  const w = L.recapWindow(NOW, L.siteContext(BUNDLE.markets, "fr"));
-  assert.deepEqual(w, { day: "2026-10-26", fromIso: "2026-10-25T23:00:00.000Z", toIso: "2026-10-26T23:00:00.000Z" });
-  const mx = L.recapWindow(new Date("2026-10-27T04:00:00Z"), L.siteContext(BUNDLE.markets, "mx"));
-  assert.equal(mx.day, "2026-10-25", "hier du destinataire (Mexico : 22 h le 26/10)");
-  const ko = "2026-10-26T19:00:00Z", pub = "2026-10-26T06:00:00Z";
-  const rows = [].concat(
-    Array(5).fill({ result: "win", published_at: pub, kickoff_at: ko, type: "single" }),
-    Array(2).fill({ result: "loss", published_at: pub, kickoff_at: ko, type: "single" }),
-    [{ result: "loss", published_at: "2026-10-26T19:30:00Z", kickoff_at: ko, type: "single" }],
-    [{ result: "no_signal", published_at: pub, kickoff_at: ko }],
-    [{ result: "void", published_at: pub, kickoff_at: ko }]
-  );
-  const r = L.recapFromRows(rows, "2026-10-26");
-  assert.deepEqual(r, { day: "2026-10-26", won: 5, lost: 2, voided: 1, pending: 0, total: 8 }, "publie apres le coup d'envoi : jamais compte");
-  assert.equal(L.recapReady(r), true);
-  assert.equal(L.recapReady(Object.assign({}, r, { pending: 2, total: 10 })), true, "1 sur 5 en attente au plus");
-  assert.equal(L.recapReady(Object.assign({}, r, { pending: 3, total: 10 })), false);
-  assert.equal(L.recapReady({ won: 0, lost: 0, voided: 0, pending: 0, total: 0 }), false, "aucun pari regle : pas d'e-mail");
+test("bilan d'hier : lu dans le fichier unique du site (preuves/bilan-hier.json, paris_simples), jamais recalcule ; veille a Paris", () => {
+  const f = (jour, ps) => ({ version: 1, jour, offert: null, selection_or: null, paris_simples: ps === undefined ? { jour, gagnes: 5, perdus: 2, annules: 1, en_attente: 0, regle: "..." } : ps });
+  assert.equal(L.parisYesterday(NOW), "2026-10-26");
+  assert.equal(L.parisYesterday(new Date("2026-10-27T23:30:00Z")), "2026-10-27", "00 h 30 a Paris le 28 : la veille est le 27");
+  assert.deepEqual(L.recapFromFile(f("2026-10-26"), NOW), { day: "2026-10-26", won: 5, lost: 2, voided: 1, pending: 0 });
+  assert.equal(L.recapFromFile(f("2026-10-25"), NOW), null, "fichier d'un autre jour : aucun bilan");
+  assert.equal(L.recapFromFile(Object.assign(f("2026-10-26"), { jour: "2026-10-25" }), NOW), null, "paris_simples d'un autre jour que le fichier");
+  assert.equal(L.recapFromFile(f("2026-10-26", null), NOW), null, "archive illisible au calcul : aucun bilan");
+  assert.equal(L.recapFromFile(null, NOW), null, "fichier absent");
+  assert.equal(L.recapFromFile(f("2026-10-26", { jour: "2026-10-26", gagnes: 0, perdus: 0, annules: 0, en_attente: 4 }), NOW), null, "aucun resultat : rien");
+  assert.equal(L.recapFromFile(f("2026-10-26", { jour: "2026-10-26", gagnes: "5", perdus: 2 }), NOW), null, "nombre illisible : rien");
+  assert.deepEqual(L.recapFromFile(f("2026-10-26", { jour: "2026-10-26", gagnes: 67, perdus: 32, annules: 0, en_attente: 1 }), NOW), { day: "2026-10-26", won: 67, lost: 32, voided: 0, pending: 1 }, "en attente : dit, jamais cache");
+  // Plus aucun calcul de bilan dans la fonction ni dans la lib (une seule source).
+  const src = fs.readFileSync(path.join(ROOT, "lib", "lifecycle-email.js"), "utf8") + fs.readFileSync(path.join(ROOT, "supabase", "functions", "send-lifecycle-emails", "index.ts"), "utf8") + fs.readFileSync(path.join(ROOT, "supabase", "functions", "send-lifecycle-emails", "handler.ts"), "utf8");
+  assert.doesNotMatch(src, /recapFromRows|yesterdayResults|from\("predictions_archive"\)/);
+  assert.match(src, /https:\/\/iashark\.com\/preuves\/bilan-hier\.json/);
 });
 
 test("e-mail du bilan : gagnes ET perdus, aucun pourcentage, essai avec la date du premier prelevement", async () => {
@@ -85,14 +82,20 @@ test("e-mail du bilan : gagnes ET perdus, aucun pourcentage, essai avec la date 
   const r = L.renderLifecycleEmail(BUNDLE, "results_recap", "fr", { marketingOptIn: true, trialDays: 7, bilan }, { unsubscribeUrl, now: NOW });
   const txt = r.text.replace(/[  ]/g, " ");
   assert.equal(r.subject, "Le bilan d'hier : 5 gagnés, 2 perdus");
-  assert.ok(txt.includes("Hier, lundi 26 octobre,") && txt.includes("- 5 gagnés") && txt.includes("- 2 perdus") && txt.includes("1 annulé (match annulé ou reporté)"), txt);
-  assert.ok(txt.includes("1 pari pas encore réglé"));
+  assert.ok(txt.includes("Hier, lundi 26 octobre, voici") && txt.includes("- 5 gagnés") && txt.includes("- 2 perdus") && txt.includes("- 1 annulé"), txt);
+  assert.ok(txt.includes("Au moment de cet e-mail : 1 en attente de résultat."));
+  assert.ok(!txt.includes("heure de Paris"), "France : pas de precision");
   assert.ok(txt.includes("Premier prélèvement : 14,99 € le 3 novembre si tu commences aujourd'hui"));
   assert.doesNotMatch(r.subject + txt, /%|taux|réussite|rentab|gain/i);
   const one = L.renderLifecycleEmail(BUNDLE, "results_recap", "fr", { marketingOptIn: true, bilan: { day: "2026-10-26", won: 1, lost: 0, voided: 0, pending: 0, total: 1 } }, { unsubscribeUrl, now: NOW });
   assert.equal(one.subject, "Le bilan d'hier : 1 gagné, 0 perdu");
   assert.ok(!one.text.includes("Premier prélèvement") && one.text.includes("Voir les matchs du jour"), "sans essai confirme : pas d'offre d'essai");
   assert.throws(() => L.renderLifecycleEmail(BUNDLE, "results_recap", "fr", { marketingOptIn: true, bilan: null }, { unsubscribeUrl, now: NOW }), (e) => e.code === "missing_results");
+  const gbTok = await L.createUnsubscribeToken({ userId: USER, dir: "gb" }, SECRET, NOW);
+  const gb = L.renderLifecycleEmail(BUNDLE, "results_recap", "gb", { marketingOptIn: true, bilan }, { unsubscribeUrl: L.unsubscribeLinks(gbTok, "gb", "https://example.supabase.co").page, now: NOW });
+  assert.ok(gb.text.includes("Yesterday, Monday 26 October (Paris time),"), "gb, mx, za : « hier, heure de Paris »");
+  const mxTok = await L.createUnsubscribeToken({ userId: USER, dir: "mx" }, SECRET, NOW);
+  assert.ok(L.renderLifecycleEmail(BUNDLE, "results_recap", "mx", { marketingOptIn: true, bilan }, { unsubscribeUrl: L.unsubscribeLinks(mxTok, "mx", "https://example.supabase.co").page, now: NOW }).text.includes("(hora de París)"));
   for (const dir of ["en", "es", "gb", "mx", "za"]) {
     const x = L.renderLifecycleEmail(BUNDLE, "results_recap", dir, { marketingOptIn: true, trialDays: 7, bilan }, { unsubscribeUrl: L.unsubscribeLinks(await L.createUnsubscribeToken({ userId: USER, dir }, SECRET, NOW), dir, "https://example.supabase.co").page, now: NOW });
     assert.doesNotMatch(x.subject + x.text, /\{\{|\}\}|undefined|null|%/, dir);
@@ -107,7 +110,7 @@ const BREVO = "https://api.brevo.com/v3/smtp/email";
 const DATA = "https://iashark.com/data-home.json";
 function deps(opts) {
   const env = { EMAIL_INTERNAL_SECRET: INTERNAL, EMAIL_UNSUBSCRIBE_SECRET: SECRET, SUPABASE_URL: "https://example.supabase.co", BREVO_API_KEY: "k", EMAIL_FROM: "IASHARK <news@iashark.com>", COMPANY_OPERATOR_NAME: "IASHARK, entrepreneur individuel", LIFECYCLE_SENDER_CONTACT: "contact@iashark.com" };
-  const calls = [], db = { args: null, windows: [] };
+  const calls = [], db = { args: null };
   const row = Object.assign({ user_id: USER, email: "client@example.com", plan: "free", role: "customer", market: "fr", marketing_opt_in: true, notify_weekly_recap: true, has_subscription: false, suppressed: false,
     created_at: ago(4.1), last_sign_in_at: ago(4.1), last_funnel_at: null, last_marketing_sent_at: ago(3.05), sent_keys: ["welcome:", "free_match:"], campaign: "results_recap", campaign_key: "", ever_subscribed: false }, opts.row || {});
   const store = {
@@ -115,24 +118,30 @@ function deps(opts) {
     reserveSend: async () => 1,
     completeSend: async () => {},
   };
-  if (opts.archive) store.yesterdayResults = async (w) => { db.windows.push(w); return opts.archive; };
   return { db, calls, deps: { env: (k) => env[k], now: () => NOW, log: { info() {}, warn() {}, error() {} }, db: store,
-    fetch: async (url, init) => { calls.push({ url: String(url), init }); if (String(url) === DATA) return new Response(JSON.stringify({ matchs: [] }), { status: 200 }); if (String(url) === BREVO) return new Response(JSON.stringify({ messageId: "<m@x>" }), { status: 201 }); throw new Error("fetch inattendu : " + url); } } };
+    fetch: async (url, init) => {
+      calls.push({ url: String(url), init });
+      if (String(url) === DATA) return new Response(JSON.stringify({ matchs: [] }), { status: 200 });
+      if (String(url) === BILAN_URL) return opts.fichier === undefined ? new Response("{}", { status: 404 }) : new Response(JSON.stringify(opts.fichier), { status: 200 });
+      if (String(url) === BREVO) return new Response(JSON.stringify({ messageId: "<m@x>" }), { status: 201 });
+      throw new Error("fetch inattendu : " + url);
+    } } };
 }
 const post = (body) => new Request("https://x/fn", { method: "POST", headers: { "x-internal-secret": INTERNAL }, body: JSON.stringify(body) });
-const ARCHIVE = [].concat(Array(5).fill({ result: "win", published_at: "2026-10-26T06:00:00Z", kickoff_at: "2026-10-26T19:00:00Z", type: "single" }), Array(2).fill({ result: "loss", published_at: "2026-10-26T06:00:00Z", kickoff_at: "2026-10-26T19:00:00Z", type: "single" }));
+const BILAN_URL = "https://iashark.com/preuves/bilan-hier.json";
+const FICHIER = { version: 1, jour: "2026-10-26", offert: null, selection_or: null, paris_simples: { jour: "2026-10-26", gagnes: 5, perdus: 2, annules: 0, en_attente: 0 } };
 
-test("fonction : la suite ne part que si elle est demandee (sequence: true -> p_sequence), bilan lu dans l'archive", async () => {
+test("fonction : la suite ne part que si elle est demandee (sequence: true -> p_sequence), bilan lu dans preuves/bilan-hier.json", async () => {
   const { handleRequest } = await loadSend();
-  let t = deps({ archive: ARCHIVE });
+  let t = deps({ fichier: FICHIER });
   let body = await (await handleRequest(post({}), t.deps)).json();
   assert.deepEqual(t.db.args, { nowIso: NOW.toISOString(), limit: 200 }, "sans la suite : aucun p_sequence envoye");
   assert.deepEqual([body.sent, body.results[0].status, body.results[0].reason], [0, "skipped", "nothing_due"], "sans la suite, le JS refuse un bilan propose : rien ne part");
-  t = deps({ archive: ARCHIVE });
+  t = deps({ fichier: FICHIER });
   body = await (await handleRequest(post({ sequence: true }), t.deps)).json();
   assert.deepEqual(t.db.args, { nowIso: NOW.toISOString(), limit: 200, sequence: true });
   assert.deepEqual([body.sent, body.sequence], [1, true]);
-  assert.deepEqual(t.db.windows, [{ fromIso: "2026-10-25T23:00:00.000Z", toIso: "2026-10-26T23:00:00.000Z" }]);
+  assert.equal(t.calls.filter((c) => c.url === BILAN_URL).length, 1, "le fichier unique, lu une fois par passage");
   const p = JSON.parse(t.calls.find((c) => c.url === BREVO).init.body);
   assert.equal(p.subject, "Le bilan d'hier : 5 gagnés, 2 perdus");
   assert.ok(p.textContent.includes("Premier prélèvement") && p.textContent.includes("abonnement.html?duree=month"));
@@ -140,12 +149,11 @@ test("fonction : la suite ne part que si elle est demandee (sequence: true -> p_
   assert.match(p.headers["List-Unsubscribe"], /email-unsubscribe\?t=/);
 });
 
-test("fonction : archive pas encore reglee ou illisible = aucun e-mail (nouvel essai l'heure suivante)", async () => {
+test("fonction : fichier absent ou d'un autre jour = aucun bilan, donc aucun e-mail J+3 (nouvel essai l'heure suivante)", async () => {
   const { handleRequest } = await loadSend();
-  const pending = ARCHIVE.concat(Array(3).fill({ result: "scheduled", published_at: "2026-10-26T06:00:00Z", kickoff_at: "2026-10-26T20:00:00Z", type: "single" }));
-  let t = deps({ archive: pending });
+  let t = deps({ fichier: Object.assign({}, FICHIER, { jour: "2026-10-25", paris_simples: Object.assign({}, FICHIER.paris_simples, { jour: "2026-10-25" }) }) });
   let body = await (await handleRequest(post({ sequence: true }), t.deps)).json();
-  assert.deepEqual([body.sent, body.results[0].reason], [0, "results_not_settled"]);
+  assert.deepEqual([body.sent, body.results[0].reason], [0, "results_not_ready"]);
   t = deps({});
   body = await (await handleRequest(post({ sequence: true }), t.deps)).json();
   assert.deepEqual([body.sent, body.results[0].reason], [0, "results_unavailable"]);

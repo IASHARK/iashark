@@ -283,22 +283,23 @@
       "preheader": "Los pronósticos publicados antes de los partidos de ayer, ganados y perdidos.",
       "title": "El balance de ayer",
       "counts": {
-        "won_one": "{n} ganado",
-        "won_many": "{n} ganados",
-        "lost_one": "{n} perdido",
-        "lost_many": "{n} perdidos",
-        "void_one": "{n} anulado (partido cancelado o pospuesto)",
-        "void_many": "{n} anulados (partidos cancelados o pospuestos)",
-        "pending_one": "{n} pronóstico aún sin resolver",
-        "pending_many": "{n} pronósticos aún sin resolver"
+        "won_one": "{n} ganada",
+        "won_many": "{n} ganadas",
+        "lost_one": "{n} perdida",
+        "lost_many": "{n} perdidas",
+        "void_one": "{n} anulada",
+        "void_many": "{n} anuladas",
+        "pending_one": "{n} pendiente de resultado",
+        "pending_many": "{n} pendientes de resultado"
       },
       "blocks": [
         {
           "type": "p",
-          "text": "Ayer, {{recapDate}}, este es el resultado de los pronósticos publicados por IASHARK antes del silbatazo inicial:"
+          "text": "Ayer, {{recapDate}}{{#recapParisTime}} (hora de París){{/recapParisTime}}, este es el resultado de los pronósticos publicados por IASHARK antes del silbatazo inicial:"
         },
         {
           "type": "list",
+          "if": "noRecapVoid",
           "items": [
             "{{recapWonText}}",
             "{{recapLostText}}"
@@ -308,6 +309,8 @@
           "type": "list",
           "if": "hasRecapVoid",
           "items": [
+            "{{recapWonText}}",
+            "{{recapLostText}}",
             "{{recapVoidText}}"
           ]
         },

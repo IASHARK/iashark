@@ -4,8 +4,9 @@
 -- appliquee ET que la suite n'est pas demandee (variable du depot EMAILS_SUITE_ACTIVE).
 --
 -- Contenu :
--- 1. nouvelle campagne « results_recap » (bilan d'hier, gagnes ET perdus, depuis
---    public.predictions_archive, + l'offre d'essai) dans la contrainte de email_sends ;
+-- 1. nouvelle campagne « results_recap » (bilan d'hier, gagnes ET perdus, lu dans le
+--    fichier unique du site preuves/bilan-hier.json, + l'offre d'essai) dans la contrainte
+--    de email_sends ;
 -- 2. lifecycle_email_candidates recoit p_sequence (faux par defaut = regles d'avant,
 --    identiques a 0024). Vrai : J+1 match offert, J+3 bilan d'hier, J+6 offre Pro.
 --    La frequence maximale (1 e-mail marketing tous les 3 jours, promise par la case

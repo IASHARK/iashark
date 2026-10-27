@@ -968,7 +968,7 @@ const require = function () { return Render; };
     inactive_30d: { marketing: true, needs: null },
     pro_weekly_summary: { marketing: true, needs: "weekend_matches" },
     // Suite courte des comptes gratuits (27/10/2026, NON activee par defaut) : le bilan
-    // d'hier (gagnes ET perdus, archive predictions_archive, aucun pourcentage) + l'essai.
+    // d'hier (gagnes ET perdus, fichier unique preuves/bilan-hier.json, aucun pourcentage) + l'essai.
     results_recap: { marketing: true, needs: "results" }
   };
 
@@ -986,10 +986,7 @@ const require = function () { return Render; };
     // J+3 bilan d'hier + essai, J+6 offre Pro. La frequence max ci-dessus (1 e-mail
     // marketing / 3 jours, promise par la case d'inscription du 15/09/2026) reste la regle :
     // en pratique J+1, J+4, J+7. Fenetres = age du compte en jours [debut, fin).
-    sequence: { freeMatch: [1, 3], resultsRecap: [3, 8], proFeatures: [6, 12] },
-    // Bilan d'hier : envoye seulement quand l'archive l'a regle (au moins un gagne ou un
-    // perdu, et au plus 1 pari sur 5 encore en attente) ; sinon l'heure suivante.
-    recapMaxPendingShare: 0.2
+    sequence: { freeMatch: [1, 3], resultsRecap: [3, 8], proFeatures: [6, 12] }
   };
 
   var TOKEN_VERSION = "v1";
@@ -1293,43 +1290,30 @@ const require = function () { return Render; };
       .slice(0, max || 8);
   }
 
-  // ------------------------------------------------- bilan d'hier (archive)
+  // ------------------------------------------- bilan d'hier (fichier unique)
 
-  // Minuit local d'un jour AAAA-MM-JJ dans un fuseau -> Date (UTC).
-  function zonedMidnight(ymd, timeZone) {
-    var p = String(ymd).split("-").map(Number);
-    var guess = Date.UTC(p[0], p[1] - 1, p[2], 0, 0);
-    var first = guess - offsetAt(guess, timeZone);
-    return new Date(guess - offsetAt(first, timeZone));
+  // Bilan d'hier = le MEME que le site (controle historique-public du 27/10/2026) : jamais
+  // recalcule ici. Lu dans le fichier public preuves/bilan-hier.json, champ paris_simples,
+  // ecrit une fois chaque matin par le calcul quotidien (lib/bilan-hier.js#bilanParisSimples :
+  // predictions_archive, paris simples publies avant le coup d'envoi, coup d'envoi la veille
+  // a l'heure de Paris ; « neutral » compte en annule). « Hier » = la veille a Paris pour
+  // tous les marches. Fichier absent, illisible, d'un autre jour, ou sans aucun gagne ni
+  // perdu : null (aucun bilan, donc aucun e-mail results_recap).
+  function parisYesterday(now) {
+    return addDays(localClock(now, "Europe/Paris").date, -1);
   }
-  // « Hier » du destinataire (calendrier du marche) : jour et bornes UTC des coups d'envoi.
-  function recapWindow(now, ctx) {
-    var today = localClock(now, ctx.timeZone).date;
-    var day = addDays(today, -1);
-    return { day: day, fromIso: zonedMidnight(day, ctx.timeZone).toISOString(), toIso: zonedMidnight(today, ctx.timeZone).toISOString() };
+  function entier(v) { return typeof v === "number" && isFinite(v) && v >= 0 && Math.floor(v) === v ? v : null; }
+  function recapFromFile(file, now) {
+    var s = file && typeof file === "object" ? file.paris_simples : null;
+    if (!s || typeof s !== "object" || typeof s.jour !== "string" || s.jour !== file.jour) return null;
+    if (!toDate(now) || s.jour !== parisYesterday(now)) return null;
+    var won = entier(s.gagnes), lost = entier(s.perdus);
+    var voided = s.annules == null ? 0 : entier(s.annules), pending = s.en_attente == null ? 0 : entier(s.en_attente);
+    if (won === null || lost === null || voided === null || pending === null || won + lost < 1) return null;
+    return { day: s.jour, won: won, lost: lost, voided: voided, pending: pending };
   }
-  // Lignes de public.predictions_archive dont le coup d'envoi tombe ce jour-la -> bilan.
-  // Seuls comptent les paris simples publies AVANT le coup d'envoi (published_at <
-  // kickoff_at, heure posee par la base : migration 0035). Gagnes ET perdus, jamais de
-  // pourcentage ; annules et pas encore regles dits a part.
-  function recapFromRows(rows, day) {
-    var r = { day: day, won: 0, lost: 0, voided: 0, pending: 0, total: 0 };
-    (Array.isArray(rows) ? rows : []).forEach(function (x) {
-      if (!x || (x.type && x.type !== "single")) return;
-      var pub = toDate(x.published_at), ko = toDate(x.kickoff_at);
-      if (!pub || !ko || pub.getTime() >= ko.getTime()) return;
-      var res = String(x.result || "");
-      if (res === "win") r.won++;
-      else if (res === "loss") r.lost++;
-      else if (res === "void") r.voided++;
-      else if (res === "scheduled" || res === "pending") r.pending++;
-      else return; // neutral, no_signal : aucun pari publie
-      r.total++;
-    });
-    return r;
-  }
-  function recapReady(r) {
-    return !!r && (r.won + r.lost) >= 1 && r.pending <= Math.floor(r.total * RULES.recapMaxPendingShare);
+  function recapValid(b) {
+    return !!b && typeof b.day === "string" && /^\d{4}-\d{2}-\d{2}$/.test(b.day) && entier(b.won) !== null && entier(b.lost) !== null && b.won + b.lost >= 1;
   }
 
   // ------------------------------------------------------------ desinscription
@@ -1534,10 +1518,12 @@ const require = function () { return Render; };
   // bundle = { layout: {html, text}, copy: {<locale>: {...}}, markets: config/markets.json }
   // data   = { freeMatch, weekendMatches, marketingOptIn, trialDays }
   // options = { company, unsubscribeUrl, now }
-  // « 5 gagnés », « 1 gagné », « 0 perdu » (francais : singulier jusqu'a 1).
-  function countText(counts, key, n, locale) {
+  // « 5 gagnés », « 1 gagné », « 0 perdu » : accord de la langue (Intl.PluralRules, comme
+  // la ligne « Hier » du site, lib/offre-pro.js#pluriel).
+  function countText(counts, key, n, intlLocale) {
     if (!counts || typeof n !== "number" || !isFinite(n)) return null;
-    var one = n === 1 || (String(locale).split("-")[0] === "fr" && n === 0);
+    var one;
+    try { one = new Intl.PluralRules(intlLocale).select(n) === "one"; } catch (_e) { one = n === 1; }
     var tpl = counts[key + (one ? "_one" : "_many")];
     return typeof tpl === "string" ? tpl.replace("{n}", String(n)) : null;
   }
@@ -1560,7 +1546,7 @@ const require = function () { return Render; };
     var need = CAMPAIGNS[campaign].needs;
     if (need === "free_match" && !data.freeMatch) fail("missing_free_match", "Aucun match offert publie");
     if (need === "weekend_matches" && !(data.weekendMatches && data.weekendMatches.length)) fail("missing_weekend_matches", "Aucun match du week-end publie");
-    if (need === "results" && !recapReady(data.bilan)) fail("missing_results", "Bilan d'hier absent ou pas encore regle");
+    if (need === "results" && !recapValid(data.bilan)) fail("missing_results", "Bilan d'hier absent (preuves/bilan-hier.json)");
     // Prix Pro : le mensuel toujours ; textes prevus pour semaine + mois (+ an)
     // ou pour le mois seul (us : offre USD de /en/, config/markets.json
     // #_usdSwitch). Mois + an sans semaine : aucun texte, jamais un prix invente.
@@ -1601,11 +1587,14 @@ const require = function () { return Render; };
       noTickets: ctx.market !== "fr",
       // Bilan d'hier (results_recap) : nombres seulement, accordes dans la langue (copy.counts).
       recapDate: data.bilan && data.bilan.day ? new Intl.DateTimeFormat(ctx.intlLocale, { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(data.bilan.day + "T12:00:00Z")) : null,
-      recapWonText: countText(c.counts, "won", data.bilan && data.bilan.won, ctx.locale),
-      recapLostText: countText(c.counts, "lost", data.bilan && data.bilan.lost, ctx.locale),
-      recapVoidText: countText(c.counts, "void", data.bilan && data.bilan.voided, ctx.locale),
-      recapPendingText: countText(c.counts, "pending", data.bilan && data.bilan.pending, ctx.locale),
+      recapWonText: countText(c.counts, "won", data.bilan && data.bilan.won, ctx.intlLocale),
+      recapLostText: countText(c.counts, "lost", data.bilan && data.bilan.lost, ctx.intlLocale),
+      recapVoidText: countText(c.counts, "void", data.bilan && data.bilan.voided, ctx.intlLocale),
+      recapPendingText: countText(c.counts, "pending", data.bilan && data.bilan.pending, ctx.intlLocale),
       hasRecapVoid: !!(data.bilan && data.bilan.voided > 0),
+      noRecapVoid: !(data.bilan && data.bilan.voided > 0),
+      // Le bilan suit le jour de Paris : hors fuseau de Paris (gb, za, mx), on le dit.
+      recapParisTime: ctx.timeZone !== "Europe/Paris",
       hasRecapPending: !!(data.bilan && data.bilan.pending > 0),
       // Petit et Grand combine, Selection en or, buteur du jour : vendus sur le
       // marche francais seulement (lib/pro-vente.js#conditions, cotes d'operateurs
@@ -1696,10 +1685,8 @@ const require = function () { return Render; };
     findForbiddenWords: findForbiddenWords,
     renderLifecycleEmail: renderLifecycleEmail,
     withUtm: withUtm,
-    zonedMidnight: zonedMidnight,
-    recapWindow: recapWindow,
-    recapFromRows: recapFromRows,
-    recapReady: recapReady,
+    parisYesterday: parisYesterday,
+    recapFromFile: recapFromFile,
     firstChargeDate: firstChargeDate,
     zeroPrice: zeroPrice
   };
@@ -2002,18 +1989,19 @@ export const BUNDLE = {
             "won_many": "{n} gagnés",
             "lost_one": "{n} perdu",
             "lost_many": "{n} perdus",
-            "void_one": "{n} annulé (match annulé ou reporté)",
-            "void_many": "{n} annulés (matchs annulés ou reportés)",
-            "pending_one": "{n} pari pas encore réglé",
-            "pending_many": "{n} paris pas encore réglés"
+            "void_one": "{n} annulé",
+            "void_many": "{n} annulés",
+            "pending_one": "{n} en attente de résultat",
+            "pending_many": "{n} en attente de résultat"
           },
           "blocks": [
             {
               "type": "p",
-              "text": "Hier, {{recapDate}}, voici le résultat des paris publiés par IASHARK avant le coup d'envoi :"
+              "text": "Hier, {{recapDate}}{{#recapParisTime}} (heure de Paris){{/recapParisTime}}, voici le résultat des paris publiés par IASHARK avant le coup d'envoi :"
             },
             {
               "type": "list",
+              "if": "noRecapVoid",
               "items": [
                 "{{recapWonText}}",
                 "{{recapLostText}}"
@@ -2023,6 +2011,8 @@ export const BUNDLE = {
               "type": "list",
               "if": "hasRecapVoid",
               "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}",
                 "{{recapVoidText}}"
               ]
             },
@@ -2345,18 +2335,19 @@ export const BUNDLE = {
             "won_many": "{n} won",
             "lost_one": "{n} lost",
             "lost_many": "{n} lost",
-            "void_one": "{n} void (match cancelled or postponed)",
-            "void_many": "{n} void (matches cancelled or postponed)",
-            "pending_one": "{n} pick not settled yet",
-            "pending_many": "{n} picks not settled yet"
+            "void_one": "{n} void",
+            "void_many": "{n} void",
+            "pending_one": "{n} awaiting result",
+            "pending_many": "{n} awaiting results"
           },
           "blocks": [
             {
               "type": "p",
-              "text": "Yesterday, {{recapDate}}, here is how the picks IASHARK published before kick-off ended:"
+              "text": "Yesterday, {{recapDate}}{{#recapParisTime}} (Paris time){{/recapParisTime}}, here is how the picks IASHARK published before kick-off ended:"
             },
             {
               "type": "list",
+              "if": "noRecapVoid",
               "items": [
                 "{{recapWonText}}",
                 "{{recapLostText}}"
@@ -2366,6 +2357,8 @@ export const BUNDLE = {
               "type": "list",
               "if": "hasRecapVoid",
               "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}",
                 "{{recapVoidText}}"
               ]
             },
@@ -2684,22 +2677,23 @@ export const BUNDLE = {
           "preheader": "Los pronósticos publicados antes de los partidos de ayer, ganados y perdidos.",
           "title": "El balance de ayer",
           "counts": {
-            "won_one": "{n} ganado",
-            "won_many": "{n} ganados",
-            "lost_one": "{n} perdido",
-            "lost_many": "{n} perdidos",
-            "void_one": "{n} anulado (partido cancelado o aplazado)",
-            "void_many": "{n} anulados (partidos cancelados o aplazados)",
-            "pending_one": "{n} pronóstico aún sin resolver",
-            "pending_many": "{n} pronósticos aún sin resolver"
+            "won_one": "{n} ganada",
+            "won_many": "{n} ganadas",
+            "lost_one": "{n} perdida",
+            "lost_many": "{n} perdidas",
+            "void_one": "{n} anulada",
+            "void_many": "{n} anuladas",
+            "pending_one": "{n} pendiente de resultado",
+            "pending_many": "{n} pendientes de resultado"
           },
           "blocks": [
             {
               "type": "p",
-              "text": "Ayer, {{recapDate}}, este es el resultado de los pronósticos publicados por IASHARK antes del inicio:"
+              "text": "Ayer, {{recapDate}}{{#recapParisTime}} (hora de París){{/recapParisTime}}, este es el resultado de los pronósticos publicados por IASHARK antes del inicio:"
             },
             {
               "type": "list",
+              "if": "noRecapVoid",
               "items": [
                 "{{recapWonText}}",
                 "{{recapLostText}}"
@@ -2709,6 +2703,8 @@ export const BUNDLE = {
               "type": "list",
               "if": "hasRecapVoid",
               "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}",
                 "{{recapVoidText}}"
               ]
             },
@@ -3027,22 +3023,23 @@ export const BUNDLE = {
           "preheader": "Los pronósticos publicados antes de los partidos de ayer, ganados y perdidos.",
           "title": "El balance de ayer",
           "counts": {
-            "won_one": "{n} ganado",
-            "won_many": "{n} ganados",
-            "lost_one": "{n} perdido",
-            "lost_many": "{n} perdidos",
-            "void_one": "{n} anulado (partido cancelado o pospuesto)",
-            "void_many": "{n} anulados (partidos cancelados o pospuestos)",
-            "pending_one": "{n} pronóstico aún sin resolver",
-            "pending_many": "{n} pronósticos aún sin resolver"
+            "won_one": "{n} ganada",
+            "won_many": "{n} ganadas",
+            "lost_one": "{n} perdida",
+            "lost_many": "{n} perdidas",
+            "void_one": "{n} anulada",
+            "void_many": "{n} anuladas",
+            "pending_one": "{n} pendiente de resultado",
+            "pending_many": "{n} pendientes de resultado"
           },
           "blocks": [
             {
               "type": "p",
-              "text": "Ayer, {{recapDate}}, este es el resultado de los pronósticos publicados por IASHARK antes del silbatazo inicial:"
+              "text": "Ayer, {{recapDate}}{{#recapParisTime}} (hora de París){{/recapParisTime}}, este es el resultado de los pronósticos publicados por IASHARK antes del silbatazo inicial:"
             },
             {
               "type": "list",
+              "if": "noRecapVoid",
               "items": [
                 "{{recapWonText}}",
                 "{{recapLostText}}"
@@ -3052,6 +3049,8 @@ export const BUNDLE = {
               "type": "list",
               "if": "hasRecapVoid",
               "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}",
                 "{{recapVoidText}}"
               ]
             },
@@ -3374,18 +3373,19 @@ export const BUNDLE = {
             "won_many": "{n} gewonnen",
             "lost_one": "{n} verloren",
             "lost_many": "{n} verloren",
-            "void_one": "{n} annulliert (Spiel abgesagt oder verlegt)",
-            "void_many": "{n} annulliert (Spiele abgesagt oder verlegt)",
-            "pending_one": "{n} Tipp noch nicht abgerechnet",
-            "pending_many": "{n} Tipps noch nicht abgerechnet"
+            "void_one": "{n} annulliert",
+            "void_many": "{n} annulliert",
+            "pending_one": "{n} noch ohne Ergebnis",
+            "pending_many": "{n} noch ohne Ergebnis"
           },
           "blocks": [
             {
               "type": "p",
-              "text": "Gestern, {{recapDate}}, so sind die Tipps ausgegangen, die IASHARK vor dem Anpfiff veröffentlicht hat:"
+              "text": "Gestern, {{recapDate}}{{#recapParisTime}} (Pariser Zeit){{/recapParisTime}}, so sind die Tipps ausgegangen, die IASHARK vor dem Anpfiff veröffentlicht hat:"
             },
             {
               "type": "list",
+              "if": "noRecapVoid",
               "items": [
                 "{{recapWonText}}",
                 "{{recapLostText}}"
@@ -3395,6 +3395,8 @@ export const BUNDLE = {
               "type": "list",
               "if": "hasRecapVoid",
               "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}",
                 "{{recapVoidText}}"
               ]
             },
@@ -3713,22 +3715,23 @@ export const BUNDLE = {
           "preheader": "I pronostici pubblicati prima delle partite di ieri, vinti e persi.",
           "title": "Il bilancio di ieri",
           "counts": {
-            "won_one": "{n} vinto",
-            "won_many": "{n} vinti",
-            "lost_one": "{n} perso",
-            "lost_many": "{n} persi",
-            "void_one": "{n} annullato (partita annullata o rinviata)",
-            "void_many": "{n} annullati (partite annullate o rinviate)",
-            "pending_one": "{n} pronostico non ancora regolato",
-            "pending_many": "{n} pronostici non ancora regolati"
+            "won_one": "{n} vinta",
+            "won_many": "{n} vinte",
+            "lost_one": "{n} persa",
+            "lost_many": "{n} perse",
+            "void_one": "{n} annullata",
+            "void_many": "{n} annullate",
+            "pending_one": "{n} in attesa di risultato",
+            "pending_many": "{n} in attesa di risultato"
           },
           "blocks": [
             {
               "type": "p",
-              "text": "Ieri, {{recapDate}}, ecco come sono andati i pronostici pubblicati da IASHARK prima del calcio d'inizio:"
+              "text": "Ieri, {{recapDate}}{{#recapParisTime}} (ora di Parigi){{/recapParisTime}}, ecco come sono andati i pronostici pubblicati da IASHARK prima del calcio d'inizio:"
             },
             {
               "type": "list",
+              "if": "noRecapVoid",
               "items": [
                 "{{recapWonText}}",
                 "{{recapLostText}}"
@@ -3738,6 +3741,8 @@ export const BUNDLE = {
               "type": "list",
               "if": "hasRecapVoid",
               "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}",
                 "{{recapVoidText}}"
               ]
             },
@@ -4056,22 +4061,23 @@ export const BUNDLE = {
           "preheader": "Os palpites publicados antes dos jogos de ontem, ganhos e perdidos.",
           "title": "O balanço de ontem",
           "counts": {
-            "won_one": "{n} ganho",
-            "won_many": "{n} ganhos",
-            "lost_one": "{n} perdido",
-            "lost_many": "{n} perdidos",
-            "void_one": "{n} anulado (jogo cancelado ou adiado)",
-            "void_many": "{n} anulados (jogos cancelados ou adiados)",
-            "pending_one": "{n} palpite ainda por resolver",
-            "pending_many": "{n} palpites ainda por resolver"
+            "won_one": "{n} ganha",
+            "won_many": "{n} ganhas",
+            "lost_one": "{n} perdida",
+            "lost_many": "{n} perdidas",
+            "void_one": "{n} anulada",
+            "void_many": "{n} anuladas",
+            "pending_one": "{n} à espera de resultado",
+            "pending_many": "{n} à espera de resultado"
           },
           "blocks": [
             {
               "type": "p",
-              "text": "Ontem, {{recapDate}}, eis o resultado dos palpites publicados pelo IASHARK antes do pontapé de saída:"
+              "text": "Ontem, {{recapDate}}{{#recapParisTime}} (hora de Paris){{/recapParisTime}}, eis o resultado dos palpites publicados pelo IASHARK antes do pontapé de saída:"
             },
             {
               "type": "list",
+              "if": "noRecapVoid",
               "items": [
                 "{{recapWonText}}",
                 "{{recapLostText}}"
@@ -4081,6 +4087,8 @@ export const BUNDLE = {
               "type": "list",
               "if": "hasRecapVoid",
               "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}",
                 "{{recapVoidText}}"
               ]
             },

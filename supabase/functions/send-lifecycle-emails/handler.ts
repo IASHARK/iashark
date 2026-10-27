@@ -69,9 +69,6 @@ export type CandidateRow = {
 export type TestRecipient = { user_id: string; email: string };
 export type LifecycleStore = {
   listCandidates: (args: { nowIso: string; limit: number; sequence?: boolean }) => Promise<CandidateRow[]>;
-  // Bilan d'hier (results_recap) : lignes de public.predictions_archive dont le coup d'envoi
-  // tombe dans [fromIso, toIso). Absent = pas de bilan (aucun e-mail results_recap).
-  yesterdayResults?: (args: { fromIso: string; toIso: string }) => Promise<ArchiveRow[]>;
   reserveSend: (args: { userId: string; campaign: string; key: string; market: string }) => Promise<number | null>;
   completeSend: (args: { id: number; status: "sent" | "failed"; messageId?: string | null; error?: string | null }) => Promise<void>;
   // Comptes administrateurs (users.role = 'admin') : destinataires de l'envoi de test.
@@ -81,7 +78,6 @@ export type LifecycleStore = {
   recentSends?: (args: { sinceIso: string }) => Promise<SentRow[]>;
   recordEvent?: (args: { messageId: string; event: TrackedEvent; at: string }) => Promise<boolean>;
 };
-export type ArchiveRow = { result: string | null; published_at: string | null; kickoff_at: string | null; type?: string | null };
 export type TrackedEvent = "opened" | "clicked" | "bounced" | "complained";
 export type SentRow = { message_id: string | null; opened_at: string | null; clicked_at: string | null; status: string | null };
 export type HandlerDeps = {
@@ -95,6 +91,8 @@ export type HandlerDeps = {
 export const RESEND_API_URL = "https://api.resend.com/emails";
 export const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 export const DEFAULT_PUBLIC_DATA_URL = "https://iashark.com/data-home.json";
+// Bilan d'hier (e-mail results_recap) : le fichier unique du site, jamais recalcule ici.
+export const DEFAULT_PUBLIC_BILAN_URL = "https://iashark.com/preuves/bilan-hier.json";
 export const MAX_BODY_BYTES = 16 * 1024;
 export const BREVO_EVENTS_URL = "https://api.brevo.com/v3/smtp/statistics/events";
 // Evenements Brevo relus -> evenement note dans email_sends (public.email_record_event).
@@ -368,18 +366,19 @@ export async function handleRequest(req: Request, deps: HandlerDeps): Promise<Re
     if (publicMatches === undefined) publicMatches = await loadPublicMatches(deps);
     return publicMatches;
   };
-  // Bilan d'hier par jour du marche (une lecture de l'archive par jour et par passage).
-  const recaps = new Map<string, Promise<Json | null>>();
-  const recapFor = (ctx: { timeZone: string }): Promise<Json | null> => {
-    const w = Lifecycle.recapWindow(now, ctx) as { day: string; fromIso: string; toIso: string };
-    const store = deps.db as LifecycleStore;
-    if (typeof store.yesterdayResults !== "function") return Promise.resolve(null);
-    if (!recaps.has(w.fromIso)) {
-      recaps.set(w.fromIso, store.yesterdayResults({ fromIso: w.fromIso, toIso: w.toIso })
-        .then((rows) => Lifecycle.recapFromRows(rows, w.day) as Json)
-        .catch((err) => { deps.log.error(TAG + " archive illisible : " + errorText(err)); return null; }));
+  // Bilan d'hier : preuves/bilan-hier.json (champ paris_simples), le MEME fichier que la ligne
+  // « Hier » du site, lu une fois par passage comme data-home.json. Absent ou d'un autre jour
+  // que la veille a Paris : aucun bilan, donc aucun e-mail results_recap (nouvel essai l'heure
+  // suivante).
+  let bilanFile: Promise<unknown | null> | null = null;
+  const loadBilan = (): Promise<unknown | null> => {
+    if (!bilanFile) {
+      const url = envValue(deps, "LIFECYCLE_PUBLIC_BILAN_URL") || DEFAULT_PUBLIC_BILAN_URL;
+      bilanFile = deps.fetch(url, { headers: { "Accept": "application/json" }, signal: timeoutSignal(10000) })
+        .then((res) => res.ok ? res.json() : null)
+        .catch((err) => { deps.log.warn(TAG + " bilan d'hier indisponible (" + errorText(err) + ")."); return null; });
     }
-    return recaps.get(w.fromIso) as Promise<Json | null>;
+    return bilanFile;
   };
   // Contenu public d'une campagne ; null = rien a envoyer (raison donnee).
   const contentFor = async (campaign: string, dir: string, optIn: boolean, trial: number): Promise<{ data: Json } | { reason: string }> => {
@@ -387,10 +386,11 @@ export async function handleRequest(req: Request, deps: HandlerDeps): Promise<Re
     const need = Lifecycle.CAMPAIGNS[campaign].needs;
     const data: Json = { marketingOptIn: optIn, freeMatch: null, weekendMatches: [], trialDays: trial };
     if (need === "results") {
-      const bilan = await recapFor(ctx);
-      if (!bilan) return { reason: "results_unavailable" };
-      if (!Lifecycle.recapReady(bilan)) return { reason: "results_not_settled" };
-      data.bilan = bilan;
+      const file = await loadBilan();
+      if (!file) return { reason: "results_unavailable" };
+      const bilan = Lifecycle.recapFromFile(file, now);
+      if (!bilan) return { reason: "results_not_ready" };
+      data.bilan = bilan as Json;
     }
     if (campaign === "welcome" || need === "free_match" || need === "weekend_matches") {
       const list = await matches();

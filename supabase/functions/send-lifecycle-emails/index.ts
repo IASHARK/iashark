@@ -24,6 +24,7 @@
 //   EMAIL_ALLOW_BLOCKED_DECISION  "true" = envoyer malgre l'identite manquante
 //   TRIAL_DAYS                 essai Pro (absent = 7 jours, "0" = coupe), meme regle que create-checkout-session
 //   LIFECYCLE_PUBLIC_DATA_URL  optionnel (defaut https://iashark.com/data-home.json)
+//   LIFECYCLE_PUBLIC_BILAN_URL optionnel (defaut https://iashark.com/preuves/bilan-hier.json, bilan d'hier)
 //   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY  fournis par Supabase
 //
 // Apres modification d'un gabarit ou de lib/lifecycle-email.js :
@@ -66,15 +67,6 @@ const db: LifecycleStore | null = supabase
         for (const r of rows) (r as { ever_subscribed?: boolean | null }).ever_subscribed = deja ? deja.has(r.user_id) : null;
       }
       return rows;
-    },
-    // Bilan d'hier (e-mail results_recap) : paris archives dont le coup d'envoi tombe ce
-    // jour-la. Lecture seule ; le tri (publie avant le match, regle ou non) est fait par
-    // lib/lifecycle-email.js#recapFromRows.
-    async yesterdayResults({ fromIso, toIso }) {
-      const { data, error } = await supabase.from("predictions_archive").select("result,published_at,kickoff_at,type")
-        .gte("kickoff_at", fromIso).lt("kickoff_at", toIso).limit(2000);
-      if (error) throw new Error("predictions_archive: " + error.message);
-      return data ?? [];
     },
     // Envoi de test : comptes administrateurs seulement (users.role = 'admin').
     async listTestRecipients() {

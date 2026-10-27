@@ -287,18 +287,19 @@
         "won_many": "{n} gewonnen",
         "lost_one": "{n} verloren",
         "lost_many": "{n} verloren",
-        "void_one": "{n} annulliert (Spiel abgesagt oder verlegt)",
-        "void_many": "{n} annulliert (Spiele abgesagt oder verlegt)",
-        "pending_one": "{n} Tipp noch nicht abgerechnet",
-        "pending_many": "{n} Tipps noch nicht abgerechnet"
+        "void_one": "{n} annulliert",
+        "void_many": "{n} annulliert",
+        "pending_one": "{n} noch ohne Ergebnis",
+        "pending_many": "{n} noch ohne Ergebnis"
       },
       "blocks": [
         {
           "type": "p",
-          "text": "Gestern, {{recapDate}}, so sind die Tipps ausgegangen, die IASHARK vor dem Anpfiff veröffentlicht hat:"
+          "text": "Gestern, {{recapDate}}{{#recapParisTime}} (Pariser Zeit){{/recapParisTime}}, so sind die Tipps ausgegangen, die IASHARK vor dem Anpfiff veröffentlicht hat:"
         },
         {
           "type": "list",
+          "if": "noRecapVoid",
           "items": [
             "{{recapWonText}}",
             "{{recapLostText}}"
@@ -308,6 +309,8 @@
           "type": "list",
           "if": "hasRecapVoid",
           "items": [
+            "{{recapWonText}}",
+            "{{recapLostText}}",
             "{{recapVoidText}}"
           ]
         },

@@ -283,22 +283,23 @@
       "preheader": "Os palpites publicados antes dos jogos de ontem, ganhos e perdidos.",
       "title": "O balanço de ontem",
       "counts": {
-        "won_one": "{n} ganho",
-        "won_many": "{n} ganhos",
-        "lost_one": "{n} perdido",
-        "lost_many": "{n} perdidos",
-        "void_one": "{n} anulado (jogo cancelado ou adiado)",
-        "void_many": "{n} anulados (jogos cancelados ou adiados)",
-        "pending_one": "{n} palpite ainda por resolver",
-        "pending_many": "{n} palpites ainda por resolver"
+        "won_one": "{n} ganha",
+        "won_many": "{n} ganhas",
+        "lost_one": "{n} perdida",
+        "lost_many": "{n} perdidas",
+        "void_one": "{n} anulada",
+        "void_many": "{n} anuladas",
+        "pending_one": "{n} à espera de resultado",
+        "pending_many": "{n} à espera de resultado"
       },
       "blocks": [
         {
           "type": "p",
-          "text": "Ontem, {{recapDate}}, eis o resultado dos palpites publicados pelo IASHARK antes do pontapé de saída:"
+          "text": "Ontem, {{recapDate}}{{#recapParisTime}} (hora de Paris){{/recapParisTime}}, eis o resultado dos palpites publicados pelo IASHARK antes do pontapé de saída:"
         },
         {
           "type": "list",
+          "if": "noRecapVoid",
           "items": [
             "{{recapWonText}}",
             "{{recapLostText}}"
@@ -308,6 +309,8 @@
           "type": "list",
           "if": "hasRecapVoid",
           "items": [
+            "{{recapWonText}}",
+            "{{recapLostText}}",
             "{{recapVoidText}}"
           ]
         },

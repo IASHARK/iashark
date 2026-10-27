@@ -283,22 +283,23 @@
       "preheader": "I pronostici pubblicati prima delle partite di ieri, vinti e persi.",
       "title": "Il bilancio di ieri",
       "counts": {
-        "won_one": "{n} vinto",
-        "won_many": "{n} vinti",
-        "lost_one": "{n} perso",
-        "lost_many": "{n} persi",
-        "void_one": "{n} annullato (partita annullata o rinviata)",
-        "void_many": "{n} annullati (partite annullate o rinviate)",
-        "pending_one": "{n} pronostico non ancora regolato",
-        "pending_many": "{n} pronostici non ancora regolati"
+        "won_one": "{n} vinta",
+        "won_many": "{n} vinte",
+        "lost_one": "{n} persa",
+        "lost_many": "{n} perse",
+        "void_one": "{n} annullata",
+        "void_many": "{n} annullate",
+        "pending_one": "{n} in attesa di risultato",
+        "pending_many": "{n} in attesa di risultato"
       },
       "blocks": [
         {
           "type": "p",
-          "text": "Ieri, {{recapDate}}, ecco come sono andati i pronostici pubblicati da IASHARK prima del calcio d'inizio:"
+          "text": "Ieri, {{recapDate}}{{#recapParisTime}} (ora di Parigi){{/recapParisTime}}, ecco come sono andati i pronostici pubblicati da IASHARK prima del calcio d'inizio:"
         },
         {
           "type": "list",
+          "if": "noRecapVoid",
           "items": [
             "{{recapWonText}}",
             "{{recapLostText}}"
@@ -308,6 +309,8 @@
           "type": "list",
           "if": "hasRecapVoid",
           "items": [
+            "{{recapWonText}}",
+            "{{recapLostText}}",
             "{{recapVoidText}}"
           ]
         },

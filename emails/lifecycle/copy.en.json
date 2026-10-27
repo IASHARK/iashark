@@ -287,18 +287,19 @@
         "won_many": "{n} won",
         "lost_one": "{n} lost",
         "lost_many": "{n} lost",
-        "void_one": "{n} void (match cancelled or postponed)",
-        "void_many": "{n} void (matches cancelled or postponed)",
-        "pending_one": "{n} pick not settled yet",
-        "pending_many": "{n} picks not settled yet"
+        "void_one": "{n} void",
+        "void_many": "{n} void",
+        "pending_one": "{n} awaiting result",
+        "pending_many": "{n} awaiting results"
       },
       "blocks": [
         {
           "type": "p",
-          "text": "Yesterday, {{recapDate}}, here is how the picks IASHARK published before kick-off ended:"
+          "text": "Yesterday, {{recapDate}}{{#recapParisTime}} (Paris time){{/recapParisTime}}, here is how the picks IASHARK published before kick-off ended:"
         },
         {
           "type": "list",
+          "if": "noRecapVoid",
           "items": [
             "{{recapWonText}}",
             "{{recapLostText}}"
@@ -308,6 +309,8 @@
           "type": "list",
           "if": "hasRecapVoid",
           "items": [
+            "{{recapWonText}}",
+            "{{recapLostText}}",
             "{{recapVoidText}}"
           ]
         },

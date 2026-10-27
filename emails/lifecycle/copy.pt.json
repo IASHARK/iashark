@@ -277,6 +277,67 @@
           "text": "Podes desativar este resumo em A minha conta, secção Notificações."
         }
       ]
+    },
+    "results_recap": {
+      "subject": "O balanço de ontem: {{recapWonText}}, {{recapLostText}}",
+      "preheader": "Os palpites publicados antes dos jogos de ontem, ganhos e perdidos.",
+      "title": "O balanço de ontem",
+      "counts": {
+        "won_one": "{n} ganho",
+        "won_many": "{n} ganhos",
+        "lost_one": "{n} perdido",
+        "lost_many": "{n} perdidos",
+        "void_one": "{n} anulado (jogo cancelado ou adiado)",
+        "void_many": "{n} anulados (jogos cancelados ou adiados)",
+        "pending_one": "{n} palpite ainda por resolver",
+        "pending_many": "{n} palpites ainda por resolver"
+      },
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Ontem, {{recapDate}}, eis o resultado dos palpites publicados pelo IASHARK antes do pontapé de saída:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "{{recapWonText}}",
+            "{{recapLostText}}"
+          ]
+        },
+        {
+          "type": "list",
+          "if": "hasRecapVoid",
+          "items": [
+            "{{recapVoidText}}"
+          ]
+        },
+        {
+          "type": "p",
+          "if": "hasRecapPending",
+          "text": "No momento deste email: {{recapPendingText}}."
+        },
+        {
+          "type": "p",
+          "text": "A tua conta gratuita abre-te todos os dias o jogo oferecido. Os palpites de todos os outros jogos do dia abrem-se com o Pro."
+        },
+        {
+          "type": "p",
+          "if": "hasTrialOffer",
+          "text": "Teste de {{trialDays}} dias na subscrição mensal: {{zeroPrice}} hoje. Primeira cobrança: {{proPrice}} a {{firstChargeDate}} se começares hoje, só se não cancelares antes. Cancelamento online na tua conta."
+        },
+        {
+          "type": "cta",
+          "if": "hasTrialOffer",
+          "label": "Experimentar {{trialDays}} dias: {{zeroPrice}} hoje",
+          "link": "trial"
+        },
+        {
+          "type": "cta",
+          "if": "noTrialOffer",
+          "label": "Ver os jogos do dia",
+          "link": "home"
+        }
+      ]
     }
   }
 }

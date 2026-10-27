@@ -24,6 +24,9 @@
 //                            (ne JAMAIS l'utiliser depuis un journal public)
 //   { test: { campaign, dir } }  UN seul e-mail « [TEST] » au premier compte administrateur
 //                            (users.role = 'admin'), sans reservation ni journal email_sends
+//   { sequence: true }       suite courte des comptes gratuits (J+1 match offert, J+3 bilan
+//                            d'hier + essai, J+6 offre Pro ; 1 e-mail / 3 jours au plus) :
+//                            NON activee par defaut ; exige la migration 0055 (p_sequence)
 //   { suivi: true }          suivi seul : ouvertures, clics, rebonds et plaintes relus chez
 //                            Brevo et notes dans email_sends ; aucun e-mail envoye
 //
@@ -65,7 +68,10 @@ export type CandidateRow = {
 };
 export type TestRecipient = { user_id: string; email: string };
 export type LifecycleStore = {
-  listCandidates: (args: { nowIso: string; limit: number }) => Promise<CandidateRow[]>;
+  listCandidates: (args: { nowIso: string; limit: number; sequence?: boolean }) => Promise<CandidateRow[]>;
+  // Bilan d'hier (results_recap) : lignes de public.predictions_archive dont le coup d'envoi
+  // tombe dans [fromIso, toIso). Absent = pas de bilan (aucun e-mail results_recap).
+  yesterdayResults?: (args: { fromIso: string; toIso: string }) => Promise<ArchiveRow[]>;
   reserveSend: (args: { userId: string; campaign: string; key: string; market: string }) => Promise<number | null>;
   completeSend: (args: { id: number; status: "sent" | "failed"; messageId?: string | null; error?: string | null }) => Promise<void>;
   // Comptes administrateurs (users.role = 'admin') : destinataires de l'envoi de test.
@@ -75,6 +81,7 @@ export type LifecycleStore = {
   recentSends?: (args: { sinceIso: string }) => Promise<SentRow[]>;
   recordEvent?: (args: { messageId: string; event: TrackedEvent; at: string }) => Promise<boolean>;
 };
+export type ArchiveRow = { result: string | null; published_at: string | null; kickoff_at: string | null; type?: string | null };
 export type TrackedEvent = "opened" | "clicked" | "bounced" | "complained";
 export type SentRow = { message_id: string | null; opened_at: string | null; clicked_at: string | null; status: string | null };
 export type HandlerDeps = {
@@ -101,7 +108,7 @@ const TRACKING_MAX_PAGES = 5;
 export const TRIAL_DAYS_DEFAULT = 7;
 // E-mails qui peuvent annoncer l'essai Pro. La bienvenue (27/10/2026) l'annonce seulement
 // aux comptes qui ont accepte nos e-mails (lib/lifecycle-email.js#hasTrialOffer).
-const SALES_CAMPAIGNS = ["welcome", "free_match", "pro_features", "inactive_7d", "inactive_30d"];
+const SALES_CAMPAIGNS = ["welcome", "free_match", "pro_features", "inactive_7d", "inactive_30d", "results_recap"];
 const TAG = "[send-lifecycle-emails]";
 
 type Json = Record<string, unknown>;
@@ -312,6 +319,9 @@ export async function handleRequest(req: Request, deps: HandlerDeps): Promise<Re
     }
   }
   const testMode = body.test !== undefined && body.test !== false && body.test !== null;
+  // Suite courte des comptes gratuits : seulement si l'appelant la demande (workflow :
+  // variable EMAILS_SUITE_ACTIVE). Absente = regles d'avant (J2 match offert, J5 Pro).
+  const sequence = body.sequence === true;
   const dryRun = body.dryRun === true && !testMode;
   const details = body.details === true;
   const limit = body.limit === undefined ? 200 : Number(body.limit);
@@ -358,11 +368,30 @@ export async function handleRequest(req: Request, deps: HandlerDeps): Promise<Re
     if (publicMatches === undefined) publicMatches = await loadPublicMatches(deps);
     return publicMatches;
   };
+  // Bilan d'hier par jour du marche (une lecture de l'archive par jour et par passage).
+  const recaps = new Map<string, Promise<Json | null>>();
+  const recapFor = (ctx: { timeZone: string }): Promise<Json | null> => {
+    const w = Lifecycle.recapWindow(now, ctx) as { day: string; fromIso: string; toIso: string };
+    const store = deps.db as LifecycleStore;
+    if (typeof store.yesterdayResults !== "function") return Promise.resolve(null);
+    if (!recaps.has(w.fromIso)) {
+      recaps.set(w.fromIso, store.yesterdayResults({ fromIso: w.fromIso, toIso: w.toIso })
+        .then((rows) => Lifecycle.recapFromRows(rows, w.day) as Json)
+        .catch((err) => { deps.log.error(TAG + " archive illisible : " + errorText(err)); return null; }));
+    }
+    return recaps.get(w.fromIso) as Promise<Json | null>;
+  };
   // Contenu public d'une campagne ; null = rien a envoyer (raison donnee).
   const contentFor = async (campaign: string, dir: string, optIn: boolean, trial: number): Promise<{ data: Json } | { reason: string }> => {
     const ctx = Lifecycle.siteContext(BUNDLE.markets, dir);
     const need = Lifecycle.CAMPAIGNS[campaign].needs;
     const data: Json = { marketingOptIn: optIn, freeMatch: null, weekendMatches: [], trialDays: trial };
+    if (need === "results") {
+      const bilan = await recapFor(ctx);
+      if (!bilan) return { reason: "results_unavailable" };
+      if (!Lifecycle.recapReady(bilan)) return { reason: "results_not_settled" };
+      data.bilan = bilan;
+    }
     if (campaign === "welcome" || need === "free_match" || need === "weekend_matches") {
       const list = await matches();
       if (!list && need) return { reason: "public_data_unavailable" };
@@ -429,7 +458,7 @@ export async function handleRequest(req: Request, deps: HandlerDeps): Promise<Re
   // ------------------------------------------------ passage normal / essai a blanc
   let rows: CandidateRow[];
   try {
-    rows = await (deps.db as LifecycleStore).listCandidates({ nowIso: now.toISOString(), limit });
+    rows = await (deps.db as LifecycleStore).listCandidates(sequence ? { nowIso: now.toISOString(), limit, sequence: true } : { nowIso: now.toISOString(), limit });
   } catch (err) {
     deps.log.error(TAG + " lecture des destinataires impossible : " + errorText(err));
     return json(500, { ok: false, error: "db_unavailable" });
@@ -447,7 +476,7 @@ export async function handleRequest(req: Request, deps: HandlerDeps): Promise<Re
     const row = rows[n];
     const campaign = String(row.campaign || "");
     const key = String(row.campaign_key || "");
-    const decision = Lifecycle.decideCampaign(Lifecycle.factsFromRow(row), now);
+    const decision = Lifecycle.decideCampaign(Lifecycle.factsFromRow(row), now, { sequence });
     if (decision.campaign !== campaign || decision.key !== key) {
       if (decision.campaign) deps.log.warn(TAG + " regles SQL/JS divergentes (" + campaign + " vs " + decision.campaign + ") : envoi ignore.");
       skip(n, campaign, decision.campaign ? "rule_mismatch" : (decision.reason || "rule_mismatch"));
@@ -532,7 +561,7 @@ export async function handleRequest(req: Request, deps: HandlerDeps): Promise<Re
     byCampaign[c][label] = (byCampaign[c][label] || 0) + 1;
   }
   deps.log.info(TAG + " execution " + now.toISOString() + (dryRun ? " (dryRun)" : "") + " : " + JSON.stringify(summary));
-  const out: Json = { ok: summary.failed === 0, processed: true, dryRun, provider: provider ? provider.name : null, ...summary, byCampaign, results };
+  const out: Json = { ok: summary.failed === 0, processed: true, dryRun, sequence, provider: provider ? provider.name : null, ...summary, byCampaign, results };
   // Passage reel : le suivi des ouvertures et clics suit l'envoi (jamais en essai a blanc,
   // qui n'ecrit rien). Une panne du suivi ne change pas le resultat de l'envoi.
   if (!dryRun) out.suivi = await syncBrevoEvents(deps, provider, now);

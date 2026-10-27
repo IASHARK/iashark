@@ -966,7 +966,10 @@ const require = function () { return Render; };
     pro_features: { marketing: true, needs: "pro_price" },
     inactive_7d: { marketing: true, needs: "weekend_matches" },
     inactive_30d: { marketing: true, needs: null },
-    pro_weekly_summary: { marketing: true, needs: "weekend_matches" }
+    pro_weekly_summary: { marketing: true, needs: "weekend_matches" },
+    // Suite courte des comptes gratuits (27/10/2026, NON activee par defaut) : le bilan
+    // d'hier (gagnes ET perdus, archive predictions_archive, aucun pourcentage) + l'essai.
+    results_recap: { marketing: true, needs: "results" }
   };
 
   var RULES = {
@@ -978,7 +981,15 @@ const require = function () { return Render; };
     freeMatchFromDays: 2, freeMatchUntilDays: 14,
     proFeaturesFromDays: 5, proFeaturesUntilDays: 21,
     inactive7Days: 7, inactive30Days: 30,
-    weekendDows: [4, 5, 6]       // jeudi, vendredi, samedi (ISO)
+    weekendDows: [4, 5, 6],      // jeudi, vendredi, samedi (ISO)
+    // Suite courte des comptes gratuits (options.sequence, 27/10/2026) : J+1 match offert,
+    // J+3 bilan d'hier + essai, J+6 offre Pro. La frequence max ci-dessus (1 e-mail
+    // marketing / 3 jours, promise par la case d'inscription du 15/09/2026) reste la regle :
+    // en pratique J+1, J+4, J+7. Fenetres = age du compte en jours [debut, fin).
+    sequence: { freeMatch: [1, 3], resultsRecap: [3, 8], proFeatures: [6, 12] },
+    // Bilan d'hier : envoye seulement quand l'archive l'a regle (au moins un gagne ou un
+    // perdu, et au plus 1 pari sur 5 encore en attente) ; sinon l'heure suivante.
+    recapMaxPendingShare: 0.2
   };
 
   var TOKEN_VERSION = "v1";
@@ -1130,8 +1141,12 @@ const require = function () { return Render; };
     };
   }
 
-  function decideCampaign(facts, now) {
+  // options.sequence (27/10/2026) : suite courte des comptes gratuits (RULES.sequence) au lieu
+  // de J2 match offert / J5 Pro. Miroir de lifecycle_email_candidates(p_sequence => true)
+  // (supabase/migrations/0055_email_suite_gratuite.sql, NON appliquee).
+  function decideCampaign(facts, now, options) {
     var n = toDate(now) || fail("invalid_now", "now obligatoire");
+    var sequence = !!(options && options.sequence === true);
     var created = toDate(facts && facts.createdAt);
     if (!created) return { campaign: null, key: "", reason: "invalid_facts" };
     var sent = facts.sentKeys || [];
@@ -1160,8 +1175,16 @@ const require = function () { return Render; };
       }
       return out(null, "", "nothing_due");
     }
-    if (age >= RULES.freeMatchFromDays && age < RULES.freeMatchUntilDays && !has("free_match:")) return out("free_match", "");
-    if (age >= RULES.proFeaturesFromDays && age < RULES.proFeaturesUntilDays && !has("pro_features:")) return out("pro_features", "");
+    var S = RULES.sequence;
+    var within = function (w) { return age >= w[0] && age < w[1]; };
+    if (sequence) {
+      if (within(S.freeMatch) && !has("free_match:")) return out("free_match", "");
+      if (within(S.resultsRecap) && !has("results_recap:")) return out("results_recap", "");
+      if (within(S.proFeatures) && !has("pro_features:")) return out("pro_features", "");
+    } else {
+      if (age >= RULES.freeMatchFromDays && age < RULES.freeMatchUntilDays && !has("free_match:")) return out("free_match", "");
+      if (age >= RULES.proFeaturesFromDays && age < RULES.proFeaturesUntilDays && !has("pro_features:")) return out("pro_features", "");
+    }
     var inactive = daysBetween(n, activity);
     var episode = activity.toISOString().slice(0, 10);
     if (inactive >= RULES.inactive30Days && inactive < RULES.stopAfterInactiveDays && !has("inactive_30d:" + episode)) return out("inactive_30d", episode);
@@ -1268,6 +1291,45 @@ const require = function () { return Render; };
       .map(function (m) { return publicMatch(m, ctx); })
       .filter(Boolean)
       .slice(0, max || 8);
+  }
+
+  // ------------------------------------------------- bilan d'hier (archive)
+
+  // Minuit local d'un jour AAAA-MM-JJ dans un fuseau -> Date (UTC).
+  function zonedMidnight(ymd, timeZone) {
+    var p = String(ymd).split("-").map(Number);
+    var guess = Date.UTC(p[0], p[1] - 1, p[2], 0, 0);
+    var first = guess - offsetAt(guess, timeZone);
+    return new Date(guess - offsetAt(first, timeZone));
+  }
+  // « Hier » du destinataire (calendrier du marche) : jour et bornes UTC des coups d'envoi.
+  function recapWindow(now, ctx) {
+    var today = localClock(now, ctx.timeZone).date;
+    var day = addDays(today, -1);
+    return { day: day, fromIso: zonedMidnight(day, ctx.timeZone).toISOString(), toIso: zonedMidnight(today, ctx.timeZone).toISOString() };
+  }
+  // Lignes de public.predictions_archive dont le coup d'envoi tombe ce jour-la -> bilan.
+  // Seuls comptent les paris simples publies AVANT le coup d'envoi (published_at <
+  // kickoff_at, heure posee par la base : migration 0035). Gagnes ET perdus, jamais de
+  // pourcentage ; annules et pas encore regles dits a part.
+  function recapFromRows(rows, day) {
+    var r = { day: day, won: 0, lost: 0, voided: 0, pending: 0, total: 0 };
+    (Array.isArray(rows) ? rows : []).forEach(function (x) {
+      if (!x || (x.type && x.type !== "single")) return;
+      var pub = toDate(x.published_at), ko = toDate(x.kickoff_at);
+      if (!pub || !ko || pub.getTime() >= ko.getTime()) return;
+      var res = String(x.result || "");
+      if (res === "win") r.won++;
+      else if (res === "loss") r.lost++;
+      else if (res === "void") r.voided++;
+      else if (res === "scheduled" || res === "pending") r.pending++;
+      else return; // neutral, no_signal : aucun pari publie
+      r.total++;
+    });
+    return r;
+  }
+  function recapReady(r) {
+    return !!r && (r.won + r.lost) >= 1 && r.pending <= Math.floor(r.total * RULES.recapMaxPendingShare);
   }
 
   // ------------------------------------------------------------ desinscription
@@ -1472,6 +1534,13 @@ const require = function () { return Render; };
   // bundle = { layout: {html, text}, copy: {<locale>: {...}}, markets: config/markets.json }
   // data   = { freeMatch, weekendMatches, marketingOptIn, trialDays }
   // options = { company, unsubscribeUrl, now }
+  // « 5 gagnés », « 1 gagné », « 0 perdu » (francais : singulier jusqu'a 1).
+  function countText(counts, key, n, locale) {
+    if (!counts || typeof n !== "number" || !isFinite(n)) return null;
+    var one = n === 1 || (String(locale).split("-")[0] === "fr" && n === 0);
+    var tpl = counts[key + (one ? "_one" : "_many")];
+    return typeof tpl === "string" ? tpl.replace("{n}", String(n)) : null;
+  }
   function trialDaysOf(data, ctx) {
     var n = data && typeof data.trialDays === "number" && isFinite(data.trialDays) ? Math.round(data.trialDays) : 0;
     return n > 0 && ctx && ctx.proPriceMinor != null ? n : 0;
@@ -1491,6 +1560,7 @@ const require = function () { return Render; };
     var need = CAMPAIGNS[campaign].needs;
     if (need === "free_match" && !data.freeMatch) fail("missing_free_match", "Aucun match offert publie");
     if (need === "weekend_matches" && !(data.weekendMatches && data.weekendMatches.length)) fail("missing_weekend_matches", "Aucun match du week-end publie");
+    if (need === "results" && !recapReady(data.bilan)) fail("missing_results", "Bilan d'hier absent ou pas encore regle");
     // Prix Pro : le mensuel toujours ; textes prevus pour semaine + mois (+ an)
     // ou pour le mois seul (us : offre USD de /en/, config/markets.json
     // #_usdSwitch). Mois + an sans semaine : aucun texte, jamais un prix invente.
@@ -1529,6 +1599,14 @@ const require = function () { return Render; };
       hasTrialOffer: trialDaysOf(data, ctx) > 0 && data.marketingOptIn === true && !!firstChargeDate(options.now, trialDaysOf(data, ctx), ctx),
       noTrialOffer: !(trialDaysOf(data, ctx) > 0 && data.marketingOptIn === true && !!firstChargeDate(options.now, trialDaysOf(data, ctx), ctx)),
       noTickets: ctx.market !== "fr",
+      // Bilan d'hier (results_recap) : nombres seulement, accordes dans la langue (copy.counts).
+      recapDate: data.bilan && data.bilan.day ? new Intl.DateTimeFormat(ctx.intlLocale, { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(data.bilan.day + "T12:00:00Z")) : null,
+      recapWonText: countText(c.counts, "won", data.bilan && data.bilan.won, ctx.locale),
+      recapLostText: countText(c.counts, "lost", data.bilan && data.bilan.lost, ctx.locale),
+      recapVoidText: countText(c.counts, "void", data.bilan && data.bilan.voided, ctx.locale),
+      recapPendingText: countText(c.counts, "pending", data.bilan && data.bilan.pending, ctx.locale),
+      hasRecapVoid: !!(data.bilan && data.bilan.voided > 0),
+      hasRecapPending: !!(data.bilan && data.bilan.pending > 0),
       // Petit et Grand combine, Selection en or, buteur du jour : vendus sur le
       // marche francais seulement (lib/pro-vente.js#conditions, cotes d'operateurs
       // agrees en France).
@@ -1618,6 +1696,10 @@ const require = function () { return Render; };
     findForbiddenWords: findForbiddenWords,
     renderLifecycleEmail: renderLifecycleEmail,
     withUtm: withUtm,
+    zonedMidnight: zonedMidnight,
+    recapWindow: recapWindow,
+    recapFromRows: recapFromRows,
+    recapReady: recapReady,
     firstChargeDate: firstChargeDate,
     zeroPrice: zeroPrice
   };
@@ -1910,6 +1992,67 @@ export const BUNDLE = {
               "text": "Tu peux désactiver ce résumé dans Mon compte, rubrique Notifications."
             }
           ]
+        },
+        "results_recap": {
+          "subject": "Le bilan d'hier : {{recapWonText}}, {{recapLostText}}",
+          "preheader": "Les paris publiés avant les matchs d'hier, gagnés et perdus.",
+          "title": "Le bilan d'hier",
+          "counts": {
+            "won_one": "{n} gagné",
+            "won_many": "{n} gagnés",
+            "lost_one": "{n} perdu",
+            "lost_many": "{n} perdus",
+            "void_one": "{n} annulé (match annulé ou reporté)",
+            "void_many": "{n} annulés (matchs annulés ou reportés)",
+            "pending_one": "{n} pari pas encore réglé",
+            "pending_many": "{n} paris pas encore réglés"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Hier, {{recapDate}}, voici le résultat des paris publiés par IASHARK avant le coup d'envoi :"
+            },
+            {
+              "type": "list",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasRecapVoid",
+              "items": [
+                "{{recapVoidText}}"
+              ]
+            },
+            {
+              "type": "p",
+              "if": "hasRecapPending",
+              "text": "Au moment de cet e-mail : {{recapPendingText}}."
+            },
+            {
+              "type": "p",
+              "text": "Ton compte gratuit t'ouvre chaque jour le match offert. Les paris de tous les autres matchs du jour s'ouvrent avec Pro."
+            },
+            {
+              "type": "p",
+              "if": "hasTrialOffer",
+              "text": "Essai de {{trialDays}} jours sur l'abonnement au mois : {{zeroPrice}} aujourd'hui. Premier prélèvement : {{proPrice}} le {{firstChargeDate}} si tu commences aujourd'hui, seulement si tu ne résilies pas avant. Résiliation en ligne depuis Mon compte."
+            },
+            {
+              "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "Essayer {{trialDays}} jours : {{zeroPrice}} aujourd'hui",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
+              "label": "Voir les matchs du jour",
+              "link": "home"
+            }
+          ]
         }
       }
     },
@@ -2190,6 +2333,67 @@ export const BUNDLE = {
             {
               "type": "p",
               "text": "You can turn off this summary in My account, under Notifications."
+            }
+          ]
+        },
+        "results_recap": {
+          "subject": "Yesterday's results: {{recapWonText}}, {{recapLostText}}",
+          "preheader": "The picks published before yesterday's matches, won and lost.",
+          "title": "Yesterday's results",
+          "counts": {
+            "won_one": "{n} won",
+            "won_many": "{n} won",
+            "lost_one": "{n} lost",
+            "lost_many": "{n} lost",
+            "void_one": "{n} void (match cancelled or postponed)",
+            "void_many": "{n} void (matches cancelled or postponed)",
+            "pending_one": "{n} pick not settled yet",
+            "pending_many": "{n} picks not settled yet"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Yesterday, {{recapDate}}, here is how the picks IASHARK published before kick-off ended:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasRecapVoid",
+              "items": [
+                "{{recapVoidText}}"
+              ]
+            },
+            {
+              "type": "p",
+              "if": "hasRecapPending",
+              "text": "At the time of this email: {{recapPendingText}}."
+            },
+            {
+              "type": "p",
+              "text": "Your free account opens the free match every day. The picks for every other match of the day open with Pro."
+            },
+            {
+              "type": "p",
+              "if": "hasTrialOffer",
+              "text": "{{trialDays}}-day trial on the monthly subscription: {{zeroPrice}} today. First charge: {{proPrice}} on {{firstChargeDate}} if you start today, only if you don't cancel before then. Cancel online from your account."
+            },
+            {
+              "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "Try {{trialDays}} days: {{zeroPrice}} today",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
+              "label": "See today's matches",
+              "link": "home"
             }
           ]
         }
@@ -2474,6 +2678,67 @@ export const BUNDLE = {
               "text": "Puedes desactivar este resumen en Mi cuenta, apartado Notificaciones."
             }
           ]
+        },
+        "results_recap": {
+          "subject": "El balance de ayer: {{recapWonText}}, {{recapLostText}}",
+          "preheader": "Los pronósticos publicados antes de los partidos de ayer, ganados y perdidos.",
+          "title": "El balance de ayer",
+          "counts": {
+            "won_one": "{n} ganado",
+            "won_many": "{n} ganados",
+            "lost_one": "{n} perdido",
+            "lost_many": "{n} perdidos",
+            "void_one": "{n} anulado (partido cancelado o aplazado)",
+            "void_many": "{n} anulados (partidos cancelados o aplazados)",
+            "pending_one": "{n} pronóstico aún sin resolver",
+            "pending_many": "{n} pronósticos aún sin resolver"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Ayer, {{recapDate}}, este es el resultado de los pronósticos publicados por IASHARK antes del inicio:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasRecapVoid",
+              "items": [
+                "{{recapVoidText}}"
+              ]
+            },
+            {
+              "type": "p",
+              "if": "hasRecapPending",
+              "text": "En el momento de este correo: {{recapPendingText}}."
+            },
+            {
+              "type": "p",
+              "text": "Tu cuenta gratuita te abre cada día el partido gratis. Los pronósticos de todos los demás partidos del día se abren con Pro."
+            },
+            {
+              "type": "p",
+              "if": "hasTrialOffer",
+              "text": "Prueba de {{trialDays}} días en la suscripción mensual: {{zeroPrice}} hoy. Primer cobro: {{proPrice}} el {{firstChargeDate}} si empiezas hoy, solo si no cancelas antes. Cancelación en línea desde tu cuenta."
+            },
+            {
+              "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "Prueba {{trialDays}} días: {{zeroPrice}} hoy",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
+              "label": "Ver los partidos del día",
+              "link": "home"
+            }
+          ]
         }
       }
     },
@@ -2754,6 +3019,67 @@ export const BUNDLE = {
             {
               "type": "p",
               "text": "Puedes desactivar este resumen en Mi cuenta, sección Notificaciones."
+            }
+          ]
+        },
+        "results_recap": {
+          "subject": "El balance de ayer: {{recapWonText}}, {{recapLostText}}",
+          "preheader": "Los pronósticos publicados antes de los partidos de ayer, ganados y perdidos.",
+          "title": "El balance de ayer",
+          "counts": {
+            "won_one": "{n} ganado",
+            "won_many": "{n} ganados",
+            "lost_one": "{n} perdido",
+            "lost_many": "{n} perdidos",
+            "void_one": "{n} anulado (partido cancelado o pospuesto)",
+            "void_many": "{n} anulados (partidos cancelados o pospuestos)",
+            "pending_one": "{n} pronóstico aún sin resolver",
+            "pending_many": "{n} pronósticos aún sin resolver"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Ayer, {{recapDate}}, este es el resultado de los pronósticos publicados por IASHARK antes del silbatazo inicial:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasRecapVoid",
+              "items": [
+                "{{recapVoidText}}"
+              ]
+            },
+            {
+              "type": "p",
+              "if": "hasRecapPending",
+              "text": "Al momento de este correo: {{recapPendingText}}."
+            },
+            {
+              "type": "p",
+              "text": "Tu cuenta gratis te abre cada día el partido gratis. Los pronósticos de todos los demás partidos del día se abren con Pro."
+            },
+            {
+              "type": "p",
+              "if": "hasTrialOffer",
+              "text": "Prueba de {{trialDays}} días en la suscripción mensual: {{zeroPrice}} hoy. Primer cobro: {{proPrice}} el {{firstChargeDate}} si empiezas hoy, solo si no cancelas antes. Cancelación en línea desde tu cuenta."
+            },
+            {
+              "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "Prueba {{trialDays}} días: {{zeroPrice}} hoy",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
+              "label": "Ver los partidos del día",
+              "link": "home"
             }
           ]
         }
@@ -3038,6 +3364,67 @@ export const BUNDLE = {
               "text": "Du kannst diese Übersicht in Mein Konto unter Benachrichtigungen abschalten."
             }
           ]
+        },
+        "results_recap": {
+          "subject": "Die Bilanz von gestern: {{recapWonText}}, {{recapLostText}}",
+          "preheader": "Die vor den Spielen von gestern veröffentlichten Tipps, gewonnen und verloren.",
+          "title": "Die Bilanz von gestern",
+          "counts": {
+            "won_one": "{n} gewonnen",
+            "won_many": "{n} gewonnen",
+            "lost_one": "{n} verloren",
+            "lost_many": "{n} verloren",
+            "void_one": "{n} annulliert (Spiel abgesagt oder verlegt)",
+            "void_many": "{n} annulliert (Spiele abgesagt oder verlegt)",
+            "pending_one": "{n} Tipp noch nicht abgerechnet",
+            "pending_many": "{n} Tipps noch nicht abgerechnet"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Gestern, {{recapDate}}, so sind die Tipps ausgegangen, die IASHARK vor dem Anpfiff veröffentlicht hat:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasRecapVoid",
+              "items": [
+                "{{recapVoidText}}"
+              ]
+            },
+            {
+              "type": "p",
+              "if": "hasRecapPending",
+              "text": "Zum Zeitpunkt dieser E-Mail: {{recapPendingText}}."
+            },
+            {
+              "type": "p",
+              "text": "Dein kostenloses Konto öffnet dir jeden Tag das Gratisspiel. Die Tipps zu allen anderen Spielen des Tages öffnen sich mit Pro."
+            },
+            {
+              "type": "p",
+              "if": "hasTrialOffer",
+              "text": "{{trialDays}} Tage Testphase beim Monatsabo: heute {{zeroPrice}}. Erste Abbuchung: {{proPrice}} am {{firstChargeDate}}, wenn du heute startest, nur wenn du nicht vorher kündigst. Online in deinem Konto kündbar."
+            },
+            {
+              "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "{{trialDays}} Tage testen: heute {{zeroPrice}}",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
+              "label": "Spiele des Tages ansehen",
+              "link": "home"
+            }
+          ]
         }
       }
     },
@@ -3320,6 +3707,67 @@ export const BUNDLE = {
               "text": "Puoi disattivare questo riepilogo in Il mio account, sezione Notifiche."
             }
           ]
+        },
+        "results_recap": {
+          "subject": "Il bilancio di ieri: {{recapWonText}}, {{recapLostText}}",
+          "preheader": "I pronostici pubblicati prima delle partite di ieri, vinti e persi.",
+          "title": "Il bilancio di ieri",
+          "counts": {
+            "won_one": "{n} vinto",
+            "won_many": "{n} vinti",
+            "lost_one": "{n} perso",
+            "lost_many": "{n} persi",
+            "void_one": "{n} annullato (partita annullata o rinviata)",
+            "void_many": "{n} annullati (partite annullate o rinviate)",
+            "pending_one": "{n} pronostico non ancora regolato",
+            "pending_many": "{n} pronostici non ancora regolati"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Ieri, {{recapDate}}, ecco come sono andati i pronostici pubblicati da IASHARK prima del calcio d'inizio:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasRecapVoid",
+              "items": [
+                "{{recapVoidText}}"
+              ]
+            },
+            {
+              "type": "p",
+              "if": "hasRecapPending",
+              "text": "Al momento di questa email: {{recapPendingText}}."
+            },
+            {
+              "type": "p",
+              "text": "Il tuo account gratuito ti apre ogni giorno la partita gratuita. I pronostici di tutte le altre partite del giorno si aprono con Pro."
+            },
+            {
+              "type": "p",
+              "if": "hasTrialOffer",
+              "text": "Prova di {{trialDays}} giorni sull'abbonamento mensile: {{zeroPrice}} oggi. Primo addebito: {{proPrice}} il {{firstChargeDate}} se inizi oggi, solo se non disdici prima. Disdetta online dal tuo account."
+            },
+            {
+              "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "Prova {{trialDays}} giorni: {{zeroPrice}} oggi",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
+              "label": "Vedi le partite del giorno",
+              "link": "home"
+            }
+          ]
         }
       }
     },
@@ -3600,6 +4048,67 @@ export const BUNDLE = {
             {
               "type": "p",
               "text": "Podes desativar este resumo em A minha conta, secção Notificações."
+            }
+          ]
+        },
+        "results_recap": {
+          "subject": "O balanço de ontem: {{recapWonText}}, {{recapLostText}}",
+          "preheader": "Os palpites publicados antes dos jogos de ontem, ganhos e perdidos.",
+          "title": "O balanço de ontem",
+          "counts": {
+            "won_one": "{n} ganho",
+            "won_many": "{n} ganhos",
+            "lost_one": "{n} perdido",
+            "lost_many": "{n} perdidos",
+            "void_one": "{n} anulado (jogo cancelado ou adiado)",
+            "void_many": "{n} anulados (jogos cancelados ou adiados)",
+            "pending_one": "{n} palpite ainda por resolver",
+            "pending_many": "{n} palpites ainda por resolver"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Ontem, {{recapDate}}, eis o resultado dos palpites publicados pelo IASHARK antes do pontapé de saída:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "{{recapWonText}}",
+                "{{recapLostText}}"
+              ]
+            },
+            {
+              "type": "list",
+              "if": "hasRecapVoid",
+              "items": [
+                "{{recapVoidText}}"
+              ]
+            },
+            {
+              "type": "p",
+              "if": "hasRecapPending",
+              "text": "No momento deste email: {{recapPendingText}}."
+            },
+            {
+              "type": "p",
+              "text": "A tua conta gratuita abre-te todos os dias o jogo oferecido. Os palpites de todos os outros jogos do dia abrem-se com o Pro."
+            },
+            {
+              "type": "p",
+              "if": "hasTrialOffer",
+              "text": "Teste de {{trialDays}} dias na subscrição mensal: {{zeroPrice}} hoje. Primeira cobrança: {{proPrice}} a {{firstChargeDate}} se começares hoje, só se não cancelares antes. Cancelamento online na tua conta."
+            },
+            {
+              "type": "cta",
+              "if": "hasTrialOffer",
+              "label": "Experimentar {{trialDays}} dias: {{zeroPrice}} hoje",
+              "link": "trial"
+            },
+            {
+              "type": "cta",
+              "if": "noTrialOffer",
+              "label": "Ver os jogos do dia",
+              "link": "home"
             }
           ]
         }

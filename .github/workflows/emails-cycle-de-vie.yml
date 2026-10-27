@@ -16,6 +16,12 @@
 # Chaque passage reel relit aussi les ouvertures et clics des 7 derniers jours chez Brevo
 # (27/10/2026 : sans cela, 0 ouverture etait comptee). Nombres seulement dans le journal.
 #
+# Suite courte des comptes gratuits (27/10/2026 : J+1 match offert, J+3 bilan d'hier + essai,
+# J+6 offre Pro ; au plus 1 e-mail tous les 3 jours) : NON activee. Il faut d'abord appliquer
+# supabase/migrations/0055_email_suite_gratuite.sql, puis faire un essai (case « suite »), puis :
+#   Activer : gh variable set EMAILS_SUITE_ACTIVE --body true --repo IASHARK/iashark
+#   Couper  : gh variable set EMAILS_SUITE_ACTIVE --body false --repo IASHARK/iashark
+#
 # Le journal de ce workflow est PUBLIC (depot public) : nombres seulement, jamais une adresse.
 # Region fixe us-east-2 : Brevo n'accepte que les adresses IP autorisees par Clement (AWS Ohio),
 # comme relance-emails.yml.
@@ -36,6 +42,11 @@ on:
         default: essai
         type: choice
         options: [essai, installer, envoi, suivi]
+      suite:
+        description: "Avec la suite courte des comptes gratuits (exige la migration 0055)"
+        required: false
+        default: false
+        type: boolean
       confirmation:
         description: "Pour un envoi reel a la main : ENVOYER"
         required: false
@@ -115,13 +126,15 @@ jobs:
           EMAIL_INTERNAL_SECRET: ${{ secrets.EMAIL_INTERNAL_SECRET }}
           DRY: ${{ steps.choix.outputs.dry }}
           SUIVI: ${{ steps.choix.outputs.suivi }}
+          # Suite courte : variable du depot (passages planifies) ou case « suite » (a la main).
+          SUITE: ${{ (github.event_name == 'workflow_dispatch' && inputs.suite) || (github.event_name != 'workflow_dispatch' && vars.EMAILS_SUITE_ACTIVE == 'true') }}
         run: |
           KEY=$(printf %s "$KEY" | tr -d '\r\n ')
-          if [ "$SUIVI" = "true" ]; then corps='{"suivi":true}'; else corps=$(jq -nc --argjson d "$DRY" '{dryRun: $d}'); fi
+          if [ "$SUIVI" = "true" ]; then corps='{"suivi":true}'; else corps=$(jq -nc --argjson d "$DRY" --argjson s "$([ "$SUITE" = "true" ] && echo true || echo false)" '{dryRun: $d, sequence: $s}'); fi
           code=$(curl -sS -o reponse.json -w "%{http_code}" -X POST "https://$PROJECT_REF.supabase.co/functions/v1/send-lifecycle-emails" \
             -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H "x-internal-secret: $EMAIL_INTERNAL_SECRET" \
             -H "x-region: us-east-2" -H "Content-Type: application/json" --max-time 300 -d "$corps")
           echo "HTTP $code"
           # Nombres seulement (journal public) : jamais d'adresse, meme masquee.
-          jq '{ok, processed, reason, missing, dryRun, provider, checked, sent, notSent, skipped, failed, byCampaign, suivi}' reponse.json || echo "reponse illisible"
+          jq '{ok, processed, reason, missing, dryRun, sequence, provider, checked, sent, notSent, skipped, failed, byCampaign, suivi}' reponse.json || echo "reponse illisible"
           [ "$code" = "200" ]

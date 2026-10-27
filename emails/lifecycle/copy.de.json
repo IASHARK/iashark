@@ -277,6 +277,67 @@
           "text": "Du kannst diese Übersicht in Mein Konto unter Benachrichtigungen abschalten."
         }
       ]
+    },
+    "results_recap": {
+      "subject": "Die Bilanz von gestern: {{recapWonText}}, {{recapLostText}}",
+      "preheader": "Die vor den Spielen von gestern veröffentlichten Tipps, gewonnen und verloren.",
+      "title": "Die Bilanz von gestern",
+      "counts": {
+        "won_one": "{n} gewonnen",
+        "won_many": "{n} gewonnen",
+        "lost_one": "{n} verloren",
+        "lost_many": "{n} verloren",
+        "void_one": "{n} annulliert (Spiel abgesagt oder verlegt)",
+        "void_many": "{n} annulliert (Spiele abgesagt oder verlegt)",
+        "pending_one": "{n} Tipp noch nicht abgerechnet",
+        "pending_many": "{n} Tipps noch nicht abgerechnet"
+      },
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Gestern, {{recapDate}}, so sind die Tipps ausgegangen, die IASHARK vor dem Anpfiff veröffentlicht hat:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "{{recapWonText}}",
+            "{{recapLostText}}"
+          ]
+        },
+        {
+          "type": "list",
+          "if": "hasRecapVoid",
+          "items": [
+            "{{recapVoidText}}"
+          ]
+        },
+        {
+          "type": "p",
+          "if": "hasRecapPending",
+          "text": "Zum Zeitpunkt dieser E-Mail: {{recapPendingText}}."
+        },
+        {
+          "type": "p",
+          "text": "Dein kostenloses Konto öffnet dir jeden Tag das Gratisspiel. Die Tipps zu allen anderen Spielen des Tages öffnen sich mit Pro."
+        },
+        {
+          "type": "p",
+          "if": "hasTrialOffer",
+          "text": "{{trialDays}} Tage Testphase beim Monatsabo: heute {{zeroPrice}}. Erste Abbuchung: {{proPrice}} am {{firstChargeDate}}, wenn du heute startest, nur wenn du nicht vorher kündigst. Online in deinem Konto kündbar."
+        },
+        {
+          "type": "cta",
+          "if": "hasTrialOffer",
+          "label": "{{trialDays}} Tage testen: heute {{zeroPrice}}",
+          "link": "trial"
+        },
+        {
+          "type": "cta",
+          "if": "noTrialOffer",
+          "label": "Spiele des Tages ansehen",
+          "link": "home"
+        }
+      ]
     }
   }
 }

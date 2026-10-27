@@ -41,7 +41,9 @@ async function renderAll(extra) {
     const data = Object.assign({
       freeMatch: L.pickFreeMatch(RAW_MATCHES, NOW, ctx),
       weekendMatches: L.weekendMatches(RAW_MATCHES, NOW, ctx),
-      marketingOptIn: true
+      marketingOptIn: true,
+      // Bilan d'hier (results_recap, 27/10/2026) : nombres de l'archive, jamais une cote.
+      bilan: { day: "2026-09-16", won: 5, lost: 2, voided: 1, pending: 0, total: 8 }
     }, extra || {});
     const unsubscribeUrl = await unsubUrl(dir);
     for (const campaign of Object.keys(L.CAMPAIGNS)) {

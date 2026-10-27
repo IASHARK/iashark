@@ -41,8 +41,12 @@ const supabase = SUPA_URL && SERVICE_KEY
 
 const db: LifecycleStore | null = supabase
   ? {
-    async listCandidates({ nowIso, limit }) {
-      const { data, error } = await supabase.rpc("lifecycle_email_candidates", { p_now: nowIso, p_limit: limit });
+    async listCandidates({ nowIso, limit, sequence }) {
+      // p_sequence (suite courte des comptes gratuits) n'existe qu'apres la migration 0055 :
+      // il n'est envoye que si la suite est demandee, jamais sinon.
+      const args: Record<string, unknown> = { p_now: nowIso, p_limit: limit };
+      if (sequence === true) args.p_sequence = true;
+      const { data, error } = await supabase.rpc("lifecycle_email_candidates", args);
       if (error) throw new Error("lifecycle_email_candidates: " + error.message);
       const rows = data ?? [];
       // Langue du compte : user_preferences.language, la SEULE source (site, robot, e-mails).
@@ -62,6 +66,15 @@ const db: LifecycleStore | null = supabase
         for (const r of rows) (r as { ever_subscribed?: boolean | null }).ever_subscribed = deja ? deja.has(r.user_id) : null;
       }
       return rows;
+    },
+    // Bilan d'hier (e-mail results_recap) : paris archives dont le coup d'envoi tombe ce
+    // jour-la. Lecture seule ; le tri (publie avant le match, regle ou non) est fait par
+    // lib/lifecycle-email.js#recapFromRows.
+    async yesterdayResults({ fromIso, toIso }) {
+      const { data, error } = await supabase.from("predictions_archive").select("result,published_at,kickoff_at,type")
+        .gte("kickoff_at", fromIso).lt("kickoff_at", toIso).limit(2000);
+      if (error) throw new Error("predictions_archive: " + error.message);
+      return data ?? [];
     },
     // Envoi de test : comptes administrateurs seulement (users.role = 'admin').
     async listTestRecipients() {

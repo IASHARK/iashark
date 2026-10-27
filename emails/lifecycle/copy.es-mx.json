@@ -277,6 +277,67 @@
           "text": "Puedes desactivar este resumen en Mi cuenta, sección Notificaciones."
         }
       ]
+    },
+    "results_recap": {
+      "subject": "El balance de ayer: {{recapWonText}}, {{recapLostText}}",
+      "preheader": "Los pronósticos publicados antes de los partidos de ayer, ganados y perdidos.",
+      "title": "El balance de ayer",
+      "counts": {
+        "won_one": "{n} ganado",
+        "won_many": "{n} ganados",
+        "lost_one": "{n} perdido",
+        "lost_many": "{n} perdidos",
+        "void_one": "{n} anulado (partido cancelado o pospuesto)",
+        "void_many": "{n} anulados (partidos cancelados o pospuestos)",
+        "pending_one": "{n} pronóstico aún sin resolver",
+        "pending_many": "{n} pronósticos aún sin resolver"
+      },
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Ayer, {{recapDate}}, este es el resultado de los pronósticos publicados por IASHARK antes del silbatazo inicial:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "{{recapWonText}}",
+            "{{recapLostText}}"
+          ]
+        },
+        {
+          "type": "list",
+          "if": "hasRecapVoid",
+          "items": [
+            "{{recapVoidText}}"
+          ]
+        },
+        {
+          "type": "p",
+          "if": "hasRecapPending",
+          "text": "Al momento de este correo: {{recapPendingText}}."
+        },
+        {
+          "type": "p",
+          "text": "Tu cuenta gratis te abre cada día el partido gratis. Los pronósticos de todos los demás partidos del día se abren con Pro."
+        },
+        {
+          "type": "p",
+          "if": "hasTrialOffer",
+          "text": "Prueba de {{trialDays}} días en la suscripción mensual: {{zeroPrice}} hoy. Primer cobro: {{proPrice}} el {{firstChargeDate}} si empiezas hoy, solo si no cancelas antes. Cancelación en línea desde tu cuenta."
+        },
+        {
+          "type": "cta",
+          "if": "hasTrialOffer",
+          "label": "Prueba {{trialDays}} días: {{zeroPrice}} hoy",
+          "link": "trial"
+        },
+        {
+          "type": "cta",
+          "if": "noTrialOffer",
+          "label": "Ver los partidos del día",
+          "link": "home"
+        }
+      ]
     }
   }
 }

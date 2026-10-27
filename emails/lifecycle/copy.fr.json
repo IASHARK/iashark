@@ -277,6 +277,67 @@
           "text": "Tu peux désactiver ce résumé dans Mon compte, rubrique Notifications."
         }
       ]
+    },
+    "results_recap": {
+      "subject": "Le bilan d'hier : {{recapWonText}}, {{recapLostText}}",
+      "preheader": "Les paris publiés avant les matchs d'hier, gagnés et perdus.",
+      "title": "Le bilan d'hier",
+      "counts": {
+        "won_one": "{n} gagné",
+        "won_many": "{n} gagnés",
+        "lost_one": "{n} perdu",
+        "lost_many": "{n} perdus",
+        "void_one": "{n} annulé (match annulé ou reporté)",
+        "void_many": "{n} annulés (matchs annulés ou reportés)",
+        "pending_one": "{n} pari pas encore réglé",
+        "pending_many": "{n} paris pas encore réglés"
+      },
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Hier, {{recapDate}}, voici le résultat des paris publiés par IASHARK avant le coup d'envoi :"
+        },
+        {
+          "type": "list",
+          "items": [
+            "{{recapWonText}}",
+            "{{recapLostText}}"
+          ]
+        },
+        {
+          "type": "list",
+          "if": "hasRecapVoid",
+          "items": [
+            "{{recapVoidText}}"
+          ]
+        },
+        {
+          "type": "p",
+          "if": "hasRecapPending",
+          "text": "Au moment de cet e-mail : {{recapPendingText}}."
+        },
+        {
+          "type": "p",
+          "text": "Ton compte gratuit t'ouvre chaque jour le match offert. Les paris de tous les autres matchs du jour s'ouvrent avec Pro."
+        },
+        {
+          "type": "p",
+          "if": "hasTrialOffer",
+          "text": "Essai de {{trialDays}} jours sur l'abonnement au mois : {{zeroPrice}} aujourd'hui. Premier prélèvement : {{proPrice}} le {{firstChargeDate}} si tu commences aujourd'hui, seulement si tu ne résilies pas avant. Résiliation en ligne depuis Mon compte."
+        },
+        {
+          "type": "cta",
+          "if": "hasTrialOffer",
+          "label": "Essayer {{trialDays}} jours : {{zeroPrice}} aujourd'hui",
+          "link": "trial"
+        },
+        {
+          "type": "cta",
+          "if": "noTrialOffer",
+          "label": "Voir les matchs du jour",
+          "link": "home"
+        }
+      ]
     }
   }
 }

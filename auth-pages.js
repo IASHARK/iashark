@@ -224,6 +224,8 @@
       };
       fixer('eyebrow', t('auth.pay_step_eyebrow', 'Passer Pro'));
       fixer('h1', t('auth.pay_step_h1', 'Étape 1 sur 2 : ton compte.'));
+      // Le bouton mene au paiement : jamais « Voir mon pari offert » sur ce chemin (avocat du diable, 27/10/2026).
+      fixer('submit', t('auth.pay_step_submit', 'Créer mon compte et continuer'));
       fixer('intro', prix ? tf('auth.pay_step_intro', 'Ensuite : paiement {duree} ({prix}) par Stripe. Ta durée reste choisie.', vars)
         : tf('auth.pay_step_intro_noprice', 'Ensuite : le paiement {duree} par Stripe. Ta durée reste choisie.', vars));
       // Les avantages du compte gratuit (« aucune carte demandée »...) ne decrivent pas ce chemin.

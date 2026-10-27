@@ -756,7 +756,9 @@
     if ($('enregistrerNotifs')) $('enregistrerNotifs').addEventListener('click', enregistrerNotifications);
     if ($('emailMarketing')) $('emailMarketing').addEventListener('click', enregistrerEmailMarketing);
     if ($('offreCompte') && window.IasharkOffrePro) {
-      window.IasharkOffrePro.mount($('offreCompte'), { mode: 'paiement', contexte: 'general', connecte: true });
+      // Deja abonne une fois (une ligne dans subscriptions, quel que soit son statut) : pas d'essai pour lui
+      // (create-checkout-session/trial.ts), donc ni « 0 € aujourd'hui » ni date d'essai (avocat du diable, 27/10/2026).
+      window.IasharkOffrePro.mount($('offreCompte'), { mode: 'paiement', contexte: 'general', connecte: true, sansEssai: !!abo });
     }
     if ($('aujourdhui') && window.IasharkAujourdhui) window.IasharkAujourdhui.mount($('aujourdhui'), {});
     if ($('souscrire')) {

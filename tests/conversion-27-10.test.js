@@ -25,8 +25,9 @@ const MARDI = Date.parse("2026-10-27T10:00:00+01:00");
 test("C4 : bouton d'essai « 0 € aujourd'hui », premier prelevement date juste dessous, sans rappel promis", () => {
   const h = OP.html({ mode: "vitrine", contexte: "match", plans: PLANS, choisi: "month", jours: 7, connecte: false, uid: "c4", maintenant: MARDI });
   assert.match(h, /Essayer 7 jours : 0 € aujourd’hui/);
-  // Meme phrase que Mon compte (PR #222) : la date, puis le prix de chaque mois, la carte demandee.
-  assert.ok(h.includes("Premier prélèvement : 14,99 € le 3 novembre, puis 14,99 € chaque mois, seulement si tu ne résilies pas avant. Carte demandée ; résiliation en ligne depuis Mon compte."), h);
+  // Meme phrase que Mon compte (PR #222) : la date, puis le prix de chaque mois, la carte demandee ; essai reserve a un
+  // premier abonnement (avocat du diable, 27/10/2026 : un ancien abonne paie tout de suite).
+  assert.ok(h.includes("Premier prélèvement : 14,99 € le 3 novembre, puis 14,99 € chaque mois, seulement si tu ne résilies pas avant. Carte demandée ; résiliation en ligne depuis Mon compte. Essai réservé à un premier abonnement."), h);
   // La ligne d'essai suit le bouton, avant la facon de payer et les avantages.
   assert.ok(h.indexOf("op-cta") < h.indexOf("data-op-trial") && h.indexOf("data-op-trial") < h.indexOf("data-op-pay"));
   // Aucun rappel par e-mail : aucune tache planifiee ne l'envoie (trial-reminder / 0042 absents).
@@ -65,14 +66,32 @@ test("C4 : date dans le fuseau du visiteur, jamais avant le vrai prelevement Str
       assert.ok(jour(affiche + 7 * 86400000) <= jour(prelevement), tz + " " + h);
     }
   }
-  // Meme phrase que Mon compte (PR #222), prix du mois deux fois, dans les 7 langues.
-  for (const l of ["fr", "en", "es", "es-mx", "de", "it", "pt"]) {
+  // Meme phrase que Mon compte (PR #222), prix du mois deux fois, puis « essai reserve a un premier abonnement »,
+  // dans les 7 langues.
+  const PREMIER = { fr: "Essai réservé à un premier abonnement.", en: "Trial for a first subscription only.", es: "Prueba solo para una primera suscripción.",
+    "es-mx": "Prueba solo para una primera suscripción.", de: "Testphase nur beim ersten Abo.", it: "Prova riservata a un primo abbonamento.", pt: "Teste reservado a uma primeira subscrição." };
+  for (const l of Object.keys(PREMIER)) {
     const v = JSON.parse(read("i18n/dict/" + l + ".json")).offre_pro.trial_first_charge;
     assert.equal((v.match(/\{price\}/g) || []).length, 2, l);
     assert.match(v, /\{date\}/, l);
+    assert.ok(v.endsWith(" " + PREMIER[l]), l + " : essai reserve a un premier abonnement");
     assert.doesNotMatch(v, /rappel|reminder|recordatorio|Erinnerung|promemoria|lembrete/i, l);
   }
-  assert.equal(JSON.parse(read("i18n/dict/en.json")).offre_pro.trial_first_charge, "First charge: {price} on {date}, then {price} every month, only if you don’t cancel before then. Card required; cancel online from your account.");
+  assert.equal(JSON.parse(read("i18n/dict/en.json")).offre_pro.trial_first_charge, "First charge: {price} on {date}, then {price} every month, only if you don’t cancel before then. Card required; cancel online from your account. Trial for a first subscription only.");
+});
+
+test("C4 : un ancien abonne (Mon compte) ne voit jamais d'essai ni « 0 € aujourd'hui »", () => {
+  // Composant : sansEssai coupe l'essai annonce par la disponibilite du serveur.
+  const src = read("lib/offre-pro.js");
+  assert.match(src, /var jours = opts\.sansEssai \? 0 : essaiOuvert\(etat\.dispo\);/);
+  // Rendu sans essai (jours = 0) : ni bouton « 0 € aujourd'hui », ni date de premier prelevement d'essai.
+  const h = OP.html({ mode: "paiement", contexte: "general", plans: PLANS, choisi: "month", jours: 0, connecte: true, uid: "anc", maintenant: MARDI });
+  assert.doesNotMatch(h, /0 € aujourd’hui|Premier prélèvement|jours d’essai/);
+  assert.match(h, /Payer 14,99 €/);
+  // Mon compte : une ligne dans subscriptions (quel que soit son statut) = deja abonne une fois.
+  assert.match(read("account-page.js"), /window\.IasharkOffrePro\.mount\(\$\('offreCompte'\), \{ mode: 'paiement', contexte: 'general', connecte: true, sansEssai: !!abo \}\);/);
+  // Meme regle que le serveur : ancien abonne ou ancien essai, meme annule : pas d'essai.
+  assert.match(read("supabase/functions/create-checkout-session/trial.ts"), /ancien abonne ou ancien essai, meme\n\/\/   annule : paiement direct, sans essai/);
 });
 
 test("C1 : sortie gratuite sous le bouton d'essai, seulement avec un match offert du jour", () => {
@@ -115,6 +134,13 @@ test("C5 : inscription, ce qu'on recoit, tutoiement, retour sur le match offert"
   const js = read("auth-pages.js");
   assert.match(js, /F\.offertDuJour\(liste, null,/);
   assert.match(js, /if \(dest === localHref\('compte\.html'\) && offertDuJour\) dest = localHref\('match\.html\?id=' \+ offertDuJour\);/);
+  // Chemin du paiement (inscription?next=/abonnement.html?duree=...) : le bouton dit ou il mene (avocat du diable, 27/10/2026).
+  const etape = js.slice(js.indexOf("function etapePaiement()"), js.indexOf("if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', etapePaiement)"));
+  assert.match(etape, /fixer\('submit', t\('auth\.pay_step_submit', 'Créer mon compte et continuer'\)\);/);
+  assert.match(html, /<button type="submit" id="submit"[^>]*data-i18n="auth\.signup_submit"/, "le bouton est bien celui que fixer('submit') retrouve");
+  const CTA = { fr: "Créer mon compte et continuer", en: "Create my account and continue", es: "Crear mi cuenta y continuar", "es-mx": "Crear mi cuenta y continuar",
+    de: "Konto erstellen und weiter", it: "Crea il mio account e continua", pt: "Criar a minha conta e continuar" };
+  for (const l of Object.keys(CTA)) assert.equal(JSON.parse(read("i18n/dict/" + l + ".json")).auth.pay_step_submit, CTA[l], l);
 });
 
 test("C6 : un seul nombre de competitions sur l'accueil, celui de config/leagues.json", () => {

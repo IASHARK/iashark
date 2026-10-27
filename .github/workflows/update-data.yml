@@ -2652,11 +2652,24 @@ jobs:
                 var fichierHier=null; try{ fichierHier=JSON.parse(fs.readFileSync(RESULTS_DIR+'/'+HIER+'.json','utf8')); }catch(e){}
                 var registreOfferts=null; try{ registreOfferts=JSON.parse(fs.readFileSync('preuves/matchs-offerts.json','utf8')); }catch(e){}
                 var bilanPrecedent=null; try{ bilanPrecedent=JSON.parse(fs.readFileSync('preuves/bilan-hier.json','utf8')); }catch(e){}
+                // Paris simples de la veille (correction C2 du 27/10/2026, ligne « Hier, publies avant les matchs : X gagnes,
+                // Y perdus » pres des boutons de paiement) : MEME source que la bande des resultats (predictions_archive, paris
+                // simples publies avant le coup d'envoi). Fenetre large ; le jour de Paris est trie dans
+                // lib/bilan-hier.js#bilanParisSimples. Lecture impossible : null (le bilan deja calcule pour ce jour reste).
+                var parisSimplesHier=null;
+                if(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY){
+                  var entS={'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY};
+                  var debutS=encodeURIComponent(new Date(Date.parse(HIER+'T00:00:00Z')-86400000).toISOString());
+                  var finS=encodeURIComponent(new Date(Date.parse(HIER+'T00:00:00Z')+2*86400000).toISOString());
+                  var repS=await rawHttpGetJson(SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/predictions_archive?select=fixture_id,result,published_at,kickoff_at,type&type=eq.single&published_at=not.is.null&kickoff_at=gte.'+debutS+'&kickoff_at=lt.'+finS+'&limit=5000',entS);
+                  if(Array.isArray(repS)) parisSimplesHier=repS;
+                  else console.log('::warning title=Bilan hier::predictions_archive illisible : paris simples de la veille non recalcules.');
+                }
                 // Jamais un bilan du jour remplace par un plus pauvre (passage sans acces a la base) : fusion avec le precedent.
-                var bilanHier=BILAN_HIER.fusionnerAvecPrecedent(BILAN_HIER.construireBilan({jour:HIER,registre:registreOfferts,ticketOr:TICKET_OR_HIER,resultats:fichierHier,parisPublies:PARIS_PUBLIES_BILAN,genereLe:genere}),bilanPrecedent);
+                var bilanHier=BILAN_HIER.fusionnerAvecPrecedent(BILAN_HIER.construireBilan({jour:HIER,registre:registreOfferts,ticketOr:TICKET_OR_HIER,resultats:fichierHier,parisPublies:PARIS_PUBLIES_BILAN,genereLe:genere,parisSimples:parisSimplesHier}),bilanPrecedent);
                 if(!fs.existsSync('preuves')) fs.mkdirSync('preuves',{recursive:true});
                 fs.writeFileSync('preuves/bilan-hier.json',JSON.stringify(bilanHier,null,2));
-                console.log('  [bilan hier] '+HIER+' : pari offert '+(bilanHier.offert?bilanHier.offert.resultat:'aucun')+', Selection en or '+(bilanHier.selection_or?bilanHier.selection_or.gagnes+'/'+bilanHier.selection_or.regles:'aucune ('+(bilanHier.selection_or_absente||'?')+')')+'.');
+                console.log('  [bilan hier] '+HIER+' : pari offert '+(bilanHier.offert?bilanHier.offert.resultat:'aucun')+', Selection en or '+(bilanHier.selection_or?bilanHier.selection_or.gagnes+'/'+bilanHier.selection_or.regles:'aucune ('+(bilanHier.selection_or_absente||'?')+')')+(bilanHier.paris_simples?', paris simples '+bilanHier.paris_simples.gagnes+' gagnes / '+bilanHier.paris_simples.perdus+' perdus / '+bilanHier.paris_simples.en_attente+' en attente':'')+'.');
               }catch(e){ console.log('::warning title=Bilan hier::preuves/bilan-hier.json non ecrit ('+(e&&e.message)+').'); }
               // BANDEAU DES VRAIS RESULTATS (demande de Clement du 26/10/2026) : les 40 derniers paris regles de
               // predictions_archive, publies avant le coup d'envoi, dans l'ordre (aucun tri par resultat), + Petit / Grand

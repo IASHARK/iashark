@@ -53,3 +53,9 @@
 .op-sortie b{color:var(--op-cyan);font-weight:700}
 .op-sortie:hover{border-color:var(--op-cyan)}
 .op-sortie:focus-visible{outline:2px solid var(--op-cyan);outline-offset:2px}
+/* Preuve de la veille (correction C2 du 27/10/2026) : une ligne sous le bouton, gagnes ET perdus,
+   chiffres en blanc, aucune couleur de resultat (ni vert ni rouge). */
+.op-preuve{display:flex;align-items:baseline;gap:8px;margin:-2px 0 0;color:var(--op-soft);font-size:13.5px;line-height:1.45}
+.op-preuve[hidden]{display:none}
+.op-preuve b{color:var(--op-text);font-weight:700;white-space:nowrap}
+.op-preuve-pt{flex:none;width:7px;height:7px;border-radius:50%;background:var(--op-cyan);transform:translateY(-1px)}

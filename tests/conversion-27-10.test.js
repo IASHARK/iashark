@@ -197,3 +197,61 @@ test("C3 : plus aucune phrase « sans les cotes » ; la phrase vraie sur l'accue
   assert.match(read("fr/index.html"), /on la compare à la probabilité des cotes, marge retirée, et on garde le chiffre le plus prudent\. Le pari retenu suit une règle fixe/);
   assert.match(read("fr/index.html"), /Buts attendus et probabilité de chaque score, puis de chaque marché, comparée aux cotes du marché, marge retirée\./);
 });
+
+// ---------------------------------------------------------------------------------------------
+// C2 : « Hier, publies avant les matchs : X gagnes, Y perdus. » pres des boutons de paiement.
+const BH = require("../lib/bilan-hier.js");
+const ligne = (fid, result, pub, ko, type) => ({ fixture_id: fid, result, published_at: pub, kickoff_at: ko, type: type === undefined ? "single" : type });
+
+test("C2 : bilan des paris simples de la veille, calcule une fois (lib/bilan-hier.js), meme source que la bande", () => {
+  const J = "2026-10-26";
+  const lignes = [
+    ligne(1, "win", "2026-10-25T05:00:00Z", "2026-10-26T18:00:00Z"),
+    ligne(2, "loss", "2026-10-26T05:00:00Z", "2026-10-26T22:30:00Z"), // 23 h 30 a Paris : la veille
+    ligne(3, "win", "2026-10-26T19:00:00Z", "2026-10-26T18:00:00Z"), // publie APRES le coup d'envoi : jamais compte
+    ligne(4, "scheduled", "2026-10-26T05:00:00Z", "2026-10-26T20:00:00Z"), // pas encore regle : dit a part
+    ligne(5, "void", "2026-10-26T05:00:00Z", "2026-10-26T16:00:00Z"),
+    ligne(6, "win", "2026-10-26T05:00:00Z", "2026-10-26T23:30:00Z"), // 00 h 30 a Paris : le lendemain
+    ligne(7, "loss", "2026-10-26T05:00:00Z", "2026-10-26T15:00:00Z", "x5"), // jambe d'un combine : pas un pari simple
+    ligne(8, "no_signal", "2026-10-26T05:00:00Z", "2026-10-26T15:00:00Z"),
+    ligne(1, "win", "2026-10-25T05:00:00Z", "2026-10-26T18:00:00Z"), // doublon
+  ];
+  const b = BH.bilanParisSimples(lignes, J);
+  assert.deepEqual({ g: b.gagnes, p: b.perdus, a: b.annules, e: b.en_attente }, { g: 1, p: 1, a: 1, e: 1 });
+  assert.equal(BH.bilanParisSimples(null, J), null, "archive illisible : rien d'invente");
+  const bilan = BH.construireBilan({ jour: J, registre: null, ticketOr: null, resultats: null, parisPublies: {}, parisSimples: lignes });
+  assert.equal(bilan.paris_simples.gagnes, 1);
+  // Un passage sans acces a l'archive ne remplace pas le bilan deja calcule pour ce jour.
+  const pauvre = BH.construireBilan({ jour: J, registre: null, ticketOr: null, resultats: null, parisPublies: {}, parisSimples: null });
+  assert.equal(BH.fusionnerAvecPrecedent(pauvre, bilan).paris_simples.gagnes, 1);
+  // Le calcul quotidien lit predictions_archive (paris simples publies) et passe les lignes au bilan.
+  const wf = read(".github/workflows/update-data.yml");
+  assert.match(wf, /predictions_archive\?select=fixture_id,result,published_at,kickoff_at,type&type=eq\.single&published_at=not\.is\.null/);
+  assert.match(wf, /BILAN_HIER\.construireBilan\(\{jour:HIER,[^}]*parisSimples:parisSimplesHier\}\)/);
+});
+
+test("C2 : la ligne « Hier » : veille a Paris et pour le visiteur, gagnes ET perdus, sans pourcentage ni lien", () => {
+  const MARDI_MATIN = Date.parse("2026-10-27T10:00:00+01:00");
+  const b = (g, p, e, jour) => ({ jour: jour || "2026-10-26", paris_simples: { jour: jour || "2026-10-26", gagnes: g, perdus: p, annules: 0, en_attente: e || 0 } });
+  assert.equal(OP.lignePreuve(b(7, 3), MARDI_MATIN), "Hier, publiés avant les matchs : <b>7 gagnés</b>, <b>3 perdus</b>.");
+  assert.equal(OP.lignePreuve(b(1, 0), MARDI_MATIN), "Hier, publiés avant les matchs : <b>1 gagné</b>, <b>0 perdu</b>.");
+  assert.equal(OP.lignePreuve(b(67, 32, 1), MARDI_MATIN), "Hier, publiés avant les matchs : <b>67 gagnés</b>, <b>32 perdus</b>, <b>1 en attente de résultat</b>.");
+  assert.equal(OP.lignePreuve(b(0, 0, 3), MARDI_MATIN), "", "aucun resultat : rien");
+  assert.equal(OP.lignePreuve(b(7, 3, 0, "2026-10-25"), MARDI_MATIN), "", "vieux bilan : rien");
+  assert.equal(OP.lignePreuve({ jour: "2026-10-26", offert: null }, MARDI_MATIN), "", "donnee absente : rien");
+  assert.equal(OP.lignePreuve(null, MARDI_MATIN), "");
+  // Rendu dans le composant : sous le bouton, jamais de % ni de lien, place cachee tant que rien n'est lu.
+  const h = OP.html({ mode: "vitrine", contexte: "general", plans: PLANS, choisi: "month", jours: 7, connecte: false, uid: "c2", preuve: OP.lignePreuve(b(7, 3), MARDI_MATIN), maintenant: MARDI_MATIN });
+  const p = h.slice(h.indexOf('class="op-preuve"'), h.indexOf("</p>", h.indexOf('class="op-preuve"')));
+  assert.ok(h.indexOf("op-cta") < h.indexOf('class="op-preuve"'));
+  assert.doesNotMatch(p, /%|<a |href|vert|rouge|green|red/);
+  assert.match(OP.html({ mode: "vitrine", contexte: "general", plans: PLANS, choisi: "month", jours: 7, connecte: false, uid: "c2b" }), /data-op-preuve hidden>/);
+  // Lu une fois par page dans le fichier du calcul quotidien (jamais recalcule ici).
+  const src = read("lib/offre-pro.js");
+  assert.match(src, /G\.fetch\("\/preuves\/bilan-hier\.json", \{ cache: "no-cache" \}\)/);
+  for (const l of LOCALES) {
+    const d = JSON.parse(read("i18n/dict/" + l + ".json")).preuve_simples;
+    for (const k of ["line", "line_pending", "won_one", "won_other", "lost_one", "lost_other", "pending_one", "pending_other"]) assert.ok(d && d[k], l + " " + k);
+    assert.doesNotMatch(JSON.stringify(d), /%|garanti|gain|esp[ée]rance/i, l);
+  }
+});

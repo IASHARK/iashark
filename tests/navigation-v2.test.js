@@ -12,17 +12,20 @@ test("les pages principales partagent la navigation produit à quatre entrées",
     assert.doesNotMatch(nav,/Marchés/i,file);
   }
 });
-test("le bandeau d’accueil expose exactement les 19 compétitions couvertes deux fois",()=>{
+test("le bandeau d’accueil : 19 logos de compétitions couvertes, deux fois, aucune compétition retirée",()=>{
   const html=fs.readFileSync(path.join(root,"index.html"),"utf8");
   // Le bandeau est passe sur Tailwind (piste dupliquee pour une boucle sans
   // couture) : le balisage a change, l'INTENTION verifiee reste la meme.
   assert.equal((html.match(/league-badge-img/g)||[]).length,38);
   assert.equal((html.match(/leagues\/61\.png/g)||[]).length,2);
-  // Liga MX (262) et Premier Soccer League (288) : lancement Mexique / Afrique du Sud.
-  assert.equal((html.match(/leagues\/262\.png/g)||[]).length,2);
-  assert.equal((html.match(/leagues\/288\.png/g)||[]).length,2);
-  // Argentine (128), Colombie (239), Perou (281), Chili (265) : ouverture LATAM.
-  [128,239,281,265].forEach(function(id){ assert.equal((html.match(new RegExp("leagues/"+id+"\\.png","g"))||[]).length,2); });
+  // Liga MX (262) : lancement Mexique. Argentine (128), Chili (265) : ouverture LATAM.
+  [262,128,265].forEach(function(id){ assert.equal((html.match(new RegExp("leagues/"+id+"\\.png","g"))||[]).length,2); });
+  // Correction C6 du 27/10/2026 : sous « COMPÉTITIONS COUVERTES », jamais une competition retiree
+  // (config/leagues.json#competitions_retirees, 03/10/2026 : Afrique du Sud 288, Colombie 239, Perou 281).
+  // Chaque logo est celui d'une competition de config/leagues.json.
+  const ids=new Set(JSON.parse(fs.readFileSync(path.join(root,"config","leagues.json"),"utf8")).leagues.map(function(l){ return l.apiFootballId; }));
+  (html.match(/football\/leagues\/(\d+)\.png" alt="" width="48"/g)||[]).forEach(function(m){ assert.ok(ids.has(Number(/(\d+)\.png/.exec(m)[1])),m); });
+  [288,239,281].forEach(function(id){ assert.doesNotMatch(html,new RegExp("leagues/"+id+"\\.png")); });
   // Les logos de ligue sont des PNG sombres : sans pastille claire derriere,
   // ils sont invisibles sur le fond noir de la page.
   assert.match(html,/league-badge-img[^"]*bg-\[#f4f7fa\]/);

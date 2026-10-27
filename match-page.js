@@ -80,8 +80,10 @@ function aide(texte,label){
   const id=uid('tip');
   return `<span class="tip"><button type="button" class="tip-btn" aria-expanded="false" aria-controls="${id}" aria-label="${esc(label)}">?</button><span class="tip-pop" id="${id}" role="note" hidden>${esc(texte)}</span></span>`;
 }
-const texteAideCote=()=>t('match_page.proba_help_implied','« Ce que dit la cote » : la chance de réussite que suppose la cote du bookmaker, soit 1 ÷ cote (une cote de 2,00 correspond à 50 %). Quand les deux issues sont cotées, sa marge est retirée.');
-const labelAideCote=()=>t('match_page.proba_help_label','Que veut dire « ce que dit la cote » ?');
+// Correction C3 du 27/10/2026 : notre chance est toujours comparee a la cote MARGE RETIREE
+// (lib/match-view-model.js#recommendedFair), jamais a 1 / cote.
+const texteAideCote=()=>t('match_page.proba_help_implied','« La cote, marge retirée » : la chance que suppose la cote une fois la marge du bookmaker enlevée. Quand notre chance vient du modèle, on la compare à ce chiffre tel qu’il était à la publication du pari. Quand elle vient des cotes du marché, il n’y a rien à comparer.');
+const labelAideCote=()=>t('match_page.proba_help_label','Que veut dire « la cote, marge retirée » ?');
 
 // Carte repliable : le titre EST le bouton, une ligne de resume reste visible.
 // o : { key, title, icon, summary (HTML deja echappe), body (HTML), open }
@@ -101,26 +103,46 @@ function ecart(model,market,edge){
   if(m===null||k===null)return{cls:'none',text:t('match_page.proba_gap_none','Pas de cote comparable pour ce pari.'),gap:''};
   const e=n(edge)!==null?n(edge):Math.round((m-k)*10)/10;
   const r=Math.round(Math.abs(e));
-  if(r===0)return{cls:'flat',text:t('match_page.proba_gap_flat','Notre estimation et la cote disent la même chose.'),gap:''};
-  const gap=`${e>0?'+':'−'}${r} ${r===1?t('match_page.proba_point_one','point'):t('match_page.proba_point_other','points')}`;
+  // Ecart de 0 a 1 point : les deux disent la meme chose (correction C3 du 27/10/2026). Au-dela,
+  // l'ecart est dit dans les deux sens, y compris quand il dessert.
+  if(r<=1)return{cls:'flat',text:t('match_page.proba_gap_flat','Les deux disent la même chose.'),gap:''};
+  const gap=`${e>0?'+':'−'}${r} ${t('match_page.proba_point_other','points')}`;
   return e>0
-    ?{cls:'pos',text:t('match_page.proba_gap_pos','Nous voyons plus de chances que le bookmaker'),gap}
-    :{cls:'neg',text:t('match_page.proba_gap_neg','Nous voyons moins de chances que le bookmaker'),gap};
+    ?{cls:'pos',text:t('match_page.proba_gap_pos','Nous voyons plus de chances que le bookmaker sur ce pari'),gap}
+    :{cls:'neg',text:t('match_page.proba_gap_neg','Le bookmaker voit plus de chances que nous sur ce pari'),gap};
 }
+// o.source (pari retenu, controles trader-de-cotes du 27/10/2026) : « marche » = la chance vient des cotes, marge
+// retiree : une seule barre, aucun ecart (la cote ne se compare pas a elle-meme) ; « marche » avec o.market et
+// o.abaissee = chance des cotes abaissee par prudence : les DEUX chiffres, « Cotes du marche, marge retiree » et
+// « Notre chance, abaissee par prudence », jamais l'etiquette « tiree des cotes » sur le chiffre abaisse ;
+// « modele » = « Notre calcul » ; null = origine inconnue (« Chance calculee »). o.abaissee ({ points }) :
+// la barre du pari dit « Notre chance, abaissee par prudence ». Ailleurs (tableau) : « Notre calcul ».
+const pointsTxt=p=>`${p} ${p===1?t('match_page.proba_point_one','point'):t('match_page.proba_point_other','points')}`;
 function duoBars(o){
-  const m=n(o.model),k=marcheValide(o.market),c=n(o.odds);
-  const g=ecart(m,k,k===null?null:o.edge);
-  const kLabel=o.kind==='consensus'&&c===null?t('match_page.proba_market_consensus','Ce que disent les cotes'):t('match_page.proba_market_label','Ce que dit la cote');
+  const ab=o.abaissee&&n(o.abaissee.points)>0?n(o.abaissee.points):0;
+  const m=n(o.model),k=o.source==='marche'&&!ab?null:marcheValide(o.market),c=n(o.odds);
+  const prudence=ab>0&&o.source==='marche'&&k!==null&&m!==null&&Math.round(k)>Math.round(m);
+  const g=prudence?{cls:'neg',text:tf('match_page.proba_lowered_gap','Par prudence, nous affichons {gap} de moins que les cotes du marché sur ce type de pari.',{gap:pointsTxt(Math.round(k)-Math.round(m))}),gap:''}
+    :ecart(m,k,k===null?null:o.edge);
+  const labelM=ab?t('match_page.proba_lowered_label','Notre chance, abaissée par prudence')
+    :o.source==='marche'?t('match_page.proba_market_chance_label','Chance tirée des cotes du marché, marge retirée')
+    :o.source===null?t('match_page.proba_chance_label','Chance calculée'):t('match_page.proba_model_label','Notre calcul');
+  const kLabel=o.source==='marche'?t('match_page.proba_market_odds_label','Cotes du marché, marge retirée')
+    :o.kind==='consensus'&&c===null?t('match_page.proba_market_consensus','Les cotes, marge retirée'):t('match_page.proba_market_label','La cote, marge retirée');
   const coteTxt=c!==null&&!o.compact?` <em>${esc(odds(c))} →</em>`:'';
+  const deux=t('match_page.label_colon',' :');
   const aria=k===null
-    ?tf('match_page.proba_aria_model_only','Notre estimation : {model}',{model:pct(m,0)})
-    :tf('match_page.proba_aria','Notre estimation : {model}. Ce que dit la cote : {market}.',{model:pct(m,0),market:pct(k,0)});
+    ?(o.source==='modele'&&!ab?tf('match_page.proba_aria_model_only','Notre calcul : {model}',{model:pct(m,0)}):`${labelM}${deux} ${pct(m,0)}`)
+    :o.source==='modele'&&!ab?tf('match_page.proba_aria','Notre calcul : {model}. La cote, marge retirée : {market}.',{model:pct(m,0),market:pct(k,0)})
+    :`${labelM}${deux} ${pct(m,0)}. ${kLabel}${deux} ${pct(k,0)}.`;
   const ligne=(cls,label,val,part)=>`<div class="duo-line ${cls}"><span class="duo-k">${label}</span><b class="duo-v">${esc(val)}</b><span class="duo-track" aria-hidden="true"><i style="--s:${(part/100).toFixed(3)}"></i></span></div>`;
   return `<div class="duo${o.compact?' duo--compact':''}" role="group" aria-label="${esc(aria)}">
-    ${ligne('is-model',esc(t('match_page.proba_model_label','Notre estimation')),pct(m,0),clamp(m))}
+    ${ligne('is-model',esc(labelM),pct(m,0),clamp(m))}
     ${k!==null?ligne('is-market',esc(kLabel)+coteTxt,pct(k,0),clamp(k))
+      // Pas de chiffre sans marge comparable (pari retenu) : aucune barre bookmaker, la phrase dit pourquoi (o.sansMarge).
+      :o.sansMarge?''
       :`<div class="duo-line is-market is-na"><span class="duo-k">${esc(kLabel)}</span><span class="duo-na">${esc(t('match_page.proba_market_na','non disponible'))}</span></div>`}
-    <p class="duo-gap is-${g.cls}"><i aria-hidden="true"></i><span>${esc(g.text)}${g.gap?`${esc(t('match_page.label_colon',' :'))} <b>${esc(g.gap)}</b>`:''}</span></p>
+    <p class="duo-gap is-${g.cls}"><i aria-hidden="true"></i><span>${k===null&&o.sansMarge?esc(o.sansMarge):`${esc(g.text)}${g.gap?`${esc(t('match_page.label_colon',' :'))} <b>${esc(g.gap)}</b>`:''}`}</span></p>
   </div>`;
 }
 
@@ -418,11 +440,25 @@ function signalCard(vm){
   const aSurveiller=risques.length?risques.slice(0,2):[phrase(t('match_page.sig_risk_default','un seul match reste très aléatoire, même avec un écart favorable'))];
   // « Sur 100 matchs » garde la chance en frequence (la forme la mieux comprise) ; la mention
   // « pas une garantie » n'est ecrite qu'une fois, en bas de l'avis.
-  const plain=prob!==null&&implied!==null
-    ?tf('match_page.sig2_plain','Sur 100 matchs comme celui-ci, ce pari passerait environ {model} fois selon notre calcul ; la cote en suppose {market}.',{model:Math.round(prob),market:Math.round(implied)}):'';
+  // Correction C3 du 27/10/2026 (controles trader-de-cotes) : source = d'ou vient la chance (lib/match-view-model.js
+  // #comparaisonPari) ; implied = chiffre sans marge du pari (publication) ; ab = points retires par prudence
+  // (chance_correction). La phrase « Sur 100 matchs » cite le chiffre qu'elle nomme : jamais « d'apres les cotes du
+  // marche » sur une chance abaissee. Chance tiree des cotes et non abaissee : aucun ecart (la cote face a elle-meme).
+  const source=vm.model.chanceSource===undefined?null:vm.model.chanceSource;
+  const ab=vm.model.chanceLowered&&n(vm.model.chanceLowered.points)>0?n(vm.model.chanceLowered.points):0;
+  const plain=prob===null?''
+    :ab&&implied!==null?tf('match_page.sig2_plain_lowered','Sur 100 matchs comme celui-ci, ce pari passerait environ {model} fois selon notre chance, abaissée par prudence ; les cotes du marché, marge retirée, en supposent {market}.',{model:Math.round(prob),market:Math.round(implied)})
+    :ab?tf('match_page.sig2_plain_lowered_only','Sur 100 matchs comme celui-ci, ce pari passerait environ {model} fois selon notre chance, abaissée par prudence.',{model:Math.round(prob)})
+    :source==='marche'?tf('match_page.sig2_plain_market','Sur 100 matchs comme celui-ci, ce pari passerait environ {model} fois d’après les cotes du marché, marge retirée.',{model:Math.round(prob)})
+    :source===null?tf('match_page.sig2_plain_unknown','Sur 100 matchs comme celui-ci, ce pari passerait environ {model} fois.',{model:Math.round(prob)})
+    :implied!==null?tf('match_page.sig2_plain','Sur 100 matchs comme celui-ci, ce pari passerait environ {model} fois selon notre calcul ; la cote, marge retirée, en suppose {market}.',{model:Math.round(prob),market:Math.round(implied)})
+    :tf('match_page.sig2_plain_model','Sur 100 matchs comme celui-ci, ce pari passerait environ {model} fois selon notre calcul.',{model:Math.round(prob)});
+  const sansMarge=source==='marche'&&!ab?t('match_page.sig2_market_only','Cette chance vient des cotes du marché : pas d’écart à montrer.')
+    :ab&&implied===null?tf('match_page.sig2_lowered_note','Abaissée de {gap} par prudence sur ce type de pari.',{gap:pointsTxt(ab)})
+    :implied===null&&cote!==null?tf('match_page.sig2_no_fair','Cote du bookmaker : {odds}. Elle contient sa marge : on ne la compare pas à notre calcul.',{odds:odds(cote)}):'';
   const compare=prob===null?'':`<div class="sig2-cmp tip-host">
       <div class="sig2-cmp-head"><h3>${esc(t('match_page.sig2_compare_title','Nos chances face à la cote'))}</h3>${aide(texteAideCote(),labelAideCote())}</div>
-      ${duoBars({model:prob,market:implied,odds:cote,edge,kind:'odds'})}
+      ${duoBars({model:prob,market:implied,odds:cote,edge,kind:'odds',sansMarge,source,abaissee:vm.model.chanceLowered||null})}
       ${plain?`<p class="sig2-plain">${esc(plain)}</p>`:''}
     </div>`;
   const risque=riskStat(vm.editorial.riskCode);
@@ -696,7 +732,7 @@ function probasCarte(vm){
     const tags=`${r.recommended?`<span class="mk-tag mk-tag--signal">${esc(t('match_page.proba_tag_signal','Pari conseillé'))}</span>`:''}${!r.recommended&&e!==null&&e>=3?`<span class="mk-tag mk-tag--value">${esc(t('match_page.proba_tag_favorable','Écart favorable'))}</span>`:''}`;
     return `<li class="pr-row${r.recommended?' is-signal':''}">
       <div class="pr-head"><span class="pr-label">${esc(libelleLigne(vm,r))}</span>${tags}${c!==null?`<span class="pr-odds">${esc(t('match_page.proba_odds_short','cote'))} <b>${odds(c)}</b></span>`:''}</div>
-      ${duoBars({model:r.model,market:r.market,odds:c,edge:r.edge,kind:c!==null?'odds':'consensus',compact:true})}
+      ${duoBars({model:r.model,market:r.market,odds:c,edge:r.edge,kind:c!==null?'odds':'consensus',compact:true,source:r.recommended?(r.chanceSource===undefined?null:r.chanceSource):'modele',abaissee:r.recommended?r.chanceLowered||null:null,sansMarge:r.recommended&&r.chanceSource==='marche'&&!r.chanceLowered?t('match_page.sig2_market_only','Cette chance vient des cotes du marché : pas d’écart à montrer.'):r.recommended&&r.chanceLowered&&n(r.market)===null?tf('match_page.sig2_lowered_note','Abaissée de {gap} par prudence sur ce type de pari.',{gap:pointsTxt(n(r.chanceLowered.points))}):''})}
     </li>`;
   };
   const liste=(part,avant)=>{let g0=avant;return part.map(x=>{const h=x.g!=='signal'&&x.g!==g0?`<li class="pr-group"><h4>${esc(nomGroupe(x.g))}</h4></li>`:'';g0=x.g;return h+ligne(x);}).join('');};
@@ -1324,6 +1360,21 @@ function enTeteOffre(raw){
   if(etat==='none')return esc(t('match_page.avis_no_signal','Pas de pari retenu par le modèle sur ce match'));
   return '';
 }
+// Sortie gratuite du cadenas Pro (correction C1 du 27/10/2026) : le match offert DU JOUR, lu dans la
+// liste du jour par lib/free-match.js#offertDuJour (la meme source que l'accueil, jamais ecrit en dur).
+// Sans match offert ce jour, ou s'il s'agit de ce match : rien. listeDuJour : la liste lue au demarrage.
+let listeDuJour=null;
+function sortieGratuite(raw,list){
+  try{
+    if(!window.IasharkFreeMatch||!IasharkFreeMatch.offertDuJour||!Array.isArray(list)||!list.length)return null;
+    const m=IasharkFreeMatch.offertDuJour(list,null,(window.IASHARK_MARKET&&window.IASHARK_MARKET.code)||null);
+    if(!m||!/^\d+$/.test(String(m.id))||String(m.id)===String(raw&&raw.id))return null;
+    const nom=e=>e&&typeof e==='object'?String(e.n||e.name||'').trim():String(e||'').trim();
+    const h=nom(m.home),a=nom(m.away);
+    if(!h||!a)return null;
+    return {href:lien('match.html?id='+m.id),match:tf('match_page.sig_match_line','{home} – {away}',{home:h,away:a})};
+  }catch(e){return null;}
+}
 function renderProWall(raw,ctx){
   const vm=viewModel(publicCopy(raw));
   const pub=vm._raw;
@@ -1341,7 +1392,7 @@ function renderProWall(raw,ctx){
   // ce match a un panneau pour Pro (nb_marches).
   paint(vm,secs,{sansStats:true,panneau:MS&&estFr()&&n(pub.nb_marches)>0?{html:MS.panneauFlou(pub.nb_marches,''),flou:true,fab:false}:null});
   const box=document.getElementById('offreMatch');
-  if(window.IasharkOffrePro&&box)IasharkOffrePro.mount(box,{mode:'vitrine',contexte:'match',next:cheminMatch(raw),connecte:!!(ctx&&ctx.session),sousTitre:enTeteOffre(pub),suivi:'match_gate_unlock',contenus,nbMarches:n(pub.nb_marches),pari:etatAnalyse(pub)!=='none'});
+  if(window.IasharkOffrePro&&box)IasharkOffrePro.mount(box,{mode:'vitrine',contexte:'match',next:cheminMatch(raw),connecte:!!(ctx&&ctx.session),sousTitre:enTeteOffre(pub),suivi:'match_gate_unlock',contenus,nbMarches:n(pub.nb_marches),pari:etatAnalyse(pub)!=='none',sortie:sortieGratuite(raw,listeDuJour)});
 }
 // MATCH OFFERT, SANS COMPTE : meme dessin que le composant de paiement, un seul
 // bouton « Creer mon compte gratuit » (retour sur ce match), lien discret
@@ -1556,6 +1607,7 @@ async function init(){
       }catch(e){appel=null;}
       renderAuthWall(raw,appel);return;
     }
+    listeDuJour=list;
     if(!isFree&&!termine&&!vuePro){renderProWall(raw,ctx);return;}
     // Compte gratuit sur le match offert : toutes les sections, panneau Marches flou
     // (cadenas Pro sur le panneau seulement). Match termine : aucun panneau (plus rien a jouer).

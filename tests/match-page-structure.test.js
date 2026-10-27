@@ -179,11 +179,14 @@ test("l'avis IASHARK montre pari, cote, deux barres, ecart, fiabilite, raisons e
   }
   assert.doesNotMatch(js,/function confMeter\(/);
   assert.match(bloc,/raw\.has_signal===true&&raw\.no_signal!==true/);
-  // A l'octet pres : la fonction est celle de la version d'origine (29/09).
+  // A l'octet pres : la fonction est celle de la version d'origine (29/09). 27/10/2026 : correction C3 du
+  // diagnostic CONVERSION-27-10 et controle trader-de-cotes (chance tiree des cotes : aucun ecart ; chance du modele :
+  // comparee au chiffre sans marge de la publication, sinon « Elle contient sa marge ») ; 2e controle : chance abaissee
+  // par prudence (deux chiffres, phrase « Sur 100 matchs » sur le chiffre qu'elle nomme) ; empreinte mise a jour.
   const crypto=require("node:crypto");
   const debut=js.indexOf("function signalCard(vm){");let p=0,fin=-1;
   for(let i=js.indexOf("{",debut);i<js.length;i++){if(js[i]==="{")p++;else if(js[i]==="}"){p--;if(!p){fin=i+1;break;}}}
-  assert.equal(crypto.createHash("sha256").update(js.slice(debut,fin)).digest("hex"),"a50925e3f1b887dfc79fea061f71b3081bbacba9c3c81b3554d4d4c916a555a3");
+  assert.equal(crypto.createHash("sha256").update(js.slice(debut,fin)).digest("hex"),"c69612b39454f364fc448aad51ff875e0664e53ed4449817532fa1eb1a6473ac");
 });
 
 // REGLE DU PROPRIETAIRE (16/09/2026) : tout ce que l'IA donne est FERME pour le

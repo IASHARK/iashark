@@ -168,6 +168,25 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', titreVenuDunMatch); else titreVenuDunMatch();
 
+  /* ---------- Inscription sans ?next= : retour sur le match offert (correction C5 du 27/10/2026) ----------
+     Le bouton dit « Voir mon pari offert » : apres l'inscription, le visiteur arrive donc sur le match
+     offert DU JOUR (lib/free-match.js#offertDuJour, liste data-home.json : la meme source que l'accueil),
+     ou son analyse s'ouvre avec le compte. Pas de match offert ce jour, ou liste illisible : Mon compte,
+     comme avant. Lu en arriere-plan, jamais bloquant. */
+  var offertDuJour = null;
+  function chercherOffert() {
+    if (!/\/inscription(\.html)?$/.test(location.pathname)) return;
+    if (new URLSearchParams(location.search).get('next')) return;
+    if (typeof fetch !== 'function') return;
+    fetch('/data-home.json', { cache: 'no-cache' }).then(function (r) { return r && r.ok ? r.json() : null; }).then(function (d) {
+      var F = window.IasharkFreeMatch, liste = d && Array.isArray(d.matchs) ? d.matchs : null;
+      if (!F || typeof F.offertDuJour !== 'function' || !liste) return;
+      var m = F.offertDuJour(liste, null, (window.IASHARK_MARKET && window.IASHARK_MARKET.code) || null);
+      if (m && /^\d+$/.test(String(m.id))) offertDuJour = String(m.id);
+    }).catch(function () {});
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', chercherOffert); else chercherOffert();
+
   /* ---------- Chemin de paiement : etape 1 sur 2 (controle UX du 04/10/2026, tour 2) ----------
      Sans compte, « Continuer avec l'annee » (lib/offre-pro.js) passe par l'inscription puis
      revient sur l'abonnement : ?next=/abonnement.html?duree=year... La page d'inscription le
@@ -205,6 +224,8 @@
       };
       fixer('eyebrow', t('auth.pay_step_eyebrow', 'Passer Pro'));
       fixer('h1', t('auth.pay_step_h1', 'Étape 1 sur 2 : ton compte.'));
+      // Le bouton mene au paiement : jamais « Voir mon pari offert » sur ce chemin (avocat du diable, 27/10/2026).
+      fixer('submit', t('auth.pay_step_submit', 'Créer mon compte et continuer'));
       fixer('intro', prix ? tf('auth.pay_step_intro', 'Ensuite : paiement {duree} ({prix}) par Stripe. Ta durée reste choisie.', vars)
         : tf('auth.pay_step_intro_noprice', 'Ensuite : le paiement {duree} par Stripe. Ta durée reste choisie.', vars));
       // Les avantages du compte gratuit (« aucune carte demandée »...) ne decrivent pas ce chemin.
@@ -350,6 +371,7 @@
         // un ?next= interne existe ; sinon « Mon compte » avec le message de
         // bienvenue. Avant : compte.html en dur, le match etait perdu.
         var dest = destination();
+        if (dest === localHref('compte.html') && offertDuJour) dest = localHref('match.html?id=' + offertDuJour);
         location.href = dest === localHref('compte.html') ? localHref('compte.html?bienvenue=1') : dest;
         return;
       }

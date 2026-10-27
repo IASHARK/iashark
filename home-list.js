@@ -186,7 +186,7 @@ function qualityFor(m){
 var BAND_LABEL={high:['home_list.band_high','Probabilité élevée'],good:['home_list.band_good','Bonne probabilité'],moderate:['home_list.band_moderate','Probabilité modérée']};
 var BAND_SHORT={high:'Proba. élevée',good:'Bonne proba.',moderate:'Proba. modérée'};
 function bandLabel(b){return t(BAND_LABEL[b][0],BAND_LABEL[b][1]);}
-function bandNote(){return t('home_list.band_note','Estimation du modèle, pas une garantie. Détail et pari réservés aux abonnés Pro.');}
+function bandNote(){return t('home_list.band_note','Estimation du modèle, pas une garantie. Le match offert s’ouvre avec un compte gratuit ; les autres matchs avec Pro.');}
 
 function analysisFor(m,ctx,H){
   // Journee passee (onglet « Hier ») : la ligne ne porte aucune analyse, juste

@@ -56,12 +56,12 @@ test("combines et Selection en or : perdu des qu'un pari est perdu, gagne si tou
   const tickets = [
     { jour: "2026-10-25", type: "x5", meta: { cote_totale: 4.03 }, contenu: { jambes: [jambe(11), jambe(12)] } },               // gagne
     { jour: "2026-10-25", type: "x10", meta: { cote_totale: 8.52 }, contenu: { jambes: [jambe(11), jambe(13), jambe(15)] } },    // perdu (un perdu suffit)
-    { jour: "2026-10-24", type: "x5", meta: { cote_totale: 3.9 }, contenu: { jambes: [jambe(11), jambe(14)] } },                // autre marche : en verification
+    { jour: "2026-10-24", type: "x5", meta: { cote_totale: 3.9 }, contenu: { jambes: [jambe(11), jambe(14, "fh-over-05")] } },  // autre marche que le score final ne regle pas : en verification
     { jour: "2026-10-24", type: "x10", meta: { cote_totale: 9 }, contenu: { jambes: [jambe(11), jambe(15)] } },                 // non regle : en verification
     { jour: "2026-10-25", type: "or", contenu: { paris: [jambe(11), jambe(13), jambe(16), jambe(99, "anytime-scorer-1")] } },   // 1 g, 1 p, 1 annule, 1 en verification
     { jour: "2026-10-26", type: "x5", meta: { cote_totale: 4 }, contenu: { jambes: [jambe(11, null, MAINTENANT - 3600000)] } }, // pas encore termine : pas montre
     { jour: "2026-10-10", type: "x5", meta: { cote_totale: 4 }, contenu: { jambes: [jambe(11, null, Date.parse("2026-10-10T11:00:00Z"))] } }, // trop ancien
-  ];
+  ].map((t) => Object.assign({ publie_a: t.jour + "T05:00:00Z", premier_coup_envoi: t.jour + "T23:00:00Z" }, t)); // publies avant leurs matchs
   const b = B.construireBandeau({ simples: [], tickets, jambes, matchs: [], maintenant: MAINTENANT });
   assert.deepEqual(b.combines.map((c) => c.j + " " + c.t + ":" + c.r).sort(), ["2026-10-24 x10:verif", "2026-10-24 x5:verif", "2026-10-25 x10:loss", "2026-10-25 x5:win"]);
   assert.deepEqual(b.or.map((o) => [o.g, o.p, o.a, o.v]), [[1, 1, 1, 1]]);
@@ -154,4 +154,140 @@ test("pages : bandeau sur l'accueil et la page match des 6 versions, hauteur de 
     assert.match(html, /<style>#bandeauPreuves\{box-sizing:border-box;height:44px;overflow:hidden\}<\/style><div id="bandeauPreuves"/, v + p + " : place reservee (pas de saut de page)");
     assert.match(html, /<script src="\/lib\/bandeau-preuves\.js" defer><\/script>/, v + p + " : script differe");
   }
+});
+
+// Controle historique-public du 27/10/2026 : une jambe sur un AUTRE marche que le pari simple publie se regle par le
+// score final de l'archive (une regle par marche) ; seuls le buteur, les mi-temps et les codes « F… » restent en
+// verification. Une regle = un test.
+test("reglerParScore : une regle par marche, sur le score final (90 minutes)", () => {
+  const R = B.reglerParScore;
+  const cas = [
+    // resultat et double chance
+    ["home-win", [3, 1], "win"], ["home-win", [1, 1], "loss"], ["draw", [2, 2], "win"], ["draw", [2, 1], "loss"],
+    ["away-win", [0, 3], "win"], ["away-win", [1, 0], "loss"],
+    ["dc-1x", [1, 1], "win"], ["dc-1x", [1, 2], "loss"], ["dc-x2", [1, 1], "win"], ["dc-x2", [4, 0], "loss"],
+    ["dc-12", [3, 1], "win"], ["dc-12", [0, 0], "loss"],
+    // rembourse si nul
+    ["home-dnb", [1, 1], "void"], ["home-dnb", [2, 0], "win"], ["dnb-away", [2, 0], "loss"],
+    // buts du match
+    ["over-15", [1, 1], "win"], ["over-15", [1, 0], "loss"], ["under-35", [2, 2], "loss"], ["under-35", [2, 1], "win"],
+    ["under-45", [4, 0], "win"], ["under-45", [3, 2], "loss"], ["over-25", [2, 1], "win"], ["under-25", [2, 1], "loss"], ["over-2_5", [2, 1], "win"],
+    // buts d'une equipe
+    ["home-team-over-05", [1, 2], "win"], ["home-team-over-05", [0, 2], "loss"], ["away-team-over-05", [4, 0], "loss"], ["away-team-over-05", [0, 3], "win"],
+    ["home-team-under-25", [0, 1], "win"], ["home-team-under-25", [5, 1], "loss"], ["away-team-under-15", [3, 1], "win"],
+    // les deux equipes marquent
+    ["btts-yes", [1, 2], "win"], ["btts-yes", [4, 0], "loss"], ["btts-no", [4, 0], "win"], ["btts-no", [1, 1], "loss"],
+    // victoire et buts du match
+    ["home-win-over-25", [4, 3], "win"], ["home-win-over-25", [2, 0], "loss"], ["home-win-over-25", [2, 3], "loss"], ["away-win-under-35", [0, 2], "win"],
+    ["draw-under-25", [1, 1], "win"], ["draw-under-25", [2, 2], "loss"],
+    // clean sheet, victoire sans encaisser
+    ["home-clean-sheet", [0, 0], "win"], ["home-clean-sheet", [1, 1], "loss"], ["away-win-to-nil", [0, 2], "win"], ["away-win-to-nil", [1, 2], "loss"],
+  ];
+  for (const [m, sc, att] of cas) assert.equal(R(m, sc), att, m + " " + sc.join("-"));
+  // Non reglables par le score final : en verification (jamais devine).
+  for (const m of ["fh-over-05", "sh-under-15", "anytime-scorer-21393", "total-shots-over-235", "F29:No", "over-2", "over-3", "inconnu"]) assert.equal(R(m, [1, 2]), null, m);
+  assert.equal(R("over-25", null), null, "score illisible");
+  assert.deepEqual(B.lireScore("4-0"), [4, 0]);
+  assert.equal(B.lireScore("4:0"), null);
+});
+
+test("tickets reels du 19 et du 20/10 : regles par le score final (x5 gagnes, x10 perdus, buteur en verification)", () => {
+  const j = (f, m, k) => ({ fixture_id: f, market_id: m, coup_envoi_ms: k });
+  const tickets = [
+    { jour: "2026-10-19", type: "x10", meta: { cote_totale: 8.57 }, contenu: { jambes: [j(1494299, "home-team-over-05", 1792429200000), j(1550153, "away-team-over-05", 1792427400000), j(1550154, "away-team-over-05", 1792435500000), j(1557436, "dc-12", 1792436400000), j(1569971, "dc-1x", 1792434600000), j(1570417, "dc-x2", 1792436400000), j(1575458, "fh-over-05", 1792437300000)] } },
+    { jour: "2026-10-19", type: "x5", meta: { cote_totale: 4 }, contenu: { jambes: [j(1550154, "away-team-over-05", 1792435500000), j(1557436, "home-win", 1792436400000), j(1569971, "dc-1x", 1792434600000), j(1570417, "dc-x2", 1792436400000)] } },
+    { jour: "2026-10-20", type: "or", contenu: { paris: [j(1635702, "home-win-over-25", 1792522800000), j(1635719, "anytime-scorer-21393", 1792514700000)] } },
+    { jour: "2026-10-20", type: "x10", meta: { cote_totale: 39.83 }, contenu: { jambes: [j(1635661, "under-35", 1792514700000), j(1635688, "home-win-over-25", 1792522800000), j(1635693, "home-team-under-25", 1792522800000), j(1635702, "under-35", 1792522800000), j(1635617, "under-45", 1792522800000)] } },
+    { jour: "2026-10-20", type: "x5", meta: { cote_totale: 3.65 }, contenu: { jambes: [j(1635719, "btts-yes", 1792514700000), j(1563150, "over-15", 1792521900000), j(1635655, "home-team-under-25", 1792522800000)] } },
+  ];
+  // Heures posees par la base (tickets_du_jour, lecture du 27/10/2026) : tous publies avant leur premier coup d'envoi.
+  const HEURES = { "2026-10-19 x10": ["2026-10-19 05:31:55.784134+00", "2026-10-19 16:30:00+00"], "2026-10-19 x5": ["2026-10-19 05:31:55.525913+00", "2026-10-19 18:30:00+00"],
+    "2026-10-20 or": ["2026-10-20 15:52:08.017484+00", "2026-10-20 16:45:00+00"], "2026-10-20 x10": ["2026-10-20 15:52:08.017484+00", "2026-10-20 16:45:00+00"], "2026-10-20 x5": ["2026-10-20 15:52:08.017484+00", "2026-10-20 16:45:00+00"] };
+  for (const t of tickets) { const h = HEURES[t.jour + " " + t.type]; t.publie_a = h[0].replace(" ", "T").replace(/\+00$/, "Z"); t.premier_coup_envoi = h[1].replace(" ", "T").replace(/\+00$/, "Z"); }
+  const a = (f, m, r, p, k, s) => ({ fixture_id: f, market: m, result: r, published_at: p, kickoff_at: k, score: s });
+  const P1 = "2026-10-17T05:54:28Z", P2 = "2026-10-18T05:47:15Z";
+  // Archive (predictions_archive, lecture du 27/10/2026) : le pari simple publie de chaque match et son score final.
+  const jambes = [a(1494299, "dc-1x", "loss", P1, "2026-10-19T17:00:00Z", "1-2"), a(1550153, "dc-x2", "loss", P1, "2026-10-19T16:30:00Z", "4-0"),
+    a(1550154, "over-15", "win", P1, "2026-10-19T18:45:00Z", "0-3"), a(1557436, "home-win", "win", P1, "2026-10-19T19:00:00Z", "3-1"),
+    a(1563150, "F29:No", "win", P2, "2026-10-20T18:45:00Z", "1-1"), a(1569971, "dc-1x", "win", P2, "2026-10-19T18:30:00Z", "1-1"),
+    a(1570417, "dc-x2", "win", P1, "2026-10-19T19:00:00Z", "1-1"), a(1575458, "fh-over-05", "win", P1, "2026-10-19T19:15:00Z", "1-2"),
+    a(1635617, "home-win", "win", P2, "2026-10-20T19:00:00Z", "4-0"), a(1635655, "over-25", "loss", P2, "2026-10-20T19:00:00Z", "0-1"),
+    a(1635661, "over-25", "win", P2, "2026-10-20T16:45:00Z", "2-2"), a(1635688, "home-win", "win", P2, "2026-10-20T19:00:00Z", "4-3"),
+    a(1635693, "home-win", "win", "2026-10-20T05:37:19Z", "2026-10-20T19:00:00Z", "5-1"), a(1635702, "home-win", "win", P2, "2026-10-20T19:00:00Z", "4-2"),
+    a(1635719, "over-25", "win", P2, "2026-10-20T16:45:00Z", "1-2")];
+  const b = B.construireBandeau({ simples: [], tickets, jambes, matchs: [], maintenant: Date.parse("2026-10-26T12:00:00Z") });
+  assert.deepEqual(b.combines.map((c) => c.j + " " + c.t + ":" + c.r).sort(), ["2026-10-19 x10:loss", "2026-10-19 x5:win", "2026-10-20 x10:loss", "2026-10-20 x5:win"]);
+  // Selection en or du 20/10 : le PSG gagne et plus de 2,5 buts (4-2) gagne ; le buteur reste en verification.
+  assert.deepEqual(b.or.map((o) => [o.j, o.g, o.p, o.a, o.v]), [["2026-10-20", 1, 0, 0, 1]]);
+  // Le calcul quotidien lit le score des matchs des tickets.
+  const wf = fs.readFileSync(path.join(__dirname, "..", ".github", "workflows", "update-data.yml"), "utf8");
+  assert.match(wf, /predictions_archive\?select=fixture_id,market,result,published_at,kickoff_at,score&fixture_id=in\./);
+});
+
+
+// Chaque marche du catalogue (lib/marches-paris.js, les seuls marches publies) : regle par le score final avec le MEME
+// resultat que la regle du catalogue, sur toutes les issues jusqu'a 3 buts par equipe et par mi-temps ; sinon (mi-temps,
+// tirs) « resultat en verification ». Buteurs et codes « F… » restent en verification.
+test("catalogue : chaque marche regle par le score final comme lib/marches-paris.js, sinon en verification", () => {
+  const MP = require("../lib/marches-paris.js");
+  const issues = [];
+  for (let h1 = 0; h1 <= 3; h1++) for (let a1 = 0; a1 <= 3; a1++) for (let h2 = 0; h2 <= 3; h2++) for (let a2 = 0; a2 <= 3; a2++) issues.push({ h1, a1, h2, a2 });
+  let regles = 0, verification = 0;
+  for (const def of Object.values(MP.CATALOGUE)) {
+    if (def.dim === "buts" && def.ft === true) {
+      for (const o of issues) {
+        const sc = [o.h1 + o.h2, o.a1 + o.a2];
+        assert.equal(B.reglerParScore(def.id, sc), def.test(o) ? "win" : "loss", def.id + " " + sc.join("-"));
+      }
+      regles++;
+    } else {
+      for (const sc of [[0, 0], [2, 1], [1, 3]]) assert.equal(B.reglerParScore(def.id, sc), null, def.id + " : en verification");
+      verification++;
+    }
+  }
+  assert.ok(regles >= 30 && verification >= 100, regles + " regles, " + verification + " en verification");
+  for (const m of ["anytime-scorer-21393", "first-scorer-874", "F29:No", "F5:Over 2.5", "F13:Home", ""]) assert.equal(B.reglerParScore(m, [2, 1]), null, m || "vide");
+  // Score illisible ou absent : jamais devine.
+  for (const sc of [null, [2], [2, -1], [1.5, 0], ["2", "1"]]) assert.equal(B.reglerParScore("over-15", sc), null, JSON.stringify(sc));
+});
+
+// Controle historique-public du 27/10/2026 : une jambe n'est annulee que si le match est reporte, annule ou abandonne
+// (statut) ; « annule » sans score dans l'archive ne suffit pas : en verification.
+test("jambe annulee seulement sur statut reporte / annule / abandonne ; sinon en verification", () => {
+  const ko = Date.parse("2026-10-25T11:00:00Z");
+  const t = (id) => ({ jour: "2026-10-25", type: "x5", meta: { cote_totale: 4 }, publie_a: "2026-10-25T05:00:00Z", premier_coup_envoi: "2026-10-25T11:00:00Z",
+    contenu: { jambes: [{ fixture_id: id, market_id: "btts-yes", coup_envoi_ms: ko }] } });
+  // Pari simple publie du match sur un AUTRE marche, annule, sans score.
+  const jambes = [31, 32, 33, 34, 35].map((id) => pari(id, 10, "void", { score: null }));
+  const r = (matchs, id) => B.construireBandeau({ simples: [], tickets: [t(id)], jambes, matchs, maintenant: MAINTENANT }).combines[0].r;
+  assert.equal(r([], 31), "verif", "aucun statut : en verification");
+  assert.equal(r([{ id: 31, status: "FT" }], 31), "verif", "match termine sans score : en verification");
+  assert.equal(r([{ id: 32, status: "PST" }], 32), "void", "reporte");
+  assert.equal(r([{ id: 33, status: "CANC" }], 33), "void", "annule");
+  assert.equal(r([{ id: 34, status: "abd" }], 34), "void", "abandonne");
+  // Statut porte par la ligne d'archive elle-meme.
+  const j2 = [pari(35, 10, "void", { score: null, status: "PST" })];
+  assert.equal(B.construireBandeau({ simples: [], tickets: [t(35)], jambes: j2, matchs: [], maintenant: MAINTENANT }).combines[0].r, "void");
+  // Le meme marche que le pari simple publie garde le reglement de l'archive (annule compris).
+  const meme = [pari(36, 10, "void", { market: "btts-yes", score: null })];
+  assert.equal(B.construireBandeau({ simples: [], tickets: [t(36)], jambes: meme, matchs: [], maintenant: MAINTENANT }).combines[0].r, "void");
+});
+
+// Controle historique-public du 27/10/2026 : un ticket publie a son premier coup d'envoi ou apres, ou sans ces heures,
+// n'est jamais montre (aucune preuve qu'il etait public avant les matchs).
+test("ticket publie apres (ou a) son premier coup d'envoi, ou sans heures : jamais montre", () => {
+  const ko = Date.parse("2026-10-25T11:00:00Z");
+  const jambes = [pari(41, 10, "win")];
+  const t = (pub, premier) => Object.assign({ jour: "2026-10-25", type: "x5", meta: { cote_totale: 4 }, contenu: { jambes: [{ fixture_id: 41, market_id: "over-25", coup_envoi_ms: ko }] } },
+    pub === undefined ? {} : { publie_a: pub }, premier === undefined ? {} : { premier_coup_envoi: premier });
+  const n = (tk) => B.construireBandeau({ simples: [], tickets: [tk], jambes, matchs: [], maintenant: MAINTENANT }).combines.length;
+  assert.equal(n(t("2026-10-25T10:59:59Z", "2026-10-25T11:00:00Z")), 1, "publie avant : montre");
+  assert.equal(n(t("2026-10-25T11:00:00Z", "2026-10-25T11:00:00Z")), 0, "publie au coup d'envoi : pas montre");
+  assert.equal(n(t("2026-10-25T12:30:00Z", "2026-10-25T11:00:00Z")), 0, "publie apres : pas montre");
+  assert.equal(n(t(undefined, "2026-10-25T11:00:00Z")), 0, "heure de publication absente : pas montre");
+  assert.equal(n(t("2026-10-25T05:00:00Z", undefined)), 0, "premier coup d'envoi absent : pas montre");
+  assert.equal(n(t("pas une date", "2026-10-25T11:00:00Z")), 0, "illisible : pas montre");
+  // Le calcul quotidien lit ces deux heures.
+  const wf = fs.readFileSync(path.join(__dirname, "..", ".github", "workflows", "update-data.yml"), "utf8");
+  assert.match(wf, /tickets_du_jour\?select=jour,type,contenu,meta,publie_a,premier_coup_envoi&type=in\.\(x5,x10,or\)/);
 });

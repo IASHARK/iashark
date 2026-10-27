@@ -273,9 +273,13 @@
         + '<a href="' + esc(lien('pro.html')) + '" class="mt-4 inline-flex h-10 items-center rounded-lg border border-hairline px-4 text-[13.5px] font-semibold transition hover:border-cyan/40">' + tr('compte_page.activity_empty_cta', 'Voir les outils') + '</a>');
     }
 
+    // Compte gratuit (27/10/2026, chantier activation) : en haut, le match offert
+    // du jour, l'offre d'essai et le canal Telegram (lib/activation-compte.js),
+    // remplis apres coup par monterActivation(). Jamais pour un abonne ni un admin.
     // Bloc « Aujourd'hui » (lib/aujourdhui.js, 04/10/2026) : le MEME que l'accueil,
     // meme fonction tickets-du-jour, memes etats par niveau. Masque sans reponse.
-    return titreSection(tr('compte_page.section_overview_title', 'Vue d’ensemble'), tr('compte_page.section_overview_subtitle', 'Un résumé de votre compte. Chaque section porte le détail.'))
+    return (t === 'free' && window.IasharkActivationCompte ? '<div id="activation" class="mb-6"></div>' : '')
+      + titreSection(tr('compte_page.section_overview_title', 'Vue d’ensemble'), tr('compte_page.section_overview_subtitle', 'Un résumé de votre compte. Chaque section porte le détail.'))
       + '<div class="space-y-4">'
       + '<section class="aj aj--compte" id="aujourdhui" aria-labelledby="ajTitre" hidden></section>'
       + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.plan_current_heading', 'Plan actuel') + '</h2><div class="mt-3">' + planResume + '</div>'
@@ -759,6 +763,7 @@
       window.IasharkOffrePro.mount($('offreCompte'), { mode: 'paiement', contexte: 'general', connecte: true });
     }
     if ($('aujourdhui') && window.IasharkAujourdhui) window.IasharkAujourdhui.mount($('aujourdhui'), {});
+    if ($('activation')) monterActivation($('activation'));
     if ($('souscrire')) {
       // Seules les durees payables sont affichees (19/09/2026) : « meme acces
       // quelle que soit la duree » seulement s'il y a plusieurs durees a choisir.
@@ -867,6 +872,102 @@
     chargerConsentement().then(function (lib) {
       // La section a pu etre re-rendue entre-temps : on ne monte que sur le bloc courant.
       if (lib && $('checkoutConsent') === bloc) consentement = lib.mount(bloc, { buttons: [bouton] });
+    });
+  }
+
+  /* Haut de la vue d'ensemble d'un compte gratuit (lib/activation-compte.js).
+     - match offert : data-home.json + lib/free-match.js, le MEME choix et le MEME
+       lien que l'accueil (index.html#loadData, #lienMatch) ;
+     - essai : seulement si le serveur l'accorde (reponse availability, lue une
+       fois par page par lib/offre-pro.js) et si ce compte n'a JAMAIS eu
+       d'abonnement (abo = derniere ligne de public.subscriptions, tous statuts ;
+       trial.ts n'accorde l'essai qu'une fois par personne). Le paiement part de
+       facturation('create-checkout-session') : duree Mois, cases obligatoires
+       verifiees avant (et par le serveur). */
+  var matchsPublics = null;
+  function lireMatchsPublics() {
+    if (!matchsPublics) {
+      matchsPublics = fetch('/data-home.json', { cache: 'no-cache' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) { return d && Array.isArray(d.matchs) ? d.matchs : []; })
+        .catch(function () { return []; });
+    }
+    return matchsPublics;
+  }
+  function langueFr() { return !(window.I18N && window.I18N.locale) || window.I18N.locale === 'fr'; }
+  function brancherLiensActivation(el) {
+    el.querySelectorAll('[data-acv-aller]').forEach(function (a) {
+      if (a.getAttribute('data-acv-branche')) return;
+      a.setAttribute('data-acv-branche', '1');
+      a.addEventListener('click', function (e) { e.preventDefault(); aller(a.getAttribute('data-acv-aller')); });
+    });
+  }
+  function monterActivation(el) {
+    var A = window.IasharkActivationCompte;
+    if (!el || !A) return;
+    el.innerHTML = A.html({ langueFr: langueFr() });
+    var bloc = el.querySelector('[data-activation]');
+    var present = function () { return document.body.contains(el); };
+
+    lireMatchsPublics().then(function (liste) {
+      if (!present()) return;
+      var FM = window.IasharkFreeMatch, MT = window.IasharkMatchTime, mk = marche();
+      var m = FM && liste.length ? FM.pickFreeMatch(liste, null, (mk && mk.code) || null) : null;
+      var info = A.infosMatch(m, MT, MT ? MT.localClock() : null, localeTag());
+      if (info) bloc.insertAdjacentHTML('afterbegin', A.htmlMatch(info, lien('match.html?id=' + encodeURIComponent(info.id))));
+    });
+
+    var OP = window.IasharkOffrePro, mk = marche();
+    if (!OP || !mk) return;
+    Promise.resolve(OP.lireDisponibilite(mk)).then(function (d) {
+      if (!present()) return;
+      var dispo = d || OP.dispoHistorique(mk);
+      var plans = OP.plans(mk, dispo);
+      var mois = plans.filter(function (p) { return p.interval === 'month'; })[0] || null;
+      var jours = OP.essaiOuvert(dispo);
+      var essai = mois && jours > 0 && !abo ? {
+        jours: jours,
+        prixMois: mois.text,
+        zero: A.zero(mk.currency, mk.priceIntlLocale || localeTag()),
+        date: A.datePremierPrelevement(Date.now(), jours, localeTag())
+      } : null;
+      var LIB = { week: ['compte_page.activation.per_week', '{price} la semaine'], year: ['compte_page.activation.per_year', '{price} l’an'] };
+      var autres = plans.filter(function (p) { return LIB[p.interval]; }).map(function (p) {
+        return tr(LIB[p.interval][0], LIB[p.interval][1]).replace('{price}', p.text);
+      });
+      var I = window.IasharkIcones;
+      var cible = el.querySelector('[data-acv-offre]');
+      if (!cible) return;
+      cible.innerHTML = A.htmlOffre({
+        essai: essai && essai.date ? essai : null,
+        prixMois: mois ? mois.text : null,
+        autres: autres,
+        avantages: OP.avantages({ contexte: 'general' }),
+        icone: function (k) { return I ? I.svg(k, 'op-ico') : ''; }
+      });
+      brancherLiensActivation(cible);
+      // Premier toucher : la case obligatoire (lib/checkout-consent.js) s'ouvre sous
+      // la date du premier prelevement ; le bouton reste verrouille tant qu'elle
+      // n'est pas cochee, puis le paiement part (facturation, duree Mois).
+      var bouton = cible.querySelector('#souscrire');
+      var cases = cible.querySelector('#checkoutConsent');
+      if (bouton && cases) {
+        selecteur = null;
+        consentement = null;
+        bouton.addEventListener('click', function () {
+          if (cases.hidden) {
+            cases.hidden = false;
+            monterConsentement();
+            chargerConsentement().then(function () {
+              try { cases.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (_e) { cases.scrollIntoView(false); }
+              var c = cases.querySelector('input');
+              if (c) { try { c.focus({ preventScroll: true }); } catch (_e) {} }
+            });
+            return;
+          }
+          facturation('create-checkout-session', bouton);
+        });
+      }
     });
   }
 
@@ -1223,7 +1324,7 @@
     afficher();
 
     if (new URLSearchParams(location.search).get('bienvenue') === '1') {
-      alerteSection(tr('compte_page.msg_welcome_account_created', 'Bienvenue. Votre compte est créé.'));
+      alerteSection(tr('compte_page.msg_welcome_account_created', 'Bienvenue. Ton compte gratuit est créé.'));
     }
 
     window.addEventListener('hashchange', function () {

@@ -67,23 +67,12 @@
         },
         {
           "type": "p",
-          "if": "hasTrialOffer",
-          "text": "Alle anderen Spiele des Tages öffnen sich mit Pro, mit {{trialDays}} Tagen Testphase. Erste Abbuchung: {{proPrice}} am {{firstChargeDate}}, wenn du heute startest, nur wenn du nicht vorher kündigst. Online in deinem Konto kündbar."
-        },
-        {
-          "type": "link",
-          "if": "hasTrialOffer",
-          "label": "{{trialDays}} Tage testen: heute {{zeroPrice}}",
-          "link": "trial"
-        },
-        {
-          "type": "p",
-          "if": "notOptedIn",
+          "if": "noTrialOffer",
           "text": "Alle anderen Spiele des Tages öffnen sich mit Pro: Alles steht in deinem Konto."
         },
         {
           "type": "link",
-          "if": "notOptedIn",
+          "if": "noTrialOffer",
           "label": "Mein Konto öffnen",
           "link": "account"
         },
@@ -118,7 +107,7 @@
         {
           "type": "p",
           "if": "hasTrialOffer",
-          "text": "Alle anderen Spiele des Tages öffnen sich mit Pro, mit {{trialDays}} Tagen Testphase. Erste Abbuchung: {{proPrice}} am {{firstChargeDate}}, wenn du heute startest, nur wenn du nicht vorher kündigst. Online in deinem Konto kündbar."
+          "text": "Alle anderen Spiele des Tages öffnen sich mit Pro, mit {{trialDays}} Tagen Testphase. Erste Abbuchung: {{proPrice}} {{trialDays}} Tage nach Beginn der Testphase, danach {{proPrice}} jeden Monat, nur wenn du nicht vorher kündigst. Karte erforderlich; online in deinem Konto kündbar."
         },
         {
           "type": "link",
@@ -149,7 +138,7 @@
           "type": "list",
           "if": "hasTickets",
           "items": [
-            "Die kleine und die große Kombi des Tages, die Gold-Auswahl und der Torschütze des Tages"
+            "Die große Kombi des Tages, die Gold-Auswahl und der Torschütze des Tages"
           ]
         },
         {
@@ -170,7 +159,7 @@
         {
           "type": "p",
           "if": "hasTrialOffer",
-          "text": "{{trialDays}} Tage Testphase beim Monatsabo (erstes Abo, Karte erforderlich): heute {{zeroPrice}}. Erste Abbuchung: {{proPrice}} am {{firstChargeDate}}, wenn du heute startest, nur wenn du nicht vorher kündigst. Online in deinem Konto kündbar."
+          "text": "{{trialDays}} Tage Testphase beim Monatsabo (erstes Abo): heute {{zeroPrice}}. Erste Abbuchung: {{proPrice}} {{trialDays}} Tage nach Beginn der Testphase, danach {{proPrice}} jeden Monat, nur wenn du nicht vorher kündigst. Karte erforderlich; online in deinem Konto kündbar."
         },
         {
           "type": "cta",
@@ -295,7 +284,7 @@
       "blocks": [
         {
           "type": "p",
-          "text": "Gestern, {{recapDate}}{{#recapParisTime}} (Pariser Zeit){{/recapParisTime}}, so sind die Tipps ausgegangen, die IASHARK vor dem Anpfiff veröffentlicht hat:"
+          "text": "Gestern, {{recapDate}}{{#recapParisTime}} (Pariser Zeit){{/recapParisTime}}, so sind die Einzeltipps ausgegangen, die IASHARK vor dem Anpfiff veröffentlicht hat:"
         },
         {
           "type": "list",
@@ -326,7 +315,7 @@
         {
           "type": "p",
           "if": "hasTrialOffer",
-          "text": "{{trialDays}} Tage Testphase beim Monatsabo: heute {{zeroPrice}}. Erste Abbuchung: {{proPrice}} am {{firstChargeDate}}, wenn du heute startest, nur wenn du nicht vorher kündigst. Online in deinem Konto kündbar."
+          "text": "{{trialDays}} Tage Testphase beim Monatsabo: heute {{zeroPrice}}. Erste Abbuchung: {{proPrice}} {{trialDays}} Tage nach Beginn der Testphase, danach {{proPrice}} jeden Monat, nur wenn du nicht vorher kündigst. Karte erforderlich; online in deinem Konto kündbar."
         },
         {
           "type": "cta",

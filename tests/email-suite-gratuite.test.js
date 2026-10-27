@@ -82,10 +82,10 @@ test("e-mail du bilan : gagnes ET perdus, aucun pourcentage, essai avec la date 
   const r = L.renderLifecycleEmail(BUNDLE, "results_recap", "fr", { marketingOptIn: true, trialDays: 7, bilan }, { unsubscribeUrl, now: NOW });
   const txt = r.text.replace(/[  ]/g, " ");
   assert.equal(r.subject, "Le bilan d'hier : 5 gagnés, 2 perdus");
-  assert.ok(txt.includes("Hier, lundi 26 octobre, voici") && txt.includes("- 5 gagnés") && txt.includes("- 2 perdus") && txt.includes("- 1 annulé"), txt);
+  assert.ok(txt.includes("Hier, lundi 26 octobre, voici le résultat des paris simples publiés") && txt.includes("- 5 gagnés") && txt.includes("- 2 perdus") && txt.includes("- 1 annulé"), txt);
   assert.ok(txt.includes("Au moment de cet e-mail : 1 en attente de résultat."));
   assert.ok(!txt.includes("heure de Paris"), "France : pas de precision");
-  assert.ok(txt.includes("Premier prélèvement : 14,99 € le 3 novembre si tu commences aujourd'hui"));
+  assert.ok(txt.includes("Premier prélèvement : 14,99 € 7 jours après le début de l'essai, puis 14,99 € chaque mois") && !/\b3 novembre\b/.test(txt), "aucune date dans un e-mail");
   assert.doesNotMatch(r.subject + txt, /%|taux|réussite|rentab|gain/i);
   const one = L.renderLifecycleEmail(BUNDLE, "results_recap", "fr", { marketingOptIn: true, bilan: { day: "2026-10-26", won: 1, lost: 0, voided: 0, pending: 0, total: 1 } }, { unsubscribeUrl, now: NOW });
   assert.equal(one.subject, "Le bilan d'hier : 1 gagné, 0 perdu");
@@ -165,4 +165,19 @@ test("workflow : la suite n'est demandee que par la variable EMAILS_SUITE_ACTIVE
   assert.match(wf, /vars\.EMAILS_SUITE_ACTIVE == 'true'/);
   assert.match(wf, /suite:\n\s+description: [^\n]+\n\s+required: false\n\s+default: false/);
   assert.match(wf, /sequence: \$s/);
+});
+
+test("fonction : base sans la migration 0055 = relecture sans p_sequence, la bienvenue part quand meme", async () => {
+  const { handleRequest } = await loadSend();
+  const t = deps({ fichier: FICHIER, row: { created_at: ago(0.2), last_sign_in_at: ago(0.2), last_marketing_sent_at: null, sent_keys: [], campaign: "welcome" } });
+  const store = t.deps.db;
+  const list = store.listCandidates;
+  store.listCandidates = async (a) => { const rows = await list(a); Object.defineProperty(rows, "sequenceFallback", { value: true, enumerable: false }); return rows; };
+  const body = await (await handleRequest(post({ sequence: true }), t.deps)).json();
+  assert.deepEqual([body.sent, body.sequence, body.sequenceFallback], [1, false, true]);
+  const p = JSON.parse(t.calls.find((c) => c.url === BREVO).init.body);
+  assert.match(p.subject, /^Bienvenue/);
+  assert.ok(!/Premier prélèvement|Essayer 7 jours/.test(p.textContent), "bienvenue sans offre d'essai");
+  const idx = fs.readFileSync(path.join(ROOT, "supabase", "functions", "send-lifecycle-emails", "index.ts"), "utf8");
+  assert.match(idx, /if \(error && sequence === true\) \{[\s\S]*rpc\("lifecycle_email_candidates", \{ p_now: nowIso, p_limit: limit \}\)/);
 });

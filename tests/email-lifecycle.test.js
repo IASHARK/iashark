@@ -219,7 +219,8 @@ test("campagnes par langue : sujet, prix de la version, consentement absent, ech
   const fmt = (iv) => R.formatMoney(Math.round(CONFIG.fr.prices.pro[iv].amount * 100), "EUR", "fr-FR").replace(/\s/g, " ");
   assert.ok(j5.includes(fmt("week") + " par semaine, " + fmt("month") + " par mois ou " + fmt("year") + " par an"), "J5 : les 3 durees et leurs prix");
   assert.ok(by("pro_features").text.includes("Français"));
-  assert.ok(j5.includes("Le Petit et le Grand combiné du jour"), "marche francais : combines, Selection en or, buteur");
+  assert.ok(j5.includes("Le Grand combiné du jour, la Sélection en or et le buteur du jour"), "marche francais : Grand combine, Selection en or, buteur");
+  assert.ok(!j5.includes("Petit combiné"), "le Petit combine est gratuit : jamais dans ce que Pro ajoute");
   assert.ok(!j5.includes("jours d'essai"), "essai jamais annonce sans confirmation de l'expediteur");
   assert.ok(by("free_match").text.includes("Chaque jour, IASHARK offre le pari d'un match à tous les comptes gratuits"));
   assert.ok(by("inactive_7d").text.includes("Paris SG – Marseille") && by("inactive_7d").text.includes("Arsenal – Chelsea"));
@@ -227,7 +228,7 @@ test("campagnes par langue : sujet, prix de la version, consentement absent, ech
   const gb = (await renderAll()).find((x) => x.dir === "gb" && x.campaign === "pro_features").r;
   // /gb/ : mensuel seul payable (19/09/2026) -> ligne « mois seul », jamais la semaine ni l'annee.
   assert.ok(gb.text.includes("Price on the English (UK) version of the site: £14.99 per month") && gb.text.includes("English (UK)"));
-  assert.ok(!gb.text.includes("Small and Big combo"), "hors marche francais : pas de combines annonces");
+  assert.ok(!gb.text.includes("Big combo"), "hors marche francais : pas de combines annonces");
   assert.doesNotMatch(gb.text + gb.html, /£4\.99|£149|per week|per year/, "GB : aucune duree non payable annoncee");
   const mx = (await renderAll()).find((x) => x.dir === "mx" && x.campaign === "pro_features").r;
   assert.ok(mx.text.includes("$69.00 MXN a la semana, $199.00 MXN al mes o $1,990.00 MXN al año"));
@@ -249,21 +250,25 @@ test("campagnes par langue : sujet, prix de la version, consentement absent, ech
   assert.equal(welcomeNo.subject, "Bienvenue : ton compte IASHARK est prêt");
   assert.ok(welcomeYes.text.includes("l'analyse complète du match offert") && welcomeYes.text.includes("le Petit combiné du jour"), "ce que le compte donne chaque jour");
 
-  // Essai Pro : seulement si l'expediteur l'a confirme pour ce compte (trialDays > 0), avec la date du
-  // premier prelevement (maintenant + 7 jours), et jamais a un compte qui n'a pas accepte nos e-mails.
+  // Essai Pro : seulement si l'expediteur l'a confirme pour ce compte (trialDays > 0) et au compte qui a
+  // accepte nos e-mails. JAMAIS de date dans un e-mail (avocat du diable, 27/10/2026) : « 7 jours apres le
+  // debut de l'essai, puis ... chaque mois ». Jamais d'essai dans la bienvenue.
   const trial = L.renderLifecycleEmail(BUNDLE, "pro_features", "fr", { trialDays: 7, marketingOptIn: true }, { unsubscribeUrl, now: NOW }).text.replace(/[  ]/g, " ");
-  assert.ok(trial.includes("Essai de 7 jours sur l'abonnement au mois (premier abonnement, carte demandée) : 0 € aujourd'hui. Premier prélèvement : " + fmt("month") + " le 24 septembre si tu commences aujourd'hui, seulement si tu ne résilies pas avant. Résiliation en ligne depuis Mon compte."), trial);
+  assert.ok(trial.includes("Essai de 7 jours sur l'abonnement au mois (premier abonnement) : 0 € aujourd'hui. Premier prélèvement : " + fmt("month") + " 7 jours après le début de l'essai, puis " + fmt("month") + " chaque mois, seulement si tu ne résilies pas avant. Carte demandée ; résiliation en ligne depuis Mon compte."), trial);
   assert.ok(trial.includes("Essayer 7 jours : 0 € aujourd'hui : https://iashark.com/fr/abonnement.html?duree=month&utm_source=email"), trial);
   assert.ok(!trial.includes("Voir l'offre Pro"), "un seul bouton");
-  const sansDate = L.renderLifecycleEmail(BUNDLE, "pro_features", "fr", { trialDays: 7, marketingOptIn: true }, { unsubscribeUrl }).text;
-  assert.ok(!sansDate.includes("Premier prélèvement") && sansDate.includes("Voir l'offre Pro"), "sans horloge : pas de date inventee, pas d'essai ecrit");
+  const MOIS = /(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre|january|february|march|april|may|june|july|august|september|october|november|december|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|januar|februar|märz|juni|juli|oktober|dezember|gennaio|febbraio|aprile|maggio|giugno|luglio|settembre|ottobre|dicembre|janeiro|fevereiro|março|maio|junho|julho|setembro|outubro|novembro|dezembro)/i;
+  const PRELEVEMENT = /Premier prélèvement|First charge|Primer cobro|Erste Abbuchung|Primo addebito|Primeira cobrança/;
+  for (const { dir, campaign, r } of await renderAll({ trialDays: 7 })) {
+    for (const line of r.text.split("\n").filter((l) => PRELEVEMENT.test(l))) assert.doesNotMatch(line, MOIS, dir + "/" + campaign + " : aucune date de prelevement dans un e-mail");
+  }
   const fmTrial = L.renderLifecycleEmail(BUNDLE, "free_match", "fr", { trialDays: 7, marketingOptIn: true, freeMatch: L.publicMatch(RAW_MATCHES[0], L.siteContext(BUNDLE.markets, "fr")) }, { unsubscribeUrl, now: NOW }).text.replace(/[  ]/g, " ");
-  assert.ok(fmTrial.includes("Pro, avec 7 jours d'essai. Premier prélèvement : " + fmt("month") + " le 24 septembre si tu commences aujourd'hui") && fmTrial.includes("https://iashark.com/fr/abonnement.html?duree=month"), fmTrial);
-  const welcomeTrial = L.renderLifecycleEmail(BUNDLE, "welcome", "fr", { trialDays: 7, marketingOptIn: true, freeMatch: null }, { unsubscribeUrl, now: NOW }).text;
-  assert.ok(welcomeTrial.includes("Premier prélèvement") && welcomeTrial.includes("le 24 septembre"));
-  const welcomeNoConsent = L.renderLifecycleEmail(BUNDLE, "welcome", "fr", { trialDays: 7, marketingOptIn: false, freeMatch: null }, { unsubscribeUrl, now: NOW }).text;
-  assert.ok(!/Premier prélèvement|Essayer 7 jours|€/.test(welcomeNoConsent), "sans accord : aucune offre commerciale dans la bienvenue");
-  assert.ok(welcomeNoConsent.includes("Ouvrir mon compte : https://iashark.com/fr/compte.html?utm_source=email"), "renvoi vers Mon compte");
+  assert.ok(fmTrial.includes("Pro, avec 7 jours d'essai. Premier prélèvement : " + fmt("month") + " 7 jours après le début de l'essai, puis ") && fmTrial.includes("https://iashark.com/fr/abonnement.html?duree=month"), fmTrial);
+  for (const optIn of [true, false]) {
+    const w = L.renderLifecycleEmail(BUNDLE, "welcome", "fr", { trialDays: 7, marketingOptIn: optIn, freeMatch: null }, { unsubscribeUrl, now: NOW }).text;
+    assert.ok(!/Premier prélèvement|Essayer 7 jours|essai|€/.test(w), "bienvenue : aucune offre d'essai, pour personne");
+    assert.ok(w.includes("Les autres matchs du jour s'ouvrent avec Pro") && w.includes("Ouvrir mon compte : https://iashark.com/fr/compte.html?utm_source=email"), "phrase neutre et renvoi vers Mon compte pour tous");
+  }
 
   const evil = L.publicMatch({ id: 9, home: { n: "<b>A&B</b>" }, away: { n: "C" }, date: "2026-09-19 20:00", league: "L" }, L.siteContext(BUNDLE.markets, "fr"));
   const esc = L.renderLifecycleEmail(BUNDLE, "free_match", "fr", { freeMatch: evil }, { unsubscribeUrl });

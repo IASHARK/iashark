@@ -51,7 +51,7 @@ test("ligne du match offert : aujourd'hui, demain ou plus tard ; noms echappes",
 test("offre : bouton « Essayer 7 jours : 0 € aujourd'hui » AVANT la case obligatoire, date du premier prelevement juste dessous", () => {
   const h = A.htmlOffre({ essai: { jours: 7, prixMois: "14,99 €", zero: "0 €", date: "3 novembre" }, autres: ["4,99 € la semaine", "99 € l’an"], avantages: [["chart-column", "Tous les matchs du jour"]] });
   assert.ok(h.includes("Essayer 7 jours : 0 € aujourd’hui"));
-  assert.ok(h.includes("Premier prélèvement : 14,99 € le 3 novembre, seulement si tu ne résilies pas avant. Résiliation en ligne depuis Mon compte."));
+  assert.ok(h.includes("Premier prélèvement : 14,99 € le 3 novembre, puis 14,99 € chaque mois, seulement si tu ne résilies pas avant. Carte demandée ; résiliation en ligne depuis Mon compte."), h);
   assert.ok(h.indexOf('id="souscrire"') < h.indexOf("Premier prélèvement") && h.indexOf("Premier prélèvement") < h.indexOf('id="checkoutConsent"'));
   assert.match(h, /id="checkoutConsent" hidden/, "la case s'ouvre au premier toucher");
   assert.ok(h.includes("Autres durées : 4,99 € la semaine ou 99 € l’an"));
@@ -68,7 +68,8 @@ test("Telegram : le robot ne relie que les comptes Pro, donc lien du canal gratu
   assert.equal(A.ROBOT_RELIE_LES_GRATUITS, false);
   assert.equal(A.lienTelegram(), "https://t.me/+qCEr2JFPDDBlZTFk");
   assert.match(read("bottom-navigation.js"), /t\.me\/\+qCEr2JFPDDBlZTFk/, "meme canal que la bulle du site");
-  assert.ok(A.htmlTelegram(true).includes("Recevoir le match offert chaque matin sur Telegram") && !A.htmlTelegram(true).includes("(en français)"));
+  assert.ok(A.htmlTelegram(true).includes("Rejoindre le canal Telegram IASHARK : match offert et résultats") && !A.htmlTelegram(true).includes("(en français)"));
+  assert.doesNotMatch(A.htmlTelegram(true), /chaque matin/, "aucune promesse de rythme");
   assert.ok(A.htmlTelegram(false).includes("(en français)"));
 });
 

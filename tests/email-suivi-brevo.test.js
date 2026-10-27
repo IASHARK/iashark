@@ -121,3 +121,16 @@ test("index.ts : envois recents lus dans email_sends, evenement ecrit par public
   const wf = fs.readFileSync(path.join(ROOT, ".github", "workflows", "emails-cycle-de-vie.yml"), "utf8");
   assert.match(wf, /suivi/, "le journal du workflow montre les nombres du suivi");
 });
+
+test("suivi : jamais plus de 20 s apres les envois (budget depasse = arret propre, dit dans la reponse)", async () => {
+  const { syncBrevoEvents, TRACKING_BUDGET_MS } = await load();
+  assert.equal(TRACKING_BUDGET_MS, 20000);
+  const t = deps();
+  const r = await syncBrevoEvents(t.deps, { name: "brevo", key: "k" }, NOW, 0);
+  assert.equal(r.synced, false);
+  assert.ok(r.errors.includes("time_budget"));
+  assert.equal(t.calls.length, 0, "budget epuise : aucun appel a Brevo");
+  assert.equal(t.recorded.length, 0);
+  const src = fs.readFileSync(path.join(DIR, "handler.ts"), "utf8");
+  assert.match(src, /signal: timeoutSignal\(Math\.max\(1, Math\.min\(10000, reste\)\)\)/, "chaque appel borne par le temps restant");
+});

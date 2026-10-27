@@ -67,23 +67,12 @@
         },
         {
           "type": "p",
-          "if": "hasTrialOffer",
-          "text": "Per aprire tutte le altre partite del giorno: Pro, con {{trialDays}} giorni di prova. Primo addebito: {{proPrice}} il {{firstChargeDate}} se inizi oggi, solo se non disdici prima. Disdetta online dal tuo account."
-        },
-        {
-          "type": "link",
-          "if": "hasTrialOffer",
-          "label": "Prova {{trialDays}} giorni: {{zeroPrice}} oggi",
-          "link": "trial"
-        },
-        {
-          "type": "p",
-          "if": "notOptedIn",
+          "if": "noTrialOffer",
           "text": "Le altre partite del giorno si aprono con Pro: è tutto spiegato nel tuo account."
         },
         {
           "type": "link",
-          "if": "notOptedIn",
+          "if": "noTrialOffer",
           "label": "Apri il mio account",
           "link": "account"
         },
@@ -118,7 +107,7 @@
         {
           "type": "p",
           "if": "hasTrialOffer",
-          "text": "Per aprire tutte le altre partite del giorno: Pro, con {{trialDays}} giorni di prova. Primo addebito: {{proPrice}} il {{firstChargeDate}} se inizi oggi, solo se non disdici prima. Disdetta online dal tuo account."
+          "text": "Per aprire tutte le altre partite del giorno: Pro, con {{trialDays}} giorni di prova. Primo addebito: {{proPrice}} {{trialDays}} giorni dopo l'inizio della prova, poi {{proPrice}} ogni mese, solo se non disdici prima. Carta richiesta; disdetta online dal tuo account."
         },
         {
           "type": "link",
@@ -149,7 +138,7 @@
           "type": "list",
           "if": "hasTickets",
           "items": [
-            "La multipla piccola e quella grande del giorno, la Selezione d'oro e il marcatore del giorno"
+            "La multipla grande del giorno, la Selezione d'oro e il marcatore del giorno"
           ]
         },
         {
@@ -170,7 +159,7 @@
         {
           "type": "p",
           "if": "hasTrialOffer",
-          "text": "Prova di {{trialDays}} giorni sull'abbonamento mensile (primo abbonamento, carta richiesta): {{zeroPrice}} oggi. Primo addebito: {{proPrice}} il {{firstChargeDate}} se inizi oggi, solo se non disdici prima. Disdetta online dal tuo account."
+          "text": "Prova di {{trialDays}} giorni sull'abbonamento mensile (primo abbonamento): {{zeroPrice}} oggi. Primo addebito: {{proPrice}} {{trialDays}} giorni dopo l'inizio della prova, poi {{proPrice}} ogni mese, solo se non disdici prima. Carta richiesta; disdetta online dal tuo account."
         },
         {
           "type": "cta",
@@ -295,7 +284,7 @@
       "blocks": [
         {
           "type": "p",
-          "text": "Ieri, {{recapDate}}{{#recapParisTime}} (ora di Parigi){{/recapParisTime}}, ecco come sono andati i pronostici pubblicati da IASHARK prima del calcio d'inizio:"
+          "text": "Ieri, {{recapDate}}{{#recapParisTime}} (ora di Parigi){{/recapParisTime}}, ecco come sono andati i pronostici singoli pubblicati da IASHARK prima del calcio d'inizio:"
         },
         {
           "type": "list",
@@ -326,7 +315,7 @@
         {
           "type": "p",
           "if": "hasTrialOffer",
-          "text": "Prova di {{trialDays}} giorni sull'abbonamento mensile: {{zeroPrice}} oggi. Primo addebito: {{proPrice}} il {{firstChargeDate}} se inizi oggi, solo se non disdici prima. Disdetta online dal tuo account."
+          "text": "Prova di {{trialDays}} giorni sull'abbonamento mensile: {{zeroPrice}} oggi. Primo addebito: {{proPrice}} {{trialDays}} giorni dopo l'inizio della prova, poi {{proPrice}} ogni mese, solo se non disdici prima. Carta richiesta; disdetta online dal tuo account."
         },
         {
           "type": "cta",

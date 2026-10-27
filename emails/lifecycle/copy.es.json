@@ -67,23 +67,12 @@
         },
         {
           "type": "p",
-          "if": "hasTrialOffer",
-          "text": "Para abrir todos los demás partidos del día: Pro, con {{trialDays}} días de prueba. Primer cobro: {{proPrice}} el {{firstChargeDate}} si empiezas hoy, solo si no cancelas antes. Cancelación en línea desde tu cuenta."
+          "if": "noTrialOffer",
+          "text": "Los demás partidos del día se abren con Pro: lo encontrarás explicado en tu cuenta."
         },
         {
           "type": "link",
-          "if": "hasTrialOffer",
-          "label": "Prueba {{trialDays}} días: {{zeroPrice}} hoy",
-          "link": "trial"
-        },
-        {
-          "type": "p",
-          "if": "notOptedIn",
-          "text": "Los demás partidos del día se abren con Pro: todo está explicado en tu cuenta."
-        },
-        {
-          "type": "link",
-          "if": "notOptedIn",
+          "if": "noTrialOffer",
           "label": "Abrir mi cuenta",
           "link": "account"
         },
@@ -118,7 +107,7 @@
         {
           "type": "p",
           "if": "hasTrialOffer",
-          "text": "Para abrir todos los demás partidos del día: Pro, con {{trialDays}} días de prueba. Primer cobro: {{proPrice}} el {{firstChargeDate}} si empiezas hoy, solo si no cancelas antes. Cancelación en línea desde tu cuenta."
+          "text": "Para abrir todos los demás partidos del día: Pro, con {{trialDays}} días de prueba. Primer cobro: {{proPrice}} {{trialDays}} días después del inicio de la prueba, luego {{proPrice}} cada mes, solo si no cancelas antes. Se pide tu tarjeta; cancelación en línea desde tu cuenta."
         },
         {
           "type": "link",
@@ -149,7 +138,7 @@
           "type": "list",
           "if": "hasTickets",
           "items": [
-            "La combinada pequeña y la grande del día, la Selección de oro y el goleador del día"
+            "La combinada grande del día, la Selección de oro y el goleador del día"
           ]
         },
         {
@@ -170,7 +159,7 @@
         {
           "type": "p",
           "if": "hasTrialOffer",
-          "text": "Prueba de {{trialDays}} días en la suscripción mensual (primera suscripción, se pide tu tarjeta): {{zeroPrice}} hoy. Primer cobro: {{proPrice}} el {{firstChargeDate}} si empiezas hoy, solo si no cancelas antes. Cancelación en línea desde tu cuenta."
+          "text": "Prueba de {{trialDays}} días en la suscripción mensual (primera suscripción): {{zeroPrice}} hoy. Primer cobro: {{proPrice}} {{trialDays}} días después del inicio de la prueba, luego {{proPrice}} cada mes, solo si no cancelas antes. Se pide tu tarjeta; cancelación en línea desde tu cuenta."
         },
         {
           "type": "cta",
@@ -295,7 +284,7 @@
       "blocks": [
         {
           "type": "p",
-          "text": "Ayer, {{recapDate}}{{#recapParisTime}} (hora de París){{/recapParisTime}}, este es el resultado de los pronósticos publicados por IASHARK antes del inicio:"
+          "text": "Ayer, {{recapDate}}{{#recapParisTime}} (hora de París){{/recapParisTime}}, este es el resultado de los pronósticos simples publicados por IASHARK antes del inicio:"
         },
         {
           "type": "list",
@@ -326,7 +315,7 @@
         {
           "type": "p",
           "if": "hasTrialOffer",
-          "text": "Prueba de {{trialDays}} días en la suscripción mensual: {{zeroPrice}} hoy. Primer cobro: {{proPrice}} el {{firstChargeDate}} si empiezas hoy, solo si no cancelas antes. Cancelación en línea desde tu cuenta."
+          "text": "Prueba de {{trialDays}} días en la suscripción mensual: {{zeroPrice}} hoy. Primer cobro: {{proPrice}} {{trialDays}} días después del inicio de la prueba, luego {{proPrice}} cada mes, solo si no cancelas antes. Se pide tu tarjeta; cancelación en línea desde tu cuenta."
         },
         {
           "type": "cta",

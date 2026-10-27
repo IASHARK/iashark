@@ -47,7 +47,15 @@ const db: LifecycleStore | null = supabase
       // il n'est envoye que si la suite est demandee, jamais sinon.
       const args: Record<string, unknown> = { p_now: nowIso, p_limit: limit };
       if (sequence === true) args.p_sequence = true;
-      const { data, error } = await supabase.rpc("lifecycle_email_candidates", args);
+      let { data, error } = await supabase.rpc("lifecycle_email_candidates", args);
+      let fallback = false;
+      // Migration 0055 absente (p_sequence inconnu) : on relit SANS la suite, pour que la
+      // bienvenue et les e-mails d'avant ne soient jamais bloques.
+      if (error && sequence === true) {
+        console.warn("[send-lifecycle-emails] p_sequence refuse (" + error.message + ") : relecture sans la suite.");
+        ({ data, error } = await supabase.rpc("lifecycle_email_candidates", { p_now: nowIso, p_limit: limit }));
+        fallback = !error;
+      }
       if (error) throw new Error("lifecycle_email_candidates: " + error.message);
       const rows = data ?? [];
       // Langue du compte : user_preferences.language, la SEULE source (site, robot, e-mails).
@@ -66,6 +74,8 @@ const db: LifecycleStore | null = supabase
         const deja = subs.error ? null : new Set((subs.data || []).map((s: { user_id: string }) => s.user_id));
         for (const r of rows) (r as { ever_subscribed?: boolean | null }).ever_subscribed = deja ? deja.has(r.user_id) : null;
       }
+      // Signale au handler que la suite n'a pas pu etre lue (regles d'avant pour ce passage).
+      if (fallback) Object.defineProperty(rows, "sequenceFallback", { value: true, enumerable: false });
       return rows;
     },
     // Envoi de test : comptes administrateurs seulement (users.role = 'admin').

@@ -67,23 +67,12 @@
         },
         {
           "type": "p",
-          "if": "hasTrialOffer",
-          "text": "Para abrir todos os outros jogos do dia: Pro, com {{trialDays}} dias de teste. Primeira cobrança: {{proPrice}} a {{firstChargeDate}} se começares hoje, só se não cancelares antes. Cancelamento online na tua conta."
-        },
-        {
-          "type": "link",
-          "if": "hasTrialOffer",
-          "label": "Experimentar {{trialDays}} dias: {{zeroPrice}} hoje",
-          "link": "trial"
-        },
-        {
-          "type": "p",
-          "if": "notOptedIn",
+          "if": "noTrialOffer",
           "text": "Os outros jogos do dia abrem-se com o Pro: está tudo explicado na tua conta."
         },
         {
           "type": "link",
-          "if": "notOptedIn",
+          "if": "noTrialOffer",
           "label": "Abrir a minha conta",
           "link": "account"
         },
@@ -118,7 +107,7 @@
         {
           "type": "p",
           "if": "hasTrialOffer",
-          "text": "Para abrir todos os outros jogos do dia: Pro, com {{trialDays}} dias de teste. Primeira cobrança: {{proPrice}} a {{firstChargeDate}} se começares hoje, só se não cancelares antes. Cancelamento online na tua conta."
+          "text": "Para abrir todos os outros jogos do dia: Pro, com {{trialDays}} dias de teste. Primeira cobrança: {{proPrice}} {{trialDays}} dias após o início do teste, depois {{proPrice}} todos os meses, só se não cancelares antes. Cartão pedido; cancelamento online na tua conta."
         },
         {
           "type": "link",
@@ -149,7 +138,7 @@
           "type": "list",
           "if": "hasTickets",
           "items": [
-            "A múltipla pequena e a grande do dia, a Seleção de ouro e o marcador do dia"
+            "A múltipla grande do dia, a Seleção de ouro e o marcador do dia"
           ]
         },
         {
@@ -170,7 +159,7 @@
         {
           "type": "p",
           "if": "hasTrialOffer",
-          "text": "Teste de {{trialDays}} dias na subscrição mensal (primeira subscrição, cartão pedido): {{zeroPrice}} hoje. Primeira cobrança: {{proPrice}} a {{firstChargeDate}} se começares hoje, só se não cancelares antes. Cancelamento online na tua conta."
+          "text": "Teste de {{trialDays}} dias na subscrição mensal (primeira subscrição): {{zeroPrice}} hoje. Primeira cobrança: {{proPrice}} {{trialDays}} dias após o início do teste, depois {{proPrice}} todos os meses, só se não cancelares antes. Cartão pedido; cancelamento online na tua conta."
         },
         {
           "type": "cta",
@@ -295,7 +284,7 @@
       "blocks": [
         {
           "type": "p",
-          "text": "Ontem, {{recapDate}}{{#recapParisTime}} (hora de Paris){{/recapParisTime}}, eis o resultado dos palpites publicados pelo IASHARK antes do pontapé de saída:"
+          "text": "Ontem, {{recapDate}}{{#recapParisTime}} (hora de Paris){{/recapParisTime}}, eis o resultado dos palpites simples publicados pelo IASHARK antes do pontapé de saída:"
         },
         {
           "type": "list",
@@ -326,7 +315,7 @@
         {
           "type": "p",
           "if": "hasTrialOffer",
-          "text": "Teste de {{trialDays}} dias na subscrição mensal: {{zeroPrice}} hoje. Primeira cobrança: {{proPrice}} a {{firstChargeDate}} se começares hoje, só se não cancelares antes. Cancelamento online na tua conta."
+          "text": "Teste de {{trialDays}} dias na subscrição mensal: {{zeroPrice}} hoje. Primeira cobrança: {{proPrice}} {{trialDays}} dias após o início do teste, depois {{proPrice}} todos os meses, só se não cancelares antes. Cartão pedido; cancelamento online na tua conta."
         },
         {
           "type": "cta",

@@ -67,23 +67,12 @@
         },
         {
           "type": "p",
-          "if": "hasTrialOffer",
-          "text": "To open every other match of the day: Pro, with a {{trialDays}}-day trial. First charge: {{proPrice}} on {{firstChargeDate}} if you start today, only if you don't cancel before then. Cancel online from your account."
-        },
-        {
-          "type": "link",
-          "if": "hasTrialOffer",
-          "label": "Try {{trialDays}} days: {{zeroPrice}} today",
-          "link": "trial"
-        },
-        {
-          "type": "p",
-          "if": "notOptedIn",
+          "if": "noTrialOffer",
           "text": "Every other match of the day opens with Pro: it's all explained in your account."
         },
         {
           "type": "link",
-          "if": "notOptedIn",
+          "if": "noTrialOffer",
           "label": "Open my account",
           "link": "account"
         },
@@ -118,7 +107,7 @@
         {
           "type": "p",
           "if": "hasTrialOffer",
-          "text": "To open every other match of the day: Pro, with a {{trialDays}}-day trial. First charge: {{proPrice}} on {{firstChargeDate}} if you start today, only if you don't cancel before then. Cancel online from your account."
+          "text": "To open every other match of the day: Pro, with a {{trialDays}}-day trial. First charge: {{proPrice}} {{trialDays}} days after the trial starts, then {{proPrice}} every month, only if you don't cancel before then. Card required; cancel online from your account."
         },
         {
           "type": "link",
@@ -149,7 +138,7 @@
           "type": "list",
           "if": "hasTickets",
           "items": [
-            "The day's Small and Big combo, the Gold Selection and the scorer of the day"
+            "The day's Big combo, the Gold Selection and the scorer of the day"
           ]
         },
         {
@@ -170,7 +159,7 @@
         {
           "type": "p",
           "if": "hasTrialOffer",
-          "text": "{{trialDays}}-day trial on the monthly subscription (first subscription, card required): {{zeroPrice}} today. First charge: {{proPrice}} on {{firstChargeDate}} if you start today, only if you don't cancel before then. Cancel online from your account."
+          "text": "{{trialDays}}-day trial on the monthly subscription (first subscription): {{zeroPrice}} today. First charge: {{proPrice}} {{trialDays}} days after the trial starts, then {{proPrice}} every month, only if you don't cancel before then. Card required; cancel online from your account."
         },
         {
           "type": "cta",
@@ -295,7 +284,7 @@
       "blocks": [
         {
           "type": "p",
-          "text": "Yesterday, {{recapDate}}{{#recapParisTime}} (Paris time){{/recapParisTime}}, here is how the picks IASHARK published before kick-off ended:"
+          "text": "Yesterday, {{recapDate}}{{#recapParisTime}} (Paris time){{/recapParisTime}}, here is how the single picks IASHARK published before kick-off ended:"
         },
         {
           "type": "list",
@@ -326,7 +315,7 @@
         {
           "type": "p",
           "if": "hasTrialOffer",
-          "text": "{{trialDays}}-day trial on the monthly subscription: {{zeroPrice}} today. First charge: {{proPrice}} on {{firstChargeDate}} if you start today, only if you don't cancel before then. Cancel online from your account."
+          "text": "{{trialDays}}-day trial on the monthly subscription: {{zeroPrice}} today. First charge: {{proPrice}} {{trialDays}} days after the trial starts, then {{proPrice}} every month, only if you don't cancel before then. Card required; cancel online from your account."
         },
         {
           "type": "cta",

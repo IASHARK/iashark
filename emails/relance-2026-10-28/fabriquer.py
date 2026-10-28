@@ -356,8 +356,8 @@ def rendre(seg, l, desinscr):
 <p style="margin:12px 0 0;font-family:{POLICE};font-size:13px;line-height:1.55;color:{C["gris"]};">{t["rep"]}</p></td></tr>
 </table></td></tr>
 <tr><td class="pad" align="center" style="padding:28px 20px 4px;">
-<p style="margin:0 0 14px;font-family:{POLICE};font-size:13px;font-weight:700;color:{C["gris2"]};">{t["suivre"]}</p>
-<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>{reseaux()}</tr></table></td></tr>
+<!--reseaux--><p style="margin:0 0 14px;font-family:{POLICE};font-size:13px;font-weight:700;color:{C["gris2"]};">{t["suivre"]}</p>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>{reseaux()}</tr></table><!--/reseaux--></td></tr>
 <tr><td class="pad" style="padding:22px 32px 0;font-family:{POLICE};font-size:12px;line-height:1.6;color:{C["gris"]};text-align:center;">
 {html.escape(s["pied"])}<br><a href="{desinscr}" style="color:{C["gris"]};text-decoration:underline;">{t["desinscr"]}</a> &nbsp;·&nbsp; <a href="{SITE}/%%DIR%%/?{u}" style="color:{C["gris"]};text-decoration:underline;">iashark.com</a></td></tr>
 </table></td></tr></table></body></html>'''
@@ -368,11 +368,14 @@ def texte(h):
     def ancre(m):
         libelle = re.sub(r"<[^>]+>", "", m.group(2)).strip()
         return f"{libelle} : {m.group(1)}" if libelle else ""
+    h = re.sub(r"<!--reseaux-->.*?<!--/reseaux-->", "", h, flags=re.S)  # logos des reseaux : pas en texte
+    h = re.sub(r'<div style="display:none[^"]*">.*?</div>', "", h, flags=re.S)  # texte d'apercu cache
     h = re.sub(r'<a href="([^"]+)"[^>]*>(.*?)</a>', ancre, h, flags=re.S)
+    h = re.sub(r"</td>", " ", h)
     h = re.sub(r"<(br|/p|/tr|/h1)[^>]*>", "\n", h)
     h = re.sub(r"<[^>]+>", "", h)
     h = html.unescape(h)
-    return "\n".join(x.strip() for x in h.splitlines() if x.strip())
+    return "\n".join(re.sub(r"[ \t]+", " ", x).strip() for x in h.splitlines() if x.strip())
 
 
 # Garde-fous de redaction (verifies a chaque fabrication).
@@ -395,7 +398,7 @@ for seg in SEG:
         apercu = rendre(seg, l, "#").replace(IMG.format(l=l), "file://" + IMG_LOCALE.format(l=l)).replace("%%DIR%%", l if seg != "partenaire" or l != "en" else "gb")
         open(os.path.join(OUT, f"apercu-{seg}-{l}.html"), "w").write(apercu)
         paquet[f"{seg}-{l}"] = {"sujet": s["sujet"], "pre": s["pre"], "html": page,
-                                "texte": visible + "\n" + T[l]["desinscr"] + " : %%DESINSCRIPTION%%"}
+                                "texte": visible}
 
 json.dump(paquet, open(os.path.join(OUT, "paquet.json"), "w"), ensure_ascii=False)
 with open(PAQUET_TS, "w") as f:

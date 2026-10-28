@@ -261,3 +261,56 @@ test("pipeline : calcul a blanc APRES publierPronostics et AVANT l'alignement ; 
   // Releve /odds du calcul garde en memoire avec son heure.
   assert.match(wf, /if\(oddsRaw\) ODDS_DU_RUN\[String\(f\.id\)\]=/);
 });
+
+test("jamais dans un ticket : un pari de repli (meme publie sous GO, cote agreee) n'entre ni dans un combine, ni dans la Selection en or (calculerDuJour)", () => {
+  const TK = require("../lib/tickets-du-jour.js");
+  const JB = require("../lib/run-output/jambes-du-jour.js");
+  const COTE_ANJ = require("../lib/cote-anj.js");
+  const [a] = COTE_ANJ.BOOKMAKERS_SUIVIS;
+  const livres = {}; livres[a + "_fr"] = { ou: { "4.5": [2.55, 1.55] } };
+  const KO2 = "2026-10-28T17:00:00+00:00";
+  const m = matchCoupe({ date: "2026-10-28 18:00", league_reliability: "en_test" });
+  const o = opts({ verdicts: { repli_coupes: { forme: "GO", marche: "GO" } }, koIso: { 777: KO2 }, cotesAnjPar: { 777: livres }, relevesAnj: { 777: "2026-10-28T12:50:00Z" } });
+  const row = { fixture_id: 777, raw_response: {} };
+  assert.equal(RF.publierRepli([m], [row], o).publies, 1);
+  P.alignerChancesAffichees([m], [row], { configLigues: CFG, figes: {} });
+  assert.equal(m.pronostic.voie, "repli_forme");
+  const nowMs = Date.parse("2026-10-28T13:00:00Z");
+  const fixtureById = { 777: { fixture: { id: 777, date: KO2, timestamp: Date.parse(KO2) / 1000, status: { short: "NS" } } } };
+  const normal = (i, mk, cote, ch) => ({ id: i, league_key: "laliga", league: "LaLiga", date: "2026-10-28 21:00", status: "NS", home: { n: "H" + i }, away: { n: "A" + i },
+    pari_rec: "x", no_signal: false, market_id: mk, cote_rec: cote, cote_source: "anj", cote_bookmaker: COTE_ANJ.nomBookmaker(a), chance_iashark: ch,
+    pronostic: { publie: true, market_id: mk, fiabilite: "vérifiée", hors_fourchette: false, libelle_fr: mk, voie: "cotes_marche" } });
+  const autres = [normal(901, "home-win", "1.55", 58), normal(902, "dc-1x", "1.45", 60)];
+  autres.forEach((x) => { fixtureById[x.id] = { fixture: { id: x.id, date: "2026-10-28T20:00:00+00:00", timestamp: Date.parse("2026-10-28T20:00:00+00:00") / 1000, status: { short: "NS" } } }; });
+  const ctx = { jour: "2026-10-28", nowMs: nowMs, fixtureById: fixtureById, configLigues: CFG, deja: {} };
+  assert.equal(JB.raisonExclusion(m, ctx, P.fourchettePari(CFG)), "repli_coupes");
+  // La variante marche aussi (selection_voie), et un candidat marque « repli_forme ».
+  assert.ok(JB.estRepli({ selection_voie: "repli_forme_marche" }) && JB.estRepli({}, { voie: "repli_forme" }));
+  const cand = JB.candidatsDuJour([m].concat(autres), { 777: [{ market_id: m.market_id, cote: Number(m.cote_rec), cote_anj: true, bookmaker: m.cote_bookmaker, chance: 70, chance_affichee: 70, fiabilite: "vérifiée", voie: "repli_forme" }] }, "jambe", ctx);
+  assert.ok(!cand.selections.some((s) => s.fixture_id === 777));
+  assert.equal(cand.exclus.repli_coupes, 1);
+  const cj = TK.calculerDuJour([m].concat(autres), ctx);
+  const ids = [].concat(cj.or ? cj.or.contenu.paris : [], cj.x5 ? cj.x5.contenu.jambes : [], cj.x10 ? cj.x10.contenu.jambes : []).map((x) => x.fixture_id);
+  assert.ok(!ids.includes(777), "repli dans un ticket : " + JSON.stringify(ids));
+});
+
+test("seuil du trader sur la chance FINALE : publie (GO) puis aligne, la chance affichee reste >= 50 et egale a celle archivee", () => {
+  const m = matchCoupe();
+  const row = { fixture_id: 777, raw_response: {} };
+  const o = opts({ verdicts: { repli_coupes: { forme: "GO", marche: "NO-GO" } } });
+  const ligne = RF.calculerBlanc([matchCoupe()], o).lignes.find((l) => l.variante === "forme");
+  RF.publierRepli([m], [row], o);
+  P.alignerChancesAffichees([m], [row], { configLigues: CFG, figes: {} });
+  assert.ok(m.chance_iashark >= RF.lireParametres(CFG).chance_min);
+  assert.equal(m.chance_iashark, ligne.chance);
+  assert.equal(ligne.voie, "repli_forme");
+});
+
+test("pipeline : le repli n'entre jamais dans les tickets ni dans le match offert", () => {
+  const wf = fs.readFileSync(path.join(ROOT, ".github", "workflows", "update-data.yml"), "utf8");
+  const ana = wf.slice(wf.indexOf("var analysable=function(m){"), wf.indexOf("\n", wf.indexOf("var analysable=function(m){")));
+  assert.match(ana, /m\.pronostic\.voie==='repli_forme'/);
+  assert.match(ana, /\^repli_forme/);
+  assert.match(fs.readFileSync(path.join(ROOT, "lib", "tickets-du-jour.js"), "utf8"), /if \(JAMBES\.estRepli\(m\)\) return;/);
+  assert.match(fs.readFileSync(path.join(ROOT, "supabase", "migrations", "0059_repli_coupes_blanc.sql"), "utf8"), /voie\s+text\s+not null check \(voie = 'repli_forme'\)/);
+});

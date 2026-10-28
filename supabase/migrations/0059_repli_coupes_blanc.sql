@@ -18,6 +18,7 @@
 
 create table if not exists public.repli_coupes_blanc (
   fixture_id      bigint      not null,
+  voie            text        not null check (voie = 'repli_forme'),
   variante        text        not null check (variante in ('forme', 'marche')),
   league_key      text        not null,
   home            text        not null,
@@ -84,7 +85,7 @@ begin
   if old.resultat is not null then
     return old;
   end if;
-  new.fixture_id := old.fixture_id; new.variante := old.variante; new.league_key := old.league_key;
+  new.fixture_id := old.fixture_id; new.voie := old.voie; new.variante := old.variante; new.league_key := old.league_key;
   new.home := old.home; new.away := old.away; new.coup_envoi := old.coup_envoi;
   new.market_id := old.market_id; new.marche := old.marche; new.pari := old.pari;
   new.cote := old.cote; new.cote_source := old.cote_source; new.bookmaker := old.bookmaker; new.cote_releve_a := old.cote_releve_a;

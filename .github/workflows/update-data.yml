@@ -4827,7 +4827,8 @@ jobs:
               // IASHARK » (03/10) est retiree. Avec 2 selections par jour, aucun match n'etait plus offert depuis le 05/10.
               // Le match offert : un pronostic publie, competition verifiee, cote dans la fourchette, coup d'envoi a venir.
               // Equipes nationales : toujours une Selection IASHARK (decision du 03/10, inchangee).
-              var analysable=function(m){ return m && m.pari_rec && !m.no_signal && (!SELECTIONS.estSelectionNationale(m) || estSelectionDuJour(m)) && competitionOffrable(m) && dansFourchetteOffert(m) && eligibleForFree(FIXTURE_BY_ID[String(m.id)],OFFRE_MS); };
+              // Pari de repli des coupes (lib/repli-forme.js, avocat du diable du 28/10/2026) : jamais le match offert.
+              var analysable=function(m){ return m && m.pari_rec && !m.no_signal && !(m.pronostic&&m.pronostic.voie==='repli_forme') && !/^repli_forme/.test(String(m.selection_voie||'')) && (!SELECTIONS.estSelectionNationale(m) || estSelectionDuJour(m)) && competitionOffrable(m) && dansFourchetteOffert(m) && eligibleForFree(FIXTURE_BY_ID[String(m.id)],OFFRE_MS); };
               // Competition connue d'abord : Ligue des nations / eliminatoires (treve), puis coupes
               // d'Europe et grands championnats, puis le reste (0 = la plus connue).
               var GRANDES_COMPETITIONS=['ldc','el','ecl','premier','laliga','seriea','bundesliga','ligue1'];

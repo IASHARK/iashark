@@ -123,6 +123,8 @@ jobs:
           var BILAN_HIER=require('./lib/bilan-hier.js');
           // Bandeau des vrais resultats (accueil et pages match, 26/10/2026) : module pur, tests/bandeau-preuves.test.js.
           var BANDEAU_PREUVES=require('./lib/bandeau-preuves.js');
+          // Les 3 montantes de la page Combines (28/10/2026) : module pur, tests/montantes.test.js.
+          var MONTANTES=require('./lib/montantes.js');
           const I18N_LOCALES = require('./i18n/locales.json');
           const I18N_PAGES = require('./scripts/i18n-manifest.js');
           const { generateLocalizedSitemaps, writeSitemapIndex } = require('./scripts/i18n-sitemaps.js');
@@ -2714,6 +2716,34 @@ jobs:
                   }else console.log('::warning title=Bandeau::archive ou tickets illisibles, preuves/bandeau.json garde.');
                 }
               }catch(e){ console.log('::warning title=Bandeau::preuves/bandeau.json non ecrit ('+(e&&e.message)+').'); }
+              // LES 3 MONTANTES de la page Combines (28/10/2026, lib/montantes.js) : chaque pari de la Selection en or
+              // nourrit sa montante (paliers gagnes d'affilee, cote cumulee, objectif cote 10). Toutes les Selections en or
+              // publiees depuis MONTANTES.DEBUT, reglees par la MEME regle que la bande (BANDEAU_PREUVES.creerRegleur).
+              // Fichier public preuves/montantes.json : jours passes seulement. Lecture impossible : le fichier precedent
+              // reste en place (jamais une montante remise a zero par une panne). Journal : compteurs seulement.
+              try{
+                if(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY){
+                  var entM={'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY};
+                  var baseM=SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/';
+                  var ticketsM=await rawHttpGetJson(baseM+'tickets_du_jour?select=jour,type,contenu,publie_a,premier_coup_envoi&type=eq.or&jour=gte.'+MONTANTES.DEBUT+'&order=jour.asc',entM);
+                  var idsM={};
+                  (Array.isArray(ticketsM)?ticketsM:[]).forEach(function(t){
+                    var l=t&&t.contenu&&t.contenu.paris;
+                    (Array.isArray(l)?l:[]).forEach(function(p){ if(p&&/^\d{1,12}$/.test(String(p.fixture_id))) idsM[String(p.fixture_id)]=true; });
+                  });
+                  var listeIdsM=Object.keys(idsM);
+                  var archiveM=listeIdsM.length?await rawHttpGetJson(baseM+'predictions_archive?select=fixture_id,market,result,published_at,kickoff_at,score&fixture_id=in.('+listeIdsM.join(',')+')',entM):[];
+                  if(Array.isArray(ticketsM)&&Array.isArray(archiveM)){
+                    var jourM=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+                    var montantes=MONTANTES.construireMontantes({tickets:ticketsM,archive:archiveM,matchs:matchsDuRun,jour:jourM,genereLe:genere});
+                    if(montantes){
+                      if(!fs.existsSync('preuves')) fs.mkdirSync('preuves',{recursive:true});
+                      fs.writeFileSync('preuves/montantes.json',JSON.stringify(montantes,null,1));
+                      console.log('  [montantes] '+montantes.montantes.map(function(m){ return 'montante '+m.rang+' : '+m.gagnes+' palier(s) gagne(s)'+(m.etat==='en_attente'?' (en attente)':'')+', '+m.objectifs.length+' objectif(s)'; }).join(' ; ')+'.');
+                    }else console.log('::warning title=Montantes::calcul impossible, preuves/montantes.json garde.');
+                  }else console.log('::warning title=Montantes::tickets ou archive illisibles, preuves/montantes.json garde.');
+                }
+              }catch(e){ console.log('::warning title=Montantes::preuves/montantes.json non ecrit ('+(e&&e.message)+').'); }
               // Fenetre glissante : les journees sorties des 60 jours sont retirees
               // du depot (rien d'autre ne vit dans results/).
               fs.readdirSync(RESULTS_DIR).forEach(function(f){

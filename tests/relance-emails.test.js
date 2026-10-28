@@ -285,6 +285,9 @@ test("workflow : envoi automatique le 28/10 a 10:00 UTC, garde de date, saisie a
   assert.match(wf, /workflow_dispatch:\s+inputs:\s+mode:/);
   assert.match(wf, /x-region: us-east-2/);
   assert.match(wf, /concurrency:\s+group: relance-emails/);
+  // Installation en 3 essais ; en envoi automatique, la version en ligne est verifiee avant d'envoyer.
+  assert.match(wf, /for essai in 1 2 3; do/);
+  assert.match(wf, /if \[ "\$code" != "200" \] \|\| \[ "\$cle" != "2026-10-28" \]; then/);
   for (const l of ["fr", "en", "es"]) assert.ok(fs.existsSync(path.join(ROOT, `assets/emails/2026-10-28/banniere-${l}.jpg`)), "banniere " + l);
   assert.match(fs.readFileSync(path.join(DIR, "paquet.ts"), "utf8").split("\n")[0], /emails\/relance-2026-10-28\/fabriquer\.py/);
 });

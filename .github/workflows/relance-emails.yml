@@ -53,9 +53,14 @@ jobs:
       - uses: actions/checkout@v4
         if: steps.garde.outputs.go == 'true'
       # La fonction est installee depuis ce depot a chaque lancement (meme version que le test).
+      # Jusqu'a 3 essais : le 28/10 a 05:37 UTC, l'assemblage chez Supabase a echoue une fois sur un
+      # telechargement trop lent (jsr.io). En envoi automatique, un echec ici n'arrete pas tout : l'etape
+      # suivante verifie d'abord que la version en ligne est bien celle du 28/10 (sinon rien ne part).
       - name: Installation de la fonction
+        id: installation
         if: steps.garde.outputs.go == 'true'
         env:
+          EVENEMENT: ${{ github.event_name }}
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           RELANCE_SECRET: ${{ secrets.RELANCE_SECRET }}
           # Meme secret pour signer (relance-emails) et verifier (email-unsubscribe) les liens de desinscription.
@@ -67,7 +72,18 @@ jobs:
           if [ -n "$BREVO_API_KEY" ]; then
             npx -y supabase@2 secrets set "BREVO_API_KEY=$(printf %s "$BREVO_API_KEY" | tr -d '\r\n ')" --project-ref ksvjraqitxouwiabecai > /dev/null
           fi
-          npx -y supabase@2 functions deploy relance-emails --project-ref ksvjraqitxouwiabecai --use-api
+          for essai in 1 2 3; do
+            if npx -y supabase@2 functions deploy relance-emails --project-ref ksvjraqitxouwiabecai --use-api; then
+              echo "installee=true" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+            echo "Installation : essai $essai echoue"; [ "$essai" = 3 ] || sleep 30
+          done
+          echo "installee=false" >> "$GITHUB_OUTPUT"
+          if [ "$EVENEMENT" = "schedule" ]; then
+            echo "::warning::Fonction non reinstallee : la version deja en ligne sera verifiee avant l'envoi."
+          else
+            exit 1
+          fi
       # Region fixe (Ohio, us-east-2) : Brevo n'accepte que les adresses autorisees par Clement
       # (plage IPv6 2600:1f16::/32) ; sans region fixe, l'adresse de depart change a chaque appel.
       - name: Appel de la fonction
@@ -85,6 +101,19 @@ jobs:
           if [ "$EVENEMENT" = "schedule" ]; then
             # Envoi automatique demande par Clement : mode envoi, avec la phrase de confirmation.
             MODE=envoi; CONFIRMATION="ENVOYER LA RELANCE"; EXCLURE=""; PLANIFIE=true
+          fi
+          appel() {
+            curl -sS -o reponse.json -w "%{http_code}" -X POST "https://ksvjraqitxouwiabecai.supabase.co/functions/v1/relance-emails" \
+              -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H "x-relance-secret: $RELANCE_SECRET" -H "x-region: us-east-2" -H "Content-Type: application/json" --max-time 600 -d "$1"
+          }
+          if [ "$PLANIFIE" = true ]; then
+            # Avant l'envoi automatique : la fonction en ligne doit etre celle de la campagne du 28/10.
+            code=$(appel '{"mode":"etat"}')
+            cle=$(jq -r '.cle // empty' reponse.json 2>/dev/null || true)
+            echo "Verification : HTTP $code, campagne en ligne : ${cle:-inconnue}"
+            if [ "$code" != "200" ] || [ "$cle" != "2026-10-28" ]; then
+              echo "::error::La fonction en ligne n'est pas celle du 28/10 : rien n'est envoye."; exit 1
+            fi
           fi
           corps=$(jq -nc --arg m "$MODE" --arg c "$CONFIRMATION" --arg x "$EXCLURE" --argjson p "$PLANIFIE" '{mode:$m, confirmation:$c, exclure:$x, planifie:$p}')
           code=$(curl -sS -o reponse.json -w "%{http_code}" -X POST "https://ksvjraqitxouwiabecai.supabase.co/functions/v1/relance-emails" \

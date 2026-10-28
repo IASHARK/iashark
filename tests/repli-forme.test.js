@@ -147,6 +147,18 @@ test("reglement : chaque marche du repli se regle comme il se lit (lib/resolvers
   RF.MARCHES_REPLI.forEach((id) => assert.ok(["RESULTAT", "DOUBLE_CHANCE", "TOTAL_BUTS", "BTTS", "BUTS_EQUIPE"].includes(MP.CATALOGUE[id].categorie), id));
 });
 
+test("cote agreee d'abord (meme regle que le pari normal) : nom de l'agree et heure reelle du releve", () => {
+  const COTE_ANJ = require("../lib/cote-anj.js");
+  const [a, b] = COTE_ANJ.BOOKMAKERS_SUIVIS;
+  const livres = {}; livres[a + "_fr"] = { ou: { "4.5": [2.55, 1.52] } }; livres[b + "_fr"] = { ou: { "4.5": [2.50, 1.55] } };
+  const m = matchCoupe();
+  const r = RF.publierRepli([m], [], opts({ cotesAnjPar: { 777: livres }, relevesAnj: { 777: "2026-10-28T05:40:00Z" } }));
+  assert.equal(r.publies, 1);
+  assert.equal(m.market_id, "under-45");
+  assert.deepEqual([m.cote_rec, m.cote_source, m.cote_bookmaker, m.cote_releve_a], ["1.55", "anj", COTE_ANJ.nomBookmaker(b), "2026-10-28T05:40:00Z"]);
+  assert.equal(m.pronostic.cote_source, "anj");
+});
+
 test("jamais sous 1,40 ni au-dessus de la borne : aucune cote dans la fourchette -> pas de pari, rien d'invente", () => {
   const bas = releve([B.resultat("15.0", "8.00", "1.10"), B.buts([[1.5, "1.05", "9.00"], [2.5, "1.25", "3.80"], [3.5, "1.38", "2.90"]])]);
   const m = matchCoupe();

@@ -55,7 +55,10 @@
     "a-propos.html","abonnement.html","exemple-analyse.html","checkout-annule.html",
     "checkout-succes.html","404.html","landing.html",
     "mentions-legales.html","cgv.html","confidentialite.html","cookies.html","jeu-responsable.html",
-    "methodologie.html"
+    "methodologie.html",
+    // 28/10/2026 : pages traduites oubliees ; depuis /gb/ ou /en/, leurs liens partaient
+    // a la racine, redirigee vers /fr/ (un abonne anglophone a atterri sur /fr/partenaires.html).
+    "combines.html","partenaires.html","partenaires-conditions.html","desinscription-email.html"
   ].forEach(function(p){ LOCALIZED_PAGES[p] = true; });
 
   var DIR_PREFIX_RE = /^\/([a-z]{2})(\/.*)?$/;

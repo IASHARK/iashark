@@ -1,5 +1,5 @@
 /* IASHARK — espace partenaire (/partenaires.html), 03/10/2026.
-   Telephone d'abord, charte du site (Tailwind + assets/pro-space.css), 7 langues
+   Telephone d'abord, feuille assets/partenaires.css (refonte du 28/10/2026), 7 langues
    (cles affiliation.* de i18n/parts/affiliation.<locale>.json).
 
    Etats, decides par la base (RPC affiliate_me / affiliate_dashboard, migration
@@ -47,56 +47,100 @@
   }
   function nombre(n) { try { return new Intl.NumberFormat(localeTag()).format(Number(n) || 0); } catch (e) { return String(n || 0); } }
 
-  /* ---------- Morceaux d'interface ---------- */
-  function carte(html, cls) { return '<div class="rounded-2xl border border-hairline bg-surface p-5 ' + (cls || '') + '">' + html + '</div>'; }
+
+  /* ---------- Morceaux d'interface (classes pa-*, assets/partenaires.css, 28/10/2026) ---------- */
+  function carte(html, cls) { return '<div class="pa-carte' + (cls ? ' ' + cls : '') + '">' + html + '</div>'; }
   function titre(t, aide) {
-    return '<h2 class="text-[22px] font-extrabold leading-tight tracking-tight sm:text-[26px]">' + esc(t) + '</h2>'
-      + (aide ? '<p class="mt-2 text-[14.5px] leading-relaxed text-soft">' + esc(aide) + '</p>' : '');
+    return '<h2 class="pa-h2">' + esc(t) + '</h2>' + (aide ? '<p class="pa-texte">' + esc(aide) + '</p>' : '');
   }
-  function bouton(id, label, primaire, href) {
-    var cls = primaire ? 'bg-cyan text-[#04141b] hover:bg-cyan/90' : 'border border-hairline text-ink hover:border-cyan/40';
-    var attrs = ' class="inline-flex h-11 items-center justify-center rounded-xl px-5 text-[14px] font-bold transition ' + cls + '"';
-    return href ? '<a href="' + esc(href) + '"' + attrs + '>' + esc(label) + '</a>' : '<button type="button" id="' + id + '"' + attrs + '>' + esc(label) + '</button>';
+  function bouton(id, label, primaire, href, petit) {
+    var cls = 'pa-btn' + (primaire ? '' : ' pa-btn--ligne') + (petit ? ' pa-btn--petit' : '');
+    return href ? '<a href="' + esc(href) + '" class="' + cls + '">' + esc(label) + '</a>' : '<button type="button" id="' + id + '" class="' + cls + '">' + esc(label) + '</button>';
   }
   function champ(id, label, o) {
     o = o || {};
-    return '<div><label for="' + id + '" class="block text-[13.5px] font-semibold text-ink">' + esc(label) + '</label>'
-      + '<input id="' + id + '" type="' + (o.type || 'text') + '"' + (o.attrs || '') + ' value="' + esc(o.value || '') + '" class="mt-2 h-12 w-full rounded-xl border border-hairline bg-panel px-4 text-[16px] text-ink outline-none transition focus:border-cyan/60">'
-      + (o.aide ? '<p class="mt-1.5 text-[12.5px] leading-relaxed text-soft">' + esc(o.aide) + '</p>' : '') + '</div>';
+    return '<div class="pa-champ"><label for="' + id + '">' + esc(label) + '</label>'
+      + '<input id="' + id + '" type="' + (o.type || 'text') + '"' + (o.attrs || '') + ' value="' + esc(o.value || '') + '" class="pa-saisie' + (o.cls ? ' ' + o.cls : '') + '"' + (o.aide ? ' aria-describedby="' + id + 'Aide"' : '') + '>'
+      + (o.aide ? '<p class="pa-aide" id="' + id + 'Aide">' + esc(o.aide) + '</p>' : '') + '</div>';
   }
   function choix(nom, valeur, label, texte, coche) {
-    return '<label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-hairline bg-panel p-3.5 transition hover:border-cyan/40 has-[:checked]:border-cyan/60 has-[:checked]:bg-cyan/[.06]">'
-      + '<input type="radio" name="' + nom + '" value="' + esc(valeur) + '"' + (coche ? ' checked' : '') + ' class="mt-1 h-[18px] w-[18px] shrink-0 accent-[#20d5ef]">'
-      + '<span><span class="block text-[14.5px] font-semibold">' + esc(label) + '</span>' + (texte ? '<span class="mt-0.5 block text-[13px] leading-relaxed text-soft">' + esc(texte) + '</span>' : '') + '</span></label>';
+    return '<label class="pa-choix"><input type="radio" name="' + nom + '" value="' + esc(valeur) + '"' + (coche ? ' checked' : '') + '>'
+      + '<span><b>' + esc(label) + '</b>' + (texte ? '<small>' + esc(texte) + '</small>' : '') + '</span></label>';
   }
   function caseAcoche(id, html) {
-    return '<label class="flex cursor-pointer items-start gap-3 text-[13.5px] leading-relaxed text-soft"><input id="' + id + '" type="checkbox" class="mt-1 h-[18px] w-[18px] shrink-0 accent-[#20d5ef]"><span>' + html + '</span></label>';
+    return '<label class="pa-case"><input id="' + id + '" type="checkbox"><span>' + html + '</span></label>';
   }
   function kpi(label, valeur, sous) {
-    return '<div class="rounded-2xl border border-hairline bg-surface p-4"><p class="text-[12px] font-semibold uppercase tracking-wider text-soft">' + esc(label) + '</p>'
-      + '<p class="pa-kpi mt-1 text-[24px] font-extrabold">' + esc(valeur) + '</p>' + (sous ? '<p class="mt-0.5 text-[12.5px] text-soft">' + esc(sous) + '</p>' : '') + '</div>';
+    return '<div class="pa-chiffre"><p>' + esc(label) + '</p><b>' + esc(valeur) + '</b>' + (sous ? '<small>' + esc(sous) + '</small>' : '') + '</div>';
   }
   function message(id, texte, type) {
     var el = document.getElementById(id);
     if (!el) return;
     el.textContent = texte || '';
     el.hidden = !texte;
-    el.className = 'mt-4 rounded-lg border px-3.5 py-3 text-[13.5px] leading-relaxed ' + (type === 'error' ? 'border-red-500/30 bg-red-500/[.07] text-red-300' : type === 'success' ? 'border-emerald-500/30 bg-emerald-500/[.07] text-emerald-300' : 'border-hairline bg-white/[.03] text-soft');
+    el.className = 'pa-msg' + (type === 'error' ? ' pa-msg--erreur' : type === 'success' ? ' pa-msg--ok' : '');
+    if (type === 'error') el.setAttribute('role', 'alert'); else el.removeAttribute('role');
+  }
+
+  /* « 40 % » du titre en cyan, dans chaque langue (40 %, 40%, 40 %…), apres la traduction. */
+  function accentuerTitre() {
+    var h = document.getElementById('paTitle');
+    if (!h || h.querySelector('.pa-accent')) return;
+    var t = h.textContent || '';
+    var m = t.match(/^(.*?)(\d+\s?%)(.*)$/);
+    if (!m) return;
+    h.textContent = '';
+    if (m[1]) h.appendChild(document.createTextNode(m[1]));
+    var s = document.createElement('span');
+    s.className = 'pa-accent';
+    s.textContent = m[2];
+    h.appendChild(s);
+    if (m[3]) h.appendChild(document.createTextNode(m[3]));
+    // Meme ecriture du taux dans le registre des conditions (40 % en francais, 40% en anglais).
+    var dt = document.querySelector('.pa-termes dt');
+    if (dt) dt.textContent = m[2];
+  }
+
+  /* Seul mouvement de la page : la frise « Comment ça marche » se trace a l'ecran. */
+  function animerFrise() {
+    var f = document.getElementById('paFrise');
+    if (!f || !('IntersectionObserver' in window)) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var r = f.getBoundingClientRect();
+    if (r.top < window.innerHeight * 0.85) return;
+    f.classList.add('pa-frise--attente');
+    var io = new IntersectionObserver(function (entrees) {
+      if (!entrees.some(function (e) { return e.isIntersecting; })) return;
+      f.classList.add('pa-frise--vue');
+      f.classList.remove('pa-frise--attente');
+      io.disconnect();
+    }, { rootMargin: '0px 0px -15% 0px' });
+    io.observe(f);
   }
 
   /* ---------- Etats ---------- */
+  // Visiteur sans compte : les boutons sont deja dans la page ; ils ramenent ici apres l'inscription.
   function rendreCtaVisiteur() {
     var ici = location.pathname;
-    cta.innerHTML = '<div class="flex flex-wrap gap-3">'
-      + bouton('', tr('affiliation.cta_signup'), true, lien('inscription.html?next=' + encodeURIComponent(ici)))
-      + bouton('', tr('affiliation.cta_login'), false, lien('connexion.html?next=' + encodeURIComponent(ici)))
-      + '</div><p class="mt-3 text-[13px] text-soft">' + esc(tr('affiliation.cta_note')) + '</p>';
+    document.querySelectorAll('[data-pa-lien]').forEach(function (a) {
+      a.setAttribute('href', lien(a.getAttribute('data-pa-lien') + '?next=' + encodeURIComponent(ici)));
+    });
   }
+  // Compte connecte : un seul bouton vers sa candidature ou son espace, plus de rappel en bas.
   function rendreCtaConnecte(label, ancre) {
-    cta.innerHTML = '<div class="flex flex-wrap gap-3">' + bouton('', label, true, '#' + ancre) + '</div>';
+    cta.innerHTML = bouton('', label, true, '#' + ancre);
+    var fin = document.getElementById('paFinal');
+    if (fin) fin.hidden = true;
+    // Arrivee depuis « Mon compte » (partenaires.html#candidature) : le bloc vient d'etre dessine,
+    // le navigateur n'a pas pu y descendre tout seul.
+    if (location.hash === '#' + ancre) {
+      var cible = document.getElementById(ancre);
+      if (cible) setTimeout(function () { cible.scrollIntoView({ block: 'start' }); }, 0);
+    }
   }
 
-  var PAYS = ['FR', 'BE', 'CH', 'LU', 'MC', 'CA', 'GB', 'IE', 'ZA', 'MX', 'ES', 'PT', 'IT', 'DE', 'AT', 'NL', 'US', 'MA', 'DZ', 'TN', 'SN', 'CI', 'CM', 'BR', 'AR', 'CO', 'CL', 'PE', 'AU', 'NZ', 'IN', 'NG', 'KE', 'GH'];
+  var PAYS = ['FR', 'BE', 'CH', 'LU', 'MC', 'CA', 'GB', 'IE', 'ZA', 'MX', 'ES', 'PT', 'IT', 'DE', 'AT', 'NL', 'US', 'MA', 'DZ', 'TN', 'SN', 'CI', 'CM', 'BR', 'AR', 'CO', 'CL', 'PE', 'AU', 'NZ', 'IN', 'NG', 'KE', 'GH',
+    'EG', 'SA', 'AE', 'QA', 'KW', 'JO', 'LB', 'TR'];
   function nomPays(code) {
     try { return new Intl.DisplayNames([localeTag()], { type: 'region' }).of(code); } catch (e) { return code; }
   }
@@ -111,28 +155,28 @@
     var options = PAYS.map(function (c) { return { c: c, n: nomPays(c) }; }).sort(function (a, b) { return a.n.localeCompare(b.n, localeTag()); });
     app.hidden = false;
     app.innerHTML = '<div id="candidature">' + titre(tr('affiliation.form_title'), tr('affiliation.form_help'))
-      + '<form id="paForm" class="mt-6 space-y-5" novalidate>'
-      + champ('paCode', tr('affiliation.f_code'), { attrs: ' maxlength="20" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="MONCODE"', aide: tr('affiliation.f_code_help') })
-      + '<div><label for="paNetworks" class="block text-[13.5px] font-semibold text-ink">' + esc(tr('affiliation.f_networks')) + '</label>'
-      + '<textarea id="paNetworks" rows="3" class="mt-2 w-full rounded-xl border border-hairline bg-panel px-4 py-3 text-[16px] text-ink outline-none transition focus:border-cyan/60" placeholder="https://www.tiktok.com/@…"></textarea>'
-      + '<p class="mt-1.5 text-[12.5px] leading-relaxed text-soft">' + esc(tr('affiliation.f_networks_help')) + '</p></div>'
+      + '<form id="paForm" class="pa-form" novalidate>'
+      + champ('paCode', tr('affiliation.f_code'), { cls: 'pa-code-saisie', attrs: ' maxlength="20" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="MONCODE"', aide: tr('affiliation.f_code_help') })
+      + '<div class="pa-champ"><label for="paNetworks">' + esc(tr('affiliation.f_networks')) + '</label>'
+      + '<textarea id="paNetworks" rows="3" class="pa-saisie" placeholder="https://www.tiktok.com/@…" aria-describedby="paNetworksAide"></textarea>'
+      + '<p class="pa-aide" id="paNetworksAide">' + esc(tr('affiliation.f_networks_help')) + '</p></div>'
       + champ('paAudience', tr('affiliation.f_audience'), { type: 'number', attrs: ' min="0" step="1" inputmode="numeric"', aide: tr('affiliation.f_audience_help') })
-      + '<fieldset><legend class="text-[13.5px] font-semibold text-ink">' + esc(tr('affiliation.f_style')) + '</legend><div class="mt-2 grid gap-2 sm:grid-cols-2">'
+      + '<fieldset class="pa-fieldset"><legend class="pa-legende">' + esc(tr('affiliation.f_style')) + '</legend><div class="pa-choix-grille">'
       + styles.map(function (s, i) { return choix('style', s, tr('affiliation.style_' + s), '', i === 0); }).join('') + '</div></fieldset>'
-      + '<div><label for="paCountry" class="block text-[13.5px] font-semibold text-ink">' + esc(tr('affiliation.f_country')) + '</label>'
-      + '<select id="paCountry" class="mt-2 h-12 w-full rounded-xl border border-hairline bg-panel px-4 text-[16px] text-ink outline-none transition focus:border-cyan/60">'
+      + '<div class="pa-champ"><label for="paCountry">' + esc(tr('affiliation.f_country')) + '</label>'
+      + '<select id="paCountry" class="pa-saisie">'
       + options.map(function (o) { return '<option value="' + o.c + '"' + (o.c === defaut ? ' selected' : '') + '>' + esc(o.n) + '</option>'; }).join('') + '</select></div>'
-      + '<fieldset><legend class="text-[13.5px] font-semibold text-ink">' + esc(tr('affiliation.f_status')) + '</legend><div class="mt-2 grid gap-2 sm:grid-cols-2">'
+      + '<fieldset class="pa-fieldset"><legend class="pa-legende">' + esc(tr('affiliation.f_status')) + '</legend><div class="pa-choix-grille">'
       + choix('statut', 'individual', tr('affiliation.status_individual'), tr('affiliation.status_individual_help'), true)
       + choix('statut', 'professional', tr('affiliation.status_professional'), tr('affiliation.status_professional_help'), false) + '</div></fieldset>'
-      + '<div><label for="paAbout" class="block text-[13.5px] font-semibold text-ink">' + esc(tr('affiliation.f_about')) + '</label>'
-      + '<textarea id="paAbout" rows="3" maxlength="1000" class="mt-2 w-full rounded-xl border border-hairline bg-panel px-4 py-3 text-[16px] text-ink outline-none transition focus:border-cyan/60"></textarea></div>'
-      + '<div class="space-y-3 rounded-2xl border border-hairline bg-surface p-4">'
-      + caseAcoche('paTerms', esc(tr('affiliation.f_accept_terms')) + ' <a href="' + esc(lien('partenaires-conditions.html')) + '" class="font-semibold text-cyan hover:underline" target="_blank" rel="noopener">' + esc(tr('affiliation.f_terms_link')) + '</a>')
+      + '<div class="pa-champ"><label for="paAbout">' + esc(tr('affiliation.f_about')) + '</label>'
+      + '<textarea id="paAbout" rows="3" maxlength="1000" class="pa-saisie"></textarea></div>'
+      + '<div class="pa-accords">'
+      + caseAcoche('paTerms', esc(tr('affiliation.f_accept_terms')) + ' <a href="' + esc(lien('partenaires-conditions.html')) + '" class="pa-lien" target="_blank" rel="noopener">' + esc(tr('affiliation.f_terms_link')) + '</a>')
       + caseAcoche('paRules', esc(tr('affiliation.f_accept_rules')))
       + '</div>'
       + '<p id="paFormMsg" hidden></p>'
-      + '<div class="flex flex-wrap gap-3">' + bouton('paSubmit', tr('affiliation.f_submit'), true) + '</div>'
+      + '<div class="pa-envoi">' + bouton('paSubmit', tr('affiliation.f_submit'), true) + '</div>'
       + '</form></div>';
     rendreCtaConnecte(tr('affiliation.cta_apply'), 'candidature');
     var form = document.getElementById('paForm');
@@ -179,21 +223,22 @@
     btn.disabled = false;
   }
 
+
   function rendreAttente() {
     app.hidden = false;
-    app.innerHTML = '<div id="attente">' + carte('<p class="text-[12px] font-bold uppercase tracking-[0.16em] text-cyan">' + esc(tr('affiliation.pending_kicker')) + '</p>'
-      + '<h2 class="mt-2 text-[22px] font-extrabold tracking-tight">' + esc(tr('affiliation.pending_title')) + '</h2>'
-      + '<p class="mt-2 text-[14.5px] leading-relaxed text-soft">' + esc(tr('affiliation.pending_text', { code: me.code })) + '</p>'
-      + '<p class="mt-3 text-[13px] text-soft">' + esc(tr('affiliation.pending_since', { date: dateCourte(me.created_at) })) + '</p>') + '</div>';
+    app.innerHTML = '<div id="attente">' + carte('<p class="pa-statut">' + esc(tr('affiliation.pending_kicker')) + '</p>'
+      + '<h2 class="pa-h2">' + esc(tr('affiliation.pending_title')) + '</h2>'
+      + '<p class="pa-texte">' + esc(tr('affiliation.pending_text', { code: me.code })) + '</p>'
+      + '<p class="pa-petit">' + esc(tr('affiliation.pending_since', { date: dateCourte(me.created_at) })) + '</p>', 'pa-carte--accent') + '</div>';
     rendreCtaConnecte(tr('affiliation.cta_pending'), 'attente');
   }
   function rendreRefus() {
     app.hidden = false;
     var suspendu = me.status === 'suspended';
-    app.innerHTML = '<div id="refus">' + carte('<h2 class="text-[22px] font-extrabold tracking-tight">' + esc(tr(suspendu ? 'affiliation.suspended_title' : 'affiliation.refused_title')) + '</h2>'
-      + '<p class="mt-2 text-[14.5px] leading-relaxed text-soft">' + esc(tr(suspendu ? 'affiliation.suspended_text' : 'affiliation.refused_text')) + '</p>'
-      + (me.reviewed_note ? '<p class="mt-3 rounded-xl border border-hairline bg-panel p-3 text-[13.5px] text-soft">' + esc(me.reviewed_note) + '</p>' : '')
-      + '<p class="mt-3 text-[13px] text-soft">' + esc(tr('affiliation.contact_us')) + ' <a href="mailto:contact@iashark.com" class="text-cyan hover:underline">contact@iashark.com</a></p>') + '</div>';
+    app.innerHTML = '<div id="refus">' + carte('<h2 class="pa-h2">' + esc(tr(suspendu ? 'affiliation.suspended_title' : 'affiliation.refused_title')) + '</h2>'
+      + '<p class="pa-texte">' + esc(tr(suspendu ? 'affiliation.suspended_text' : 'affiliation.refused_text')) + '</p>'
+      + (me.reviewed_note ? '<p class="pa-msg">' + esc(me.reviewed_note) + '</p>' : '')
+      + '<p class="pa-petit">' + esc(tr('affiliation.contact_us')) + ' <a href="mailto:contact@iashark.com" class="pa-lien">contact@iashark.com</a></p>') + '</div>';
     rendreCtaConnecte(tr(suspendu ? 'affiliation.cta_suspended' : 'affiliation.cta_refused'), 'refus');
   }
 
@@ -214,11 +259,12 @@
     catch (e) { if (b) b.textContent = tr('affiliation.copy_failed'); }
   }
 
+
   function ligneSolde(cur, b) {
-    return '<div class="grid grid-cols-3 gap-2 text-center">'
-      + '<div class="rounded-xl border border-hairline bg-panel p-3"><p class="text-[11.5px] uppercase tracking-wider text-soft">' + esc(tr('affiliation.bal_pending')) + '</p><p class="pa-kpi mt-1 text-[18px] font-extrabold">' + esc(money(b.pending, cur)) + '</p></div>'
-      + '<div class="rounded-xl border border-hairline bg-panel p-3"><p class="text-[11.5px] uppercase tracking-wider text-soft">' + esc(tr('affiliation.bal_payable')) + '</p><p class="pa-kpi mt-1 text-[18px] font-extrabold text-cyan">' + esc(money(b.payable, cur)) + '</p></div>'
-      + '<div class="rounded-xl border border-hairline bg-panel p-3"><p class="text-[11.5px] uppercase tracking-wider text-soft">' + esc(tr('affiliation.bal_paid')) + '</p><p class="pa-kpi mt-1 text-[18px] font-extrabold">' + esc(money(b.paid, cur)) + '</p></div>'
+    return '<div class="pa-soldes">'
+      + '<div class="pa-solde"><p>' + esc(tr('affiliation.bal_pending')) + '</p><b>' + esc(money(b.pending, cur)) + '</b></div>'
+      + '<div class="pa-solde pa-solde--accent"><p>' + esc(tr('affiliation.bal_payable')) + '</p><b>' + esc(money(b.payable, cur)) + '</b></div>'
+      + '<div class="pa-solde"><p>' + esc(tr('affiliation.bal_paid')) + '</p><b>' + esc(money(b.paid, cur)) + '</b></div>'
       + '</div>';
   }
   function libelleStatut(h) {
@@ -235,44 +281,46 @@
     var pays = Array.isArray(d.payouts) ? d.payouts : [];
     var connectBloc;
     if (me.payout_ready) {
-      connectBloc = '<p class="text-[14px] text-soft">' + esc(tr('affiliation.payout_ready_text')) + '</p>';
+      connectBloc = '<p class="pa-texte">' + esc(tr('affiliation.payout_ready_text')) + '</p>';
     } else if (me.has_stripe_account) {
-      connectBloc = '<p class="text-[14px] text-soft">' + esc(tr('affiliation.payout_pending_text')) + '</p><div class="mt-4 flex flex-wrap gap-3">' + bouton('paConnect', tr('affiliation.payout_continue'), true) + bouton('paConnectStatus', tr('affiliation.payout_check'), false) + '</div>';
+      connectBloc = '<p class="pa-texte">' + esc(tr('affiliation.payout_pending_text')) + '</p><div class="pa-actions">' + bouton('paConnect', tr('affiliation.payout_continue'), true, '', true) + bouton('paConnectStatus', tr('affiliation.payout_check'), false, '', true) + '</div>';
     } else {
-      connectBloc = '<p class="text-[14px] text-soft">' + esc(tr('affiliation.payout_setup_text')) + '</p><div class="mt-4 flex flex-wrap gap-3">' + bouton('paConnect', tr('affiliation.payout_setup'), true) + '</div>';
+      connectBloc = '<p class="pa-texte">' + esc(tr('affiliation.payout_setup_text')) + '</p><div class="pa-actions">' + bouton('paConnect', tr('affiliation.payout_setup'), true, '', true) + '</div>';
     }
     app.hidden = false;
     app.innerHTML = '<div id="espace">' + titre(tr('affiliation.space_title'), tr('affiliation.space_help'))
-      + '<div class="mt-6 grid gap-4 sm:grid-cols-[1fr_auto]">'
-      + carte('<p class="text-[12px] font-semibold uppercase tracking-wider text-soft">' + esc(tr('affiliation.your_link')) + '</p>'
-        + '<p class="mt-1 break-all text-[15px] font-semibold">' + esc(url) + '</p>'
-        + '<div class="mt-3 flex flex-wrap gap-2">' + bouton('paCopyLink', tr('affiliation.copy'), true) + '</div>'
-        + '<p class="mt-5 text-[12px] font-semibold uppercase tracking-wider text-soft">' + esc(tr('affiliation.your_code')) + '</p>'
-        + '<p class="pa-code mt-1 text-[22px] font-extrabold">' + esc(me.code) + '</p>'
-        + '<p class="mt-1 text-[12.5px] text-soft">' + esc(tr('affiliation.code_help')) + '</p>'
-        + '<div class="mt-3 flex flex-wrap gap-2">' + bouton('paCopyCode', tr('affiliation.copy'), false) + '</div>')
-      + carte('<p class="text-[12px] font-semibold uppercase tracking-wider text-soft">' + esc(tr('affiliation.qr')) + '</p><div id="paQr" class="mt-3"></div><p class="mt-2 text-[12.5px] text-soft">' + esc(tr('affiliation.qr_help')) + '</p>', 'text-center')
+      + '<div class="pa-lien-grille">'
+      + carte('<p class="pa-etiquette">' + esc(tr('affiliation.your_link')) + '</p>'
+        + '<p class="pa-url">' + esc(url) + '</p>'
+        + '<div class="pa-actions">' + bouton('paCopyLink', tr('affiliation.copy'), true, '', true) + '</div>'
+        + '<p class="pa-etiquette pa-etiquette--suite">' + esc(tr('affiliation.your_code')) + '</p>'
+        + '<p class="pa-code">' + esc(me.code) + '</p>'
+        + '<p class="pa-aide">' + esc(tr('affiliation.code_help')) + '</p>'
+        + '<div class="pa-actions">' + bouton('paCopyCode', tr('affiliation.copy'), false, '', true) + '</div>', 'pa-carte--accent')
+      + carte('<p class="pa-etiquette">' + esc(tr('affiliation.qr')) + '</p><div id="paQr"></div><p class="pa-aide">' + esc(tr('affiliation.qr_help')) + '</p>', 'pa-qr-carte')
       + '</div>'
-      + '<div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">'
+      + '<div class="pa-chiffres">'
       + kpi(tr('affiliation.k_clicks'), nombre(d.clicks && d.clicks.total), tr('affiliation.k_clicks_30', { n: nombre(d.clicks && d.clicks.days_30) }))
       + kpi(tr('affiliation.k_signups'), nombre(d.signups))
       + kpi(tr('affiliation.k_trials'), nombre(d.trials))
       + kpi(tr('affiliation.k_paying'), nombre(d.active_paying))
       + '</div>'
-      + '<div class="mt-6">' + carte('<h3 class="text-[16px] font-bold">' + esc(tr('affiliation.balances_title')) + '</h3><p class="mt-1 text-[13px] text-soft">' + esc(tr('affiliation.balances_help')) + '</p>'
-        + devises.map(function (c) { return '<div class="mt-4">' + (devises.length > 1 ? '<p class="mb-2 text-[12px] font-semibold uppercase text-soft">' + esc(String(c).toUpperCase()) + '</p>' : '') + ligneSolde(c, bal[c]) + '</div>'; }).join('')) + '</div>'
-      + '<div class="mt-6">' + carte('<h3 class="text-[16px] font-bold">' + esc(tr('affiliation.payout_title')) + '</h3><div class="mt-2">' + connectBloc + '</div><p id="paConnectMsg" hidden></p>') + '</div>'
-      + '<div class="mt-6">' + carte('<h3 class="text-[16px] font-bold">' + esc(tr('affiliation.history_title')) + '</h3>'
-        + (hist.length ? '<div class="mt-3 overflow-x-auto"><table class="pa-table w-full text-left text-[13.5px]"><thead><tr class="text-[11.5px] uppercase tracking-wider text-soft"><th>' + esc(tr('affiliation.h_date')) + '</th><th>' + esc(tr('affiliation.h_customer')) + '</th><th>' + esc(tr('affiliation.h_amount')) + '</th><th>' + esc(tr('affiliation.h_status')) + '</th></tr></thead><tbody>'
+      + '<div class="pa-pile">'
+      + carte('<h3>' + esc(tr('affiliation.balances_title')) + '</h3><p class="pa-aide">' + esc(tr('affiliation.balances_help')) + '</p>'
+        + devises.map(function (c) { return (devises.length > 1 ? '<p class="pa-devise">' + esc(String(c).toUpperCase()) + '</p>' : '') + ligneSolde(c, bal[c]); }).join(''))
+      + carte('<h3>' + esc(tr('affiliation.payout_title')) + '</h3>' + connectBloc + '<p id="paConnectMsg" hidden></p>')
+      + carte('<h3>' + esc(tr('affiliation.history_title')) + '</h3>'
+        + (hist.length ? '<div class="pa-table-zone"><table class="pa-table"><thead><tr><th>' + esc(tr('affiliation.h_date')) + '</th><th>' + esc(tr('affiliation.h_customer')) + '</th><th>' + esc(tr('affiliation.h_amount')) + '</th><th>' + esc(tr('affiliation.h_status')) + '</th></tr></thead><tbody>'
           + hist.map(function (h) {
             var neg = h.kind === 'reversal';
-            return '<tr><td class="whitespace-nowrap text-soft">' + esc(dateCourte(h.at)) + '</td><td>' + esc(h.customer || '—') + '</td><td class="pa-kpi whitespace-nowrap font-semibold' + (neg ? ' text-red-300' : '') + '">' + (neg ? '− ' : '') + esc(money(h.amount_cents, h.currency)) + '</td><td class="text-soft">' + esc(libelleStatut(h)) + (h.status === 'pending' && h.payable_at ? '<br><span class="text-[12px]">' + esc(tr('affiliation.payable_on', { date: dateCourte(h.payable_at) })) + '</span>' : '') + '</td></tr>';
+            return '<tr><td class="pa-num pa-date">' + esc(dateCourte(h.at)) + '</td><td>' + esc(h.customer || '—') + '</td><td class="pa-num' + (neg ? ' pa-moins' : '') + '">' + (neg ? '− ' : '') + esc(money(h.amount_cents, h.currency)) + '</td><td>' + esc(libelleStatut(h)) + (h.status === 'pending' && h.payable_at ? '<br><span class="pa-aide">' + esc(tr('affiliation.payable_on', { date: dateCourte(h.payable_at) })) + '</span>' : '') + '</td></tr>';
           }).join('') + '</tbody></table></div>'
-          : '<p class="mt-2 text-[14px] text-soft">' + esc(tr('affiliation.history_empty')) + '</p>')) + '</div>'
-      + '<div class="mt-6">' + carte('<h3 class="text-[16px] font-bold">' + esc(tr('affiliation.payouts_title')) + '</h3>'
-        + (pays.length ? '<ul class="mt-3 space-y-2 text-[14px]">' + pays.map(function (p) { return '<li class="flex justify-between gap-3"><span class="text-soft">' + esc(dateCourte(p.at)) + (p.reference ? ' · ' + esc(p.reference) : '') + '</span><b class="pa-kpi">' + esc(money(p.amount_cents, p.currency)) + '</b></li>'; }).join('') + '</ul>'
-          : '<p class="mt-2 text-[14px] text-soft">' + esc(tr('affiliation.payouts_empty')) + '</p>')) + '</div>'
-      + '<p class="mt-6 text-[12.5px] text-soft">' + esc(tr('affiliation.space_terms_note')) + ' <a href="' + esc(lien('partenaires-conditions.html')) + '" class="text-cyan hover:underline">' + esc(tr('affiliation.f_terms_link')) + '</a></p>'
+          : '<p class="pa-texte">' + esc(tr('affiliation.history_empty')) + '</p>'))
+      + carte('<h3>' + esc(tr('affiliation.payouts_title')) + '</h3>'
+        + (pays.length ? '<ul class="pa-versements">' + pays.map(function (p) { return '<li><span>' + esc(dateCourte(p.at)) + (p.reference ? ' · ' + esc(p.reference) : '') + '</span><b class="pa-num">' + esc(money(p.amount_cents, p.currency)) + '</b></li>'; }).join('') + '</ul>'
+          : '<p class="pa-texte">' + esc(tr('affiliation.payouts_empty')) + '</p>'))
+      + '</div>'
+      + '<p class="pa-petit pa-note">' + esc(tr('affiliation.space_terms_note')) + ' <a href="' + esc(lien('partenaires-conditions.html')) + '" class="pa-lien">' + esc(tr('affiliation.f_terms_link')) + '</a></p>'
       + '</div>';
     rendreCtaConnecte(tr('affiliation.cta_space'), 'espace');
     dessinerQr(url);
@@ -303,13 +351,14 @@
   }
 
   /* ---------- Chargement ---------- */
+
+  /* ---------- Chargement ---------- */
   async function charger() {
     var r = await sb.rpc('affiliate_me');
     if (r.error) {
       var m = String(r.error.message || '');
       app.hidden = false;
-      app.innerHTML = carte('<p class="text-[14px] text-soft">' + esc(/does not exist|PGRST202|42883/.test(m) ? tr('affiliation.err_not_open') : tr('affiliation.err_generic')) + '</p>');
-      cta.innerHTML = '';
+      app.innerHTML = carte('<p class="pa-texte">' + esc(/does not exist|PGRST202|42883/.test(m) ? tr('affiliation.err_not_open') : tr('affiliation.err_generic')) + '</p>');
       return;
     }
     me = r.data || null;
@@ -324,6 +373,8 @@
 
   async function demarrer() {
     if (window.I18N && window.I18N.init) { try { await window.I18N.init(); } catch (_e) {} }
+    accentuerTitre();
+    animerFrise();
     if (!window.IasharkApp) { rendreCtaVisiteur(); return; }
     sb = window.IasharkApp.supabase;
     try { ctx = await window.IasharkApp.context(); } catch (e) { ctx = null; }

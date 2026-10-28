@@ -24,14 +24,7 @@
 <link rel="stylesheet" href="/assets/tailwind.css">
 <link rel="stylesheet" href="/assets/pro-space.css">
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
-<style>
-.pa-kpi{font-variant-numeric:tabular-nums}
-.pa-qr{display:inline-block;background:#fff;padding:10px;border-radius:12px;line-height:0}
-.pa-qr svg,.pa-qr img{display:block;width:168px;height:168px}
-.pa-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em}
-.pa-table td,.pa-table th{padding:10px 8px;vertical-align:top}
-.pa-table tr+tr td{border-top:1px solid rgba(255,255,255,.06)}
-</style>
+<link rel="stylesheet" href="/assets/partenaires.css">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="IASHARK">
 <meta property="og:locale" content="es_ES">
@@ -41,65 +34,81 @@
 <meta property="og:image" content="https://iashark.com/icon-512.png">
 <meta name="twitter:card" content="summary">
 </head>
-<body class="min-h-[100dvh] bg-page font-sans text-ink antialiased">
+<body class="pa">
 
-<header class="border-b border-hairline">
-  <div class="mx-auto flex h-14 w-full max-w-[760px] items-center gap-4 px-4 sm:px-6">
-    <a href="/es/" aria-label="IASHARK, inicio" data-i18n-attr="aria-label:site_header.aria_home"><img src="/assets/iashark-logo.png" alt="IASHARK" class="h-7 w-auto object-contain"></a>
-    <span class="rounded-full border border-cyan/40 bg-cyan/10 px-2.5 py-1 text-[11px] font-bold tracking-wider text-cyan" data-i18n="affiliation.badge">PARTNERS</span>
-    <a href="/es/compte.html" class="ml-auto text-[13px] text-soft transition hover:text-ink" data-href="compte.html" data-i18n="affiliation.my_account">Mi cuenta</a>
+<header class="pa-entete">
+  <div class="pa-entete-in">
+    <a href="/es/" class="pa-logo" aria-label="IASHARK, inicio" data-i18n-attr="aria-label:site_header.aria_home"><img src="/assets/iashark-logo.png" alt="IASHARK" width="112" height="28"></a>
+    <span class="pa-badge" data-i18n="affiliation.badge">PARTNERS</span>
+    <a href="/es/compte.html" class="pa-entete-lien" data-href="compte.html" data-i18n="affiliation.my_account">Mi cuenta</a>
   </div>
 </header>
 
-<main class="mx-auto w-full max-w-[760px] px-4 pb-32 pt-6 sm:px-6 sm:pt-10">
+<main class="pa-main">
 
-  <!-- Presentation (statique, indexable). Aucune promesse de gain, aucune mise. -->
-  <section id="presentation" aria-labelledby="paTitle">
-    <p class="text-[12px] font-bold uppercase tracking-[0.16em] text-cyan" data-i18n="affiliation.kicker">Programa IASHARK Partners</p>
-    <h1 id="paTitle" class="mt-2 text-[30px] font-extrabold leading-[1.05] tracking-tight sm:text-[38px]" data-i18n="affiliation.title">El 40 % de cada suscripción, de por vida.</h1>
-    <p class="mt-4 text-[15.5px] leading-relaxed text-soft" data-i18n="affiliation.intro">¿Hablas de fútbol a una comunidad? Recomienda IASHARK con tu enlace o tu código. Cada vez que uno de tus suscriptores paga su suscripción Pro — semanal, mensual o anual — cobras el 40 % del importe cobrado. No solo la primera vez: en cada pago, mientras siga suscrito.</p>
-
-    <div class="mt-7 grid gap-3 sm:grid-cols-3">
-      <div class="rounded-2xl border border-hairline bg-surface p-4">
-        <p class="text-[26px] font-extrabold text-cyan">40 %</p>
-        <p class="mt-1 text-[13.5px] leading-relaxed text-soft" data-i18n="affiliation.card_rate">de cada pago cobrado, sin impuestos, tras cualquier descuento.</p>
-      </div>
-      <div class="rounded-2xl border border-hairline bg-surface p-4">
-        <p class="text-[26px] font-extrabold text-cyan" data-i18n="affiliation.card_life_title">De por vida</p>
-        <p class="mt-1 text-[13.5px] leading-relaxed text-soft" data-i18n="affiliation.card_life">mientras la persona siga suscrita: cada renovación cuenta.</p>
-      </div>
-      <div class="rounded-2xl border border-hairline bg-surface p-4">
-        <p class="text-[26px] font-extrabold text-cyan" data-i18n="affiliation.card_days_title">60 días</p>
-        <p class="mt-1 text-[13.5px] leading-relaxed text-soft" data-i18n="affiliation.card_days">para que un clic en tu enlace siga contando al registrarse.</p>
-      </div>
+  <!-- Ouverture : l'offre et le bouton dans le premier ecran. Aucune promesse de gain, aucune mise :
+       40 % est un taux de commission sur les paiements encaisses. -->
+  <section class="pa-ouverture" aria-labelledby="paTitle">
+    <div class="pa-ouverture-fond" aria-hidden="true">
+      <picture>
+        <source media="(min-width:768px)" srcset="/assets/hero/stade-nuit.webp">
+        <img src="/assets/hero/stade-nuit-portrait.webp" alt="" width="750" height="1100" decoding="async" fetchpriority="high">
+      </picture>
     </div>
+    <h1 id="paTitle" class="pa-h1" data-i18n="affiliation.title">El 40 % de cada suscripción, de por vida.</h1>
+    <p class="pa-intro" data-i18n="affiliation.intro">¿Hablas de fútbol a una comunidad? Recomienda IASHARK con tu enlace o tu código. Cada vez que uno de tus suscriptores paga su suscripción Pro — semanal, mensual o anual — cobras el 40 % del importe cobrado. No solo la primera vez: en cada pago, mientras siga suscrito.</p>
+    <!-- Visiteur sans compte par defaut ; partenaires-page.js remplace ce bloc pour un compte connecte. -->
+    <div class="pa-cta" id="paCta">
+      <a class="pa-btn" data-pa-lien="inscription.html" href="/es/inscription.html" data-i18n="affiliation.cta_signup">Crear mi cuenta y solicitar</a>
+      <a class="pa-btn pa-btn--ligne" data-pa-lien="connexion.html" href="/es/connexion.html" data-i18n="affiliation.cta_login">Ya tengo una cuenta</a>
+      <p class="pa-cta-note" data-i18n="affiliation.cta_note">Se necesita una cuenta IASHARK (gratuita) para ser partner.</p>
+    </div>
+  </section>
 
-    <h2 class="mt-9 text-[20px] font-extrabold tracking-tight" data-i18n="affiliation.how_title">Cómo funciona</h2>
-    <ol class="mt-3 space-y-3">
-      <li class="flex gap-3.5 rounded-2xl border border-hairline bg-surface p-4"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan text-[13px] font-bold text-[#04141b]">1</span><p class="text-[14.5px] leading-relaxed text-soft" data-i18n="affiliation.how_1">Creas tu cuenta IASHARK y rellenas el cuestionario de partner (tus redes, tu público, tu país).</p></li>
-      <li class="flex gap-3.5 rounded-2xl border border-hairline bg-surface p-4"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan text-[13px] font-bold text-[#04141b]">2</span><p class="text-[14.5px] leading-relaxed text-soft" data-i18n="affiliation.how_2">IASHARK valida tu candidatura. Recibes tu enlace, tu código y un código QR.</p></li>
-      <li class="flex gap-3.5 rounded-2xl border border-hairline bg-surface p-4"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan text-[13px] font-bold text-[#04141b]">3</span><p class="text-[14.5px] leading-relaxed text-soft" data-i18n="affiliation.how_3">Tus suscriptores se registran con tu enlace o escriben tu código al pagar. En cada pago cobrado, tu comisión aparece en tu espacio; es pagadera 30 días después y se abona cada mes a partir de 50 €.</p></li>
+  <!-- Les trois conditions, en registre (une seule liste, pas trois cartes). -->
+  <section class="pa-section">
+    <dl class="pa-termes">
+      <dt>40 %</dt>
+      <dd data-i18n="affiliation.card_rate">de cada pago cobrado, sin impuestos, tras cualquier descuento.</dd>
+      <dt data-i18n="affiliation.card_life_title">De por vida</dt>
+      <dd data-i18n="affiliation.card_life">mientras la persona siga suscrita: cada renovación cuenta.</dd>
+      <dt data-i18n="affiliation.card_days_title">60 días</dt>
+      <dd data-i18n="affiliation.card_days">para que un clic en tu enlace siga contando al registrarse.</dd>
+    </dl>
+  </section>
+
+  <section class="pa-section" aria-labelledby="paComment">
+    <h2 id="paComment" class="pa-h2" data-i18n="affiliation.how_title">Cómo funciona</h2>
+    <ol class="pa-frise" id="paFrise">
+      <li><span class="pa-point" aria-hidden="true"></span><span data-i18n="affiliation.how_1">Creas tu cuenta IASHARK y rellenas el cuestionario de partner (tus redes, tu público, tu país).</span></li>
+      <li><span class="pa-point" aria-hidden="true"></span><span data-i18n="affiliation.how_2">IASHARK valida tu candidatura. Recibes tu enlace, tu código y un código QR.</span></li>
+      <li><span class="pa-point" aria-hidden="true"></span><span data-i18n="affiliation.how_3">Tus suscriptores se registran con tu enlace o escriben tu código al pagar. En cada pago cobrado, tu comisión aparece en tu espacio; es pagadera 30 días después y se abona cada mes a partir de 50 €.</span></li>
     </ol>
+  </section>
 
-    <div class="mt-7 rounded-2xl border border-hairline bg-surface p-4">
-      <h3 class="text-[15px] font-bold" data-i18n="affiliation.rules_title">Las reglas, en claro</h3>
-      <ul class="mt-2 space-y-1.5 text-[13.5px] leading-relaxed text-soft">
-        <li data-i18n="affiliation.rule_1">Un solo nivel: cobras por tus suscriptores, nunca por los partners que traigas.</li>
-        <li data-i18n="affiliation.rule_2">Nada durante la prueba gratuita: la comisión nace con el primer pago real.</li>
-        <li data-i18n="affiliation.rule_3">Reembolso o disputa: la comisión correspondiente se recupera.</li>
-        <li data-i18n="affiliation.rule_4">Cada contenido debe llevar la mención « colaboración comercial » o « publicidad », dirigirse a un público de 18 años o más, y nunca prometer ganancias ni decir cuánto jugar.</li>
-        <li data-i18n="affiliation.rule_5">Ninguna comisión sobre uno mismo, sus propias tarjetas o sus propias direcciones: esos intentos se detectan y conllevan la suspensión.</li>
-      </ul>
-      <a href="/es/partenaires-conditions.html" data-href="partenaires-conditions.html" class="mt-3 inline-block text-[13.5px] font-semibold text-cyan hover:underline" data-i18n="affiliation.read_terms">Leer las condiciones completas del programa →</a>
-    </div>
+  <section class="pa-section" aria-labelledby="paRegles">
+    <h2 id="paRegles" class="pa-h2" data-i18n="affiliation.rules_title">Las reglas, en claro</h2>
+    <ul class="pa-regles">
+      <li data-i18n="affiliation.rule_1">Un solo nivel: cobras por tus suscriptores, nunca por los partners que traigas.</li>
+      <li data-i18n="affiliation.rule_2">Nada durante la prueba gratuita: la comisión nace con el primer pago real.</li>
+      <li data-i18n="affiliation.rule_3">Reembolso o disputa: la comisión correspondiente se recupera.</li>
+      <li data-i18n="affiliation.rule_4">Cada contenido debe llevar la mención « colaboración comercial » o « publicidad », dirigirse a un público de 18 años o más, y nunca prometer ganancias ni decir cuánto jugar.</li>
+      <li data-i18n="affiliation.rule_5">Ninguna comisión sobre uno mismo, sus propias tarjetas o sus propias direcciones: esos intentos se detectan y conllevan la suspensión.</li>
+    </ul>
+    <a href="/es/partenaires-conditions.html" data-href="partenaires-conditions.html" class="pa-lien pa-regles-lien" data-i18n="affiliation.read_terms">Leer las condiciones completas del programa →</a>
+  </section>
 
-    <div class="mt-7" id="paCta">
-      <p class="text-[14px] text-soft" data-i18n="affiliation.loading">Cargando…</p>
+  <!-- Rappel de l'offre en fin de page, pour un visiteur sans compte (cache pour un compte connecte). -->
+  <section class="pa-final" id="paFinal" aria-labelledby="paFinalTitre">
+    <h2 id="paFinalTitre" class="pa-h2" data-i18n="affiliation.title">El 40 % de cada suscripción, de por vida.</h2>
+    <div class="pa-cta">
+      <a class="pa-btn" data-pa-lien="inscription.html" href="/es/inscription.html" data-i18n="affiliation.cta_signup">Crear mi cuenta y solicitar</a>
+      <a class="pa-btn pa-btn--ligne" data-pa-lien="connexion.html" href="/es/connexion.html" data-i18n="affiliation.cta_login">Ya tengo una cuenta</a>
     </div>
   </section>
 
   <!-- Espace partenaire (candidature, attente, tableau de bord) : rendu par partenaires-page.js. -->
-  <section id="partnerApp" class="mt-10" aria-live="polite" hidden></section>
+  <section id="partnerApp" class="pa-app" aria-live="polite" hidden></section>
 </main>
 
 <nav class="bottom-nav" aria-label="Navegación principal" data-i18n-attr="aria-label:geo.nav.aria_label"><a href="/es/"><span>⌂</span><b data-i18n="nav.home">INICIO</b></a><a href="/es/pro.html"><span>☆</span><b data-i18n="nav.tools">COMBINADAS</b></a><a href="/es/blog/"><span>▤</span><b data-i18n="nav.guides">BLOG</b></a><a href="/es/compte.html"><span>♙</span><b data-i18n="nav.account">CUENTA</b></a></nav>

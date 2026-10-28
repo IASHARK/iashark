@@ -16,13 +16,17 @@
 // d'inscription « au plus un email tous les 3 jours » ; l'e-mail d'accueil ne compte pas, meme regle
 // que lifecycle_email_candidates).
 //
-// APPEL SERVEUR UNIQUEMENT : en-tete x-relance-secret = RELANCE_SECRET (workflow relance-emails.yml).
+// APPEL SERVEUR UNIQUEMENT : en-tete x-relance-secret = RELANCE_SECRET (workflow relance-emails.yml),
+// ou, pour l'envoi automatique de 11 h seulement, en-tete x-relance-jeton = jeton tire au hasard dans la
+// base (table relance_planifiee, migration 0057, lue ici avec la cle service ; tache pg_cron a 10:00 UTC).
 //
 // Corps JSON :
 //   { mode: "etat" }   -> qui recevrait quoi (comptes par type et langue), fournisseur configure. N'envoie RIEN.
 //   { mode: "test" }   -> tous les e-mails aux seuls comptes administrateurs (users.role = 'admin'), objet [TEST].
 //   { mode: "envoi", confirmation: "ENVOYER LA RELANCE" } -> l'envoi reel, une fois par personne.
-//   planifie: true (envoi automatique) -> refuse si la date UTC n'est pas celle de la campagne.
+//   planifie: true (envoi automatique) -> refuse si la date UTC n'est pas celle de la campagne, apres
+//   15:00 UTC (16 h a Paris : trop tard pour « ce soir »), ou si la PR n'est pas fusionnee (banniere
+//   absente du site ET de la branche main) : la fusion reste le feu vert.
 //
 // Envoi par Brevo (BREVO_API_KEY ; le domaine iashark.com y est authentifie). Desinscription en
 // 1 clic : meme jeton signe que email-unsubscribe (EMAIL_UNSUBSCRIBE_SECRET) + en-tetes
@@ -43,6 +47,7 @@ const ABONNE_EN_COURS = ["active", "trialing", "past_due"];
 const PLANS_MANUELS = ["famille", "pro"];
 const FREQUENCE_JOURS = 3;
 const PARTENAIRE_JOURS = 7;
+const HEURE_LIMITE_UTC = 15;
 // Banniere : sur le site ; si la mise en ligne Netlify n'a pas eu lieu, copie du depot public
 // (branche main, sinon la branche d'ou part le lancement, ex. un test avant la fusion).
 const BANNIERE_SITE = `${SITE}/assets/emails/${CLE}/`;
@@ -217,13 +222,21 @@ Deno.serve(async (req: Request) => {
   const attendu = env("RELANCE_SECRET");
   const recu = req.headers.get("x-relance-secret") || "";
   const okSecret = !!attendu && attendu.length >= 32 && recu.length === attendu.length && timingSafe(recu, attendu);
-  if (!okSecret && roleDuJeton(req) !== "service_role") return json(403, { ok: false, raison: "acces refuse" });
+  const jetonRecu = req.headers.get("x-relance-jeton") || "";
+  if (!okSecret && roleDuJeton(req) !== "service_role" && !jetonRecu) return json(403, { ok: false, raison: "acces refuse" });
   const base = env("SUPABASE_URL"), service = env("SUPABASE_SERVICE_ROLE_KEY");
   if (!base || !service) return json(503, { ok: false, raison: "base non configuree" });
   const sb = createClient(base, service, { auth: { persistSession: false, autoRefreshToken: false } });
   let corps: Record<string, unknown> = {};
   try { corps = await req.json(); } catch { /* corps vide */ }
   const mode = String(corps.mode || "etat");
+  if (!okSecret && roleDuJeton(req) !== "service_role") {
+    // Jeton de la tache pg_cron : seulement l'envoi automatique de cette campagne.
+    const { data: ligne } = await sb.from("relance_planifiee").select("jeton").eq("cle", CLE).maybeSingle();
+    const vrai = String((ligne as any)?.jeton || "");
+    const okJeton = vrai.length >= 32 && jetonRecu.length === vrai.length && timingSafe(jetonRecu, vrai);
+    if (!okJeton || mode !== "envoi" || corps.planifie !== true) return json(403, { ok: false, raison: "acces refuse" });
+  }
 
   const brevo = env("BREVO_API_KEY"), secret = env("EMAIL_UNSUBSCRIBE_SECRET");
   const cfg = {
@@ -265,9 +278,19 @@ Deno.serve(async (req: Request) => {
     }
     return json(200, { ok: true, mode, evenements: evts.length, par_type: parType, nouvelles_ouvertures_notees: ouverts, nouveaux_clics_notes: cliques });
   }
-  // Envoi automatique : seulement le jour de la campagne (le declencheur planifie se repete chaque annee).
-  if (corps.planifie === true && new Date().toISOString().slice(0, 10) !== CLE) {
-    return json(400, { ok: false, mode, raison: `envoi planifie prevu le ${CLE} seulement : rien n'est parti` });
+  // Envoi automatique : seulement le jour de la campagne (le declencheur planifie se repete chaque annee),
+  // avant 15:00 UTC, et seulement si la PR est fusionnee (banniere sur le site ou sur main).
+  if (corps.planifie === true) {
+    const maintenant = new Date();
+    if (maintenant.toISOString().slice(0, 10) !== CLE) {
+      return json(400, { ok: false, mode, raison: `envoi planifie prevu le ${CLE} seulement : rien n'est parti` });
+    }
+    if (maintenant.getUTCHours() >= HEURE_LIMITE_UTC) {
+      return json(400, { ok: false, mode, raison: `envoi planifie trop tard (apres ${HEURE_LIMITE_UTC}:00 UTC) : rien n'est parti` });
+    }
+    if (!(await enLigne(BANNIERE_SITE)) && !(await enLigne(banniereDepot("main")))) {
+      return json(400, { ok: false, mode, raison: "PR non fusionnee (banniere absente du site et de main) : rien n'est parti" });
+    }
   }
   const tout = await classer(sb);
   // Personnes a ne pas relancer (choix de Clement), par identifiant de compte.

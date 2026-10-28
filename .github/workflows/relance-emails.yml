@@ -4,11 +4,20 @@
 #   test  : tous les e-mails aux seuls comptes administrateurs (objet [TEST])
 #   envoi : l'envoi reel, une fois par personne (phrase « ENVOYER LA RELANCE »)
 # Envoi AUTOMATIQUE (demande de Clement) : mercredi 28/10/2026 a 11 h, heure de Paris (10:00 UTC,
-# heure d'hiver). Second passage a 10:20 UTC au cas ou GitHub sauterait le premier : chaque personne
-# n'est servie qu'une fois (email_reserve_send), rien ne part deux fois. Un autre jour (le declencheur
-# revient chaque annee), rien n'est fait : garde de date ici ET dans la fonction (planifie: true).
+# heure d'hiver). Declencheur principal : la tache pg_cron « relance-2026-10-28 » de la base
+# (migration 0057), a l'heure exacte. Les taches planifiees GitHub de ce depot partent avec 3 a 6 h de
+# retard : celles ci-dessous ne sont qu'un secours (la fonction refuse apres 15:00 UTC). Chaque
+# personne n'est servie qu'une fois (email_reserve_send), rien ne part deux fois. Un autre jour (le
+# declencheur revient chaque annee), rien n'est fait : garde de date ici ET dans la fonction.
+# A la fusion sur main (push), la fonction est reinstallee depuis main et le mode etat s'affiche :
+# la version appelee par pg_cron est donc toujours celle de main.
 name: Relance e-mails
 on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/functions/relance-emails/**"
+      - ".github/workflows/relance-emails.yml"
   schedule:
     - cron: "0 10 28 10 *"
     - cron: "20 10 28 10 *"
@@ -101,6 +110,9 @@ jobs:
           if [ "$EVENEMENT" = "schedule" ]; then
             # Envoi automatique demande par Clement : mode envoi, avec la phrase de confirmation.
             MODE=envoi; CONFIRMATION="ENVOYER LA RELANCE"; EXCLURE=""; PLANIFIE=true
+          elif [ "$EVENEMENT" = "push" ]; then
+            # Fusion sur main : reinstallation (etape precedente) puis etat, rien n'est envoye.
+            MODE=etat; CONFIRMATION=""; EXCLURE=""
           fi
           appel() {
             curl -sS -o reponse.json -w "%{http_code}" -X POST "https://ksvjraqitxouwiabecai.supabase.co/functions/v1/relance-emails" \

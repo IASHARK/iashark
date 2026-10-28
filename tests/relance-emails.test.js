@@ -14,6 +14,7 @@ const NODE_MODULE = require("node:module");
 const ROOT = path.join(__dirname, "..");
 const DIR = path.join(ROOT, "supabase/functions/relance-emails");
 const SECRET = "s".repeat(40);
+const JETON = "j".repeat(64);
 const JOUR = 86400e3;
 const il_y_a = (ms) => new Date(Date.now() - ms).toISOString();
 
@@ -77,6 +78,7 @@ function base() {
         { user_id: "gb", event_type: "click", locale: "gb", metadata: { label: "account_cta_other" }, created_at: il_y_a(3600e3) },
       ],
       affiliates: [{ user_id: "part-affilie" }],
+      relance_planifiee: [{ cle: "2026-10-28", jeton: JETON }],
     },
   };
 }
@@ -97,6 +99,7 @@ function client(db, journal) {
         not: (c, op, v) => { assert.equal(op, "is"); assert.equal(v, null); filtres.push((l) => valeur(l, c) != null); return q; },
         order: () => q,
         limit: (n) => { limite = n; return q; },
+        maybeSingle: async () => ({ data: (db.tables[table] || []).filter((l) => filtres.every((f) => f(l)))[0] ?? null, error: null }),
         then: (ok, ko) => Promise.resolve({ data: (db.tables[table] || []).filter((l) => filtres.every((f) => f(l))).slice(0, limite), error: null }).then(ok, ko),
       };
       return q;
@@ -134,7 +137,7 @@ async function fonction() {
 }
 
 // Lance la fonction avec une base neuve ; renvoie la reponse, les e-mails partis et le journal.
-async function appeler(corps, options = {}) {
+async function appeler(corps, options = {}, entetes = { "x-relance-secret": SECRET }) {
   const f = await fonction();
   const db = base();
   const journal = { rpc: [], reserves: new Set(), brevo: [], head: [] };
@@ -157,7 +160,7 @@ async function appeler(corps, options = {}) {
   globalThis.setTimeout = (fn) => timeoutAvant(fn, 0);
   try {
     const req = new Request("https://projet.supabase.co/functions/v1/relance-emails", {
-      method: "POST", headers: { "Content-Type": "application/json", "x-relance-secret": SECRET }, body: JSON.stringify(corps),
+      method: "POST", headers: Object.assign({ "Content-Type": "application/json" }, entetes), body: JSON.stringify(corps),
     });
     const r = await f.handler(req);
     return { status: r.status, body: JSON.parse(await r.text()), journal };
@@ -230,11 +233,34 @@ test("envoi : phrase de confirmation obligatoire ; puis un e-mail par personne, 
   assert.ok(a.htmlContent.includes("https://iashark.com/assets/emails/2026-10-28/banniere-es.jpg"));
 });
 
-test("envoi automatique (planifie) : rien un autre jour que le 28/10/2026", async (t) => {
+test("envoi automatique (planifie) : seulement le 28/10/2026 avant 15:00 UTC, et PR fusionnee", async (t) => {
   if (!(await fonction())) { t.skip(SANS_TS); return; }
-  const { status, journal } = await appeler({ mode: "envoi", confirmation: "ENVOYER LA RELANCE", planifie: true });
-  if (new Date().toISOString().slice(0, 10) === "2026-10-28") assert.equal(status, 200);
+  const corps = { mode: "envoi", confirmation: "ENVOYER LA RELANCE", planifie: true };
+  const maintenant = new Date();
+  const dansLaFenetre = maintenant.toISOString().slice(0, 10) === "2026-10-28" && maintenant.getUTCHours() < 15;
+  const { status, journal } = await appeler(corps);
+  if (dansLaFenetre) assert.equal(status, 200);
   else { assert.equal(status, 400); assert.equal(journal.brevo.length, 0); assert.equal(journal.rpc.length, 0); }
+  // PR non fusionnee : banniere ni sur le site ni sur main -> rien ne part, quel que soit le jour.
+  const nonFusionnee = await appeler(corps, { banniereAbsente: true });
+  assert.equal(nonFusionnee.status, 400);
+  assert.equal(nonFusionnee.journal.brevo.length, 0);
+});
+
+test("jeton de la tache pg_cron : accepte seulement pour l'envoi automatique, jamais pour lire ou tester", async (t) => {
+  if (!(await fonction())) { t.skip(SANS_TS); return; }
+  const anon = { Authorization: "Bearer x." + Buffer.from(JSON.stringify({ role: "anon" })).toString("base64url") + ".y" };
+  const faux = await appeler({ mode: "envoi", confirmation: "ENVOYER LA RELANCE", planifie: true }, {}, Object.assign({ "x-relance-jeton": "k".repeat(64) }, anon));
+  assert.equal(faux.status, 403);
+  for (const corps of [{ mode: "etat" }, { mode: "test" }, { mode: "suivi" }, { mode: "envoi", confirmation: "ENVOYER LA RELANCE" }]) {
+    const r = await appeler(corps, {}, Object.assign({ "x-relance-jeton": JETON }, anon));
+    assert.equal(r.status, 403, JSON.stringify(corps));
+    assert.equal(r.journal.brevo.length, 0);
+  }
+  const sansRien = await appeler({ mode: "etat" }, {}, anon);
+  assert.equal(sansRien.status, 403);
+  const bon = await appeler({ mode: "envoi", confirmation: "ENVOYER LA RELANCE", planifie: true }, {}, Object.assign({ "x-relance-jeton": JETON }, anon));
+  assert.notEqual(bon.status, 403, "le bon jeton passe (puis gardes de date et de fusion)");
 });
 
 test("test : tous les e-mails aux seuls comptes admin, objet [TEST] ; banniere de secours si le site ne l'a pas encore", async (t) => {
@@ -289,6 +315,12 @@ test("workflow : envoi automatique le 28/10 a 10:00 UTC, garde de date, saisie a
   assert.match(wf, /concurrency:\s+group: relance-emails/);
   // Installation en 3 essais ; en envoi automatique, la version en ligne est verifiee avant d'envoyer.
   assert.match(wf, /for essai in 1 2 3; do/);
+  assert.match(wf, /push:\s+branches: \[main\]/);
+  const sql = fs.readFileSync(path.join(ROOT, "supabase/migrations/0057_relance_planifiee.sql"), "utf8");
+  assert.match(sql, /cron\.schedule\(\s+'relance-2026-10-28',\s+'0 10 28 10 \*'/);
+  assert.match(sql, /encode\(extensions\.gen_random_bytes\(32\), 'hex'\)/, "jeton tire au hasard dans la base");
+  assert.ok(!/service_role|x-relance-secret/.test(sql), "aucune cle secrete dans la migration");
+  assert.match(sql, /'planifie', true/);
   assert.match(wf, /if \[ "\$code" != "200" \] \|\| \[ "\$cle" != "2026-10-28" \]; then/);
   for (const l of ["fr", "en", "es"]) assert.ok(fs.existsSync(path.join(ROOT, `assets/emails/2026-10-28/banniere-${l}.jpg`)), "banniere " + l);
   assert.match(fs.readFileSync(path.join(DIR, "paquet.ts"), "utf8").split("\n")[0], /emails\/relance-2026-10-28\/fabriquer\.py/);

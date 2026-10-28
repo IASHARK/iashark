@@ -17,45 +17,15 @@
 <link rel="icon" href="/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/product-pages.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/composants.css">
 <link rel="stylesheet" href="/assets/aujourdhui.css">
 <link rel="stylesheet" href="/assets/offre-pro.css">
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
-<style>
-/* Page « Combines » (21/10/2026, demande de Clement : « ca sert a rien de mettre les combines
-   sur l'accueil, cree une page »). Remplace l'onglet « Outils » de la barre du bas. Le contenu
-   est LE bloc « Aujourd'hui » (lib/aujourdhui.js, fonction tickets-du-jour : le serveur choisit
-   ce que voit le visiteur, sans compte, gratuit ou Pro) ; ici, en pleine largeur : sur telephone
-   les tickets sont empiles et montrent leur detail, sans tiroir. Une seule colonne de 860 px. */
-.cb-page{width:min(860px,calc(100% - 32px));margin:26px auto 80px}
-.cb-tete h1{margin:0;font:800 clamp(30px,7.6vw,44px)/1.06 "DM Sans",Inter,system-ui,sans-serif;letter-spacing:-.03em;color:var(--text);text-wrap:balance}
-.cb-date{margin:10px 0 0;color:var(--cyan);font:700 15px/1.3 "DM Sans",Inter,sans-serif}
-.cb-sous{margin:12px 0 0;max-width:58ch;color:var(--soft);font:400 16px/1.55 "DM Sans",Inter,sans-serif}
-.cb-tete .preuve-hier{margin:16px 0 0}
-#aujourdhui.aj{width:100%;margin:26px 0 0}
-.aj--page .aj-row,.aj--page .aj-row.aj-n2{grid-template-columns:minmax(0,1fr);gap:12px}
-@media(min-width:900px){.aj--page .aj-row{grid-template-columns:repeat(3,minmax(0,1fr))}.aj--page .aj-row.aj-n2{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.cb-vide{margin:26px 0 0;padding:18px;border:1px solid rgba(141,179,211,.22);border-radius:16px;color:var(--soft);font:500 15px/1.5 "DM Sans",Inter,sans-serif}
-.cb-regles{margin:44px 0 0}
-.cb-regles h2{margin:0;font:800 23px/1.2 "DM Sans",Inter,sans-serif;letter-spacing:-.02em;color:var(--text)}
-.cb-regles ul{margin:14px 0 0;padding:0;list-style:none;border-top:1px solid rgba(141,179,211,.16)}
-.cb-regles li{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr);gap:4px 16px;padding:14px 0;border-bottom:1px solid rgba(141,179,211,.16)}
-.cb-regles li b{color:var(--text);font:700 15.5px/1.4 "DM Sans",Inter,sans-serif}
-.cb-regles li span{color:var(--soft);font:400 15px/1.5 "DM Sans",Inter,sans-serif}
-@media(max-width:520px){.cb-regles li{grid-template-columns:minmax(0,1fr)}}
-.cb-regles p{margin:14px 0 0;color:var(--soft);font:400 14.5px/1.55 "DM Sans",Inter,sans-serif}
-.topbar .btn-login,.topbar .account-chip{min-height:44px;font:700 13px/1.2 "DM Sans",Inter,system-ui,sans-serif;letter-spacing:0}
-.legal-note{margin:28px auto 0;color:var(--soft);font-size:12px;line-height:1.7;text-align:center;text-wrap:balance}
-.legal-note a{color:var(--soft);text-decoration:none;display:inline-flex;align-items:center;min-height:44px;padding:0 2px}
-/* Liens legaux (26/10/2026) : les points de separation restent en fin de ligne, jamais
-   au debut de la ligne suivante (« · Cookies »). Les points du texte sont masques, chaque lien
-   sauf le dernier porte le sien. */
-.legal-links{display:flex;flex-wrap:wrap;justify-content:center;font-size:0}
-.legal-links a{font-size:12px}
-.legal-links a:not(:last-child)::after{content:"\00B7";margin:0 3px 0 6px;color:var(--soft)}
-</style>
+<link rel="stylesheet" href="/assets/combines.css">
+<!-- Page « Combines » (21/10/2026, refaite le 28/10/2026 : assets/combines.css, lib/combines-page.js). Le contenu
+     est LE bloc « Aujourd'hui » (lib/aujourdhui.js, fonction tickets-du-jour : le serveur choisit ce que voit le
+     visiteur, sans compte, gratuit ou Pro), suivi de la course des 3 montantes et de la carte des buteurs du jour. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="IASHARK">
 <meta property="og:locale" content="en_GB">
@@ -65,56 +35,50 @@
 <meta property="og:image" content="https://iashark.com/icon-512.png">
 <meta name="twitter:card" content="summary">
 </head>
-<body>
+<body class="cb">
 <header class="topbar"><a class="brand" href="/gb/" data-href=""><img src="/assets/iashark-logo.png" alt="IASHARK"></a><div class="top-actions"><span id="authHeaderSlot"><a href="/gb/compte.html" data-href="compte.html" class="btn-login" data-i18n="nav.login">Connexion</a></span></div></header>
 <main class="cb-page">
-  <header class="cb-tete">
-    <h1 data-i18n="combines_page.title">Today's combos</h1>
+  <section class="cb-ouverture" aria-labelledby="cbTitre">
+    <div class="cb-ouverture-fond" aria-hidden="true">
+      <picture>
+        <source media="(min-width:768px)" srcset="/assets/hero/stade-nuit.webp">
+        <img src="/assets/hero/stade-nuit-portrait.webp" alt="" width="750" height="1100" decoding="async" fetchpriority="high">
+      </picture>
+    </div>
+    <h1 class="cb-h1" id="cbTitre" data-i18n="combines_page.title">Today's combos</h1>
     <p class="cb-date" id="cbDate"></p>
     <p class="cb-sous" data-i18n="combines_page.sub">Published before kick-off, wins and losses shown. Each ticket combines single bets picked by the same rule every day.</p>
     <p class="preuve-hier preuve-hier--cb" data-preuve-hier hidden></p>
-  </header>
+    <nav class="cb-sommaire" id="cbSommaire" aria-label="On this page" data-i18n-attr="aria-label:combines_v2.nav_aria" hidden>
+      <a href="#cbTickets" data-cb-ancre="cbTickets" hidden><span data-i18n="combines_v2.nav_tickets">Combos</span></a>
+      <a href="#cbOr" data-cb-ancre="cbOr" hidden><span data-i18n="combines_v2.nav_gold">Gold Selection</span></a>
+      <a href="#montantes" data-cb-ancre="montantes" hidden><span data-i18n="combines_v2.nav_climb">Ladders</span></a>
+      <a href="#buteurs" data-cb-ancre="buteurs" hidden><span data-i18n="combines_v2.nav_scorers">Scorers</span></a>
+    </nav>
+  </section>
   <!-- LE bloc « Aujourd'hui » (lib/aujourdhui.js) : le serveur n'envoie jamais le contenu d'un ticket verrouille. -->
   <section class="aj aj--page" id="aujourdhui" aria-labelledby="ajTitre" hidden></section>
   <p class="cb-vide" id="cbVide" hidden data-i18n="combines_page.empty">Today's combos arrive every morning, as soon as the daily calculation is done.</p>
   <section class="cb-regles" aria-labelledby="cbReglesT">
-    <h2 id="cbReglesT" data-i18n="combines_page.rules_title">How they are built</h2>
-    <ul>
-      <li><b data-i18n="combines_page.rule_small_t">Small combo</b><span data-i18n="combines_page.rule_small">3 to 5 matches, total odds between 4.00 and 6.00. Open with a free account.</span></li>
-      <li><b data-i18n="combines_page.rule_big_t">Big combo</b><span data-i18n="combines_page.rule_big">5 to 7 matches, total odds between 8.50 and 12.00. With Pro.</span></li>
-      <li><b data-i18n="combines_page.rule_gold_t">Gold selection</b><span data-i18n="combines_page.rule_gold">The 3 most likely bets of the day. With Pro.</span></li>
-      <li><b data-i18n="combines_page.rule_scorer_t">Scorer of the day</b><span data-i18n="combines_page.rule_scorer">The player most likely to score, among the expected starters. With Pro.</span></li>
-    </ul>
-    <p data-i18n="combines_page.rules_note">Every bet in a ticket has odds between 1.40 and 2.20 and at least a 50% calculated chance. An estimate, never a guarantee.</p>
+    <h2 class="cb-h2" id="cbReglesT" data-i18n="combines_page.rules_title">How they are built</h2>
+    <dl class="cb-registre">
+      <dt data-i18n="combines_page.rule_small_t">Small combo</dt><dd data-i18n="combines_page.rule_small">3 to 5 matches, total odds between 4.00 and 6.00. Open with a free account.</dd>
+      <dt data-i18n="combines_page.rule_big_t">Big combo</dt><dd data-i18n="combines_page.rule_big">5 to 7 matches, total odds between 8.50 and 12.00. With Pro.</dd>
+      <dt data-i18n="combines_page.rule_gold_t">Gold selection</dt><dd data-i18n="combines_page.rule_gold">Since 21/10: the 3 most likely bets of the day. With Pro.</dd>
+      <dt data-i18n="combines_v2.rule_climb_t">Ladders</dt><dd data-i18n="combines_v2.rule_climb">Each Gold Selection pick moves its own ladder forward: won, one more step; lost, back to step 1; odds of 10 reached, announced, then it starts again. A day without a Gold Selection does not break the run. Worked out every morning since the first Gold Selection on 6 October; the whole history is shown, wins and losses.</dd>
+      <dt data-i18n="combines_page.rule_scorer_t">Scorers of the day</dt><dd data-i18n="combines_page.rule_scorer">Up to two players, from two different matches: the most likely to score among the expected starters. Open with a free account.</dd>
+    </dl>
+    <p class="cb-petit" data-i18n="combines_page.rules_note">Every bet in the Small and Big combos has odds between 1.40 and 2.20 and at least a 50% calculated chance. An estimate, never a guarantee.</p>
   </section>
   <p class="legal-note" data-i18n="pricing_page.legal_note">Information for statistical purposes — Not betting advice · Prohibited for under-18s</p>
-  <p class="legal-note" style="margin-top:6px"><span data-i18n="match_page.shell_help_label">Help:</span> <a data-market-helpline="url" href="https://www.begambleaware.org">begambleaware.org</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">0808 8020 133</span></span></p>
-  <p class="legal-note legal-links" style="margin-top:10px"><a href="/gb/mentions-legales.html" data-href="mentions-legales.html" data-i18n="footer.mentions_legales">Legal Notice</a> · <a href="/gb/cgv.html" data-href="cgv.html" data-i18n="footer.cgv">Terms</a> · <a href="/gb/confidentialite.html" data-href="confidentialite.html" data-i18n="footer.confidentialite">Privacy</a> · <a href="/gb/jeu-responsable.html" data-href="jeu-responsable.html" data-i18n="footer.responsible_gambling">Responsible gambling</a></p>
+  <p class="legal-note legal-note--aide"><span data-i18n="match_page.shell_help_label">Help:</span> <a data-market-helpline="url" href="https://www.begambleaware.org">begambleaware.org</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">0808 8020 133</span></span></p>
+  <p class="legal-note legal-links"><a href="/gb/mentions-legales.html" data-href="mentions-legales.html" data-i18n="footer.mentions_legales">Legal Notice</a> · <a href="/gb/cgv.html" data-href="cgv.html" data-i18n="footer.cgv">Terms</a> · <a href="/gb/confidentialite.html" data-href="confidentialite.html" data-i18n="footer.confidentialite">Privacy</a> · <a href="/gb/jeu-responsable.html" data-href="jeu-responsable.html" data-i18n="footer.responsible_gambling">Responsible gambling</a></p>
 </main>
 <nav class="bottom-nav" aria-label="Main navigation" data-i18n-attr="aria-label:geo.nav.aria_label"><a href="/gb/"><span>⌂</span><b data-i18n="nav.home">HOME</b></a><a href="/gb/combines.html"><span>☆</span><b data-i18n="nav.tools">COMBOS</b></a><a href="/en/blog/"><span>▤</span><b data-i18n="nav.guides">BLOG</b></a><a href="/gb/compte.html"><span>♙</span><b data-i18n="nav.account">ACCOUNT</b></a></nav>
-<script src="/i18n/i18n.js"></script><script src="/lib/market-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" defer></script><script src="/app-client.js" defer></script><script src="/auth-header.js"></script><script src="/lib/icones.js"></script><script src="/lib/composants.js"></script><script src="/lib/market-labels.js"></script><script src="/lib/checkout-consent.js"></script><script src="/lib/offre-pro.js"></script><script src="/lib/aujourdhui.js"></script><script src="/lib/preuve-hier.js" defer></script><script src="/site-prefs.js"></script>
-<script>
-// Montage : dictionnaire, session (le serveur decide du niveau), puis le bloc ; statut public
-// des matchs (data-home.json) pour signaler un match reporte ou annule dans un ticket.
-document.addEventListener('DOMContentLoaded',function(){
-  if(window.IasharkAuthHeader)IasharkAuthHeader.mount('#authHeaderSlot');
-  var I=window.I18N;
-  (async function(){
-    try{if(I&&I.init)await I.init();}catch(e){}
-    var d=document.getElementById('cbDate');
-    try{d.textContent=new Date().toLocaleDateString(I&&I.localeTag?I.localeTag():'fr-FR',{weekday:'long',day:'numeric',month:'long',timeZone:'Europe/Paris'});}catch(e){}
-    try{if(window.IasharkApp&&IasharkApp.context)await IasharkApp.context();}catch(e){}
-    var el=document.getElementById('aujourdhui'),vide=document.getElementById('cbVide');
-    var rep=null;
-    try{rep=window.IasharkAujourdhui?await IasharkAujourdhui.mount(el,{}):null;}catch(e){rep=null;}
-    if(!rep||el.hidden){vide.hidden=false;return;}
-    try{
-      var r=await fetch('/data-home.json',{cache:'no-cache'});
-      if(r.ok){var j=await r.json(),parId={};(j.matchs||[]).forEach(function(m){if(m&&m.id!=null)parId[String(m.id)]=m.status;});IasharkAujourdhui.statuts(el,function(fid){return parId[String(fid)];});}
-    }catch(e){}
-  })();
-});
-</script>
+<script src="/i18n/i18n.js"></script><script src="/lib/market-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" defer></script><script src="/app-client.js" defer></script><script src="/auth-header.js"></script><script src="/lib/icones.js"></script><script src="/lib/composants.js"></script><script src="/lib/market-labels.js"></script><script src="/lib/checkout-consent.js"></script><script src="/lib/offre-pro.js"></script><script src="/lib/aujourdhui.js"></script><script src="/lib/montantes.js"></script><script src="/lib/preuve-hier.js" defer></script><script src="/site-prefs.js"></script>
+<!-- Montage (lib/combines-page.js) : dictionnaire, session (le serveur decide du niveau), tickets et montantes, puis
+     statut public des matchs (data-home.json) pour un match reporte ou annule et les logos des clubs des buteurs. -->
+<script src="/lib/combines-page.js" defer></script>
 <script src="/bottom-navigation.js"></script>
 <!--SEO_FOOTER_NAV--><nav class="seo-foot-nav" aria-label="Site navigation" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#91a0b3;text-align:center"><p style="margin:0 0 4px"><span style="color:#c3ccd8">Leagues:</span> <a href="/gb/leagues/premier-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Premier League</a> · <a href="/gb/leagues/champions-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Champions League</a> · <a href="/gb/leagues/europa-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Europa League</a> · <a href="/gb/leagues/conference-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Conference League</a> · <a href="/gb/leagues/mls.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">MLS</a></p><p style="margin:0"><a href="/gb/clubs/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Clubs and derbies</a> · <a href="/gb/articles/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">UK articles</a> · <a href="/en/blog/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Blog and guides</a> · <a href="/gb/marches.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Markets analysed</a> · <a href="/gb/methodologie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Methodology</a></p></nav><!--/SEO_FOOTER_NAV-->
 </body></html>

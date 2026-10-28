@@ -123,6 +123,8 @@ jobs:
           var BILAN_HIER=require('./lib/bilan-hier.js');
           // Bandeau des vrais resultats (accueil et pages match, 26/10/2026) : module pur, tests/bandeau-preuves.test.js.
           var BANDEAU_PREUVES=require('./lib/bandeau-preuves.js');
+          // Les 3 montantes de la page Combines (28/10/2026) : module pur, tests/montantes.test.js.
+          var MONTANTES=require('./lib/montantes.js');
           const I18N_LOCALES = require('./i18n/locales.json');
           const I18N_PAGES = require('./scripts/i18n-manifest.js');
           const { generateLocalizedSitemaps, writeSitemapIndex } = require('./scripts/i18n-sitemaps.js');
@@ -2714,6 +2716,44 @@ jobs:
                   }else console.log('::warning title=Bandeau::archive ou tickets illisibles, preuves/bandeau.json garde.');
                 }
               }catch(e){ console.log('::warning title=Bandeau::preuves/bandeau.json non ecrit ('+(e&&e.message)+').'); }
+              // LES 3 MONTANTES de la page Combines (28/10/2026, lib/montantes.js) : chaque pari de la Selection en or
+              // nourrit sa montante (paliers gagnes d'affilee, cote cumulee, objectif cote 10). Toutes les Selections en or
+              // publiees depuis MONTANTES.DEBUT, reglees par la MEME regle que la bande (BANDEAU_PREUVES.creerRegleur).
+              // Fichier public preuves/montantes.json : jours passes seulement. Lecture impossible : le fichier precedent
+              // reste en place (jamais une montante remise a zero par une panne). Journal : compteurs seulement.
+              try{
+                if(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY){
+                  var entM={'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY};
+                  var baseM=SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/';
+                  var ticketsM=await rawHttpGetJson(baseM+'tickets_du_jour?select=jour,type,contenu,publie_a,premier_coup_envoi&type=eq.or&jour=gte.'+MONTANTES.DEBUT+'&order=jour.asc',entM);
+                  var jourM=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+                  var precM=null; try{ precM=JSON.parse(fs.readFileSync('preuves/montantes.json','utf8')); }catch(e){}
+                  // Archive des seuls paris dont le resultat n'est pas deja fige dans le calcul precedent (les plus recents
+                  // d'abord, 80 au plus) : jamais tous les matchs depuis le debut dans l'adresse.
+                  var listeIdsM=Array.isArray(ticketsM)?MONTANTES.aLireArchive({tickets:ticketsM,precedent:precM,jour:jourM}):[];
+                  var archiveM=listeIdsM.length?await rawHttpGetJson(baseM+'predictions_archive?select=fixture_id,market,result,published_at,kickoff_at,score&fixture_id=in.('+listeIdsM.join(',')+')',entM):[];
+                  if(Array.isArray(ticketsM)&&Array.isArray(archiveM)){
+                    var optsM={tickets:ticketsM,archive:archiveM,matchs:matchsDuRun,jour:jourM,genereLe:genere,precedent:precM,faits:{}};
+                    // Paris que ni l'archive ni un calcul precedent ne reglent (buteur, mi-temps, archive en retard) : faits du
+                    // match chez API-Sports (fixtures?id= : statut, score, evenements, joueurs), les plus recents d'abord, 15 au plus.
+                    var aLireM=MONTANTES.aRegler(optsM).slice(0,15), lusM=0;
+                    for(var mi2=0;mi2<aLireM.length;mi2++){
+                      try{
+                        var rfM=await get('https://v3.football.api-sports.io/fixtures?id='+aLireM[mi2],APS);
+                        var faM=MONTANTES.faitsDuMatch(rfM&&Array.isArray(rfM.response)?rfM.response[0]:null);
+                        if(faM){ optsM.faits[String(aLireM[mi2])]=faM; lusM++; }
+                      }catch(e){}
+                    }
+                    if(aLireM.length) console.log('  [montantes] faits lus chez API-Sports : '+lusM+' match(s) sur '+aLireM.length+'.');
+                    var montantes=MONTANTES.construireMontantes(optsM);
+                    if(montantes){
+                      if(!fs.existsSync('preuves')) fs.mkdirSync('preuves',{recursive:true});
+                      fs.writeFileSync('preuves/montantes.json',JSON.stringify(montantes,null,1));
+                      console.log('  [montantes] '+montantes.montantes.map(function(m){ return 'montante '+m.rang+' : '+m.gagnes+' palier(s) en cours'+(m.etat==='en_attente'?' (en attente)':'')+', bilan '+m.bilan.gagnes+' gagne(s) / '+m.bilan.perdus+' perdu(s) / '+m.bilan.non_regles+' non regle(s), '+m.objectifs.length+' objectif(s)'; }).join(' ; ')+'.');
+                    }else console.log('::warning title=Montantes::calcul impossible, preuves/montantes.json garde.');
+                  }else console.log('::warning title=Montantes::tickets ou archive illisibles, preuves/montantes.json garde.');
+                }
+              }catch(e){ console.log('::warning title=Montantes::preuves/montantes.json non ecrit ('+(e&&e.message)+').'); }
               // Fenetre glissante : les journees sorties des 60 jours sont retirees
               // du depot (rien d'autre ne vit dans results/).
               fs.readdirSync(RESULTS_DIR).forEach(function(f){
@@ -4686,6 +4726,33 @@ jobs:
             runOutput.DAILY_COMBOS=rapportTickets.daily_combos;
             console.log('  '+TICKETS_DU_JOUR.ligneJournal(rapportTickets));
           }catch(e){ console.log('::warning title=Tickets::tickets non calcules ('+(e&&e.message)+'), le calcul quotidien continue.'); }
+          // EMPREINTE DE LA SELECTION EN OR DU JOUR (controles historique-public et avocat du diable du 28/10/2026, montantes
+          // de la page Combines) : juste apres la publication et AVANT son premier match, rang de chaque pari compris
+          // (lib/montantes.js#ajouterEmpreinteOr, meme construction que lib/empreintes-paris.js : SHA-256 sale du jour,
+          // maillons chaines, sel revele deux jours plus tard). Registre a part preuves/empreintes-or.json.
+          try{
+            var SECRET_OR=process.env.EMPREINTE_SECRET||SUPA_SERVICE_KEY||'';
+            if(SECRET_OR&&SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY){
+              var jourOr=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+              var repOr=await rawHttpGetJson(SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/tickets_du_jour?select=jour,contenu,publie_a,premier_coup_envoi&type=eq.or&jour=eq.'+jourOr,{'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY});
+              if(Array.isArray(repOr)){
+                var regOr=EMPREINTES.vide();
+                try{ regOr=JSON.parse(fs.readFileSync('preuves/empreintes-or.json','utf8')); }catch(e){}
+                var verifOr=EMPREINTES.verifier(regOr);
+                if(!verifOr.ok) console.log('::error title=Empreintes Selection en or::chaine existante invalide : '+verifOr.erreurs.slice(0,3).join(' ; '));
+                else{
+                  regOr.explication=MONTANTES.EXPLICATION_EMPREINTES_OR;
+                  repOr.forEach(function(t){
+                    var aOr=MONTANTES.ajouterEmpreinteOr(EMPREINTES,regOr,t,SECRET_OR,new Date().toISOString(),Date.now());
+                    console.log('  [empreinte or] '+t.jour+' : '+(aOr.ajoute?'maillon '+aOr.maillon.n+' ('+aOr.raison+', '+aOr.maillon.nb_paris+' paris)':aOr.raison));
+                  });
+                  EMPREINTES.revelerSels(regOr,SECRET_OR,MATCH_RESULTS.ajouterJours(jourOr,-2));
+                  if(!fs.existsSync('preuves')) fs.mkdirSync('preuves',{recursive:true});
+                  fs.writeFileSync('preuves/empreintes-or.json',JSON.stringify(regOr,null,2));
+                }
+              }else console.log('::warning title=Empreintes Selection en or::tickets_du_jour illisible, pas d empreinte ce run.');
+            }
+          }catch(e){ console.log('::warning title=Empreintes Selection en or::'+(e&&e.message)); }
           // ================= PANNEAU « MARCHES » (demande de Clement, 04/10/2026) =================
           // Tous les marches calcules de chaque match ouvert, par familles, chance AFFICHEE (lib/chance-iashark.js) et cote
           // minimum (lib/marches-panneau.js). Champ premium marches_panneau, Pro seulement meme sur le match offert ; nombre

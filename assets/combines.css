@@ -1,0 +1,275 @@
+/* IASHARK — page Combines (combines.html, lib/combines-page.js), refaite le 28/10/2026.
+   Meme monde que la page Pro et la page Partenaires (assets/pro-vente.css, assets/partenaires.css) : fond nuit,
+   surfaces bleu nuit, cyan et gris, Inter, filets fins, photo du stade de nuit en ouverture. Telephone d'abord.
+   Les grands chiffres (cotes, chances) en Barlow Condensed, comme un tableau d'affichage de stade.
+   Le bloc « Aujourd'hui » (lib/aujourdhui.js, assets/aujourdhui.css) est repris tel quel ; ce fichier ne fait que
+   sa mise en page sur cette page (tickets en pleine largeur avec leur detail, sans tiroir) et dessine les deux
+   nouveautes : la course des 3 montantes (piste a segments : base Origin UI « Stepper », demo Progress, MIT) et
+   la carte des buteurs du jour (base shadcn/ui « Card », MIT).
+   Aucun libelle en majuscules a chasse fixe, aucun vert ni rouge (gagne / perdu en toutes lettres), la Selection en
+   or garde le seul or du site. Un seul mouvement : les pistes des montantes se remplissent a leur entree a l'ecran. */
+
+.cb{
+  --cb-ink:#f4f7fb;--cb-soft:#91a0b3;--cb-soft2:#b4c0cf;--cb-cyan:#20d5ef;--cb-page:#060b12;--cb-surface:#0a1420;--cb-panel:#0d1926;
+  --cb-line:rgba(141,179,211,.14);--cb-line2:rgba(141,179,211,.3);
+  --cb-ease:cubic-bezier(.23,1,.32,1);
+  --cb-num:"Barlow Condensed",Inter,system-ui,sans-serif;
+  margin:0;background:var(--cb-page);color:var(--cb-ink);
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;overflow-x:clip
+}
+:where(.cb) *,:where(.cb) *::before,:where(.cb) *::after{box-sizing:border-box}
+html:has(.cb){background:#060b12}
+.cb ::selection{background:rgba(32,213,239,.3);color:#fff}
+html:has(.cb){scrollbar-color:rgba(141,179,211,.32) #060b12}
+@media (prefers-reduced-motion:no-preference){html:has(.cb){scroll-behavior:smooth}}
+.cb [hidden]{display:none!important}
+#cbTickets,#cbOr,#montantes,#buteurs{scroll-margin-top:76px}
+/* En-tete du site (memes regles que assets/product-pages.css, que cette page ne charge plus). */
+.cb .topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;height:64px;padding:0 max(28px,calc((100vw - 1400px) / 2));border-bottom:1px solid #132738;background:#040a11}
+.cb .brand{display:inline-flex;align-items:center;min-height:44px}
+.cb .brand img{display:block;width:auto;height:32px}
+.cb .top-actions{display:flex;align-items:center;gap:18px;margin-left:auto}
+.cb .topbar .btn-login,.cb .topbar .account-chip{display:inline-flex;align-items:center;min-height:44px;padding:9px 14px;border:1px solid #1a4960;border-radius:9px;
+  background:transparent;color:var(--cb-cyan);font:700 13px/1.2 Inter,system-ui,sans-serif;letter-spacing:0;text-decoration:none;white-space:nowrap;cursor:pointer}
+.cb .topbar .btn-login:focus-visible,.cb .topbar .account-chip:focus-visible{outline:2px solid var(--cb-cyan);outline-offset:2px}
+@media (max-width:850px){
+  .cb .topbar{height:56px;padding:0 14px}
+  .cb .brand img{height:28px}
+  .cb .top-actions{gap:8px;min-width:0}
+}
+@media (max-width:430px){.cb .topbar .brand img{width:104px;height:auto}.cb .top-actions>.btn-login{max-width:150px;padding:6px 10px;line-height:1.2;white-space:normal}}
+.cb-ico{display:inline-block;flex:none;width:16px;height:16px;vertical-align:-3px}
+
+/* ---------- Mise en page ---------- */
+.cb-page{width:min(860px,calc(100% - 32px));margin:0 auto;padding:0 0 calc(104px + env(safe-area-inset-bottom))}
+.cb-h2{margin:0;font-size:clamp(24px,6.2vw,32px);font-weight:800;line-height:1.12;letter-spacing:-.03em;color:var(--cb-ink);text-wrap:balance}
+.cb-texte{margin:0;max-width:56ch;font-size:15px;line-height:1.6;color:var(--cb-soft)}
+.cb-petit{margin:14px 0 0;max-width:68ch;font-size:13px;line-height:1.55;color:var(--cb-soft)}
+.cb-tete-s{display:grid;gap:10px}
+.cb-msg{margin:18px 0 0;padding:14px 16px;border:1px solid var(--cb-line);border-radius:12px;color:var(--cb-soft2);font-size:14.5px;line-height:1.5}
+.cb-verrou{display:inline-flex;align-items:center;gap:5px;justify-self:start;padding:4px 10px;border-radius:999px;background:rgba(148,163,184,.14);
+  color:#dbe4ee;font-size:12px;font-weight:600;line-height:1.2;white-space:nowrap}
+.cb-verrou .cb-ico{width:13px;height:13px;vertical-align:0}
+
+/* ---------- Ouverture : photo du stade de nuit, titre, date, preuve d'hier ---------- */
+.cb-ouverture{position:relative;padding:34px 0 34px;isolation:isolate}
+.cb-ouverture-fond{position:absolute;z-index:-1;top:0;bottom:0;left:calc(50% - 50vw);right:calc(50% - 50vw);overflow:hidden;pointer-events:none}
+.cb-ouverture-fond picture{display:block;height:100%}
+.cb-ouverture-fond img{display:block;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 22%;opacity:.85}
+.cb-ouverture-fond::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(6,11,18,.12) 0%,rgba(6,11,18,.55) 40%,rgba(6,11,18,.9) 72%,var(--cb-page) 98%)}
+.cb-h1{margin:0;max-width:12ch;font-size:clamp(38px,10.6vw,62px);font-weight:800;line-height:1.02;letter-spacing:-.035em;text-wrap:balance}
+.cb-date{margin:12px 0 0;color:var(--cb-cyan);font-size:15px;font-weight:600}
+.cb-date::first-letter{text-transform:uppercase}
+.cb-sous{margin:12px 0 0;max-width:52ch;font-size:16px;line-height:1.6;color:var(--cb-soft2)}
+.cb .preuve-hier--cb{margin:18px 0 0;max-width:560px;background:rgba(8,14,20,.8);border:1px solid rgba(34,211,238,.2)}
+/* Sommaire : quatre liens vers les blocs de la page (caches quand le bloc n'existe pas). */
+.cb-sommaire{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.cb-sommaire a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border:1px solid var(--cb-line2);border-radius:999px;
+  background:rgba(10,20,32,.86);color:var(--cb-ink);font-size:14px;font-weight:600;text-decoration:none;
+  transition:border-color .2s ease,background-color .2s ease,transform .16s var(--cb-ease)}
+.cb-sommaire a:active{transform:scale(.97)}
+.cb-sommaire a:focus-visible,.mt-det summary:focus-visible,.legal-note a:focus-visible{outline:2px solid var(--cb-cyan);outline-offset:3px}
+@media (hover:hover) and (pointer:fine){.cb-sommaire a:hover{border-color:rgba(32,213,239,.6);background:rgba(32,213,239,.08)}}
+
+/* ---------- Le bloc « Aujourd'hui » sur cette page ---------- */
+.cb .aj--page{width:100%;margin:6px 0 0;padding:0;gap:16px}
+.cb .aj,.cb .aj *{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+.cb .aj--page .aj-head{display:none}
+.cb .aj--page .aj-row,.cb .aj--page .aj-row.aj-n2{grid-template-columns:minmax(0,1fr);gap:14px}
+@media (min-width:720px){.cb .aj--page .aj-row.aj-n2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Tickets (Petit et Grand combine) : un vrai ticket, perforation et encoches, detail toujours visible. */
+.cb .aj--page .sc{gap:14px;padding:18px 0 16px;border-radius:16px;border-color:var(--cb-line);background:var(--cb-panel);box-shadow:none;overflow:hidden}
+.cb .aj--page .sc-h{padding:0 16px}
+.cb .aj--page .sc-ico .lucide{width:18px;height:18px}
+.cb .aj--page .sc-t{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.cb .aj--page .sc-d{font-size:13px;color:var(--cb-soft)}
+.cb .aj--page .sc-sep{position:relative;border-top-color:var(--cb-line2)}
+.cb .aj--page .sc-sep::before,.cb .aj--page .sc-sep::after{content:"";position:absolute;top:-10px;width:18px;height:18px;border-radius:50%;
+  background:var(--cb-page);border:1px solid var(--cb-line)}
+.cb .aj--page .sc-sep::before{left:-10px}
+.cb .aj--page .sc-sep::after{right:-10px}
+.cb .aj--page .sc-c{padding:0 16px}
+.cb .aj--page .sc-k{font-size:12.5px;color:var(--cb-soft)}
+.cb .aj .sc-v{font:700 40px/1 var(--cb-num);letter-spacing:0;font-variant-numeric:tabular-nums}
+.cb .aj--page .sc-det{display:grid;gap:10px;padding:0 16px}
+.cb .aj--page .sc-hit,.cb .aj--page .sc-short{display:none}
+.cb .aj--page .sc:has(.sc-hit){padding-bottom:16px}
+.cb .aj--page .sc.is-empty .sc-sep,.cb .aj--page .sc.is-empty .sc-c{display:none}
+.cb .aj--page .sc.is-locked{padding-bottom:16px}
+.cb .aj--page .sc.is-locked .sc-a{position:static}
+.cb .aj--page .tk-leg{padding:10px 12px;border-radius:10px;background:rgba(141,179,211,.06)}
+.cb .aj--page .tk-m b{font-size:14px}
+.cb .aj--page .tk-m small{font-size:12.5px;color:var(--cb-soft)}
+.cb .aj--page .tk-o b{font-size:15px}
+.cb .aj--page .tk-f .mu-sub{min-height:44px}
+
+/* Selection en or : gardee telle quelle (« parfait, on garde »), juste a la largeur de la page. */
+.cb .aj--page .or{border-radius:16px}
+.cb .aj--page .or-h{padding:14px 16px}
+.cb .aj--page .or-l{padding:2px 16px 8px}
+.cb .aj--page .or-l li{padding:10px 0}
+
+/* Deblocage et mentions du bloc. */
+.cb .aj--page .aj-unlock{margin-top:12px;gap:14px;padding:22px 18px;border:1px solid rgba(32,213,239,.28);border-radius:16px;background:rgba(32,213,239,.05)}
+.cb .aj--page .aj-unlock-t{font-size:16px;line-height:1.45}
+.cb .aj--page .aj-small{font-size:13px}
+.cb .aj--page .aj-legal{font-size:12px;color:var(--cb-soft)}
+
+/* ---------- Sections ajoutees apres la Selection en or ---------- */
+.mt,.bt{margin-top:18px;padding-top:34px;border-top:1px solid var(--cb-line)}
+
+/* ---------- La course des montantes ---------- */
+.mt-course{margin-top:20px;padding:14px 16px 4px;border:1px solid var(--cb-line);border-radius:16px;background:var(--cb-surface)}
+.mt-repere{display:flex;justify-content:space-between;align-items:center;padding:0 0 12px;font-size:12.5px;font-weight:600;color:var(--cb-soft)}
+.mt-repere span{display:inline-flex;align-items:center;gap:6px}
+.mt-repere .cb-ico{width:15px;height:15px;color:var(--cb-cyan);vertical-align:0}
+.mt-couloirs{margin:0;padding:0;list-style:none}
+.mt-c{padding:16px 0 14px;border-top:1px solid var(--cb-line)}
+.mt-c-h{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 12px}
+.cb .mt-nom{display:flex;align-items:center;gap:10px;margin:0;font-size:16px;font-weight:700;line-height:1.2}
+.cb .mt-num{display:grid;place-items:center;flex:none;width:28px;height:28px;border:1.5px solid var(--cb-cyan);border-radius:50%;
+  color:var(--cb-cyan);font:700 16px/1 var(--cb-num)}
+.mt-g{min-width:0;margin-left:auto;font-size:13px;color:var(--cb-soft);font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere}
+/* Piste : un segment par palier gagne (longueur = part de la cote vers 10, echelle log), le pari du soir en pointille,
+   le coureur au bout, la ligne d'arrivee en damier. */
+.mt-piste{position:relative;height:18px;margin-top:14px}
+.mt-rail{position:absolute;top:4px;left:0;right:16px;display:flex;height:10px;border-radius:999px;background:rgba(141,179,211,.12);overflow:hidden}
+.mt-seg{flex:0 0 var(--w);height:100%;clip-path:inset(0 3px 0 0);transform-origin:left center}
+.mt-seg.is-gagne{background:var(--cb-cyan)}
+.mt-seg.is-soir{background:rgba(32,213,239,.16);box-shadow:inset 0 0 0 1.5px rgba(32,213,239,.75);clip-path:none;border-radius:0 999px 999px 0}
+.mt-coureur{position:absolute;top:0;left:calc((100% - 16px) * var(--x));width:18px;height:18px;margin-left:-9px;border-radius:50%;
+  background:var(--cb-ink);border:4px solid var(--cb-cyan);box-shadow:0 2px 6px rgba(0,0,0,.55)}
+.mt-arrivee{position:absolute;top:0;right:0;width:9px;height:18px;border-radius:2px;
+  background:conic-gradient(var(--cb-ink) 25%,var(--cb-page) 0 50%,var(--cb-ink) 0 75%,var(--cb-page) 0) 0 0/6px 6px}
+/* Le seul mouvement de la page (lib/combines-page.js pose l'etat d'attente, visible par defaut). */
+.mt-attente .mt-seg{transform:scaleX(0)}
+.mt-attente .mt-coureur{opacity:0}
+.mt-vue .mt-seg{transition:transform .7s var(--cb-ease)}
+.mt-vue .mt-seg:nth-child(2){transition-delay:.08s}.mt-vue .mt-seg:nth-child(3){transition-delay:.16s}
+.mt-vue .mt-seg:nth-child(4){transition-delay:.24s}.mt-vue .mt-seg:nth-child(5){transition-delay:.32s}
+.mt-vue .mt-seg:nth-child(6){transition-delay:.4s}.mt-vue .mt-seg:nth-child(n+7){transition-delay:.48s}
+.mt-vue .mt-coureur{transition:opacity .3s ease .55s}
+.mt-vue .mt-c:nth-child(2) .mt-seg{transition-duration:.8s}.mt-vue .mt-c:nth-child(3) .mt-seg{transition-duration:.9s}
+@media (prefers-reduced-motion:reduce){.mt-attente .mt-seg{transform:none}.mt-attente .mt-coureur{opacity:1}}
+/* Chiffres : cote cumulee, et « si ca passe ce soir » (Pro). */
+.mt-figs{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 32px;margin-top:12px}
+.mt-fig{display:grid;gap:3px}
+.mt-k{font-size:12.5px;color:var(--cb-soft)}
+.cb .mt-v{font:700 36px/1 var(--cb-num);letter-spacing:0;color:var(--cb-ink);font-variant-numeric:tabular-nums}
+.cb .mt-v--depart{font:600 17px/1.4 Inter,system-ui,sans-serif;color:var(--cb-soft2)}
+.cb .mt-fig--soir .mt-v{color:var(--cb-cyan)}
+.mt-fig--soir{grid-template-columns:auto auto;align-items:center;column-gap:10px}
+.mt-fig--soir .mt-k{grid-column:1/-1}
+.mt-arr{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid rgba(32,213,239,.45);border-radius:999px;color:var(--cb-cyan);font-size:12px;font-weight:700;white-space:nowrap}
+.mt-arr .cb-ico{width:13px;height:13px;vertical-align:0}
+/* Ce soir. */
+.mt-soir{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:3px 12px;margin:14px 0 0;padding:11px 12px;border-radius:12px;background:rgba(141,179,211,.06)}
+.mt-soir-k{grid-column:1/-1;font-size:12.5px;font-weight:700;color:var(--cb-cyan)}
+.mt-soir-p{display:grid;gap:2px;min-width:0}
+.mt-soir-p b{font-size:14.5px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
+.mt-soir-p small{font-size:12.5px;line-height:1.4;color:var(--cb-soft)}
+.cb .mt-soir-c{font:700 24px/1 var(--cb-num);font-variant-numeric:tabular-nums}
+.mt-soir--verrou .mt-soir-p b{font-size:13.5px;font-weight:500;color:var(--cb-soft2)}
+.mt-soir--info{background:none;padding:2px 0 0}
+.mt-soir--info .mt-soir-p small{font-size:13px;color:var(--cb-soft2)}
+/* Ce qui est arrive : objectif atteint, retour au palier 1. */
+.mt-evt{display:flex;align-items:flex-start;gap:8px;margin:10px 0 0;font-size:13px;line-height:1.5;color:var(--cb-soft2)}
+.mt-evt .cb-ico{margin-top:2px;color:var(--cb-soft);vertical-align:0}
+.mt-evt--but{color:var(--cb-ink);font-weight:600}
+.mt-evt--but .cb-ico{color:var(--cb-cyan)}
+/* Bilan depuis le depart, gagnes ET perdus. */
+.mt-bilan{margin:12px 0 0;font-size:13px;font-weight:600;line-height:1.5;color:var(--cb-soft2);font-variant-numeric:tabular-nums}
+/* Historique complet, du plus recent au plus ancien. */
+.mt-det{margin-top:4px}
+.mt-det summary{display:inline-flex;align-items:center;gap:6px;min-height:44px;color:var(--cb-cyan);font-size:13.5px;font-weight:600;cursor:pointer;list-style:none;-webkit-tap-highlight-color:transparent}
+.mt-det summary::-webkit-details-marker{display:none}
+.mt-chev{transition:transform .2s var(--cb-ease)}
+.mt-det[open] .mt-chev{transform:rotate(180deg)}
+.mt-ls{display:grid;margin:0 0 8px;padding:0;list-style:none}
+.mt-l{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--cb-line);font-size:13px}
+.mt-l-j{color:var(--cb-soft);font-variant-numeric:tabular-nums}
+.mt-l-m,.mt-l-d{display:grid;gap:2px;min-width:0}
+.mt-l-m b{font-weight:600;overflow-wrap:anywhere}
+.mt-l-m small,.mt-l-d small{color:var(--cb-soft);font-size:12px}
+.mt-l-d{justify-items:end}
+.mt-l-d b{font-weight:700;font-variant-numeric:tabular-nums}
+.mt-l-d small{display:inline-flex;align-items:center;gap:3px}
+.mt-l-d .cb-ico{width:13px;height:13px;vertical-align:0}
+.mt-l--gagne .mt-l-d small,.mt-l--perdu .mt-l-d small{color:var(--cb-ink)}
+.mt-l--gagne .mt-l-d .cb-ico{color:var(--cb-cyan)}
+.mt-l-m small.mt-l-cc{color:var(--cb-soft2)}
+.mt-l--but .mt-l-m small.mt-l-cc{color:var(--cb-cyan);font-weight:700}
+.mt-l--perdu .mt-l-m b,.mt-l--non_regle .mt-l-m b{color:var(--cb-soft2)}
+
+/* ---------- Les buteurs du jour : une carte par joueur ---------- */
+.bt-grille{display:grid;gap:12px;margin-top:20px}
+.bt-n2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.bt-n1{grid-template-columns:minmax(0,1fr)}
+@media (min-width:720px){.bt-n1{grid-template-columns:minmax(0,440px)}}
+.bt-c{position:relative;min-width:0;border:1px solid var(--cb-line);border-radius:16px;background:var(--cb-panel);overflow:hidden;container:btc / inline-size}
+.bt-c-in{display:flex;flex-direction:column;height:100%}
+.bt-c-haut{position:relative;display:grid;place-items:center;padding:20px 12px 16px;
+  background:linear-gradient(180deg,rgba(13,25,38,.15) 0%,rgba(13,25,38,.7) 62%,var(--cb-panel) 100%),url(/assets/hero/stade-nuit-portrait.webp) 50% 30%/cover no-repeat}
+.cb .bt-c-rang{position:absolute;top:10px;left:12px;font:700 24px/1 var(--cb-num);color:var(--cb-ink)}
+.bt-c-photo{position:relative;display:block;width:92px;height:92px;border:2px solid var(--cb-cyan);border-radius:50%;background:#132233}
+.bt-c-photo img[data-bt-photo]{display:block;width:100%;height:100%;border-radius:50%;object-fit:cover}
+.cb .bt-c-init{position:absolute;inset:0;display:grid;place-items:center;font:700 30px/1 var(--cb-num);color:var(--cb-soft2)}
+.bt-c-logo{position:absolute;right:-8px;bottom:-4px;width:34px;height:34px;padding:4px;border-radius:50%;background:#f4f7fb;object-fit:contain;
+  box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.bt-c-corps{display:flex;flex-direction:column;gap:4px;flex:1;padding:12px 14px 14px}
+.bt-c-nom{margin:0;font-size:17px;font-weight:700;line-height:1.2;letter-spacing:-.01em;text-wrap:balance;overflow-wrap:anywhere}
+.bt-c-club,.bt-c-match{margin:0;font-size:12.5px;line-height:1.4;color:var(--cb-soft)}
+.bt-c-match{color:var(--cb-soft2)}
+.bt-c-chiffres{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin:auto 0 0;padding-top:10px;border-top:1px solid var(--cb-line)}
+.bt-c-match{margin-bottom:10px}
+.bt-c-chiffres div{display:flex;flex-direction:column}
+.bt-c-chiffres dt{flex:1;font-size:11.5px;line-height:1.3;color:var(--cb-soft)}
+.cb .bt-c-chiffres dd{margin:3px 0 0;font:700 36px/1 var(--cb-num);font-variant-numeric:tabular-nums;color:var(--cb-cyan)}
+.bt-c-type{margin:10px 0 0;font-size:12px;line-height:1.45;color:var(--cb-soft)}
+.bt-c-type b{color:var(--cb-ink);font-weight:600}
+.bt-c-out{margin:8px 0 0;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);color:var(--cb-soft2);font-size:12.5px;line-height:1.45}
+.bt-c.is-off .bt-c-haut,.bt-c.is-off .bt-c-chiffres{opacity:.55}
+.bt-c.is-off .bt-c-nom{text-decoration:line-through;text-decoration-thickness:1px}
+.bt-c--faux .bt-c-photo{border-color:var(--cb-line2)}
+.cb .bt-c--faux .bt-c-init{color:var(--cb-soft)}
+.bt-c--faux .bt-c-init .cb-ico{width:40px;height:40px}
+/* Carte large (ordinateur, un seul buteur) : photo a gauche, chiffres a droite. */
+@container btc (min-width:400px){
+  .bt-c-in{flex-direction:row}
+  .bt-c-haut{flex:0 0 156px;padding:24px 12px}
+  .bt-c-corps{padding:18px 18px 16px}
+  .bt-c-nom{font-size:19px}
+}
+
+/* ---------- Regles ---------- */
+.cb-vide{margin:26px 0 0;padding:18px;border:1px solid var(--cb-line2);border-radius:16px;color:var(--cb-soft2);font-size:15px;line-height:1.5}
+.cb-regles{margin:44px 0 0;padding-top:34px;border-top:1px solid var(--cb-line)}
+.cb-registre{display:grid;grid-template-columns:minmax(0,1fr);margin:16px 0 0}
+.cb-registre dt{padding:14px 0 0;border-top:1px solid var(--cb-line);font-size:15.5px;font-weight:700;line-height:1.4;color:var(--cb-ink)}
+.cb-registre dd{margin:4px 0 0;padding:0 0 14px;font-size:14.5px;line-height:1.55;color:var(--cb-soft)}
+.cb-registre dt:first-of-type{border-top:0;padding-top:4px}
+@media (min-width:600px){
+  .cb-registre{grid-template-columns:minmax(0,170px) minmax(0,1fr);column-gap:24px}
+  .cb-registre dt,.cb-registre dd{margin:0;padding:15px 0;border-top:1px solid var(--cb-line)}
+  .cb-registre dt:first-of-type,.cb-registre dd:first-of-type{border-top:0;padding-top:4px}
+}
+
+/* ---------- Mentions ---------- */
+.cb .legal-note{margin:28px auto 0;color:var(--cb-soft);font-size:12px;line-height:1.7;text-align:center;text-wrap:balance}
+.cb .legal-note--aide{margin-top:6px}
+.cb .legal-note a{display:inline-flex;align-items:center;min-height:44px;padding:0 2px;color:var(--cb-soft);text-decoration:none}
+/* Liens legaux : les points de separation restent en fin de ligne, jamais au debut de la ligne suivante. */
+.cb .legal-links{display:flex;flex-wrap:wrap;justify-content:center;margin-top:10px;font-size:0}
+.cb .legal-links a{font-size:12px}
+.cb .legal-links a:not(:last-child)::after{content:"\00B7";margin:0 3px 0 6px;color:var(--cb-soft)}
+
+/* ---------- Ordinateur ---------- */
+@media (min-width:768px){
+  .cb-ouverture{padding:60px 0 50px}
+  .cb-sous{font-size:17px}
+  .mt-course{padding:18px 24px 6px}
+  .mt-c{padding:20px 0 18px}
+  .cb .mt-v:not(.mt-v--depart){font-size:40px}
+}

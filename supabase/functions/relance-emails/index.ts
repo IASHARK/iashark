@@ -43,9 +43,10 @@ const ABONNE_EN_COURS = ["active", "trialing", "past_due"];
 const PLANS_MANUELS = ["famille", "pro"];
 const FREQUENCE_JOURS = 3;
 const PARTENAIRE_JOURS = 7;
-// Banniere : sur le site ; si la mise en ligne Netlify n'a pas eu lieu, copie du depot public.
+// Banniere : sur le site ; si la mise en ligne Netlify n'a pas eu lieu, copie du depot public
+// (branche main, sinon la branche d'ou part le lancement, ex. un test avant la fusion).
 const BANNIERE_SITE = `${SITE}/assets/emails/${CLE}/`;
-const BANNIERE_SECOURS = `https://raw.githubusercontent.com/IASHARK/iashark/main/assets/emails/${CLE}/`;
+const banniereDepot = (branche: string) => `https://raw.githubusercontent.com/IASHARK/iashark/${branche}/assets/emails/${CLE}/`;
 const TAG = "[relance-emails]";
 
 const env = (n: string) => { const v = Deno.env.get(n); return v && v.trim() ? v.trim() : null; };
@@ -168,14 +169,20 @@ function compter(liste: Personne[], cle: (p: Personne) => string = (p) => `${p.s
 }
 
 // La banniere est-elle en ligne sur le site (mise en ligne Netlify faite) ? Sinon : copie du depot public.
-async function baseBanniere(): Promise<{ base: string; site: boolean }> {
+async function enLigne(base: string): Promise<boolean> {
   for (const l of LANGUES) {
     try {
-      const r = await fetch(`${BANNIERE_SITE}banniere-${l}.jpg`, { method: "HEAD" });
-      if (!r.ok || !String(r.headers.get("content-type") || "").startsWith("image/")) return { base: BANNIERE_SECOURS, site: false };
-    } catch { return { base: BANNIERE_SECOURS, site: false }; }
+      const r = await fetch(`${base}banniere-${l}.jpg`, { method: "HEAD" });
+      if (!r.ok || !String(r.headers.get("content-type") || "").startsWith("image/")) return false;
+    } catch { return false; }
   }
-  return { base: BANNIERE_SITE, site: true };
+  return true;
+}
+async function baseBanniere(branche: string): Promise<{ base: string; site: boolean }> {
+  if (await enLigne(BANNIERE_SITE)) return { base: BANNIERE_SITE, site: true };
+  const branches = ["main", ...(/^[A-Za-z0-9._\/-]{1,80}$/.test(branche) && branche !== "main" ? [branche] : [])];
+  for (const b of branches) if (await enLigne(banniereDepot(b))) return { base: banniereDepot(b), site: false };
+  return { base: banniereDepot("main"), site: false };
 }
 
 async function envoyer(p: Personne, variante: string, cfg: { brevo: string; secret: string; base: string; nom: string; de: string; repondre: string; banniere: string }, prefixe = "") {
@@ -268,7 +275,7 @@ Deno.serve(async (req: Request) => {
     .map((x: unknown) => String(x).trim().toLowerCase()).filter(Boolean));
   const liste = tout.liste.filter((p) => !exclure.has(p.id.toLowerCase()));
   const ecartes = { ...tout.ecartes, exclus: tout.liste.length - liste.length };
-  const banniere = await baseBanniere();
+  const banniere = await baseBanniere(String(corps.branche || ""));
   cfg.banniere = banniere.base;
   if (mode === "etat") {
     return json(200, { ok: true, mode, cle: CLE, pret, banniere_sur_le_site: banniere.site, destinataires: liste.length,

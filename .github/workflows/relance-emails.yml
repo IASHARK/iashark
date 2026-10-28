@@ -115,7 +115,7 @@ jobs:
               echo "::error::La fonction en ligne n'est pas celle du 28/10 : rien n'est envoye."; exit 1
             fi
           fi
-          corps=$(jq -nc --arg m "$MODE" --arg c "$CONFIRMATION" --arg x "$EXCLURE" --argjson p "$PLANIFIE" '{mode:$m, confirmation:$c, exclure:$x, planifie:$p}')
+          corps=$(jq -nc --arg m "$MODE" --arg c "$CONFIRMATION" --arg x "$EXCLURE" --argjson p "$PLANIFIE" --arg b "$GITHUB_REF_NAME" '{mode:$m, confirmation:$c, exclure:$x, planifie:$p, branche:$b}')
           code=$(curl -sS -o reponse.json -w "%{http_code}" -X POST "https://ksvjraqitxouwiabecai.supabase.co/functions/v1/relance-emails" \
             -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H "x-relance-secret: $RELANCE_SECRET" -H "x-region: us-east-2" -H "Content-Type: application/json" --max-time 600 -d "$corps")
           echo "HTTP $code (mode $MODE)"; jq . reponse.json || cat reponse.json

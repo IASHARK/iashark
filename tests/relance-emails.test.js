@@ -143,7 +143,8 @@ async function appeler(corps, options = {}) {
   globalThis.fetch = async (url, init = {}) => {
     if ((init.method || "GET") === "HEAD") {
       journal.head.push(String(url));
-      return options.banniereAbsente ? { ok: false, status: 404, headers: new Headers({ "content-type": "text/html" }) }
+      const absente = options.banniereAbsente && (String(url).startsWith("https://iashark.com/") || String(url).includes("/main/"));
+      return absente ? { ok: false, status: 404, headers: new Headers({ "content-type": "text/html" }) }
         : { ok: true, status: 200, headers: new Headers({ "content-type": "image/jpeg" }) };
     }
     if (String(url) === "https://api.brevo.com/v3/smtp/email") {
@@ -238,14 +239,15 @@ test("envoi automatique (planifie) : rien un autre jour que le 28/10/2026", asyn
 
 test("test : tous les e-mails aux seuls comptes admin, objet [TEST] ; banniere de secours si le site ne l'a pas encore", async (t) => {
   if (!(await fonction())) { t.skip(SANS_TS); return; }
-  const { status, body, journal } = await appeler({ mode: "test" }, { banniereAbsente: true });
+  const { status, body, journal } = await appeler({ mode: "test", branche: "relance-28-10" }, { banniereAbsente: true });
   assert.equal(status, 200);
   assert.equal(body.envoyes, 12);
   assert.equal(body.banniere_sur_le_site, false);
   assert.ok(journal.brevo.every((m) => m.to[0].email === "admin@exemple.fr" && m.subject.startsWith("[TEST] ")));
   assert.equal(journal.rpc.length, 0, "le test ne reserve aucun envoi");
   const fr = journal.brevo.find((m) => m.tags[1] === "accord-fr");
-  assert.ok(fr.htmlContent.includes("https://raw.githubusercontent.com/IASHARK/iashark/main/assets/emails/2026-10-28/banniere-fr.jpg"));
+  // Ni le site ni main n'ont encore la banniere (test avant la fusion) : copie de la branche testee.
+  assert.ok(fr.htmlContent.includes("https://raw.githubusercontent.com/IASHARK/iashark/relance-28-10/assets/emails/2026-10-28/banniere-fr.jpg"));
   assert.ok(journal.brevo.find((m) => m.tags[1] === "partenaire-en").htmlContent.includes("/gb/partenaires.html"));
 });
 

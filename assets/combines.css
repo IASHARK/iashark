@@ -179,7 +179,9 @@ html:has(.cb){scrollbar-color:rgba(141,179,211,.32) #060b12}
 .mt-evt .cb-ico{margin-top:2px;color:var(--cb-soft);vertical-align:0}
 .mt-evt--but{color:var(--cb-ink);font-weight:600}
 .mt-evt--but .cb-ico{color:var(--cb-cyan)}
-/* Paliers de la serie en cours. */
+/* Bilan depuis le depart, gagnes ET perdus. */
+.mt-bilan{margin:12px 0 0;font-size:13px;font-weight:600;line-height:1.5;color:var(--cb-soft2);font-variant-numeric:tabular-nums}
+/* Historique complet, du plus recent au plus ancien. */
 .mt-det{margin-top:4px}
 .mt-det summary{display:inline-flex;align-items:center;gap:6px;min-height:44px;color:var(--cb-cyan);font-size:13.5px;font-weight:600;cursor:pointer;list-style:none;-webkit-tap-highlight-color:transparent}
 .mt-det summary::-webkit-details-marker{display:none}
@@ -195,8 +197,11 @@ html:has(.cb){scrollbar-color:rgba(141,179,211,.32) #060b12}
 .mt-l-d b{font-weight:700;font-variant-numeric:tabular-nums}
 .mt-l-d small{display:inline-flex;align-items:center;gap:3px}
 .mt-l-d .cb-ico{width:13px;height:13px;vertical-align:0}
-.mt-l--gagne .mt-l-d small{color:var(--cb-ink)}
+.mt-l--gagne .mt-l-d small,.mt-l--perdu .mt-l-d small{color:var(--cb-ink)}
 .mt-l--gagne .mt-l-d .cb-ico{color:var(--cb-cyan)}
+.mt-l-m small.mt-l-cc{color:var(--cb-soft2)}
+.mt-l--but .mt-l-m small.mt-l-cc{color:var(--cb-cyan);font-weight:700}
+.mt-l--perdu .mt-l-m b,.mt-l--non_regle .mt-l-m b{color:var(--cb-soft2)}
 
 /* ---------- Les buteurs du jour : une carte par joueur ---------- */
 .bt-grille{display:grid;gap:12px;margin-top:20px}

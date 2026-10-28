@@ -62,7 +62,9 @@ test("15. compte gratuit : x5 et buteur complets ; x10 et Selection en or sans a
   assert.equal(x5.publie_a, "2026-10-04T04:12:09Z");
   assert.deepEqual(r.tickets[1], { type: "x10", statut: "publie", verrou: "pro", nb_matchs: 6, cote_totale: 10.18 });
   assert.deepEqual(r.selection_or, { statut: "publie", verrou: "pro", nb_paris: 3 });
-  assert.deepEqual(Object.keys(r.buteur_du_jour).sort(), ["adversaire", "chance", "coup_envoi", "equipe", "etat", "fixture_id", "joueur", "joueur_id", "ligue", "poste", "publie_a", "statut", "verrou"]);
+  assert.deepEqual(Object.keys(r.buteur_du_jour).sort(), ["adversaire", "buteurs", "chance", "coup_envoi", "equipe", "etat", "fixture_id", "joueur", "joueur_id", "ligue", "poste", "publie_a", "statut", "verrou"]);
+  // Ancien ticket (un seul joueur) : buteurs = [ce joueur], sans photo inventee.
+  assert.deepEqual(r.buteur_du_jour.buteurs.map((b) => [b.joueur, b.chance, b.photo, b.etat]), [["Buteur Secret", 35, null, "a_venir"]]);
   assert.equal(r.buteur_du_jour.chance, 35);
   const json = JSON.stringify([r.tickets[1], r.selection_or]);
   assert.doesNotMatch(json, /Lens|Lille|Winamax|home-win|"chance"/);
@@ -89,6 +91,29 @@ test("16. Pro : tout complet (x10 avec « sans ce match », Selection en or clas
   assert.equal(C.cacheDe("anonyme"), "public, max-age=300");
   assert.equal(C.cacheDe("gratuit"), "private, no-store");
   assert.equal(C.cacheDe("pro"), "private, no-store");
+});
+
+test("buteurs du jour (regle du 28/10/2026) : 2 joueurs, meme liste blanche par joueur, etat de chacun ; nb_buteurs seul sans compte", async () => {
+  const C = await charger();
+  const j1 = { joueur: "Buteur Un", joueur_id: 123, poste: "Attaquant", cote: "home", equipe: "Lens", adversaire: "Lille", domicile: "Lens", exterieur: "Lille",
+    fixture_id: 1234567, ligue: "Ligue 1", ligue_key: "ligue1", coup_envoi: "2026-10-04 21:00", coup_envoi_ms: 1, chance: 35, p_marque: 0.3712,
+    photo: "https://media.api-sports.io/football/players/123.png" };
+  const j2 = Object.assign({}, j1, { joueur: "Buteur Deux", joueur_id: 456, cote: "away", equipe: "Nice", adversaire: "Brest", domicile: "Brest", exterieur: "Nice",
+    fixture_id: 7654321, chance: 30, photo: "javascript:alert(1)" });
+  const ligne = { type: "buteur", meta: { nb_buteurs: 2 }, publie_a: "2026-10-04T04:12:09Z", etats: { buteurs: ["a_venir", "retire"] },
+    contenu: Object.assign({}, j1, { buteurs: [j1, j2] }) };
+  const anonyme = C.construireReponse({ jour: "2026-10-04", niveau: "anonyme", lignes: [ligne], calcul: null });
+  assert.deepEqual(anonyme.buteur_du_jour, { statut: "publie", verrou: "compte", nb_buteurs: 2 });
+  const r = C.construireReponse({ jour: "2026-10-04", niveau: "gratuit", lignes: [ligne], calcul: null });
+  const b = r.buteur_du_jour;
+  assert.equal(b.joueur, "Buteur Un", "le 1er joueur reste au premier niveau");
+  assert.equal(b.nb_buteurs, 2);
+  assert.deepEqual(b.buteurs.map((x) => [x.joueur, x.equipe, x.adversaire, x.domicile, x.exterieur, x.chance, x.etat]),
+    [["Buteur Un", "Lens", "Lille", "Lens", "Lille", 35, "a_venir"], ["Buteur Deux", "Nice", "Brest", "Brest", "Nice", 30, "retire"]]);
+  assert.equal(b.buteurs[0].photo, "https://media.api-sports.io/football/players/123.png");
+  assert.equal(b.buteurs[1].photo, null, "jamais une adresse d'image hors API-Football");
+  assert.deepEqual(Object.keys(b.buteurs[0]).sort(), ["adversaire", "chance", "coup_envoi", "domicile", "equipe", "etat", "exterieur", "fixture_id", "joueur", "joueur_id", "ligue", "photo", "poste"]);
+  INTERNES.forEach((k) => assert.ok(!clesProfondes(r).has(k), "cle interne " + k));
 });
 
 test("statuts : aucun, en preparation, indisponible ; jamais d'erreur crue", async () => {

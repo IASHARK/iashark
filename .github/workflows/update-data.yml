@@ -4668,7 +4668,9 @@ jobs:
           // casser la tete ») : jambes et Selection en or = SEULEMENT le pari affiche de chaque match (meme pari, meme cote,
           // meme chance que la page). Selection en or = les 3 paris les plus probables du jour ; petit combine (3-5 jambes,
           // cote 4,00-6,00) et grand combine (5-7 jambes, cote 8,50-12,00) = la plus grande chance parmi ces paris
-          // (lib/run-output/combos.js#meilleurCombine), jamais force. Gele a sa publication dans la table tickets_du_jour (migration 0050,
+          // (lib/run-output/combos.js#meilleurCombine), jamais force. Regle du 28/10/2026 : jambes cherchees d'abord
+          // parmi les paris a 1,44 au plus, puis 1,49, 1,59, 2,20 (config/tickets.json#paliers_cote_jambe) ; 2 buteurs
+          // du jour de 2 matchs differents (paris simples). Gele a sa publication dans la table tickets_du_jour (migration 0050,
           // lib/tickets-du-jour.js) : un ticket publie ne se recalcule plus. Rien sans le feu vert du mathematicien
           // (config/verdicts-maths.json). Table ou cle absente : simple avertissement, le calcul quotidien continue.
           // data.json : statut de chaque ticket seulement (lib/public-run-output.js). Journal : statuts et compteurs seulement.

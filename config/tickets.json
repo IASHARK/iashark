@@ -1,5 +1,8 @@
 {
   "_readme": [
+    "REGLE DU 28/10/2026 : CHOIX DE CLEMENT (« pour la cote a 10 le meilleur possible et 5 aussi, change de formule » ; « ticket de buteur du jour : on en donne 2, a ne pas jouer en combine, en paris simples »). La Selection en or ne change pas. Ne s'applique jamais aux tickets deja publies (table tickets_du_jour gelee) : a partir du prochain calcul. La mesure des tickets continue.",
+    "Combines x5 et x10 : PALIERS DE COTE DES JAMBES (paliers_cote_jambe). Les jambes restent le pari AFFICHE de chaque match (meme pari, meme cote affichee, meme chance que la page). Chaque ticket est d'abord cherche avec les seuls paris affiches dont la cote est au plus 1,44 ; s'il n'en existe pas, au plus 1,49 ; puis 1,59 ; puis 2,20 (= la regle d'avant). Garde de chance : le ticket d'un palier bas n'est garde que si sa chance affichee (% entier) ne baisse pas par rapport au meilleur ticket fait avec toutes les jambes ; sinon c'est ce dernier. Le reste ne change pas : x5 = 3 a 5 jambes, cote totale 4,00-6,00 ; x10 = 5 a 7 jambes, 8,50-12,00 ; une jambe par match ; la plus grande chance (produit des chances affichees) ; jamais force (lib/run-output/combos.js#generateDailyCombos). Plancher des jambes, fourchettes et paliers : toujours sur la cote AFFICHEE (une cote indicative est dite telle quelle sur la page).",
+    "Buteurs du jour (buteur_du_jour.nb = 2) : les 2 plus probables du calcul buteur du moteur v3 (v3_buteurs, memes regles que l'ancien buteur du jour), de 2 matchs differents, presentes comme 2 paris simples, jamais combines (lib/run-output/jambes-du-jour.js#buteursDuJour). Contenu du ticket « buteur » : les champs du 1er joueur au premier niveau (inchanges) + buteurs: [joueur 1, joueur 2] (memes champs, + photo). Un joueur absent de la composition est remplace seul (migration 0058), jamais par un joueur du match de l'autre buteur.",
     "REGLE DU 21/10/2026 AU SOIR (Clement : « pourquoi la Ligue des champions exclue, enleve cette regle » ; « chaque jour faut des combines » ; « pas besoin de mathematicien, reflechis ») : TOUT pari affiche sur une page de match peut entrer dans un combine et dans la Selection en or, quelle que soit la competition (coupes d'Europe, coupes nationales, tournois) ou la famille du pari (plus/moins 1,5 et 3,5, les deux equipes marquent), et meme « en test » (jambe.accepter_en_test). Restent : cote 1,40-2,20, chance affichee >= 50 %, coup d'envoi a plus de 15 min, jamais un repli. Les anciennes exclusions sont gardees dans config/verdicts-maths.json (competitions_jambes_retirees_21_10, categories_no_go_retirees_21_10).",
     "TICKETS DU JOUR, SELECTION EN OR, BUTEUR DU JOUR. Regle du 21/10/2026 (Clement : « les 3 Selection en or c'est les 3 matchs simples les mieux de la journee ; le petit combine les matchs les plus logiques, le grand pareil ; le buteur comme d'hab » ; « faut pas se casser la tete ») ; remplace la regle du 06/10/2026 (tous les marches, Selection en or a 1,70-2,50, jambes 1,20-1,45).",
     "Candidats : SEULEMENT le pari affiche de chaque match du jour (lib/tickets-du-jour.js#calculerDuJour : meme pari, meme cote, meme chance que la page, une seule source). Conditions communes : pari publie et « verifie », jamais un repli, cote dans jambe.cote_min-jambe.cote_max (celle du pari affiche), chance affichee >= jambe.chance_min, match du jour J de Paris a plus de marge_coup_envoi_min minutes de son coup d'envoi, competition mesuree (config/verdicts-maths.json#competitions_jambes), categorie non NO-GO (categories_no_go).",
@@ -10,13 +13,15 @@
     "Un ticket publie ne change plus (table tickets_du_jour, migration 0050) : la regle vaut a partir du prochain calcul, jamais retroactivement. Rien n'est produit sans le feu vert du mathematicien (config/verdicts-maths.json).",
     "fichier_buteurs_public : « retire » depuis le 04/10/2026 = buteurs-du-jour.json sans aucune entree."
   ],
-  "regle_version": "tickets-2026-10-21-soir",
+  "regle_version": "tickets-2026-10-28",
   "x5": { "jambes": [3, 4, 5], "cote_min": 4.0, "cote_max": 6.0, "centre": 5 },
   "x10": { "jambes": [5, 6, 7], "cote_min": 8.5, "cote_max": 12, "centre": 10 },
   "jambe": { "cote_min": 1.4, "cote_max": 2.2, "chance_min": 50, "accepter_en_test": true },
+  "paliers_cote_jambe": [1.44, 1.49, 1.59, 2.2],
   "coherence": { "seuil_jambe": 0.8 },
   "marge_coup_envoi_min": 15,
   "operateurs": "agrees_sinon_api_football",
   "selection_or": { "nb": 3 },
+  "buteur_du_jour": { "nb": 2 },
   "fichier_buteurs_public": "retire"
 }

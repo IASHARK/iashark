@@ -1,9 +1,17 @@
-# Relance par e-mail des inscrits (supabase/functions/relance-emails), lancee a la main.
+# Relance par e-mail des inscrits (supabase/functions/relance-emails).
 #   etat  : qui recevrait quoi (comptes par type et langue), rien n'est envoye
-#   test  : les 12 e-mails aux seuls comptes administrateurs
+#   suivi : ce que Brevo a fait des e-mails de la campagne (sans adresse)
+#   test  : tous les e-mails aux seuls comptes administrateurs (objet [TEST])
 #   envoi : l'envoi reel, une fois par personne (phrase « ENVOYER LA RELANCE »)
+# Envoi AUTOMATIQUE (demande de Clement) : mercredi 28/10/2026 a 11 h, heure de Paris (10:00 UTC,
+# heure d'hiver). Second passage a 10:20 UTC au cas ou GitHub sauterait le premier : chaque personne
+# n'est servie qu'une fois (email_reserve_send), rien ne part deux fois. Un autre jour (le declencheur
+# revient chaque annee), rien n'est fait : garde de date ici ET dans la fonction (planifie: true).
 name: Relance e-mails
 on:
+  schedule:
+    - cron: "0 10 28 10 *"
+    - cron: "20 10 28 10 *"
   workflow_dispatch:
     inputs:
       mode:
@@ -22,14 +30,31 @@ on:
         default: ""
 permissions:
   contents: read
+# Jamais deux lancements en meme temps (le second attend la fin du premier).
+concurrency:
+  group: relance-emails
+  cancel-in-progress: false
 jobs:
   relance:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Garde de date (envoi automatique)
+        id: garde
+        env:
+          EVENEMENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENEMENT" = "schedule" ] && [ "$(date -u +%F)" != "2026-10-28" ]; then
+            echo "Envoi automatique prevu le 2026-10-28 seulement (aujourd'hui $(date -u +%F)) : rien n'est fait."
+            echo "go=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "go=true" >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/checkout@v4
+        if: steps.garde.outputs.go == 'true'
       # La fonction est installee depuis ce depot a chaque lancement (meme version que le test).
       - name: Installation de la fonction
+        if: steps.garde.outputs.go == 'true'
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           RELANCE_SECRET: ${{ secrets.RELANCE_SECRET }}
@@ -46,16 +71,23 @@ jobs:
       # Region fixe (Ohio, us-east-2) : Brevo n'accepte que les adresses autorisees par Clement
       # (plage IPv6 2600:1f16::/32) ; sans region fixe, l'adresse de depart change a chaque appel.
       - name: Appel de la fonction
+        if: steps.garde.outputs.go == 'true'
         env:
           KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           RELANCE_SECRET: ${{ secrets.RELANCE_SECRET }}
+          EVENEMENT: ${{ github.event_name }}
           MODE: ${{ inputs.mode }}
           CONFIRMATION: ${{ inputs.confirmation }}
           EXCLURE: ${{ inputs.exclure }}
         run: |
           KEY=$(printf %s "$KEY" | tr -d '\r\n ')
-          corps=$(jq -nc --arg m "$MODE" --arg c "$CONFIRMATION" --arg x "$EXCLURE" '{mode:$m, confirmation:$c, exclure:$x}')
+          PLANIFIE=false
+          if [ "$EVENEMENT" = "schedule" ]; then
+            # Envoi automatique demande par Clement : mode envoi, avec la phrase de confirmation.
+            MODE=envoi; CONFIRMATION="ENVOYER LA RELANCE"; EXCLURE=""; PLANIFIE=true
+          fi
+          corps=$(jq -nc --arg m "$MODE" --arg c "$CONFIRMATION" --arg x "$EXCLURE" --argjson p "$PLANIFIE" '{mode:$m, confirmation:$c, exclure:$x, planifie:$p}')
           code=$(curl -sS -o reponse.json -w "%{http_code}" -X POST "https://ksvjraqitxouwiabecai.supabase.co/functions/v1/relance-emails" \
             -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H "x-relance-secret: $RELANCE_SECRET" -H "x-region: us-east-2" -H "Content-Type: application/json" --max-time 600 -d "$corps")
-          echo "HTTP $code"; jq . reponse.json || cat reponse.json
+          echo "HTTP $code (mode $MODE)"; jq . reponse.json || cat reponse.json
           [ "$code" = "200" ]

@@ -254,23 +254,14 @@ test("2. premier buteur et ancien calcul : memes regles ; interrupteur d'urgence
   assert.ok(iPremiers > SCRIPT.indexOf("SECTIONS_MATCH.poserSections(allMatchsData)") && iPremiers < SCRIPT.indexOf("SECTIONS_MATCH.poserContenusPro(allMatchsData)"));
 });
 
-// Faux PostgREST pour tickets_du_jour (comme tests/tickets-du-jour-gel.test.js).
+// Fausse table tickets_du_jour qui applique les VRAIES regles de gel de la base (tests/helpers/gel-tickets-du-jour.js :
+// 0050, 0051, 0058 ; remplace_a pose par la base). opts.migrationAbsente : 0051 absente (gel de 0050 seul) ;
+// opts.mode : « 0050 », « 0051 » (0058 absente) ou « 0058 » (par defaut).
+const { fausseBase } = require("./helpers/gel-tickets-du-jour.js");
 function fauxTickets(ligne, opts) {
   opts = opts || {};
-  const appels = [];
-  const f = async function (url, init) {
-    init = init || {};
-    const corps = init.body ? JSON.parse(init.body) : null;
-    appels.push({ url, method: init.method || "GET", body: corps });
-    if ((init.method || "GET") === "GET") return { ok: true, status: 200, json: async () => (ligne ? [clone(ligne)] : []) };
-    if (init.method === "PATCH" && /type=eq\.buteur/.test(url) && corps && corps.contenu) {
-      // Migration 0051 appliquee : contenu garde ; absente : le gel de 0050 remet l'ancien.
-      return { ok: true, status: 200, json: async () => [Object.assign({}, ligne, corps, opts.migrationAbsente ? { contenu: ligne.contenu } : {})] };
-    }
-    return { ok: true, status: 204, json: async () => null };
-  };
-  f.appels = appels;
-  return f;
+  return fausseBase(ligne ? Object.assign({ jour: "2026-10-04", premier_coup_envoi: "2026-10-04T19:00:00.000Z" }, ligne) : null,
+    { mode: opts.mode || (opts.migrationAbsente ? "0050" : "0058"), nowMs: opts.nowMs || NOW_B });
 }
 const BUTEUR_PUBLIE = { joueur: "Alexandre Lacazette", joueur_id: 11, cote: "home", fixture_id: 101, coup_envoi: "2026-10-04 21:00", coup_envoi_ms: Date.parse("2026-10-04T19:00:00Z"), chance: 40 };
 function matchsDuJour(lineups) {
@@ -306,6 +297,93 @@ test("2. buteur du jour absent de la composition : remplace (trace de l'ancien g
     supabase: { url: "https://essai.supabase.co", cle: "x" }, fetch: f3, avertir: () => {}, erreur: () => {} });
   assert.equal(r3.buteur, "deja_publie");
   assert.ok(!f3.appels.some((a) => a.method === "PATCH" && /tickets_du_jour\?/.test(a.url)), "aucun etat « retire » sans composition");
+});
+
+const FX2 = Object.assign({}, FX_B, { 102: { fixture: { id: 102, status: { short: "NS" }, timestamp: Date.parse("2026-10-04T19:00:00Z") / 1000 } } });
+const m102 = (o) => Object.assign({ id: 102, date: "2026-10-04 21:00", league_key: "ligue1", league: "Ligue 1", home: { n: "Lens", id: 116 }, away: { n: "Nice", id: 84 },
+  pari_rec: "Victoire Domicile", no_signal: false, v3_buteurs: [{ joueur_id: 31, joueur: "Florian Sotoca", cote: "home", p_marque: 0.30 }, { joueur_id: 41, joueur: "Adrien Thomasson", cote: "home", p_marque: 0.45 }] }, o || {});
+const LINEUPS_102_SANS_SOTOCA = { home: { startXI: onze(300, ["Adrien Thomasson"]) }, away: { startXI: onze(400) } };
+const J2_SOTOCA = { joueur: "Florian Sotoca", joueur_id: 31, cote: "home", fixture_id: 102, coup_envoi: "2026-10-04 21:00", coup_envoi_ms: Date.parse("2026-10-04T19:00:00Z"), chance: 30 };
+const ligneDeux = () => ({ type: "buteur", meta: { nb_buteurs: 2 }, contenu: T.contenuButeurs([Object.assign({}, BUTEUR_PUBLIE), J2_SOTOCA]), etats: {} });
+const ctxDeux = (f, l101, l102) => ({ matchs: matchsDuJour(l101).concat([m102(l102 ? { lineups: l102 } : {})]), fixtureById: FX2, nowMs: NOW_B,
+  supabase: { url: "https://essai.supabase.co", cle: "x" }, fetch: f, verdicts: VERDICTS_GO, avertir: () => {} });
+
+test("2. deux buteurs du jour (regle du 28/10/2026) : seul le joueur absent est remplace, jamais par un joueur du match de l'autre", async () => {
+  const ligne = ligneDeux();
+  const contenu = ligne.contenu;
+  assert.deepEqual(Object.keys(contenu).sort(), Object.keys(BUTEUR_PUBLIE).concat(["buteurs"]).sort(), "premier niveau = 1er joueur, + buteurs");
+  // Personne d'absent : rien n'est ecrit.
+  const f0 = fauxTickets(ligne);
+  assert.equal((await T.actualiserButeurDuJour(ctxDeux(f0))).statut, "present");
+  assert.ok(!f0.appels.some((a) => a.method === "PATCH"));
+  // Lacazette (1er joueur, match 101) absent : remplace par Mikautadze (match 101, 0,38), jamais par Thomasson (0,45) du match du 2e joueur.
+  const f1 = fauxTickets(ligne);
+  assert.equal((await T.actualiserButeurDuJour(ctxDeux(f1, LINEUPS_SANS_LACAZETTE))).statut, "remplace");
+  const enBase = f1.ligne();
+  assert.deepEqual(enBase.contenu.buteurs.map((b) => b.joueur), ["Georges Mikautadze", "Florian Sotoca"], "la base a garde le remplacement (regle 0058)");
+  assert.equal(enBase.contenu.joueur, "Georges Mikautadze", "le premier niveau suit le 1er joueur");
+  assert.deepEqual(enBase.contenu.buteurs[1], J2_SOTOCA, "l'autre joueur ne change pas");
+  assert.deepEqual(enBase.etats.remplacements.map((x) => [x.motif, x.rang, x.ancien.joueur, typeof x.remplace_a]), [["absent_composition", 0, "Alexandre Lacazette", "string"]]);
+  assert.deepEqual(enBase.etats.remplacements[0].ancien, contenu, "trace exacte de l'ancien ticket");
+  // Migration 0058 absente (0051 seule) : le 2e joueur absent n'est pas remplace (0051 ne connait qu'un joueur) :
+  // avertissement, joueur marque retire (etat par joueur), le 1er reste a venir.
+  const avert = [];
+  const f2 = fauxTickets(ligne, { mode: "0051" });
+  const r2 = await T.actualiserButeurDuJour(Object.assign(ctxDeux(f2, null, LINEUPS_102_SANS_SOTOCA), { avertir: (t) => avert.push(t) }));
+  assert.equal(r2.statut, "retire");
+  assert.match(avert.join(" "), /migration 0058 non appliquee/);
+  assert.deepEqual(f2.ligne().contenu, contenu, "la base a refuse le remplacement");
+  assert.deepEqual(f2.ligne().etats.buteurs, ["a_venir", "retire"]);
+  assert.equal(f2.ligne().etats.joueur, undefined, "le 1er joueur reste a venir");
+  // Etats par joueur : match du 2e joueur reporte -> seul lui est « reporte » ; jamais de retour a « a venir » le meme jour.
+  const e = T.etatsDe("buteur", contenu, { fixtureById: { 102: { fixture: { status: { short: "PST" } } } }, matchParId: {} });
+  assert.deepEqual(e, { buteurs: ["a_venir", "reporte"] });
+  assert.deepEqual(T.etatsDe("buteur", contenu, { fixtureById: {}, matchParId: {}, etatsActuels: e }), e);
+  // Calcul de la nuit : le nouveau ticket porte deux joueurs de deux matchs differents.
+  const calc = T.calculerDuJour(matchsDuJour().concat([m102()]), { jour: "2026-10-04", nowMs: NOW_B, fixtureById: FX2, configLigues: CFG, categoriesNoGo: [] });
+  assert.deepEqual(calc.buteur.contenu.buteurs.map((b) => [b.joueur, b.fixture_id]), [["Adrien Thomasson", 102], ["Alexandre Lacazette", 101]]);
+  assert.deepEqual(calc.buteur.meta, { nb_buteurs: 2 });
+  assert.equal(T.premierCoupEnvoi("buteur", calc.buteur.contenu), "2026-10-04T19:00:00.000Z");
+});
+
+test("2. deux buteurs ABSENTS au meme passage (avocat du diable, 28/10) : chacun remplace, le 2e repart de la ligne gardee par la base", async () => {
+  // Regles 0058 : les deux remplacements sont acceptes ; la 2e trace recopie la 1re AVEC son remplace_a (pose par la base).
+  for (const via of ["mise a jour legere", "calcul de la nuit"]) {
+    const f = fauxTickets(ligneDeux());
+    const ctx = ctxDeux(f, LINEUPS_SANS_LACAZETTE, LINEUPS_102_SANS_SOTOCA);
+    if (via === "mise a jour legere") assert.equal((await T.actualiserButeurDuJour(ctx)).statut, "remplace");
+    else assert.equal((await T.publierTicketsDuJour(Object.assign({}, ctx, { configLigues: CFG, erreur: () => {} }))).buteurs_remplaces, 2);
+    const l = f.ligne();
+    assert.deepEqual(l.contenu.buteurs.map((b) => [b.joueur, b.fixture_id]), [["Georges Mikautadze", 101], ["Adrien Thomasson", 102]], via);
+    assert.equal(l.contenu.joueur, "Georges Mikautadze");
+    assert.deepEqual(l.etats.remplacements.map((x) => [x.rang, x.ancien.buteurs.map((b) => b.joueur).join("+"), typeof x.remplace_a]),
+      [[0, "Alexandre Lacazette+Florian Sotoca", "string"], [1, "Georges Mikautadze+Florian Sotoca", "string"]], via);
+    assert.ok(!(l.etats.buteurs || []).includes("retire"), via + " : personne de retire");
+  }
+  // 0051 seule (0058 absente) : la base accepte le 1er joueur (regle d'un joueur : le premier niveau change), refuse le 2e.
+  const avert = [];
+  const f51 = fauxTickets(ligneDeux(), { mode: "0051" });
+  const r = await T.actualiserButeurDuJour(Object.assign(ctxDeux(f51, LINEUPS_SANS_LACAZETTE, LINEUPS_102_SANS_SOTOCA), { avertir: (t) => avert.push(t) }));
+  assert.equal(r.statut, "retire");
+  assert.deepEqual(f51.ligne().contenu.buteurs.map((b) => b.joueur), ["Georges Mikautadze", "Florian Sotoca"]);
+  assert.deepEqual(f51.ligne().etats.buteurs, ["a_venir", "retire"]);
+  assert.match(avert.join(" "), /migration 0058 non appliquee/);
+});
+
+test("migration 0058 : deux buteurs, un joueur remplace a la fois, trace avec rang, ancien ticket = regle de 0051", () => {
+  const sql = fs.readFileSync(path.join(ROOT, "supabase/migrations/0058_tickets_deux_buteurs.sql"), "utf8");
+  assert.match(sql, /create or replace function public\.tickets_du_jour_gel\(\)/);
+  assert.match(sql, /derniere ->> 'rang'/);
+  assert.match(sql, /derniere -> 'ancien' = old\.contenu/);
+  assert.match(sql, /\(new\.contenu - 'buteurs'\) = \(nb -> 0\)/, "premier niveau = 1er joueur");
+  assert.match(sql, /\(nb -> i ->> 'fixture_id'\) = \(nj ->> 'fixture_id'\)/, "jamais deux joueurs du meme match");
+  assert.match(sql, /ko > now\(\)/);
+  for (const k of ["jour", "type", "regle_version", "meta", "publie_a", "pipeline_sha"]) assert.match(sql, new RegExp("new\\." + k + " := old\\." + k + ";"), k);
+  assert.match(sql, /new\.contenu := old\.contenu;/);
+  assert.match(sql, /suppression refusee/);
+  assert.match(sql, /NE PAS APPLIQUER sans l'accord de Clement/);
+  assert.ok(fs.existsSync(path.join(ROOT, "supabase/tests/0058_tickets_deux_buteurs.test.sql")));
+  assert.equal(fs.readdirSync(path.join(ROOT, "supabase/migrations")).filter((f) => f.startsWith("0058_")).length, 1);
 });
 
 test("2. buteurDuJour : jamais un joueur exclu (deja remplace) ni absent de la composition", () => {

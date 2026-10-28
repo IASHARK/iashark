@@ -5,6 +5,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 
 const { generateDailyCombos, decrireTicket } = require("../lib/run-output/combos.js");
+const COMBOS = require("../lib/run-output/combos.js");
 const MATH = require("../lib/run-output/combo-math.js");
 const J = require("../lib/run-output/jambes-du-jour.js");
 const T = require("../lib/tickets-du-jour.js");
@@ -146,6 +147,23 @@ function bruteForce(legs, R) {
   return best;
 }
 
+// Regle du 28/10/2026 (paliers de cote des jambes, config/tickets.json#paliers_cote_jambe) : la force brute est faite
+// palier par palier, sur les seules jambes dont la cote est au plus ce palier ; le premier palier qui donne un ticket gagne.
+// Garde de chance (avocat du diable, 28/10) : un palier bas n'est garde que si la chance affichee de son ticket (% entier,
+// vers le bas) n'est pas plus basse que celle du meilleur ticket fait avec toutes les jambes.
+const pourcent = (b) => Math.max(1, Number(b.Q / 100n ** BigInt(b.k - 1)));
+function bruteForcePaliers(legs, R, paliers) {
+  const complet = bruteForce(legs, R);
+  if (!complet) return null;
+  for (const p of (paliers && paliers.length ? paliers : [Infinity])) {
+    const sous = legs.filter((l) => Math.round(l.cote * 100) <= Math.round(p * 100));
+    const b = bruteForce(sous, R);
+    if (b && pourcent(b) >= pourcent(complet)) return Object.assign({ palier: p }, b);
+  }
+  return Object.assign({ palier: null }, complet);
+}
+const SANS_PALIERS = Object.assign({}, REGLES, { paliers_cote_jambe: undefined });
+
 test("3. optimalite : 200 tirages de 8 a 14 jambes, le resultat = la recherche par force brute", () => {
   const rnd = prng(20261004);
   for (let t = 0; t < 200; t++) {
@@ -155,7 +173,7 @@ test("3. optimalite : 200 tirages de 8 a 14 jambes, le resultat = la recherche p
     const r = generateDailyCombos({ jambes: legs, snapshotTime: SNAP });
     for (const type of ["x5", "x10"]) {
       const c = r.combos.find((x) => x.type === type);
-      const b = bruteForce(legs, REGLES[type]);
+      const b = bruteForcePaliers(legs, REGLES[type], REGLES.paliers_cote_jambe);
       if (!b) { assert.equal(c.status, "NO_QUALIFYING_COMBINATION", "tirage " + t + " " + type); continue; }
       assert.equal(c.status, "GENERATED", "tirage " + t + " " + type);
       assert.deepEqual(c.jambes.map((j) => j.fixture_id), b.ids, "tirage " + t + " " + type);
@@ -174,7 +192,7 @@ test("3 bis. recherche exacte (controle du mathematicien du 04/10/2026) : egalit
     const r = generateDailyCombos({ jambes: legs, snapshotTime: SNAP });
     for (const type of ["x5", "x10"]) {
       const c = r.combos.find((x) => x.type === type);
-      const b = bruteForce(legs, REGLES[type]);
+      const b = bruteForcePaliers(legs, REGLES[type], REGLES.paliers_cote_jambe);
       if (!b) { assert.equal(c.status, "NO_QUALIFYING_COMBINATION", "egalites " + t + " " + type); continue; }
       assert.deepEqual(c.jambes.map((j) => j.fixture_id), b.ids, "egalites " + t + " " + type);
     }
@@ -184,7 +202,8 @@ test("3 bis. recherche exacte (controle du mathematicien du 04/10/2026) : egalit
   const jour = [];
   for (let i = 0; i < 44; i++) jour.push(leg(3000 + i, 1.4, 70));
   jour.push(leg(3999, 1.7, 50));
-  const x5 = generateDailyCombos({ jambes: jour, snapshotTime: SNAP }).combos[0];
+  // (Sans les paliers du 28/10 : avec eux, le palier 1,44 donne d'abord 5 jambes a 1,40, voir le test 3 ter.)
+  const x5 = generateDailyCombos({ jambes: jour, snapshotTime: SNAP, regles: SANS_PALIERS }).combos[0];
   assert.equal(x5.status, "GENERATED");
   assert.deepEqual(x5.jambes.map((j) => j.fixture_id), [3000, 3001, 3002, 3999]);
   assert.equal(x5.cote_totale, 4.66);
@@ -196,6 +215,55 @@ test("3 bis. recherche exacte (controle du mathematicien du 04/10/2026) : egalit
   const rc = generateDailyCombos({ jambes: charge, snapshotTime: SNAP });
   assert.ok(Date.now() - t0 < 1000, "recherche trop lente : " + (Date.now() - t0) + " ms");
   assert.deepEqual(rc.combos.map((c) => c.status), ["GENERATED", "GENERATED"]);
+});
+
+test("3 ter. paliers de cote des jambes (regle du 28/10/2026) : 1,44 d'abord, puis 1,49, 1,59, 2,20 ; garde de chance ; jamais force", () => {
+  assert.deepEqual(REGLES.paliers_cote_jambe, [1.44, 1.49, 1.59, 2.2]);
+  assert.equal(REGLES.regle_version, "tickets-2026-10-28");
+  assert.deepEqual(COMBOS.paliersJambe(REGLES), [1.44, 1.49, 1.59, 2.2]);
+  assert.deepEqual(COMBOS.paliersJambe({}), [Infinity], "sans paliers : la regle d'avant");
+  // Palier garde : 4 jambes a 1,42 (68 %) = 21,38 % (affiche 21 %) ; la regle complete prendrait 3 jambes a 1,62 = 21,96 %
+  // (affiche 21 %) : meme chance affichee, le palier 1,44 gagne.
+  const a = [leg(1, 1.42, 68), leg(2, 1.42, 68), leg(3, 1.42, 68), leg(4, 1.42, 68), leg(5, 1.62, 60), leg(6, 1.62, 60), leg(7, 1.62, 61)];
+  const ta = generateDailyCombos({ jambes: a, snapshotTime: SNAP }).combos[0];
+  assert.deepEqual([ta.jambes.map((j) => j.fixture_id), ta.cote_totale, ta.chance, ta.palier_cote_jambe], [[1, 2, 3, 4], 4.07, 21, 1.44]);
+  const sansPaliers = generateDailyCombos({ jambes: a, snapshotTime: SNAP, regles: SANS_PALIERS }).combos[0];
+  assert.deepEqual([sansPaliers.jambes.map((j) => j.fixture_id), sansPaliers.chance], [[5, 6, 7], 21]);
+  // Palier refuse (exemple de l'avocat du diable) : le ticket a 1,44 au plus (8 %) ferait baisser la chance du meilleur
+  // ticket (33 %) : on garde ce dernier.
+  const b = [leg(1, 1.43, 56), leg(2, 1.43, 55), leg(3, 1.44, 53), leg(4, 1.44, 52), leg(5, 1.65, 70), leg(6, 1.66, 70), leg(7, 1.68, 69)];
+  const tb = generateDailyCombos({ jambes: b, snapshotTime: SNAP }).combos[0];
+  assert.deepEqual([tb.jambes.map((j) => j.fixture_id), tb.chance, tb.palier_cote_jambe], [[5, 6, 7], 33, 2.2], "dernier palier = toutes les jambes");
+  // 2e palier : paris a 1,45-1,49 seulement (le pari a 1,70 ne donne pas plus de chance).
+  const p2 = [leg(1, 1.47, 66), leg(2, 1.47, 66), leg(3, 1.47, 66), leg(4, 1.47, 66), leg(5, 1.7, 50)];
+  assert.equal(generateDailyCombos({ jambes: p2, snapshotTime: SNAP }).combos[0].palier_cote_jambe, 1.49);
+  // Aucun ticket possible : aucun ticket (jamais force).
+  assert.equal(generateDailyCombos({ jambes: [leg(1, 1.4, 70), leg(2, 1.4, 70)], snapshotTime: SNAP }).combos[0].status, "NO_QUALIFYING_COMBINATION");
+  // Fourchettes sur la cote AFFICHEE, cote agreee ou indicative (avocat du diable, 2e passage) : 3 jambes a 1,82 = 6,03
+  // affichee -> jamais un x5 (la page promet 4,00-6,00) ; avec une 4e jambe possible, le ticket affiche reste dans 4,00-6,00.
+  for (const o of [{}, { operateur: null }]) {
+    const haut = [1, 2, 3].map((i) => leg(i, 1.82, 60, o));
+    assert.equal(generateDailyCombos({ jambes: haut, snapshotTime: SNAP }).combos[0].status, "NO_QUALIFYING_COMBINATION");
+    const t4 = generateDailyCombos({ jambes: haut.concat([leg(4, 1.5, 70, o)]), snapshotTime: SNAP }).combos[0];
+    assert.ok(t4.status === "GENERATED" && t4.cote_totale >= 4 && t4.cote_totale <= 6, JSON.stringify([t4.status, t4.cote_totale]));
+  }
+  assert.equal(REGLES.cote_prudente, undefined, "pas de cote prudente (decision du 28/10/2026)");
+});
+
+test("3 quater. buteurs du jour (regle du 28/10/2026) : les 2 plus probables, de 2 matchs differents, avec photo", () => {
+  const ms = [
+    match(1, { v3_buteurs: [{ joueur_id: 9, joueur: "A", cote: "home", p_marque: 0.41 }, { joueur_id: 8, joueur: "B", cote: "away", p_marque: 0.40 }] }),
+    match(2, { date: "2026-10-04 15:00", v3_buteurs: [{ joueur_id: 7, joueur: "C", cote: "home", p_marque: 0.30 }] }),
+    match(3, { date: "2026-10-04 07:00", v3_buteurs: [{ joueur_id: 6, joueur: "D", cote: "home", p_marque: 0.9 }] }), // commence
+  ];
+  const w = monde(ms);
+  const l = J.buteursDuJour(ms, { nowMs: NOW, fixtureById: w.fixtureById, nb: 2 });
+  assert.deepEqual(l.map((b) => [b.joueur, b.fixture_id]), [["A", 1], ["C", 2]], "B (match 1) saute : deux matchs differents");
+  assert.equal(l[0].photo, "https://media.api-sports.io/football/players/9.png");
+  assert.deepEqual(Object.keys(l[1]).sort(), Object.keys(J.buteurDuJour(ms, { nowMs: NOW, fixtureById: w.fixtureById })).sort(), "memes champs que l'ancien buteur du jour");
+  assert.deepEqual(J.buteursDuJour([ms[0]], { nowMs: NOW, fixtureById: monde([ms[0]]).fixtureById, nb: 2 }).map((b) => b.joueur), ["A"], "un seul match : un seul buteur");
+  assert.deepEqual(J.buteursDuJour([], { nowMs: NOW, nb: 2 }), []);
+  assert.equal(J.photoJoueur(null), null);
 });
 
 // ------------------------------------------------------------ 4. determinisme et departage
@@ -385,7 +453,9 @@ test("calcul complet du jour (regle du 21/10) : Selection en or, x5, x10 et bute
   assert.ok(c.x5 && c.x10 && c.or && c.buteur);
   assert.deepEqual(Object.keys(c.x5.meta).sort(), ["cote_totale", "nb_matchs"]);
   assert.deepEqual(Object.keys(c.or.meta), ["nb_paris"]);
-  assert.deepEqual(c.buteur.meta, {});
+  assert.deepEqual(c.buteur.meta, { nb_buteurs: 1 }, "un seul match avec un buteur : un seul joueur");
+  assert.deepEqual(c.buteur.contenu.buteurs.map((b) => b.joueur), ["Z"]);
+  assert.deepEqual(Object.assign({}, c.buteur.contenu, { buteurs: undefined }), Object.assign({}, c.buteur.contenu.buteurs[0], { buteurs: undefined }), "premier niveau = 1er joueur");
   // Selection en or : les 3 paris affiches les plus probables du jour, avec la cote et la chance de leur page.
   assert.deepEqual(c.or.contenu.paris.map((p) => [p.fixture_id, p.market_id, p.cote, p.chance, p.rang]), [[10, "home-win", 1.55, 65, 1], [9, "home-win", 1.55, 64, 2], [8, "home-win", 1.55, 63, 3]]);
   // Combines : les paris affiches les plus probables, une jambe par match, jamais un autre marche.

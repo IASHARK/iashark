@@ -113,17 +113,36 @@ function selectionOr(ligne, statut, niveau) {
   return out;
 }
 
+// BUTEURS DU JOUR (regle du 28/10/2026 : deux buteurs, deux matchs differents, deux paris simples). Le 1er joueur reste
+// au premier niveau (memes champs qu'avant) ; buteurs = la liste complete (meme liste blanche par joueur, + domicile,
+// exterieur, photo). Ancien ticket (un seul joueur, sans buteurs) : buteurs = [ce joueur]. nb_buteurs (entier seul,
+// tire de meta) est donne a tous les niveaux, comme nb_matchs.
+const PHOTO = /^https:\/\/media\.api-sports\.io\/football\/players\/\d+\.png$/;
+function joueurPublic(b, e) {
+  return {
+    joueur: texte(b.joueur), joueur_id: entier(b.joueur_id), poste: texte(b.poste),
+    equipe: texte(b.equipe), adversaire: texte(b.adversaire), domicile: texte(b.domicile), exterieur: texte(b.exterieur),
+    fixture_id: entier(b.fixture_id), ligue: texte(b.ligue), coup_envoi: texte(b.coup_envoi), chance: entier(b.chance),
+    photo: typeof b.photo === "string" && PHOTO.test(b.photo) ? b.photo : null,
+    etat: etat(e),
+  };
+}
 function buteur(ligne, statut, niveau) {
   const verrou = verrouDe(niveau, "buteur");
   const out = { statut: statut, verrou: verrou };
+  if (statut === "publie" && entier(objet(ligne.meta).nb_buteurs) !== null) out.nb_buteurs = entier(objet(ligne.meta).nb_buteurs);
   if (statut !== "publie" || verrou !== null) return out;
   const b = objet(ligne.contenu);
+  const e = objet(ligne.etats);
+  const liste = Array.isArray(b.buteurs) && b.buteurs.length ? b.buteurs : [b];
+  const etatsJ = Array.isArray(e.buteurs) ? e.buteurs : [e.joueur];
   return Object.assign(out, {
     publie_a: texte(ligne.publie_a),
     joueur: texte(b.joueur), joueur_id: entier(b.joueur_id), poste: texte(b.poste),
     equipe: texte(b.equipe), adversaire: texte(b.adversaire), fixture_id: entier(b.fixture_id),
     ligue: texte(b.ligue), coup_envoi: texte(b.coup_envoi), chance: entier(b.chance),
-    etat: etat(objet(ligne.etats).joueur),
+    etat: etat(e.joueur),
+    buteurs: liste.map((x, i) => joueurPublic(objet(x), etatsJ[i])),
   });
 }
 

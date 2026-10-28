@@ -1,0 +1,37 @@
+name: Alerte partenaires
+
+# 28/10/2026 : chaque nouvelle candidature au programme Partenaires part dans la
+# conversation privee de Clement avec le robot Telegram (TELEGRAM_CHAT_ID), une seule
+# fois (colonne affiliates.owner_notified_at, migration 0056). Rien n'est publie.
+# Secrets deja en place : SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, TELEGRAM_BOT_TOKEN,
+# TELEGRAM_CHAT_ID.
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: alerte-partenaires
+  cancel-in-progress: false
+
+jobs:
+  alerte:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts/telegram
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Candidatures a signaler
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node scripts/telegram/alerte-partenaires.mjs

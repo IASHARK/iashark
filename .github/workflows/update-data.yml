@@ -2735,11 +2735,24 @@ jobs:
                   var archiveM=listeIdsM.length?await rawHttpGetJson(baseM+'predictions_archive?select=fixture_id,market,result,published_at,kickoff_at,score&fixture_id=in.('+listeIdsM.join(',')+')',entM):[];
                   if(Array.isArray(ticketsM)&&Array.isArray(archiveM)){
                     var jourM=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-                    var montantes=MONTANTES.construireMontantes({tickets:ticketsM,archive:archiveM,matchs:matchsDuRun,jour:jourM,genereLe:genere});
+                    var precM=null; try{ precM=JSON.parse(fs.readFileSync('preuves/montantes.json','utf8')); }catch(e){}
+                    var optsM={tickets:ticketsM,archive:archiveM,matchs:matchsDuRun,jour:jourM,genereLe:genere,precedent:precM,faits:{}};
+                    // Paris que ni l'archive ni un calcul precedent ne reglent (buteur, mi-temps, archive en retard) : faits du
+                    // match chez API-Sports (fixtures?id= : statut, score, evenements, joueurs), 15 matchs au plus par passage.
+                    var aLireM=MONTANTES.aRegler(optsM).slice(0,15), lusM=0;
+                    for(var mi2=0;mi2<aLireM.length;mi2++){
+                      try{
+                        var rfM=await get('https://v3.football.api-sports.io/fixtures?id='+aLireM[mi2],APS);
+                        var faM=MONTANTES.faitsDuMatch(rfM&&Array.isArray(rfM.response)?rfM.response[0]:null);
+                        if(faM){ optsM.faits[String(aLireM[mi2])]=faM; lusM++; }
+                      }catch(e){}
+                    }
+                    if(aLireM.length) console.log('  [montantes] faits lus chez API-Sports : '+lusM+' match(s) sur '+aLireM.length+'.');
+                    var montantes=MONTANTES.construireMontantes(optsM);
                     if(montantes){
                       if(!fs.existsSync('preuves')) fs.mkdirSync('preuves',{recursive:true});
                       fs.writeFileSync('preuves/montantes.json',JSON.stringify(montantes,null,1));
-                      console.log('  [montantes] '+montantes.montantes.map(function(m){ return 'montante '+m.rang+' : '+m.gagnes+' palier(s) gagne(s)'+(m.etat==='en_attente'?' (en attente)':'')+', '+m.objectifs.length+' objectif(s)'; }).join(' ; ')+'.');
+                      console.log('  [montantes] '+montantes.montantes.map(function(m){ return 'montante '+m.rang+' : '+m.gagnes+' palier(s) en cours'+(m.etat==='en_attente'?' (en attente)':'')+', bilan '+m.bilan.gagnes+' gagne(s) / '+m.bilan.perdus+' perdu(s) / '+m.bilan.non_regles+' non regle(s), '+m.objectifs.length+' objectif(s)'; }).join(' ; ')+'.');
                     }else console.log('::warning title=Montantes::calcul impossible, preuves/montantes.json garde.');
                   }else console.log('::warning title=Montantes::tickets ou archive illisibles, preuves/montantes.json garde.');
                 }
@@ -4714,6 +4727,33 @@ jobs:
             runOutput.DAILY_COMBOS=rapportTickets.daily_combos;
             console.log('  '+TICKETS_DU_JOUR.ligneJournal(rapportTickets));
           }catch(e){ console.log('::warning title=Tickets::tickets non calcules ('+(e&&e.message)+'), le calcul quotidien continue.'); }
+          // EMPREINTE DES SELECTIONS EN OR (controle historique-public du 28/10/2026, montantes de la page Combines) : meme
+          // chaine que les paris simples (lib/empreintes-paris.js : SHA-256 sale du jour, chainee, sel revele deux jours plus
+          // tard), registre a part preuves/empreintes-or.json, ajoutee juste apres la publication, avant les matchs.
+          // Selection en or d'hier et d'aujourd'hui (une Selection en or figee ne change plus : un maillon par jour).
+          try{
+            var SECRET_OR=process.env.EMPREINTE_SECRET||SUPA_SERVICE_KEY||'';
+            if(SECRET_OR&&SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY){
+              var jourOr=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+              var repOr=await rawHttpGetJson(SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/tickets_du_jour?select=jour,contenu&type=eq.or&jour=gte.'+MATCH_RESULTS.ajouterJours(jourOr,-1)+'&jour=lte.'+jourOr+'&order=jour.asc',{'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY});
+              if(Array.isArray(repOr)){
+                var regOr=EMPREINTES.vide();
+                try{ regOr=JSON.parse(fs.readFileSync('preuves/empreintes-or.json','utf8')); }catch(e){}
+                var verifOr=EMPREINTES.verifier(regOr);
+                if(!verifOr.ok) console.log('::error title=Empreintes Selection en or::chaine existante invalide : '+verifOr.erreurs.slice(0,3).join(' ; '));
+                else{
+                  regOr.explication=MONTANTES.EXPLICATION_EMPREINTES_OR;
+                  repOr.forEach(function(t){
+                    var aOr=EMPREINTES.ajouter(regOr,t.jour,MONTANTES.commeParisSimples(t),SECRET_OR,new Date().toISOString());
+                    console.log('  [empreinte or] '+t.jour+' : '+(aOr.ajoute?'maillon '+aOr.maillon.n+' ('+aOr.raison+')':aOr.raison));
+                  });
+                  EMPREINTES.revelerSels(regOr,SECRET_OR,MATCH_RESULTS.ajouterJours(jourOr,-2));
+                  if(!fs.existsSync('preuves')) fs.mkdirSync('preuves',{recursive:true});
+                  fs.writeFileSync('preuves/empreintes-or.json',JSON.stringify(regOr,null,2));
+                }
+              }else console.log('::warning title=Empreintes Selection en or::tickets_du_jour illisible, pas d empreinte ce run.');
+            }
+          }catch(e){ console.log('::warning title=Empreintes Selection en or::'+(e&&e.message)); }
           // ================= PANNEAU « MARCHES » (demande de Clement, 04/10/2026) =================
           // Tous les marches calcules de chaque match ouvert, par familles, chance AFFICHEE (lib/chance-iashark.js) et cote
           // minimum (lib/marches-panneau.js). Champ premium marches_panneau, Pro seulement meme sur le match offert ; nombre

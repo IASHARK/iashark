@@ -134,9 +134,89 @@ test("fichier public : aucune mise, aucun gain, aucun montant ; cles courtes, ja
   const s = JSON.stringify(f);
   assert.doesNotMatch(s, /mise|gain|stake|profit|unite|capital|€|\$/i);
   const p = f.montantes[0].paliers[0];
-  assert.deepEqual(Object.keys(p).sort(), ["a", "c", "f", "h", "j", "m", "p", "r"]);
+  assert.deepEqual(Object.keys(p).sort(), ["a", "c", "cc", "f", "h", "j", "m", "p", "r"]);
   const PF = require("../lib/premium-fields.js");
   assert.deepEqual(PF.deepPremiumLeaks(f), []);
+});
+
+// ---------------------------------------------------------------- faits API-Sports et historique complet
+// (controle historique-public du 28/10/2026 : perdus visibles, buteurs regles par les buts du match)
+function fx(statut, gh, ga, ht, events, players) {
+  return { fixture: { id: 1, status: { short: statut } }, goals: { home: gh, away: ga }, score: { fulltime: { home: gh, away: ga }, halftime: { home: ht[0], away: ht[1] } }, events: events, players: players };
+}
+const but = (id, elapsed, detail) => ({ type: "Goal", detail: detail || "Normal Goal", time: { elapsed: elapsed }, player: { id: id } });
+const joueurs = (l) => [{ players: l.map((x) => ({ player: { id: x[0] }, statistics: [{ games: { minutes: x[1] } }] })) }];
+
+test("faits du match : buts de joueur en temps reglementaire, sans contre son camp ni penalty manque ; minutes jouees", () => {
+  const f = M.faitsDuMatch(fx("AET", 1, 1, [0, 1], [but(7, 20), but(7, 90), but(8, 55, "Own Goal"), but(9, 60, "Missed Penalty"), but(10, 105)], joueurs([[7, 120], [8, 90], [11, null]])));
+  assert.deepEqual(f.buts, { 7: 2 });
+  assert.deepEqual(f.score, [1, 1], "score reglementaire (lib/resolvers.js)");
+  assert.deepEqual(f.mt, [0, 1]);
+  assert.deepEqual(f.joue, { 7: true, 8: true, 11: false });
+  assert.equal(M.faitsDuMatch(null), null);
+});
+
+test("buteur : gagne s'il marque, perdu s'il a joue sans marquer, annule s'il n'a pas joue, rien sans donnees", () => {
+  const f = M.faitsDuMatch(fx("FT", 1, 2, [0, 1], [but(21393, 30), but(21393, 70)], joueurs([[21393, 90], [5, 90], [6, 0]])));
+  assert.equal(M.reglerParFaits("anytime-scorer-21393", f), "win");
+  assert.equal(M.reglerParFaits("anytime-scorer-5", f), "loss");
+  assert.equal(M.reglerParFaits("anytime-scorer-6", f), "void");
+  assert.equal(M.reglerParFaits("anytime-scorer-5", Object.assign({}, f, { joue: null })), null, "sans les joueurs : pas de verdict");
+  assert.equal(M.reglerParFaits("anytime-scorer-5", Object.assign({}, f, { statut: "2H" })), null, "match pas fini");
+  assert.equal(M.reglerParFaits("over-25", Object.assign({}, f, { statut: "PST" })), "void");
+  assert.equal(M.reglerParFaits("over-25", f), "win");
+  assert.equal(M.reglerParFaits("fh-over-05", f), "win", "mi-temps : score a la pause");
+  assert.equal(M.reglerParFaits("fh-over-05", Object.assign({}, f, { mt: [0, 0] })), "loss");
+});
+
+test("historique complet : gagnes, perdus, objectifs et cote cumulee apres chaque pari ; bilan ; precedent reutilise", () => {
+  const jours = ["2026-11-01", "2026-11-02", "2026-11-03", "2026-11-04", "2026-11-05", "2026-11-06", "2026-11-07", "2026-11-08", "2026-11-09"];
+  const t = jours.map((j, i) => or(j, [[200 + i, "over-25", 1.4]]));
+  const a = jours.map((j, i) => ar(200 + i, "over-25", i === 7 ? "loss" : "win", i === 7 ? "0-1" : "3-1"));
+  const f = calc(t, a);
+  const m = f.montantes[0];
+  assert.deepEqual(m.historique.map((x) => x.r), ["gagne", "gagne", "gagne", "gagne", "gagne", "gagne", "gagne", "perdu", "gagne"]);
+  assert.equal(m.historique[6].o, 1); assert.equal(m.historique[6].cc, 10.54);
+  assert.equal(m.historique[1].cc, 1.96); assert.equal(m.historique[7].cc, null);
+  assert.deepEqual(m.bilan, { gagnes: 8, perdus: 1, annules: 0, non_regles: 0, objectifs: 1 });
+  // Un resultat deja etabli (faits API-Sports d'un passage precedent) est repris sans relire l'API.
+  const t2 = [or("2026-11-01", [[300, "anytime-scorer-9", 1.7]])];
+  const precedent = { version: 1, montantes: [{ historique: [{ j: "2026-11-01", f: 300, m: "anytime-scorer-9", r: "gagne" }] }] };
+  const o = { tickets: t2, archive: [], matchs: [], jour: "2026-11-20", maintenant: MAINTENANT, precedent };
+  assert.deepEqual(M.aRegler(o), [], "deja regle : rien a relire");
+  assert.equal(M.construireMontantes(o).montantes[0].gagnes, 1);
+  assert.deepEqual(M.aRegler(Object.assign({}, o, { precedent: null })), [300], "sinon : faits a lire chez API-Sports");
+});
+
+test("Selections en or reelles du 06 au 27/10 : buteur regle par ses buts, perdus visibles, objectif de la montante 2", () => {
+  const D = JSON.parse(read("tests/fixtures/montantes-selections-or-octobre.json"));
+  const base = { tickets: D.tickets, archive: D.archive, matchs: [], jour: "2026-10-28", maintenant: Date.parse("2026-10-28T06:30:00Z") };
+  // Sans les faits du match 1635719 : le pari buteur du 20/10 (Guirassy) n'est pas regle ; les 3 matchs du 27/10 non plus.
+  assert.deepEqual(M.aRegler(base).sort(), [1550174, 1635719, 1638559, 1638565]);
+  // Faits : Guirassy (21393) a marque deux fois le 20/10 (Sabah 1-2 Dortmund, controle historique-public du 28/10) ;
+  // 27/10 : Gladbach 2-0 (plus de 2,5 perdu) ; les deux autres scores sont des scores d'ESSAI donnant les issues
+  // relevees par historique-public (plus de 2,5 gagne a Grossaspach, nul ou Lazio gagne a Sassuolo).
+  const faits = {
+    1635719: M.faitsDuMatch(fx("FT", 1, 2, [0, 1], [but(21393, 34), but(21393, 77)], joueurs([[21393, 90]]))),
+    1638559: M.faitsDuMatch(fx("FT", 2, 0, [1, 0], [], [])),
+    1638565: M.faitsDuMatch(fx("FT", 0, 3, [0, 1], [], [])),
+    1550174: M.faitsDuMatch(fx("FT", 1, 1, [0, 0], [], [])),
+  };
+  const avant27 = M.construireMontantes(Object.assign({}, base, { faits: { 1635719: faits[1635719] } }));
+  const m2 = avant27.montantes[1];
+  assert.equal(m2.etat, "en_attente"); assert.equal(m2.gagnes, 6); assert.equal(m2.cote, 9.3);
+  assert.deepEqual(m2.bilan, { gagnes: 6, perdus: 1, annules: 0, non_regles: 0, objectifs: 0 });
+  const f = M.construireMontantes(Object.assign({}, base, { faits }));
+  const [n1, n2, n3] = f.montantes;
+  assert.deepEqual(n1.bilan, { gagnes: 6, perdus: 2, annules: 0, non_regles: 0, objectifs: 1 });
+  assert.deepEqual(n1.objectifs, [{ j: "2026-10-25", n: 5, c: 11.02 }]);
+  assert.equal(n1.gagnes, 1); assert.equal(n1.cote, 1.4);
+  assert.deepEqual(n2.objectifs, [{ j: "2026-10-27", n: 7, c: 13.03 }]);
+  assert.equal(n2.gagnes, 0); assert.equal(n2.dernier.t, "objectif");
+  assert.deepEqual(n2.bilan, { gagnes: 7, perdus: 1, annules: 0, non_regles: 0, objectifs: 1 });
+  assert.equal(n3.gagnes, 0); assert.equal(n3.dernier.t, "perdu"); assert.equal(n3.dernier.j, "2026-10-27"); assert.equal(n3.dernier.n, 6);
+  assert.deepEqual(n3.bilan, { gagnes: 6, perdus: 1, annules: 0, non_regles: 0, objectifs: 0 });
+  assert.deepEqual(n3.historique.map((x) => x.j), ["2026-10-06", "2026-10-22", "2026-10-23", "2026-10-24", "2026-10-25", "2026-10-26", "2026-10-27"], "un jour sans Selection en or ne casse pas la serie");
 });
 
 test("calcul quotidien : montantes ecrites apres la bande, memes lectures, fichier garde si une lecture echoue", () => {
@@ -148,9 +228,35 @@ test("calcul quotidien : montantes ecrites apres la bande, memes lectures, fichi
   const bloc = wf.slice(debut, fin);
   assert.match(bloc, /tickets_du_jour\?select=jour,type,contenu,publie_a,premier_coup_envoi&type=eq\.or&jour=gte\.'\+MONTANTES\.DEBUT/);
   assert.match(bloc, /predictions_archive\?select=fixture_id,market,result,published_at,kickoff_at,score&fixture_id=in\./);
+  assert.match(bloc, /MONTANTES\.aRegler\(optsM\)\.slice\(0,15\)/);
+  assert.match(bloc, /fixtures\?id='\+aLireM\[mi2\]/);
+  assert.match(bloc, /precedent:precM/);
   const garde = bloc.indexOf("if(Array.isArray(ticketsM)&&Array.isArray(archiveM)){");
   const ecriture = bloc.indexOf("fs.writeFileSync('preuves/montantes.json'");
   assert.ok(garde > 0 && ecriture > garde, "ecriture seulement apres lectures reussies");
   assert.equal(bloc.split("fs.writeFileSync('preuves/montantes.json'").length - 1, 1);
   (bloc.match(/console\.log\([^;]*\);/g) || []).forEach((l) => assert.doesNotMatch(l, /\.pari\b|\.cote\b|\.p\b|\.h\b/, l));
+});
+
+test("empreinte des Selections en or : meme chaine que les paris simples, recalculable depuis l'historique public", () => {
+  const E = require("../lib/empreintes-paris.js");
+  const t = or("2026-11-02", [[3, "over-25", 1.4], [4, "dc-1x", 1.45], [5, "btts-yes", 1.5]]);
+  const reg = E.vide();
+  const a = E.ajouter(reg, t.jour, M.commeParisSimples(t), "secret-essai", "2026-11-02T06:01:00Z");
+  assert.equal(a.ajoute, true); assert.equal(a.maillon.nb_paris, 3);
+  assert.equal(E.ajouter(reg, t.jour, M.commeParisSimples(t), "secret-essai").raison, "inchange", "Selection en or figee : un maillon");
+  assert.equal(E.verifier(reg).ok, true);
+  // Sel revele : l'empreinte se refait avec les seuls champs de l'historique public (f, h, a, m, p, c).
+  const f = calc([t], [ar(3, "over-25", "win", "3-0"), ar(4, "dc-1x", "win", "1-0"), ar(5, "btts-yes", "loss", "1-0")]);
+  const publics = f.montantes.map((m) => m.historique[0]).map((x) => ({ fixture_id: x.f, home: x.h, away: x.a, prediction: x.p, cote: x.c, model_probability: null, market: x.m,
+    moteur: null, moteur_version: null, published_at: null, kickoff_at: null }));
+  publics.sort((x, y) => x.fixture_id - y.fixture_id);
+  assert.equal(E.empreinteParis(publics, E.sel("secret-essai", t.jour)), a.maillon.empreinte_paris);
+  const wf = read(".github/workflows/update-data.yml");
+  const i = wf.indexOf("// EMPREINTE DES SELECTIONS EN OR"), j = wf.indexOf("TICKETS_DU_JOUR.publierTicketsDuJour(");
+  assert.ok(i > j && j > 0, "juste apres la publication des tickets du jour");
+  const bloc = wf.slice(i, wf.indexOf("::warning title=Empreintes Selection en or::'+(e&&e.message)", i));
+  assert.match(bloc, /EMPREINTES\.verifier\(regOr\)/);
+  assert.match(bloc, /fs\.writeFileSync\('preuves\/empreintes-or\.json'/);
+  assert.match(bloc, /EMPREINTES\.revelerSels\(regOr,SECRET_OR,MATCH_RESULTS\.ajouterJours\(jourOr,-2\)\)/);
 });

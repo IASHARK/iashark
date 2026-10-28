@@ -4676,7 +4676,9 @@ jobs:
             var blancRepli=REPLI_FORME.calculerBlanc(allMatchsData,optsRepli);
             var supaRepli=(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY)?{url:SUPA_URL_PIPELINE,cle:SUPA_SERVICE_KEY}:null;
             var archiveRepli=supaRepli?await REPLI_FORME.archiver(blancRepli.lignes,{supabase:supaRepli}):null;
-            var regleesRepli=supaRepli?await REPLI_FORME.reglerArchive({supabase:supaRepli,matchsParIds:async function(ids){ var r=await get('https://v3.football.api-sports.io/fixtures?ids='+ids.join('-'),APS,{essentiel:true}); return (r&&r.response)||[]; }}):null;
+            // Table absente (migration 0059 non appliquee) : lignes refusees et reglement impossible, simple compteur dans le journal.
+            var regleesRepli=null;
+            if(supaRepli){ try{ regleesRepli=await REPLI_FORME.reglerArchive({supabase:supaRepli,matchsParIds:async function(ids){ var r=await get('https://v3.football.api-sports.io/fixtures?ids='+ids.join('-'),APS,{essentiel:true}); return (r&&r.response)||[]; }}); }catch(e){ regleesRepli='impossible ('+(e&&e.message)+')'; } }
             console.log('  [REPLI COUPES] calcul a blanc : '+blancRepli.candidats+' match(s) de coupe sans pari ; decisions forme '+blancRepli.lignes.filter(function(l){ return l.variante==='forme'; }).length+', marche '+blancRepli.lignes.filter(function(l){ return l.variante==='marche'; }).length+' ; refus de l\'API '+erreursRepli+' ; sans decision : forme '+JSON.stringify(blancRepli.raisons.forme)+', marche '+JSON.stringify(blancRepli.raisons.marche)+' ; archive : '+(archiveRepli?archiveRepli.nouvelles+' nouvelle(s), '+archiveRepli.refus+' refus':'base absente')+' ; reglees : '+(regleesRepli==null?'-':regleesRepli)+' ; feu forme '+FEU_REPLI.forme+', marche '+FEU_REPLI.marche+'.');
             // VERROU : publication seulement si le mathematicien a mis une variante a « GO ». NO-GO (28/10) : rien n'est publie.
             if(FEU_REPLI.forme==='GO'||FEU_REPLI.marche==='GO'){

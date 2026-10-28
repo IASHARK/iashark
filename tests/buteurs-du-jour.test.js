@@ -824,7 +824,9 @@ test("accueil : lien vers la page Combines ; combines.html : bloc « Aujourd'hui
   assert.ok(pos('<script src="/lib/offre-pro.js">') < pos('<script src="/lib/aujourdhui.js">'), "interrupteur OUVERT.tickets lu avant le bloc");
   assert.match(html, /<link rel="stylesheet" href="\/assets\/composants\.css">/);
   assert.match(html, /<link rel="stylesheet" href="\/assets\/aujourdhui\.css">/);
-  assert.match(html, /IasharkAujourdhui\.mount\(el,\{\}\)/);
+  // 28/10/2026 : montage dans lib/combines-page.js (montantes et carte des buteurs apres la Selection en or).
+  assert.ok(pos('<script src="/lib/aujourdhui.js">') < pos('<script src="/lib/combines-page.js" defer>'), "le bloc avant la page");
+  assert.match(read("lib/combines-page.js"), /A\.mount\(el, \{ lire: lire, sansButeur: true, apresOr: apresOr,/);
 });
 
 test("i18n : cles home_scorers identiques dans les 7 langues (dict et parts), regles du manifeste pour les textes statiques", () => {

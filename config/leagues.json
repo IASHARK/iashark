@@ -274,6 +274,22 @@
       "DECISION DE CLEMENT DU 06/10/2026 (soir, branche paris-tous-marches) : choix NEUTRE parmi tous les marches des bookmakers sauf corners et cartons (lib/flux-paris.js, lib/pronostic.js#evaluerCandidatsNeutres), « le plus probable », fourchette corrigee a 1,40-2,20. marge_sans_agree passe a 0 : la relever pour les seules cotes non agreees favorisait les quelques marches cotes chez un agree (1N2, double chance, buts), contraire a « sans en favoriser un »."
     ],
     "fourchette_pari": { "cote_min": 1.40, "cote_max": 2.20, "marge_sans_agree": 0 },
+    "_readme_repli_forme": [
+      "REPLI « FORME » DES MATCHS DE COUPE (demande de Clement du 28/10/2026, lib/repli-forme.js) : un match d'une coupe",
+      "nationale de 'competitions' reste sans pari apres la regle normale -> pari tire des 10 derniers matchs officiels de",
+      "chaque club et de l'ecart de division, seulement sur un marche qui a une COTE REELLE entre fourchette_pari.cote_min et",
+      "cote_max ci-dessous ; chance = le plus bas entre la forme et la cote sans marge ; fiabilite « en test ».",
+      "beta (par division d'ecart), avantage_domicile, buts_moyens et lissage : ajustes sur les coupes 2025-2026 seulement,",
+      "mesures sur 2026-2027 (scripts/backtest-repli-coupes.js). min_matchs : en dessous, pas de pari. chance_min : en",
+      "dessous, pas de pari."
+    ],
+    "repli_forme": {
+      "competitions": ["copa_del_rey", "dfb_pokal", "efl_cup", "coppa_italia", "coupe_de_france", "fa_cup"],
+      "cote_max": 2.00, "chance_min": 50, "n_matchs": 10, "min_matchs": 5,
+      "buts_moyens": 1.5, "beta": 0.28, "avantage_domicile": 1.3, "lissage": 5,
+      "marches_exclus": ["over-25", "under-25", "over-35", "btts-yes", "away-team-over-15"],
+      "prudence": { "ecart_2_divisions_ou_plus": 5, "autres": 0 }
+    },
     "_readme_corrections_chance": [
       "Chance affichee = chance calculee + points (toujours negatifs) quand la regle correspond : competition (ou '*'),",
       "famille (1N2, DC, OU2.5 ou '*'), option ('principale', 'cote' ou '*'), et si donnees les bornes de chance (en %) et",

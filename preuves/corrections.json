@@ -1,0 +1,216 @@
+{
+  "version": 1,
+  "explication": "Journal public des corrections des paris publies (ajout seulement). Chaque entree dit quand, pourquoi et quels champs ont change, avec l'ancienne et la nouvelle valeur. Tant que le pari n'est pas regle, les valeurs du pari (pronostic, cote, chance, marche) restent secretes, comme dans historique.json : elles sont ajoutees au reglement. Ce journal sert aussi a verifier les empreintes (preuves/empreintes-paris.json) : l'etat des paris a l'heure d'un maillon s'obtient en defaisant les corrections posterieures.",
+  "notes": [
+    {
+      "jour": "2026-10-19",
+      "ecrit_le": "2026-10-23",
+      "texte": "Journee du 19/10/2026 : la version du moteur inscrite sur 3 paris publies ce jour-la (Inter - Shakhtar Donetsk, Real Madrid - RB Leipzig, Sporting CP - Lask Linz) a ete reecrite deux fois le 21/10, avant leur coup d'envoi, par le programme qui realigne un pari en attente sur le pari publie. Le pronostic, la cote, la chance et le marche de ces paris n'ont pas change : en remettant la version du moteur d'origine (entrees ci-dessous), les deux empreintes de cette journee (maillons 40 et 41 de preuves/empreintes-paris.json) correspondent aux paris publies. Le maillon 41 avait ete calcule avec la cote ecrite en texte au lieu d'un nombre ; la valeur est la meme. Le meme programme a aussi reecrit la version du moteur du pari FC Midtjylland - St. Truiden, publie le 20/10 (entrees ci-dessous). Que le reste de ce pari n'ait pas change n'est pas encore prouve publiquement : sa journee du 20/10 ne pourra etre verifiee que lorsque tous ses paris seront publics. Depuis la mise en service du format 3 des empreintes (premier maillon portant format: 3 dans preuves/empreintes-paris.json), la version du moteur est figee a la premiere publication d'un pari."
+    },
+    {
+      "jour": "2026-10-14",
+      "ecrit_le": "2026-10-23",
+      "texte": "Journee du 14/10/2026 : deux paris annules (matchs reportes) sont restes masques dans historique.json, puis la limite de 500 paris de ce fichier en a retire une partie. Les empreintes de cette journee (maillons 30 et 31) n'ont donc pas pu etre verifiees publiquement : cela ne prouve ni une modification de ces paris, ni leur integrite. Depuis la mise en service du format 3 des empreintes (premier maillon portant format: 3), le pari d'un match reporte redevient public apres l'heure prevue du match, la limite de historique.json ne coupe plus une journee en deux, et chaque journee verifiee est figee dans preuves/paris-scelles/.",
+      "journee_non_verifiable": true
+    },
+    {
+      "jour": "2026-10-03",
+      "ecrit_le": "2026-10-23",
+      "texte": "Perimetre verifiable : les maillons 1 a 29 de preuves/empreintes-paris.json (journees du 03/10 au 13/10/2026) ne peuvent plus etre verifies publiquement, car les paris de ces journees ne sont plus dans historique.json ni dans preuves/paris-scelles/. Cela ne prouve ni une modification de ces paris, ni leur integrite. La verification publique porte sur les journees encore presentes dans ces fichiers (a partir du 15/10/2026), une fois leurs paris regles et le sel de la journee revele. Le maillon 30 et le maillon 31 (14/10) sont expliques par la note du 14/10."
+    }
+  ],
+  "corrections": [
+    {
+      "id": "1635672|2026-10-21T05:39:51.616Z",
+      "type": "version_moteur",
+      "jour": "2026-10-19",
+      "fixture_id": 1635672,
+      "match": "Inter - Shakhtar Donetsk",
+      "apres": "2026-10-20T05:38:23Z",
+      "au_plus_tard": "2026-10-21T05:39:51.616Z",
+      "motif": "version du moteur reecrite avant le coup d'envoi par le realignement d'un pari en attente (lib/pick-freeze.js#alignPendingPrediction), pari inchange",
+      "champs": [
+        "moteur",
+        "moteur_version"
+      ],
+      "ancien": {
+        "moteur": "v3",
+        "moteur_version": "3.0.0+60ce47f"
+      },
+      "nouveau": {
+        "moteur": "ancien",
+        "moteur_version": "score-matrix-dc-early-season-v2"
+      },
+      "constate_le": "2026-10-23",
+      "source": "historique.json, commits 7938df3cc puis e006b251f"
+    },
+    {
+      "id": "1635672|2026-10-21T15:02:45.530Z",
+      "type": "version_moteur",
+      "jour": "2026-10-19",
+      "fixture_id": 1635672,
+      "match": "Inter - Shakhtar Donetsk",
+      "apres": "2026-10-21T05:41:00Z",
+      "au_plus_tard": "2026-10-21T15:02:45.530Z",
+      "motif": "version du moteur reecrite avant le coup d'envoi par le realignement d'un pari en attente (lib/pick-freeze.js#alignPendingPrediction), pari inchange",
+      "champs": [
+        "moteur",
+        "moteur_version"
+      ],
+      "ancien": {
+        "moteur": "ancien",
+        "moteur_version": "score-matrix-dc-early-season-v2"
+      },
+      "nouveau": {
+        "moteur": "v3",
+        "moteur_version": "3.0.0+7594318"
+      },
+      "constate_le": "2026-10-23",
+      "source": "historique.json, commits e006b251f puis 01531461a"
+    },
+    {
+      "id": "1635716|2026-10-21T05:39:51.616Z",
+      "type": "version_moteur",
+      "jour": "2026-10-19",
+      "fixture_id": 1635716,
+      "match": "Real Madrid - RB Leipzig",
+      "apres": "2026-10-20T05:38:23Z",
+      "au_plus_tard": "2026-10-21T05:39:51.616Z",
+      "motif": "version du moteur reecrite avant le coup d'envoi par le realignement d'un pari en attente (lib/pick-freeze.js#alignPendingPrediction), pari inchange",
+      "champs": [
+        "moteur",
+        "moteur_version"
+      ],
+      "ancien": {
+        "moteur": "v3",
+        "moteur_version": "3.0.0+60ce47f"
+      },
+      "nouveau": {
+        "moteur": "ancien",
+        "moteur_version": "score-matrix-dc-early-season-v2"
+      },
+      "constate_le": "2026-10-23",
+      "source": "historique.json, commits 7938df3cc puis e006b251f"
+    },
+    {
+      "id": "1635716|2026-10-21T15:02:45.530Z",
+      "type": "version_moteur",
+      "jour": "2026-10-19",
+      "fixture_id": 1635716,
+      "match": "Real Madrid - RB Leipzig",
+      "apres": "2026-10-21T05:41:00Z",
+      "au_plus_tard": "2026-10-21T15:02:45.530Z",
+      "motif": "version du moteur reecrite avant le coup d'envoi par le realignement d'un pari en attente (lib/pick-freeze.js#alignPendingPrediction), pari inchange",
+      "champs": [
+        "moteur",
+        "moteur_version"
+      ],
+      "ancien": {
+        "moteur": "ancien",
+        "moteur_version": "score-matrix-dc-early-season-v2"
+      },
+      "nouveau": {
+        "moteur": "v3",
+        "moteur_version": "3.0.0+7594318"
+      },
+      "constate_le": "2026-10-23",
+      "source": "historique.json, commits e006b251f puis 01531461a"
+    },
+    {
+      "id": "1635737|2026-10-21T05:39:51.616Z",
+      "type": "version_moteur",
+      "jour": "2026-10-19",
+      "fixture_id": 1635737,
+      "match": "Sporting CP - Lask Linz",
+      "apres": "2026-10-20T05:38:23Z",
+      "au_plus_tard": "2026-10-21T05:39:51.616Z",
+      "motif": "version du moteur reecrite avant le coup d'envoi par le realignement d'un pari en attente (lib/pick-freeze.js#alignPendingPrediction), pari inchange",
+      "champs": [
+        "moteur",
+        "moteur_version"
+      ],
+      "ancien": {
+        "moteur": "v3",
+        "moteur_version": "3.0.0+60ce47f"
+      },
+      "nouveau": {
+        "moteur": "ancien",
+        "moteur_version": "score-matrix-dc-early-season-v2"
+      },
+      "constate_le": "2026-10-23",
+      "source": "historique.json, commits 7938df3cc puis e006b251f"
+    },
+    {
+      "id": "1635737|2026-10-21T15:02:45.530Z",
+      "type": "version_moteur",
+      "jour": "2026-10-19",
+      "fixture_id": 1635737,
+      "match": "Sporting CP - Lask Linz",
+      "apres": "2026-10-21T05:41:00Z",
+      "au_plus_tard": "2026-10-21T15:02:45.530Z",
+      "motif": "version du moteur reecrite avant le coup d'envoi par le realignement d'un pari en attente (lib/pick-freeze.js#alignPendingPrediction), pari inchange",
+      "champs": [
+        "moteur",
+        "moteur_version"
+      ],
+      "ancien": {
+        "moteur": "ancien",
+        "moteur_version": "score-matrix-dc-early-season-v2"
+      },
+      "nouveau": {
+        "moteur": "v3",
+        "moteur_version": "3.0.0+7594318"
+      },
+      "constate_le": "2026-10-23",
+      "source": "historique.json, commits e006b251f puis 01531461a"
+    },
+    {
+      "id": "1636449|2026-10-21T05:39:51.616Z",
+      "type": "version_moteur",
+      "jour": "2026-10-20",
+      "fixture_id": 1636449,
+      "match": "FC Midtjylland - St. Truiden",
+      "apres": "2026-10-20T05:38:23Z",
+      "au_plus_tard": "2026-10-21T05:39:51.616Z",
+      "motif": "version du moteur reecrite avant le coup d'envoi par le realignement d'un pari en attente (lib/pick-freeze.js#alignPendingPrediction)",
+      "champs": [
+        "moteur",
+        "moteur_version"
+      ],
+      "ancien": {
+        "moteur": "v3",
+        "moteur_version": "3.0.0+60ce47f"
+      },
+      "nouveau": {
+        "moteur": "ancien",
+        "moteur_version": "score-matrix-dc-early-season-v2"
+      },
+      "constate_le": "2026-10-23",
+      "source": "historique.json, commits 7938df3cc puis e006b251f"
+    },
+    {
+      "id": "1636449|2026-10-21T15:02:45.530Z",
+      "type": "version_moteur",
+      "jour": "2026-10-20",
+      "fixture_id": 1636449,
+      "match": "FC Midtjylland - St. Truiden",
+      "apres": "2026-10-21T05:41:00Z",
+      "au_plus_tard": "2026-10-21T15:02:45.530Z",
+      "motif": "version du moteur reecrite avant le coup d'envoi par le realignement d'un pari en attente (lib/pick-freeze.js#alignPendingPrediction)",
+      "champs": [
+        "moteur",
+        "moteur_version"
+      ],
+      "ancien": {
+        "moteur": "ancien",
+        "moteur_version": "score-matrix-dc-early-season-v2"
+      },
+      "nouveau": {
+        "moteur": "v3",
+        "moteur_version": "3.0.0+7594318"
+      },
+      "constate_le": "2026-10-23",
+      "source": "historique.json, commits e006b251f puis 01531461a"
+    }
+  ]
+}

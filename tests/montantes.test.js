@@ -142,22 +142,36 @@ test("fichier public : aucune mise, aucun gain, aucun montant ; cles courtes, ja
 // ---------------------------------------------------------------- faits API-Sports et historique complet
 // (controle historique-public du 28/10/2026 : perdus visibles, buteurs regles par les buts du match)
 function fx(statut, gh, ga, ht, events, players) {
-  return { fixture: { id: 1, status: { short: statut } }, goals: { home: gh, away: ga }, score: { fulltime: { home: gh, away: ga }, halftime: { home: ht[0], away: ht[1] } }, events: events, players: players };
+  return { fixture: { id: 1, status: { short: statut } }, teams: { home: { id: 1 }, away: { id: 2 } }, goals: { home: gh, away: ga },
+    score: { fulltime: { home: gh, away: ga }, halftime: { home: ht[0], away: ht[1] } }, events: events, players: players };
 }
-const but = (id, elapsed, detail) => ({ type: "Goal", detail: detail || "Normal Goal", time: { elapsed: elapsed }, player: { id: id } });
+// But : joueur, minute, equipe qui en profite (1 = domicile, 2 = exterieur), detail.
+const but = (id, elapsed, eq, detail) => ({ type: "Goal", detail: detail || "Normal Goal", time: { elapsed: elapsed }, player: { id: id }, team: { id: eq } });
 const joueurs = (l) => [{ players: l.map((x) => ({ player: { id: x[0] }, statistics: [{ games: { minutes: x[1] } }] })) }];
 
 test("faits du match : buts de joueur en temps reglementaire, sans contre son camp ni penalty manque ; minutes jouees", () => {
-  const f = M.faitsDuMatch(fx("AET", 1, 1, [0, 1], [but(7, 20), but(7, 90), but(8, 55, "Own Goal"), but(9, 60, "Missed Penalty"), but(10, 105)], joueurs([[7, 120], [8, 90], [11, null]])));
+  // 2-1 a 90 minutes (contre son camp de 8 pour l'exterieur), puis prolongation.
+  const f = M.faitsDuMatch(fx("AET", 2, 1, [1, 1], [but(7, 20, 1), but(8, 55, 2, "Own Goal"), but(9, 60, 1, "Missed Penalty"), but(7, 90, 1), but(10, 105, 2)], joueurs([[7, 120], [8, 90], [11, null]])));
   assert.deepEqual(f.buts, { 7: 2 });
-  assert.deepEqual(f.score, [1, 1], "score reglementaire (lib/resolvers.js)");
-  assert.deepEqual(f.mt, [0, 1]);
+  assert.deepEqual(f.score, [2, 1], "score reglementaire (lib/resolvers.js)");
+  assert.deepEqual(f.mt, [1, 1]);
   assert.deepEqual(f.joue, { 7: true, 8: true, 11: false });
   assert.equal(M.faitsDuMatch(null), null);
 });
 
+test("buteur : buts controles contre le score (VAR), sinon aucun verdict (lib/film-du-match.js#controlerMatch)", () => {
+  const annule = { type: "Var", detail: "Goal cancelled", time: { elapsed: 31 }, player: { id: 5 }, team: { id: 1 } };
+  const propre = M.faitsDuMatch(fx("FT", 0, 0, [0, 0], [but(5, 30, 1), annule], joueurs([[5, 90]])));
+  assert.deepEqual(propre.buts, {}, "but annule par la VAR retire");
+  assert.equal(M.reglerParFaits("anytime-scorer-5", propre), "loss");
+  const incoherent = M.faitsDuMatch(fx("FT", 0, 0, [0, 0], [but(5, 30, 1)], joueurs([[5, 90]])));
+  assert.equal(incoherent.buts, null, "evenements qui ne redonnent pas le score : pas de buts par joueur");
+  assert.equal(M.reglerParFaits("anytime-scorer-5", incoherent), null);
+  assert.equal(M.reglerParFaits("under-25", incoherent), "win", "le score reglementaire, lui, reste lisible");
+});
+
 test("buteur : gagne s'il marque, perdu s'il a joue sans marquer, annule s'il n'a pas joue, rien sans donnees", () => {
-  const f = M.faitsDuMatch(fx("FT", 1, 2, [0, 1], [but(21393, 30), but(21393, 70)], joueurs([[21393, 90], [5, 90], [6, 0]])));
+  const f = M.faitsDuMatch(fx("FT", 1, 2, [0, 1], [but(99, 10, 1), but(21393, 30, 2), but(21393, 70, 2)], joueurs([[21393, 90], [5, 90], [6, 0]])));
   assert.equal(M.reglerParFaits("anytime-scorer-21393", f), "win");
   assert.equal(M.reglerParFaits("anytime-scorer-5", f), "loss");
   assert.equal(M.reglerParFaits("anytime-scorer-6", f), "void");
@@ -167,6 +181,30 @@ test("buteur : gagne s'il marque, perdu s'il a joue sans marquer, annule s'il n'
   assert.equal(M.reglerParFaits("over-25", f), "win");
   assert.equal(M.reglerParFaits("fh-over-05", f), "win", "mi-temps : score a la pause");
   assert.equal(M.reglerParFaits("fh-over-05", Object.assign({}, f, { mt: [0, 0] })), "loss");
+});
+
+test("non regle : DEFINITIF une fois pose, jamais d'objectif retroactif ; archive et faits lus les plus recents d'abord", () => {
+  const jours = ["2026-11-01", "2026-11-02", "2026-11-03", "2026-11-04", "2026-11-05", "2026-11-06", "2026-11-07"];
+  const t = jours.map((j, i) => or(j, [[400 + i, i === 0 ? "anytime-scorer-9" : "over-25", 1.4]]));
+  const gagnes = jours.map((j, i) => ar(400 + i, "over-25", "win", "3-1"));
+  // Passage du 08/11 : le buteur du 01/11 n'a aucune donnee depuis plus de 72 h -> non regle.
+  const avant = M.construireMontantes({ tickets: t, archive: gagnes.slice(1), matchs: [], jour: "2026-11-08", maintenant: Date.parse("2026-11-08T06:00:00Z") });
+  assert.equal(avant.montantes[0].historique[0].r, "non_regle");
+  assert.equal(avant.montantes[0].gagnes, 6); assert.equal(avant.montantes[0].objectifs.length, 0);
+  // Le resultat reapparait ensuite (archive, faits) : le non regle reste, aucun objectif retroactif (1,4^7 = 10,54).
+  const archiveTard = gagnes.concat([ar(400, "anytime-scorer-9", "win", "1-0")]);
+  const faitsTard = { 400: M.faitsDuMatch(fx("FT", 1, 0, [1, 0], [but(9, 10, 1)], joueurs([[9, 90]]))) };
+  const o = { tickets: t, archive: archiveTard, matchs: [], jour: "2026-11-09", maintenant: Date.parse("2026-11-09T06:00:00Z"), precedent: avant, faits: faitsTard };
+  const apres = M.construireMontantes(o);
+  assert.equal(apres.montantes[0].historique[0].r, "non_regle");
+  assert.equal(apres.montantes[0].objectifs.length, 0);
+  assert.equal(apres.montantes[0].bilan.non_regles, 1);
+  assert.ok(!M.aRegler(o).includes(400), "plus jamais relu");
+  assert.ok(!M.aLireArchive(o).includes(400), "plus dans l'adresse de l'archive");
+  // Les plus recents d'abord ; rien de deja fige dans l'adresse de l'archive.
+  assert.deepEqual(M.aLireArchive({ tickets: t, precedent: null, jour: "2026-11-09" }), [406, 405, 404, 403, 402, 401, 400]);
+  assert.deepEqual(M.aLireArchive({ tickets: t, precedent: avant, jour: "2026-11-09" }), []);
+  assert.deepEqual(M.aRegler({ tickets: t, archive: [], matchs: [], jour: "2026-11-09", maintenant: Date.parse("2026-11-09T06:00:00Z") }).slice(0, 3), [406, 405, 404]);
 });
 
 test("historique complet : gagnes, perdus, objectifs et cote cumulee apres chaque pari ; bilan ; precedent reutilise", () => {
@@ -197,7 +235,7 @@ test("Selections en or reelles du 06 au 27/10 : buteur regle par ses buts, perdu
   // 27/10 : Gladbach 2-0 (plus de 2,5 perdu) ; les deux autres scores sont des scores d'ESSAI donnant les issues
   // relevees par historique-public (plus de 2,5 gagne a Grossaspach, nul ou Lazio gagne a Sassuolo).
   const faits = {
-    1635719: M.faitsDuMatch(fx("FT", 1, 2, [0, 1], [but(21393, 34), but(21393, 77)], joueurs([[21393, 90]]))),
+    1635719: M.faitsDuMatch(fx("FT", 1, 2, [0, 1], [but(888, 12, 1), but(21393, 34, 2), but(21393, 77, 2)], joueurs([[21393, 90]]))),
     1638559: M.faitsDuMatch(fx("FT", 2, 0, [1, 0], [], [])),
     1638565: M.faitsDuMatch(fx("FT", 0, 3, [0, 1], [], [])),
     1550174: M.faitsDuMatch(fx("FT", 1, 1, [0, 0], [], [])),
@@ -228,6 +266,7 @@ test("calcul quotidien : montantes ecrites apres la bande, memes lectures, fichi
   const bloc = wf.slice(debut, fin);
   assert.match(bloc, /tickets_du_jour\?select=jour,type,contenu,publie_a,premier_coup_envoi&type=eq\.or&jour=gte\.'\+MONTANTES\.DEBUT/);
   assert.match(bloc, /predictions_archive\?select=fixture_id,market,result,published_at,kickoff_at,score&fixture_id=in\./);
+  assert.match(bloc, /MONTANTES\.aLireArchive\(\{tickets:ticketsM,precedent:precM,jour:jourM\}\)/);
   assert.match(bloc, /MONTANTES\.aRegler\(optsM\)\.slice\(0,15\)/);
   assert.match(bloc, /fixtures\?id='\+aLireM\[mi2\]/);
   assert.match(bloc, /precedent:precM/);
@@ -238,24 +277,35 @@ test("calcul quotidien : montantes ecrites apres la bande, memes lectures, fichi
   (bloc.match(/console\.log\([^;]*\);/g) || []).forEach((l) => assert.doesNotMatch(l, /\.pari\b|\.cote\b|\.p\b|\.h\b/, l));
 });
 
-test("empreinte des Selections en or : meme chaine que les paris simples, recalculable depuis l'historique public", () => {
+test("empreinte de la Selection en or du jour : rang compris, avant le premier match, recalculable depuis l'historique public", () => {
   const E = require("../lib/empreintes-paris.js");
   const t = or("2026-11-02", [[3, "over-25", 1.4], [4, "dc-1x", 1.45], [5, "btts-yes", 1.5]]);
   const reg = E.vide();
-  const a = E.ajouter(reg, t.jour, M.commeParisSimples(t), "secret-essai", "2026-11-02T06:01:00Z");
+  const avantMatch = Date.parse("2026-11-02T07:00:00Z");
+  const a = M.ajouterEmpreinteOr(E, reg, t, "secret-essai", "2026-11-02T07:00:00Z", avantMatch);
   assert.equal(a.ajoute, true); assert.equal(a.maillon.nb_paris, 3);
-  assert.equal(E.ajouter(reg, t.jour, M.commeParisSimples(t), "secret-essai").raison, "inchange", "Selection en or figee : un maillon");
+  assert.equal(M.ajouterEmpreinteOr(E, reg, t, "secret-essai", null, avantMatch).raison, "inchange", "Selection en or figee : un maillon");
   assert.equal(E.verifier(reg).ok, true);
-  // Sel revele : l'empreinte se refait avec les seuls champs de l'historique public (f, h, a, m, p, c).
+  assert.equal(M.ajouterEmpreinteOr(E, E.vide(), t, "secret-essai", null, Date.parse("2026-11-02T18:30:00Z")).raison, "premier match commence");
+  assert.equal(M.ajouterEmpreinteOr(E, E.vide(), Object.assign({}, t, { publie_a: "2026-11-02T18:30:00Z" }), "secret-essai", null, avantMatch).ajoute, false);
+  // Un jour a 2 paris : 2 paris empreints.
+  const deux = or("2026-11-03", [[6, "over-25", 1.4], [7, "home-win", 1.5]]);
+  assert.equal(M.ajouterEmpreinteOr(E, reg, deux, "secret-essai", null, Date.parse("2026-11-03T07:00:00Z")).maillon.nb_paris, 2);
+  assert.equal(E.verifier(reg).ok, true);
+  assert.match(M.EXPLICATION_EMPREINTES_OR, /2 ou 3 paris, avec leur rang/);
+  // Sel revele : l'empreinte se refait avec les champs de l'historique public, rang = numero de la montante.
   const f = calc([t], [ar(3, "over-25", "win", "3-0"), ar(4, "dc-1x", "win", "1-0"), ar(5, "btts-yes", "loss", "1-0")]);
-  const publics = f.montantes.map((m) => m.historique[0]).map((x) => ({ fixture_id: x.f, home: x.h, away: x.a, prediction: x.p, cote: x.c, model_probability: null, market: x.m,
-    moteur: null, moteur_version: null, published_at: null, kickoff_at: null }));
-  publics.sort((x, y) => x.fixture_id - y.fixture_id);
+  const publics = f.montantes.map((m) => Object.assign({ rang: m.rang }, m.historique[0])).map((x) => ({ rang: x.rang, fixture_id: x.f, home: x.h, away: x.a, prediction: x.p, cote: x.c, market: x.m }));
   assert.equal(E.empreinteParis(publics, E.sel("secret-essai", t.jour)), a.maillon.empreinte_paris);
+  // Changer le rang casse l'empreinte.
+  const permute = publics.map((x, i) => Object.assign({}, x, { rang: [2, 1, 3][i] }));
+  assert.notEqual(E.empreinteParis(permute, E.sel("secret-essai", t.jour)), a.maillon.empreinte_paris);
   const wf = read(".github/workflows/update-data.yml");
-  const i = wf.indexOf("// EMPREINTE DES SELECTIONS EN OR"), j = wf.indexOf("TICKETS_DU_JOUR.publierTicketsDuJour(");
+  const i = wf.indexOf("// EMPREINTE DE LA SELECTION EN OR DU JOUR"), j = wf.indexOf("TICKETS_DU_JOUR.publierTicketsDuJour(");
   assert.ok(i > j && j > 0, "juste apres la publication des tickets du jour");
   const bloc = wf.slice(i, wf.indexOf("::warning title=Empreintes Selection en or::'+(e&&e.message)", i));
+  assert.match(bloc, /type=eq\.or&jour=eq\.'\+jourOr/, "la Selection en or du jour seulement");
+  assert.match(bloc, /MONTANTES\.ajouterEmpreinteOr\(EMPREINTES,regOr,t,SECRET_OR,new Date\(\)\.toISOString\(\),Date\.now\(\)\)/);
   assert.match(bloc, /EMPREINTES\.verifier\(regOr\)/);
   assert.match(bloc, /fs\.writeFileSync\('preuves\/empreintes-or\.json'/);
   assert.match(bloc, /EMPREINTES\.revelerSels\(regOr,SECRET_OR,MATCH_RESULTS\.ajouterJours\(jourOr,-2\)\)/);

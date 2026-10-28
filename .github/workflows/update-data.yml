@@ -2726,19 +2726,16 @@ jobs:
                   var entM={'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY};
                   var baseM=SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/';
                   var ticketsM=await rawHttpGetJson(baseM+'tickets_du_jour?select=jour,type,contenu,publie_a,premier_coup_envoi&type=eq.or&jour=gte.'+MONTANTES.DEBUT+'&order=jour.asc',entM);
-                  var idsM={};
-                  (Array.isArray(ticketsM)?ticketsM:[]).forEach(function(t){
-                    var l=t&&t.contenu&&t.contenu.paris;
-                    (Array.isArray(l)?l:[]).forEach(function(p){ if(p&&/^\d{1,12}$/.test(String(p.fixture_id))) idsM[String(p.fixture_id)]=true; });
-                  });
-                  var listeIdsM=Object.keys(idsM);
+                  var jourM=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+                  var precM=null; try{ precM=JSON.parse(fs.readFileSync('preuves/montantes.json','utf8')); }catch(e){}
+                  // Archive des seuls paris dont le resultat n'est pas deja fige dans le calcul precedent (les plus recents
+                  // d'abord, 80 au plus) : jamais tous les matchs depuis le debut dans l'adresse.
+                  var listeIdsM=Array.isArray(ticketsM)?MONTANTES.aLireArchive({tickets:ticketsM,precedent:precM,jour:jourM}):[];
                   var archiveM=listeIdsM.length?await rawHttpGetJson(baseM+'predictions_archive?select=fixture_id,market,result,published_at,kickoff_at,score&fixture_id=in.('+listeIdsM.join(',')+')',entM):[];
                   if(Array.isArray(ticketsM)&&Array.isArray(archiveM)){
-                    var jourM=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-                    var precM=null; try{ precM=JSON.parse(fs.readFileSync('preuves/montantes.json','utf8')); }catch(e){}
                     var optsM={tickets:ticketsM,archive:archiveM,matchs:matchsDuRun,jour:jourM,genereLe:genere,precedent:precM,faits:{}};
                     // Paris que ni l'archive ni un calcul precedent ne reglent (buteur, mi-temps, archive en retard) : faits du
-                    // match chez API-Sports (fixtures?id= : statut, score, evenements, joueurs), 15 matchs au plus par passage.
+                    // match chez API-Sports (fixtures?id= : statut, score, evenements, joueurs), les plus recents d'abord, 15 au plus.
                     var aLireM=MONTANTES.aRegler(optsM).slice(0,15), lusM=0;
                     for(var mi2=0;mi2<aLireM.length;mi2++){
                       try{
@@ -4727,15 +4724,15 @@ jobs:
             runOutput.DAILY_COMBOS=rapportTickets.daily_combos;
             console.log('  '+TICKETS_DU_JOUR.ligneJournal(rapportTickets));
           }catch(e){ console.log('::warning title=Tickets::tickets non calcules ('+(e&&e.message)+'), le calcul quotidien continue.'); }
-          // EMPREINTE DES SELECTIONS EN OR (controle historique-public du 28/10/2026, montantes de la page Combines) : meme
-          // chaine que les paris simples (lib/empreintes-paris.js : SHA-256 sale du jour, chainee, sel revele deux jours plus
-          // tard), registre a part preuves/empreintes-or.json, ajoutee juste apres la publication, avant les matchs.
-          // Selection en or d'hier et d'aujourd'hui (une Selection en or figee ne change plus : un maillon par jour).
+          // EMPREINTE DE LA SELECTION EN OR DU JOUR (controles historique-public et avocat du diable du 28/10/2026, montantes
+          // de la page Combines) : juste apres la publication et AVANT son premier match, rang de chaque pari compris
+          // (lib/montantes.js#ajouterEmpreinteOr, meme construction que lib/empreintes-paris.js : SHA-256 sale du jour,
+          // maillons chaines, sel revele deux jours plus tard). Registre a part preuves/empreintes-or.json.
           try{
             var SECRET_OR=process.env.EMPREINTE_SECRET||SUPA_SERVICE_KEY||'';
             if(SECRET_OR&&SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY){
               var jourOr=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-              var repOr=await rawHttpGetJson(SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/tickets_du_jour?select=jour,contenu&type=eq.or&jour=gte.'+MATCH_RESULTS.ajouterJours(jourOr,-1)+'&jour=lte.'+jourOr+'&order=jour.asc',{'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY});
+              var repOr=await rawHttpGetJson(SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/tickets_du_jour?select=jour,contenu,publie_a,premier_coup_envoi&type=eq.or&jour=eq.'+jourOr,{'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY});
               if(Array.isArray(repOr)){
                 var regOr=EMPREINTES.vide();
                 try{ regOr=JSON.parse(fs.readFileSync('preuves/empreintes-or.json','utf8')); }catch(e){}
@@ -4744,8 +4741,8 @@ jobs:
                 else{
                   regOr.explication=MONTANTES.EXPLICATION_EMPREINTES_OR;
                   repOr.forEach(function(t){
-                    var aOr=EMPREINTES.ajouter(regOr,t.jour,MONTANTES.commeParisSimples(t),SECRET_OR,new Date().toISOString());
-                    console.log('  [empreinte or] '+t.jour+' : '+(aOr.ajoute?'maillon '+aOr.maillon.n+' ('+aOr.raison+')':aOr.raison));
+                    var aOr=MONTANTES.ajouterEmpreinteOr(EMPREINTES,regOr,t,SECRET_OR,new Date().toISOString(),Date.now());
+                    console.log('  [empreinte or] '+t.jour+' : '+(aOr.ajoute?'maillon '+aOr.maillon.n+' ('+aOr.raison+', '+aOr.maillon.nb_paris+' paris)':aOr.raison));
                   });
                   EMPREINTES.revelerSels(regOr,SECRET_OR,MATCH_RESULTS.ajouterJours(jourOr,-2));
                   if(!fs.existsSync('preuves')) fs.mkdirSync('preuves',{recursive:true});

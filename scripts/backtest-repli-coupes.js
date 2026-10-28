@@ -51,11 +51,9 @@ Object.keys(COUPES).forEach((L) => [2025, 2026].forEach((S) => {
 
 const BASE = RF.lireParametres(CFG);
 function preparer(x, p) {
-  const f = x.f, ko = f.fixture.date, pays = RF.PAYS_COUPE[x.coupe];
-  const dH = matchsDuClub(f.teams.home.id, x.saison), dA = matchsDuClub(f.teams.away.id, x.saison);
-  const fD = RF.formeClub(dH, f.teams.home.id, ko, p.n_matchs), fE = RF.formeClub(dA, f.teams.away.id, ko, p.n_matchs);
-  const vD = RF.divisionDuClub(dH, f.teams.home.id, ko, pays), vE = RF.divisionDuClub(dA, f.teams.away.id, ko, pays);
-  return { x: x, fD: fD, fE: fE, vD: vD, vE: vE, ok: fD.n >= p.min_matchs && fE.n >= p.min_matchs && vD.niveau !== null && vE.niveau !== null };
+  const f = x.f, ko = f.fixture.date;
+  const bf = RF.baseForme(matchsDuClub(f.teams.home.id, x.saison), matchsDuClub(f.teams.away.id, x.saison), f.teams.home.id, f.teams.away.id, ko, p);
+  return { x: x, fD: bf.fD, fE: bf.fE, vD: bf.dvD, vE: bf.dvE, ok: bf.ok };
 }
 function logPoisson(k, l) { let s = -l + k * Math.log(l); for (let i = 2; i <= k; i++) s -= Math.log(i); return s; }
 function vraisemblance(prep, p) {
@@ -68,7 +66,7 @@ const params = Object.assign({}, BASE);
 const prepTous = echantillon.map((x) => preparer(x, params));
 const app = prepTous.filter((q) => q.ok && q.x.saison === 2025);
 const test = prepTous.filter((q) => q.ok && q.x.saison === 2026);
-console.log("Matchs de coupe finis : " + echantillon.length + " ; exploitables (>= " + params.min_matchs + " matchs officiels par club, division connue ou deduite) : ajustement 2025-26 = " + app.length + ", test 2026-27 = " + test.length);
+console.log("Matchs de coupe finis : " + echantillon.length + " ; exploitables (>= " + params.min_matchs + " matchs officiels et >= " + params.min_matchs_championnat + " matchs de championnat par club sur " + params.fenetre_jours + " jours) : ajustement 2025-26 = " + app.length + ", test 2026-27 = " + test.length);
 
 if (AJUSTER) {
   let best = null;
@@ -131,7 +129,7 @@ mesurer(test, "TEST, saison 2026-27 (jamais vue)");
 const avecCotes = prepTous.filter((q) => lire("odds/" + q.x.f.fixture.id + ".json"));
 const PR = require("../lib/pronostic.js");
 const regles = CFG.fiabilite.corrections_chance || [];
-const lignes = [], marche = [], normal = [];
+const lignes = [], marche = [], normal = [], marcheSeul = [];
 // Regle normale des coupes (lib/pronostic.js, paris_cotes_marche : 1N2, double chance, plus/moins de 2,5 ; chance = cote
 // sans marge ; la plus probable dont la cote est dans fourchette_pari) : le repli ne sert QUE quand elle ne donne rien.
 const FOURCHETTE = CFG.fiabilite.fourchette_pari;
@@ -142,7 +140,11 @@ avecCotes.forEach((q) => {
   const cotesN = RF.cotesReelles(m, raw, null);
   const n = NORMAUX.filter((id) => cotesN[id] && cotesN[id].cote >= FOURCHETTE.cote_min && cotesN[id].cote <= FOURCHETTE.cote_max).sort((a, b) => cotesN[b].sans_marge - cotesN[a].sans_marge)[0];
   if (n) { normal.push({ match: f.teams.home.name + " - " + f.teams.away.name, pari: n, p: cotesN[n].sans_marge, g: MP.CATALOGUE[n].test(issue(q.x.h, q.x.a)) ? 1 : 0 }); }
-  const r = RF.choisir(m, { dom: matchsDuClub(f.teams.home.id, q.x.saison), ext: matchsDuClub(f.teams.away.id, q.x.saison), odds: raw }, { params: params, regles: regles, chanceCorrigee: PR.chanceCorrigee, avantIso: f.fixture.date, ligueId: q.x.coupe });
+  const dd = { dom: matchsDuClub(f.teams.home.id, q.x.saison), ext: matchsDuClub(f.teams.away.id, q.x.saison), odds: raw };
+  const oo = { params: params, regles: regles, chanceCorrigee: PR.chanceCorrigee, avantIso: f.fixture.date };
+  const r = RF.choisirForme(m, dd, oo);
+  const rm = RF.choisirMarche(m, dd, oo);
+  if (rm.pari) marcheSeul.push({ normal: !!n, p: rm.pari.chance_affichee, g: MP.CATALOGUE[rm.pari.market_id].test(issue(q.x.h, q.x.a)) ? 1 : 0 });
   if (n) r.normal = true;
   const g = r.pari ? (MP.CATALOGUE[r.pari.market_id].test(issue(q.x.h, q.x.a)) ? 1 : 0) : null;
   lignes.push({ normal: !!r.normal, match: f.teams.home.name + " - " + f.teams.away.name, score: q.x.h + "-" + q.x.a, pari: r.pari ? r.pari.market_id : "(" + r.raison + ")", cote: r.pari ? r.pari.cote : null, chance: r.pari ? r.pari.chance_affichee : null, forme: r.pari ? r.pari.p_forme : null, sm: r.pari ? r.pari.sans_marge : null, g: g });
@@ -157,5 +159,6 @@ const pc = (l, k) => l.filter((x) => x.g).length + "/" + l.length + " = " + (l.l
 console.log("Regle normale des coupes (1N2, DC, 2,5 buts, cote " + FOURCHETTE.cote_min + "-" + FOURCHETTE.cote_max + ") : pari sur " + normal.length + " matchs : " + pc(normal, "p"));
 const seuls = avec.filter((l) => !l.normal);
 console.log("Repli forme sur les matchs SANS pari normal (son vrai role) : " + pc(seuls, "chance"));
+console.log("Variante marche (mediane sans marge) sur les matchs SANS pari normal : " + pc(marcheSeul.filter((x) => !x.normal), "p") + " ; sur tous : " + pc(marcheSeul, "p"));
 if (avec.length) console.log("Repli forme sur tous les matchs : " + avec.filter((l) => l.g).length + "/" + avec.length + " = " + (avec.filter((l) => l.g).length / avec.length * 100).toFixed(1) + " % reels pour " + (avec.reduce((s, l) => s + l.chance, 0) / avec.length).toFixed(1) + " % annonces");
 if (marche.length) console.log("Reference, cotes du marche seules : " + marche.filter((l) => l.g).length + "/" + marche.length + " = " + (marche.filter((l) => l.g).length / marche.length * 100).toFixed(1) + " % reels pour " + (marche.reduce((s, l) => s + l.p, 0) / marche.length).toFixed(1) + " % annonces");

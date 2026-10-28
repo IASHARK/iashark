@@ -215,6 +215,7 @@ test("archivage prive : insert ligne par ligne sans ecraser (ignore-duplicates),
   const a = await RF.archiver(lignes, { supabase: { url: "https://x.supabase.co", cle: "k" }, fetch: fakeFetch });
   assert.deepEqual(a, { nouvelles: lignes.length, refus: 0 });
   appels.forEach((c) => {
+    assert.ok(c.init.signal, "delai maximal sur chaque appel a la base");
     assert.match(c.url, /\/rest\/v1\/repli_coupes_blanc\?on_conflict=fixture_id,variante$/);
     assert.match(c.init.headers.Prefer, /resolution=ignore-duplicates/);
   });
@@ -223,6 +224,7 @@ test("archivage prive : insert ligne par ligne sans ecraser (ignore-duplicates),
     matchsParIds: async () => [{ fixture: { id: 777, status: { short: "FT" } }, score: { fulltime: { home: 0, away: 2 } } }] });
   assert.equal(n, 1);
   const patch = appels.find((c) => c.init.method === "PATCH");
+  assert.ok(appels.every((c) => c.init.signal), "delai maximal sur la lecture et le reglement");
   assert.match(patch.url, /repli_coupes_blanc\?fixture_id=eq\.777&variante=eq\.forme/);
   assert.equal(JSON.parse(patch.init.body).resultat, "gagne");
   assert.equal(await RF.archiver(lignes, {}), null, "sans base : rien");

@@ -127,11 +127,11 @@ html:has(.cb){scrollbar-color:rgba(141,179,211,.32) #060b12}
 .mt-repere .cb-ico{width:15px;height:15px;color:var(--cb-cyan);vertical-align:0}
 .mt-couloirs{margin:0;padding:0;list-style:none}
 .mt-c{padding:16px 0 14px;border-top:1px solid var(--cb-line)}
-.mt-c-h{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mt-c-h{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 12px}
 .cb .mt-nom{display:flex;align-items:center;gap:10px;margin:0;font-size:16px;font-weight:700;line-height:1.2}
 .cb .mt-num{display:grid;place-items:center;flex:none;width:28px;height:28px;border:1.5px solid var(--cb-cyan);border-radius:50%;
   color:var(--cb-cyan);font:700 16px/1 var(--cb-num)}
-.mt-g{font-size:13px;color:var(--cb-soft);font-variant-numeric:tabular-nums;white-space:nowrap}
+.mt-g{min-width:0;margin-left:auto;font-size:13px;color:var(--cb-soft);font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere}
 /* Piste : un segment par palier gagne (longueur = part de la cote vers 10, echelle log), le pari du soir en pointille,
    le coureur au bout, la ligne d'arrivee en damier. */
 .mt-piste{position:relative;height:18px;margin-top:14px}

@@ -1,0 +1,426 @@
+{
+ "version": 1,
+ "genere_le": "2026-10-29T07:13:15.086Z",
+ "jour": "2026-10-29",
+ "debut": "2026-10-06",
+ "objectif": 10,
+ "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-10-29. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
+ "montantes": [
+  {
+   "rang": 1,
+   "paliers": [
+    {
+     "j": "2026-10-27",
+     "f": 1638565,
+     "h": "SG Sonnenhof Grossaspach",
+     "a": "FC Augsburg",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 1.4
+    },
+    {
+     "j": "2026-10-28",
+     "f": 1638564,
+     "h": "SC Freiburg",
+     "a": "VfL Wolfsburg",
+     "m": "home-win",
+     "p": "Victoire SC Freiburg",
+     "c": 1.42,
+     "r": "gagne",
+     "cc": 1.99
+    }
+   ],
+   "gagnes": 2,
+   "cote": 1.99,
+   "etat": "en_cours",
+   "attente": null,
+   "dernier": {
+    "t": "perdu",
+    "j": "2026-10-26",
+    "n": 0,
+    "h": "Beşiktaş",
+    "a": "Başakşehir",
+    "p": "Plus de 2,5 buts",
+    "k": 1.4
+   },
+   "objectifs": [
+    {
+     "j": "2026-10-25",
+     "n": 5,
+     "c": 11.02
+    }
+   ],
+   "historique": [
+    {
+     "j": "2026-10-06",
+     "f": 1528951,
+     "h": "Kazakhstan",
+     "a": "Faroe Islands",
+     "m": "under-25",
+     "p": "Moins de 2,5 buts",
+     "c": 1.44,
+     "r": "perdu",
+     "cc": null
+    },
+    {
+     "j": "2026-10-20",
+     "f": 1635702,
+     "h": "Paris Saint Germain",
+     "a": "Barcelona",
+     "m": "home-win-over-25",
+     "p": "Le PSG gagne et plus de 2,5 buts dans le match",
+     "c": 2.75,
+     "r": "gagne",
+     "cc": 2.75
+    },
+    {
+     "j": "2026-10-22",
+     "f": 1636330,
+     "h": "Union St. Gilloise",
+     "a": "Hapoel Beer Sheva",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.46,
+     "r": "gagne",
+     "cc": 4.02
+    },
+    {
+     "j": "2026-10-23",
+     "f": 1576206,
+     "h": "VfL Bochum",
+     "a": "VfL Wolfsburg",
+     "m": "btts-yes",
+     "p": "Les deux équipes marquent",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 5.62
+    },
+    {
+     "j": "2026-10-24",
+     "f": 1505540,
+     "h": "D. La Serena",
+     "a": "Concepción",
+     "m": "dc-1x",
+     "p": "D. La Serena ou match nul",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 7.87
+    },
+    {
+     "j": "2026-10-25",
+     "f": 1550157,
+     "h": "Atalanta",
+     "a": "Frosinone",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 11.02,
+     "o": 1
+    },
+    {
+     "j": "2026-10-26",
+     "f": 1584440,
+     "h": "Beşiktaş",
+     "a": "Başakşehir",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.4,
+     "r": "perdu",
+     "cc": null
+    },
+    {
+     "j": "2026-10-27",
+     "f": 1638565,
+     "h": "SG Sonnenhof Grossaspach",
+     "a": "FC Augsburg",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 1.4
+    },
+    {
+     "j": "2026-10-28",
+     "f": 1638564,
+     "h": "SC Freiburg",
+     "a": "VfL Wolfsburg",
+     "m": "home-win",
+     "p": "Victoire SC Freiburg",
+     "c": 1.42,
+     "r": "gagne",
+     "cc": 1.99
+    }
+   ],
+   "bilan": {
+    "gagnes": 7,
+    "perdus": 2,
+    "annules": 0,
+    "non_regles": 0,
+    "objectifs": 1
+   }
+  },
+  {
+   "rang": 2,
+   "paliers": [],
+   "gagnes": 0,
+   "cote": null,
+   "etat": "en_cours",
+   "attente": null,
+   "dernier": {
+    "t": "perdu",
+    "j": "2026-10-28",
+    "n": 0,
+    "h": "Degerfors IF",
+    "a": "Vasteras SK FK",
+    "p": "Degerfors IF ou match nul",
+    "k": 1.4
+   },
+   "objectifs": [
+    {
+     "j": "2026-10-27",
+     "n": 7,
+     "c": 13.03
+    }
+   ],
+   "historique": [
+    {
+     "j": "2026-10-06",
+     "f": 1528957,
+     "h": "Estonia",
+     "a": "Iceland",
+     "m": "away-win",
+     "p": "Victoire Islande",
+     "c": 1.54,
+     "r": "perdu",
+     "cc": null
+    },
+    {
+     "j": "2026-10-20",
+     "f": 1635719,
+     "h": "Sabah FA",
+     "a": "Borussia Dortmund",
+     "m": "anytime-scorer-21393",
+     "p": "Serhou Guirassy marque",
+     "c": 1.67,
+     "r": "gagne",
+     "cc": 1.67
+    },
+    {
+     "j": "2026-10-22",
+     "f": 1603062,
+     "h": "Al-Ahli Jeddah",
+     "a": "Al Khaleej Saihat",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.44,
+     "r": "gagne",
+     "cc": 2.4
+    },
+    {
+     "j": "2026-10-23",
+     "f": 1601567,
+     "h": "Empoli",
+     "a": "Vicenza Virtus",
+     "m": "fh-over-05",
+     "p": "1re mi-temps : plus de 0,5 but",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 3.37
+    },
+    {
+     "j": "2026-10-24",
+     "f": 1593338,
+     "h": "AEK Athens FC",
+     "a": "Panetolikos",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 4.71
+    },
+    {
+     "j": "2026-10-25",
+     "f": 1550161,
+     "h": "Inter",
+     "a": "Fiorentina",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.41,
+     "r": "gagne",
+     "cc": 6.65
+    },
+    {
+     "j": "2026-10-26",
+     "f": 1584442,
+     "h": "Galatasaray",
+     "a": "Fenerbahçe",
+     "m": "dc-1x",
+     "p": "Galatasaray ou match nul",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 9.3
+    },
+    {
+     "j": "2026-10-27",
+     "f": 1550174,
+     "h": "Sassuolo",
+     "a": "Lazio",
+     "m": "dc-x2",
+     "p": "Match nul ou Lazio",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 13.03,
+     "o": 1
+    },
+    {
+     "j": "2026-10-28",
+     "f": 1494315,
+     "h": "Degerfors IF",
+     "a": "Vasteras SK FK",
+     "m": "dc-1x",
+     "p": "Degerfors IF ou match nul",
+     "c": 1.4,
+     "r": "perdu",
+     "cc": null
+    }
+   ],
+   "bilan": {
+    "gagnes": 7,
+    "perdus": 2,
+    "annules": 0,
+    "non_regles": 0,
+    "objectifs": 1
+   }
+  },
+  {
+   "rang": 3,
+   "paliers": [
+    {
+     "j": "2026-10-28",
+     "f": 1644347,
+     "h": "Cieza",
+     "a": "Granada CF",
+     "m": "away-win",
+     "p": "Victoire Granada CF",
+     "c": 1.44,
+     "r": "annule",
+     "cc": null
+    }
+   ],
+   "gagnes": 0,
+   "cote": null,
+   "etat": "en_cours",
+   "attente": null,
+   "dernier": {
+    "t": "perdu",
+    "j": "2026-10-27",
+    "n": 6,
+    "h": "Borussia Mönchengladbach",
+    "a": "Karlsruher SC",
+    "p": "Plus de 2,5 buts",
+    "k": 1.4
+   },
+   "objectifs": [],
+   "historique": [
+    {
+     "j": "2026-10-06",
+     "f": 1545612,
+     "h": "Luxembourg",
+     "a": "Bulgaria",
+     "m": "under-25",
+     "p": "Moins de 2,5 buts",
+     "c": 1.51,
+     "r": "gagne",
+     "cc": 1.51
+    },
+    {
+     "j": "2026-10-22",
+     "f": 1636267,
+     "h": "1899 Hoffenheim",
+     "a": "Lyon",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.48,
+     "r": "gagne",
+     "cc": 2.23
+    },
+    {
+     "j": "2026-10-23",
+     "f": 1550165,
+     "h": "Torino",
+     "a": "Monza",
+     "m": "away-team-over-05",
+     "p": "Monza : plus de 0,5 but",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 3.13
+    },
+    {
+     "j": "2026-10-24",
+     "f": 1575202,
+     "h": "SC Paderborn 07",
+     "a": "Hamburger SV",
+     "m": "dc-1x",
+     "p": "SC Paderborn 07 ou match nul",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 4.38
+    },
+    {
+     "j": "2026-10-25",
+     "f": 1570424,
+     "h": "Athletic Club",
+     "a": "Getafe",
+     "m": "over-15",
+     "p": "Plus de 1,5 but",
+     "c": 1.41,
+     "r": "gagne",
+     "cc": 6.18
+    },
+    {
+     "j": "2026-10-26",
+     "f": 1552800,
+     "h": "Paris Saint Germain",
+     "a": "Lyon",
+     "m": "home-win",
+     "p": "Victoire PSG",
+     "c": 1.41,
+     "r": "gagne",
+     "cc": 8.71
+    },
+    {
+     "j": "2026-10-27",
+     "f": 1638559,
+     "h": "Borussia Mönchengladbach",
+     "a": "Karlsruher SC",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.4,
+     "r": "perdu",
+     "cc": null
+    },
+    {
+     "j": "2026-10-28",
+     "f": 1644347,
+     "h": "Cieza",
+     "a": "Granada CF",
+     "m": "away-win",
+     "p": "Victoire Granada CF",
+     "c": 1.44,
+     "r": "annule",
+     "cc": null
+    }
+   ],
+   "bilan": {
+    "gagnes": 6,
+    "perdus": 1,
+    "annules": 1,
+    "non_regles": 0,
+    "objectifs": 0
+   }
+  }
+ ]
+}

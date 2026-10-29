@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "explication": "Empreinte SHA-256 de la Selection en or publiee chaque jour (2 ou 3 paris, avec leur rang), chainee a la precedente, ajoutee le jour meme juste apres la publication et avant le premier match. Un pari modifie apres coup ou un maillon retire casse la chaine. Le sel de chaque jour est revele deux jours plus tard : empreinte_paris = SHA-256(sel + saut de ligne + JSON canonique de la liste des paris tries par rang, chacun { rang, fixture_id, home, away, prediction, cote, market } = { numero de la montante, f, h, a, p, c, m } de l'historique de preuves/montantes.json).",
+  "chaine": [
+    {
+      "n": 1,
+      "jour": "2026-10-29",
+      "genere_le": "2026-10-29T07:12:49.321Z",
+      "nb_paris": 3,
+      "empreinte_paris": "d31f4e5c2bc0b6b06b5840de15d3428aef8c8336d3b7968e5118e7d5ae19d321",
+      "precedente": "0000000000000000000000000000000000000000000000000000000000000000",
+      "empreinte": "742cb3061e0f083eb21074faecafbfef107c942d8f7ed3e0984f748bf10f0528"
+    }
+  ]
+}

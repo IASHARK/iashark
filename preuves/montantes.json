@@ -1,10 +1,10 @@
 {
  "version": 1,
- "genere_le": "2026-10-29T07:13:15.086Z",
- "jour": "2026-10-29",
+ "genere_le": "2026-10-30T07:15:05.971Z",
+ "jour": "2026-10-30",
  "debut": "2026-10-06",
  "objectif": 10,
- "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-10-29. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
+ "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-10-30. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
  "montantes": [
   {
    "rang": 1,
@@ -30,10 +30,21 @@
      "c": 1.42,
      "r": "gagne",
      "cc": 1.99
+    },
+    {
+     "j": "2026-10-29",
+     "f": 1603077,
+     "h": "Al Riyadh",
+     "a": "Al-Qadisiyah FC",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 2.78
     }
    ],
-   "gagnes": 2,
-   "cote": 1.99,
+   "gagnes": 3,
+   "cote": 2.78,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
@@ -152,10 +163,21 @@
      "c": 1.42,
      "r": "gagne",
      "cc": 1.99
+    },
+    {
+     "j": "2026-10-29",
+     "f": 1603077,
+     "h": "Al Riyadh",
+     "a": "Al-Qadisiyah FC",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 2.78
     }
    ],
    "bilan": {
-    "gagnes": 7,
+    "gagnes": 8,
     "perdus": 2,
     "annules": 0,
     "non_regles": 0,
@@ -164,9 +186,21 @@
   },
   {
    "rang": 2,
-   "paliers": [],
-   "gagnes": 0,
-   "cote": null,
+   "paliers": [
+    {
+     "j": "2026-10-29",
+     "f": 1644356,
+     "h": "Guijuelo",
+     "a": "Sporting Gijon",
+     "m": "away-win",
+     "p": "Victoire Sporting Gijon",
+     "c": 1.41,
+     "r": "gagne",
+     "cc": 1.41
+    }
+   ],
+   "gagnes": 1,
+   "cote": 1.41,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
@@ -285,10 +319,21 @@
      "c": 1.4,
      "r": "perdu",
      "cc": null
+    },
+    {
+     "j": "2026-10-29",
+     "f": 1644356,
+     "h": "Guijuelo",
+     "a": "Sporting Gijon",
+     "m": "away-win",
+     "p": "Victoire Sporting Gijon",
+     "c": 1.41,
+     "r": "gagne",
+     "cc": 1.41
     }
    ],
    "bilan": {
-    "gagnes": 7,
+    "gagnes": 8,
     "perdus": 2,
     "annules": 0,
     "non_regles": 0,
@@ -308,10 +353,21 @@
      "c": 1.44,
      "r": "annule",
      "cc": null
+    },
+    {
+     "j": "2026-10-29",
+     "f": 1550170,
+     "h": "Frosinone",
+     "a": "Lecce",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.44,
+     "r": "gagne",
+     "cc": 1.44
     }
    ],
-   "gagnes": 0,
-   "cote": null,
+   "gagnes": 1,
+   "cote": 1.44,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
@@ -412,10 +468,21 @@
      "c": 1.44,
      "r": "annule",
      "cc": null
+    },
+    {
+     "j": "2026-10-29",
+     "f": 1550170,
+     "h": "Frosinone",
+     "a": "Lecce",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.44,
+     "r": "gagne",
+     "cc": 1.44
     }
    ],
    "bilan": {
-    "gagnes": 6,
+    "gagnes": 7,
     "perdus": 1,
     "annules": 1,
     "non_regles": 0,

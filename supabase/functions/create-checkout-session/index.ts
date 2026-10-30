@@ -299,6 +299,11 @@ Deno.serve(async (req: Request) => {
       mode: "subscription" as const,
       line_items: [{ price: STRIPE_PRICE_ID_RESOLVED, quantity: 1 }],
       client_reference_id: user.id,
+      // Carte seulement (Apple Pay et Google Pay restent proposes) : sans
+      // « Link », Stripe n'envoie plus de code par SMS au numero enregistre
+      // chez Link pour cette adresse e-mail (client bloque le 29/10/2026 par
+      // un code envoye a un numero qui n'etait pas le sien).
+      payment_method_types: ["card" as const],
       ...(mapping?.stripe_customer_id ? { customer: mapping.stripe_customer_id } : { customer_email: user.email }),
       success_url: returnBase + "/checkout-succes.html?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: returnBase + "/checkout-annule.html",

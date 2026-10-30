@@ -134,3 +134,14 @@
   s.defer = true;
   document.head.appendChild(s);
 })();
+
+/* « Nous contacter » (pied de page) et fenetre d'essai gratuit des comptes
+   gratuits connectes : lib/contact-essai.js (30/10/2026), charge sur TOUTES
+   les pages depuis ce script partage, comme la mesure des visites. */
+(function(){
+  if(window.__iasharkContactEssai || document.querySelector('script[src$="/lib/contact-essai.js"]')) return;
+  var s = document.createElement('script');
+  s.src = '/lib/contact-essai.js';
+  s.defer = true;
+  document.head.appendChild(s);
+})();

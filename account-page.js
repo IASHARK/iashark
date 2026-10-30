@@ -231,6 +231,15 @@
       + '</div>';
   }
 
+  /* Nous contacter (30/10/2026) : renvoi vers la page Contact (Telegram prive
+     https://t.me/IASHARK + formulaire), meme lien que le pied de page
+     (lib/contact-essai.js). Aucune adresse e-mail affichee. */
+  function carteContact() {
+    return carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('contact.account_title', 'Nous contacter') + '</h2>'
+      + '<p class="mt-3 max-w-lg text-[14px] leading-relaxed text-soft">' + tr('contact.account_text', 'Une question sur votre compte, votre abonnement ou un paiement ? Écrivez-nous sur Telegram, nous vous répondons en message privé.') + '</p>'
+      + '<a href="' + esc(lien('contact.html')) + '" data-track="contact_compte" class="mt-4 inline-flex h-10 items-center rounded-lg border border-hairline px-4 text-[13.5px] font-semibold transition hover:border-cyan/40">' + tr('contact.account_cta', 'Nous écrire') + '</a>');
+  }
+
   /* ---------- Sections ---------- */
 
   /* Vue d'ensemble : un resume court, avec un lien vers la section qui porte
@@ -297,6 +306,7 @@
       + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.security_heading', 'Sécurité') + '</h2>'
           + '<p class="mt-3 text-[14px] leading-relaxed text-soft">' + tr('compte_page.security_summary', 'Votre compte est protégé par un mot de passe.') + '</p>'
           + '<div class="mt-4"><button type="button" data-aller="securite" class="text-[13.5px] font-semibold text-cyan transition hover:underline">' + tr('compte_page.manage_security_cta', 'Gérer la sécurité') + '</button></div>')
+      + carteContact()
       + '</div>';
   }
 

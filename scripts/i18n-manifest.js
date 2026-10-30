@@ -988,6 +988,9 @@ var PAGES = [
   // la page des conditions est legale (noindex).
   {file: "partenaires.html"},
   {file: "partenaires-conditions.html", noSitemap: true},
+  // Page Contact (30/10/2026) : Telegram prive + formulaire (lib/contact-page.js,
+  // migration 0060), traduite au build (data-i18n) ; noindex, hors sitemap.
+  {file: "contact.html", noSitemap: true},
   {file: "404.html", noSitemap: true}
 ];
 

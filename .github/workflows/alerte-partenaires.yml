@@ -35,3 +35,14 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: node scripts/telegram/alerte-partenaires.mjs
+      # 30/10/2026 : meme alerte pour les messages de la page Contact
+      # (contact_messages.owner_notified_at, migration 0060). Sans la table,
+      # le script le dit et s'arrete sans erreur.
+      - name: Messages de la page Contact a signaler
+        if: always()
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node scripts/telegram/alerte-contact.mjs

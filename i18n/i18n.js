@@ -58,7 +58,9 @@
     "methodologie.html",
     // 28/10/2026 : pages traduites oubliees ; depuis /gb/ ou /en/, leurs liens partaient
     // a la racine, redirigee vers /fr/ (un abonne anglophone a atterri sur /fr/partenaires.html).
-    "combines.html","partenaires.html","partenaires-conditions.html","desinscription-email.html"
+    "combines.html","partenaires.html","partenaires-conditions.html","desinscription-email.html",
+    // 30/10/2026 : page Contact.
+    "contact.html"
   ].forEach(function(p){ LOCALIZED_PAGES[p] = true; });
 
   var DIR_PREFIX_RE = /^\/([a-z]{2})(\/.*)?$/;

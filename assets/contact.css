@@ -1,0 +1,53 @@
+/* IASHARK — page Contact (30/10/2026). Sombre, cyan + gris, Inter. */
+:root{--ct-bg:#060b12;--ct-surface:#0a1420;--ct-panel:#0d1926;--ct-cyan:#20d5ef;--ct-ink:#f4f7fb;--ct-soft:#91a0b3;--ct-text:#c6d1de;--ct-line:rgba(141,179,211,.16);--ct-err:#ffb4a8;--ct-ok:#7ee0b0}
+*{box-sizing:border-box}
+html{background:var(--ct-bg)}
+.ct-body{margin:0;min-height:100dvh;background:var(--ct-bg);color:var(--ct-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.ct-body ::selection{background:rgba(32,213,239,.3);color:#fff}
+.hdr{position:sticky;top:0;z-index:99;background:rgba(6,11,18,.96);border-bottom:1px solid var(--ct-line);padding:0 20px;height:56px;display:flex;align-items:center}
+.logo{display:inline-flex;align-items:center;min-height:44px}
+.logo img{display:block;height:28px;width:auto}
+
+.ct{max-width:560px;margin:0 auto;padding:48px 16px 24px}
+.ct-logo{display:block;height:40px;width:auto;margin:0 0 28px}
+.ct-h1{margin:0;font-size:clamp(30px,6vw,40px);line-height:1.08;font-weight:800;letter-spacing:-.03em;text-wrap:balance}
+.ct-lead{margin:12px 0 0;font-size:17px;line-height:1.5;color:var(--ct-text);max-width:42ch}
+
+/* Telegram : la voie la plus rapide, en premier. */
+.ct-tg{margin-top:32px;padding:22px 20px 18px;border-radius:16px;background:var(--ct-surface);background-image:radial-gradient(110% 80% at 0% 0%,rgba(32,213,239,.12),transparent 60%);border:1px solid var(--ct-line)}
+.ct-tg-id{display:flex;align-items:center;gap:14px}
+.ct-tg-avatar{width:56px;height:56px;border-radius:14px;flex:none;background:#000;box-shadow:0 0 0 1px var(--ct-line)}
+.ct-tg-nom{margin:0;font-size:18px;font-weight:800;letter-spacing:-.01em}
+.ct-tg-pseudo{margin:2px 0 0;font-size:14px;color:var(--ct-soft)}
+.ct-tg-cta{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:18px;min-height:54px;border-radius:12px;background:var(--ct-cyan);color:#04141b;font-size:16px;font-weight:800;text-decoration:none;transition:background-color .15s ease,transform .15s ease}
+.ct-tg-cta:hover{background:#5fe2f4}
+.ct-tg-cta:active{transform:translateY(1px)}
+.ct-tg-cta:focus-visible{outline:2px solid var(--ct-cyan);outline-offset:3px}
+.ct-tg-note{margin:12px 0 0;font-size:13px;line-height:1.5;color:var(--ct-soft)}
+
+.ct-ou{display:flex;align-items:center;gap:14px;margin:32px 0 20px;font-size:13px;color:var(--ct-soft)}
+.ct-ou::before,.ct-ou::after{content:"";flex:1;height:1px;background:var(--ct-line)}
+
+.ct-form{display:flex;flex-direction:column;gap:18px}
+.ct-champ label{display:block;font-size:14px;font-weight:600;margin-bottom:8px}
+.ct-champ input,.ct-champ textarea{width:100%;background:var(--ct-panel);border:1px solid var(--ct-line);border-radius:12px;padding:13px 14px;color:var(--ct-ink);font:inherit;font-size:16px;line-height:1.45;caret-color:var(--ct-cyan);transition:border-color .15s ease}
+.ct-champ textarea{resize:vertical;min-height:132px}
+.ct-champ input:hover,.ct-champ textarea:hover{border-color:rgba(141,179,211,.3)}
+.ct-champ input:focus,.ct-champ textarea:focus{outline:none;border-color:var(--ct-cyan);box-shadow:0 0 0 3px rgba(32,213,239,.18)}
+.ct-champ [aria-invalid="true"]{border-color:var(--ct-err)}
+.ct-aide{margin:6px 0 0;font-size:12.5px;color:var(--ct-soft)}
+.ct-piege{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
+.ct-envoyer{min-height:50px;border-radius:12px;border:1px solid rgba(32,213,239,.45);background:rgba(32,213,239,.08);color:var(--ct-ink);font:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:background-color .15s ease,border-color .15s ease}
+.ct-envoyer:hover{background:rgba(32,213,239,.16);border-color:var(--ct-cyan)}
+.ct-envoyer:focus-visible{outline:2px solid var(--ct-cyan);outline-offset:3px}
+.ct-envoyer:disabled{opacity:.6;cursor:wait}
+.ct-statut{margin:0;min-height:1.4em;font-size:14px;line-height:1.5;color:var(--ct-soft)}
+.ct-statut.is-ok{color:var(--ct-ok)}
+.ct-statut.is-erreur{color:var(--ct-err)}
+.ct-legal{margin:18px 0 0;font-size:12.5px}
+.ct-legal a{color:var(--ct-soft);text-underline-offset:3px}
+.ct-legal a:hover{color:var(--ct-ink)}
+
+.ct-foot{max-width:560px;margin:0 auto;padding:24px 16px 104px;font-size:12px;line-height:1.7;color:var(--ct-soft);text-align:center}
+.ct-foot a{color:var(--ct-soft)}
+@media (prefers-reduced-motion:reduce){.ct-tg-cta,.ct-envoyer,.ct-champ input,.ct-champ textarea{transition:none}}

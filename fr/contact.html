@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="iashark-market" content="fr">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nous contacter — IASHARK</title>
+<meta name="robots" content="noindex, follow">
+<meta name="description" content="Une question, un souci pour payer ? Écris à IASHARK sur Telegram ou par le formulaire.">
+<link rel="canonical" href="https://iashark.com/fr/contact.html">
+<link rel="alternate" hreflang="fr" href="https://iashark.com/fr/contact.html">
+<link rel="alternate" hreflang="en-GB" href="https://iashark.com/gb/contact.html">
+<link rel="alternate" hreflang="en-ZA" href="https://iashark.com/za/contact.html">
+<link rel="alternate" hreflang="en" href="https://iashark.com/en/contact.html">
+<link rel="alternate" hreflang="es-MX" href="https://iashark.com/mx/contact.html">
+<link rel="alternate" hreflang="es" href="https://iashark.com/es/contact.html">
+<link rel="alternate" hreflang="x-default" href="https://iashark.com/en/contact.html">
+<link rel="icon" href="/favicon-32x32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/contact.css">
+<link rel="stylesheet" href="/assets/bottom-navigation.css">
+<script src="/i18n/i18n.js"></script>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="IASHARK">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="Nous contacter — IASHARK">
+<meta property="og:description" content="Une question, un souci pour payer ? Écris à IASHARK sur Telegram ou par le formulaire.">
+<meta property="og:url" content="https://iashark.com/fr/contact.html">
+<meta property="og:image" content="https://iashark.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="ct-body">
+<header class="hdr"><a href="/fr/" data-href="" class="logo"><img src="/assets/iashark-logo.png" alt="IASHARK" width="105" height="28"></a></header>
+
+<!-- Page Contact (30/10/2026). Le profil Telegram s'affiche « I A » sans photo :
+     la page porte elle-meme le nom et le logo IASHARK. Aucune adresse e-mail
+     affichee. Formulaire : table contact_messages (migration 0060), transmis a
+     Clement sur Telegram par scripts/telegram/alerte-contact.mjs. -->
+<main class="ct">
+  <h1 class="ct-h1" data-i18n="contact_page.title">Nous contacter</h1>
+  <p class="ct-lead" data-i18n="contact_page.lead">Une question, un souci pour payer ? On te répond.</p>
+
+  <section class="ct-tg" aria-labelledby="ctTgTitre">
+    <div class="ct-tg-id">
+      <img class="ct-tg-avatar" src="/icon-192.png" alt="" width="56" height="56">
+      <div>
+        <h2 class="ct-tg-nom" id="ctTgTitre">IASHARK</h2>
+        <p class="ct-tg-pseudo"><span data-i18n="contact_page.tg_handle">@IASHARK sur Telegram</span></p>
+      </div>
+    </div>
+    <a class="ct-tg-cta" href="https://t.me/IASHARK" target="_blank" rel="noopener" data-track="contact_page_telegram">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+      <span data-i18n="contact_page.tg_cta">Écrire sur Telegram</span>
+    </a>
+    <p class="ct-tg-note" data-i18n="contact_page.tg_note">Le plus rapide. Sur Telegram, notre profil peut s’afficher « I A » : c’est bien nous, réponse en message privé.</p>
+  </section>
+
+  <p class="ct-ou"><span data-i18n="contact_page.or">ou par message</span></p>
+
+  <form class="ct-form" id="ctForm" novalidate>
+    <div class="ct-champ">
+      <label for="ctEmail" data-i18n="contact_page.email_label">Ton e-mail</label>
+      <input id="ctEmail" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required aria-describedby="ctEmailAide">
+      <p class="ct-aide" id="ctEmailAide" data-i18n="contact_page.email_help">Seulement pour te répondre.</p>
+    </div>
+    <div class="ct-champ">
+      <label for="ctMessage" data-i18n="contact_page.message_label">Ton message</label>
+      <textarea id="ctMessage" name="message" rows="5" minlength="10" maxlength="2000" required></textarea>
+    </div>
+    <!-- Champ piege : invisible pour une personne, rempli par les robots. Jamais envoye. -->
+    <div class="ct-piege" aria-hidden="true">
+      <label for="ctSite">Site web</label>
+      <input id="ctSite" name="site" type="text" tabindex="-1" autocomplete="off">
+    </div>
+    <button class="ct-envoyer" id="ctEnvoyer" type="submit" data-track="contact_page_envoyer"><span data-i18n="contact_page.send">Envoyer le message</span></button>
+    <p class="ct-statut" id="ctStatut" role="status" aria-live="polite"></p>
+  </form>
+  <p class="ct-legal"><a href="/fr/confidentialite.html" data-href="confidentialite.html" data-i18n="footer.confidentialite">Confidentialité</a></p>
+</main>
+
+<footer class="ct-foot"><span data-i18n="rg_footer.age_line">18+ · Interdit aux mineurs · Jouez responsable</span><br><span data-i18n="match_page.shell_help_label">Aide :</span> <a data-market-helpline="url" href="https://www.joueurs-info-service.fr">joueurs-info-service.fr</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">09 74 75 13 13</span></span></footer>
+<!--SEO_FOOTER_NAV--><nav class="seo-foot-nav" aria-label="Navigation du site" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#91a0b3;text-align:center"><p style="margin:0 0 4px"><span style="color:#c3ccd8">Championnats :</span> <a href="/fr/leagues/ligue-1.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Ligue 1</a> · <a href="/fr/leagues/champions-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Champions League</a> · <a href="/fr/leagues/premier-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Premier League</a> · <a href="/fr/leagues/la-liga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">La Liga</a> · <a href="/fr/leagues/serie-a.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Serie A</a> · <a href="/fr/leagues/bundesliga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Bundesliga</a> · <a href="/fr/leagues/europa-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Europa League</a> · <a href="/fr/leagues/conference-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Conference League</a> · <a href="/fr/leagues/eredivisie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Eredivisie</a> · <a href="/fr/leagues/liga-portugal.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga Portugal</a> · <a href="/fr/leagues/mls.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">MLS</a> · <a href="/fr/leagues/allsvenskan.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Allsvenskan</a> · <a href="/fr/leagues/j1-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">J1 League</a> · <a href="/fr/leagues/liga-mx.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga MX</a> · <a href="/fr/leagues/liga-profesional-argentina.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga Profesional Argentina</a> · <a href="/fr/leagues/primera-division-chile.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Primera Division Chile</a> · <a href="/fr/leagues/championship.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Championship</a> · <a href="/fr/leagues/2-bundesliga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">2. Bundesliga</a> · <a href="/fr/leagues/segunda-division.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Segunda Division</a> · <a href="/fr/leagues/serie-b.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Serie B</a> · <a href="/fr/leagues/jupiler-pro-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Jupiler Pro League</a> · <a href="/fr/leagues/super-lig.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Super Lig</a> · <a href="/fr/leagues/scottish-premiership.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Scottish Premiership</a> · <a href="/fr/leagues/brasileirao-serie-a.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Brasileirao Serie A</a> · <a href="/fr/leagues/austrian-bundesliga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Austrian Bundesliga</a> · <a href="/fr/leagues/swiss-super-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Swiss Super League</a> · <a href="/fr/leagues/danish-superliga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Danish Superliga</a> · <a href="/fr/leagues/ekstraklasa.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Ekstraklasa</a> · <a href="/fr/leagues/uefa-nations-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">UEFA Nations League</a> · <a href="/fr/leagues/world-cup-qualifiers-europe.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">World Cup Qualifiers Europe</a> · <a href="/fr/leagues/ligue-2.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Ligue 2</a> · <a href="/fr/leagues/super-league-greece.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Super League Greece</a> · <a href="/fr/leagues/eliteserien.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Eliteserien</a> · <a href="/fr/leagues/saudi-pro-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Saudi Pro League</a> · <a href="/fr/leagues/dfb-pokal.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">DFB Pokal</a> · <a href="/fr/leagues/coppa-italia.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Coppa Italia</a> · <a href="/fr/leagues/copa-del-rey.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Copa del Rey</a> · <a href="/fr/leagues/fa-cup.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">FA Cup</a> · <a href="/fr/leagues/coupe-de-france.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Coupe de France</a> · <a href="/fr/leagues/k-league-1.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">K League 1</a> · <a href="/fr/leagues/efl-cup.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">EFL Cup</a> · <a href="/fr/leagues/copa-libertadores.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Copa Libertadores</a> · <a href="/fr/leagues/copa-sudamericana.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Copa Sudamericana</a> · <a href="/fr/leagues/fifa-club-world-cup.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">FIFA Club World Cup</a> · <a href="/fr/leagues/leagues-cup.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Leagues Cup</a> · <a href="/fr/leagues/uefa-euro.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">UEFA Euro</a> · <a href="/fr/leagues/euro-qualifiers.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Euro Qualifiers</a> · <a href="/fr/leagues/wc-qualifiers-south-america.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">WC Qualifiers South America</a> · <a href="/fr/leagues/copa-america.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Copa America</a> · <a href="/fr/leagues/africa-cup-of-nations.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Africa Cup of Nations</a> · <a href="/fr/leagues/concacaf-gold-cup.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">CONCACAF Gold Cup</a></p><p style="margin:0"><a href="/fr/clubs/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Clubs et derbies</a> · <a href="/fr/articles/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Articles</a> · <a href="/blog.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Blog et guides</a> · <a href="/fr/marches.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Marchés analysés</a> · <a href="/fr/methodologie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Méthodologie</a></p></nav><!--/SEO_FOOTER_NAV-->
+
+<nav class="bottom-nav" aria-label="Navigation principale" data-i18n-attr="aria-label:geo.nav.aria_label"><a href="/fr/"><span>⌂</span><b data-i18n="nav.home">Accueil</b></a><a href="/fr/pro.html"><span>☆</span><b data-i18n="nav.tools">Outils</b></a><a href="/blog.html"><span>▤</span><b data-i18n="nav.guides">Blog</b></a><a href="/fr/compte.html"><span>♙</span><b data-i18n="nav.account">Compte</b></a></nav>
+
+<script src="/lib/market-config.js"></script>
+<script src="/lib/contact-page.js" defer></script>
+<script src="/site-prefs.js"></script>
+<script src="/bottom-navigation.js"></script><script src="/site-header.js" defer></script>
+</body>
+</html>

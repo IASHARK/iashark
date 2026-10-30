@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="iashark-market" content="mx">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Contacto — IASHARK</title>
+<meta name="robots" content="noindex, follow">
+<meta name="description" content="¿Una pregunta o un problema para pagar? Escribe a IASHARK por Telegram o con el formulario.">
+<link rel="canonical" href="https://iashark.com/mx/contact.html">
+<link rel="alternate" hreflang="fr" href="https://iashark.com/fr/contact.html">
+<link rel="alternate" hreflang="en-GB" href="https://iashark.com/gb/contact.html">
+<link rel="alternate" hreflang="en-ZA" href="https://iashark.com/za/contact.html">
+<link rel="alternate" hreflang="en" href="https://iashark.com/en/contact.html">
+<link rel="alternate" hreflang="es-MX" href="https://iashark.com/mx/contact.html">
+<link rel="alternate" hreflang="es" href="https://iashark.com/es/contact.html">
+<link rel="alternate" hreflang="x-default" href="https://iashark.com/en/contact.html">
+<link rel="icon" href="/favicon-32x32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/contact.css">
+<link rel="stylesheet" href="/assets/bottom-navigation.css">
+<script src="/i18n/i18n.js"></script>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="IASHARK">
+<meta property="og:locale" content="es_MX">
+<meta property="og:title" content="Contacto — IASHARK">
+<meta property="og:description" content="¿Una pregunta o un problema para pagar? Escribe a IASHARK por Telegram o con el formulario.">
+<meta property="og:url" content="https://iashark.com/mx/contact.html">
+<meta property="og:image" content="https://iashark.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="ct-body">
+<header class="hdr"><a href="/mx/" data-href="" class="logo"><img src="/assets/iashark-logo.png" alt="IASHARK" width="105" height="28"></a></header>
+
+<!-- Page Contact (30/10/2026). Le profil Telegram s'affiche « I A » sans photo :
+     la page porte elle-meme le nom et le logo IASHARK. Aucune adresse e-mail
+     affichee. Formulaire : table contact_messages (migration 0060), transmis a
+     Clement sur Telegram par scripts/telegram/alerte-contact.mjs. -->
+<main class="ct">
+  <h1 class="ct-h1" data-i18n="contact_page.title">Contáctanos</h1>
+  <p class="ct-lead" data-i18n="contact_page.lead">¿Una pregunta o un problema para pagar? Te respondemos.</p>
+
+  <section class="ct-tg" aria-labelledby="ctTgTitre">
+    <div class="ct-tg-id">
+      <img class="ct-tg-avatar" src="/icon-192.png" alt="" width="56" height="56">
+      <div>
+        <h2 class="ct-tg-nom" id="ctTgTitre">IASHARK</h2>
+        <p class="ct-tg-pseudo"><span data-i18n="contact_page.tg_handle">@IASHARK en Telegram</span></p>
+      </div>
+    </div>
+    <a class="ct-tg-cta" href="https://t.me/IASHARK" target="_blank" rel="noopener" data-track="contact_page_telegram">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+      <span data-i18n="contact_page.tg_cta">Escribir por Telegram</span>
+    </a>
+    <p class="ct-tg-note" data-i18n="contact_page.tg_note">Lo más rápido. En Telegram nuestro perfil puede aparecer como «I A»: somos nosotros, te respondemos en privado.</p>
+  </section>
+
+  <p class="ct-ou"><span data-i18n="contact_page.or">o envía un mensaje</span></p>
+
+  <form class="ct-form" id="ctForm" novalidate>
+    <div class="ct-champ">
+      <label for="ctEmail" data-i18n="contact_page.email_label">Tu correo</label>
+      <input id="ctEmail" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required aria-describedby="ctEmailAide">
+      <p class="ct-aide" id="ctEmailAide" data-i18n="contact_page.email_help">Solo para responderte.</p>
+    </div>
+    <div class="ct-champ">
+      <label for="ctMessage" data-i18n="contact_page.message_label">Tu mensaje</label>
+      <textarea id="ctMessage" name="message" rows="5" minlength="10" maxlength="2000" required></textarea>
+    </div>
+    <!-- Champ piege : invisible pour une personne, rempli par les robots. Jamais envoye. -->
+    <div class="ct-piege" aria-hidden="true">
+      <label for="ctSite">Site web</label>
+      <input id="ctSite" name="site" type="text" tabindex="-1" autocomplete="off">
+    </div>
+    <button class="ct-envoyer" id="ctEnvoyer" type="submit" data-track="contact_page_envoyer"><span data-i18n="contact_page.send">Enviar el mensaje</span></button>
+    <p class="ct-statut" id="ctStatut" role="status" aria-live="polite"></p>
+  </form>
+  <p class="ct-legal"><a href="/mx/confidentialite.html" data-href="confidentialite.html" data-i18n="footer.confidentialite">Privacidad</a></p>
+</main>
+
+<footer class="ct-foot"><span data-i18n="rg_footer.age_line">18+ · Prohibido para menores · Juega con responsabilidad</span><br><span data-i18n="match_page.shell_help_label">Ayuda:</span> <a data-market-helpline="url" href="https://www.gob.mx/conasama/articulos/linea-de-la-vida-800-911-2000">gob.mx/conasama</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">800 911 2000</span></span></footer>
+<!--SEO_FOOTER_NAV--><nav class="seo-foot-nav" aria-label="Navegación del sitio" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#91a0b3;text-align:center"><p style="margin:0 0 4px"><span style="color:#c3ccd8">Ligas:</span> <a href="/mx/leagues/liga-mx.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga MX</a> · <a href="/mx/leagues/champions-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Champions League</a> · <a href="/mx/leagues/la-liga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">La Liga</a> · <a href="/mx/leagues/europa-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Europa League</a> · <a href="/mx/leagues/conference-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Conference League</a></p><p style="margin:0"><a href="/mx/equipos/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Equipos y clásicos</a> · <a href="/mx/articulos/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Artículos de futbol mexicano</a> · <a href="/mx/blog/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Blog y guías</a> · <a href="/mx/marches.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Mercados analizados</a> · <a href="/mx/methodologie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Metodología</a></p></nav><!--/SEO_FOOTER_NAV-->
+
+<nav class="bottom-nav" aria-label="Navegación principal" data-i18n-attr="aria-label:geo.nav.aria_label"><a href="/mx/"><span>⌂</span><b data-i18n="nav.home">INICIO</b></a><a href="/mx/pro.html"><span>☆</span><b data-i18n="nav.tools">PARLAYS</b></a><a href="/mx/blog/"><span>▤</span><b data-i18n="nav.guides">BLOG</b></a><a href="/mx/compte.html"><span>♙</span><b data-i18n="nav.account">CUENTA</b></a></nav>
+
+<script src="/lib/market-config.js"></script>
+<script src="/lib/contact-page.js" defer></script>
+<script src="/site-prefs.js"></script>
+<script src="/bottom-navigation.js"></script><script src="/site-header.js" defer></script>
+</body>
+</html>

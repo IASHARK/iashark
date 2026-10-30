@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title data-i18n="geo.meta.contact.title">Nous contacter — IASHARK</title>
+<meta name="robots" content="noindex, follow">
+<meta name="description" content="Une question, un souci pour payer ? Écris à IASHARK sur Telegram ou par le formulaire." data-i18n-attr="content:geo.meta.contact.description">
+<link rel="canonical" href="https://iashark.com/contact.html">
+<link rel="icon" href="/favicon-32x32.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/contact.css">
+<link rel="stylesheet" href="/assets/bottom-navigation.css">
+<script src="/i18n/i18n.js"></script>
+</head>
+<body class="ct-body">
+<header class="hdr"><a href="/" data-href="" class="logo"><img src="/assets/iashark-logo.png" alt="IASHARK" width="105" height="28"></a></header>
+
+<!-- Page Contact (30/10/2026). Le profil Telegram s'affiche « I A » sans photo :
+     la page porte elle-meme le nom et le logo IASHARK. Aucune adresse e-mail
+     affichee. Formulaire : table contact_messages (migration 0060), transmis a
+     Clement sur Telegram par scripts/telegram/alerte-contact.mjs. -->
+<main class="ct">
+  <h1 class="ct-h1" data-i18n="contact_page.title">Nous contacter</h1>
+  <p class="ct-lead" data-i18n="contact_page.lead">Une question, un souci pour payer ? On te répond.</p>
+
+  <section class="ct-tg" aria-labelledby="ctTgTitre">
+    <div class="ct-tg-id">
+      <img class="ct-tg-avatar" src="/icon-192.png" alt="" width="56" height="56">
+      <div>
+        <h2 class="ct-tg-nom" id="ctTgTitre">IASHARK</h2>
+        <p class="ct-tg-pseudo"><span data-i18n="contact_page.tg_handle">@IASHARK sur Telegram</span></p>
+      </div>
+    </div>
+    <a class="ct-tg-cta" href="https://t.me/IASHARK" target="_blank" rel="noopener" data-track="contact_page_telegram">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+      <span data-i18n="contact_page.tg_cta">Écrire sur Telegram</span>
+    </a>
+    <p class="ct-tg-note" data-i18n="contact_page.tg_note">Le plus rapide. Sur Telegram, notre profil peut s’afficher « I A » : c’est bien nous, réponse en message privé.</p>
+  </section>
+
+  <p class="ct-ou"><span data-i18n="contact_page.or">ou par message</span></p>
+
+  <form class="ct-form" id="ctForm" novalidate>
+    <div class="ct-champ">
+      <label for="ctEmail" data-i18n="contact_page.email_label">Ton e-mail</label>
+      <input id="ctEmail" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required aria-describedby="ctEmailAide">
+      <p class="ct-aide" id="ctEmailAide" data-i18n="contact_page.email_help">Seulement pour te répondre.</p>
+    </div>
+    <div class="ct-champ">
+      <label for="ctMessage" data-i18n="contact_page.message_label">Ton message</label>
+      <textarea id="ctMessage" name="message" rows="5" minlength="10" maxlength="2000" required></textarea>
+    </div>
+    <!-- Champ piege : invisible pour une personne, rempli par les robots. Jamais envoye. -->
+    <div class="ct-piege" aria-hidden="true">
+      <label for="ctSite">Site web</label>
+      <input id="ctSite" name="site" type="text" tabindex="-1" autocomplete="off">
+    </div>
+    <button class="ct-envoyer" id="ctEnvoyer" type="submit" data-track="contact_page_envoyer"><span data-i18n="contact_page.send">Envoyer le message</span></button>
+    <p class="ct-statut" id="ctStatut" role="status" aria-live="polite"></p>
+  </form>
+  <p class="ct-legal"><a href="/confidentialite.html" data-href="confidentialite.html" data-i18n="footer.confidentialite">Confidentialité</a></p>
+</main>
+
+<footer class="ct-foot"><span data-i18n="rg_footer.age_line">18+ · Interdit aux mineurs · Jouez responsable</span><br><span data-i18n="match_page.shell_help_label">Aide :</span> <a data-market-helpline="url" href="https://www.joueurs-info-service.fr">joueurs-info-service.fr</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">09 74 75 13 13</span></span></footer>
+
+<nav class="bottom-nav" aria-label="Navigation principale" data-i18n-attr="aria-label:geo.nav.aria_label"><a href="/"><span>⌂</span><b data-i18n="nav.home">Accueil</b></a><a href="/pro.html"><span>☆</span><b data-i18n="nav.tools">Outils</b></a><a href="/blog.html"><span>▤</span><b data-i18n="nav.guides">Blog</b></a><a href="/compte.html"><span>♙</span><b data-i18n="nav.account">Compte</b></a></nav>
+
+<script src="/lib/market-config.js"></script>
+<script src="/lib/contact-page.js" defer></script>
+<script src="/site-prefs.js"></script>
+<script src="/bottom-navigation.js"></script><script src="/site-header.js" defer></script>
+</body>
+</html>

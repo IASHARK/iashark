@@ -139,7 +139,8 @@ async function classer(sb: ReturnType<typeof createClient>, maintenant = new Dat
     if (enCours.has(u.id)) { ecartes.abonne_en_cours++; continue; }
     if (PLANS_MANUELS.includes(String(compte?.plan || "").toLowerCase())) { ecartes.plan_manuel++; continue; }
     if (aEuAbo.has(u.id)) { ecartes.ancien_abonne++; continue; }
-    if (recent.has(u.id)) { ecartes.email_moins_de_3_jours++; continue; }
+    // Regle des 3 jours levee pour cette campagne seulement : decision explicite de Clement (31/10).
+    void recent;
     liste.push({ id: u.id, email, segment: pref?.marketing_opt_in ? "accord" : "sans_accord", langue: lg });
   }
   return { liste, admins, tous, ecartes };

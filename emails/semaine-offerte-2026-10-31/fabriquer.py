@@ -32,9 +32,10 @@ PRO = "/{l}/pro.html"
 
 T = {
  "fr": {
+  "we_t": "Ce week-end, ça continue :", "we_n": "Nos paris sur ces matchs seront dans le Pro avant le coup d'envoi.", "we": [("Dimanche 17 h 30","Liverpool – Arsenal",40,42,""),("Dimanche 20 h 45","Juventus – Naples",496,492,""),("Dimanche 21 h","Athletic Bilbao – Real Sociedad",531,548,"le derby basque"),("Lundi 21 h","Newcastle – Everton",34,45,"")], "essai_c": "7 jours gratuits. Rien n'est prélevé pendant l'essai, tu annules en ligne quand tu veux.",
   "date": "Samedi 31 octobre",
-  "sujet": "Découvre la semaine Pro offerte : 7 jours pour tout voir",
-  "pre": "Vendredi en Ligue 1 : 2 paris sur 3 gagnés. Pendant 7 jours, tout l'espace Pro est à toi.",
+  "sujet": "Découvre la semaine Pro offerte",
+  "pre": "Liverpool – Arsenal, Juventus – Naples : nos paris seront dans le Pro avant le coup d'envoi.",
   "titre": "Découvre la semaine Pro offerte",
   "intro": "Bonjour, c'est Clément, le créateur d'IASHARK. Les paris Pro sont bien partis ces derniers jours : c'est le bon moment pour les voir de près, sans rien payer pendant 7 jours. Voici les derniers résultats, gagnés comme perdus.",
   "res_t": "Vendredi 30 octobre, Ligue 1",
@@ -45,9 +46,9 @@ T = {
   "mont_t": "Montante n°1",
   "mont": "Du 27 au 29 octobre : 3 victoires de suite, cote cumulée 2,78.",
   "mont_p": "La montante enchaîne chaque jour le premier pari de la Sélection en or : chaque pari gagné fait monter la cote cumulée.",
-  "liste_t": "Pendant 7 jours, tout est ouvert :",
+  "liste_t": "Dans le Pro :",
   "liste": ["tous les paris du jour ;", "la Sélection en or ;", "les buteurs du jour ;", "les combinés ;", "les montantes."],
-  "cta": "Découvrir la semaine Pro offerte",
+  "cta": "Activer ma semaine offerte",
   "essai_t": "Comment marche la semaine offerte",
   "essai": "7 jours gratuits sur l'abonnement au mois, pour un premier abonnement. Ta carte est demandée, mais rien n'est prélevé pendant l'essai. Tu annules quand tu veux, en ligne, depuis Mon compte. Sans annulation, le prix du mois affiché sur la page est prélevé à la fin de l'essai.",
   "tg_t": "La chaîne Telegram gratuite",
@@ -60,9 +61,10 @@ T = {
            "sans_accord": "Tu reçois ce message parce que tu as un compte IASHARK."},
  },
  "en": {
+  "we_t": "This weekend, it continues:", "we_n": "Our picks on these matches will be in Pro before kick-off.", "we": [("Sunday 5:30 pm","Liverpool vs Arsenal",40,42,""),("Sunday 8:45 pm","Juventus vs Napoli",496,492,""),("Sunday 9 pm","Athletic Bilbao vs Real Sociedad",531,548,"the Basque derby"),("Monday 9 pm","Newcastle vs Everton",34,45,"")], "essai_c": "7 days free. Nothing is charged during the trial, cancel online whenever you want.",
   "date": "Saturday 31 October",
-  "sujet": "Discover the free Pro week: 7 days to see everything",
-  "pre": "Friday in Ligue 1: 2 picks out of 3 won. For 7 days, the whole Pro space is yours.",
+  "sujet": "Discover the free Pro week",
+  "pre": "Liverpool vs Arsenal, Juventus vs Napoli: our picks will be in Pro before kick-off.",
   "titre": "Discover the free Pro week",
   "intro": "Hi, it's Clément, the founder of IASHARK. Our Pro picks have had a good run these last few days: it is the right time to see them up close, without paying anything for 7 days. Here are the latest results, won and lost.",
   "res_t": "Friday 30 October, Ligue 1",
@@ -73,9 +75,9 @@ T = {
   "mont_t": "Ladder no. 1",
   "mont": "From 27 to 29 October: 3 wins in a row, combined odds 2.78.",
   "mont_p": "The ladder follows the first pick of the Gold Selection every day: each winning pick raises the combined odds.",
-  "liste_t": "For 7 days, everything is open:",
+  "liste_t": "In Pro:",
   "liste": ["every pick of the day;", "the Gold Selection;", "the scorers of the day;", "the combos;", "the ladders."],
-  "cta": "Discover the free Pro week",
+  "cta": "Activate my free week",
   "essai_t": "How the free week works",
   "essai": "7 days free on the monthly plan, for a first subscription. Your card is requested, but nothing is charged during the trial. Cancel anytime, online, from your account. If you do not cancel, the monthly price shown on the page is charged when the trial ends.",
   "tg_t": "The free Telegram channel",
@@ -88,9 +90,10 @@ T = {
            "sans_accord": "You are receiving this message because you have an IASHARK account."},
  },
  "es": {
+  "we_t": "Este fin de semana, sigue:", "we_n": "Nuestras apuestas en estos partidos estarán en el Pro antes del inicio.", "we": [("Domingo 17:30","Liverpool – Arsenal",40,42,""),("Domingo 20:45","Juventus – Nápoles",496,492,""),("Domingo 21:00","Athletic Club – Real Sociedad",531,548,"el derbi vasco"),("Lunes 21:00","Newcastle – Everton",34,45,"")], "essai_c": "7 días gratis. No se cobra nada durante la prueba, cancelas en línea cuando quieras.",
   "date": "Sábado 31 de octubre",
-  "sujet": "Descubre la semana Pro gratis: 7 días para verlo todo",
-  "pre": "El viernes en la Ligue 1: 2 apuestas de 3 ganadas. Durante 7 días, todo el espacio Pro es tuyo.",
+  "sujet": "Descubre la semana Pro gratis",
+  "pre": "Liverpool – Arsenal, Juventus – Nápoles: nuestras apuestas estarán en el Pro antes del inicio.",
   "titre": "Descubre la semana Pro gratis",
   "intro": "Hola, soy Clément, el creador de IASHARK. Las apuestas Pro van bien estos últimos días: es el momento de verlas de cerca, sin pagar nada durante 7 días. Estos son los últimos resultados, ganados y perdidos.",
   "res_t": "Viernes 30 de octubre, Ligue 1",
@@ -101,9 +104,9 @@ T = {
   "mont_t": "Escalera n.º 1",
   "mont": "Del 27 al 29 de octubre: 3 victorias seguidas, cuota acumulada 2,78.",
   "mont_p": "La escalera sigue cada día la primera apuesta de la Selección de oro: cada apuesta ganada sube la cuota acumulada.",
-  "liste_t": "Durante 7 días, todo está abierto:",
+  "liste_t": "En el Pro:",
   "liste": ["todas las apuestas del día;", "la Selección de oro;", "los goleadores del día;", "las combinadas;", "las escaleras."],
-  "cta": "Descubrir la semana Pro gratis",
+  "cta": "Activar mi semana gratis",
   "essai_t": "Cómo funciona la semana gratis",
   "essai": "7 días gratis en la suscripción mensual, para una primera suscripción. Se pide tu tarjeta, pero no se cobra nada durante la prueba. Cancelas cuando quieras, en línea, desde tu cuenta. Si no cancelas, el precio mensual que aparece en la página se cobra al final de la prueba.",
   "tg_t": "El canal de Telegram gratuito",
@@ -125,8 +128,7 @@ ICONES = SITE + "/assets/emails/icones"
 RESEAUX = [("youtube", "YouTube", "@IASHARK", "https://www.youtube.com/@IASHARK"),
            ("x", "X", "@IASHARK1", "https://x.com/IASHARK1"),
            ("instagram", "Instagram", "@IASHARK", "https://www.instagram.com/iashark/"),
-           ("tiktok", "TikTok", "@iashark_data", "https://www.tiktok.com/@iashark_data"),
-           ("tiktok", "TikTok", "@iasharkdata", "https://www.tiktok.com/@iasharkdata")]
+           ("tiktok", "TikTok", "@iashark_data", "https://www.tiktok.com/@iashark_data")]
 
 
 def reseaux():
@@ -181,6 +183,19 @@ def resultats(t):
             f'</td></tr></table>')
 
 
+def weekend(t):
+    L = "https://media.api-sports.io/football/teams/{}.png"
+    rows = ""
+    for q, m, a, b, n in t["we"]:
+        sous = f'<br><span style="font-size:12px;font-weight:400;color:{C["gris"]};">{html.escape(n)}</span>' if n else ""
+        rows += (f'<tr><td style="padding:10px 0;border-top:1px solid {C["bord"]};"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>'
+                 f'<td style="font-family:{POLICE};font-size:13px;color:{C["gris"]};width:120px;">{html.escape(q)}</td>'
+                 f'<td style="width:30px;"><img src="{L.format(a)}" width="24" height="24" alt="" style="display:block;border:0;"></td>'
+                 f'<td style="font-family:{POLICE};font-size:15px;font-weight:700;color:{C["blanc"]};">{html.escape(m)}{sous}</td>'
+                 f'<td style="width:30px;" align="right"><img src="{L.format(b)}" width="24" height="24" alt="" style="display:block;border:0;"></td></tr></table></td></tr>')
+    return f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">{rows}</table>'
+
+
 def rendre(seg, l, desinscr):
     t = T[l]
     lien = lambda p: f"{SITE}{p}{'&' if '?' in p else '?'}{UTM}"
@@ -201,15 +216,14 @@ def rendre(seg, l, desinscr):
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
 <tr><td class="pad" style="padding:32px 32px 6px;">
 <h1 class="h1" style="margin:0 0 16px;font-family:{POLICE};font-size:30px;line-height:1.2;font-weight:800;color:{C["blanc"]};">{html.escape(t["titre"])}</h1>
-<p style="margin:0 0 20px;font-family:{POLICE};font-size:16px;line-height:1.6;color:{C["gris2"]};">{html.escape(t["intro"])}</p>
-{resultats(t)}</td></tr>
+<p style="margin:8px 0 10px;font-family:{POLICE};font-size:18px;font-weight:800;color:{C["blanc"]};">{html.escape(t["we_t"])}</p>
+{weekend(t)}
+<p style="margin:12px 0 0;font-family:{POLICE};font-size:15px;line-height:1.6;color:{C["gris2"]};">{html.escape(t["we_n"])}</p></td></tr>
 <tr><td class="pad" style="padding:24px 32px 6px;">
 <p style="margin:0 0 10px;font-family:{POLICE};font-size:17px;font-weight:700;color:{C["blanc"]};">{html.escape(t["liste_t"])}</p>
 {puces(t["liste"])}</td></tr>
 <tr><td class="pad" style="padding:8px 32px 26px;">{bouton(t["cta"], pro)}</td></tr>
-<tr><td class="pad" style="padding:0 32px 28px;">
-<p style="margin:0 0 6px;font-family:{POLICE};font-size:14px;font-weight:700;color:{C["gris2"]};">{html.escape(t["essai_t"])}</p>
-<p style="margin:0;font-family:{POLICE};font-size:14px;line-height:1.6;color:{C["gris"]};">{html.escape(t["essai"])}</p></td></tr>
+<tr><td class="pad" style="padding:0 32px 28px;"><p style="margin:0;font-family:{POLICE};font-size:14px;line-height:1.6;color:{C["gris"]};">{html.escape(t["essai_c"])}</p></td></tr>
 <tr><td class="pad" style="padding:0 32px 28px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid {C["bord"]};"><tr><td style="padding-top:22px;">
 <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding-right:14px;vertical-align:top;"><a href="{TG}" target="_blank"><img src="{ICONES}/telegram.png" width="40" height="40" alt="Telegram" style="display:block;border:0;"></a></td>
 <td style="vertical-align:top;"><p style="margin:0 0 4px;font-family:{POLICE};font-size:16px;font-weight:700;line-height:1.3;color:{C["blanc"]};">{t["tg_t"]}</p>
@@ -249,9 +263,7 @@ INTERDITS = [r"garanti", r"guarant", r"\bsûrs?\b", r"safe bet", r"seguro", r"\b
              r"derni[eè]re chance", r"last chance", r"[uú]ltima oportunidad", r"\bvite\b", r"hurry", r"date limite"]
 EMOJI = re.compile("[\U0001F300-\U0001FAFF☀-➿]")
 # Les seuls chiffres de resultats autorises (verifies, voir l'en-tete).
-ATTENDUS = {"fr": ["1,70", "1,40", "1,44", "1-5", "1-0", "5-2", "2 sur 3", "2,78"],
-            "en": ["1.70", "1.40", "1.44", "1-5", "1-0", "5-2", "2 out of 3", "2.78"],
-            "es": ["1,70", "1,40", "1,44", "1-5", "1-0", "5-2", "2 de 3", "2,78"]}
+ATTENDUS = {"fr": ["Liverpool", "Juventus", "Real Sociedad", "Everton"], "en": ["Liverpool", "Juventus", "Real Sociedad", "Everton"], "es": ["Liverpool", "Juventus", "Real Sociedad", "Everton"]}
 
 paquet = {}
 for seg in SEGMENTS:

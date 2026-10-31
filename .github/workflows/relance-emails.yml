@@ -3,12 +3,11 @@
 #   suivi : ce que Brevo a fait des e-mails de la campagne (sans adresse)
 #   test  : tous les e-mails aux seuls comptes administrateurs (objet [TEST])
 #   envoi : l'envoi reel, une fois par personne (phrase « ENVOYER LA RELANCE »)
-# Envoi AUTOMATIQUE (demande de Clement) : mercredi 28/10/2026 a 11 h, heure de Paris (10:00 UTC,
-# heure d'hiver). Declencheur principal : la tache pg_cron « relance-2026-10-28 » de la base
-# (migration 0057), a l'heure exacte. Les taches planifiees GitHub de ce depot partent avec 3 a 6 h de
-# retard : celles ci-dessous ne sont qu'un secours (la fonction refuse apres 15:00 UTC). Chaque
-# personne n'est servie qu'une fois (email_reserve_send), rien ne part deux fois. Un autre jour (le
-# declencheur revient chaque annee), rien n'est fait : garde de date ici ET dans la fonction.
+# Campagne en cours : « semaine Pro offerte », samedi 31/10/2026 a 9 h, heure de Paris (08:00 UTC).
+# Declencheur unique de l'envoi automatique : la tache pg_cron « semaine-offerte-2026-10-31 » de la base
+# (migration 0061), posee seulement apres la validation de l'apercu par Clement. Plus de declencheur
+# planifie GitHub ici : ces taches partent avec 3 a 6 h de retard, et la fusion seule ne doit rien
+# envoyer. Chaque personne n'est servie qu'une fois (email_reserve_send), rien ne part deux fois.
 # A la fusion sur main (push), la fonction est reinstallee depuis main et le mode etat s'affiche :
 # la version appelee par pg_cron est donc toujours celle de main.
 name: Relance e-mails
@@ -18,9 +17,6 @@ on:
     paths:
       - "supabase/functions/relance-emails/**"
       - ".github/workflows/relance-emails.yml"
-  schedule:
-    - cron: "0 10 28 10 *"
-    - cron: "20 10 28 10 *"
   workflow_dispatch:
     inputs:
       mode:
@@ -53,8 +49,8 @@ jobs:
         env:
           EVENEMENT: ${{ github.event_name }}
         run: |
-          if [ "$EVENEMENT" = "schedule" ] && [ "$(date -u +%F)" != "2026-10-28" ]; then
-            echo "Envoi automatique prevu le 2026-10-28 seulement (aujourd'hui $(date -u +%F)) : rien n'est fait."
+          if [ "$EVENEMENT" = "schedule" ] && [ "$(date -u +%F)" != "2026-10-31" ]; then
+            echo "Envoi automatique prevu le 2026-10-31 seulement (aujourd'hui $(date -u +%F)) : rien n'est fait."
             echo "go=false" >> "$GITHUB_OUTPUT"
           else
             echo "go=true" >> "$GITHUB_OUTPUT"
@@ -64,7 +60,7 @@ jobs:
       # La fonction est installee depuis ce depot a chaque lancement (meme version que le test).
       # Jusqu'a 3 essais : le 28/10 a 05:37 UTC, l'assemblage chez Supabase a echoue une fois sur un
       # telechargement trop lent (jsr.io). En envoi automatique, un echec ici n'arrete pas tout : l'etape
-      # suivante verifie d'abord que la version en ligne est bien celle du 28/10 (sinon rien ne part).
+      # suivante verifie d'abord que la version en ligne est bien celle de la campagne (sinon rien ne part).
       - name: Installation de la fonction
         id: installation
         if: steps.garde.outputs.go == 'true'
@@ -119,12 +115,12 @@ jobs:
               -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H "x-relance-secret: $RELANCE_SECRET" -H "x-region: us-east-2" -H "Content-Type: application/json" --max-time 600 -d "$1"
           }
           if [ "$PLANIFIE" = true ]; then
-            # Avant l'envoi automatique : la fonction en ligne doit etre celle de la campagne du 28/10.
+            # Avant l'envoi automatique : la fonction en ligne doit etre celle de la campagne du 31/10.
             code=$(appel '{"mode":"etat"}')
             cle=$(jq -r '.cle // empty' reponse.json 2>/dev/null || true)
             echo "Verification : HTTP $code, campagne en ligne : ${cle:-inconnue}"
-            if [ "$code" != "200" ] || [ "$cle" != "2026-10-28" ]; then
-              echo "::error::La fonction en ligne n'est pas celle du 28/10 : rien n'est envoye."; exit 1
+            if [ "$code" != "200" ] || [ "$cle" != "semaine-offerte-31-10" ]; then
+              echo "::error::La fonction en ligne n'est pas celle du 31/10 : rien n'est envoye."; exit 1
             fi
           fi
           corps=$(jq -nc --arg m "$MODE" --arg c "$CONFIRMATION" --arg x "$EXCLURE" --argjson p "$PLANIFIE" --arg b "$GITHUB_REF_NAME" '{mode:$m, confirmation:$c, exclure:$x, planifie:$p, branche:$b}')

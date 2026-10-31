@@ -121,10 +121,13 @@ test("pages profondes : aucune redirection selon le pays, la langue ou un cookie
   });
   // Aucune redirection conditionnelle declaree dans netlify.toml non plus.
   assert.doesNotMatch(read("netlify.toml"), /conditions\s*=\s*\{[^}]*(Country|Language|Cookie)/);
-  // Cote navigateur : ni i18n.js ni le bandeau ne changent de page d'eux-memes.
-  ["i18n/i18n.js", "lib/lang-suggest.js"].forEach((f) => {
-    assert.doesNotMatch(read(f), /location\.(href\s*=[^=]|replace\(|assign\()|location\s*=[^=]/, f);
-  });
+  // Cote navigateur : le bandeau ne change jamais de page de lui-meme ; i18n.js
+  // une seule fois, a la page d'arrivee (autoLangRedirect, tests/lang-landing.test.js).
+  assert.doesNotMatch(read("lib/lang-suggest.js"), /location\.(href\s*=[^=]|replace\(|assign\()|location\s*=[^=]/);
+  const i18nSrc = read("i18n/i18n.js");
+  assert.doesNotMatch(i18nSrc, /location\.(href\s*=[^=]|assign\()|location\s*=[^=]/);
+  assert.equal((i18nSrc.match(/\.replace\(d\.href\)/g) || []).length, 1);
+  assert.equal((i18nSrc.match(/loc\.replace\(/g) || []).length, 1);
 });
 
 // i18n/i18n.js dans un bac a sable, avec document.cookie observable.

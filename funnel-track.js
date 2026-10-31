@@ -64,6 +64,9 @@
 // explicite (site-prefs.js).
 (function () {
   if (window.__iasharkTrackLoaded) return;
+  // Page quittee aussitot par la redirection de langue de la page d'arrivee
+  // (i18n/i18n.js) : la visite est comptee sur la page de destination.
+  if (window.__iasharkLangRedirecting) return;
   window.__iasharkTrackLoaded = true;
 
   var SUPA_URL = "https://ksvjraqitxouwiabecai.supabase.co";
@@ -666,6 +669,14 @@
     var refHost = "";
     try { refHost = document.referrer ? new URL(document.referrer).hostname : ""; } catch (e) {}
     var externalRef = refHost && !PROD_HOSTS[refHost] ? refHost : null;
+    // Redirection automatique de langue (i18n/i18n.js) : le referent visible
+    // est la page d'origine du site ; on garde le vrai referent externe.
+    var langAuto = null;
+    try { langAuto = JSON.parse(sessionStorage.getItem("iashark_lang_auto") || "null"); } catch (e) { langAuto = null; }
+    var firstView = false;
+    try { firstView = !sessionStorage.getItem("iashark_visit_pages"); } catch (e) {}
+    if (!firstView) langAuto = null;
+    if (langAuto && !externalRef && typeof langAuto.ref === "string" && langAuto.ref && !PROD_HOSTS[langAuto.ref]) externalRef = langAuto.ref;
 
     var seq = null;
     try {
@@ -693,6 +704,7 @@
       os: osName(),
       screen_w: screenW,
       lang: clip(nav.language, 16),
+      lang_auto_from: langAuto && langAuto.from ? clip(langAuto.from, 4) : null,
       tz: clip(tz, 48),
       country_guess: tzCountry(tz),
       match_id: matchIdFromPath(loc.pathname, params),

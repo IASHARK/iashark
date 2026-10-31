@@ -282,6 +282,194 @@
     }catch(e){}
   }
 
+  // ---------------------------------------------------------------------------
+  // Langue de la PAGE D'ARRIVEE (31/10/2026). Mesure sur 14 jours : des
+  // visiteurs arrivaient par un lien /fr/... partage (X, Telegram) avec un
+  // telephone en anglais, turc, portugais... et lisaient une langue qu'ils ne
+  // comprennent pas (et inversement des telephones francais sur /en/).
+  // Regle : a la PREMIERE page d'une visite seulement, si le visiteur n'a
+  // jamais choisi de version et que la langue de son telephone n'est pas celle
+  // de la page, il est envoye sur la MEME page dans sa langue (parametres
+  // d'URL et ancre gardes). Un petit lien « Lire en français » (langue
+  // d'origine) permet de revenir et memorise ce choix.
+  // Jamais : pour un robot (les pages traduites restent indexables telles
+  // quelles, hreflang inchange), apres un choix (selecteur, bandeau, cookies
+  // nf_*), en cours de navigation, sans sessionStorage (impossible d'eviter
+  // une boucle), sur connexion / inscription / compte / paiement, ni si la
+  // page n'existe pas dans la langue cible.
+  // decideLandingRedirect(env) est pure (tests/lang-landing.test.js).
+  var AUTO_KEY = "iashark_lang_auto";          // sessionStorage : redirection faite (origine, cible, retour)
+  var LANDING_KEY = "iashark_lang_landing";    // sessionStorage : visite commencee (page d'arrivee vue)
+  var AUTO_SKIP_RE = /\/(connexion|inscription|mot-de-passe-oublie|reinitialiser-mot-de-passe|compte|abonnement|checkout-annule|checkout-succes|desinscription-email|404)\.html$/;
+  var AUTO_BOT_RE = /bot\/|bot-|bot;|telegrambot|crawl|spider|slurp|mediapartners|facebookexternalhit|facebookcatalog|embedly|pinterest|preview|lighthouse|pagespeed|headless|phantomjs|prerender|gtmetrix|google-inspectiontool|yandex|baiduspider|bytespider|petalbot|ahrefs|semrush|mj12|dotbot/i;
+  // Fuseaux du Mexique (offre MXN de /mx/) ; Royaume-Uni (/gb/) ; Afrique du Sud (/za/).
+  var MX_TZ_RE = /^America\/(Mexico_City|Cancun|Merida|Monterrey|Matamoros|Chihuahua|Ciudad_Juarez|Ojinaga|Mazatlan|Bahia_Banderas|Hermosillo|Tijuana)$/;
+  function baseLang(tag){ return String(tag || "").toLowerCase().split(/[-_]/)[0]; }
+  function dirLang(dir){ return isDir(dir) ? baseLang(DIR_BY_CODE[dir].locale) : ""; }
+
+  // Langue du telephone (+ fuseau horaire) -> version du site.
+  // fr -> fr ; es -> es (mx au Mexique) ; en et TOUTE autre langue (arabe,
+  // turc, portugais, allemand...) -> anglais (gb au Royaume-Uni, za en
+  // Afrique du Sud). Aucune langue connue -> "" (rien ne change).
+  function autoTargetDir(lang, timeZone){
+    var b = baseLang(lang);
+    if (!b || !/^[a-z]{2,3}$/.test(b)) return "";
+    var tz = String(timeZone || "");
+    if (b === "fr") return "fr";
+    if (b === "es") return MX_TZ_RE.test(tz) ? "mx" : "es";
+    if (tz === "Europe/London") return "gb";
+    if (tz === "Africa/Johannesburg") return "za";
+    return "en";
+  }
+
+  // Repertoire de la page pour cette regle : page prefixee, accueil "/" (sert
+  // l'accueil francais) et pages match statiques /match/<id>.html (francais).
+  function landingPageDir(pathname){
+    var p = String(pathname || "/");
+    var d = pathDir(p);
+    if (d) return d;
+    if (p === "/" || /^\/match\/\d+\.html$/.test(p)) return "fr";
+    return "";
+  }
+
+  // env : { pathname, search, hash, languages, timeZone, userAgent, webdriver,
+  //   sessionOk, visitStarted, referrerHost, host, chosen, choiceCookie,
+  //   alternates: {hreflang minuscule: chemin} }
+  // -> { redirect:false, reason } | { redirect:true, from, to, href }
+  function decideLandingRedirect(env){
+    env = env || {};
+    var pathname = String(env.pathname || "/");
+    var from = landingPageDir(pathname);
+    if (!from) return {redirect:false, reason:"no-page-dir"};
+    if (AUTO_SKIP_RE.test(pathname)) return {redirect:false, reason:"skip-page"};
+    if (env.webdriver || AUTO_BOT_RE.test(String(env.userAgent || ""))) return {redirect:false, reason:"bot"};
+    if (!env.sessionOk) return {redirect:false, reason:"no-session"};
+    if (env.visitStarted) return {redirect:false, reason:"not-landing"};
+    if (env.referrerHost && env.host && env.referrerHost === env.host) return {redirect:false, reason:"internal"};
+    if (env.chosen || env.choiceCookie) return {redirect:false, reason:"chosen"};
+    var langs = env.languages || [];
+    var to = autoTargetDir(langs[0], env.timeZone);
+    if (!to) return {redirect:false, reason:"no-language"};
+    if (dirLang(to) === dirLang(from)) return {redirect:false, reason:"same-language"};
+
+    var search = String(env.search || ""), hash = String(env.hash || "");
+    var path;
+    var staticMatch = pathname.match(/^\/match\/(\d+)\.html$/);
+    if (staticMatch) {
+      // /match/<id>.html -> /<dir>/match.html?id=<id> + les autres parametres.
+      var rest = search.replace(/^\?/, "").split("&").filter(function(kv){ return kv && !/^id=/.test(kv); });
+      path = "/" + to + "/match.html";
+      search = "?id=" + staticMatch[1] + (rest.length ? "&" + rest.join("&") : "");
+    } else {
+      var m = pathname.match(DIR_PREFIX_RE);
+      var bare = ((m && isDir(m[1])) ? (m[2] || "/") : pathname).replace(/^\/+/, "");
+      if (bare !== "" && !hasOwn.call(LOCALIZED_PAGES, bare)) return {redirect:false, reason:"no-equivalent"};
+      path = hrefFor(bare, to);
+    }
+    // Liens hreflang de la page (source de verite du build) : si la page en
+    // declare, la version cible doit y figurer.
+    var alts = env.alternates || {};
+    if (Object.keys(alts).length && !hasOwn.call(alts, String(DIR_BY_CODE[to].htmlLang).toLowerCase())) {
+      return {redirect:false, reason:"no-equivalent"};
+    }
+    if (path === pathname) return {redirect:false, reason:"same-page"};
+    return {redirect:true, from:from, to:to, href: path + search + hash};
+  }
+
+  function readAlternates(doc){
+    var out = {};
+    try{
+      var links = doc.querySelectorAll('link[rel="alternate"][hreflang]');
+      for (var i = 0; i < links.length; i++) {
+        var hl = String(links[i].getAttribute("hreflang") || "").toLowerCase();
+        if (hl && hl !== "x-default" && links[i].getAttribute("href")) out[hl] = links[i].getAttribute("href");
+      }
+    }catch(e){}
+    return out;
+  }
+
+  function autoLangRedirect(){
+    try{
+      var doc = global.document, loc = global.location, nav = global.navigator || {};
+      if (!doc || !loc || !loc.pathname) return;
+      var ss = null, visitStarted = false;
+      try{
+        ss = global.sessionStorage;
+        visitStarted = !!(ss.getItem(LANDING_KEY) || ss.getItem(AUTO_KEY) || ss.getItem("iashark_visit_pages"));
+        ss.setItem(LANDING_KEY, "1");
+      }catch(e){ ss = null; }
+      var refHost = "";
+      try{ refHost = doc.referrer ? new global.URL(doc.referrer).hostname : ""; }catch(e){}
+      var chosen = "";
+      try{ chosen = global.localStorage.getItem(CHOSEN_KEY) || ""; }catch(e){}
+      var tz = "";
+      try{ tz = global.Intl.DateTimeFormat().resolvedOptions().timeZone || ""; }catch(e){}
+      var langs = [];
+      try{ langs = nav.languages && nav.languages.length ? Array.prototype.slice.call(nav.languages) : [nav.language]; }catch(e){}
+      var d = decideLandingRedirect({
+        pathname: loc.pathname, search: loc.search, hash: loc.hash,
+        languages: langs, timeZone: tz, userAgent: nav.userAgent, webdriver: !!nav.webdriver,
+        sessionOk: !!ss, visitStarted: visitStarted, referrerHost: refHost, host: loc.hostname,
+        chosen: !!chosen, choiceCookie: /(?:^|;\s*)nf_(?:country|lang)=/.test(String(doc.cookie || "")),
+        alternates: readAlternates(doc)
+      });
+      if (!d.redirect) return;
+      ss.setItem(AUTO_KEY, JSON.stringify({
+        from: d.from, to: d.to, back: loc.pathname + (loc.search || "") + (loc.hash || ""),
+        ref: refHost && refHost !== loc.hostname ? refHost : ""
+      }));
+      global.__iasharkLangRedirecting = true;
+      loc.replace(d.href);
+    }catch(e){}
+  }
+
+  // Lien discret de retour vers la langue d'origine, sur la page d'arrivee
+  // apres une redirection automatique. Au clic : choix memorise (selecteur).
+  var BACK_TEXT = {
+    fr: {lang:"fr", label:"Lire en français", close:"Fermer"},
+    en: {lang:"en", label:"Read in English", close:"Close"},
+    es: {lang:"es", label:"Leer en español", close:"Cerrar"}
+  };
+  function mountBackLink(){
+    try{
+      var doc = global.document, ss = global.sessionStorage;
+      var info = JSON.parse(ss.getItem(AUTO_KEY) || "null");
+      if (!info || info.shown || !isDir(info.from) || info.to !== CURRENT_DIR || !doc.body) return;
+      if (typeof info.back !== "string" || !/^\/(?!\/)/.test(info.back)) return;
+      info.shown = 1;
+      ss.setItem(AUTO_KEY, JSON.stringify(info));
+      var t = BACK_TEXT[dirLang(info.from)] || BACK_TEXT.fr;
+      if (!doc.getElementById("iasharkLangBackCss")) {
+        var st = doc.createElement("style");
+        st.id = "iasharkLangBackCss";
+        st.textContent =
+          ".ias-lang-back{position:fixed;left:12px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:1001;display:flex;align-items:center;gap:2px;" +
+          "padding:2px 2px 2px 12px;border:1px solid rgba(148,163,184,.28);border-radius:999px;background:rgba(10,18,28,.94);" +
+          "box-shadow:0 6px 18px rgba(0,0,0,.35);font:13px/1.3 'DM Sans','Inter',system-ui,-apple-system,'Segoe UI',sans-serif}" +
+          ".ias-lang-back--nav{bottom:calc(96px + env(safe-area-inset-bottom))}" +
+          "@media(max-width:700px){.ias-lang-back--nav{bottom:calc(84px + env(safe-area-inset-bottom))}}" +
+          ".ias-lang-back a{color:#67e8f9;text-decoration:underline;text-underline-offset:2px;padding:6px 2px}" +
+          ".ias-lang-back button{width:32px;height:32px;border:0;border-radius:999px;background:transparent;color:#8fa3b8;font-size:18px;line-height:1;cursor:pointer}" +
+          ".ias-lang-back button:hover{color:#e2e8f0}" +
+          ".ias-lang-back a:focus-visible,.ias-lang-back button:focus-visible{outline:2px solid #22d3ee;outline-offset:2px}" +
+          "@media print{.ias-lang-back{display:none}}";
+        (doc.head || doc.documentElement).appendChild(st);
+      }
+      var el = doc.createElement("div");
+      el.id = "iasharkLangBack";
+      el.className = "ias-lang-back" + (doc.querySelector(".site-bottom-nav") ? " ias-lang-back--nav" : "");
+      el.setAttribute("lang", t.lang);
+      el.innerHTML = '<a href="' + escHtml(info.back) + '" hreflang="' + t.lang + '">' + escHtml(t.label) + "</a>" +
+        '<button type="button" aria-label="' + t.close + '" title="' + t.close + '"><span aria-hidden="true">×</span></button>';
+      el.querySelector("a").addEventListener("click", function(){ try{ I18N.rememberChoice(info.from); }catch(e){} });
+      el.querySelector("button").addEventListener("click", function(){ if (el.parentNode) el.parentNode.removeChild(el); });
+      doc.body.appendChild(el);
+      // La barre du bas (bottom-navigation.js) peut apparaitre apres : on remonte le lien au-dessus.
+      var lift = function(){ try{ if (doc.querySelector(".site-bottom-nav")) el.className = "ias-lang-back ias-lang-back--nav"; }catch(e){} };
+      if (typeof global.setTimeout === "function") { global.setTimeout(lift, 300); global.setTimeout(lift, 1500); }
+    }catch(e){}
+  }
+
   var I18N = {
     locale: LOCALE,
     supported: SUPPORTED,
@@ -349,6 +537,9 @@
     // bandeau) et pre-filtre gratuit (langHintWanted, plus haut).
     hintPageDir: function(){ return hintPageDir(); },
     langHintWanted: function(){ return langHintWanted(); },
+    // Langue de la page d'arrivee (tests/lang-landing.test.js).
+    decideLandingRedirect: decideLandingRedirect,
+    autoTargetDir: autoTargetDir,
 
     t: function(key, fallback){
       var v = this.dict ? get(this.dict, key) : null;
@@ -451,6 +642,20 @@
   };
 
   global.I18N = I18N;
+
+  // Page d'arrivee : redirection eventuelle vers la langue du telephone (une
+  // seule fois par script), puis lien de retour apres une redirection.
+  if (!global.__iasharkLangLanding) {
+    global.__iasharkLangLanding = true;
+    autoLangRedirect();
+    if (!global.__iasharkLangRedirecting) {
+      try{
+        var doc0 = global.document;
+        if (doc0 && doc0.body) mountBackLink();
+        else if (doc0 && typeof doc0.addEventListener === "function") doc0.addEventListener("DOMContentLoaded", mountBackLink);
+      }catch(e){}
+    }
+  }
 
   // Bandeau de suggestion : apres le chargement complet de la page (+1,2 s),
   // jamais pendant le premier affichage. Une seule planification meme si ce

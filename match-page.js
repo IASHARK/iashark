@@ -1612,6 +1612,14 @@ async function init(){
     // Compte gratuit sur le match offert : toutes les sections, panneau Marches flou
     // (cadenas Pro sur le panneau seulement). Match termine : aucun panneau (plus rien a jouer).
     render(raw,{vuePro,verrouPro:!vuePro&&isFree&&!termine,panneau:termine?false:undefined});
+    // Compte gratuit qui ouvre l'analyse du match offert (31/10/2026) : la fenetre
+    // d'essai (lib/contact-essai.js) s'affiche ici, en grand, avec le nom du match.
+    if(isFree&&!termine&&!vuePro&&ctx.session){
+      try{
+        window.__iasharkMatchOffertOuvert={home:String(raw.home||''),away:String(raw.away||'')};
+        document.dispatchEvent(new CustomEvent('iashark:match-offert-ouvert',{detail:window.__iasharkMatchOffertOuvert}));
+      }catch(e){}
+    }
   }catch(e){
     root.innerHTML=`<div class="match-error"><b>${esc(e.message||t('match_page.generic_load_error','Erreur de chargement'))}</b><a href="${esc(lien(''))}">${esc(t('match_page.back_to_home','Retour à l\'accueil'))}</a></div>`;
   }

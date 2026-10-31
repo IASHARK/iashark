@@ -1,10 +1,10 @@
 {
  "version": 1,
- "genere_le": "2026-10-30T07:15:05.971Z",
- "jour": "2026-10-30",
+ "genere_le": "2026-10-31T07:14:35.996Z",
+ "jour": "2026-10-31",
  "debut": "2026-10-06",
  "objectif": 10,
- "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-10-30. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
+ "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-10-31. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
  "montantes": [
   {
    "rang": 1,
@@ -41,10 +41,21 @@
      "c": 1.4,
      "r": "gagne",
      "cc": 2.78
+    },
+    {
+     "j": "2026-10-30",
+     "f": 1494789,
+     "h": "Bodo/Glimt",
+     "a": "Viking",
+     "m": "btts-yes",
+     "p": "Les deux équipes marquent",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 3.9
     }
    ],
-   "gagnes": 3,
-   "cote": 2.78,
+   "gagnes": 4,
+   "cote": 3.9,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
@@ -174,10 +185,21 @@
      "c": 1.4,
      "r": "gagne",
      "cc": 2.78
+    },
+    {
+     "j": "2026-10-30",
+     "f": 1494789,
+     "h": "Bodo/Glimt",
+     "a": "Viking",
+     "m": "btts-yes",
+     "p": "Les deux équipes marquent",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 3.9
     }
    ],
    "bilan": {
-    "gagnes": 8,
+    "gagnes": 9,
     "perdus": 2,
     "annules": 0,
     "non_regles": 0,
@@ -186,31 +208,19 @@
   },
   {
    "rang": 2,
-   "paliers": [
-    {
-     "j": "2026-10-29",
-     "f": 1644356,
-     "h": "Guijuelo",
-     "a": "Sporting Gijon",
-     "m": "away-win",
-     "p": "Victoire Sporting Gijon",
-     "c": 1.41,
-     "r": "gagne",
-     "cc": 1.41
-    }
-   ],
-   "gagnes": 1,
-   "cote": 1.41,
+   "paliers": [],
+   "gagnes": 0,
+   "cote": null,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
     "t": "perdu",
-    "j": "2026-10-28",
-    "n": 0,
-    "h": "Degerfors IF",
-    "a": "Vasteras SK FK",
-    "p": "Degerfors IF ou match nul",
-    "k": 1.4
+    "j": "2026-10-30",
+    "n": 1,
+    "h": "Villarreal",
+    "a": "Espanyol",
+    "p": "Victoire Villarreal",
+    "k": 1.41
    },
    "objectifs": [
     {
@@ -330,11 +340,22 @@
      "c": 1.41,
      "r": "gagne",
      "cc": 1.41
+    },
+    {
+     "j": "2026-10-30",
+     "f": 1570442,
+     "h": "Villarreal",
+     "a": "Espanyol",
+     "m": "home-win",
+     "p": "Victoire Villarreal",
+     "c": 1.41,
+     "r": "perdu",
+     "cc": null
     }
    ],
    "bilan": {
     "gagnes": 8,
-    "perdus": 2,
+    "perdus": 3,
     "annules": 0,
     "non_regles": 0,
     "objectifs": 1
@@ -364,10 +385,21 @@
      "c": 1.44,
      "r": "gagne",
      "cc": 1.44
+    },
+    {
+     "j": "2026-10-30",
+     "f": 1493218,
+     "h": "Estudiantes de Rio Cuarto",
+     "a": "Gimnasia L.P.",
+     "m": "over-15",
+     "p": "Plus de 1,5 but",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 2.02
     }
    ],
-   "gagnes": 1,
-   "cote": 1.44,
+   "gagnes": 2,
+   "cote": 2.02,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
@@ -479,10 +511,21 @@
      "c": 1.44,
      "r": "gagne",
      "cc": 1.44
+    },
+    {
+     "j": "2026-10-30",
+     "f": 1493218,
+     "h": "Estudiantes de Rio Cuarto",
+     "a": "Gimnasia L.P.",
+     "m": "over-15",
+     "p": "Plus de 1,5 but",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 2.02
     }
    ],
    "bilan": {
-    "gagnes": 7,
+    "gagnes": 8,
     "perdus": 1,
     "annules": 1,
     "non_regles": 0,

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comment lire une cote : probabilité et marge du bookmaker</title>
+<meta name="description" content="Une cote se transforme en chance : 1 divisé par la cote. Comment faire le calcul, ce qu'est la marge du bookmaker et comment la retirer, avec un exemple.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://iashark.com/blog/guides/lire-une-cote-probabilite-marge-guide.html">
+<link rel="alternate" hreflang="fr" href="https://iashark.com/blog/guides/lire-une-cote-probabilite-marge-guide.html">
+<link rel="alternate" hreflang="en" href="https://iashark.com/en/blog/guides/lire-une-cote-probabilite-marge-guide.html">
+<link rel="alternate" hreflang="es" href="https://iashark.com/es/blog/guides/lire-une-cote-probabilite-marge-guide.html">
+<link rel="alternate" hreflang="es-MX" href="https://iashark.com/mx/blog/guides/lire-une-cote-probabilite-marge-guide.html">
+<link rel="alternate" hreflang="x-default" href="https://iashark.com/en/blog/guides/lire-une-cote-probabilite-marge-guide.html">
+<meta property="og:title" content="Comment lire une cote : probabilité et marge du bookmaker">
+<meta property="og:description" content="De la cote à la chance en une division, puis la marge du bookmaker et la façon de la retirer. Un exemple chiffré, des cotes inventées.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://iashark.com/blog/guides/lire-une-cote-probabilite-marge-guide.html">
+<meta property="og:image" content="https://iashark.com/assets/blog/cover-value-bet.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="IASHARK">
+<meta property="article:published_time" content="2026-11-01">
+<meta property="article:modified_time" content="2026-11-01">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Comment lire une cote : probabilité et marge du bookmaker">
+<meta name="twitter:description" content="De la cote à la chance en une division, puis la marge du bookmaker et la façon de la retirer. Un exemple chiffré, des cotes inventées.">
+<meta name="twitter:image" content="https://iashark.com/assets/blog/cover-value-bet.jpg">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/article.css">
+<link rel="stylesheet" href="/assets/bottom-navigation.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"Comment lire une cote de foot : de la cote à la probabilité, et la marge du bookmaker","description":"Une cote se transforme en chance : 1 divisé par la cote. Comment faire le calcul, ce qu'est la marge du bookmaker et comment la retirer, avec un exemple.","image":"https://iashark.com/assets/blog/cover-value-bet.jpg","datePublished":"2026-11-01","dateModified":"2026-11-01","author":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com/"},"publisher":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com/","logo":{"@type":"ImageObject","url":"https://iashark.com/icon-512.png","width":512,"height":512}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://iashark.com/blog/guides/lire-une-cote-probabilite-marge-guide.html"},"inLanguage":"fr-FR"}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://iashark.com/fr/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://iashark.com/blog.html"},{"@type":"ListItem","position":3,"name":"Lire une cote","item":"https://iashark.com/blog/guides/lire-une-cote-probabilite-marge-guide.html"}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Une cote basse est-elle sûre ?","acceptedAnswer":{"@type":"Answer","text":"Non. Une cote de 1,25 correspond à environ 80 % : une fois sur cinq, le résultat va dans l'autre sens."}},{"@type":"Question","name":"Pourquoi la cote change-t-elle avant le match ?","acceptedAnswer":{"@type":"Answer","text":"Les compositions, les blessures et le volume de paris font bouger le prix jusqu'au coup d'envoi."}},{"@type":"Question","name":"Comment convertir une cote en pourcentage de tête ?","acceptedAnswer":{"@type":"Answer","text":"Divisez 100 par la cote : 100 ÷ 2,50 = 40 %. Le résultat est une approximation propre, sans calculatrice."}},{"@type":"Question","name":"À quoi sert la cote pour IASHARK ?","acceptedAnswer":{"@type":"Answer","text":"IASHARK compare la chance calculée par son modèle à celle de la cote, marge retirée. C'est la comparaison de deux estimations, pas une garantie."}}]}
+</script>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="art-hero">
+  <nav class="crumb"><a href="/fr/">Accueil</a> › <a href="/blog.html">Blog</a> › Lire une cote</nav>
+  <span class="tag">Méthode · Cotes</span>
+  <h1>Comment lire une cote de foot :<br>de la cote à la <em>chance</em></h1>
+  <p class="chapo">Une cote n'est pas qu'un prix. Elle cache une chance, et une marge. Voici comment passer de l'une à l'autre en quelques secondes, avec une simple calculatrice.</p>
+  <div class="meta">
+    <span>Publié le 1er novembre 2026</span>
+    <span>·</span>
+    <span>4 min de lecture</span>
+    <span>·</span>
+    <span>Niveau : débutant</span>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Sommaire">
+  <h2>Au sommaire</h2>
+  <ol>
+    <li><a href="#definition">Que dit une cote au football ?</a></li>
+    <li><a href="#calcul">Comment passer de la cote à la chance ?</a></li>
+    <li><a href="#marge">Qu'est-ce que la marge du bookmaker ?</a></li>
+    <li><a href="#retirer">Comment retirer la marge pour voir la chance réelle ?</a></li>
+    <li><a href="#interessante">Comment savoir si une cote est intéressante ?</a></li>
+    <li><a href="#differences">Pourquoi deux sites affichent-ils des cotes différentes ?</a></li>
+    <li><a href="#formats">Et les cotes fractionnaires ou américaines ?</a></li>
+    <li><a href="#faq">Questions fréquentes</a></li>
+  </ol>
+</nav>
+
+<main class="body">
+
+<h2 id="definition">Que dit une cote au football ?</h2>
+<p>En France, la cote est décimale : 1,55 ; 2,10 ; 3,40. Plus elle est basse, plus l'issue est jugée probable. Plus elle est haute, moins le marché y croit.</p>
+<p>Une cote ne dit pas ce qui va arriver. Elle dit comment le marché voit le match à un instant donné, et elle bouge jusqu'au coup d'envoi.</p>
+
+<h2 id="calcul">Comment passer de la cote à la chance ?</h2>
+<p>C'est une division : <strong>1 ÷ cote</strong>. On l'appelle la probabilité implicite : celle que contient la cote.</p>
+<div class="keyfig">
+  <div><b>2,00</b><span>1 ÷ 2,00 = 50 %</span></div>
+  <div><b>4,00</b><span>1 ÷ 4,00 = 25 %</span></div>
+  <div><b>1,25</b><span>1 ÷ 1,25 = 80 %</span></div>
+</div>
+<p>Pour une cote de 1,80, divisez 1 par 1,80 : vous obtenez environ 56 %. Avec une calculatrice, cela prend cinq secondes.</p>
+
+<h2 id="marge">Qu'est-ce que la marge du bookmaker ?</h2>
+<p>Prenons un match à trois issues. Les cotes ci-dessous sont un exemple inventé, pas celles d'un vrai match.</p>
+<div class="tw">
+<table>
+  <thead><tr><th>Issue</th><th>Cote (exemple)</th><th>1 ÷ cote</th><th>Marge retirée</th></tr></thead>
+  <tbody>
+    <tr><td>Victoire à domicile</td><td class="num">2,10</td><td class="num">47,6 %</td><td class="num">45,4 %</td></tr>
+    <tr><td>Match nul</td><td class="num">3,40</td><td class="num">29,4 %</td><td class="num">28,1 %</td></tr>
+    <tr><td>Victoire à l'extérieur</td><td class="num">3,60</td><td class="num">27,8 %</td><td class="num">26,5 %</td></tr>
+    <tr class="hi"><td>Total</td><td></td><td class="num">104,8 %</td><td class="num">100 %</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Les trois chances d'un match font toujours 100 %. Ici, on arrive à 104,8 %. Les 4,8 points en trop sont la <strong>marge</strong> : la part que le bookmaker garde pour lui. Elle est dans toutes les cotes.</p>
+
+<h2 id="retirer">Comment retirer la marge pour voir la chance réelle ?</h2>
+<p>Divisez chaque pourcentage par le total : 47,6 ÷ 1,048 = 45,4 %. Faites pareil pour les deux autres. Le total retombe à 100 % : ce sont les chances que le marché attribue, marge retirée.</p>
+<div class="box warn">
+  <div class="box-t">Une approximation</div>
+  <p>Cette méthode répartit la marge au prorata, de façon égale. Tous les bookmakers ne la répartissent pas ainsi. Le résultat est une bonne estimation, pas une valeur exacte.</p>
+</div>
+
+<h2 id="interessante">Comment savoir si une cote est intéressante ?</h2>
+<p>Il y a deux usages. Retirer la marge sert à lire l'avis du marché : 45,4 % pour la victoire à domicile dans l'exemple. Juger un prix est différent : on garde la marge, car c'est bien cette cote-là qui est proposée.</p>
+<p>Une cote est intéressante quand la chance que vous estimez dépasse celle qu'elle contient, marge comprise. Vous estimez la victoire à domicile à 50 % ? La cote de 2,10 contient 47,6 % : votre estimation est 2,4 points au-dessus.</p>
+<p>Tout repose sur la qualité de votre estimation. Si elle est fausse, l'écart est faux. Cet écart a un nom, le value bet, expliqué dans <a href="/blog/guides/value-bet-guide-complet-2026.html">notre guide du value bet</a>. Un écart favorable n'augmente pas la chance que le pari passe : il dit seulement que la cote paie plus que ce que vous estimez juste.</p>
+
+<h2 id="differences">Pourquoi deux sites affichent-ils des cotes différentes ?</h2>
+<p>Chaque bookmaker fixe son propre prix et sa propre marge. Pour le même match, on peut voir 2,05 chez l'un et 2,15 chez l'autre. La marge varie aussi d'un marché à l'autre : elle est souvent plus faible sur un grand match que sur un petit championnat.</p>
+<p>Mieux vaut comparer deux cotes dont on a retiré la marge que se fier à une seule.</p>
+
+<h2 id="formats">Et les cotes fractionnaires ou américaines ?</h2>
+<p>Sur des sites étrangers, vous verrez 5/2 ou +250. C'est le même prix qu'une cote décimale de 3,50. Pour revenir en décimal : 5 ÷ 2 + 1 = 3,50, ou 250 ÷ 100 + 1 = 3,50. Ensuite, la division 1 ÷ cote fonctionne comme d'habitude. Aucun format n'est meilleur qu'un autre : seul le langage change, le prix reste le même.</p>
+
+<div class="related">
+  <a href="/blog/guides/double-chance-expliquee-guide.html"><span>Suite logique</span><b>Double chance au foot : comment ça marche, avec exemples</b></a>
+  <a href="/blog/guides/site-pronostics-foot-serieux-criteres-guide.html"><span>À lire aussi</span><b>Comment reconnaître un site de pronostics foot sérieux</b></a>
+</div>
+
+<h2 id="faq">Questions fréquentes</h2>
+
+<div class="faq">
+  <details><summary>Une cote basse est-elle sûre ?</summary><p>Non. Une cote de 1,25 correspond à environ 80 % : une fois sur cinq, le résultat va dans l'autre sens.</p></details>
+  <details><summary>Pourquoi la cote change-t-elle avant le match ?</summary><p>Les compositions, les blessures et le volume de paris font bouger le prix jusqu'au coup d'envoi.</p></details>
+  <details><summary>Comment convertir une cote en pourcentage de tête ?</summary><p>Divisez 100 par la cote : 100 ÷ 2,50 = 40 %. Le résultat est une approximation propre, sans calculatrice.</p></details>
+  <details><summary>À quoi sert la cote pour IASHARK ?</summary><p>IASHARK compare la chance calculée par son modèle à celle de la cote, marge retirée. C'est la comparaison de deux estimations, pas une garantie.</p></details>
+</div>
+
+<div class="cta">
+  <h2>Voir le match offert du jour</h2>
+  <p>Chaque jour, IASHARK offre l'analyse d'un match : la chance calculée de chaque issue, à côté de la cote du marché. Créez un compte gratuit pour la voir.</p>
+  <a class="btn" href="/fr/">Voir le match offert du jour →</a>
+</div>
+
+</main>
+
+<!--RELATED_GUIDES--><nav aria-labelledby="related-guides-title" style="max-width:760px;margin:32px auto;padding:0 20px"><h2 id="related-guides-title" style="font-size:18px;margin:0 0 8px">À lire aussi</h2><ul style="list-style:none;padding:0;margin:0"><li style="margin:6px 0"><a href="/blog/guides/double-chance-expliquee-guide.html" style="color:#22d3ee">Double chance au foot : comment ça marche, avec exemples</a></li><li style="margin:6px 0"><a href="/blog/guides/site-pronostics-foot-serieux-criteres-guide.html" style="color:#22d3ee">Comment reconnaître un site de pronostics foot sérieux</a></li><li style="margin:6px 0"><a href="/blog/guides/value-bet-guide-complet-2026.html" style="color:#22d3ee">Value bet : comparer une probabilité à une cote sans se tromper</a></li></ul></nav><!--/RELATED_GUIDES-->
+<footer class="art-foot">
+  <p>IASHARK — analyses statistiques de football. Les probabilités publiées sont indicatives et ne garantissent aucun résultat. Interdit aux mineurs (18+). Besoin d'aide ? Joueurs Info Service : 09 74 75 13 13 (appel non surtaxé).</p>
+<p class="legal-links"><a href="/fr/mentions-legales.html" style="color:inherit;text-decoration:underline">Mentions légales</a> · <a href="/fr/cgv.html" style="color:inherit;text-decoration:underline">CGV</a> · <a href="/fr/confidentialite.html" style="color:inherit;text-decoration:underline">Confidentialité</a> · <a href="/fr/cookies.html" style="color:inherit;text-decoration:underline">Cookies</a> · <a href="/fr/jeu-responsable.html" style="color:inherit;text-decoration:underline">Jeu responsable</a></p>
+</footer>
+
+</div>
+
+<script src="/site-header.js"></script>
+<script src="/site-prefs.js"></script>
+<script src="/bottom-navigation.js"></script>
+</body>
+</html>

@@ -1,5 +1,9 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import Stripe from "npm:stripe@17";
+// Programme de partenaires (03/10/2026) : empreinte de carte (essai coupe si
+// la carte a deja servi), commission de 40 % a chaque facture payee, reprise
+// sur remboursement ou contestation. Jamais bloquant pour l'abonnement.
+import { recordCardAndGuardTrial, recordCommission, reverseCommission } from "./affiliation-hooks.ts";
 
 // Webhook de paiement — MASTER V2.1 §3.2/§23. DÉSACTIVÉ PAR DÉFAUT via
 // PAYMENT_PROVIDER (architecture agnostique du prestataire final - le choix
@@ -70,6 +74,33 @@ const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const PAYMENT_PROVIDER = Deno.env.get("PAYMENT_PROVIDER") || "disabled";
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
 const STRIPE_WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+// E-mail de confirmation d'achat (audit V3 du 02/10/2026, point I7) : appel
+// serveur a send-transactional-email avec le secret interne partage. Absent =
+// aucun e-mail (journal), le paiement est traite normalement.
+const EMAIL_INTERNAL_SECRET = Deno.env.get("EMAIL_INTERNAL_SECRET");
+
+// Demande l'e-mail de confirmation d'achat. NE LEVE JAMAIS : un e-mail en echec
+// ne doit ni bloquer ni faire re-essayer le traitement du paiement. Les donnees
+// (montant, dates, langue) sont relues chez Stripe par send-transactional-email ;
+// Resend deduplique 24 h sur la cle purchase_confirmation:<marche>:<abonnement>.
+async function demanderConfirmationAchat(subscriptionId: string): Promise<void> {
+  if (!EMAIL_INTERNAL_SECRET) {
+    console.log("[stripe-webhook] EMAIL_INTERNAL_SECRET absent : confirmation d'achat non demandee pour " + subscriptionId + ".");
+    return;
+  }
+  try {
+    const res = await fetch(SUPA_URL.replace(/\/$/, "") + "/functions/v1/send-transactional-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-internal-secret": EMAIL_INTERNAL_SECRET },
+      body: JSON.stringify({ type: "purchase_confirmation", stripeSubscriptionId: subscriptionId }),
+      signal: AbortSignal.timeout(15000),
+    });
+    const corps = await res.text().catch(() => "");
+    console.log("[stripe-webhook] confirmation d'achat " + subscriptionId + " : HTTP " + res.status + " " + corps.slice(0, 200));
+  } catch (err) {
+    console.error("[stripe-webhook] confirmation d'achat " + subscriptionId + " non demandee :", (err as Error).message);
+  }
+}
 
 // Version d'API alignee sur celle que Stripe envoie reellement dans les
 // evenements de ce compte (constatee dans billing_events.payload
@@ -83,9 +114,11 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, stripe-signature",
 };
 
-// Statuts Stripe qui donnent acces PRO. "trialing" inclus par anticipation
-// (MASTER §3.2 le liste comme statut possible) meme si aucun essai PRO
-// n'est actuellement vendu (§3.1 : pas de "1€ 3 jours", plan FREE permanent).
+// Statuts Stripe qui donnent acces PRO. "trialing" = essai gratuit de 7
+// jours (remis le 02/10/2026, create-checkout-session/trial.ts) : Pro complet
+// pendant l'essai, 0 EUR preleve. Fin d'essai : "active" si le premier
+// paiement passe, "canceled" si l'essai a ete annule ou si la carte manque,
+// "past_due" si la carte est refusee (acces coupe : unpaidAfterTrial).
 const ACTIVE_LIKE_STATUSES = new Set(["active", "trialing"]);
 
 // TOLERANCE IMPAYE (decision produit explicite de l'utilisateur, 02/09/2026).
@@ -130,6 +163,25 @@ function periodEndIso(sub: Stripe.Subscription): string | null {
   const ts = onSub ?? onItem;
   return ts ? new Date(ts * 1000).toISOString() : null;
 }
+// Essai termine sans premier paiement (carte refusee au 8e jour) : Stripe
+// passe l'abonnement en "past_due" mais sa periode a deja avance d'une duree
+// entiere. La tolerance d'impaye (pensee pour un client qui a deja paye)
+// offrirait alors une periode gratuite de plus. Periode commencee a la fin de
+// l'essai et pas encore payee = acces coupe des la fin de l'essai.
+// Copie identique dans stripe-webhook et sync-subscription
+// (tests/pro-trial.test.js).
+function unpaidAfterTrial(sub: Stripe.Subscription, status: string): boolean {
+  if (status !== "past_due" && status !== "unpaid") return false;
+  const anySub = sub as unknown as Record<string, unknown>;
+  const trialEnd = anySub.trial_end as number | null | undefined;
+  if (typeof trialEnd !== "number") return false;
+  const onSub = anySub.current_period_start as number | undefined;
+  const onItem = (sub.items?.data?.[0] as unknown as Record<string, unknown> | undefined)
+    ?.current_period_start as number | undefined;
+  const start = onSub ?? onItem;
+  return typeof start === "number" && Math.abs(start - trialEnd) < 3600;
+}
+
 
 // Duree et marche de l'abonnement, lus sur l'objet Stripe reel (jamais sur
 // une donnee du navigateur). Offre Pro unique : la duree ne change pas les
@@ -275,7 +327,8 @@ Deno.serve(async (req: Request) => {
     return null;
   }
 
-  async function applySubscription(sub: Stripe.Subscription, deleted: boolean) {
+  // Renvoie l'id du compte IASHARK (pour les crochets du programme de partenaires).
+  async function applySubscription(sub: Stripe.Subscription, deleted: boolean): Promise<string> {
     const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
     const userId = await resolveUserId(customerId);
     if (!userId) {
@@ -300,7 +353,7 @@ Deno.serve(async (req: Request) => {
 
     // users.plan reflete l'etat reel de l'abonnement - jamais mis a jour
     // par le client (voir compte.html, aucune ecriture directe).
-    const newPlan = grantsProAccess(status, periodEnd, billing.billing_interval) ? "pro" : "free";
+    const newPlan = !unpaidAfterTrial(sub, status) && grantsProAccess(status, periodEnd, billing.billing_interval) ? "pro" : "free";
     const { data: updated, error: planError } = await supabase
       .from("users")
       .update({ plan: newPlan })
@@ -318,7 +371,9 @@ Deno.serve(async (req: Request) => {
       if (insertError) throw new Error("creation ligne users manquante: " + insertError.message);
     }
     console.log("[stripe-webhook] abonnement " + sub.id + " -> statut " + status + ", plan " + newPlan + " applique.");
+    return userId;
   }
+  const hooks = { stripe, supabase };
 
   try {
     switch (event.type) {
@@ -337,7 +392,14 @@ Deno.serve(async (req: Request) => {
         const subscriptionId = typeof session.subscription === "string" ? session.subscription : session.subscription?.id;
         if (subscriptionId) {
           const sub = await stripe.subscriptions.retrieve(subscriptionId);
-          await applySubscription(sub, false);
+          const uid = await applySubscription(sub, false);
+          // Empreinte de la carte : essai coupe si elle a deja servi (programme de partenaires, faille de l'essai).
+          await recordCardAndGuardTrial(hooks, sub, uid);
+          // Checkout reussi : confirmation d'achat, dans la langue du compte
+          // (gabarits fr et gb ; les autres langues sont ignorees, voir
+          // lib/email-render.js#purchaseConfirmationFromStripe). Une seule fois
+          // par evenement : billing_events deduplique les re-essais Stripe.
+          await demanderConfirmationAchat(subscriptionId);
         }
         break;
       }
@@ -345,7 +407,8 @@ Deno.serve(async (req: Request) => {
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription;
-        await applySubscription(sub, event.type === "customer.subscription.deleted");
+        const uid = await applySubscription(sub, event.type === "customer.subscription.deleted");
+        if (event.type !== "customer.subscription.deleted") await recordCardAndGuardTrial(hooks, sub, uid);
         break;
       }
       case "invoice.paid":
@@ -365,7 +428,24 @@ Deno.serve(async (req: Request) => {
           break;
         }
         const sub = await stripe.subscriptions.retrieve(subscriptionId);
-        await applySubscription(sub, false);
+        const uid = await applySubscription(sub, false);
+        // Programme de partenaires : facture PAYEE = commission de 40 % du HT
+        // encaisse (0 pendant l'essai), 'pending' 30 jours. Unique par facture.
+        if (event.type !== "invoice.payment_failed") await recordCommission(hooks, invoice, sub, uid);
+        break;
+      }
+      case "charge.refunded":
+      case "charge.dispute.created": {
+        // Remboursement ou contestation : la commission liee est reprise
+        // (annulee si jamais payee, deduite du prochain versement sinon).
+        const obj = event.data.object as unknown as Record<string, unknown>;
+        const isDispute = event.type === "charge.dispute.created";
+        const chargeId = isDispute ? (typeof obj.charge === "string" ? obj.charge : (obj.charge as { id?: string } | undefined)?.id) : (obj.id as string);
+        if (!chargeId) break;
+        const charge = isDispute ? (await stripe.charges.retrieve(chargeId)) as unknown as Record<string, unknown> : obj;
+        const refs = (charge.refunds as { data?: { id?: string }[] } | undefined)?.data || [];
+        const refId = isDispute ? String(obj.id) : (refs[0]?.id || event.id);
+        await reverseCommission(hooks, charge, isDispute ? "dispute" : "refund", refId);
         break;
       }
       default:

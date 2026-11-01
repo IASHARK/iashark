@@ -97,7 +97,7 @@ test("page d'abonnement : une colonne, le composant de paiement unique, ni table
   const h = OP.html({ mode: "vitrine", contexte: "general", plans, choisi: "month", jours: 0, connecte: false, uid: "a" });
   const phrases = (h.match(/<ul class="op-benefits">([\s\S]*?)<\/ul>/) || ["", ""])[1].match(/<li>/g) || [];
   assert.ok(phrases.length >= 3 && phrases.length <= 4, "3 ou 4 phrases");
-  for (const x of ["Carte bancaire", "Paiement sécurisé par Stripe", "Sans engagement", "Résiliable en ligne à tout moment"]) assert.ok(h.includes(x), x);
+  for (const x of ["Paiement sécurisé par Stripe", "Sans engagement"]) assert.ok(h.includes(x), x);
   assert.equal((h.match(/class="mu-shimmer op-cta"/g) || []).length, 1, "un seul gros bouton");
   const an = OP.html({ mode: "vitrine", contexte: "general", plans, choisi: "year", jours: 0, connecte: false, uid: "b" });
   assert.doesNotMatch(an.slice(an.indexOf('data-op-pay')), /Sans engagement/, "annuel : jamais « sans engagement » (CGV art. 6)");

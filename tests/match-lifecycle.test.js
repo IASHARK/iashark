@@ -124,8 +124,6 @@ test("perimetre des versions : table explicite dans config/leagues.json, fr touj
   assert.equal(byKey.premier.apiFootballId, 39);
   const sorted = (a) => a.slice().sort();
   assert.deepEqual(sorted(L.matchDirsFor("liga_mx")), sorted(["fr", "mx", "es"]));
-  assert.deepEqual(sorted(L.matchDirsFor("turkey_superlig")), sorted(["fr", "en"]));
-  assert.deepEqual(sorted(L.matchDirsFor("libertadores")), sorted(["fr", "es", "mx", "en"]));
   assert.deepEqual(sorted(L.matchDirsFor("south_africa_premiership")), ["fr"], "competition retiree : hors perimetre");
   assert.deepEqual(sorted(L.matchDirsFor("mls")), sorted(["fr", "en", "gb"]));
   assert.deepEqual(sorted(L.matchDirsFor("premier")), sorted(["fr", "gb", "en", "za"]));

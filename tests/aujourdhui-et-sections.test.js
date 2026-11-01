@@ -121,7 +121,7 @@ test("interrupteurs : essai ouvert (si le serveur l'accorde), tickets ouverts ; 
   try {
     assert.equal(AJ.enLigne({}), true);
     globalThis.IASHARK_MARKET = { code: "gb" };
-    assert.equal(AJ.enLigne({}), false, "hors de France : cotes d'operateurs francais, rien");
+    assert.equal(AJ.enLigne({}), true, "tous marches depuis le 02/11/2026 : meme page qu'en France");
     const textes = OP.avantages().map((a) => a[1]).join(" | ");
     assert.doesNotMatch(textes, /tickets x5/);
     globalThis.IASHARK_MARKET = { code: "fr" };
@@ -336,4 +336,31 @@ test("apercu flou : titre du match offert ; match bloque : panneau flou sans deu
   // marches de ce match » quand Pro n'en aura pas (controle UX du 04/10, tour 2).
   assert.match(mp, /o\.verrouPro&&estFr\(\)&&n\(raw\.nb_marches\)>0/);
   assert.match(mp, /MS&&estFr\(\)&&n\(pub\.nb_marches\)>0\?\{html:MS\.panneauFlou/);
+});
+
+// Decision de Clement du 02/11/2026 : memes combines qu'en France, dans la langue du visiteur.
+test("hors de France et hors du francais : pari traduit depuis le code, aucun nom d'operateur, cote indicative", () => {
+  const ML = require("../lib/market-labels.js");
+  const leg = { fixture_id: 9, domicile: "Sassuolo", exterieur: "Fiorentina", ligue: "Serie A", coup_envoi: "2026-11-03 21:00", pari: "Match nul ou Fiorentina", market_id: "dc-x2", cote: 1.42, operateur: "Betclic", chance: 66, etat: "a_venir" };
+  const rep = { version: 1, jour: "2026-11-03", niveau: "pro", tickets: [{ type: "x5", statut: "publie", verrou: null, nb_matchs: 1, cote_totale: 1.42, chance: 66, jambes: [leg] }] };
+  const dict = require("../i18n/dict/en.json");
+  const lire = (k, fb) => k.split(".").reduce((o, c) => (o ? o[c] : undefined), dict) || fb;
+  const avant = { M: globalThis.IasharkMarketLabels, I: globalThis.I18N, K: globalThis.IASHARK_MARKET };
+  for (const code of ["gb", "us", "fr"]) {
+    globalThis.IasharkMarketLabels = ML;
+    globalThis.I18N = { locale: "en", localeTag: () => "en-GB", t: lire, dict };
+    globalThis.IASHARK_MARKET = { code };
+    try {
+      const page = AJ.html(rep, { ouvert: true, jour: rep.jour });
+      assert.doesNotMatch(page, /Match nul ou Fiorentina/, code + " : pas de libelle francais");
+      assert.match(page, /Fiorentina \(double chance\)/, code + " : libelle construit depuis le code");
+      assert.doesNotMatch(page, /Betclic/, code + " : pas de nom d'operateur hors du francais");
+      assert.match(page, new RegExp(dict.aujourdhui.indicative_note.slice(0, 15)), code + " : mention cote indicative");
+      assert.match(AJ.texteCopie(rep.tickets[0], rep.jour), new RegExp(dict.aujourdhui.copy_total_indicative.replace(/[()]/g, ".")), code + " : ticket copie, cotes indicatives");
+      const verrouille = { version: 1, jour: rep.jour, niveau: "anonyme", tickets: [{ type: "x5", statut: "publie", verrou: "compte", nb_matchs: 3, cote_totale: 4.11 }] };
+      assert.match(AJ.html(verrouille, {}), new RegExp(dict.aujourdhui.indicative_note.slice(0, 15)), code + " : sans compte aussi");
+    } finally {
+      globalThis.IasharkMarketLabels = avant.M; globalThis.I18N = avant.I; globalThis.IASHARK_MARKET = avant.K;
+    }
+  }
 });

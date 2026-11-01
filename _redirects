@@ -5777,6 +5777,14 @@
 /es/match/1636344.html            /es/leagues/europa-league.html  301
 # --- Fin des pages match retirees.
 
+# --- Ancienne page match absente de cette version : accueil de la version. Non force :
+# une page qui existe (ou une regle plus haut) passe toujours avant.
+/gb/match/*                        /gb/                           301
+/za/match/*                        /za/                           301
+/en/match/*                        /en/                           301
+/mx/match/*                        /mx/                           301
+/es/match/*                        /es/                           301
+
 # --- 404 traduite par repertoire. Non forcee : ne s'applique que si aucun
 # fichier n'existe au chemin demande. Toujours en dernier.
 /fr/*                             /fr/404.html                  404

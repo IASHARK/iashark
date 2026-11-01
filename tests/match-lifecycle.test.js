@@ -112,7 +112,9 @@ test("perimetre des versions : table explicite dans config/leagues.json, fr touj
   assert.equal(byKey.mls.apiFootballId, 253);
   assert.equal(byKey.premier.apiFootballId, 39);
   const sorted = (a) => a.slice().sort();
-  assert.deepEqual(sorted(L.matchDirsFor("liga_mx")), sorted(["fr", "mx", "es"]));
+  assert.deepEqual(sorted(L.matchDirsFor("liga_mx")), sorted(["fr", "mx", "es", "en"]));
+  assert.deepEqual(sorted(L.matchDirsFor("turkey_superlig")), sorted(["fr", "en"]));
+  assert.deepEqual(sorted(L.matchDirsFor("libertadores")), sorted(["fr", "es", "mx", "en"]));
   assert.deepEqual(sorted(L.matchDirsFor("south_africa_premiership")), ["fr"], "competition retiree : hors perimetre");
   assert.deepEqual(sorted(L.matchDirsFor("mls")), sorted(["fr", "en", "gb"]));
   assert.deepEqual(sorted(L.matchDirsFor("premier")), sorted(["fr", "gb", "en", "za"]));
@@ -134,10 +136,10 @@ test("hreflang uniquement entre versions generees, pages ecrites seulement dans 
     cycle(root, [WITH_PREMIUM], at(-DAY));
     for (const d of C.DIR_CODES) {
       const rel = C.matchPath(d, RICH.id).slice(1);
-      assert.equal(exists(root, rel), ["fr", "mx", "es"].includes(d), d + " : " + rel);
+      assert.equal(exists(root, rel), ["fr", "mx", "es", "en"].includes(d), d + " : " + rel);
     }
     const html = readT(root, "mx/match/777001.html");
-    assert.deepEqual(alternates(html).map((a) => a.hl).sort(), ["es", "es-MX", "fr", "x-default"]);
+    assert.deepEqual(alternates(html).map((a) => a.hl).sort(), ["en", "es", "es-MX", "fr", "x-default"]);
     // Aucun hreflang, dans aucune page ecrite, vers une version non generee.
     for (const rel of ["match/777001.html", "mx/match/777001.html", "es/match/777001.html"]) {
       for (const a of alternates(readT(root, rel))) {
@@ -146,17 +148,17 @@ test("hreflang uniquement entre versions generees, pages ecrites seulement dans 
     }
     const xml = readT(root, "sitemap-matches-i18n.xml");
     assert.match(xml, /\/mx\/match\/777001\.html/);
-    assert.doesNotMatch(xml, /\/(gb|za|en|de|it|pt)\/match\/777001\.html/);
+    assert.doesNotMatch(xml, /\/(gb|za|de|it|pt)\/match\/777001\.html/);
     // Hub hors perimetre : noindex, sans hreflang, liens vers une version existante.
     const deHub = SEO.renderLeagueHub("liga_mx", "de", [RICH, Object.assign({}, RICH, { id: 777003 })]);
     assert.equal(deHub.indexable, false);
     assert.match(head(deHub.html), /<meta name="robots" content="noindex,follow">/);
     assert.equal(alternates(deHub.html).length, 0);
-    assert.match(deHub.html, /href="\/match\/777001\.html"/);
+    assert.match(deHub.html, /href="\/en\/match\/777001\.html"/);
     assert.doesNotMatch(deHub.html, /href="\/de\/match\//);
     const mxHub = SEO.renderLeagueHub("liga_mx", "mx", [RICH, Object.assign({}, RICH, { id: 777003 })]);
     assert.equal(mxHub.indexable, true);
-    assert.deepEqual(alternates(mxHub.html).map((a) => a.hl).sort(), ["es", "es-MX", "fr", "x-default"]);
+    assert.deepEqual(alternates(mxHub.html).map((a) => a.hl).sort(), ["en", "es", "es-MX", "fr", "x-default"]);
     const gbHub = SEO.renderLeagueHub("laliga", "gb", [Object.assign({}, RICH, { league_key: "laliga" })]);
     assert.match(gbHub.html, /href="\/en\/match\/777001\.html"/, "gb hors perimetre LaLiga -> version en");
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
@@ -286,7 +288,7 @@ test("J+30 : pages supprimees, 301 vers le hub ligue de la version, qui survit a
       assert.ok(i !== -1 && i < first404, from + " -> " + to);
       assert.ok(exists(root, to.slice(1)), "cible " + to + " existante");
     }
-    assert.equal(rules.filter((r) => /777001/.test(r[0])).length, 3, "aucune redirection pour une version jamais generee");
+    assert.equal(rules.filter((r) => /777001/.test(r[0])).length, 4, "aucune redirection pour une version jamais generee");
     // Idempotent, 404 toujours en dernier, meme bloc que scripts/build-locales.js.
     const text = readT(root, "_redirects");
     assert.equal(L.applyRedirectsBlock(text, reg), text);
@@ -312,7 +314,7 @@ test("versions sorties du perimetre : 301 vers le hub de la version ou la versio
     const day = new Date(at(-DAY)).toISOString().slice(0, 10);
     let { reg } = cycle(root, [RICH], at(-DAY));
     const e = reg.matches["777001"];
-    assert.deepEqual(e.dirs, ["fr", "mx", "es"]);
+    assert.deepEqual(e.dirs, ["fr", "en", "mx", "es"]);
     assert.deepEqual(e.retired_dirs, { gb: day, za: day }, "versions retirees datees, ordre stable");
     const rulesOf = (text) => text.split("\n").filter((l) => l.trim() && l[0] !== "#").map((l) => l.trim().split(/\s+/));
     let rules = rulesOf(readT(root, "_redirects"));
@@ -345,12 +347,12 @@ test("versions sorties du perimetre : 301 vers le hub de la version ou la versio
     for (const from of ["/gb/match/777001.html", "/za/match/777001.html"]) {
       assert.ok(rules.some((r) => r[0] === from && r[1] === "/fr/leagues/liga-mx.html" && r[2] === "301"), from + " -> hub FR");
     }
-    assert.equal(rules.filter((r) => /777001/.test(r[0])).length, 5);
+    assert.equal(rules.filter((r) => /777001/.test(r[0])).length, 6);
     // 90 jours apres le retrait : regles des versions retirees supprimees, celles de J+30 conservees.
     ({ reg } = cycle(root, [], at((L.REDIRECT_RETENTION_DAYS + 1) * DAY)));
     assert.equal(reg.matches["777001"].retired_dirs, undefined);
     rules = rulesOf(readT(root, "_redirects"));
-    assert.deepEqual(rules.filter((r) => /777001/.test(r[0])).map((r) => r[0]).sort(), ["/es/match/777001.html", "/match/777001.html", "/mx/match/777001.html"]);
+    assert.deepEqual(rules.filter((r) => /777001/.test(r[0])).map((r) => r[0]).sort(), ["/en/match/777001.html", "/es/match/777001.html", "/match/777001.html", "/mx/match/777001.html"]);
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
 

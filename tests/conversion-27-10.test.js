@@ -408,15 +408,8 @@ test("C2 : la ligne « Hier » : veille a Paris et pour le visiteur, gagnes ET p
   assert.equal(OP.lignePreuve(b(7, 3, 0, "2026-10-25"), MARDI_MATIN), "", "vieux bilan : rien");
   assert.equal(OP.lignePreuve({ jour: "2026-10-26", offert: null }, MARDI_MATIN), "", "donnee absente : rien");
   assert.equal(OP.lignePreuve(null, MARDI_MATIN), "");
-  // Rendu dans le composant : sous le bouton, jamais de % ni de lien, place cachee tant que rien n'est lu.
-  const h = OP.html({ mode: "vitrine", contexte: "general", plans: PLANS, choisi: "month", jours: 7, connecte: false, uid: "c2", preuve: OP.lignePreuve(b(7, 3), MARDI_MATIN), maintenant: MARDI_MATIN });
-  const p = h.slice(h.indexOf('class="op-preuve"'), h.indexOf("</p>", h.indexOf('class="op-preuve"')));
-  assert.ok(h.indexOf("op-cta") < h.indexOf('class="op-preuve"'));
-  assert.doesNotMatch(p, /%|<a |href|vert|rouge|green|red/);
-  assert.match(OP.html({ mode: "vitrine", contexte: "general", plans: PLANS, choisi: "month", jours: 7, connecte: false, uid: "c2b" }), /data-op-preuve hidden>/);
-  // Lu une fois par page dans le fichier du calcul quotidien (jamais recalcule ici).
-  const src = read("lib/offre-pro.js");
-  assert.match(src, /G\.fetch\("\/preuves\/bilan-hier\.json", \{ cache: "no-cache" \}\)/);
+  // Choix de Clement du 02/11/2026 : le bilan d'hier n'est plus affiche dans le bloc de paiement.
+  assert.doesNotMatch(OP.html({ mode: "vitrine", contexte: "general", plans: PLANS, choisi: "month", jours: 7, connecte: false, uid: "c2" }), /op-preuve/);
   for (const l of LOCALES) {
     const d = JSON.parse(read("i18n/dict/" + l + ".json")).preuve_simples;
     for (const k of ["line", "won_one", "won_other", "lost_one", "lost_other", "void_one", "void_other", "pending_one", "pending_other"]) assert.ok(d && d[k], l + " " + k);

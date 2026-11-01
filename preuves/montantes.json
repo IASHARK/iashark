@@ -1,69 +1,24 @@
 {
  "version": 1,
- "genere_le": "2026-10-31T07:14:35.996Z",
- "jour": "2026-10-31",
+ "genere_le": "2026-11-01T07:29:09.931Z",
+ "jour": "2026-11-01",
  "debut": "2026-10-06",
  "objectif": 10,
- "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-10-31. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
+ "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-11-01. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
  "montantes": [
   {
    "rang": 1,
-   "paliers": [
-    {
-     "j": "2026-10-27",
-     "f": 1638565,
-     "h": "SG Sonnenhof Grossaspach",
-     "a": "FC Augsburg",
-     "m": "over-25",
-     "p": "Plus de 2,5 buts",
-     "c": 1.4,
-     "r": "gagne",
-     "cc": 1.4
-    },
-    {
-     "j": "2026-10-28",
-     "f": 1638564,
-     "h": "SC Freiburg",
-     "a": "VfL Wolfsburg",
-     "m": "home-win",
-     "p": "Victoire SC Freiburg",
-     "c": 1.42,
-     "r": "gagne",
-     "cc": 1.99
-    },
-    {
-     "j": "2026-10-29",
-     "f": 1603077,
-     "h": "Al Riyadh",
-     "a": "Al-Qadisiyah FC",
-     "m": "over-25",
-     "p": "Plus de 2,5 buts",
-     "c": 1.4,
-     "r": "gagne",
-     "cc": 2.78
-    },
-    {
-     "j": "2026-10-30",
-     "f": 1494789,
-     "h": "Bodo/Glimt",
-     "a": "Viking",
-     "m": "btts-yes",
-     "p": "Les deux équipes marquent",
-     "c": 1.4,
-     "r": "gagne",
-     "cc": 3.9
-    }
-   ],
-   "gagnes": 4,
-   "cote": 3.9,
+   "paliers": [],
+   "gagnes": 0,
+   "cote": null,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
     "t": "perdu",
-    "j": "2026-10-26",
-    "n": 0,
-    "h": "Beşiktaş",
-    "a": "Başakşehir",
+    "j": "2026-10-31",
+    "n": 4,
+    "h": "Werder Bremen",
+    "a": "1899 Hoffenheim",
     "p": "Plus de 2,5 buts",
     "k": 1.4
    },
@@ -196,11 +151,22 @@
      "c": 1.4,
      "r": "gagne",
      "cc": 3.9
+    },
+    {
+     "j": "2026-10-31",
+     "f": 1575209,
+     "h": "Werder Bremen",
+     "a": "1899 Hoffenheim",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.4,
+     "r": "perdu",
+     "cc": null
     }
    ],
    "bilan": {
     "gagnes": 9,
-    "perdus": 2,
+    "perdus": 3,
     "annules": 0,
     "non_regles": 0,
     "objectifs": 1
@@ -208,9 +174,21 @@
   },
   {
    "rang": 2,
-   "paliers": [],
-   "gagnes": 0,
-   "cote": null,
+   "paliers": [
+    {
+     "j": "2026-10-31",
+     "f": 1563230,
+     "h": "Middlesbrough",
+     "a": "Charlton",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 1.4
+    }
+   ],
+   "gagnes": 1,
+   "cote": 1.4,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
@@ -351,10 +329,21 @@
      "c": 1.41,
      "r": "perdu",
      "cc": null
+    },
+    {
+     "j": "2026-10-31",
+     "f": 1563230,
+     "h": "Middlesbrough",
+     "a": "Charlton",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 1.4
     }
    ],
    "bilan": {
-    "gagnes": 8,
+    "gagnes": 9,
     "perdus": 3,
     "annules": 0,
     "non_regles": 0,
@@ -363,52 +352,18 @@
   },
   {
    "rang": 3,
-   "paliers": [
-    {
-     "j": "2026-10-28",
-     "f": 1644347,
-     "h": "Cieza",
-     "a": "Granada CF",
-     "m": "away-win",
-     "p": "Victoire Granada CF",
-     "c": 1.44,
-     "r": "annule",
-     "cc": null
-    },
-    {
-     "j": "2026-10-29",
-     "f": 1550170,
-     "h": "Frosinone",
-     "a": "Lecce",
-     "m": "over-25",
-     "p": "Plus de 2,5 buts",
-     "c": 1.44,
-     "r": "gagne",
-     "cc": 1.44
-    },
-    {
-     "j": "2026-10-30",
-     "f": 1493218,
-     "h": "Estudiantes de Rio Cuarto",
-     "a": "Gimnasia L.P.",
-     "m": "over-15",
-     "p": "Plus de 1,5 but",
-     "c": 1.4,
-     "r": "gagne",
-     "cc": 2.02
-    }
-   ],
-   "gagnes": 2,
-   "cote": 2.02,
+   "paliers": [],
+   "gagnes": 0,
+   "cote": null,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
     "t": "perdu",
-    "j": "2026-10-27",
-    "n": 6,
-    "h": "Borussia Mönchengladbach",
-    "a": "Karlsruher SC",
-    "p": "Plus de 2,5 buts",
+    "j": "2026-10-31",
+    "n": 2,
+    "h": "Moreirense",
+    "a": "Estrela",
+    "p": "Match nul ou Estrela",
     "k": 1.4
    },
    "objectifs": [],
@@ -522,11 +477,22 @@
      "c": 1.4,
      "r": "gagne",
      "cc": 2.02
+    },
+    {
+     "j": "2026-10-31",
+     "f": 1575535,
+     "h": "Moreirense",
+     "a": "Estrela",
+     "m": "dc-x2",
+     "p": "Match nul ou Estrela",
+     "c": 1.4,
+     "r": "perdu",
+     "cc": null
     }
    ],
    "bilan": {
     "gagnes": 8,
-    "perdus": 1,
+    "perdus": 2,
     "annules": 1,
     "non_regles": 0,
     "objectifs": 0

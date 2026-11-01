@@ -365,7 +365,11 @@ test("versions sorties du perimetre : 301 vers le hub de la version ou la versio
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
 
-test("registre commite : chaque version retiree a sa 301 dans _redirects (meme bloc que le pipeline)", () => {
+test("registre commite : chaque version retiree a sa 301 dans _redirects (meme bloc que le pipeline)", (ctx) => {
+  // Le vrai perimetre de config/leagues.json, pas les perimetres reduits de ce fichier.
+  const vrais = JSON.parse(read("config/leagues.json")).leagues;
+  for (const k of Object.keys(PERIMETRES)) C.leagueByKey(k).seoMatchDirs = vrais.find((l) => l.key === k).seoMatchDirs;
+  ctx.after(() => { for (const k of Object.keys(PERIMETRES)) C.leagueByKey(k).seoMatchDirs = PERIMETRES[k]; });
   const reg = L.loadRegistry(ROOT);
   const text = read("_redirects");
   assert.equal(L.applyRedirectsBlock(text, reg), text, "_redirects desynchronise de data/match-pages-registry.json");

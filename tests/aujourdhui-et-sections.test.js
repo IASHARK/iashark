@@ -291,7 +291,7 @@ test("composant de paiement : textes sans mot interdit ni fausse urgence", () =>
   // Correction C4 du 27/10/2026 : le montant d'aujourd'hui dans le bouton, la date du premier prelevement dessous.
   const essai = OP.html({ mode: "vitrine", contexte: "general", plans, choisi: "month", jours: 7, connecte: false, uid: "v" });
   assert.match(essai, /Essayer 7 jours : 0 € aujourd’hui/);
-  for (const re of [/Avant le \d{1,2} \S+/, /Le \d{1,2} \S+/, /19,95 €, puis 19,95 € chaque mois, si tu n’as pas résilié\./, /Carte demandée pour démarrer\. Essai réservé à un premier abonnement\./]) assert.match(essai, re);
+  for (const re of [/Avant le \d{1,2} \S+, tu peux résilier/, /Le \d{1,2} \S+/, />19,95 €</, /Puis chaque mois, si tu n’as pas résilié\./, /Carte demandée pour démarrer\. Essai réservé à un premier abonnement\./]) assert.match(essai, re);
 });
 
 // Controle UX du 04/10/2026 : aucune repetition (le nombre de buts et le film), « Et si » ecrit

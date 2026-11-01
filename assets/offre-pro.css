@@ -21,6 +21,7 @@
 .op-from b{color:var(--op-text);font-weight:700}
 .op-plan-note.is-trial{color:var(--op-cyan);font-weight:700}
 .op-billing{margin:-4px 0 0;color:var(--op-soft);font-size:13px;min-height:1.45em}
+.op-billing:empty{display:none}
 .op-closed{margin:0;padding:12px 14px;border:1px solid var(--op-line2);border-radius:12px;color:var(--op-soft);font-size:13.5px}
 .op .op-cta{width:100%}
 .op .iash-consent-locked[aria-disabled="true"]{opacity:.5;cursor:not-allowed;filter:saturate(.6)}
@@ -35,17 +36,27 @@
 .op-ico-s{width:16px;height:16px;color:var(--op-soft)}
 .op-pay{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0;padding:0;list-style:none;color:var(--op-soft);font-size:12.5px;line-height:1.4}
 .op-pay li{display:inline-flex;align-items:center;gap:6px}
-.op-trial{margin:2px 0 0;color:var(--op-soft);font-size:13.5px;line-height:1.45}
-/* Les trois etapes de l'essai (02/11/2026) : un fil, trois points ; seul « aujourd'hui » est en cyan. */
-.op-temps{display:grid;margin:0;padding:0;list-style:none}
-.op-temps-e{position:relative;display:grid;gap:1px;padding:0 0 12px 22px}
-.op-temps-e:last-child{padding-bottom:0}
-.op-temps-e::before{content:"";position:absolute;left:0;top:6px;width:9px;height:9px;border:1.5px solid var(--op-dim);border-radius:50%;background:#0a1521}
-.op-temps-e:not(:last-child)::after{content:"";position:absolute;left:4px;top:18px;bottom:-3px;width:1px;background:var(--op-line2)}
-.op-temps-q{color:var(--op-text);font-weight:700}
-.op-temps-e.is-now::before{border-color:var(--op-cyan);background:var(--op-cyan)}
-.op-temps-e.is-now .op-temps-q{color:var(--op-cyan);font-size:15.5px}
-.op-temps-note{margin:10px 0 0;color:var(--op-dim);font-size:12.5px;line-height:1.4}
+.op-trial{margin:-4px 0 0;color:var(--op-soft);font-size:12.5px;line-height:1.45;text-align:center;text-wrap:pretty}
+/* Durees (composant 21st.dev « Pricing Card » de 0xUrvish, 02/11/2026) : point a gauche, la duree choisie s'ouvre. */
+.op .op-plans{gap:10px}
+.op .op-plan{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:0 12px;align-items:start;padding:12px 14px;border-radius:12px;border:1px solid rgba(244,247,251,.12);background:#0c1b29;cursor:pointer;transition:border-color .25s,box-shadow .25s,background-color .25s}
+.op .op-plan:hover{background:#0e2030}
+.op .op-plan.is-on{border-color:var(--op-cyan);box-shadow:0 0 0 1px var(--op-cyan)}
+.op .op-plan input{appearance:none;-webkit-appearance:none;display:grid;place-items:center;width:24px;height:24px;margin:1px 0 0;border:2px solid rgba(163,177,194,.4);border-radius:50%;background:transparent;cursor:pointer;transition:border-color .25s}
+.op .op-plan input::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--op-cyan);transform:scale(0);transition:transform .3s cubic-bezier(.22,1,.36,1)}
+.op .op-plan input:checked{border-color:var(--op-cyan)}
+.op .op-plan input:checked::before{transform:scale(1)}
+.op .op-plan .hu-radio-p{margin-left:0}
+.op-plan-plus{grid-column:1/-1;display:grid;grid-template-rows:0fr;transition:grid-template-rows .4s cubic-bezier(.32,.72,0,1)}
+.op-plan.is-on .op-plan-plus{grid-template-rows:1fr}
+.op-plan-plus-i{min-height:0;overflow:hidden;visibility:hidden;transition:visibility .4s}
+.op-plan.is-on .op-plan-plus-i{visibility:visible}
+.op-pl{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid var(--op-line)}
+.op-pl-t{display:grid;gap:1px;min-width:0;font-size:13px;line-height:1.35;color:var(--op-soft)}
+.op-pl-t b{color:var(--op-text);font-size:14.5px;font-weight:700}
+.op-pl-m{flex:none;padding:5px 10px;border:1px solid var(--op-line2);border-radius:10px;background:#0f2130;color:var(--op-text);font-size:14px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.op-pl.is-now .op-pl-m{border-color:rgba(32,213,239,.55);color:var(--op-cyan);font-size:18px;font-weight:800}
+@media (prefers-reduced-motion:reduce){.op-plan,.op-plan input,.op-plan input::before,.op-plan-plus,.op-plan-plus-i{transition:none}}
 .op-trial[hidden]{display:none}
 .op-alt{justify-self:center;color:var(--op-soft);font-size:13.5px;text-decoration:underline;text-underline-offset:3px}
 .op-alt--start{justify-self:start;color:var(--op-cyan)}

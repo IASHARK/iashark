@@ -804,6 +804,9 @@ function redirectsContent() {
 
   out.push("", "# --- 404 traduite par repertoire. Non forcee : ne s'applique que si aucun",
     "# fichier n'existe au chemin demande. Toujours en dernier.");
+  // Ancienne page match absente de la version : accueil de la version, plutot qu'une 404 (02/11/2026).
+  // Apres le bloc des pages retirees : ses regles precises, vers le hub ligue, passent avant.
+  DIR_CODES.filter(function (d) { return d !== "fr"; }).forEach(function (d) { out.push(rule("/" + d + "/match/*", "/" + d + "/", "301")); });
   DIR_CODES.forEach(function (d) { out.push(rule("/" + d + "/*", "/" + d + "/404.html", "404")); });
   return out.join("\n") + "\n";
 }

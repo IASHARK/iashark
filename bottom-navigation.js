@@ -437,3 +437,9 @@
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',poser);else poser();
 })();
+
+/* Articles et guides : bloc « Match offert aujourd'hui » (lib/article-offert.js, 02/11/2026). */
+(function(){
+  if(!/^\/(?:[a-z]{2}\/)?(?:blog|articles|articulos)\/.+\.html$/.test(location.pathname))return;
+  var s=document.createElement('script');s.src='/lib/article-offert.js';document.head.appendChild(s);
+})();

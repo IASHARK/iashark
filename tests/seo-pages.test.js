@@ -11,6 +11,8 @@ const os = require("os");
 const ROOT = path.join(__dirname, "..");
 const SEO = require("../scripts/seo-pages.js");
 const C = require("../scripts/seo-common.js");
+// Perimetre reduit fixe pour ce fichier : la logique hreflang est verifiee sur une partie des versions.
+C.leagueByKey("premier").seoMatchDirs = ["gb", "en", "za"];
 const LASTMOD = require("../scripts/seo-lastmod.js");
 const SPLIT = require("../lib/public-data-split.js");
 const { writeSitemapIndex } = require("../scripts/i18n-sitemaps.js");

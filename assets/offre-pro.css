@@ -35,7 +35,17 @@
 .op-ico-s{width:16px;height:16px;color:var(--op-soft)}
 .op-pay{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0;padding:0;list-style:none;color:var(--op-soft);font-size:12.5px;line-height:1.4}
 .op-pay li{display:inline-flex;align-items:center;gap:6px}
-.op-trial{margin:-4px 0 0;color:var(--op-soft);font-size:13px;line-height:1.45}
+.op-trial{margin:2px 0 0;color:var(--op-soft);font-size:13.5px;line-height:1.45}
+/* Les trois etapes de l'essai (02/11/2026) : un fil, trois points ; seul « aujourd'hui » est en cyan. */
+.op-temps{display:grid;margin:0;padding:0;list-style:none}
+.op-temps-e{position:relative;display:grid;gap:1px;padding:0 0 12px 22px}
+.op-temps-e:last-child{padding-bottom:0}
+.op-temps-e::before{content:"";position:absolute;left:0;top:6px;width:9px;height:9px;border:1.5px solid var(--op-dim);border-radius:50%;background:#0a1521}
+.op-temps-e:not(:last-child)::after{content:"";position:absolute;left:4px;top:18px;bottom:-3px;width:1px;background:var(--op-line2)}
+.op-temps-q{color:var(--op-text);font-weight:700}
+.op-temps-e.is-now::before{border-color:var(--op-cyan);background:var(--op-cyan)}
+.op-temps-e.is-now .op-temps-q{color:var(--op-cyan);font-size:15.5px}
+.op-temps-note{margin:10px 0 0;color:var(--op-dim);font-size:12.5px;line-height:1.4}
 .op-trial[hidden]{display:none}
 .op-alt{justify-self:center;color:var(--op-soft);font-size:13.5px;text-decoration:underline;text-underline-offset:3px}
 .op-alt--start{justify-self:start;color:var(--op-cyan)}

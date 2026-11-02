@@ -15,6 +15,10 @@ const SEO = require("../scripts/seo-pages.js");
 const L = require("../scripts/match-lifecycle.js");
 const C = require("../scripts/seo-common.js");
 const PREMIUM = require("../lib/premium-fields.js");
+// Depuis le 02/11/2026 les 51 competitions sont ouvertes partout (config/leagues.json). Ces tests
+// verifient la logique d'un perimetre reduit : ils le fixent eux-memes, ici et pour ce fichier seulement.
+const PERIMETRES = { premier: ["gb", "en", "za"], laliga: ["es", "mx", "en"], seriea: ["en"], bundesliga: ["en"], ligue1: ["en"], primeira: ["en"], mls: ["en", "gb"], liga_mx: ["mx", "es"], argentina_liga_profesional: ["es", "en"] };
+for (const k of Object.keys(PERIMETRES)) C.leagueByKey(k).seoMatchDirs = PERIMETRES[k];
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), "utf8");
 const TPL = read("match.html");
 const HOUR = 3600 * 1000, DAY = 24 * HOUR;
@@ -94,6 +98,13 @@ function tmpRoot() {
 const exists = (root, rel) => fs.existsSync(path.join(root, rel));
 const readT = (root, rel) => fs.readFileSync(path.join(root, rel), "utf8");
 const at = (ms) => new Date(KICKOFF + ms);
+
+test("decision du 02/11/2026 : les 51 competitions ont leur page dans toutes les versions", () => {
+  const leagues = JSON.parse(read("config/leagues.json")).leagues;
+  assert.equal(leagues.length, 51);
+  const toutes = C.DIR_CODES.filter((d) => d !== "fr").sort();
+  for (const l of leagues) assert.deepEqual(l.seoMatchDirs.slice().sort(), toutes, l.key);
+});
 
 test("perimetre des versions : table explicite dans config/leagues.json, fr toujours genere", () => {
   const leagues = JSON.parse(read("config/leagues.json")).leagues;
@@ -354,7 +365,11 @@ test("versions sorties du perimetre : 301 vers le hub de la version ou la versio
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
 
-test("registre commite : chaque version retiree a sa 301 dans _redirects (meme bloc que le pipeline)", () => {
+test("registre commite : chaque version retiree a sa 301 dans _redirects (meme bloc que le pipeline)", (ctx) => {
+  // Le vrai perimetre de config/leagues.json, pas les perimetres reduits de ce fichier.
+  const vrais = JSON.parse(read("config/leagues.json")).leagues;
+  for (const k of Object.keys(PERIMETRES)) C.leagueByKey(k).seoMatchDirs = vrais.find((l) => l.key === k).seoMatchDirs;
+  ctx.after(() => { for (const k of Object.keys(PERIMETRES)) C.leagueByKey(k).seoMatchDirs = PERIMETRES[k]; });
   const reg = L.loadRegistry(ROOT);
   const text = read("_redirects");
   assert.equal(L.applyRedirectsBlock(text, reg), text, "_redirects desynchronise de data/match-pages-registry.json");

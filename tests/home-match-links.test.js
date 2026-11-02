@@ -56,6 +56,10 @@ test("accueils de version : chaque lien du resume vise une page match existante,
 });
 
 test("build-locales : meme resolution que le pipeline (version, meme langue, en, fr ; sinon nom sans lien)", () => {
+  // Perimetre reduit fixe pour ce test : les 51 competitions sont ouvertes partout depuis le 02/11/2026.
+  const CC = require("../scripts/seo-common.js");
+  CC.leagueByKey("premier").seoMatchDirs = ["gb", "en", "za"];
+  CC.leagueByKey("liga_mx").seoMatchDirs = ["mx", "es"];
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "iashark-home-links-"));
   try {
     const put = (rel, body) => { fs.mkdirSync(path.dirname(path.join(root, rel)), { recursive: true }); fs.writeFileSync(path.join(root, rel), body); };

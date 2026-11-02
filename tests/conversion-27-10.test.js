@@ -25,9 +25,9 @@ const MARDI = Date.parse("2026-10-27T10:00:00+01:00");
 test("C4 : bouton d'essai « 0 € aujourd'hui », premier prelevement date juste dessous, sans rappel promis", () => {
   const h = OP.html({ mode: "vitrine", contexte: "match", plans: PLANS, choisi: "month", jours: 7, connecte: false, uid: "c4", maintenant: MARDI });
   assert.match(h, /Essayer 7 jours : 0 € aujourd’hui/);
-  // Meme phrase que Mon compte (PR #222) : la date, puis le prix de chaque mois, la carte demandee ; essai reserve a un
-  // premier abonnement (avocat du diable, 27/10/2026 : un ancien abonne paie tout de suite).
-  assert.ok(h.includes("Premier prélèvement : 14,99 € le 3 novembre, puis 14,99 € chaque mois, seulement si tu ne résilies pas avant. Carte demandée ; résiliation en ligne depuis Mon compte. Essai réservé à un premier abonnement."), h);
+  // Les trois etapes de l'essai (02/11/2026) : meme verite que Mon compte (PR #222) : montant, date, prix de chaque
+  // mois, carte demandee ; essai reserve a un premier abonnement (avocat du diable, 27/10/2026).
+  for (const s of ["Aujourd’hui : 0 €", "Avant le 3 novembre", "Le 3 novembre", "14,99 €, puis 14,99 € chaque mois, si tu n’as pas résilié.", "Carte demandée pour démarrer. Essai réservé à un premier abonnement."]) assert.ok(h.includes(s), s);
   // La ligne d'essai suit le bouton, avant la facon de payer et les avantages.
   assert.ok(h.indexOf("op-cta") < h.indexOf("data-op-trial") && h.indexOf("data-op-trial") < h.indexOf("data-op-pay"));
   // Aucun rappel par e-mail : aucune tache planifiee ne l'envoie (trial-reminder / 0042 absents).

@@ -7,7 +7,7 @@ const TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN")!;
 const ADMIN = Deno.env.get("TELEGRAM_ADMIN_CHAT_ID")!;
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
-const IMAGE_OK = /^https:\/\/github\.com\/IASHARK\//;
+const IMAGE_OK = /^https:\/\/(github\.com|raw\.githubusercontent\.com)\/IASHARK\//;
 const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const clavier = { inline_keyboard: [
   [{ text: "Voir les matchs du jour", url: "https://iashark.com/?utm_source=telegram&utm_campaign=canal" }],
@@ -24,8 +24,8 @@ async function lire(url: string) {
 async function envoyer(texteUrl: string, imageUrl: string) {
   const texte = esc((await (await lire(texteUrl)).text()).trim());
   let res: Response;
-  if (imageUrl) {
-    if (texte.length > 1024) throw new Error("legende trop longue");
+  // Legende limitee a 1024 signes : au-dela, l'image passe en apercu au-dessus du texte, dans le meme message.
+  if (imageUrl && texte.length <= 1024) {
     const form = new FormData();
     form.append("chat_id", ADMIN);
     form.append("caption", texte);
@@ -37,7 +37,7 @@ async function envoyer(texteUrl: string, imageUrl: string) {
     res = await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ chat_id: ADMIN, text: texte, parse_mode: "HTML", link_preview_options: { is_disabled: true }, reply_markup: clavier }),
+      body: JSON.stringify({ chat_id: ADMIN, text: texte, parse_mode: "HTML", link_preview_options: imageUrl ? { url: imageUrl, prefer_large_media: true, show_above_text: true } : { is_disabled: true }, reply_markup: clavier }),
     });
   }
   const json = await res.json().catch(() => ({}));

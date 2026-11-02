@@ -1,22 +1,25 @@
 #!/usr/bin/env node
 // Envoie sur Telegram les messages prepares par build-posts.mjs.
 //   TELEGRAM_BOT_TOKEN=... TELEGRAM_CHAT_ID=... node scripts/telegram/send-posts.mjs <dossier>
-// Choix de Clement (28/09/2026) : il valide chaque publication d'un clic. Tout
-// part donc dans SA conversation privee avec le robot, avec les boutons
-// « Publier sur le canal » / « Ne pas publier ». Le clic est traite par
-// l'Edge Function supabase/functions/telegram-bot, qui copie le message sur
-// le canal @iasharkdata.
-// TEST=1 (essais de la branche) : marque [TEST], sans bouton de publication.
-// Publication automatique (plus tard, si Clement le decide) : TELEGRAM_AUTO=1
-// et TELEGRAM_CHANNEL_ID renseigne.
+// Tant que TELEGRAM_AUTO n'est pas a 1 : tout part dans la conversation privee de Clement, avec les
+// boutons « Publier sur le canal » / « Ne pas publier » (le clic est traite par le robot deploye).
+// TEST=1 (essais) : marque [TEST], sans bouton de publication.
+// Publication automatique (accord de Clement du 03/11/2026, reglage pose a la main) : TELEGRAM_AUTO=1 et
+// TELEGRAM_CHANNEL_ID = numero de la chaine privee (-100...). L'ancienne adresse @iasharkdata appartient
+// depuis le 26/10/2026 a un petit canal de renvoi : elle est refusee, et toute chaine publique aussi.
+//   node scripts/telegram/send-posts.mjs --verifier : dit si le reglage vise bien la chaine privee, sans afficher de valeur.
 import fs from "node:fs";
 import path from "node:path";
+import {createRequire} from "node:module";
+const P = createRequire(import.meta.url)("../../lib/telegram-posts.js");
 
-const dir = path.resolve(process.argv[2] || "telegram-out");
+const verifier = process.argv[2] === "--verifier";
+const dir = path.resolve(verifier ? "." : process.argv[2] || "telegram-out");
 const {TELEGRAM_BOT_TOKEN: token, TELEGRAM_CHAT_ID: prive, TELEGRAM_CHANNEL_ID: canal, TEST, TELEGRAM_AUTO} = process.env;
-if (!token || !prive) throw new Error("TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID manquants");
+if (!token || (!prive && !verifier)) throw new Error("TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID manquants");
 const test = TEST === "1";
 const auto = !test && TELEGRAM_AUTO === "1" && !!canal;
+if (!test && TELEGRAM_AUTO === "1" && !canal) console.log("::warning title=Telegram::TELEGRAM_AUTO=1 mais TELEGRAM_CHANNEL_ID absent : les messages restent a valider d'un clic.");
 const chatId = auto ? canal : prive;
 const validation = !test && !auto;
 const api = (m) => `https://api.telegram.org/bot${token}/${m}`;
@@ -34,9 +37,32 @@ const clavier = (p) => {
 };
 const prefixe = test ? "<b>[TEST — pas publié sur le canal]</b>\n" : "";
 
+// La chaine visee : verdict sans aucune valeur secrete.
+async function verdictChaine() {
+  if (!canal) return null;
+  if (!/^-100\d+$/.test(canal)) return {adresse: false};
+  const chat = await call("getChat", {chat_id: canal});
+  const moi = await call("getMe", {});
+  const membre = await call("getChatMember", {chat_id: canal, user_id: moi.result.id});
+  return {adresse: true, ...P.verdictChaine(chat.result, membre.result)};
+}
+if (verifier) {
+  const v = await verdictChaine();
+  if (!v) { console.log("TELEGRAM_CHANNEL_ID : absent. Rien ne peut partir en automatique."); process.exit(1); }
+  if (!v.adresse) { console.log("TELEGRAM_CHANNEL_ID : ce n'est pas un numero -100... (ancienne adresse ?). A corriger."); process.exit(1); }
+  const oui = (x) => (x === null ? "non lisible" : x ? "oui" : "non");
+  console.log(`Titre : ${v.titre}\nChaine : ${oui(v.chaine)}\nPrivee : ${oui(v.privee)}\nRobot administrateur : ${oui(v.robotAdmin)}\nMeme lien d'invitation que le plan : ${oui(v.lienIdentique)}`);
+  process.exit(v.chaine && v.privee && v.robotAdmin ? 0 : 1);
+}
+if (auto) {
+  const v = await verdictChaine();
+  if (!v.adresse) throw new Error("TELEGRAM_CHANNEL_ID doit etre le numero de la chaine privee (-100...) : rien n'est envoye.");
+  if (!v.privee || !v.robotAdmin) throw new Error("TELEGRAM_CHANNEL_ID ne vise pas une chaine privee ou le robot n'y est pas administrateur : rien n'est envoye.");
+}
+
 const {posts, date} = JSON.parse(fs.readFileSync(path.join(dir, "posts.json"), "utf8"));
 if (!posts.length) { console.log("Aucun message a envoyer."); process.exit(0); }
-console.log(`${test ? "TEST (conversation privee)" : auto ? "CANAL (automatique)" : "A VALIDER (conversation privee)"} — ${posts.length} message(s) du ${date}`);
+console.log(`${test ? "TEST (conversation privee)" : auto ? "CHAINE (automatique)" : "A VALIDER (conversation privee)"} — ${posts.length} message(s) du ${date}`);
 for (const p of posts) {
   if (p.type === "text") {
     await call("sendMessage", {chat_id: chatId, text: prefixe + p.html, parse_mode: "HTML",
@@ -58,10 +84,6 @@ for (const p of posts) {
     if (clavier(p)) form.append("reply_markup", JSON.stringify(clavier(p)));
     form.append("video", new Blob([fs.readFileSync(p.image)], {type: "video/mp4"}), "video.mp4");
     await call("sendVideo", form);
-  } else if (p.type === "poll") {
-    if (test) await call("sendMessage", {chat_id: chatId, text: prefixe + "Sondage ci-dessous :", parse_mode: "HTML"});
-    await call("sendPoll", {chat_id: chatId, question: p.question.slice(0, 300), options: p.options.map((t) => ({text: t.slice(0, 100)})),
-      is_anonymous: true, reply_markup: clavier(p)});
   }
   // Trace de ce qui est VRAIMENT parti : le workflow ne memorise que ces messages
   // (un match gratuit non envoye reste a envoyer ce jour-la).

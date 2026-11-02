@@ -33,6 +33,12 @@
       "max_matchs_par_lancement": 15,
       "max_appels_par_lancement": 60
     },
+    "telegram_canal": {
+      "_lisezmoi": "Chaine Telegram : au plus A appels par passage. Compos : seulement dans les N minutes avant le gros match du soir (2 appels par passage, toutes les 15 min) ; hors de cette fenetre, aucun appel. Debat : 1 appel pour M matchs au plus. Hier : 1 appel (les 2 buteurs).",
+      "fenetre_compos_minutes": 70,
+      "max_appels_par_lancement": 3,
+      "max_matchs_debat": 5
+    },
     "suivi_proche_coup_envoi": {
       "_lisezmoi": "forward-odds-near-kickoff (toutes les heures) : matchs dans les N heures, au plus M appels par lancement.",
       "fenetre_heures": 3,

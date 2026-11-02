@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="fr"><head><meta charset="utf-8">
-<!-- Banniere du match gratuit pour le canal Telegram (1080x740).
+<!-- Banniere du match offert pour le canal Telegram (1080x740).
      Remplie par build-posts.mjs ; valeurs deja echappees. Choix de Clement
      (20/10/2026) : seulement IASHARK, les deux logos des clubs, le match,
      la competition, la date et l'heure. Charte : fond #060b12, cyan #20d5ef, gris. -->
@@ -19,6 +19,6 @@
 </style></head><body><div class="c">
 <div class="logo">IA<span>SHARK</span></div>
 <div class="logos" style="{{LOGOS}}"><img src="{{LOGO_DOM}}" alt=""><span class="vs">VS</span><img src="{{LOGO_EXT}}" alt=""></div>
-<div class="lbl">MATCH GRATUIT DU JOUR</div>
+<div class="lbl">LE MATCH OFFERT</div>
 <div class="t{{LONG}}">{{EQUIPES}}</div><div class="w">{{QUAND}}</div>
 </div></body></html>

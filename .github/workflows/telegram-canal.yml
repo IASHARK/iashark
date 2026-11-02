@@ -1,19 +1,23 @@
 name: Canal Telegram IASHARK
 
-# Messages du canal t.me/iasharkdata (27/09/2026, valide par Clement).
-# Programme du 20/10/2026 (Clement) : 9h le match du jour (meme match que le site,
-# avec image et lien) + resultats d'hier ; 13h le guide du jour ; 15h sondage sur
-# l'affiche du soir ; 16h30 l'actu foot ; 18h30 les gros matchs du soir avec liens.
-# Les crons tournent aux 2 heures UTC possibles (ete / hiver) ; le script ne
-# garde que celle qui tombe a la bonne heure de Paris.
+# Chaine Telegram privee d'IASHARK, plan valide par Clement le 03/11/2026 (heure de Paris, ete comme hiver) :
+#   9 h    « Hier »           ce qu'on a donne la veille, gagnes ET perdus, apres le calcul du matin
+#   12 h   « Le match offert » l'affiche, l'heure, 2 faits de la fiche publique, le lien du compte gratuit
+#   23 h 15 « Le debat »       les resultats du soir (score = liste des buts) et une question ouverte
+#   1 h avant le gros match du soir, « Les compos » : workflow a part, telegram-compos.yml.
+# Plus de guide de 13 h, de sondage de 15 h, d'actu de 16 h 30 ni de liste de 18 h 30.
 #
-# SECURITE : tout part dans la conversation privee de Clement (TELEGRAM_CHAT_ID),
-# avec les boutons « Publier sur le canal » / « Ne pas publier » : il valide
-# chaque message d'un clic (scripts/telegram/send-posts.mjs). L'envoi direct sur
-# le canal n'existe que si TELEGRAM_AUTO=1 ET TELEGRAM_CHANNEL_ID sont poses
-# (decision de Clement, pas en place : TELEGRAM_AUTO n'est pas dans ce workflow).
-# Secrets : TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID (deja la pour les videos),
-# TELEGRAM_CHANNEL_ID (@iasharkdata).
+# L'HEURE : les crons de ce depot arrivent des heures en retard (mesure du 02/11/2026 : le cron de 8 h-9 h
+# est parti a 17 h 58, celui de 18 h 30 a 0 h 39 ; buteurs-jour-de-match, « toutes les 30 min », tourne 2 a 3 fois
+# par jour). Seule la fin du calcul du matin (workflow_run) est a l'heure. Donc une CHAINE, chaque maillon
+# attend son heure puis lance le suivant : calcul du matin -> Hier (attend 9 h) -> match offert (attend 12 h) ->
+# telegram-compos.yml (repasse toutes les 15 min) -> debat (attend 23 h 15). Les crons restent en secours :
+# n'importe quel passage rattrape ce qui n'est pas parti (memoire d'envoi : un seul message par jour).
+#
+# SECURITE : tant que la variable TELEGRAM_AUTO n'est pas a 1, tout part dans la conversation privee
+# de Clement (TELEGRAM_CHAT_ID) avec les boutons « Publier sur le canal » / « Ne pas publier ». Envoi direct :
+# variable TELEGRAM_AUTO=1 ET secret TELEGRAM_CHANNEL_ID = numero de la chaine privee (-100...), jamais
+# @iasharkdata (canal de renvoi depuis le 26/10/2026). Verification : slot « verifier-chaine » (aucune valeur affichee).
 
 on:
   workflow_run:
@@ -21,20 +25,18 @@ on:
     types: [completed]
     branches: [main]
   schedule:
-    - cron: '5 7,8 * * *'    # match du jour (+ resultats), 9h Paris
-    - cron: '5 11,12 * * *'  # guide, 13h Paris
-    - cron: '5 13,14 * * *'  # sondage, 15h Paris
-    - cron: '35 14,15 * * *' # actu, 16h30 Paris
-    - cron: '35 16,17 * * *' # gros matchs du soir, 18h30 Paris
+    - cron: '5 7,8 * * *'    # Hier, 9 h Paris
+    - cron: '5 10,11 * * *'  # match offert, 12 h Paris
+    - cron: '15 21,22 * * *' # debat, 23 h 15 Paris
   workflow_dispatch:
     inputs:
       slot:
         description: "Quels messages"
         type: choice
-        options: [tout, apres-maj, sondage, soir, actu, guide]
+        options: [tout, hier, offert, debat, verifier-chaine]
         default: tout
       test:
-        description: "Test : envoyer dans ma conversation privee, pas sur le canal"
+        description: "Test : envoyer dans ma conversation privee, pas sur la chaine"
         type: boolean
         default: true
   # Essai de la branche de travail : tout part en TEST dans la conversation privee.
@@ -57,9 +59,11 @@ jobs:
     # (avocat du diable, 2e revue : une panne ne doit plus tout faire taire).
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Jusqu'a 5 h 45 d'attente de l'heure du rendez-vous, puis l'envoi.
+    timeout-minutes: 360
     permissions:
       contents: read
+      actions: write # lancer le maillon suivant de la chaine
     steps:
       - name: Choix des messages
         id: slot
@@ -68,24 +72,43 @@ jobs:
           INPUT_SLOT: ${{ inputs.slot }}
           INPUT_TEST: ${{ inputs.test }}
         run: |
-          H=$(TZ=Europe/Paris date +%-H)
+          H=${FORCER_HEURE:-$(TZ=Europe/Paris date +%-H)}
+          M=${FORCER_MINUTE:-$(TZ=Europe/Paris date +%-M)}
           TEST=0; SLOT=""
           case "$EVENT" in
             workflow_run)
-              # Pas de message la nuit (le calcul tourne parfois apres minuit) :
-              # le run suivant de la journee enverra.
-              if [ "$H" -ge 8 ] && [ "$H" -lt 21 ]; then SLOT=apres-maj; fi ;;
+              # Fin du calcul du matin : Hier (attend 9 h), ou tout ce qui n'est pas parti s'il finit tard.
+              case "$H" in
+                4|5|6|7|8|9|10|11) SLOT=hier ;;
+                12|13|14|15|16|17|18|19|20) SLOT=rattrapage ;;
+              esac ;;
             schedule)
-              case "$H" in 9) SLOT=apres-maj ;; 13) SLOT=guide ;; 15) SLOT=sondage ;; 16) SLOT=actu ;; 18) SLOT=soir ;; esac ;;
+              case "$H" in
+                4|5|6|7|8|9|10|11) SLOT=hier ;;
+                12|13|14|15|16|17|18|19|20) SLOT=rattrapage ;;
+                21|22|23|0|1|2) SLOT=debat ;;
+              esac ;;
             workflow_dispatch)
               SLOT="$INPUT_SLOT"; [ "$INPUT_TEST" = "true" ] && TEST=1 ;;
             push)
               SLOT=tout; TEST=1 ;;
           esac
+          # Minutes a attendre l'heure du rendez-vous (jamais en test). Plus de 5 h 45 : ce passage ne fait rien.
+          CIBLE=0
+          case "$SLOT" in hier) CIBLE=540 ;; offert) CIBLE=720 ;; debat) [ "$H" -ge 6 ] && CIBLE=1395 ;; esac
+          ATTENTE=$((CIBLE - H * 60 - M))
+          if [ "$TEST" = "1" ] || [ "$ATTENTE" -lt 0 ]; then ATTENTE=0; fi
+          if [ "$ATTENTE" -gt 345 ]; then echo "Trop tot pour $SLOT : ce passage ne fait rien."; SLOT=""; ATTENTE=0; fi
+          DATE=$(TZ=Europe/Paris date +%F)
+          # Debat en retard, apres minuit : il reste celui du soir d'avant (un seul par soir).
+          if [ "$SLOT" = "debat" ] && [ "$H" -lt 6 ]; then
+            DATE=$(TZ=Europe/Paris date -d yesterday +%F 2>/dev/null || TZ=Europe/Paris date -v-1d +%F)
+          fi
           echo "slot=$SLOT" >> "$GITHUB_OUTPUT"
           echo "test=$TEST" >> "$GITHUB_OUTPUT"
-          echo "date=$(TZ=Europe/Paris date +%F)" >> "$GITHUB_OUTPUT"
-          echo "Heure de Paris : ${H}h -> messages : ${SLOT:-aucun} (test=$TEST)"
+          echo "date=$DATE" >> "$GITHUB_OUTPUT"
+          echo "attente=$ATTENTE" >> "$GITHUB_OUTPUT"
+          echo "Heure de Paris : ${H}h${M} -> messages : ${SLOT:-aucun}, attente : ${ATTENTE} min (test=$TEST)"
 
       - name: Prevenir Clement (calcul du matin en echec)
         if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure' }}
@@ -93,95 +116,103 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          echo "::warning title=Canal Telegram::le calcul du matin a echoue : messages faits sur les donnees deja publiees"
+          echo "::warning title=Canal Telegram::le calcul du matin a echoue : Hier et le match offert attendent le calcul relance"
           if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
             curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
               --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
-              --data-urlencode "text=⚠️ Le calcul du matin a échoué (voir l'e-mail de GitHub). Le canal utilise les données déjà publiées : pas de match gratuit si celles du jour manquent. Il partira quand le calcul relancé aura réussi." > /dev/null || true
+              --data-urlencode "text=Le calcul du matin a échoué (voir l'e-mail de GitHub). Hier et le match offert partiront quand le calcul relancé aura réussi." > /dev/null || true
           fi
 
-      # Une seule fois par jour et par message (le calcul du jour tourne parfois
-      # plusieurs fois) : une cle de cache sert de memoire. Contre-controle de
-      # l'avocat du diable (30/09/2026) : une cle PAR MESSAGE (resultats d'hier,
-      # match gratuit), posee seulement quand ce message est VRAIMENT parti. Un
-      # calcul du matin en echec (donnees du jour absentes) n'envoie que les
-      # resultats : le match gratuit n'est pas consomme et partira apres le calcul
-      # relance avec succes.
-      - name: Deja envoye aujourd'hui ? (resultats d'hier)
-        id: deja_resultats
-        if: ${{ steps.slot.outputs.slot == 'apres-maj' && steps.slot.outputs.test == '0' }}
+      # Une seule fois par jour et par message : une cle de cache sert de memoire, posee
+      # seulement quand ce message est VRAIMENT parti (envoyes.txt, ecrit par send-posts.mjs).
+      - name: Deja envoye aujourd'hui ? (Hier)
+        id: deja_hier
+        if: ${{ (steps.slot.outputs.slot == 'hier' || steps.slot.outputs.slot == 'rattrapage') && steps.slot.outputs.test == '0' }}
         uses: actions/cache/restore@v4
         with:
           path: .telegram-envoye
-          key: telegram-${{ steps.slot.outputs.date }}-resultats
+          key: telegram-${{ steps.slot.outputs.date }}-hier
           lookup-only: true
 
-      - name: Deja envoye aujourd'hui ? (match gratuit)
-        id: deja_match
-        if: ${{ steps.slot.outputs.slot == 'apres-maj' && steps.slot.outputs.test == '0' }}
+      - name: Deja envoye aujourd'hui ? (match offert)
+        id: deja_offert
+        if: ${{ (steps.slot.outputs.slot == 'offert' || steps.slot.outputs.slot == 'rattrapage') && steps.slot.outputs.test == '0' }}
         uses: actions/cache/restore@v4
         with:
           path: .telegram-envoye
-          key: telegram-${{ steps.slot.outputs.date }}-match
+          key: telegram-${{ steps.slot.outputs.date }}-offert
           lookup-only: true
 
-      - name: Deja envoye aujourd'hui ? (autre creneau)
-        id: deja_autre
-        if: ${{ steps.slot.outputs.slot != '' && steps.slot.outputs.slot != 'apres-maj' && steps.slot.outputs.test == '0' }}
+      - name: Deja envoye aujourd'hui ? (debat)
+        id: deja_debat
+        if: ${{ steps.slot.outputs.slot == 'debat' && steps.slot.outputs.test == '0' }}
         uses: actions/cache/restore@v4
         with:
           path: .telegram-envoye
-          key: telegram-${{ steps.slot.outputs.date }}-${{ steps.slot.outputs.slot }}
+          key: telegram-${{ steps.slot.outputs.date }}-debat
           lookup-only: true
 
       - name: Messages a preparer
         id: afaire
-        if: ${{ steps.slot.outputs.slot != '' }}
+        if: ${{ steps.slot.outputs.slot != '' && steps.slot.outputs.slot != 'verifier-chaine' }}
         env:
           SLOT: ${{ steps.slot.outputs.slot }}
-          DEJA_RESULTATS: ${{ steps.deja_resultats.outputs.cache-hit }}
-          DEJA_MATCH: ${{ steps.deja_match.outputs.cache-hit }}
-          DEJA_AUTRE: ${{ steps.deja_autre.outputs.cache-hit }}
+          DEJA_HIER: ${{ steps.deja_hier.outputs.cache-hit }}
+          DEJA_OFFERT: ${{ steps.deja_offert.outputs.cache-hit }}
+          DEJA_DEBAT: ${{ steps.deja_debat.outputs.cache-hit }}
         run: |
           A="$SLOT"
-          if [ "$SLOT" = "apres-maj" ]; then
-            if [ "$DEJA_RESULTATS" = "true" ] && [ "$DEJA_MATCH" = "true" ]; then A=""
-            elif [ "$DEJA_RESULTATS" = "true" ]; then A="match"
-            elif [ "$DEJA_MATCH" = "true" ]; then A="resultats"
-            fi
-          elif [ "$DEJA_AUTRE" = "true" ]; then A=""
-          fi
+          case "$SLOT" in
+            rattrapage)
+              if [ "$DEJA_HIER" = "true" ] && [ "$DEJA_OFFERT" = "true" ]; then A=""
+              elif [ "$DEJA_HIER" = "true" ]; then A="offert"
+              elif [ "$DEJA_OFFERT" = "true" ]; then A="hier"
+              fi ;;
+            hier) [ "$DEJA_HIER" = "true" ] && A="" ;;
+            offert) [ "$DEJA_OFFERT" = "true" ] && A="" ;;
+            debat) [ "$DEJA_DEBAT" = "true" ] && A="" ;;
+          esac
           echo "slot=$A" >> "$GITHUB_OUTPUT"
           echo "Messages a preparer : ${A:-aucun, deja envoyes ce jour}"
 
+      - name: Attendre l'heure du rendez-vous
+        if: ${{ steps.afaire.outputs.slot != '' && steps.slot.outputs.attente != '0' }}
+        env:
+          ATTENTE: ${{ steps.slot.outputs.attente }}
+        run: sleep $((ATTENTE * 60))
+
       - uses: actions/checkout@v4
-        if: ${{ steps.afaire.outputs.slot != '' }}
+        if: ${{ steps.afaire.outputs.slot != '' || steps.slot.outputs.slot == 'verifier-chaine' }}
         with:
           ref: ${{ github.event_name == 'push' && github.ref || 'main' }}
 
       - uses: actions/setup-node@v4
-        if: ${{ steps.afaire.outputs.slot != '' }}
+        if: ${{ steps.afaire.outputs.slot != '' || steps.slot.outputs.slot == 'verifier-chaine' }}
         with:
           node-version: '20'
           cache: npm
 
-      - name: Dependances (navigateur pour l'image)
-        if: ${{ steps.afaire.outputs.slot != '' }}
+      - name: La chaine visee est-elle la bonne ? (aucune valeur affichee)
+        if: ${{ steps.slot.outputs.slot == 'verifier-chaine' }}
         env:
-          SLOT: ${{ steps.afaire.outputs.slot }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
+        run: node scripts/telegram/send-posts.mjs --verifier
+
+      - name: Dependances (navigateur pour l'image)
+        if: ${{ steps.afaire.outputs.slot == 'offert' || steps.afaire.outputs.slot == 'rattrapage' || steps.afaire.outputs.slot == 'tout' }}
         run: |
           npm ci
-          if [ "$SLOT" = "apres-maj" ] || [ "$SLOT" = "match" ] || [ "$SLOT" = "tout" ]; then
-            npx playwright install --with-deps chromium
-          fi
+          npx playwright install --with-deps chromium
 
       - name: Preparation des messages
         if: ${{ steps.afaire.outputs.slot != '' }}
         env:
           SLOT: ${{ steps.afaire.outputs.slot }}
-          # Lecture seule du pari, de sa cote et de la chance du match du jour (match_premium_data).
+          # Lecture seule : archive, tickets de la veille. API-Football : buteurs d'hier, scores du debat.
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
         run: node scripts/telegram/build-posts.mjs --slot "$SLOT" --out "$RUNNER_TEMP/telegram"
 
       - name: Envoi Telegram
@@ -191,6 +222,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
+          TELEGRAM_AUTO: ${{ vars.TELEGRAM_AUTO }}
           TEST: ${{ steps.slot.outputs.test }}
         run: node scripts/telegram/send-posts.mjs "$RUNNER_TEMP/telegram"
 
@@ -199,37 +231,45 @@ jobs:
       - name: Ce qui est parti
         id: parti
         if: ${{ always() && steps.afaire.outputs.slot != '' && steps.slot.outputs.test == '0' }}
-        env:
-          SLOT: ${{ steps.slot.outputs.slot }}
-          ENVOI: ${{ steps.envoi.outcome }}
         run: |
           F="$RUNNER_TEMP/telegram/envoyes.txt"
-          for s in resultats match; do
+          for s in hier offert debat; do
             if [ -f "$F" ] && grep -qx "$s" "$F"; then echo "$s=1" >> "$GITHUB_OUTPUT"; fi
           done
-          if [ "$SLOT" != "apres-maj" ] && [ "$ENVOI" = "success" ]; then echo "autre=1" >> "$GITHUB_OUTPUT"; fi
           mkdir -p .telegram-envoye && date > .telegram-envoye/ok
 
-      - name: Memoriser l'envoi du jour (resultats d'hier)
-        if: ${{ always() && steps.parti.outputs.resultats == '1' }}
+      - name: Memoriser l'envoi du jour (Hier)
+        if: ${{ always() && steps.parti.outputs.hier == '1' }}
         uses: actions/cache/save@v4
         with:
           path: .telegram-envoye
-          key: telegram-${{ steps.slot.outputs.date }}-resultats
+          key: telegram-${{ steps.slot.outputs.date }}-hier
 
-      - name: Memoriser l'envoi du jour (match gratuit)
-        if: ${{ always() && steps.parti.outputs.match == '1' }}
+      - name: Memoriser l'envoi du jour (match offert)
+        if: ${{ always() && steps.parti.outputs.offert == '1' }}
         uses: actions/cache/save@v4
         with:
           path: .telegram-envoye
-          key: telegram-${{ steps.slot.outputs.date }}-match
+          key: telegram-${{ steps.slot.outputs.date }}-offert
 
-      - name: Memoriser l'envoi du jour (autre creneau)
-        if: ${{ always() && steps.parti.outputs.autre == '1' }}
+      - name: Memoriser l'envoi du jour (debat)
+        if: ${{ always() && steps.parti.outputs.debat == '1' }}
         uses: actions/cache/save@v4
         with:
           path: .telegram-envoye
-          key: telegram-${{ steps.slot.outputs.date }}-${{ steps.slot.outputs.slot }}
+          key: telegram-${{ steps.slot.outputs.date }}-debat
+
+      # La chaine : le rendez-vous suivant (jamais en test ; rien a faire si ce message etait deja parti).
+      - name: Rendez-vous suivant
+        if: ${{ always() && steps.afaire.outputs.slot != '' && steps.slot.outputs.test == '0' }}
+        env:
+          SLOT: ${{ steps.afaire.outputs.slot }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          case "$SLOT" in
+            hier) gh workflow run telegram-canal.yml -R "$GITHUB_REPOSITORY" --ref main -f slot=offert -f test=false ;;
+            offert|rattrapage) gh workflow run telegram-compos.yml -R "$GITHUB_REPOSITORY" --ref main -f test=false ;;
+          esac
 
       # Copie des messages et de l'image (7 jours) pour verifier ce qui est parti.
       - uses: actions/upload-artifact@v4

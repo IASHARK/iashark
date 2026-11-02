@@ -27,7 +27,7 @@ test("C4 : bouton d'essai « 0 € aujourd'hui », premier prelevement date just
   assert.match(h, /Essayer 7 jours : 0 € aujourd’hui/);
   // Les trois etapes de l'essai (02/11/2026) : meme verite que Mon compte (PR #222) : montant, date, prix de chaque
   // mois, carte demandee ; essai reserve a un premier abonnement (avocat du diable, 27/10/2026).
-  for (const s of ["Aujourd’hui : 0 €", "Avant le 3 novembre", "Le 3 novembre", "14,99 €, puis 14,99 € chaque mois, si tu n’as pas résilié.", "Carte demandée pour démarrer. Essai réservé à un premier abonnement."]) assert.ok(h.includes(s), s);
+  for (const s of ["Aujourd’hui", ">0 €<", "Le 3 novembre", ">14,99 €<", "Puis chaque mois, si tu n’as pas résilié", "Avant le 3 novembre, tu peux résilier en ligne depuis Mon compte : tu ne paies rien.", "Carte demandée. Essai réservé à un premier abonnement."]) assert.ok(h.includes(s), s);
   // La ligne d'essai suit le bouton, avant la facon de payer et les avantages.
   assert.ok(h.indexOf("op-cta") < h.indexOf("data-op-trial") && h.indexOf("data-op-trial") < h.indexOf("data-op-pay"));
   // Aucun rappel par e-mail : aucune tache planifiee ne l'envoie (trial-reminder / 0042 absents).
@@ -408,15 +408,8 @@ test("C2 : la ligne « Hier » : veille a Paris et pour le visiteur, gagnes ET p
   assert.equal(OP.lignePreuve(b(7, 3, 0, "2026-10-25"), MARDI_MATIN), "", "vieux bilan : rien");
   assert.equal(OP.lignePreuve({ jour: "2026-10-26", offert: null }, MARDI_MATIN), "", "donnee absente : rien");
   assert.equal(OP.lignePreuve(null, MARDI_MATIN), "");
-  // Rendu dans le composant : sous le bouton, jamais de % ni de lien, place cachee tant que rien n'est lu.
-  const h = OP.html({ mode: "vitrine", contexte: "general", plans: PLANS, choisi: "month", jours: 7, connecte: false, uid: "c2", preuve: OP.lignePreuve(b(7, 3), MARDI_MATIN), maintenant: MARDI_MATIN });
-  const p = h.slice(h.indexOf('class="op-preuve"'), h.indexOf("</p>", h.indexOf('class="op-preuve"')));
-  assert.ok(h.indexOf("op-cta") < h.indexOf('class="op-preuve"'));
-  assert.doesNotMatch(p, /%|<a |href|vert|rouge|green|red/);
-  assert.match(OP.html({ mode: "vitrine", contexte: "general", plans: PLANS, choisi: "month", jours: 7, connecte: false, uid: "c2b" }), /data-op-preuve hidden>/);
-  // Lu une fois par page dans le fichier du calcul quotidien (jamais recalcule ici).
-  const src = read("lib/offre-pro.js");
-  assert.match(src, /G\.fetch\("\/preuves\/bilan-hier\.json", \{ cache: "no-cache" \}\)/);
+  // Choix de Clement du 02/11/2026 : le bilan d'hier n'est plus affiche dans le bloc de paiement.
+  assert.doesNotMatch(OP.html({ mode: "vitrine", contexte: "general", plans: PLANS, choisi: "month", jours: 7, connecte: false, uid: "c2" }), /op-preuve/);
   for (const l of LOCALES) {
     const d = JSON.parse(read("i18n/dict/" + l + ".json")).preuve_simples;
     for (const k of ["line", "won_one", "won_other", "lost_one", "lost_other", "void_one", "void_other", "pending_one", "pending_other"]) assert.ok(d && d[k], l + " " + k);

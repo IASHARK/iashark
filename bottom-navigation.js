@@ -320,9 +320,10 @@
     a.target='_blank';
     a.rel='noopener';
     a.setAttribute('data-track','telegram_bubble');
-    a.setAttribute('aria-label','Rejoins-nous sur Telegram : match du jour, actu, résultats');
+    var TXT={en:['Join us on Telegram','Match of the day, news, results'],es:['Únete a nosotros en Telegram','Partido del día, noticias, resultados'],'es-mx':['Únete a nosotros en Telegram','Partido del día, noticias, resultados'],de:['Komm zu uns auf Telegram','Spiel des Tages, News, Ergebnisse'],it:['Unisciti a noi su Telegram','Partita del giorno, notizie, risultati'],pt:['Junta-te a nós no Telegram','Jogo do dia, notícias, resultados']}[window.I18N&&window.I18N.locale]||['Rejoins-nous sur Telegram','Match du jour, actu, résultats'];
+    a.setAttribute('aria-label',TXT[0]+' : '+TXT[1].charAt(0).toLowerCase()+TXT[1].slice(1));
     a.innerHTML='<span class="ias-tg-i" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#060b12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></span>'
-      +'<span><span class="ias-tg-1">Rejoins-nous sur Telegram</span><span class="ias-tg-2">Match du jour, actu, résultats</span></span>';
+      +'<span><span class="ias-tg-1">'+TXT[0]+'</span><span class="ias-tg-2">'+TXT[1]+'</span></span>';
     document.body.appendChild(a);
     // JAMAIS par-dessus un bouton ou un prix (26/10/2026). L'ancienne garde ne surveillait que
     // deux sortes de boutons (.op-cta, .mu-shimmer) : sur telephone la bulle couvrait l'offre

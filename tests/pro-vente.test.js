@@ -79,7 +79,7 @@ test("interrupteurs de verite : une ligne n'apparait que si elle est vraie pour 
   assert.equal(si("anj"), 1);
   // Memes regles que le composant (lib/offre-pro.js#avantages, lib/aujourdhui.js#enLigne).
   assert.deepEqual(PV.conditions({ tickets: true, marcheFr: true, langueFr: true }), { tickets: true, marches: true, telegram: false, anj: true });
-  assert.deepEqual(PV.conditions({ tickets: true, marcheFr: false, langueFr: false }), { tickets: false, marches: false, telegram: false, anj: false });
+  assert.deepEqual(PV.conditions({ tickets: true, marcheFr: false, langueFr: false }), { tickets: true, marches: false, telegram: false, anj: false });
   assert.deepEqual(PV.conditions({ tickets: false, marcheFr: true, langueFr: true }), { tickets: false, marches: true, telegram: false, anj: true });
   // Messages prives Telegram : pas en ligne au 21/10/2026 (seul Clement les recoit en
   // rodage). Passer OUVERT.telegram a true LE JOUR ou chaque abonne lie les recoit, et

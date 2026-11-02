@@ -410,24 +410,13 @@ test('Canal : le bon creneau a la bonne heure, ete comme hiver, jamais avant 9 h
   const lancer = lanceur(wf, dir);
   const choix = (EVENT, h, m, extra) => lancer('Choix des messages', {EVENT, FORCER_HEURE: String(h), FORCER_MINUTE: String(m || 0), INPUT_SLOT: '', INPUT_TEST: '', ...extra});
   const creneau = (EVENT, h) => choix(EVENT, h).slot || '';
-  assert.deepStrictEqual([3, 4, 8, 9, 11, 12, 20, 21, 23, 0, 2].map((h) => creneau('schedule', h)), ['', 'hier', 'hier', 'hier', 'hier', 'rattrapage', 'rattrapage', 'debat', 'debat', 'debat', 'debat']);
-  assert.deepStrictEqual([3, 8, 9, 11, 12, 20, 21].map((h) => creneau('workflow_run', h)), ['', 'hier', 'hier', 'hier', 'rattrapage', 'rattrapage', '']);
-  // Chaque message attend son heure : calcul du matin fini a 8 h 08 -> 52 min avant Hier.
-  assert.strictEqual(choix('workflow_run', 8, 8).attente, '52');
-  assert.strictEqual(choix('workflow_run', 9, 30).attente, '0', 'calcul en retard : tout de suite');
-  const dispatch = (slot, h, m, test) => choix('workflow_dispatch', h, m, {INPUT_SLOT: slot, INPUT_TEST: test || 'false'});
-  assert.deepStrictEqual([dispatch('offert', 9, 10).slot, dispatch('offert', 9, 10).attente], ['offert', '170']);
-  assert.deepStrictEqual([dispatch('debat', 21, 15).slot, dispatch('debat', 21, 15).attente], ['debat', '120']);
-  assert.strictEqual(dispatch('debat', 0, 20).attente, '0', 'passage en retard, apres minuit : tout de suite');
-  // Au-dela de 5 h 45 (limite de 6 h de GitHub) : ce passage ne fait rien.
-  assert.strictEqual(dispatch('debat', 12, 0).slot || '', '');
-  assert.strictEqual(dispatch('hier', 2, 0).slot || '', '');
-  assert.strictEqual(dispatch('hier', 2, 0, 'true').attente, '0', 'en test : jamais d\'attente');
-  // La chaine : Hier -> match offert -> compos -> debat, jamais en test.
-  assert.match(wf, /hier\) gh workflow run telegram-canal\.yml .* -f slot=offert -f test=false/);
-  assert.match(wf, /offert\|rattrapage\) gh workflow run telegram-compos\.yml .* -f test=false/);
-  assert.match(wf, /actions: write/);
-  assert.match(wf, /timeout-minutes: 360/);
+  assert.deepStrictEqual([3, 4, 8, 12, 20, 21, 22, 23, 0, 2].map((h) => creneau('schedule', h)), ['', 'rattrapage', 'rattrapage', 'rattrapage', 'rattrapage', '', '', 'debat', 'debat', 'debat']);
+  assert.deepStrictEqual([3, 8, 12, 20, 21].map((h) => creneau('workflow_run', h)), ['', 'rattrapage', 'rattrapage', 'rattrapage', '']);
+  // Aucun job n'attend : pas de sleep, pas de chaine, 20 minutes au plus.
+  assert.ok(!/\bsleep\b/.test(wf.replace(/^\s*#.*$/gm, '')), 'aucune attente');
+  assert.ok(!/gh workflow run/.test(wf), 'aucun maillon lance');
+  assert.ok(!/actions: write/.test(wf));
+  assert.match(wf, /timeout-minutes: 20/);
   // Crons UTC : hiver (UTC+1) et ete (UTC+2) tombent sur 9 h, 12 h et 23 h 15 de Paris.
   assert.match(wf, /cron: '5 7,8 \* \* \*'/);
   assert.match(wf, /cron: '5 10,11 \* \* \*'/);
@@ -494,28 +483,11 @@ test('Compos : passage toutes les 15 min aux heures utiles, une fois par jour, s
   const lancer = lanceur(wf, dir);
   const utile = (h) => lancer('Heure utile ?', {EVENT: 'schedule', FORCER_HEURE: String(h), INPUT_TEST: ''}).utile;
   assert.deepStrictEqual([5, 6, 20, 22, 23].map(utile), ['0', '1', '1', '1', '0']);
-  // Les passages : 15 min entre chaque, arret des que le message est pret ou le coup d'envoi passe, relais avant 6 h.
-  const faux = path.join(dir, 'faux');
-  fs.mkdirSync(faux);
-  const etats = path.join(dir, 'etats'), compte = path.join(dir, 'sommeils');
-  fs.writeFileSync(path.join(faux, 'node'), `#!/bin/bash
-set -e
-E=$(head -1 "${etats}"); sed -i.bak 1d "${etats}"
-mkdir -p "$RUNNER_TEMP/telegram"
-printf '{\\n  "compos_etat": "%s"\\n}' "$E" > "$RUNNER_TEMP/telegram/posts.json"
-`, {mode: 0o755});
-  fs.writeFileSync(path.join(faux, 'sleep'), `#!/bin/bash\necho "$1" >> "${compte}"\n`, {mode: 0o755});
-  const passages = (liste, TEST) => {
-    fs.writeFileSync(etats, liste.join('\n') + '\n');
-    fs.writeFileSync(compte, '');
-    const r = lancer('Passages toutes les 15 min', {PATH: faux + ':' + process.env.PATH, TEST: TEST || '0'});
-    return [r.suite, fs.readFileSync(compte, 'utf8').split('\n').filter(Boolean)];
-  };
-  assert.deepStrictEqual(passages(['attendre', 'attendre', 'pret']), ['debat', ['900', '900']], 'composition publiee au 3e passage');
-  assert.deepStrictEqual(passages(['attendre', 'fini']), ['debat', ['900']], 'jamais publiee : on s\'arrete au coup d\'envoi, sans message');
-  assert.deepStrictEqual(passages(['attendre'], '1'), ['debat', []], 'essai : un seul passage');
-  assert.match(script(wf, 'Passages toutes les 15 min'), /SECONDS" -ge "\$FIN" \]; then SUITE=relais/);
-  assert.match(script(wf, 'Relais ou debat'), /-f slot=debat -f test=false/);
+  // Un seul passage, sans attente : le message peut manquer un soir, jamais rien n'est invente.
+  const sansCommentaire = wf.replace(/^\s*#.*$/gm, '');
+  assert.ok(!/\bsleep\b/.test(sansCommentaire) && !/gh workflow run/.test(sansCommentaire), 'aucune attente ni relais');
+  assert.match(wf, /build-posts\.mjs --slot compos/);
+  assert.match(wf, /timeout-minutes: 10/);
   fs.writeFileSync(path.join(dir, 'x'), '');
   assert.deepStrictEqual(lancer('Ce qui est parti', {}), {});
   fs.mkdirSync(path.join(dir, 'telegram'), {recursive: true});

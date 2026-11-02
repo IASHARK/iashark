@@ -7,12 +7,9 @@ name: Canal Telegram IASHARK
 #   1 h avant le gros match du soir, « Les compos » : workflow a part, telegram-compos.yml.
 # Plus de guide de 13 h, de sondage de 15 h, d'actu de 16 h 30 ni de liste de 18 h 30.
 #
-# L'HEURE : les crons de ce depot arrivent des heures en retard (mesure du 02/11/2026 : le cron de 8 h-9 h
-# est parti a 17 h 58, celui de 18 h 30 a 0 h 39 ; buteurs-jour-de-match, « toutes les 30 min », tourne 2 a 3 fois
-# par jour). Seule la fin du calcul du matin (workflow_run) est a l'heure. Donc une CHAINE, chaque maillon
-# attend son heure puis lance le suivant : calcul du matin -> Hier (attend 9 h) -> match offert (attend 12 h) ->
-# telegram-compos.yml (repasse toutes les 15 min) -> debat (attend 23 h 15). Les crons restent en secours :
-# n'importe quel passage rattrape ce qui n'est pas parti (memoire d'envoi : un seul message par jour).
+# L'HEURE : les crons de ce depot arrivent parfois des heures en retard (mesure du 02/11/2026). Seule la fin du
+# calcul du matin (workflow_run) est a l'heure : elle envoie donc Hier et le match offert ensemble, Clement valide d'un
+# clic. Les crons restent en secours, et un seul message par jour part pour chaque rendez-vous. Aucun job n'attend : pas de sleep.
 #
 # SECURITE : tant que la variable TELEGRAM_AUTO n'est pas a 1, tout part dans la conversation privee
 # de Clement (TELEGRAM_CHAT_ID) avec les boutons « Publier sur le canal » / « Ne pas publier ». Envoi direct :
@@ -59,11 +56,9 @@ jobs:
     # (avocat du diable, 2e revue : une panne ne doit plus tout faire taire).
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure' }}
     runs-on: ubuntu-latest
-    # Jusqu'a 5 h 45 d'attente de l'heure du rendez-vous, puis l'envoi.
-    timeout-minutes: 360
+    timeout-minutes: 20
     permissions:
       contents: read
-      actions: write # lancer le maillon suivant de la chaine
     steps:
       - name: Choix des messages
         id: slot
@@ -73,32 +68,23 @@ jobs:
           INPUT_TEST: ${{ inputs.test }}
         run: |
           H=${FORCER_HEURE:-$(TZ=Europe/Paris date +%-H)}
-          M=${FORCER_MINUTE:-$(TZ=Europe/Paris date +%-M)}
           TEST=0; SLOT=""
           case "$EVENT" in
             workflow_run)
-              # Fin du calcul du matin : Hier (attend 9 h), ou tout ce qui n'est pas parti s'il finit tard.
+              # Fin du calcul du matin : Hier et le match offert, a valider d'un clic.
               case "$H" in
-                4|5|6|7|8|9|10|11) SLOT=hier ;;
-                12|13|14|15|16|17|18|19|20) SLOT=rattrapage ;;
+                4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20) SLOT=rattrapage ;;
               esac ;;
             schedule)
               case "$H" in
-                4|5|6|7|8|9|10|11) SLOT=hier ;;
-                12|13|14|15|16|17|18|19|20) SLOT=rattrapage ;;
-                21|22|23|0|1|2) SLOT=debat ;;
+                4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20) SLOT=rattrapage ;;
+                23|0|1|2) SLOT=debat ;;
               esac ;;
             workflow_dispatch)
               SLOT="$INPUT_SLOT"; [ "$INPUT_TEST" = "true" ] && TEST=1 ;;
             push)
               SLOT=tout; TEST=1 ;;
           esac
-          # Minutes a attendre l'heure du rendez-vous (jamais en test). Plus de 5 h 45 : ce passage ne fait rien.
-          CIBLE=0
-          case "$SLOT" in hier) CIBLE=540 ;; offert) CIBLE=720 ;; debat) [ "$H" -ge 6 ] && CIBLE=1395 ;; esac
-          ATTENTE=$((CIBLE - H * 60 - M))
-          if [ "$TEST" = "1" ] || [ "$ATTENTE" -lt 0 ]; then ATTENTE=0; fi
-          if [ "$ATTENTE" -gt 345 ]; then echo "Trop tot pour $SLOT : ce passage ne fait rien."; SLOT=""; ATTENTE=0; fi
           DATE=$(TZ=Europe/Paris date +%F)
           # Debat en retard, apres minuit : il reste celui du soir d'avant (un seul par soir).
           if [ "$SLOT" = "debat" ] && [ "$H" -lt 6 ]; then
@@ -107,8 +93,7 @@ jobs:
           echo "slot=$SLOT" >> "$GITHUB_OUTPUT"
           echo "test=$TEST" >> "$GITHUB_OUTPUT"
           echo "date=$DATE" >> "$GITHUB_OUTPUT"
-          echo "attente=$ATTENTE" >> "$GITHUB_OUTPUT"
-          echo "Heure de Paris : ${H}h${M} -> messages : ${SLOT:-aucun}, attente : ${ATTENTE} min (test=$TEST)"
+          echo "Heure de Paris : ${H}h -> messages : ${SLOT:-aucun} (test=$TEST)"
 
       - name: Prevenir Clement (calcul du matin en echec)
         if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure' }}
@@ -175,11 +160,6 @@ jobs:
           echo "slot=$A" >> "$GITHUB_OUTPUT"
           echo "Messages a preparer : ${A:-aucun, deja envoyes ce jour}"
 
-      - name: Attendre l'heure du rendez-vous
-        if: ${{ steps.afaire.outputs.slot != '' && steps.slot.outputs.attente != '0' }}
-        env:
-          ATTENTE: ${{ steps.slot.outputs.attente }}
-        run: sleep $((ATTENTE * 60))
 
       - uses: actions/checkout@v4
         if: ${{ steps.afaire.outputs.slot != '' || steps.slot.outputs.slot == 'verifier-chaine' }}
@@ -258,24 +238,3 @@ jobs:
         with:
           path: .telegram-envoye
           key: telegram-${{ steps.slot.outputs.date }}-debat
-
-      # La chaine : le rendez-vous suivant (jamais en test ; rien a faire si ce message etait deja parti).
-      - name: Rendez-vous suivant
-        if: ${{ always() && steps.afaire.outputs.slot != '' && steps.slot.outputs.test == '0' }}
-        env:
-          SLOT: ${{ steps.afaire.outputs.slot }}
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          case "$SLOT" in
-            hier) gh workflow run telegram-canal.yml -R "$GITHUB_REPOSITORY" --ref main -f slot=offert -f test=false ;;
-            offert|rattrapage) gh workflow run telegram-compos.yml -R "$GITHUB_REPOSITORY" --ref main -f test=false ;;
-          esac
-
-      # Copie des messages et de l'image (7 jours) pour verifier ce qui est parti.
-      - uses: actions/upload-artifact@v4
-        if: ${{ always() && steps.afaire.outputs.slot != '' }}
-        with:
-          name: telegram-${{ github.run_id }}
-          path: ${{ runner.temp }}/telegram
-          retention-days: 7
-          if-no-files-found: ignore

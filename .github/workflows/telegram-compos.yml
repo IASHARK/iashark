@@ -11,9 +11,8 @@ name: Canal Telegram - Les compos
 # Pas de copie des messages en piece jointe : le depot est public.
 # Envoi : conversation privee de Clement tant que la variable TELEGRAM_AUTO n'est pas a 1 (voir telegram-canal.yml).
 #
-# L'HEURE : les crons de ce depot arrivent des heures en retard (voir telegram-canal.yml) ; ils ne suffisent pas pour
-# tenir « 1 h avant le match ». Le run lance par le match offert de midi fait donc lui-meme ses passages toutes les
-# 15 min, passe le relais a un nouveau run avant la limite de 6 h de GitHub, puis lance le debat. Le cron reste en secours.
+# L'HEURE : les crons de ce depot arrivent parfois en retard : ce message peut manquer un soir, jamais il n'invente.
+# Chaque passage fait une seule lecture, sans attendre.
 
 on:
   schedule:
@@ -31,12 +30,11 @@ concurrency:
 
 permissions:
   contents: read
-  actions: write # relais et lancement du debat
 
 jobs:
   compos:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 10
     steps:
       - name: Heure utile ?
         id: passage
@@ -70,27 +68,14 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Passages toutes les 15 min
-        id: passages
+      - name: Un passage
         if: ${{ steps.passage.outputs.utile == '1' && steps.deja.outputs.cache-hit != 'true' }}
         env:
           APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           TEST: ${{ steps.passage.outputs.test }}
-        run: |
-          OUT="$RUNNER_TEMP/telegram"
-          FIN=$((SECONDS + 340 * 60))
-          SUITE=debat
-          while :; do
-            node scripts/telegram/build-posts.mjs --slot compos --out "$OUT"
-            # Message pret, coup d'envoi passe, ou essai : on s'arrete.
-            grep -q '"compos_etat": "attendre"' "$OUT/posts.json" || break
-            [ "$TEST" = "1" ] && break
-            if [ "$SECONDS" -ge "$FIN" ]; then SUITE=relais; break; fi
-            sleep 900
-          done
-          echo "suite=$SUITE" >> "$GITHUB_OUTPUT"
+        run: node scripts/telegram/build-posts.mjs --slot compos --out "$RUNNER_TEMP/telegram"
 
       - name: Envoi Telegram
         id: envoi
@@ -117,19 +102,3 @@ jobs:
         with:
           path: .telegram-envoye
           key: telegram-${{ steps.passage.outputs.date }}-compos
-
-      # Le maillon suivant de la chaine (telegram-canal.yml) : un nouveau run, ou le debat.
-      - name: Relais ou debat
-        if: ${{ always() && steps.passages.outputs.suite != '' && steps.passage.outputs.test == '0' }}
-        env:
-          SUITE: ${{ steps.passages.outputs.suite }}
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if [ "$SUITE" = "relais" ]; then
-            gh workflow run telegram-compos.yml -R "$GITHUB_REPOSITORY" --ref main -f test=false
-          else
-            # Le debat attend 23 h 15, 5 h 45 au plus : pas avant 18 h.
-            N=$((10#$(TZ=Europe/Paris date +%H) * 60 + 10#$(TZ=Europe/Paris date +%M)))
-            if [ "$N" -lt 1080 ]; then sleep $(((1080 - N) * 60)); fi
-            gh workflow run telegram-canal.yml -R "$GITHUB_REPOSITORY" --ref main -f slot=debat -f test=false
-          fi

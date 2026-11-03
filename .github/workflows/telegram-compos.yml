@@ -1,0 +1,104 @@
+name: Canal Telegram - Les compos
+
+# « Les compos » (plan valide par Clement le 03/11/2026) : 1 h avant le gros match du soir, une fois la
+# composition officielle publiee, qui est absent ou remplacant, et 1 seul prono d'appel. Tourne sur
+# GitHub Actions, sans ordinateur. Regle du gros match : lib/telegram-posts.js#grosMatch.
+#
+# Un passage toutes les 15 min aux heures utiles. Hors des 70 min avant le coup d'envoi : aucun appel a
+# API-Football ; dedans, 2 appels par passage (config/quotas.json#api_football.telegram_canal).
+# Composition pas publiee au dernier passage avant le match : pas de message, jamais d'invention.
+# Une seule fois par jour : cle de cache posee seulement si le message est vraiment parti.
+# Pas de copie des messages en piece jointe : le depot est public.
+# Envoi : conversation privee de Clement tant que la variable TELEGRAM_AUTO n'est pas a 1 (voir telegram-canal.yml).
+#
+# L'HEURE : les crons de ce depot arrivent parfois en retard : ce message peut manquer un soir, jamais il n'invente.
+# Chaque passage fait une seule lecture, sans attendre.
+
+on:
+  schedule:
+    - cron: '4,19,34,49 14-20 * * *'
+  workflow_dispatch:
+    inputs:
+      test:
+        description: "Test : envoyer dans ma conversation privee, pas sur la chaine"
+        type: boolean
+        default: true
+
+concurrency:
+  group: telegram-compos
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  compos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Heure utile ?
+        id: passage
+        env:
+          EVENT: ${{ github.event_name }}
+          INPUT_TEST: ${{ inputs.test }}
+        run: |
+          H=${FORCER_HEURE:-$(TZ=Europe/Paris date +%-H)}
+          TEST=0; UTILE=0
+          if [ "$H" -ge 6 ] && [ "$H" -le 22 ]; then UTILE=1; fi
+          if [ "$EVENT" = "workflow_dispatch" ]; then UTILE=1; [ "$INPUT_TEST" = "true" ] && TEST=1; fi
+          echo "utile=$UTILE" >> "$GITHUB_OUTPUT"
+          echo "test=$TEST" >> "$GITHUB_OUTPUT"
+          echo "date=$(TZ=Europe/Paris date +%F)" >> "$GITHUB_OUTPUT"
+          echo "Heure de Paris : ${H}h -> passage utile : $UTILE (test=$TEST)"
+
+      - name: Deja envoye aujourd'hui ?
+        id: deja
+        if: ${{ steps.passage.outputs.utile == '1' && steps.passage.outputs.test == '0' }}
+        uses: actions/cache/restore@v4
+        with:
+          path: .telegram-envoye
+          key: telegram-${{ steps.passage.outputs.date }}-compos
+          lookup-only: true
+
+      - uses: actions/checkout@v4
+        if: ${{ steps.passage.outputs.utile == '1' && steps.deja.outputs.cache-hit != 'true' }}
+
+      - uses: actions/setup-node@v4
+        if: ${{ steps.passage.outputs.utile == '1' && steps.deja.outputs.cache-hit != 'true' }}
+        with:
+          node-version: '20'
+
+      - name: Un passage
+        if: ${{ steps.passage.outputs.utile == '1' && steps.deja.outputs.cache-hit != 'true' }}
+        env:
+          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TEST: ${{ steps.passage.outputs.test }}
+        run: node scripts/telegram/build-posts.mjs --slot compos --out "$RUNNER_TEMP/telegram"
+
+      - name: Envoi Telegram
+        id: envoi
+        if: ${{ steps.passage.outputs.utile == '1' && steps.deja.outputs.cache-hit != 'true' }}
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
+          TELEGRAM_AUTO: ${{ vars.TELEGRAM_AUTO }}
+          TEST: ${{ steps.passage.outputs.test }}
+        run: node scripts/telegram/send-posts.mjs "$RUNNER_TEMP/telegram"
+
+      - name: Ce qui est parti
+        id: parti
+        if: ${{ always() && steps.passage.outputs.utile == '1' && steps.deja.outputs.cache-hit != 'true' && steps.passage.outputs.test == '0' }}
+        run: |
+          F="$RUNNER_TEMP/telegram/envoyes.txt"
+          if [ -f "$F" ] && grep -qx "compos" "$F"; then echo "compos=1" >> "$GITHUB_OUTPUT"; fi
+          mkdir -p .telegram-envoye && date > .telegram-envoye/ok
+
+      - name: Memoriser l'envoi du jour
+        if: ${{ always() && steps.parti.outputs.compos == '1' }}
+        uses: actions/cache/save@v4
+        with:
+          path: .telegram-envoye
+          key: telegram-${{ steps.passage.outputs.date }}-compos

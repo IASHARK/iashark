@@ -1,327 +1,569 @@
 'use strict';
-// Canal Telegram (lib/telegram-posts.js) : regles d'honnetete et de secret.
+// Chaine Telegram (lib/telegram-posts.js) : les 4 rendez-vous du plan du 03/11/2026.
+// Dates fixes : l'horloge de la machine n'entre jamais dans ces essais.
 const test = require('node:test');
 const assert = require('node:assert');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const {execFileSync, spawnSync} = require('node:child_process');
 const P = require('../lib/telegram-posts.js');
-// Une seule source (01/10/2026) : la chance publiee est chance_iashark, posee par le pipeline
-// (le plus bas entre le modele et la cote sans marge) ; le pari s'ecrit comme sur la page.
-const CHANCE = require('../lib/chance-iashark.js');
-const avecChance = (m) => { CHANCE.poserChance(m); return m; };
 
-const libre = {id: 1, is_free: true, status: 'NS', analysis_tier: 'FULL_ANALYSIS', date: '2026-09-27 18:00', league: 'UEFA Nations League',
-  home: {n: 'Austria'}, away: {n: 'Kosovo'}, c1: '1.62', cn: '3.90', c2: '5.60',
-  pari_rec: 'Premiere mi-temps moins de 1.5 but', market_id: 'fh-under-15', model_probability: 65.5, cote_rec: 1.47,
-  p1: 56, pn: 24, p2: 20, market_consensus_p1: 62, market_consensus_pN: 24, market_consensus_p2: 14,
-  markets_compared: [{id: 'fh-under-15', market: 'Premiere mi-temps moins de 1.5 but', probability: 65.5, consensus: 64.1, edge: 1.3}],
-  // Pari du moteur v3, meme marche, marche « vérifié sur le passé » (ronde 4) : sans lui, aucun pourcentage.
-  // Probabilite « modèle + cotes » (lib/moteur-v3.js#origineProbabilite) : cas ou un
-  // pourcentage peut partir meme au-dessus de la cote sans marge (condition 1, 30/09).
-  moteur_v3: {source: 'v3', origine_probabilite: 'modèle + cotes'}, v3_pari: {market_id: 'fh-under-15', etiquette: 'vérifié sur le passé', fiabilite_marche: 'vérifié sur le passé'}};
-avecChance(libre); // 65,5 (modele) face a 64,1 (cote sans marge) : 64 %
-const payant = {id: 2, is_free: false, status: 'NS', date: '2026-09-27 20:45', league: 'UEFA Nations League',
-  home: {n: 'Norway'}, away: {n: 'Portugal'}, c1: '2.38', cn: '3.80', c2: '2.70', pari_rec: 'SECRET PRO', model_probability: 71, p1: 44};
-const home = {matchs: [libre, payant]};
-// Heure de Paris de l'envoi (obligatoire : verification du jour, 30/09/2026).
-const MATIN = '2026-09-27 10:00';
+const RACINE = path.join(__dirname, '..');
+const lireFichier = (...f) => fs.readFileSync(path.join(RACINE, ...f), 'utf8');
 
-test('match gratuit : le match, le pari, la cote et la chance calculee par IASHARK (decision de Clement, 30/09)', () => {
-  const p = P.matchGratuit(home, {matchs: [libre]}, MATIN);
-  assert.strictEqual(p.carte.estimation, 64, 'chance_iashark : le plus bas entre 65,5 et 64,1');
-  const libellePage = require('../lib/market-labels.js').marketLabelFr('Premiere mi-temps moins de 1.5 but', {home: 'Austria', away: 'Kosovo'});
-  assert.strictEqual(p.carte.pari, libellePage, 'le pari ecrit comme sur la page match');
-  assert.match(libellePage, /^1re mi-temps\s?: moins de 1,5\sbut$/);
-  assert.strictEqual(p.carte.dit, undefined, 'plus de « ce que dit la cote sans la marge »');
-  // Une seule cote (lib/cote-anj.js, 01/10/2026) : sans cote d'un agree ANJ, la cote est « indicative », sans bookmaker.
-  // Format du 20/10/2026 (Clement) : ce que dit le modele, ce que disent les bookmakers (1/cote).
-  assert.ok(p.html.includes('Pari : <b>' + libellePage + '</b>\nNotre modèle dit : <b>64 %</b>\nLes bookmakers disent : 68 % (cote 1,47)'), p.html);
-  // Avec la cote d'un agree ANJ : son nom, la meme cote dans le message et sur l'image.
-  const anj = P.matchGratuit(home, {matchs: [Object.assign({}, libre, {cote_rec: '1.52', cote_source: 'anj', cote_bookmaker: 'Winamax'})]}, MATIN);
-  assert.ok(anj.html.includes('Les bookmakers disent : 66 % (cote 1,52 chez Winamax)'), anj.html);
-  assert.deepEqual([anj.carte.coteTxt, anj.carte.coteLibelle], ['1,52', 'Cote chez Winamax']);
-  assert.ok(!/points|plus de chances|en suppose|sans la marge|selon la cote|Sur 100 matchs|mise|il faut gagner/.test(JSON.stringify(p)));
-  assert.ok(!/le plus attendu/.test(p.html));
-  assert.match(p.html, /la chance d’un but par tranche de 15 minutes \(Pro\)/);
-  assert.match(p.html, /les buteurs les plus probables \(Pro\)/, "buteurs reserves au Pro (avocat du diable, 01/10/2026)");
-  assert.match(p.html, /les scores exacts les plus probables/);
-  assert.ok(p.html.length <= 1024, 'la legende photo Telegram est limitee a 1024 caracteres');
-  assert.ok(!/comporte des risques/.test(p.html), 'pas de mention bookmaker (choix de Clement)');
-  assert.ok(!JSON.stringify(payant).includes('SECRET') || !JSON.stringify(p).includes('SECRET PRO'), 'jamais le pari d un autre match');
-});
+// Ce qui ne doit jamais partir, quel que soit le message.
+const INTERDIT = /\bmises?\b|\bunités?\b|capital|espérance|bankroll|garanti|gagner à coup sûr|sûr de gagner|argent facile|comporte des risques|winamax|betclic|unibet|parions ?sport|\bpmu\b|bwin|zebet|pokerstars|vbet|feelingbet|genybet|netbet|1xbet|bet365|bookmaker|\bvalue\b|\bedge\b|\bBTTS\b|\bover\b|\bunder\b|marge|kelly|\bxg\b/i;
+const EMOTICONE = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}]/u;
+const propre = (p) => {
+  assert.ok(p && p.html, 'message attendu');
+  assert.ok(!INTERDIT.test(p.html), 'mot interdit : ' + p.html);
+  assert.ok(!EMOTICONE.test(p.html), 'emoticone : ' + p.html);
+};
 
-test('match gratuit : seulement la chance calculee et la cote, aucun ecart ni chiffre du marche', () => {
-  const m = avecChance({...libre, markets_compared: [{id: 'fh-under-15', probability: 60, consensus: 64, edge: -4}], model_probability: 60});
-  const c = P.chancesMatchGratuit(m);
-  assert.deepStrictEqual([c.estimation, c.coteTxt, c.dit, c.ecartTxt], [60, '1,47', undefined, undefined]);
-});
+// ---------- Donnees d'essai ----------
+const JOUR = '2026-11-01';
+const bandeau = {genere_le: '2026-11-02T07:06:59.972Z',
+  combines: [{t: 'x10', j: JOUR, n: 6, c: 8.73, r: 'loss'}, {t: 'x5', j: JOUR, n: 4, c: 4.09, r: 'win'}, {t: 'x5', j: '2026-10-31', n: 4, c: 4.07, r: 'loss'}],
+  or: [{j: JOUR, n: 3, g: 2, p: 1, a: 0, v: 0}, {j: '2026-10-31', n: 3, g: 1, p: 2, a: 0, v: 0}]};
+const pas = (h, a, p, c, r, cc) => ({j: JOUR, f: 1, h, a, m: 'x', p, c, r, cc});
+const montantes = {montantes: [
+  {rang: 1, objectifs: [], historique: [{j: '2026-10-31', h: 'V', a: 'W', p: 'Vieux pari', c: 1.5, r: 'perdu', cc: null}, pas('PEC Zwolle', 'ADO Den Haag', 'PEC Zwolle ou match nul', 1.4, 'gagne', 1.4)]},
+  {rang: 2, objectifs: [], historique: [pas('Trabzonspor', 'Gaziantep FK', 'Plus de 2,5 buts', 1.4, 'perdu', null)]},
+  {rang: 3, objectifs: [], historique: [pas('Eintracht Frankfurt', 'Hamburger SV', 'Plus de 2,5 buts', 1.41, 'gagne', 1.41)]}]};
+const bilan = {jour: JOUR, offert: null, selection_or: null, paris_simples: {jour: JOUR, gagnes: 55, perdus: 34, annules: 0, en_attente: 1}};
+const registre = {matchs: [{jour: JOUR, fixture_id: 1575205, match: 'Eintracht Frankfurt - Hamburger SV', pari: 'Over 2.5', market_id: 'over-25', cote_affichee: 1.41}]};
+const buteurs = [{joueur: 'Samuel Essende', domicile: 'BSC Young Boys', exterieur: 'FC Zurich', verdict: 'marque'}, {joueur: 'Dušan Vlahović', domicile: 'Kasımpaşa', exterieur: 'Beşiktaş', verdict: 'pas_marque'}];
+const complet = {jour: JOUR, bandeau, montantes, bilan, registre, archiveOffert: {market: 'over-25', result: 'win'}, buteurs};
 
-test('match gratuit : donnee absente = aucun chiffre (jamais 0 %)', () => {
-  const p = P.matchGratuit({matchs: [{...libre, chance_iashark: null}]}, null, MATIN);
-  assert.strictEqual(p.type, 'photo'); assert.strictEqual(p.carte.pari, null);
-  assert.ok(!/%/.test(p.html));
-  // Une designation existe (un autre jour) : jamais un match payant non designe.
-  assert.strictEqual(P.matchGratuit({matchs: [payant, {...libre, id: 'autre-jour', date: '2026-09-28 20:00'}]}, null, MATIN), null);
-});
+const hist = (equipe, ids) => ids.flatMap((pid, i) => [1, 2, 3, 4, 5].map((f) => ({fixture_id: equipe * 100 + f, player_id: pid, name: 'J' + pid, minutes: 90, date: '2026-10-0' + f})));
+const eq = (base) => Array.from({length: 11}, (_, i) => ({id: base + i, name: 'J' + (base + i)}));
+const psg = {id: 10, date: '2026-11-03 21:00', status: 'NS', league: 'UEFA Champions League', league_key: 'ldc', analysis_tier: 'FULL_ANALYSIS', league_reliability: 'validee', has_signal: true, no_signal: false,
+  home: {n: 'Villarreal', id: 533}, away: {n: 'Paris Saint Germain', id: 85}, c1: '4.77', c2: '1.60',
+  player_history: {home: hist(1, eq(100).map((p) => p.id)), away: hist(2, eq(200).map((p) => p.id))}, current_squads: {}};
+const compoApi = {home: {startXI: eq(100), substitutes: [{id: 300, name: 'B'}]}, away: {startXI: eq(200), substitutes: [{id: 301, name: 'C'}]}};
 
-test('match gratuit : jamais un match deja commence ou joue', () => {
-  assert.strictEqual(P.matchGratuit({matchs: [{...libre, status: '1H'}]}, null, MATIN), null);
-  assert.strictEqual(P.matchGratuit(home, null, '2026-09-27 18:00'), null);
-  assert.ok(P.matchGratuit(home, null, '2026-09-27 13:05'));
-});
-
-test('match gratuit : seulement celui du jour, avec sa date (contre-controle, 30/09/2026)', () => {
-  // Jour sans match offert : celui du lendemain n'est JAMAIS annonce comme « du jour ».
-  const demain = {...libre, id: 7, date: '2026-10-04 17:30', home: {n: 'Arsenal'}, away: {n: 'Chelsea'}};
-  assert.strictEqual(P.matchGratuit({matchs: [demain, payant]}, {matchs: [demain]}, '2026-10-03 13:05'), null);
-  // Offre du jour ET du lendemain (liste dans n'importe quel ordre) : celle du jour.
-  const p = P.matchGratuit({matchs: [demain, libre, payant]}, null, MATIN);
-  assert.strictEqual(p.matchId, 1);
-  assert.strictEqual(p.jour, '2026-09-27');
-  // La date est ecrite en toutes lettres, dans le message et sur l'image.
-  assert.match(p.html, /UEFA Nations League|Ligue des nations/);
-  assert.match(p.html, /dimanche 27 septembre · 18h00/);
-  assert.match(p.carte.quand, /dimanche 27 septembre · 18h00/);
-  const texte = P.matchGratuit({matchs: [{...libre, analysis_tier: 'UNVERIFIED'}]}, null, MATIN);
-  assert.match(texte.html, /dimanche 27 septembre · 18h00/);
-  // Donnees completes d'un autre jour pour le meme numero : refus.
-  assert.strictEqual(P.matchGratuit(home, {matchs: [{...libre, date: '2026-09-28 18:00'}]}, MATIN), null);
-  // Sans heure d'envoi, aucune verification possible : pas de message.
-  assert.strictEqual(P.matchGratuit(home, null), null);
-  assert.strictEqual(P.matchGratuit(home, null, 'demain'), null);
-});
-
-test('match gratuit non fiable : publie SANS aucun pourcentage', () => {
-  const nonVerifie = P.matchGratuit({matchs: [{...libre, analysis_tier: 'UNVERIFIED'}]}, null, MATIN);
-  assert.strictEqual(nonVerifie.carte.pari, null);
-  assert.ok(!/%/.test(nonVerifie.html), 'aucun pourcentage');
-  assert.match(nonVerifie.html, /les scores exacts les plus probables/);
-  const limite = P.matchGratuit({matchs: [{...libre, analysis_tier: 'LIMITED_DATA'}]}, null, MATIN);
-  assert.strictEqual(limite.carte.pari, null);
-  // Favori inverse par rapport au marche (cas Autriche-Kosovo) : chiffresFiables le signale toujours.
-  const inverse = {...libre, p1: 33.1, pn: 28.2, p2: 38.6, market_consensus_p1: 62, market_consensus_pN: 24, market_consensus_p2: 14};
-  assert.strictEqual(P.chiffresFiables(inverse), false);
-  // Meme favori : chiffres publies.
-  assert.strictEqual(P.chiffresFiables({...libre, p1: 55, pn: 25, p2: 20, market_consensus_p1: 60, market_consensus_pN: 24, market_consensus_p2: 16}), true);
-});
-
-test('sondage : aucune donnee payante, jamais le match gratuit', () => {
-  const p = P.sondage(home, '2026-09-27', '12:00');
-  assert.strictEqual(p.matchId, 2);
-  const tout = JSON.stringify(p);
-  assert.ok(!tout.includes('SECRET') && !tout.includes('71') && !tout.includes('44'));
-  assert.deepStrictEqual(p.options, ['Norvège', 'Match nul', 'Portugal']);
-});
-
-test('sondage : pas de match deja commence ou trop tot', () => {
-  assert.strictEqual(P.sondage(home, '2026-09-27', '21:00'), null);
-});
-
-// T3 (decision de Clement, 29/09/2026) : bilan des SEULS paris du moteur v3.
-const lignes = (v3, ancien) => [].concat(
-  Object.entries(v3).flatMap(([r, n]) => Array.from({length: n}, () => ({result: r, moteur: 'v3'}))),
-  Object.entries(ancien || {}).flatMap(([r, n]) => Array.from({length: n}, () => ({result: r, moteur: 'ancien'}))),
-  [{result: 'win'}]);
-test('resultats : gagnes ET perdus du seul moteur v3, rien si pas de bilan v3', () => {
-  const p = P.resultats({day: '2026-09-26', totals: {settled: 30, won: 25, lost: 5}, matches: lignes({win: 12, loss: 3}, {win: 13, loss: 2})});
-  // Base exacte (avocat du diable, 01/10/2026) : les paris du SITE (moteur v3), un par match.
-  assert.match(p.html, /Paris publiés sur le site pour les matchs d'hier \(moteur IASHARK v3, un pari par match\) : <b>12 gagnés, 3 perdus<\/b>/);
-  assert.ok(!/validée|On publie tout/.test(p.html), 'ni « validées » ni « On publie tout »');
-  assert.match(p.html, /samedi 26 septembre/);
+// ---------- 1. Hier ----------
+test('Hier : tout ce qu\'on a donne la veille, gagnes ET perdus', () => {
+  const p = P.hier(complet);
+  propre(p);
+  assert.strictEqual(p.slot, 'hier');
+  assert.match(p.html, /Hier, dimanche 1er novembre/);
+  assert.match(p.html, /Petit combiné \(4 matchs, cote 4,09\) : <b>gagné<\/b>/);
+  assert.match(p.html, /Grand combiné \(6 matchs, cote 8,73\) : <b>perdu<\/b>/);
+  assert.match(p.html, /Samuel Essende \(BSC Young Boys - FC Zurich\) : a marqué/);
+  assert.match(p.html, /Dušan Vlahović \(Kasımpaşa - Beşiktaş\) : n'a pas marqué/);
+  assert.match(p.html, /Montante 1 : pari gagné, cote totale 1,40/);
+  assert.match(p.html, /Montante 2 : pari perdu, retour au premier pari/);
+  assert.match(p.html, /Sélection en or<\/b> : 2 gagnés, 1 perdu/);
+  assert.match(p.html, /- Trabzonspor - Gaziantep FK : Plus de 2,5 buts, cote 1,40 : perdu/);
+  assert.match(p.html, /Match offert<\/b> : Eintracht Frankfurt - Hamburger SV, Plus de 2,5 buts, cote 1,41 : gagné/);
+  assert.match(p.html, /55 gagnés, 34 perdus, 1 en attente/);
+  assert.ok(!/Vieux pari/.test(p.html), 'seulement la veille');
   assert.ok(!/%|taux/i.test(p.html), 'aucun taux de reussite');
-  assert.ok(!/historique|archiv|<a href/i.test(p.html), "ni historique public ni archive citee (decision de Clement)");
-  assert.strictEqual(P.resultats({day: '2026-09-26', totals: {settled: 15, won: 12, lost: 3}, matches: lignes({}, {win: 12, loss: 3})}), null, 'ancien moteur seul : pas de message');
-  assert.strictEqual(P.resultats({day: '2026-09-26', totals: {settled: 15, won: 12, lost: 3}}), null, 'sans le detail par moteur : pas de message');
-  assert.strictEqual(P.resultats({day: '2026-09-26', matches: []}), null);
 });
 
-test('actu : titres fiables recents seulement, echappes', () => {
-  const now = Date.parse('2026-09-27T12:00:00Z');
-  const items = [
-    {fiabilite: 'high', title: 'A <b>', source: 'X', link: 'https://a.fr/1', date: 'Sun, 27 Sep 2026 10:00:00 GMT'},
-    {fiabilite: 'mid', title: 'B', source: 'Y', link: 'https://a.fr/2', date: 'Sun, 27 Sep 2026 10:00:00 GMT'},
-    {fiabilite: 'high', title: 'C', source: 'Z', link: 'https://a.fr/3', date: 'Sat, 26 Sep 2026 13:00:00 GMT'},
-    {fiabilite: 'high', title: 'D', source: 'W', link: 'https://a.fr/4', date: 'Fri, 25 Sep 2026 10:00:00 GMT'}];
-  const p = P.actu({items}, now);
-  assert.match(p.html, /A &lt;b&gt;/);
-  assert.ok(!p.html.includes('• B') && !p.html.includes('• D'));
+test('Hier : perdus jamais caches, meme un jour tout perdu', () => {
+  const p = P.hier({jour: JOUR, bandeau: {combines: [{t: 'x5', j: JOUR, n: 4, c: 4, r: 'loss'}, {t: 'x10', j: JOUR, n: 6, c: 9, r: 'loss'}], or: [{j: JOUR, n: 3, g: 0, p: 3, a: 0, v: 0}]},
+    bilan: {jour: JOUR, paris_simples: {jour: JOUR, gagnes: 0, perdus: 40, annules: 0, en_attente: 0}}});
+  assert.strictEqual((p.html.match(/<b>perdu<\/b>/g) || []).length, 2);
+  assert.match(p.html, /0 gagné, 3 perdus/);
+  assert.match(p.html, /0 gagné, 40 perdus/);
 });
 
-test('protection : une probabilite 1N2 manquante = pas de pourcentage', () => {
-  assert.strictEqual(P.chiffresFiables({...libre, p1: null}), false);
-});
-
-test('resultats : matchs pas encore termines signales', () => {
-  const p = P.resultats({day: '2026-09-26', matches: lignes({win: 7, loss: 3, pending: 2}, {pending: 5})});
-  assert.match(p.html, /<b>7 gagnés, 3 perdus<\/b>/);
-  assert.match(p.html, /2 encore en attente/);
-});
-
-test('guide : tourne chaque jour', () => {
-  const g = [{title: 'Un', url: 'https://iashark.com/1'}, {title: 'Deux', url: 'https://iashark.com/2'}];
-  assert.notStrictEqual(P.guide(g, '2026-09-27').html, P.guide(g, '2026-09-28').html);
-});
-
-test('panne du calcul du matin : le canal tourne quand meme et Clement est prevenu en prive', () => {
-  const wf = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', '.github', 'workflows', 'telegram-canal.yml'), 'utf8');
-  assert.match(wf, /github\.event\.workflow_run\.conclusion == 'failure' \}\}/);
-  assert.match(wf, /name: Prevenir Clement \(calcul du matin en echec\)/);
-  assert.match(wf, /chat_id=\$\{TELEGRAM_CHAT_ID\}/);
-  assert.ok(!/TELEGRAM_CHANNEL_ID[^\n]*\n[^\n]*Prevenir/.test(wf));
-});
-
-// Contre-controle de l'avocat du diable (30/09/2026) : un calcul du matin en echec ne
-// consomme plus l'envoi du match gratuit. Les scripts du workflow sont EXECUTES ici.
-test('memoire des envois : une cle par message, posee seulement si le message est parti', () => {
-  const fs = require('node:fs');
-  const os = require('node:os');
-  const path = require('node:path');
-  const {execFileSync} = require('node:child_process');
-  const wf = fs.readFileSync(path.join(__dirname, '..', '.github', 'workflows', 'telegram-canal.yml'), 'utf8');
-  const script = (nom) => {
-    const i = wf.indexOf('- name: ' + nom);
-    assert.ok(i > 0, nom);
-    const bloc = wf.slice(i).split('\n      - ')[0];
-    const run = bloc.split('run: |\n')[1];
-    return run.split('\n').map((l) => l.replace(/^ {10}/, '')).join('\n');
+test('Hier : une donnee absente, la ligne n\'apparait pas ; rien du tout, pas de message', () => {
+  const sans = (champ, motif) => {
+    const p = P.hier({...complet, [champ]: null});
+    assert.ok(p);
+    assert.ok(!motif.test(p.html), champ + ' : ' + p.html);
+    propre(p);
   };
+  sans('buteurs', /buteurs? du jour/i);
+  sans('archiveOffert', /Match offert/);
+  sans('registre', /Match offert/);
+  sans('montantes', /Montante \d/);
+  sans('bandeau', /combiné|Sélection en or/);
+  sans('bilan', /paris simples/i);
+  assert.strictEqual(P.hier({jour: JOUR}), null);
+  assert.strictEqual(P.hier({...complet, jour: 'hier'}), null);
+  // Fichiers d'un autre jour : rien.
+  assert.strictEqual(P.hier({jour: '2026-10-01', bandeau, montantes, bilan, registre, buteurs: null}), null);
+  // Un seul combine connu : l'autre ligne n'apparait pas.
+  const un = P.hier({jour: JOUR, bandeau: {combines: [{t: 'x5', j: JOUR, n: 4, c: 4.09, r: 'win'}]}});
+  assert.ok(/Petit combiné/.test(un.html) && !/Grand combiné/.test(un.html));
+  // Detail de la Selection en or different du compte : le compte reste, pas le detail.
+  const faux = P.hier({jour: JOUR, bandeau: {or: [{j: JOUR, n: 3, g: 3, p: 0, a: 0, v: 0}]}, montantes});
+  assert.match(faux.html, /3 gagnés, 0 perdu/);
+  assert.ok(!/- PEC Zwolle/.test(faux.html));
+});
+
+test('Hier : le match offert regle seulement par le meme marche', () => {
+  assert.ok(!/Match offert/.test(P.hier({...complet, archiveOffert: {market: 'under-25', result: 'win'}}).html));
+  assert.ok(!/Match offert/.test(P.hier({...complet, registre: {matchs: [{...registre.matchs[0], masque: true}]}}).html), 'pari encore masque');
+  const deux = {matchs: [registre.matchs[0], {...registre.matchs[0], fixture_id: 2}]};
+  assert.ok(!/Match offert/.test(P.hier({...complet, registre: deux}).html), 'deux offres : jamais deviner');
+  // L'archive : seulement un pari publie avant le coup d'envoi.
+  assert.strictEqual(P.ligneArchive([{market: 'a', published_at: '2026-11-01T18:00:00Z', kickoff_at: '2026-11-01T16:00:00Z'}]), null);
+  assert.strictEqual(P.ligneArchive([{market: 'a', published_at: '2026-11-01T10:00:00Z', kickoff_at: '2026-11-01T16:00:00Z'}]).market, 'a');
+  assert.strictEqual(P.ligneArchive(null), null);
+});
+
+const feuille = (id, buts, extra) => Object.assign({fixture: {id, status: {short: 'FT'}}, teams: {home: {id: 1}, away: {id: 2}}, score: {fulltime: {home: buts.filter((b) => b.t === 1).length, away: buts.filter((b) => b.t === 2).length}, halftime: {home: 0, away: 0}},
+  goals: {home: 0, away: 0},
+  events: buts.map((b) => ({type: 'Goal', detail: b.d || 'Normal Goal', team: {id: b.t}, player: {id: b.j}, time: {elapsed: b.m || 30}})).concat([{type: 'Card', detail: 'Yellow Card', team: {id: 1}, player: {id: 9}, time: {elapsed: 10}}]),
+  players: [{players: [{player: {id: 8651}, statistics: [{games: {minutes: 90}}]}, {player: {id: 7}, statistics: [{games: {minutes: 0}}]}]}]}, extra);
+
+test('Buteurs d\'hier : a marque, n\'a pas marque, n\'a pas joue, et rien sans liste des buts juste', () => {
+  const b = {joueur_id: 8651};
+  assert.strictEqual(P.verdictButeur(b, feuille(1, [{t: 1, j: 8651}])), 'marque');
+  assert.strictEqual(P.verdictButeur(b, feuille(1, [{t: 1, j: 5}])), 'pas_marque');
+  assert.strictEqual(P.verdictButeur(b, feuille(1, [{t: 2, j: 8651, d: 'Own Goal'}])), 'pas_marque', 'contre son camp : pas un but de buteur');
+  assert.strictEqual(P.verdictButeur({joueur_id: 7}, feuille(1, [{t: 1, j: 5}])), 'pas_joue');
+  assert.strictEqual(P.verdictButeur(b, null), 'verif');
+  const fx = feuille(1, [{t: 1, j: 8651}]); fx.score.fulltime.home = 3;
+  assert.strictEqual(P.verdictButeur(b, fx), 'verif', 'score different de la liste des buts');
+  assert.strictEqual(P.verdictButeur(b, feuille(1, [], {fixture: {id: 1, status: {short: 'PST'}}})), 'annule');
+  assert.strictEqual(P.verdictButeur(b, feuille(1, []), 'retire'), 'retire');
+  // Le ticket : les deux joueurs, jamais un seul en silence ; sans feuille lue, pas de ligne.
+  const ligne = {contenu: {buteurs: [{joueur: 'A', joueur_id: 8651, fixture_id: 1, domicile: 'X', exterieur: 'Y'}, {joueur: 'B', joueur_id: 3, fixture_id: 2, domicile: 'Z', exterieur: 'W'}]}, etats: {}};
+  const r = P.buteursHier(ligne, [feuille(1, [{t: 1, j: 8651}])]);
+  assert.deepStrictEqual(r.map((x) => x.verdict), ['marque', 'verif']);
+  assert.strictEqual(P.buteursHier(ligne, null), null);
+  assert.strictEqual(P.buteursHier(null, []), null);
+});
+
+// ---------- 2. Le match offert ----------
+const offertM = {id: 1550185, is_free: true, status: 'NS', date: '2026-11-02 18:30', league: 'Serie A', league_key: 'seriea', home: {n: 'Sassuolo', id: 488}, away: {n: 'Fiorentina', id: 502},
+  // Le pari ne doit jamais sortir, meme present dans les donnees.
+  pari_rec: 'PARI SECRET', cote_rec: 1.77, chance_iashark: 58, market_id: 'x',
+  classement: {home: {rank: 15, pts: 8, played: 9}, away: {rank: 17, pts: 5, played: 9}},
+  h2h: [{home: 'Fiorentina', away: 'Sassuolo', s: '0-0', w: 'N'}, {home: 'Sassuolo', away: 'Fiorentina', s: '3-1', w: '1'}, {home: 'Fiorentina', away: 'Sassuolo', s: '2-1', w: '2'}],
+  form_home: Array(5).fill({result: 'L'}), form_away: Array(5).fill({result: 'W'})};
+const offertHome = {matchs: [offertM]}, MIDI = '2026-11-02 12:05';
+
+test('Match offert : l\'affiche, l\'heure, 2 faits, le lien du compte gratuit, jamais le pari', () => {
+  const p = P.offert(offertHome, {matchs: [offertM]}, MIDI);
+  propre(p);
+  assert.strictEqual(p.slot, 'offert');
+  assert.match(p.html, /Le match offert : Sassuolo – Fiorentina/);
+  assert.match(p.html, /Serie A · lundi 2 novembre · 18h30/);
+  assert.match(p.html, /Classement : Sassuolo 15e \(8 points\), Fiorentina 17e \(5 points\)\./);
+  // Recompte par les scores : le 1er match du fichier est un nul, le 3e une victoire de la Fiorentina a domicile.
+  assert.match(p.html, /Leurs 3 derniers face-à-face : 1 victoire de Sassuolo, 1 victoire de Fiorentina, 1 nul\./);
+  assert.ok(p.html.includes('https://iashark.com/fr/match.html?id=1550185&amp;utm_source=telegram&amp;utm_campaign=offert'), 'lien echappe pour le mode HTML de Telegram');
+  assert.match(p.html, /compte gratuit/);
+  const tout = JSON.stringify(p);
+  assert.ok(!/PARI SECRET|1,77|1\.77|58|%/.test(tout), tout);
+  assert.ok(p.html.length <= 1024, 'la legende photo est limitee a 1024 caracteres');
+});
+
+test('Match offert : faits absents, ligne absente ; seulement celui du jour, pas encore commence', () => {
+  const {classement, h2h, ...reste} = offertM;
+  const p = P.offert({matchs: [reste]}, {matchs: [reste]}, MIDI);
+  assert.match(p.html, /Sur leurs 5 derniers matchs : Sassuolo 0 victoire, 0 nul, 5 défaites ; Fiorentina 5 victoires, 0 nul, 0 défaite\./);
+  const nu = {id: 1, is_free: true, status: 'NS', date: '2026-11-02 18:30', league: 'Serie A', home: {n: 'A'}, away: {n: 'B'}};
+  assert.ok(!/Classement|face-à-face|derniers matchs/.test(P.offert({matchs: [nu]}, null, MIDI).html));
+  assert.deepStrictEqual(P.faitsPublics(nu), []);
+  assert.strictEqual(P.offert(offertHome, null, '2026-11-03 12:05'), null, 'un autre jour');
+  assert.strictEqual(P.offert(offertHome, null, '2026-11-02 18:30'), null, 'deja commence');
+  assert.strictEqual(P.offert({matchs: [{...offertM, status: '1H'}]}, null, MIDI), null);
+  assert.strictEqual(P.offert({matchs: [{...offertM, is_free: false}]}, null, MIDI), null, 'jamais un match non designe');
+  assert.strictEqual(P.offert(offertHome, null, 'midi'), null);
+  // Fiche fausse (un autre club dans le face-a-face) : pas de fait.
+  const faux = {...offertM, classement: null, form_home: null, h2h: [{home: 'Milan', away: 'Sassuolo', s: '1-0'}, ...offertM.h2h]};
+  assert.deepStrictEqual(P.faitsPublics(faux), []);
+});
+
+// ---------- 3. Le gros match ----------
+const mk = (id, league_key, h, a, heure, extra) => ({id, league_key, league: league_key, date: '2026-11-03 ' + (heure || '21:00'), status: 'NS', home: {n: h}, away: {n: a}, ...extra});
+test('Gros match : Ligue des champions, puis clubs francais, puis les plus gros championnats', () => {
+  const choix = (...l) => { const g = P.grosMatch(l, '2026-11-03'); return g && g.id; };
+  const ldc = mk(1, 'ldc', 'Feyenoord', 'Inter'), fr = mk(2, 'ligue1', 'Lorient', 'Auxerre'), pl = mk(3, 'premier', 'Arsenal', 'Chelsea'), liga = mk(4, 'laliga', 'Real Madrid', 'Barcelona');
+  const a = mk(5, 'seriea', 'Inter', 'Juventus'), b = mk(6, 'bundesliga', 'Bayern Munich', 'Borussia Dortmund'), el = mk(7, 'el', 'Ajax', 'Porto');
+  assert.strictEqual(choix(pl, fr, ldc), 1);
+  assert.strictEqual(choix(pl, fr), 2, 'club francais avant la Premier League');
+  assert.strictEqual(choix(liga, pl), 3);
+  assert.strictEqual(choix(a, liga), 4);
+  assert.strictEqual(choix(b, a), 5);
+  assert.strictEqual(choix(el, b), 6);
+  // Un club francais en coupe d'Europe passe avant les championnats etrangers.
+  assert.strictEqual(choix(pl, mk(8, 'el', 'Lyon', 'Ajax')), 8);
+  // Dans la meme competition : le club francais le plus suivi, puis les grandes equipes, puis les cotes serrees.
+  assert.strictEqual(choix(mk(9, 'ldc', 'Bodo/Glimt', 'Lille', '21:00', {c1: 1.85, c2: 3.9}), mk(10, 'ldc', 'Villarreal', 'Paris Saint Germain', '21:00', {c1: 4.77, c2: 1.6}), mk(11, 'ldc', 'Atletico Madrid', 'Bayern München')), 10);
+  assert.strictEqual(choix(mk(12, 'ldc', 'Lask Linz', 'Slovan Bratislava'), mk(13, 'ldc', 'Atletico Madrid', 'Bayern München')), 13);
+  assert.strictEqual(choix(mk(14, 'premier', 'Burnley', 'Leeds', '21:00', {c1: 2, c2: 4}), mk(15, 'premier', 'Fulham', 'Brentford', '21:00', {c1: 2.5, c2: 2.6})), 15);
+});
+test('Gros match : pas le match offert, pas sans pari annonce, seulement le soir, jamais une ligue voisine', () => {
+  const choix = (...l) => { const g = P.grosMatch(l, '2026-11-03'); return g && g.id; };
+  assert.strictEqual(choix(mk(1, 'ldc', 'A', 'B', '21:00', {is_free: true}), mk(2, 'premier', 'C', 'D')), 2);
+  assert.strictEqual(choix(mk(1, 'ligue1', 'Lorient', 'Brest', '20:45', {no_signal: true, has_signal: false}), mk(2, 'premier', 'C', 'D')), 2);
+  assert.strictEqual(choix(mk(1, 'ldc', 'A', 'B', '17:30'), mk(2, 'premier', 'C', 'D', '18:00')), 2, 'soir : a partir de 18 h');
+  assert.strictEqual(choix(mk(1, 'brazil_seriea', 'A', 'B')), null, 'Serie A du Bresil : pas la Serie A');
+  assert.strictEqual(choix(mk(1, 'libertadores', 'A', 'B')), null);
+  assert.strictEqual(choix(mk(1, 'ligue2', 'Reims', 'Sochaux')), null);
+  assert.strictEqual(choix(mk(1, 'ldc', 'A', 'B', '21:00', {status: 'PST'})), null, 'match reporte');
+  assert.strictEqual(P.grosMatch([{...mk(1, 'ldc', 'A', 'B'), date: '2026-11-04 21:00'}], '2026-11-03'), null, 'un autre jour');
+  assert.strictEqual(P.grosMatch(null, '2026-11-03'), null);
+  // Toujours le meme match, quel que soit l'ordre du fichier.
+  const l = [mk(1, 'ldc', 'A', 'B'), mk(2, 'ldc', 'C', 'D'), mk(3, 'ldc', 'E', 'F')];
+  assert.strictEqual(P.grosMatch(l, '2026-11-03').id, P.grosMatch(l.slice().reverse(), '2026-11-03').id);
+});
+
+// ---------- 3 bis. Les compos ----------
+const proteges = {pari_rec: 'Victoire Exterieur', market_id: 'away-win', cote_rec: 1.61, chance_iashark: 61};
+test('Compos : absents et remplacants, faits de la composition, et 1 seul prono avec cote et chance', () => {
+  // 200 (titulaire habituel) sur le banc, 201 pas sur la feuille ; 100 a 110 tous titulaires.
+  const away = {startXI: eq(202).slice(0, 9).concat(eq(400).slice(0, 2)), substitutes: [{id: 200, name: 'J200'}, {id: 500, name: 'X'}]};
+  const prono = P.pronoAppel(psg, proteges, {});
+  const p = P.compos(psg, {home: compoApi.home, away}, prono);
+  propre(p);
+  assert.match(p.html, /Les compos : Villarreal – PSG/);
+  assert.match(p.html, /Ligue des champions · 21h00/);
+  assert.match(p.html, /<b>Villarreal<\/b> : tous ses joueurs les plus utilisés sont titulaires\./);
+  assert.match(p.html, /Pas sur la feuille de match : J201/);
+  assert.match(p.html, /Sur le banc au coup d'envoi : J200/);
+  assert.ok(!/J400/.test(p.html), 'un titulaire sans historique n\'est pas cite');
+  assert.match(p.html, /Notre prono : <b>[^<]+<\/b>\nCote 1,61, chance calculée 61 %/);
+  assert.strictEqual((p.html.match(/Notre prono/g) || []).length, 1);
+  assert.ok(p.html.includes('utm_source=telegram&amp;utm_campaign=compos'));
+});
+
+test('Compos : composition non publiee ou incomplete, pas de message ; jamais d\'invention', () => {
+  assert.strictEqual(P.compos(psg, null, null), null);
+  assert.strictEqual(P.compos(psg, {home: compoApi.home}, null), null, 'une seule equipe');
+  assert.strictEqual(P.compos(psg, {home: compoApi.home, away: {startXI: eq(200).slice(0, 10), substitutes: [{id: 1}]}}, null), null, '10 titulaires');
+  assert.strictEqual(P.compos(psg, {home: compoApi.home, away: {startXI: eq(200), substitutes: []}}, null), null, 'banc vide : on ne dit pas « absent »');
+  // Pas d'historique : rien a dire, pas de message.
+  assert.strictEqual(P.compos({...psg, player_history: null}, compoApi, null), null);
+  // Feuille sans numero de joueur, ou trop d'absents : la ligne de cette equipe ne part pas.
+  const sansId = {home: {startXI: eq(100).map((x) => ({...x, id: null})), substitutes: [{id: 1, name: 'B'}]}, away: compoApi.away};
+  assert.ok(!/Villarreal<\/b>/.test(P.compos(psg, sansId, null).html));
+  const autres = {home: {startXI: eq(700), substitutes: [{id: 1, name: 'B'}]}, away: compoApi.away};
+  assert.ok(!/Villarreal<\/b>/.test(P.compos(psg, autres, null).html));
+  // Un joueur parti du club (hors de l'effectif actuel) n'est pas dit absent.
+  const cles = P.joueursCles(psg.player_history.home, eq(100).slice(1).map((x) => ({player_id: x.id})));
+  assert.ok(!cles.some((x) => x.id === '100') && cles.length === 10);
+  assert.strictEqual(P.joueursCles(hist(1, [1]).slice(0, 2), null), null, 'moins de 3 matchs');
+});
+
+test('Prono d\'appel : jamais un pari d\'un combine ou de la Selection en or, jamais au-dessus de la cote', () => {
+  const ok = P.pronoAppel(psg, proteges, {});
+  assert.deepStrictEqual([ok.coteTxt, ok.chance], ['1,61', 61]);
+  assert.strictEqual(P.pronoAppel(psg, proteges, {10: true}), null, 'le match est dans un ticket');
+  assert.strictEqual(P.pronoAppel(psg, proteges, null), null, 'tickets illisibles : prudence');
+  assert.strictEqual(P.pronoAppel(psg, null, {}), null, 'base illisible');
+  assert.strictEqual(P.pronoAppel(psg, {...proteges, chance_iashark: 70}, {}), null, '70 % au-dessus de la cote 1,61 (62 %)');
+  assert.strictEqual(P.pronoAppel(psg, {...proteges, chance_iashark: null}, {}), null);
+  assert.strictEqual(P.pronoAppel(psg, {...proteges, pari_rec: ''}, {}), null);
+  assert.strictEqual(P.pronoAppel({...psg, league_reliability: 'en_test'}, proteges, {}), null);
+  assert.strictEqual(P.pronoAppel({...psg, analysis_tier: 'LIMITED_DATA'}, proteges, {}), null);
+  const ids = P.matchsDesTickets([{type: 'or', contenu: {paris: [{fixture_id: 1}]}}, {type: 'x5', contenu: {jambes: [{fixture_id: 2}]}}]);
+  assert.deepStrictEqual(Object.keys(ids).sort(), ['1', '2']);
+  assert.strictEqual(P.matchsDesTickets(null), null);
+  // Le bookmaker de la base n'est jamais repris.
+  const n = P.compos(psg, compoApi, P.pronoAppel(psg, {...proteges, cote_bookmaker: 'Winamax', cote_source: 'anj'}, {}));
+  propre(n);
+});
+
+const repFixture = (st) => ({response: [{fixture: {id: 10, status: {short: st}}}]});
+const repCompo = {response: [
+  {team: {id: 533}, startXI: eq(100).map((x) => ({player: x})), substitutes: [{player: {id: 300, name: 'B'}}]},
+  {team: {id: 85}, startXI: eq(200).map((x) => ({player: x})), substitutes: [{player: {id: 301, name: 'C'}}]}]};
+const flux = (maintenant, reponses, extra) => {
+  const appels = [];
+  const api = async (c) => { appels.push(c); return c.startsWith('fixtures/lineups') ? reponses.compo : reponses.fx; };
+  return P.composDuSoir({matchs: [psg], maintenant, fenetreMinutes: 70, api, lireProteges: async () => proteges, lireTickets: async () => [], ...extra})
+    .then((p) => ({p, appels}));
+};
+test('Passage des compos : aucun appel hors de la fenetre, 2 appels dedans, rien si pas publiee', async () => {
+  let r = await flux('2026-11-03 17:00', {fx: repFixture('NS'), compo: repCompo});
+  assert.deepStrictEqual([r.p, r.appels.length], [null, 0], 'trop tot : aucun appel');
+  r = await flux('2026-11-03 21:00', {fx: repFixture('NS'), compo: repCompo});
+  assert.deepStrictEqual([r.p, r.appels.length], [null, 0], 'coup d\'envoi passe : aucun appel');
+  r = await flux('2026-11-03 20:00', {fx: repFixture('NS'), compo: repCompo});
+  assert.strictEqual(r.p.slot, 'compos');
+  assert.strictEqual(r.appels.length, 2);
+  assert.match(r.p.html, /Notre prono/);
+  // Composition pas encore la (reponse vide, API en panne) : pas de message.
+  r = await flux('2026-11-03 20:50', {fx: repFixture('NS'), compo: {response: []}});
+  assert.strictEqual(r.p, null);
+  r = await flux('2026-11-03 20:50', {fx: repFixture('NS'), compo: null});
+  assert.strictEqual(r.p, null);
+  // Match commence ou reporte, statut illisible : pas de composition lue.
+  for (const fx of [repFixture('1H'), repFixture('PST'), null]) {
+    r = await flux('2026-11-03 20:50', {fx, compo: repCompo});
+    assert.deepStrictEqual([r.p, r.appels.length], [null, 1]);
+  }
+  // Tickets illisibles : le message part sans prono.
+  r = await flux('2026-11-03 20:00', {fx: repFixture('NS'), compo: repCompo}, {lireTickets: async () => null});
+  assert.ok(r.p && !/Notre prono/.test(r.p.html));
+});
+
+// ---------- 4. Le debat ----------
+const fin = (id, h, a, buts, extra) => Object.assign({fixture: {id, status: {short: 'FT'}}, teams: {home: {id: h}, away: {id: a}},
+  score: {fulltime: {home: buts.filter((t) => t === h).length, away: buts.filter((t) => t === a).length}},
+  events: [{type: 'Card', detail: 'Yellow Card', team: {id: h}, time: {elapsed: 5}}].concat(buts.map((t) => ({type: 'Goal', detail: 'Normal Goal', team: {id: t}, player: {id: 1}, time: {elapsed: 30}})))}, extra);
+const mD = (id, h, a) => ({id, league: 'UEFA Champions League', league_key: 'ldc', date: '2026-11-03 21:00', status: 'NS', home: {n: h, id: id * 10 + 1}, away: {n: a, id: id * 10 + 2}, pari_rec: 'PARI SECRET', cote_rec: 1.5});
+
+test('Debat : scores de l\'API controles par la liste des buts, une question ouverte en une phrase', () => {
+  const a = mD(1, 'Villarreal', 'Paris Saint Germain'), b = mD(2, 'Arsenal', 'Chelsea');
+  const p = P.debat([{m: a, fx: fin(1, 11, 12, [12, 12, 11])}, {m: b, fx: fin(2, 21, 22, [])}]);
+  propre(p);
+  assert.strictEqual(p.slot, 'debat');
+  assert.match(p.html, /Villarreal 1-2 PSG \(Ligue des champions\)/);
+  assert.match(p.html, /Arsenal 0-0 Chelsea/);
+  assert.strictEqual((p.html.match(/\?/g) || []).filter(Boolean).length, 2, 'la question et l\'invitation');
+  assert.match(p.html, /PSG gagne chez Villarreal : exploit ou simple logique, selon vous \?/);
+  assert.ok(p.html.endsWith(P.INVITATION));
+  assert.ok(!/PARI SECRET|1,5/.test(p.html));
+});
+
+test('Debat : score different de la liste des buts ou match pas fini, jamais publie', () => {
+  const a = mD(1, 'A', 'B'), b = mD(2, 'C', 'D');
+  const faux = fin(1, 11, 12, [11]); faux.score.fulltime.home = 2; // API : 2-0 au score, 1 but dans la liste (cas du 24/10/2026)
+  assert.strictEqual(P.scoreVerifie(faux), null);
+  const p = P.debat([{m: a, fx: faux}, {m: b, fx: fin(2, 21, 22, [21])}]);
+  assert.ok(!/A 2-0|A 1-0/.test(p.html), 'score faux : match non cite');
+  assert.match(p.html, /C 1-0 D/);
+  assert.strictEqual(P.debat([{m: a, fx: faux}]), null, 'aucun score verifie : pas de message');
+  assert.strictEqual(P.debat([{m: a, fx: fin(1, 11, 12, [11], {fixture: {id: 1, status: {short: '2H'}}})}]), null, 'pas termine');
+  assert.strictEqual(P.debat([{m: a, fx: fin(1, 99, 12, [99])}]), null, 'une autre equipe que celle de la fiche');
+  assert.strictEqual(P.debat([{m: a, fx: null}]), null);
+  assert.strictEqual(P.debat([]), null);
+  assert.strictEqual(P.scoreVerifie(fin(1, 11, 12, [], {events: []})), null, 'sans evenements : pas de controle possible');
+});
+
+test('Debat : prolongation et tirs au but controles, questions selon le score', () => {
+  const ap = fin(1, 11, 12, [11, 12], {fixture: {id: 1, status: {short: 'AET'}}, goals: {home: 2, away: 1}});
+  ap.events.push({type: 'Goal', detail: 'Normal Goal', team: {id: 11}, player: {id: 3}, time: {elapsed: 105}});
+  assert.deepStrictEqual([P.scoreVerifie(ap).texte, P.scoreVerifie(ap).suite], ['2-1', ' après prolongation']);
+  const tab = fin(1, 11, 12, [11, 12], {fixture: {id: 1, status: {short: 'PEN'}}, goals: {home: 1, away: 1}, score: {fulltime: {home: 1, away: 1}, penalty: {home: 4, away: 3}}});
+  tab.events.push({type: 'Goal', detail: 'Penalty', comments: 'Penalty Shootout', team: {id: 11}, player: {id: 3}, time: {elapsed: 120}});
+  assert.strictEqual(P.scoreVerifie(tab).suite, ' après prolongation, 4-3 aux tirs au but');
+  const fauxAp = fin(1, 11, 12, [11, 12], {fixture: {id: 1, status: {short: 'AET'}}, goals: {home: 2, away: 1}});
+  assert.strictEqual(P.scoreVerifie(fauxAp), null, 'but de la prolongation absent de la liste');
+  const q = (buts) => P.debat([{m: mD(1, 'Lens', 'Como'), fx: fin(1, 11, 12, buts)}]).html;
+  assert.match(q([11, 12]), /Lens - Como, 1-1 : qui a le plus à regretter ce soir \?/);
+  assert.match(q([11, 11, 11]), /Lens gagne de 3 buts : ce score dit-il tout du match, selon vous \?/);
+  assert.match(q([11]), /Lens gagne à domicile contre Como : mérité ou non, selon vous \?/);
+});
+
+test('Passage du debat : 1 seul appel pour 5 matchs au plus, seulement ceux deja commences', async () => {
+  const l = [1, 2, 3, 4, 5, 6, 7].map((i) => mD(i, 'E' + i, 'F' + i)).concat([{...mD(8, 'G', 'H'), date: '2026-11-03 23:45'}]);
+  const appels = [];
+  const api = async (c) => { appels.push(c); return {response: [fin(1, 11, 12, [11])]}; };
+  const p = await P.debatDuSoir({matchs: l, jour: '2026-11-03', maxMatchs: 5, maintenant: '2026-11-03 23:15', api});
+  assert.strictEqual(appels.length, 1);
+  assert.strictEqual(appels[0].split('=')[1].split('-').length, 5);
+  assert.ok(!appels[0].includes('8'));
+  assert.match(p.html, /E1 1-0 F1/);
+  assert.strictEqual(P.composEtat([], '2026-11-03 12:05'), 'attendre', 'pas de gros match : le debat attend 18 h');
+  assert.strictEqual(P.composEtat([], '2026-11-03 18:00'), 'fini');
+  assert.strictEqual(P.composEtat([psg], '2026-11-03 20:59'), 'attendre');
+  assert.strictEqual(P.composEtat([psg], '2026-11-03 21:00'), 'fini', 'coup d\'envoi : plus de message');
+  assert.strictEqual(await P.debatDuSoir({matchs: [], jour: '2026-11-03', maxMatchs: 5, maintenant: '2026-11-03 23:15', api}), null);
+  assert.strictEqual(appels.length, 1, 'pas de gros match : aucun appel');
+});
+
+// ---------- Regles absolues ----------
+test('Avant match : aucun pari payant, aucun combine, buteur, montante ni match en or', async () => {
+  const autre = {...mk(99, 'premier', 'Arsenal', 'Chelsea'), pari_rec: 'SECRET PRO', cote_rec: 1.9, chance_iashark: 50, market_id: 'y', analysis_tier: 'FULL_ANALYSIS'};
+  const avant = [
+    P.offert({matchs: [offertM, autre]}, {matchs: [offertM, autre]}, MIDI),
+    (await P.composDuSoir({matchs: [psg, autre], maintenant: '2026-11-03 20:00', fenetreMinutes: 70, api: async (c) => (c.startsWith('fixtures/lineups') ? repCompo : repFixture('NS')), lireProteges: async () => proteges, lireTickets: async () => []})),
+  ];
+  for (const p of avant) {
+    propre(p);
+    assert.ok(!/combiné|buteur|montante|Sélection en or|match en or|SECRET|Arsenal/i.test(p.html), p.html);
+  }
+  assert.ok(!/%|cote/i.test(avant[0].html), 'le match offert : ni cote ni chance');
+});
+
+test('Les anciens rendez-vous ont disparu', () => {
+  for (const nom of ['guide', 'sondage', 'actu', 'soir', 'resultats', 'matchGratuit']) assert.strictEqual(P[nom], undefined, nom);
+  const wf = lireFichier('.github', 'workflows', 'telegram-canal.yml');
+  assert.ok(!/SLOT=(guide|sondage|actu|soir)|\[tout, .*(guide|sondage|actu|soir)/.test(wf));
+  const build = lireFichier('scripts', 'telegram', 'build-posts.mjs');
+  assert.ok(!/actus\.json|blog\/guides|sondage/.test(build));
+  assert.ok(!/sendPoll/.test(lireFichier('scripts', 'telegram', 'send-posts.mjs')));
+  assert.match(lireFichier('scripts', 'telegram', 'card.tpl'), /LE MATCH OFFERT/);
+});
+
+// ---------- Workflows : les scripts sont EXECUTES ici ----------
+const script = (wf, nom) => {
+  const i = wf.indexOf('- name: ' + nom);
+  assert.ok(i > 0, nom);
+  const bloc = wf.slice(i).split('\n      - ')[0];
+  const run = bloc.split('run: |\n')[1];
+  return run.split('\n').map((l) => l.replace(/^ {10}/, '')).join('\n');
+};
+const lanceur = (wf, dir) => (nom, env) => {
+  const out = path.join(dir, 'out-' + Math.random().toString(36).slice(2));
+  fs.writeFileSync(out, '');
+  execFileSync('bash', ['-e', '-c', script(wf, nom)], {env: {...process.env, GITHUB_OUTPUT: out, RUNNER_TEMP: dir, ...env}, cwd: dir, stdio: 'pipe'});
+  return Object.fromEntries(fs.readFileSync(out, 'utf8').split('\n').filter(Boolean).map((l) => l.split('=')));
+};
+
+test('Canal : le bon creneau a la bonne heure, ete comme hiver, jamais avant 9 h', () => {
+  const wf = lireFichier('.github', 'workflows', 'telegram-canal.yml');
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tg-'));
-  const lancer = (nom, env) => {
-    const out = path.join(dir, 'out-' + Math.random().toString(36).slice(2));
-    fs.writeFileSync(out, '');
-    execFileSync('bash', ['-c', script(nom)], {env: {...process.env, GITHUB_OUTPUT: out, RUNNER_TEMP: dir, ...env}, cwd: dir, stdio: 'pipe'});
-    return Object.fromEntries(fs.readFileSync(out, 'utf8').split('\n').filter(Boolean).map((l) => l.split('=')));
-  };
-  // Choix des messages a preparer.
-  const choix = (slot, r, m, a) => lancer('Messages a preparer', {SLOT: slot, DEJA_RESULTATS: r || '', DEJA_MATCH: m || '', DEJA_AUTRE: a || ''}).slot;
-  assert.strictEqual(choix('apres-maj'), 'apres-maj');
-  assert.strictEqual(choix('apres-maj', 'true'), 'match', 'resultats deja partis (calcul en echec) : le match gratuit reste a envoyer');
-  assert.strictEqual(choix('apres-maj', '', 'true'), 'resultats');
-  assert.strictEqual(choix('apres-maj', 'true', 'true'), '');
-  assert.strictEqual(choix('sondage'), 'sondage');
-  assert.strictEqual(choix('sondage', '', '', 'true'), '');
-  // Ce qui est parti : seul un message vraiment envoye est memorise.
+  const lancer = lanceur(wf, dir);
+  const choix = (EVENT, h, m, extra) => lancer('Choix des messages', {EVENT, FORCER_HEURE: String(h), FORCER_MINUTE: String(m || 0), INPUT_SLOT: '', INPUT_TEST: '', ...extra});
+  const creneau = (EVENT, h) => choix(EVENT, h).slot || '';
+  assert.deepStrictEqual([3, 4, 8, 12, 20, 21, 22, 23, 0, 2].map((h) => creneau('schedule', h)), ['', 'rattrapage', 'rattrapage', 'rattrapage', 'rattrapage', '', '', 'debat', 'debat', 'debat']);
+  assert.deepStrictEqual([3, 8, 12, 20, 21].map((h) => creneau('workflow_run', h)), ['', 'rattrapage', 'rattrapage', 'rattrapage', '']);
+  // Aucun job n'attend : pas de sleep, pas de chaine, 20 minutes au plus.
+  assert.ok(!/\bsleep\b/.test(wf.replace(/^\s*#.*$/gm, '')), 'aucune attente');
+  assert.ok(!/gh workflow run/.test(wf), 'aucun maillon lance');
+  assert.ok(!/actions: write/.test(wf));
+  assert.match(wf, /timeout-minutes: 20/);
+  // Crons UTC : hiver (UTC+1) et ete (UTC+2) tombent sur 9 h, 12 h et 23 h 15 de Paris.
+  assert.match(wf, /cron: '5 7,8 \* \* \*'/);
+  assert.match(wf, /cron: '5 10,11 \* \* \*'/);
+  assert.match(wf, /cron: '15 21,22 \* \* \*'/);
+  assert.strictEqual((wf.match(/- cron:/g) || []).length, 3);
+  // Essai manuel : TEST par defaut.
+  assert.deepStrictEqual(lancer('Choix des messages', {EVENT: 'workflow_dispatch', FORCER_HEURE: '15', INPUT_SLOT: 'hier', INPUT_TEST: 'true'}).test, '1');
+  fs.rmSync(dir, {recursive: true, force: true});
+});
+
+test('Envoi unique : une cle par message et par jour, posee seulement si le message est parti', () => {
+  const wf = lireFichier('.github', 'workflows', 'telegram-canal.yml');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tg-'));
+  const lancer = lanceur(wf, dir);
+  const choix = (slot, h, o, d) => lancer('Messages a preparer', {SLOT: slot, DEJA_HIER: h || '', DEJA_OFFERT: o || '', DEJA_DEBAT: d || ''}).slot || '';
+  assert.strictEqual(choix('hier'), 'hier');
+  assert.strictEqual(choix('hier', 'true'), '');
+  assert.strictEqual(choix('offert'), 'offert');
+  assert.strictEqual(choix('offert', '', 'true'), '');
+  assert.strictEqual(choix('debat'), 'debat');
+  assert.strictEqual(choix('debat', '', '', 'true'), '');
+  assert.strictEqual(choix('rattrapage'), 'rattrapage');
+  assert.strictEqual(choix('rattrapage', 'true'), 'offert');
+  assert.strictEqual(choix('rattrapage', '', 'true'), 'hier');
+  assert.strictEqual(choix('rattrapage', 'true', 'true'), '');
   fs.mkdirSync(path.join(dir, 'telegram'), {recursive: true});
   const envoyes = path.join(dir, 'telegram', 'envoyes.txt');
-  fs.writeFileSync(envoyes, 'resultats\n');
-  assert.deepStrictEqual(lancer('Ce qui est parti', {SLOT: 'apres-maj', ENVOI: 'success'}), {resultats: '1'}, 'calcul en echec : match gratuit NON memorise');
-  fs.writeFileSync(envoyes, 'resultats\nmatch\n');
-  assert.deepStrictEqual(lancer('Ce qui est parti', {SLOT: 'apres-maj', ENVOI: 'failure'}), {resultats: '1', match: '1'});
-  fs.rmSync(envoyes);
-  assert.deepStrictEqual(lancer('Ce qui est parti', {SLOT: 'apres-maj', ENVOI: 'success'}), {});
-  assert.deepStrictEqual(lancer('Ce qui est parti', {SLOT: 'guide', ENVOI: 'success'}), {autre: '1'});
-  assert.deepStrictEqual(lancer('Ce qui est parti', {SLOT: 'guide', ENVOI: 'failure'}), {});
+  assert.deepStrictEqual(lancer('Ce qui est parti', {}), {}, 'rien n\'est parti : rien de memorise');
+  fs.writeFileSync(envoyes, 'hier\n');
+  assert.deepStrictEqual(lancer('Ce qui est parti', {}), {hier: '1'}, 'le match offert reste a envoyer');
+  fs.writeFileSync(envoyes, 'hier\noffert\n');
+  assert.deepStrictEqual(lancer('Ce qui est parti', {}), {hier: '1', offert: '1'});
+  fs.writeFileSync(envoyes, 'debat\n');
+  assert.deepStrictEqual(lancer('Ce qui est parti', {}), {debat: '1'});
   fs.rmSync(dir, {recursive: true, force: true});
-  // Cles distinctes par message, sauvegardees seulement sur ces sorties.
-  assert.match(wf, /key: telegram-\$\{\{ steps\.slot\.outputs\.date \}\}-resultats/);
-  assert.match(wf, /key: telegram-\$\{\{ steps\.slot\.outputs\.date \}\}-match/);
-  assert.match(wf, /if: \$\{\{ always\(\) && steps\.parti\.outputs\.match == '1' \}\}/);
-  assert.doesNotMatch(wf, /key: telegram-\$\{\{ steps\.slot\.outputs\.date \}\}-apres-maj/);
-  // send-posts.mjs trace chaque message accepte par Telegram.
-  const send = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'telegram', 'send-posts.mjs'), 'utf8');
+  for (const s of ['hier', 'offert', 'debat']) {
+    assert.match(wf, new RegExp('key: telegram-\\$\\{\\{ steps\\.slot\\.outputs\\.date \\}\\}-' + s));
+    assert.match(wf, new RegExp("if: \\$\\{\\{ always\\(\\) && steps\\.parti\\.outputs\\." + s + " == '1' \\}\\}"));
+  }
+  const send = lireFichier('scripts', 'telegram', 'send-posts.mjs');
   assert.match(send, /fs\.appendFileSync\(path\.join\(dir, "envoyes\.txt"\), p\.slot \+ "\\n"\);\n  console\.log\(`envoye : \$\{p\.slot\}`\);/);
 });
 
-// « Marge retiree » : plus de chiffre du marche dans le message (decision de Clement,
-// 30/09/2026, canal-pro) : seulement la chance calculee par IASHARK et la cote.
-test('match gratuit : plus aucun chiffre « selon la cote », ni marge, ni « Sur 100 matchs »', () => {
-  const p = P.matchGratuit(home, {matchs: [libre]}, MATIN);
-  assert.ok(!/selon la cote|marge|Sur 100 matchs|en suppose/.test(JSON.stringify(p)), p.html);
-  const fs = require('node:fs'), path = require('node:path');
-  const tpl = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'telegram', 'card.tpl'), 'utf8');
-  assert.ok(!/MARGE|\{\{DIT\}\}|Ce que dit la cote/.test(tpl), 'card.tpl : plus de « ce que dit la cote »');
-  assert.match(tpl, /MATCH GRATUIT DU JOUR/);
+test('Panne du calcul du matin : Clement est prevenu en prive, Hier attend le calcul du jour', () => {
+  const wf = lireFichier('.github', 'workflows', 'telegram-canal.yml');
+  assert.match(wf, /github\.event\.workflow_run\.conclusion == 'failure' \}\}/);
+  assert.match(wf, /name: Prevenir Clement \(calcul du matin en echec\)/);
+  assert.match(wf, /chat_id=\$\{TELEGRAM_CHAT_ID\}/);
+  assert.ok(!EMOTICONE.test(wf), 'aucune emoticone');
+  assert.match(lireFichier('scripts', 'telegram', 'build-posts.mjs'), /frais\(bandeau\.genere_le\)/);
 });
 
-// Decision de Clement (20/10/2026) : le pari du jour part avec ses chiffres, ancien moteur
-// compris (chance_iashark est deja bornee par la cote sans marge) ; jamais pour une
-// competition « en test », jamais un pourcentage du modele au-dessus de celui de la cote.
-test('match gratuit : pari et pourcentages avec chance_iashark, jamais au-dessus de la cote', () => {
-  const sansChiffre = (m, pourquoi) => {
-    const p = P.matchGratuit({matchs: [m]}, null, MATIN);
-    assert.strictEqual(p.carte.pari, null, pourquoi);
-    assert.ok(!/%|Sur 100 matchs|Pari :|mi-temps/.test(JSON.stringify(p)), pourquoi + ' : ni pari ni pourcentage');
-  };
-  sansChiffre({...libre, league_reliability: 'en_test'}, 'competition « Fiabilité : en test » (config/leagues.json#fiabilite)');
-  sansChiffre({...libre, market_id: null}, 'marche du pari absent');
-  sansChiffre({...libre, pari_rec: ''}, 'libelle du pari absent');
-  sansChiffre({...libre, chance_iashark: 70}, 'modele (70 %) au-dessus de la cote (1,47 = 68 %)');
-  const {moteur_v3, v3_pari, ...ancien} = libre;
-  const ok = P.matchGratuit({matchs: [ancien]}, null, MATIN);
-  assert.strictEqual(ok.type, 'photo');
-  assert.deepStrictEqual([ok.carte.estimation, ok.carte.bookmakers], [64, 68]);
-  assert.match(ok.html, /Notre modèle dit : <b>64 %<\/b>\nLes bookmakers disent : 68 % \(cote 1,47\)/);
+test('Compos : passage toutes les 15 min aux heures utiles, une fois par jour, sans piece jointe', () => {
+  const wf = lireFichier('.github', 'workflows', 'telegram-compos.yml');
+  assert.match(wf, /cron: '4,19,34,49 14-20 \* \* \*'/);
+  assert.match(wf, /key: telegram-\$\{\{ steps\.passage\.outputs\.date \}\}-compos/);
+  assert.match(wf, /lookup-only: true/);
+  assert.match(wf, /if: \$\{\{ always\(\) && steps\.parti\.outputs\.compos == '1' \}\}/);
+  assert.match(wf, /steps\.deja\.outputs\.cache-hit != 'true'/);
+  assert.ok(!/upload-artifact/.test(wf), 'depot public : pas de copie du prono');
+  assert.match(wf, /TELEGRAM_AUTO: \$\{\{ vars\.TELEGRAM_AUTO \}\}/);
+  assert.match(lireFichier('.github', 'workflows', 'telegram-canal.yml'), /TELEGRAM_AUTO: \$\{\{ vars\.TELEGRAM_AUTO \}\}/);
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tg-'));
+  const lancer = lanceur(wf, dir);
+  const utile = (h) => lancer('Heure utile ?', {EVENT: 'schedule', FORCER_HEURE: String(h), INPUT_TEST: ''}).utile;
+  assert.deepStrictEqual([5, 6, 20, 22, 23].map(utile), ['0', '1', '1', '1', '0']);
+  // Un seul passage, sans attente : le message peut manquer un soir, jamais rien n'est invente.
+  const sansCommentaire = wf.replace(/^\s*#.*$/gm, '');
+  assert.ok(!/\bsleep\b/.test(sansCommentaire) && !/gh workflow run/.test(sansCommentaire), 'aucune attente ni relais');
+  assert.match(wf, /build-posts\.mjs --slot compos/);
+  assert.match(wf, /timeout-minutes: 10/);
+  fs.writeFileSync(path.join(dir, 'x'), '');
+  assert.deepStrictEqual(lancer('Ce qui est parti', {}), {});
+  fs.mkdirSync(path.join(dir, 'telegram'), {recursive: true});
+  fs.writeFileSync(path.join(dir, 'telegram', 'envoyes.txt'), 'compos\n');
+  assert.deepStrictEqual(lancer('Ce qui est parti', {}), {compos: '1'});
+  fs.rmSync(dir, {recursive: true, force: true});
 });
 
-// Condition 1 du mathematicien et de l'avocat du diable (30/09/2026). Preuve rejouee
-// (avocat-r6/condition1.js) : un pari MLS a 80 %, calcule par le modele seul, face a
-// une cote sans marge a 72 %, partait dans le canal avec « Sur 100 matchs comme
-// celui-ci… environ 80 fois ». Ces paris passent environ 70 % du temps.
-test('match gratuit : modele seul au-dessus de la cote sans marge, aucun pourcentage (preuve de l\'avocat, MLS 80 % / 72 %)', () => {
-  const V = 'vérifié sur le passé';
-  const mls = {id: 999, is_free: true, league: 'Major League Soccer', league_key: 'mls', home: {n: 'Austin'}, away: {n: 'Dallas'}, date: '2026-10-03 23:30', status: 'NS',
-    pari_rec: 'Victoire Domicile', market_id: 'home-win', model_probability: 80, cote_rec: '1.30', model_output_available: true, data_quality_score: 80,
-    markets_compared: [{id: 'home-win', market: 'Victoire Domicile', probability: 80, consensus: 72, edge: 8}],
-    v3_pari: {market_id: 'home-win', probabilite: 80, etiquette: V, fiabilite_marche: V}, moteur_v3: {source: 'v3', origine_probabilite: 'modèle seul', couverture: 'vérifiée', fiabilite_niveau: V},
-    reliability: {label: 'Élevée'}, p1: 80, pn: 12, p2: 8, c1: 1.30, cn: 5.5, c2: 9.0, analysis_tier: 'FULL_ANALYSIS', market_consensus_p1: 72, market_consensus_pN: 17, market_consensus_p2: 11};
-  const JOUR = '2026-10-03 09:00';
-  const sansChiffre = (m, pourquoi) => {
-    assert.strictEqual(P.pariV3Calibre(m), false, pourquoi);
-    const p = P.matchGratuit({matchs: [m]}, {matchs: [m]}, JOUR);
-    assert.strictEqual(p.carte.pari, null, pourquoi);
-    assert.ok(!/%|Sur 100 matchs|plus de chances|points/.test(JSON.stringify(p)), pourquoi);
-  };
-  sansChiffre(mls, 'preuve de l\'avocat : modele seul 80 % > cote sans marge 72 %');
-  sansChiffre({...mls, moteur_v3: {source: 'v3', couverture: 'vérifiée'}}, 'origine absente (donnees d\'avant le correctif)');
-  sansChiffre({...mls, moteur_v3: {...mls.moteur_v3, origine_probabilite: 'modele et cotes'}}, 'origine inconnue');
-  sansChiffre({...mls, model_probability: 72.2, v3_pari: {...mls.v3_pari, probabilite: 72.2}}, 'a peine au-dessus');
-  sansChiffre({...mls, model_probability: 70, markets_compared: []}, 'cote sans marge inconnue (1/cote garde la marge)');
-  // Meme pari, probabilite « modèle + cotes » (championnat europeen) : permis.
-  // Chance publiee : le plus bas entre 80 (modele) et 72 (cote sans marge), la meme que la page.
-  const europe = avecChance({...mls, moteur_v3: {...mls.moteur_v3, origine_probabilite: 'modèle + cotes'}});
-  assert.strictEqual(P.pariV3Calibre(europe), true);
-  assert.strictEqual(P.matchGratuit({matchs: [europe]}, {matchs: [europe]}, JOUR).carte.estimation, 72);
-  // Modele seul SOUS la cote sans marge (ou egal) : permis (chance calculee et cote).
-  for (const prob of [70, 72]) {
-    const dessous = avecChance({...mls, model_probability: prob, v3_pari: {...mls.v3_pari, probabilite: prob}, p1: prob});
-    assert.strictEqual(P.pariV3Calibre(dessous), true, String(prob));
-    const p = P.matchGratuit({matchs: [dessous]}, {matchs: [dessous]}, JOUR);
-    assert.strictEqual(p.type, 'photo');
-    assert.strictEqual(p.carte.estimation, prob);
-    assert.ok(!/plus de chances|points/.test(JSON.stringify(p)));
-  }
+test('Quotas : reglages lus dans config/quotas.json, plafond du jour respecte, budget par passage', () => {
+  const q = JSON.parse(lireFichier('config', 'quotas.json')).api_football;
+  assert.strictEqual(q.telegram_canal.fenetre_compos_minutes, 70);
+  assert.ok(q.telegram_canal.max_appels_par_lancement <= 3);
+  // Au pire 5 passages dans la fenetre x 2 appels + Hier 1 + debat 1 : 12 appels par jour, loin du plafond.
+  assert.ok(12 < q.plafond_jour);
+  const build = lireFichier('scripts', 'telegram', 'build-posts.mjs');
+  assert.match(build, /QUOTAS\.autorise\("api_football", QUOTAS\.lireEtat\(\), CFG\)/);
+  assert.match(build, /appels >= REGLAGES\.max_appels_par_lancement/);
 });
 
-test('canal : aucun mot « valeur » ou « avantage », aucun taux de reussite dans les messages v3', () => {
-  const p = P.matchGratuit({matchs: [libre]}, {matchs: [libre]}, MATIN);
-  const r = P.resultats({day: '2026-09-26', matches: [{moteur: 'v3', result: 'win'}, {moteur: 'v3', result: 'loss'}, {moteur: 'v3', result: 'win'}]});
-  for (const msg of [p, r]) {
-    const t = JSON.stringify(msg);
-    assert.ok(!/valeur|avantage|\bvalue\b|taux de réussite|réussite/i.test(t), t);
-  }
-  assert.ok(!/%/.test(r.html), 'resultats : jamais de pourcentage de reussite');
-});
+// ---------- Envoi : Telegram est simule, rien ne sort de la machine ----------
+function envoyer(env, posts, chat) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tg-envoi-'));
+  fs.writeFileSync(path.join(dir, 'posts.json'), JSON.stringify({date: '2026-11-03', slot: 'x', posts}));
+  const faux = path.join(dir, 'faux.mjs'), trace = path.join(dir, 'appels.jsonl');
+  fs.writeFileSync(faux, `import fs from "node:fs";
+globalThis.fetch = async (u, o) => {
+  const methode = String(u).split("/").pop();
+  fs.appendFileSync(${JSON.stringify(trace)}, JSON.stringify({methode, corps: o && typeof o.body === "string" ? JSON.parse(o.body) : null}) + "\\n");
+  const result = methode === "getChat" ? ${JSON.stringify(chat || {type: 'channel', title: 'IASHARK'})} : methode === "getChatMember" ? {status: "administrator"} : methode === "getMe" ? {id: 1} : {};
+  return {status: 200, json: async () => ({ok: true, result})};
+};
+globalThis.setTimeout = ((st) => (f) => st(f, 0))(globalThis.setTimeout);
+`);
+  const base = {PATH: process.env.PATH, TELEGRAM_BOT_TOKEN: 'faux', TELEGRAM_CHAT_ID: '111'};
+  const r = spawnSync(process.execPath, ['--import', faux, path.join(RACINE, 'scripts', 'telegram', 'send-posts.mjs'), dir], {env: {...base, ...env}, encoding: 'utf8'});
+  const appels = fs.existsSync(trace) ? fs.readFileSync(trace, 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l)) : [];
+  const parti = fs.existsSync(path.join(dir, 'envoyes.txt')) ? fs.readFileSync(path.join(dir, 'envoyes.txt'), 'utf8') : '';
+  fs.rmSync(dir, {recursive: true, force: true});
+  return {code: r.status, sortie: r.stdout + r.stderr, envois: appels.filter((a) => a.methode === 'sendMessage'), parti};
+}
+const msg = {type: 'text', slot: 'hier', html: 'Essai', apercu: false};
+const CHAINE = '-1001234567890';
 
-// 20/10/2026 : sans aucune designation is_free, le match du jour est celui que le site
-// met en avant (lib/free-match.js) ; avec une designation, jamais un autre match.
-test('match du jour : sans designation, meme match que le site ; avec designation, rien d\'autre', () => {
-  const base = {id: 9001, date: '2026-10-20 21:00', status: 'NS', league: 'UEFA Champions League', home: {n: 'Paris Saint Germain'}, away: {n: 'Barcelona'}, has_signal: true};
-  const autre = {id: 9002, date: '2026-10-20 18:45', status: 'NS', league: 'UEFA Champions League', home: {n: 'Fenerbahçe'}, away: {n: 'Slavia Praha'}};
-  const p = P.matchGratuit({matchs: [base, autre]}, null, '2026-10-20 08:00');
-  assert.ok(p, 'un match du jour sans designation');
-  assert.strictEqual(p.carte.pari, null);
-  assert.ok(!/%/.test(p.html), 'aucun pourcentage');
-  const designeHier = {...autre, id: 9003, date: '2026-10-19 20:00', is_free: true};
-  assert.strictEqual(P.matchGratuit({matchs: [base, designeHier]}, null, '2026-10-20 08:00'), null);
+test('Envoi : le clic du patron reste tant que TELEGRAM_AUTO n\'est pas a 1', () => {
+  const r = envoyer({TELEGRAM_CHANNEL_ID: CHAINE}, [msg]);
+  assert.strictEqual(r.code, 0, r.sortie);
+  assert.strictEqual(r.envois[0].corps.chat_id, '111');
+  assert.match(JSON.stringify(r.envois[0].corps.reply_markup), /Publier sur le canal/);
+  const sansId = envoyer({TELEGRAM_AUTO: '1'}, [msg]);
+  assert.strictEqual(sansId.envois[0].corps.chat_id, '111', 'AUTO sans chaine : reste a valider');
+  assert.match(sansId.sortie, /TELEGRAM_CHANNEL_ID absent/);
 });
-
-test('gros matchs du soir : seulement ceux qui n\'ont pas commence, avec un lien chacun, sans chiffre', () => {
-  const ms = [
-    {id: 1, date: '2026-10-20 21:00', status: 'NS', league: 'UEFA Champions League', league_key: 'ucl', home: {n: 'Paris Saint Germain'}, away: {n: 'Barcelona'}},
-    {id: 2, date: '2026-10-20 18:45', status: '1H', league: 'UEFA Champions League', league_key: 'ucl', home: {n: 'Fenerbahçe'}, away: {n: 'Slavia Praha'}},
-    {id: 3, date: '2026-10-21 21:00', status: 'NS', league: 'UEFA Champions League', league_key: 'ucl', home: {n: 'Real Madrid'}, away: {n: 'Juventus'}}
-  ];
-  const p = P.soir({matchs: ms}, '2026-10-20', '18:30');
-  assert.ok(p);
-  assert.ok(/PSG|Paris/.test(p.html) && /match\.html\?id=1/.test(p.html));
-  assert.ok(!/Fenerbah/.test(p.html) && !/Real Madrid/.test(p.html));
-  assert.ok(!/%/.test(p.html));
+test('Envoi : TELEGRAM_AUTO=1 publie sur la chaine privee, sans bouton, et trace ce qui est parti', () => {
+  const r = envoyer({TELEGRAM_AUTO: '1', TELEGRAM_CHANNEL_ID: CHAINE}, [msg]);
+  assert.strictEqual(r.code, 0, r.sortie);
+  assert.strictEqual(r.envois[0].corps.chat_id, CHAINE);
+  assert.strictEqual(r.envois[0].corps.reply_markup, undefined);
+  assert.strictEqual(r.parti, 'hier\n');
+  assert.ok(!r.sortie.includes(CHAINE), 'la valeur du reglage n\'est jamais affichee');
+});
+test('Envoi : ancienne adresse ou chaine publique refusees, rien ne part', () => {
+  const ancienne = envoyer({TELEGRAM_AUTO: '1', TELEGRAM_CHANNEL_ID: '@iasharkdata'}, [msg]);
+  assert.notStrictEqual(ancienne.code, 0);
+  assert.strictEqual(ancienne.envois.length, 0);
+  assert.ok(!ancienne.sortie.includes('@iasharkdata'));
+  const publique = envoyer({TELEGRAM_AUTO: '1', TELEGRAM_CHANNEL_ID: CHAINE}, [msg], {type: 'channel', username: 'iasharkdata'});
+  assert.notStrictEqual(publique.code, 0);
+  assert.strictEqual(publique.envois.length, 0);
+  assert.strictEqual(publique.parti, '');
+  // En test : jamais la chaine, meme avec TELEGRAM_AUTO=1.
+  const t = envoyer({TEST: '1', TELEGRAM_AUTO: '1', TELEGRAM_CHANNEL_ID: CHAINE}, [msg]);
+  assert.strictEqual(t.envois[0].corps.chat_id, '111');
+});
+test('Chaine visee : verdict sans valeur secrete', () => {
+  assert.deepStrictEqual(P.verdictChaine({type: 'channel', title: 'T', invite_link: P.INVITATION}, {status: 'administrator'}), {chaine: true, privee: true, robotAdmin: true, lienIdentique: true, titre: 'T'});
+  const v = P.verdictChaine({type: 'channel', username: 'iasharkdata'}, {status: 'member'});
+  assert.deepStrictEqual([v.privee, v.robotAdmin, v.lienIdentique], [false, false, null]);
+  assert.strictEqual(P.verdictChaine({type: 'supergroup'}, null).chaine, false);
 });

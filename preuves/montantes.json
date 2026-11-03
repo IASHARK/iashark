@@ -1,10 +1,10 @@
 {
  "version": 1,
- "genere_le": "2026-11-02T07:06:59.972Z",
- "jour": "2026-11-02",
+ "genere_le": "2026-11-03T12:38:36.711Z",
+ "jour": "2026-11-03",
  "debut": "2026-10-06",
  "objectif": 10,
- "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-11-02. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
+ "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-11-03. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
  "montantes": [
   {
    "rang": 1,
@@ -19,10 +19,21 @@
      "c": 1.4,
      "r": "gagne",
      "cc": 1.4
+    },
+    {
+     "j": "2026-11-02",
+     "f": 1575533,
+     "h": "GIL Vicente",
+     "a": "Vitória SC",
+     "m": "dc-x2",
+     "p": "Match nul ou Vitória SC",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 1.96
     }
    ],
-   "gagnes": 1,
-   "cote": 1.4,
+   "gagnes": 2,
+   "cote": 1.96,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
@@ -185,10 +196,21 @@
      "c": 1.4,
      "r": "gagne",
      "cc": 1.4
+    },
+    {
+     "j": "2026-11-02",
+     "f": 1575533,
+     "h": "GIL Vicente",
+     "a": "Vitória SC",
+     "m": "dc-x2",
+     "p": "Match nul ou Vitória SC",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 1.96
     }
    ],
    "bilan": {
-    "gagnes": 10,
+    "gagnes": 11,
     "perdus": 3,
     "annules": 0,
     "non_regles": 0,
@@ -197,9 +219,21 @@
   },
   {
    "rang": 2,
-   "paliers": [],
-   "gagnes": 0,
-   "cote": null,
+   "paliers": [
+    {
+     "j": "2026-11-02",
+     "f": 1549050,
+     "h": "Sonderjyske",
+     "a": "FC Copenhagen",
+     "m": "away-win",
+     "p": "Victoire FC Copenhagen",
+     "c": 1.42,
+     "r": "gagne",
+     "cc": 1.42
+    }
+   ],
+   "gagnes": 1,
+   "cote": 1.42,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
@@ -362,10 +396,21 @@
      "c": 1.4,
      "r": "perdu",
      "cc": null
+    },
+    {
+     "j": "2026-11-02",
+     "f": 1549050,
+     "h": "Sonderjyske",
+     "a": "FC Copenhagen",
+     "m": "away-win",
+     "p": "Victoire FC Copenhagen",
+     "c": 1.42,
+     "r": "gagne",
+     "cc": 1.42
     }
    ],
    "bilan": {
-    "gagnes": 9,
+    "gagnes": 10,
     "perdus": 4,
     "annules": 0,
     "non_regles": 0,
@@ -385,10 +430,21 @@
      "c": 1.41,
      "r": "gagne",
      "cc": 1.41
+    },
+    {
+     "j": "2026-11-02",
+     "f": 1550185,
+     "h": "Sassuolo",
+     "a": "Fiorentina",
+     "m": "dc-x2",
+     "p": "Match nul ou Fiorentina",
+     "c": 1.42,
+     "r": "gagne",
+     "cc": 2
     }
    ],
-   "gagnes": 1,
-   "cote": 1.41,
+   "gagnes": 2,
+   "cote": 2,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
@@ -533,10 +589,21 @@
      "c": 1.41,
      "r": "gagne",
      "cc": 1.41
+    },
+    {
+     "j": "2026-11-02",
+     "f": 1550185,
+     "h": "Sassuolo",
+     "a": "Fiorentina",
+     "m": "dc-x2",
+     "p": "Match nul ou Fiorentina",
+     "c": 1.42,
+     "r": "gagne",
+     "cc": 2
     }
    ],
    "bilan": {
-    "gagnes": 9,
+    "gagnes": 10,
     "perdus": 2,
     "annules": 1,
     "non_regles": 0,

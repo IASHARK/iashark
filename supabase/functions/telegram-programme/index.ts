@@ -8,7 +8,8 @@ const ADMIN = Deno.env.get("TELEGRAM_ADMIN_CHAT_ID")!;
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
 const IMAGE_OK = /^https:\/\/(github\.com|raw\.githubusercontent\.com)\/IASHARK\//;
-const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+// Le gras <b> des textes est garde, tout le reste est echappe.
+const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/&lt;(\/?)b&gt;/g, "<$1b>");
 const clavier = { inline_keyboard: [
   [{ text: "Voir les matchs du jour", url: "https://iashark.com/?utm_source=telegram&utm_campaign=canal" }],
   [{ text: "Publier sur le canal", callback_data: "pub" }, { text: "Ne pas publier", callback_data: "non" }],

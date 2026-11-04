@@ -62,14 +62,14 @@ test("Aujourd'hui, compte gratuit : buteur complet ; x5 (Pro seul depuis le 04/1
   assert.match(h, /Ce que tu débloques : le petit combiné, le grand combiné et la Sélection en or\./);
   assert.match(h, /href="\/abonnement\.html\?duree=month&amp;next=/);
   assert.equal((h.match(/class="mu-shimmer aj-cta"/g) || []).length, 1);
-  // Lignes dans l'ordre des coups d'envoi.
-  assert.ok(h.indexOf("Lens – Lille") < h.indexOf("Monaco – Nice") && h.indexOf("Monaco – Nice") < h.indexOf("Porto – Braga"));
   assert.doesNotMatch(h, INTERDITS);
 });
 
 test("Aujourd'hui, Pro : tout ouvert, aucun bouton de paiement ; Selection en or = le seul or (Shine Border)", () => {
   const rep = { version: 1, jour: JOUR, niveau: "pro", tickets: [X5, { type: "x10", statut: "aucun", verrou: null }], selection_or: OR, buteur_du_jour: BUT };
   const h = AJ.html(rep, {});
+  // Lignes dans l'ordre des coups d'envoi.
+  assert.ok(h.indexOf("Lens – Lille") < h.indexOf("Monaco – Nice") && h.indexOf("Monaco – Nice") < h.indexOf("Porto – Braga"));
   assert.doesNotMatch(h, /aj-unlock|aj-cta/);
   assert.match(h, /On ne force jamais un combiné\./);
   assert.match(h, /<article class="or is-on"><span class="mu-shine" aria-hidden="true"><\/span>/);

@@ -27,7 +27,13 @@ test("C4 : bouton d'essai « 0 € aujourd'hui », premier prelevement date just
   assert.match(h, /Essayer 7 jours : 0 € aujourd’hui/);
   // Les trois etapes de l'essai (02/11/2026) : meme verite que Mon compte (PR #222) : montant, date, prix de chaque
   // mois, carte demandee ; essai reserve a un premier abonnement (avocat du diable, 27/10/2026).
-  for (const s of ["Aujourd’hui", ">0 €<", "Le 3 novembre", ">14,99 €<", "Puis chaque mois, si tu n’as pas résilié", "Avant le 3 novembre, tu peux résilier en ligne depuis Mon compte : tu ne paies rien.", "Carte demandée. Essai réservé à un premier abonnement."]) assert.ok(h.includes(s), s);
+  for (const s of ["Aujourd’hui", ">0 €<", "Le 3 novembre", ">14,99 €<", "Puis chaque mois, si tu n’as pas résilié", "Premier prélèvement : 14,99 € le 3 novembre, puis 14,99 € chaque mois, seulement si tu ne résilies pas avant.", "Carte demandée ; résiliation en ligne depuis Mon compte. Essai réservé à un premier abonnement."]) assert.ok(h.includes(s), s);
+  // Match bloque (04/11/2026) : bouton et conditions avant le choix des durees, pour le premier ecran du telephone.
+  assert.ok(h.indexOf("op-cta") < h.indexOf("op-plans"));
+  // Ailleurs : durees d'abord, et la phrase qui dit comment partir sans payer.
+  const ailleurs = OP.html({ mode: "vitrine", contexte: "general", plans: PLANS, choisi: "month", jours: 7, connecte: false, uid: "c4g", maintenant: MARDI });
+  assert.ok(ailleurs.indexOf("op-plans") < ailleurs.indexOf("op-cta"));
+  for (const s of ["Avant le 3 novembre, tu peux résilier en ligne depuis Mon compte : tu ne paies rien.", "Carte demandée. Essai réservé à un premier abonnement."]) assert.ok(ailleurs.includes(s), s);
   // La ligne d'essai suit le bouton, avant la facon de payer et les avantages.
   assert.ok(h.indexOf("op-cta") < h.indexOf("data-op-trial") && h.indexOf("data-op-trial") < h.indexOf("data-op-pay"));
   // Aucun rappel par e-mail : aucune tache planifiee ne l'envoie (trial-reminder / 0042 absents).

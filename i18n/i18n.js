@@ -354,9 +354,10 @@
 
     var search = String(env.search || ""), hash = String(env.hash || "");
     var path;
-    var staticMatch = pathname.match(/^\/match\/(\d+)\.html$/);
+    var staticMatch = pathname.match(/^(?:\/[a-z]{2})?\/match\/(\d+)\.html$/);
     if (staticMatch) {
-      // /match/<id>.html -> /<dir>/match.html?id=<id> + les autres parametres.
+      // /match/<id>.html ou /<dir>/match/<id>.html -> /<cible>/match.html?id=<id>
+      // + les autres parametres.
       var rest = search.replace(/^\?/, "").split("&").filter(function(kv){ return kv && !/^id=/.test(kv); });
       path = "/" + to + "/match.html";
       search = "?id=" + staticMatch[1] + (rest.length ? "&" + rest.join("&") : "");

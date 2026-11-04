@@ -172,4 +172,8 @@ test("decision pure exposee : raisons explicites", () => {
   assert.equal(I.decideLandingRedirect(Object.assign({}, base, { pathname: "/de/pro.html" })).reason, "no-page-dir");
   assert.equal(I.decideLandingRedirect(Object.assign({}, base, { languages: [] })).reason, "no-language");
   assert.equal(I.decideLandingRedirect(Object.assign({}, base, { pathname: "/blog/x.html" })).reason, "no-page-dir");
+  // Page match statique deja dans une langue : meme traitement qu'a la racine.
+  assert.equal(I.decideLandingRedirect(Object.assign({}, base, { pathname: "/es/match/7.html", search: "?utm_source=x" })).href, "/en/match.html?id=7&utm_source=x");
+  assert.equal(I.decideLandingRedirect(Object.assign({}, base, { pathname: "/en/match/7.html", languages: ["es-ES"] })).href, "/es/match.html?id=7");
+  assert.equal(I.decideLandingRedirect(Object.assign({}, base, { pathname: "/en/match/7.html" })).reason, "same-language");
 });

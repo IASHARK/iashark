@@ -6,7 +6,7 @@
 // dans la table tickets_du_jour par le pipeline (lib/tickets-du-jour.js). Chaque niveau recoit
 // ce a quoi il a droit, construit par LISTE BLANCHE (supabase/functions/_shared/tickets-contrat.mjs) :
 //  - sans compte : nombre de matchs et cote totale des tickets, rien d'autre ;
-//  - compte gratuit : ticket x5 et buteur du jour complets ;
+//  - compte gratuit : buteur du jour complet (x5 reserve a Pro depuis le 04/11/2026) ;
 //  - Pro (plan « pro » ou « famille », ou role « admin », lus cote serveur) : tout.
 // Le client ne choisit rien : ni le jour (celui du serveur, heure de Paris), ni le niveau
 // (lu ici avec la cle service role). Table illisible : 200 avec statut « indisponible ».

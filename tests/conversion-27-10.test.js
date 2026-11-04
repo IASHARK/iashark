@@ -24,10 +24,10 @@ const MARDI = Date.parse("2026-10-27T10:00:00+01:00");
 
 test("C4 : bouton d'essai « 0 € aujourd'hui », premier prelevement date juste dessous, sans rappel promis", () => {
   const h = OP.html({ mode: "vitrine", contexte: "match", plans: PLANS, choisi: "month", jours: 7, connecte: false, uid: "c4", maintenant: MARDI });
-  assert.match(h, /Essayer 7 jours : 0 € aujourd’hui/);
+  assert.match(h, /Démarrer mes 7 jours gratuits/);
   // Les trois etapes de l'essai (02/11/2026) : meme verite que Mon compte (PR #222) : montant, date, prix de chaque
   // mois, carte demandee ; essai reserve a un premier abonnement (avocat du diable, 27/10/2026).
-  for (const s of ["Aujourd’hui", ">0 €<", "Le 3 novembre", ">14,99 €<", "Puis chaque mois, si tu n’as pas résilié", "Premier prélèvement : 14,99 € le 3 novembre, puis 14,99 € chaque mois, seulement si tu ne résilies pas avant.", "Carte demandée ; résiliation en ligne depuis Mon compte. Essai réservé à un premier abonnement."]) assert.ok(h.includes(s), s);
+  for (const s of ["Aujourd’hui", ">0 €<", "Le 3 novembre", ">14,99 €<", "Puis chaque mois, si tu n’as pas résilié", "0 € aujourd’hui, carte demandée. 14,99 €/mois à partir du 3 novembre, sauf si tu annules avant."]) assert.ok(h.includes(s), s);
   // Match bloque (04/11/2026) : bouton et conditions avant le choix des durees, pour le premier ecran du telephone.
   assert.ok(h.indexOf("op-cta") < h.indexOf("op-plans"));
   // Ailleurs : durees d'abord, et la phrase qui dit comment partir sans payer.

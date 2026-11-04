@@ -152,9 +152,9 @@ test("comparatif Compte gratuit / Pro du premier ecran : conforme aux verrous de
   };
   ["pro.html", "fr/pro.html", "en/pro.html", "es/pro.html", "gb/pro.html", "mx/pro.html", "za/pro.html"].forEach((page) => {
     const html = fs.readFileSync(path.join(__dirname, "..", page), "utf8");
-    // lib : supabase/functions/_shared/tickets-contrat.mjs (compte gratuit : x5 et buteur ouverts, x10 et Selection en or « pro »).
-    ["cmp_others", "cmp_big", "item_gold_title"].forEach((k) => assert.equal(ligne(html, k), "non/oui", page + " " + k));
-    ["cmp_offered", "cmp_small", "item_scorer_title"].forEach((k) => assert.equal(ligne(html, k), "oui/oui", page + " " + k));
+    // supabase/functions/_shared/tickets-contrat.mjs (compte gratuit : buteur ouvert ; x5, x10 et Selection en or « pro »).
+    ["cmp_others", "cmp_small", "cmp_big", "item_gold_title", "cmp_climb"].forEach((k) => assert.equal(ligne(html, k), "non/oui", page + " " + k));
+    ["cmp_offered", "item_scorer_title"].forEach((k) => assert.equal(ligne(html, k), "oui/oui", page + " " + k));
     assert.ok(html.indexOf('class="pv-cmp"') < html.indexOf('class="pv-hero-cta"'), page);
   });
 });

@@ -127,10 +127,10 @@ test("C1 : offertDuJour = le choix de l'accueil, mais jamais un match d'un autre
 test("C5 : inscription, ce qu'on recoit, tutoiement, retour sur le match offert", () => {
   const fr = JSON.parse(read("i18n/dict/fr.json")).auth;
   assert.equal(fr.signup_h1, "Ton pari offert du jour, gratuit");
-  assert.equal(fr.signup_intro, "Avec un compte gratuit : l’analyse complète du match offert, chaque jour, et le Petit combiné. Sans carte bancaire.");
+  assert.equal(fr.signup_intro, "Avec un compte gratuit : l’analyse complète du match offert, chaque jour. Sans carte bancaire.");
   assert.equal(fr.signup_submit, "Voir mon pari offert");
   assert.equal(fr.email_placeholder, "ton@email.com");
-  // Petit combine : seulement la ou il est servi (marche francais) ; en (gb, za, us) et es-mx n'en parlent pas.
+  // Petit combine : reserve a Pro depuis le 04/11/2026, plus aucune page d'inscription n'en parle.
   assert.doesNotMatch(JSON.parse(read("i18n/dict/en.json")).auth.signup_intro, /combo|accumulator/i);
   assert.doesNotMatch(JSON.parse(read("i18n/dict/es-mx.json")).auth.signup_intro, /parlay|combinad/i);
   // Aucune connexion Google tant qu'elle n'est pas branchee (Supabase : external.google = false).
@@ -167,7 +167,7 @@ test("C6 : textes vrais sous le match offert et sur la page Combinés (config/ti
   const T = JSON.parse(read("config/tickets.json"));
   const v = (x) => x.toFixed(2).replace(".", ",");
   const c = JSON.parse(read("i18n/dict/fr.json")).combines_page;
-  assert.equal(c.rule_small, T.x5.jambes[0] + " à " + T.x5.jambes[T.x5.jambes.length - 1] + " matchs, cote totale entre " + v(T.x5.cote_min) + " et " + v(T.x5.cote_max) + ". Ouvert avec un compte gratuit.");
+  assert.equal(c.rule_small, T.x5.jambes[0] + " à " + T.x5.jambes[T.x5.jambes.length - 1] + " matchs, cote totale entre " + v(T.x5.cote_min) + " et " + v(T.x5.cote_max) + ". Réservé à Pro.");
   assert.equal(c.rule_big, T.x10.jambes[0] + " à " + T.x10.jambes[T.x10.jambes.length - 1] + " matchs, cote totale entre " + v(T.x10.cote_min) + " et " + v(T.x10.cote_max) + ". Avec Pro.");
   assert.match(c.rules_note, new RegExp("entre " + v(T.jambe.cote_min) + " et " + v(T.jambe.cote_max) + " et au moins " + T.jambe.chance_min + " %"));
   // /en/ reste en dollars (marche us).

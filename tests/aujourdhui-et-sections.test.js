@@ -46,19 +46,20 @@ test("Aujourd'hui, sans compte : en-tete vrai (nombre de matchs, cote totale), c
   assert.match(h, /aria-hidden="true" inert/);
   assert.equal((h.match(/class="aj-unlock hs-gate-card"/g) || []).length, 1, "un seul bloc de deverrouillage");
   assert.equal((h.match(/class="mu-shimmer aj-cta"/g) || []).length, 1, "un seul bouton");
-  assert.match(h, /Ce que tu débloques : le petit combiné et le buteur du jour, gratuitement\./);
+  assert.match(h, /Ce que tu débloques : le buteur du jour, gratuitement\./);
+  assert.match(h, /Le petit combiné, le grand combiné et la Sélection en or : dans Pro\./);
   assert.match(h, /href="\/inscription\.html\?next=/);
   assert.doesNotMatch(h, INTERDITS);
   for (const l of AJ.FAUX_LIGNES) for (const x of l) assert.doesNotMatch(x, /\d/, "faux contenu sans chiffre : " + x);
 });
 
-test("Aujourd'hui, compte gratuit : ticket x5 et buteur complets, x10 et Selection en or flous, bouton « Passe Pro »", () => {
-  const rep = { version: 1, jour: JOUR, niveau: "gratuit", tickets: [X5, { type: "x10", statut: "publie", verrou: "pro", nb_matchs: 6, cote_totale: 10.18 }],
+test("Aujourd'hui, compte gratuit : buteur complet ; x5 (Pro seul depuis le 04/11/2026), x10 et Selection en or flous, bouton « Passe Pro »", () => {
+  const rep = { version: 1, jour: JOUR, niveau: "gratuit", tickets: [{ type: "x5", statut: "publie", verrou: "pro", nb_matchs: 3, cote_totale: 4.62 }, { type: "x10", statut: "publie", verrou: "pro", nb_matchs: 6, cote_totale: 10.18 }],
     selection_or: { statut: "publie", verrou: "pro", nb_paris: 3 }, buteur_du_jour: BUT };
   const h = AJ.html(rep, {});
-  assert.match(h, /Lens – Lille/);
+  assert.doesNotMatch(h, /Lens – Lille/);
   assert.match(h, /data-mu-gauge="35"/, "jauge Magic UI du buteur");
-  assert.match(h, /Ce que tu débloques : le grand combiné et la Sélection en or\./);
+  assert.match(h, /Ce que tu débloques : le petit combiné, le grand combiné et la Sélection en or\./);
   assert.match(h, /href="\/abonnement\.html\?duree=month&amp;next=/);
   assert.equal((h.match(/class="mu-shimmer aj-cta"/g) || []).length, 1);
   // Lignes dans l'ordre des coups d'envoi.

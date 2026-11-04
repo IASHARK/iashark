@@ -90,13 +90,13 @@ test("aucun nom technique de traduction ni « undefined » : chaque cle des modu
   }
 });
 
-test("Aujourd'hui sans compte : le ticket x10 et la Selection en or portent le cadenas « Pro », jamais « Gratuit »", () => {
+test("Aujourd'hui sans compte : les tickets x5 et x10 et la Selection en or portent le cadenas « Pro », jamais « Gratuit »", () => {
   const AJ = require("../lib/aujourdhui.js");
   const v = (x) => ({ statut: "publie", verrou: x, nb_matchs: 4, cote_totale: 4.8 });
   const h = AJ.html({ version: 1, jour: "2026-10-04", niveau: "anonyme", tickets: [Object.assign({ type: "x5" }, v("compte")), Object.assign({ type: "x10" }, v("compte"))],
     selection_or: { statut: "publie", verrou: "compte", nb_paris: 3 }, buteur_du_jour: { statut: "publie", verrou: "compte" } }, {});
   const badge = (re) => { const m = re.exec(h); assert.ok(m, String(re)); return /sc-lock[^>]*>(?:<svg[\s\S]*?<\/svg>)?<span>([^<]+)</.exec(h.slice(m.index))[1]; };
-  assert.equal(badge(/data-aj-card="x5"/), "Gratuit");
+  assert.equal(badge(/data-aj-card="x5"/), "Pro");
   assert.equal(badge(/data-aj-card="x10"/), "Pro");
   assert.equal(badge(/data-aj-card="buteur"/), "Gratuit");
   assert.equal(badge(/<article class="or is-locked"/), "Pro");

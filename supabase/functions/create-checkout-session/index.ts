@@ -93,6 +93,16 @@ function pickLocale(req: Request, hint?: unknown): string {
   }
   return "fr";
 }
+// Sur la page Stripe, juste au-dessus du bouton, pendant l'essai (04/11/2026) : 12 ouvertures
+// sur 16 s'arretaient la, sans aucun rappel que rien n'est preleve aujourd'hui.
+const ESSAI_STRIPE: Record<string, Record<string, string>> = { submit: {
+  fr: "Rien n'est prélevé aujourd'hui. Annulation en ligne à tout moment depuis ton compte.",
+  en: "Nothing is charged today. Cancel online anytime from your account.",
+  es: "Hoy no se cobra nada. Cancela en línea cuando quieras desde tu cuenta.",
+  de: "Heute wird nichts abgebucht. Du kannst jederzeit online in deinem Konto kündigen.",
+  it: "Oggi non viene addebitato nulla. Puoi disdire online quando vuoi dal tuo account.",
+  pt: "Hoje não é cobrado nada. Cancela online quando quiseres a partir da tua conta.",
+} };
 function msg(table: Record<string, Record<string, string>>, key: string, locale: string): string {
   const row = table[key];
   return (row && (row[locale] || row[locale.split("-")[0]] || row.fr)) || key;
@@ -367,7 +377,11 @@ Deno.serve(async (req: Request) => {
     const trial = trialForAccount({ days: trialDays(getEnv), interval: usedInterval, statuses, stripeHasHistory });
     if (trial.trial) {
       const tp = trialSessionParams(trial.days, baseSession.subscription_data.metadata as Record<string, string>);
-      Object.assign(baseSession, { payment_method_collection: tp.payment_method_collection, subscription_data: tp.subscription_data });
+      Object.assign(baseSession, {
+        payment_method_collection: tp.payment_method_collection,
+        subscription_data: tp.subscription_data,
+        custom_text: { submit: { message: msg(ESSAI_STRIPE, "submit", pickLocale(req, requestedLocale)) } },
+      });
       (baseSession.metadata as Record<string, string>).trial_days = String(trial.days);
     }
     const fieldOnly = usedInterval === "month" ? { allow_promotion_codes: true } : {};

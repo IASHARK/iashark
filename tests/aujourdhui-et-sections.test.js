@@ -291,7 +291,7 @@ test("composant de paiement : textes sans mot interdit ni fausse urgence", () =>
   }
   // Correction C4 du 27/10/2026 : le montant d'aujourd'hui dans le bouton, la date du premier prelevement dessous.
   const essai = OP.html({ mode: "vitrine", contexte: "general", plans, choisi: "month", jours: 7, connecte: false, uid: "v" });
-  assert.match(essai, /Essayer 7 jours : 0 € aujourd’hui/);
+  assert.match(essai, /Démarrer mes 7 jours gratuits/);
   for (const re of [/Avant le \d{1,2} \S+, tu peux résilier/, /Le \d{1,2} \S+/, />19,95 €</, /Puis chaque mois, si tu n’as pas résilié/, /Carte demandée\. Essai réservé à un premier abonnement\./]) assert.match(essai, re);
 });
 

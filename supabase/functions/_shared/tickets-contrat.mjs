@@ -6,8 +6,8 @@
 //  - sans compte  : type, statut, nombre de matchs et cote totale de chaque ticket ; « 3 paris »
 //                   pour la Selection en or ; « pret » pour le buteur. Jamais un match, un pari,
 //                   une cote de jambe, une chance, un joueur ;
-//  - compte gratuit : ticket x5 complet et buteur du jour complet ; ticket x10 et Selection en
-//                   or comme sans compte (verrou « pro ») ;
+//  - compte gratuit : buteur du jour complet ; tickets x5 et x10 et Selection en or comme sans
+//                   compte (verrou « pro » ; x5 reserve a Pro depuis le 04/11/2026, Clement) ;
 //  - Pro          : tout.
 // La reponse est CONSTRUITE PAR LISTE BLANCHE : un objet neuf avec les seuls champs permis,
 // jamais une copie d'une ligne a laquelle on retirerait des champs. Les faux chiffres sous le
@@ -45,7 +45,7 @@ export function jourParis(ms) {
 // debloque ; « pro » = l'abonnement Pro debloque.
 const VERROUS = {
   anonyme: { x5: "compte", x10: "compte", or: "compte", buteur: "compte" },
-  gratuit: { x5: null, x10: "pro", or: "pro", buteur: null },
+  gratuit: { x5: "pro", x10: "pro", or: "pro", buteur: null },
   pro: { x5: null, x10: null, or: null, buteur: null },
 };
 export function verrouDe(niveau, type) {

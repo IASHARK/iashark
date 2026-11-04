@@ -143,3 +143,18 @@ test("pages generees : la page de vente traduite dans chaque version publique", 
     assert.doesNotMatch(page, /Calculateur de mise|Simulateur de capital|data-tool="(stake|bankroll)"/, dir);
   }
 });
+
+test("comparatif Compte gratuit / Pro du premier ecran : conforme aux verrous des tickets, dans toutes les pages", () => {
+  const ligne = (html, cle) => {
+    const m = html.match(new RegExp('<tr[^>]*><th scope="row" data-i18n="pro_vente\\.' + cle + '">.*?</tr>'));
+    assert.ok(m, cle);
+    return (m[0].match(/data-i18n="pro_vente\.cmp_(yes|no)"/g) || []).map((x) => (/cmp_yes/.test(x) ? "oui" : "non")).join("/");
+  };
+  ["pro.html", "fr/pro.html", "en/pro.html", "es/pro.html", "gb/pro.html", "mx/pro.html", "za/pro.html"].forEach((page) => {
+    const html = fs.readFileSync(path.join(__dirname, "..", page), "utf8");
+    // supabase/functions/_shared/tickets-contrat.mjs (compte gratuit : buteur ouvert ; x5, x10 et Selection en or « pro »).
+    ["cmp_others", "cmp_small", "cmp_big", "item_gold_title", "cmp_climb"].forEach((k) => assert.equal(ligne(html, k), "non/oui", page + " " + k));
+    ["cmp_offered", "item_scorer_title"].forEach((k) => assert.equal(ligne(html, k), "oui/oui", page + " " + k));
+    assert.ok(html.indexOf('class="pv-cmp"') < html.indexOf('class="pv-hero-cta"'), page);
+  });
+});

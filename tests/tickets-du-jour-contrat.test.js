@@ -51,10 +51,12 @@ test("14. sans compte : type, statut, nombre de matchs et cote totale ; aucune c
   assert.doesNotMatch(JSON.stringify(r), /Lens|Lille|Winamax|Buteur Secret|1234567|home-win/);
 });
 
-test("15. compte gratuit : x5 et buteur complets ; x10 et Selection en or sans aucune cle revelatrice", async () => {
+test("15. compte gratuit : buteur complet ; x5 (Pro seul depuis le 04/11/2026), x10 et Selection en or sans aucune cle revelatrice", async () => {
   const C = await charger();
   const r = C.construireReponse({ jour: "2026-10-04", niveau: "gratuit", lignes: LIGNES, calcul: null });
-  const x5 = r.tickets[0];
+  assert.equal(r.tickets[0].verrou, "pro");
+  assert.deepEqual(Object.keys(r.tickets[0]).sort(), ["cote_totale", "nb_matchs", "statut", "type", "verrou"]);
+  const x5 = C.construireReponse({ jour: "2026-10-04", niveau: "pro", lignes: LIGNES, calcul: null }).tickets[0];
   assert.equal(x5.verrou, null); assert.equal(x5.chance, 17); assert.equal(x5.operateur_unique, "Winamax");
   assert.equal(x5.jambes.length, 4);
   assert.deepEqual(Object.keys(x5.jambes[0]).sort(), ["chance", "cote", "coup_envoi", "domicile", "etat", "exterieur", "fixture_id", "ligue", "market_id", "operateur", "pari"]);

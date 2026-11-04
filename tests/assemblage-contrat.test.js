@@ -212,8 +212,7 @@ test("tickets du jour : la reponse du contrat (3 niveaux) est rendue sans fuite 
   assert.doesNotMatch(hA, /Buteur du jour|indisponible/i, "buteur sans feu vert : aucune carte");
   const gratuit = C.construireReponse({ jour: "2026-10-04", niveau: "gratuit", lignes: LIGNES, calcul });
   const hG = AJ.html(gratuit, {});
-  assert.match(hG, /Lens1 – Lille1/);
-  assert.doesNotMatch(hG, /Lens11|Lens21/, "x10 et Selection en or : jamais leurs jambes pour un compte gratuit");
+  assert.doesNotMatch(hG, /Lens1 |Lens11|Lens21/, "x5, x10 et Selection en or : jamais leurs jambes pour un compte gratuit");
   const pro = C.construireReponse({ jour: "2026-10-04", niveau: "pro", lignes: LIGNES, calcul });
   const hP = AJ.html(pro, {});
   for (const x of ["Lens1 – Lille1", "Lens11 – Lille11", "Victoire Lens21"]) assert.ok(hP.includes(x), x);

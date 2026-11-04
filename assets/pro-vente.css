@@ -51,6 +51,19 @@ html{scrollbar-color:rgba(141,179,211,.32) #060b12}
 .pv-hero{padding:40px 0 44px}
 .pv-lead{margin-top:18px;max-width:52ch;font-size:16.5px;line-height:1.55;color:var(--pv-soft)}
 .pv-hero-cta{display:flex;flex-direction:column;gap:14px;margin-top:28px}
+/* Gratuit / Pro en un coup d'oeil : Comparison 2 de Hirael (21st.dev, MIT), colonne Pro mise en avant. */
+.pv-cmp{width:100%;max-width:560px;margin-top:20px;table-layout:fixed;border-collapse:separate;border-spacing:0;font-size:14px;line-height:1.25}
+.pv-cmp th,.pv-cmp td{padding:8px 4px;text-align:center;vertical-align:middle;border-top:1px solid var(--pv-line)}
+.pv-cmp thead td,.pv-cmp thead th{border-top:0;font-size:13px;font-weight:600;color:var(--pv-soft)}
+.pv-cmp tbody th{padding-left:0;text-align:left;font-weight:500;color:var(--pv-ink)}
+.pv-cmp tbody td,.pv-cmp thead th{width:70px}
+.pv-cmp .pv-cmp-pro{background:var(--pv-surface);border-left:1px solid var(--pv-line2);border-right:1px solid var(--pv-line2)}
+.pv-cmp thead .pv-cmp-pro{border-top:1px solid var(--pv-line2);border-radius:10px 10px 0 0;color:var(--pv-cyan);font-size:15px;font-weight:700}
+.pv-cmp tbody tr:last-child .pv-cmp-pro{border-bottom:1px solid var(--pv-line2);border-radius:0 0 10px 10px}
+.pv-cmp-i{display:inline-block;width:18px;height:18px;vertical-align:middle;fill:none;stroke:var(--pv-soft);stroke-opacity:.5;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pv-cmp-i--oui{stroke:var(--pv-cyan);stroke-opacity:1;stroke-width:2.5}
+.pv-cmp-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media (max-width:767px){.pv-lead{display:none}}
 .pv-essai-note{margin:14px 0 0;max-width:62ch;font-size:13px;line-height:1.5;color:var(--pv-soft)}
 .pv-reassure{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--pv-soft);font-size:13.5px}
 .pv-reassure .pv-ico{width:16px;height:16px}

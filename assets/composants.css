@@ -56,13 +56,14 @@
 .mu-shimmer>.lucide{width:18px;height:18px;flex:none}
 /* 21st.dev « Gradient CTA Button » (mengto, composant 25501), recolore cyan : bouton d'offre (page Pro, match bloque, abonnement).
    Pilule en degrade, ombre et reliefs internes ; au survol, voile blanc qui monte (translate-y-full -> 0, 300 ms). */
-.mu-shimmer.op-cta,.mu-shimmer.pv-cta{--radius:9999px;min-height:56px;padding:1rem 2rem;border:0;color:#04222b;
+.mu-shimmer.op-cta,.mu-shimmer.pv-cta,.mu-shimmer.aj-cta{--radius:9999px;min-height:56px;padding:1rem 2rem;border:0;color:#04222b;
   background:linear-gradient(90deg,#8aeeff,#20d5ef);
   box-shadow:0 15px 33px -12px rgba(32,213,239,.9),inset 0 4px 6.3px rgba(190,246,255,1),inset 0 -5px 6.3px rgba(12,170,196,1)}
 .mu-shimmer.op-cta>.mu-shimmer-spark-c,.mu-shimmer.op-cta>.mu-shimmer-hl,.mu-shimmer.op-cta>.mu-shimmer-bd,
-.mu-shimmer.pv-cta>.mu-shimmer-spark-c,.mu-shimmer.pv-cta>.mu-shimmer-hl,.mu-shimmer.pv-cta>.mu-shimmer-bd{display:none}
-.mu-shimmer.op-cta::after,.mu-shimmer.pv-cta::after{content:"";position:absolute;inset:0;z-index:-1;background:rgba(255,255,255,.2);transform:translateY(100%);transition:transform .3s}
-.mu-shimmer.op-cta:hover::after,.mu-shimmer.pv-cta:hover::after{transform:translateY(0)}
+.mu-shimmer.pv-cta>.mu-shimmer-spark-c,.mu-shimmer.pv-cta>.mu-shimmer-hl,.mu-shimmer.pv-cta>.mu-shimmer-bd,
+.mu-shimmer.aj-cta>.mu-shimmer-spark-c,.mu-shimmer.aj-cta>.mu-shimmer-hl,.mu-shimmer.aj-cta>.mu-shimmer-bd{display:none}
+.mu-shimmer.op-cta::after,.mu-shimmer.pv-cta::after,.mu-shimmer.aj-cta::after{content:"";position:absolute;inset:0;z-index:-1;background:rgba(255,255,255,.2);transform:translateY(100%);transition:transform .3s}
+.mu-shimmer.op-cta:hover::after,.mu-shimmer.pv-cta:hover::after,.mu-shimmer.aj-cta:hover::after{transform:translateY(0)}
 .mu-shimmer.pv-cta::before{content:"";order:2;width:18px;height:18px;flex:none;background:currentColor;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M12 5l7 7-7 7'/%3E%3C/svg%3E") center/contain no-repeat;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M12 5l7 7-7 7'/%3E%3C/svg%3E") center/contain no-repeat}

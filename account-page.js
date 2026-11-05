@@ -231,13 +231,13 @@
       + '</div>';
   }
 
-  /* Nous contacter (30/10/2026) : renvoi vers la page Contact (Telegram prive
-     https://t.me/IASHARK + formulaire), meme lien que le pied de page
-     (lib/contact-essai.js). Aucune adresse e-mail affichee. */
+  /* Nous contacter : Telegram prive https://t.me/iashark_contact, comme le pied
+     de page (lib/contact-essai.js) ; la page Contact reste pour ecrire sans Telegram. */
   function carteContact() {
     return carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('contact.account_title', 'Nous contacter') + '</h2>'
       + '<p class="mt-3 max-w-lg text-[14px] leading-relaxed text-soft">' + tr('contact.account_text', 'Une question sur votre compte, votre abonnement ou un paiement ? Écrivez-nous sur Telegram, nous vous répondons en message privé.') + '</p>'
-      + '<a href="' + esc(lien('contact.html')) + '" data-track="contact_compte" class="mt-4 inline-flex h-10 items-center rounded-lg border border-hairline px-4 text-[13.5px] font-semibold transition hover:border-cyan/40">' + tr('contact.account_cta', 'Nous écrire') + '</a>');
+      + '<a href="https://t.me/iashark_contact" target="_blank" rel="noopener" data-track="contact_compte" class="mt-4 inline-flex h-10 items-center rounded-lg border border-hairline px-4 text-[13.5px] font-semibold text-cyan transition hover:border-cyan/40"><img src="/assets/telegram.svg" width="15" height="15" alt="" style="display:inline-block;vertical-align:-2px;margin-right:6px">' + tr('contact_page.tg_cta', 'Écrire sur Telegram') + '</a>'
+      + '<a href="' + esc(lien('contact.html')) + '" data-track="contact_compte_message" class="text-[13px] text-soft" style="margin-left:14px;text-decoration:underline;text-underline-offset:2px">' + tr('contact_page.or', 'ou par message') + '</a>');
   }
 
   /* ---------- Sections ---------- */

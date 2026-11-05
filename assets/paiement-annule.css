@@ -49,6 +49,6 @@ body{background:var(--c-page);color:var(--c-ink);font-family:"DM Sans",Inter,sys
 .pa-tg:focus-visible{outline:2px solid var(--c-cyan);outline-offset:3px}
 .pa-liens{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 20px;margin-top:24px;font-size:14px}
 .pa-legal{margin-top:24px;text-align:center;font-size:12.5px;line-height:1.5;color:var(--c-dim)}
-@keyframes pa-enter{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes pa-enter{from{transform:translateY(6px)}to{transform:none}}
 @media (prefers-reduced-motion:reduce){.pa-result{animation:none}.pa-item,.pa-chev{transition:none}}
 @media (min-width:768px){.pa-result{padding-top:72px}.pa-result h1{font-size:36px}}

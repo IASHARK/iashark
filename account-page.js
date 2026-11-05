@@ -231,13 +231,13 @@
       + '</div>';
   }
 
-  /* Nous contacter (30/10/2026) : renvoi vers la page Contact (Telegram prive
-     https://t.me/iashark_contact + formulaire), meme lien que le pied de page
-     (lib/contact-essai.js). Aucune adresse e-mail affichee. */
+  /* Nous contacter : Telegram prive https://t.me/iashark_contact, comme le pied
+     de page (lib/contact-essai.js) ; la page Contact reste pour ecrire sans Telegram. */
   function carteContact() {
     return carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('contact.account_title', 'Nous contacter') + '</h2>'
       + '<p class="mt-3 max-w-lg text-[14px] leading-relaxed text-soft">' + tr('contact.account_text', 'Une question sur votre compte, votre abonnement ou un paiement ? Écrivez-nous sur Telegram, nous vous répondons en message privé.') + '</p>'
-      + '<a href="' + esc(lien('contact.html')) + '" data-track="contact_compte" class="mt-4 inline-flex h-10 items-center rounded-lg border border-hairline px-4 text-[13.5px] font-semibold transition hover:border-cyan/40">' + tr('contact.account_cta', 'Nous écrire') + '</a>');
+      + '<a href="https://t.me/iashark_contact" target="_blank" rel="noopener" data-track="contact_compte" class="mt-4 inline-flex h-10 items-center rounded-lg border border-hairline px-4 text-[13.5px] font-semibold text-cyan transition hover:border-cyan/40"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-2px;margin-right:6px"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>' + tr('contact_page.tg_cta', 'Écrire sur Telegram') + '</a>'
+      + '<a href="' + esc(lien('contact.html')) + '" data-track="contact_compte_message" class="ml-4 text-[13px] text-soft underline underline-offset-2">' + tr('contact_page.or', 'ou par message') + '</a>');
   }
 
   /* ---------- Sections ---------- */

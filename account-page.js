@@ -232,7 +232,7 @@
   }
 
   /* Nous contacter (30/10/2026) : renvoi vers la page Contact (Telegram prive
-     https://t.me/IASHARK + formulaire), meme lien que le pied de page
+     https://t.me/iashark_contact + formulaire), meme lien que le pied de page
      (lib/contact-essai.js). Aucune adresse e-mail affichee. */
   function carteContact() {
     return carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('contact.account_title', 'Nous contacter') + '</h2>'

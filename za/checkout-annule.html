@@ -18,30 +18,11 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c12'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='40' fill='%2322d3ee'%3E🦈%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/composants.css">
+<link rel="stylesheet" href="/assets/paiement-annule.css">
 <script src="/funnel-track.js"></script>
 <script src="/i18n/i18n.js"></script>
-<style>
-:root{--bg:#080c12;--card:#0d1520;--cyan:#22d3ee;--amber:#f59e0b;--text:#e2e8f0;--muted:#7089a1;--border:rgba(255,255,255,0.06);--bc:rgba(34,211,238,0.18);--ba:rgba(245,158,11,0.2);}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:60px;}
-.hdr{position:sticky;top:0;z-index:99;background:rgba(8,12,18,0.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;}
-.logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--text);text-decoration:none;}
-.logo span{color:var(--cyan);}
-/* Logo image, comme les autres en-tetes (QA 14/09/2026). */
-.logo{display:inline-flex;align-items:center;min-height:44px;}
-.logo img{display:block;height:28px;width:auto;}
-.wrap{max-width:460px;margin:0 auto;padding:60px 20px;}
-.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px 28px;text-align:center;}
-.icon{font-size:48px;margin-bottom:16px;}
-.title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;margin-bottom:10px;}
-.body{font-size:13.5px;color:var(--muted);line-height:1.7;margin-bottom:24px;}
-.ctas{display:flex;flex-direction:column;gap:10px;}
-.cta{display:block;width:100%;padding:15px 13px;border-radius:10px;border:1px solid var(--ba);background:rgba(245,158,11,0.1);color:var(--amber);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;text-decoration:none;text-align:center;}
-.cta.secondary{border-color:var(--border);background:none;color:var(--muted);}
-.cta[hidden]{display:none;}
-.trust{margin-top:18px;font-size:11px;color:var(--muted);letter-spacing:.04em;}
-</style>
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="IASHARK">
@@ -51,43 +32,109 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 <meta property="og:url" content="https://iashark.com/za/checkout-annule.html">
 <meta property="og:image" content="https://iashark.com/icon-512.png">
 <meta name="twitter:card" content="summary">
-<script src="/lib/market-config.js"></script>
 </head>
 <body>
 <header class="hdr"><a href="/za/" data-href="" class="logo"><img src="/assets/iashark-logo.png" alt="IASHARK" width="105" height="28"></a></header>
-<div class="wrap">
-  <div class="card">
-    <div class="icon">↩️</div>
-    <div class="title" data-i18n="checkout_pages.cancel_heading">Payment cancelled</div>
-    <div class="body" data-i18n="checkout_pages.cancel_body">No payment has been made. You can try again whenever you like, with no commitment.</div>
-    <!-- Page de reprise, pas une impasse (tunnel 09/2026 : un visiteur y est
-         passe deux fois sans jamais revenir au paiement). Le premier bouton
-         ramene au choix de duree ; le match d'origine, s'il est connu, est
-         propose juste en dessous. -->
-    <div class="ctas">
-      <a href="/za/abonnement.html" data-href="abonnement.html" id="ctaRetry" class="cta" data-i18n="checkout_pages.cancel_cta_retry">TRY AGAIN — NO COMMITMENT →</a>
-      <a href="https://t.me/iashark_contact" target="_blank" rel="noopener" class="cta secondary" data-track="contact_annule_telegram"><img src="/assets/telegram.svg" width="15" height="15" alt="" style="display:inline-block;vertical-align:-2px;margin-right:6px"><span data-i18n="checkout_pages.cancel_contact">Did something stop you? Message me on Telegram</span></a>
-      <a href="/za/" id="ctaMatch" class="cta secondary" hidden data-i18n="checkout_pages.cancel_cta_match">BACK TO THE MATCH →</a>
-      <a href="/za/compte.html" data-href="compte.html" id="ctaAccount" class="cta secondary" data-i18n="checkout_pages.cancel_cta_account">MY ACCOUNT →</a>
+<main class="pa">
+  <section class="pa-result" role="status" aria-live="polite">
+    <span class="pa-result-ico" data-ico="shield-check" aria-hidden="true"></span>
+    <h1 data-i18n="checkout_pages.cancel_heading">Payment cancelled</h1>
+    <p class="pa-result-txt" data-i18n="checkout_pages.cancel_body">Nothing was charged. You can pick up where you left off in one click.</p>
+    <p class="pa-context" id="paContext" hidden></p>
+    <!-- Page de reprise, pas une impasse (tunnel 09/2026 : un visiteur y est passe deux
+         fois sans jamais revenir au paiement). Le bouton ramene au choix de duree. -->
+    <div class="pa-actions">
+      <a class="mu-shimmer" href="/za/abonnement.html" id="ctaRetry" data-href="abonnement.html" data-track="annule_reprendre"><span class="mu-shimmer-spark-c" aria-hidden="true"><span class="mu-shimmer-spark"><span class="mu-shimmer-spark-b"></span></span></span><span data-mu-label data-i18n="checkout_pages.cancel_cta_retry">Resume my subscription</span><span class="mu-shimmer-hl" aria-hidden="true"></span><span class="mu-shimmer-bd" aria-hidden="true"></span></a>
+      <p class="pa-note" id="paNote" hidden></p>
+      <p class="pa-trust" data-i18n="checkout_pages.cancel_trust">Secure payment by Stripe · No commitment · Cancel online</p>
     </div>
-    <p class="trust" data-i18n="checkout_pages.cancel_trust">Secure payment · Cancel anytime</p>
-  </div>
-</div>
+  </section>
+
+  <section class="pa-faq">
+    <h2 data-i18n="checkout_pages.cancel_faq_title">What made you hesitate?</h2>
+    <div class="pa-acc">
+      <details class="pa-item" name="pa-q" open>
+        <summary><span data-i18n="checkout_pages.cancel_q1">I'm afraid of being charged without noticing</span><span class="pa-chev" data-ico="chevron-down"></span></summary>
+        <div class="pa-rep"><span data-i18n="checkout_pages.cancel_a1">You cancel online from My account, whenever you like, without having to write to us. Your card details are handled by Stripe: IASHARK does not store them.</span></div>
+      </details>
+      <details class="pa-item" name="pa-q">
+        <summary><span data-i18n="checkout_pages.cancel_q2">I'm not sure what I'll get</span><span class="pa-chev" data-ico="chevron-down"></span></summary>
+        <div class="pa-rep"><span data-i18n="checkout_pages.cancel_a2">Every day, all the matches open: the chosen bet, its calculated chance and why. And when our rules allow it, the small and big combos and the Gold Selection. Everything is published before kick-off.</span></div>
+      </details>
+      <details class="pa-item" name="pa-q">
+        <summary><span data-i18n="checkout_pages.cancel_q3">I want to see if it's serious first</span><span class="pa-chev" data-ico="chevron-down"></span></summary>
+        <div class="pa-rep"><span data-i18n="checkout_pages.cancel_a3">Look at today's free match, free with an account: the bet, its chance and why. Make up your own mind, then decide.</span><br><a href="/za/" data-href="" data-track="annule_match_offert" data-i18n="checkout_pages.cancel_a3_link">See the free match</a></div>
+      </details>
+      <details class="pa-item" name="pa-q">
+        <summary><span data-i18n="checkout_pages.cancel_q4">I don't want to be tied in</span><span class="pa-chev" data-ico="chevron-down"></span></summary>
+        <div class="pa-rep"><span data-i18n="checkout_pages.cancel_a4">You choose your duration, and you cancel online whenever you like.</span> <span id="paFrom" hidden></span></div>
+      </details>
+    </div>
+  </section>
+
+  <section class="pa-contact">
+    <h2 data-i18n="checkout_pages.cancel_contact_title">Did something stop you?</h2>
+    <p data-i18n="checkout_pages.cancel_contact_text">Tell me, I'll answer you myself.</p>
+    <a class="pa-tg" href="https://t.me/iashark_contact" target="_blank" rel="noopener" data-track="contact_annule_telegram"><img src="/assets/telegram.svg" width="20" height="20" alt=""><span data-i18n="contact_page.tg_cta">Message us on Telegram</span></a>
+    <div class="pa-liens">
+      <a href="/za/" id="ctaMatch" hidden data-track="annule_retour_match" data-i18n="checkout_pages.cancel_cta_match">Back to the match</a>
+      <a href="/za/compte.html" data-href="compte.html" id="ctaAccount" data-i18n="checkout_pages.cancel_cta_account">My account</a>
+    </div>
+  </section>
+  <p class="pa-legal" data-i18n="pricing_page.legal_note">Information for statistical purposes — Not betting advice · Prohibited for under-18s</p>
+</main>
+<script src="/lib/market-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js"></script>
+<script src="/app-client.js"></script>
+<script src="/lib/icones.js"></script>
+<script src="/lib/composants.js"></script>
+<script src="/lib/offre-pro.js"></script>
 <script>
 (function(){
   if(window.iasharkTrack) iasharkTrack('checkout_cancel_view');
+  var I=window.IasharkIcones;
+  if(I) document.querySelectorAll('[data-ico]').forEach(function(el){el.innerHTML=I.svg(el.getAttribute('data-ico'),'');});
   // Match d'origine memorise par abonnement-page.js avant le depart vers
   // Stripe : chemin interne uniquement, sinon les liens restent generiques.
   var ctx=null;try{ctx=JSON.parse(sessionStorage.getItem('iashark.checkout.return')||'null');}catch(e){}
-  var path=ctx&&ctx.path;
+  var path=ctx&&ctx.path, retour=false;
   if(typeof path==='string'&&path.charAt(0)==='/'&&path.charAt(1)!=='/'&&path.indexOf('\\')===-1&&/\/match\.html(\?|$)/.test(path)){
+    retour=true;
     var retry=document.getElementById('ctaRetry');
     retry.setAttribute('data-href','abonnement.html?next='+encodeURIComponent(path));
     retry.href='/za/abonnement.html?next='+encodeURIComponent(path);
     var match=document.getElementById('ctaMatch');match.href=path;match.hidden=false;
     document.getElementById('ctaAccount').hidden=true;
   }
-  if(window.I18N&&window.I18N.init){window.I18N.init();}
+  function tr(k,fb){return (window.I18N&&window.I18N.t)?window.I18N.t(k,fb):fb;}
+  function suite(){
+    if(retour&&ctx&&typeof ctx.label==='string'&&ctx.label){
+      var c=document.getElementById('paContext');
+      c.textContent=tr('offre_pro.context_match','Tu étais sur {match} : l’analyse s’ouvre dès le paiement validé.').replace('{match}',ctx.label);
+      c.hidden=false;
+    }
+    // L'essai et les durees ne s'ecrivent QUE si le serveur les accorde (regle de lib/offre-pro.js).
+    var O=window.IasharkOffrePro, M=window.IASHARK_MARKET;
+    if(!O||!O.lireDisponibilite) return;
+    O.lireDisponibilite(M).then(function(d){
+      if(!d) return;
+      var j=O.essaiOuvert(d);
+      if(j){
+        var lab=document.querySelector('#ctaRetry [data-mu-label]');
+        if(lab){lab.removeAttribute('data-i18n');lab.textContent=tr('checkout_pages.cancel_cta_trial','Reprendre mes {n} jours d’essai').replace('{n}',j);}
+        var n=document.getElementById('paNote');
+        n.textContent=tr('offre_pro.trial_cancel_note','Avant le {date}, tu peux résilier en ligne depuis Mon compte : tu ne paies rien.').replace('{date}',O.datePrelevement(j))+' '+tr('offre_pro.trial_step_note','Carte demandée. Essai réservé à un premier abonnement.');
+        n.hidden=false;
+      }
+      var p=(d.intervals&&d.intervals.week&&M&&M.formatPrice)?M.formatPrice('pro.week'):null;
+      if(p){
+        var f=document.getElementById('paFrom');
+        f.textContent=tr('checkout_pages.cancel_from','À partir de {price} par semaine.').replace('{price}',p);
+        f.hidden=false;
+      }
+    }).catch(function(){});
+  }
+  if(window.I18N&&window.I18N.init){Promise.resolve().then(function(){return window.I18N.init();}).then(suite,suite);}else{suite();}
 })();
 </script>
 <script src="/site-prefs.js"></script>

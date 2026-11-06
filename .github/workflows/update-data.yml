@@ -4770,6 +4770,20 @@ jobs:
             });
             runOutput.DAILY_COMBOS=rapportTickets.daily_combos;
             console.log('  '+TICKETS_DU_JOUR.ligneJournal(rapportTickets));
+            // LENDEMAIN A L'AVANCE (06/11/2026, Clement) : les tickets de demain sont prets des minuit sur la page Combines,
+            // calcules ici avec les paris deja affiches de ces matchs, puis geles (demain : etats seulement, jamais recalcules).
+            try{
+              var dDemain=new Date(); dDemain.setUTCDate(dDemain.getUTCDate()+1);
+              var jourDemain=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).format(dDemain);
+              var rapportDemain=await TICKETS_DU_JOUR.publierTicketsDuJour({
+                jour:jourDemain, matchs:allMatchsData, fixtureById:FIXTURE_BY_ID, nowMs:Date.now(), configLigues:LEAGUES_CONFIG,
+                supabase:(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY)?{url:SUPA_URL_PIPELINE,cle:SUPA_SERVICE_KEY}:null,
+                pipelineSha:process.env.GITHUB_SHA||null, snapshotTime:runOutput.snapshot_time,
+                avertir:function(t){ console.log('::warning title=Tickets demain::'+t); },
+                erreur:function(t){ console.log('::error title=Tickets demain::'+t); }
+              });
+              console.log('  demain '+TICKETS_DU_JOUR.ligneJournal(rapportDemain));
+            }catch(e){ console.log('::warning title=Tickets demain::non calcules ('+(e&&e.message)+').'); }
           }catch(e){ console.log('::warning title=Tickets::tickets non calcules ('+(e&&e.message)+'), le calcul quotidien continue.'); }
           // EMPREINTE DE LA SELECTION EN OR DU JOUR (controles historique-public et avocat du diable du 28/10/2026, montantes
           // de la page Combines) : juste apres la publication et AVANT son premier match, rang de chaque pari compris

@@ -247,7 +247,7 @@
       var ctx = { sb: sb, userId: userId, pro: pro, locale: detectLocale(), url: SUPA_URL, key: SUPA_KEY };
       if(window.IasharkTelegramDemande){ window.IasharkTelegramDemande.lancer(ctx); return; }
       var s = document.createElement('script');
-      s.src = '/lib/telegram-demande.js?v=20261106';
+      s.src = '/lib/telegram-demande.js' + '?v=20261106';
       s.async = true;
       s.onload = function(){ if(window.IasharkTelegramDemande) window.IasharkTelegramDemande.lancer(ctx); };
       document.head.appendChild(s);

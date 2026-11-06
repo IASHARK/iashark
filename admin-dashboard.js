@@ -2030,19 +2030,27 @@
     var now = Date.now();
     var resume = '<p class="m-summary"><b>' + esc(H.fmtInt(d.laisses || 0) + " sur " + H.fmtInt(d.inscrits || 0) + " inscrits") + "</b>"
       + "<span>" + esc("ont laissé leur Telegram") + "</span>"
+      + "<span>" + esc(H.fmtInt(d.sans || 0) + " n'ont pas Telegram") + "</span>"
       + "<span>" + esc("fenêtre montrée " + H.fmtInt(d.vues || 0) + " fois") + "</span></p>";
     if (!list.length) { el.innerHTML = resume + emptyHtml("Personne pour le moment", "Chaque Telegram laissé apparaîtra ici, avec l'adresse du compte et son offre."); return; }
-    var cols = [{ label: "Telegram" }, { label: "Adresse" }, { label: "Offre" }, { label: "Langue" }, { label: "Laissé" }];
+    var LANGUES = { fr: "Français", en: "Anglais", es: "Espagnol", de: "Allemand", it: "Italien", pt: "Portugais" };
+    var SITES = { gb: "Angleterre", mx: "Mexique", za: "Afrique du Sud" };
+    var cols = [{ label: "Telegram" }, { label: "Adresse" }, { label: "Offre" }, { label: "Langue des messages" }, { label: "Réponse" }];
     var rows = list.map(function (x) {
       var p = String(x.pseudo || "");
-      var tg = p.charAt(0) === "@"
+      var tg = x.sans_telegram ? '<span style="color:var(--muted)">Pas de Telegram</span>'
+        : p.charAt(0) === "@"
         ? '<a href="https://t.me/' + esc(p.slice(1)) + '" target="_blank" rel="noopener">' + esc(p) + "</a>"
         : esc(p);
+      var code = String(x.langue || "").slice(0, 2).toLowerCase();
+      var langueTxt = (LANGUES[code] || "Inconnue") + (SITES[x.marche] ? " (" + SITES[x.marche] + ")" : "");
+      var tel = String(x.langue_navigateur || "").slice(0, 2).toLowerCase();
+      var langueHtml = esc(langueTxt) + (tel && tel !== code ? '<br><span style="color:var(--muted)">' + esc("téléphone : " + (LANGUES[tel] || tel.toUpperCase())) + "</span>" : "");
       var mail = S.showEmails ? (x.email || "Adresse inconnue") : (x.email_masked || H.maskEmail(x.email) || "Adresse inconnue");
       var offre = x.is_internal ? statusBadge({ label: "Test", cls: "gone", help: "Compte admin ou de test" })
         : x.plan === "pro" ? statusBadge(H.MEMBER_STATUS.pro)
         : statusBadge({ label: "Gratuit", cls: "new", help: "Compte gratuit" });
-      return { cells: [tg, esc(mail), offre, esc(String(x.langue || "").toUpperCase() || "?"), esc(H.daysAgo(x.updated_at || x.created_at, now))] };
+      return { cells: [tg, esc(mail), offre, langueHtml, esc(H.daysAgo(x.updated_at || x.created_at, now))] };
     });
     el.innerHTML = resume + tableHtml(cols, rows);
   }

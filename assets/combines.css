@@ -76,7 +76,8 @@ html:has(.cb){background:#060b12;scrollbar-color:rgba(141,179,211,.32) #060b12}
 /* Telephone : le sommaire laisse la place au ticket (les onglets suffisent au premier ecran). */
 @media (max-width:599px){
   .cb .cb-sommaire{display:none!important}
-  .tdj-tete .cb-texte{display:none}
+  /* La phrase reste visible : le matin, elle dit quels combines sont montres et si ceux d'hier sont en verification. */
+  .tdj-tete .cb-texte{font-size:13px;margin:0 0 8px}
   /* Le titre de scene reste lu par les lecteurs d'ecran ; a l'oeil, les onglets font titre. */
   .tdj-tete .cb-h2{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 }

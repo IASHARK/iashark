@@ -334,15 +334,13 @@
     //   2. sinon, en rond seul (l'icone) si le rond ne gene rien ;
     //   3. sinon elle s'efface le temps de passer, et revient des que la place est libre.
     // Elle ne bouge jamais de son coin : rien ne saute sous le doigt.
-    // [data-tg-evite] (06/11/2026) : un bloc entier a ne jamais couvrir, meme sans bouton dedans
-    // (les tickets de la page Combines : cotes et paris des matchs).
     var st2=document.createElement('style');
     st2.textContent='#ias-tg.ias-tg--mini{padding:7px}#ias-tg.ias-tg--mini>span:last-child{display:none}'
       +'#ias-tg{transition:transform .12s ease,border-color .18s ease,opacity .16s ease,visibility 0s}'
       +'#ias-tg.ias-tg--cache{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .16s ease,visibility 0s linear .16s}'
       +'@media (prefers-reduced-motion:reduce){#ias-tg,#ias-tg.ias-tg--cache{transition:none}}';
     document.head.appendChild(st2);
-    var CLIQUABLE='[data-tg-evite],a[href],button,summary,input:not([type=hidden]),select,textarea,label,[role=button],[role=tab],[role=link],[role=radio],[role=checkbox],[role=switch],[onclick],[tabindex]:not([tabindex="-1"])';
+    var CLIQUABLE='a[href],button,summary,input:not([type=hidden]),select,textarea,label,[role=button],[role=tab],[role=link],[role=radio],[role=checkbox],[role=switch],[onclick],[tabindex]:not([tabindex="-1"])';
     // Un prix : un nombre colle a une monnaie (4,99 €, 99 €, $4.99, £4.99, R 99, MX$ 99).
     var PRIX=/\d\s?(€|\$|£)|(€|\$|£|\bR)\s?\d/g;
     var MARGE=8;

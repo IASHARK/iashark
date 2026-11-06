@@ -472,3 +472,22 @@ html:has(.cb){background:#060b12;scrollbar-color:rgba(141,179,211,.32) #060b12}
 .xl-l.sd-passe .xl-direct{color:#060b12;background:var(--cb-cyan)}
 .xl-l.sd-perdu{opacity:.55}
 @media (min-width:600px){.xl-l{grid-template-columns:56px minmax(0,1fr) repeat(3,52px)}.xl-m{grid-template-columns:1fr 1fr;column-gap:10px}.xl-direct{grid-column:1/-1}}
+
+/* ============ ONGLETS DES RUBRIQUES (06/11/2026) : une barre en haut, un panneau par rubrique ============ */
+.cb-onglets{position:sticky;top:var(--cb-haut,56px);z-index:6;display:flex;gap:6px;margin:4px -16px 22px;padding:10px 16px;overflow-x:auto;scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;background:rgba(6,11,18,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--cb-line)}
+.cb-onglets::-webkit-scrollbar{display:none}
+.cb-onglet{display:inline-flex;align-items:center;gap:6px;flex:none;min-height:40px;padding:0 16px;border:1px solid var(--cb-line2);border-radius:999px;
+  background:rgba(10,20,32,.86);color:var(--cb-soft2);font:600 14px Inter,system-ui,sans-serif;text-decoration:none;cursor:pointer;
+  transition:color .2s ease,border-color .2s ease,background-color .2s ease,transform .16s var(--cb-ease)}
+.cb-onglet:active{transform:scale(.97)}
+.cb-onglet[aria-selected="true"]{border-color:transparent;background:var(--cb-cyan);color:#060b12;font-weight:800}
+.cb-onglet--lien{border-style:dashed;color:var(--cb-cyan)}
+.cb-onglet--lien svg{width:15px;height:15px}
+.cb-onglet:focus-visible{outline:2px solid var(--cb-cyan);outline-offset:2px}
+@media (hover:hover) and (pointer:fine){.cb-onglet:not([aria-selected="true"]):hover{border-color:rgba(32,213,239,.6);color:var(--cb-ink)}}
+@media (min-width:600px){.cb-onglets{margin-left:0;margin-right:0;padding-left:0;padding-right:0}}
+.cb-panneau[hidden]{display:none}
+.cb-panneau--entre{animation:cbEntre .32s var(--cb-ease) both}
+@keyframes cbEntre{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.cb-panneau--entre{animation:none}}

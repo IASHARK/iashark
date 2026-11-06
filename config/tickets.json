@@ -1,5 +1,6 @@
 {
   "_readme": [
+    "REGLE DU 06/11/2026 (Clement : « la Selection en or et la montante c'est pareil » ; « des matchs vraiment surs, des fois oser » ; carte blanche) : la Selection en or n'est plus montree comme une rubrique ; ses 3 paris nourrissent les 3 montantes, chacune avec SON style (montantes.styles) : 1 la sure = le pari affiche le plus probable ; 2 la solide = le plus probable a cote >= 1,55 ; 3 l'audacieuse = le plus probable a cote >= 1,85 ; 3 matchs differents ; rang sans pari = montante immobile (lib/run-output/jambes-du-jour.js#selectionMontantes). Toujours le pari affiche de la page (cote 1,40-2,20, chance >= 50 %).",
     "REGLE DU 28/10/2026 : CHOIX DE CLEMENT (« pour la cote a 10 le meilleur possible et 5 aussi, change de formule » ; « ticket de buteur du jour : on en donne 2, a ne pas jouer en combine, en paris simples »). La Selection en or ne change pas. Ne s'applique jamais aux tickets deja publies (table tickets_du_jour gelee) : a partir du prochain calcul. La mesure des tickets continue.",
     "Combines x5 et x10 : PALIERS DE COTE DES JAMBES (paliers_cote_jambe). Les jambes restent le pari AFFICHE de chaque match (meme pari, meme cote affichee, meme chance que la page). Chaque ticket est d'abord cherche avec les seuls paris affiches dont la cote est au plus 1,44 ; s'il n'en existe pas, au plus 1,49 ; puis 1,59 ; puis 2,20 (= la regle d'avant). Garde de chance : le ticket d'un palier bas n'est garde que si sa chance affichee (% entier) ne baisse pas par rapport au meilleur ticket fait avec toutes les jambes ; sinon c'est ce dernier. Le reste ne change pas : x5 = 3 a 5 jambes, cote totale 4,00-6,00 ; x10 = 5 a 7 jambes, 8,50-12,00 ; une jambe par match ; la plus grande chance (produit des chances affichees) ; jamais force (lib/run-output/combos.js#generateDailyCombos). Plancher des jambes, fourchettes et paliers : toujours sur la cote AFFICHEE (une cote indicative est dite telle quelle sur la page).",
     "Buteurs du jour (buteur_du_jour.nb = 2) : les 2 plus probables du calcul buteur du moteur v3 (v3_buteurs, memes regles que l'ancien buteur du jour), de 2 matchs differents, presentes comme 2 paris simples, jamais combines (lib/run-output/jambes-du-jour.js#buteursDuJour). Contenu du ticket « buteur » : les champs du 1er joueur au premier niveau (inchanges) + buteurs: [joueur 1, joueur 2] (memes champs, + photo). Un joueur absent de la composition est remplace seul (migration 0058), jamais par un joueur du match de l'autre buteur.",
@@ -13,7 +14,7 @@
     "Un ticket publie ne change plus (table tickets_du_jour, migration 0050) : la regle vaut a partir du prochain calcul, jamais retroactivement. Rien n'est produit sans le feu vert du mathematicien (config/verdicts-maths.json).",
     "fichier_buteurs_public : « retire » depuis le 04/10/2026 = buteurs-du-jour.json sans aucune entree."
   ],
-  "regle_version": "tickets-2026-10-28",
+  "regle_version": "tickets-2026-11-06",
   "x5": { "jambes": [3, 4, 5], "cote_min": 4.0, "cote_max": 6.0, "centre": 5 },
   "x10": { "jambes": [5, 6, 7], "cote_min": 8.5, "cote_max": 12, "centre": 10 },
   "jambe": { "cote_min": 1.4, "cote_max": 2.2, "chance_min": 50, "accepter_en_test": true },
@@ -22,6 +23,7 @@
   "marge_coup_envoi_min": 15,
   "operateurs": "agrees_sinon_api_football",
   "selection_or": { "nb": 3 },
+  "montantes": { "styles": [{ "nom": "sure", "cote_min": 0 }, { "nom": "solide", "cote_min": 1.55 }, { "nom": "audacieuse", "cote_min": 1.85 }] },
   "buteur_du_jour": { "nb": 2 },
   "fichier_buteurs_public": "retire"
 }

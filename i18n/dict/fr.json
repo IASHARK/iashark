@@ -2831,7 +2831,7 @@
     "total_odds": "cote totale {v}",
     "unavailable": "Momentanément indisponible.",
     "unlock_free": "Ce que tu débloques : {list}, gratuitement.",
-    "unlock_gold": "la Sélection en or",
+    "unlock_gold": "les paris des montantes",
     "unlock_pro": "Ce que tu débloques : {list}.",
     "unlock_scorer": "le buteur du jour",
     "unlock_x10": "le grand combiné",
@@ -3066,7 +3066,7 @@
     "nav_climb": "Montantes",
     "nav_scorers": "Buteurs",
     "climb_title": "La course des montantes",
-    "climb_sub": "Chaque pari de la Sélection en or fait avancer sa montante. Gagné : un palier de plus. Perdu : retour au départ. Objectif : cote 10.",
+    "climb_sub": "Trois montantes, trois styles. La sûre prend le pari le plus probable du jour, la solide vise une cote d’au moins 1,55, l’audacieuse ose à partir de 1,85. Gagné : un palier de plus. Perdu : retour au départ. Objectif : cote 10.",
     "climb_start": "Départ",
     "climb_finish": "Cote 10",
     "climb_name": "Montante {n}",
@@ -3079,8 +3079,8 @@
     "climb_waiting": "En attente du résultat du {date}.",
     "climb_stale": "Mise à jour chaque matin, après les résultats de la veille.",
     "climb_tonight_preparing": "Pari du soir en préparation.",
-    "climb_tonight_none": "Pas de Sélection en or aujourd’hui : la montante ne bouge pas.",
-    "climb_tonight_pro": "Pari du soir : dans la Sélection en or, avec Pro.",
+    "climb_tonight_none": "Pas de pari pour cette montante aujourd’hui : elle ne bouge pas.",
+    "climb_tonight_pro": "Pari du soir : avec Pro.",
     "climb_tonight_no_rank": "Pas de pari {n} ce soir : la montante ne bouge pas.",
     "climb_aria": "Montante {n} : {w} paris gagnés d’affilée, cote cumulée {odds}, objectif 10.",
     "climb_aria_start": "Montante {n} : au départ, objectif cote 10.",
@@ -3099,7 +3099,7 @@
     "scorer_single_sub": "le joueur marque pendant le match",
     "unlock_scorers": "les buteurs du jour",
     "rule_climb_t": "Montantes",
-    "rule_climb": "Chaque pari de la Sélection en or fait avancer sa montante : gagné, un palier de plus ; perdu, retour au palier 1 ; cote 10 atteinte, annoncée, puis elle repart. Un jour sans Sélection en or ne casse pas la série. Calculées chaque matin depuis la première Sélection en or, le 6 octobre ; tout l’historique est montré, gagnés et perdus.",
+    "rule_climb": "Trois montantes, trois styles : la sûre (le pari le plus probable du jour), la solide (cote d’au moins 1,55), l’audacieuse (cote d’au moins 1,85). Gagné, un palier de plus ; perdu, retour au palier 1 ; cote 10 atteinte, annoncée, puis elle repart. Un jour sans pari ne casse pas la série. Avec Pro.",
     "climb_finish_tonight": "Arrivée",
     "scorers_sub_one": "Le joueur le plus probable de marquer aujourd’hui, parmi les titulaires attendus.",
     "climb_hist_open": "Voir l’historique ({n} paris)",
@@ -3118,7 +3118,10 @@
     "climb_b_unsettled_1": "{n} non réglé",
     "climb_b_unsettled_n": "{n} non réglés",
     "climb_b_goal_1": "{n} objectif atteint",
-    "climb_b_goal_n": "{n} objectifs atteints"
+    "climb_b_goal_n": "{n} objectifs atteints",
+    "climb_style_1": "La sûre",
+    "climb_style_2": "La solide",
+    "climb_style_3": "L’audacieuse"
   },
   "contact": {
     "question": "Une question ?",
@@ -3222,5 +3225,13 @@
     "expected_k": "Bons résultats attendus",
     "note": "Chances du modèle IASHARK pour chaque issue ; cases en cyan : le choix de la grille. Matchs supposés indépendants. Une estimation, jamais une garantie.",
     "under1": "moins de 1 %"
+  },
+  "combines_tabs": {
+    "soir": "Combinés",
+    "montantes": "Montantes",
+    "outils": "Nul et grille",
+    "buteurs": "Buteurs",
+    "tous": "Tous les matchs",
+    "aria": "Rubriques du jour"
   }
 }

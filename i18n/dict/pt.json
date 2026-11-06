@@ -2831,7 +2831,7 @@
     "total_odds": "odd total {v}",
     "unavailable": "Temporariamente indisponível.",
     "unlock_free": "O que desbloqueias: {list}, grátis.",
-    "unlock_gold": "a Seleção de ouro",
+    "unlock_gold": "as apostas das escadas",
     "unlock_pro": "O que desbloqueias: {list}.",
     "unlock_scorer": "o marcador do dia",
     "unlock_x10": "a múltipla grande",
@@ -3066,7 +3066,7 @@
     "nav_climb": "Escadas",
     "nav_scorers": "Marcadores",
     "climb_title": "A corrida das escadas",
-    "climb_sub": "Cada aposta da Seleção de ouro faz avançar a sua escada. Ganha: mais um degrau. Perdida: volta à partida. Objetivo: odd 10.",
+    "climb_sub": "Três escadas, três estilos. A segura escolhe a aposta mais provável do dia, a sólida procura uma odd de pelo menos 1,55, a ousada arrisca a partir de 1,85. Ganha: mais um degrau. Perdida: volta ao início. Objetivo: odd 10.",
     "climb_start": "Partida",
     "climb_finish": "Odd 10",
     "climb_name": "Escada {n}",
@@ -3079,8 +3079,8 @@
     "climb_waiting": "À espera do resultado de {date}.",
     "climb_stale": "Atualizada todas as manhãs, depois dos resultados da véspera.",
     "climb_tonight_preparing": "Aposta desta noite em preparação.",
-    "climb_tonight_none": "Hoje não há Seleção de ouro: a escada não se mexe.",
-    "climb_tonight_pro": "Aposta desta noite: na Seleção de ouro, com Pro.",
+    "climb_tonight_none": "Sem aposta para esta escada hoje: fica parada.",
+    "climb_tonight_pro": "Aposta da noite: com Pro.",
     "climb_tonight_no_rank": "Esta noite não há aposta {n}: a escada não se mexe.",
     "climb_aria": "Escada {n}: {w} apostas ganhas seguidas, odd acumulada {odds}, objetivo 10.",
     "climb_aria_start": "Escada {n}: na partida, objetivo odd 10.",
@@ -3099,7 +3099,7 @@
     "scorer_single_sub": "o jogador marca durante o jogo",
     "unlock_scorers": "os marcadores do dia",
     "rule_climb_t": "Escadas",
-    "rule_climb": "Cada aposta da Seleção de ouro faz avançar a sua escada: ganha, mais um degrau; perdida, volta ao degrau 1; odd 10 atingida, anunciada, e recomeça. Um dia sem Seleção de ouro não quebra a série. Calculadas todas as manhãs desde a primeira Seleção de ouro, a 6 de outubro; todo o histórico é mostrado, ganhas e perdidas.",
+    "rule_climb": "Três escadas, três estilos: a segura (a aposta mais provável do dia), a sólida (odd de pelo menos 1,55), a ousada (odd de pelo menos 1,85). Ganha, mais um degrau; perdida, volta ao degrau 1; odd 10 atingida, anunciada, e recomeça. Um dia sem aposta não quebra a série. Com Pro.",
     "climb_finish_tonight": "Chegada",
     "scorers_sub_one": "O jogador com mais probabilidade de marcar hoje, entre os titulares esperados.",
     "climb_hist_open": "Ver o histórico ({n} apostas)",
@@ -3118,7 +3118,10 @@
     "climb_b_unsettled_1": "{n} não liquidada",
     "climb_b_unsettled_n": "{n} não liquidadas",
     "climb_b_goal_1": "{n} objetivo atingido",
-    "climb_b_goal_n": "{n} objetivos atingidos"
+    "climb_b_goal_n": "{n} objetivos atingidos",
+    "climb_style_1": "A segura",
+    "climb_style_2": "A sólida",
+    "climb_style_3": "A ousada"
   },
   "contact": {
     "question": "Got a question?",
@@ -3222,5 +3225,13 @@
     "expected_k": "Resultados certos esperados",
     "note": "Probabilidades do modelo IASHARK para cada resultado; casas em ciano: a escolha da grelha. Jogos considerados independentes. Uma estimativa, nunca uma garantia.",
     "under1": "menos de 1 %"
+  },
+  "combines_tabs": {
+    "soir": "Múltiplas",
+    "montantes": "Escadas",
+    "outils": "Empate e grelha",
+    "buteurs": "Marcadores",
+    "tous": "Todos os jogos",
+    "aria": "Secções do dia"
   }
 }

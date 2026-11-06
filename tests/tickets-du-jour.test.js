@@ -219,7 +219,7 @@ test("3 bis. recherche exacte (controle du mathematicien du 04/10/2026) : egalit
 
 test("3 ter. paliers de cote des jambes (regle du 28/10/2026) : 1,44 d'abord, puis 1,49, 1,59, 2,20 ; garde de chance ; jamais force", () => {
   assert.deepEqual(REGLES.paliers_cote_jambe, [1.44, 1.49, 1.59, 2.2]);
-  assert.equal(REGLES.regle_version, "tickets-2026-10-28");
+  assert.equal(REGLES.regle_version, "tickets-2026-11-06", "06/11/2026 : un style de pari par montante ; paliers inchanges");
   assert.deepEqual(COMBOS.paliersJambe(REGLES), [1.44, 1.49, 1.59, 2.2]);
   assert.deepEqual(COMBOS.paliersJambe({}), [Infinity], "sans paliers : la regle d'avant");
   // Palier garde : 4 jambes a 1,42 (68 %) = 21,38 % (affiche 21 %) ; la regle complete prendrait 3 jambes a 1,62 = 21,96 %
@@ -456,8 +456,9 @@ test("calcul complet du jour (regle du 21/10) : Selection en or, x5, x10 et bute
   assert.deepEqual(c.buteur.meta, { nb_buteurs: 1 }, "un seul match avec un buteur : un seul joueur");
   assert.deepEqual(c.buteur.contenu.buteurs.map((b) => b.joueur), ["Z"]);
   assert.deepEqual(Object.assign({}, c.buteur.contenu, { buteurs: undefined }), Object.assign({}, c.buteur.contenu.buteurs[0], { buteurs: undefined }), "premier niveau = 1er joueur");
-  // Selection en or : les 3 paris affiches les plus probables du jour, avec la cote et la chance de leur page.
-  assert.deepEqual(c.or.contenu.paris.map((p) => [p.fixture_id, p.market_id, p.cote, p.chance, p.rang]), [[10, "home-win", 1.55, 65, 1], [9, "home-win", 1.55, 64, 2], [8, "home-win", 1.55, 63, 3]]);
+  // Paris des montantes (06/11/2026) : la sure = le plus probable ; la solide = le plus probable a cote >= 1,55 (autre
+  // match) ; l'audacieuse (cote >= 1,85) : aucun pari ici, sa montante ne bouge pas. Cote et chance de leur page.
+  assert.deepEqual(c.or.contenu.paris.map((p) => [p.fixture_id, p.market_id, p.cote, p.chance, p.rang]), [[10, "home-win", 1.55, 65, 1], [9, "home-win", 1.55, 64, 2]]);
   // Combines : les paris affiches les plus probables, une jambe par match, jamais un autre marche.
   [c.x5, c.x10].forEach((t) => {
     assert.ok(t.contenu.jambes.every((j) => j.market_id === "home-win" && j.cote === 1.55));
@@ -486,7 +487,19 @@ test("competitions et familles : l'ancienne regle (04/10) excluait coupes, tourn
   assert.deepEqual(jambesDe(ms, { categoriesNoGo: V.categories_no_go, competitions: V.competitions_jambes }).jambes.map((j) => j.fixture_id), [1, 2, 3, 4, 5, 6, 7]);
   const w = monde(ms);
   const c = T.calculerDuJour(ms, { jour: "2026-10-04", nowMs: NOW, fixtureById: w.fixtureById, configLigues: LIGUES, categoriesNoGo: V.categories_no_go, competitions: V.competitions_jambes });
-  assert.ok(c.or && c.or.contenu.paris.length === 3);
+  assert.ok(c.or && c.or.contenu.paris.length >= 1 && c.or.contenu.paris[0].rang === 1);
   // Aucun facteur de dependance : chance = produit exact des chances affichees.
   assert.equal(require("node:fs").readFileSync(require.resolve("../lib/run-output/combo-math.js"), "utf8").includes("0.985"), false);
+});
+
+test("montantes (06/11/2026) : la sure, la solide (cote >= 1,55) et l'audacieuse (cote >= 1,85), 3 matchs differents", () => {
+  const J = require("../lib/run-output/jambes-du-jour.js");
+  const j = (id, cote, chance) => ({ fixture_id: id, market_id: "home-win", cote: cote, chance: chance, chance_calculee: null, coup_envoi: "2026-11-07 21:00" });
+  const styles = REGLES.montantes.styles;
+  const l = [j(1, 1.42, 72), j(2, 1.5, 70), j(3, 1.6, 64), j(4, 1.62, 66), j(5, 1.9, 55), j(6, 2.1, 53)];
+  assert.deepEqual(J.selectionMontantes(l, { styles }).map((p) => [p.rang, p.fixture_id]), [[1, 1], [2, 4], [3, 5]]);
+  // Le plus probable a cote >= 1,55 est aussi le plus probable du jour : il va a la sure, la solide prend le suivant.
+  assert.deepEqual(J.selectionMontantes([j(7, 1.7, 80), j(8, 1.6, 60), j(9, 2.0, 52)], { styles }).map((p) => [p.rang, p.fixture_id]), [[1, 7], [2, 8], [3, 9]]);
+  assert.deepEqual(J.selectionMontantes([j(1, 1.42, 72)], { styles }).map((p) => p.rang), [1], "rang sans pari : montante immobile");
+  assert.equal(J.selectionMontantes([], { styles }), null);
 });

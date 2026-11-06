@@ -2831,7 +2831,7 @@
     "total_odds": "cuota total {v}",
     "unavailable": "No disponible por el momento.",
     "unlock_free": "Lo que desbloqueas: {list}, gratis.",
-    "unlock_gold": "la Selección de oro",
+    "unlock_gold": "las apuestas de las escaleras",
     "unlock_pro": "Lo que desbloqueas: {list}.",
     "unlock_scorer": "el goleador del día",
     "unlock_x10": "la combinada grande",
@@ -3066,7 +3066,7 @@
     "nav_climb": "Escaleras",
     "nav_scorers": "Goleadores",
     "climb_title": "La carrera de las escaleras",
-    "climb_sub": "Cada apuesta de la Selección de oro hace avanzar su escalera. Ganada: un peldaño más. Perdida: vuelta a la salida. Objetivo: cuota 10.",
+    "climb_sub": "Tres escaleras, tres estilos. La segura toma la apuesta más probable del día, la sólida busca una cuota de al menos 1,55, la atrevida se arriesga desde 1,85. Ganada: un escalón más. Perdida: vuelta al inicio. Objetivo: cuota 10.",
     "climb_start": "Salida",
     "climb_finish": "Cuota 10",
     "climb_name": "Escalera {n}",
@@ -3079,8 +3079,8 @@
     "climb_waiting": "A la espera del resultado del {date}.",
     "climb_stale": "Se actualiza cada mañana, tras los resultados del día anterior.",
     "climb_tonight_preparing": "Apuesta de esta noche en preparación.",
-    "climb_tonight_none": "Hoy no hay Selección de oro: la escalera no se mueve.",
-    "climb_tonight_pro": "Apuesta de esta noche: en la Selección de oro, con Pro.",
+    "climb_tonight_none": "Hoy no hay apuesta para esta escalera: no se mueve.",
+    "climb_tonight_pro": "Apuesta de la noche: con Pro.",
     "climb_tonight_no_rank": "Esta noche no hay apuesta {n}: la escalera no se mueve.",
     "climb_aria": "Escalera {n}: {w} apuestas ganadas seguidas, cuota acumulada {odds}, objetivo 10.",
     "climb_aria_start": "Escalera {n}: en la salida, objetivo cuota 10.",
@@ -3099,7 +3099,7 @@
     "scorer_single_sub": "el jugador marca durante el partido",
     "unlock_scorers": "los goleadores del día",
     "rule_climb_t": "Escaleras",
-    "rule_climb": "Cada apuesta de la Selección de oro hace avanzar su escalera: ganada, un peldaño más; perdida, vuelta al peldaño 1; cuota 10 alcanzada, anunciada, y vuelve a empezar. Un día sin Selección de oro no rompe la serie. Calculadas cada mañana desde la primera Selección de oro, el 6 de octubre; se muestra todo el historial, ganadas y perdidas.",
+    "rule_climb": "Tres escaleras, tres estilos: la segura (la apuesta más probable del día), la sólida (cuota de al menos 1,55), la atrevida (cuota de al menos 1,85). Ganada, un escalón más; perdida, vuelta al escalón 1; cuota 10 alcanzada, anunciada, y vuelve a empezar. Un día sin apuesta no rompe la racha. Con Pro.",
     "climb_finish_tonight": "Llegada",
     "scorers_sub_one": "El jugador con más probabilidades de marcar hoy, entre los titulares previstos.",
     "climb_hist_open": "Ver el historial ({n} apuestas)",
@@ -3118,7 +3118,10 @@
     "climb_b_unsettled_1": "{n} sin liquidar",
     "climb_b_unsettled_n": "{n} sin liquidar",
     "climb_b_goal_1": "{n} objetivo alcanzado",
-    "climb_b_goal_n": "{n} objetivos alcanzados"
+    "climb_b_goal_n": "{n} objetivos alcanzados",
+    "climb_style_1": "La segura",
+    "climb_style_2": "La sólida",
+    "climb_style_3": "La atrevida"
   },
   "contact": {
     "question": "¿Alguna pregunta?",
@@ -3222,5 +3225,13 @@
     "expected_k": "Aciertos esperados",
     "note": "Probabilidades del modelo IASHARK para cada resultado; casillas en cian: la elección de la quiniela. Partidos supuestos independientes. Una estimación, nunca una garantía.",
     "under1": "menos del 1 %"
+  },
+  "combines_tabs": {
+    "soir": "Combinadas",
+    "montantes": "Escaleras",
+    "outils": "Empate y quiniela",
+    "buteurs": "Goleadores",
+    "tous": "Todos los partidos",
+    "aria": "Secciones del día"
   }
 }

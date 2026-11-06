@@ -285,11 +285,12 @@ function veilleAppel(liste,actif,jourHier){
 
 /* ---------- Rendu ligne ---------- */
 function initials(n){return String(n||'?').replace(/[^A-Za-zÀ-ÿ0-9 ]/g,'').split(' ').filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase()||'?';}
-function teamHtml(tm,H){
+// cote : 'h' ou 'a' -> emplacement vide des buts en direct (lib/scores-direct.js), rempli seulement par un vrai score.
+function teamHtml(tm,H,cote){
   var url=H.teamLogoUrl(tm),ini=esc(initials(tm&&tm.n));
   var logo=url?'<img class="hl-logo" src="'+esc(url)+'" width="18" height="18" alt="" loading="lazy" decoding="async" data-ini="'+ini+'">'
     :'<span class="hl-logo hl-logo-ph" aria-hidden="true">'+ini+'</span>';
-  return '<span class="hl-team">'+logo+'<span class="hl-tname">'+esc(tm&&tm.n||'')+'</span></span>';
+  return '<span class="hl-team">'+logo+'<span class="hl-tname">'+esc(tm&&tm.n||'')+'</span>'+(cote?'<b class="sd-g" data-sd-g="'+cote+'" hidden></b>':'')+'</span>';
 }
 function fmtInt(n){return Number(n).toLocaleString(localeTag());}
 // Pastille de niveau (ligne verrouillee) : HyperUI « Badges » n° 2 (assets/composants.css,
@@ -386,11 +387,13 @@ function renderMatchRow(m,ctx,H,index){
   // Journee passee : la ligne EST cliquable. L'analyse d'un match termine est
   // ouverte a tout le monde (20/09/2026) : c'est tout l'interet de la preuve,
   // on doit pouvoir regarder ce qu'il y avait dedans.
-  var ouvrante='<a class="'+cls+'" href="'+esc(href)+'" aria-label="'+esc(aria)+'"'+track+' style="--i:'+Math.min(index||0,14)+'">';
+  // Score en direct (lib/scores-direct.js, 06/11/2026) : public pour tous, un score n'est pas un pari.
+  var direct=/^\d{1,12}$/.test(String(m&&m.id))&&isFinite(ts)?' data-sd-fid="'+esc(m.id)+'" data-sd-ts="'+ts+'"':'';
+  var ouvrante='<a class="'+cls+'" href="'+esc(href)+'" aria-label="'+esc(aria)+'"'+track+direct+' style="--i:'+Math.min(index||0,14)+'">';
   var fermante='</a>';
   return '<li class="hl-item'+(star?' has-star':'')+'">'+ouvrante
-    +'<span class="hl-time"><span class="hl-kick">'+esc(heure)+'</span></span>'
-    +'<span class="hl-teams">'+teamHtml(home,H)+teamHtml(away,H)+'</span>'
+    +'<span class="hl-time"><span class="hl-kick">'+esc(heure)+'</span><span class="sd-t" data-sd-t hidden></span></span>'
+    +'<span class="hl-teams">'+teamHtml(home,H,direct?'h':'')+teamHtml(away,H,direct?'a':'')+'</span>'
     +'<span class="hl-meta">'+tags.join('')+'</span>'
     +zone+fermante+star+'</li>';
 }

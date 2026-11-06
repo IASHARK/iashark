@@ -231,12 +231,27 @@
       var meta=session.user.user_metadata||{};
       var identity=meta.username||meta.display_name||meta.full_name||meta.name||session.user.email;
       el.innerHTML = loggedInHtml(identity, plan, role);
+      demanderTelegram(sb, session.user.id, plan === 'pro' || plan === 'famille' || role === 'admin');
       sb.auth.onAuthStateChange(function(event, newSession){
         if(!newSession){ el.innerHTML = loggedOutHtml(); }
       });
     }catch(e){
       el.innerHTML = loggedOutHtml();
     }
+  }
+
+  // Fenetre « Tes pronos sur Telegram » (06/11/2026) : chargee seulement pour un compte connecte,
+  // une seule copie pour tout le site (lib/telegram-demande.js decide si elle s'affiche).
+  function demanderTelegram(sb, userId, pro){
+    try{
+      var ctx = { sb: sb, userId: userId, pro: pro, locale: detectLocale(), url: SUPA_URL, key: SUPA_KEY };
+      if(window.IasharkTelegramDemande){ window.IasharkTelegramDemande.lancer(ctx); return; }
+      var s = document.createElement('script');
+      s.src = '/lib/telegram-demande.js?v=20261106';
+      s.async = true;
+      s.onload = function(){ if(window.IasharkTelegramDemande) window.IasharkTelegramDemande.lancer(ctx); };
+      document.head.appendChild(s);
+    }catch(e){}
   }
 
   window.IasharkAuthHeader = {

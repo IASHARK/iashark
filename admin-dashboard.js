@@ -2010,6 +2010,42 @@
       renderMembers();
     });
   }
+  // ---------- Telegram laisses (migration 0068_admin_telegram.sql, 06/11/2026) ----------
+  function loadTelegram() {
+    if (!sb) return Promise.resolve();
+    return rpc("admin_telegram").then(function (r) {
+      if (r && r.kind === "denied") return;
+      S.telegram = r;
+      renderTelegram();
+    });
+  }
+  function renderTelegram() {
+    var el = $("telegramList");
+    if (!el) return;
+    var r = S.telegram;
+    if (!r) return;
+    if (r.kind === "missing") { el.innerHTML = '<p class="soft-msg"><b>À activer</b>Mise à jour de la base 0068_admin_telegram.sql à appliquer.</p>'; return; }
+    if (!r.data) { blockError(el, r, "Telegram laissés"); return; }
+    var d = r.data, list = Array.isArray(d.lignes) ? d.lignes : [];
+    var now = Date.now();
+    var resume = '<p class="m-summary"><b>' + esc(H.fmtInt(d.laisses || 0) + " sur " + H.fmtInt(d.inscrits || 0) + " inscrits") + "</b>"
+      + "<span>" + esc("ont laissé leur Telegram") + "</span>"
+      + "<span>" + esc("fenêtre montrée " + H.fmtInt(d.vues || 0) + " fois") + "</span></p>";
+    if (!list.length) { el.innerHTML = resume + emptyHtml("Personne pour le moment", "Chaque Telegram laissé apparaîtra ici, avec l'adresse du compte et son offre."); return; }
+    var cols = [{ label: "Telegram" }, { label: "Adresse" }, { label: "Offre" }, { label: "Langue" }, { label: "Laissé" }];
+    var rows = list.map(function (x) {
+      var p = String(x.pseudo || "");
+      var tg = p.charAt(0) === "@"
+        ? '<a href="https://t.me/' + esc(p.slice(1)) + '" target="_blank" rel="noopener">' + esc(p) + "</a>"
+        : esc(p);
+      var mail = S.showEmails ? (x.email || "Adresse inconnue") : (x.email_masked || H.maskEmail(x.email) || "Adresse inconnue");
+      var offre = x.is_internal ? statusBadge({ label: "Test", cls: "gone", help: "Compte admin ou de test" })
+        : x.plan === "pro" ? statusBadge(H.MEMBER_STATUS.pro)
+        : statusBadge({ label: "Gratuit", cls: "new", help: "Compte gratuit" });
+      return { cells: [tg, esc(mail), offre, esc(String(x.langue || "").toUpperCase() || "?"), esc(H.daysAgo(x.updated_at || x.created_at, now))] };
+    });
+    el.innerHTML = resume + tableHtml(cols, rows);
+  }
   function trackingNote(since) {
     if (!since) return "Le suivi des visites par inscrit démarre avec la mise en ligne de la mise à jour du site. Pour l'instant, seules la date d'inscription et la dernière connexion sont connues : rien n'est reconstitué pour les jours d'avant.";
     return "Visites des inscrits suivies depuis le " + fmtDateTime(since) + " (heure de Paris). Avant, seules l'inscription et la dernière connexion sont connues : rien n'est reconstitué.";
@@ -2989,6 +3025,7 @@
       setBusy(false);
       refreshNames();
       loadMembers();
+      loadTelegram();
       loadUnlocks();
       loadDrop();
       loadDiag();
@@ -3147,7 +3184,7 @@
       if (ex) { askExclusion(ex.getAttribute("data-exclude")); return; }
       if (t.closest("#visitsMore")) { S.visitLimit += 20; renderVisits(); return; }
       if (t.closest("#signupsMore")) { S.signupLimit += 15; renderSignups(); return; }
-      if (t.closest("#membersEmails")) { S.showEmails = !S.showEmails; renderMemberList(S.members && S.members.data); return; }
+      if (t.closest("#membersEmails")) { S.showEmails = !S.showEmails; renderMemberList(S.members && S.members.data); renderTelegram(); return; }
       if (t.closest("#membersMore")) { S.memberLimit += 25; renderMemberList(S.members && S.members.data); return; }
       var mrow = t.closest("button.m-row");
       if (mrow) { toggleMember(mrow); return; }

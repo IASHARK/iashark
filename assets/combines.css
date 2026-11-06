@@ -410,3 +410,65 @@ html:has(.cb){background:#060b12;scrollbar-color:rgba(141,179,211,.32) #060b12}
 .tq-leg.sd-perdu .tq-direct{color:#ff8a8a;background:rgba(255,107,107,.12)}
 @keyframes tqPouls{0%,100%{opacity:1}50%{opacity:.25}}
 @media (prefers-reduced-motion:reduce){.tq-leg.sd-cours .tq-direct::before{animation:none}}
+
+/* ============ LE NUL DU JOUR ET LA GRILLE LOTO FOOT (06/11/2026) : en haut de la page, Pro ============ */
+.xn,.xl{display:grid;gap:14px;margin:8px 0 40px}
+.xn .cb-tete-s,.xl .cb-tete-s{grid-template-columns:1fr auto;align-items:center}
+.xn .cb-tete-s .cb-texte,.xl .cb-tete-s .cb-texte{grid-column:1/-1}
+.xn-carte{position:relative;display:grid;gap:14px;padding:18px;border:1px solid var(--cb-line2);border-radius:20px;
+  background:radial-gradient(120% 90% at 100% 0,rgba(32,213,239,.12),transparent 60%),var(--cb-panel)}
+.xn-haut{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:600;color:var(--cb-soft2)}
+.xn-heure{font-variant-numeric:tabular-nums;color:var(--cb-cyan)}
+.xn-ligue{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.xn-match{display:grid;gap:6px}
+.xn-eq{display:flex;align-items:center;gap:9px;min-width:0;font-size:17px}
+.xn-eq b{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:700;color:var(--cb-ink)}
+.xn-logo{width:22px;height:22px;object-fit:contain;flex:none}
+.xn-duel{display:grid;gap:9px}
+.xn-ligne{display:grid;grid-template-columns:74px minmax(0,1fr) auto;align-items:center;gap:10px}
+.xn-k{font-size:12px;font-weight:700;letter-spacing:.02em;color:var(--cb-ink)}
+.xn-ligne--m .xn-k{color:var(--cb-soft)}
+.xn-barre{position:relative;display:block;height:10px;border-radius:999px;background:rgba(141,179,211,.12);overflow:hidden}
+.xn-barre>span{position:absolute;inset:0 auto 0 0;width:calc(var(--v,0)*100%);border-radius:inherit;background:linear-gradient(90deg,#06b6d4,#20d5ef)}
+.xn-ligne--m .xn-barre>span,.xn-barre--m>span{background:rgba(180,192,207,.45)}
+.xn-v{font:400 22px/1 var(--cb-num);color:var(--cb-ink);font-variant-numeric:tabular-nums;min-width:52px;text-align:right}
+.xn-ligne--m .xn-v{color:var(--cb-soft2)}
+.xn-bas{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.xn-pari{font-size:15px;font-weight:700;color:var(--cb-ink)}
+.xn-ecart{padding:4px 10px;border-radius:999px;font-size:12.5px;font-weight:800;color:#060b12;background:var(--cb-cyan)}
+.xn-cote{margin-left:auto;font:400 30px/1 var(--cb-num);color:var(--cb-ink)}
+.xn-direct{margin:0}
+.xn-direct [data-sd-jambe]{display:inline-flex;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;color:var(--cb-cyan);background:rgba(32,213,239,.1)}
+.xn-direct [data-sd-jambe][hidden]{display:none}
+.xn-carte.sd-passe .xn-direct [data-sd-jambe]{color:#060b12;background:var(--cb-cyan)}
+.xn-carte.sd-perdu{opacity:.6}
+.xn-carte--verrou{min-height:150px}
+.xn-offre{justify-self:start;display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border:1px solid rgba(32,213,239,.45);border-radius:12px;background:rgba(32,213,239,.08);color:var(--cb-cyan);font:700 14px Inter,system-ui,sans-serif;cursor:pointer}
+.xn-offre svg{width:16px;height:16px}
+.xn-offre[hidden]{display:none}
+.xn-offre:hover{background:rgba(32,213,239,.16)}
+
+.xl-chiffres{display:grid;grid-template-columns:1.3fr 1fr;gap:10px}
+.xl-fig{display:grid;gap:4px;align-content:start;padding:14px;border:1px solid var(--cb-line);border-radius:16px;background:var(--cb-panel)}
+.xl-fig--fort{border-color:rgba(32,213,239,.45);background:radial-gradient(120% 100% at 0 0,rgba(32,213,239,.14),transparent 70%),var(--cb-panel)}
+.xl-k{font-size:12px;font-weight:600;color:var(--cb-soft2)}
+.xl-v{font:400 34px/1 var(--cb-num);color:var(--cb-ink);font-variant-numeric:tabular-nums}
+.xl-v small{font:600 14px Inter,system-ui,sans-serif;color:var(--cb-soft)}
+.xl-fig small{font-size:12px;color:var(--cb-soft)}
+.xl-grille{border:1px solid var(--cb-line2);border-radius:18px;background:var(--cb-panel);overflow:hidden}
+.xl-ls{list-style:none;margin:0;padding:6px 10px}
+.xl-l{display:grid;grid-template-columns:40px minmax(0,1fr) repeat(3,40px);align-items:center;gap:6px;padding:9px 0}
+.xl-l+.xl-l{border-top:1px solid var(--cb-line)}
+.xl-l--tete{padding:4px 0}
+.xl-l--tete .xl-c{background:none;border:0;color:var(--cb-soft);font-weight:800;font-size:12px}
+.xl-h{font-size:12px;font-weight:600;color:var(--cb-soft2);font-variant-numeric:tabular-nums}
+.xl-m{display:grid;gap:2px;min-width:0;font-size:13.5px}
+.xl-m b{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:600;color:var(--cb-ink)}
+.xl-c{display:grid;place-items:center;height:36px;border-radius:10px;border:1px solid var(--cb-line);font-size:13px;font-weight:700;color:var(--cb-soft2);font-variant-numeric:tabular-nums}
+.xl-c.is-choix{border-color:transparent;background:var(--cb-cyan);color:#060b12}
+.xl-l.is-double .xl-c.is-choix{background:linear-gradient(135deg,#20d5ef,#06b6d4)}
+.xl-direct{justify-self:start;margin-top:3px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;color:var(--cb-cyan);background:rgba(32,213,239,.1)}
+.xl-direct[hidden]{display:none}
+.xl-l.sd-passe .xl-direct{color:#060b12;background:var(--cb-cyan)}
+.xl-l.sd-perdu{opacity:.55}
+@media (min-width:600px){.xl-l{grid-template-columns:56px minmax(0,1fr) repeat(3,52px)}.xl-m{grid-template-columns:1fr 1fr;column-gap:10px}.xl-direct{grid-column:1/-1}}

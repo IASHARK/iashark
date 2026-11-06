@@ -44,9 +44,9 @@ export function jourParis(ms) {
 // Ce que chaque niveau debloque : null = debloque ; « compte » = un compte gratuit
 // debloque ; « pro » = l'abonnement Pro debloque.
 const VERROUS = {
-  anonyme: { x5: "compte", x10: "compte", or: "compte", buteur: "compte" },
-  gratuit: { x5: "pro", x10: "pro", or: "pro", buteur: null },
-  pro: { x5: null, x10: null, or: null, buteur: null },
+  anonyme: { x5: "compte", x10: "compte", or: "compte", buteur: "compte", nul: "pro", loto: "pro" },
+  gratuit: { x5: "pro", x10: "pro", or: "pro", buteur: null, nul: "pro", loto: "pro" },
+  pro: { x5: null, x10: null, or: null, buteur: null, nul: null, loto: null },
 };
 export function verrouDe(niveau, type) {
   const v = VERROUS[niveau] || VERROUS.anonyme;
@@ -146,6 +146,46 @@ function buteur(ligne, statut, niveau) {
   });
 }
 
+// LE NUL DU JOUR et LA GRILLE LOTO FOOT (06/11/2026, Pro). Verrouille : le statut seul (et, pour la grille, le nombre
+// de matchs et de doubles, comme nb_matchs d'un ticket) ; jamais un match, un choix, une cote ni une chance.
+function nulDuJour(ligne, statut, niveau) {
+  const verrou = verrouDe(niveau, "nul");
+  const out = { statut: statut, verrou: verrou };
+  if (statut !== "publie" || verrou !== null) return out;
+  const c = objet(ligne.contenu);
+  return Object.assign(out, {
+    publie_a: texte(ligne.publie_a), fixture_id: entier(c.fixture_id), domicile: texte(c.domicile), exterieur: texte(c.exterieur),
+    ligue: texte(c.ligue), coup_envoi: texte(c.coup_envoi), pari: texte(c.pari), market_id: texte(c.market_id),
+    cote: nombre(c.cote), chance: entier(c.chance), chance_marche: entier(c.chance_marche), ecart_points: nombre(c.ecart_points),
+    etat: etat(objet(objet(ligne.etats).jambes)[String(c.fixture_id)]),
+  });
+}
+const CHOIX = ["1", "N", "2"];
+function grilleLoto(ligne, statut, niveau) {
+  const verrou = verrouDe(niveau, "loto");
+  const out = { statut: statut, verrou: verrou };
+  if (statut !== "publie") return out;
+  const meta = objet(ligne.meta);
+  out.nb_matchs = entier(meta.nb_matchs);
+  out.nb_doubles = entier(meta.nb_doubles);
+  if (verrou !== null) return out;
+  const c = objet(ligne.contenu);
+  const e = objet(objet(ligne.etats).jambes);
+  return Object.assign(out, {
+    publie_a: texte(ligne.publie_a), chance_grille: nombre(c.chance_grille), chance_sans_doubles: nombre(c.chance_sans_doubles),
+    bons_attendus: nombre(c.bons_attendus),
+    matchs: (Array.isArray(c.matchs) ? c.matchs : []).map((x) => {
+      const m = objet(x);
+      return {
+        fixture_id: entier(m.fixture_id), domicile: texte(m.domicile), exterieur: texte(m.exterieur), ligue: texte(m.ligue),
+        coup_envoi: texte(m.coup_envoi), choix: (Array.isArray(m.choix) ? m.choix : []).filter((k) => CHOIX.indexOf(k) !== -1),
+        double: m.double === true, p1: entier(m.p1), pn: entier(m.pn), p2: entier(m.p2), chance: entier(m.chance),
+        etat: etat(e[String(m.fixture_id)]),
+      };
+    }),
+  });
+}
+
 // { jour, niveau, lignes: [{type, meta, contenu, etats, publie_a}], calcul: {statuts} | null,
 //   lectureOk } -> reponse JSON (version 1).
 export function construireReponse({ jour, niveau, lignes, calcul, lectureOk }) {
@@ -158,6 +198,8 @@ export function construireReponse({ jour, niveau, lignes, calcul, lectureOk }) {
     tickets: TYPES_TICKETS.map((t) => ticket(t, parType[t], st(t), n)),
     selection_or: selectionOr(parType.or, st("or"), n),
     buteur_du_jour: buteur(parType.buteur, st("buteur"), n),
+    nul_du_jour: nulDuJour(parType.nul, st("nul"), n),
+    grille_loto: grilleLoto(parType.loto, st("loto"), n),
   };
 }
 

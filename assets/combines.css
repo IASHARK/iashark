@@ -398,3 +398,15 @@ html:has(.cb){background:#060b12;scrollbar-color:rgba(141,179,211,.32) #060b12}
 .tq-chance-k small{font-size:12px;color:var(--cb-soft2)}
 @media (min-width:768px){.tq-chance{max-width:130px}.tq-jour{font-size:13.5px}.tq-chance-k{font-size:13px}}
 @media (max-width:599px){.tdj-tete{gap:0}.tdj{margin-top:2px}}
+
+/* Score en direct d'une jambe (lib/scores-direct.js, 06/11/2026) : etat provisoire, l'archive regle le resultat. */
+.tq-direct{grid-column:2/-1;justify-self:start;display:inline-flex;align-items:center;gap:6px;margin-top:-4px;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--cb-soft2);background:rgba(141,179,211,.08)}
+.tq-direct[hidden]{display:none}
+.tq-leg.sd-cours .tq-direct{color:#20d5ef;background:rgba(32,213,239,.1)}
+.tq-leg.sd-cours .tq-direct::before{content:"";width:6px;height:6px;border-radius:50%;background:#20d5ef;animation:tqPouls 1.6s ease-in-out infinite}
+.tq-leg.sd-passe .tq-direct{color:#060b12;background:#20d5ef}
+.tq-leg.sd-passe .tq-direct::before{content:"\2713"}
+.tq-leg.sd-perdu{opacity:.6}
+.tq-leg.sd-perdu .tq-direct{color:#ff8a8a;background:rgba(255,107,107,.12)}
+@keyframes tqPouls{0%,100%{opacity:1}50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.tq-leg.sd-cours .tq-direct::before{animation:none}}

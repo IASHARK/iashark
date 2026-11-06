@@ -229,3 +229,12 @@
 .hl-proof-dot{width:8px;height:8px;border-radius:50%;background:var(--hl-win);flex:none}
 .hl-proof-t{flex:1;font-size:13.5px;font-weight:700;line-height:1.3}
 .hl-proof-go{color:var(--hl-win);font-weight:800}
+
+/* Score en direct (lib/scores-direct.js, 06/11/2026) : buts au bout de chaque equipe, minute sous l'heure. */
+.hl-team .sd-g{margin-left:auto;padding-left:8px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text,#f4f7fb);}
+.hl-row.sd-live .sd-g{color:#20d5ef;}
+.hl-time .sd-t{display:block;margin-top:3px;font-size:11.5px;font-weight:700;color:#20d5ef;}
+.hl-row.sd-fini .sd-t{color:var(--soft,#a6b4c6);}
+.hl-row.sd-live .sd-t::before{content:"";display:inline-block;width:6px;height:6px;margin-right:4px;border-radius:50%;background:#20d5ef;vertical-align:1px;animation:sdPouls 1.6s ease-in-out infinite;}
+@keyframes sdPouls{0%,100%{opacity:1}50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.hl-row.sd-live .sd-t::before{animation:none}}

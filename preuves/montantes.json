@@ -1,37 +1,25 @@
 {
  "version": 1,
- "genere_le": "2026-11-05T08:03:19.107Z",
- "jour": "2026-11-05",
+ "genere_le": "2026-11-06T08:14:45.485Z",
+ "jour": "2026-11-06",
  "debut": "2026-10-06",
  "objectif": 10,
- "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-11-05. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
+ "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-11-06. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
  "montantes": [
   {
    "rang": 1,
-   "paliers": [
-    {
-     "j": "2026-11-04",
-     "f": 1635745,
-     "h": "Viking",
-     "a": "Sabah FA",
-     "m": "home-win",
-     "p": "Victoire Viking",
-     "c": 1.4,
-     "r": "gagne",
-     "cc": 1.4
-    }
-   ],
-   "gagnes": 1,
-   "cote": 1.4,
+   "paliers": [],
+   "gagnes": 0,
+   "cote": null,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
     "t": "perdu",
-    "j": "2026-11-03",
-    "n": 2,
-    "h": "Galatasaray",
-    "a": "VfB Stuttgart",
-    "p": "Plus de 2,5 buts",
+    "j": "2026-11-05",
+    "n": 1,
+    "h": "Bayer Leverkusen",
+    "a": "Marseille",
+    "p": "Victoire Bayer Leverkusen",
     "k": 1.4
    },
    "objectifs": [
@@ -218,11 +206,22 @@
      "c": 1.4,
      "r": "gagne",
      "cc": 1.4
+    },
+    {
+     "j": "2026-11-05",
+     "f": 1636223,
+     "h": "Bayer Leverkusen",
+     "a": "Marseille",
+     "m": "home-win",
+     "p": "Victoire Bayer Leverkusen",
+     "c": 1.4,
+     "r": "perdu",
+     "cc": null
     }
    ],
    "bilan": {
     "gagnes": 12,
-    "perdus": 4,
+    "perdus": 5,
     "annules": 0,
     "non_regles": 0,
     "objectifs": 1
@@ -263,10 +262,21 @@
      "c": 1.4,
      "r": "gagne",
      "cc": 2.78
+    },
+    {
+     "j": "2026-11-05",
+     "f": 1636448,
+     "h": "FC Midtjylland",
+     "a": "Ajax",
+     "m": "btts-yes",
+     "p": "Les deux équipes marquent",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 3.9
     }
    ],
-   "gagnes": 3,
-   "cote": 2.78,
+   "gagnes": 4,
+   "cote": 3.9,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
@@ -462,10 +472,21 @@
      "c": 1.4,
      "r": "gagne",
      "cc": 2.78
+    },
+    {
+     "j": "2026-11-05",
+     "f": 1636448,
+     "h": "FC Midtjylland",
+     "a": "Ajax",
+     "m": "btts-yes",
+     "p": "Les deux équipes marquent",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 3.9
     }
    ],
    "bilan": {
-    "gagnes": 12,
+    "gagnes": 13,
     "perdus": 4,
     "annules": 0,
     "non_regles": 0,
@@ -474,31 +495,19 @@
   },
   {
    "rang": 3,
-   "paliers": [
-    {
-     "j": "2026-11-04",
-     "f": 1635658,
-     "h": "Fenerbahçe",
-     "a": "Liverpool",
-     "m": "over-25",
-     "p": "Plus de 2,5 buts",
-     "c": 1.49,
-     "r": "gagne",
-     "cc": 1.49
-    }
-   ],
-   "gagnes": 1,
-   "cote": 1.49,
+   "paliers": [],
+   "gagnes": 0,
+   "cote": null,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
     "t": "perdu",
-    "j": "2026-11-03",
-    "n": 2,
-    "h": "Atletico Madrid",
-    "a": "Bayern München",
-    "p": "Plus de 2,5 buts",
-    "k": 1.42
+    "j": "2026-11-05",
+    "n": 1,
+    "h": "Sunderland",
+    "a": "Dinamo Zagreb",
+    "p": "Victoire Sunderland",
+    "k": 1.44
    },
    "objectifs": [],
    "historique": [
@@ -666,11 +675,22 @@
      "c": 1.49,
      "r": "gagne",
      "cc": 1.49
+    },
+    {
+     "j": "2026-11-05",
+     "f": 1636345,
+     "h": "Sunderland",
+     "a": "Dinamo Zagreb",
+     "m": "home-win",
+     "p": "Victoire Sunderland",
+     "c": 1.44,
+     "r": "perdu",
+     "cc": null
     }
    ],
    "bilan": {
     "gagnes": 11,
-    "perdus": 3,
+    "perdus": 4,
     "annules": 1,
     "non_regles": 0,
     "objectifs": 0

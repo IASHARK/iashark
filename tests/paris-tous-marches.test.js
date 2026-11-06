@@ -251,7 +251,9 @@ function matchJour(id, o) {
 function fixtures(ms) { const o = {}; ms.forEach((m) => { o[String(m.id)] = { fixture: { timestamp: Date.parse("2026-10-07T18:00:00Z") / 1000, status: { short: "NS" } } }; }); return o; }
 const cand = (id, cote, chance, extra) => Object.assign({ market_id: id, famille: (P.MARCHE[id] || {}).famille, cote, cote_anj: false, bookmaker: null, chance, chance_affichee: chance, fiabilite: "vérifiée", p_modele: null, q: chance }, extra || {});
 
-test("Selection en or (regle du 21/10/2026) : les 3 paris affiches les plus probables du jour, un par match ; autres marches ignores", () => {
+// Regle du 06/11/2026 : les 3 paris nourrissent les 3 montantes, chacune son style (la sure, la solide a 1,55 ou plus,
+// l'audacieuse a 1,85 ou plus) ; un rang sans pari reste vide.
+test("Selection des montantes (regle du 06/11/2026) : pari affiche le plus probable par style, un par match ; autres marches ignores", () => {
   assert.deepEqual(REGLES.selection_or, { nb: 3 });
   const dom = { pari_rec: "Victoire Domicile", market_id: "home-win", cote_rec: "1.45", pronostic: { market_id: "home-win", publie: true, fiabilite: "vérifiée" } };
   const ms = [matchJour(1, { chance_iashark: 58 }), matchJour(2, Object.assign({ chance_iashark: 66 }, dom)), matchJour(3, { chance_iashark: 63 }),
@@ -259,13 +261,13 @@ test("Selection en or (regle du 21/10/2026) : les 3 paris affiches les plus prob
   const cp = { 1: [cand("btts-yes", 1.9, 80, { p_modele: 85, q: 80 })] }; // ignore : seul le pari affiche compte
   const c = T.calculerDuJour(ms, { jour: "2026-10-07", nowMs: NOW, fixtureById: fixtures(ms), configLigues: LIGUES, candidatsPar: cp });
   assert.ok(c.or);
-  assert.deepEqual(c.or.contenu.paris.map((p) => [p.fixture_id, p.market_id, p.cote, p.chance, p.rang]), [[2, "home-win", 1.45, 66, 1], [3, "over-25", 1.62, 63, 2], [4, "over-25", 1.62, 61, 3]]);
+  assert.deepEqual(c.or.contenu.paris.map((p) => [p.fixture_id, p.market_id, p.cote, p.chance, p.rang]), [[2, "home-win", 1.45, 66, 1], [3, "over-25", 1.62, 63, 2]], "aucun pari a 1,85 ou plus : pas d'audacieuse ce jour-la");
   c.or.contenu.paris.forEach((p) => {
     assert.deepEqual(Object.keys(p).sort(), ["chance", "chance_calculee", "cote", "coup_envoi", "coup_envoi_ms", "domicile", "exterieur", "famille", "fixture_id", "ligue", "ligue_id", "ligue_key", "market_id", "operateur", "pari", "rang"]);
   });
   assert.equal(c.exclus.jambe_hors_cote, 1);
-  // Moins de 3 paris possibles : pas de Selection en or (jamais completee).
-  const c2 = T.calculerDuJour(ms.slice(0, 2), { jour: "2026-10-07", nowMs: NOW, fixtureById: fixtures(ms), configLigues: LIGUES, candidatsPar: cp });
+  // Aucun pari possible : rien (jamais complete).
+  const c2 = T.calculerDuJour(ms.slice(4, 5), { jour: "2026-10-07", nowMs: NOW, fixtureById: fixtures(ms), configLigues: LIGUES, candidatsPar: cp });
   assert.equal(c2.or, null);
 });
 

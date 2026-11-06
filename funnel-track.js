@@ -1032,6 +1032,28 @@
         window.iasharkTrack("click", { kind: "checkout_consent", label: clip(el.getAttribute("data-consent"), 20), pv: PAGE_VIEW_ID });
       } catch (e) {}
     }, true);
+
+    // Copie et partage (07/11/2026, demande de Clement : « savoir qui partage »). Jamais le texte copie :
+    // seulement le fait (copie d'un lien ou d'un texte, sa longueur arrondie) et la page. Au plus 5 par page.
+    // Une capture d'ecran ne se detecte pas depuis un site : rien n'est tente.
+    var copies = 0;
+    document.addEventListener("copy", function () {
+      try {
+        if (copies >= 5) return;
+        copies++;
+        var sel = String((window.getSelection && window.getSelection()) || "");
+        var lien = /https?:\/\/|iashark\.com/i.test(sel);
+        window.iasharkTrack("click", { kind: "copie", label: lien ? "lien" : "texte", target: String(Math.min(2000, Math.round(sel.length / 10) * 10)), pv: PAGE_VIEW_ID });
+      } catch (e) {}
+    }, true);
+    if (navigator.share && !navigator.__iasharkShare) {
+      var shareOrig = navigator.share.bind(navigator);
+      navigator.__iasharkShare = true;
+      navigator.share = function (data) {
+        try { window.iasharkTrack("click", { kind: "partage", label: data && data.url ? "lien" : "texte", pv: PAGE_VIEW_ID }); } catch (e) {}
+        return shareOrig(data);
+      };
+    }
   } catch (e) {}
 
   // ---------- gate_view : panneau « Debloquer » reellement vu ----------

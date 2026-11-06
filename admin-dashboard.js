@@ -772,7 +772,7 @@
     match_avis_unlock: "« Débloquer » (avis de l'IA)", match_recall_unlock: "« Débloquer » (rappel après les stats)",
     match_analysis_unlock: "« Débloquer » (analyse fermée)", match_faq_unlock: "« Débloquer » (FAQ)", match_bar_unlock: "« Débloquer » (barre du bas)",
     home_scorers_unlock: "« Débloquer » (buteurs du jour)", home_scorers_locked_row: "un buteur flouté", home_scorers_card: "un buteur du jour",
-    checkout_consent: "la case des conditions de vente"
+    checkout_consent: "la case des conditions de vente", copie: "copie (texte ou lien)", partage: "partage"
   };
   function dayTitle(ymd, now) {
     var today = parisToday(now ? new Date(now) : new Date());
@@ -826,7 +826,7 @@
       } else if (it.type === "click") {
         g.clicks += 1;
         e.kind = "click";
-        e.text = "Clic sur " + (MEMBER_CLICK_KINDS[it.kind] || "bouton") + (it.label && it.label !== it.kind && !/^(match|home|checkout)_[a-z_]+$/.test(String(it.label)) && it.kind !== "checkout_consent" ? " : « " + String(it.label).slice(0, 80) + " »" : "");
+        e.text = it.kind === "partage" ? "A partagé la page" : it.kind === "copie" ? (it.label === "lien" ? "A copié un lien" : "A copié du texte") : "Clic sur " + (MEMBER_CLICK_KINDS[it.kind] || "bouton") + (it.label && it.label !== it.kind && !/^(match|home|checkout)_[a-z_]+$/.test(String(it.label)) && it.kind !== "checkout_consent" ? " : « " + String(it.label).slice(0, 80) + " »" : "");
         if (it.kind === "match" && it.match_id) { var nm = matchName(it.match_id, names); if (nm) e.text += " → " + nm; }
       } else {
         e.kind = "event";
@@ -983,16 +983,20 @@
   // key = ancre (#ecran-<key>) et valeur de data-screen dans admin.html.
   var SCREENS = [
     { key: "aujourdhui", label: "Aujourd'hui", title: "Que dois-je faire aujourd'hui ?", sub: "Les problèmes qui te coûtent le plus de clients, puis les chiffres de la période et qui est sur le site maintenant." },
+    { key: "inscrits", label: "Les gens", title: "Qui vient, qui s'inscrit, qui relancer ?", sub: "Cherche une personne, ouvre sa fiche, et vois les listes prêtes : à relancer, Pro qui risquent de partir, nouveaux du jour." },
+    { key: "argent", label: "Argent", title: "Combien ça rapporte, qui arrive, qui part ?", sub: "Abonnés du moment, chaque essai, paiement, désabonnement et départ, avec la raison quand elle est donnée." },
+    { key: "provenance", label: "Réseaux", title: "Quel réseau amène des gens utiles ?", sub: "Tes abonnés Telegram, X et TikTok jour par jour, puis ce que chaque réseau et chaque publication amène sur le site." },
+    { key: "paris", label: "Paris", title: "Comment vont les paris ?", sub: "Les mêmes chiffres que le site, gagnés et perdus, mis à jour chaque matin." },
+    { key: "alertes", label: "Alertes", title: "Être prévenu sur ton téléphone", sub: "Choisis ce qui t'envoie une notification : nouveau Pro, désabonnement, paiement raté, site en panne…" },
     { key: "site", label: "Le site", title: "Est-ce que le site marche bien ?", sub: "Pannes, vitesse d'affichage et matchs qui s'affichent (ou pas) : ce qui peut faire fuir un visiteur sans qu'il le dise." },
-    { key: "provenance", label: "Provenance", title: "Quel réseau amène des gens utiles ?", sub: "Pour chaque réseau et chaque publication : combien viennent, combien regardent vraiment, combien s'inscrivent ou ouvrent le paiement." },
     { key: "arrivee", label: "Arrivée", title: "Pourquoi les gens partent dès l'arrivée ?", sub: "La première page vue, le temps passé dessus et la langue : c'est là que se joue la plus grosse perte." },
     { key: "parcours", label: "Parcours", title: "À quelle étape on perd les futurs clients ?", sub: "Du premier match ouvert jusqu'au paiement, étape par étape, avec le formulaire d'inscription et le paiement en détail." },
     { key: "envie", label: "Envie", title: "Qu'est-ce qui donne envie de payer ?", sub: "Les boutons « Débloquer » cliqués, les pages et les matchs les plus regardés." },
-    { key: "inscrits", label: "Inscrits", title: "Les inscrits reviennent-ils ?", sub: "Ce que font les personnes qui ont créé un compte, et qui relancer." },
-    { key: "argent", label: "Argent", title: "Combien ça rapporte ?", sub: "Abonnements en cours, argent encaissé, nouveaux abonnés et résiliations, d'après Stripe et les comptes." },
     { key: "partenaires", label: "Partenaires", title: "Qui accepter comme partenaire ?", sub: "Les candidatures déposées sur la page Partenaires, à accepter ou à refuser, puis ce que rapporte chaque partenaire accepté." },
-    { key: "fiabilite", label: "Fiabilité", title: "Peut-on croire ces chiffres ?", sub: "Ce qui est mesuré, ce qui manque, ce qui est retiré (robots, tests, ton appareil), et tous les filtres." }
+    { key: "fiabilite", label: "Fiabilité", title: "Peut-on croire ces chiffres ?", sub: "Ce qui est mesuré, ce qui manque, ce qui est retiré (robots, tests, ton appareil), et tous les filtres." },
+    { key: "plus", label: "Plus", title: "Tous les écrans", sub: "Les autres écrans de ton tableau de bord." }
   ];
+
   function screenKey(hash) {
     var m = String(hash || "").match(/^#ecran-([a-z]+)$/);
     if (!m) return null;
@@ -1317,6 +1321,15 @@
   };
 
   function $(id) { return document.getElementById(id); }
+  // Appli (admin-app.js) : acces aux donnees deja chargees, jamais une seconde connexion.
+  function appHook(name, arg) { try { var A = window.IasharkAdminApp; if (A && typeof A[name] === "function") A[name](arg); } catch (e) {} }
+  window.IasharkAdmin = {
+    sb: function () { return sb; }, rpc: function (n, a) { return rpc(n, a); }, S: S, H: H, esc: esc,
+    toast: function (t) { toast(t); }, fmtDateTime: function (x) { return fmtDateTime(x); }, fmtTime: function (x) { return fmtTime(x); },
+    fmtDay: function (x) { return fmtDay(x); }, emptyHtml: function (a, b) { return emptyHtml(a, b); }, blockError: function (e, r, w) { blockError(e, r, w); },
+    statusBadge: function (x) { return statusBadge(x); }, tableHtml: function (c, r, o) { return tableHtml(c, r, o); }, visitDetail: function (v) { return visitDetail(v); },
+    journeyHtml: function (u) { return journeyHtml(u); }, loadMissingNames: function (ids) { return loadMissingNames(ids); }
+  };
 
   // ---------- Preferences (seulement la periode, jamais les filtres) ----------
   function loadPrefs() {
@@ -1754,13 +1767,11 @@
       if (S.liveError) blockError(el, S.liveError, "Qui est là maintenant");
       return;
     }
-    var list = (S.live.visitors || []).slice().sort(function (x, y) {
-      var hx = H.visitorKind(x).human, hy = H.visitorKind(y).human;
-      if (hx !== hy) return hx ? -1 : 1;
+    // Seulement de vrais humains (demande de Clement du 07/11/2026) : robots, tests et ton appareil ne sont plus listes.
+    var list = (S.live.visitors || []).filter(function (v) { return H.visitorKind(v).human; }).sort(function (x, y) {
       return new Date(y.last_at) - new Date(x.last_at);
     });
-    var humans = list.filter(function (v) { return H.visitorKind(v).human; }).length;
-    var robots = list.length - humans;
+    var humans = list.length;
     $("liveChip").hidden = false;
     $("liveChipText").textContent = H.fmtInt(humans) + " en ligne";
     $("liveChipDot").classList.toggle("off", !humans);
@@ -1775,7 +1786,6 @@
     }
     var now = Date.now();
     el.innerHTML = '<ul class="lrows">' + list.slice(0, 15).map(function (v) {
-      var kind = H.visitorKind(v);
       var info = H.pageInfo(v.page, v.match_id, S.names);
       var clock = H.visitClock(new Date(now).toISOString(), v.tz);
       var meta = [
@@ -1787,11 +1797,10 @@
       if (since) meta.push("<span>" + esc(since) + "</span>");
       if (clock.local && clock.local !== clock.paris) meta.push("<span>il est " + esc(clock.local) + " chez cette personne</span>");
       if (v.tab_hidden) meta.push("<span>onglet en arrière-plan</span>");
-      return '<li class="lrow' + (kind.human ? "" : " robot") + '"><span class="lflag" aria-hidden="true">' + (H.isCountry(v.country) ? H.flagEmoji(v.country) : "🌐") + "</span>"
-        + '<div style="min-width:0"><div class="lpage" title="' + esc(info.title) + '">' + esc(info.name) + '</div><div class="lmeta">' + meta.join("") + "</div></div>"
-        + '<span class="badge ' + (kind.human ? "human" : "robot") + '" title="' + esc(kind.why) + '">' + esc(kind.label) + '<span class="sr-only"> : ' + esc(kind.why) + "</span></span></li>";
+      return '<li class="lrow"><span class="lflag" aria-hidden="true">' + (H.isCountry(v.country) ? H.flagEmoji(v.country) : "🌐") + "</span>"
+        + '<div style="min-width:0"><div class="lpage" title="' + esc(info.title) + '">' + esc(info.name) + '</div><div class="lmeta">' + meta.join("") + "</div></div></li>";
     }).join("") + "</ul>"
-      + '<p class="live-foot">' + esc(H.fmtInt(humans) + " humain" + (humans > 1 ? "s" : "") + (robots ? " · " + H.fmtInt(robots) + " robot" + (robots > 1 ? "s" : "") + " ou test" + (robots > 1 ? "s" : "") + " (non compté" + (robots > 1 ? "s" : "") + ")" : "") + (list.length > 15 ? " · 15 premières lignes affichées" : "")) + "</p>";
+      + '<p class="live-foot">' + esc(H.fmtInt(humans) + " personne" + (humans > 1 ? "s" : "") + " en ce moment" + (list.length > 15 ? " · 15 premières lignes affichées" : "")) + "</p>";
   }
 
   // ---------- 7. Pages et matchs ----------
@@ -1914,7 +1923,7 @@
     match_gate_unlock: "Débloquer (panneau d'analyse)", match_avis_unlock: "Débloquer (avis)", match_recall_unlock: "Débloquer (rappel)", match_analysis_unlock: "Débloquer (analyse)", match_analysis_unloc: "Débloquer (analyse)", match_faq_unlock: "Débloquer (FAQ)", match_bar_unlock: "Débloquer (barre du bas)",
     // 0031 (19/09/2026) : buteurs du jour, case des conditions de vente (kind coupe a 20 caracteres).
     home_scorers_unlock: "Débloquer (buteurs du jour)", home_scorers_locked_row: "buteur flouté", home_scorers_locked_: "buteur flouté", home_scorers_card: "buteur du jour",
-    checkout_consent: "case des conditions cochée" };
+    checkout_consent: "case des conditions cochée", copie: "copie", partage: "partage" };
   function visitKey(s, i) { return String(s.session_id || s.first_at + "|" + i); }
   function visitDetail(s) {
     var items = [];
@@ -1925,7 +1934,10 @@
     });
     (s.events || []).forEach(function (e) {
       var label, cls = "ev";
-      if (e.type === "click") {
+      if (e.type === "click" && (e.kind === "copie" || e.kind === "partage")) {
+        label = e.kind === "partage" ? "A partagé la page" : e.label === "lien" ? "A copié un lien" : "A copié du texte";
+        cls = "ev win";
+      } else if (e.type === "click") {
         label = "Clic " + (CLICK_KINDS[e.kind] || "") + (e.label && !/^(match|home|checkout)_[a-z_]+$/.test(String(e.label)) && e.kind !== "checkout_consent" ? " : « " + String(e.label) + " »" : "");
         if (e.kind === "match" && e.match_id) { var nm = H.matchName(e.match_id, S.names); if (nm) label += " → " + nm; }
       } else {
@@ -2053,6 +2065,7 @@
       return { cells: [tg, esc(mail), offre, langueHtml, esc(H.daysAgo(x.updated_at || x.created_at, now))] };
     });
     el.innerHTML = resume + tableHtml(cols, rows);
+    appHook("membres");
   }
   function trackingNote(since) {
     if (!since) return "Le suivi des visites par inscrit démarre avec la mise en ligne de la mise à jour du site. Pour l'instant, seules la date d'inscription et la dernière connexion sont connues : rien n'est reconstitué pour les jours d'avant.";
@@ -2072,6 +2085,7 @@
     $("membersBody").hidden = false;
     $("membersNote").hidden = !(m || r);
     $("membersNote").textContent = trackingNote((m && m.tracking_since) || (r && r.tracking_since) || null);
+    appHook("membres");
     renderMemberCards(m, r);
     renderMemberList(m);
     renderRetention(r);
@@ -2615,10 +2629,13 @@
     $("screenTitle").textContent = def.title;
     $("screenSub").textContent = def.sub;
     document.title = "IASHARK — " + def.label;
+    appHook("ecran", def.key);
     if (scroll === false) return;
     if (r.target) r.target.scrollIntoView({ behavior: "smooth", block: "start" });
     else {
       var nav = $("screens");
+      // Telephone : la barre d'ecrans du haut est cachee (barre d'onglets en bas) : on remonte au titre de l'ecran.
+      if (nav && !nav.offsetParent && $("screenTitle") && $("screenTitle").getBoundingClientRect) nav = $("screenTitle");
       var top = nav ? nav.getBoundingClientRect().top + window.pageYOffset - 70 : 0;
       if (window.pageYOffset > top) window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
     }
@@ -3039,6 +3056,7 @@
       loadDiag();
       loadRevenue();
       loadPartners();
+      appHook("charger");
       if (!opts.silent) return loadLive().then(startTimers);
     }).catch(function (e) {
       setBusy(false);
@@ -3078,6 +3096,7 @@
         S.liveError = null;
         renderLive();
         renderCards();
+        appHook("live", S.live);
         var ids = (S.live.visitors || []).map(function (v) { return v.match_id; }).filter(Boolean);
         if (ids.some(function (id) { return !S.names[id]; })) loadMissingNames(ids).then(function (changed) { if (changed) renderLive(); });
       } else {

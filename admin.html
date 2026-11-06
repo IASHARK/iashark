@@ -6,11 +6,18 @@
 <title>IASHARK — Mon tableau de bord</title>
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#070b12">
+<link rel="manifest" href="/admin.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IASHARK Admin">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23070b12'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='40' fill='%2322d3ee'%3E🦈%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/admin.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" defer></script>
 <script src="/admin-dashboard.js" defer></script>
+<script src="/admin-app.js" defer></script>
 </head>
 <body>
 <a class="skip" href="#main">Aller au contenu</a>
@@ -36,7 +43,7 @@
     <div class="state-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg></div>
     <h1>Page réservée</h1>
     <p>Ce tableau de bord est réservé au compte administrateur. Connecte-toi avec ce compte, puis reviens sur cette page.</p>
-    <a class="btn" href="/connexion.html">Se connecter</a>
+    <a class="btn" href="/connexion.html?next=/admin.html">Se connecter</a>
   </section>
 
   <section class="state" id="stateError" hidden>
@@ -85,19 +92,21 @@
       </div>
     </div>
 
-    <!-- Les 10 écrans (9 le 19/10/2026, Partenaires le 20/10/2026) : une question
+    <!-- Les écrans (9 le 19/10/2026, Partenaires le 20/10/2026, appli le 07/11/2026) : une question
          par écran. Les liens changent l'ancre (#ecran-...), le bouton « retour »
          du téléphone fonctionne. -->
     <nav class="screens" id="screens" aria-label="Écrans du tableau de bord">
       <ol class="screens-track">
         <li><a href="#ecran-aujourdhui" data-screen-link="aujourdhui" aria-current="page">Aujourd'hui</a></li>
+        <li><a href="#ecran-inscrits" data-screen-link="inscrits">Les gens</a></li>
+        <li><a href="#ecran-argent" data-screen-link="argent">Argent</a></li>
+        <li><a href="#ecran-provenance" data-screen-link="provenance">Réseaux</a></li>
+        <li><a href="#ecran-paris" data-screen-link="paris">Paris</a></li>
+        <li><a href="#ecran-alertes" data-screen-link="alertes">Alertes</a></li>
         <li><a href="#ecran-site" data-screen-link="site">Le site</a></li>
-        <li><a href="#ecran-provenance" data-screen-link="provenance">Provenance</a></li>
         <li><a href="#ecran-arrivee" data-screen-link="arrivee">Arrivée</a></li>
         <li><a href="#ecran-parcours" data-screen-link="parcours">Parcours</a></li>
         <li><a href="#ecran-envie" data-screen-link="envie">Envie</a></li>
-        <li><a href="#ecran-inscrits" data-screen-link="inscrits">Inscrits</a></li>
-        <li><a href="#ecran-argent" data-screen-link="argent">Argent</a></li>
         <li><a href="#ecran-partenaires" data-screen-link="partenaires">Partenaires<span class="tab-count tnum" id="partnersTabCount" hidden></span></a></li>
         <li><a href="#ecran-fiabilite" data-screen-link="fiabilite">Fiabilité</a></li>
       </ol>
@@ -260,6 +269,14 @@
       </div>
     </section>
 
+    <!-- Reseaux (07/11/2026) : abonnes jour par jour (admin_reseaux) -->
+    <section class="card section" data-screen="provenance" aria-labelledby="abosTitle">
+      <div class="card-head">
+        <div><h2 class="card-title" id="abosTitle">Tes abonnés</h2><p class="card-sub">Relevés chaque jour : Telegram et TikTok automatiquement, X depuis Metricool</p></div>
+      </div>
+      <div id="reseauxAbos"><div class="skel skel-block"></div></div>
+    </section>
+
     <!-- Écran 3 : provenance -->
     <section class="card section" data-screen="provenance" aria-labelledby="channelsTitle">
       <div class="card-head">
@@ -311,9 +328,30 @@
         </div>
         <button type="button" class="info" aria-expanded="false" aria-controls="helpLive" aria-label="Aide : qui est là maintenant">i</button>
       </div>
-      <p class="help" id="helpLive" hidden>Chaque ligne est une personne (un onglet ouvert sur le site). Badge <b>Humain</b> : visite normale, comptée dans tes chiffres. Badge <b>Robot / test</b> : robot, test automatique, écran simulé ou ton propre appareil ; affiché pour information mais jamais compté. L'heure « chez la personne » s'affiche quand son fuseau horaire est connu.</p>
+      <p class="help" id="helpLive" hidden>Chaque ligne est une vraie personne (un onglet ouvert sur le site). Robots, tests et ton propre appareil ne sont jamais affichés. L'heure « chez la personne » s'affiche quand son fuseau horaire est connu.</p>
+      <div class="live-map" id="liveMap" role="img" aria-label="Carte des personnes sur le site en ce moment"></div>
       <div id="live"><div class="skel skel-block"></div></div>
       <p class="sr-only" id="liveAnnounce" aria-live="polite"></p>
+    </section>
+
+    <!-- Les gens (07/11/2026) : recherche + listes pretes + fiche (admin-app.js, admin_personne) -->
+    <section class="card section" data-screen="inscrits" aria-labelledby="chercheTitle">
+      <div class="card-head">
+        <div><h2 class="card-title" id="chercheTitle">Chercher une personne</h2><p class="card-sub">Adresse e-mail ou @Telegram, puis touche la personne pour ouvrir sa fiche</p></div>
+      </div>
+      <label class="field cherche"><span class="sr-only">Adresse e-mail ou Telegram</span><input type="search" id="chercheInput" placeholder="ex. martin@gmail.com ou @martin" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></label>
+      <div id="chercheRes"></div>
+    </section>
+    <section class="section" data-screen="inscrits" aria-labelledby="listesTitle">
+      <div class="section-head"><h2 class="section-title" id="listesTitle">Listes prêtes</h2><p class="section-sub">Touche une liste pour voir les personnes, puis une personne pour sa fiche</p></div>
+      <div id="listes"><div class="skel skel-block"></div></div>
+    </section>
+
+    <section class="card section" data-screen="inscrits" aria-labelledby="visitsTitle">
+      <div class="card-head">
+        <div><h2 class="card-title" id="visitsTitle">Tous les visiteurs, un par un</h2><p class="card-sub">Inscrits ou pas : touche une visite pour voir chaque page, l'heure exacte et le temps passé</p></div>
+      </div>
+      <div id="visits"><div class="skel skel-block"></div></div>
     </section>
 
     <!-- 6 bis. Mes inscrits (migration 0025_admin_members.sql ; sans elle : « a activer ») -->
@@ -403,6 +441,24 @@
         <div><h2 class="card-title" id="signupsTitle">Derniers inscrits</h2><p class="card-sub" id="signupsSub">Comptes créés sur le site (comptes admin et de test masqués)</p></div>
       </div>
       <div id="signups"><div class="skel skel-block"></div></div>
+    </section>
+
+    <!-- Argent (07/11/2026) : abonnes et evenements (admin_abonnements) -->
+    <section class="section" data-screen="argent" aria-labelledby="abonnesTitle">
+      <div class="section-head"><h2 class="section-title" id="abonnesTitle">Tes abonnés maintenant</h2><p class="section-sub">Comptes admin et de test retirés · lu dans les abonnements Stripe</p></div>
+      <div class="cards ab-cards" id="abonnesEtat"><div class="skel skel-card"></div><div class="skel skel-card"></div><div class="skel skel-card"></div><div class="skel skel-card"></div></div>
+    </section>
+    <section class="card section" data-screen="argent" aria-labelledby="mouvTitle">
+      <div class="card-head">
+        <div><h2 class="card-title" id="mouvTitle">Ce qui s'est passé</h2><p class="card-sub" id="mouvSub">Chaque essai, paiement, désabonnement et départ, du plus récent au plus ancien</p></div>
+      </div>
+      <div class="seg ab-filtre" role="group" aria-label="Quoi afficher" id="mouvFiltre">
+        <button type="button" data-f="tout" aria-pressed="true">Tout</button>
+        <button type="button" data-f="departs" aria-pressed="false">Départs</button>
+        <button type="button" data-f="paiements" aria-pressed="false">Paiements</button>
+        <button type="button" data-f="essais" aria-pressed="false">Essais</button>
+      </div>
+      <div id="mouvements"><div class="skel skel-block"></div></div>
     </section>
 
     <!-- Écran 8 : argent -->
@@ -504,15 +560,36 @@
           </div>
         </section>
 
-        <section class="card" aria-labelledby="visitsTitle">
-          <div class="card-head">
-            <div><h3 class="card-title" id="visitsTitle">Dernières visites</h3><p class="card-sub">Touche une visite pour voir son parcours page par page</p></div>
-          </div>
-          <div id="visits"><div class="skel skel-block"></div></div>
-        </section>
+
 
       </div>
     </details>
+
+    <!-- Paris (07/11/2026) : memes fichiers que le site (preuves/bandeau.json, preuves/bilan-hier.json) -->
+    <section class="section" data-screen="paris" aria-labelledby="parisTitle">
+      <h2 class="sr-only" id="parisTitle">Les paris</h2>
+      <div id="paris"><div class="skel skel-block"></div></div>
+    </section>
+
+    <!-- Alertes (07/11/2026) : notifications sur le telephone (admin-sw.js, fonction admin-alertes) -->
+    <section class="section" data-screen="alertes" aria-labelledby="alertesTitle">
+      <h2 class="sr-only" id="alertesTitle">Alertes</h2>
+      <div id="alertes"><div class="skel skel-block"></div></div>
+    </section>
+
+    <!-- Plus (telephone) : les autres ecrans -->
+    <section class="section" data-screen="plus" aria-labelledby="plusTitle">
+      <h2 class="sr-only" id="plusTitle">Tous les écrans</h2>
+      <ul class="plus-list">
+        <li><a href="#ecran-alertes"><b>Alertes</b><span>Notifications sur ton téléphone</span></a></li>
+        <li><a href="#ecran-site"><b>Le site</b><span>Pannes, vitesse, matchs affichés</span></a></li>
+        <li><a href="#ecran-arrivee"><b>Arrivée</b><span>La première page vue et la langue</span></a></li>
+        <li><a href="#ecran-parcours"><b>Parcours</b><span>Du premier match au paiement</span></a></li>
+        <li><a href="#ecran-envie"><b>Envie</b><span>Ce qui donne envie de payer</span></a></li>
+        <li><a href="#ecran-partenaires"><b>Partenaires</b><span>Candidatures et commissions</span></a></li>
+        <li><a href="#ecran-fiabilite"><b>Fiabilité</b><span>Ce qui est mesuré, filtres</span></a></li>
+      </ul>
+    </section>
 
     <footer class="foot">
       <p><b>Comment c'est compté.</b> Visiteur = une personne (un onglet de navigateur) qui a vu au moins une page, sans cookie : si elle revient un autre jour, elle compte à nouveau. Inscriptions et abonnés viennent directement des comptes et de Stripe. Pays et villes sont approximatifs.</p>
@@ -539,6 +616,21 @@
     <button type="button" class="btn" id="partnerOk">Refuser</button>
   </div>
 </dialog>
+<dialog class="fiche" id="ficheDialog" aria-labelledby="ficheTitre">
+  <div class="fiche-head">
+    <h2 id="ficheTitre">Fiche</h2>
+    <button type="button" class="btn btn-ghost btn-sm" id="ficheFermer">Fermer</button>
+  </div>
+  <div id="ficheBody"></div>
+</dialog>
+<nav class="tabbar" id="tabbar" aria-label="Écrans principaux">
+  <a href="#ecran-aujourdhui" data-screen-link="aujourdhui"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg><span>Aujourd'hui</span></a>
+  <a href="#ecran-inscrits" data-screen-link="inscrits"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21v-1a6 6 0 0112 0v1"/><path d="M16 4a4 4 0 010 8M22 21v-1a6 6 0 00-4-5.6"/></svg><span>Les gens</span></a>
+  <a href="#ecran-argent" data-screen-link="argent"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg><span>Argent</span></a>
+  <a href="#ecran-provenance" data-screen-link="provenance"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg><span>Réseaux</span></a>
+  <a href="#ecran-paris" data-screen-link="paris"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3l3 6-3 3-3-3zM12 12v9M3.5 9.5L9 9M20.5 9.5L15 9"/></svg><span>Paris</span></a>
+  <a href="#ecran-plus" data-screen-link="plus"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg><span>Plus</span></a>
+</nav>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 </body>
 </html>

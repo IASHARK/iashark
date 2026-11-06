@@ -353,8 +353,9 @@ test("rendu : resume, 6 cartes, feu, parcours, sources, humain/robot, sans ville
   assert.match(d.text("countries"), /France/);
   assert.match(d.text("cities"), /Villes disponibles après activation/);
   const live = d.text("live");
-  assert.match(live, /badge human" title="Visite normale, comptée dans tes chiffres\.">Humain/);
-  assert.match(live, /badge robot" title="Robot, test ou ton appareil/);
+  // 07/11 : « des vrais humains il me faut » : le direct ne montre plus que les personnes, sans badge ni robot.
+  assert.doesNotMatch(live, /badge robot|badge human/);
+  assert.match(live, /1 personne en ce moment/);
   assert.match(live, /Match PSG – OM/);
   assert.match(d.text("pages"), /Match PSG – OM/);
   assert.match(d.text("matches"), /PSG – OM/);
@@ -380,7 +381,7 @@ test("rendu : avec villes (0022), raisons exactes, heure locale, donnees visiteu
   assert.ok(!d.calls.some((c) => c[0] === "admin_recent_sessions" && c[1].p_include_internal), "pas d'echantillon quand 0022 est la");
   assert.match(d.text("live"), /Lyon, France/);
   assert.match(d.text("live"), /chez cette personne/);
-  assert.match(d.text("live"), /Robot ou navigateur automatique : pas compté/);
+  assert.doesNotMatch(d.text("live"), /Robot ou navigateur automatique/, "robots retires du direct");
 });
 
 test("rendu : etats vides rassurants", async () => {
@@ -403,7 +404,7 @@ test("rendu : erreur reseau expliquee en clair, avec quoi faire", async () => {
   assert.equal(d.els.noticeError.hidden, false);
   assert.match(d.els.noticeErrorText.textContent, /Pas de connexion au serveur.*Vérifie ta connexion Internet/);
   assert.match(d.text("funnel"), /Réessayer/);
-  assert.match(d.text("live"), /Humain/, "le direct continue de fonctionner");
+  assert.match(d.text("live"), /en ce moment/, "le direct continue de fonctionner");
 });
 
 // ---------------------------------------------------------------------------
@@ -472,13 +473,15 @@ test("0022 (non appliquee) : villes / regions / fuseau, memes signatures, admin 
 test("admin.html : sections dans l'ordre, periodes, aide i reliee, Exclure cet appareil, Details replies", () => {
   // Ordre des 9 ecrans (19/10/2026) : chaque ecran garde ses blocs d'avant.
   const order = ["todo", "heroText", "cards", "health", "speed", "errors", "shown", "funnel", "signupFlow", "payFlow", "channels", "posts", "sources",
-    "countries", "cities", "live", "landing", "langs", "unlockClicks", "pages", "matches", "signups", "money", "quality", "bots", "deviceBtn", "details", "visits"];
+    "countries", "cities", "live", "landing", "langs", "unlockClicks", "pages", "matches", "signups", "money", "quality", "bots", "deviceBtn", "details"];
   let last = -1;
   for (const id of order) {
     const at = html.indexOf('id="' + id + '"');
     assert.ok(at > last, "section " + id + " presente et dans l'ordre");
     last = at;
   }
+  // 07/11 : la liste des visites, une par une, est rangee dans « Les gens ».
+  assert.ok(html.indexOf('id="visits"') > html.indexOf('data-screen="inscrits"'), "visites dans Les gens");
   assert.deepEqual([...html.matchAll(/data-period="(\w+)"/g)].map((m) => m[1]), ["today", "yesterday", "7", "15", "30"]);
   // Suivi jour par jour (19/09/2026) : fleches et tableau.
   ["dayNav", "dayPrev", "dayNext", "dayNavLabel", "dailySection", "daily"].forEach((id) => assert.match(html, new RegExp('id="' + id + '"'), id));
@@ -568,7 +571,7 @@ test("rendu : 7 jours -> tableau « Jour par jour » cliquable, pas de fleches ;
 
 // ---------- Admin en 10 écrans (9 le 19/10/2026, migration 0052 ; Partenaires le 20/10/2026) ----------
 test("10 écrans : chaque écran a son lien et au moins un bloc dans admin.html", () => {
-  assert.equal(H.SCREENS.length, 10);
+  assert.equal(H.SCREENS.length, 13);
   for (const s of H.SCREENS) {
     assert.match(html, new RegExp('href="#ecran-' + s.key + '" data-screen-link="' + s.key + '"'), s.key + " : lien");
     assert.match(html, new RegExp('data-screen="' + s.key + '"'), s.key + " : bloc");

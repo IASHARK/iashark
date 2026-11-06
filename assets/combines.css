@@ -493,3 +493,9 @@ html:has(.cb){background:#060b12;scrollbar-color:rgba(141,179,211,.32) #060b12}
 /* Le championnat a penalties (06/11/2026) : les matchs du jour du championnat. */
 .xp-liste{list-style:none;margin:0;padding:0;display:grid;gap:14px}
 .xp-m{display:grid;gap:6px;padding-bottom:12px;border-bottom:1px solid rgba(141,179,211,.14)}
+/* Aujourd'hui avec l'acces Pro (06/11/2026) : ce que Pro debloque ce jour, en haut, pour les non-Pro. */
+.cb-pro-soir{margin:4px 0 22px;padding:16px 18px;border:1px solid rgba(32,213,239,.35);border-radius:14px;background:linear-gradient(180deg,rgba(32,213,239,.08),rgba(32,213,239,.02))}
+.cb-pro-soir .cb-h3{margin:0 0 10px;font-size:17px;font-weight:800;color:#f4f7fb}
+.cb-pro-liste{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:7px}
+.cb-pro-liste li{display:flex;gap:9px;align-items:center;font-size:14.5px;color:#f4f7fb}
+.cb-pro-liste svg{width:16px;height:16px;flex:none;stroke:#20d5ef}

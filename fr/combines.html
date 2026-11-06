@@ -17,15 +17,16 @@
 <link rel="icon" href="/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/composants.css">
 <link rel="stylesheet" href="/assets/aujourdhui.css">
 <link rel="stylesheet" href="/assets/offre-pro.css">
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
 <link rel="stylesheet" href="/assets/combines.css">
-<!-- Page « Combines » (21/10/2026, refaite le 28/10/2026 : assets/combines.css, lib/combines-page.js). Le contenu
-     est LE bloc « Aujourd'hui » (lib/aujourdhui.js, fonction tickets-du-jour : le serveur choisit ce que voit le
-     visiteur, sans compte, gratuit ou Pro), suivi de la course des 3 montantes et de la carte des buteurs du jour. -->
+<!-- Page « Combines » (21/10/2026, refaite le 28/10/2026, visuel refait le 06/11/2026 : assets/combines.css,
+     lib/combines-page.js). Le contenu est LE bloc « Aujourd'hui » (lib/aujourdhui.js, fonction tickets-du-jour : le
+     serveur choisit ce que voit le visiteur, sans compte, gratuit ou Pro), dessine par la page : le ticket du soir en
+     grand, les derniers combines (gagnes et perdus), la Selection en or, la serie des 3 montantes et les buteurs. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="IASHARK">
 <meta property="og:locale" content="fr_FR">
@@ -47,10 +48,10 @@
     </div>
     <h1 class="cb-h1" id="cbTitre" data-i18n="combines_page.title">Les combinés du jour</h1>
     <p class="cb-date" id="cbDate"></p>
-    <p class="cb-sous" data-i18n="combines_page.sub">Publiés avant les matchs, gagnés et perdus montrés. Chaque ticket assemble des paris simples, choisis par la même règle chaque jour.</p>
     <p class="preuve-hier preuve-hier--cb" data-preuve-hier hidden></p>
     <nav class="cb-sommaire" id="cbSommaire" aria-label="Sur cette page" data-i18n-attr="aria-label:combines_v2.nav_aria" hidden>
       <a href="#cbTickets" data-cb-ancre="cbTickets" hidden><span data-i18n="combines_v2.nav_tickets">Combinés</span></a>
+      <a href="#derniers" data-cb-ancre="derniers" hidden><span data-i18n="combines_v3.nav_recent">Résultats</span></a>
       <a href="#cbOr" data-cb-ancre="cbOr" hidden><span data-i18n="combines_v2.nav_gold">Sélection en or</span></a>
       <a href="#montantes" data-cb-ancre="montantes" hidden><span data-i18n="combines_v2.nav_climb">Montantes</span></a>
       <a href="#buteurs" data-cb-ancre="buteurs" hidden><span data-i18n="combines_v2.nav_scorers">Buteurs</span></a>
@@ -61,6 +62,7 @@
   <p class="cb-vide" id="cbVide" hidden data-i18n="combines_page.empty">Les combinés du jour arrivent chaque matin, dès que le calcul du jour est terminé.</p>
   <section class="cb-regles" aria-labelledby="cbReglesT">
     <h2 class="cb-h2" id="cbReglesT" data-i18n="combines_page.rules_title">Comment ils sont faits</h2>
+    <p class="cb-texte" data-i18n="combines_page.sub">Publiés avant les matchs, gagnés et perdus montrés. Chaque ticket assemble des paris simples, choisis par la même règle chaque jour.</p>
     <dl class="cb-registre">
       <dt data-i18n="combines_page.rule_small_t">Petit combiné</dt><dd data-i18n="combines_page.rule_small">3 à 5 matchs, cote totale entre 4,00 et 6,00. Réservé à Pro.</dd>
       <dt data-i18n="combines_page.rule_big_t">Grand combiné</dt><dd data-i18n="combines_page.rule_big">5 à 7 matchs, cote totale entre 8,50 et 12,00. Avec Pro.</dd>

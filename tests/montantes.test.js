@@ -304,7 +304,8 @@ test("empreinte de la Selection en or du jour : rang compris, avant le premier m
   const i = wf.indexOf("// EMPREINTE DE LA SELECTION EN OR DU JOUR"), j = wf.indexOf("TICKETS_DU_JOUR.publierTicketsDuJour(");
   assert.ok(i > j && j > 0, "juste apres la publication des tickets du jour");
   const bloc = wf.slice(i, wf.indexOf("::warning title=Empreintes Selection en or::'+(e&&e.message)", i));
-  assert.match(bloc, /type=eq\.or&jour=eq\.'\+jourOr/, "la Selection en or du jour seulement");
+  // 06/11/2026 : les paris des montantes de demain sont publies a l'avance, empreints aussitot (aujourd'hui et demain seulement).
+  assert.match(bloc, /type=eq\.or&jour=in\.\('\+jourOr\+','\+jourOrDemain\+'\)/, "aujourd'hui et demain seulement");
   assert.match(bloc, /MONTANTES\.ajouterEmpreinteOr\(EMPREINTES,regOr,t,SECRET_OR,new Date\(\)\.toISOString\(\),Date\.now\(\)\)/);
   assert.match(bloc, /EMPREINTES\.verifier\(regOr\)/);
   assert.match(bloc, /fs\.writeFileSync\('preuves\/empreintes-or\.json'/);

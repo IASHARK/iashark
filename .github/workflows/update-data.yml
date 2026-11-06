@@ -4759,9 +4759,22 @@ jobs:
           // lib/tickets-du-jour.js) : un ticket publie ne se recalcule plus. Rien sans le feu vert du mathematicien
           // (config/verdicts-maths.json). Table ou cle absente : simple avertissement, le calcul quotidien continue.
           // data.json : statut de chaque ticket seulement (lib/public-run-output.js). Journal : statuts et compteurs seulement.
+          // MATCHS A PENALTY (06/11/2026) : registre des matchs termines de nos 12 championnats (avec ou sans penalty),
+          // complete avec les 3 derniers jours (lib/penalties-donnees.js, ~5 appels), puis donne au calcul des tickets.
+          var PENALTIES=null;
+          try{
+            var PEN_DONNEES=require('./lib/penalties-donnees.js');
+            var penFichier='preuves/penalties-championnats.json';
+            var penAvant=fs.existsSync(penFichier)?JSON.parse(fs.readFileSync(penFichier,'utf8')):[];
+            var jourPen=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+            PENALTIES=await PEN_DONNEES.mettreAJour(penAvant,{jour:jourPen,get:function(u){ return rawHttpGetJson(u,APS); }});
+            fs.writeFileSync(penFichier,'[\n'+PENALTIES.map(function(x){ return JSON.stringify(x); }).join(',\n')+'\n]\n');
+            console.log('  [PENALTY] registre : '+PENALTIES.length+' matchs ('+(PENALTIES.length-penAvant.length)+' de plus).');
+          }catch(e){ console.log('::warning title=Penalty::registre non mis a jour ('+(e&&e.message)+').'); }
           try{
             var TICKETS_DU_JOUR=require('./lib/tickets-du-jour.js');
             var rapportTickets=await TICKETS_DU_JOUR.publierTicketsDuJour({
+              penalties:PENALTIES,
               matchs:allMatchsData, fixtureById:FIXTURE_BY_ID, nowMs:Date.now(), configLigues:LEAGUES_CONFIG,
               supabase:(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY)?{url:SUPA_URL_PIPELINE,cle:SUPA_SERVICE_KEY}:null,
               pipelineSha:process.env.GITHUB_SHA||null, snapshotTime:runOutput.snapshot_time,
@@ -4770,6 +4783,20 @@ jobs:
             });
             runOutput.DAILY_COMBOS=rapportTickets.daily_combos;
             console.log('  '+TICKETS_DU_JOUR.ligneJournal(rapportTickets));
+            // LENDEMAIN A L'AVANCE (06/11/2026, Clement) : les tickets de demain sont prets des minuit sur la page Combines,
+            // calcules ici avec les paris deja affiches de ces matchs, puis geles (demain : etats seulement, jamais recalcules).
+            try{
+              var dDemain=new Date(); dDemain.setUTCDate(dDemain.getUTCDate()+1);
+              var jourDemain=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).format(dDemain);
+              var rapportDemain=await TICKETS_DU_JOUR.publierTicketsDuJour({
+                jour:jourDemain, penalties:PENALTIES, matchs:allMatchsData, fixtureById:FIXTURE_BY_ID, nowMs:Date.now(), configLigues:LEAGUES_CONFIG,
+                supabase:(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY)?{url:SUPA_URL_PIPELINE,cle:SUPA_SERVICE_KEY}:null,
+                pipelineSha:process.env.GITHUB_SHA||null, snapshotTime:runOutput.snapshot_time,
+                avertir:function(t){ console.log('::warning title=Tickets demain::'+t); },
+                erreur:function(t){ console.log('::error title=Tickets demain::'+t); }
+              });
+              console.log('  demain '+TICKETS_DU_JOUR.ligneJournal(rapportDemain));
+            }catch(e){ console.log('::warning title=Tickets demain::non calcules ('+(e&&e.message)+').'); }
           }catch(e){ console.log('::warning title=Tickets::tickets non calcules ('+(e&&e.message)+'), le calcul quotidien continue.'); }
           // EMPREINTE DE LA SELECTION EN OR DU JOUR (controles historique-public et avocat du diable du 28/10/2026, montantes
           // de la page Combines) : juste apres la publication et AVANT son premier match, rang de chaque pari compris
@@ -4779,7 +4806,9 @@ jobs:
             var SECRET_OR=process.env.EMPREINTE_SECRET||SUPA_SERVICE_KEY||'';
             if(SECRET_OR&&SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY){
               var jourOr=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-              var repOr=await rawHttpGetJson(SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/tickets_du_jour?select=jour,contenu,publie_a,premier_coup_envoi&type=eq.or&jour=eq.'+jourOr,{'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY});
+              // Depuis le 06/11/2026, les montantes de demain sont publiees a l'avance : leur empreinte est ajoutee tout de suite.
+              var jourOrDemain=MATCH_RESULTS.ajouterJours(jourOr,1);
+              var repOr=await rawHttpGetJson(SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/tickets_du_jour?select=jour,contenu,publie_a,premier_coup_envoi&type=eq.or&jour=in.('+jourOr+','+jourOrDemain+')&order=jour.asc',{'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY});
               if(Array.isArray(repOr)){
                 var regOr=EMPREINTES.vide();
                 try{ regOr=JSON.parse(fs.readFileSync('preuves/empreintes-or.json','utf8')); }catch(e){}

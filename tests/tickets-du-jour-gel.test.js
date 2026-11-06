@@ -82,7 +82,8 @@ test("publication : chaque type ecrit une fois (insert ignore-duplicates), statu
     assert.equal(l.publie_a, undefined, "l'heure de publication est posee par la base");
   });
   const calc = f.appels.find((a) => /tickets_du_jour_calculs/.test(a.url));
-  assert.deepEqual(calc.body[0].statuts, { x5: "publie", x10: "publie", or: "publie", buteur: "publie" });
+  // nul et loto : jamais ecrits sans le GO du mathematicien (config/verdicts-maths.json).
+  assert.deepEqual(calc.body[0].statuts, { x5: "publie", x10: "publie", or: "publie", buteur: "publie", nul: "non_go", loto: "non_go", penalty: "non_go" });
   assert.deepEqual(r.daily_combos.combos.map((c) => [c.combo_id, c.status]), [["TICKET_X5", "GENERATED"], ["TICKET_X10", "GENERATED"]]);
 });
 
@@ -136,8 +137,9 @@ test("12d. aucun ticket possible : rien d'ecrit (un calcul plus tard le meme jou
   const w = jour(2);
   const f = fauxFetch();
   const { r } = await lancer(w, f);
-  assert.equal(r.x5, "aucun"); assert.equal(r.x10, "aucun"); assert.equal(r.or, "aucun");
-  assert.ok(!f.appels.some((a) => a.method === "POST" && /tickets_du_jour\?/.test(a.url) && a.body[0].type !== "buteur"));
+  assert.equal(r.x5, "aucun"); assert.equal(r.x10, "aucun");
+  // 06/11/2026 : la montante sure n'a besoin que d'un pari ; les combines, eux, ne sont jamais forces.
+  assert.ok(!f.appels.some((a) => a.method === "POST" && /tickets_du_jour\?/.test(a.url) && ["x5", "x10"].indexOf(a.body[0].type) !== -1));
   const calc = f.appels.find((a) => /tickets_du_jour_calculs/.test(a.url));
   assert.equal(calc.body[0].statuts.x5, "aucun");
   assert.match(calc.prefer, /merge-duplicates/, "le statut du calcul, lui, se met a jour");

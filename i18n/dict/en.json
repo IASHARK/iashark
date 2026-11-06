@@ -2831,7 +2831,7 @@
     "total_odds": "total odds {v}",
     "unavailable": "Temporarily unavailable.",
     "unlock_free": "What you unlock: {list}, for free.",
-    "unlock_gold": "the Gold Selection",
+    "unlock_gold": "the ladder picks",
     "unlock_pro": "What you unlock: {list}.",
     "unlock_scorer": "the scorer of the day",
     "unlock_x10": "the big combo",
@@ -3066,7 +3066,7 @@
     "nav_climb": "Ladders",
     "nav_scorers": "Scorers",
     "climb_title": "The ladder race",
-    "climb_sub": "Each Gold Selection pick moves its own ladder forward. Won: one more step. Lost: back to the start. Target: odds of 10.",
+    "climb_sub": "Three ladders, three styles. The safe one takes the day’s most likely pick, the solid one aims for odds of at least 1.55, the bold one dares from 1.85. Won: one more step. Lost: back to the start. Target: odds of 10.",
     "climb_start": "Start",
     "climb_finish": "Odds 10",
     "climb_name": "Ladder {n}",
@@ -3079,8 +3079,8 @@
     "climb_waiting": "Waiting for the result of {date}.",
     "climb_stale": "Updated every morning, after the previous day’s results.",
     "climb_tonight_preparing": "Tonight’s pick is being prepared.",
-    "climb_tonight_none": "No Gold Selection today: the ladder stays where it is.",
-    "climb_tonight_pro": "Tonight’s pick: in the Gold Selection, with Pro.",
+    "climb_tonight_none": "No pick for this ladder today: it stays where it is.",
+    "climb_tonight_pro": "Tonight’s pick: with Pro.",
     "climb_tonight_no_rank": "No pick {n} tonight: the ladder stays where it is.",
     "climb_aria": "Ladder {n}: {w} picks won in a row, combined odds {odds}, target 10.",
     "climb_aria_start": "Ladder {n}: at the start, target odds of 10.",
@@ -3099,7 +3099,7 @@
     "scorer_single_sub": "the player scores during the match",
     "unlock_scorers": "today’s scorers",
     "rule_climb_t": "Ladders",
-    "rule_climb": "Each Gold Selection pick moves its own ladder forward: won, one more step; lost, back to step 1; odds of 10 reached, announced, then it starts again. A day without a Gold Selection does not break the run. Worked out every morning since the first Gold Selection on 6 October; the whole history is shown, wins and losses.",
+    "rule_climb": "Three ladders, three styles: the safe one (the day’s most likely pick), the solid one (odds of at least 1.55), the bold one (odds of at least 1.85). Won, one more step; lost, back to step 1; odds of 10 reached, announced, then it starts again. A day without a pick does not break the run. With Pro.",
     "climb_finish_tonight": "Finish",
     "scorers_sub_one": "The player most likely to score today, among the expected starters.",
     "climb_hist_open": "See the history ({n} picks)",
@@ -3118,7 +3118,10 @@
     "climb_b_unsettled_1": "{n} not settled",
     "climb_b_unsettled_n": "{n} not settled",
     "climb_b_goal_1": "{n} target reached",
-    "climb_b_goal_n": "{n} targets reached"
+    "climb_b_goal_n": "{n} targets reached",
+    "climb_style_1": "The safe one",
+    "climb_style_2": "The solid one",
+    "climb_style_3": "The bold one"
   },
   "contact": {
     "question": "Got a question?",
@@ -3200,5 +3203,56 @@
     "ft": "FT",
     "ht": "HT",
     "score_aria": "Live score"
+  },
+  "combines_nul": {
+    "title": "Draw of the day",
+    "sub": "The match where our model rates the draw more likely than the odds do.",
+    "none": "No draw spotted today: none is rated above the odds.",
+    "aria": "Draw chance: {a} for IASHARK, {b} from the odds",
+    "market": "The odds, margin removed",
+    "bet": "Draw",
+    "gap": "+{v} points",
+    "note": "The draw is still the hardest bet to find. An estimate, never a guarantee.",
+    "unlock": "Unlock with Pro access"
+  },
+  "combines_loto": {
+    "title": "Today’s 1X2 grid",
+    "sub": "The 7 safest matches across our 12 leagues, one pick per match and 2 doubles where they matter most.",
+    "none": "No grid today: fewer than 7 matches scheduled in our 12 leagues.",
+    "pick_aria": "Pick {k}, {p} %",
+    "full_k": "Whole grid right",
+    "without": "{v} without the doubles",
+    "expected_k": "Expected correct results",
+    "note": "IASHARK model chances for each outcome; cyan boxes: the grid’s picks. Matches assumed independent. An estimate, never a guarantee.",
+    "under1": "under 1 %"
+  },
+  "combines_tabs": {
+    "soir": "Combos",
+    "montantes": "Ladders",
+    "outils": "Draw, penalty, 1X2",
+    "buteurs": "Scorers",
+    "tous": "All matches",
+    "aria": "Today’s sections"
+  },
+  "combines_pen": {
+    "title": "Penalty matches",
+    "sub": "Today’s 3 matches in the leagues where penalties come most often (last 12 months).",
+    "none": "No penalty match today: no league on the schedule stands out enough.",
+    "aria": "{a} of matches in this league had at least one penalty, {b} on average",
+    "match_k": "This match",
+    "league_k": "Its league",
+    "bet": "Penalty in the match: yes",
+    "note": "Real share of matches with at least one penalty (missed ones included, shootouts excluded) in each league over 12 months. Average: our 12 leagues. Teams and referee were tested and add nothing. An estimate, never a guarantee.",
+    "avg_k": "Average"
+  },
+  "combines_pro": {
+    "title": "Today with Pro access",
+    "x5": "Small combo",
+    "x10": "Big combo",
+    "avec_matchs": "{nom}: {n} matches",
+    "montantes": "The bets of the 3 ladders",
+    "nul": "The draw of the day",
+    "grille": "The 1X2 grid of the day",
+    "penalty": "The 3 penalty matches"
   }
 }

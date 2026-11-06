@@ -292,7 +292,7 @@ test("empreinte de la Selection en or du jour : rang compris, avant le premier m
   const deux = or("2026-11-03", [[6, "over-25", 1.4], [7, "home-win", 1.5]]);
   assert.equal(M.ajouterEmpreinteOr(E, reg, deux, "secret-essai", null, Date.parse("2026-11-03T07:00:00Z")).maillon.nb_paris, 2);
   assert.equal(E.verifier(reg).ok, true);
-  assert.match(M.EXPLICATION_EMPREINTES_OR, /2 ou 3 paris, avec leur rang/);
+  assert.match(M.EXPLICATION_EMPREINTES_OR, /1 a 3 paris, avec leur rang/);
   // Sel revele : l'empreinte se refait avec les champs de l'historique public, rang = numero de la montante.
   const f = calc([t], [ar(3, "over-25", "win", "3-0"), ar(4, "dc-1x", "win", "1-0"), ar(5, "btts-yes", "loss", "1-0")]);
   const publics = f.montantes.map((m) => Object.assign({ rang: m.rang }, m.historique[0])).map((x) => ({ rang: x.rang, fixture_id: x.f, home: x.h, away: x.a, prediction: x.p, cote: x.c, market: x.m }));
@@ -304,7 +304,8 @@ test("empreinte de la Selection en or du jour : rang compris, avant le premier m
   const i = wf.indexOf("// EMPREINTE DE LA SELECTION EN OR DU JOUR"), j = wf.indexOf("TICKETS_DU_JOUR.publierTicketsDuJour(");
   assert.ok(i > j && j > 0, "juste apres la publication des tickets du jour");
   const bloc = wf.slice(i, wf.indexOf("::warning title=Empreintes Selection en or::'+(e&&e.message)", i));
-  assert.match(bloc, /type=eq\.or&jour=eq\.'\+jourOr/, "la Selection en or du jour seulement");
+  // 06/11/2026 : les paris des montantes de demain sont publies a l'avance, empreints aussitot (aujourd'hui et demain seulement).
+  assert.match(bloc, /type=eq\.or&jour=in\.\('\+jourOr\+','\+jourOrDemain\+'\)/, "aujourd'hui et demain seulement");
   assert.match(bloc, /MONTANTES\.ajouterEmpreinteOr\(EMPREINTES,regOr,t,SECRET_OR,new Date\(\)\.toISOString\(\),Date\.now\(\)\)/);
   assert.match(bloc, /EMPREINTES\.verifier\(regOr\)/);
   assert.match(bloc, /fs\.writeFileSync\('preuves\/empreintes-or\.json'/);

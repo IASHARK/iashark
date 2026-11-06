@@ -83,7 +83,7 @@ test("publication : chaque type ecrit une fois (insert ignore-duplicates), statu
   });
   const calc = f.appels.find((a) => /tickets_du_jour_calculs/.test(a.url));
   // nul et loto : jamais ecrits sans le GO du mathematicien (config/verdicts-maths.json).
-  assert.deepEqual(calc.body[0].statuts, { x5: "publie", x10: "publie", or: "publie", buteur: "publie", nul: "non_go", loto: "non_go" });
+  assert.deepEqual(calc.body[0].statuts, { x5: "publie", x10: "publie", or: "publie", buteur: "publie", nul: "non_go", loto: "non_go", penalty: "non_go" });
   assert.deepEqual(r.daily_combos.combos.map((c) => [c.combo_id, c.status]), [["TICKET_X5", "GENERATED"], ["TICKET_X10", "GENERATED"]]);
 });
 

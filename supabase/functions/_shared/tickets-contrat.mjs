@@ -44,9 +44,9 @@ export function jourParis(ms) {
 // Ce que chaque niveau debloque : null = debloque ; « compte » = un compte gratuit
 // debloque ; « pro » = l'abonnement Pro debloque.
 const VERROUS = {
-  anonyme: { x5: "compte", x10: "compte", or: "compte", buteur: "compte", nul: "pro", loto: "pro" },
-  gratuit: { x5: "pro", x10: "pro", or: "pro", buteur: null, nul: "pro", loto: "pro" },
-  pro: { x5: null, x10: null, or: null, buteur: null, nul: null, loto: null },
+  anonyme: { x5: "compte", x10: "compte", or: "compte", buteur: "compte", nul: "pro", loto: "pro", penalty: "pro" },
+  gratuit: { x5: "pro", x10: "pro", or: "pro", buteur: null, nul: "pro", loto: "pro", penalty: "pro" },
+  pro: { x5: null, x10: null, or: null, buteur: null, nul: null, loto: null, penalty: null },
 };
 export function verrouDe(niveau, type) {
   const v = VERROUS[niveau] || VERROUS.anonyme;
@@ -146,7 +146,7 @@ function buteur(ligne, statut, niveau) {
   });
 }
 
-// LE NUL DU JOUR et LA GRILLE LOTO FOOT (06/11/2026, Pro). Verrouille : le statut seul (et, pour la grille, le nombre
+// LE NUL DU JOUR et LA GRILLE 1N2 (06/11/2026, Pro). Verrouille : le statut seul (et, pour la grille, le nombre
 // de matchs et de doubles, comme nb_matchs d'un ticket) ; jamais un match, un choix, une cote ni une chance.
 function nulDuJour(ligne, statut, niveau) {
   const verrou = verrouDe(niveau, "nul");
@@ -158,6 +158,20 @@ function nulDuJour(ligne, statut, niveau) {
     ligue: texte(c.ligue), coup_envoi: texte(c.coup_envoi), pari: texte(c.pari), market_id: texte(c.market_id),
     cote: nombre(c.cote), chance: entier(c.chance), chance_marche: entier(c.chance_marche), ecart_points: nombre(c.ecart_points),
     etat: etat(objet(objet(ligne.etats).jambes)[String(c.fixture_id)]),
+  });
+}
+// LES MATCHS A PENALTY (06/11/2026, Pro) : verrouille, le statut seul ; sinon 3 matchs et la part reelle de leur
+// championnat (aucun chiffre propre au match : les equipes et l'arbitre ne predisent rien de plus).
+function penaltyDuJour(ligne, statut, niveau) {
+  const verrou = verrouDe(niveau, "penalty");
+  const out = { statut: statut, verrou: verrou };
+  if (statut !== "publie" || verrou !== null) return out;
+  const c = objet(ligne.contenu);
+  return Object.assign(out, {
+    publie_a: texte(ligne.publie_a), pari: texte(c.pari), market_id: texte(c.market_id), chance_moyenne: entier(c.chance_moyenne),
+    matchs: (Array.isArray(c.matchs) ? c.matchs : []).slice(0, 3).map((x) => { const m = objet(x); return { fixture_id: entier(m.fixture_id),
+      domicile: texte(m.domicile), exterieur: texte(m.exterieur), ligue: texte(m.ligue), coup_envoi: texte(m.coup_envoi),
+      chance_championnat: entier(m.chance_championnat), nb_matchs_historique: entier(m.nb_matchs_historique) }; }),
   });
 }
 const CHOIX = ["1", "N", "2"];
@@ -200,6 +214,7 @@ export function construireReponse({ jour, niveau, lignes, calcul, lectureOk }) {
     buteur_du_jour: buteur(parType.buteur, st("buteur"), n),
     nul_du_jour: nulDuJour(parType.nul, st("nul"), n),
     grille_loto: grilleLoto(parType.loto, st("loto"), n),
+    penalty_du_jour: penaltyDuJour(parType.penalty, st("penalty"), n),
   };
 }
 

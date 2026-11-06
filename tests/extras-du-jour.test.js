@@ -17,19 +17,22 @@ function opts(ms, extra) {
   return Object.assign({ jour: JOUR, nowMs: NOW, fixtureById: byId }, extra || {});
 }
 
-test("nul : garde le plus grand ecart positif entre le moteur et la cote sans marge", () => {
+test("nul : garde le plus grand ecart positif sous 3 points (avocat du diable, 06/11/2026) entre le moteur et la cote sans marge", () => {
   const ms = [
     match(1, "premier", [40, 30, 30], [2.4, 3.4, 3.0]),
     match(2, "laliga", [38, 33, 29], [2.3, 3.5, 3.2]),
     match(3, "seriea", [45, 25, 30], [2.0, 3.6, 3.9]),
   ];
+  // match 2 : ecart ~5 points, exclu (a 3 points ou plus, le nul tombait moins qu'annonce) ; match 1 : ~1,8 point.
   const n = X.nulDuJour(ms, opts(ms));
-  assert.equal(n.fixture_id, 2);
+  assert.equal(n.fixture_id, 1);
+  const m2 = X.nulDuJour(ms, Object.assign(opts(ms), { regle: { ecart_max_points: 99 } }));
+  assert.equal(m2.fixture_id, 2);
   assert.equal(n.market_id, "draw");
-  assert.equal(n.cote, 3.5);
-  const inv = [1 / 2.3, 1 / 3.5, 1 / 3.2], q = inv[1] / (inv[0] + inv[1] + inv[2]);
+  assert.equal(n.cote, 3.4);
+  const inv = [1 / 2.4, 1 / 3.4, 1 / 3.0], q = inv[1] / (inv[0] + inv[1] + inv[2]);
   assert.equal(n.chance_marche, Math.round(q * 100));
-  assert.equal(n.ecart_points, Math.round((0.33 - q) * 1000) / 10);
+  assert.equal(n.ecart_points, Math.round((0.30 - q) * 1000) / 10);
 });
 
 test("nul : aucun si le moteur ne depasse jamais la cote, si la cote sort de 2,80-4,00 ou hors des 7 championnats", () => {
@@ -77,4 +80,30 @@ test("loto : pas de grille sous 7 matchs ; probabilite absente = match ignore, j
   const ms = [];
   for (let i = 0; i < 7; i++) ms.push(match(30 + i, "premier", i === 0 ? [null, 30, 30] : [50, 30, 20], null));
   assert.equal(X.grilleLoto(ms, opts(ms, { ligues: ["premier"] })), null);
+});
+
+// MATCHS A PENALTY (06/11/2026) : 3 matchs des championnats les plus a penalties, part reelle sur 12 mois, rien du jour meme.
+test("penalty du jour : 3 matchs des championnats au-dessus de la moyenne, part reelle, jamais le jour meme", () => {
+  const X = require("../lib/run-output/extras-du-jour.js");
+  const hist = [];
+  const ajouter = (l, n, avec) => { for (let i = 0; i < n; i++) hist.push({ f: hist.length + 1, d: "2026-06-01", l, p: i < avec ? 1 : 0 }); };
+  ajouter("liga_mx", 200, 80); ajouter("primeira", 200, 60); ajouter("premier", 200, 30); ajouter("suede", 200, 30);
+  hist.push({ f: 99999, d: "2026-11-06", l: "premier", p: 1 }); // le jour meme : ignore
+  const st = X.statsPenalties(hist, "2026-11-06");
+  assert.equal(st.n, 800); assert.equal(st.ligues.premier.avec, 30);
+  const jour = "2026-11-06", ms = [];
+  [["liga_mx", 1], ["liga_mx", 2], ["primeira", 3], ["primeira", 4], ["premier", 5], ["ligue1", 6]].forEach(([l, id]) => ms.push({ id, league_key: l, league: l, date: jour + "T20:00:00+01:00", home: "A" + id, away: "B" + id }));
+  const fixtureById = {}; ms.forEach((m) => { fixtureById[String(m.id)] = { fixture: { id: m.id, date: m.date, status: { short: "NS" } } }; });
+  const r = X.penaltyDuJour(ms, { jour, penalties: hist, nowMs: Date.parse("2026-11-06T08:00:00Z"), fixtureById });
+  assert.ok(r);
+  assert.deepEqual(r.matchs.map((m) => m.fixture_id), [1, 2, 3]);
+  assert.deepEqual(r.matchs.map((m) => m.chance_championnat), [40, 40, 30]);
+  assert.equal(r.chance_moyenne, 25);
+  assert.equal(X.penaltyDuJour(ms, { jour, penalties: null, nowMs: Date.parse("2026-11-06T08:00:00Z"), fixtureById }), null, "sans registre : rien");
+});
+test("penalty : un penalty manque compte, les tirs au but non", () => {
+  const D = require("../lib/penalties-donnees.js");
+  assert.equal(D.avecPenalty([{ type: "Goal", detail: "Missed Penalty", time: { elapsed: 30 } }]), 1);
+  assert.equal(D.avecPenalty([{ type: "Goal", detail: "Penalty", comments: "Penalty Shootout", time: { elapsed: 120 } }]), 0);
+  assert.equal(D.avecPenalty([{ type: "Goal", detail: "Normal Goal", time: { elapsed: 10 } }]), 0);
 });

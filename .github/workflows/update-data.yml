@@ -4759,9 +4759,22 @@ jobs:
           // lib/tickets-du-jour.js) : un ticket publie ne se recalcule plus. Rien sans le feu vert du mathematicien
           // (config/verdicts-maths.json). Table ou cle absente : simple avertissement, le calcul quotidien continue.
           // data.json : statut de chaque ticket seulement (lib/public-run-output.js). Journal : statuts et compteurs seulement.
+          // MATCHS A PENALTY (06/11/2026) : registre des matchs termines de nos 12 championnats (avec ou sans penalty),
+          // complete avec les 3 derniers jours (lib/penalties-donnees.js, ~5 appels), puis donne au calcul des tickets.
+          var PENALTIES=null;
+          try{
+            var PEN_DONNEES=require('./lib/penalties-donnees.js');
+            var penFichier='preuves/penalties-championnats.json';
+            var penAvant=fs.existsSync(penFichier)?JSON.parse(fs.readFileSync(penFichier,'utf8')):[];
+            var jourPen=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+            PENALTIES=await PEN_DONNEES.mettreAJour(penAvant,{jour:jourPen,get:function(u){ return rawHttpGetJson(u,APS); }});
+            fs.writeFileSync(penFichier,'[\n'+PENALTIES.map(function(x){ return JSON.stringify(x); }).join(',\n')+'\n]\n');
+            console.log('  [PENALTY] registre : '+PENALTIES.length+' matchs ('+(PENALTIES.length-penAvant.length)+' de plus).');
+          }catch(e){ console.log('::warning title=Penalty::registre non mis a jour ('+(e&&e.message)+').'); }
           try{
             var TICKETS_DU_JOUR=require('./lib/tickets-du-jour.js');
             var rapportTickets=await TICKETS_DU_JOUR.publierTicketsDuJour({
+              penalties:PENALTIES,
               matchs:allMatchsData, fixtureById:FIXTURE_BY_ID, nowMs:Date.now(), configLigues:LEAGUES_CONFIG,
               supabase:(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY)?{url:SUPA_URL_PIPELINE,cle:SUPA_SERVICE_KEY}:null,
               pipelineSha:process.env.GITHUB_SHA||null, snapshotTime:runOutput.snapshot_time,
@@ -4776,7 +4789,7 @@ jobs:
               var dDemain=new Date(); dDemain.setUTCDate(dDemain.getUTCDate()+1);
               var jourDemain=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).format(dDemain);
               var rapportDemain=await TICKETS_DU_JOUR.publierTicketsDuJour({
-                jour:jourDemain, matchs:allMatchsData, fixtureById:FIXTURE_BY_ID, nowMs:Date.now(), configLigues:LEAGUES_CONFIG,
+                jour:jourDemain, penalties:PENALTIES, matchs:allMatchsData, fixtureById:FIXTURE_BY_ID, nowMs:Date.now(), configLigues:LEAGUES_CONFIG,
                 supabase:(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY)?{url:SUPA_URL_PIPELINE,cle:SUPA_SERVICE_KEY}:null,
                 pipelineSha:process.env.GITHUB_SHA||null, snapshotTime:runOutput.snapshot_time,
                 avertir:function(t){ console.log('::warning title=Tickets demain::'+t); },

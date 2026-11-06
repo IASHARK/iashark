@@ -435,7 +435,6 @@ html:has(.cb){background:#060b12;scrollbar-color:rgba(141,179,211,.32) #060b12}
 .xn-ligne--m .xn-v{color:var(--cb-soft2)}
 .xn-bas{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .xn-pari{font-size:15px;font-weight:700;color:var(--cb-ink)}
-.xn-ecart{padding:4px 10px;border-radius:999px;font-size:12.5px;font-weight:800;color:#060b12;background:var(--cb-cyan)}
 .xn-cote{margin-left:auto;font:400 30px/1 var(--cb-num);color:var(--cb-ink)}
 .xn-direct{margin:0}
 .xn-direct [data-sd-jambe]{display:inline-flex;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;color:var(--cb-cyan);background:rgba(32,213,239,.1)}
@@ -491,3 +490,6 @@ html:has(.cb){background:#060b12;scrollbar-color:rgba(141,179,211,.32) #060b12}
 .cb-panneau--entre{animation:cbEntre .32s var(--cb-ease) both}
 @keyframes cbEntre{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.cb-panneau--entre{animation:none}}
+/* Le championnat a penalties (06/11/2026) : les matchs du jour du championnat. */
+.xp-liste{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.xp-m{display:grid;gap:6px;padding-bottom:12px;border-bottom:1px solid rgba(141,179,211,.14)}

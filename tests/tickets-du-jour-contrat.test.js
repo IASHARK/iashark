@@ -48,6 +48,7 @@ test("14. sans compte : type, statut, nombre de matchs et cote totale ; aucune c
     // Nul du jour et grille Loto Foot (06/11/2026) : rien d'ecrit ce jour-la -> en preparation, verrou Pro meme sans compte (rubriques Pro seulement).
     nul_du_jour: { statut: "en_preparation", verrou: "pro" },
     grille_loto: { statut: "en_preparation", verrou: "pro" },
+    penalty_du_jour: { statut: "en_preparation", verrou: "pro" },
   });
   const cles = clesProfondes(r);
   SECRETES.concat(INTERNES).forEach((k) => assert.ok(!cles.has(k), "cle " + k));

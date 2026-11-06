@@ -4793,7 +4793,9 @@ jobs:
             var SECRET_OR=process.env.EMPREINTE_SECRET||SUPA_SERVICE_KEY||'';
             if(SECRET_OR&&SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY){
               var jourOr=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-              var repOr=await rawHttpGetJson(SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/tickets_du_jour?select=jour,contenu,publie_a,premier_coup_envoi&type=eq.or&jour=eq.'+jourOr,{'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY});
+              // Depuis le 06/11/2026, les montantes de demain sont publiees a l'avance : leur empreinte est ajoutee tout de suite.
+              var jourOrDemain=MATCH_RESULTS.ajouterJours(jourOr,1);
+              var repOr=await rawHttpGetJson(SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/tickets_du_jour?select=jour,contenu,publie_a,premier_coup_envoi&type=eq.or&jour=in.('+jourOr+','+jourOrDemain+')&order=jour.asc',{'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY});
               if(Array.isArray(repOr)){
                 var regOr=EMPREINTES.vide();
                 try{ regOr=JSON.parse(fs.readFileSync('preuves/empreintes-or.json','utf8')); }catch(e){}

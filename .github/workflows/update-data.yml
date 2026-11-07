@@ -2190,7 +2190,7 @@ jobs:
             }).map(function(p){return String(p.fixture_id);}).filter(function(v,i,a){return /^\d+$/.test(v)&&a.indexOf(v)===i;});
             var out=[];
             for(var i=0;i<ids.length&&i<100;i+=20){
-              var r=await get('https://v3.football.api-sports.io/fixtures?ids='+ids.slice(i,i+20).join('-')+'&timezone=Europe/Paris',APS);
+              var r=await get('https://v3.football.api-sports.io/fixtures?ids='+ids.slice(i,i+20).join('-')+'&timezone=Europe/Paris',APS,{essentiel:true});
               out=out.concat((r&&r.response)||[]);
               await sleep(150);
             }
@@ -2221,8 +2221,8 @@ jobs:
               var yResults=[];
               for(var rdi=0; rdi<resolveDates.length; rdi++){
                 var rDate=resolveDates[rdi];
-                var fClassic=await get('https://v3.football.api-sports.io/fixtures?date='+rDate+'&timezone=Europe/Paris',APS);
-                var fWC=await get('https://v3.football.api-sports.io/fixtures?league=1&season=2026&date='+rDate+'&timezone=Europe/Paris',APS);
+                var fClassic=await get('https://v3.football.api-sports.io/fixtures?date='+rDate+'&timezone=Europe/Paris',APS,{essentiel:true});
+                var fWC=await get('https://v3.football.api-sports.io/fixtures?league=1&season=2026&date='+rDate+'&timezone=Europe/Paris',APS,{essentiel:true});
                 var fNL=await get('https://v3.football.api-sports.io/fixtures?league=5&season=2026&date='+rDate+'&timezone=Europe/Paris',APS);
                 yResults=yResults.concat(fClassic.response||[], fWC.response||[], fNL.response||[]);
                 console.log('  Resultats '+rDate+': '+(fClassic.response||[]).length+' classique + '+(fWC.response||[]).length+' World Cup + '+(fNL.response||[]).length+' Nations League');
@@ -2739,7 +2739,7 @@ jobs:
                     var aLireM=MONTANTES.aRegler(optsM).slice(0,15), lusM=0;
                     for(var mi2=0;mi2<aLireM.length;mi2++){
                       try{
-                        var rfM=await get('https://v3.football.api-sports.io/fixtures?id='+aLireM[mi2],APS);
+                        var rfM=await get('https://v3.football.api-sports.io/fixtures?id='+aLireM[mi2],APS,{essentiel:true});
                         var faM=MONTANTES.faitsDuMatch(rfM&&Array.isArray(rfM.response)?rfM.response[0]:null);
                         if(faM){ optsM.faits[String(aLireM[mi2])]=faM; lusM++; }
                       }catch(e){}
@@ -3170,8 +3170,8 @@ jobs:
                 var yResEarly=[];
                 for(var rdiE=0; rdiE<resolveDatesEarly.length; rdiE++){
                   var rDateE=resolveDatesEarly[rdiE];
-                  var fClassicE=await get('https://v3.football.api-sports.io/fixtures?date='+rDateE+'&timezone=Europe/Paris',APS);
-                  var fWCE=await get('https://v3.football.api-sports.io/fixtures?league=1&season=2026&date='+rDateE+'&timezone=Europe/Paris',APS);
+                  var fClassicE=await get('https://v3.football.api-sports.io/fixtures?date='+rDateE+'&timezone=Europe/Paris',APS,{essentiel:true});
+                  var fWCE=await get('https://v3.football.api-sports.io/fixtures?league=1&season=2026&date='+rDateE+'&timezone=Europe/Paris',APS,{essentiel:true});
                   yResEarly=yResEarly.concat(fClassicE.response||[], fWCE.response||[]);
                   await sleep(150);
                 }

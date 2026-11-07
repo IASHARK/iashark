@@ -577,9 +577,10 @@
   // =====================================================================================================
   // Aujourd'hui : vrais visiteurs jour par jour sur 6 semaines (admin_analytics, robots et tests retires)
   // =====================================================================================================
+  // admin_analytics sur 42 jours depassait la limite de temps de la base (code 57014) : admin_visiteurs_jours
+  // (migration 0072) garde le total de chaque jour passe et ne recalcule que la journee en cours.
   function chargerVisiteurs() {
-    var H = A().H, jours = derniersJours(42);
-    return A().rpc("admin_analytics", { p_days: 42, p_include_internal: false, p_from: jours[0], p_to: jours[41], p_since: H.LAUNCH_AT, p_site: null, p_device: null, p_source: null })
+    return A().rpc("admin_visiteurs_jours", { p_jours: 42 })
       .then(function (r) { E.visiteurs = r.data || null; E.visiteursErr = r.data ? null : r; rendreVisiteurs(); });
   }
   function rendreVisiteurs() {

@@ -318,51 +318,234 @@
   }
 
   // =====================================================================================================
-  // Argent : abonnes et evenements
+  // Argent (refait le 07/11/2026) : une seule source, admin_abonnements (comptes admin et de test retires).
+  // Haut : composant 21st.dev « LED Dot Matrix Chart Card » (kedhareswer) transpose en HTML/SVG/CSS sans React :
+  // un point par jour, allume de bas en haut, chiffre qui defile comme un compteur.
+  // Prochains paiements : composant 21st.dev « Payments Table » (bundui) : avatar, prix, pastille de couleur, date.
   // =====================================================================================================
+  var PAR_MOIS = { week: 52 / 12, month: 1, year: 1 / 12, day: 365 / 12 };
+  var RYTHME = { week: "semaine", month: "mois", year: "an", day: "jour" };
+  var MOIS_COURT = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+  var MOIS_LONG = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
   function chargerAbonnements() {
     return A().rpc("admin_abonnements", { p_jours: 120 }).then(function (r) {
       E.abo = r.data || null;
       E.aboErr = r.data ? null : r;
+      E.aboA = new Date();
       rendreAbonnes();
       listes();
+      try { A().renderCards(); } catch (e) {}
     });
   }
-  function kcard(cls, label, valeur, sous) {
-    return '<article class="kcard ' + cls + '"><div class="kcard-top"><h3 class="kcard-label">' + esc(label) + '</h3></div><div class="kcard-value tnum">' + esc(valeur) + '</div><div class="kcard-delta">' + sous + "</div></article>";
+  // « 41,57 € » ; les centimes ronds disparaissent (« 15 € »).
+  function argent(c, devise) {
+    var n = num(c) / 100, d = String(devise || "EUR").toUpperCase();
+    var s = n.toLocaleString("fr-FR", { minimumFractionDigits: Math.round(n * 100) % 100 ? 2 : 0, maximumFractionDigits: 2 }).replace(/ | /g, " ");
+    return s + " " + ({ EUR: "€", GBP: "£", USD: "$", ZAR: "R", MXN: "MX$" }[d] || d);
   }
-  function compteSur(evs, quoi, j) {
-    var lim = Date.now() - j * 86400000;
-    return evs.filter(function (e) { return quoi.indexOf(e.quoi) !== -1 && Date.parse(e.at) >= lim; }).length;
+  // Plusieurs devises : la principale d'abord, les autres a cote (« 41,57 € + 199 R »).
+  function sommes(map) {
+    var k = Object.keys(map).filter(function (d) { return map[d] > 0; }).sort(function (a, b) { return a === "EUR" ? -1 : b === "EUR" ? 1 : map[b] - map[a]; });
+    return k.length ? k.map(function (d) { return argent(map[d], d); }) : [argent(0, "EUR")];
+  }
+  function ajoute(map, d, c) { d = String(d || "EUR").toUpperCase(); map[d] = (map[d] || 0) + num(c); }
+  function parisJour(iso) { return A().H.parisToday(new Date(iso)); }
+  function initiales(email) {
+    var l = String(email || "?").replace(/@.*/, "").replace(/[^a-zA-Z]/g, "");
+    return (l.slice(0, 2) || "?").toUpperCase();
+  }
+  var TEINTES = ["#20d5ef", "#a79ff0", "#34d399", "#fcc54d", "#fb8a8a", "#60a5fa", "#f0abfc"];
+  function teinte(s) { var h = 0; String(s || "").split("").forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) >>> 0; }); return TEINTES[h % TEINTES.length]; }
+  // Chiffres qui roulent (meme principe que le composant : une bande 0-9 par chiffre, deplacee de -n em).
+  function roule(texte) {
+    return '<span class="ag-roule" aria-hidden="true">' + String(texte).split("").map(function (ch) {
+      var d = ch.charCodeAt(0) - 48;
+      if (d < 0 || d > 9) return "<span>" + (ch === " " ? "&nbsp;" : esc(ch)) + "</span>";
+      return '<span class="ag-r"><span class="ag-bande" data-d="' + d + '">' + "0123456789".split("").map(function (n) { return "<span>" + n + "</span>"; }).join("") + "</span></span>";
+    }).join("") + "</span>";
+  }
+  function lancerRoule(el) {
+    if (!el) return;
+    var fait = false, go = function () {
+      if (fait) return; fait = true;
+      Array.prototype.forEach.call(el.querySelectorAll(".ag-bande"), function (b) { b.style.transform = "translateY(-" + b.getAttribute("data-d") + "em)"; });
+      el.classList.add("on");
+    };
+    requestAnimationFrame(function () { requestAnimationFrame(go); });
+    setTimeout(go, 120); // page en arriere-plan : pas d'image dessinee, on pose quand meme les chiffres
+    setTimeout(function () { go(); el.classList.add("fini"); }, 1000); // et si l'animation est en pause, les chiffres se posent net
+  }
+  // Le calcul, fait une seule fois, sert a l'ecran Argent ET a la carte « Chaque mois » d'Aujourd'hui.
+  function calculArgent() {
+    var en = (E.abo && E.abo.en_cours) || [], mensuel = {}, potentiel = {}, c = { paient: 0, essai: 0, partent: 0, rate: 0 };
+    en.forEach(function (s) {
+      var m = num(s.montant_cents) * (PAR_MOIS[s.rythme] || 1);
+      if (s.statut === "past_due" || s.statut === "unpaid") { c.rate++; return; }
+      if (s.arret_prevu) { c.partent++; return; }
+      if (s.statut === "active") { c.paient++; ajoute(mensuel, s.devise, m); ajoute(potentiel, s.devise, m); }
+      else if (s.statut === "trialing") { c.essai++; ajoute(potentiel, s.devise, m); }
+    });
+    return { mensuel: mensuel, potentiel: potentiel, compte: c, en: en };
   }
   function rendreAbonnes() {
-    var el = $("abonnesEtat"), mv = $("mouvements");
-    if (!el || !mv) return;
-    if (!E.abo) { A().blockError(el, E.aboErr, "Tes abonnés"); mv.innerHTML = ""; return; }
-    var e = E.abo.etat || {}, evs = E.abo.evenements || [];
-    var periode = function (q) { return esc(compteSur(evs, q, 1) + " aujourd'hui · " + compteSur(evs, q, 7) + " en 7 jours"); };
-    el.innerHTML = kcard("green", "Pro qui paient", num(e.payants) + num(e.payants_qui_arretent), num(e.payants_qui_arretent) ? esc(num(e.payants_qui_arretent) + " ont demandé à arrêter") : "aucun départ prévu")
-      + kcard("", "En essai", num(e.essais) + num(e.essais_qui_arretent), num(e.essais_qui_arretent) ? esc(num(e.essais_qui_arretent) + " ont déjà dit non") : "aucun n'a dit non")
-      + kcard("red", "Départs en 30 jours", compteSur(evs, ["arret_demande", "parti"], 30), periode(["arret_demande", "parti"]))
-      + kcard("amber", "Paiements ratés", num(e.en_retard), num(e.en_retard) ? "à relancer" : "aucun en ce moment")
-      + kcard("green", "Nouveaux en 30 jours", compteSur(evs, ["essai", "nouveau"], 30), periode(["essai", "nouveau"]));
+    var led = $("argentLed"), tu = $("argentTuiles"), pr = $("argentProchains"), mv = $("mouvements");
+    if (!led || !mv) return;
+    if (!E.abo) { A().blockError(led, E.aboErr, "L'argent"); if (tu) tu.innerHTML = ""; if (pr) pr.innerHTML = ""; mv.innerHTML = ""; return; }
+    var evs = E.abo.evenements || [], enc = E.abo.encaisse || [], K = calculArgent();
+    var H = A().H, today = H.parisToday(new Date());
+
+    // ---------- 1. Argent recu, jour par jour (LED) ----------
+    var NJ = 42, jours42 = [];
+    for (var i = NJ - 1; i >= 0; i--) jours42.push(H.addDays(today, -i));
+    var parJour = {};
+    evs.forEach(function (x) {
+      if ((x.quoi === "premier_paiement" || x.quoi === "paiement") && String(x.devise || "EUR").toUpperCase() === "EUR") {
+        var j = parisJour(x.at); parJour[j] = (parJour[j] || 0) + num(x.montant_cents);
+      }
+    });
+    var vals = jours42.map(function (j) { return parJour[j] || 0; });
+    var total42 = vals.reduce(function (a, b) { return a + b; }, 0);
+    var tot = {}, mois = {}, auj = {};
+    enc.forEach(function (r) { ajoute(tot, r.devise, r.total_cents); ajoute(mois, r.devise, r.mois_cents); ajoute(auj, r.devise, r.aujourdhui_cents); });
+    var ROWS = 8, max = Math.max.apply(null, vals.concat([0]));
+    var niveaux = vals.map(function (v) { return max <= 0 || v <= 0 ? 0 : Math.max(1, Math.round(v / max * ROWS)); });
+    var W = NJ * 10, Hh = ROWS * 10, svg = "";
+    niveaux.forEach(function (lv, c) {
+      svg += '<g class="ag-col" data-c="' + c + '">';
+      for (var r = 0; r < ROWS; r++) {
+        var bas = ROWS - 1 - r, allume = bas < lv, haut = allume && bas === lv - 1;
+        svg += '<circle cx="' + (c * 10 + 5) + '" cy="' + (r * 10 + 5) + '" r="2.7" class="ag-dot' + (allume ? " ag-lit" : "") + (haut ? " ag-top" : "") + '" style="--c:' + c + ";--r:" + bas + '"/>';
+      }
+      svg += '<rect class="ag-hit" x="' + c * 10 + '" y="0" width="10" height="' + Hh + '"/></g>';
+    });
+    var jourTxt = function (j) { var p = j.split("-"); return Number(p[2]) + " " + MOIS_COURT[Number(p[1]) - 1]; };
+    var moisNom = MOIS_LONG[Number(today.slice(5, 7)) - 1];
+    var aMaj = E.aboA ? A().fmtTime(E.aboA.toISOString()) : "";
+    led.innerHTML = '<article class="ag-led">'
+      + '<div class="ag-led-tete"><div class="ag-id"><span class="ag-puce" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 20V12M12 20V5M19 20v-9"/></svg></span>'
+      + '<div><h2 class="ag-titre">Argent reçu</h2><p class="ag-cap">Jour par jour, 6 dernières semaines</p></div></div>'
+      + '<div class="ag-somme"><div class="ag-gros"><span class="sr">' + esc(argent(total42, "EUR")) + "</span>" + roule(argent(total42, "EUR")) + "</div>"
+      + '<div class="ag-delta"><span class="ag-pill ' + (num(mois.EUR) > 0 ? "up" : "") + '">' + esc("+" + sommes(mois).join(" + ")) + "</span>en " + esc(moisNom) + "</div></div></div>"
+      + '<div class="ag-plot" tabindex="0" role="img" aria-label="' + esc("Argent reçu par jour : " + jours42.filter(function (j, k) { return vals[k] > 0; }).map(function (j) { return jourTxt(j) + " " + argent(parJour[j], "EUR"); }).join(", ") || "aucun paiement sur 6 semaines") + '">'
+      + '<svg class="ag-svg" viewBox="0 0 ' + W + " " + Hh + '" preserveAspectRatio="none" aria-hidden="true">' + svg + "</svg>"
+      + '<div class="ag-guide"></div><div class="ag-tip"><div class="ag-tip-d"></div><div class="ag-tip-v"></div></div></div>'
+      + '<div class="ag-axe" aria-hidden="true"><span>' + esc(jourTxt(jours42[0])) + "</span><span>" + esc(jourTxt(jours42[NJ >> 1])) + "</span><span>aujourd'hui</span></div>"
+      + '<div class="ag-pied"><span>Depuis le début : <b>' + esc(sommes(tot).join(" + ")) + "</b></span>"
+      + '<button type="button" class="ag-maj" id="agMaj">À jour à ' + esc(aMaj) + " · Actualiser</button></div></article>";
+    var plot = led.querySelector(".ag-plot"), ledCarte = led.querySelector(".ag-led");
+    var montrer = function (c) {
+      if (c < 0) { ledCarte.classList.remove("hot"); return; }
+      ledCarte.classList.add("hot");
+      Array.prototype.forEach.call(plot.querySelectorAll(".ag-col"), function (g) {
+        var k = Number(g.getAttribute("data-c"));
+        g.classList.toggle("act", k === c); g.classList.toggle("near", Math.abs(k - c) === 1);
+      });
+      var gauche = (c + 0.5) / NJ * 100, haut = Math.min(Math.max((1 - niveaux[c] / ROWS) * 100 + 50 / ROWS, 18), 82);
+      plot.querySelector(".ag-guide").style.left = gauche + "%";
+      var tip = plot.querySelector(".ag-tip");
+      tip.style.left = gauche + "%"; tip.style.top = haut + "%";
+      tip.classList.toggle("flip", c > NJ * 0.6);
+      tip.querySelector(".ag-tip-d").textContent = c === NJ - 1 ? "Aujourd'hui" : jourTxt(jours42[c]);
+      tip.querySelector(".ag-tip-v").textContent = vals[c] ? "+" + argent(vals[c], "EUR") : "Aucun paiement";
+    };
+    var colDe = function (e) { var r = plot.getBoundingClientRect(); return Math.min(NJ - 1, Math.max(0, Math.floor((e.clientX - r.left) / r.width * NJ))); };
+    var actif = -1;
+    plot.addEventListener("pointermove", function (e) { actif = colDe(e); montrer(actif); });
+    plot.addEventListener("pointerdown", function (e) { actif = colDe(e); montrer(actif); });
+    plot.addEventListener("pointerleave", function () { actif = -1; montrer(-1); });
+    plot.addEventListener("blur", function () { actif = -1; montrer(-1); });
+    plot.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); actif = Math.min(NJ - 1, Math.max(0, (actif < 0 ? (e.key === "ArrowRight" ? -1 : NJ) : actif) + (e.key === "ArrowRight" ? 1 : -1))); montrer(actif); }
+      else if (e.key === "Escape") { actif = -1; montrer(-1); }
+    });
+    requestAnimationFrame(function () { requestAnimationFrame(function () { ledCarte.classList.add("on"); }); });
+    setTimeout(function () { ledCarte.classList.add("on"); }, 120);
+    setTimeout(function () { ledCarte.classList.add("fini"); }, 1600);
+    lancerRoule(led.querySelector(".ag-gros"));
+
+    // ---------- 2. Trois tuiles ----------
+    var c = K.compte, pm = sommes(K.mensuel), pot = sommes(K.potentiel);
+    var eurM = num(K.mensuel.EUR), eurP = Math.max(num(K.potentiel.EUR), 1);
+    var tot4 = Math.max(1, c.paient + c.essai + c.partent + c.rate);
+    var seg = function (n, cls) { return n ? '<i class="' + cls + '" style="flex:' + n + '"></i>' : ""; };
+    var parMoisL = (E.abo.par_mois || []).filter(function (m) { return String(m.devise).toUpperCase() === "EUR"; });
+    var moisListe = [];
+    for (var m = 2; m >= 0; m--) {
+      var d = new Date(Number(today.slice(0, 4)), Number(today.slice(5, 7)) - 1 - m, 1);
+      moisListe.push(d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"));
+    }
+    var moisVal = moisListe.map(function (k) { var x = parMoisL.filter(function (p) { return p.mois === k; })[0]; return x ? num(x.cents) : 0; });
+    var moisMax = Math.max.apply(null, moisVal.concat([1]));
+    tu.innerHTML = '<article class="ag-tuile t-mois"><h3>Chaque mois</h3><b class="ag-num">' + esc(pm[0]) + "</b>"
+      + (pm.length > 1 ? '<small class="ag-autre">' + esc("+ " + pm.slice(1).join(" + ")) + "</small>" : "")
+      + '<p>Ce que paient en ce moment tes ' + c.paient + " abonné" + (c.paient > 1 ? "s" : "") + ", ramené au mois.</p>"
+      + '<div class="ag-jauge" aria-hidden="true"><i style="width:' + Math.round(eurM / eurP * 100) + '%"></i></div>'
+      + '<p class="ag-si">' + (c.essai ? "Si les " + c.essai + " essai" + (c.essai > 1 ? "s" : "") + " paient : <b>" + esc(pot[0]) + "</b> par mois" : "Aucun essai en cours") + "</p></article>"
+      + '<article class="ag-tuile t-gens"><h3>Tes abonnés</h3><b class="ag-num">' + (c.paient + c.essai + c.partent + c.rate) + "</b>"
+      + '<div class="ag-pile" aria-hidden="true">' + seg(c.paient, "v") + seg(c.essai, "b") + seg(c.partent, "r") + seg(c.rate, "o") + "</div>"
+      + '<ul class="ag-leg"><li><i class="v"></i><b>' + c.paient + "</b> paient</li><li><i class=\"b\"></i><b>" + c.essai + "</b> en essai gratuit</li>"
+      + '<li><i class="r"></i><b>' + c.partent + "</b> vont partir</li><li><i class=\"o\"></i><b>" + c.rate + "</b> paiement raté</li></ul></article>"
+      + '<article class="ag-tuile t-recu"><h3>Reçu en ' + esc(moisNom) + '</h3><b class="ag-num">' + esc(sommes(mois)[0]) + "</b>"
+      + '<p>' + (num(auj.EUR) ? esc(argent(auj.EUR, "EUR")) + " aujourd'hui" : "Rien encore aujourd'hui") + "</p>"
+      + '<div class="ag-barres" aria-hidden="true">' + moisListe.map(function (k, idx) {
+        return '<div class="ag-barre' + (idx === 2 ? " cur" : "") + '"><span class="ag-bv">' + esc(argent(moisVal[idx], "EUR")) + '</span><i style="height:' + Math.max(4, Math.round(moisVal[idx] / moisMax * 56)) + 'px"></i><span class="ag-bm">' + esc(MOIS_COURT[Number(k.slice(5, 7)) - 1]) + "</span></div>";
+      }).join("") + "</div></article>";
+
+    // ---------- 3. Prochains paiements ----------
+    var lignes = K.en.slice().sort(function (a, b) { return Date.parse(a.fin_periode || 0) - Date.parse(b.fin_periode || 0); });
+    var attendu = {};
+    var statut = function (s) {
+      if (s.statut === "past_due" || s.statut === "unpaid") return ["o", "Paiement raté"];
+      if (s.arret_prevu) return ["r", s.statut === "trialing" ? "A dit stop pendant l'essai" : "A dit stop"];
+      if (s.statut === "trialing") return ["b", "Fin d'essai : 1er paiement"];
+      return ["v", "Renouvellement"];
+    };
+    var quandTxt = function (iso) {
+      if (!iso) return ["—", ""];
+      var j = parisJour(iso), diff = Math.round((Date.parse(j + "T12:00:00Z") - Date.parse(today + "T12:00:00Z")) / 86400000);
+      var p = j.split("-"), date = Number(p[2]) + " " + MOIS_COURT[Number(p[1]) - 1];
+      var heure = A().fmtTime(iso);
+      if (diff < 0) return ["passé", date];
+      if (diff === 0) return ["aujourd'hui", heure];
+      if (diff === 1) return ["demain", heure];
+      return ["dans " + diff + " j", date];
+    };
+    if (!lignes.length) pr.innerHTML = A().emptyHtml("Aucun abonnement en cours", "Les prochains paiements apparaîtront ici.");
+    else {
+      pr.innerHTML = '<table class="ag-table"><thead><tr><th>Personne</th><th>Quand</th><th class="ag-r-num">Montant</th><th>Statut</th></tr></thead><tbody>'
+        + lignes.map(function (s) {
+          var st = statut(s), q = quandTxt(s.fin_periode), paiera = st[0] === "v" || st[0] === "b";
+          if (paiera) ajoute(attendu, s.devise, s.montant_cents);
+          var em = mail(s.email, s.email_masked);
+          return '<tr data-fiche="' + esc(s.uid || "") + '" tabindex="0"><td><div class="ag-qui"><span class="ag-av" style="--t:' + teinte(s.email || s.uid) + '">' + esc(initiales(s.email || s.email_masked)) + "</span>"
+            + '<span><b>' + esc(em) + "</b><small>" + esc(argent(s.montant_cents, s.devise) + " par " + (RYTHME[s.rythme] || "mois")) + "</small></span></div></td>"
+            + '<td><b class="ag-q">' + esc(q[0]) + "</b><small>" + esc(q[1]) + "</small></td>"
+            + '<td class="ag-r-num"><span class="ag-mt' + (paiera ? "" : " barre") + '">' + esc(argent(s.montant_cents, s.devise)) + "</span></td>"
+            + '<td><span class="ag-badge ' + st[0] + '">' + esc(st[1]) + "</span></td></tr>";
+        }).join("") + "</tbody></table>"
+        + '<p class="ag-total">Si tout passe : <b>' + esc(sommes(attendu).join(" + ")) + "</b> à recevoir d'ici le " + esc(quandTxt(lignes[lignes.length - 1].fin_periode)[1] || "") + ".</p>";
+    }
+
+    // ---------- 4. Ce qui s'est passe ----------
     var f = E.filtre;
     var garde = { tout: null, departs: ["arret_demande", "parti", "reprise"], paiements: ["premier_paiement", "paiement", "paiement_rate"], essais: ["essai", "nouveau"] }[f];
     var list = evs.filter(function (x) { return !garde || garde.indexOf(x.quoi) !== -1; });
     Array.prototype.forEach.call(document.querySelectorAll("#mouvFiltre button"), function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-f") === f)); });
     if (!list.length) { mv.innerHTML = A().emptyHtml("Rien sur cette période", "Chaque essai, paiement et départ apparaîtra ici."); return; }
-    mv.innerHTML = '<ol class="ev-list">' + list.slice(0, 120).map(function (x) {
+    var ICO = { vert: "M5 12l5 5L20 7", bleu: "M12 5v14M5 12h14", rouge: "M6 6l12 12M18 6L6 18", orange: "M12 7v6M12 17h.01" };
+    mv.innerHTML = '<ol class="ag-ev">' + list.slice(0, 120).map(function (x) {
       var q = QUOI[x.quoi] || { t: x.quoi, c: "" };
       var j = x.debut ? jours(x.debut) : null;
       var details = [];
       if (x.quoi === "arret_demande" || x.quoi === "parti") {
         if (j !== null) details.push("après " + j + " j " + (x.essai ? "d'essai" : "d'abonnement"));
-        details.push(x.paye_cents ? "a payé " + euros(x.paye_cents, x.devise) + " au total" : "n'a jamais payé");
+        details.push(x.paye_cents ? "a payé " + argent(x.paye_cents, x.devise) + " au total" : "n'a jamais payé");
       }
-      if (x.montant_cents && x.quoi !== "essai" && x.quoi !== "arret_demande" && x.quoi !== "parti") details.push(euros(x.montant_cents, x.devise));
-      if (x.quoi === "essai" && x.montant_cents) details.push("puis " + euros(x.montant_cents, x.devise));
-      return '<li class="ev-row ' + q.c + '"><span class="ev-dot" aria-hidden="true"></span><div>'
-        + '<b>' + esc(q.t) + '</b> · <button type="button" class="ev-qui" data-fiche="' + esc(x.uid || "") + '">' + esc(mail(x.email, x.email_masked)) + "</button>"
+      if (x.quoi === "essai" && x.montant_cents) details.push("puis " + argent(x.montant_cents, x.devise) + " si il garde");
+      var montant = (x.quoi === "premier_paiement" || x.quoi === "paiement") && x.montant_cents ? "+" + argent(x.montant_cents, x.devise) : "";
+      return '<li class="ag-ev-l ' + q.c + '"><span class="ag-ev-i" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="' + (ICO[q.c] || ICO.bleu) + '"/></svg></span>'
+        + '<div class="ag-ev-c"><div class="ag-ev-h"><b>' + esc(q.t) + "</b>" + (montant ? '<span class="ag-ev-m">' + esc(montant) + "</span>" : "") + "</div>"
+        + '<button type="button" class="ev-qui" data-fiche="' + esc(x.uid || "") + '">' + esc(mail(x.email, x.email_masked)) + "</button>"
         + (details.length ? '<span class="ev-det">' + esc(details.join(" · ")) + "</span>" : "")
         + ((x.quoi === "arret_demande" || x.quoi === "parti") ? '<span class="ev-raison">' + esc(x.raison ? "Raison : " + x.raison : "Pas de raison donnée") + "</span>" : "")
         + (x.commentaire ? '<span class="ev-raison">« ' + esc(x.commentaire) + " »</span>" : "")
@@ -554,6 +737,7 @@
     if (l) { var id = l.getAttribute("data-liste"); E.liste = E.liste === id ? null : id; listes(); return; }
     var fb = t.closest("#mouvFiltre button");
     if (fb) { E.filtre = fb.getAttribute("data-f"); rendreAbonnes(); return; }
+    if (t.closest("#agMaj")) { var bm = $("agMaj"); if (bm) bm.textContent = "Mise à jour…"; chargerAbonnements(); return; }
     if (t.closest("#alOn")) { activer(); return; }
     if (t.closest("#alTest")) { test(); return; }
     if (t.closest("#alOff")) { couper(); return; }
@@ -583,6 +767,8 @@
       charge = true;
     },
     membres: function () { listes(); chercher(); },
+    // Carte « Chaque mois » de l'ecran Aujourd'hui : meme calcul que l'ecran Argent.
+    parMois: function () { return E.abo ? sommes(calculArgent().mensuel).join(" + ") : null; },
     live: function (live) { carte(live); },
     ecran: function (key) {
       onglet(key);

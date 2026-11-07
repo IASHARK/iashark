@@ -1328,7 +1328,8 @@
     toast: function (t) { toast(t); }, fmtDateTime: function (x) { return fmtDateTime(x); }, fmtTime: function (x) { return fmtTime(x); },
     fmtDay: function (x) { return fmtDay(x); }, emptyHtml: function (a, b) { return emptyHtml(a, b); }, blockError: function (e, r, w) { blockError(e, r, w); },
     statusBadge: function (x) { return statusBadge(x); }, tableHtml: function (c, r, o) { return tableHtml(c, r, o); }, visitDetail: function (v) { return visitDetail(v); },
-    journeyHtml: function (u) { return journeyHtml(u); }, loadMissingNames: function (ids) { return loadMissingNames(ids); }
+    journeyHtml: function (u) { return journeyHtml(u); }, loadMissingNames: function (ids) { return loadMissingNames(ids); },
+    renderCards: function () { try { if (S.analytics || S.business) renderCards(); } catch (e) {} }
   };
 
   // ---------- Preferences (seulement la periode, jamais les filtres) ----------
@@ -1620,17 +1621,19 @@
       help: "Comptes créés sur le site pendant la période. Les comptes administrateur et de test ne sont pas comptés."
     });
 
-    var active = b ? H.num(subs.active) : S.stats ? H.num(S.stats.pro_users) : null;
+    // 07/11 : seulement ceux qui paient (les essais a 0 sont a part), comme l'ecran Argent.
+    var active = b ? H.num(subs.paying !== undefined ? subs.paying : subs.active) : S.stats ? H.num(S.stats.pro_users) : null;
+    var essaisEnCours = b && subs.trialing !== undefined ? H.num(subs.trialing) : null;
     var newPro = b ? H.num(subs.new_in_period) : null;
     var proMean = active === null ? "Chiffre indisponible pour le moment."
       : active === 0 ? "Personne ne paie l'abonnement Pro pour l'instant."
       : H.fmtInt(active) + " " + plural(active, "personne paie", "personnes paient") + " l'abonnement Pro en ce moment.";
-    if (newPro > 0) proMean += " Dont " + H.fmtInt(newPro) + " " + plural(newPro, "nouveau", "nouveaux") + " sur la période.";
+    if (essaisEnCours > 0) proMean += " Et " + H.fmtInt(essaisEnCours) + " " + plural(essaisEnCours, "personne en essai gratuit", "personnes en essai gratuit") + " (pas encore payé).";
     if (b && Number(subs.past_due) > 0) proMean += " Attention : " + H.fmtInt(subs.past_due) + " paiement" + (Number(subs.past_due) > 1 ? "s" : "") + " en échec.";
     cards.push({
-      id: "pro", label: "Abonnés Pro actifs", icon: ICONS.star, cls: "amber", value: H.fmtInt(active), delta: '<span class="delta-cap">aujourd\'hui, toutes dates confondues</span>',
+      id: "pro", label: "Abonnés qui paient", icon: ICONS.star, cls: "amber", value: H.fmtInt(active), delta: '<span class="delta-cap">aujourd\'hui, toutes dates confondues</span>',
       mean: proMean,
-      help: "Nombre d'abonnements Pro payants en cours aujourd'hui (Stripe). Ce chiffre ne dépend pas de la période choisie. Comptes de test exclus."
+      help: "Abonnements Pro qui paient en ce moment (Stripe). Les essais gratuits ne sont pas comptés. Ce chiffre ne dépend pas de la période choisie. Tes comptes et les comptes de test sont exclus."
     });
 
     var firstCount = b ? (b.first_payments || []).reduce(function (n, r) { return n + (Number(r.payments) || 0); }, 0) : 0;
@@ -1653,12 +1656,16 @@
       : "Ce que rapportent les abonnements en cours chaque mois si rien ne change.";
     if (rev && failed30 > 0) mrrMean += " Attention : " + H.fmtInt(failed30) + " paiement" + (failed30 > 1 ? "s" : "") + " en échec sur 30 jours.";
     if (rev && cancelPending > 0) mrrMean += " " + H.fmtInt(cancelPending) + " résiliation" + (cancelPending > 1 ? "s" : "") + " programmée" + (cancelPending > 1 ? "s" : "") + ".";
-    var mrr = rev ? H.mrrText(rev) : "—";
+    // 07/11 : une seule source (ecran Argent, admin_abonnements) : ceux qui paient vraiment, sans les essais ni tes comptes.
+    var appArgent = null;
+    try { appArgent = window.IasharkAdminApp && window.IasharkAdminApp.parMois ? window.IasharkAdminApp.parMois() : null; } catch (e) { appArgent = null; }
+    if (appArgent) mrrMean = "Ce que rapportent chaque mois ceux qui paient en ce moment, si rien ne change (essais gratuits non comptés).";
+    var mrr = appArgent || (rev ? H.mrrText(rev) : "—");
     cards.push({
-      id: "mrr", label: "Revenu mensuel (MRR)", icon: ICONS.money, cls: "violet", value: mrr, long: mrr.length > 10,
+      id: "mrr", label: "Chaque mois", icon: ICONS.money, cls: "violet", value: mrr, long: mrr.length > 10,
       delta: '<span class="delta-cap">abonnements en cours, Stripe</span>',
       mean: mrrMean,
-      help: "Revenu mensuel récurrent : la somme des abonnements en cours ramenée au mois (hebdo × 52/12, annuel ÷ 12), lue en direct dans Stripe. Les abonnements dont la résiliation est programmée ne sont pas comptés."
+      help: "La somme de ce que paient les abonnés en cours, ramenée au mois (semaine × 52 ÷ 12, année ÷ 12). Ni les essais gratuits, ni les abonnés qui ont demandé à arrêter, ni tes comptes ne sont comptés."
     });
 
     var now = liveHumans();
@@ -2883,7 +2890,8 @@
   }
 
   function renderMoney(d) {
-    var el = $("money"), m = d.money || {};
+    var el = document.getElementById("money"), m = d.money || {};
+    if (!el) return; // 07/11 : ancien bloc retire, l'ecran Argent a sa propre source
     var MARKET = { fr: "France (€)", gb: "Royaume-Uni (£)", za: "Afrique du Sud (R)", mx: "Mexique ($)", us: "États-Unis ($)" };
     var INTERVAL = { month: "au mois", week: "à la semaine", year: "à l'année", day: "au jour" };
     var mrr = S.revenue ? H.mrrText(S.revenue) : S.revenueLoading ? "…" : "—";
@@ -3232,7 +3240,16 @@
     $("partnerOk").addEventListener("click", runPartner);
     $("partnerCancel").addEventListener("click", function () { pendingPartner = null; $("partnerDialog").close(); });
     $("partnerDialog").addEventListener("close", function () { pendingPartner = null; });
-    document.addEventListener("visibilitychange", function () { if (!document.hidden && S.liveTimer) loadLive(); });
+    // 07/11 (« les gens sont meme pas a jour ») : l'appli du telephone reste ouverte des heures en arriere-plan.
+    // Au retour, tout est recharge si la derniere mise a jour date de plus d'une minute.
+    var cacheA = 0;
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) { cacheA = Date.now(); return; }
+      if (!S.liveTimer) return;
+      loadLive();
+      if (cacheA && Date.now() - cacheA > 60000 && !S.loading) loadAll({ silent: true });
+    });
+    if (typeof window.addEventListener === "function") window.addEventListener("pageshow", function (e) { if (e && e.persisted && S.liveTimer && !S.loading) loadAll({ silent: true }); });
     if (typeof window.addEventListener === "function") window.addEventListener("hashchange", function () { applyScreen(window.location.hash); });
   }
 

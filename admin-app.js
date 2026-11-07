@@ -194,12 +194,13 @@
   function parisAujourdhui() { return A().H.parisToday(new Date()); }
   function ligneGens(u, extra) {
     var tg = telegramDe(u.email);
-    var plan = u.plan === "pro" ? A().statusBadge(A().H.MEMBER_STATUS.pro) : A().statusBadge({ label: "Gratuit", cls: "new", help: "Compte gratuit" });
+    var pro = u.plan === "pro";
     return '<li class="g-row"><button type="button" class="g-open" data-fiche="' + esc(u.user_id) + '">'
-      + '<span class="g-mail">' + esc(mail(u.email, u.email_masked)) + "</span>"
-      + '<span class="g-meta">' + plan + "<span>" + esc(extra || ("vu " + depuisTxt(vu(u)))) + "</span>"
-      + (tg ? "<span>" + esc(tg) + "</span>" : "") + "</span></button>"
-      + (u.email ? '<button type="button" class="btn btn-ghost btn-sm g-copy" data-copie="' + esc(u.email) + '">Copier l\'adresse</button>' : "")
+      + '<span class="ag-av" style="--t:' + teinte(u.email || u.user_id) + '">' + esc(initiales(u.email || u.email_masked)) + "</span>"
+      + '<span class="g-txt"><span class="g-mail">' + esc(mail(u.email, u.email_masked)) + "</span>"
+      + '<span class="g-meta"><span class="ag-badge ' + (pro ? "v" : "b") + '">' + (pro ? "Pro" : "Gratuit") + "</span><span>" + esc(extra || ("vu " + depuisTxt(vu(u)))) + "</span>"
+      + (tg ? "<span>" + esc(tg) + "</span>" : "") + "</span></span></button>"
+      + (u.email ? '<button type="button" class="btn btn-ghost btn-sm g-copy" data-copie="' + esc(u.email) + '">Copier</button>' : "")
       + "</li>";
   }
   function listes() {
@@ -327,6 +328,77 @@
   var RYTHME = { week: "semaine", month: "mois", year: "an", day: "jour" };
   var MOIS_COURT = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
   var MOIS_LONG = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+  // Carte « LED » generique (composant 21st.dev LED Dot Matrix Chart Card, kedhareswer) : un point par jour,
+  // allume de bas en haut, info-bulle au doigt, gros chiffre qui roule. Servie a Argent, Aujourd'hui, Reseaux, Paris.
+  // o = { titre, cap, accent, jours: [AAAA-MM-JJ], vals: [nombres], fmt(v), gros, pill, pillUp, pillLabel, pied, rows, icone }
+  var MOIS_C = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+  function jourCourt(j) { var p = String(j).split("-"); return Number(p[2]) + " " + MOIS_C[Number(p[1]) - 1]; }
+  function ledCarte(el, o) {
+    if (!el) return;
+    var NJ = o.jours.length, ROWS = o.rows || 8, vals = o.vals, today = A().H.parisToday(new Date());
+    var max = Math.max.apply(null, vals.concat([0]));
+    var niveaux = vals.map(function (v) { return max <= 0 || v <= 0 ? 0 : Math.max(1, Math.round(v / max * ROWS)); });
+    var W = NJ * 10, Hh = ROWS * 10, svg = "";
+    niveaux.forEach(function (lv, c) {
+      svg += '<g class="ag-col" data-c="' + c + '">';
+      for (var r = 0; r < ROWS; r++) {
+        var bas = ROWS - 1 - r, allume = bas < lv, haut = allume && bas === lv - 1;
+        svg += '<circle cx="' + (c * 10 + 5) + '" cy="' + (r * 10 + 5) + '" r="2.7" class="ag-dot' + (allume ? " ag-lit" : "") + (haut ? " ag-top" : "") + '" style="--c:' + c + ";--r:" + bas + '"/>';
+      }
+      svg += '<rect class="ag-hit" x="' + c * 10 + '" y="0" width="10" height="' + Hh + '"/></g>';
+    });
+    var resume = o.jours.map(function (j, k) { return vals[k] > 0 ? jourCourt(j) + " " + o.fmt(vals[k]) : null; }).filter(Boolean).join(", ");
+    el.innerHTML = '<article class="ag-led" style="--ag-accent:' + (o.accent || "#20d5ef") + '">'
+      + '<div class="ag-led-tete"><div class="ag-id"><span class="ag-puce" aria-hidden="true">' + (o.icone || '<svg viewBox="0 0 24 24"><path d="M5 20V12M12 20V5M19 20v-9"/></svg>') + "</span>"
+      + '<div><h2 class="ag-titre">' + esc(o.titre) + '</h2><p class="ag-cap">' + esc(o.cap) + "</p></div></div>"
+      + '<div class="ag-somme"><div class="ag-gros"><span class="sr">' + esc(o.gros) + "</span>" + roule(o.gros) + "</div>"
+      + (o.pill ? '<div class="ag-delta"><span class="ag-pill ' + (o.pillUp ? "up" : "") + '">' + esc(o.pill) + "</span>" + esc(o.pillLabel || "") + "</div>" : "") + "</div></div>"
+      + '<div class="ag-plot" tabindex="0" role="img" aria-label="' + esc(o.titre + " : " + (resume || "rien sur la période")) + '">'
+      + '<svg class="ag-svg" viewBox="0 0 ' + W + " " + Hh + '" preserveAspectRatio="none" aria-hidden="true" style="aspect-ratio:' + NJ + "/" + ROWS + '">' + svg + "</svg>"
+      + '<div class="ag-guide"></div><div class="ag-tip"><div class="ag-tip-d"></div><div class="ag-tip-v"></div></div></div>'
+      + '<div class="ag-axe" aria-hidden="true"><span>' + esc(jourCourt(o.jours[0])) + "</span><span>" + esc(jourCourt(o.jours[NJ >> 1])) + "</span><span>" + (o.jours[NJ - 1] === today ? "aujourd'hui" : esc(jourCourt(o.jours[NJ - 1]))) + "</span></div>"
+      + (o.pied ? '<div class="ag-pied">' + o.pied + "</div>" : "") + "</article>";
+    var plot = el.querySelector(".ag-plot"), carte = el.querySelector(".ag-led");
+    var montrer = function (c) {
+      if (c < 0) { carte.classList.remove("hot"); return; }
+      carte.classList.add("hot");
+      Array.prototype.forEach.call(plot.querySelectorAll(".ag-col"), function (g) {
+        var k = Number(g.getAttribute("data-c"));
+        g.classList.toggle("act", k === c); g.classList.toggle("near", Math.abs(k - c) === 1);
+      });
+      var gauche = (c + 0.5) / NJ * 100, haut = Math.min(Math.max((1 - niveaux[c] / ROWS) * 100 + 50 / ROWS, 18), 82);
+      plot.querySelector(".ag-guide").style.left = gauche + "%";
+      var tip = plot.querySelector(".ag-tip");
+      tip.style.left = gauche + "%"; tip.style.top = haut + "%";
+      tip.classList.toggle("flip", c > NJ * 0.6);
+      tip.querySelector(".ag-tip-d").textContent = o.jours[c] === today ? "Aujourd'hui" : jourCourt(o.jours[c]);
+      tip.querySelector(".ag-tip-v").textContent = o.fmt(vals[c]);
+    };
+    var colDe = function (e) { var r = plot.getBoundingClientRect(); return Math.min(NJ - 1, Math.max(0, Math.floor((e.clientX - r.left) / r.width * NJ))); };
+    var actif = -1;
+    plot.addEventListener("pointermove", function (e) { actif = colDe(e); montrer(actif); });
+    plot.addEventListener("pointerdown", function (e) { actif = colDe(e); montrer(actif); });
+    plot.addEventListener("pointerleave", function () { actif = -1; montrer(-1); });
+    plot.addEventListener("blur", function () { actif = -1; montrer(-1); });
+    plot.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); actif = Math.min(NJ - 1, Math.max(0, (actif < 0 ? (e.key === "ArrowRight" ? -1 : NJ) : actif) + (e.key === "ArrowRight" ? 1 : -1))); montrer(actif); }
+      else if (e.key === "Escape") { actif = -1; montrer(-1); }
+    });
+    requestAnimationFrame(function () { requestAnimationFrame(function () { carte.classList.add("on"); }); });
+    setTimeout(function () { carte.classList.add("on"); }, 120);
+    setTimeout(function () { carte.classList.add("fini"); }, 1600);
+    lancerRoule(el.querySelector(".ag-gros"));
+  }
+  function derniersJours(n) {
+    var H = A().H, t = H.parisToday(new Date()), out = [];
+    for (var i = n - 1; i >= 0; i--) out.push(H.addDays(t, -i));
+    return out;
+  }
+  // Petite tuile coloree (meme famille que les tuiles Argent) : cls = t-mois (cyan), t-gens (violet), t-recu (vert), t-or (ambre), t-rouge.
+  function tuile(cls, titre, valeur, texte, extra) {
+    return '<article class="ag-tuile ' + cls + '"><h3>' + esc(titre) + '</h3><b class="ag-num">' + esc(valeur) + "</b>" + (texte ? "<p>" + texte + "</p>" : "") + (extra || "") + "</article>";
+  }
+
   function chargerAbonnements() {
     return A().rpc("admin_abonnements", { p_jours: 120 }).then(function (r) {
       E.abo = r.data || null;
@@ -395,9 +467,7 @@
     var H = A().H, today = H.parisToday(new Date());
 
     // ---------- 1. Argent recu, jour par jour (LED) ----------
-    var NJ = 42, jours42 = [];
-    for (var i = NJ - 1; i >= 0; i--) jours42.push(H.addDays(today, -i));
-    var parJour = {};
+    var jours42 = derniersJours(42), parJour = {};
     evs.forEach(function (x) {
       if ((x.quoi === "premier_paiement" || x.quoi === "paiement") && String(x.devise || "EUR").toUpperCase() === "EUR") {
         var j = parisJour(x.at); parJour[j] = (parJour[j] || 0) + num(x.montant_cents);
@@ -407,61 +477,12 @@
     var total42 = vals.reduce(function (a, b) { return a + b; }, 0);
     var tot = {}, mois = {}, auj = {};
     enc.forEach(function (r) { ajoute(tot, r.devise, r.total_cents); ajoute(mois, r.devise, r.mois_cents); ajoute(auj, r.devise, r.aujourdhui_cents); });
-    var ROWS = 8, max = Math.max.apply(null, vals.concat([0]));
-    var niveaux = vals.map(function (v) { return max <= 0 || v <= 0 ? 0 : Math.max(1, Math.round(v / max * ROWS)); });
-    var W = NJ * 10, Hh = ROWS * 10, svg = "";
-    niveaux.forEach(function (lv, c) {
-      svg += '<g class="ag-col" data-c="' + c + '">';
-      for (var r = 0; r < ROWS; r++) {
-        var bas = ROWS - 1 - r, allume = bas < lv, haut = allume && bas === lv - 1;
-        svg += '<circle cx="' + (c * 10 + 5) + '" cy="' + (r * 10 + 5) + '" r="2.7" class="ag-dot' + (allume ? " ag-lit" : "") + (haut ? " ag-top" : "") + '" style="--c:' + c + ";--r:" + bas + '"/>';
-      }
-      svg += '<rect class="ag-hit" x="' + c * 10 + '" y="0" width="10" height="' + Hh + '"/></g>';
-    });
-    var jourTxt = function (j) { var p = j.split("-"); return Number(p[2]) + " " + MOIS_COURT[Number(p[1]) - 1]; };
     var moisNom = MOIS_LONG[Number(today.slice(5, 7)) - 1];
     var aMaj = E.aboA ? A().fmtTime(E.aboA.toISOString()) : "";
-    led.innerHTML = '<article class="ag-led">'
-      + '<div class="ag-led-tete"><div class="ag-id"><span class="ag-puce" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 20V12M12 20V5M19 20v-9"/></svg></span>'
-      + '<div><h2 class="ag-titre">Argent reçu</h2><p class="ag-cap">Jour par jour, 6 dernières semaines</p></div></div>'
-      + '<div class="ag-somme"><div class="ag-gros"><span class="sr">' + esc(argent(total42, "EUR")) + "</span>" + roule(argent(total42, "EUR")) + "</div>"
-      + '<div class="ag-delta"><span class="ag-pill ' + (num(mois.EUR) > 0 ? "up" : "") + '">' + esc("+" + sommes(mois).join(" + ")) + "</span>en " + esc(moisNom) + "</div></div></div>"
-      + '<div class="ag-plot" tabindex="0" role="img" aria-label="' + esc("Argent reçu par jour : " + jours42.filter(function (j, k) { return vals[k] > 0; }).map(function (j) { return jourTxt(j) + " " + argent(parJour[j], "EUR"); }).join(", ") || "aucun paiement sur 6 semaines") + '">'
-      + '<svg class="ag-svg" viewBox="0 0 ' + W + " " + Hh + '" preserveAspectRatio="none" aria-hidden="true">' + svg + "</svg>"
-      + '<div class="ag-guide"></div><div class="ag-tip"><div class="ag-tip-d"></div><div class="ag-tip-v"></div></div></div>'
-      + '<div class="ag-axe" aria-hidden="true"><span>' + esc(jourTxt(jours42[0])) + "</span><span>" + esc(jourTxt(jours42[NJ >> 1])) + "</span><span>aujourd'hui</span></div>"
-      + '<div class="ag-pied"><span>Depuis le début : <b>' + esc(sommes(tot).join(" + ")) + "</b></span>"
-      + '<button type="button" class="ag-maj" id="agMaj">À jour à ' + esc(aMaj) + " · Actualiser</button></div></article>";
-    var plot = led.querySelector(".ag-plot"), ledCarte = led.querySelector(".ag-led");
-    var montrer = function (c) {
-      if (c < 0) { ledCarte.classList.remove("hot"); return; }
-      ledCarte.classList.add("hot");
-      Array.prototype.forEach.call(plot.querySelectorAll(".ag-col"), function (g) {
-        var k = Number(g.getAttribute("data-c"));
-        g.classList.toggle("act", k === c); g.classList.toggle("near", Math.abs(k - c) === 1);
-      });
-      var gauche = (c + 0.5) / NJ * 100, haut = Math.min(Math.max((1 - niveaux[c] / ROWS) * 100 + 50 / ROWS, 18), 82);
-      plot.querySelector(".ag-guide").style.left = gauche + "%";
-      var tip = plot.querySelector(".ag-tip");
-      tip.style.left = gauche + "%"; tip.style.top = haut + "%";
-      tip.classList.toggle("flip", c > NJ * 0.6);
-      tip.querySelector(".ag-tip-d").textContent = c === NJ - 1 ? "Aujourd'hui" : jourTxt(jours42[c]);
-      tip.querySelector(".ag-tip-v").textContent = vals[c] ? "+" + argent(vals[c], "EUR") : "Aucun paiement";
-    };
-    var colDe = function (e) { var r = plot.getBoundingClientRect(); return Math.min(NJ - 1, Math.max(0, Math.floor((e.clientX - r.left) / r.width * NJ))); };
-    var actif = -1;
-    plot.addEventListener("pointermove", function (e) { actif = colDe(e); montrer(actif); });
-    plot.addEventListener("pointerdown", function (e) { actif = colDe(e); montrer(actif); });
-    plot.addEventListener("pointerleave", function () { actif = -1; montrer(-1); });
-    plot.addEventListener("blur", function () { actif = -1; montrer(-1); });
-    plot.addEventListener("keydown", function (e) {
-      if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); actif = Math.min(NJ - 1, Math.max(0, (actif < 0 ? (e.key === "ArrowRight" ? -1 : NJ) : actif) + (e.key === "ArrowRight" ? 1 : -1))); montrer(actif); }
-      else if (e.key === "Escape") { actif = -1; montrer(-1); }
-    });
-    requestAnimationFrame(function () { requestAnimationFrame(function () { ledCarte.classList.add("on"); }); });
-    setTimeout(function () { ledCarte.classList.add("on"); }, 120);
-    setTimeout(function () { ledCarte.classList.add("fini"); }, 1600);
-    lancerRoule(led.querySelector(".ag-gros"));
+    ledCarte(led, { titre: "Argent reçu", cap: "Jour par jour, 6 dernières semaines", jours: jours42, vals: vals,
+      fmt: function (v) { return v ? "+" + argent(v, "EUR") : "Aucun paiement"; }, gros: argent(total42, "EUR"),
+      pill: "+" + sommes(mois).join(" + "), pillUp: num(mois.EUR) > 0, pillLabel: "en " + moisNom,
+      pied: "<span>Depuis le début : <b>" + esc(sommes(tot).join(" + ")) + '</b></span><button type="button" class="ag-maj" id="agMaj">À jour à ' + esc(aMaj) + " · Actualiser</button>" });
 
     // ---------- 2. Trois tuiles ----------
     var c = K.compte, pm = sommes(K.mensuel), pot = sommes(K.potentiel);
@@ -554,78 +575,126 @@
   }
 
   // =====================================================================================================
-  // Reseaux : abonnes jour par jour
+  // Aujourd'hui : vrais visiteurs jour par jour sur 6 semaines (admin_analytics, robots et tests retires)
   // =====================================================================================================
-  var RESEAUX = [["telegram", "Telegram", "Chaîne gratuite"], ["x", "X", "Compte X"], ["tiktok", "TikTok", "@iashark_data"]];
+  function chargerVisiteurs() {
+    var H = A().H, jours = derniersJours(42);
+    return A().rpc("admin_analytics", { p_days: 42, p_include_internal: false, p_from: jours[0], p_to: jours[41], p_since: H.LAUNCH_AT, p_site: null, p_device: null, p_source: null })
+      .then(function (r) { E.visiteurs = r.data || null; E.visiteursErr = r.data ? null : r; rendreVisiteurs(); });
+  }
+  function rendreVisiteurs() {
+    var el = $("ledVisiteurs");
+    if (!el) return;
+    if (!E.visiteurs) { A().blockError(el, E.visiteursErr, "Visiteurs jour par jour"); return; }
+    var jours = derniersJours(42), parJour = {};
+    (E.visiteurs.series || []).forEach(function (b) { var j = String(b && b.t || "").slice(0, 10); parJour[j] = (parJour[j] || 0) + num(b.visitors); });
+    var vals = jours.map(function (j) { return parJour[j] || 0; });
+    var auj = vals[41], sept = vals.slice(34, 41), moy = Math.round(sept.reduce(function (a, b) { return a + b; }, 0) / 7);
+    var total = vals.reduce(function (a, b) { return a + b; }, 0);
+    var ecart = moy ? Math.round((auj - moy) / moy * 100) : 0;
+    ledCarte(el, { titre: "Visiteurs", cap: "Vrais visiteurs jour par jour, 6 dernières semaines", accent: "#20d5ef", jours: jours, vals: vals,
+      fmt: function (v) { return v + " visiteur" + (v > 1 ? "s" : ""); }, gros: A().H.fmtInt(auj) + " aujourd'hui",
+      pill: moy + " par jour", pillUp: false, pillLabel: "en moyenne sur 7 jours",
+      icone: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.4 3-5.4 6-5.4s5.4 2 6 5.4M16 4.6a3.2 3.2 0 0 1 0 6.4M18 14.8c1.7.7 2.8 2.5 3 5.2"/></svg>',
+      pied: "<span>" + esc(A().H.fmtInt(total) + " visiteurs en 6 semaines") + "</span><span>" + esc(moy ? (ecart >= 0 ? "+" : "") + ecart + " % aujourd'hui par rapport à la moyenne (journée en cours)" : "") + "</span>" });
+  }
+
+  // =====================================================================================================
+  // Reseaux : abonnes jour par jour, une carte LED par reseau (gagnes chaque jour)
+  // =====================================================================================================
+  var RESEAUX = [
+    ["telegram", "Telegram", "Chaîne gratuite", "#38bdf8", '<svg viewBox="0 0 24 24"><path d="M21 4L3 11l6 2 2 6 3-4 5 4z"/></svg>'],
+    ["x", "X", "Compte X", "#e2e8f0", '<svg viewBox="0 0 24 24"><path d="M5 4l14 16M19 4L5 20"/></svg>'],
+    ["tiktok", "TikTok", "@iashark_data", "#f472b6", '<svg viewBox="0 0 24 24"><path d="M14 4v10a4 4 0 1 1-4-4M14 4c1 2.5 3 4 6 4"/></svg>']
+  ];
   function chargerReseaux() {
     return A().rpc("admin_reseaux", { p_jours: 120 }).then(function (r) { E.reseaux = r.data || null; E.reseauxErr = r.data ? null : r; rendreReseaux(); });
-  }
-  function courbe(points) {
-    if (points.length < 2) return "";
-    var w = 260, h = 56, min = Math.min.apply(null, points), max = Math.max.apply(null, points), span = Math.max(1, max - min);
-    var d = points.map(function (v, i) { return (i ? "L" : "M") + (i * w / (points.length - 1)).toFixed(1) + "," + (h - 4 - (v - min) / span * (h - 8)).toFixed(1); }).join("");
-    return '<svg class="r-courbe" viewBox="0 0 ' + w + " " + h + '" preserveAspectRatio="none" aria-hidden="true"><path d="' + d + '"/></svg>';
   }
   function rendreReseaux() {
     var el = $("reseauxAbos");
     if (!el) return;
     if (!E.reseaux) { A().blockError(el, E.reseauxErr, "Tes abonnés"); return; }
-    var series = E.reseaux.series || [];
-    el.innerHTML = '<div class="r-grid">' + RESEAUX.map(function (r) {
+    var series = E.reseaux.series || [], jours = derniersJours(21);
+    var total = 0, gain7 = 0;
+    el.innerHTML = '<div class="rs-grid">' + RESEAUX.map(function (r) { return '<div id="rs-' + r[0] + '"></div>'; }).join("") + "</div>";
+    RESEAUX.forEach(function (r) {
       var pts = series.filter(function (s) { return s.reseau === r[0]; });
-      if (!pts.length) return '<article class="r-card"><h3>' + esc(r[1]) + "</h3><p class=\"soft-msg\">Premier relevé en cours.</p></article>";
-      var der = pts[pts.length - 1], val = num(der.abonnes);
-      var ecart = function (j) {
-        var lim = new Date(Date.parse(der.jour) - j * 86400000).toISOString().slice(0, 10);
-        var avant = pts.filter(function (p) { return p.jour <= lim; }).pop();
-        if (!avant) return null;
-        return val - num(avant.abonnes);
-      };
-      var e1 = ecart(1), e7 = ecart(7);
-      var signe = function (n) { return n === null ? "—" : (n > 0 ? "+" : "") + n; };
-      return '<article class="r-card"><div class="r-top"><h3>' + esc(r[1]) + "</h3><span>" + esc(r[2]) + '</span></div><b class="r-val tnum">' + A().H.fmtInt(val)
-        + '</b><p class="r-delta"><span class="' + (e1 > 0 ? "up" : e1 < 0 ? "down" : "") + '">' + esc(signe(e1)) + " en 1 jour</span><span class=\"" + (e7 > 0 ? "up" : e7 < 0 ? "down" : "") + '">' + esc(signe(e7)) + " en 7 jours</span></p>"
-        + courbe(pts.map(function (p) { return num(p.abonnes); })) + '<small>Relevé du ' + esc(A().H.shortDay(der.jour)) + " · depuis le " + esc(A().H.shortDay(pts[0].jour)) + "</small></article>";
-    }).join("") + "</div>";
+      var box = $("rs-" + r[0]);
+      var parJour = {};
+      pts.forEach(function (p) { parJour[p.jour] = num(p.abonnes); });
+      // Gain d'un jour = releve du jour moins le releve precedent connu.
+      var gains = jours.map(function (j) {
+        if (parJour[j] === undefined) return 0;
+        var avant = pts.filter(function (p) { return p.jour < j; }).pop();
+        return avant ? Math.max(0, parJour[j] - num(avant.abonnes)) : 0;
+      });
+      var der = pts[pts.length - 1];
+      var val = der ? num(der.abonnes) : null;
+      var lim7 = A().H.addDays(A().H.parisToday(new Date()), -7);
+      var avant7 = pts.filter(function (p) { return p.jour <= lim7; }).pop() || pts[0];
+      var g7 = der && avant7 ? val - num(avant7.abonnes) : 0;
+      if (val !== null) { total += val; gain7 += g7; }
+      ledCarte(box, { titre: r[1], cap: r[2] + " · nouveaux abonnés par jour", accent: r[3], icone: r[4], rows: 6, jours: jours, vals: gains,
+        fmt: function (v) { return v ? "+" + v + " abonné" + (v > 1 ? "s" : "") : "Aucun nouveau"; },
+        gros: val === null ? "—" : A().H.fmtInt(val), pill: (g7 >= 0 ? "+" : "") + g7, pillUp: g7 > 0, pillLabel: der ? "en 7 jours" : "premier relevé en cours",
+        pied: der ? "<span>Relevé du " + esc(A().H.shortDay(der.jour)) + " · suivi depuis le " + esc(A().H.shortDay(pts[0].jour)) + "</span>" : "" });
+    });
   }
 
   // =====================================================================================================
-  // Paris : les memes fichiers que le site
+  // Paris : les memes fichiers que le site (preuves/bandeau.json, preuves/bilan-hier.json)
+  // LED : paris simples gagnes par jour ; tableau facon « Payments Table » avec logos des equipes.
   // =====================================================================================================
-  var RES = { win: ["Gagné", "vert"], loss: ["Perdu", "rouge"], void: ["Annulé", ""] };
+  var RES = { win: ["Gagné", "v"], loss: ["Perdu", "r"], void: ["Annulé", "o"] };
   function chargerParis() {
     var get = function (u) { return fetch(u, { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); };
     return Promise.all([get("/preuves/bandeau.json"), get("/preuves/bilan-hier.json")]).then(function (r) { E.paris = { bandeau: r[0], hier: r[1] }; rendreParis(); });
   }
+  function logo(id) { return id ? '<img class="pr-logo" src="https://media.api-sports.io/football/teams/' + encodeURIComponent(id) + '.png" alt="" loading="lazy" width="24" height="24">' : ""; }
   function rendreParis() {
     var el = $("paris");
     if (!el || !E.paris) return;
     var b = E.paris.bandeau, h = E.paris.hier;
     if (!b) { el.innerHTML = A().emptyHtml("Résultats indisponibles", "Le fichier des résultats du site n'a pas pu être lu. Réessaie dans un instant."); return; }
-    var c = b.compte || {}, g = num(c.gagnes), p = num(c.perdus);
-    var hs = h && h.paris_simples;
-    var html = '<div class="cards">'
-      + kcard("green", "Depuis le " + A().H.shortDay(c.depuis || ""), g + " gagnés", esc(p + " perdus · " + (g + p ? Math.round(g / (g + p) * 100) : 0) + " % gagnés"))
-      + (hs ? kcard("", "Hier (" + A().H.shortDay(hs.jour) + ")", num(hs.gagnes) + " gagnés", esc(num(hs.perdus) + " perdus · " + num(hs.annules) + " annulés" + (num(hs.en_attente) ? " · " + num(hs.en_attente) + " en attente" : ""))) : "")
-      + "</div>";
-    var cmb = (b.combines || []).slice(0, 10), or = (b.or || []).slice(0, 7);
-    html += '<section class="card section"><div class="card-head"><div><h3 class="card-title">Combinés des 7 derniers jours</h3><p class="card-sub">Ticket ×5 gratuit et ×10 Pro</p></div></div>'
-      + (cmb.length ? '<ul class="p-list">' + cmb.map(function (x) {
-        var r = RES[x.r] || ["En cours", ""];
-        return '<li class="p-row ' + r[1] + '"><span>' + esc(A().H.shortDay(x.j)) + " · " + esc(x.t === "x10" ? "Ticket ×10" : "Ticket ×5") + " · " + esc(x.n + " matchs") + '</span><span class="tnum">cote ' + esc(String(x.c).replace(".", ",")) + '</span><b>' + esc(r[0]) + "</b></li>";
-      }).join("") + "</ul>" : A().emptyHtml("Aucun combiné", "")) + "</section>";
-    html += '<section class="card section"><div class="card-head"><div><h3 class="card-title">Sélection en or</h3><p class="card-sub">Paris gagnés sur le nombre de paris, par jour</p></div></div>'
-      + (or.length ? '<ul class="p-list">' + or.map(function (x) {
-        return '<li class="p-row ' + (x.p ? (x.g ? "" : "rouge") : "vert") + '"><span>' + esc(A().H.shortDay(x.j)) + '</span><span class="tnum">' + esc(x.g + " sur " + x.n) + "</span><b>" + esc(x.p ? x.p + " perdu" + (x.p > 1 ? "s" : "") : "tout gagné") + "</b></li>";
-      }).join("") + "</ul>" : A().emptyHtml("Aucune sélection", "")) + "</section>";
-    var simples = ((b.simples && b.simples.items) || []).slice(0, 40);
-    html += '<section class="card section"><div class="card-head"><div><h3 class="card-title">Les 40 derniers paris simples</h3><p class="card-sub">Publiés avant le match, du plus récent au plus ancien</p></div></div>'
-      + (simples.length ? '<ul class="p-list">' + simples.map(function (x) {
-        var r = RES[x.r] || ["En cours", ""];
-        return '<li class="p-row ' + r[1] + '"><span>' + esc(x.h + " – " + x.a) + "<small>" + esc(x.p + " · " + A().fmtDay(x.k)) + '</small></span><span class="tnum">' + esc((x.s || "") + " · " + String(x.c).replace(".", ",")) + "</span><b>" + esc(r[0]) + "</b></li>";
-      }).join("") + "</ul>" : A().emptyHtml("Aucun pari réglé", "")) + "</section>";
-    html += '<p class="note">Mêmes chiffres que la bande des résultats du site, calculés chaque matin (dernier calcul : ' + esc(b.genere_le ? quand(b.genere_le) : "—") + ").</p>";
-    el.innerHTML = html;
+    var c = b.compte || {}, g = num(c.gagnes), p = num(c.perdus), pct = g + p ? Math.round(g / (g + p) * 100) : 0;
+    var items = (b.simples && b.simples.items) || [];
+    var jours = derniersJours(21), gagnesJour = {}, joues = {};
+    items.forEach(function (x) { var j = parisJour(x.k); joues[j] = (joues[j] || 0) + (x.r === "win" || x.r === "loss" ? 1 : 0); if (x.r === "win") gagnesJour[j] = (gagnesJour[j] || 0) + 1; });
+    el.innerHTML = '<div class="ag"><div id="parisLed"></div><div class="ag-tuiles" id="parisTuiles"></div><div id="parisListes"></div></div>';
+    ledCarte($("parisLed"), { titre: "Paris simples gagnés", cap: "Jour par jour, 3 dernières semaines", accent: "#34d399", jours: jours,
+      vals: jours.map(function (j) { return gagnesJour[j] || 0; }),
+      fmt: function (v) { return v ? v + " gagné" + (v > 1 ? "s" : "") : "Aucun gagné"; },
+      gros: g + " gagnés", pill: pct + " %", pillUp: pct >= 50, pillLabel: "gagnés depuis le " + A().H.shortDay(c.depuis || ""),
+      pied: "<span>" + esc(p + " perdus depuis le " + A().H.shortDay(c.depuis || "")) + "</span><span>Calcul du " + esc(b.genere_le ? quand(b.genere_le) : "—") + "</span>" });
+    var hs = h && h.paris_simples, or = (b.or || []).slice(0, 7), cmb = (b.combines || []).slice(0, 10);
+    var orG = or.reduce(function (s, x) { return s + num(x.g); }, 0), orN = or.reduce(function (s, x) { return s + num(x.n); }, 0);
+    var cmbG = cmb.filter(function (x) { return x.r === "win"; }).length;
+    $("parisTuiles").innerHTML = tuile("t-recu", hs ? "Hier, " + A().H.shortDay(hs.jour) : "Hier", hs ? num(hs.gagnes) + " gagnés" : "—",
+        hs ? esc(num(hs.perdus) + " perdus · " + num(hs.annules) + " annulés" + (num(hs.en_attente) ? " · " + num(hs.en_attente) + " en attente" : "")) : "Bilan pas encore calculé")
+      + tuile("t-or", "Sélection en or, 7 jours", orG + " sur " + orN, esc(orN ? Math.round(orG / orN * 100) + " % des paris gagnés" : "Aucune sélection"),
+        '<div class="pr-points" aria-hidden="true">' + or.slice().reverse().map(function (x) {
+          // Un point par pari : vert gagne, rouge perdu, orange annule.
+          var pts = "", k;
+          for (k = 0; k < num(x.g); k++) pts += '<i class="v" title="' + esc(x.j) + '"></i>';
+          for (k = 0; k < num(x.p); k++) pts += '<i class="r" title="' + esc(x.j) + '"></i>';
+          for (k = 0; k < num(x.a); k++) pts += '<i class="o" title="' + esc(x.j) + '"></i>';
+          return pts;
+        }).join("") + "</div>")
+      + tuile("t-gens", "Combinés, 7 jours", cmbG + " sur " + cmb.length, esc("Tickets ×5 gratuits et ×10 Pro"),
+        '<div class="pr-points" aria-hidden="true">' + cmb.slice().reverse().map(function (x) { return '<i class="' + (x.r === "win" ? "v" : x.r === "loss" ? "r" : "o") + '"></i>'; }).join("") + "</div>");
+    var simples = items.slice(0, 40);
+    $("parisListes").innerHTML = '<section class="ag-bloc"><div class="ag-bloc-tete"><h2>Les 40 derniers paris simples</h2><p>Publiés avant le match, du plus récent au plus ancien</p></div>'
+      + (simples.length ? '<table class="ag-table pr-table"><thead><tr><th>Match</th><th>Pari</th><th class="ag-r-num">Cote</th><th>Résultat</th></tr></thead><tbody>' + simples.map(function (x) {
+        var r = RES[x.r] || ["En cours", "b"];
+        return '<tr class="pr-l"><td><div class="ag-qui"><span class="pr-logos">' + logo(x.hi) + logo(x.ai) + "</span><span><b>" + esc(x.h + " – " + x.a) + "</b><small>" + esc(A().fmtDay(x.k) + (x.s ? " · score " + x.s : "")) + "</small></span></div></td>"
+          + "<td>" + esc(x.p) + '</td><td class="ag-r-num"><span class="ag-mt">' + esc(String(x.c).replace(".", ",")) + '</span></td><td><span class="ag-badge ' + r[1] + '">' + esc(r[0]) + "</span></td></tr>";
+      }).join("") + "</tbody></table>" : A().emptyHtml("Aucun pari réglé", "")) + "</section>"
+      + '<section class="ag-bloc"><div class="ag-bloc-tete"><h2>Combinés des 7 derniers jours</h2><p>Ticket ×5 gratuit et ×10 Pro</p></div>'
+      + (cmb.length ? '<table class="ag-table"><thead><tr><th>Ticket</th><th>Matchs</th><th class="ag-r-num">Cote</th><th>Résultat</th></tr></thead><tbody>' + cmb.map(function (x) {
+        var r = RES[x.r] || ["En cours", "b"];
+        return '<tr><td><div class="ag-qui"><span class="ag-av" style="--t:' + (x.t === "x10" ? "#fcc54d" : "#20d5ef") + '">' + (x.t === "x10" ? "×10" : "×5") + "</span><span><b>" + esc(x.t === "x10" ? "Ticket ×10 Pro" : "Ticket ×5 gratuit") + "</b><small>" + esc(A().H.shortDay(x.j)) + "</small></span></div></td>"
+          + "<td>" + esc(x.n + " matchs") + '</td><td class="ag-r-num"><span class="ag-mt">' + esc(String(x.c).replace(".", ",")) + '</span></td><td><span class="ag-badge ' + r[1] + '">' + esc(r[0]) + "</span></td></tr>";
+      }).join("") + "</tbody></table>" : A().emptyHtml("Aucun combiné", "")) + "</section>";
   }
 
   // =====================================================================================================
@@ -761,6 +830,7 @@
   window.IasharkAdminApp = {
     charger: function () {
       chargerAbonnements();
+      chargerVisiteurs();
       chargerReseaux();
       if (!charge || A().S.screen === "paris") chargerParis();
       if (A().S.screen === "alertes") chargerAlertes();

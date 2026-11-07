@@ -872,3 +872,140 @@ dialog.fiche::backdrop{background:rgba(3,6,10,.78)}
   .ag-qui b{max-width:none}
 }
 @media (prefers-reduced-motion:reduce){.ag-dot,.ag-bande,.ag-tip,.ag-guide{transition:none!important}}
+
+/* =====================================================================================================
+   Toutes les pages (07/11/2026, Clement : « fais pareil pour toutes les pages ») : meme langage que l'ecran
+   Argent (21st.dev LED Dot Matrix + Payments Table) : Inter Tight pour le texte, JetBrains Mono pour les chiffres,
+   cartes teintees de couleurs differentes, tableaux et pastilles facon Payments Table.
+   ===================================================================================================== */
+body{--ag-accent:#20d5ef;--ag-spring:linear(0,0.009,0.035 2.1%,0.141,0.281 6.7%,0.723 12.9%,0.938 16.7%,1.017,1.077,1.121,1.149 24.3%,1.159,1.163,1.161,1.154 29.9%,1.129 32.8%,1.051 39.6%,1.017 43.1%,0.991,0.977 51%,0.974 53.8%,0.975 57.1%,0.997 69.8%,1.003 76.9%,1);
+  --ag-mono:'JetBrains Mono','SF Mono',ui-monospace,monospace;--ag-ui:'Inter Tight','Inter',ui-sans-serif,system-ui,sans-serif;
+  --ag-v:#34d399;--ag-b:#60a5fa;--ag-r:#fb7185;--ag-o:#fbbf24;font-family:var(--ag-ui)}
+.ag-solo{display:block}
+.kcard-value,.bar-val,.l-head b,.dt .num,.r-val,.todo-n,.hero-text .tnum,.lrow .tnum,.dt-v.tnum,.delta,.live-chip,.v-time{font-family:var(--ag-mono);font-variant-numeric:tabular-nums}
+
+/* Titres */
+.screen-title{font-family:var(--ag-ui);font-weight:700;letter-spacing:-.025em}
+.section-title,.card-title{font-family:var(--ag-ui);font-weight:600;letter-spacing:-.01em;color:#fff}
+.card-title{font-size:17px}
+
+/* Cartes et blocs : meme forme que les blocs Argent */
+.card{border-radius:22px;background:linear-gradient(180deg,var(--card2),var(--card))}
+.hero{border-radius:28px;background:radial-gradient(120% 90% at 100% 0%,rgba(32,213,239,.22),transparent 55%),radial-gradient(80% 60% at 0% 100%,#0f2a3a,transparent 70%),linear-gradient(180deg,#0d1a28,#070d16);
+  border:1px solid rgba(150,220,255,.1);box-shadow:0 30px 60px -24px rgba(0,8,20,.6)}
+.hero-text{font-family:var(--ag-ui);font-weight:600;letter-spacing:-.02em}
+
+/* Chiffres cles : chaque couleur a sa teinte (cartes differentes, comme les tuiles Argent) */
+.kcard{border-radius:22px;background:radial-gradient(90% 80% at 100% 0%,rgba(32,213,239,.16),transparent 60%),linear-gradient(180deg,#0f1f2e,#0a1420);border-color:rgba(32,213,239,.22)}
+.kcard.green{background:radial-gradient(90% 80% at 100% 0%,rgba(52,211,153,.16),transparent 60%),linear-gradient(180deg,#0f2220,#0a1416);border-color:rgba(52,211,153,.24)}
+.kcard.violet{background:radial-gradient(90% 80% at 100% 0%,rgba(167,159,240,.18),transparent 60%),linear-gradient(180deg,#141a2e,#0c1220);border-color:rgba(167,159,240,.26)}
+.kcard.amber{background:radial-gradient(90% 80% at 100% 0%,rgba(251,191,36,.15),transparent 60%),linear-gradient(180deg,#221d10,#14110a);border-color:rgba(251,191,36,.24)}
+.kcard-label{font-family:var(--ag-ui);text-transform:none;letter-spacing:0;font-size:13.5px;font-weight:600;color:var(--soft)}
+.kcard-value{font-weight:600;letter-spacing:-.035em;color:#7ee8f7}
+.kcard.green .kcard-value{color:#86efac}.kcard.violet .kcard-value{color:#c4b5fd}.kcard.amber .kcard-value{color:#fcd34d}
+.kcard-icon{border-radius:12px}
+.delta{border-radius:999px;padding:3px 9px;font-weight:600}
+.delta.good{box-shadow:0 0 0 1px rgba(52,211,153,.24) inset}.delta.bad{box-shadow:0 0 0 1px rgba(251,113,133,.24) inset}
+
+/* Barres : pilules en degrade */
+.bar-track{height:10px;border-radius:999px;background:rgba(148,163,184,.12)}
+.bar-track i{border-radius:999px;background:linear-gradient(90deg,#06b6d4,#20d5ef)}
+.bar-track i.alt{background:linear-gradient(90deg,#8b5cf6,#a79ff0)}
+.bar-track i.warm{background:linear-gradient(90deg,#f59e0b,#fcd34d)}
+.bar-val{font-weight:600;color:#fff}
+.bars li:nth-child(4n+2) .bar-track i:not(.alt):not(.warm){background:linear-gradient(90deg,#8b5cf6,#a79ff0)}
+.bars li:nth-child(4n+3) .bar-track i:not(.alt):not(.warm){background:linear-gradient(90deg,#10b981,#34d399)}
+.bars li:nth-child(4n+4) .bar-track i:not(.alt):not(.warm){background:linear-gradient(90deg,#f59e0b,#fcd34d)}
+
+/* Tableaux : facon Payments Table */
+.dt{font-size:14px}
+.dt thead th{font:500 12px var(--ag-ui);height:40px;vertical-align:middle;border-bottom:1px solid var(--line)}
+.dt th,.dt td{padding:12px 10px;vertical-align:middle}
+.dt tbody th{font-weight:600;color:var(--text)}
+.dt tbody tr{transition:background .15s}
+.dt tbody tr:hover th,.dt tbody tr:hover td{background:rgba(148,163,184,.06)}
+.dt .num{font-weight:600;color:#fff}
+
+/* Pastilles de statut : point de couleur + fond teinte */
+.mstatus{gap:6px;padding:3px 10px;font:600 12px var(--ag-ui)}
+.mstatus:before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.mstatus.st-pro{background:rgba(52,211,153,.14);color:#6ee7b7}
+.mstatus.st-new{background:rgba(96,165,250,.14);color:#93c5fd}
+.mstatus.st-active{background:rgba(32,213,239,.14);color:#7ee8f7}
+.mstatus.st-nudge,.mstatus.st-intent{background:rgba(251,191,36,.14);color:#fcd34d}
+.mstatus.st-gone{background:rgba(251,113,133,.12);color:#fda4af}
+.pill{font-family:var(--ag-ui);letter-spacing:0}
+
+/* Les gens : lignes avec avatar (Payments Table) */
+.g-row{padding:12px 2px}
+.g-open{flex-direction:row;align-items:center;gap:12px}
+.g-txt{display:flex;flex-direction:column;gap:4px;min-width:0}
+.g-mail{font-weight:600;color:var(--text)}
+.g-meta .ag-badge{padding:2px 9px;font-size:11.5px}
+.l-grid{gap:12px}
+.l-card{border-radius:20px;padding:4px 16px;background:linear-gradient(180deg,var(--card2),var(--card))}
+.l-card.vert{background:radial-gradient(90% 90% at 100% 0%,rgba(52,211,153,.14),transparent 60%),linear-gradient(180deg,#0f2220,#0a1416);border-color:rgba(52,211,153,.22)}
+.l-card.orange{background:radial-gradient(90% 90% at 100% 0%,rgba(251,191,36,.13),transparent 60%),linear-gradient(180deg,#221d10,#14110a);border-color:rgba(251,191,36,.22)}
+.l-card.rouge{background:radial-gradient(90% 90% at 100% 0%,rgba(251,113,133,.13),transparent 60%),linear-gradient(180deg,#24121a,#150b10);border-color:rgba(251,113,133,.22)}
+.l-head b{font-weight:600;font-size:30px}
+.l-head strong{font-family:var(--ag-ui);font-weight:600}
+.l-card.rouge .l-head b{color:#fda4af}.l-card.orange .l-head b{color:#fcd34d}.l-card.vert .l-head b{color:#86efac}
+.cherche input{border-radius:999px;padding:10px 18px;font-family:var(--ag-ui)}
+
+/* Parcours d'une personne : frise en couleurs */
+.j-title{font-family:var(--ag-ui);font-weight:600;color:#fff}
+.timeline li{padding:8px 0 8px 26px}
+.timeline li::before{left:7px;background:linear-gradient(180deg,rgba(32,213,239,.35),rgba(148,163,184,.15))}
+.timeline li::after{left:1px;top:13px;width:13px;height:13px;border:0;background:#20d5ef;box-shadow:0 0 0 3px rgba(32,213,239,.18)}
+.timeline li.ev::after{background:#fbbf24;box-shadow:0 0 0 3px rgba(251,191,36,.18);width:13px;height:13px;left:1px;top:13px}
+.timeline li.win::after{background:#34d399;box-shadow:0 0 0 3px rgba(52,211,153,.2)}
+.tl-meta{font-family:var(--ag-mono);font-size:12px;color:var(--muted);white-space:nowrap}
+.f-h{font-family:var(--ag-ui);font-weight:600;color:#fff}
+
+/* Visites, qui est la, a faire */
+.todo-n{border-radius:12px;font-weight:600}
+.v-row{border-radius:14px}
+.lrow{padding:12px 4px}
+
+/* Reseaux : une carte LED par reseau */
+.rs-grid{display:grid;grid-template-columns:1fr;gap:14px}
+@media (min-width:1100px){.rs-grid{grid-template-columns:1fr 1fr}.rs-grid>div:first-child{grid-column:1/-1}}
+
+/* Paris */
+.t-or{background:radial-gradient(90% 80% at 100% 0%,rgba(251,191,36,.16),transparent 60%),linear-gradient(180deg,#221d10,#14110a);border-color:rgba(251,191,36,.24)}
+.t-or .ag-num{color:#fcd34d}
+.t-gens .ag-num{color:#c4b5fd}
+.pr-points{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.pr-points i{width:14px;height:14px;border-radius:50%}
+.pr-points .v{background:var(--ag-v);box-shadow:0 0 10px rgba(52,211,153,.5)}.pr-points .r{background:var(--ag-r)}.pr-points .o{background:var(--ag-o)}
+.pr-logos{display:flex;flex:none}
+.pr-logo{width:28px;height:28px;border-radius:50%;background:#fff;padding:3px;object-fit:contain;box-shadow:0 0 0 2px var(--card)}
+.pr-logo+.pr-logo{margin-left:-8px}
+#paris .ag{gap:16px}
+
+/* Plus : liste des ecrans en couleurs */
+.plus-list{background:none;border:0;gap:10px}
+.plus-list li a{border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,var(--card2),var(--card));padding:14px 44px 14px 16px;position:relative;border-top:1px solid var(--line)}
+.plus-list li:first-child a{border-top:1px solid var(--line)}
+.plus-list li a:after{content:'';position:absolute;right:18px;top:50%;width:8px;height:8px;border-right:2px solid var(--muted);border-top:2px solid var(--muted);transform:translateY(-50%) rotate(45deg)}
+.plus-list li a b{font-family:var(--ag-ui);font-weight:600;font-size:15.5px}
+.plus-list li a:before{content:'';position:absolute;left:0;top:14px;bottom:14px;width:0}
+.plus-list li:nth-child(6n+1) a{background:radial-gradient(90% 120% at 100% 0%,rgba(32,213,239,.26),transparent 60%),linear-gradient(180deg,var(--card2),var(--card))}
+.plus-list li:nth-child(6n+2) a{background:radial-gradient(90% 120% at 100% 0%,rgba(167,159,240,.26),transparent 60%),linear-gradient(180deg,var(--card2),var(--card))}
+.plus-list li:nth-child(6n+3) a{background:radial-gradient(90% 120% at 100% 0%,rgba(52,211,153,.26),transparent 60%),linear-gradient(180deg,var(--card2),var(--card))}
+.plus-list li:nth-child(6n+4) a{background:radial-gradient(90% 120% at 100% 0%,rgba(251,191,36,.26),transparent 60%),linear-gradient(180deg,var(--card2),var(--card))}
+.plus-list li:nth-child(6n+5) a{background:radial-gradient(90% 120% at 100% 0%,rgba(244,114,182,.26),transparent 60%),linear-gradient(180deg,var(--card2),var(--card))}
+.plus-list li:nth-child(6n+6) a{background:radial-gradient(90% 120% at 100% 0%,rgba(96,165,250,.26),transparent 60%),linear-gradient(180deg,var(--card2),var(--card))}
+
+/* Barre d'onglets du bas */
+.tabbar a span{font-family:var(--ag-ui);font-weight:600}
+
+@media (max-width:640px){
+  .pr-table td:nth-child(2){grid-column:1;grid-row:2;color:var(--soft)}
+  .kcard-value{font-size:26px}
+  .l-grid{grid-template-columns:1fr}
+}
+.kcard .micro{text-transform:none;letter-spacing:0;font:600 12.5px var(--ag-ui);color:var(--muted)}
+.pr-points{gap:5px}.pr-points i{width:11px;height:11px}
+.ag-led .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#reseauxAbos .rs-grid{margin-top:4px}

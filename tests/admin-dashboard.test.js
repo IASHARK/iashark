@@ -343,7 +343,7 @@ test("rendu : resume, 6 cartes, feu, parcours, sources, humain/robot, sans ville
   assert.match(d.text("heroCompare"), /4 visiteurs de plus qu&#39;hier à la même heure/);
   const cards = d.text("cards");
   assert.equal((cards.match(/class="kcard /g) || []).length, 6);
-  for (const label of ["Visiteurs", "Inscriptions", "Abonnés Pro actifs", "Argent encaissé", "Revenu mensuel (MRR)", "En ce moment"]) assert.ok(cards.includes(">" + label + "<"), label);
+  for (const label of ["Visiteurs", "Inscriptions", "Abonnés qui paient", "Argent encaissé", "Chaque mois", "En ce moment"]) assert.ok(cards.includes(">" + label + "<"), label);
   assert.equal((cards.match(/Ce que ça veut dire/g) || []).length, 6);
   assert.equal((cards.match(/class="info"/g) || []).length, 6, "un bouton i par carte");
   assert.match(cards, /1 personne navigue sur le site en ce moment/, "le robot n'est pas compte");
@@ -473,7 +473,7 @@ test("0022 (non appliquee) : villes / regions / fuseau, memes signatures, admin 
 test("admin.html : sections dans l'ordre, periodes, aide i reliee, Exclure cet appareil, Details replies", () => {
   // Ordre des 9 ecrans (19/10/2026) : chaque ecran garde ses blocs d'avant.
   const order = ["todo", "heroText", "cards", "health", "speed", "errors", "shown", "funnel", "signupFlow", "payFlow", "channels", "posts", "sources",
-    "countries", "cities", "live", "landing", "langs", "unlockClicks", "pages", "matches", "signups", "money", "quality", "bots", "deviceBtn", "details"];
+    "countries", "cities", "live", "landing", "langs", "unlockClicks", "pages", "matches", "signups", "argentLed", "quality", "bots", "deviceBtn", "details"];
   let last = -1;
   for (const id of order) {
     const at = html.indexOf('id="' + id + '"');
@@ -584,7 +584,7 @@ test("10 écrans : chaque écran a son lien et au moins un bloc dans admin.html"
 });
 
 test("diagnostics : chaque bloc rempli par admin_diagnostics existe dans admin.html", () => {
-  for (const id of ["todo", "speed", "errors", "shown", "channels", "posts", "landing", "langs", "signupFlow", "payFlow", "money", "quality"]) {
+  for (const id of ["todo", "speed", "errors", "shown", "channels", "posts", "landing", "langs", "signupFlow", "payFlow", "quality"]) {
     assert.match(html, new RegExp('id="' + id + '"'), id);
   }
   assert.match(sql52, /create or replace function public\.admin_diagnostics\(/);

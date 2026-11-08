@@ -1,10 +1,10 @@
 {
  "version": 1,
- "genere_le": "2026-11-07T13:24:57.122Z",
- "jour": "2026-11-07",
+ "genere_le": "2026-11-08T07:22:42.746Z",
+ "jour": "2026-11-08",
  "debut": "2026-10-06",
  "objectif": 10,
- "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-11-07. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
+ "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-11-08. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
  "montantes": [
   {
    "rang": 1,
@@ -23,8 +23,10 @@
    ],
    "gagnes": 1,
    "cote": 1.4,
-   "etat": "en_cours",
-   "attente": null,
+   "etat": "en_attente",
+   "attente": {
+    "j": "2026-11-07"
+   },
    "dernier": {
     "t": "perdu",
     "j": "2026-11-05",
@@ -240,6 +242,17 @@
      "c": 1.4,
      "r": "gagne",
      "cc": 1.4
+    },
+    {
+     "j": "2026-11-07",
+     "f": 1494798,
+     "h": "Kristiansund BK",
+     "a": "Valerenga",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.4,
+     "r": "en_attente",
+     "cc": null
     }
    ],
    "bilan": {
@@ -252,75 +265,19 @@
   },
   {
    "rang": 2,
-   "paliers": [
-    {
-     "j": "2026-11-02",
-     "f": 1549050,
-     "h": "Sonderjyske",
-     "a": "FC Copenhagen",
-     "m": "away-win",
-     "p": "Victoire FC Copenhagen",
-     "c": 1.42,
-     "r": "gagne",
-     "cc": 1.42
-    },
-    {
-     "j": "2026-11-03",
-     "f": 1635662,
-     "h": "Feyenoord",
-     "a": "Inter",
-     "m": "over-25",
-     "p": "Plus de 2,5 buts",
-     "c": 1.4,
-     "r": "gagne",
-     "cc": 1.99
-    },
-    {
-     "j": "2026-11-04",
-     "f": 1492445,
-     "h": "Flamengo",
-     "a": "Gremio",
-     "m": "over-25",
-     "p": "Plus de 2,5 buts",
-     "c": 1.4,
-     "r": "gagne",
-     "cc": 2.78
-    },
-    {
-     "j": "2026-11-05",
-     "f": 1636448,
-     "h": "FC Midtjylland",
-     "a": "Ajax",
-     "m": "btts-yes",
-     "p": "Les deux équipes marquent",
-     "c": 1.4,
-     "r": "gagne",
-     "cc": 3.9
-    },
-    {
-     "j": "2026-11-06",
-     "f": 1494334,
-     "h": "Hammarby FF",
-     "a": "IF Elfsborg",
-     "m": "over-25",
-     "p": "Plus de 2,5 buts",
-     "c": 1.57,
-     "r": "gagne",
-     "cc": 6.12
-    }
-   ],
-   "gagnes": 5,
-   "cote": 6.12,
+   "paliers": [],
+   "gagnes": 0,
+   "cote": null,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
     "t": "perdu",
-    "j": "2026-11-01",
-    "n": 1,
-    "h": "Trabzonspor",
-    "a": "Gaziantep FK",
+    "j": "2026-11-07",
+    "n": 5,
+    "h": "Preston",
+    "a": "Southampton",
     "p": "Plus de 2,5 buts",
-    "k": 1.4
+    "k": 1.55
    },
    "objectifs": [
     {
@@ -369,7 +326,7 @@
      "h": "Empoli",
      "a": "Vicenza Virtus",
      "m": "fh-over-05",
-     "p": "1re mi-temps : plus de 0,5 but",
+     "p": "1re mi-temps : plus de 0,5 but",
      "c": 1.4,
      "r": "gagne",
      "cc": 3.37
@@ -528,11 +485,22 @@
      "c": 1.57,
      "r": "gagne",
      "cc": 6.12
+    },
+    {
+     "j": "2026-11-07",
+     "f": 1563258,
+     "h": "Preston",
+     "a": "Southampton",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.55,
+     "r": "perdu",
+     "cc": null
     }
    ],
    "bilan": {
     "gagnes": 14,
-    "perdus": 4,
+    "perdus": 5,
     "annules": 0,
     "non_regles": 0,
     "objectifs": 1
@@ -547,12 +515,12 @@
    "attente": null,
    "dernier": {
     "t": "perdu",
-    "j": "2026-11-05",
-    "n": 1,
-    "h": "Sunderland",
-    "a": "Dinamo Zagreb",
-    "p": "Victoire Sunderland",
-    "k": 1.44
+    "j": "2026-11-07",
+    "n": 0,
+    "h": "New York Red Bulls",
+    "a": "Atlanta United FC",
+    "p": "Match nul ou Atlanta United FC",
+    "k": 1.85
    },
    "objectifs": [],
    "historique": [
@@ -584,7 +552,7 @@
      "h": "Torino",
      "a": "Monza",
      "m": "away-team-over-05",
-     "p": "Monza : plus de 0,5 but",
+     "p": "Monza : plus de 0,5 but",
      "c": 1.4,
      "r": "gagne",
      "cc": 3.13
@@ -731,11 +699,22 @@
      "c": 1.44,
      "r": "perdu",
      "cc": null
+    },
+    {
+     "j": "2026-11-07",
+     "f": 1490603,
+     "h": "New York Red Bulls",
+     "a": "Atlanta United FC",
+     "m": "dc-x2",
+     "p": "Match nul ou Atlanta United FC",
+     "c": 1.85,
+     "r": "perdu",
+     "cc": null
     }
    ],
    "bilan": {
     "gagnes": 11,
-    "perdus": 4,
+    "perdus": 5,
     "annules": 1,
     "non_regles": 0,
     "objectifs": 0

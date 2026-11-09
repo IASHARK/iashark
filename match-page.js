@@ -403,6 +403,53 @@ function matchTermine(m){
 }
 
 
+// BOUTON SITE DE PARIS (09/11/2026, decision de Clement) : sous le pari de l'Avis
+// IASHARK, « Parier <match> chez 1win ». Le lien passe par /go/1win/site
+// (netlify/edge-functions/lib/go-links.mjs : un seul endroit pour l'adresse).
+// Affiche SEULEMENT dans les pays ou le site de paris accepte les joueurs :
+// pays du visiteur = /api/geo (cache iashark_geo_v1 de funnel-track.js) ; pays
+// inconnu = pas de bouton. Liste des pays fermes a 1win : sources tierces, a
+// remplacer par la liste officielle du gestionnaire 1win des qu'elle arrive.
+// Aucune cote 1win ici : nos sources de cotes ne couvrent pas 1win.
+const BK_PAYS_FERMES={
+  '1win':['FR','GP','MQ','GF','RE','YT','PM','BL','MF','NC','PF','WF','US','GB','ES','IT','DE','NL','BE','AT','CH','DK','SE','NO','FI','IS','AU','HR','CZ','JP','IL','LT','SK','MT','UA','TR','CW']
+};
+const BK_NOMS={'1win':'1win'};
+function paysVisiteur(done){
+  try{
+    const raw=sessionStorage.getItem('iashark_geo_v1');
+    if(raw&&raw!=='none'){const g=JSON.parse(raw);if(g&&typeof g.country==='string'&&/^[A-Z]{2}$/.test(g.country)){done(g.country);return;}}
+  }catch(e){}
+  try{
+    if(typeof fetch!=='function'){done(null);return;}
+    fetch('/api/geo',{method:'GET',credentials:'omit',cache:'no-store'})
+      .then(r=>r&&r.ok?r.json():null)
+      .then(d=>done(d&&typeof d.country==='string'&&/^[A-Z]{2}$/.test(d.country)?d.country:null),()=>done(null));
+  }catch(e){done(null);}
+}
+function remplirBoutonsParieur(root){
+  // Pose apres le rendu, sous le ticket du pari (.sig-slip, ou ses chiffres .appel-stats sur le
+  // pari offert) : signalCard et carteAppel ne sont pas modifiees (empreinte de l'Avis).
+  const cartes=[...(root||document).querySelectorAll('.signal-card.avis')].filter(c=>c.querySelector('.sig-slip')&&!c.querySelector('.bk-cta'));
+  if(!cartes.length)return;
+  const bk='1win',nom=BK_NOMS[bk];
+  const slots=cartes.map(c=>{
+    const el=document.createElement('div');
+    el.className='bk-cta';el.hidden=true;
+    const ancre=c.querySelector('.appel-stats')||c.querySelector('.sig-slip');
+    ancre.insertAdjacentElement('afterend',el);
+    const fx=c.querySelector('.sig-fixture');
+    return {el,m:fx?fx.textContent.trim():''};
+  });
+  paysVisiteur(pays=>{
+    if(!pays||(BK_PAYS_FERMES[bk]||[]).indexOf(pays)!==-1)return;
+    slots.forEach(({el,m})=>{
+      el.innerHTML=`<a class="bk-cta-btn" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi('bookmaker_'+bk)}>${esc(m?tf('match_page.bk_cta','Parier {match} chez {book}',{match:m,book:nom}):nom)}<span aria-hidden="true"> →</span></a><p class="bk-cta-note">${esc(tf('match_page.bk_cta_note','18+. {book} n’est pas ouvert dans tous les pays.',{book:nom}))}</p>`;
+      el.hidden=false;
+    });
+  });
+}
+
 // L'AVIS IASHARK (abonne Pro ou match offert connecte) : le pari et sa cote,
 // « Nos chances face a la cote » en deux barres avec l'ecart dit en mots, sur
 // 100 matchs, pourquoi, a surveiller, risque et fiabilite, puis le detail des
@@ -1232,6 +1279,7 @@ function paint(vm,sections,opts){
   const fab=mk&&mk.fab?`<button type="button" class="mk-fab" data-mk-open>${esc(libMk)}${mk.nb?` <b>· ${esc(Number(mk.nb).toLocaleString(localeTag()))}</b>`:''}${mk.flou?cardIcon('lock'):''}</button>`:'';
   document.body.classList.remove('has-cta-bar');
   root.innerHTML=`<div class="page${mk?' has-mk':''}">${mk?`<aside class="mk-col${mk.flou?' is-locked':''}" id="mkCol" aria-labelledby="mkTitle">${mk.html}</aside>`:''}<div class="page-main">${hero(vm,opts)}${navChips(items,puce,opts.sticky)}<div class="secs">${corps}</div></div></div>${fab}`;
+  remplirBoutonsParieur(root);
   bindMotion();
   bindUi();
   bindNav();

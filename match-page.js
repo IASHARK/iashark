@@ -410,20 +410,38 @@ function matchTermine(m){
 // localisation peut se tromper ; la petite ligne dit que 1win n'est pas ouvert partout).
 // Aucune cote 1win ici : nos sources de cotes ne couvrent pas 1win.
 const BK_NOMS={'1win':'1win'};
-function remplirBoutonsParieur(root){
+// Moment du match pour le bouton (09/11/2026, Clement) : 'avant' le coup d'envoi, 'direct' une fois
+// le coup d'envoi passe (le bouton propose de parier en direct), 'fini' : aucun bouton.
+// Match reporte, annule ou sans heure fiable : 'avant' (jamais « en direct » par erreur).
+function momentParieur(m){
+  if(!m||matchTermine(m))return 'fini';
+  if(STATUTS_BLOQUANTS.indexOf(String(m.status||'').trim().toUpperCase())!==-1)return 'avant';
+  const MT=window.IasharkMatchTime,ts=MT&&MT.matchTimestamp?MT.matchTimestamp(m):NaN;
+  return isFinite(ts)&&Date.now()>=ts?'direct':'avant';
+}
+// Le bouton lui-meme. match : « Lyon – PSG » ; moment : 'avant' ou 'direct' ;
+// mur : page fermee (visiteur sans Pro) : « Voir les cotes de ... », bouton discret sous l'offre Pro.
+function boutonParieurHtml(match,moment,mur){
+  const bk='1win',nom=BK_NOMS[bk];
+  // Logo officiel (espace partenaire 1win, Materiel promotionnel) a la place du nom.
+  const logo=`<img class="bk-cta-logo" src="/assets/bk/${bk}.png" alt="${esc(nom)}" width="50" height="22">`;
+  const vars={match,book:'@@BK@@'};
+  const txt=!match?'@@BK@@'
+    :moment==='direct'?tf('match_page.bk_cta_live','Parier {match} en direct chez {book}',vars)
+    :mur?tf('match_page.bk_cta_mur','Voir les cotes de {match} chez {book}',vars)
+    :tf('match_page.bk_cta','Parier {match} chez {book}',vars);
+  const kind='bookmaker_'+bk+(moment==='direct'?'_direct':mur?'_mur':'');
+  return `<div class="bk-cta${mur?' bk-cta--mur':''}"><a class="bk-cta-btn" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi(kind)}><span>${String(txt).split('@@BK@@').map(esc).join(`</span>${logo}<span>`)}</span><span aria-hidden="true">→</span></a><p class="bk-cta-note">${esc(tf('match_page.bk_cta_note','18+. {book} n’est pas ouvert dans tous les pays.',{book:nom}))}</p></div>`;
+}
+function remplirBoutonsParieur(root,raw){
   // Pose apres le rendu, sous le ticket du pari (.sig-slip, ou ses chiffres .appel-stats sur le
   // pari offert) : signalCard et carteAppel ne sont pas modifiees (empreinte de l'Avis).
+  const moment=momentParieur(raw);
+  if(moment==='fini')return;
   const cartes=[...(root||document).querySelectorAll('.signal-card.avis')].filter(c=>c.querySelector('.sig-slip')&&!c.querySelector('.bk-cta'));
-  const bk='1win',nom=BK_NOMS[bk];
   cartes.forEach(c=>{
     const fx=c.querySelector('.sig-fixture'),m=fx?fx.textContent.trim():'';
-    const el=document.createElement('div');
-    el.className='bk-cta';
-    // Logo officiel (espace partenaire 1win, Materiel promotionnel) a la place du nom.
-    const logo=`<img class="bk-cta-logo" src="/assets/bk/${bk}.png" alt="${esc(nom)}" width="50" height="22">`;
-    const txt=m?tf('match_page.bk_cta','Parier {match} chez {book}',{match:m,book:'@@BK@@'}):'@@BK@@';
-    el.innerHTML=`<a class="bk-cta-btn" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi('bookmaker_'+bk)}><span>${String(txt).split('@@BK@@').map(esc).join(`</span>${logo}<span>`)}</span><span aria-hidden="true">→</span></a><p class="bk-cta-note">${esc(tf('match_page.bk_cta_note','18+. {book} n’est pas ouvert dans tous les pays.',{book:nom}))}</p>`;
-    (c.querySelector('.appel-stats')||c.querySelector('.sig-slip')).insertAdjacentElement('afterend',el);
+    (c.querySelector('.appel-stats')||c.querySelector('.sig-slip')).insertAdjacentHTML('afterend',boutonParieurHtml(m,moment,false));
   });
 }
 
@@ -1256,7 +1274,7 @@ function paint(vm,sections,opts){
   const fab=mk&&mk.fab?`<button type="button" class="mk-fab" data-mk-open>${esc(libMk)}${mk.nb?` <b>· ${esc(Number(mk.nb).toLocaleString(localeTag()))}</b>`:''}${mk.flou?cardIcon('lock'):''}</button>`:'';
   document.body.classList.remove('has-cta-bar');
   root.innerHTML=`<div class="page${mk?' has-mk':''}">${mk?`<aside class="mk-col${mk.flou?' is-locked':''}" id="mkCol" aria-labelledby="mkTitle">${mk.html}</aside>`:''}<div class="page-main">${hero(vm,opts)}${navChips(items,puce,opts.sticky)}<div class="secs">${corps}</div></div></div>${fab}`;
-  remplirBoutonsParieur(root);
+  remplirBoutonsParieur(root,vm._raw);
   bindMotion();
   bindUi();
   bindNav();
@@ -1407,6 +1425,10 @@ function renderProWall(raw,ctx){
   // Repli sans module : un lien vers l'abonnement (jamais une page vide).
   const repli=`<section class="op op--vitrine"><h2 class="op-title">${esc(t('offre_pro.title_match','Passe Pro pour ouvrir ce match'))}</h2>${boutonAction(lien('abonnement.html?duree=month&next='+encodeURIComponent(cheminMatch(raw))),t('match_v4.panel_cta','Passe Pro'),suivi('match_gate_unlock').trim())}</section>`;
   const secs=[['offre',`<div id="offreMatch" class="gate">${repli}</div>`,null,true]];
+  // Bouton 1win discret SOUS l'offre Pro (09/11/2026, Clement) : le visiteur qui ne prend pas Pro
+  // peut voir les cotes du match chez 1win (en direct apres le coup d'envoi). Aucun pari devoile.
+  const momentBk=momentParieur(pub);
+  if(momentBk!=='fini')secs.push(['bk',boutonParieurHtml(tf('match_page.sig_match_line','{home} – {away}',{home:vm.identity.home.name,away:vm.identity.away.name}),momentBk,true),null,true]);
   // Apercu HONNETE (controle UX du 04/10/2026, tour 2) : seulement ce que Pro aura sur CE match
   // (pro_sections, liste publique du calcul quotidien), de faux chiffres constants.
   const contenus=Array.isArray(pub.pro_sections)?pub.pro_sections:[];

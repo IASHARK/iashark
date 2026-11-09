@@ -23,12 +23,12 @@ test("go : declaree dans netlify.toml", () => {
   assert.match(toml, /path = "\/go\/\*"\s*\n\s*function = "go"/);
 });
 
-test("page match : bouton 1win sous l'Avis, pays fermes, clic suivi", () => {
+test("page match : bouton 1win sous l'Avis, pour tous les pays, clic suivi", () => {
   const src = require("fs").readFileSync(require("path").join(__dirname, "..", "match-page.js"), "utf8");
   assert.match(src, /querySelectorAll\('.signal-card.avis'\)/);
   assert.match(src, /href="\/go\/\$\{bk\}\/site"/);
   assert.match(src, /rel="sponsored noopener"/);
-  assert.match(src, /'1win':\['FR'/);
+  assert.doesNotMatch(src, /BK_PAYS_FERMES/);
   assert.match(src, /remplirBoutonsParieur\(root\)/);
   const ft = require("fs").readFileSync(require("path").join(__dirname, "..", "funnel-track.js"), "utf8");
   assert.match(ft, /bookmaker_1win: true/);

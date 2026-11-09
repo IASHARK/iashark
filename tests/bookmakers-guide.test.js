@@ -115,11 +115,11 @@ test("JSON-LD valide et FAQ structuree identique a la FAQ visible", () => {
   }
 });
 
-// 25/09/2026 : versions de/it/pt retirees : leur guide n'est plus publie et
+// 25/09/2026 : versions de/it retirees (pt rouverte le 09/11/2026) : leur guide n'est plus publie et
 // l'URL mene en 301 vers la version anglaise (texte neutre verifie ci-dessus).
-test("de/it/pt retirees : guide non publie, 301 vers /en/", () => {
+test("de/it retirees : guide non publie, 301 vers /en/", () => {
   const rules = read("_redirects").split("\n").map((l) => l.trim().split(/\s+/));
-  for (const d of ["de", "it", "pt"]) {
+  for (const d of ["de", "it"]) {
     assert.ok(!fs.existsSync(path.join(ROOT, d, GUIDE)), d + "/" + GUIDE + " encore present");
     const r = rules.find((p) => p[0] === "/" + d + "/*");
     assert.ok(r && r[1] === "/en/:splat" && r[2] === "301!", "/" + d + "/* sans 301 vers /en/");

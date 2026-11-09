@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="iashark-market" content="fr">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IASHARK Parceiros: 40 % de cada subscrição, para sempre</title>
+<meta name="description" content="Recomenda o IASHARK à tua comunidade: 40 % de cada pagamento dos teus subscritores Pro, em cada renovação. Link, código, código QR, painel. 18+">
+<link rel="canonical" href="https://iashark.com/pt/partenaires.html">
+<link rel="alternate" hreflang="fr" href="https://iashark.com/fr/partenaires.html">
+<link rel="alternate" hreflang="en-GB" href="https://iashark.com/gb/partenaires.html">
+<link rel="alternate" hreflang="en-ZA" href="https://iashark.com/za/partenaires.html">
+<link rel="alternate" hreflang="en" href="https://iashark.com/en/partenaires.html">
+<link rel="alternate" hreflang="es-MX" href="https://iashark.com/mx/partenaires.html">
+<link rel="alternate" hreflang="es" href="https://iashark.com/es/partenaires.html">
+<link rel="alternate" hreflang="pt" href="https://iashark.com/pt/partenaires.html">
+<link rel="alternate" hreflang="x-default" href="https://iashark.com/en/partenaires.html">
+<link rel="icon" href="/assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" defer></script>
+<!-- QR code du lien partenaire, dessine dans la page (aucune donnee envoyee a un tiers). -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" defer></script>
+<link rel="stylesheet" href="/assets/tailwind.css">
+<link rel="stylesheet" href="/assets/pro-space.css">
+<link rel="stylesheet" href="/assets/bottom-navigation.css">
+<link rel="stylesheet" href="/assets/partenaires.css">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="IASHARK">
+<meta property="og:locale" content="pt_PT">
+<meta property="og:title" content="IASHARK Parceiros: 40 % de cada subscrição, para sempre">
+<meta property="og:description" content="Recomenda o IASHARK à tua comunidade: 40 % de cada pagamento dos teus subscritores Pro, em cada renovação. Link, código, código QR, painel. 18+">
+<meta property="og:url" content="https://iashark.com/pt/partenaires.html">
+<meta property="og:image" content="https://iashark.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="pa">
+
+<header class="pa-entete">
+  <div class="pa-entete-in">
+    <a href="/pt/" class="pa-logo" aria-label="IASHARK, início" data-i18n-attr="aria-label:site_header.aria_home"><img src="/assets/iashark-logo.png" alt="IASHARK" width="112" height="28"></a>
+    <span class="pa-badge" data-i18n="affiliation.badge">PARCEIROS</span>
+    <a href="/pt/compte.html" class="pa-entete-lien" data-href="compte.html" data-i18n="affiliation.my_account">A minha conta</a>
+  </div>
+</header>
+
+<main class="pa-main">
+
+  <!-- Ouverture : l'offre et le bouton dans le premier ecran. Aucune promesse de gain, aucune mise :
+       40 % est un taux de commission sur les paiements encaisses. -->
+  <section class="pa-ouverture" aria-labelledby="paTitle">
+    <div class="pa-ouverture-fond" aria-hidden="true">
+      <picture>
+        <source media="(min-width:768px)" srcset="/assets/hero/stade-nuit.webp">
+        <img src="/assets/hero/stade-nuit-portrait.webp" alt="" width="750" height="1100" decoding="async" fetchpriority="high">
+      </picture>
+    </div>
+    <h1 id="paTitle" class="pa-h1" data-i18n="affiliation.title">40 % de cada subscrição, para sempre.</h1>
+    <p class="pa-intro" data-i18n="affiliation.intro">Falas de futebol a uma comunidade? Recomenda o IASHARK com o teu link ou o teu código. Sempre que um dos teus subscritores paga a sua subscrição Pro — semanal, mensal ou anual — recebes 40 % do valor cobrado. Não só da primeira vez: em cada pagamento, enquanto ele continuar subscrito.</p>
+    <!-- Visiteur sans compte par defaut ; partenaires-page.js remplace ce bloc pour un compte connecte. -->
+    <div class="pa-cta" id="paCta">
+      <a class="pa-btn" data-pa-lien="inscription.html" href="/pt/inscription.html" data-i18n="affiliation.cta_signup">Criar a minha conta e candidatar-me</a>
+      <a class="pa-btn pa-btn--ligne" data-pa-lien="connexion.html" href="/pt/connexion.html" data-i18n="affiliation.cta_login">Já tenho uma conta</a>
+      <p class="pa-cta-note" data-i18n="affiliation.cta_note">É necessária uma conta IASHARK (gratuita) para ser parceiro.</p>
+    </div>
+  </section>
+
+  <!-- Les trois conditions, en registre (une seule liste, pas trois cartes). -->
+  <section class="pa-section">
+    <dl class="pa-termes">
+      <dt>40 %</dt>
+      <dd data-i18n="affiliation.card_rate">de cada pagamento cobrado, sem impostos, após eventual desconto.</dd>
+      <dt data-i18n="affiliation.card_life_title">Para sempre</dt>
+      <dd data-i18n="affiliation.card_life">enquanto a pessoa continuar subscrita: cada renovação conta.</dd>
+      <dt data-i18n="affiliation.card_days_title">60 dias</dt>
+      <dd data-i18n="affiliation.card_days">para que um clique no teu link ainda conte na inscrição.</dd>
+    </dl>
+  </section>
+
+  <section class="pa-section" aria-labelledby="paComment">
+    <h2 id="paComment" class="pa-h2" data-i18n="affiliation.how_title">Como funciona</h2>
+    <ol class="pa-frise" id="paFrise">
+      <li><span class="pa-point" aria-hidden="true"></span><span data-i18n="affiliation.how_1">Crias a tua conta IASHARK e preenches o questionário de parceiro (as tuas redes, o teu público, o teu país).</span></li>
+      <li><span class="pa-point" aria-hidden="true"></span><span data-i18n="affiliation.how_2">O IASHARK aprova a tua candidatura. Recebes o teu link, o teu código e um código QR.</span></li>
+      <li><span class="pa-point" aria-hidden="true"></span><span data-i18n="affiliation.how_3">Os teus subscritores inscrevem-se com o teu link ou escrevem o teu código no pagamento. Em cada pagamento cobrado, a tua comissão aparece no teu espaço; fica pagável 30 dias depois e é paga todos os meses a partir de 50 €.</span></li>
+    </ol>
+  </section>
+
+  <section class="pa-section" aria-labelledby="paRegles">
+    <h2 id="paRegles" class="pa-h2" data-i18n="affiliation.rules_title">As regras, em claro</h2>
+    <ul class="pa-regles">
+      <li data-i18n="affiliation.rule_1">Um só nível: és pago pelos teus subscritores, nunca pelos parceiros que trazes.</li>
+      <li data-i18n="affiliation.rule_2">Nada durante o teste gratuito: a comissão nasce no primeiro pagamento real.</li>
+      <li data-i18n="affiliation.rule_3">Reembolso ou contestação: a comissão correspondente é retirada.</li>
+      <li data-i18n="affiliation.rule_4">Cada conteúdo deve ter a menção « colaboração comercial » ou « publicidade », dirigir-se a um público com 18 anos ou mais, e nunca prometer ganhos nem dizer quanto jogar.</li>
+      <li data-i18n="affiliation.rule_5">Nenhuma comissão sobre ti próprio, os teus próprios cartões ou os teus próprios endereços: essas tentativas são detetadas e levam à suspensão.</li>
+    </ul>
+    <a href="/pt/partenaires-conditions.html" data-href="partenaires-conditions.html" class="pa-lien pa-regles-lien" data-i18n="affiliation.read_terms">Ler as condições completas do programa →</a>
+  </section>
+
+  <!-- Rappel de l'offre en fin de page, pour un visiteur sans compte (cache pour un compte connecte). -->
+  <section class="pa-final" id="paFinal" aria-labelledby="paFinalTitre">
+    <h2 id="paFinalTitre" class="pa-h2" data-i18n="affiliation.title">40 % de cada subscrição, para sempre.</h2>
+    <div class="pa-cta">
+      <a class="pa-btn" data-pa-lien="inscription.html" href="/pt/inscription.html" data-i18n="affiliation.cta_signup">Criar a minha conta e candidatar-me</a>
+      <a class="pa-btn pa-btn--ligne" data-pa-lien="connexion.html" href="/pt/connexion.html" data-i18n="affiliation.cta_login">Já tenho uma conta</a>
+    </div>
+  </section>
+
+  <!-- Espace partenaire (candidature, attente, tableau de bord) : rendu par partenaires-page.js. -->
+  <section id="partnerApp" class="pa-app" aria-live="polite" hidden></section>
+</main>
+
+<nav class="bottom-nav" aria-label="Navegação principal" data-i18n-attr="aria-label:geo.nav.aria_label"><a href="/pt/"><span>⌂</span><b data-i18n="nav.home">INÍCIO</b></a><a href="/pt/pro.html"><span>☆</span><b data-i18n="nav.tools">MÚLTIPLAS</b></a><a href="/en/blog/"><span>▤</span><b data-i18n="nav.guides">BLOG</b></a><a href="/pt/compte.html"><span>♙</span><b data-i18n="nav.account">CONTA</b></a></nav>
+
+<script src="/app-client.js" defer></script>
+<script src="/i18n/i18n.js"></script>
+<script src="/lib/market-config.js"></script>
+<script src="/funnel-track.js"></script>
+<script src="/partenaires-page.js" defer></script>
+<script src="/site-prefs.js"></script>
+<script src="/bottom-navigation.js"></script>
+<!--SEO_FOOTER_NAV--><nav class="seo-foot-nav" aria-label="Navegação do site" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#91a0b3;text-align:center"><p style="margin:0 0 4px"><span style="color:#c3ccd8">Competições:</span> <a href="/pt/leagues/liga-portugal.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga Portugal</a> · <a href="/pt/leagues/champions-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Champions League</a> · <a href="/pt/leagues/premier-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Premier League</a> · <a href="/pt/leagues/la-liga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">La Liga</a> · <a href="/pt/leagues/serie-a.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Serie A</a> · <a href="/pt/leagues/bundesliga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Bundesliga</a> · <a href="/pt/leagues/ligue-1.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Ligue 1</a> · <a href="/pt/leagues/europa-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Europa League</a> · <a href="/pt/leagues/conference-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Conference League</a> · <a href="/pt/leagues/eredivisie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Eredivisie</a> · <a href="/pt/leagues/mls.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">MLS</a> · <a href="/pt/leagues/allsvenskan.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Allsvenskan</a> · <a href="/pt/leagues/j1-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">J1 League</a> · <a href="/pt/leagues/liga-mx.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga MX</a> · <a href="/pt/leagues/liga-profesional-argentina.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga Profesional Argentina</a> · <a href="/pt/leagues/primera-division-chile.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Primera Division Chile</a> · <a href="/pt/leagues/championship.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Championship</a> · <a href="/pt/leagues/2-bundesliga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">2. Bundesliga</a> · <a href="/pt/leagues/segunda-division.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Segunda Division</a> · <a href="/pt/leagues/serie-b.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Serie B</a> · <a href="/pt/leagues/jupiler-pro-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Jupiler Pro League</a> · <a href="/pt/leagues/super-lig.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Super Lig</a> · <a href="/pt/leagues/scottish-premiership.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Scottish Premiership</a> · <a href="/pt/leagues/brasileirao-serie-a.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Brasileirao Serie A</a> · <a href="/pt/leagues/austrian-bundesliga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Austrian Bundesliga</a> · <a href="/pt/leagues/swiss-super-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Swiss Super League</a> · <a href="/pt/leagues/danish-superliga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Danish Superliga</a> · <a href="/pt/leagues/ekstraklasa.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Ekstraklasa</a> · <a href="/pt/leagues/uefa-nations-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">UEFA Nations League</a> · <a href="/pt/leagues/world-cup-qualifiers-europe.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">World Cup Qualifiers Europe</a> · <a href="/pt/leagues/ligue-2.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Ligue 2</a> · <a href="/pt/leagues/super-league-greece.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Super League Greece</a> · <a href="/pt/leagues/eliteserien.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Eliteserien</a> · <a href="/pt/leagues/saudi-pro-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Saudi Pro League</a> · <a href="/pt/leagues/dfb-pokal.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">DFB Pokal</a> · <a href="/pt/leagues/coppa-italia.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Coppa Italia</a> · <a href="/pt/leagues/copa-del-rey.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Copa del Rey</a> · <a href="/pt/leagues/fa-cup.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">FA Cup</a> · <a href="/pt/leagues/coupe-de-france.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Coupe de France</a> · <a href="/pt/leagues/k-league-1.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">K League 1</a> · <a href="/pt/leagues/efl-cup.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">EFL Cup</a> · <a href="/pt/leagues/copa-libertadores.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Copa Libertadores</a> · <a href="/pt/leagues/copa-sudamericana.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Copa Sudamericana</a> · <a href="/pt/leagues/fifa-club-world-cup.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">FIFA Club World Cup</a> · <a href="/pt/leagues/leagues-cup.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Leagues Cup</a> · <a href="/pt/leagues/uefa-euro.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">UEFA Euro</a> · <a href="/pt/leagues/euro-qualifiers.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Euro Qualifiers</a> · <a href="/pt/leagues/wc-qualifiers-south-america.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">WC Qualifiers South America</a> · <a href="/pt/leagues/copa-america.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Copa America</a> · <a href="/pt/leagues/africa-cup-of-nations.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Africa Cup of Nations</a> · <a href="/pt/leagues/concacaf-gold-cup.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">CONCACAF Gold Cup</a></p><p style="margin:0"><a href="/en/blog/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Blog e guias</a> · <a href="/pt/marches.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Mercados analisados</a> · <a href="/pt/methodologie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Metodologia</a></p></nav><!--/SEO_FOOTER_NAV-->
+</body>
+</html>

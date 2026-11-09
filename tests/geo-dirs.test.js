@@ -63,8 +63,9 @@ function fakeRoot(els) {
 
 test("config : repertoires publics et prix des marches conformes aux docs 06/07/08", () => {
   assert.deepEqual(ALL_DIR_CODES, ["fr", "gb", "za", "en", "mx", "es", "de", "it", "pt"]);
-  assert.deepEqual(DIR_CODES, ["fr", "gb", "za", "en", "mx", "es"]);
-  assert.deepEqual(RETIRED_DIRS, { de: "en", it: "en", pt: "en" });
+  assert.deepEqual(DIR_CODES, ["fr", "gb", "za", "en", "mx", "es", "pt"]);
+  // pt rouvert le 09/11/2026 (fenetre du choix du pays : Bresil, Portugal...).
+  assert.deepEqual(RETIRED_DIRS, { de: "en", it: "en" });
   Object.keys(RETIRED_DIRS).forEach(function (d) {
     assert.ok(DIR_CODES.includes(RETIRED_DIRS[d]), d + " : repli non public");
     assert.ok(!fs.existsSync(path.join(ROOT, d)), d + "/ encore present");
@@ -92,7 +93,7 @@ test("i18n.js : table des repertoires identique a config/markets.json#_dirs", ()
   });
   assert.deepEqual(dirs.map(function (d) { return d.label; }), [
     "Français", "English (UK)", "English (South Africa)", "English (International)",
-    "Español (México)", "Español"
+    "Español (México)", "Español", "Português"
   ]);
 });
 

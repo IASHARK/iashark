@@ -14,6 +14,7 @@
 <link rel="alternate" hreflang="en" href="https://iashark.com/en/checkout-annule.html">
 <link rel="alternate" hreflang="es-MX" href="https://iashark.com/mx/checkout-annule.html">
 <link rel="alternate" hreflang="es" href="https://iashark.com/es/checkout-annule.html">
+<link rel="alternate" hreflang="pt" href="https://iashark.com/pt/checkout-annule.html">
 <link rel="alternate" hreflang="x-default" href="https://iashark.com/en/checkout-annule.html">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c12'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='40' fill='%2322d3ee'%3E🦈%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,14 +40,14 @@
   <section class="pa-result" role="status" aria-live="polite">
     <span class="pa-result-ico" data-ico="shield-check" aria-hidden="true"></span>
     <h1 data-i18n="checkout_pages.cancel_heading">Pago cancelado</h1>
-    <p class="pa-result-txt" data-i18n="checkout_pages.cancel_body">No se ha cobrado nada. Puedes retomarlo en un clic, donde lo dejaste.</p>
+    <p class="pa-result-txt" data-i18n="checkout_pages.cancel_body">No se realizó ningún pago. Puedes intentarlo de nuevo cuando quieras, sin ningún compromiso.</p>
     <p class="pa-context" id="paContext" hidden></p>
     <!-- Page de reprise, pas une impasse (tunnel 09/2026 : un visiteur y est passe deux
          fois sans jamais revenir au paiement). Le bouton ramene au choix de duree. -->
     <div class="pa-actions">
-      <a class="mu-shimmer" href="/mx/abonnement.html" id="ctaRetry" data-href="abonnement.html" data-track="annule_reprendre"><span class="mu-shimmer-spark-c" aria-hidden="true"><span class="mu-shimmer-spark"><span class="mu-shimmer-spark-b"></span></span></span><span data-mu-label data-i18n="checkout_pages.cancel_cta_retry">Retomar mi suscripción</span><span class="mu-shimmer-hl" aria-hidden="true"></span><span class="mu-shimmer-bd" aria-hidden="true"></span></a>
+      <a class="mu-shimmer" href="/mx/abonnement.html" id="ctaRetry" data-href="abonnement.html" data-track="annule_reprendre"><span class="mu-shimmer-spark-c" aria-hidden="true"><span class="mu-shimmer-spark"><span class="mu-shimmer-spark-b"></span></span></span><span data-mu-label data-i18n="checkout_pages.cancel_cta_retry">VOLVER A INTENTARLO — SIN COMPROMISO →</span><span class="mu-shimmer-hl" aria-hidden="true"></span><span class="mu-shimmer-bd" aria-hidden="true"></span></a>
       <p class="pa-note" id="paNote" hidden></p>
-      <p class="pa-trust" data-i18n="checkout_pages.cancel_trust">Pago seguro con Stripe · Sin compromiso · Cancelación en línea</p>
+      <p class="pa-trust" data-i18n="checkout_pages.cancel_trust">Pago seguro · Cancela cuando quieras</p>
     </div>
   </section>
 
@@ -77,8 +78,8 @@
     <p data-i18n="checkout_pages.cancel_contact_text">Cuéntamelo, te respondo yo mismo.</p>
     <a class="pa-tg" href="https://t.me/iashark_contact" target="_blank" rel="noopener" data-track="contact_annule_telegram"><img src="/assets/telegram.svg" width="20" height="20" alt=""><span data-i18n="contact_page.tg_cta">Escribir por Telegram</span></a>
     <div class="pa-liens">
-      <a href="/mx/" id="ctaMatch" hidden data-track="annule_retour_match" data-i18n="checkout_pages.cancel_cta_match">Volver al partido</a>
-      <a href="/mx/compte.html" data-href="compte.html" id="ctaAccount" data-i18n="checkout_pages.cancel_cta_account">Mi cuenta</a>
+      <a href="/mx/" id="ctaMatch" hidden data-track="annule_retour_match" data-i18n="checkout_pages.cancel_cta_match">VOLVER AL PARTIDO →</a>
+      <a href="/mx/compte.html" data-href="compte.html" id="ctaAccount" data-i18n="checkout_pages.cancel_cta_account">MI CUENTA →</a>
     </div>
   </section>
   <p class="pa-legal" data-i18n="pricing_page.legal_note">Información con fines estadísticos — No constituye una recomendación de apuestas · Prohibido para menores de 18 años</p>

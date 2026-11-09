@@ -41,8 +41,7 @@
   "_retiredDirs_readme": "Versions linguistiques retirees du site public le 25/09/2026 (decision proprietaire, option B : francais + anglais + espagnol ; Search Console : ~10 clics en 3 mois pour ces langues). Leur configuration reste dans _dirs (e-mails des comptes existants, reouverture possible) mais aucune page n'est generee, publiee, liee ni declaree en hreflang/sitemap : chaque URL /<dir>/<page> est redirigee en 301 vers /<repli>/<page> (scripts/build-locales.js). Pour rouvrir une langue : la retirer d'ici puis relancer node scripts/build-locales.js.",
   "_retiredDirs": {
     "de": "en",
-    "it": "en",
-    "pt": "en"
+    "it": "en"
   },
   "_dirs": {
     "fr": {
@@ -130,7 +129,7 @@
       "htmlLang": "pt",
       "hreflang": "pt",
       "intlLocale": "pt-PT",
-      "blogDir": "pt",
+      "blogDir": "en",
       "label": "Português",
       "helpline": "international"
     }

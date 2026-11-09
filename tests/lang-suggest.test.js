@@ -50,9 +50,10 @@ test("cas nominal : navigateur anglais sur une page francaise -> version anglais
   assert.equal(d.target, "en");
   assert.equal(d.href, "/en/pro.html");
   assert.equal(d.text.lang, "en");
-  // Langues des versions retirees (de/it/pt) : version anglaise, jamais /de/.
+  // Langues des versions retirees (de/it) : version anglaise, jamais /de/ ;
+  // pt rouvert le 09/11/2026.
   assert.equal(decide({ languages: ["de-AT"] }).href, "/en/pro.html");
-  assert.equal(decide({ languages: ["pt-BR", "en"] }).target, "en");
+  assert.equal(decide({ languages: ["pt-BR", "en"] }).target, "pt");
   assert.equal(decide({ languages: ["it-IT"] }).target, "en");
   assert.equal(decide(Object.assign(pageEnv("es"), { languages: ["fr-CH"] })).href, "/fr/pro.html");
 });

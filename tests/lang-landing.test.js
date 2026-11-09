@@ -13,7 +13,7 @@ const ROOT = path.join(__dirname, "..");
 const SRC = fs.readFileSync(path.join(ROOT, "i18n/i18n.js"), "utf8");
 
 const CHROME_UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
-const ALTS = { fr: "/fr/match.html", "en-gb": "/gb/match.html", "en-za": "/za/match.html", en: "/en/match.html", "es-mx": "/mx/match.html", es: "/es/match.html" };
+const ALTS = { fr: "/fr/match.html", "en-gb": "/gb/match.html", "en-za": "/za/match.html", en: "/en/match.html", "es-mx": "/mx/match.html", es: "/es/match.html", pt: "/pt/match.html" };
 
 // Navigateur simule complet : location (replace observable), sessionStorage,
 // localStorage, document (hreflang, referrer, cookie, body).
@@ -82,7 +82,7 @@ test("table des langues : fr, es (mx au Mexique), en et toute autre langue -> an
     ["fr-FR", "Europe/Paris", "fr"], ["fr-CA", "America/Toronto", "fr"],
     ["es-ES", "Europe/Madrid", "es"], ["es-MX", "America/Mexico_City", "mx"], ["es-US", "America/Tijuana", "mx"],
     ["en-US", "America/New_York", "en"], ["en-GB", "Europe/London", "gb"], ["en-ZA", "Africa/Johannesburg", "za"],
-    ["tr-TR", "Europe/Istanbul", "en"], ["pt-BR", "America/Sao_Paulo", "en"], ["id-ID", "Asia/Jakarta", "en"],
+    ["tr-TR", "Europe/Istanbul", "en"], ["pt-BR", "America/Sao_Paulo", "pt"], ["id-ID", "Asia/Jakarta", "en"],
     ["de-DE", "Europe/Berlin", "en"], ["ko-KR", "Asia/Seoul", "en"], ["sv-SE", "Europe/Stockholm", "en"],
     ["vi-VN", "Asia/Ho_Chi_Minh", "en"], ["nb-NO", "Europe/Oslo", "en"], ["ar-SA", "Asia/Riyadh", "en"],
     ["ar", "Europe/London", "gb"], ["", "Europe/Paris", ""], [undefined, "", ""]
@@ -93,7 +93,7 @@ test("table des langues : fr, es (mx au Mexique), en et toute autre langue -> an
 test("langues etrangeres sur une page francaise -> anglais ; francais sur /en/ -> /fr/ ; arabe sur /en/ reste", () => {
   for (const lang of ["tr-TR", "pt-BR", "id-ID", "de-DE", "ko-KR", "sv-SE", "vi-VN", "nb-NO", "es-ES", "ar-SA"]) {
     const b = browser({ languages: [lang], tz: "Asia/Dubai" });
-    const want = lang === "es-ES" ? "/es/match.html?id=1&utm_source=x" : "/en/match.html?id=1&utm_source=x";
+    const want = lang === "es-ES" ? "/es/match.html?id=1&utm_source=x" : lang === "pt-BR" ? "/pt/match.html?id=1&utm_source=x" : "/en/match.html?id=1&utm_source=x";
     assert.deepEqual(b.replaced, [want], lang);
   }
   const fr = browser({ url: "https://iashark.com/en/pro.html?utm_source=telegram", languages: ["fr-FR"], tz: "Europe/Paris", alternates: {} });
@@ -143,13 +143,15 @@ test("pas de boucle : la page de destination ne redirige plus et affiche le lien
   const first = browser({ referrer: "https://x.com/" });
   assert.equal(first.replaced.length, 1);
   // Page de destination, meme onglet (sessionStorage conserve), referent = page d'origine.
-  const second = browser({ url: "https://iashark.com" + first.replaced[0], session: first.ss, referrer: "https://iashark.com/fr/match.html?id=1&utm_source=x" });
+  // Fenetre du pays deja fermee (sinon elle remplace le lien de retour, test plus bas).
+  const ferme = { iashark_pays_ferme: "1" };
+  const second = browser({ url: "https://iashark.com" + first.replaced[0], session: first.ss, local: ferme, referrer: "https://iashark.com/fr/match.html?id=1&utm_source=x" });
   assert.deepEqual(second.replaced, []);
   assert.equal(second.appended.length, 1, "lien de retour affiche");
   assert.match(second.appended[0].innerHTML, /Lire en français/);
   assert.match(second.appended[0].innerHTML, /href="\/fr\/match\.html\?id=1&amp;utm_source=x"/);
   // Rechargement : plus de lien, toujours pas de redirection.
-  const third = browser({ url: "https://iashark.com" + first.replaced[0], session: second.ss });
+  const third = browser({ url: "https://iashark.com" + first.replaced[0], session: second.ss, local: ferme });
   assert.deepEqual(third.replaced, []);
   assert.equal(third.appended.length, 0);
   // Retour sur la page francaise (bouton precedent) : pas de nouvelle redirection.
@@ -158,11 +160,24 @@ test("pas de boucle : la page de destination ne redirige plus et affiche le lien
 
 test("lien de retour dans la langue d'origine (anglais, espagnol)", () => {
   const a = browser({ url: "https://iashark.com/en/pro.html", languages: ["fr-FR"], alternates: {} });
-  const b = browser({ url: "https://iashark.com" + a.replaced[0], session: a.ss, alternates: {} });
+  const ferme = { iashark_pays_ferme: "1" };
+  const b = browser({ url: "https://iashark.com" + a.replaced[0], session: a.ss, alternates: {}, local: ferme });
   assert.match(b.appended[0].innerHTML, /Read in English/);
   const c = browser({ url: "https://iashark.com/es/pro.html", languages: ["fr-FR"], alternates: {} });
-  const d = browser({ url: "https://iashark.com" + c.replaced[0], session: c.ss, alternates: {} });
+  const d = browser({ url: "https://iashark.com" + c.replaced[0], session: c.ss, alternates: {}, local: ferme });
   assert.match(d.appended[0].innerHTML, /Leer en español/);
+});
+
+test("premiere visite sans choix : la fenetre du pays (lib/pays-choix.js) remplace le lien de retour", () => {
+  const first = browser({ referrer: "https://x.com/" });
+  const second = browser({ url: "https://iashark.com" + first.replaced[0], session: first.ss, referrer: "https://iashark.com/fr/match.html?id=1&utm_source=x" });
+  assert.equal(second.win.I18N.paysWanted(), true);
+  assert.equal(second.win.__iasharkPaysLoad, true, "lib/pays-choix.js charge");
+  assert.equal(second.appended.length, 0, "pas de lien de retour sous la fenetre");
+  // Pays deja choisi : ni fenetre ni redirection.
+  const chosen = browser({ local: { iashark_pays: "FR", iashark_dir_chosen: "fr" } });
+  assert.deepEqual(chosen.replaced, []);
+  assert.equal(chosen.appended.length, 0);
 });
 
 test("decision pure exposee : raisons explicites", () => {

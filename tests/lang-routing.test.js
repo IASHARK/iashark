@@ -69,10 +69,10 @@ test("routeRoot : langue du navigateur seule (decision du 25/09/2026)", () => {
     ["GB", "en-GB,en;q=0.9", "en"], ["GB", "fr-FR", "fr"], ["ZA", "en-ZA", "en"], ["ZA", "af", "fr"],
     ["MX", "es-MX", "es"], ["MX", "en-US", "en"],
     ["ES", "es-ES", "es"], ["AR", "es-AR", "es"], ["CL", "es-419", "es"], ["PE", "", "fr"],
-    ["PT", "pt-PT", "en"], ["BR", "pt-BR", "en"], ["DE", "de-DE", "en"], ["AT", "de-AT", "en"], ["IT", "it-IT", "en"],
+    ["PT", "pt-PT", "pt"], ["BR", "pt-BR", "pt"], ["DE", "de-DE", "en"], ["AT", "de-AT", "en"], ["IT", "it-IT", "en"],
     ["FR", "fr-FR", "fr"], ["FR", "en-US,en", "en"], ["MA", "ar-MA", "fr"],
     ["US", "en-US", "en"], ["CH", "de-CH", "en"], ["CH", "fr-CH", "fr"], ["BE", "nl-BE", "fr"],
-    ["NL", "de-DE", "en"], ["JP", "ja-JP", "fr"], ["", "es-ES", "es"], ["", "pt-BR", "en"], ["", "", "fr"],
+    ["NL", "de-DE", "en"], ["JP", "ja-JP", "fr"], ["", "es-ES", "es"], ["", "pt-BR", "pt"], ["", "", "fr"],
     // Premiere langue seulement, quel que soit q (semantique Netlify).
     ["", "nl-NL,en;q=0.9", "fr"], ["", "it;q=0.1,es;q=0.9", "en"]
   ];

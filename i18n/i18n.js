@@ -30,9 +30,12 @@
     {dir:"za", locale:"en",    htmlLang:"en-ZA", intl:"en-ZA", market:"za", blog:"en", label:"English (South Africa)"},
     {dir:"en", locale:"en",    htmlLang:"en",    intl:"en-GB", market:"us", blog:"en", label:"English (International)"},
     {dir:"mx", locale:"es-mx", htmlLang:"es-MX", intl:"es-MX", market:"mx", blog:"mx", label:"Español (México)"},
-    {dir:"es", locale:"es",    htmlLang:"es",    intl:"es-ES", market:"fr", blog:"es", label:"Español"}
-    // de / it / pt retires le 25/09/2026 (config/markets.json#_retiredDirs) :
-    // /de/*, /it/*, /pt/* sont rediriges en 301 vers /en/.
+    {dir:"es", locale:"es",    htmlLang:"es",    intl:"es-ES", market:"fr", blog:"es", label:"Español"},
+    // pt rouvert le 09/11/2026 (Bresil, Portugal, Angola... : fenetre du choix
+    // du pays, lib/pays-choix.js).
+    {dir:"pt", locale:"pt",    htmlLang:"pt",    intl:"pt-PT", market:"fr", blog:"en", label:"Português"}
+    // de / it retires le 25/09/2026 (config/markets.json#_retiredDirs) :
+    // /de/*, /it/* sont rediriges en 301 vers /en/.
   ];
   var DIR_BY_CODE = {};
   DIRS.forEach(function(d){ DIR_BY_CODE[d.dir] = d; });
@@ -42,7 +45,7 @@
   // Compat : ancienne table marche -> dictionnaire (toujours valable).
   var MARKET_LOCALE = {gb:"en", mx:"es-mx", za:"en"};
   // Locale de dictionnaire -> repertoire de langue correspondant.
-  var LOCALE_DIR = {fr:"fr", en:"en", es:"es", "es-mx":"mx", de:"en", it:"en", pt:"en"};
+  var LOCALE_DIR = {fr:"fr", en:"en", es:"es", "es-mx":"mx", de:"en", it:"en", pt:"pt"};
   var LOCALE_INTL = {fr:"fr-FR", en:"en-GB", es:"es-ES", "es-mx":"es-MX", de:"de-DE", it:"it-IT", pt:"pt-PT"};
 
   // Pages presentes dans CHAQUE repertoire (scripts/i18n-manifest.js + pages
@@ -116,7 +119,7 @@
   // condition de langue (verifie par tests/lang-routing.test.js) : apres un
   // choix, "/" renvoie toujours vers la version choisie.
   var CHOICE_COOKIES = {fr:["fr","fr"], gb:["gb","en"], za:["za","en"], en:["us","en"],
-    mx:["mx","es"], es:["es","es"]};
+    mx:["mx","es"], es:["es","es"], pt:["br","pt"]};
   function setChoiceCookies(dir){
     var c = CHOICE_COOKIES[dir];
     if (!c) return;
@@ -267,8 +270,38 @@
       return hasOwn.call(HINT_LANGS, first) && first !== String(LOCALE).split("-")[0];
     }catch(e){ return false; }
   }
+  // Fenetre « Choisis ton pays » (09/11/2026, lib/pays-choix.js) : premiere
+  // visite seulement. Pre-filtre gratuit ici (le script n'est telecharge que
+  // si la fenetre peut s'afficher) ; decision complete dans pays-choix.js.
+  // Quand elle s'affiche, ni bandeau de langue ni lien de retour.
+  var PAYS_SKIP_RE = /\/(connexion|inscription|mot-de-passe-oublie|reinitialiser-mot-de-passe|compte|abonnement|checkout-annule|checkout-succes|desinscription-email|404|admin)\.html$/;
+  function paysWanted(){
+    try{
+      var nav = global.navigator, doc = global.document, ls = global.localStorage;
+      if (!nav || nav.webdriver || AUTO_BOT_RE.test(String(nav.userAgent || ""))) return false;
+      if (!landingPageDir(currentLocation().pathname) || PAYS_SKIP_RE.test(currentLocation().pathname || "")) return false;
+      if (ls.getItem("iashark_pays") || ls.getItem("iashark_pays_ferme") || ls.getItem(CHOSEN_KEY)) return false;
+      if (/(?:^|;\s*)nf_(?:country|lang)=/.test(String((doc && doc.cookie) || ""))) return false;
+      return true;
+    }catch(e){ return false; }
+  }
+  function loadPaysChoix(){
+    if (global.__iasharkPaysLoad || global.__iasharkLangRedirecting || !paysWanted()) return;
+    global.__iasharkPaysLoad = true;
+    try{
+      var doc = global.document;
+      var s = doc.createElement("script");
+      s.src = "/lib/pays-choix.js";
+      s.async = true;
+      s.onload = function(){
+        try{ if (global.IasharkPaysChoix) global.IasharkPaysChoix.run(global.I18N, global); }catch(e){}
+      };
+      (doc.head || doc.documentElement).appendChild(s);
+    }catch(e){}
+  }
+
   function loadLangHint(){
-    if (global.__iasharkLangHint || !langHintWanted()) return;
+    if (global.__iasharkLangHint || global.__iasharkPaysLoad || !langHintWanted()) return;
     global.__iasharkLangHint = true;
     try{
       var doc = global.document;
@@ -317,6 +350,7 @@
     var tz = String(timeZone || "");
     if (b === "fr") return "fr";
     if (b === "es") return MX_TZ_RE.test(tz) ? "mx" : "es";
+    if (b === "pt") return "pt";
     if (tz === "Europe/London") return "gb";
     if (tz === "Africa/Johannesburg") return "za";
     return "en";
@@ -538,6 +572,8 @@
     // bandeau) et pre-filtre gratuit (langHintWanted, plus haut).
     hintPageDir: function(){ return hintPageDir(); },
     langHintWanted: function(){ return langHintWanted(); },
+    // Fenetre du choix du pays : pre-filtre (tests/pays-choix.test.js).
+    paysWanted: function(){ return paysWanted(); },
     // Langue de la page d'arrivee (tests/lang-landing.test.js).
     decideLandingRedirect: decideLandingRedirect,
     autoTargetDir: autoTargetDir,
@@ -652,8 +688,9 @@
     if (!global.__iasharkLangRedirecting) {
       try{
         var doc0 = global.document;
-        if (doc0 && doc0.body) mountBackLink();
-        else if (doc0 && typeof doc0.addEventListener === "function") doc0.addEventListener("DOMContentLoaded", mountBackLink);
+        var afterDom = function(){ loadPaysChoix(); if (!global.__iasharkPaysLoad) mountBackLink(); };
+        if (doc0 && doc0.body) afterDom();
+        else if (doc0 && typeof doc0.addEventListener === "function") doc0.addEventListener("DOMContentLoaded", afterDom);
       }catch(e){}
     }
   }

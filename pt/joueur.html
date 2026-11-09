@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="iashark-market" content="fr">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ficha do jogador — IASHARK</title>
+<link rel="canonical" href="https://iashark.com/pt/joueur.html">
+<link rel="alternate" hreflang="fr" href="https://iashark.com/fr/joueur.html">
+<link rel="alternate" hreflang="en-GB" href="https://iashark.com/gb/joueur.html">
+<link rel="alternate" hreflang="en-ZA" href="https://iashark.com/za/joueur.html">
+<link rel="alternate" hreflang="en" href="https://iashark.com/en/joueur.html">
+<link rel="alternate" hreflang="es-MX" href="https://iashark.com/mx/joueur.html">
+<link rel="alternate" hreflang="es" href="https://iashark.com/es/joueur.html">
+<link rel="alternate" hreflang="pt" href="https://iashark.com/pt/joueur.html">
+<link rel="alternate" hreflang="x-default" href="https://iashark.com/en/joueur.html">
+<meta name="description" content="A ameaça ofensiva de um jogador num jogo concreto: pontuação, contexto do adversário, forma recente e produção real.">
+<!-- Page de detail rattachee a un match precis (?m=&p=) : son contenu n'a
+     pas de sens hors de ce contexte et changerait a chaque journee. Elle
+     reste suivie pour transmettre la valeur des liens, mais pas indexee. -->
+<meta name="robots" content="noindex,follow">
+<link rel="icon" href="/assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" defer></script>
+<link rel="stylesheet" href="/assets/tailwind.css">
+<link rel="stylesheet" href="/assets/player-page.css">
+<link rel="stylesheet" href="/assets/lang-switcher.css">
+<link rel="stylesheet" href="/assets/bottom-navigation.css">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="IASHARK">
+<meta property="og:locale" content="pt_PT">
+<meta property="og:title" content="Ficha do jogador — IASHARK">
+<meta property="og:description" content="A ameaça ofensiva de um jogador num jogo concreto: pontuação, contexto do adversário, forma recente e produção real.">
+<meta property="og:url" content="https://iashark.com/pt/joueur.html">
+<meta property="og:image" content="https://iashark.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="bg-page pb-24 text-ink antialiased">
+
+<header class="sticky top-0 z-40 border-b border-hairline bg-page/95 backdrop-blur">
+  <div class="mx-auto flex h-14 w-full max-w-[1240px] items-center gap-4 px-4 sm:px-6">
+    <a href="/pt/" aria-label="IASHARK, início" data-i18n-attr="aria-label:site_header.aria_home"><img src="/assets/iashark-logo.png" alt="IASHARK" class="h-7 w-auto object-contain"></a>
+    <span class="lang-switch-slot ml-auto" id="langSwitchSlot"></span>
+    <span id="authHeaderSlot"><a class="rounded-lg border border-hairline px-3 py-1.5 text-[12.5px] font-semibold transition hover:border-cyan/40" href="/pt/connexion.html" data-i18n="match_page.shell_login">Entrar</a></span>
+  </div>
+</header>
+
+<main class="mx-auto w-full max-w-[1240px] px-4 sm:px-6">
+
+  <!-- Squelette calque sur la vraie mise en page : en-tete, score, quatre
+       indicateurs. Pas un rond qui tourne au milieu de l'ecran. -->
+  <div id="squelette" class="py-8" aria-busy="true" aria-live="polite">
+    <div class="h-4 w-56 animate-pulse rounded bg-white/[.06]"></div>
+    <div class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_260px]">
+      <div class="flex items-center gap-5">
+        <div class="h-24 w-24 shrink-0 animate-pulse rounded-2xl bg-white/[.05]"></div>
+        <div class="flex-1 space-y-3">
+          <div class="h-9 w-2/3 animate-pulse rounded bg-white/[.06]"></div>
+          <div class="h-4 w-1/3 animate-pulse rounded bg-white/[.04]"></div>
+          <div class="h-4 w-1/4 animate-pulse rounded bg-white/[.04]"></div>
+        </div>
+      </div>
+      <div class="h-32 animate-pulse rounded-2xl bg-white/[.04]"></div>
+    </div>
+    <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div class="h-20 animate-pulse rounded-xl bg-white/[.04]"></div>
+      <div class="h-20 animate-pulse rounded-xl bg-white/[.04]"></div>
+      <div class="h-20 animate-pulse rounded-xl bg-white/[.04]"></div>
+      <div class="h-20 animate-pulse rounded-xl bg-white/[.04]"></div>
+    </div>
+    <span class="sr-only" data-i18n="player_page.loading_profile">A carregar a ficha do jogador…</span>
+  </div>
+
+  <div id="playerRoot" hidden></div>
+
+</main>
+
+<footer class="mx-auto mt-12 w-full max-w-[1240px] border-t border-hairline px-4 py-8 sm:px-6">
+  <p class="max-w-[80ch] text-[12.5px] leading-relaxed text-soft"><span data-i18n="player_page.footer_disclaimer">Informação estatística, nunca uma garantia de resultado. As apostas desportivas envolvem risco de perda financeira e de dependência. Proibido a menores.</span> <span data-helpline-row><span data-i18n="match_page.shell_help_label">Ajuda:</span> <a data-market-helpline="url" href="https://www.gamblingtherapy.org" class="text-cyan hover:underline">gamblingtherapy.org</a><span data-market-helpline-if="phone" hidden> · <span data-market-helpline="phone" hidden></span></span></span></p>
+</footer>
+<!--SEO_FOOTER_NAV--><nav class="seo-foot-nav" aria-label="Navegação do site" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#91a0b3;text-align:center"><p style="margin:0 0 4px"><span style="color:#c3ccd8">Competições:</span> <a href="/pt/leagues/liga-portugal.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga Portugal</a> · <a href="/pt/leagues/champions-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Champions League</a> · <a href="/pt/leagues/premier-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Premier League</a> · <a href="/pt/leagues/la-liga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">La Liga</a> · <a href="/pt/leagues/serie-a.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Serie A</a> · <a href="/pt/leagues/bundesliga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Bundesliga</a> · <a href="/pt/leagues/ligue-1.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Ligue 1</a> · <a href="/pt/leagues/europa-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Europa League</a> · <a href="/pt/leagues/conference-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Conference League</a> · <a href="/pt/leagues/eredivisie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Eredivisie</a> · <a href="/pt/leagues/mls.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">MLS</a> · <a href="/pt/leagues/allsvenskan.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Allsvenskan</a> · <a href="/pt/leagues/j1-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">J1 League</a> · <a href="/pt/leagues/liga-mx.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga MX</a> · <a href="/pt/leagues/liga-profesional-argentina.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Liga Profesional Argentina</a> · <a href="/pt/leagues/primera-division-chile.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Primera Division Chile</a> · <a href="/pt/leagues/championship.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Championship</a> · <a href="/pt/leagues/2-bundesliga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">2. Bundesliga</a> · <a href="/pt/leagues/segunda-division.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Segunda Division</a> · <a href="/pt/leagues/serie-b.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Serie B</a> · <a href="/pt/leagues/jupiler-pro-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Jupiler Pro League</a> · <a href="/pt/leagues/super-lig.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Super Lig</a> · <a href="/pt/leagues/scottish-premiership.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Scottish Premiership</a> · <a href="/pt/leagues/brasileirao-serie-a.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Brasileirao Serie A</a> · <a href="/pt/leagues/austrian-bundesliga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Austrian Bundesliga</a> · <a href="/pt/leagues/swiss-super-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Swiss Super League</a> · <a href="/pt/leagues/danish-superliga.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Danish Superliga</a> · <a href="/pt/leagues/ekstraklasa.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Ekstraklasa</a> · <a href="/pt/leagues/uefa-nations-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">UEFA Nations League</a> · <a href="/pt/leagues/world-cup-qualifiers-europe.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">World Cup Qualifiers Europe</a> · <a href="/pt/leagues/ligue-2.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Ligue 2</a> · <a href="/pt/leagues/super-league-greece.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Super League Greece</a> · <a href="/pt/leagues/eliteserien.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Eliteserien</a> · <a href="/pt/leagues/saudi-pro-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Saudi Pro League</a> · <a href="/pt/leagues/dfb-pokal.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">DFB Pokal</a> · <a href="/pt/leagues/coppa-italia.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Coppa Italia</a> · <a href="/pt/leagues/copa-del-rey.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Copa del Rey</a> · <a href="/pt/leagues/fa-cup.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">FA Cup</a> · <a href="/pt/leagues/coupe-de-france.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Coupe de France</a> · <a href="/pt/leagues/k-league-1.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">K League 1</a> · <a href="/pt/leagues/efl-cup.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">EFL Cup</a> · <a href="/pt/leagues/copa-libertadores.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Copa Libertadores</a> · <a href="/pt/leagues/copa-sudamericana.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Copa Sudamericana</a> · <a href="/pt/leagues/fifa-club-world-cup.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">FIFA Club World Cup</a> · <a href="/pt/leagues/leagues-cup.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Leagues Cup</a> · <a href="/pt/leagues/uefa-euro.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">UEFA Euro</a> · <a href="/pt/leagues/euro-qualifiers.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Euro Qualifiers</a> · <a href="/pt/leagues/wc-qualifiers-south-america.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">WC Qualifiers South America</a> · <a href="/pt/leagues/copa-america.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Copa America</a> · <a href="/pt/leagues/africa-cup-of-nations.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Africa Cup of Nations</a> · <a href="/pt/leagues/concacaf-gold-cup.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">CONCACAF Gold Cup</a></p><p style="margin:0"><a href="/en/blog/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Blog e guias</a> · <a href="/pt/marches.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Mercados analisados</a> · <a href="/pt/methodologie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Metodologia</a></p></nav><!--/SEO_FOOTER_NAV-->
+
+<nav class="bottom-nav" aria-label="Navigation principale"><a href="/pt/"><span>&#8962;</span><b>Accueil</b></a><a href="/pt/pro.html"><span>&#9734;</span><b>Outils</b></a><a href="/en/blog/"><span>&#9636;</span><b>Blog</b></a><a href="/pt/compte.html"><span>&#9817;</span><b>Compte</b></a></nav>
+
+<script src="/app-client.js" defer></script>
+<script src="/lib/display-data.js"></script>
+<script src="/lib/insights.js"></script>
+<script src="/lib/market-labels.js"></script><script src="/lib/match-view-model.js"></script>
+<script src="/i18n/i18n.js"></script>
+<script src="/lib/market-config.js"></script>
+<script src="/player-page.js" defer></script>
+<script src="/auth-header.js"></script>
+<script>document.addEventListener('DOMContentLoaded',function(){IasharkAuthHeader.mount('#authHeaderSlot');});</script>
+<script src="/lang-switcher.js"></script>
+<script>IasharkLangSwitcher.mount('#langSwitchSlot');</script>
+<script src="/site-prefs.js"></script>
+<script src="/bottom-navigation.js"></script>
+</body>
+</html>

@@ -573,3 +573,10 @@ test('Lien 1win (code partenaire Telegram) sous le match offert et sous les comp
   assert.ok(p.html.includes('<a href="https://iashark.com/go/1win/telegram">Parier ce match chez 1win</a> (18+)'));
   assert.ok(p.html.length <= 1024);
 });
+
+test('Lien 1win aussi sur le bilan d\'hier et le debat du soir (09/11 : « tout le temps »)', () => {
+  const L = '<a href="https://iashark.com/go/1win/telegram">Parier chez 1win</a> (18+)';
+  assert.ok(P.hier(complet).html.endsWith(L));
+  const d = P.debat([{m: mD(1, 'Villarreal', 'Paris Saint Germain'), fx: fin(1, 11, 12, [12, 12, 11])}]).html;
+  assert.ok(d.includes(L) && d.endsWith(P.INVITATION));
+});

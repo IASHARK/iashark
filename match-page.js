@@ -403,6 +403,27 @@ function matchTermine(m){
 }
 
 
+// BOUTON SITE DE PARIS (09/11/2026, decision de Clement) : sous le pari de l'Avis
+// IASHARK, « Parier <match> chez 1win ». Le lien passe par /go/1win/site
+// (netlify/edge-functions/lib/go-links.mjs : un seul endroit pour l'adresse).
+// Montre a TOUS les visiteurs, quel que soit le pays (09/11/2026, Clement : la
+// localisation peut se tromper ; la petite ligne dit que 1win n'est pas ouvert partout).
+// Aucune cote 1win ici : nos sources de cotes ne couvrent pas 1win.
+const BK_NOMS={'1win':'1win'};
+function remplirBoutonsParieur(root){
+  // Pose apres le rendu, sous le ticket du pari (.sig-slip, ou ses chiffres .appel-stats sur le
+  // pari offert) : signalCard et carteAppel ne sont pas modifiees (empreinte de l'Avis).
+  const cartes=[...(root||document).querySelectorAll('.signal-card.avis')].filter(c=>c.querySelector('.sig-slip')&&!c.querySelector('.bk-cta'));
+  const bk='1win',nom=BK_NOMS[bk];
+  cartes.forEach(c=>{
+    const fx=c.querySelector('.sig-fixture'),m=fx?fx.textContent.trim():'';
+    const el=document.createElement('div');
+    el.className='bk-cta';
+    el.innerHTML=`<a class="bk-cta-btn" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi('bookmaker_'+bk)}>${esc(m?tf('match_page.bk_cta','Parier {match} chez {book}',{match:m,book:nom}):nom)}<span aria-hidden="true"> →</span></a><p class="bk-cta-note">${esc(tf('match_page.bk_cta_note','18+. {book} n’est pas ouvert dans tous les pays.',{book:nom}))}</p>`;
+    (c.querySelector('.appel-stats')||c.querySelector('.sig-slip')).insertAdjacentElement('afterend',el);
+  });
+}
+
 // L'AVIS IASHARK (abonne Pro ou match offert connecte) : le pari et sa cote,
 // « Nos chances face a la cote » en deux barres avec l'ecart dit en mots, sur
 // 100 matchs, pourquoi, a surveiller, risque et fiabilite, puis le detail des
@@ -1232,6 +1253,7 @@ function paint(vm,sections,opts){
   const fab=mk&&mk.fab?`<button type="button" class="mk-fab" data-mk-open>${esc(libMk)}${mk.nb?` <b>· ${esc(Number(mk.nb).toLocaleString(localeTag()))}</b>`:''}${mk.flou?cardIcon('lock'):''}</button>`:'';
   document.body.classList.remove('has-cta-bar');
   root.innerHTML=`<div class="page${mk?' has-mk':''}">${mk?`<aside class="mk-col${mk.flou?' is-locked':''}" id="mkCol" aria-labelledby="mkTitle">${mk.html}</aside>`:''}<div class="page-main">${hero(vm,opts)}${navChips(items,puce,opts.sticky)}<div class="secs">${corps}</div></div></div>${fab}`;
+  remplirBoutonsParieur(root);
   bindMotion();
   bindUi();
   bindNav();

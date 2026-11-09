@@ -26,3 +26,9 @@
 [[edge_functions]]
   path = "/api/geo"
   function = "geo"
+
+# /go/<site>/<source> : lien d'affiliation du site de paris (09/11/2026), un
+# seul endroit pour les adresses : netlify/edge-functions/lib/go-links.mjs.
+[[edge_functions]]
+  path = "/go/*"
+  function = "go"

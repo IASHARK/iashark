@@ -32,4 +32,7 @@ test("page match : bouton 1win sous l'Avis, pour tous les pays, clic suivi", () 
   assert.match(src, /remplirBoutonsParieur\(root\)/);
   const ft = require("fs").readFileSync(require("path").join(__dirname, "..", "funnel-track.js"), "utf8");
   assert.match(ft, /bookmaker_1win: true/);
+  // Logo officiel du site de paris dans le bouton (fichier publie avec assets/).
+  assert.match(src, /src="\/assets\/bk\/\$\{bk\}\.png"/);
+  assert.ok(require("fs").existsSync(require("path").join(__dirname, "..", "assets", "bk", "1win.png")));
 });

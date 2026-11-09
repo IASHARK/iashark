@@ -567,3 +567,9 @@ test('Chaine visee : verdict sans valeur secrete', () => {
   assert.deepStrictEqual([v.privee, v.robotAdmin, v.lienIdentique], [false, false, null]);
   assert.strictEqual(P.verdictChaine({type: 'supergroup'}, null).chaine, false);
 });
+
+test('Lien 1win (code partenaire Telegram) sous le match offert et sous les compos', () => {
+  const p = P.offert(offertHome, {matchs: [offertM]}, MIDI);
+  assert.ok(p.html.includes('<a href="https://iashark.com/go/1win/telegram">Parier ce match chez 1win</a> (18+)'));
+  assert.ok(p.html.length <= 1024);
+});

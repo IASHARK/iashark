@@ -419,7 +419,10 @@ function remplirBoutonsParieur(root){
     const fx=c.querySelector('.sig-fixture'),m=fx?fx.textContent.trim():'';
     const el=document.createElement('div');
     el.className='bk-cta';
-    el.innerHTML=`<a class="bk-cta-btn" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi('bookmaker_'+bk)}>${esc(m?tf('match_page.bk_cta','Parier {match} chez {book}',{match:m,book:nom}):nom)}<span aria-hidden="true"> →</span></a><p class="bk-cta-note">${esc(tf('match_page.bk_cta_note','18+. {book} n’est pas ouvert dans tous les pays.',{book:nom}))}</p>`;
+    // Logo officiel (espace partenaire 1win, Materiel promotionnel) a la place du nom.
+    const logo=`<img class="bk-cta-logo" src="/assets/bk/${bk}.png" alt="${esc(nom)}" width="50" height="22">`;
+    const txt=m?tf('match_page.bk_cta','Parier {match} chez {book}',{match:m,book:'@@BK@@'}):'@@BK@@';
+    el.innerHTML=`<a class="bk-cta-btn" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi('bookmaker_'+bk)}><span>${String(txt).split('@@BK@@').map(esc).join(`</span>${logo}<span>`)}</span><span aria-hidden="true">→</span></a><p class="bk-cta-note">${esc(tf('match_page.bk_cta_note','18+. {book} n’est pas ouvert dans tous les pays.',{book:nom}))}</p>`;
     (c.querySelector('.appel-stats')||c.querySelector('.sig-slip')).insertAdjacentElement('afterend',el);
   });
 }

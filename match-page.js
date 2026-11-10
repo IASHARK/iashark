@@ -409,7 +409,11 @@ function matchTermine(m){
 // Montre a TOUS les visiteurs, quel que soit le pays (09/11/2026, Clement : la
 // localisation peut se tromper ; la petite ligne dit que 1win n'est pas ouvert partout).
 // Aucune cote 1win ici : nos sources de cotes ne couvrent pas 1win.
-const BK_NOMS={'1win':'1win'};
+const BK_NOMS={'1win':'1win','vavada':'Vavada'};
+// Site de paris mis en avant (10/11/2026, Clement : Vavada a la place de 1win).
+const BK_ACTIF='vavada';
+// Logo officiel quand on l'a (assets/bk/<site>.png) ; sinon le nom en gras.
+const BK_LOGOS={'1win':true};
 // Moment du match pour le bouton (09/11/2026, Clement) : 'avant' le coup d'envoi, 'direct' une fois
 // le coup d'envoi passe (le bouton propose de parier en direct), 'fini' : aucun bouton.
 // Match reporte, annule ou sans heure fiable : 'avant' (jamais « en direct » par erreur).
@@ -422,9 +426,9 @@ function momentParieur(m){
 // Le bouton lui-meme. match : « Lyon – PSG » ; moment : 'avant' ou 'direct' ;
 // mur : page fermee (visiteur sans Pro) : « Voir les cotes de ... », bouton discret sous l'offre Pro.
 function boutonParieurHtml(match,moment,mur){
-  const bk='1win',nom=BK_NOMS[bk];
-  // Logo officiel (espace partenaire 1win, Materiel promotionnel) a la place du nom.
-  const logo=`<img class="bk-cta-logo" src="/assets/bk/${bk}.png" alt="${esc(nom)}" width="50" height="22">`;
+  const bk=BK_ACTIF,nom=BK_NOMS[bk];
+  // Logo officiel (espace partenaire, Materiel promotionnel) a la place du nom, sinon le nom.
+  const logo=BK_LOGOS[bk]?`<img class="bk-cta-logo" src="/assets/bk/${bk}.png" alt="${esc(nom)}" width="50" height="22">`:`<b class="bk-cta-nom">${esc(nom)}</b>`;
   const vars={match,book:'@@BK@@'};
   const txt=!match?'@@BK@@'
     :moment==='direct'?tf('match_page.bk_cta_live','Parier {match} en direct chez {book}',vars)
@@ -1425,7 +1429,7 @@ function renderProWall(raw,ctx){
   // Repli sans module : un lien vers l'abonnement (jamais une page vide).
   const repli=`<section class="op op--vitrine"><h2 class="op-title">${esc(t('offre_pro.title_match','Passe Pro pour ouvrir ce match'))}</h2>${boutonAction(lien('abonnement.html?duree=month&next='+encodeURIComponent(cheminMatch(raw))),t('match_v4.panel_cta','Passe Pro'),suivi('match_gate_unlock').trim())}</section>`;
   const secs=[['offre',`<div id="offreMatch" class="gate">${repli}</div>`,null,true]];
-  // Bouton 1win discret SOUS l'offre Pro (09/11/2026, Clement) : le visiteur qui ne prend pas Pro
+  // Bouton du site de paris (Vavada depuis le 10/11) discret SOUS l'offre Pro (09/11/2026, Clement) : le visiteur qui ne prend pas Pro
   // peut voir les cotes du match chez 1win (en direct apres le coup d'envoi). Aucun pari devoile.
   const momentBk=momentParieur(pub);
   if(momentBk!=='fini')secs.push(['bk',boutonParieurHtml(tf('match_page.sig_match_line','{home} – {away}',{home:vm.identity.home.name,away:vm.identity.away.name}),momentBk,true),null,true]);

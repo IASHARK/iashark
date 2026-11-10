@@ -6,12 +6,16 @@
 // Sources : site (boutons des pages match), x, telegram. Une source inconnue
 // retombe sur « site ». Un site inconnu renvoie vers l'accueil IASHARK.
 
+// Vavada (10/11/2026, Clement) : partenaire mis en avant a la place de 1win. Un seul
+// lien de parrainage pour l'instant (espace vavadapart, Media > Links, RevShare 50 %) ;
+// des liens separes par source viendront de la manager.
+const VAVADA = "https://standarttrack.com/?promo=e5c4d13e-1395-4bcc-af9b-194be7ff5af2&target=register";
+
 export const GO_LINKS = {
-  "1win": {
-    site: "https://r1wquow.com/betting?open=register&p=xf5w",
-    x: "https://r1wquow.com/betting?open=register&p=f8ja",
-    telegram: "https://r1wquow.com/betting?open=register&p=exbd",
-  },
+  vavada: { site: VAVADA, x: VAVADA, telegram: VAVADA },
+  // 1win retire le 10/11/2026 (Clement : « enleve 1win de partout ») : les anciens
+  // liens /go/1win/... des posts X et Telegram menent maintenant chez Vavada.
+  "1win": { site: VAVADA, x: VAVADA, telegram: VAVADA },
 };
 
 export function resolveGo(pathname) {

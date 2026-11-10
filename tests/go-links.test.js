@@ -15,7 +15,8 @@ test("go : 1win par source, source inconnue = site, site inconnu = accueil", asy
   const r = goResponse("/go/1win/x");
   assert.strictEqual(r.status, 302);
   assert.match(r.headers["Cache-Control"], /no-store/);
-  for (const src of Object.values(GO_LINKS["1win"])) assert.match(src, /^https:\/\/[^/]+\/betting\?open=register&p=[a-z0-9]+$/);
+  // 1win retire le 10/11 : ses anciens liens menent chez Vavada.
+  for (const src of Object.values(GO_LINKS["1win"])) assert.strictEqual(src, GO_LINKS.vavada.site);
 });
 
 test("go : Vavada (10/11) pour le site, X et Telegram", async () => {

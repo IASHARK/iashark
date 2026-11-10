@@ -1,10 +1,10 @@
 {
  "version": 1,
- "genere_le": "2026-11-09T07:13:57.424Z",
- "jour": "2026-11-09",
+ "genere_le": "2026-11-10T07:53:17.513Z",
+ "jour": "2026-11-10",
  "debut": "2026-10-06",
  "objectif": 10,
- "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-11-09. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
+ "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-11-10. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
  "montantes": [
   {
    "rang": 1,
@@ -19,14 +19,45 @@
      "c": 1.4,
      "r": "gagne",
      "cc": 1.4
+    },
+    {
+     "j": "2026-11-07",
+     "f": 1494798,
+     "h": "Kristiansund BK",
+     "a": "Valerenga",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.4,
+     "r": "annule",
+     "cc": 1.4
+    },
+    {
+     "j": "2026-11-08",
+     "f": 1490609,
+     "h": "Real Salt Lake",
+     "a": "Los Angeles Galaxy",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 1.96
+    },
+    {
+     "j": "2026-11-09",
+     "f": 1551036,
+     "h": "Club Queretaro",
+     "a": "Puebla",
+     "m": "under-35",
+     "p": "Moins de 3,5 buts",
+     "c": 1.44,
+     "r": "gagne",
+     "cc": 2.82
     }
    ],
-   "gagnes": 1,
-   "cote": 1.4,
-   "etat": "en_attente",
-   "attente": {
-    "j": "2026-11-07"
-   },
+   "gagnes": 3,
+   "cote": 2.82,
+   "etat": "en_cours",
+   "attente": null,
    "dernier": {
     "t": "perdu",
     "j": "2026-11-05",
@@ -251,45 +282,55 @@
      "m": "over-25",
      "p": "Plus de 2,5 buts",
      "c": 1.4,
-     "r": "en_attente",
-     "cc": null
+     "r": "annule",
+     "cc": 1.4
+    },
+    {
+     "j": "2026-11-08",
+     "f": 1490609,
+     "h": "Real Salt Lake",
+     "a": "Los Angeles Galaxy",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 1.96
+    },
+    {
+     "j": "2026-11-09",
+     "f": 1551036,
+     "h": "Club Queretaro",
+     "a": "Puebla",
+     "m": "under-35",
+     "p": "Moins de 3,5 buts",
+     "c": 1.44,
+     "r": "gagne",
+     "cc": 2.82
     }
    ],
    "bilan": {
-    "gagnes": 13,
+    "gagnes": 15,
     "perdus": 5,
-    "annules": 0,
+    "annules": 1,
     "non_regles": 0,
     "objectifs": 1
    }
   },
   {
    "rang": 2,
-   "paliers": [
-    {
-     "j": "2026-11-08",
-     "f": 1490608,
-     "h": "Seattle Sounders",
-     "a": "Los Angeles FC",
-     "m": "over-25",
-     "p": "Plus de 2,5 buts",
-     "c": 1.56,
-     "r": "gagne",
-     "cc": 1.56
-    }
-   ],
-   "gagnes": 1,
-   "cote": 1.56,
+   "paliers": [],
+   "gagnes": 0,
+   "cote": null,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
     "t": "perdu",
-    "j": "2026-11-07",
-    "n": 5,
-    "h": "Preston",
-    "a": "Southampton",
+    "j": "2026-11-09",
+    "n": 1,
+    "h": "Plymouth Parkway",
+    "a": "Berkhamsted",
     "p": "Plus de 2,5 buts",
-    "k": 1.55
+    "k": 1.65
    },
    "objectifs": [
     {
@@ -519,11 +560,22 @@
      "c": 1.56,
      "r": "gagne",
      "cc": 1.56
+    },
+    {
+     "j": "2026-11-09",
+     "f": 1646814,
+     "h": "Plymouth Parkway",
+     "a": "Berkhamsted",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.65,
+     "r": "perdu",
+     "cc": null
     }
    ],
    "bilan": {
     "gagnes": 15,
-    "perdus": 5,
+    "perdus": 6,
     "annules": 0,
     "non_regles": 0,
     "objectifs": 1

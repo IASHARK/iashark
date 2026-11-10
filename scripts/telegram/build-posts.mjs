@@ -83,7 +83,9 @@ if (veut("hier")) {
     const entree = ((registre && registre.matchs) || []).filter((x) => x && x.jour === HIER && x.fixture_id != null);
     if (entree.length === 1 && !(bilan && bilan.jour === HIER && bilan.offert)) {
       const id = entree[0].fixture_id;
-      const a = P.ligneArchive(await base(`predictions_archive?fixture_id=eq.${encodeURIComponent(id)}&select=market,result,published_at,kickoff_at,type&order=kickoff_at.desc`));
+      // Match rejoue (migration 0073) : seulement la ligne la plus recente du match (celle d'hier), jamais un repli sur
+      // la ligne d'un pari annule plus ancien.
+      const a = P.ligneArchive(((await base(`predictions_archive?fixture_id=eq.${encodeURIComponent(id)}&select=market,result,published_at,kickoff_at,type&order=kickoff_at.desc.nullslast&limit=1`)) || []).slice(0, 1));
       const simple = ((bandeau.simples && bandeau.simples.items) || []).find((x) => x && String(x.f) === String(id));
       src.archiveOffert = a || (simple ? {market: simple.m, result: simple.r} : null);
     }

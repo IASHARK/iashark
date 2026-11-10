@@ -137,7 +137,8 @@ test("pipeline : ecritures Supabase jamais en echec silencieux", () => {
   assert.match(wf, /Could not find the '\(\[A-Za-z0-9_\]\+\)' column/, "colonne inconnue rangee dans raw_response puis lot renvoye");
   assert.match(wf, /c\.raw_response=Object\.assign\(\{\},c\.raw_response\|\|\{\},extra\);/);
   assert.match(wf, /rows=dedoublonnerParFixture\(rows,'dernier'\);/);
-  assert.match(wf, /var rows=dedoublonnerParFixture\(candidates,'premier'\)/);
+  // Match rejoue (migration 0073) : avec la colonne rejoue, doublons retires par (fixture_id, rejoue) ; sans elle, par fixture_id.
+  assert.match(wf, /:dedoublonnerParFixture\(candidates,'premier'\);/);
   for (const zone of ["premium", "archive", "snapshots"]) {
     assert.match(wf, new RegExp("signalerEchecPersistance\\('" + zone + "','echec upsert"), zone + " : echec signale");
   }

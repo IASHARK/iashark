@@ -202,7 +202,8 @@ test("combines : la jambe d'un match rejoue est reglee par la ligne de SON coup 
   const regler = BP.creerRegleur(lignes, []);
   assert.equal(regler(ID, "home-win", KO_NOUVEAU), "win", "ticket du 10/11");
   assert.equal(regler(ID, "over-25", KO_ORIGINE), "void", "ticket du 28/10 : jambe annulee, jamais reglee sur le match rejoue");
-  assert.equal(regler(ID, "home-win"), "win", "sans coup d'envoi : derniere ligne, comme avant");
+  assert.equal(regler(ID, "home-win"), "win", "sans coup d'envoi : la ligne du match rejoue");
+  assert.equal(BP.creerRegleur(lignes.slice().reverse(), [])(ID, "home-win"), "win", "quel que soit l'ordre de lecture");
 });
 
 test("pipeline : colonne rejoue verifiee, gel branche, nouvelle ligne d'historique, archive en (fixture_id, rejoue)", () => {
@@ -261,4 +262,14 @@ test("migration 0073 : cle (fixture_id, rejoue), ligne d'origine intacte, correc
   assert.match(sql, /NE PAS APPLIQUER sans l'accord de Clement/);
   // Aucune ligne existante modifiee : ni update ni delete de donnees.
   assert.doesNotMatch(sql.replace(/\$\$[\s\S]*?\$\$/g, "").replace(/--.*$/gm, ""), /^\s*(update|delete)\s/im);
+});
+
+test("donnees d'entree (match_snapshots) : le pari du match rejoue a son propre snapshot, celui du pari annule n'est pas ecrase", () => {
+  assert.match(WF, /if\(gel\.match&&Number\(gel\.match\.rejoue\)>0\) GEL_REJOUE\[cleGel\]=Math\.floor\(Number\(gel\.match\.rejoue\)\);/);
+  const i = WF.indexOf("snapshotRows=snapshotRows.map(function(r){");
+  assert.ok(i !== -1 && i > WF.indexOf("snapshotRows=snapshotRows.filter(function(r){ return !GEL_FIGES[String(r&&r.fixture_id)]; });"));
+  assert.ok(i < WF.indexOf("await writeSnapshots(snapshotRows);"));
+  assert.match(WF, /snapshot_type:'prediction_rejoue_'\+nR,captured_at:new Date\(\)\.toISOString\(\)/);
+  const sql = fs.readFileSync(path.join(root, "supabase/migrations/0073_predictions_archive_rejoue.sql"), "utf8");
+  assert.match(sql, /snapshot_type ~ '\^prediction_rejoue_\[1-9\]\$'/);
 });

@@ -18,6 +18,8 @@
 --    - predictions_archive_verrou : la correction publique d'un resultat vise (fixture_id, rejoue).
 -- 3. Journal public des corrections : colonne rejoue (0 par defaut) ; corriger_resultat_archive prend un 5e
 --    argument p_rejoue (0 par defaut), l'ancienne version a 4 arguments est retiree (sinon appel ambigu).
+-- 4. match_snapshots (donnees d'entree, prive) : un type 'prediction_rejoue_<n>' (n de 1 a 9) garde les donnees
+--    d'entree du pari du match rejoue a cote de celles du pari annule ('prediction', jamais ecrase).
 --
 -- ORDRE DE MISE EN LIGNE : d'abord le code (le pipeline detecte la colonne et garde l'ancienne cle tant
 -- qu'elle n'existe pas ; il ne publie alors aucun pari de match rejoue), PUIS cette migration. Si la
@@ -35,6 +37,10 @@ alter table public.predictions_archive drop constraint if exists predictions_arc
 alter table public.predictions_archive add constraint predictions_archive_pkey primary key (fixture_id, rejoue);
 
 alter table public.predictions_archive_corrections add column if not exists rejoue smallint not null default 0;
+
+alter table public.match_snapshots drop constraint if exists match_snapshots_snapshot_type_check;
+alter table public.match_snapshots add constraint match_snapshots_snapshot_type_check
+  check (snapshot_type in ('prediction', 'closing') or snapshot_type ~ '^prediction_rejoue_[1-9]$');
 
 create or replace function public.predictions_archive_publication()
 returns trigger

@@ -4472,7 +4472,7 @@ jobs:
             // ne retrouve jamais de pari) et apres les traductions, AVANT la selection
             // canonique, le match offert, les fichiers publics, les lignes premium,
             // les snapshots et l'historique - qui recoivent donc tous le pari publie.
-            var GEL_FIGES={}, GEL_COMPTES={};
+            var GEL_FIGES={}, GEL_COMPTES={}, GEL_REJOUE={};
             // MATCH REPORTE APRES L'HEURE PREVUE (ronde 5, lib/pick-freeze.js#freezeAnalysis) :
             // la ligne d'historique de chaque match (une seule par match, verrouillee a son
             // heure d'origine) ; un match reporte ne recoit alors aucun nouveau pari.
@@ -4515,6 +4515,7 @@ jobs:
               GEL_COMPTES[gel.status]=(GEL_COMPTES[gel.status]||0)+1;
               if(gel.remplacement) GEL_COMPTES['EXCEPTION_'+gel.remplacement.motif]=(GEL_COMPTES['EXCEPTION_'+gel.remplacement.motif]||0)+1;
               if(gel.rejoue) GEL_COMPTES.REJOUE=(GEL_COMPTES.REJOUE||0)+1;
+              if(gel.match&&Number(gel.match.rejoue)>0) GEL_REJOUE[cleGel]=Math.floor(Number(gel.match.rejoue));
               // FROZEN_CLOSED (20/09/2026) : match commence/joue dont l'analyse
               // publiee est restauree figee - meme traitement aval que FROZEN
               // (jamais SAFE_PICK, jamais un nouveau snapshot 'prediction').
@@ -4544,6 +4545,12 @@ jobs:
             // Snapshot 'prediction' (match_snapshots) : celui de la premiere publication
             // reste en place, ce sont les donnees d'entree qui expliquent le pari fige.
             snapshotRows=snapshotRows.filter(function(r){ return !GEL_FIGES[String(r&&r.fixture_id)]; });
+            // Match rejoue (migration 0073) : les donnees d'entree du nouveau pari vont dans leur propre snapshot
+            // ('prediction_rejoue_<n>', heure de capture du run), jamais par-dessus celles du pari annule ('prediction').
+            snapshotRows=snapshotRows.map(function(r){
+              var nR=r&&GEL_REJOUE[String(r.fixture_id)];
+              return nR&&r.snapshot_type==='prediction'?Object.assign({},r,{snapshot_type:'prediction_rejoue_'+nR,captured_at:new Date().toISOString()}):r;
+            });
             var RUN_OUTPUT_SNAPSHOT_TIME = new Date().toISOString();
             var runOutput = runOutputForSnapshot({
               candidates: RUN_OUTPUT_CANDIDATES,

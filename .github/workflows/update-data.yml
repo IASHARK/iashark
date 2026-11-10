@@ -2160,7 +2160,8 @@ jobs:
             var ids=masquees().map(function(p){return String(p.fixture_id);}).filter(function(v,i,a){return /^\d+$/.test(v)&&a.indexOf(v)===i;});
             var lignes=[];
             for(var i=0;i<ids.length;i+=100){
-              var url=SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/predictions_archive?select=fixture_id,'+PREMIUM_FIELDS_LIB.PENDING_REDACTED_FIELDS.join(',')+'&fixture_id=in.('+ids.slice(i,i+100).join(',')+')';
+              // rejoue (migration 0073) : un match rejoue a deux lignes, chaque prediction est relue dans la SIENNE.
+              var url=SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/predictions_archive?select=fixture_id,'+((await archiveAColonneRejoue())?'rejoue,':'')+PREMIUM_FIELDS_LIB.PENDING_REDACTED_FIELDS.join(',')+'&fixture_id=in.('+ids.slice(i,i+100).join(',')+')';
               var rep=await rawHttpGetJson(url,{'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY});
               if(Array.isArray(rep)) lignes=lignes.concat(rep);
               else signalerEchecPersistance('historique','lecture predictions_archive impossible : '+JSON.stringify(rep).slice(0,160));
@@ -2330,7 +2331,14 @@ jobs:
             var realignees=0;
             for(var mi=0;mi<matchsData.length;mi++){
               var m=matchsData[mi];
-              var alreadyExists=histo.predictions.find(function(p){return p.fixture_id===m.id||(p.home===m.home.n&&p.away===m.away.n&&p.date&&p.date.substring(0,10)===TODAY);});
+              // MATCH REJOUE (decision de Clement du 10/11/2026, lib/pick-freeze.js#matchRejoue) : le pari d'origine a
+              // ete annule (match reporte), le match est de nouveau a venir. Sa ligne d'historique est une NOUVELLE ligne
+              // (rejoue = numero du match rejoue, cle (fixture_id, rejoue) de predictions_archive, migration 0073) ; la
+              // ligne du pari annule reste telle quelle. Sans numero : la ligne la plus recente du match, comme avant.
+              var rejoueM=Number(m.rejoue)>0?Math.floor(Number(m.rejoue)):0;
+              var alreadyExists=rejoueM
+                ?histo.predictions.find(function(p){return p.fixture_id===m.id&&(Number(p.rejoue)||0)===rejoueM;})
+                :histo.predictions.find(function(p){return p.fixture_id===m.id||(p.home===m.home.n&&p.away===m.away.n&&p.date&&p.date.substring(0,10)===TODAY);});
               // GEL DU PARI (19/09/2026, lib/pick-freeze.js) : une prediction encore en
               // attente suit le pari PUBLIE (fige jusqu'au coup d'envoi, celui que voient
               // les abonnes), jamais un pari recalcule puis abandonne. Cas : prediction
@@ -2380,7 +2388,7 @@ jobs:
                 // nouveau moteur a son historique a part. "v3" seulement quand le pari
                 // publie est celui du moteur v3 (v3_pari pose par l adaptateur du moteur v3 et
                 // retire si le pari fige vient de l'ancien moteur) ; sinon "ancien".
-                histo.predictions.unshift({
+                var nouvelleLigne={
                   match:m.home.n+' vs '+m.away.n,home:m.home.n,away:m.away.n,
                   prediction:betLabel,cote:betCote,conf:m.conf,conf_bucket:confBucket,
                   model_probability:m.model_probability!=null?m.model_probability:null,
@@ -2396,7 +2404,10 @@ jobs:
                   // seule « publie avant le match » (migration 0035, verrou en base).
                   published_at:(function(){ var t=Date.parse(m.pick_frozen_at||''); return new Date(Number.isFinite(t)?t:Date.now()).toISOString(); })(),
                   kickoff_at:koMs!=null?new Date(koMs).toISOString():null
-                });
+                };
+                // Match rejoue : numero du match rejoue (absent sur les autres lignes, qui valent 0).
+                if(rejoueM){ nouvelleLigne.rejoue=rejoueM; console.log('  [REJOUE] nouveau pari ajoute a l historique pour un match rejoue apres un pari annule (fixture '+m.id+', rejoue '+rejoueM+').'); }
+                histo.predictions.unshift(nouvelleLigne);
               }
             }
             // Archive complete, non plafonnee, dans Supabase (predictions_archive,
@@ -2536,7 +2547,7 @@ jobs:
               if(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY){
                 var entetes={'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY};
                 var base=SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/';
-                var colonnes='fixture_id,match_label,home,away,'+PREMIUM_FIELDS_LIB.PENDING_REDACTED_FIELDS.join(',')+',league,league_key,has_pinnacle,date,result,type,score';
+                var colonnes='fixture_id,match_label,home,away,'+PREMIUM_FIELDS_LIB.PENDING_REDACTED_FIELDS.join(',')+',league,league_key,has_pinnacle,date,result,type,score'+((await archiveAColonneRejoue())?',rejoue':'');
                 // predictions_archive.date est la date de PUBLICATION, pas celle du
                 // match (le pipeline publie jusqu'a 2 jours a l'avance) : la fenetre
                 // lue est elargie de 4 jours, sinon les journees les plus anciennes
@@ -2576,9 +2587,13 @@ jobs:
                   repP.forEach(function(r){ if(r&&r.fixture_id!=null&&r.pari_rec) PARIS_PUBLIES_BILAN[String(r.fixture_id)]={pari:r.pari_rec,cote:r.cote_rec,market:r.market_id}; });
                   repP.forEach(function(r){ if(r&&r.fixture_id!=null&&r.pari_rec) publies[String(r.fixture_id)]=r; });
                   var remplaces=0;
+                  // Match rejoue (migration 0073) : le pari publie (ligne premium) est celui du match rejoue, la ligne
+                  // au plus grand numero rejoue ; la ligne du pari annule garde son propre pari.
+                  var rejoueMax={};
+                  archive.forEach(function(a){ if(a&&a.fixture_id!=null) rejoueMax[String(a.fixture_id)]=Math.max(rejoueMax[String(a.fixture_id)]||0,Number(a.rejoue)||0); });
                   archive=archive.map(function(a){
                     var pub=a&&a.fixture_id!=null?publies[String(a.fixture_id)]:null;
-                    if(!pub) return a;
+                    if(!pub||(Number(a.rejoue)||0)!==rejoueMax[String(a.fixture_id)]) return a;
                     if(a.prediction&&String(a.prediction)!==String(pub.pari_rec)) remplaces++;
                     return Object.assign({},a,{prediction:pub.pari_rec,cote:pub.cote_rec,market:pub.market_id});
                   });
@@ -2994,10 +3009,45 @@ jobs:
           // doublons retires (la plus recente, en tete de liste, est gardee),
           // predictions masquees jamais ecrites (elles effaceraient le pari archive),
           // tout echec signale.
+          // MATCH REJOUE (10/11/2026, migration 0073) : predictions_archive a pour cle (fixture_id, rejoue). La ligne du
+          // pari annule (rejoue 0) et celle du match rejoue (rejoue 1, 2...) coexistent, aucune n'ecrase l'autre.
+          // Colonne absente (migration 0073 pas encore appliquee) : ancienne cle fixture_id, et une ligne de match
+          // rejoue n'est JAMAIS envoyee (elle ecraserait le pari annule) ; de toute facon le gel n'en cree pas
+          // (rejouePossible:false). Memorise pour tout le run ; une panne de lecture est retentee une fois.
+          var ARCHIVE_REJOUE_PROMESSE=null;
+          function archiveAColonneRejoue(){
+            if(!ARCHIVE_REJOUE_PROMESSE) ARCHIVE_REJOUE_PROMESSE=(async function(){
+              if(!SUPA_URL_PIPELINE||!SUPA_SERVICE_KEY) return false;
+              var url=SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/predictions_archive?select=fixture_id,rejoue&limit=1';
+              var entetes={'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY};
+              for(var essai=0;essai<2;essai++){
+                try{
+                  var rep=await rawHttpGetJson(url,entetes);
+                  if(Array.isArray(rep)) return true;
+                  if(rep&&/rejoue/.test(String(rep.message||''))) return false;
+                }catch(e){}
+              }
+              return false;
+            })();
+            return ARCHIVE_REJOUE_PROMESSE;
+          }
+          function cleArchive(p){ return String(p&&p.fixture_id)+'|'+(Number(p&&p.rejoue)>0?Math.floor(Number(p.rejoue)):0); }
           async function writePredictionsArchive(predictions) {
             var candidates=(predictions||[]).filter(function(p){return p.fixture_id!=null&&p.type==='single'&&!p.redacted;});
-            var rows=dedoublonnerParFixture(candidates,'premier').map(function(p){
-              return {
+            var avecRejoue=await archiveAColonneRejoue();
+            if(!avecRejoue){
+              var rejouees=candidates.filter(function(p){ return Number(p.rejoue)>0; });
+              if(rejouees.length) signalerEchecPersistance('archive',rejouees.length+' pari(s) de match rejoue NON archive(s) : colonne rejoue absente de predictions_archive (appliquer supabase/migrations/0073_predictions_archive_rejoue.sql).');
+              candidates=candidates.filter(function(p){ return !(Number(p.rejoue)>0); });
+            }
+            // Doublons : meme cle (fixture_id, rejoue) avec la colonne, sinon meme fixture_id ; la plus recente, en tete
+            // de liste, est gardee.
+            var vusCle={};
+            var uniques=avecRejoue
+              ?candidates.filter(function(p){ var k=cleArchive(p); if(vusCle[k]) return false; vusCle[k]=true; return true; })
+              :dedoublonnerParFixture(candidates,'premier');
+            var rows=uniques.map(function(p){
+              var ligne={
                 fixture_id:p.fixture_id,
                 match_label:p.match||null,home:p.home||null,away:p.away||null,
                 prediction:p.prediction||null,cote:p.cote!=null?String(p.cote):null,
@@ -3018,7 +3068,10 @@ jobs:
                 // heure et ignore celle-ci (contre-controle ronde 4, 30/09/2026).
                 published_at:p.published_at||null,kickoff_at:p.kickoff_at||null,
               };
+              if(avecRejoue) ligne.rejoue=Number(p.rejoue)>0?Math.floor(Number(p.rejoue)):0;
+              return ligne;
             });
+            var conflit=avecRejoue?'fixture_id,rejoue':'fixture_id';
             if(!rows.length) return;
             if(!SUPA_URL_PIPELINE||!SUPA_SERVICE_KEY){
               signalerEchecPersistance('archive','SUPABASE_SERVICE_ROLE_KEY non configure - '+rows.length+' predictions NON archivees (risque de perte definitive au prochain troncage du cache JSON local).');
@@ -3028,7 +3081,7 @@ jobs:
             var batchSize = 200, ecrites = 0;
             for(var i=0;i<rows.length;i+=batchSize){
               var batch = rows.slice(i,i+batchSize);
-              var r = await upsertJSON(u.hostname, '/rest/v1/predictions_archive?on_conflict=fixture_id', batch, {
+              var r = await upsertJSON(u.hostname, '/rest/v1/predictions_archive?on_conflict='+conflit, batch, {
                 'apikey': SUPA_SERVICE_KEY,
                 'Authorization': 'Bearer '+SUPA_SERVICE_KEY,
                 'Prefer': 'resolution=merge-duplicates,return=minimal',
@@ -3038,7 +3091,7 @@ jobs:
               if(!r.ok && /moteur|published_at|kickoff_at/.test(String(r.error||r.body||''))){
                 signalerEchecPersistance('archive','colonnes moteur/published_at/kickoff_at absentes de predictions_archive : appliquer supabase/migrations/0034_predictions_archive_moteur.sql et 0035_predictions_archive_verrou.sql (lot '+i+' archive sans elles).');
                 batch=batch.map(function(x){ var y=Object.assign({},x); delete y.moteur; delete y.moteur_version; delete y.published_at; delete y.kickoff_at; return y; });
-                r = await upsertJSON(u.hostname, '/rest/v1/predictions_archive?on_conflict=fixture_id', batch, {
+                r = await upsertJSON(u.hostname, '/rest/v1/predictions_archive?on_conflict='+conflit, batch, {
                   'apikey': SUPA_SERVICE_KEY,
                   'Authorization': 'Bearer '+SUPA_SERVICE_KEY,
                   'Prefer': 'resolution=merge-duplicates,return=minimal',
@@ -3099,7 +3152,9 @@ jobs:
           async function lireVerrousArchive(ids){
             var uniques=(ids||[]).map(String).filter(function(v,i,a){ return /^\d+$/.test(v)&&a.indexOf(v)===i; });
             if(!uniques.length||!SUPA_URL_PIPELINE||!SUPA_SERVICE_KEY) return [];
-            var lignes=[], echecs=0, colonnes='fixture_id,type,result,kickoff_at';
+            // score : un pari annule sans etre joue (void sans score) peut ouvrir un match rejoue ; rejoue (migration
+            // 0073) : numero de la ligne, la plus grande l'emporte (lib/pick-freeze.js#historyLocks).
+            var lignes=[], echecs=0, colonnes='fixture_id,type,result,kickoff_at,score'+((await archiveAColonneRejoue())?',rejoue':'');
             var base=SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/predictions_archive?select=';
             var entetes={'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY};
             try{
@@ -4427,6 +4482,9 @@ jobs:
             var VERROUS_FICHIER=PICK_FREEZE.historyLocks(HISTORIQUE_GEL);
             var ARCHIVE_GEL=await lireVerrousArchive(allMatchsData.map(function(m){ return m&&m.id!=null?String(m.id):null; }).filter(function(id){ return id&&!VERROUS_FICHIER[id]; }));
             var VERROUS_HISTORIQUE=PICK_FREEZE.historyLocks(HISTORIQUE_GEL,ARCHIVE_GEL);
+            // MATCH REJOUE (decision de Clement du 10/11/2026) : seulement si l'archive sait garder deux lignes pour un
+            // match (colonne rejoue, migration 0073). Sinon le match reste ferme « Match reporte », comme avant.
+            var REJOUE_POSSIBLE=await archiveAColonneRejoue();
             allMatchsData.forEach(function(m,iGel){
               if(!m||m.id==null) return;
               var cleGel=String(m.id);
@@ -4443,7 +4501,8 @@ jobs:
                   nowMs:KICKOFF_CHECK_MS, fixture:FIXTURE_BY_ID[cleGel], previousPublic:prevByFixture[cleGel]||null,
                   premiumRow:iLignes.length?premiumRows[iLignes[iLignes.length-1]]:null,
                   exceptionGel:PRONOSTIC.motifExceptionGel,
-                  historyLock:VERROUS_HISTORIQUE[cleGel]||null
+                  historyLock:VERROUS_HISTORIQUE[cleGel]||null,
+                  rejouePossible:REJOUE_POSSIBLE
                 });
               }catch(e){
                 // Jamais bloquant : calcul du jour publie tel quel pour ce match.
@@ -4455,6 +4514,7 @@ jobs:
               iLignes.forEach(function(ir){ premiumRows[ir]=gel.premiumRow; });
               GEL_COMPTES[gel.status]=(GEL_COMPTES[gel.status]||0)+1;
               if(gel.remplacement) GEL_COMPTES['EXCEPTION_'+gel.remplacement.motif]=(GEL_COMPTES['EXCEPTION_'+gel.remplacement.motif]||0)+1;
+              if(gel.rejoue) GEL_COMPTES.REJOUE=(GEL_COMPTES.REJOUE||0)+1;
               // FROZEN_CLOSED (20/09/2026) : match commence/joue dont l'analyse
               // publiee est restauree figee - meme traitement aval que FROZEN
               // (jamais SAFE_PICK, jamais un nouveau snapshot 'prediction').

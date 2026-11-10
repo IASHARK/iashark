@@ -83,7 +83,7 @@ if (veut("hier")) {
     const entree = ((registre && registre.matchs) || []).filter((x) => x && x.jour === HIER && x.fixture_id != null);
     if (entree.length === 1 && !(bilan && bilan.jour === HIER && bilan.offert)) {
       const id = entree[0].fixture_id;
-      const a = P.ligneArchive(await base(`predictions_archive?fixture_id=eq.${encodeURIComponent(id)}&select=market,result,published_at,kickoff_at,type`));
+      const a = P.ligneArchive(await base(`predictions_archive?fixture_id=eq.${encodeURIComponent(id)}&select=market,result,published_at,kickoff_at,type&order=kickoff_at.desc`));
       const simple = ((bandeau.simples && bandeau.simples.items) || []).find((x) => x && String(x.f) === String(id));
       src.archiveOffert = a || (simple ? {market: simple.m, result: simple.r} : null);
     }

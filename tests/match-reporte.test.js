@@ -150,7 +150,7 @@ test("pipeline : la ligne d'historique est transmise au gel, le match ferme n'a 
   assert.ok(gel !== -1);
   assert.ok(gel < WF.indexOf("gel=PICK_FREEZE.freezeAnalysis(m,precedent,{"));
   assert.match(WF, /JSON\.parse\(fs\.readFileSync\('historique\.json','utf8'\)\)\.predictions; \}catch\(e\)\{ return \[\]; \}/);
-  assert.match(WF, /historyLock:VERROUS_HISTORIQUE\[cleGel\]\|\|null\n\s+\}\);/);
+  assert.match(WF, /historyLock:VERROUS_HISTORIQUE\[cleGel\]\|\|null,\n\s+rejouePossible:REJOUE_POSSIBLE\n\s+\}\);/);
   assert.match(WF, /if\(gel\.status==='FROZEN'\|\|gel\.status==='FROZEN_CLOSED'\|\|gel\.status==='POSTPONED_CLOSED'\) GEL_FIGES\[cleGel\]=true;/);
   assert.ok(WF.indexOf("GEL_FIGES[cleGel]=true;") < WF.indexOf("RUN_OUTPUT_CANDIDATES=PICK_FREEZE.withoutFrozenCandidates(RUN_OUTPUT_CANDIDATES,GEL_FIGES);"));
   const debut = WF.indexOf("async function updateHistorique(matchsData){");
@@ -266,25 +266,32 @@ test("pipeline : predictions_archive relue pour les matchs absents de historique
   const src = WF.slice(debut, fin);
   // Rejeu : 1er lot refuse (colonne kickoff_at absente sans 0035) puis relu sans elle.
   const urls = [], journal = [];
-  const fabrique = new Function("SUPA_URL_PIPELINE", "SUPA_SERVICE_KEY", "rawHttpGetJson", "console", src + "\nreturn lireVerrousArchive;");
+  // archiveAColonneRejoue : migration 0073 absente ici (colonne rejoue non demandee).
+  const fabrique = new Function("SUPA_URL_PIPELINE", "SUPA_SERVICE_KEY", "rawHttpGetJson", "console", "archiveAColonneRejoue", src + "\nreturn lireVerrousArchive;");
   const rep = async (url) => {
     urls.push(url);
     if (/kickoff_at/.test(url)) return { code: "42703", message: "column predictions_archive.kickoff_at does not exist" };
     return [{ fixture_id: 4, type: "single", result: "void" }];
   };
-  const lire = fabrique("https://exemple.supabase.co/", "cle-de-test", rep, { log: (s) => journal.push(s) });
+  const sansRejoue = async () => false;
+  const lire = fabrique("https://exemple.supabase.co/", "cle-de-test", rep, { log: (s) => journal.push(s) }, sansRejoue);
   const lignes = await lire(["4", "4", "abc", 5]);
   assert.deepEqual(lignes, [{ fixture_id: 4, type: "single", result: "void" }]);
   assert.equal(urls.length, 2);
-  assert.match(urls[0], /\/rest\/v1\/predictions_archive\?select=fixture_id,type,result,kickoff_at&type=eq\.single&fixture_id=in\.\(4,5\)$/);
+  assert.match(urls[0], /\/rest\/v1\/predictions_archive\?select=fixture_id,type,result,kickoff_at,score&type=eq\.single&fixture_id=in\.\(4,5\)$/);
   assert.match(urls[1], /select=fixture_id,type,result&type=eq\.single&fixture_id=in\.\(4,5\)$/);
   assert.ok(!journal.some((s) => /::warning/.test(s)));
   // Archive illisible : avertissement, jamais bloquant.
-  const panne = fabrique("https://exemple.supabase.co", "cle-de-test", async () => ({ __ia_network_error: true }), { log: (s) => journal.push(s) });
+  const panne = fabrique("https://exemple.supabase.co", "cle-de-test", async () => ({ __ia_network_error: true }), { log: (s) => journal.push(s) }, sansRejoue);
   assert.deepEqual(await panne(["4"]), []);
   assert.ok(journal.some((s) => /::warning title=Gel des paris::predictions_archive illisible/.test(s)));
   // Sans cle service role : aucune lecture.
-  assert.deepEqual(await fabrique("", "", rep, { log() {} })(["4"]), []);
+  assert.deepEqual(await fabrique("", "", rep, { log() {} }, sansRejoue)(["4"]), []);
+  // Migration 0073 appliquee : score et rejoue relus (le match rejoue a deux lignes).
+  const urlsR = [];
+  const avecRejoue = fabrique("https://exemple.supabase.co", "cle-de-test", async (url) => { urlsR.push(url); return []; }, { log() {} }, async () => true);
+  await avecRejoue(["4"]);
+  assert.match(urlsR[0], /select=fixture_id,type,result,kickoff_at,score,rejoue&type=eq\.single&fixture_id=in\.\(4\)$/);
   // Branchement : lu apres historique.json, pour les matchs qui n'y sont pas, avant le gel.
   const iFichier = WF.indexOf("var VERROUS_FICHIER=PICK_FREEZE.historyLocks(HISTORIQUE_GEL);");
   const iArchive = WF.indexOf("var ARCHIVE_GEL=await lireVerrousArchive(allMatchsData.map(");

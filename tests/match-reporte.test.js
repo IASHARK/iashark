@@ -291,7 +291,7 @@ test("pipeline : predictions_archive relue pour les matchs absents de historique
   const urlsR = [];
   const avecRejoue = fabrique("https://exemple.supabase.co", "cle-de-test", async (url) => { urlsR.push(url); return []; }, { log() {} }, async () => true);
   await avecRejoue(["4"]);
-  assert.match(urlsR[0], /select=fixture_id,type,result,kickoff_at,score,rejoue&type=eq\.single&fixture_id=in\.\(4\)$/);
+  assert.match(urlsR[0], /select=fixture_id,type,result,kickoff_at,score,rejoue,reporte&type=eq\.single&fixture_id=in\.\(4\)$/);
   // Branchement : lu apres historique.json, pour les matchs qui n'y sont pas, avant le gel.
   const iFichier = WF.indexOf("var VERROUS_FICHIER=PICK_FREEZE.historyLocks(HISTORIQUE_GEL);");
   const iArchive = WF.indexOf("var ARCHIVE_GEL=await lireVerrousArchive(allMatchsData.map(");

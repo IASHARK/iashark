@@ -20,6 +20,9 @@
 --    argument p_rejoue (0 par defaut), l'ancienne version a 4 arguments est retiree (sinon appel ambigu).
 -- 4. match_snapshots (donnees d'entree, prive) : un type 'prediction_rejoue_<n>' (n de 1 a 9) garde les donnees
 --    d'entree du pari du match rejoue a cote de celles du pari annule ('prediction', jamais ecrase).
+-- 5. Colonne reporte (true : pari annule pour REPORT ; false : annule pour annulation ou arret du match, CANC ou
+--    ABD ; null : inconnu, lignes anciennes). Un match arrete puis repris n'est jamais un match rejoue. Elle
+--    decrit le verdict : comme result, elle peut etre ecrite apres le coup d'envoi (liste « libres » du verrou).
 --
 -- ORDRE DE MISE EN LIGNE : d'abord le code (le pipeline detecte la colonne et garde l'ancienne cle tant
 -- qu'elle n'existe pas ; il ne publie alors aucun pari de match rejoue), PUIS cette migration. Si la
@@ -35,6 +38,8 @@ alter table public.predictions_archive add constraint predictions_archive_rejoue
 
 alter table public.predictions_archive drop constraint if exists predictions_archive_pkey;
 alter table public.predictions_archive add constraint predictions_archive_pkey primary key (fixture_id, rejoue);
+
+alter table public.predictions_archive add column if not exists reporte boolean;
 
 alter table public.predictions_archive_corrections add column if not exists rejoue smallint not null default 0;
 
@@ -79,7 +84,7 @@ security definer
 set search_path = public
 as $$
 declare
-  libres constant text[] := array['result', 'score', 'resolved_date', 'updated_at'];
+  libres constant text[] := array['result', 'score', 'resolved_date', 'updated_at', 'reporte'];
   pas_regle constant text[] := array['scheduled', 'pending'];
   avant jsonb;
   apres jsonb;

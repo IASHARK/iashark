@@ -273,3 +273,23 @@ test("donnees d'entree (match_snapshots) : le pari du match rejoue a son propre 
   const sql = fs.readFileSync(path.join(root, "supabase/migrations/0073_predictions_archive_rejoue.sql"), "utf8");
   assert.match(sql, /snapshot_type ~ '\^prediction_rejoue_\[1-9\]\$'/);
 });
+
+test("match ARRETE ou ANNULE (pas reporte) puis repris : jamais traite comme un match rejoue (avocat du diable)", () => {
+  // Ligne d'historique du pari annule pour arret (ABD) ou annulation (CANC) : reporte false.
+  const lockArret = PF.historyLocks([], [archiveA({ reporte: false })])[String(ID)];
+  assert.equal(lockArret.reporte, false);
+  const r = run(marquee(), { historyLock: lockArret });
+  assert.equal(r.status, "POSTPONED_CLOSED");
+  assert.equal(r.match.pari_rec, "");
+  // Reporte (true) ou inconnu (lignes d'avant 0073, comme les 3 matchs du 10/11) : match rejoue.
+  assert.equal(run(marquee(), { historyLock: PF.historyLocks([], [archiveA({ reporte: true })])[String(ID)] }).status, "FIRST_PUBLICATION");
+  assert.equal(run(marquee(), { historyLock: PF.historyLocks([], [archiveA({ reporte: null })])[String(ID)] }).status, "FIRST_PUBLICATION");
+  // Pipeline : le reglement pose reporte true / false, l'archive l'envoie avec la colonne rejoue.
+  assert.match(WF, /found\.reporte=\(motifVoid==='reporte'\);/);
+  assert.match(WF, /found\.reporte=\(motifVoidE==='reporte'\);/);
+  assert.match(WF, /ligne\.reporte=p\.reporte===true\?true:\(p\.reporte===false\?false:null\);/);
+  assert.match(WF, /colonnes='fixture_id,type,result,kickoff_at,score'\+\(\(await archiveAColonneRejoue\(\)\)\?',rejoue,reporte':''\);/);
+  const sql = fs.readFileSync(path.join(root, "supabase/migrations/0073_predictions_archive_rejoue.sql"), "utf8");
+  assert.match(sql, /add column if not exists reporte boolean/);
+  assert.match(sql, /'updated_at', 'reporte'\]/);
+});

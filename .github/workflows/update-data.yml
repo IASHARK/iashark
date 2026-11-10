@@ -2298,7 +2298,9 @@ jobs:
                 var motifVoid=PICK_FREEZE.motifAnnulation(found,fix);
                 if(motifVoid){
                   found.result='void';found.score=null;found.fixture_id=fid;found.resolved_date=TODAY;
-                  if(motifVoid==='reporte') found.reporte=true;
+                  // reporte : true (reporte, peut etre rejoue : lib/pick-freeze.js#matchRejoue) ; false (annule ou arrete :
+                  // jamais un match rejoue, il pourrait reprendre a la minute d'arret).
+                  found.reporte=(motifVoid==='reporte');
                   console.log('  VOID (match '+(motifVoid==='reporte'?'reporte':'annule')+', statut '+status+'): '+found.match);
                   continue;
                 }
@@ -3068,7 +3070,11 @@ jobs:
                 // heure et ignore celle-ci (contre-controle ronde 4, 30/09/2026).
                 published_at:p.published_at||null,kickoff_at:p.kickoff_at||null,
               };
-              if(avecRejoue) ligne.rejoue=Number(p.rejoue)>0?Math.floor(Number(p.rejoue)):0;
+              if(avecRejoue){
+                ligne.rejoue=Number(p.rejoue)>0?Math.floor(Number(p.rejoue)):0;
+                // Migration 0073 : pari annule pour REPORT (true) ou pour annulation / arret (false) ; inconnu : null.
+                ligne.reporte=p.reporte===true?true:(p.reporte===false?false:null);
+              }
               return ligne;
             });
             var conflit=avecRejoue?'fixture_id,rejoue':'fixture_id';
@@ -3154,7 +3160,7 @@ jobs:
             if(!uniques.length||!SUPA_URL_PIPELINE||!SUPA_SERVICE_KEY) return [];
             // score : un pari annule sans etre joue (void sans score) peut ouvrir un match rejoue ; rejoue (migration
             // 0073) : numero de la ligne, la plus grande l'emporte (lib/pick-freeze.js#historyLocks).
-            var lignes=[], echecs=0, colonnes='fixture_id,type,result,kickoff_at,score'+((await archiveAColonneRejoue())?',rejoue':'');
+            var lignes=[], echecs=0, colonnes='fixture_id,type,result,kickoff_at,score'+((await archiveAColonneRejoue())?',rejoue,reporte':'');
             var base=SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/predictions_archive?select=';
             var entetes={'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY};
             try{
@@ -3253,7 +3259,7 @@ jobs:
                   var motifVoidE=PICK_FREEZE.motifAnnulation(found,fix);
                   if(motifVoidE){
                     found.result='void';found.score=null;found.fixture_id=fid;found.resolved_date=TODAY;
-                    if(motifVoidE==='reporte') found.reporte=true;
+                    found.reporte=(motifVoidE==='reporte');
                     return;
                   }
                   if(!joueE)return;

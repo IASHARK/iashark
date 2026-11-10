@@ -275,6 +275,17 @@
       "DECISION DE CLEMENT DU 06/10/2026 (soir, branche paris-tous-marches) : choix NEUTRE parmi tous les marches des bookmakers sauf corners et cartons (lib/flux-paris.js, lib/pronostic.js#evaluerCandidatsNeutres), « le plus probable », fourchette corrigee a 1,40-2,20. marge_sans_agree passe a 0 : la relever pour les seules cotes non agreees favorisait les quelques marches cotes chez un agree (1N2, double chance, buts), contraire a « sans en favoriser un »."
     ],
     "fourchette_pari": { "cote_min": 1.40, "cote_max": 2.20, "marge_sans_agree": 0 },
+    "_readme_marches_selections_nationales": [
+      "DEMANDE DE CLEMENT DU 10/11/2026 (Ligue des nations) : pour un match de selections nationales, le pari publie se choisit",
+      "SEULEMENT parmi ces marches (lib/pronostic.js#marcheAutoriseDuMatch) : victoire seche d'une equipe, double chance, plus/moins",
+      "de 2,5 buts, moins de 3,5 buts, les deux marquent : oui. C'est un CHOIX DE PRODUIT (la liste de Clement), pas un resultat mesure :",
+      "il retire seulement plus/moins de 1,5 et plus de 3,5 des marches connus. Meme fourchette, meme chance (cote sans marge), memes corrections.",
+      "Mathematicien (10/11/2026) : victoire et double chance GO (Ligue des nations 2018-2025) ; buts et « les deux marquent : oui » en test",
+      "(moins de 150 paris mesures). « Les deux marquent : non », tirs et tirs cadres : caches (verdict du 06/10, rien de mesure hors",
+      "echantillon sur les selections) ; les cotes avant match sont archivees dans odds_snapshots pour les mesurer plus tard.",
+      "Le buteur n'est jamais le pari du match. Liste vide ou absente : les marches connus."
+    ],
+    "marches_selections_nationales": ["home-win", "away-win", "dc-1x", "dc-x2", "dc-12", "over-25", "under-25", "under-35", "btts-yes"],
     "_readme_repli_forme": [
       "REPLI DES MATCHS DE COUPE SANS PARI (demande de Clement du 28/10/2026, lib/repli-forme.js) : CALCUL A BLANC. Rien",
       "n'est publie tant que config/verdicts-maths.json#repli_coupes ne dit pas « GO » ; les decisions des deux variantes",

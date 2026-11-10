@@ -12,8 +12,8 @@
 //  1. statut reel (un appel /fixtures?ids= pour 20 matchs au plus) : un match commence ou reporte
 //     n'est pas touche (ses decisions sont figees) ;
 //  2. composition officielle (/fixtures/lineups) ; tant qu'elle n'est pas complete : absences du
-//     match (/injuries?fixture=, jamais de cache) et, pour une selection nationale, effectif
-//     convoque des deux equipes (/players/squads) ;
+//     match (/injuries?fixture=, jamais de cache) ; plus d'effectif /players/squads pour les selections
+//     depuis le 10/11/2026 (liste d'API-Football perimee, controle de l'ingenieur donnees) ;
 //  3. buteurs probables, premier buteur et ancien calcul buteur deja servis (premium_fields de
 //     match_premium_data) : chaque joueur ABSENT est retire (lib/buteurs-figes.js#retirerAbsents :
 //     composition publiee sans lui, absence annoncee pour ce match, hors de l'effectif convoque ; sur
@@ -28,7 +28,6 @@ const fs = require("fs");
 const LEGER = require("../lib/buteurs-jour-de-match.js");
 const BUTEURS = require("../lib/buteurs-figes.js");
 const TICKETS = require("../lib/tickets-du-jour.js");
-const SELECTIONS = require("../lib/selections-nationales.js");
 const { jourParis } = require("../lib/run-output/jambes-du-jour.js");
 
 function estObjet(v) { return !!v && typeof v === "object" && !Array.isArray(v); }
@@ -106,15 +105,11 @@ async function lancer(opts) {
     if (!LEGER.compositionComplete(r.lineups)) {
       const repI = await api("injuries?fixture=" + m.id);
       if (repI) { r.injuries = LEGER.absencesDepuisApi(repI); rapport.absences_lues += r.injuries.length; } else rapport.illisibles++;
-      if (SELECTIONS.estSelectionNationale(m)) {
-        r.effectif = {};
-        for (const c of ["home", "away"]) {
-          const team = m[c] && m[c].id;
-          if (team == null) continue;
-          const repS = await api("players/squads?team=" + team);
-          if (repS) { r.effectif[c] = LEGER.effectifDepuisApi(repS); if (r.effectif[c].length) rapport.effectifs++; } else rapport.illisibles++;
-        }
-      }
+      // SELECTIONS (controle de l'ingenieur donnees du 10/11/2026) : la liste /players/squads d'API-Football d'une
+      // selection n'est PAS la liste du rassemblement (France : 16 noms communs sur 23 avec la liste officielle du 06/11 ;
+      // Belgique : 19 sur 26). Elle n'est plus lue ici : un buteur n'est jamais retire « hors effectif » sur une liste
+      // perimee (retrait definitif, decisions figees). Reste la composition officielle (API-Football ne donne
+      // aucune absence annoncee pour la Ligue des nations : league-coverage-report.json, injuries false).
     }
     releves[String(m.id)] = r;
   }

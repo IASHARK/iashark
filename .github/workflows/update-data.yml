@@ -3518,9 +3518,16 @@ jobs:
               var last10IdsA_xg=modelFixturesA.slice(0,10).map(function(fx){return fx.fixture.id;});
               var xgH=await getWeightedXGStats(home.id,last10IdsH_xg,modelFixturesH,xgConcededCache);
               var xgA=await getWeightedXGStats(away.id,last10IdsA_xg,modelFixturesA,xgConcededCache);
+              var SEL_SQUAD_OFF=isInternationalMatch||SELECTIONS.estSelectionNationale({league_id:lg.id,league:lg.name});
               var playerDataBatch=await Promise.all([
                 getRecentPlayerHistory(modelFixturesH.slice(0,10),home.id,currentSeason,{sheetFallback:isInternationalMatch}),getRecentPlayerHistory(modelFixturesA.slice(0,10),away.id,currentSeason,{sheetFallback:isInternationalMatch}),
-                getCurrentSquad(home.id),getCurrentSquad(away.id)
+                // SELECTIONS (controle de l'ingenieur donnees du 10/11/2026) : /players/squads d'une selection n'est PAS la liste du
+                // rassemblement (France : 16 noms communs sur 23 avec la liste officielle du 06/11 ; Belgique : 19 sur 26). Elle n'est
+                // plus lue : effectif inconnu (liste vide), donc aucun buteur ecarte ni « absent » sur une liste perimee (buteurs,
+                // page, Telegram, buteurs du jour). Reste la composition officielle, le jour du match (API-Football ne donne aucune
+                // absence annoncee pour la Ligue des nations). Toutes les selections (lib/selections-nationales.js), pas seulement
+                // Coupe du monde et Ligue des nations.
+                SEL_SQUAD_OFF?[]:getCurrentSquad(home.id),SEL_SQUAD_OFF?[]:getCurrentSquad(away.id)
               ]);
               var playerHistoryH=playerDataBatch[0],playerHistoryA=playerDataBatch[1],currentSquadH=playerDataBatch[2],currentSquadA=playerDataBatch[3];
           

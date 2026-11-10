@@ -537,7 +537,9 @@ test("verdict des familles ajoutees : plus/moins 1,5 et 3,5, les deux marquent c
   assert.equal(mes["OU2.5"], undefined, "plus/moins 2,5 : hors de ce verdict");
   // Meme match, memes cotes : « plus de 1,5 but » a 1,50 (64 %) est le pari en Ligue 1, jamais en Argentine ni en Ligue des nations.
   const cotes = { c1: "2.10", cn: "3.30", c2: "3.60", cdc1x: "1.28", cdc2x: "1.72", cdc12: "1.33", co25: "2.05", cu25: "1.80", co15: "1.50", cu15: "2.70", co35: "3.80", cu35: "1.30" };
-  const fr = match(Object.assign({ id: 760, league_key: "ligue1", league_id: 61 }, cotes));
+  // league : le nom de la competition aussi (sinon le match garde « UEFA Nations League » du modele et compte comme une
+  // selection nationale, dont le pari se choisit parmi config/leagues.json#marches_selections_nationales depuis le 10/11/2026).
+  const fr = match(Object.assign({ id: 760, league_key: "ligue1", league_id: 61, league: "Ligue 1" }, cotes));
   P.poserPronostics([fr], { configLigues: CFG });
   P.publierPronostics([fr], [], { configLigues: CFG, figes: {} });
   assert.equal(fr.market_id, "over-15");

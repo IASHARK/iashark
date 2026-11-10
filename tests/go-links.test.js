@@ -18,6 +18,14 @@ test("go : 1win par source, source inconnue = site, site inconnu = accueil", asy
   for (const src of Object.values(GO_LINKS["1win"])) assert.match(src, /^https:\/\/[^/]+\/betting\?open=register&p=[a-z0-9]+$/);
 });
 
+test("go : Vavada (10/11) pour le site, X et Telegram", async () => {
+  const { resolveGo, GO_LINKS } = await import("../netlify/edge-functions/lib/go-links.mjs");
+  for (const s of ["site", "x", "telegram"]) {
+    assert.strictEqual(resolveGo("/go/vavada/" + s).location, GO_LINKS.vavada[s]);
+    assert.match(GO_LINKS.vavada[s], /^https:\/\/standarttrack\.com\/\?promo=[0-9a-f-]{36}&target=register$/);
+  }
+});
+
 test("go : declaree dans netlify.toml", () => {
   const toml = require("fs").readFileSync(require("path").join(__dirname, "..", "netlify.toml"), "utf8");
   assert.match(toml, /path = "\/go\/\*"\s*\n\s*function = "go"/);
@@ -32,8 +40,11 @@ test("page match : bouton 1win sous l'Avis, pour tous les pays, clic suivi", () 
   assert.match(src, /remplirBoutonsParieur\(root,vm\._raw\)/);
   const ft = require("fs").readFileSync(require("path").join(__dirname, "..", "funnel-track.js"), "utf8");
   assert.match(ft, /bookmaker_1win: true/);
-  // Logo officiel du site de paris dans le bouton (fichier publie avec assets/).
+  assert.match(ft, /bookmaker_vavada: true, bookmaker_vavada_mur: true, bookmaker_vavada_direct: true/);
+  assert.match(src, /const BK_ACTIF='vavada';/);
+  // Logo officiel du site de paris dans le bouton quand on l'a (fichier publie avec assets/), sinon le nom.
   assert.match(src, /src="\/assets\/bk\/\$\{bk\}\.png"/);
+  assert.match(src, /bk-cta-nom/);
   assert.ok(require("fs").existsSync(require("path").join(__dirname, "..", "assets", "bk", "1win.png")));
 });
 

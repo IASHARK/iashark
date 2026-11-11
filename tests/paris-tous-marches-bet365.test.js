@@ -62,6 +62,15 @@ test("tous les marches candidats s'ils sont reglables : corners, cartons, tirs, 
   assert.match(FP.raisonExclusion(250, "First Card Received (3 way)", REGLE), /cartons/);
 });
 
+test("pile ou face exclu (decision de Clement du 12/11) : pair / impair des buts, mi-temps, equipes et fautes jamais choisi", () => {
+  [21, 22, 23, 60, 63, 343].forEach((id) => assert.equal(FP.raisonExclusion(id, "x", REGLE), FP.RAISON_PILE_OU_FACE, "bet " + id));
+  ["Corners. Odd/Even", "Cards Odd/Even", "Odd/Even - Second Half"].forEach((n) => assert.equal(FP.raisonExclusion(999, n, REGLE), FP.RAISON_PILE_OU_FACE, n));
+  assert.ok(FP.catalogue(REGLE).publiables.every((x) => !FP.EXCLUS_PILE_OU_FACE[x.bet_id]));
+  const r = raw([B1, { id: 21, name: "Odd/Even", values: v([["Odd", 1.75], ["Even", 2.05]]) }]);
+  const c = P.choisirPariFourchette(Object.assign({}, M), ctxAvec(r), {});
+  assert.ok(!c || !/^F21:/.test(c.market_id), "jamais pair / impair : " + (c && c.market_id));
+});
+
 test("reglement des cartons (jaune 1, rouge 2, 2e jaune non compte en plus, banc exclu) et des corners", () => {
   const ev = (eq, joueur, detail, min) => ({ type: "Card", detail, team: { id: eq }, player: { id: joueur }, time: { elapsed: min } });
   const src = { fixture: { teams: { home: { id: 1 }, away: { id: 2 } }, score: { fulltime: { home: 1, away: 0 }, halftime: { home: 0, away: 0 } }, fixture: { status: { short: "FT" } } },

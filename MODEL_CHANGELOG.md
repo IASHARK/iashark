@@ -10,7 +10,8 @@ Changements qui affectent le calcul des probabilités, marchés, edge/Kelly ou l
 - **Marchés d'un seul côté** : chance = (1/cote)/(1+M), M = max(15 %, 3 × marge 1N2 Bet365) ; buteurs plafonnés aux buts attendus de l'équipe. Valeurs provisoires, à calibrer.
 - **Règlement ajouté** : corners (statistiques d'équipe), cartons (événements, règle Bet365 à confirmer), tirs du match à partir de 15,5.
 - **Données** : sans relevé `odds_snapshots` de moins de 12 h, le calcul relit les cotes `/odds` de son propre run (Ligue des nations du 12/11).
-- **Mesure sur 1 037 matchs archivés (cotes seules, sans v3)** : un pari sur chaque match, cote moyenne 1,73 (avant 1,51), chance moyenne 54,8 % (avant 62,9 %) ; familles : pair/impair 34 %, handicap asiatique 14 %, corners 8 %, mi-temps 7 %, buts 7 %, handicap européen 7 %, tirs 5 %, résultat 4 %, cartons 2 %.
+- **Pile ou face exclu (décision de Clément du 12/11)** : pair / impair des buts (match, mi-temps, équipes) et des fautes, et tout marché « Odd/Even », jamais choisi (il sortait sur 34 % des matchs).
+- **Mesure sur 1 037 matchs archivés (cotes seules, sans v3, pair/impair exclu)** : un pari sur chaque match, cote moyenne 1,73 (avant 1,51), chance moyenne 54,5 % (avant 62,9 %) ; familles : corners 19 %, handicap asiatique 17 %, buts 11 %, les deux marquent 11 %, mi-temps 9 %, handicap européen 8 %, tirs 7 %, résultat 5 %, buts d'une équipe 5 %, cartons 4 %, résultat et buts 4 %.
 
 ## 2026-10-06 (nuit) — corrections du contrôle ROUGE de l'avocat du diable
 

@@ -4,7 +4,7 @@ Décision de Clément du 11/11/2026 (21 h 40 et 21 h 50) : le pari affiché est 
 
 - Liste : `/odds/bets` d'API-Sports, 338 types, relevée le 11/11/2026 (un seul appel).
 - « Offert par Bet365 » : part des 1052 matchs archivés (odds_snapshots, 06/10-11/11/2026) où Bet365 cote ce type.
-- 110 types vus chez Bet365 ; 130 types candidats (réglables), dont 81 vus chez Bet365.
+- 110 types vus chez Bet365 ; 124 types candidats (réglables), dont 76 vus chez Bet365.
 - Méthode de chance juste : la même pour toutes les familles (code : lib/flux-paris.js#selectionsDuMatch, réglages : config/marches-pari.json#choix_du_pari).
   - Marché complet (toutes les issues cotées) : marge retirée par la méthode puissance (somme des (1/cote)^k = 1).
   - Marché d'un seul côté (buteurs, joueurs « N ou plus », « Home / Away » qui peuvent perdre tous les deux) : la méthode puissance est impossible ; chance = (1/cote)/(1+M), M = max(15 %, 3 × marge du 1N2 Bet365 du même match) ; buteurs : en plus, la somme des chances des buteurs d'une équipe ne dépasse jamais ses buts attendus (lignes de buts Bet365). M est provisoire : à calibrer par le mathématicien (verdict ROUGE du 06/10 : joueurs annoncés 70 %, 29 % réels).
@@ -34,9 +34,9 @@ Décision de Clément du 11/11/2026 (21 h 40 et 21 h 50) : le pari affiché est 
 | 18 | Handicap Result - First Half | 98 % | Handicap européen | oui : score final et mi-temps (/fixtures) | puissance sur les 3 issues de la ligne ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 19 | Asian Handicap First Half | 98 % | Handicap asiatique | oui : score final et mi-temps (/fixtures) | puissance par demi-ligne (2 issues) ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 20 | Double Chance - First Half | 99 % | Mi-temps | oui : score final et mi-temps (/fixtures) | somme de 2 issues du marché à 3 issues sans marge (puissance) ; moteur v3 : le plus bas des deux là où il dit le marché juste ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 21 | Odd/Even | 96 % | Pair/impair | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 22 | Odd/Even - First Half | 96 % | Pair/impair | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 23 | Home Odd/Even | 95 % | Pair/impair | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
+| 21 | Odd/Even | 96 % | Pair/impair | non : pair / impair : pile ou face, pas un pronostic (décision de Clément du 12/11/2026) | — |
+| 22 | Odd/Even - First Half | 96 % | Pair/impair | non : pair / impair : pile ou face, pas un pronostic (décision de Clément du 12/11/2026) | — |
+| 23 | Home Odd/Even | 95 % | Pair/impair | non : pair / impair : pile ou face, pas un pronostic (décision de Clément du 12/11/2026) | — |
 | 24 | Results/Both Teams Score | 98 % | Résultat et buts | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 25 | Result/Total Goals | 98 % | Résultat et buts | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 26 | Goals Over/Under - Second Half | 97 % | Mi-temps | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
@@ -73,10 +73,10 @@ Décision de Clément du 11/11/2026 (21 h 40 et 21 h 50) : le pari affiché est 
 | 57 | Home Corners Over/Under | 95 % | Corners | oui : statistiques d'équipe (/fixtures/statistics) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 58 | Away Corners Over/Under | 95 % | Corners | oui : statistiques d'équipe (/fixtures/statistics) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 59 | Own Goal | 86 % | Ordre des buts | oui : événements du match (/fixtures/events) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 60 | Away Odd/Even | 94 % | Pair/impair | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
+| 60 | Away Odd/Even | 94 % | Pair/impair | non : pair / impair : pile ou face, pas un pronostic (décision de Clément du 12/11/2026) | — |
 | 61 | To Qualify | 3 % | — | non : qualification : dépend du match aller (score cumulé non fourni) | — |
 | 62 | Correct Score - Second Half | jamais vu | Score exact | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 63 | Odd/Even - Second Half | 95 % | Pair/impair | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
+| 63 | Odd/Even - Second Half | 95 % | Pair/impair | non : pair / impair : pile ou face, pas un pronostic (décision de Clément du 12/11/2026) | — |
 | 72 | Goal Line (1st Half) | 98 % | Mi-temps | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 73 | Both Teams to Score 1st Half - 2nd Half | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 74 | 10 Over/Under | jamais vu | — | non branché : règle de règlement à écrire | — |
@@ -159,7 +159,7 @@ Décision de Clément du 11/11/2026 (21 h 40 et 21 h 50) : le pari affiché est 
 | 154 | Yellow Double Chance | jamais vu | — | non : cartons : règlement automatique non vérifié (rouge compté 1 ou 2, 2e jaune, cartons du banc : règles du bookmaker) | — |
 | 155 | Yellow Over/Under (1st Half) | jamais vu | — | non : cartons : règlement automatique non vérifié (rouge compté 1 ou 2, 2e jaune, cartons du banc : règles du bookmaker) | — |
 | 156 | Yellow Over/Under (2nd Half) | jamais vu | — | non : cartons : règlement automatique non vérifié (rouge compté 1 ou 2, 2e jaune, cartons du banc : règles du bookmaker) | — |
-| 157 | Yellow Odd/Even | jamais vu | — | non : cartons : règlement automatique non vérifié (rouge compté 1 ou 2, 2e jaune, cartons du banc : règles du bookmaker) | — |
+| 157 | Yellow Odd/Even | jamais vu | — | non : pair / impair : pile ou face, pas un pronostic (décision de Clément du 12/11/2026) | — |
 | 158 | Yellow Cards 1x2 | jamais vu | — | non : cartons : règlement automatique non vérifié (rouge compté 1 ou 2, 2e jaune, cartons du banc : règles du bookmaker) | — |
 | 159 | Yellow Asian Handicap (1st Half) | jamais vu | — | non : cartons : règlement automatique non vérifié (rouge compté 1 ou 2, 2e jaune, cartons du banc : règles du bookmaker) | — |
 | 160 | Yellow Asian Handicap (2nd Half) | jamais vu | — | non : cartons : règlement automatique non vérifié (rouge compté 1 ou 2, 2e jaune, cartons du banc : règles du bookmaker) | — |
@@ -205,8 +205,8 @@ Décision de Clément du 11/11/2026 (21 h 40 et 21 h 50) : le pari affiché est 
 | 200 | Home Win To Nill (2nd Half) | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 201 | To Score In 1st Half | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 202 | To Score In 2nd Half | jamais vu | — | non branché : règle de règlement à écrire | — |
-| 203 | Yellow Cards. Odd/Even (1st Half) | jamais vu | — | non : cartons : règlement automatique non vérifié (rouge compté 1 ou 2, 2e jaune, cartons du banc : règles du bookmaker) | — |
-| 204 | Yellow Cards. Odd/Even (2nd Half) | jamais vu | — | non : cartons : règlement automatique non vérifié (rouge compté 1 ou 2, 2e jaune, cartons du banc : règles du bookmaker) | — |
+| 203 | Yellow Cards. Odd/Even (1st Half) | jamais vu | — | non : pair / impair : pile ou face, pas un pronostic (décision de Clément du 12/11/2026) | — |
+| 204 | Yellow Cards. Odd/Even (2nd Half) | jamais vu | — | non : pair / impair : pile ou face, pas un pronostic (décision de Clément du 12/11/2026) | — |
 | 205 | First Team to Score (3 way) 2nd Half | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 206 | Home No Bet | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 207 | Away No Bet | jamais vu | — | non branché : règle de règlement à écrire | — |
@@ -315,8 +315,8 @@ Décision de Clément du 11/11/2026 (21 h 40 et 21 h 50) : le pari affiché est 
 | 310 | Yellow Cards Away Total (1st Half) | jamais vu | — | non : cartons : règlement automatique non vérifié (rouge compté 1 ou 2, 2e jaune, cartons du banc : règles du bookmaker) | — |
 | 311 | Which team will score the 1st goal? | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 312 | 1x2 - 20 minutes | jamais vu | — | non branché : règle de règlement à écrire | — |
-| 313 | Offsides Odd/Even | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
-| 314 | Fouls Odd/Even | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
+| 313 | Offsides Odd/Even | jamais vu | — | non : pair / impair : pile ou face, pas un pronostic (décision de Clément du 12/11/2026) | — |
+| 314 | Fouls Odd/Even | jamais vu | — | non : pair / impair : pile ou face, pas un pronostic (décision de Clément du 12/11/2026) | — |
 | 315 | Saves Total | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
 | 316 | Saves 1x2 | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
 | 317 | Saves Asian H | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
@@ -325,7 +325,7 @@ Décision de Clément du 11/11/2026 (21 h 40 et 21 h 50) : le pari affiché est 
 | 320 | Saves Double Chance | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
 | 321 | Penalty Awarded (1st Half) | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 322 | Penalty Awarded (2nd Half) | jamais vu | — | non branché : règle de règlement à écrire | — |
-| 323 | Saves Odd/Even | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
+| 323 | Saves Odd/Even | jamais vu | — | non : pair / impair : pile ou face, pas un pronostic (décision de Clément du 12/11/2026) | — |
 | 324 | Corner in 1-15 minutes | jamais vu | — | non : il faudrait la minute de chaque corner/carton/tir, absente d'API-Football | — |
 | 325 | Corner in 16-30 minutes | jamais vu | — | non : il faudrait la minute de chaque corner/carton/tir, absente d'API-Football | — |
 | 326 | Corner in 31-45 minutes | jamais vu | — | non : il faudrait la minute de chaque corner/carton/tir, absente d'API-Football | — |
@@ -340,13 +340,13 @@ Décision de Clément du 11/11/2026 (21 h 40 et 21 h 50) : le pari affiché est 
 | 335 | Red Cards Over/Under | jamais vu | — | non : cartons : règlement automatique non vérifié (rouge compté 1 ou 2, 2e jaune, cartons du banc : règles du bookmaker) | — |
 | 336 | Goal Line | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 337 | Asian Handicap (Sets) | jamais vu | — | non branché : règle de règlement à écrire | — |
-| 338 | Corners. Odd/Even | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
+| 338 | Corners. Odd/Even | jamais vu | — | non : pair / impair : pile ou face, pas un pronostic (décision de Clément du 12/11/2026) | — |
 | 339 | Corners. Double Chance | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
 | 340 | Shots.1x2 | 34 % | Tirs | oui : statistiques d'équipe (/fixtures/statistics) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 341 | (sans nom) | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 342 | Red Card In The Match (1st Half) | jamais vu | — | non : cartons : règlement automatique non vérifié (rouge compté 1 ou 2, 2e jaune, cartons du banc : règles du bookmaker) | — |
-| 343 | Fouls. Odd/Even | jamais vu | Fautes | oui : statistiques d'équipe (/fixtures/statistics) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 344 | Odd/Even (1st Set) | jamais vu | — | non branché : règle de règlement à écrire | — |
+| 343 | Fouls. Odd/Even | jamais vu | Fautes | non : pair / impair : pile ou face, pas un pronostic (décision de Clément du 12/11/2026) | — |
+| 344 | Odd/Even (1st Set) | jamais vu | — | non : pair / impair : pile ou face, pas un pronostic (décision de Clément du 12/11/2026) | — |
 | 345 | Set Betting | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 346 | Extra Point (1st Set) | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 347 | Home Winning Margin (1st Set) | jamais vu | — | non branché : règle de règlement à écrire | — |

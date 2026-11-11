@@ -53,7 +53,9 @@ test("page match : bouton 1win sous l'Avis, pour tous les pays, clic suivi", () 
   assert.match(ft, /bookmaker_lolly: true, bookmaker_lolly_mur: true, bookmaker_lolly_direct: true/);
   assert.match(src, /const BK_ACTIF='lolly';/);
   // Logo officiel du site de paris dans le bouton quand on l'a (fichier publie avec assets/), sinon le nom.
-  assert.match(src, /src="\/assets\/bk\/\$\{bk\}\.png"/);
+  assert.match(src, /src="\/assets\/bk\/\$\{L\.f\}"/);
+  assert.match(src, /'lolly':\{f:'lolly\.svg'/);
+  assert.ok(require("fs").existsSync(require("path").join(__dirname, "..", "assets", "bk", "lolly.svg")));
   assert.match(src, /bk-cta-nom/);
   assert.ok(require("fs").existsSync(require("path").join(__dirname, "..", "assets", "bk", "1win.png")));
 });

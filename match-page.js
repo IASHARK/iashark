@@ -413,7 +413,9 @@ const BK_NOMS={'1win':'1win','vavada':'Vavada','lolly':'Lolly Bet'};
 // Site de paris mis en avant (11/11/2026, Clement : Lolly Bet a la place de Vavada ; 10/11 : Vavada a la place de 1win).
 const BK_ACTIF='lolly';
 // Logo officiel quand on l'a (assets/bk/<site>.png) ; sinon le nom en gras.
-const BK_LOGOS={'1win':true};
+// Lolly Bet (11/11/2026) : logo vectoriel officiel (site lolly-bet), pose sur une pastille sombre
+// (couleurs d'origine, rouge et blanc, lisibles sur le bouton cyan comme sur le bouton discret).
+const BK_LOGOS={'1win':{f:'1win.png',w:50,h:22},'lolly':{f:'lolly.svg',w:62,h:14}};
 // Moment du match pour le bouton (09/11/2026, Clement) : 'avant' le coup d'envoi, 'direct' une fois
 // le coup d'envoi passe (le bouton propose de parier en direct), 'fini' : aucun bouton.
 // Match reporte, annule ou sans heure fiable : 'avant' (jamais « en direct » par erreur).
@@ -428,7 +430,7 @@ function momentParieur(m){
 function boutonParieurHtml(match,moment,mur){
   const bk=BK_ACTIF,nom=BK_NOMS[bk];
   // Logo officiel (espace partenaire, Materiel promotionnel) a la place du nom, sinon le nom.
-  const logo=BK_LOGOS[bk]?`<img class="bk-cta-logo" src="/assets/bk/${bk}.png" alt="${esc(nom)}" width="50" height="22">`:`<b class="bk-cta-nom">${esc(nom)}</b>`;
+  const L=BK_LOGOS[bk],logo=L?`<img class="bk-cta-logo bk-cta-logo--${bk}" src="/assets/bk/${L.f}" alt="${esc(nom)}" width="${L.w}" height="${L.h}">`:`<b class="bk-cta-nom">${esc(nom)}</b>`;
   const vars={match,book:'@@BK@@'};
   const txt=!match?'@@BK@@'
     :moment==='direct'?tf('match_page.bk_cta_live','Parier {match} en direct chez {book}',vars)

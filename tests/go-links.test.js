@@ -15,8 +15,8 @@ test("go : 1win par source, source inconnue = site, site inconnu = accueil", asy
   const r = goResponse("/go/1win/x");
   assert.strictEqual(r.status, 302);
   assert.match(r.headers["Cache-Control"], /no-store/);
-  // 1win retire le 10/11 : ses anciens liens menent chez Vavada.
-  for (const src of Object.values(GO_LINKS["1win"])) assert.strictEqual(src, GO_LINKS.vavada.site);
+  // 1win retire le 10/11 : ses anciens liens menent chez Lolly Bet (11/11).
+  for (const s of ["site", "x", "telegram"]) assert.strictEqual(GO_LINKS["1win"][s], GO_LINKS.lolly[s]);
 });
 
 test("go : Vavada (10/11) pour le site, X et Telegram", async () => {
@@ -25,6 +25,14 @@ test("go : Vavada (10/11) pour le site, X et Telegram", async () => {
     assert.strictEqual(resolveGo("/go/vavada/" + s).location, GO_LINKS.vavada[s]);
     assert.match(GO_LINKS.vavada[s], /^https:\/\/standarttrack\.com\/\?promo=[0-9a-f-]{36}&target=register$/);
   }
+});
+
+test("go : Lolly Bet (11/11), une campagne par source", async () => {
+  const { resolveGo } = await import("../netlify/edge-functions/lib/go-links.mjs");
+  for (const s of ["site", "x", "telegram"]) {
+    assert.strictEqual(resolveGo("/go/lolly/" + s).location, "https://www.lolly-bet888.com?faff=1258&sub=" + s);
+  }
+  assert.strictEqual(resolveGo("/go/lolly").location, "https://www.lolly-bet888.com?faff=1258&sub=site");
 });
 
 test("go : declaree dans netlify.toml", () => {
@@ -42,7 +50,8 @@ test("page match : bouton 1win sous l'Avis, pour tous les pays, clic suivi", () 
   const ft = require("fs").readFileSync(require("path").join(__dirname, "..", "funnel-track.js"), "utf8");
   assert.match(ft, /bookmaker_1win: true/);
   assert.match(ft, /bookmaker_vavada: true, bookmaker_vavada_mur: true, bookmaker_vavada_direct: true/);
-  assert.match(src, /const BK_ACTIF='vavada';/);
+  assert.match(ft, /bookmaker_lolly: true, bookmaker_lolly_mur: true, bookmaker_lolly_direct: true/);
+  assert.match(src, /const BK_ACTIF='lolly';/);
   // Logo officiel du site de paris dans le bouton quand on l'a (fichier publie avec assets/), sinon le nom.
   assert.match(src, /src="\/assets\/bk\/\$\{bk\}\.png"/);
   assert.match(src, /bk-cta-nom/);

@@ -941,7 +941,7 @@
       // (tableau de bord : admin_unlock_clicks, 0025 puis 0029).
       match_gate_unlock: true, match_avis_unlock: true, match_appel_pro: true,
       // Bouton du site de paris sous l'Avis (match-page.js#boutonParieur, 09/11/2026).
-      bookmaker_1win: true, bookmaker_1win_mur: true, bookmaker_1win_direct: true, bookmaker_vavada: true, bookmaker_vavada_mur: true, bookmaker_vavada_direct: true, bookmaker_lolly: true, bookmaker_lolly_mur: true, bookmaker_lolly_direct: true, accueil_pari_offert: true, match_recall_unlock: true, match_analysis_unlock: true, match_faq_unlock: true, match_bar_unlock: true,
+      bookmaker_1win: true, bookmaker_1win_mur: true, bookmaker_1win_direct: true, bookmaker_vavada: true, bookmaker_vavada_mur: true, bookmaker_vavada_direct: true, bookmaker_lolly: true, bookmaker_lolly_mur: true, bookmaker_lolly_direct: true, bookmaker_lolly_ticket: true, accueil_pari_offert: true, match_recall_unlock: true, match_analysis_unlock: true, match_faq_unlock: true, match_bar_unlock: true,
       // Buteurs du jour de l'accueil (home-scorers.js) : bouton « Debloquer »
       // du panneau, ligne floutee, carte d'un buteur (avant le 19/09/2026 :
       // kind cta, label = meme valeur).

@@ -11,7 +11,12 @@
 // des liens separes par source viendront de la manager.
 const VAVADA = "https://standarttrack.com/?promo=e5c4d13e-1395-4bcc-af9b-194be7ff5af2&target=register";
 
+// Lolly Bet (11/11/2026, Clement) : compte partenaire 1258, une campagne par source
+// (espace affiliates.lolly-bet888.com > Campaigns), pour savoir d'ou viennent les joueurs.
+const LOLLY = "https://www.lolly-bet888.com?faff=1258&sub=";
+
 export const GO_LINKS = {
+  lolly: { site: LOLLY + "site", x: LOLLY + "x", telegram: LOLLY + "telegram" },
   vavada: { site: VAVADA, x: VAVADA, telegram: VAVADA },
   // 1win retire le 10/11/2026 (Clement : « enleve 1win de partout ») : les anciens
   // liens /go/1win/... des posts X et Telegram menent maintenant chez Vavada.

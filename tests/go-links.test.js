@@ -27,6 +27,14 @@ test("go : Vavada (10/11) pour le site, X et Telegram", async () => {
   }
 });
 
+test("go : Lolly Bet (11/11), une campagne par source", async () => {
+  const { resolveGo } = await import("../netlify/edge-functions/lib/go-links.mjs");
+  for (const s of ["site", "x", "telegram"]) {
+    assert.strictEqual(resolveGo("/go/lolly/" + s).location, "https://www.lolly-bet888.com?faff=1258&sub=" + s);
+  }
+  assert.strictEqual(resolveGo("/go/lolly").location, "https://www.lolly-bet888.com?faff=1258&sub=site");
+});
+
 test("go : declaree dans netlify.toml", () => {
   const toml = require("fs").readFileSync(require("path").join(__dirname, "..", "netlify.toml"), "utf8");
   assert.match(toml, /path = "\/go\/\*"\s*\n\s*function = "go"/);

@@ -15,8 +15,8 @@ test("go : 1win par source, source inconnue = site, site inconnu = accueil", asy
   const r = goResponse("/go/1win/x");
   assert.strictEqual(r.status, 302);
   assert.match(r.headers["Cache-Control"], /no-store/);
-  // 1win retire le 10/11 : ses anciens liens menent chez Vavada.
-  for (const src of Object.values(GO_LINKS["1win"])) assert.strictEqual(src, GO_LINKS.vavada.site);
+  // 1win retire le 10/11 : ses anciens liens menent chez Lolly Bet (11/11).
+  for (const s of ["site", "x", "telegram"]) assert.strictEqual(GO_LINKS["1win"][s], GO_LINKS.lolly[s]);
 });
 
 test("go : Vavada (10/11) pour le site, X et Telegram", async () => {
@@ -50,7 +50,8 @@ test("page match : bouton 1win sous l'Avis, pour tous les pays, clic suivi", () 
   const ft = require("fs").readFileSync(require("path").join(__dirname, "..", "funnel-track.js"), "utf8");
   assert.match(ft, /bookmaker_1win: true/);
   assert.match(ft, /bookmaker_vavada: true, bookmaker_vavada_mur: true, bookmaker_vavada_direct: true/);
-  assert.match(src, /const BK_ACTIF='vavada';/);
+  assert.match(ft, /bookmaker_lolly: true, bookmaker_lolly_mur: true, bookmaker_lolly_direct: true/);
+  assert.match(src, /const BK_ACTIF='lolly';/);
   // Logo officiel du site de paris dans le bouton quand on l'a (fichier publie avec assets/), sinon le nom.
   assert.match(src, /src="\/assets\/bk\/\$\{bk\}\.png"/);
   assert.match(src, /bk-cta-nom/);

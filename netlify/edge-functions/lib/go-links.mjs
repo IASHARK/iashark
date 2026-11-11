@@ -19,8 +19,9 @@ export const GO_LINKS = {
   lolly: { site: LOLLY + "site", x: LOLLY + "x", telegram: LOLLY + "telegram" },
   vavada: { site: VAVADA, x: VAVADA, telegram: VAVADA },
   // 1win retire le 10/11/2026 (Clement : « enleve 1win de partout ») : les anciens
-  // liens /go/1win/... des posts X et Telegram menent maintenant chez Vavada.
-  "1win": { site: VAVADA, x: VAVADA, telegram: VAVADA },
+  // liens /go/1win/... des posts X et Telegram menaient chez Vavada, et chez Lolly Bet
+  // depuis le 11/11/2026 (Clement : « on passe sur Lolly Bet partout »).
+  "1win": { site: LOLLY + "site", x: LOLLY + "x", telegram: LOLLY + "telegram" },
 };
 
 export function resolveGo(pathname) {

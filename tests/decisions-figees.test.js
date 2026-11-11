@@ -1,4 +1,6 @@
 "use strict";
+// Ecrit pour l'ancienne regle du pari (1,40-2,20, avant le 11/11/2026) : remise en memoire, voir le module.
+require("./ancienne-regle-pari.js");
 // REGLE DE CLEMENT DU 04/10/2026, 20 h :
 //   « Chaque decision affichee ne doit plus jamais changer, qu'elle soit pour aujourd'hui ou pour demain.
 //     Seule exception : les buteurs, si le joueur n'est pas dans la composition. Le match gratuit reste le
@@ -498,7 +500,8 @@ test("mise a jour legere : joueur absent retire des buteurs (rien d'autre ecrit)
   assert.ok(!fr.appels.some((a) => a.method === "PATCH"));
 });
 
-test("mise a jour legere : selection nationale, joueur parti du rassemblement (hors effectif convoque) retire avant la composition", async () => {
+// 10/11/2026 (controle de l'ingenieur donnees, PR #313) : la liste /players/squads d'une selection est perimee ; le script ne la lit plus.
+test("mise a jour legere : selection nationale, liste d'API-Football jamais lue, aucun buteur retire hors effectif avant la composition", async () => {
   const data = [{ id: 501, date: "2026-10-04 19:00", status: "NS", league_key: "wcq_europe", league: "World Cup - Qualification Europe", league_id: 32, home: { n: "Portugal", id: 27 }, away: { n: "Norway", id: 1090 } }];
   const squadPortugal = onze(600).concat(onze(700)).map((p) => ({ id: p.id, name: p.name }));
   const f = fauxMonde({
@@ -507,8 +510,9 @@ test("mise a jour legere : selection nationale, joueur parti du rassemblement (h
     premium: { 501: { v3_buteurs: [{ joueur_id: 874, joueur: "Cristiano Ronaldo", cote: "home", p_marque: 0.4 }, { joueur_id: 600, joueur: squadPortugal[0].name, cote: "home", p_marque: 0.2 }] } },
   });
   const r = await SCRIPT_LEGER.lancer({ env: ENV, fetch: f, nowMs: NOW_B, dataPath: ecrireData(data), journal: () => {}, avertir: () => {} });
-  assert.deepEqual(f.premium["501"].v3_buteurs.map((b) => b.joueur_id), [600]);
-  assert.equal(r.effectifs, 1, "effectif de la Norvege illisible : pas d'effectif, personne retire de ce cote");
+  assert.deepEqual(f.premium["501"].v3_buteurs.map((b) => b.joueur_id), [874, 600], "personne retire sur la liste d'API-Football");
+  assert.equal(r.effectifs, 0);
+  assert.ok(!f.appels.some((a) => /players\/squads/.test(String(a.url || ""))), "aucun appel /players/squads");
 });
 
 test("workflow de la mise a jour legere : 10:07-21:37 UTC toutes les 30 min, secrets existants, jamais de commit", () => {

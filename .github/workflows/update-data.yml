@@ -3518,9 +3518,14 @@ jobs:
               var last10IdsA_xg=modelFixturesA.slice(0,10).map(function(fx){return fx.fixture.id;});
               var xgH=await getWeightedXGStats(home.id,last10IdsH_xg,modelFixturesH,xgConcededCache);
               var xgA=await getWeightedXGStats(away.id,last10IdsA_xg,modelFixturesA,xgConcededCache);
+              var SEL_SQUAD_OFF=isInternationalMatch||SELECTIONS.estSelectionNationale({league_id:lg.id,league:lg.name});
               var playerDataBatch=await Promise.all([
                 getRecentPlayerHistory(modelFixturesH.slice(0,10),home.id,currentSeason,{sheetFallback:isInternationalMatch}),getRecentPlayerHistory(modelFixturesA.slice(0,10),away.id,currentSeason,{sheetFallback:isInternationalMatch}),
-                getCurrentSquad(home.id),getCurrentSquad(away.id)
+                // SELECTIONS (controle de l'ingenieur donnees du 10/11/2026, repris de la PR #313) : /players/squads d'une selection
+                // n'est PAS la liste du rassemblement (France : 16 noms communs sur 23 avec la liste officielle du 06/11 ; Belgique :
+                // 19 sur 26). Elle n'est plus lue : effectif inconnu (liste vide), aucun buteur ecarte sur une liste perimee. Les
+                // paris joueurs/buteurs d'une selection ne deviennent candidats qu'avec la composition officielle (regle du 11/11).
+                SEL_SQUAD_OFF?[]:getCurrentSquad(home.id),SEL_SQUAD_OFF?[]:getCurrentSquad(away.id)
               ]);
               var playerHistoryH=playerDataBatch[0],playerHistoryA=playerDataBatch[1],currentSquadH=playerDataBatch[2],currentSquadA=playerDataBatch[3];
           
@@ -4635,6 +4640,21 @@ jobs:
               });
               console.log('  [MARCHES] '+nFlux+' match(s) avec le bloc « Tous les marchés » ('+CFG_FLUX.marches.size+' marche(s) valide(s)).');
             }catch(e){ console.log('::warning title=Marches du flux::bloc non pose ('+(e&&e.message)+').'); }
+            // REGLE DU 11/11/2026 (Clement : pari choisi parmi tous les marches cotes par Bet365, cote Bet365 affichee) :
+            // un match ouvert sans releve odds_snapshots de moins de 12 h (ex. Ligue des nations, releve du 09/11) prend le
+            // releve /odds DE CE CALCUL (ODDS_DU_RUN, deja paye : aucun appel de plus), en memoire seulement. Sans aucun releve
+            // Bet365 : pas de pari sur ce match (lib/pronostic.js#choisirPariFourchette), jamais une autre cote.
+            try{
+              var nRunFlux=0;
+              allMatchsData.forEach(function(m){
+                if(!m||m.id==null||(m.status&&m.status!=='NS')) return;
+                var k=String(m.id);
+                if(FLUX_PARIS[k]&&FLUX_PARIS[k].raw) return;
+                var od=ODDS_DU_RUN[k];
+                if(od&&od.raw&&Array.isArray(od.raw.bookmakers)){ FLUX_PARIS[k]=Object.assign({selections:[],toutes:[]},FLUX_PARIS[k]||{},{raw:{bookmakers:od.raw.bookmakers}}); nRunFlux++; }
+              });
+              console.log('  [MARCHES] '+nRunFlux+' match(s) sans releve recent : cotes /odds de ce calcul (Bet365) pour le choix du pari.');
+            }catch(e){ console.log('::warning title=Marches du flux::releve du calcul non repris ('+(e&&e.message)+').'); }
             // MOTEUR_V3:DEBUT - chance IASHARK des marches 1N2 / double chance pour le Canal Pro.
             // Fichier TEMPORAIRE du run (jamais dans le depot ni dans les journaux) : l'etape
             // « Canal Pro - deposer la sortie du moteur v3 » le joint a la sortie deposee.

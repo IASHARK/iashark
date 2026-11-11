@@ -1,4 +1,6 @@
 "use strict";
+// Ecrit pour l'ancienne regle du pari (1,40-2,20, avant le 11/11/2026) : remise en memoire, voir le module.
+require("./ancienne-regle-pari.js");
 // CALCUL DU 04/10/2026 (decisions de Clement du 03/10, 23 h) : les 30 championnats, les coupes et
 // les selections (dont la Ligue des nations) avec un pari publie ; Colombie, Perou et Afrique du
 // Sud retires ; chance AFFICHEE juste (corrigee quand une categorie est trop optimiste) ; option
@@ -125,7 +127,8 @@ const F = P.fourchettePari(CFG);
 const dansF = (k) => P.dansFourchette(k, F);
 
 test("fourchette : bornes 1,40-2,20 dans config/leagues.json (un seul endroit, decision de Clement du 06/10), bornes comprises", () => {
-  assert.deepEqual(CFG_DEPOT.fiabilite.fourchette_pari, { cote_min: 1.4, cote_max: 2.2, marge_sans_agree: 0 });
+  // Fichier du depot : regle du 11/11/2026 (1,70-3,50) ; la suite du test verifie la mecanique avec l'ancienne fourchette remise en memoire.
+  assert.deepEqual(CFG_DEPOT.fiabilite.fourchette_pari, { cote_min: 1.7, cote_max: 3.5, marge_sans_agree: 0 });
   assert.deepEqual([F.cote_min, F.cote_max], [1.4, 1.7]);
   assert.ok(dansF("1.40") && dansF("1,70") && dansF(1.55));
   assert.ok(!dansF("1.39") && !dansF(1.71) && !dansF(null) && !dansF(""));
@@ -137,7 +140,7 @@ test("fourchette : bornes 1,40-2,20 dans config/leagues.json (un seul endroit, d
   const bloc = SCRIPT.slice(SCRIPT.indexOf("(function designerMatchGratuit(){"), SCRIPT.indexOf("\n            })();", SCRIPT.indexOf("(function designerMatchGratuit(){")));
   assert.match(bloc, /var FOURCHETTE_OFFERT=PRONOSTIC\.fourchettePari\(LEAGUES_CONFIG\);/);
   // Config absente ou illisible : la fourchette du depot, jamais une fourchette inventee.
-  assert.deepEqual(P.fourchettePari({ fiabilite: {} }), P.fourchettePari(CFG_DEPOT));
+  assert.deepEqual(P.fourchettePari({ fiabilite: {} }), P.fourchettePari(require("../config/leagues.json")));
   assert.deepEqual(P.fourchettePari({ fiabilite: { fourchette_pari: { cote_min: 1.5, cote_max: 1.6 } } }), { cote_min: 1.5, cote_max: 1.6, marge_sans_agree: 0 });
 });
 

@@ -1,4 +1,6 @@
 "use strict";
+// Ecrit pour l'ancienne regle du pari (1,40-2,20, avant le 11/11/2026) : remise en memoire, voir le module.
+require("./ancienne-regle-pari.js");
 // UN PRONOSTIC SUR CHAQUE MATCH (plan de Clement, 03/10/2026) : lib/pronostic.js, son
 // branchement dans le pipeline, la protection Pro (anti-fuite) et l'affichage de la liste.
 //  - un pronostic sur chaque match qui a un modele ou des cotes (sauf match ferme) ;

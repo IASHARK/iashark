@@ -2,6 +2,16 @@
 
 Changements qui affectent le calcul des probabilités, marchés, edge/Kelly ou la manière dont ils sont décidés. Journal complet et non-technique dans `IASHARK_V2_EXECUTION_STATE.md` ; ce fichier ne liste que ce qui touche le moteur lui-même.
 
+## 2026-11-11 (soir) — pari choisi parmi tous les marchés Bet365, cote 1,70-3,50 (décision de Clément, NON FUSIONNÉ : validation mathématicien + avocat du diable)
+
+- **Règle** : `config/marches-pari.json#choix_du_pari.regle = "tous_marches_bet365"` (toute autre valeur = ancienne règle). Fourchette `config/leagues.json#fiabilite.fourchette_pari` 1,70-3,50, 1,70 minimum strict, aucun repli.
+- **Bookmaker** : Bet365 seul (référence, cote affichée) ; jamais un autre bookmaker en repli ; contrôle Pinnacle sur tous les marchés (écart > 8 points : issue écartée).
+- **Candidats** : tous les marchés réglables automatiquement (corners, cartons, tirs, hors-jeu, fautes, joueurs, buteurs, scores exacts, nombre de buts, prolongation...). Liste complète : `docs/MARCHES-BET365-REGLE-11-11.md`.
+- **Marchés d'un seul côté** : chance = (1/cote)/(1+M), M = max(15 %, 3 × marge 1N2 Bet365) ; buteurs plafonnés aux buts attendus de l'équipe. Valeurs provisoires, à calibrer.
+- **Règlement ajouté** : corners (statistiques d'équipe), cartons (événements, règle Bet365 à confirmer), tirs du match à partir de 15,5.
+- **Données** : sans relevé `odds_snapshots` de moins de 12 h, le calcul relit les cotes `/odds` de son propre run (Ligue des nations du 12/11).
+- **Mesure sur 1 037 matchs archivés (cotes seules, sans v3)** : un pari sur chaque match, cote moyenne 1,73 (avant 1,51), chance moyenne 54,8 % (avant 62,9 %) ; familles : pair/impair 34 %, handicap asiatique 14 %, corners 8 %, mi-temps 7 %, buts 7 %, handicap européen 7 %, tirs 5 %, résultat 4 %, cartons 2 %.
+
 ## 2026-10-06 (nuit) — corrections du contrôle ROUGE de l'avocat du diable
 
 - **Libellé affiché = pari réglé** : un pari « F… » s'affiche à partir de son CODE (`lib/market-labels.js#fluxLibelle`, 7 langues), jamais en relisant le libellé français (qui changeait de mi-temps, d'équipe ou perdait une condition dans 9 cas sur 17 vrais matchs). Vue du match, accueil, outils et tickets passent par le code ; test sur tous les codes publiables.

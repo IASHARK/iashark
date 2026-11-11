@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title data-i18n="geo.meta.lolly.title">Parier avec IASHARK chez Lolly Bet — IASHARK</title>
+<meta name="robots" content="noindex, follow">
+<meta name="description" content="Nos analyses, tes paris chez Lolly Bet : tirs cadrés, cartons, corners, arrêts. Et ton Pro IASHARK offert 1 mois si tu t'inscris par notre lien." data-i18n-attr="content:geo.meta.lolly.description">
+<link rel="canonical" href="https://iashark.com/lolly.html">
+<link rel="icon" href="/favicon-32x32.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/lolly.css">
+<link rel="stylesheet" href="/assets/bottom-navigation.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js" defer></script>
+<script src="/i18n/i18n.js"></script>
+</head>
+<body class="lb-body">
+<header class="hdr"><a href="/" data-href="" class="logo"><img src="/assets/iashark-logo.png" alt="IASHARK" width="105" height="28"></a></header>
+
+<!-- Page partenaire Lolly Bet (11/11/2026). Liens affilies : /go/lolly/site seulement.
+     Offre de bienvenue : formulation exacte de Lolly (jamais « 100 € offerts »), aucun code promo.
+     « Pro offert 1 mois » : formulaire rendu par lib/lolly-page.js, table pro_offert_demandes
+     (migration 0074), validation a la main dans admin.html. -->
+<main class="lb">
+
+  <section class="lb-ouverture" aria-labelledby="lbTitre">
+    <p class="lb-duo"><img src="/assets/iashark-logo.png" alt="IASHARK" width="90" height="24"><span aria-hidden="true">×</span><span class="lb-logo"><img src="/assets/bk/lolly.svg" alt="Lolly Bet" width="80" height="18"></span></p>
+    <h1 class="lb-h1" id="lbTitre" data-i18n="lolly_page.title">Parier avec IASHARK chez Lolly Bet</h1>
+    <p class="lb-lead" data-i18n="lolly_page.lead">Nos analyses sur IASHARK, tes paris chez Lolly Bet. Avec des marchés qu’on ne trouve pas partout.</p>
+    <a class="lb-cta" href="/go/lolly/site" target="_blank" rel="sponsored noopener" data-track="lolly_page_inscription" data-track-kind="lolly_page_inscription"><span data-i18n="lolly_page.cta">S’inscrire chez Lolly Bet</span><span aria-hidden="true">→</span></a>
+    <p class="lb-18" data-i18n="lolly_page.age">18+. Il faut un compte Lolly Bet pour parier.</p>
+    <!-- Banniere officielle (materiel promotionnel Lolly) : texte en francais, affichee en francais seulement. -->
+    <a class="lb-banniere" id="lbBanniere" href="/go/lolly/site" target="_blank" rel="sponsored noopener" data-track="lolly_page_banniere" data-track-kind="lolly_page_banniere" hidden><img src="/assets/bk/lolly-bienvenue-fr.webp" alt="Lolly Bet : 1er pari remboursé en cash jusqu'à 100 € (+50 % sur le 2e et le 3e dépôt)" width="1428" height="428" decoding="async"></a>
+  </section>
+
+  <section class="lb-marches" aria-labelledby="lbMarchesTitre">
+    <h2 class="lb-h2" id="lbMarchesTitre" data-i18n="lolly_page.markets_title">Ce que tu y trouves</h2>
+    <ul class="lb-marches-liste">
+      <li><b data-i18n="lolly_page.m_shots">Tirs cadrés d’un joueur</b><span data-i18n="lolly_page.m_shots_ex">L’attaquant cadre 2 tirs ou plus</span></li>
+      <li><b data-i18n="lolly_page.m_cards">Cartons</b><span data-i18n="lolly_page.m_cards_ex">Plus de 4,5 cartons dans le match</span></li>
+      <li><b data-i18n="lolly_page.m_corners">Corners</b><span data-i18n="lolly_page.m_corners_ex">Plus de 9,5 corners</span></li>
+      <li><b data-i18n="lolly_page.m_saves">Arrêts du gardien</b><span data-i18n="lolly_page.m_saves_ex">Le gardien fait 3 arrêts ou plus</span></li>
+    </ul>
+  </section>
+
+  <section class="lb-offre" aria-labelledby="lbOffreTitre">
+    <h2 class="lb-h2" id="lbOffreTitre" data-i18n="lolly_page.offer_title">L’offre de bienvenue</h2>
+    <p class="lb-offre-gros" data-i18n="lolly_page.offer_main">1er pari remboursé en cash jusqu’à 100 €</p>
+    <p class="lb-exemple"><b data-i18n="lolly_page.example_label">Exemple</b> <span data-i18n="lolly_page.example">Tu paries 20 €, ton pari perd : Lolly te rembourse 20 € en cash.</span></p>
+    <p class="lb-offre-2"><b data-i18n="lolly_page.offer_second">+50 % sur le 2e et le 3e dépôt</b> <span data-i18n="lolly_page.offer_second_detail">en freebet, 50 € maximum, sans condition de mise.</span></p>
+    <p class="lb-sans-code" data-i18n="lolly_page.no_code">Pas de code promo : passe simplement par notre bouton.</p>
+  </section>
+
+  <section class="lb-pro" id="pro-offert" aria-labelledby="lbProTitre">
+    <p class="lb-pro-k" data-i18n="lolly_page.pro_kicker">Pour toi</p>
+    <h2 class="lb-h2" id="lbProTitre" data-i18n="lolly_page.pro_title">Ton Pro IASHARK offert 1 mois</h2>
+    <p class="lb-pro-txt" data-i18n="lolly_page.pro_text">Inscris-toi chez Lolly Bet avec notre lien : on t’ouvre Pro pendant un mois. L’inscription suffit.</p>
+    <div class="lb-pro-app" id="lbPro" aria-live="polite"><p class="lb-pro-attente" data-i18n="lolly_page.pro_loading">Chargement…</p></div>
+  </section>
+
+  <section class="lb-etapes" aria-labelledby="lbEtapesTitre">
+    <h2 class="lb-h2" id="lbEtapesTitre" data-i18n="lolly_page.steps_title">Sur ton téléphone</h2>
+    <ol class="lb-etapes-liste">
+      <li><b data-i18n="lolly_page.step1">Touche « S’inscrire chez Lolly Bet »</b><span data-i18n="lolly_page.step1_sub">Tu arrives chez Lolly Bet par notre lien.</span></li>
+      <li><b data-i18n="lolly_page.step2">Crée ton compte Lolly Bet</b><span data-i18n="lolly_page.step2_sub">Il en faut un pour parier.</span></li>
+      <li><b data-i18n="lolly_page.step3">Charge un code ticket</b><span data-i18n="lolly_page.step3_sub">On te donne un code ? Ouvre ton ticket chez Lolly Bet et entre le code : les paris se remplissent tout seuls. Pas besoin de compte pour charger un ticket.</span></li>
+      <li><b data-i18n="lolly_page.step4">Vérifie les cotes et valide</b><span data-i18n="lolly_page.step4_sub">Les cotes peuvent bouger avant le match.</span></li>
+    </ol>
+    <a class="lb-cta lb-cta--bas" href="/go/lolly/site" target="_blank" rel="sponsored noopener" data-track="lolly_page_inscription_bas" data-track-kind="lolly_page_inscription_bas"><span data-i18n="lolly_page.cta">S’inscrire chez Lolly Bet</span><span aria-hidden="true">→</span></a>
+  </section>
+</main>
+
+<footer class="lb-foot"><span data-i18n="rg_footer.age_line">18+ · Interdit aux mineurs · Jouez responsable</span><br><span data-i18n="match_page.shell_help_label">Aide :</span> <a data-market-helpline="url" href="https://www.joueurs-info-service.fr">joueurs-info-service.fr</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">09 74 75 13 13</span></span></footer>
+
+<nav class="bottom-nav" aria-label="Navigation principale" data-i18n-attr="aria-label:geo.nav.aria_label"><a href="/"><span>⌂</span><b data-i18n="nav.home">Accueil</b></a><a href="/pro.html"><span>☆</span><b data-i18n="nav.tools">Outils</b></a><a href="/blog.html"><span>▤</span><b data-i18n="nav.guides">Blog</b></a><a href="/compte.html"><span>♙</span><b data-i18n="nav.account">Compte</b></a></nav>
+
+<script src="/app-client.js" defer></script>
+<script src="/lib/market-config.js"></script>
+<script src="/lib/lolly-page.js" defer></script>
+<script src="/site-prefs.js"></script>
+<script src="/bottom-navigation.js"></script><script src="/site-header.js" defer></script>
+</body>
+</html>

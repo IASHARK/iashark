@@ -445,6 +445,16 @@ function banniereBk(bk){
   if(bk!=='lolly'||!estFr())return '';
   return `<a class="bk-banniere" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi('bookmaker_'+bk+'_banniere')}><img src="/assets/bk/lolly-bienvenue-fr.webp" alt="Lolly Bet : 1er pari remboursé en cash jusqu'à 100 € (+50 % sur le 2e et le 3e dépôt)" width="1428" height="428" loading="lazy" decoding="async"></a>`;
 }
+// « Pro offert 1 mois » (11/11/2026, decision de Clement) : 2e option du cadenas Pro, sous l'offre
+// payante. Mene a la page Lolly Bet (#pro-offert) : compte IASHARK, inscription chez Lolly par notre
+// lien, puis declaration de l'identifiant Lolly (lib/lolly-page.js, migration 0074). Le Pro ne
+// s'ouvre qu'apres verification a la main (admin.html), jamais tout seul.
+function carteProOffert(){
+  const bk='lolly',L=BK_LOGOS[bk];
+  const logo=`<img class="po-logo" src="/assets/bk/${L.f}" alt="${esc(BK_NOMS[bk])}" width="${L.w}" height="${L.h}">`;
+  const txt=tf('match_page.pro_offert_text','Inscris-toi chez {book} avec notre lien',{book:'@@BK@@'});
+  return `<a class="po-carte" href="${esc(lien('lolly.html'))}#pro-offert"${suivi('lolly_pro_offert_match')}><span class="po-ou">${esc(t('match_page.pro_offert_or','Ou bien'))}</span><span class="po-corps"><b class="po-titre">${esc(t('match_page.pro_offert_title','Pro offert 1 mois'))}</b><span class="po-txt"><span>${String(txt).split('@@BK@@').map(esc).join(`</span>${logo}<span>`)}</span></span></span><span class="po-fleche" aria-hidden="true">→</span></a>`;
+}
 function remplirBoutonsParieur(root,raw){
   // Pose apres le rendu, sous le ticket du pari (.sig-slip, ou ses chiffres .appel-stats sur le
   // pari offert) : signalCard et carteAppel ne sont pas modifiees (empreinte de l'Avis).
@@ -1450,6 +1460,7 @@ function renderProWall(raw,ctx){
   // Repli sans module : un lien vers l'abonnement (jamais une page vide).
   const repli=`<section class="op op--vitrine"><h2 class="op-title">${esc(t('offre_pro.title_match','Passe Pro pour ouvrir ce match'))}</h2>${boutonAction(lien('abonnement.html?duree=month&next='+encodeURIComponent(cheminMatch(raw))),t('match_v4.panel_cta','Passe Pro'),suivi('match_gate_unlock').trim())}</section>`;
   const secs=[['offre',`<div id="offreMatch" class="gate">${repli}</div>`,null,true]];
+  secs.push(['prooffert',carteProOffert(),null,true]);
   // Bouton du site de paris (Lolly Bet depuis le 11/11) discret SOUS l'offre Pro (09/11/2026, Clement) : le visiteur qui ne prend pas Pro
   // peut voir les cotes du match chez 1win (en direct apres le coup d'envoi). Aucun pari devoile.
   const momentBk=momentParieur(pub);

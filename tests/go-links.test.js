@@ -72,7 +72,9 @@ test("page match : bouton 1win aussi sur les matchs fermes et en direct, rien ap
   assert.match(ft, /bookmaker_1win_mur: true, bookmaker_1win_direct: true/);
   for (const l of ["fr", "en", "de", "it", "es", "es-mx", "pt"]) {
     const d = require("../i18n/dict/" + l + ".json").match_page;
-    for (const k of ["bk_cta_live", "bk_cta_mur"]) assert.match(d[k], /\{match\}.*\{book\}|\{book\}.*\{match\}/, l + " " + k);
+    assert.match(d.bk_cta_live, /\{match\}.*\{book\}|\{book\}.*\{match\}/, l + " bk_cta_live");
+    assert.match(d.bk_cta_mur, /\{book\}/, l + " bk_cta_mur");
+    assert.doesNotMatch(d.bk_cta_mur, /\{match\}/, l + " bk_cta_mur sans match (une ligne)");
   }
 });
 

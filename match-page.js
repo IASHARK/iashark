@@ -434,8 +434,8 @@ function boutonParieurHtml(match,moment,mur){
   const vars={match,book:'@@BK@@'};
   const txt=!match?'@@BK@@'
     :moment==='direct'?tf('match_page.bk_cta_live','Parier {match} en direct chez {book}',vars)
-    :mur?tf('match_page.bk_cta_mur','Voir les cotes de {match} chez {book}',vars)
-    :tf('match_page.bk_cta','Parier {match} chez {book}',vars);
+    // Une seule formule avant le match, page ouverte ou fermee (11/11/2026, Clement : « pas 2 fois »).
+    :tf('match_page.bk_cta_mur','Voir les cotes de {match} chez {book}',vars);
   const kind='bookmaker_'+bk+(moment==='direct'?'_direct':mur?'_mur':'');
   return `<div class="bk-cta${mur?' bk-cta--mur':''}"><a class="bk-cta-btn" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi(kind)}><span>${String(txt).split('@@BK@@').map(esc).join(`</span>${logo}<span>`)}</span><span aria-hidden="true">→</span></a><p class="bk-cta-note">${esc(tf('match_page.bk_cta_note','18+. {book} n’est pas ouvert dans tous les pays.',{book:nom}))}</p></div>`;
 }

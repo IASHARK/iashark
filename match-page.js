@@ -437,7 +437,7 @@ function boutonParieurHtml(match,moment,mur){
     // Une seule formule avant le match, page ouverte ou fermee (11/11/2026, Clement : « pas 2 fois »).
     :tf('match_page.bk_cta_mur','Voir les cotes de {match} chez {book}',vars);
   const kind='bookmaker_'+bk+(moment==='direct'?'_direct':mur?'_mur':'');
-  return `<div class="bk-cta${mur?' bk-cta--mur':''}"><a class="bk-cta-btn" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi(kind)}><span>${String(txt).split('@@BK@@').map(esc).join(`</span>${logo}<span>`)}</span><span aria-hidden="true">→</span></a><p class="bk-cta-note">${esc(tf('match_page.bk_cta_note','18+. {book} n’est pas ouvert dans tous les pays.',{book:nom}))}</p></div>`;
+  return `<div class="bk-cta${mur?' bk-cta--mur':''}"><a class="bk-cta-btn" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi(kind)}><span>${String(txt).split('@@BK@@').map(esc).join(`</span>${logo}<span>`)}</span><span aria-hidden="true">→</span></a><p class="bk-cta-note">18+</p></div>`;
 }
 function remplirBoutonsParieur(root,raw){
   // Pose apres le rendu, sous le ticket du pari (.sig-slip, ou ses chiffres .appel-stats sur le
@@ -448,6 +448,19 @@ function remplirBoutonsParieur(root,raw){
   cartes.forEach(c=>{
     const fx=c.querySelector('.sig-fixture'),m=fx?fx.textContent.trim():'';
     (c.querySelector('.appel-stats')||c.querySelector('.sig-slip')).insertAdjacentHTML('afterend',boutonParieurHtml(m,moment,false));
+    // Le ticket du pari (cote) ouvre aussi le site de paris, discretement (11/11/2026, Clement).
+    // Attributs poses apres le rendu : le HTML de l'Avis (signalCard) ne change pas.
+    const slip=c.querySelector('.sig-slip');
+    if(slip&&!slip.hasAttribute('data-track')){
+      const kind='bookmaker_'+BK_ACTIF+'_ticket',url='/go/'+BK_ACTIF+'/site';
+      slip.classList.add('sig-slip--bk');
+      slip.setAttribute('data-track',kind);slip.setAttribute('data-track-kind',kind);
+      slip.setAttribute('role','link');slip.setAttribute('tabindex','0');
+      slip.setAttribute('aria-label',tf('match_page.bk_cta_mur','Voir les cotes de {match} chez {book}',{match:m,book:BK_NOMS[BK_ACTIF]}));
+      const ouvrir=()=>window.open(url,'_blank','noopener');
+      slip.addEventListener('click',e=>{if(!e.target.closest('a,button'))ouvrir();});
+      slip.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();ouvrir();}});
+    }
   });
 }
 

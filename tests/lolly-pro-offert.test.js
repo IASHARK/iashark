@@ -216,3 +216,39 @@ test("relecture « visiteur » du 12/11 : etape 1 cochee au retour, textes qui n
   assert.match(dict("fr").lolly_page.pro_pending, /^Demande reçue\. .*reviens sur cette page/);
   assert.equal(dict("fr").match_page.bk_pro_link, "1 mois de Pro offert : voir comment");
 });
+
+test("l'autre chemin vers le Pro (12/11/2026) : une ligne sous le deblocage des combines et sur Mon compte, bloc partenaire sur la page d'exemple", () => {
+  const A = require("../lib/aujourdhui.js");
+  const pub = { statut: "publie", verrou: "pro" };
+  const rep = (niveau) => ({ niveau, jour: "2026-11-12", blocs: { x5: pub, x10: pub, or: pub, buteur: { statut: "publie", verrou: niveau === "anonyme" ? "compte" : null } } });
+  const src = read("lib/aujourdhui.js");
+  // Compte gratuit : sous le bouton « Passe Pro », UNE ligne vers la page Lolly (jamais un deuxieme bouton).
+  assert.match(src, /bouton\(hrefPro, t\("aujourdhui\.cta_pro", "Passe Pro"\)\), "", offert\);/);
+  assert.match(src, /<a class="aj-offert" href="' \+ esc\(lien\("lolly\.html"\)\) \+ '#pro-offert" data-track="lolly_pro_offert_tickets"/);
+  assert.match(src, /a\.parentNode\.insertBefore\(p, a\.parentNode\.querySelector\("\.aj-offert"\)\);/, "la mention de l'essai reste collee a son bouton");
+  if (typeof A.deverrouillage === "function") {
+    const gratuit = A.deverrouillage(rep("gratuit"), {});
+    if (gratuit) {
+      assert.equal((gratuit.match(/class="aj-offert"/g) || []).length, 1);
+      assert.match(gratuit, /Lolly Bet, notre partenaire/);
+      assert.ok(gratuit.indexOf("aj-cta") < gratuit.indexOf("aj-offert"), "apres le bouton");
+    }
+    const pro = A.deverrouillage(rep("pro"), {});
+    assert.doesNotMatch(String(pro || ""), /aj-offert/, "un abonne Pro ne voit pas la ligne");
+  }
+  // Mon compte (compte gratuit) : la meme ligne sous le composant de paiement.
+  assert.match(read("account-page.js"), /<div id="offreCompte"><\/div>'[\s\S]{0,400}class="aj-offert" href="' \+ esc\(lien\('lolly\.html'\)\) \+ '#pro-offert" data-track="lolly_pro_offert_compte"/);
+  // Page d'exemple : le match fige est termine, le bloc partenaire s'affiche quand meme.
+  assert.match(read("match-page.js"), /const demo=typeof IASHARK_DEMO!=='undefined'&&IASHARK_DEMO;\n\s*const moment=demo\?'avant':momentParieur\(raw\);/);
+  const ft = read("funnel-track.js");
+  for (const k of ["lolly_pro_offert_tickets", "lolly_pro_offert_compte"]) assert.match(ft, new RegExp(k + ": true"));
+  const PART = { fr: /notre partenaire/, en: /our partner/, es: /nuestro socio/, "es-mx": /nuestro socio/, de: /unserem Partner/, it: /nostro partner/, pt: /nossa parceira/ };
+  for (const l of LOCALES) {
+    const v = dict(l).aujourdhui.pro_offert_link;
+    assert.ok(String(v || "").trim(), l);
+    assert.match(v, /Lolly Bet/, l);
+    assert.match(v, PART[l], l + " : Lolly Bet, notre partenaire");
+    assert.equal(JSON.parse(read("i18n/parts/vente." + l + ".json")).aujourdhui.pro_offert_link, v, l);
+  }
+  assert.doesNotMatch(read("assets/aujourdhui.css").split("\n").filter((x) => /^\.aj-offert/.test(x)).join("\n"), /uppercase|monospace/);
+});

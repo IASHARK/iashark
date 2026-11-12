@@ -126,9 +126,11 @@ test("C1 : offertDuJour = le choix de l'accueil, mais jamais un match d'un autre
 
 test("C5 : inscription, ce qu'on recoit, tutoiement, retour sur le match offert", () => {
   const fr = JSON.parse(read("i18n/dict/fr.json")).auth;
-  assert.equal(fr.signup_h1, "Ton pari offert du jour, gratuit");
-  assert.equal(fr.signup_intro, "Avec un compte gratuit : l’analyse complète du match offert, chaque jour. Sans carte bancaire.");
-  assert.equal(fr.signup_submit, "Voir mon pari offert");
+  // 12/11/2026 (Clement : « pas assez vendeuse » ; avis ChatGPT, section 5) : « pari offert » pouvait
+  // evoquer un pari offert par un bookmaker. Le titre dit ce que le compte donne, le bouton ce qu'il fait.
+  assert.equal(fr.signup_h1, "Ton analyse foot gratuite, chaque jour");
+  assert.equal(fr.signup_intro, "Un match analysé avec le pronostic et ses raisons, sans carte bancaire.");
+  assert.equal(fr.signup_submit, "Créer mon compte gratuit");
   assert.equal(fr.email_placeholder, "ton@email.com");
   // Petit combine : reserve a Pro depuis le 04/11/2026, plus aucune page d'inscription n'en parle.
   assert.doesNotMatch(JSON.parse(read("i18n/dict/en.json")).auth.signup_intro, /combo|accumulator/i);
@@ -147,6 +149,49 @@ test("C5 : inscription, ce qu'on recoit, tutoiement, retour sur le match offert"
   const CTA = { fr: "Créer mon compte et continuer", en: "Create my account and continue", es: "Crear mi cuenta y continuar", "es-mx": "Crear mi cuenta y continuar",
     de: "Konto erstellen und weiter", it: "Crea il mio account e continua", pt: "Criar a minha conta e continuar" };
   for (const l of Object.keys(CTA)) assert.equal(JSON.parse(read("i18n/dict/" + l + ".json")).auth.pay_step_submit, CTA[l], l);
+});
+
+test("inscription du 12/11 : formulaire tout de suite, match offert nomme, proposition Pro offert, arrivee depuis Lolly", () => {
+  const html = read("inscription.html");
+  const corps = html.slice(html.indexOf("<main"), html.indexOf("</main>"));
+  // Ordre : le titre et sa ligne, le match du jour, le formulaire, puis la proposition secondaire.
+  const ordre = ['data-i18n="auth.signup_h1"', 'data-i18n="auth.signup_intro"', "data-ins-jour hidden", '<form id="form"', 'data-i18n="auth.already_member_prompt"', 'data-i18n="auth.signup_pro_title"'];
+  let avant = -1;
+  for (const r of ordre) { const i = corps.indexOf(r); assert.ok(i > avant, "ordre ou partie manquante : " + r); avant = i; }
+  // Plus de puces generiques ni de titre au-dessus du formulaire.
+  assert.doesNotMatch(corps, /signup_bullet_|signup_form_heading|✓/);
+  assert.match(corps, /Lolly Bet, notre partenaire/);
+  assert.match(corps, /data-ins-pro>[\s\S]*?href="\/lolly\.html" data-href="lolly\.html"/);
+  assert.ok(html.indexOf('src="/lib/noms-equipes-fr.js"') > 0 && html.indexOf('src="/lib/noms-equipes-fr.js"') < html.indexOf('src="/auth-pages.js"'));
+  const js = read("auth-pages.js");
+  // Le match offert du jour : seulement son nom, la meme source que l'accueil.
+  assert.match(js, /if \(m && \/\^\\d\+\$\/\.test\(String\(m\.id\)\)\) \{ offertDuJour = String\(m\.id\); nommerOffert\(m\); \}/);
+  const nommer = js.slice(js.indexOf("function nommerOffert("), js.indexOf("/* ---------- Chemin de paiement"));
+  assert.match(nommer, /t\('auth\.signup_today'/);
+  assert.doesNotMatch(nommer, /pari_rec|cote|prob/i, "aucun pari ni cote dans la ligne du jour");
+  // Arrivee depuis la page Lolly : ?next= en liste blanche, titre et bouton adaptes, proposition retiree.
+  assert.match(js, /\/\^\\\/\(\?:\[a-z\]\{2\}\\\/\)\?lolly\\\.html\(\?:\[\?#\]\|\$\)\/\.test\(brut\)/);
+  const lolly = js.slice(js.indexOf("function titreVenuDeLolly()"), js.indexOf("DOMContentLoaded', titreVenuDeLolly"));
+  assert.match(lolly, /'auth\.signup_h1_lolly'/);
+  assert.match(lolly, /'auth\.pay_step_submit', 'Créer mon compte et continuer'/);
+  assert.match(lolly, /retirerPropositionPro\(\);/);
+  const etape = js.slice(js.indexOf("function etapePaiement()"), js.indexOf("DOMContentLoaded', etapePaiement"));
+  assert.match(etape, /retirerPropositionPro\(\);/, "venu du paiement : pas de deuxieme offre");
+  // Textes dans les 7 langues, sans emoji ; Lolly Bet toujours nomme comme partenaire.
+  const CLES = ["signup_h1", "signup_intro", "signup_today", "signup_submit", "signup_pro_title", "signup_pro_text", "signup_pro_link", "signup_h1_lolly", "signup_intro_lolly", "pay_step_h1"];
+  const PARTENAIRE = { fr: /notre partenaire/, en: /our partner/, es: /nuestro socio/, "es-mx": /nuestro socio/, de: /unserem Partner/, it: /nostro partner/, pt: /nossa parceira/ };
+  for (const l of Object.keys(PARTENAIRE)) {
+    const d = JSON.parse(read("i18n/dict/" + l + ".json")).auth;
+    const part = JSON.parse(read("i18n/parts/vente." + l + ".json")).auth;
+    for (const k of CLES) {
+      assert.ok(typeof d[k] === "string" && d[k].trim(), l + " auth." + k);
+      assert.equal(part[k], d[k], l + " : part et dictionnaire identiques pour auth." + k);
+      assert.doesNotMatch(d[k], /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u, l + " auth." + k + " : aucun emoji");
+    }
+    assert.match(d.signup_today, /\{match\}/, l);
+    assert.match(d.signup_pro_text, /Lolly Bet/, l);
+    assert.match(d.signup_pro_text, PARTENAIRE[l], l + " : Lolly Bet, notre partenaire");
+  }
 });
 
 test("C6 : un seul nombre de competitions sur l'accueil, celui de config/leagues.json", () => {

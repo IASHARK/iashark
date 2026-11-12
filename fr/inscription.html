@@ -41,27 +41,21 @@
   </div>
 </header>
 
-<main class="mx-auto grid w-full max-w-[1080px] items-center gap-12 px-5 py-12 lg:min-h-[calc(100dvh-3.5rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:gap-16 lg:py-16">
+<main class="ins mx-auto w-full max-w-[1080px] px-5">
 
-  <!-- Les trois promesses ci-dessous sont verifiees dans le produit :
-       une analyse est bien offerte chaque jour (lib/free-match.js designe le
-       match gratuit), les outils sont bien accessibles en decouverte, et il
-       n'y a aucun engagement puisque le compte gratuit ne demande pas de
-       moyen de paiement. Rien d'autre n'est promis ici. -->
-  <section class="lg:pr-6">
-    <h1 class="mt-3 text-[38px] font-extrabold leading-[1.05] tracking-tight sm:text-[46px]" data-i18n="auth.signup_h1">Ton pari offert du jour, gratuit</h1>
-    <p class="mt-4 max-w-md text-[15px] leading-relaxed text-soft" data-i18n="auth.signup_intro">Avec un compte gratuit : l’analyse complète du match offert, chaque jour. Sans carte bancaire.</p>
-    <ul class="mt-8 hidden max-w-md space-y-3.5 lg:block">
-      <li class="flex items-start gap-3 text-[14.5px] text-soft"><span aria-hidden="true" class="mt-[3px] text-cyan">✓</span><span data-i18n="auth.signup_bullet_analysis">L’analyse complète offerte chaque jour</span></li>
-      <li class="flex items-start gap-3 text-[14.5px] text-soft"><span aria-hidden="true" class="mt-[3px] text-cyan">✓</span><span data-i18n="auth.signup_bullet_tools">La découverte des outils de décision</span></li>
-      <li class="flex items-start gap-3 text-[14.5px] text-soft"><span aria-hidden="true" class="mt-[3px] text-cyan">✓</span><span data-i18n="auth.signup_bullet_no_commitment">Aucun engagement, aucune carte demandée</span></li>
-    </ul>
+  <!-- 12/11/2026 (Clement : « pas assez vendeuse » ; avis ChatGPT, section 5). Ce que le compte
+       donne, dit en une ligne : un match analyse chaque jour (lib/free-match.js designe le match
+       offert), sans carte bancaire. Le match offert DU JOUR est nomme quand il existe
+       ([data-ins-jour], auth-pages.js). Le formulaire suit tout de suite au telephone. Le titre
+       change selon la provenance (auth-pages.js) : un match, la demande Lolly, le paiement. -->
+  <section class="ins-tete">
+    <h1 class="ins-h1" data-i18n="auth.signup_h1">Ton analyse foot gratuite, chaque jour</h1>
+    <p class="ins-ligne" data-i18n="auth.signup_intro">Un match analysé avec le pronostic et ses raisons, sans carte bancaire.</p>
+    <p class="ins-jour" data-ins-jour hidden></p>
   </section>
 
-  <section class="rounded-2xl border border-hairline bg-surface p-6 sm:p-7">
-    <h2 class="text-[19px] font-bold tracking-tight" data-i18n="auth.signup_form_heading">Créer mon compte</h2>
-
-    <form id="form" onsubmit="event.preventDefault()" novalidate class="mt-6">
+  <section class="ins-form rounded-2xl border border-hairline bg-surface">
+    <form id="form" onsubmit="event.preventDefault()" novalidate>
       <div>
         <label for="email" class="block text-[13px] font-semibold text-soft" data-i18n="auth.email_label">Email</label>
         <input id="email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required
@@ -98,7 +92,7 @@
       </div>
 
       <button type="submit" id="submit"
-              class="mt-6 h-12 w-full rounded-xl bg-cyan text-[15px] font-bold text-[#04141b] transition hover:bg-cyan/90 disabled:cursor-wait disabled:opacity-60" data-i18n="auth.signup_submit">Voir mon pari offert</button>
+              class="mt-6 h-12 w-full rounded-xl bg-cyan text-[15px] font-bold text-[#04141b] transition hover:bg-cyan/90 disabled:cursor-wait disabled:opacity-60" data-i18n="auth.signup_submit">Créer mon compte gratuit</button>
 
       <p id="formMsg" hidden role="alert" aria-live="polite"></p>
 
@@ -109,10 +103,19 @@
       </p>
     </form>
 
-    <p class="mt-6 border-t border-hairline pt-5 text-center text-[13.5px] text-soft">
-      <a href="https://t.me/iashark_contact" target="_blank" rel="noopener" data-track="contact_inscription_telegram" class="mb-3 block font-semibold text-cyan transition hover:underline" ><img src="/assets/telegram.svg" width="15" height="15" alt="" style="display:inline-block;vertical-align:-2px;margin-right:6px"><span data-i18n="contact.tg_line">Une question ? Écris-moi sur Telegram</span></a>
-      <span data-i18n="auth.already_member_prompt">Déjà membre ?</span> <a href="/fr/connexion.html" data-href="connexion.html" class="font-semibold text-cyan transition hover:underline" data-i18n="auth.login_link">Se connecter</a>
+    <p class="mt-5 border-t border-hairline pt-5 text-center text-[13.5px] text-soft">
+      <span data-i18n="auth.already_member_prompt">Déjà inscrit ?</span> <a href="/fr/connexion.html" data-href="connexion.html" class="font-semibold text-cyan transition hover:underline" data-i18n="auth.login_link">Se connecter</a>
     </p>
+  </section>
+
+  <!-- Proposition secondaire, sans carte : le Pro offert contre une inscription chez Lolly Bet,
+       notre partenaire. Retiree quand le visiteur vient deja de la page Lolly ou du paiement
+       (auth-pages.js) : il poursuit l'action qu'il a choisie. -->
+  <section class="ins-pro" data-ins-pro>
+    <h2 class="ins-pro-titre" data-i18n="auth.signup_pro_title">Envie de toutes les analyses ?</h2>
+    <p class="ins-pro-ligne" data-i18n="auth.signup_pro_text">Pro offert 1 mois avec une inscription chez Lolly Bet, notre partenaire.</p>
+    <a class="ins-pro-lien" href="/fr/lolly.html" data-href="lolly.html" data-track="inscription_offre_partenaire" data-track-kind="inscription_offre_partenaire"><span data-i18n="auth.signup_pro_link">Découvrir l’offre partenaire</span><span aria-hidden="true"> →</span></a>
+    <a href="https://t.me/iashark_contact" target="_blank" rel="noopener" data-track="contact_inscription_telegram" class="ins-contact"><img src="/assets/telegram.svg" width="15" height="15" alt="" style="display:inline-block;vertical-align:-2px;margin-right:6px"><span data-i18n="contact.tg_line">Une question ? Écris-moi sur Telegram</span></a>
   </section>
 
 </main>
@@ -128,9 +131,10 @@
 <script src="/lib/market-config.js"></script>
 <script src="/app-client.js" defer></script>
 <!-- Match offert du jour (correction C5 du 27/10/2026) : apres une inscription sans ?next=, retour sur
-     le match offert (lib/free-match.js, meme source que l'accueil), annonce par le bouton « Voir mon pari offert ». -->
+     le match offert (lib/free-match.js, meme source que l'accueil), ou son analyse s ouvre avec le compte. -->
 <script src="/lib/match-time.js" defer></script>
 <script src="/lib/free-match.js" defer></script>
+<script src="/lib/noms-equipes-fr.js" defer></script>
 <script src="/auth-pages.js" defer></script>
 <script>
   if (window.I18N && window.I18N.init) { window.I18N.init(); }

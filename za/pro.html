@@ -53,113 +53,44 @@
 
 <main class="mx-auto w-full max-w-[1440px] px-4 pb-12 sm:px-6">
 
-<!-- PAGE DE VENTE (visiteur sans compte ou compte gratuit, 21/10/2026) : la promesse,
-     ce que recoit un abonne chaque jour, l'exemple d'analyse, comment ca marche, le
-     prix et le bouton (LE composant de paiement, lib/offre-pro.js), les questions.
-     Branchement : lib/pro-vente.js. Les lignes [data-pv-si] ne s'affichent que si
-     elles sont vraies en ligne pour ce visiteur (marche, langue, interrupteurs). -->
+<!-- PAGE DE VENTE COURTE (12/11/2026, Clement : « la raccourcir encore » ; avis ChatGPT section 3).
+     Constat : au telephone la page faisait 6 ecrans et le prix arrivait au 4e. Maintenant, dans
+     l'ordre : le titre et une ligne ; « Pro offert 1 mois » (la meme carte que le cadenas du match,
+     Lolly Bet, notre partenaire) ; le Pro par abonnement (LE composant de paiement, lib/offre-pro.js,
+     jamais un prix ecrit ici) ; deux liens (un exemple d'analyse, l'analyse gratuite du jour).
+     Retires : le comparatif, le catalogue, « Comment ca marche », le bouton intermediaire, les questions.
+     Branchement : lib/pro-vente.js. -->
 <div id="proVente" class="pv">
 
   <section class="pv-hero" aria-labelledby="pvTitre">
-    <h1 id="pvTitre" class="pv-h1"><span data-i18n="pro_vente.hero_title_pre">Every bet of the day,</span> <span class="pv-hl" data-i18n="pro_vente.hero_title_hl">published before kick-off.</span></h1>
-    <p class="pv-lead" data-i18n="pro_vente.hero_sub">Every match of the day open: the pick, its calculated chance and why. You compare it with your odds, then you decide.</p>
-    <!-- Comparison 2, Hirael (21st.dev, MIT, Mohammad Shehadeh) : tableau a colonne mise en avant, ecrit sans React. -->
-    <table class="pv-cmp">
-      <caption class="pv-cmp-sr" data-i18n="pro_vente.cmp_caption">Free account and Pro compared</caption>
-      <thead><tr><td></td><th scope="col" data-i18n="pro_vente.cmp_free">Free account</th><th scope="col" class="pv-cmp-pro" data-i18n="pro_vente.cmp_pro">Pro</th></tr></thead>
-      <tbody>
-        <tr><th scope="row" data-i18n="pro_vente.cmp_others">All the other matches of the day</th><td><svg class="pv-cmp-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg><span class="pv-cmp-sr" data-i18n="pro_vente.cmp_no">Not included</span></td><td class="pv-cmp-pro"><svg class="pv-cmp-i pv-cmp-i--oui" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="pv-cmp-sr" data-i18n="pro_vente.cmp_yes">Included</span></td></tr>
-        <tr data-pv-si="tickets" hidden><th scope="row" data-i18n="pro_vente.cmp_small">The small combo</th><td><svg class="pv-cmp-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg><span class="pv-cmp-sr" data-i18n="pro_vente.cmp_no">Not included</span></td><td class="pv-cmp-pro"><svg class="pv-cmp-i pv-cmp-i--oui" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="pv-cmp-sr" data-i18n="pro_vente.cmp_yes">Included</span></td></tr>
-        <tr data-pv-si="tickets" hidden><th scope="row" data-i18n="pro_vente.cmp_big">The big combo</th><td><svg class="pv-cmp-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg><span class="pv-cmp-sr" data-i18n="pro_vente.cmp_no">Not included</span></td><td class="pv-cmp-pro"><svg class="pv-cmp-i pv-cmp-i--oui" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="pv-cmp-sr" data-i18n="pro_vente.cmp_yes">Included</span></td></tr>
-        <tr data-pv-si="tickets" hidden><th scope="row" data-i18n="pro_vente.item_gold_title">The Gold Selection</th><td><svg class="pv-cmp-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg><span class="pv-cmp-sr" data-i18n="pro_vente.cmp_no">Not included</span></td><td class="pv-cmp-pro"><svg class="pv-cmp-i pv-cmp-i--oui" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="pv-cmp-sr" data-i18n="pro_vente.cmp_yes">Included</span></td></tr>
-        <tr data-pv-si="tickets" hidden><th scope="row" data-i18n="pro_vente.cmp_climb">The ladders</th><td><svg class="pv-cmp-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg><span class="pv-cmp-sr" data-i18n="pro_vente.cmp_no">Not included</span></td><td class="pv-cmp-pro"><svg class="pv-cmp-i pv-cmp-i--oui" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="pv-cmp-sr" data-i18n="pro_vente.cmp_yes">Included</span></td></tr>
-        <tr><th scope="row" data-i18n="pro_vente.cmp_offered">The free match of the day</th><td><svg class="pv-cmp-i pv-cmp-i--oui" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="pv-cmp-sr" data-i18n="pro_vente.cmp_yes">Included</span></td><td class="pv-cmp-pro"><svg class="pv-cmp-i pv-cmp-i--oui" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="pv-cmp-sr" data-i18n="pro_vente.cmp_yes">Included</span></td></tr>
-        <tr data-pv-si="tickets" hidden><th scope="row" data-i18n="pro_vente.item_scorer_title">The scorer of the day</th><td><svg class="pv-cmp-i pv-cmp-i--oui" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="pv-cmp-sr" data-i18n="pro_vente.cmp_yes">Included</span></td><td class="pv-cmp-pro"><svg class="pv-cmp-i pv-cmp-i--oui" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="pv-cmp-sr" data-i18n="pro_vente.cmp_yes">Included</span></td></tr>
-      </tbody>
-    </table>
-    <div class="pv-hero-cta">
-      <a class="mu-shimmer pv-cta" href="#offre" data-track="pro_vente_hero"><span class="mu-shimmer-spark-c" aria-hidden="true"><span class="mu-shimmer-spark"><span class="mu-shimmer-spark-b"></span></span></span><span data-i18n="pro_vente.hero_cta">See the Pro offer</span><span class="mu-shimmer-hl" aria-hidden="true"></span><span class="mu-shimmer-bd" aria-hidden="true"></span></a>
-      <p class="pv-reassure"><span class="pv-ico" data-pv-ico="rotate-ccw" aria-hidden="true"></span><span data-i18n="offre_pro.pay_cancel">Cancel online at any time</span></p>
-    </div>
-    <p class="pv-essai-note" data-pv-essai-note hidden></p>
+    <h1 id="pvTitre" class="pv-h1" data-i18n="pro_vente.short_title">Every analysis of the day with IASHARK Pro</h1>
+    <p class="pv-lead" data-i18n="pro_vente.short_sub">The picks, their probabilities and the reasons behind each choice.</p>
     <p class="preuve-hier preuve-hier--pro" data-preuve-hier hidden></p>
   </section>
 
-  <section class="pv-section pv-recu" aria-labelledby="pvRecu">
-    <div class="pv-recu-tete">
-      <h2 id="pvRecu" class="pv-h2" data-i18n="pro_vente.daily_title">What you get every day</h2>
-      <p class="pv-texte" data-i18n="pro_vente.daily_sub">Everything is published before kick-off, and nothing is changed once the match has started.</p>
+  <div class="pv-acces">
+    <!-- « Pro offert 1 mois » : memes textes (match_page.pro_offert_*) et meme carte (.po-*) que le
+         cadenas de la page match. Le logo du partenaire est pose par lib/pro-vente.js. -->
+    <div class="po-carte" data-pv-offert>
+      <p class="po-titre" data-i18n="match_page.pro_offert_title">1 month of Pro free</p>
+      <p class="po-txt" data-pv-offert-txt>Inscris-toi chez Lolly Bet, notre partenaire, avec notre lien</p>
+      <a class="po-btn" href="/za/lolly.html#pro-offert" data-track="lolly_pro_offert_pro" data-track-kind="lolly_pro_offert_pro"><span data-i18n="match_page.pro_offert_cta">Get my free Pro month</span><span aria-hidden="true">→</span></a>
     </div>
-    <div class="pv-recu-corps">
-      <article class="pv-fiche" data-pv-fiche aria-labelledby="pvFiche">
-        <h3 id="pvFiche" class="pv-fiche-titre"><span class="pv-ico pv-ico--accent" data-pv-ico="chart-column" aria-hidden="true"></span><span data-i18n="pro_vente.item_all_title">Every match of the day, open</span></h3>
-        <ol class="pv-anatomie">
-          <li><span class="pv-point" aria-hidden="true"></span><b data-i18n="pro_vente.anat_pick_title">The pick</b><span data-i18n="pro_vente.anat_pick_text">Only one per match, chosen by a fixed rule.</span></li>
-          <li><span class="pv-point" aria-hidden="true"></span><b data-i18n="pro_vente.anat_chance_title">Its calculated chance</b><span data-i18n="pro_vente.anat_chance_text">As a percentage, to compare with your operator’s odds.</span></li>
-          <li><span class="pv-point" aria-hidden="true"></span><b data-i18n="pro_vente.anat_why_title">Why</b><span data-i18n="pro_vente.anat_why_text">The reasons for the choice, in plain words.</span></li>
-        </ol>
-      </article>
-      <ul class="pv-liste">
-        <li data-pv-si="tickets" hidden><span class="pv-ico pv-ico--accent" data-pv-ico="ticket" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_combos_title">The day’s Small and Big combo</h3><p data-i18n="pro_vente.item_combos_text">The small one has 3 to 5 matches, the big one 5 to 7. When no combination meets our rules, we don’t publish one.</p></div></li>
-        <li data-pv-si="tickets" hidden><span class="pv-ico pv-ico--accent" data-pv-ico="award" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_gold_title">The Gold Selection</h3><p data-i18n="pro_vente.item_gold_text">The day’s 3 most likely picks, chosen by IASHARK. Published only when 3 picks meet our rules.</p></div></li>
-        <li data-pv-si="tickets" hidden><span class="pv-ico pv-ico--accent" data-pv-ico="user-round" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_scorer_title">The scorer of the day</h3><p data-i18n="pro_vente.item_scorer_text">The player most likely to score among the probable starters, once he reaches a 10% chance.</p></div></li>
-        <li data-pv-si="marches" hidden><span class="pv-ico pv-ico--accent" data-pv-ico="list-checks" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_markets_title">Every market of the match</h3><p data-i18n="pro_vente.item_markets_text">Each market of the match with its calculated chance, to compare with your operator’s odds.</p></div></li>
-        <li><span class="pv-ico pv-ico--accent" data-pv-ico="clapperboard" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_film_title">The match timeline</h3><p data-i18n="pro_vente.item_film_text">The match split into six quarter-hours, and the two teams compared.</p></div></li>
-        <li><span class="pv-ico pv-ico--accent" data-pv-ico="goal" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_scores_title">The most likely scorelines</h3><p data-i18n="pro_vente.item_scores_text">In the best-measured leagues: the most likely scorelines and who scores first.</p></div></li>
-        <li data-pv-si="telegram" hidden><span class="pv-ico pv-ico--accent" data-pv-ico="signal-high" aria-hidden="true"></span><div><h3 data-i18n="pro_vente.item_telegram_title">Private messages from the Telegram bot</h3><p data-i18n="pro_vente.item_telegram_text">Your daily programme sent as a private message, in your language.</p></div></li>
-      </ul>
-    </div>
-  </section>
 
-  <section class="pv-section pv-exemple" aria-labelledby="pvExemple">
-    <div class="pv-exemple-texte">
-      <h2 id="pvExemple" class="pv-h2" data-i18n="pro_vente.example_title">See an analysis before you pay</h2>
-      <p class="pv-texte" data-i18n="pro_vente.example_text">A real, complete analysis, open to all with no account: the pick, its chance, the match timeline and the two teams compared.</p>
-    </div>
-    <a class="pv-btn-ligne" href="/za/exemple-analyse.html" data-track="pro_vente_exemple"><span data-i18n="pro_vente.example_cta">See the sample analysis</span><span class="pv-ico" data-pv-ico="arrow-right" aria-hidden="true"></span></a>
-  </section>
+    <section class="pv-offre" id="offre" aria-label="Pro offer" data-i18n-attr="aria-label:pro_vente.offer_aria">
+      <!-- LE composant de paiement (lib/offre-pro.js, mode vitrine) : durees et prix du
+           marche (config/markets.json), un bouton, comment on paie. Repli sans JS : un
+           lien vers la page abonnement, aucun prix ecrit ici. -->
+      <div id="offrePro"><section class="op op--vitrine"><h2 class="op-title" data-i18n="offre_pro.title_sub">Pro by subscription</h2><a class="mu-shimmer op-cta" href="/za/abonnement.html" data-i18n="pro_vente.offer_fallback_cta">See prices</a></section></div>
+    </section>
+  </div>
 
-  <section class="pv-section pv-etapes" aria-labelledby="pvEtapes">
-    <h2 id="pvEtapes" class="pv-h2" data-i18n="pro_vente.how_title">How it works</h2>
-    <ol class="pv-etapes-liste">
-      <li><span class="pv-num" aria-hidden="true">1</span><h3 data-i18n="pro_vente.how_1_title">Choose your plan length</h3><p data-i18n="pro_vente.how_1_text">Create your account, then pay by card. Payment is secured by Stripe.</p></li>
-      <li><span class="pv-num" aria-hidden="true">2</span><h3 data-i18n="pro_vente.how_2_title">Open the day’s matches</h3><p data-i18n="pro_vente.how_2_text">Every pick is published before kick-off, with its calculated chance and why.</p></li>
-      <li><span class="pv-num" aria-hidden="true">3</span><h3 data-i18n="pro_vente.how_3_title">Compare and decide</h3><p data-i18n="pro_vente.how_3_text">Put the calculated chance against your licensed operator’s odds. You make the call.</p></li>
-    </ol>
-  </section>
-
-  <section class="pv-section pv-offre" id="offre" aria-label="Pro offer" data-i18n-attr="aria-label:pro_vente.offer_aria">
-    <!-- LE composant de paiement (lib/offre-pro.js, mode vitrine) : durees et prix du
-         marche (config/markets.json), un bouton, comment on paie. Repli sans JS : un
-         lien vers la page abonnement, aucun prix ecrit ici. -->
-    <div id="offrePro"><section class="op op--vitrine"><h2 class="op-title" data-i18n="offre_pro.title_general">Go Pro: every match of the day, open</h2><a class="mu-shimmer op-cta" href="/za/abonnement.html" data-i18n="pro_vente.offer_fallback_cta">See prices</a></section></div>
-    <p class="pv-gratuit" id="pvGratuit" data-i18n="offre_pro.free_line">Free: the analysis of the match of the day, with an account.</p>
-    <!-- Contact direct : Telegram prive @iashark_contact. -->
-    <p class="ia-contact-pay" data-contact-paiement><a href="https://t.me/iashark_contact" target="_blank" rel="noopener" data-track="contact_pro_telegram"><img src="/assets/telegram.svg" width="15" height="15" alt="" style="display:inline-block;vertical-align:-2px;margin-right:6px"><span data-i18n="contact.tg_pay">A question or a payment issue? Message me on Telegram</span></a></p>
-  </section>
-
-  <section class="pv-section pv-faq" aria-labelledby="pvFaq">
-    <h2 id="pvFaq" class="pv-h2" data-i18n="pro_vente.faq_title">Frequently asked questions</h2>
-    <div class="pv-faq-liste">
-      <details class="pv-q">
-        <summary><span data-i18n="pro_vente.faq_cancel_q">Can I cancel whenever I want?</span><span class="pv-ico pv-chevron" data-pv-ico="chevron-down" aria-hidden="true"></span></summary>
-        <div class="pv-r"><p data-i18n="pro_vente.faq_cancel_a">Yes. You cancel at any time, free of charge and online, from “My account”. Nothing more is charged after you cancel.</p><p><a class="pv-lien" href="/za/cgv.html" data-i18n="pro_vente.faq_cancel_link">The details for each plan length are in the Terms</a></p></div>
-      </details>
-      <details class="pv-q" data-pv-essai hidden>
-        <summary><span data-i18n="pro_vente.faq_trial_q">Is there a trial?</span><span class="pv-ico pv-chevron" data-pv-ico="chevron-down" aria-hidden="true"></span></summary>
-        <div class="pv-r"><p data-pv-essai-texte></p></div>
-      </details>
-      <details class="pv-q">
-        <summary><span data-i18n="pro_vente.faq_where_q">Where do I place my bets?</span><span class="pv-ico pv-chevron" data-pv-ico="chevron-down" aria-hidden="true"></span></summary>
-        <div class="pv-r"><p data-i18n="pro_vente.faq_where_a">With your licensed operator. IASHARK takes no bets and manages no player accounts: we publish analyses.</p><p data-pv-si="anj" hidden data-i18n="pro_vente.faq_where_anj">In France, the odds shown are taken from operators licensed by the ANJ. When none of them offers the match, the odds are marked indicative and no operator is named.</p></div>
-      </details>
-      <details class="pv-q">
-        <summary><span data-i18n="pro_vente.faq_age_q">How old do I need to be?</span><span class="pv-ico pv-chevron" data-pv-ico="chevron-down" aria-hidden="true"></span></summary>
-        <div class="pv-r"><p data-i18n="pro_vente.faq_age_a">18 or over. The service is for adults only, like sports betting.</p></div>
-      </details>
-    </div>
-    <a class="pv-btn-ligne pv-faq-cta" href="#offre" data-track="pro_vente_faq"><span data-i18n="pro_vente.faq_cta">Choose my plan length</span><span class="pv-ico" data-pv-ico="arrow-up" aria-hidden="true"></span></a>
-  </section>
+  <nav class="pv-liens" aria-label="Before you choose" data-i18n-attr="aria-label:pro_vente.links_aria">
+    <a class="pv-lien" href="/za/exemple-analyse.html" data-track="pro_vente_exemple"><span data-i18n="pro_vente.example_cta">See the sample analysis</span><span class="pv-ico" data-pv-ico="arrow-right" aria-hidden="true"></span></a>
+    <a class="pv-lien" id="pvGratuit" href="/za/inscription.html" data-track="pro_vente_gratuit"><span data-i18n="pro_vente.free_link">Start with today’s free analysis</span><span class="pv-ico" data-pv-ico="arrow-right" aria-hidden="true"></span></a>
+  </nav>
+  <!-- Contact direct : Telegram prive @iashark_contact. -->
+  <p class="ia-contact-pay" data-contact-paiement><a href="https://t.me/iashark_contact" target="_blank" rel="noopener" data-track="contact_pro_telegram"><img src="/assets/telegram.svg" width="15" height="15" alt="" style="display:inline-block;vertical-align:-2px;margin-right:6px"><span data-i18n="contact.tg_pay">A question or a payment issue? Message me on Telegram</span></a></p>
 </div>
 
 <!-- OUTILS PRO (abonne Pro seulement, tools-page.js) : quatre outils. Les outils de

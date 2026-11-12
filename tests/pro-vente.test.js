@@ -1,15 +1,13 @@
 "use strict";
-// Page Pro qui VEND (21/10/2026). Constat : 36 visites de la page Pro en 5 semaines,
-// 2 abonnes ; la page etait un « Tool Center » rempli de lignes fictives et ne disait
-// pas ce que recoit un parieur. Carte blanche de Clement pour vendre plus.
-// Ce que ces tests gardent :
-//   - un visiteur non abonne voit, dans l'ordre : la promesse, ce que recoit un abonne
-//     chaque jour, l'exemple d'analyse, comment ca marche, le prix et le bouton (LE
-//     composant de paiement unique, jamais un prix ecrit dans la page), les questions ;
-//   - chaque ligne « ce que tu recois » n'apparait que si elle est vraie en ligne pour
-//     ce visiteur (memes regles que lib/offre-pro.js) ; les messages prives Telegram
-//     restent fermes tant qu'ils ne sont pas en ligne ;
-//   - la question « essai » n'apparait que si le composant affiche un essai ;
+// Page Pro qui VEND (21/10/2026), raccourcie le 12/11/2026 (Clement : « la raccourcir encore » ;
+// avis ChatGPT, section 3). Constat du 12/11 : au telephone la page faisait 6 ecrans et le prix
+// arrivait au 4e. Ce que ces tests gardent :
+//   - un visiteur non abonne voit, dans l'ordre : le titre et une ligne ; « Pro offert 1 mois »
+//     (Lolly Bet, notre partenaire : la meme carte que le cadenas de la page match) ; le Pro par
+//     abonnement (LE composant de paiement unique, jamais un prix ecrit dans la page) ; deux liens
+//     (un exemple d'analyse, l'analyse gratuite du jour) ;
+//   - le comparatif, le catalogue, « Comment ca marche », le bouton intermediaire et les questions
+//     ne reviennent pas ;
 //   - textes dans les 7 langues, sans promesse de gain, sans mise, capital ni esperance,
 //     sans emoji, sans chiffre de resultat ;
 //   - direction visuelle : ni majuscules a chasse fixe, ni vert ni rouge.
@@ -29,14 +27,14 @@ const PV = require("../lib/pro-vente.js");
 const html = read("pro.html");
 const vente = html.slice(html.indexOf('<div id="proVente"'), html.indexOf('<div id="proOutils"'));
 
-test("page de vente : les six parties dans l'ordre demande", () => {
+test("page de vente courte : titre, Pro offert, Pro par abonnement, deux liens, dans cet ordre", () => {
   const reperes = [
-    'data-i18n="pro_vente.hero_title_pre"',
-    'data-i18n="pro_vente.daily_title"',
-    'href="/exemple-analyse.html"',
-    'data-i18n="pro_vente.how_title"',
+    'data-i18n="pro_vente.short_title"',
+    'data-i18n="pro_vente.short_sub"',
+    'class="po-carte" data-pv-offert',
     '<div id="offrePro">',
-    'data-i18n="pro_vente.faq_title"'
+    'href="/exemple-analyse.html"',
+    'id="pvGratuit" href="/inscription.html"'
   ];
   let avant = -1;
   for (const r of reperes) {
@@ -46,60 +44,59 @@ test("page de vente : les six parties dans l'ordre demande", () => {
   }
   assert.equal((vente.match(/<h1[\s>]/g) || []).length, 1, "un seul h1 dans la page de vente");
   assert.doesNotMatch(html.slice(html.indexOf('<div id="proOutils"')), /<h1[\s>]/, "l'en-tete des outils (h1) n'est rendu que pour un abonne");
-  // Ce que recoit un abonne : chaque contenu demande est present.
-  for (const k of ["item_all_title", "item_combos_title", "item_gold_title", "item_scorer_title", "item_markets_title", "item_film_title", "item_telegram_title"]) {
-    assert.match(vente, new RegExp('data-i18n="pro_vente\\.' + k + '"'), k);
-  }
-  // Questions : resiliation, essai, operateurs agrees (ANJ), 18 ans et plus.
-  for (const k of ["faq_cancel_q", "faq_trial_q", "faq_where_q", "faq_where_anj", "faq_age_q"]) {
-    assert.match(vente, new RegExp('data-i18n="pro_vente\\.' + k + '"'), k);
-  }
+  // Ce qui a ete retire le 12/11 ne revient pas : comparatif, catalogue, etapes, bouton intermediaire, questions.
+  assert.doesNotMatch(vente, /pv-cmp|pv-liste|pv-fiche|pv-etapes|pv-faq|<details|pv-hero-cta|href="#offre"/);
+  assert.ok(vente.length < 4500, "la page de vente reste courte (" + vente.length + " caracteres)");
+});
+
+test("Pro offert 1 mois : la carte du cadenas, Lolly Bet nomme comme partenaire, vers la page Lolly", () => {
+  const carte = vente.slice(vente.indexOf('class="po-carte"'), vente.indexOf('<section class="pv-offre"'));
+  for (const k of ["pro_offert_title", "pro_offert_cta"]) assert.match(carte, new RegExp('data-i18n="match_page\\.' + k + '"'), k);
+  assert.match(carte, /Lolly Bet, notre partenaire/, "repli sans JS : le partenaire est nomme");
+  assert.match(carte, /<a class="po-btn" href="\/lolly\.html#pro-offert" data-track="lolly_pro_offert_pro"/);
+  // Avec JS : le meme texte que le cadenas (match_page.pro_offert_text), le logo a la place du nom.
+  const ligne = PV.ligneOffert();
+  assert.match(ligne, /^<span>Inscris-toi chez <\/span><img class="po-logo" src="\/assets\/bk\/lolly\.svg" alt="Lolly Bet" width="62" height="14"><span>, notre partenaire, avec notre lien<\/span>$/);
+  assert.ok(fs.existsSync(path.join(ROOT, "assets/bk/lolly.svg")));
+  const mp = read("match-page.js");
+  assert.match(mp, /'lolly':\{f:'lolly\.svg',w:62,h:14\}/, "meme logo que match-page.js");
+  assert.match(mp, /tf\('match_page\.pro_offert_text'/);
+  for (const l of LOCALES) assert.match(DICTS[l].match_page.pro_offert_text, /\{book\}/, l);
+  // Une seule carte, deux feuilles : les regles .po-* sont recopiees telles quelles de match-page.css.
+  const regles = (css) => css.split("\n").filter((x) => /^\.po-/.test(x));
+  const ref = regles(read("assets/match-page.css"));
+  assert.ok(ref.length >= 6);
+  assert.deepEqual(regles(read("assets/pro-vente.css")), ref, "carte « Pro offert » : memes regles que le cadenas");
 });
 
 test("prix et bouton : LE composant de paiement, aucun prix ecrit dans la page", () => {
   assert.doesNotMatch(vente, /\d+[,.]\d{2}\s?(€|£)|(€|£|MX\$|US\$)\s?\d|\bR\s?\d{2,}|data-market-price/, "aucun prix en dur");
   const js = read("lib/pro-vente.js");
-  assert.match(js, /OP\.mount\(boite, \{ mode: "vitrine", contexte: "general"/);
+  assert.match(js, /OP\.mount\(boite, \{ mode: "vitrine", contexte: "abonnement"/);
   assert.doesNotMatch(js, /\d+[,.]\d{2}\s?(€|£)|19,95|14\.99|MX\$|R199/);
+  // Titre du composant sur cette page : « Pro par abonnement » ; memes avantages que le contexte general.
+  const op = read("lib/offre-pro.js");
+  assert.match(op, /abonnement: \["offre_pro\.title_sub", "Pro par abonnement"\]/);
+  for (const l of LOCALES) {
+    assert.ok(String(DICTS[l].offre_pro.title_sub || "").trim(), l + " offre_pro.title_sub");
+    assert.equal(JSON.parse(read("i18n/parts/vente." + l + ".json")).offre_pro.title_sub, DICTS[l].offre_pro.title_sub, l);
+  }
   assert.match(html, /<script src="\/lib\/icones\.js"><\/script><script src="\/lib\/composants\.js"><\/script><script src="\/lib\/offre-pro\.js"><\/script><script src="\/lib\/pro-vente\.js"><\/script>\s*<script src="\/tools-page\.js">/);
   for (const css of ["composants.css", "offre-pro.css", "pro-vente.css"]) assert.match(html, new RegExp('href="/assets/' + css.replace(".", "\\.") + '"'), css);
   // Repli sans JS : un lien vers la page abonnement, pas de prix.
   assert.match(vente, /<div id="offrePro"><section class="op op--vitrine">[\s\S]*?href="\/abonnement\.html"/);
 });
 
-test("interrupteurs de verite : une ligne n'apparait que si elle est vraie pour ce visiteur", () => {
-  // Lignes conditionnelles cachees dans le HTML, montrees par lib/pro-vente.js.
-  const conditionnelles = [...vente.matchAll(/<(li|p)\b[^>]*data-pv-si="(\w+)"[^>]*>/g)];
-  assert.ok(conditionnelles.length >= 6);
-  for (const m of conditionnelles) assert.match(m[0], /\shidden[\s>]/, "cachee par defaut : " + m[0]);
-  const si = (nom) => conditionnelles.filter((m) => m[2] === nom).length;
-  assert.equal(si("tickets"), 3, "petit et grand combine, Selection en or, buteur du jour");
-  assert.equal(si("marches"), 1);
-  assert.equal(si("telegram"), 1);
-  assert.equal(si("anj"), 1);
-  // Memes regles que le composant (lib/offre-pro.js#avantages, lib/aujourdhui.js#enLigne).
-  assert.deepEqual(PV.conditions({ tickets: true, marcheFr: true, langueFr: true }), { tickets: true, marches: true, telegram: false, anj: true });
-  assert.deepEqual(PV.conditions({ tickets: true, marcheFr: false, langueFr: false }), { tickets: true, marches: false, telegram: false, anj: false });
-  assert.deepEqual(PV.conditions({ tickets: false, marcheFr: true, langueFr: true }), { tickets: false, marches: true, telegram: false, anj: true });
-  // Messages prives Telegram : pas en ligne au 21/10/2026 (seul Clement les recoit en
-  // rodage). Passer OUVERT.telegram a true LE JOUR ou chaque abonne lie les recoit, et
-  // mettre ce test a jour le meme jour.
-  assert.equal(PV.OUVERT.telegram, false);
-});
-
-test("question « essai » : seulement si le composant de paiement affiche un essai, avec son texte", () => {
-  assert.match(vente, /<details class="pv-q" data-pv-essai hidden>/);
+test("lien gratuit : l'inscription ; deja connecte, les matchs du jour", () => {
   const js = read("lib/pro-vente.js");
-  assert.match(js, /OP\.lireDisponibilite\(market\)\.then/);
-  assert.match(js, /var jours = OP\.essaiOuvert\(dispo\);/);
-  assert.match(js, /if \(!jours \|\| !mois\) return;/);
-  assert.match(js, /tf\("offre_pro\.trial_detail"/);
+  assert.match(js, /gratuit\.setAttribute\("href", opts\.connecte \? lien\(""\) : lien\("inscription\.html"\)\);/);
 });
 
 test("i18n : pro_vente.* complet et identique dans les 7 dictionnaires et leurs parts", () => {
   const ref = Object.keys(DICTS.fr.pro_vente).sort();
-  assert.ok(ref.length >= 45);
+  assert.deepEqual(ref, ["example_cta", "free_link", "links_aria", "offer_aria", "offer_fallback_cta", "short_sub", "short_title", "tools_sub"]);
   const cles = [...html.matchAll(/data-i18n(?:-attr="[^"]*:|=")(pro_vente\.\w+)/g)].map((m) => m[1].split(".")[1]);
+  assert.ok(cles.length >= 6);
   for (const k of cles) assert.ok(ref.includes(k), "cle utilisee par la page et absente : " + k);
   for (const l of LOCALES) {
     const d = DICTS[l].pro_vente;
@@ -112,13 +109,14 @@ test("i18n : pro_vente.* complet et identique dans les 7 dictionnaires et leurs 
 test("textes : aucune promesse de gain, ni mise, ni capital, ni esperance, ni chiffre de resultat, ni emoji", () => {
   const INTERDITS = /\b(sûrs?|gagnants?|gains?|gagner|mises?|unités?|capital|espérance|bankroll|garanti\w*|guarantee\w*|winnings?|stakes?|expected value|ganancias?|ganar|garantizad\w*|Gewinn\w*|Einsatz|Kapital|garantiert|guadagn\w*|puntata|capitale|ganhos?|ganhar|garantid\w*)\b|offre limitée|dernière chance|réussite|win rate|success rate|ROI\b|rentab\w*|profit\w*/i;
   for (const l of LOCALES) {
-    const tout = JSON.stringify(DICTS[l].pro_vente);
+    const tout = JSON.stringify(DICTS[l].pro_vente) + " " + DICTS[l].offre_pro.title_sub;
     assert.doesNotMatch(tout, INTERDITS, l);
     assert.doesNotMatch(tout, /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u, l + " : aucun emoji");
     assert.doesNotMatch(tout, /\d+\s?%\s?(de réussite|of wins|de acierto|Treffer|di successo|de acerto)/i, l + " : aucun chiffre de resultat");
   }
   const texteVente = vente.replace(/<!--[\s\S]*?-->/g, "").replace(/<[^>]+>/g, " ");
   assert.doesNotMatch(texteVente, INTERDITS, "texte statique francais");
+  assert.doesNotMatch(texteVente, /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u, "aucun emoji");
 });
 
 test("direction visuelle : ni majuscules a chasse fixe, ni vert ni rouge, mouvement reduit respecte", () => {
@@ -126,7 +124,6 @@ test("direction visuelle : ni majuscules a chasse fixe, ni vert ni rouge, mouvem
   assert.doesNotMatch(css, /text-transform\s*:\s*uppercase|monospace|Space Mono/i);
   assert.doesNotMatch(css, /#(22c55e|16a34a|10b981|ef4444|dc2626|ff8f85|f43f5e)\b/i, "vert et rouge reserves aux ecarts chiffres");
   assert.match(css, /prefers-reduced-motion:no-preference/);
-  assert.match(read("lib/pro-vente.js"), /prefers-reduced-motion: reduce/);
 });
 
 test("pages generees : la page de vente traduite dans chaque version publique", () => {
@@ -135,26 +132,14 @@ test("pages generees : la page de vente traduite dans chaque version publique", 
   for (const dir of DIRS) {
     const page = read(dir + "/pro.html");
     const loc = MARKETS._dirs[dir].locale;
-    for (const k of ["pro_vente.hero_title_pre", "pro_vente.daily_title", "pro_vente.faq_title"]) {
+    for (const k of ["pro_vente.short_title", "pro_vente.short_sub", "pro_vente.free_link", "match_page.pro_offert_title", "match_page.pro_offert_cta"]) {
       const v = get(DICTS[loc], k);
       assert.ok(page.includes('data-i18n="' + k + '">' + esc(v) + "<"), dir + " : " + k + " non traduit");
     }
     assert.match(page, new RegExp('href="/' + dir + '/exemple-analyse\\.html"'), dir + " : lien vers l'exemple de la version");
+    assert.match(page, new RegExp('href="/' + dir + '/lolly\\.html#pro-offert"'), dir + " : lien vers la page Lolly de la version");
+    assert.match(page, new RegExp('id="pvGratuit" href="/' + dir + '/inscription\\.html"'), dir + " : lien vers l'inscription de la version");
     assert.doesNotMatch(page, /Calculateur de mise|Simulateur de capital|data-tool="(stake|bankroll)"/, dir);
+    assert.doesNotMatch(page, /pv-cmp|pv-faq|pv-etapes/, dir + " : ancienne page longue");
   }
-});
-
-test("comparatif Compte gratuit / Pro du premier ecran : conforme aux verrous des tickets, dans toutes les pages", () => {
-  const ligne = (html, cle) => {
-    const m = html.match(new RegExp('<tr[^>]*><th scope="row" data-i18n="pro_vente\\.' + cle + '">.*?</tr>'));
-    assert.ok(m, cle);
-    return (m[0].match(/data-i18n="pro_vente\.cmp_(yes|no)"/g) || []).map((x) => (/cmp_yes/.test(x) ? "oui" : "non")).join("/");
-  };
-  ["pro.html", "fr/pro.html", "en/pro.html", "es/pro.html", "gb/pro.html", "mx/pro.html", "za/pro.html"].forEach((page) => {
-    const html = fs.readFileSync(path.join(__dirname, "..", page), "utf8");
-    // supabase/functions/_shared/tickets-contrat.mjs (compte gratuit : buteur ouvert ; x5, x10 et Selection en or « pro »).
-    ["cmp_others", "cmp_small", "cmp_big", "item_gold_title", "cmp_climb"].forEach((k) => assert.equal(ligne(html, k), "non/oui", page + " " + k));
-    ["cmp_offered", "item_scorer_title"].forEach((k) => assert.equal(ligne(html, k), "oui/oui", page + " " + k));
-    assert.ok(html.indexOf('class="pv-cmp"') < html.indexOf('class="pv-hero-cta"'), page);
-  });
 });

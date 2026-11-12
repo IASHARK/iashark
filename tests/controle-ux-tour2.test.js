@@ -100,8 +100,8 @@ test("inscription venue de l'abonnement : etape 1 sur 2, duree en liste blanche,
   assert.match(read("inscription.html"), /<script src="\/lib\/market-config\.js"><\/script>/);
   // Tutoiement, comme le reste du site.
   const fr = JSON.parse(read("i18n/dict/fr.json")).auth;
-  assert.equal(fr.signup_h1, "Ton pari offert du jour, gratuit"); // correction C5 du 27/10/2026
-  assert.equal(fr.pay_step_h1, "Étape 1 sur 2 : ton compte.");
+  assert.equal(fr.signup_h1, "Ton analyse foot gratuite, chaque jour"); // 12/11/2026, avis ChatGPT section 5
+  assert.equal(fr.pay_step_h1, "Crée ton compte pour activer Pro");
   assert.match(fr.legal_prefix, /tu acceptes/);
 });
 

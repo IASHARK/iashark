@@ -219,8 +219,15 @@ function analysisFor(m,ctx,H){
   return {state:'open',free:free,probNum:pn,prob:pn!=null?fmtProb(pn):null,market:market};
 }
 
-// Competitions favorites d'abord, puis A->Z ; dans chaque competition, matchs
-// favoris d'abord, puis par heure de coup d'envoi.
+// ORDRE « COMME FLASHSCORE » (demande de Clement du 11/11/2026) : competitions
+// favorites du visiteur d'abord, puis les grosses competitions dans l'ordre de
+// GROSSES (a changer ici, nulle part ailleurs), puis toutes les autres par pays
+// (A->Z, nom du pays dans la langue de la page), puis par nom.
+var GROSSES=['ligue1','seriea','laliga','nations_league','ldc','premier','bundesliga','el','ecl',
+  'wcq_europe','euro','euro_qualifiers','club_world_cup'];
+function rangGrosse(k){var i=GROSSES.indexOf(String(k||''));return i===-1?GROSSES.length:i;}
+// Competitions favorites d'abord, puis grosses competitions, puis par pays et
+// nom ; dans chaque competition, matchs favoris d'abord, puis par heure.
 function groupByLeague(list,H,favLeagues,favMatches){
   var map={},order=[],fl=favLeagues||NO_FAVS,fm=favMatches||NO_FAVS;
   list.forEach(function(m){
@@ -235,7 +242,12 @@ function groupByLeague(list,H,favLeagues,favMatches){
     g.matches.sort(function(a,b){return ((fm.has(a.id)?0:1)-(fm.has(b.id)?0:1))||H.compareMatches(a,b);});
     g.ready=g.matches.filter(hasSignal).length;
     return g;
-  }).sort(function(a,b){return ((a.fav?0:1)-(b.fav?0:1))||String(a.name).localeCompare(String(b.name),lt,{sensitivity:'base'});});
+  }).sort(function(a,b){
+    var ca=String(a.country||''),cb=String(b.country||'');
+    return ((a.fav?0:1)-(b.fav?0:1))||(rangGrosse(a.key)-rangGrosse(b.key))
+      ||((ca?0:1)-(cb?0:1))||ca.localeCompare(cb,lt,{sensitivity:'base'})
+      ||String(a.name).localeCompare(String(b.name),lt,{sensitivity:'base'});
+  });
 }
 
 /* ---------- Resultats de la veille : la couleur, rien d'autre ----------

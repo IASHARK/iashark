@@ -160,8 +160,8 @@ test("favoris : competitions favorites en tete de la meme liste, matchs favoris 
   const favL = setStore(["premier"]);
   const favM = setStore([2, 999]);
   const groups = HL.groupByLeague(list, H, favL, favM);
-  assert.deepEqual(groups.map((g) => g.key), ["premier", "el", "laliga"], "favorite d'abord, puis A->Z");
-  assert.deepEqual(groups[2].matches.map((m) => m.id), [2, 1], "match favori en tete de sa competition");
+  assert.deepEqual(groups.map((g) => g.key), ["premier", "laliga", "el"], "favorite d'abord, puis les grosses competitions dans l'ordre (11/11/2026)");
+  assert.deepEqual(groups[1].matches.map((m) => m.id), [2, 1], "match favori en tete de sa competition");
   const html = HL.renderDayBody(list, ctx({ favorites: favL, favMatches: favM }), H);
   const mine = html.match(/<section class="hl-mine"[\s\S]*?<\/section>/);
   assert.ok(mine, "section « Mes matchs »");
@@ -211,8 +211,8 @@ test("matchs favoris : store {id, ko}, nettoyage des matchs passes, fusion avec 
 test("competition : favoris puis A->Z, en-tete « N matchs » sans decompte d'analyses, ajout aux favoris suivi", () => {
   const H = helpers();
   const groups = HL.groupByLeague([base({ league: "La Liga" }), base({ id: 2, league_key: "el", league: "Europa League", has_signal: false, no_signal: true }), base({ id: 3 })], H);
-  assert.deepEqual(groups.map((g) => g.name), ["Europa League", "La Liga"]);
-  const block = HL.renderLeagueBlock(groups[1], ctx(), H, 0);
+  assert.deepEqual(groups.map((g) => g.name), ["La Liga", "Europa League"]);
+  const block = HL.renderLeagueBlock(groups[0], ctx(), H, 0);
   // Le decompte « M analyses prêtes » a ete retire de l'en-tete le 16/09/2026 :
   // il repetait ce que chaque ligne dit deja, et chargeait la barre de competition.
   assert.match(block, />2 matchs</);
@@ -222,8 +222,16 @@ test("competition : favoris puis A->Z, en-tete « N matchs » sans decompte d'an
   // lecteur d'ecran : c'est la seule mention qui doit subsister.
   assert.match(block, /aria-label="[^"]*Analyse prête, réservée aux abonnés Pro/);
   assert.match(block, /data-track="laliga" data-track-kind="home_fav_add"/);
-  const favBlock = HL.renderLeagueBlock(groups[1], ctx({ favorites: { has: () => true, list: () => ["laliga"] } }), H, 0);
+  const favBlock = HL.renderLeagueBlock(groups[0], ctx({ favorites: { has: () => true, list: () => ["laliga"] } }), H, 0);
   assert.doesNotMatch(favBlock, /home_fav_add/, "retrait d'un favori : pas d'evenement d'ajout");
+});
+
+test("ordre comme Flashscore (11/11/2026) : favoris, grosses competitions dans l'ordre, puis par pays A->Z, puis par nom", () => {
+  const pays = { championship: "Angleterre", ligue2: "France", bundesliga2: "Allemagne", eredivisie: "Pays-Bas", primeira: "Portugal", x: "" };
+  const H = Object.assign(helpers(), { leagueCountry: (m) => pays[m.league_key] || "" });
+  const cles = ["x", "primeira", "championship", "ldc", "ligue2", "seriea", "bundesliga2", "ligue1", "eredivisie", "laliga", "nations_league"];
+  const groups = HL.groupByLeague(cles.map((k, i) => base({ id: i + 1, league_key: k, league: k })), H, setStore(["primeira"]));
+  assert.deepEqual(groups.map((g) => g.key), ["primeira", "ligue1", "seriea", "laliga", "nations_league", "ldc", "bundesliga2", "championship", "ligue2", "eredivisie", "x"]);
 });
 
 test("favoris : store local + fusion avec le compte (user_metadata.fav_leagues), sauvegarde si la fusion ajoute", async () => {

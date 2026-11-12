@@ -1,0 +1,58 @@
+name: petites-ligues
+
+# PETITES LIGUES BET365, CHEMIN LEGER - PHASE 1, ESSAI A BLANC (demande de Clement des 11 et 12/11/2026).
+# Toutes les 3 heures : programme du jour (/fixtures?date) et cotes Bet365 + Pinnacle par date (/odds, en pages) des
+# 3 prochains jours ; pari choisi par la regle du site (lib/pronostic.js), horodate, fige ; cote de la meme issue suivie
+# jusqu'au coup d'envoi ; reglement sur le score. Logique : lib/petites-ligues.js ; lancement : scripts/petites-ligues.js ;
+# reglages : config/petites-ligues.json (actif = false : aucun appel, rien a commiter).
+# RIEN n'est affiche sur le site : seule l'archive data/petites-ligues/<jour>.json est commitee (dossier jamais publie
+# par Netlify : scripts/netlify-ignore.sh saute le deploiement). Le calcul quotidien (update-data.yml) n'est pas touche :
+# il ne lit ni n'ecrit ce dossier, et sa sauvegarde garde la version distante des fichiers qu'il ne produit pas.
+# Cout mesure le 12/11/2026 : 38 pages Bet365 + 25 pages Pinnacle + 3 programmes pour les 12, 13 et 14/11, soit
+# environ 70 appels par lancement, 560 par jour au plus (quota 75 000) ; plafond dur max_appels_par_lancement.
+
+on:
+  schedule:
+    - cron: '23 */3 * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: petites-ligues
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  petites-ligues:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Petites ligues (essai a blanc)
+        env:
+          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
+        run: node scripts/petites-ligues.js
+
+      - name: Commiter l'archive (seulement data/petites-ligues)
+        run: |
+          set -euo pipefail
+          [ -d data/petites-ligues ] || { echo "Rien a commiter."; exit 0; }
+          git add data/petites-ligues
+          if git diff --cached --quiet; then echo "Archive inchangee."; exit 0; fi
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "Petites ligues (essai a blanc) $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
+          # Seul ce workflow ecrit data/petites-ligues : un rebase ne peut pas entrer en conflit.
+          for i in 1 2 3 4 5; do
+            if git fetch -q --depth=50 origin "${GITHUB_REF_NAME}" && git rebase -q FETCH_HEAD && git push -q origin "HEAD:${GITHUB_REF_NAME}"; then exit 0; fi
+            git rebase --abort 2>/dev/null || true
+            sleep $((i * 15))
+          done
+          echo "Envoi impossible apres 5 essais." >&2
+          exit 1

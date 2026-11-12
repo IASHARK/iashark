@@ -134,10 +134,14 @@ test("page match : bloc partenaire sous le pari (12/11/2026) : un cadre, la bann
   const direct = fr("Lens – Lille", "direct", true);
   assert.match(direct, /Parier en direct chez Lolly Bet/);
   assert.match(direct, /data-track="bookmaker_lolly_direct"/);
-  // Autre langue : pas de banniere (son texte est en francais), le bouton reste (jamais cache selon le pays).
+  // Autre langue : la banniere dans cette langue (fournie par le partenaire le 12/11), jamais la francaise.
   const en = rendu("en")("Lens – Lille", "avant", false);
-  assert.doesNotMatch(en, /bk-offre-img|lolly-bienvenue|refunded|remboursé/);
-  assert.match(en, /<a class="po-btn bk-offre-btn" href="\/go\/lolly\/site"/);
+  assert.match(en, /class="bk-offre-img" href="\/go\/lolly\/site"/);
+  assert.match(en, /src="\/assets\/bk\/lolly-bienvenue-en\.jpg"[^>]* width="1280" height="384"/);
+  assert.doesNotMatch(en, /lolly-bienvenue-fr/);
+  assert.match(en, /<a class="bk-offre-btn bk-offre-btn--doux" href="\/go\/lolly\/site"/);
+  for (const l of ["en", "es", "de", "it", "pt"]) assert.ok(fs.existsSync(path.join(ROOT, "assets/bk/lolly-bienvenue-" + l + ".jpg")), l);
+  assert.match(src, /\{gb:'en',za:'en',mx:'es','es-mx':'es'\}/);
   assert.match(en, /Bet on this match at Lolly Bet/);
   assert.match(en, /our partner/);
   assert.match(en, /href="\/en\/lolly\.html#pro-offert"/);

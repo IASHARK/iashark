@@ -429,16 +429,17 @@ function momentParieur(m){
   return isFinite(ts)&&Date.now()>=ts?'direct':'avant';
 }
 // LE BLOC PARTENAIRE sous le pari (12/11/2026, carte blanche de Clement : « harmoniser tout ca », faire
-// cliquer « sans que la personne se sente harcelee »). Un seul cadre, la meme carte que « Pro offert 1 mois »
-// du cadenas et de la page Pro (.po-carte), dans l'ordre :
+// cliquer « sans que la personne se sente harcelee »). Un seul cadre discret, dans l'ordre :
 //   1. le logo du partenaire, « notre partenaire », 18+ ;
-//   2. l'offre de bienvenue en TEXTE (« 1er pari remboursé jusqu'à 100 € »), en francais seulement : elle
-//      remplace la banniere image (rouge et jaune, hors du style du site, retiree le matin meme) ;
-//   3. UN bouton : « Parier ce match chez Lolly Bet » (ou « en direct » apres le coup d'envoi) ;
-//   4. pour qui n'est pas abonne Pro seulement : un lien d'une ligne vers la page Lolly (#pro-offert), ou
+//   2. en francais : la banniere officielle de l'offre de bienvenue, cliquable avec notre lien. C'est ELLE
+//      qui porte l'offre (retour de Clement le 12/11 : l'offre ecrite en gros blanc etait « agressive ») ;
+//   3. UNE phrase d'appel, en bouton a contour (pas un aplat cyan a cote de la banniere) : « Parier ce
+//      match chez Lolly Bet » (« en direct » apres le coup d'envoi). Sans banniere (autres langues) : le
+//      bouton cyan habituel ;
+//   4. pour qui n'est pas abonne Pro seulement : une ligne vers la page Lolly (#pro-offert), ou
 //      l'inscription par notre lien donne 1 mois de Pro (verification a la main, jamais automatique).
-// Plus de « Meilleure cote trouvee chez ... » ici : aucune cote du partenaire n'est relevee, on ne peut pas
-// l'affirmer match par match. Montre a tous les pays (jamais cache selon le pays).
+// Aucune phrase sur « la meilleure cote » : aucune cote du partenaire n'est relevee. Montre a tous les
+// pays (jamais cache selon le pays) ; seule la banniere, ecrite en francais, est reservee au francais.
 // match : « Lyon – PSG » ; moment : 'avant' ou 'direct' ; pro : abonne Pro (pas de ligne Pro offert).
 function boutonParieurHtml(match,moment,pro){
   const bk=BK_ACTIF,nom=BK_NOMS[bk];
@@ -448,11 +449,11 @@ function boutonParieurHtml(match,moment,pro){
   const libelle=direct?tf('match_page.bk_btn_live','Parier en direct chez {book}',{book:nom}):tf('match_page.bk_btn','Parier ce match chez {book}',{book:nom});
   const kind='bookmaker_'+bk+(direct?'_direct':'');
   const tete=`<p class="bk-offre-tete">${logo}<span>${esc(t('match_page.bk_partner','notre partenaire'))}</span><span class="bk-offre-age">18+</span></p>`;
-  // L'offre de bienvenue : en francais seulement (comme la banniere qu'elle remplace).
-  const offre=estFr()?`<p class="po-titre bk-offre-titre">${esc(t('match_page.bk_offer','1er pari remboursé jusqu’à 100 €'))}</p>`:'';
-  const bouton=`<a class="po-btn bk-offre-btn" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi(kind)}><span>${esc(libelle)}</span><span aria-hidden="true">→</span></a>`;
+  // Banniere officielle (Lolly Bet, materiel promotionnel) : son texte est en francais, donc en francais seulement.
+  const banniere=bk==='lolly'&&estFr()?`<a class="bk-offre-img" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi('bookmaker_'+bk+'_banniere')}><img src="/assets/bk/lolly-bienvenue-fr.webp" alt="${esc(nom)} : ${esc(t('match_page.bk_offer','1er pari remboursé jusqu’à 100 €'))}" width="1428" height="428" loading="lazy" decoding="async"></a>`:'';
+  const bouton=`<a class="${banniere?'bk-offre-btn bk-offre-btn--doux':'po-btn bk-offre-btn'}" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi(kind)}><span>${esc(libelle)}</span><span aria-hidden="true">→</span></a>`;
   const proOffert=pro||bk!=='lolly'?'':`<a class="bk-offre-pro" href="${esc(lien('lolly.html'))}#pro-offert"${suivi('lolly_pro_offert_avis')}><span>${esc(t('match_page.bk_pro_link','1 mois de Pro offert à l’inscription'))}</span><span aria-hidden="true">→</span></a>`;
-  return `<div class="bk-cta bk-offre po-carte" data-bk-match="${esc(match||'')}">${tete}${offre}${bouton}${proOffert}</div>`;
+  return `<div class="bk-cta bk-offre po-carte" data-bk-match="${esc(match||'')}">${tete}${banniere}${bouton}${proOffert}</div>`;
 }
 // « Pro offert 1 mois » (11/11/2026, decision de Clement) : 2e option du cadenas Pro, sous l'offre
 // payante. Mene a la page Lolly Bet (#pro-offert) : compte IASHARK, inscription chez Lolly par notre

@@ -9,7 +9,6 @@ html{background:var(--lb-bg)}
 .logo img{display:block;height:28px;width:auto}
 
 .lb{max-width:600px;margin:0 auto;padding:0 16px 24px}
-.lb-h2{margin:0;font-size:clamp(22px,5vw,27px);line-height:1.15;font-weight:800;letter-spacing:-.02em;text-wrap:balance}
 
 /* Ouverture */
 .lb-ouverture{position:relative;padding:40px 0 8px}
@@ -19,45 +18,21 @@ html{background:var(--lb-bg)}
 .lb-logo{display:inline-flex;align-items:center;padding:6px 10px;border-radius:8px;background:#060b12;box-shadow:inset 0 0 0 1px rgba(141,179,211,.22)}
 .lb-logo img{display:block;height:16px;width:auto}
 .lb-h1{margin:0;font-size:clamp(31px,7.4vw,44px);line-height:1.06;font-weight:800;letter-spacing:-.03em;text-wrap:balance}
-.lb-lead{margin:14px 0 0;font-size:17px;line-height:1.5;color:var(--lb-text);max-width:40ch}
 .lb-cta{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:24px;min-height:56px;padding:0 18px;border-radius:14px;background:var(--lb-cyan);color:#04141b;font-size:17px;font-weight:800;text-decoration:none;transition:background-color .15s ease,transform .15s ease}
 .lb-cta:hover{background:#5fe2f4}
 .lb-cta:active{transform:translateY(1px)}
 .lb-cta:focus-visible{outline:2px solid var(--lb-cyan);outline-offset:3px}
-.lb-18{margin:10px 0 0;font-size:13px;color:var(--lb-soft);text-align:center}
 .lb-banniere{display:block;margin:18px 0 0;border-radius:12px;overflow:hidden;line-height:0}
 .lb-banniere[hidden]{display:none}
 .lb-banniere img{display:block;width:100%;height:auto}
 .lb-banniere:focus-visible{outline:2px solid var(--lb-cyan);outline-offset:2px}
 
-/* Marches : des lignes, pas des cartes */
-.lb-marches{margin-top:44px}
-.lb-marches-liste{margin:16px 0 0;padding:0;list-style:none;border-top:1px solid var(--lb-line)}
-.lb-marches-liste li{display:grid;grid-template-columns:minmax(0,11.5em) minmax(0,1fr);gap:4px 16px;align-items:baseline;padding:14px 0;border-bottom:1px solid var(--lb-line)}
-.lb-marches-liste b{font-size:16px;font-weight:700}
-.lb-marches-liste span{font-size:14.5px;line-height:1.45;color:var(--lb-soft)}
-.lb-marches-liste li:first-child b{color:var(--lb-cyan)}
-@media (max-width:420px){.lb-marches-liste li{grid-template-columns:1fr}}
-
-/* Offre */
-.lb-offre{margin-top:44px}
-.lb-offre-gros{margin:14px 0 0;font-size:clamp(24px,6vw,31px);line-height:1.15;font-weight:800;letter-spacing:-.02em;color:var(--lb-cyan);text-wrap:balance}
-.lb-exemple{margin:16px 0 0;padding:12px 14px;border-left:3px solid var(--lb-cyan);border-radius:0 10px 10px 0;background:rgba(32,213,239,.06);font-size:15.5px;line-height:1.5;color:var(--lb-ink)}
-.lb-exemple b{display:block;margin-bottom:2px;font-size:13px;font-weight:700;color:var(--lb-soft)}
-.lb-offre-2{margin:18px 0 0;font-size:15.5px;line-height:1.5;color:var(--lb-text)}
-.lb-offre-2 b{color:var(--lb-ink);font-weight:800}
-.lb-sans-code{margin:10px 0 0;font-size:14px;color:var(--lb-soft)}
-
 /* Pro offert : le seul encadre de la page */
-.lb-pro{margin-top:44px;padding:24px 20px 22px;border-radius:18px;background:var(--lb-surface);background-image:radial-gradient(120% 90% at 100% 0%,rgba(32,213,239,.14),transparent 60%);border:1px solid rgba(32,213,239,.35);scroll-margin-top:72px}
-.lb-pro-k{margin:0 0 6px;font-size:13px;font-weight:700;color:var(--lb-cyan)}
-.lb-pro-txt{margin:10px 0 0;font-size:15.5px;line-height:1.5;color:var(--lb-text)}
 .lb-pro-app{margin-top:18px}
 .lb-pro-attente{margin:0;font-size:14px;color:var(--lb-soft)}
 .lb-pas{margin:0;padding:0;list-style:none;display:grid;gap:14px}
 .lb-pas>li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:12px;align-items:start}
 .lb-pas-n{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;border:1px solid rgba(32,213,239,.5);color:var(--lb-cyan);font-size:14px;font-weight:800}
-.lb-pas-fait .lb-pas-n{background:var(--lb-cyan);border-color:var(--lb-cyan);color:#04141b}
 .lb-pas-t{margin:4px 0 0;font-size:15.5px;font-weight:700;line-height:1.35}
 .lb-pas-s{margin:4px 0 0;font-size:14px;line-height:1.45;color:var(--lb-soft)}
 .lb-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:50px;margin-top:10px;padding:0 16px;border-radius:12px;border:0;background:var(--lb-cyan);color:#04141b;font:inherit;font-size:15.5px;font-weight:800;text-decoration:none;cursor:pointer;transition:background-color .15s ease}
@@ -79,17 +54,6 @@ html{background:var(--lb-bg)}
 .lb-etat.is-ok{background:rgba(126,224,176,.1);color:#d9f7e8}
 .lb-etat-detail{margin:8px 0 0;font-size:13.5px;color:var(--lb-soft);overflow-wrap:anywhere}
 
-/* Etapes sur telephone : une ligne de temps */
-.lb-etapes{margin-top:44px}
-.lb-etapes-liste{margin:18px 0 0;padding:0;list-style:none;counter-reset:lb}
-.lb-etapes-liste li{position:relative;padding:0 0 20px 44px;counter-increment:lb}
-.lb-etapes-liste li::before{content:counter(lb);position:absolute;left:0;top:0;display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--lb-panel);border:1px solid var(--lb-line);color:var(--lb-cyan);font-size:14px;font-weight:800}
-.lb-etapes-liste li::after{content:"";position:absolute;left:15px;top:34px;bottom:4px;width:1px;background:var(--lb-line)}
-.lb-etapes-liste li:last-child::after{display:none}
-.lb-etapes-liste b{display:block;padding-top:4px;font-size:16px;font-weight:700}
-.lb-etapes-liste span{display:block;margin-top:4px;font-size:14.5px;line-height:1.5;color:var(--lb-soft)}
-.lb-cta--bas{margin-top:8px}
-
 .lb-foot{max-width:600px;margin:0 auto;padding:24px 16px 104px;font-size:12px;line-height:1.7;color:var(--lb-soft);text-align:center}
 .lb-foot a{color:var(--lb-soft)}
 @media (prefers-reduced-motion:reduce){.lb-cta,.lb-btn{transition:none}}
@@ -102,3 +66,19 @@ html{background:var(--lb-bg)}
 .lb-deux .lb-form{margin-top:6px}
 .lb-offre-court{margin:30px 0 0;font-size:14.5px;line-height:1.5;color:var(--lb-soft);text-align:center}
 .lb-offre-court a{color:var(--lb-cyan);font-weight:700;text-decoration:none}
+
+/* 12/11 (soir) : meme e-mail sur les deux comptes, tailles alignees sur la page Pro et l'inscription,
+   un seul bouton plein (l'inscription chez le partenaire), banniere officielle en bas (francais). */
+.lb-h1{font-size:clamp(28px,7.6vw,46px);line-height:1.08}
+.lb-cta{min-height:52px;border-radius:12px;font-size:16px}
+.lb-deux .lb-pas-s{font-size:14.5px;color:var(--lb-text)}
+.lb-meme{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin-top:6px}
+.lb-meme[hidden]{display:none}
+.lb-meme-email{color:var(--lb-ink);font-weight:700;overflow-wrap:anywhere}
+.lb-copier{min-height:32px;padding:0 12px;border:1px solid rgba(141,179,211,.3);border-radius:8px;background:transparent;color:var(--lb-ink);font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:border-color .15s ease,color .15s ease}
+.lb-copier:hover{border-color:var(--lb-cyan);color:var(--lb-cyan)}
+.lb-copier:focus-visible{outline:2px solid var(--lb-cyan);outline-offset:2px}
+.lb-banniere{margin-top:30px;aspect-ratio:1428/428;background:var(--lb-panel)}
+.lb-banniere img{height:100%;object-fit:cover}
+.lb-banniere+.lb-offre-court{margin-top:10px}
+.lb-offre-court [hidden]{display:none}

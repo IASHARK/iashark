@@ -46,6 +46,8 @@ html{scrollbar-color:rgba(141,179,211,.32) #060b12}
 .po-logo{display:inline-block;vertical-align:middle;margin:0 4px;height:12px;width:auto;padding:4px 7px;border-radius:6px;background:#060b12;box-shadow:inset 0 0 0 1px rgba(141,179,211,.18);box-sizing:content-box}
 .pv-offre{display:grid}
 #offrePro{width:100%}
+/* Une seule police sur la page : le composant de paiement prend celle de la page (Inter), comme la carte au-dessus. */
+.pv .op,.pv .op-title,.pv .op .op-cta{font-family:inherit}
 
 /* ---------- Deux liens : l'exemple, le gratuit ---------- */
 .pv-liens{display:grid;margin-top:18px;border-bottom:1px solid var(--pv-line)}

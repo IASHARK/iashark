@@ -151,3 +151,45 @@ test("admin : liste a verifier, Valider / Refuser seulement en attente, texte de
   assert.match(js, /esc\(d\.identifiant \|\| "Identifiant vide"\)/);
   assert.match(js, /loadPartners\(\);\n\s+loadProOffert\(\);/);
 });
+
+test("meme e-mail sur les deux comptes (12/11/2026) : e-mail du compte affiche, champ deja rempli, repere dans l'admin", () => {
+  // E-mail du compte connecte : minuscules, sans espaces ; rien si inconnu ou mal forme.
+  assert.equal(LP.emailCompte({ session: { user: { email: "  Joueur@Exemple.FR " } } }), "joueur@exemple.fr");
+  assert.equal(LP.emailCompte({ user: { email: "a@b.co" } }), "a@b.co");
+  for (const c of [null, {}, { session: null }, { session: { user: {} } }, { session: { user: { email: "pas un mail" } } }, { session: { user: { email: "<x>@y.fr" } } }]) assert.equal(LP.emailCompte(c), "", JSON.stringify(c));
+  // La meme regle des deux cotes : page publique et admin.
+  for (const f of [LP.memeEmail, H.proOffertMemeEmail]) {
+    assert.equal(f("Joueur@Exemple.fr ", "joueur@exemple.fr"), true);
+    assert.equal(f("joueur_75", "joueur@exemple.fr"), false);
+    assert.equal(f("", ""), false);
+    assert.equal(f(null, undefined), false);
+  }
+  const js = read("lib/lolly-page.js");
+  // Etape 1 : l'e-mail du compte et un bouton Copier, par textContent (jamais innerHTML).
+  assert.match(js, /p\.appendChild\(el\("b", "lb-meme-email", email\)\);/);
+  assert.match(js, /navigator\.clipboard\.writeText\(email\)/);
+  assert.doesNotMatch(js, /\.innerHTML\s*=/);
+  // Etape 2 : champ deja rempli avec l'e-mail du compte, bouton qui dit l'action.
+  assert.match(js, /inp\.value = emailCompte\(ctx\);/);
+  assert.match(js, /t\("lolly_page\.pro_send", "Demander mon mois Pro"\)/);
+  // Sans compte : le compte IASHARK se cree avec le meme e-mail, en bouton a contour (un seul bouton plein sur la page).
+  assert.match(js, /el\("a", "lb-btn lb-btn--ligne", t\("lolly_page\.pro_signup"/);
+  const html = read("lolly.html");
+  assert.match(html, /<p class="lb-pas-s lb-meme" id="lbMeme" hidden><\/p>\s*<a class="lb-cta" href="\/go\/lolly\/site"/);
+  assert.equal((html.match(/class="lb-cta"/g) || []).length, 1, "un seul bouton plein dans la page");
+  // Banniere officielle : cliquable avec notre lien, cachee par defaut (montree en francais seulement).
+  assert.match(html, /<a class="lb-banniere" id="lbBanniere" hidden href="\/go\/lolly\/site" target="_blank" rel="sponsored noopener" data-track="lolly_page_banniere"/);
+  assert.match(js, /if \(ban && fr\) \{ ban\.hidden = false; if \(ligne\) ligne\.hidden = true; \}/);
+  // Inscription venue de la page Lolly : la meme consigne.
+  for (const l of LOCALES) {
+    const d = dict(l);
+    for (const k of ["same_email", "copy", "copied", "pro_send", "step_declare", "pro_need_account"]) assert.ok(String(d.lolly_page[k] || "").trim(), l + " lolly_page." + k);
+    assert.ok(String(d.auth.signup_intro_lolly || "").trim(), l + " auth.signup_intro_lolly");
+  }
+  assert.match(dict("fr").lolly_page.pro_need_account, /même e-mail que chez Lolly Bet/);
+  assert.match(dict("fr").auth.signup_intro_lolly, /même e-mail que chez Lolly Bet/);
+  // Admin : chaque demande dit si l'identifiant declare est l'e-mail du compte.
+  const adm = read("admin-dashboard.js");
+  assert.match(adm, /H\.proOffertMemeEmail\(d\.identifiant, d\.email\) \? "même e-mail chez Lolly Bet et sur IASHARK" : "identifiant différent de l'e-mail du compte"/);
+  assert.match(read("funnel-track.js"), /lolly_pro_copier: true/);
+});

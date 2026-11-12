@@ -96,7 +96,7 @@ test("page match : moment du bouton (avant, direct, fini)", () => {
   assert.strictEqual(moment({ ts: Infinity }), "avant");
 });
 
-test("page match : bloc partenaire sous le pari (12/11/2026), un cadre, un bouton, l'offre en texte, Pro offert hors abonnes", () => {
+test("page match : bloc partenaire sous le pari (12/11/2026) : un cadre, la banniere cliquable en francais, une phrase d'appel douce, Pro offert hors abonnes", () => {
   const fs = require("fs"), path = require("path");
   const ROOT = path.join(__dirname, "..");
   const src = fs.readFileSync(path.join(ROOT, "match-page.js"), "utf8");
@@ -113,39 +113,45 @@ test("page match : bloc partenaire sous le pari (12/11/2026), un cadre, un bouto
   };
   const fr = rendu("fr");
   const gratuit = fr("Lens – Lille", "avant", false);
-  // Un seul cadre (la carte « Pro offert » du cadenas), dans l'ordre : partenaire et 18+, offre, bouton, Pro offert.
+  // Un seul cadre, dans l'ordre : partenaire et 18+, banniere, phrase d'appel, Pro offert.
   assert.match(gratuit, /^<div class="bk-cta bk-offre po-carte"/);
-  const ordre = ['class="bk-offre-tete"', "notre partenaire", ">18+<", "1er pari remboursé jusqu’à 100 €", 'href="/go/lolly/site"', "Parier ce match chez Lolly Bet", 'href="/fr/lolly.html#pro-offert"', "1 mois de Pro offert à l’inscription"];
+  const ordre = ['class="bk-offre-tete"', "notre partenaire", ">18+<", 'class="bk-offre-img" href="/go/lolly/site"', 'src="/assets/bk/lolly-bienvenue-fr.webp"', 'class="bk-offre-btn bk-offre-btn--doux" href="/go/lolly/site"', "Parier ce match chez Lolly Bet", 'href="/fr/lolly.html#pro-offert"', "1 mois de Pro offert à l’inscription"];
   let avant = -1;
   for (const r of ordre) { const i = gratuit.indexOf(r); assert.ok(i > avant, "ordre ou partie manquante : " + r); avant = i; }
-  assert.equal((gratuit.match(/class="po-btn/g) || []).length, 1, "un seul bouton");
-  assert.match(gratuit, /<a class="po-btn bk-offre-btn" href="\/go\/lolly\/site" target="_blank" rel="sponsored noopener" data-track="bookmaker_lolly"/);
+  // La banniere : cliquable avec notre lien, mesuree, sans saut de mise en page ; l'offre n'est plus ecrite en gros.
+  assert.match(gratuit, /<a class="bk-offre-img" href="\/go\/lolly\/site" target="_blank" rel="sponsored noopener" data-track="bookmaker_lolly_banniere"/);
+  assert.match(gratuit, /alt="Lolly Bet : 1er pari remboursé jusqu’à 100 €" width="1428" height="428" loading="lazy"/);
+  assert.doesNotMatch(gratuit, /po-titre|class="po-btn/, "avec la banniere : ni titre en gros ni aplat cyan");
+  assert.equal((gratuit.match(/bk-offre-btn/g) || []).length, 2, "une seule phrase d'appel (bk-offre-btn + sa variante douce)");
+  assert.match(gratuit, /data-track="bookmaker_lolly"/);
   assert.match(gratuit, /data-track="lolly_pro_offert_avis"/);
   assert.match(gratuit, /<img class="po-logo" src="\/assets\/bk\/lolly\.svg" alt="Lolly Bet"/);
-  // Abonne Pro : pas de « Pro offert ». En direct : le bouton le dit, et le clic est suivi a part.
+  assert.ok(fs.existsSync(path.join(ROOT, "assets/bk/lolly-bienvenue-fr.webp")));
+  // Abonne Pro : pas de « Pro offert ». En direct : la phrase le dit, et le clic est suivi a part.
   const pro = fr("Lens – Lille", "avant", true);
   assert.doesNotMatch(pro, /pro-offert|bk-offre-pro/);
-  assert.match(pro, /1er pari remboursé jusqu’à 100 €/);
+  assert.match(pro, /bk-offre-img/);
   const direct = fr("Lens – Lille", "direct", true);
   assert.match(direct, /Parier en direct chez Lolly Bet/);
   assert.match(direct, /data-track="bookmaker_lolly_direct"/);
-  // Autre langue : le bouton reste (jamais cache selon le pays), l'offre de bienvenue non (francais seulement).
+  // Autre langue : pas de banniere (son texte est en francais), le bouton reste (jamais cache selon le pays).
   const en = rendu("en")("Lens – Lille", "avant", false);
+  assert.doesNotMatch(en, /bk-offre-img|lolly-bienvenue|refunded|remboursé/);
+  assert.match(en, /<a class="po-btn bk-offre-btn" href="\/go\/lolly\/site"/);
   assert.match(en, /Bet on this match at Lolly Bet/);
   assert.match(en, /our partner/);
-  assert.doesNotMatch(en, /refunded|remboursé/);
   assert.match(en, /href="\/en\/lolly\.html#pro-offert"/);
-  // Plus de banniere image, plus de « meilleure cote » (aucune cote du partenaire n'est relevee), aucune urgence.
-  assert.doesNotMatch(src, /bk-banniere|lolly-bienvenue|function banniereBk/);
+  // Aucune phrase sur « la meilleure cote » (aucune cote du partenaire n'est relevee), aucune urgence.
   assert.doesNotMatch(bloc, /bk_cta_mur/);
   for (const h of [gratuit, pro, direct, en]) {
     assert.doesNotMatch(h, /100 € offerts|meilleure cote|best odds|gagn|garanti|sans risque|plus que|expire|dépos/i);
     assert.doesNotMatch(h, /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u);
   }
-  // Abonne Pro connu avant le rendu ; clic suivi ; textes dans les 7 langues ; style sans majuscules espacees.
+  // Abonne Pro connu avant le rendu ; clics suivis ; textes dans les 7 langues ; style sans majuscules espacees.
   assert.match(src, /visiteurPro=!!ctx\.isPro;/);
   assert.match(src, /boutonParieurHtml\(m,moment,visiteurPro\)/);
-  assert.match(fs.readFileSync(path.join(ROOT, "funnel-track.js"), "utf8"), /lolly_pro_offert_avis: true/);
+  const ft = fs.readFileSync(path.join(ROOT, "funnel-track.js"), "utf8");
+  for (const k of ["bookmaker_lolly_banniere", "lolly_pro_offert_avis"]) assert.match(ft, new RegExp(k + ": true"));
   for (const l of ["fr", "en", "de", "it", "es", "es-mx", "pt"]) {
     const d = dict(l).match_page, part = require("../i18n/parts/lolly." + l + ".json").match_page;
     for (const k of ["bk_partner", "bk_offer", "bk_btn", "bk_btn_live", "bk_pro_link"]) {
@@ -158,6 +164,6 @@ test("page match : bloc partenaire sous le pari (12/11/2026), un cadre, un bouto
   assert.equal(dict("fr").match_page.bk_offer, "1er pari remboursé jusqu’à 100 €");
   const css = fs.readFileSync(path.join(ROOT, "assets/match-page.css"), "utf8");
   const regles = css.split("\n").filter((x) => /^\.bk-offre/.test(x)).join("\n");
-  assert.match(regles, /\.bk-offre\{/);
+  assert.match(regles, /\.bk-offre-img\{[^}]*aspect-ratio:1428\/428/);
   assert.doesNotMatch(regles, /uppercase|monospace|#(22c55e|ef4444)/i);
 });

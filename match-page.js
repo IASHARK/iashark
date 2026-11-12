@@ -439,7 +439,7 @@ function momentParieur(m){
 //   4. pour qui n'est pas abonne Pro seulement : une ligne vers la page Lolly (#pro-offert), ou
 //      l'inscription par notre lien donne 1 mois de Pro (verification a la main, jamais automatique).
 // Aucune phrase sur « la meilleure cote » : aucune cote du partenaire n'est relevee. Montre a tous les
-// pays (jamais cache selon le pays) ; seule la banniere, ecrite en francais, est reservee au francais.
+// pays (jamais cache selon le pays) ; la banniere suit la langue de la page (6 langues).
 // match : « Lyon – PSG » ; moment : 'avant' ou 'direct' ; pro : abonne Pro (pas de ligne Pro offert).
 function boutonParieurHtml(match,moment,pro){
   const bk=BK_ACTIF,nom=BK_NOMS[bk];
@@ -449,8 +449,12 @@ function boutonParieurHtml(match,moment,pro){
   const libelle=direct?tf('match_page.bk_btn_live','Parier en direct chez {book}',{book:nom}):tf('match_page.bk_btn','Parier ce match chez {book}',{book:nom});
   const kind='bookmaker_'+bk+(direct?'_direct':'');
   const tete=`<p class="bk-offre-tete">${logo}<span>${esc(t('match_page.bk_partner','notre partenaire'))}</span><span class="bk-offre-age">18+</span></p>`;
-  // Banniere officielle (Lolly Bet, materiel promotionnel) : son texte est en francais, donc en francais seulement.
-  const banniere=bk==='lolly'&&estFr()?`<a class="bk-offre-img" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi('bookmaker_'+bk+'_banniere')}><img src="/assets/bk/lolly-bienvenue-fr.webp" alt="${esc(nom)} : ${esc(t('match_page.bk_offer','1er pari remboursé jusqu’à 100 €'))}" width="1428" height="428" loading="lazy" decoding="async"></a>`:'';
+  // Banniere officielle (Lolly Bet, materiel promotionnel) dans la langue de la page : 6 langues fournies par
+  // le partenaire le 12/11/2026 (fr, en, es, de, it, pt). Autre langue : pas de banniere, le bouton reste.
+  const BAN={fr:['fr.webp',1428,428],en:['en.jpg',1280,384],es:['es.jpg',1280,384],de:['de.jpg',1280,384],it:['it.jpg',1280,384],pt:['pt.jpg',1280,384]};
+  const loc=String((typeof window!=='undefined'&&window.I18N&&window.I18N.locale)||(estFr()?'fr':'en')).toLowerCase();
+  const B=bk==='lolly'?BAN[{gb:'en',za:'en',mx:'es','es-mx':'es'}[loc]||loc.slice(0,2)]:null;
+  const banniere=B?`<a class="bk-offre-img" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi('bookmaker_'+bk+'_banniere')}><img src="/assets/bk/lolly-bienvenue-${B[0]}" alt="${esc(nom)} : ${esc(t('match_page.bk_offer','1er pari remboursé jusqu’à 100 €'))}" width="${B[1]}" height="${B[2]}" loading="lazy" decoding="async"></a>`:'';
   const bouton=`<a class="${banniere?'bk-offre-btn bk-offre-btn--doux':'po-btn bk-offre-btn'}" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi(kind)}><span>${esc(libelle)}</span><span aria-hidden="true">→</span></a>`;
   const proOffert=pro||bk!=='lolly'?'':`<a class="bk-offre-pro" href="${esc(lien('lolly.html'))}#pro-offert"${suivi('lolly_pro_offert_avis')}><span>${esc(t('match_page.bk_pro_link','1 mois de Pro offert : voir comment'))}</span><span aria-hidden="true">→</span></a>`;
   return `<div class="bk-cta bk-offre po-carte" data-bk-match="${esc(match||'')}">${tete}${banniere}${bouton}${proOffert}</div>`;

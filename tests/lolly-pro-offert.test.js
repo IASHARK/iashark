@@ -178,9 +178,12 @@ test("meme e-mail sur les deux comptes (12/11/2026) : e-mail du compte affiche, 
   const html = read("lolly.html");
   assert.match(html, /<p class="lb-pas-s lb-meme" id="lbMeme" hidden><\/p>\s*<a class="lb-cta" href="\/go\/lolly\/site"/);
   assert.equal((html.match(/class="lb-cta"/g) || []).length, 1, "un seul bouton plein dans la page");
-  // Banniere officielle : cliquable avec notre lien, cachee par defaut (montree en francais seulement).
+  // Banniere officielle : cliquable avec notre lien, cachee par defaut.
   assert.match(html, /<a class="lb-banniere" id="lbBanniere" hidden href="\/go\/lolly\/site" target="_blank" rel="sponsored noopener" data-track="lolly_page_banniere"/);
-  assert.match(js, /if \(ban && fr\) \{ ban\.hidden = false; if \(ligne\) ligne\.hidden = true; \}/);
+  // Montree dans la langue de la page quand le partenaire a fourni la banniere (6 langues, 12/11/2026).
+  assert.match(js, /if \(ban && fichier\) \{/);
+  assert.match(js, /ban\.hidden = false; if \(ligne\) ligne\.hidden = true;/);
+  assert.match(js, /\{ fr: "fr\.webp", en: "en\.jpg", es: "es\.jpg", de: "de\.jpg", it: "it\.jpg", pt: "pt\.jpg" \}/);
   // Inscription venue de la page Lolly : la meme consigne.
   for (const l of LOCALES) {
     const d = dict(l);

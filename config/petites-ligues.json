@@ -1,0 +1,30 @@
+{
+  "_lisezmoi": [
+    "PETITES LIGUES BET365, CHEMIN LEGER (demande de Clement des 11 et 12/11/2026 : toutes les competitions qui ont des cotes Bet365, un pari par match, meme regle que le site).",
+    "PHASE 1 = ESSAI A BLANC : les paris sont calcules, horodates, figes et regles, mais RIEN n'est affiche sur le site (ni liste, ni page match, ni sitemap, ni match offert, ni combine, ni Selection en or, ni VIP, ni Telegram). Archive : data/petites-ligues/<jour>.json (dossier jamais publie par Netlify, scripts/netlify-ignore.sh). Phase 2 (affichage) seulement apres le feu vert du mathematicien puis de l'avocat du diable.",
+    "Chemin leger : AUCUNE statistique, aucun moteur. Seulement /fixtures?date (programme et resultats, 1 appel par jour) et /odds?date&bookmaker (cotes Bet365 = 8, controle Pinnacle = 4, 10 matchs par page). Mesure du 12/11/2026 : 8 + 8 + 22 pages Bet365 et 8 + 7 + 10 pages Pinnacle pour les 12, 13 et 14/11.",
+    "Pari : lib/pronostic.js#choisirPariFourchette avec la regle du 11/11 (config/marches-pari.json#choix_du_pari, config/leagues.json#fiabilite.fourchette_pari). Couverture vide : seulement les marches regles par le score et le statut du match (jamais tirs, corners, cartons, ordre des buts, joueurs), car le reglement ne lit que /fixtures.",
+    "actif : false = le workflow petites-ligues.yml ne fait aucun appel. max_appels_par_lancement : plafond dur. arret_si_restant_sous : on s'arrete si le quota API-Football du jour restant passe sous ce nombre (quota partage avec le site).",
+    "exclure_* : competitions jamais prises (feminines, jeunes, reserves, amicaux). Les 51 competitions du site et les competitions retirees le 03/10 (config/leagues.json#competitions_retirees) sont toujours exclues, sans reglage ici."
+  ],
+  "actif": false,
+  "regle_version": "petites-ligues-leger-2026-11-12",
+  "bookmaker_reference_id": 8,
+  "bookmaker_controle_id": 4,
+  "jours": 3,
+  "fuseau": "Europe/Paris",
+  "max_appels_par_lancement": 150,
+  "arret_si_restant_sous": 3000,
+  "marge_1n2_max": 0.25,
+  "ecart_horaire_max_secondes": 60,
+  "reglement_apres_minutes": 150,
+  "_selections_nationales": "Matchs de selections (pays World et nom de competition de selections) : seulement 1N2 (bet 1) et double chance (bet 12), comme le site (config/marches-pari.json#selections_nationales, decision du 03/10/2026).",
+  "selections_nationales_motif": "qualification|nations league|cup of nations|world cup|gold cup|asian cup|copa america|euro championship",
+  "selections_nationales_bets": [1, 12],
+  "exclure_ligues_ids": [10, 667],
+  "exclure_motifs_nom": [
+    "women", "woman", "femin", "frauen", "damen", "wsl", "nwsl", "ladies", "girls",
+    "u-?1[0-9]\\b", "u-?2[0-3]\\b", "under[ -]?[12][0-9]", "youth", "junior", "juvenil", "primavera",
+    "reserve", "reserva", "friendl", "amical", "amistos"
+  ]
+}

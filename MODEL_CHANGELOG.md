@@ -2,6 +2,13 @@
 
 Changements qui affectent le calcul des probabilités, marchés, edge/Kelly ou la manière dont ils sont décidés. Journal complet et non-technique dans `IASHARK_V2_EXECUTION_STATE.md` ; ce fichier ne liste que ce qui touche le moteur lui-même.
 
+## 2026-11-12 — petites ligues Bet365, chemin léger, phase 1 en essai à blanc (branche `petites-ligues-bet365`, NON FUSIONNÉ : mathématicien puis avocat du diable)
+
+- Demande de Clément (11 et 12/11) : un pari sur chaque match des compétitions hors site qui ont des cotes Bet365. Chemin léger sans statistiques ni moteur : `/fixtures?date` + `/odds?date&bookmaker=8` (et 4 pour le contrôle Pinnacle), environ 70 appels par lancement.
+- Pari : même fonction que le site (`lib/pronostic.js#choisirPariFourchette`, règle `tous_marches_bet365`, 1,70-3,50), couverture vide (seulement les marchés réglés par le score), sélections nationales en 1N2 / double chance seulement. Exclues : les 51 compétitions du site, les compétitions retirées le 03/10, féminines, jeunes, réserves, amicaux (`config/petites-ligues.json`).
+- Phase 1 : rien n'est affiché. Paris horodatés (heure Bet365 + heure de lecture), figés, cote suivie jusqu'au coup d'envoi, réglés sur le score, archivés dans `data/petites-ligues/` (jamais publié). `actif: false` tant que le mathématicien n'a pas validé la collecte. Code : `lib/petites-ligues.js`, `scripts/petites-ligues.js`, `.github/workflows/petites-ligues.yml`, tests `tests/petites-ligues.test.js`.
+- Accueil : ordre des compétitions « comme Flashscore » (favoris, grosses compétitions, puis pays A→Z), `home-list.js#GROSSES`.
+
 ## 2026-11-11 (soir) — pari choisi parmi tous les marchés Bet365, cote 1,70-3,50 (décision de Clément, NON FUSIONNÉ : validation mathématicien + avocat du diable)
 
 - **Règle** : `config/marches-pari.json#choix_du_pari.regle = "tous_marches_bet365"` (toute autre valeur = ancienne règle). Fourchette `config/leagues.json#fiabilite.fourchette_pari` 1,70-3,50, 1,70 minimum strict, aucun repli.

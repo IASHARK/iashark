@@ -95,3 +95,69 @@ test("page match : moment du bouton (avant, direct, fini)", () => {
   assert.strictEqual(moment({ ts: now - 5 * 3600e3, status: "" }), "fini");
   assert.strictEqual(moment({ ts: Infinity }), "avant");
 });
+
+test("page match : bloc partenaire sous le pari (12/11/2026), un cadre, un bouton, l'offre en texte, Pro offert hors abonnes", () => {
+  const fs = require("fs"), path = require("path");
+  const ROOT = path.join(__dirname, "..");
+  const src = fs.readFileSync(path.join(ROOT, "match-page.js"), "utf8");
+  const bloc = src.slice(src.indexOf("const BK_NOMS="), src.indexOf("// « Pro offert 1 mois » (11/11/2026, decision de Clement)"));
+  const dict = (l) => require("../i18n/dict/" + l + ".json");
+  const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  // La vraie fonction de la page, avec les textes de la langue demandee.
+  const rendu = (langue) => {
+    const d = dict(langue);
+    const t = (k, fb) => k.split(".").reduce((o, x) => (o ? o[x] : undefined), d) || fb;
+    const tf = (k, fb, v) => String(t(k, fb)).replace(/\{(\w+)\}/g, (m, x) => (v && v[x] != null ? v[x] : m));
+    return new Function("esc", "t", "tf", "suivi", "lien", "estFr", "matchTermine", "STATUTS_BLOQUANTS", bloc + "; return boutonParieurHtml;")(
+      esc, t, tf, (k) => ' data-track="' + k + '" data-track-kind="' + k + '"', (p) => "/" + (langue === "fr" ? "fr" : "en") + "/" + p, () => langue === "fr", () => false, []);
+  };
+  const fr = rendu("fr");
+  const gratuit = fr("Lens – Lille", "avant", false);
+  // Un seul cadre (la carte « Pro offert » du cadenas), dans l'ordre : partenaire et 18+, offre, bouton, Pro offert.
+  assert.match(gratuit, /^<div class="bk-cta bk-offre po-carte"/);
+  const ordre = ['class="bk-offre-tete"', "notre partenaire", ">18+<", "1er pari remboursé jusqu’à 100 €", 'href="/go/lolly/site"', "Parier ce match chez Lolly Bet", 'href="/fr/lolly.html#pro-offert"', "1 mois de Pro offert à l’inscription"];
+  let avant = -1;
+  for (const r of ordre) { const i = gratuit.indexOf(r); assert.ok(i > avant, "ordre ou partie manquante : " + r); avant = i; }
+  assert.equal((gratuit.match(/class="po-btn/g) || []).length, 1, "un seul bouton");
+  assert.match(gratuit, /<a class="po-btn bk-offre-btn" href="\/go\/lolly\/site" target="_blank" rel="sponsored noopener" data-track="bookmaker_lolly"/);
+  assert.match(gratuit, /data-track="lolly_pro_offert_avis"/);
+  assert.match(gratuit, /<img class="po-logo" src="\/assets\/bk\/lolly\.svg" alt="Lolly Bet"/);
+  // Abonne Pro : pas de « Pro offert ». En direct : le bouton le dit, et le clic est suivi a part.
+  const pro = fr("Lens – Lille", "avant", true);
+  assert.doesNotMatch(pro, /pro-offert|bk-offre-pro/);
+  assert.match(pro, /1er pari remboursé jusqu’à 100 €/);
+  const direct = fr("Lens – Lille", "direct", true);
+  assert.match(direct, /Parier en direct chez Lolly Bet/);
+  assert.match(direct, /data-track="bookmaker_lolly_direct"/);
+  // Autre langue : le bouton reste (jamais cache selon le pays), l'offre de bienvenue non (francais seulement).
+  const en = rendu("en")("Lens – Lille", "avant", false);
+  assert.match(en, /Bet on this match at Lolly Bet/);
+  assert.match(en, /our partner/);
+  assert.doesNotMatch(en, /refunded|remboursé/);
+  assert.match(en, /href="\/en\/lolly\.html#pro-offert"/);
+  // Plus de banniere image, plus de « meilleure cote » (aucune cote du partenaire n'est relevee), aucune urgence.
+  assert.doesNotMatch(src, /bk-banniere|lolly-bienvenue|function banniereBk/);
+  assert.doesNotMatch(bloc, /bk_cta_mur/);
+  for (const h of [gratuit, pro, direct, en]) {
+    assert.doesNotMatch(h, /100 € offerts|meilleure cote|best odds|gagn|garanti|sans risque|plus que|expire|dépos/i);
+    assert.doesNotMatch(h, /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u);
+  }
+  // Abonne Pro connu avant le rendu ; clic suivi ; textes dans les 7 langues ; style sans majuscules espacees.
+  assert.match(src, /visiteurPro=!!ctx\.isPro;/);
+  assert.match(src, /boutonParieurHtml\(m,moment,visiteurPro\)/);
+  assert.match(fs.readFileSync(path.join(ROOT, "funnel-track.js"), "utf8"), /lolly_pro_offert_avis: true/);
+  for (const l of ["fr", "en", "de", "it", "es", "es-mx", "pt"]) {
+    const d = dict(l).match_page, part = require("../i18n/parts/lolly." + l + ".json").match_page;
+    for (const k of ["bk_partner", "bk_offer", "bk_btn", "bk_btn_live", "bk_pro_link"]) {
+      assert.ok(typeof d[k] === "string" && d[k].trim(), l + " match_page." + k);
+      assert.equal(part[k], d[k], l + " match_page." + k);
+    }
+    assert.match(d.bk_btn, /\{book\}/, l);
+    assert.match(d.bk_btn_live, /\{book\}/, l);
+  }
+  assert.equal(dict("fr").match_page.bk_offer, "1er pari remboursé jusqu’à 100 €");
+  const css = fs.readFileSync(path.join(ROOT, "assets/match-page.css"), "utf8");
+  const regles = css.split("\n").filter((x) => /^\.bk-offre/.test(x)).join("\n");
+  assert.match(regles, /\.bk-offre\{/);
+  assert.doesNotMatch(regles, /uppercase|monospace|#(22c55e|ef4444)/i);
+});

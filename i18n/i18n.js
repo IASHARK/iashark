@@ -272,10 +272,12 @@
       return hasOwn.call(HINT_LANGS, first) && first !== String(LOCALE).split("-")[0];
     }catch(e){ return false; }
   }
-  // Fenetre « Choisis ton pays » (09/11/2026, lib/pays-choix.js) : premiere
-  // visite seulement. Pre-filtre gratuit ici (le script n'est telecharge que
-  // si la fenetre peut s'afficher) ; decision complete dans pays-choix.js.
-  // Quand elle s'affiche, ni bandeau de langue ni lien de retour.
+  // Choix du pays (09/11/2026, lib/pays-choix.js) : premiere visite seulement.
+  // 12/11/2026 : plus de fenetre a l'arrivee ; une petite bande en bas, et
+  // seulement si le pays devine a une autre version du site que la page.
+  // Pre-filtre gratuit ici (le script n'est telecharge que s'il peut servir) ;
+  // decision complete dans pays-choix.js. Quand la bande s'affiche, pas de
+  // bandeau de langue ; quand elle n'a rien a proposer, il reprend la main.
   var PAYS_SKIP_RE = /\/(connexion|inscription|mot-de-passe-oublie|reinitialiser-mot-de-passe|compte|abonnement|checkout-annule|checkout-succes|desinscription-email|404|admin)\.html$/;
   function paysWanted(){
     try{
@@ -296,14 +298,18 @@
       s.src = "/lib/pays-choix.js";
       s.async = true;
       s.onload = function(){
-        try{ if (global.IasharkPaysChoix) global.IasharkPaysChoix.run(global.I18N, global); }catch(e){}
+        try{
+          if (global.IasharkPaysChoix) global.IasharkPaysChoix.run(global.I18N, global, function(montre){
+            if (!montre){ global.__iasharkPaysRien = true; loadLangHint(); }
+          });
+        }catch(e){}
       };
       (doc.head || doc.documentElement).appendChild(s);
     }catch(e){}
   }
 
   function loadLangHint(){
-    if (global.__iasharkLangHint || global.__iasharkPaysLoad || !langHintWanted()) return;
+    if (global.__iasharkLangHint || (global.__iasharkPaysLoad && !global.__iasharkPaysRien) || !langHintWanted()) return;
     global.__iasharkLangHint = true;
     try{
       var doc = global.document;

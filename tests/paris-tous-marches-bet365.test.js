@@ -97,11 +97,14 @@ test("mi-temps rangee ailleurs (avocat du diable, REJETE du 12/11 a midi) : hand
   // Le calcul de 11 h avait publie « Dijon -0,5 (handicap) (1re mi-temps) » : le marche 19 est range dans
   // « Handicap asiatique », l'exclusion ne regardait que l'etiquette « Mi-temps ».
   const ids = [18, 19, 31, 34, 35, 42, 46, 48, 62, 78, 104, 105, 106, 107, 108, 111, 112, 113, 114, 115, 116, 117, 181, 185];
-  ids.forEach((id) => assert.equal(FP.raisonExclusion(id, "x", REGLE), FP.RAISON_MI_TEMPS, "bet " + id));
+  ids.forEach((id) => assert.equal(FP.raisonExclusion(id, "x", REGLE), FP.RAISON_MI_TEMPS_AUTRES, "bet " + id));
+  // La raison dit la verite : exclus par coherence, pas pour un defaut mesure (mathematicien : 54,8 % annonces, 51,1 % reels, dans le hasard).
+  assert.match(FP.RAISON_MI_TEMPS_AUTRES, /cohérence/);
+  assert.doesNotMatch(FP.RAISON_MI_TEMPS_AUTRES, /41,5/);
   assert.deepEqual(Object.keys(FP.EXCLUS_MI_TEMPS_AUTRES).map(Number).sort((a, b) => a - b), ids);
   // Par le nom Bet365 aussi, pour un numero qu'on ne connait pas encore.
   ["Asian Handicap First Half", "Both Teams To Score - Second Half", "To Win Both Halves", "Correct Score - First Half"].forEach((n) =>
-    assert.equal(FP.raisonExclusion(999, n, REGLE), FP.RAISON_MI_TEMPS, n));
+    assert.equal(FP.raisonExclusion(999, n, REGLE), FP.RAISON_MI_TEMPS_AUTRES, n));
   // Les memes marches sur le match entier restent candidats.
   [[4, "Asian Handicap"], [5, "Goals Over/Under"], [8, "Both Teams Score"], [45, "Corners Over Under"]].forEach(([id, n]) => assert.equal(FP.raisonExclusion(id, n, REGLE), null, n));
   // Plus aucun marche d'une seule mi-temps dans la liste des publiables ; aucun libelle publiable ne parle de mi-temps.
@@ -112,6 +115,11 @@ test("mi-temps rangee ailleurs (avocat du diable, REJETE du 12/11 a midi) : hand
     for (const val of ["Home", "Away", "Draw", "Over 0.5", "Yes", "1:0", "0", "Home/Draw", "Home -0.5"]) { try { t += " " + FP.SPECS[x.bet_id].lib(val, "DOM", "EXT"); } catch (e) {} }
     assert.doesNotMatch(t, /mi-temps/i, "bet " + x.bet_id + " : " + t.slice(0, 80));
   }
+  // Tranches de minutes (conseil du mathematicien) : famille « Minutes » hors du choix, aucun pari ne changeait.
+  const minutes = Object.keys(FP.SPECS).filter((id) => FP.SPECS[id].fam === "Minutes").map(Number);
+  assert.ok(minutes.length >= 10 && minutes.includes(54) && minutes.includes(149), minutes.join(","));
+  minutes.forEach((id) => assert.equal(FP.raisonExclusion(id, "x", REGLE), FP.RAISON_MINUTES, "bet " + id));
+  assert.ok(pub.every((x) => FP.SPECS[x.bet_id].fam !== "Minutes"));
   // Seul le handicap de 1re mi-temps est dans la fourchette : aucun pari ne sort.
   const r = raw([{ id: 1, name: "Match Winner", values: v([["Home", 1.3], ["Draw", 5], ["Away", 9]]) },
     { id: 19, name: "Asian Handicap First Half", values: v([["Home -0.5", 1.75], ["Away +0.5", 2.05]]) }]);

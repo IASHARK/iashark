@@ -4796,6 +4796,7 @@ jobs:
             var rapportTickets=await TICKETS_DU_JOUR.publierTicketsDuJour({
               penalties:PENALTIES,
               matchs:allMatchsData, fixtureById:FIXTURE_BY_ID, nowMs:Date.now(), configLigues:LEAGUES_CONFIG,
+              chancesV3Par:(typeof CHANCES_V3_PRONO!=='undefined'?CHANCES_V3_PRONO:null), cotesAnjPar:(typeof LIVRES_ANJ!=='undefined'?LIVRES_ANJ:null),
               supabase:(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY)?{url:SUPA_URL_PIPELINE,cle:SUPA_SERVICE_KEY}:null,
               pipelineSha:process.env.GITHUB_SHA||null, snapshotTime:runOutput.snapshot_time,
               avertir:function(t){ console.log('::warning title=Tickets::'+t); },
@@ -4810,6 +4811,7 @@ jobs:
               var jourDemain=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).format(dDemain);
               var rapportDemain=await TICKETS_DU_JOUR.publierTicketsDuJour({
                 jour:jourDemain, penalties:PENALTIES, matchs:allMatchsData, fixtureById:FIXTURE_BY_ID, nowMs:Date.now(), configLigues:LEAGUES_CONFIG,
+              chancesV3Par:(typeof CHANCES_V3_PRONO!=='undefined'?CHANCES_V3_PRONO:null), cotesAnjPar:(typeof LIVRES_ANJ!=='undefined'?LIVRES_ANJ:null),
                 supabase:(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY)?{url:SUPA_URL_PIPELINE,cle:SUPA_SERVICE_KEY}:null,
                 pipelineSha:process.env.GITHUB_SHA||null, snapshotTime:runOutput.snapshot_time,
                 avertir:function(t){ console.log('::warning title=Tickets demain::'+t); },

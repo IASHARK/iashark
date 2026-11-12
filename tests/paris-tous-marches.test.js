@@ -1,4 +1,7 @@
 "use strict";
+// Ecrit pour l'ancienne regle du pari (1,40-2,20, avant le 11/11/2026) : remise en memoire, voir le module. Les jambes
+// des combines sous la regle du 11/11 : tests/paris-tous-marches-bet365.test.js.
+require("./ancienne-regle-pari.js");
 // PARIS SUR TOUS LES MARCHES (demande de Clement du 06/10/2026 : « Je veux plein de marches, il choisit le
 // meilleur, c'est tout. » ; Selection en or different des combines ; jamais une selection qui contredit le pari
 // affiche ni une autre selection du jour).

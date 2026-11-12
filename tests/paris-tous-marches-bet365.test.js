@@ -55,8 +55,8 @@ test("cote affichee = Bet365 ; jamais un autre bookmaker en repli quand Bet365 n
   assert.equal(c.cote, 2.1);
 });
 
-test("tous les marches candidats s'ils sont reglables : corners, cartons, tirs, joueurs ; exclus seulement les non reglables", () => {
-  [45, 55, 56, 57, 58, 80, 81, 82, 83, 87, 211, 176, 340, 164, 92, 231, 218, 257, 240, 241, 266, 267, 269, 10, 38, 224, 225, 298].forEach((id) =>
+test("tous les marches candidats s'ils sont reglables : corners, tirs, hors-jeu, score ; exclus seulement les non reglables", () => {
+  [45, 55, 56, 57, 58, 87, 211, 176, 340, 164, 10, 38, 224, 225, 298].forEach((id) =>
     assert.equal(FP.raisonExclusion(id, "x", REGLE), null, "candidat : " + id));
   [2, 47, 61, 93, 94, 97, 212, 213, 215, 228, 229, 281].forEach((id) => assert.ok(FP.raisonExclusion(id, "x", REGLE), "non reglable : " + id));
   assert.match(FP.raisonExclusion(250, "First Card Received (3 way)", REGLE), /cartons/);
@@ -69,6 +69,69 @@ test("pile ou face exclu (decision de Clement du 12/11) : pair / impair des buts
   const r = raw([B1, { id: 21, name: "Odd/Even", values: v([["Odd", 1.75], ["Even", 2.05]]) }]);
   const c = P.choisirPariFourchette(Object.assign({}, M), ctxAvec(r), {});
   assert.ok(!c || !/^F21:/.test(c.market_id), "jamais pair / impair : " + (c && c.market_id));
+});
+
+test("joueurs et buteurs exclus (condition ORANGE du mathematicien du 12/11 : 35 % annonces, 18 % reels), par numero et par nom", () => {
+  [92, 218, 231, 257, 240, 241, 269, 266, 267].forEach((id) => assert.equal(FP.raisonExclusion(id, "x", REGLE), FP.RAISON_JOUEURS, "bet " + id));
+  ["Player Assists", "First Goal Scorer", "Goalkeeper Saves", "Player to be Booked", "Anytime Goalscorer"].forEach((n) => assert.ok(FP.raisonExclusion(999, n, REGLE), n));
+  assert.ok(FP.catalogue(REGLE).publiables.every((x) => !FP.EXCLUS_JOUEURS[x.bet_id]));
+  const r = raw([{ id: 1, name: "Match Winner", values: v([["Home", 1.3], ["Draw", 5], ["Away", 9]]) }, { id: 92, name: "Anytime Goal Scorer", values: v([["Florian Sotoca", 1.75]]) },
+    { id: 240, name: "Home Player Shots", values: v([["Florian Sotoca - 1", 1.8]]) }]);
+  assert.equal(P.choisirPariFourchette(Object.assign({}, M), ctxAvec(r), {}), null, "seuls des marches joueurs dans la fourchette : pas de pari");
+});
+
+test("cartons (80 a 83) exclus tant que le comptage n'est pas valide, famille Mi-temps exclue (avocat du diable du 12/11)", () => {
+  [80, 81, 82, 83].forEach((id) => assert.equal(FP.raisonExclusion(id, "x", REGLE), FP.RAISON_CARTONS_ATTENTE, "bet " + id));
+  const mt = Object.keys(FP.SPECS).filter((id) => /^Mi-temps/.test(FP.SPECS[id].fam));
+  assert.ok(mt.length >= 10 && mt.includes("6") && mt.includes("20") && mt.includes("7"), mt.join(","));
+  mt.forEach((id) => assert.equal(FP.raisonExclusion(Number(id), "x", REGLE), FP.RAISON_MI_TEMPS, "bet " + id));
+  const pub = FP.catalogue(REGLE).publiables;
+  assert.ok(pub.every((x) => !FP.EXCLUS_CARTONS_ATTENTE[x.bet_id] && (!FP.SPECS[x.bet_id] || !/^Mi-temps/.test(FP.SPECS[x.bet_id].fam))));
+  const r = raw([{ id: 1, name: "Match Winner", values: v([["Home", 1.3], ["Draw", 5], ["Away", 9]]) },
+    { id: 6, name: "Goals Over/Under First Half", values: v([["Over 0.5", 1.75], ["Under 0.5", 2.05]]) },
+    { id: 80, name: "Cards Over/Under", values: v([["Over 3.5", 1.8], ["Under 3.5", 1.95]]) }]);
+  assert.equal(P.choisirPariFourchette(Object.assign({}, M), ctxAvec(r), {}), null, "seuls mi-temps et cartons dans la fourchette : pas de pari");
+});
+
+test("cartons jamais regles sans evenements ; statistique absente ou vide jamais comptee 0 (en attente)", () => {
+  const base = { fixture: { teams: { home: { id: 1 }, away: { id: 2 } }, score: { fulltime: { home: 0, away: 0 }, halftime: { home: 0, away: 0 } }, fixture: { status: { short: "FT" } } } };
+  [undefined, []].forEach((events) => {
+    const F = FP.faitsDuMatch(Object.assign({}, base, { events }));
+    assert.equal(F.cartons, null, "evenements " + JSON.stringify(events));
+    assert.equal(FP.regler("F80:Under 3.5", F), null, "« moins de » jamais gagne sans donnee");
+  });
+  const st = (val) => Object.assign({}, base, { statistics: [{ team: { id: 1 }, statistics: [{ type: "Corner Kicks", value: val }, { type: "Total Shots", value: 7 }] },
+    { team: { id: 2 }, statistics: [{ type: "Corner Kicks", value: val }, { type: "Total Shots", value: 5 }] }] });
+  [null, ""].forEach((val) => {
+    const F = FP.faitsDuMatch(st(val));
+    assert.equal(FP.regler("F45:Under 9.5", F), null, "corners " + JSON.stringify(val));
+    assert.equal(FP.regler("F55:Home", F), null);
+  });
+  assert.equal(FP.regler("F45:Under 9.5", FP.faitsDuMatch(base)), null, "statistiques absentes");
+  assert.equal(FP.regler("F45:Under 9.5", FP.faitsDuMatch(st(2))), true);
+  // Aucun carton saisi (seulement un but) : en attente, jamais 0 carton.
+  const but = { type: "Goal", detail: "Normal Goal", team: { id: 1 }, player: { id: 9 }, time: { elapsed: 30 } };
+  assert.equal(FP.faitsDuMatch(Object.assign({}, base, { events: [but] })).cartons, null);
+  // Match arrete (ABD) : rien n'est regle sur les statistiques ni les cartons.
+  const abd = Object.assign({}, st(2), { fixture: Object.assign({}, base.fixture, { fixture: { status: { short: "ABD" } } }),
+    events: [{ type: "Card", detail: "Yellow Card", team: { id: 1 }, player: { id: 9 }, time: { elapsed: 30 } }] });
+  assert.equal(FP.regler("F45:Under 9.5", FP.faitsDuMatch(abd)), null, "ABD corners");
+  assert.equal(FP.faitsDuMatch(abd).cartons, null, "ABD cartons");
+  // Carton de l'entraineur ou d'un joueur du banc : non compte.
+  const coach = Object.assign({}, base, { events: [{ type: "Card", detail: "Yellow Card", team: { id: 1 }, player: { id: 500 }, time: { elapsed: 50 }, comments: "Coach" },
+    { type: "Card", detail: "Yellow Card", team: { id: 2 }, player: { id: 20 }, time: { elapsed: 60 } }] });
+  assert.deepEqual(FP.faitsDuMatch(coach).cartons, [0, 1]);
+});
+
+test("statistiques d'equipe reglees sur 90 minutes : match prolonge (AET, PEN) jamais regle automatiquement sur les chiffres d'API-Football", () => {
+  const src = (statut) => ({ fixture: { teams: { home: { id: 1 }, away: { id: 2 } }, score: { fulltime: { home: 1, away: 1 }, halftime: { home: 0, away: 0 } }, fixture: { status: { short: statut } } },
+    statistics: [{ team: { id: 1 }, statistics: [{ type: "Corner Kicks", value: 8 }, { type: "Total Shots", value: 15 }] }, { team: { id: 2 }, statistics: [{ type: "Corner Kicks", value: 4 }, { type: "Total Shots", value: 9 }] }] });
+  assert.equal(FP.regler("F45:Over 9.5", FP.faitsDuMatch(src("FT"))), true);
+  ["AET", "PEN"].forEach((st) => {
+    const F = FP.faitsDuMatch(src(st));
+    assert.equal(FP.regler("F45:Over 9.5", F), null, st + " corners");
+    assert.equal(FP.regler("F55:Home", F), null, st + " corners 1N2");
+  });
 });
 
 test("reglement des cartons (jaune 1, rouge 2, 2e jaune non compte en plus, banc exclu) et des corners", () => {
@@ -92,8 +155,7 @@ test("marche d'un seul cote : chance = (1/cote)/(1+M), M >= 15 % ; buteurs ramen
   const pen = s.find((x) => x.code === "F99:Home");
   assert.ok(pen && pen.un_seul_cote, "marche « Home » sans issue contraire");
   assert.ok(pen.chance <= (1 / 1.8) / 1.15 + 1e-9, "marge d'au moins 15 % retiree : " + pen.chance);
-  const but = s.find((x) => /^F231:Florian Sotoca/.test(x.code));
-  assert.ok(but && but.un_seul_cote && but.chance <= (1 / 1.8) / 1.15 + 1e-9, "buteur : " + (but && but.chance));
+  assert.ok(!s.some((x) => /^F231:/.test(x.code)), "buteurs : jamais candidats (condition du mathematicien du 12/11)");
   assert.ok(FP.margeUnSeulCote({}, "bet365", REGLE.unSeulCote) >= 0.15);
 });
 
@@ -129,4 +191,45 @@ test("textes publics : la fourchette citee est celle du choix (1,70-3,50), dans 
   assert.ok(fr.includes("entre 1,70 et 3,50") && fr.includes("fourchette 1,70-3,50"));
   assert.ok(en.includes("between 1.70 and 3.50") && en.includes("1.70-3.50 odds range"));
   ["fr", "en", "es", "de", "it", "pt", "gb", "mx", "za"].forEach((d) => assert.doesNotMatch(fs.readFileSync(path.join(ROOT, "i18n/seo/" + d + ".json"), "utf8"), /1[.,]40-2[.,]20/, d));
+});
+
+test("combines : jambes de l'ancienne selection (1,40-2,20, config/tickets.json), un x10 se construit avec la vraie configuration", () => {
+  const T = require("../lib/tickets-du-jour.js");
+  const MP = require("../lib/marches-paris.js");
+  const REGLES = require("../config/tickets.json");
+  const V = require("../config/verdicts-maths.json");
+  assert.deepEqual([REGLES.jambe.cote_min, REGLES.jambe.cote_max], [1.4, 2.2]);
+  const matchs = [], fixtureById = {};
+  for (let i = 1; i <= 8; i++) {
+    // Pari affiche de la regle du 11/11 (corners, 1,85) : jamais une jambe ; la jambe est l'ancien pari (victoire, 1,55).
+    const m = { id: 9100 + i, home: { n: "Dom" + i, id: i * 10 }, away: { n: "Ext" + i, id: i * 10 + 1 }, date: "2026-11-14 " + (14 + (i % 6)) + ":00",
+      league: "Premier League", league_key: "premier", league_id: 39, league_reliability: "validee", no_signal: false,
+      pari_rec: "Plus de 9,5 corners", market_id: "F45:Over 9.5", cote_rec: "1.85", cote_source: "bet365", chance_iashark: 52,
+      c1: "1.55", cn: "4.20", c2: "6.00", co25: "1.60", cu25: "2.40", cdc1x: "1.12", cdc2x: "2.50", cdc12: "1.25" };
+    matchs.push(m);
+    fixtureById[String(m.id)] = { fixture: { timestamp: Math.floor(Date.parse("2026-11-14T" + (14 + (i % 6)) + ":00:00+01:00") / 1000), status: { short: "NS" } } };
+  }
+  const opts = { jour: "2026-11-14", nowMs: Date.parse("2026-11-14T07:00:00Z"), fixtureById, configLigues: LIGUES, categoriesNoGo: V.categories_no_go, competitions: V.competitions_jambes };
+  const c = T.calculerDuJour(matchs, opts);
+  assert.equal(c.nb_jambes, 8, JSON.stringify(c.exclus));
+  assert.ok(c.x10, "x10 construit : " + JSON.stringify(c.exclus));
+  assert.ok(c.x10.meta.cote_totale >= REGLES.x10.cote_min && c.x10.meta.cote_totale <= REGLES.x10.cote_max, String(c.x10.meta.cote_totale));
+  c.x10.contenu.jambes.forEach((j) => assert.ok(j.cote >= 1.4 && j.cote <= 2.2 && !/^F\d+:/.test(j.market_id), JSON.stringify(j)));
+  assert.ok(c.x5, "x5 construit");
+  // Une jambe qui ne peut pas gagner avec le pari affiche : jamais (ex. pari affiche « victoire Ext », jambe « victoire Dom »).
+  assert.equal(MP.compatibles("F4:Home -1.5", "dc-x2"), false);
+  assert.equal(MP.compatibles("F45:Over 9.5", "home-win"), true);
+  const contraire = matchs.map((m) => Object.assign({}, m, { market_id: "F1:Away", pari_rec: "Victoire Ext" }));
+  assert.equal(T.calculerDuJour(contraire, opts).nb_jambes, 0);
+});
+
+test("match offert : une selection nationale verifiee par les cotes reste une Selection IASHARK sans le v3", () => {
+  const nl = Object.assign({}, M, { league: "UEFA Nations League", league_key: "nations_league", league_id: 5, home: { n: "France" }, away: { n: "Italie" },
+    home_team: "France", away_team: "Italie" });
+  const r = () => raw([{ id: 1, name: "Match Winner", values: v([["Home", 1.8], ["Draw", 3.6], ["Away", 4.6]]) }]);
+  const c = P.choisirPariFourchette(nl, ctxAvec(r()), {});
+  assert.ok(c, "un pari dans la fourchette");
+  assert.equal(c.selection_possible, true, c.market_id);
+  const club = P.choisirPariFourchette(Object.assign({}, M), ctxAvec(r()), {});
+  assert.equal(club.selection_possible, false, "club sans v3 : inchange");
 });

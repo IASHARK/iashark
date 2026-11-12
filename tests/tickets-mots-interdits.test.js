@@ -1,4 +1,6 @@
 "use strict";
+// Ecrit pour l'ancienne regle du pari (1,40-2,20, avant le 11/11/2026) : remise en memoire, voir le module.
+require("./ancienne-regle-pari.js");
 // MOTS INTERDITS dans tout ce que le serveur produit pour les tickets, la Selection en or, le
 // buteur du jour et le panneau Marches (regles-tickets.md §8, test 20 ; L121-4 7° et 15°) :
 // ni « sûr », ni « garanti », ni « gagnant », ni gain, mise, unite, capital, esperance ;

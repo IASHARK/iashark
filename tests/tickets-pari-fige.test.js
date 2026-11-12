@@ -1,4 +1,6 @@
 "use strict";
+// Ecrit pour l'ancienne regle du pari (1,40-2,20, avant le 11/11/2026) : remise en memoire, voir le module.
+require("./ancienne-regle-pari.js");
 // CONTROLES DU 04/10/2026 (tour 1 des corrections) sur les jambes des tickets et de la
 // Selection en or :
 //  - trader de cotes, point 1 (ROUGE) : un pari publie lors d'un calcul precedent est FIGE ;

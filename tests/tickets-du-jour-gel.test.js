@@ -1,4 +1,6 @@
 "use strict";
+// Ecrit pour l'ancienne regle du pari (1,40-2,20, avant le 11/11/2026) : remise en memoire, voir le module.
+require("./ancienne-regle-pari.js");
 // TICKETS DU JOUR : gel, archivage avant match, pannes (regles-tickets.md §2.7, §4.1, tests 12-13).
 const test = require("node:test");
 const assert = require("node:assert/strict");

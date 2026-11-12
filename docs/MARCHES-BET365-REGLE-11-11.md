@@ -4,7 +4,7 @@ Décision de Clément du 11/11/2026 (21 h 40 et 21 h 50) : le pari affiché est 
 
 - Liste : `/odds/bets` d'API-Sports, 338 types, relevée le 11/11/2026 (un seul appel).
 - « Offert par Bet365 » : part des 1052 matchs archivés (odds_snapshots, 06/10-11/11/2026) où Bet365 cote ce type.
-- 110 types vus chez Bet365 ; 124 types candidats (réglables), dont 76 vus chez Bet365.
+- 110 types vus chez Bet365 ; 95 types candidats (réglables), dont 51 vus chez Bet365.
 - Méthode de chance juste : la même pour toutes les familles (code : lib/flux-paris.js#selectionsDuMatch, réglages : config/marches-pari.json#choix_du_pari).
   - Marché complet (toutes les issues cotées) : marge retirée par la méthode puissance (somme des (1/cote)^k = 1).
   - Marché d'un seul côté (buteurs, joueurs « N ou plus », « Home / Away » qui peuvent perdre tous les deux) : la méthode puissance est impossible ; chance = (1/cote)/(1+M), M = max(15 %, 3 × marge du 1N2 Bet365 du même match) ; buteurs : en plus, la somme des chances des buteurs d'une équipe ne dépasse jamais ses buts attendus (lignes de buts Bet365). M est provisoire : à calibrer par le mathématicien (verdict ROUGE du 06/10 : joueurs annoncés 70 %, 29 % réels).
@@ -16,43 +16,43 @@ Décision de Clément du 11/11/2026 (21 h 40 et 21 h 50) : le pari affiché est 
 |---|---|---|---|---|---|
 | 1 | Match Winner | 99 % | Résultat | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; moteur v3 : le plus bas des deux là où il dit le marché juste ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 2 | Home/Away | 99 % | — | non : remboursé si nul : remboursement, règlement non branché | — |
-| 3 | Second Half Winner | 94 % | Mi-temps | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
+| 3 | Second Half Winner | 94 % | Mi-temps | non : mi-temps : 41,5 % réels pour 54 % annoncés (mathématicien, 12/11/2026) | — |
 | 4 | Asian Handicap | 99 % | Handicap asiatique | oui : score final et mi-temps (/fixtures) | puissance par demi-ligne (2 issues) ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 5 | Goals Over/Under | 99 % | Buts | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; moteur v3 : le plus bas des deux là où il dit le marché juste ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 6 | Goals Over/Under First Half | 96 % | Mi-temps | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; moteur v3 : le plus bas des deux là où il dit le marché juste ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 7 | HT/FT Double | 98 % | Mi-temps/fin | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
+| 6 | Goals Over/Under First Half | 96 % | Mi-temps | non : mi-temps : 41,5 % réels pour 54 % annoncés (mathématicien, 12/11/2026) | — |
+| 7 | HT/FT Double | 98 % | Mi-temps/fin | non : mi-temps : 41,5 % réels pour 54 % annoncés (mathématicien, 12/11/2026) | — |
 | 8 | Both Teams Score | 98 % | Les deux marquent | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; moteur v3 : le plus bas des deux là où il dit le marché juste ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 9 | Handicap Result | 97 % | Handicap européen | oui : score final et mi-temps (/fixtures) | puissance sur les 3 issues de la ligne ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 10 | Exact Score | 99 % | Score exact | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 11 | Highest Scoring Half | 95 % | Mi-temps | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
+| 11 | Highest Scoring Half | 95 % | Mi-temps | non : mi-temps : 41,5 % réels pour 54 % annoncés (mathématicien, 12/11/2026) | — |
 | 12 | Double Chance | 98 % | Double chance | oui : score final et mi-temps (/fixtures) | somme de 2 issues du marché à 3 issues sans marge (puissance) ; moteur v3 : le plus bas des deux là où il dit le marché juste ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 13 | First Half Winner | 99 % | Mi-temps | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; moteur v3 : le plus bas des deux là où il dit le marché juste ; contrôle Pinnacle (écart > 8 points : écarté) |
+| 13 | First Half Winner | 99 % | Mi-temps | non : mi-temps : 41,5 % réels pour 54 % annoncés (mathématicien, 12/11/2026) | — |
 | 14 | Team To Score First | 95 % | Ordre des buts | oui : événements du match (/fixtures/events) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 15 | Team To Score Last | 96 % | Ordre des buts | oui : événements du match (/fixtures/events) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 16 | Total - Home | 95 % | Buts d'une équipe | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; moteur v3 : le plus bas des deux là où il dit le marché juste ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 17 | Total - Away | 95 % | Buts d'une équipe | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; moteur v3 : le plus bas des deux là où il dit le marché juste ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 18 | Handicap Result - First Half | 98 % | Handicap européen | oui : score final et mi-temps (/fixtures) | puissance sur les 3 issues de la ligne ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 19 | Asian Handicap First Half | 98 % | Handicap asiatique | oui : score final et mi-temps (/fixtures) | puissance par demi-ligne (2 issues) ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 20 | Double Chance - First Half | 99 % | Mi-temps | oui : score final et mi-temps (/fixtures) | somme de 2 issues du marché à 3 issues sans marge (puissance) ; moteur v3 : le plus bas des deux là où il dit le marché juste ; contrôle Pinnacle (écart > 8 points : écarté) |
+| 20 | Double Chance - First Half | 99 % | Mi-temps | non : mi-temps : 41,5 % réels pour 54 % annoncés (mathématicien, 12/11/2026) | — |
 | 21 | Odd/Even | 96 % | Pair/impair | non : pair / impair : pile ou face, pas un pronostic (décision de Clément du 12/11/2026) | — |
 | 22 | Odd/Even - First Half | 96 % | Pair/impair | non : pair / impair : pile ou face, pas un pronostic (décision de Clément du 12/11/2026) | — |
 | 23 | Home Odd/Even | 95 % | Pair/impair | non : pair / impair : pile ou face, pas un pronostic (décision de Clément du 12/11/2026) | — |
 | 24 | Results/Both Teams Score | 98 % | Résultat et buts | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 25 | Result/Total Goals | 98 % | Résultat et buts | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 26 | Goals Over/Under - Second Half | 97 % | Mi-temps | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
+| 26 | Goals Over/Under - Second Half | 97 % | Mi-temps | non : mi-temps : 41,5 % réels pour 54 % annoncés (mathématicien, 12/11/2026) | — |
 | 27 | Clean Sheet - Home | 96 % | Buts d'une équipe | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 28 | Clean Sheet - Away | 96 % | Buts d'une équipe | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 29 | Win to Nil - Home | jamais vu | Résultat et buts | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 30 | Win to Nil - Away | jamais vu | Résultat et buts | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 31 | Correct Score - First Half | 98 % | Score exact | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 32 | Win Both Halves | 98 % | Mi-temps | oui : score final et mi-temps (/fixtures) | un seul côté : (1/cote)/(1+M), M = max(15 %, 3 × marge 1N2 Bet365) ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 33 | Double Chance - Second Half | jamais vu | Mi-temps | oui : score final et mi-temps (/fixtures) | somme de 2 issues du marché à 3 issues sans marge (puissance) ; contrôle Pinnacle (écart > 8 points : écarté) |
+| 32 | Win Both Halves | 98 % | Mi-temps | non : mi-temps : 41,5 % réels pour 54 % annoncés (mathématicien, 12/11/2026) | — |
+| 33 | Double Chance - Second Half | jamais vu | Mi-temps | non : mi-temps : 41,5 % réels pour 54 % annoncés (mathématicien, 12/11/2026) | — |
 | 34 | Both Teams Score - First Half | 98 % | Les deux marquent | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 35 | Both Teams To Score - Second Half | 98 % | Les deux marquent | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 36 | Win To Nil | 98 % | Résultat et buts | oui : score final et mi-temps (/fixtures) | un seul côté : (1/cote)/(1+M), M = max(15 %, 3 × marge 1N2 Bet365) ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 37 | Home win both halves | jamais vu | Mi-temps | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
+| 37 | Home win both halves | jamais vu | Mi-temps | non : mi-temps : 41,5 % réels pour 54 % annoncés (mathématicien, 12/11/2026) | — |
 | 38 | Exact Goals Number | 97 % | Nombre de buts | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 39 | To Win Either Half | 98 % | Mi-temps | oui : score final et mi-temps (/fixtures) | un seul côté : (1/cote)/(1+M), M = max(15 %, 3 × marge 1N2 Bet365) ; contrôle Pinnacle (écart > 8 points : écarté) |
+| 39 | To Win Either Half | 98 % | Mi-temps | non : mi-temps : 41,5 % réels pour 54 % annoncés (mathématicien, 12/11/2026) | — |
 | 40 | Home Team Exact Goals Number | 95 % | Nombre de buts | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 41 | Away Team Exact Goals Number | 95 % | Nombre de buts | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 42 | Second Half Exact Goals Number | 96 % | Nombre de buts | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
@@ -66,7 +66,7 @@ Décision de Clément du 11/11/2026 (21 h 40 et 21 h 50) : le pari affiché est 
 | 50 | Goal Line | 99 % | Buts | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 51 | Halftime Result/Total Goals | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 52 | Halftime Result/Both Teams Score | jamais vu | — | non branché : règle de règlement à écrire | — |
-| 53 | Away win both halves | jamais vu | Mi-temps | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
+| 53 | Away win both halves | jamais vu | Mi-temps | non : mi-temps : 41,5 % réels pour 54 % annoncés (mathématicien, 12/11/2026) | — |
 | 54 | First 10 min Winner | 93 % | Minutes | oui : événements du match (/fixtures/events) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 55 | Corners 1x2 | 4 % | Corners | oui : statistiques d'équipe (/fixtures/statistics) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 56 | Corners Asian Handicap | 95 % | Corners | oui : statistiques d'équipe (/fixtures/statistics) | puissance par demi-ligne (2 issues) ; contrôle Pinnacle (écart > 8 points : écarté) |
@@ -77,7 +77,7 @@ Décision de Clément du 11/11/2026 (21 h 40 et 21 h 50) : le pari affiché est 
 | 61 | To Qualify | 3 % | — | non : qualification : dépend du match aller (score cumulé non fourni) | — |
 | 62 | Correct Score - Second Half | jamais vu | Score exact | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 63 | Odd/Even - Second Half | 95 % | Pair/impair | non : pair / impair : pile ou face, pas un pronostic (décision de Clément du 12/11/2026) | — |
-| 72 | Goal Line (1st Half) | 98 % | Mi-temps | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
+| 72 | Goal Line (1st Half) | 98 % | Mi-temps | non : mi-temps : 41,5 % réels pour 54 % annoncés (mathématicien, 12/11/2026) | — |
 | 73 | Both Teams to Score 1st Half - 2nd Half | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 74 | 10 Over/Under | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 75 | Last Corner | jamais vu | — | non : il faudrait la minute de chaque corner/carton/tir, absente d'API-Football | — |
@@ -85,10 +85,10 @@ Décision de Clément du 11/11/2026 (21 h 40 et 21 h 50) : le pari affiché est 
 | 77 | Total Corners (1st Half) | 96 % | — | non : il faudrait la minute de chaque corner/carton/tir, absente d'API-Football | — |
 | 78 | RTG_H1 | 94 % | Résultat et buts | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 79 | Cards European Handicap | 43 % | — | non : cartons : règlement automatique non vérifié (rouge compté 1 ou 2, 2e jaune, cartons du banc : règles du bookmaker) | — |
-| 80 | Cards Over/Under | 48 % | Cartons | oui : événements du match (/fixtures/events) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 81 | Cards Asian Handicap | 45 % | Cartons | oui : événements du match (/fixtures/events) | puissance par demi-ligne (2 issues) ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 82 | Home Team Total Cards | 43 % | Cartons | oui : événements du match (/fixtures/events) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 83 | Away Team Total Cards | 43 % | Cartons | oui : événements du match (/fixtures/events) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
+| 80 | Cards Over/Under | 48 % | Cartons | non : cartons : comptage à valider par l'ingénieur données (avocat du diable, 12/11/2026) | — |
+| 81 | Cards Asian Handicap | 45 % | Cartons | non : cartons : comptage à valider par l'ingénieur données (avocat du diable, 12/11/2026) | — |
+| 82 | Home Team Total Cards | 43 % | Cartons | non : cartons : comptage à valider par l'ingénieur données (avocat du diable, 12/11/2026) | — |
+| 83 | Away Team Total Cards | 43 % | Cartons | non : cartons : comptage à valider par l'ingénieur données (avocat du diable, 12/11/2026) | — |
 | 84 | Total Corners (3 way) (1st Half) | jamais vu | — | non : il faudrait la minute de chaque corner/carton/tir, absente d'API-Football | — |
 | 85 | Total Corners (3 way) | 96 % | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
 | 86 | RCARD | jamais vu | — | non : cartons : règlement automatique non vérifié (rouge compté 1 ou 2, 2e jaune, cartons du banc : règles du bookmaker) | — |
@@ -96,16 +96,16 @@ Décision de Clément du 11/11/2026 (21 h 40 et 21 h 50) : le pari affiché est 
 | 88 | Home Total ShotOnGoal | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
 | 89 | Away Total ShotOnGoal | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
 | 91 | Total Goals (3 way) | jamais vu | — | non branché : règle de règlement à écrire | — |
-| 92 | Anytime Goal Scorer | 88 % | Buteurs | oui : effectifs + statistiques joueurs (/fixtures/players, /fixtures/events) | un seul côté : (1/cote)/(1+M) + plafond aux buts attendus de l'équipe (buts Bet365) ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 93 | First Goal Scorer | 88 % | — | non : premier buteur : règle des buts contre son camp différente selon les bookmakers | — |
-| 94 | Last Goal Scorer | 88 % | — | non : dernier buteur : idem | — |
+| 92 | Anytime Goal Scorer | 88 % | Buteurs | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 93 | First Goal Scorer | 88 % | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 94 | Last Goal Scorer | 88 % | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
 | 95 | To Score Two or More Goals | jamais vu | — | non branché : règle de règlement à écrire | — |
-| 96 | Last Goal Scorer | jamais vu | — | non branché : marché joueur à décrire (format des valeurs) | — |
+| 96 | Last Goal Scorer | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
 | 97 | First Goal Method | 50 % | — | non : façon de marquer le premier but (tête, coup franc, tir) : absente des événements | — |
 | 99 | To Score A Penalty | 50 % | Ordre des buts | oui : événements du match (/fixtures/events) | un seul côté : (1/cote)/(1+M), M = max(15 %, 3 × marge 1N2 Bet365) ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 100 | To Miss A Penalty | 50 % | Ordre des buts | oui : événements du match (/fixtures/events) | un seul côté : (1/cote)/(1+M), M = max(15 %, 3 × marge 1N2 Bet365) ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 102 | Player to be booked | jamais vu | — | non branché : marché joueur à décrire (format des valeurs) | — |
-| 103 | Player to be Sent Off | jamais vu | — | non branché : marché joueur à décrire (format des valeurs) | — |
+| 102 | Player to be booked | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 103 | Player to be Sent Off | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
 | 104 | Asian Handicap (2nd Half) | jamais vu | Handicap asiatique | oui : score final et mi-temps (/fixtures) | puissance par demi-ligne (2 issues) ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 105 | Home Team Total Goals(1st Half) | jamais vu | Buts d'une équipe | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 106 | Away Team Total Goals(1st Half) | jamais vu | Buts d'une équipe | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
@@ -186,7 +186,7 @@ Décision de Clément du 11/11/2026 (21 h 40 et 21 h 50) : le pari affiché est 
 | 181 | European Handicap (2nd Half) | jamais vu | Handicap européen | oui : score final et mi-temps (/fixtures) | puissance sur les 3 issues de la ligne ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 182 | Draw No Bet (2nd Half) | jamais vu | — | non : remboursé si nul : idem | — |
 | 183 | Double Chance/Total | jamais vu | — | non branché : règle de règlement à écrire | — |
-| 184 | To Score in Both Halves | jamais vu | Mi-temps | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
+| 184 | To Score in Both Halves | jamais vu | Mi-temps | non : mi-temps : 41,5 % réels pour 54 % annoncés (mathématicien, 12/11/2026) | — |
 | 185 | First Team to Score (3 way) 1st Half | jamais vu | Ordre des buts | oui : événements du match (/fixtures/events) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 186 | Total Goals Number By Ranges | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 187 | Total Goals By Ranges (1st Half) | jamais vu | — | non branché : règle de règlement à écrire | — |
@@ -194,8 +194,8 @@ Décision de Clément du 11/11/2026 (21 h 40 et 21 h 50) : le pari affiché est 
 | 189 | To Advance Handicap | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 190 | Home Exact Goals Number (1st Half) | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 191 | Away Exact Goals Number (1st Half) | jamais vu | — | non branché : règle de règlement à écrire | — |
-| 192 | Home Highest Scoring Half | 96 % | Mi-temps | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 193 | Away Highest Scoring Half | 96 % | Mi-temps | oui : score final et mi-temps (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
+| 192 | Home Highest Scoring Half | 96 % | Mi-temps | non : mi-temps : 41,5 % réels pour 54 % annoncés (mathématicien, 12/11/2026) | — |
+| 193 | Away Highest Scoring Half | 96 % | Mi-temps | non : mi-temps : 41,5 % réels pour 54 % annoncés (mathématicien, 12/11/2026) | — |
 | 194 | Result/Total Goals (2nd Half) | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 195 | Either Team Wins By 1 Goals | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 196 | Either Team Wins By 2 Goals | jamais vu | — | non branché : règle de règlement à écrire | — |
@@ -214,37 +214,37 @@ Décision de Clément du 11/11/2026 (21 h 40 et 21 h 50) : le pari affiché est 
 | 209 | Home Come From Behind and Draw | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 210 | Away Come From Behind and Draw | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 211 | Total Shots | 35 % | Tirs | oui : statistiques d'équipe (/fixtures/statistics) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 212 | Player Assists | 0 % | — | non : passes décisives d'un joueur : marché sans nom de joueur | — |
-| 213 | Player Triples | 19 % | — | non : « Player Triples » : marché non documenté | — |
-| 214 | Player Points | jamais vu | — | non branché : marché joueur à décrire (format des valeurs) | — |
-| 215 | Player Singles | 68 % | — | non : « Player Singles » : marché non documenté (doublon des tirs ?) | — |
+| 212 | Player Assists | 0 % | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 213 | Player Triples | 19 % | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 214 | Player Points | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 215 | Player Singles | 68 % | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
 | 216 | Multi Touchdown Scorer (2 or More) | jamais vu | — | non branché : marché joueur à décrire (format des valeurs) | — |
 | 217 | Multi Touchdown Scorer (3 or More) | jamais vu | — | non branché : marché joueur à décrire (format des valeurs) | — |
-| 218 | Away Anytime Goal Scorer | 88 % | Buteurs | oui : effectifs + statistiques joueurs (/fixtures/players, /fixtures/events) | un seul côté : (1/cote)/(1+M) + plafond aux buts attendus de l'équipe (buts Bet365) ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 219 | Away First Goal Scorer | 88 % | — | non : premier buteur : idem | — |
+| 218 | Away Anytime Goal Scorer | 88 % | Buteurs | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 219 | Away First Goal Scorer | 88 % | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
 | 220 | Shots. Away Total | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
 | 221 | Shots. Home Total | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
 | 222 | To Win From Behind | 98 % | Ordre des buts | oui : événements du match (/fixtures/events) | un seul côté : (1/cote)/(1+M), M = max(15 %, 3 × marge 1N2 Bet365) ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 223 | Number of Goals In Match (Range) | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 224 | Game Decided After Penalties | 2 % | Prolongation | oui : statut final AET/PEN (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
 | 225 | Game Decided in Extra Time | 2 % | Prolongation | oui : statut final AET/PEN (/fixtures) | puissance sur le marché complet ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 226 | Away Last Goal Scorer | 88 % | — | non : dernier buteur : idem | — |
+| 226 | Away Last Goal Scorer | 88 % | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
 | 227 | Goal Method Header | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 228 | Home Goal Method Header | 45 % | — | non : but de la tête : absent des événements | — |
 | 229 | Goal Method Outside the Box | 45 % | — | non : but hors de la surface : absent des événements | — |
 | 230 | Home Goal Method Outside the Box | jamais vu | — | non branché : règle de règlement à écrire | — |
-| 231 | Home Anytime Goal Scorer | 88 % | Buteurs | oui : effectifs + statistiques joueurs (/fixtures/players, /fixtures/events) | un seul côté : (1/cote)/(1+M) + plafond aux buts attendus de l'équipe (buts Bet365) ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 232 | Home First Goal Scorer | 88 % | — | non : premier buteur : idem | — |
-| 233 | Home Last Goal Scorer | 88 % | — | non : dernier buteur : idem | — |
+| 231 | Home Anytime Goal Scorer | 88 % | Buteurs | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 232 | Home First Goal Scorer | 88 % | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 233 | Home Last Goal Scorer | 88 % | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
 | 234 | Home To Score Three or More Goals | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 235 | Away To Score Three or More Goals | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 236 | Away To Score Two or More Goals | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 237 | Home To Score Two or More Goals | jamais vu | — | non branché : règle de règlement à écrire | — |
-| 238 | Home Team Goalscorers First | jamais vu | — | non branché : marché joueur à décrire (format des valeurs) | — |
+| 238 | Home Team Goalscorers First | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
 | 239 | Corners. European Handicap | 92 % | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
-| 240 | Home Player Shots | 68 % | Joueurs | oui : effectifs + statistiques joueurs (/fixtures/players, /fixtures/events) | un seul côté : (1/cote)/(1+M) ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 241 | Away Player Shots | 68 % | Joueurs | oui : effectifs + statistiques joueurs (/fixtures/players, /fixtures/events) | un seul côté : (1/cote)/(1+M) ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 242 | Player Shots On Target | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
+| 240 | Home Player Shots | 68 % | Joueurs | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 241 | Away Player Shots | 68 % | Joueurs | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 242 | Player Shots On Target | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
 | 243 | Home Shots On Target | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
 | 244 | Away Shots On Target | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
 | 245 | Away Goal Method Header | 45 % | — | non : but de la tête : absent des événements | — |
@@ -253,46 +253,46 @@ Décision de Clément du 11/11/2026 (21 h 40 et 21 h 50) : le pari affiché est 
 | 248 | Time Of 1st Score | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 249 | Multicorners | 91 % | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
 | 250 | First Card Received (3 way) | 42 % | — | non : cartons : règlement automatique non vérifié (rouge compté 1 ou 2, 2e jaune, cartons du banc : règles du bookmaker) | — |
-| 251 | Player to be booked | jamais vu | — | non branché : marché joueur à décrire (format des valeurs) | — |
+| 251 | Player to be booked | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
 | 252 | Both Teams to Receive a Card | jamais vu | — | non : cartons : règlement automatique non vérifié (rouge compté 1 ou 2, 2e jaune, cartons du banc : règles du bookmaker) | — |
 | 253 | Time Of 1st Score | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 254 | Team Performances (Range) | jamais vu | — | non branché : règle de règlement à écrire | — |
-| 255 | Home Player Assists | jamais vu | — | non branché : marché joueur à décrire (format des valeurs) | — |
-| 256 | Away Player Assists | jamais vu | — | non branché : marché joueur à décrire (format des valeurs) | — |
-| 257 | Player to Score or Assist | 66 % | Buteurs | oui : effectifs + statistiques joueurs (/fixtures/players, /fixtures/events) | un seul côté : (1/cote)/(1+M) + plafond aux buts attendus de l'équipe (buts Bet365) ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 258 | Home Player to Score or Assist | jamais vu | — | non branché : marché joueur à décrire (format des valeurs) | — |
-| 259 | Away Player to Score or Assist | jamais vu | — | non branché : marché joueur à décrire (format des valeurs) | — |
+| 255 | Home Player Assists | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 256 | Away Player Assists | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 257 | Player to Score or Assist | 66 % | Buteurs | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 258 | Home Player to Score or Assist | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 259 | Away Player to Score or Assist | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
 | 260 | Team Time Of 1st Score | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 261 | Total Goal Minutes (Range) | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 262 | Late Goal (Range) | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 263 | Early Goal (Range) | jamais vu | — | non branché : règle de règlement à écrire | — |
-| 264 | Player Shots On Target Total | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
-| 265 | Player Shots Total | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
-| 266 | Player Fouls Committed | 21 % | Joueurs | oui : effectifs + statistiques joueurs (/fixtures/players, /fixtures/events) | un seul côté : (1/cote)/(1+M) ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 267 | Goalkeeper Saves | 29 % | Joueurs | oui : effectifs + statistiques joueurs (/fixtures/players, /fixtures/events) | un seul côté : (1/cote)/(1+M) ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 268 | Home Goalkeeper Saves | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
-| 269 | Home Player Shots On Target Total | 68 % | Joueurs | oui : effectifs + statistiques joueurs (/fixtures/players, /fixtures/events) | un seul côté : (1/cote)/(1+M) ; contrôle Pinnacle (écart > 8 points : écarté) |
-| 270 | Home Player Shots Total | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
-| 271 | Home Player Fouls Committed | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
-| 272 | Home Player Tackles | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
-| 273 | Home Player Passes | jamais vu | — | non branché : marché joueur à décrire (format des valeurs) | — |
-| 274 | Away Goalkeeper Saves | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
-| 275 | Away Player Shots On Target Total | 45 % | — | non : libellé incohérent avec les cotes relevées | — |
-| 276 | Away Player Shots Total | 35 % | — | non : libellé incohérent avec les cotes relevées | — |
-| 277 | Away Player Fouls Committed | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
-| 278 | Away Player Tackles | jamais vu | — | non branché : règle à écrire (statistiques ou événements), à vérifier marché par marché | — |
-| 279 | Away Player Passes | jamais vu | — | non branché : marché joueur à décrire (format des valeurs) | — |
+| 264 | Player Shots On Target Total | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 265 | Player Shots Total | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 266 | Player Fouls Committed | 21 % | Joueurs | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 267 | Goalkeeper Saves | 29 % | Joueurs | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 268 | Home Goalkeeper Saves | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 269 | Home Player Shots On Target Total | 68 % | Joueurs | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 270 | Home Player Shots Total | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 271 | Home Player Fouls Committed | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 272 | Home Player Tackles | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 273 | Home Player Passes | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 274 | Away Goalkeeper Saves | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 275 | Away Player Shots On Target Total | 45 % | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 276 | Away Player Shots Total | 35 % | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 277 | Away Player Fouls Committed | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 278 | Away Player Tackles | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 279 | Away Player Passes | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
 | 280 | First Set Piece 5 Minutes | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 281 | Total Tackles | 4 % | — | non : tacles : non fournis dans les statistiques d'équipe | — |
 | 282 | Double Chance/Both Teams To Score | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 283 | Away Win To Nill (1st Half) | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 284 | Away Win To Nill (2nd Half) | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 285 | Team To Score (Goals) | jamais vu | — | non branché : règle de règlement à écrire | — |
-| 286 | Team Goalscorers First | jamais vu | — | non branché : marché joueur à décrire (format des valeurs) | — |
-| 287 | Team Goalscorers Last | jamais vu | — | non branché : marché joueur à décrire (format des valeurs) | — |
-| 288 | Home Team Goalscorers Last | jamais vu | — | non branché : marché joueur à décrire (format des valeurs) | — |
-| 289 | Away Team Goalscorers First | jamais vu | — | non branché : marché joueur à décrire (format des valeurs) | — |
-| 290 | Away Team Goalscorers Last | jamais vu | — | non branché : marché joueur à décrire (format des valeurs) | — |
+| 286 | Team Goalscorers First | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 287 | Team Goalscorers Last | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 288 | Home Team Goalscorers Last | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 289 | Away Team Goalscorers First | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
+| 290 | Away Team Goalscorers Last | jamais vu | — | non : joueurs et buteurs : chance annoncée 35 %, réussite 18 % (mathématicien, 12/11/2026) | — |
 | 291 | Time of First Goal Brackets (Range) | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 292 | Over/Under between 0 and 10m | jamais vu | — | non branché : règle de règlement à écrire | — |
 | 293 | Double Chance 0-15m | jamais vu | — | non branché : règle de règlement à écrire | — |

@@ -198,8 +198,8 @@ test("textes des 7 langues : meme structure, statut REVIEW, liste Pro alignee su
     // 25/10/2026 : liste Pro = lignes vraies partout de la page Pro (lib/pro-vente.js : tous les
     // matchs, film du match, scores les plus probables) ; combines, Selection en or et buteur
     // seulement sur le marche francais (hasTickets). Plus d'outils, de journal ni de bankroll.
-    const dict = JSON.parse(fs.readFileSync(path.join(ROOT, "i18n", "dict", loc + ".json"), "utf8")).pro_vente;
-    for (const k of ["item_all_title", "item_film_title", "item_scores_title", "item_combos_title", "item_gold_title", "item_scorer_title"]) assert.ok(dict[k], loc + " " + k);
+    // 12/11/2026 : la page Pro est raccourcie et ne porte plus cette liste (pro_vente.item_* retires) ;
+    // la liste de l'e-mail reste verifiee ci-dessous par sa forme et ses mots interdits.
     const pro = c.campaigns.pro_features.blocks.filter((b) => b.type === "list");
     assert.deepEqual(pro.map((b) => [b.if || "", b.items.length]), [["", 3], ["hasTickets", 1]], loc);
     const all = JSON.stringify(c);

@@ -99,7 +99,7 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb'].includes(x.dir))) {
       await expect(page.locator('#authHeaderSlot')).toContainText('e2e.free', { timeout: 15000 });
     });
 
-    // Correction C5 du 27/10/2026 : le bouton dit « Voir mon pari offert » ; sans ?next=, le nouveau compte
+    // Correction C5 du 27/10/2026 (bouton « Créer mon compte gratuit » depuis le 12/11) : sans ?next=, le nouveau compte
     // arrive sur le match offert du jour (lib/free-match.js#offertDuJour) ; sans match offert ce jour, Mon compte.
     test('inscription directe (sans next) : le match offert du jour, sinon accueil du compte avec le message de bienvenue', async ({ page, supa, siteData }) => {
       await page.goto(`/${v.dir}/inscription.html`);

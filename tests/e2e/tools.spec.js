@@ -15,12 +15,12 @@ for (const v of VERSIONS) {
         const dict = await dictFor(v.locale);
         if (persona === 'free') await supa.as('free');
         await page.goto(`/${v.dir}/pro.html`);
-        await expect(page.locator('#proVente h1')).toContainText(tr(dict, 'pro_vente.hero_title_pre'));
+        await expect(page.locator('#proVente h1')).toContainText(tr(dict, 'pro_vente.short_title'));
         await expect(page.locator('#proOutils')).toBeHidden();
         const exemple = page.locator('#proVente a[data-track="pro_vente_exemple"]');
         expect(pathOf(await exemple.getAttribute('href'), baseURL)).toBe(`/${v.dir}/exemple-analyse.html`);
         // Le composant de paiement unique est monte (ou sa ligne « pas encore ouvert »).
-        await expect(page.locator('#offrePro .op-title')).toHaveText(tr(dict, 'offre_pro.title_general'));
+        await expect(page.locator('#offrePro .op-title')).toHaveText(tr(dict, 'offre_pro.title_sub'));
         await page.waitForLoadState('networkidle').catch(() => {});
         expect(supa.callsTo('match-data'), 'match-data appele sans abonnement').toHaveLength(0);
         const text = await page.locator('main').innerText();

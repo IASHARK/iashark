@@ -175,7 +175,9 @@ test("(b) bascule appliquee, build complet en memoire : /en/ en USD partout, che
     const html = files[f], meta = headMeta(html);
     assert.match(html, /<meta name="iashark-market" content="us">/, f);
     for (const k of Object.keys(meta)) assert.doesNotMatch(meta[k], EUR_PRICE, f + " " + k + " : " + meta[k]);
-    assert.doesNotMatch(visible(html), /€|19[.,]95|US\$/, f + " : prix EUR ou US$ visible");
+    // en/lolly.html : montants de l'offre du partenaire Lolly Bet, en euros
+    // comme Lolly les donne ; ce ne sont pas des prix IASHARK.
+    if (f !== "en/lolly.html") assert.doesNotMatch(visible(html), /€|19[.,]95|US\$/, f + " : prix EUR ou US$ visible");
     for (const ld of html.match(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g) || []) {
       assert.doesNotMatch(ld, /€|\\u20ac|"EUR"|19[.,]95|priceCurrency/, f + " : JSON-LD");
     }

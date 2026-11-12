@@ -1,0 +1,95 @@
+/* IASHARK — page « Parier avec IASHARK chez Lolly Bet » (11/11/2026). Sombre, cyan + gris, Inter. */
+:root{--lb-bg:#060b12;--lb-surface:#0a1420;--lb-panel:#0d1926;--lb-cyan:#20d5ef;--lb-ink:#f4f7fb;--lb-soft:#91a0b3;--lb-text:#c6d1de;--lb-line:rgba(141,179,211,.16);--lb-err:#ffb4a8;--lb-ok:#7ee0b0}
+*{box-sizing:border-box}
+html{background:var(--lb-bg)}
+.lb-body{margin:0;min-height:100dvh;background:var(--lb-bg);color:var(--lb-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.lb-body ::selection{background:rgba(32,213,239,.3);color:#fff}
+.hdr{position:sticky;top:0;z-index:99;background:rgba(6,11,18,.96);border-bottom:1px solid var(--lb-line);padding:0 20px;height:56px;display:flex;align-items:center}
+.logo{display:inline-flex;align-items:center;min-height:44px}
+.logo img{display:block;height:28px;width:auto}
+
+.lb{max-width:600px;margin:0 auto;padding:0 16px 24px}
+
+/* Ouverture */
+.lb-ouverture{position:relative;padding:40px 0 8px}
+.lb-ouverture::before{content:"";position:absolute;inset:0 -16px;z-index:-1;background:radial-gradient(90% 70% at 10% 0%,rgba(32,213,239,.16),transparent 65%)}
+.lb-duo{display:flex;align-items:center;gap:10px;margin:0 0 22px;color:var(--lb-soft);font-size:15px}
+.lb-duo>img{display:block;height:22px;width:auto}
+.lb-logo{display:inline-flex;align-items:center;padding:6px 10px;border-radius:8px;background:#060b12;box-shadow:inset 0 0 0 1px rgba(141,179,211,.22)}
+.lb-logo img{display:block;height:16px;width:auto}
+.lb-h1{margin:0;font-size:clamp(31px,7.4vw,44px);line-height:1.06;font-weight:800;letter-spacing:-.03em;text-wrap:balance}
+.lb-cta{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:24px;min-height:56px;padding:0 18px;border-radius:14px;background:var(--lb-cyan);color:#04141b;font-size:17px;font-weight:800;text-decoration:none;transition:background-color .15s ease,transform .15s ease}
+.lb-cta:hover{background:#5fe2f4}
+.lb-cta:active{transform:translateY(1px)}
+.lb-cta:focus-visible{outline:2px solid var(--lb-cyan);outline-offset:3px}
+.lb-banniere{display:block;margin:18px 0 0;border-radius:12px;overflow:hidden;line-height:0}
+.lb-banniere[hidden]{display:none}
+.lb-banniere img{display:block;width:100%;height:auto}
+.lb-banniere:focus-visible{outline:2px solid var(--lb-cyan);outline-offset:2px}
+
+/* Pro offert : le seul encadre de la page */
+.lb-pro-app{margin-top:18px}
+.lb-pro-attente{margin:0;font-size:14px;color:var(--lb-soft)}
+.lb-pas{margin:0;padding:0;list-style:none;display:grid;gap:14px}
+.lb-pas>li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:12px;align-items:start}
+.lb-pas-n{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;border:1px solid rgba(32,213,239,.5);color:var(--lb-cyan);font-size:14px;font-weight:800}
+.lb-pas-t{margin:4px 0 0;font-size:15.5px;font-weight:700;line-height:1.35}
+.lb-pas-s{margin:4px 0 0;font-size:14px;line-height:1.45;color:var(--lb-soft)}
+.lb-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:50px;margin-top:10px;padding:0 16px;border-radius:12px;border:0;background:var(--lb-cyan);color:#04141b;font:inherit;font-size:15.5px;font-weight:800;text-decoration:none;cursor:pointer;transition:background-color .15s ease}
+.lb-btn:hover{background:#5fe2f4}
+.lb-btn:focus-visible{outline:2px solid var(--lb-cyan);outline-offset:3px}
+.lb-btn--ligne{background:rgba(32,213,239,.08);border:1px solid rgba(32,213,239,.45);color:var(--lb-ink)}
+.lb-btn--ligne:hover{background:rgba(32,213,239,.16)}
+.lb-btn:disabled{opacity:.6;cursor:wait}
+.lb-lien{display:inline-flex;align-items:center;min-height:44px;color:var(--lb-soft);font-size:14px;text-underline-offset:3px}
+.lb-lien:hover{color:var(--lb-ink)}
+.lb-form{display:grid;gap:8px;margin-top:10px}
+.lb-form label{font-size:14px;font-weight:600}
+.lb-form input{width:100%;background:var(--lb-panel);border:1px solid var(--lb-line);border-radius:12px;padding:13px 14px;color:var(--lb-ink);font:inherit;font-size:16px;caret-color:var(--lb-cyan)}
+.lb-form input:focus{outline:none;border-color:var(--lb-cyan);box-shadow:0 0 0 3px rgba(32,213,239,.18)}
+.lb-form input[aria-invalid="true"]{border-color:var(--lb-err)}
+.lb-statut{margin:0;min-height:1.4em;font-size:14px;line-height:1.5;color:var(--lb-soft)}
+.lb-statut.is-erreur{color:var(--lb-err)}
+.lb-etat{margin:0;padding:14px 16px;border-radius:12px;background:rgba(32,213,239,.07);font-size:15.5px;line-height:1.5;color:var(--lb-ink)}
+.lb-etat.is-ok{background:rgba(126,224,176,.1);color:#d9f7e8}
+.lb-etat-detail{margin:8px 0 0;font-size:13.5px;color:var(--lb-soft);overflow-wrap:anywhere}
+
+.lb-foot{max-width:600px;margin:0 auto;padding:24px 16px 104px;font-size:12px;line-height:1.7;color:var(--lb-soft);text-align:center}
+.lb-foot a{color:var(--lb-soft)}
+@media (prefers-reduced-motion:reduce){.lb-cta,.lb-btn{transition:none}}
+
+/* 12/11 : page en 2 etapes */
+.lb-deux{margin-top:28px;gap:26px}
+.lb-deux .lb-pas-t{font-size:17px}
+.lb-deux .lb-cta{margin-top:12px}
+.lb-deux .lb-pro-app{margin-top:6px}
+.lb-deux .lb-form{margin-top:6px}
+.lb-offre-court{margin:30px 0 0;font-size:14.5px;line-height:1.5;color:var(--lb-soft);text-align:center}
+.lb-offre-court a{color:var(--lb-cyan);font-weight:700;text-decoration:none}
+
+/* 12/11 (soir) : meme e-mail sur les deux comptes, tailles alignees sur la page Pro et l'inscription,
+   un seul bouton plein (l'inscription chez le partenaire), banniere officielle en bas (francais). */
+.lb-h1{font-size:clamp(28px,7.6vw,46px);line-height:1.08}
+.lb-cta{min-height:52px;border-radius:12px;font-size:16px}
+.lb-deux .lb-pas-s{font-size:14.5px;color:var(--lb-text)}
+.lb-meme{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin-top:6px}
+.lb-meme[hidden]{display:none}
+.lb-meme-email{color:var(--lb-ink);font-weight:700;overflow-wrap:anywhere}
+.lb-copier{min-height:32px;padding:0 12px;border:1px solid rgba(141,179,211,.3);border-radius:8px;background:transparent;color:var(--lb-ink);font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:border-color .15s ease,color .15s ease}
+.lb-copier:hover{border-color:var(--lb-cyan);color:var(--lb-cyan)}
+.lb-copier:focus-visible{outline:2px solid var(--lb-cyan);outline-offset:2px}
+.lb-banniere{margin-top:30px;aspect-ratio:1428/428;background:var(--lb-panel)}
+.lb-banniere img{height:100%;object-fit:cover}
+.lb-banniere+.lb-offre-court{margin-top:10px}
+.lb-offre-court [hidden]{display:none}
+
+/* Relecture « visiteur » du 12/11 : memes tailles de bouton et de texte que la carte « Pro offert » et
+   l'inscription (52 px, 16 px, 800) ; etape 1 cochee une fois faite, le bouton de l'etape 2 prend le relais. */
+.lb-btn{min-height:52px;font-size:16px}
+.lb-deux .lb-pas-t{font-size:18px;font-weight:800;letter-spacing:-.01em}
+.lb-deux .lb-pas-s{font-size:15px}
+.lb-fait .lb-pas>li:first-child .lb-pas-n{background:var(--lb-cyan);border-color:var(--lb-cyan);color:#04141b}
+.lb-fait .lb-cta{background:rgba(32,213,239,.08);border:1px solid rgba(32,213,239,.45);color:var(--lb-ink)}
+.lb-fait .lb-cta:hover{background:rgba(32,213,239,.16)}
+.lb-fait .lb-pro-app .lb-btn--ligne{background:var(--lb-cyan);border-color:var(--lb-cyan);color:#04141b}
+.lb-fait .lb-pro-app .lb-btn--ligne:hover{background:#5fe2f4}

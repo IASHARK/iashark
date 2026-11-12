@@ -1242,6 +1242,37 @@
     });
     return c;
   }
+  // ---------- Pro offert 1 mois contre une inscription Lolly Bet (11/11/2026, migration 0074) ----------
+  var PRO_OFFERT_STATUT = {
+    en_attente: { label: "À vérifier", cls: "nudge", group: "À vérifier" },
+    valide: { label: "Pro ouvert", cls: "new", group: "Validées" },
+    refuse: { label: "Refusée", cls: "gone", group: "Refusées" }
+  };
+  var PRO_OFFERT_ORDRE = ["en_attente", "valide", "refuse"];
+  // L'identifiant declare est-il l'e-mail du compte IASHARK ? (meme regle que lib/lolly-page.js#memeEmail)
+  function proOffertMemeEmail(identifiant, email) {
+    var a = String(identifiant == null ? "" : identifiant).trim().toLowerCase();
+    var b = String(email == null ? "" : email).trim().toLowerCase();
+    return !!a && a === b;
+  }
+  function proOffertStatut(s) { return PRO_OFFERT_STATUT[s] || { label: "Statut inconnu", cls: "gone", group: "Autres" }; }
+  // Boutons : seulement sur une demande en attente (une décision ne se défait pas ici).
+  function proOffertActions(s) {
+    return s === "en_attente"
+      ? [{ to: "valide", label: "Valider (Pro 1 mois)", primary: true }, { to: "refuse", label: "Refuser", primary: false }]
+      : [];
+  }
+  function proOffertTri(list) {
+    var rang = function (s) { var i = PRO_OFFERT_ORDRE.indexOf(s); return i === -1 ? PRO_OFFERT_ORDRE.length : i; };
+    return (Array.isArray(list) ? list : []).filter(function (d) { return d && typeof d === "object"; }).sort(function (a, b) {
+      return rang(a.statut) - rang(b.statut) || (msOf(b.created_at) || 0) - (msOf(a.created_at) || 0);
+    });
+  }
+  function proOffertCompte(list) {
+    var c = { en_attente: 0, valide: 0, refuse: 0 };
+    (Array.isArray(list) ? list : []).forEach(function (d) { if (d && Object.prototype.hasOwnProperty.call(c, d.statut)) c[d.statut] += 1; });
+    return c;
+  }
   // Commissions en centimes, par devise : « 12,50 € » (+ « 3,00 $US » si autre devise).
   // open = en attente + à verser, c'est-à-dire ce qu'un refus ou une suspension annule.
   function partnerMoney(balances) {
@@ -1264,6 +1295,7 @@
 
   return {
     PARTNER_STATUS: PARTNER_STATUS, PARTNER_STYLES: PARTNER_STYLES, partnerStatus: partnerStatus, partnerStyle: partnerStyle, partnerLegal: partnerLegal,
+    PRO_OFFERT_STATUT: PRO_OFFERT_STATUT, proOffertStatut: proOffertStatut, proOffertMemeEmail: proOffertMemeEmail, proOffertActions: proOffertActions, proOffertTri: proOffertTri, proOffertCompte: proOffertCompte,
     partnerActions: partnerActions, partnerUrl: partnerUrl, partnerLinks: partnerLinks, partnerSort: partnerSort, partnerCounts: partnerCounts, partnerMoney: partnerMoney,
     SCREENS: SCREENS, screenKey: screenKey, DIAG_FILE: DIAG_FILE, pctOf: pctOf, msText: msText, VITALS: VITALS, vitalVerdict: vitalVerdict,
     vitalValue: vitalValue, langName: langName, siteLangText: siteLangText, landingName: landingName, failReason: failReason, todoActions: todoActions,
@@ -2606,6 +2638,115 @@
     });
   }
 
+  // ---------- Pro offert Lolly Bet (admin_pro_offert_demandes, admin_pro_offert_decider) ----------
+  // L'identifiant est tapé par la personne : toujours passé par esc().
+  function proOffertListe() {
+    var r = S.proOffert;
+    if (!r || r.error) return null;
+    var d = r.data;
+    if (typeof d === "string") { try { d = JSON.parse(d); } catch (e) { d = null; } }
+    return H.proOffertTri(d && d.demandes);
+  }
+  function loadProOffert() {
+    if (!sb) return Promise.resolve();
+    if (S.proOffertLoading) return Promise.resolve();
+    S.proOffertLoading = true;
+    return rpc("admin_pro_offert_demandes").then(function (r) {
+      S.proOffertLoading = false;
+      if (r.kind === "denied") { showState("denied"); return; }
+      S.proOffert = r;
+      renderProOffert();
+    });
+  }
+  function renderProOffertFlag(list) {
+    var n = list ? H.proOffertCompte(list).en_attente : 0;
+    var t = $("proOffertTodo");
+    if (!t) return;
+    t.hidden = !n;
+    t.innerHTML = n ? '<span class="badge warn">Lolly Bet</span><b>' + esc(H.fmtInt(n) + " " + plural(n, "demande de Pro offert à vérifier", "demandes de Pro offert à vérifier"))
+      + '</b><a class="todo-link" href="#proOffertBloc">Vérifier ›</a>' : "";
+  }
+  function proOffertLigne(d) {
+    var st = H.proOffertStatut(d.statut);
+    var id = String(d.id == null ? "" : d.id);
+    var when = onDay(d.created_at);
+    var facts = [
+      "Compte IASHARK : " + (d.email || "e-mail inconnu"),
+      d.plan === "pro" ? "déjà abonné payant" : d.plan === "famille" ? "accès Pro offert" : "compte gratuit"
+    ];
+    var autres = H.num(d.meme_identifiant_ailleurs) || 0;
+    // Meme e-mail sur les deux comptes (12/11/2026) : a chercher tel quel dans le rapport Lolly Bet.
+    facts.push(H.proOffertMemeEmail(d.identifiant, d.email) ? "même e-mail chez Lolly Bet et sur IASHARK" : "identifiant différent de l'e-mail du compte");
+    var fin = d.pro_jusqu_au ? fmtDay(d.pro_jusqu_au) : null;
+    var busy = S.proOffertBusy;
+    var boutons = UUID_RE.test(id) ? H.proOffertActions(d.statut).map(function (x) {
+      var mine = busy && busy.id === id && busy.to === x.to;
+      return '<button type="button" class="btn btn-sm' + (x.primary ? "" : " btn-ghost") + '" data-po-id="' + esc(id) + '" data-po-to="' + esc(x.to) + '"'
+        + (busy ? " disabled" : "") + ">" + esc(mine ? "Enregistrement…" : x.label) + "</button>";
+    }).join("") : "";
+    return '<li class="pa"' + (busy && busy.id === id ? ' aria-busy="true"' : "") + ">"
+      + '<div class="pa-top"><b class="pa-code">' + esc(d.identifiant || "Identifiant vide") + '</b><span class="mstatus st-' + esc(st.cls) + '">' + esc(st.label) + "</span>"
+      + '<span class="pa-date">' + esc(when ? "Déclaré " + when + " à " + fmtTime(d.created_at) : "Date inconnue") + "</span></div>"
+      + '<p class="pa-facts">' + esc(facts.join(" · ")) + "</p>"
+      + (autres > 0 ? '<p class="pa-review">' + esc("Attention : cet identifiant est aussi déclaré par " + H.fmtInt(autres) + " " + plural(autres, "autre compte", "autres comptes") + ".") + "</p>" : "")
+      + (d.statut === "valide" && fin ? '<p class="pa-review">' + esc((d.fin_appliquee_le ? "Mois offert terminé (" : "Pro ouvert jusqu'au ") + fin + (d.fin_appliquee_le ? ")" : "")) + "</p>" : "")
+      + (boutons ? '<div class="pa-actions">' + boutons + "</div>" : "")
+      + "</li>";
+  }
+  function renderProOffert() {
+    var el = $("proOffert"), r = S.proOffert;
+    if (!el || !r) return;
+    var list = proOffertListe();
+    renderProOffertFlag(list);
+    if (!list) {
+      if (r.kind === "missing") el.innerHTML = '<p class="soft-msg"><b>Pas encore branché</b>La liste s\'affichera quand la migration 0074 sera appliquée dans Supabase. Préviens ton développeur.</p>';
+      else blockError(el, r, "Pro offert");
+      return;
+    }
+    if (!list.length) {
+      el.innerHTML = emptyHtml("Aucune demande pour l'instant.", "Les personnes qui déclarent leur inscription Lolly Bet sur la page Lolly apparaîtront ici.");
+      return;
+    }
+    var c = H.proOffertCompte(list);
+    var cell = function (n, label, todo) { return "<div" + (todo ? ' class="is-todo"' : "") + '><b class="tnum">' + esc(H.fmtInt(n)) + "</b><span>" + esc(label) + "</span></div>"; };
+    var html = '<div class="pa-sum">' + cell(c.en_attente, "À vérifier", c.en_attente > 0) + cell(c.valide, "Pro ouverts") + cell(c.refuse, "Refusées") + "</div>";
+    var group = null;
+    list.forEach(function (d) {
+      var g = H.proOffertStatut(d.statut).group;
+      if (g !== group) {
+        html += (group === null ? "" : "</ul>") + '<h3 class="pa-group">' + esc(g) + '</h3><ul class="pa-list">';
+        group = g;
+      }
+      html += proOffertLigne(d);
+    });
+    el.innerHTML = html + "</ul>";
+  }
+  function decideProOffert(id, to) {
+    if (S.proOffertBusy || !UUID_RE.test(String(id || "")) || (to !== "valide" && to !== "refuse")) return;
+    var d = (proOffertListe() || []).filter(function (x) { return String(x.id) === String(id); })[0];
+    var qui = d && d.identifiant ? "« " + d.identifiant + " »" : "cette demande";
+    var question = to === "valide"
+      ? "Tu as bien trouvé " + qui + " dans le rapport User management de Lolly Bet ? Le Pro s'ouvre tout de suite pour un mois."
+      : "Refuser " + qui + " ? La personne pourra corriger son identifiant et renvoyer.";
+    if (!window.confirm(question)) return;
+    S.proOffertBusy = { id: id, to: to };
+    renderProOffert();
+    rpc("admin_pro_offert_decider", { p_id: id, p_statut: to, p_note: null }).then(function (r) {
+      S.proOffertBusy = null;
+      if (r.kind === "denied") { showState("denied"); return; }
+      if (!r.error && (!r.data || r.data.ok !== true)) r = { error: { message: "réponse inattendue" }, kind: "error" };
+      if (r.error) {
+        toast(r.kind === "invalid" || /demande_introuvable/.test(String(r.error.message || ""))
+          ? "Cette demande a déjà été traitée. La liste vient d'être rechargée."
+          : "La décision n'a pas pu être enregistrée. Réessaie ; si ça continue, préviens ton développeur.");
+        renderProOffert();
+        return loadProOffert();
+      }
+      toast(to === "valide" ? "Pro ouvert pour un mois." : "Demande refusée.");
+      return loadProOffert();
+    });
+  }
+
   // ---------- Les 10 écrans ----------
   // L'ancre #ecran-<cle> choisit l'écran ; une ancre vers un bloc (#maintenant,
   // #inscrits...) ouvre l'écran qui le contient puis y descend.
@@ -3064,6 +3205,7 @@
       loadDiag();
       loadRevenue();
       loadPartners();
+      loadProOffert();
       appHook("charger");
       if (!opts.silent) return loadLive().then(startTimers);
     }).catch(function (e) {
@@ -3205,6 +3347,8 @@
       if (t.closest("button[data-retry]")) { loadAll({ silent: true }); loadLive(); return; }
       var pa = t.closest("button[data-pa-to]");
       if (pa) { if (!pa.disabled) askPartner(pa.getAttribute("data-pa-id"), pa.getAttribute("data-pa-to")); return; }
+      var po = t.closest("button[data-po-to]");
+      if (po) { if (!po.disabled) decideProOffert(po.getAttribute("data-po-id"), po.getAttribute("data-po-to")); return; }
       var info = t.closest("button.info");
       if (info) {
         var id = info.getAttribute("aria-controls"), panel = id && document.getElementById(id);

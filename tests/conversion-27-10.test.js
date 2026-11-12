@@ -128,9 +128,11 @@ test("C1 : offertDuJour = le choix de l'accueil, mais jamais un match d'un autre
 
 test("C5 : inscription, ce qu'on recoit, tutoiement, retour sur le match offert", () => {
   const fr = JSON.parse(read("i18n/dict/fr.json")).auth;
-  assert.equal(fr.signup_h1, "Ton pari offert du jour, gratuit");
-  assert.equal(fr.signup_intro, "Avec un compte gratuit : l’analyse complète du match offert, chaque jour. Sans carte bancaire.");
-  assert.equal(fr.signup_submit, "Voir mon pari offert");
+  // 12/11/2026 (Clement : « pas assez vendeuse » ; avis ChatGPT, section 5) : « pari offert » pouvait
+  // evoquer un pari offert par un bookmaker. Le titre dit ce que le compte donne, le bouton ce qu'il fait.
+  assert.equal(fr.signup_h1, "Ton analyse foot gratuite, chaque jour");
+  assert.equal(fr.signup_intro, "Un match analysé avec le pronostic et ses raisons, sans carte bancaire.");
+  assert.equal(fr.signup_submit, "Créer mon compte gratuit");
   assert.equal(fr.email_placeholder, "ton@email.com");
   // Petit combine : reserve a Pro depuis le 04/11/2026, plus aucune page d'inscription n'en parle.
   assert.doesNotMatch(JSON.parse(read("i18n/dict/en.json")).auth.signup_intro, /combo|accumulator/i);
@@ -149,6 +151,49 @@ test("C5 : inscription, ce qu'on recoit, tutoiement, retour sur le match offert"
   const CTA = { fr: "Créer mon compte et continuer", en: "Create my account and continue", es: "Crear mi cuenta y continuar", "es-mx": "Crear mi cuenta y continuar",
     de: "Konto erstellen und weiter", it: "Crea il mio account e continua", pt: "Criar a minha conta e continuar" };
   for (const l of Object.keys(CTA)) assert.equal(JSON.parse(read("i18n/dict/" + l + ".json")).auth.pay_step_submit, CTA[l], l);
+});
+
+test("inscription du 12/11 : formulaire tout de suite, match offert nomme, proposition Pro offert, arrivee depuis Lolly", () => {
+  const html = read("inscription.html");
+  const corps = html.slice(html.indexOf("<main"), html.indexOf("</main>"));
+  // Ordre : le titre et sa ligne, le match du jour, le formulaire, puis la proposition secondaire.
+  const ordre = ['data-i18n="auth.signup_h1"', 'data-i18n="auth.signup_intro"', "data-ins-jour hidden", '<form id="form"', 'data-i18n="auth.already_member_prompt"', 'data-i18n="auth.signup_pro_title"'];
+  let avant = -1;
+  for (const r of ordre) { const i = corps.indexOf(r); assert.ok(i > avant, "ordre ou partie manquante : " + r); avant = i; }
+  // Plus de puces generiques ni de titre au-dessus du formulaire.
+  assert.doesNotMatch(corps, /signup_bullet_|signup_form_heading|✓/);
+  assert.match(corps, /Lolly Bet, notre partenaire/);
+  assert.match(corps, /data-ins-pro>[\s\S]*?href="\/lolly\.html" data-href="lolly\.html"/);
+  assert.ok(html.indexOf('src="/lib/noms-equipes-fr.js"') > 0 && html.indexOf('src="/lib/noms-equipes-fr.js"') < html.indexOf('src="/auth-pages.js"'));
+  const js = read("auth-pages.js");
+  // Le match offert du jour : seulement son nom, la meme source que l'accueil.
+  assert.match(js, /if \(m && \/\^\\d\+\$\/\.test\(String\(m\.id\)\)\) \{ offertDuJour = String\(m\.id\); nommerOffert\(m\); \}/);
+  const nommer = js.slice(js.indexOf("function nommerOffert("), js.indexOf("/* ---------- Chemin de paiement"));
+  assert.match(nommer, /t\('auth\.signup_today'/);
+  assert.doesNotMatch(nommer, /pari_rec|cote|prob/i, "aucun pari ni cote dans la ligne du jour");
+  // Arrivee depuis la page Lolly : ?next= en liste blanche, titre et bouton adaptes, proposition retiree.
+  assert.match(js, /\/\^\\\/\(\?:\[a-z\]\{2\}\\\/\)\?lolly\\\.html\(\?:\[\?#\]\|\$\)\/\.test\(brut\)/);
+  const lolly = js.slice(js.indexOf("function titreVenuDeLolly()"), js.indexOf("DOMContentLoaded', titreVenuDeLolly"));
+  assert.match(lolly, /'auth\.signup_h1_lolly'/);
+  assert.match(lolly, /'auth\.pay_step_submit', 'Créer mon compte et continuer'/);
+  assert.match(lolly, /retirerPropositionPro\(\);/);
+  const etape = js.slice(js.indexOf("function etapePaiement()"), js.indexOf("DOMContentLoaded', etapePaiement"));
+  assert.match(etape, /retirerPropositionPro\(\);/, "venu du paiement : pas de deuxieme offre");
+  // Textes dans les 7 langues, sans emoji ; Lolly Bet toujours nomme comme partenaire.
+  const CLES = ["signup_h1", "signup_intro", "signup_today", "signup_submit", "signup_pro_title", "signup_pro_text", "signup_pro_link", "signup_h1_lolly", "signup_intro_lolly", "pay_step_h1"];
+  const PARTENAIRE = { fr: /notre partenaire/, en: /our partner/, es: /nuestro socio/, "es-mx": /nuestro socio/, de: /unserem Partner/, it: /nostro partner/, pt: /nossa parceira/ };
+  for (const l of Object.keys(PARTENAIRE)) {
+    const d = JSON.parse(read("i18n/dict/" + l + ".json")).auth;
+    const part = JSON.parse(read("i18n/parts/vente." + l + ".json")).auth;
+    for (const k of CLES) {
+      assert.ok(typeof d[k] === "string" && d[k].trim(), l + " auth." + k);
+      assert.equal(part[k], d[k], l + " : part et dictionnaire identiques pour auth." + k);
+      assert.doesNotMatch(d[k], /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u, l + " auth." + k + " : aucun emoji");
+    }
+    assert.match(d.signup_today, /\{match\}/, l);
+    assert.match(d.signup_pro_text, /Lolly Bet/, l);
+    assert.match(d.signup_pro_text, PARTENAIRE[l], l + " : Lolly Bet, notre partenaire");
+  }
 });
 
 test("C6 : un seul nombre de competitions sur l'accueil, celui de config/leagues.json", () => {
@@ -425,4 +470,50 @@ test("C2 : la ligne « Hier » : veille a Paris et pour le visiteur, gagnes ET p
     assert.ok(d.line.includes("{list}"), l + " : gabarit");
     assert.doesNotMatch(JSON.stringify(d), /%|garanti|gain|esp[ée]rance/i, l);
   }
+});
+
+test("page de paiement du 12/11 : titre d'action, un seul recapitulatif par duree, plus de liste d'avantages", () => {
+  const OP = require("../lib/offre-pro.js");
+  const plans = [{ interval: "week", amount: 4.99, text: "4,99 €" }, { interval: "month", amount: 14.99, text: "14,99 €", weeklyEquivalentText: "3,46 €" }, { interval: "year", amount: 99, text: "99 €", weeklyEquivalentText: "1,90 €", savingsPct: 44 }];
+  const maintenant = Date.UTC(2026, 10, 12, 10, 0, 0);
+  // Avec essai.
+  const essai = OP.html({ mode: "paiement", contexte: "general", plans, choisi: "month", jours: 7, connecte: true, uid: "p", maintenant });
+  assert.match(essai, /class="op-title" id="p-t">Active ton accès Pro</);
+  assert.match(essai, /<p class="op-sub">Toutes les analyses du jour sur ton compte IASHARK\.<\/p>/);
+  assert.doesNotMatch(essai, /op-benefits/, "plus de liste d'avantages sur la page de paiement");
+  assert.doesNotMatch(essai, /par semaine|soit 3,46/, "plus d'equivalent par semaine");
+  assert.deepEqual(OP.recap(plans[1], 7, maintenant).map((l) => l[1]), ["0 €", "14,99 €"]);
+  assert.match(OP.recap(plans[1], 7, maintenant)[0][0], /^Aujourd’hui · Rien n’est prélevé$/);
+  assert.match(OP.recap(plans[1], 7, maintenant)[1][0], /^Le 19 novembre · Puis chaque mois, si tu n’as pas résilié$/);
+  // Ce que la loi et les CGV demandent reste ecrit une fois : carte, premier abonnement, comment resilier.
+  assert.match(essai, /Avant le 19 novembre, tu peux résilier en ligne depuis Mon compte : tu ne paies rien\. Carte demandée\. Essai réservé à un premier abonnement\./);
+  assert.match(essai, /id="checkoutConsent"/);
+  assert.ok(essai.indexOf('id="checkoutConsent"') < essai.indexOf('id="subscribeButton"'), "les cases juste avant le bouton");
+  // Sans essai : ce qui part aujourd'hui, puis le renouvellement.
+  assert.deepEqual(OP.recap(plans[1], 0, maintenant), [["Aujourd’hui", "14,99 €"], ["Puis chaque mois, sauf résiliation", "14,99 €"]]);
+  assert.deepEqual(OP.recap(plans[0], 0, maintenant), [["Aujourd’hui", "4,99 €"], ["Puis chaque semaine, sauf résiliation", "4,99 €"]]);
+  // Annee : une ligne ; le renouvellement annuel reste ecrit une seule fois, sous le bouton (jamais « sans engagement »).
+  assert.deepEqual(OP.recap(plans[2], 0, maintenant), [["Aujourd’hui · 12 mois payés en une fois", "99 €"]]);
+  const annee = OP.html({ mode: "paiement", contexte: "general", plans, choisi: "year", jours: 0, connecte: true, uid: "y", maintenant });
+  assert.match(annee, /Payer 99 €/);
+  assert.match(annee, /44 % de moins que 12 mois au tarif mensuel/);
+  assert.match(annee, /renouvelés chaque année sauf résiliation avant l’échéance/);
+  assert.doesNotMatch(annee.slice(annee.indexOf("data-op-pay")), /Sans engagement/);
+  // La vitrine (cadenas, page Pro) ne change pas : avantages, et l'essai detaille seulement sur le mois.
+  const vitrine = OP.html({ mode: "vitrine", contexte: "abonnement", plans, choisi: "month", jours: 7, connecte: false, uid: "v", maintenant });
+  assert.match(vitrine, /op-benefits/);
+  assert.match(vitrine, /Pro par abonnement/);
+  assert.equal((vitrine.match(/class="op-essai-lignes"/g) || []).length, 1);
+  // Un contexte de match garde son titre, meme en mode paiement.
+  assert.match(OP.html({ mode: "paiement", contexte: "match", plans, choisi: "month", jours: 0, connecte: true, uid: "m" }), /Passe Pro pour ouvrir ce match/);
+  // Textes dans les 7 langues ; repli sans JS de la page avec le meme titre ; cases : plus de majuscules espacees.
+  for (const l of ["fr", "en", "es", "es-mx", "de", "it", "pt"]) {
+    const d = JSON.parse(read("i18n/dict/" + l + ".json")).offre_pro, part = JSON.parse(read("i18n/parts/vente." + l + ".json")).offre_pro;
+    for (const k of ["pay_title", "pay_sub", "recap_year_once", "recap_then_month", "recap_then_week"]) {
+      assert.ok(typeof d[k] === "string" && d[k].trim(), l + " offre_pro." + k);
+      assert.equal(part[k], d[k], l + " offre_pro." + k);
+    }
+  }
+  assert.match(read("abonnement.html"), /<h1 data-i18n="offre_pro\.pay_title">Active ton accès Pro<\/h1>/);
+  assert.doesNotMatch(read("lib/checkout-consent.js").match(/\.iash-consent-title\{[^}]*\}/)[0], /uppercase|letter-spacing/);
 });

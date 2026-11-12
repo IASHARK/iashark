@@ -168,8 +168,35 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', titreVenuDunMatch); else titreVenuDunMatch();
 
+  /* ---------- Proposition « Pro offert » sous le formulaire (12/11/2026) ----------
+     Retiree quand le visiteur vient deja de la page Lolly ou du paiement : il poursuit l'action
+     qu'il a choisie (avis ChatGPT du 12/11, section 5). Le lien de contact reste (assets/account.css). */
+  function retirerPropositionPro() {
+    var bloc = document.querySelector('[data-ins-pro]');
+    if (bloc) bloc.setAttribute('data-ins-pro', 'non');
+  }
+
+  /* ---------- Inscription venue de la page Lolly (12/11/2026) ----------
+     « Pro offert 1 mois » : sans compte, la page Lolly envoie ici avec ?next=/fr/lolly.html#pro-offert
+     (lib/lolly-page.js). Le titre dit pourquoi on cree le compte, le bouton dit qu'on continue, et
+     l'inscription ramene sur la demande. ?next= lu en LISTE BLANCHE (chemin interne lolly.html). */
+  function venuDeLolly(brut) {
+    if (!brut || brut.charAt(0) !== '/' || brut.charAt(1) === '/' || brut.indexOf('\\') !== -1) return false;
+    return /^\/(?:[a-z]{2}\/)?lolly\.html(?:[?#]|$)/.test(brut);
+  }
+  function titreVenuDeLolly() {
+    if (!/\/inscription(\.html)?$/.test(location.pathname)) return;
+    if (!venuDeLolly(new URLSearchParams(location.search).get('next') || '')) return;
+    var poser = function (el, cle, texte) { if (!el) return; el.setAttribute('data-i18n', cle); el.textContent = t(cle, texte); };
+    poser(document.querySelector('[data-i18n="auth.signup_h1"]'), 'auth.signup_h1_lolly', 'Crée ton compte pour recevoir ton mois Pro');
+    poser(document.querySelector('[data-i18n="auth.signup_intro"]'), 'auth.signup_intro_lolly', 'Utilise le même e-mail que chez Lolly Bet : c’est avec lui qu’on retrouve ton inscription.');
+    poser(document.querySelector('[data-i18n="auth.signup_submit"]'), 'auth.pay_step_submit', 'Créer mon compte et continuer');
+    retirerPropositionPro();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', titreVenuDeLolly); else titreVenuDeLolly();
+
   /* ---------- Inscription sans ?next= : retour sur le match offert (correction C5 du 27/10/2026) ----------
-     Le bouton dit « Voir mon pari offert » : apres l'inscription, le visiteur arrive donc sur le match
+     Apres l'inscription, le visiteur arrive donc sur le match
      offert DU JOUR (lib/free-match.js#offertDuJour, liste data-home.json : la meme source que l'accueil),
      ou son analyse s'ouvre avec le compte. Pas de match offert ce jour, ou liste illisible : Mon compte,
      comme avant. Lu en arriere-plan, jamais bloquant. */
@@ -182,8 +209,21 @@
       var F = window.IasharkFreeMatch, liste = d && Array.isArray(d.matchs) ? d.matchs : null;
       if (!F || typeof F.offertDuJour !== 'function' || !liste) return;
       var m = F.offertDuJour(liste, null, (window.IASHARK_MARKET && window.IASHARK_MARKET.code) || null);
-      if (m && /^\d+$/.test(String(m.id))) offertDuJour = String(m.id);
+      if (m && /^\d+$/.test(String(m.id))) { offertDuJour = String(m.id); nommerOffert(m); }
     }).catch(function () {});
+  }
+  /* « Aujourd'hui : equipe – equipe » sous le titre (12/11/2026) : le match offert du jour, le meme
+     que l'accueil. Seulement son nom : le pari reste derriere le compte. Noms francais sur les pages
+     francaises (lib/noms-equipes-fr.js). Pas de match offert ce jour : la ligne reste cachee. */
+  function nommerOffert(m) {
+    var el = document.querySelector('[data-ins-jour]');
+    var h = m && m.home && m.home.n, a = m && m.away && m.away.n;
+    if (!el || !h || !a) return;
+    var N = window.IasharkNomsEquipesFr;
+    var fr = !(window.I18N && window.I18N.locale) || window.I18N.locale === 'fr';
+    var nom = function (x) { return fr && N && typeof N.nom === 'function' ? N.nom(x) : String(x); };
+    el.textContent = String(t('auth.signup_today', 'Aujourd’hui : {match}')).replace('{match}', nom(h) + ' – ' + nom(a));
+    el.hidden = false;
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', chercherOffert); else chercherOffert();
 
@@ -223,8 +263,8 @@
         el.textContent = texte;
       };
       fixer('eyebrow', t('auth.pay_step_eyebrow', 'Passer Pro'));
-      fixer('h1', t('auth.pay_step_h1', 'Étape 1 sur 2 : ton compte.'));
-      // Le bouton mene au paiement : jamais « Voir mon pari offert » sur ce chemin (avocat du diable, 27/10/2026).
+      fixer('h1', t('auth.pay_step_h1', 'Crée ton compte pour activer Pro'));
+      // Le bouton mene au paiement : jamais le bouton du compte gratuit sur ce chemin (avocat du diable, 27/10/2026).
       fixer('submit', t('auth.pay_step_submit', 'Créer mon compte et continuer'));
       fixer('intro', prix ? tf('auth.pay_step_intro', 'Ensuite : paiement {duree} ({prix}) par Stripe. Ta durée reste choisie.', vars)
         : tf('auth.pay_step_intro_noprice', 'Ensuite : le paiement {duree} par Stripe. Ta durée reste choisie.', vars));
@@ -232,6 +272,7 @@
       var puce = document.querySelector('[data-i18n="auth.signup_bullet_analysis"]');
       var liste = puce && puce.closest('ul');
       if (liste) { liste.hidden = true; liste.style.display = 'none'; }
+      retirerPropositionPro();
     };
     poser();
     // Dictionnaire charge apres coup (autre langue) : on reecrit dans la bonne langue.

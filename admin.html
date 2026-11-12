@@ -124,6 +124,7 @@
       </div>
       <p class="help" id="helpTodo" hidden>Trois problèmes au plus, les plus graves d'abord : paiement qui échoue, site qui plante, puis les endroits où tu perds le plus de visiteurs. Chaque ligne t'emmène vers l'écran qui donne le détail. Rien ne s'affiche quand il n'y a pas assez de visiteurs pour être sûr (moins de 20 sur une page ou une source).</p>
       <div class="todo-pa" id="partnersTodo" hidden></div>
+      <div class="todo-pa" id="proOffertTodo" hidden></div>
       <div id="todo"><div class="skel skel-block"></div></div>
     </section>
 
@@ -470,6 +471,17 @@
       </section>
     </section>
 
+    <!-- Pro offert 1 mois contre une inscription chez Lolly Bet (11/11/2026) : admin_pro_offert_demandes,
+         admin_pro_offert_decider (migration 0074). Jamais d'auto-validation. -->
+    <section class="card section" data-screen="partenaires" id="proOffertBloc" aria-labelledby="proOffertTitle">
+      <div class="card-head">
+        <div><h2 class="card-title" id="proOffertTitle">Pro offert : inscriptions Lolly Bet à vérifier</h2><p class="card-sub">Les demandes en attente d'abord</p></div>
+        <button type="button" class="info" aria-expanded="false" aria-controls="helpProOffert" aria-label="Aide : Pro offert Lolly Bet">i</button>
+      </div>
+      <p class="help" id="helpProOffert" hidden>Ouvre ton espace partenaire Lolly Bet, rapport « User management » : il liste l'e-mail et le login des joueurs inscrits par nos liens. Si l'identifiant de la demande y est, touche <b>Valider</b> : le Pro s'ouvre tout de suite pour un mois, puis s'arrête tout seul. Sinon, <b>Refuser</b> : la personne peut corriger et renvoyer.</p>
+      <div id="proOffert"><div class="skel skel-block"></div></div>
+    </section>
+
     <!-- Écran Partenaires (20/10/2026) : admin_affiliates, admin_affiliate_set_status -->
     <section class="card section" data-screen="partenaires" aria-labelledby="partnersTitle">
       <div class="card-head">
@@ -585,7 +597,7 @@
         <li><a href="#ecran-arrivee"><b>Arrivée</b><span>La première page vue et la langue</span></a></li>
         <li><a href="#ecran-parcours"><b>Parcours</b><span>Du premier match au paiement</span></a></li>
         <li><a href="#ecran-envie"><b>Envie</b><span>Ce qui donne envie de payer</span></a></li>
-        <li><a href="#ecran-partenaires"><b>Partenaires</b><span>Candidatures et commissions</span></a></li>
+        <li><a href="#ecran-partenaires"><b>Partenaires</b><span>Candidatures, commissions, Pro offert Lolly Bet</span></a></li>
         <li><a href="#ecran-fiabilite"><b>Fiabilité</b><span>Ce qui est mesuré, filtres</span></a></li>
       </ul>
     </section>

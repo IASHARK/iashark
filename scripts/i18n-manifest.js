@@ -991,6 +991,9 @@ var PAGES = [
   // Page Contact (30/10/2026) : Telegram prive + formulaire (lib/contact-page.js,
   // migration 0060), traduite au build (data-i18n) ; noindex, hors sitemap.
   {file: "contact.html", noSitemap: true},
+  // Page partenaire Lolly Bet + « Pro offert 1 mois » (11/11/2026) : lib/lolly-page.js,
+  // migration 0074 ; traduite au build (data-i18n) ; noindex, hors sitemap.
+  {file: "lolly.html", noSitemap: true},
   {file: "404.html", noSitemap: true}
 ];
 

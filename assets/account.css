@@ -48,7 +48,7 @@ input:-webkit-autofill,input:-webkit-autofill:focus{
    cible tactile). */
 .fld{
   width:100%;height:46px;padding:0 13px;
-  border:1px solid rgba(141,179,211,.2);border-radius:9px;
+  border:1px solid rgba(141,179,211,.2);border-radius:12px;
   background:rgba(255,255,255,.035);color:#f4f7fb;
   font-size:15px;outline:none;
   transition:border-color .15s,background .15s,box-shadow .15s;
@@ -188,3 +188,33 @@ a[data-href="mot-de-passe-oublie.html"]{display:inline-block;padding:10px 0;marg
 .acv-tg:hover{border-color:rgba(32,213,239,.45)}
 .acv-tg-i{flex:none;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:#20d5ef;color:#060b12}
 .acv-match:focus-visible,.acv-tg:focus-visible{outline:2px solid #20d5ef;outline-offset:2px;border-radius:16px}
+
+/* ---------- Inscription (12/11/2026) : ce que le compte donne, puis le formulaire tout de suite ----------
+   Telephone : titre court, formulaire dans le premier ecran. Ordinateur : le titre a gauche, le
+   formulaire a droite, la proposition Pro sous le titre. */
+.ins{display:grid;gap:18px;padding-top:22px;padding-bottom:32px}
+.ins [hidden]{display:none!important}
+.ins-h1{font-size:clamp(28px,7.6vw,46px);font-weight:800;line-height:1.08;letter-spacing:-.03em;color:#f4f7fb;text-wrap:balance}
+.ins-ligne{margin-top:10px;max-width:44ch;font-size:16px;line-height:1.45;color:#c6d1de}
+.ins-jour{margin-top:12px;font-size:16px;font-weight:700;line-height:1.35;color:#20d5ef}
+.ins-form{padding:20px 18px 18px}
+.ins-pro{display:grid;gap:6px;padding-top:18px;border-top:1px solid rgba(141,179,211,.14)}
+.ins-pro-titre{font-size:18px;font-weight:800;line-height:1.25;letter-spacing:-.01em;color:#f4f7fb}
+.ins-pro-ligne{max-width:46ch;font-size:15px;line-height:1.45;color:#c6d1de}
+.ins-pro-lien{justify-self:start;margin-top:4px;padding:6px 0;font-size:15.5px;font-weight:700;color:#20d5ef;text-decoration:underline;text-decoration-color:rgba(32,213,239,.4);text-underline-offset:4px}
+.ins-pro-lien:hover{text-decoration-color:#20d5ef}
+.ins-contact{justify-self:start;margin-top:10px;font-size:13.5px;font-weight:600;color:#91a0b3}
+.ins-contact:hover{color:#f4f7fb}
+.ins-pro-lien:focus-visible,.ins-contact:focus-visible{outline:2px solid #20d5ef;outline-offset:3px;border-radius:3px}
+/* Venu de la page Lolly ou du paiement : la proposition Pro est retiree, le contact reste. */
+.ins-pro[data-ins-pro="non"]{border-top:0;padding-top:0}
+.ins-pro[data-ins-pro="non"]>:not(.ins-contact){display:none}
+@media (min-width:1024px){
+  .ins{grid-template-columns:minmax(0,1fr) minmax(0,420px);column-gap:64px;row-gap:28px;align-content:center;min-height:calc(100dvh - 3.5rem);padding-top:48px;padding-bottom:48px}
+  .ins-tete{grid-column:1;grid-row:1;align-self:end}
+  .ins-form{grid-column:2;grid-row:1 / span 2;align-self:center;padding:28px}
+  .ins-pro{grid-column:1;grid-row:2;align-self:start}
+  .ins-ligne{font-size:18px}
+}
+/* Bouton de l'inscription : memes mesures que les boutons du parcours de vente (52 px, 16 px, 800). */
+.ins #submit{height:52px;font-size:16px;font-weight:800}

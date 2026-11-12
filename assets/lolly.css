@@ -82,3 +82,14 @@ html{background:var(--lb-bg)}
 .lb-banniere img{height:100%;object-fit:cover}
 .lb-banniere+.lb-offre-court{margin-top:10px}
 .lb-offre-court [hidden]{display:none}
+
+/* Relecture « visiteur » du 12/11 : memes tailles de bouton et de texte que la carte « Pro offert » et
+   l'inscription (52 px, 16 px, 800) ; etape 1 cochee une fois faite, le bouton de l'etape 2 prend le relais. */
+.lb-btn{min-height:52px;font-size:16px}
+.lb-deux .lb-pas-t{font-size:18px;font-weight:800;letter-spacing:-.01em}
+.lb-deux .lb-pas-s{font-size:15px}
+.lb-fait .lb-pas>li:first-child .lb-pas-n{background:var(--lb-cyan);border-color:var(--lb-cyan);color:#04141b}
+.lb-fait .lb-cta{background:rgba(32,213,239,.08);border:1px solid rgba(32,213,239,.45);color:var(--lb-ink)}
+.lb-fait .lb-cta:hover{background:rgba(32,213,239,.16)}
+.lb-fait .lb-pro-app .lb-btn--ligne{background:var(--lb-cyan);border-color:var(--lb-cyan);color:#04141b}
+.lb-fait .lb-pro-app .lb-btn--ligne:hover{background:#5fe2f4}

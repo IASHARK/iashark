@@ -115,7 +115,7 @@ test("page match : bloc partenaire sous le pari (12/11/2026) : un cadre, la bann
   const gratuit = fr("Lens – Lille", "avant", false);
   // Un seul cadre, dans l'ordre : partenaire et 18+, banniere, phrase d'appel, Pro offert.
   assert.match(gratuit, /^<div class="bk-cta bk-offre po-carte"/);
-  const ordre = ['class="bk-offre-tete"', "notre partenaire", ">18+<", 'class="bk-offre-img" href="/go/lolly/site"', 'src="/assets/bk/lolly-bienvenue-fr.webp"', 'class="bk-offre-btn bk-offre-btn--doux" href="/go/lolly/site"', "Parier ce match chez Lolly Bet", 'href="/fr/lolly.html#pro-offert"', "1 mois de Pro offert à l’inscription"];
+  const ordre = ['class="bk-offre-tete"', "notre partenaire", ">18+<", 'class="bk-offre-img" href="/go/lolly/site"', 'src="/assets/bk/lolly-bienvenue-fr.webp"', 'class="bk-offre-btn bk-offre-btn--doux" href="/go/lolly/site"', "Parier ce match chez Lolly Bet", 'href="/fr/lolly.html#pro-offert"', "1 mois de Pro offert : voir comment"];
   let avant = -1;
   for (const r of ordre) { const i = gratuit.indexOf(r); assert.ok(i > avant, "ordre ou partie manquante : " + r); avant = i; }
   // La banniere : cliquable avec notre lien, mesuree, sans saut de mise en page ; l'offre n'est plus ecrite en gros.

@@ -452,7 +452,7 @@ function boutonParieurHtml(match,moment,pro){
   // Banniere officielle (Lolly Bet, materiel promotionnel) : son texte est en francais, donc en francais seulement.
   const banniere=bk==='lolly'&&estFr()?`<a class="bk-offre-img" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi('bookmaker_'+bk+'_banniere')}><img src="/assets/bk/lolly-bienvenue-fr.webp" alt="${esc(nom)} : ${esc(t('match_page.bk_offer','1er pari remboursé jusqu’à 100 €'))}" width="1428" height="428" loading="lazy" decoding="async"></a>`:'';
   const bouton=`<a class="${banniere?'bk-offre-btn bk-offre-btn--doux':'po-btn bk-offre-btn'}" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi(kind)}><span>${esc(libelle)}</span><span aria-hidden="true">→</span></a>`;
-  const proOffert=pro||bk!=='lolly'?'':`<a class="bk-offre-pro" href="${esc(lien('lolly.html'))}#pro-offert"${suivi('lolly_pro_offert_avis')}><span>${esc(t('match_page.bk_pro_link','1 mois de Pro offert à l’inscription'))}</span><span aria-hidden="true">→</span></a>`;
+  const proOffert=pro||bk!=='lolly'?'':`<a class="bk-offre-pro" href="${esc(lien('lolly.html'))}#pro-offert"${suivi('lolly_pro_offert_avis')}><span>${esc(t('match_page.bk_pro_link','1 mois de Pro offert : voir comment'))}</span><span aria-hidden="true">→</span></a>`;
   return `<div class="bk-cta bk-offre po-carte" data-bk-match="${esc(match||'')}">${tete}${banniere}${bouton}${proOffert}</div>`;
 }
 // « Pro offert 1 mois » (11/11/2026, decision de Clement) : 2e option du cadenas Pro, sous l'offre

@@ -53,7 +53,8 @@ test("offre Lolly : formulation exacte, jamais « 100 € offerts », pas de cod
   const sp = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, String(v).replace(/\u00a0/g, " ")]));
   const fr = sp(dict("fr").lolly_page);
   assert.equal(fr.offer_main, "1er pari remboursé en cash jusqu’à 100 €");
-  assert.equal(fr.pro_pending, "On vérifie ton inscription, ton Pro s’ouvre dès que c’est confirmé.");
+  // 12/11/2026 : l'attente dit aussi de revenir sur la page (personne n'est prevenu autrement).
+  assert.equal(fr.pro_pending, "Demande reçue. On vérifie ton inscription chez Lolly Bet : reviens sur cette page, ton Pro s’y affiche dès que c’est confirmé.");
   const emoji = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u;
   for (const l of LOCALES) {
     const txt = JSON.stringify(dict(l).lolly_page) + JSON.stringify(dict(l).match_page.pro_offert_text);
@@ -192,4 +193,26 @@ test("meme e-mail sur les deux comptes (12/11/2026) : e-mail du compte affiche, 
   const adm = read("admin-dashboard.js");
   assert.match(adm, /H\.proOffertMemeEmail\(d\.identifiant, d\.email\) \? "même e-mail chez Lolly Bet et sur IASHARK" : "identifiant différent de l'e-mail du compte"/);
   assert.match(read("funnel-track.js"), /lolly_pro_copier: true/);
+});
+
+test("relecture « visiteur » du 12/11 : etape 1 cochee au retour, textes qui ne promettent pas plus vite que la verification", () => {
+  const js = read("lib/lolly-page.js"), css = read("assets/lolly.css");
+  // Apres l'appui sur le bouton Lolly (memorise dans le navigateur) ou des que la demande est partie.
+  assert.match(js, /root\.localStorage\.setItem\(CLE_FAIT, "1"\)/);
+  assert.match(js, /marquerEtape1\(etat === "en_attente" \|\| etat === "valide" \|\| etape1Memorisee\(\)\);/);
+  assert.match(js, /zone\.classList\.toggle\("lb-fait", !!fait\);/);
+  // Le bouton de l'etape 2 prend le relais ; celui de l'etape 1 passe en contour.
+  assert.match(css, /\.lb-fait \.lb-cta\{background:rgba\(32,213,239,\.08\)/);
+  assert.match(css, /\.lb-fait \.lb-pro-app \.lb-btn--ligne\{background:var\(--lb-cyan\)/);
+  // Memes mesures de bouton sur tout le parcours : 52 px, 16 px.
+  assert.match(css, /\.lb-btn\{min-height:52px;font-size:16px\}/);
+  assert.match(read("assets/account.css"), /\.ins #submit\{height:52px;font-size:16px;font-weight:800\}/);
+  // Verification a la main : aucun texte ne dit « tout de suite » ; l'attente dit de revenir sur la page.
+  for (const l of LOCALES) {
+    const d = dict(l);
+    assert.doesNotMatch(d.auth.signup_intro_lolly + " " + d.lolly_page.pro_pending, /tout de suite|right away|enseguida|sofort|subito|logo o teu/i, l);
+    assert.ok(String(d.match_page.bk_pro_link || "").trim(), l + " match_page.bk_pro_link");
+  }
+  assert.match(dict("fr").lolly_page.pro_pending, /^Demande reçue\. .*reviens sur cette page/);
+  assert.equal(dict("fr").match_page.bk_pro_link, "1 mois de Pro offert : voir comment");
 });

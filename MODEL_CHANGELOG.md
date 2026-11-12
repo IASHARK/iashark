@@ -15,7 +15,7 @@ Changements qui affectent le calcul des probabilités, marchés, edge/Kelly ou l
 - **Corrections du 12/11 (mathématicien ORANGE, avocat du diable ROUGE)** :
   - exclus du choix : joueurs et buteurs (35 % annoncés, 18 % réels), cartons 80-83 (comptage à valider par l'ingénieur données), famille mi-temps et mi-temps/fin (41,5 % réels pour 54 % annoncés) ;
   - règlement : statistiques d'équipe (corners, tirs, fautes, hors-jeu) seulement sur un match fini en 90 minutes (FT) ; prolongé, arrêté ou statistique absente = en attente, jamais 0 ; cartons en attente sans événement de carton ou match non fini, cartons de l'entraîneur ou du banc non comptés ;
-  - combinés et Sélection en or : jambes = pari de l'ancienne règle de chaque match (marchés connus, 1,40-2,20 de `config/tickets.json`), plus le pari affiché ; une jambe doit pouvoir gagner avec le pari affiché (`lib/marches-paris.js#compatibles`) ;
+  - combinés et Sélection en or : jambes = pari de l'ancienne règle de chaque match (marchés connus, 1,40-2,20 de `config/tickets.json`) ; le pari affiché n'y est PAS ajouté (lib/tickets-du-jour.js#candidatsAvecPariAffiche), mais une jambe doit pouvoir gagner avec le pari affiché (`lib/marches-paris.js#compatibles`) ;
   - sélection nationale vérifiée par les cotes (Ligue des nations, éliminatoires) : Sélection IASHARK même sans le v3, donc peut être le match offert ;
   - mesure (règlement indépendant du mathématicien, 1 023 matchs réglés) : chance annoncée 54,4 %, réussite 53,3 % (IC 95 % 50,2-56,3), cote moyenne 1,73 ; jambes des combinés (ancienne règle) : 62,9 % annoncés, 66,1 % réels, cote 1,51.
 

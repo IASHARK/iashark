@@ -2,6 +2,14 @@
 
 Changements qui affectent le calcul des probabilités, marchés, edge/Kelly ou la manière dont ils sont décidés. Journal complet et non-technique dans `IASHARK_V2_EXECUTION_STATE.md` ; ce fichier ne liste que ce qui touche le moteur lui-même.
 
+## 2026-11-12 (midi) — mi-temps : la porte est fermée pour de bon (avocat du diable REJETÉ, NON FUSIONNÉ : validation mathématicien + avocat du diable)
+
+- **Constat** : la règle « tous_marches_bet365 » est en ligne depuis le 12/11 à 11 h. Le calcul de 11 h a publié « Dijon -0,5 (handicap) (1re mi-temps) », cote 1,75 (Coupe de France, 13/11). L'exclusion « mi-temps » ne regardait que l'étiquette de famille : les marchés jugés sur une seule mi-temps mais rangés dans une autre famille restaient candidats.
+- **Correction** (`lib/flux-paris.js#estMiTemps`, `EXCLUS_MI_TEMPS_AUTRES`) : sortent du choix, par numéro et par nom Bet365 (« half », « halves ») : 18, 19, 104, 181 (handicaps de mi-temps) ; 31, 62 (score exact d'une mi-temps) ; 34, 35 (les deux marquent sur une mi-temps) ; 42, 46 (nombre exact de buts d'une mi-temps) ; 78 (résultat et buts de la 1re mi-temps) ; 48, 105-108, 111-117 (buts d'une équipe par mi-temps) ; 185 (premier but de la 1re mi-temps). Marchés publiables : 71 (avant : 95).
+- **Non touché** : la famille « Minutes » (tranches de 15 minutes, « gagne après 10 minutes »), jamais mesurée à part : au mathématicien de trancher.
+- **Décision déjà affichée** : le pari de Dijon - Orléans reste affiché et compte au bilan (règle de Clément : une décision affichée ne change plus) ; il se règle sur le score de la pause.
+- **À faire par le mathématicien** : refaire la mesure des 1 023 matchs sans ces marchés (chance annoncée, réussite réelle, cote moyenne, part des matchs avec un pari).
+
 ## 2026-11-11 (soir) — pari choisi parmi tous les marchés Bet365, cote 1,70-3,50 (décision de Clément, NON FUSIONNÉ : validation mathématicien + avocat du diable)
 
 - **Règle** : `config/marches-pari.json#choix_du_pari.regle = "tous_marches_bet365"` (toute autre valeur = ancienne règle). Fourchette `config/leagues.json#fiabilite.fourchette_pari` 1,70-3,50, 1,70 minimum strict, aucun repli.

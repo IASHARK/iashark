@@ -93,6 +93,31 @@ test("cartons (80 a 83) exclus tant que le comptage n'est pas valide, famille Mi
   assert.equal(P.choisirPariFourchette(Object.assign({}, M), ctxAvec(r), {}), null, "seuls mi-temps et cartons dans la fourchette : pas de pari");
 });
 
+test("mi-temps rangee ailleurs (avocat du diable, REJETE du 12/11 a midi) : handicap, score exact, les deux marquent et buts d'UNE mi-temps jamais choisis", () => {
+  // Le calcul de 11 h avait publie « Dijon -0,5 (handicap) (1re mi-temps) » : le marche 19 est range dans
+  // « Handicap asiatique », l'exclusion ne regardait que l'etiquette « Mi-temps ».
+  const ids = [18, 19, 31, 34, 35, 42, 46, 48, 62, 78, 104, 105, 106, 107, 108, 111, 112, 113, 114, 115, 116, 117, 181, 185];
+  ids.forEach((id) => assert.equal(FP.raisonExclusion(id, "x", REGLE), FP.RAISON_MI_TEMPS, "bet " + id));
+  assert.deepEqual(Object.keys(FP.EXCLUS_MI_TEMPS_AUTRES).map(Number).sort((a, b) => a - b), ids);
+  // Par le nom Bet365 aussi, pour un numero qu'on ne connait pas encore.
+  ["Asian Handicap First Half", "Both Teams To Score - Second Half", "To Win Both Halves", "Correct Score - First Half"].forEach((n) =>
+    assert.equal(FP.raisonExclusion(999, n, REGLE), FP.RAISON_MI_TEMPS, n));
+  // Les memes marches sur le match entier restent candidats.
+  [[4, "Asian Handicap"], [5, "Goals Over/Under"], [8, "Both Teams Score"], [45, "Corners Over Under"]].forEach(([id, n]) => assert.equal(FP.raisonExclusion(id, n, REGLE), null, n));
+  // Plus aucun marche d'une seule mi-temps dans la liste des publiables ; aucun libelle publiable ne parle de mi-temps.
+  const pub = FP.catalogue(REGLE).publiables;
+  assert.ok(pub.every((x) => !FP.estMiTemps(x.bet_id, "")));
+  for (const x of pub) {
+    let t = "";
+    for (const val of ["Home", "Away", "Draw", "Over 0.5", "Yes", "1:0", "0", "Home/Draw", "Home -0.5"]) { try { t += " " + FP.SPECS[x.bet_id].lib(val, "DOM", "EXT"); } catch (e) {} }
+    assert.doesNotMatch(t, /mi-temps/i, "bet " + x.bet_id + " : " + t.slice(0, 80));
+  }
+  // Seul le handicap de 1re mi-temps est dans la fourchette : aucun pari ne sort.
+  const r = raw([{ id: 1, name: "Match Winner", values: v([["Home", 1.3], ["Draw", 5], ["Away", 9]]) },
+    { id: 19, name: "Asian Handicap First Half", values: v([["Home -0.5", 1.75], ["Away +0.5", 2.05]]) }]);
+  assert.equal(P.choisirPariFourchette(Object.assign({}, M), ctxAvec(r), {}), null, "seul un handicap de 1re mi-temps dans la fourchette : pas de pari");
+});
+
 test("cartons jamais regles sans evenements ; statistique absente ou vide jamais comptee 0 (en attente)", () => {
   const base = { fixture: { teams: { home: { id: 1 }, away: { id: 2 } }, score: { fulltime: { home: 0, away: 0 }, halftime: { home: 0, away: 0 } }, fixture: { status: { short: "FT" } } } };
   [undefined, []].forEach((events) => {

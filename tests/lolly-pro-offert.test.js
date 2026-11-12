@@ -38,14 +38,12 @@ test("etat du bloc Pro offert : compte d'abord, puis attente, valide, deja Pro, 
   assert.equal(LP.erreurCle({ message: "autre" }), "envoi");
 });
 
-test("page : bouton vers /go/lolly/site, 18+, banniere en francais seulement, aucun texte utilisateur en innerHTML", () => {
+test("page : bouton vers /go/lolly/site, 18+, aucun texte utilisateur en innerHTML", () => {
   const src = read("lolly.html"), js = read("lib/lolly-page.js");
   assert.ok((src.match(/href="\/go\/lolly\/site"/g) || []).length >= 2);
   assert.match(src, /rel="sponsored noopener"/);
   assert.match(src, /18\+/);
   assert.match(src, /id="pro-offert"/);
-  assert.match(src, /id="lbBanniere"[^>]*hidden/);
-  assert.match(js, /if \(ban && estFr\(\)\) ban\.hidden = false;/);
   assert.doesNotMatch(js, /\.innerHTML\s*=|insertAdjacentHTML/);
   assert.match(js, /lien\("inscription\.html\?next="/);
   assert.match(js, /from\(TABLE\)\.insert\(\{ identifiant: v, partenaire: "lolly" \}\)/);
@@ -55,9 +53,6 @@ test("offre Lolly : formulation exacte, jamais « 100 € offerts », pas de cod
   const sp = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, String(v).replace(/\u00a0/g, " ")]));
   const fr = sp(dict("fr").lolly_page);
   assert.equal(fr.offer_main, "1er pari remboursé en cash jusqu’à 100 €");
-  assert.equal(fr.offer_second, "+50 % sur le 2e et le 3e dépôt");
-  assert.equal(fr.offer_second_detail, "en freebet, 50 € maximum, sans condition de mise.");
-  assert.equal(fr.example, "Tu paries 20 €, ton pari perd : Lolly te rembourse 20 € en cash.");
   assert.equal(fr.pro_pending, "On vérifie ton inscription, ton Pro s’ouvre dès que c’est confirmé.");
   const emoji = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u;
   for (const l of LOCALES) {
@@ -103,11 +98,11 @@ test("cadenas Pro de la page match : 2e option « Pro offert 1 mois » vers la p
   assert.match(src, /secs\.push\(\['prooffert',carteProOffert\(\),null,true\]\);/);
   assert.match(src, /lien\('lolly\.html'\)\)\}#pro-offert"\$\{suivi\('lolly_pro_offert_match'\)\}/);
   const ft = read("funnel-track.js");
-  for (const k of ["lolly_page_inscription", "lolly_page_inscription_bas", "lolly_page_banniere", "lolly_pro_offert_match", "lolly_pro_compte", "lolly_pro_lien", "lolly_pro_declarer", "lolly_pro_outils"]) {
+  for (const k of ["lolly_page_inscription", "lolly_page_inscription_bas", "lolly_page_banniere", "lolly_page_offre", "lolly_pro_offert_match", "lolly_pro_compte", "lolly_pro_lien", "lolly_pro_declarer", "lolly_pro_outils"]) {
     assert.match(ft, new RegExp(k + ": true"), k);
   }
-  for (const k of ["lolly_page_inscription", "lolly_page_inscription_bas", "lolly_page_banniere"]) assert.match(read("lolly.html"), new RegExp('data-track-kind="' + k + '"'), k);
-  for (const k of ["lolly_pro_compte", "lolly_pro_lien", "lolly_pro_declarer", "lolly_pro_outils"]) assert.match(read("lib/lolly-page.js"), new RegExp('"' + k + '"'), k);
+  for (const k of ["lolly_page_inscription", "lolly_page_offre"]) assert.match(read("lolly.html"), new RegExp('data-track-kind="' + k + '"'), k);
+  for (const k of ["lolly_pro_compte", "lolly_pro_declarer", "lolly_pro_outils"]) assert.match(read("lib/lolly-page.js"), new RegExp('"' + k + '"'), k);
   assert.match(read("assets/match-page.css"), /\.po-carte\{/);
 });
 

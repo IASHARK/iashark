@@ -380,6 +380,10 @@
       // Composant de paiement unique (lib/offre-pro.js, mode « paiement », 04/10/2026) :
       // la duree, les cases legales, un bouton, paiement direct depuis le compte.
       + '<div id="offreCompte"></div>'
+      // L'autre chemin vers le Pro (12/11/2026) : la meme ligne que sous le deblocage des combines
+      // (lib/aujourdhui.js, .aj-offert), vers la page Lolly Bet, notre partenaire.
+      + '<a class="aj-offert" href="' + esc(lien('lolly.html')) + '#pro-offert" data-track="lolly_pro_offert_compte" data-track-kind="lolly_pro_offert_compte"><span>'
+      + esc(tr('aujourdhui.pro_offert_link', 'Ou 1 mois de Pro offert avec Lolly Bet, notre partenaire')) + '</span><span aria-hidden="true">→</span></a>'
       + '</div>';
   }
 

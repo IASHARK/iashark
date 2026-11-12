@@ -468,7 +468,10 @@ function carteProOffert(){
 function remplirBoutonsParieur(root,raw){
   // Pose apres le rendu, sous le ticket du pari (.sig-slip, ou ses chiffres .appel-stats sur le
   // pari offert) : signalCard et carteAppel ne sont pas modifiees (empreinte de l'Avis).
-  const moment=momentParieur(raw);
+  // Page d'exemple (exemple-analyse.html, sans compte) : le match fige est termine, mais l'exemple montre
+  // l'analyse telle qu'on la lit avant un match, bloc partenaire compris (12/11/2026).
+  const demo=typeof IASHARK_DEMO!=='undefined'&&IASHARK_DEMO;
+  const moment=demo?'avant':momentParieur(raw);
   if(moment==='fini')return;
   const cartes=[...(root||document).querySelectorAll('.signal-card.avis')].filter(c=>c.querySelector('.sig-slip')&&!c.querySelector('.bk-cta'));
   cartes.forEach(c=>{

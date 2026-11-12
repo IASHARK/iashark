@@ -762,7 +762,6 @@ a{color:inherit}
 .bk-cta--court .bk-cta-btn{flex-wrap:nowrap;white-space:nowrap}
 @media (max-width:380px){.bk-cta--court .bk-cta-btn{font-size:14px;padding:12px 10px;gap:5px}}
 .bk-cta-note{margin:6px 0 0;font-size:12px;color:#91a0b3;text-align:center}
-.bk-banniere{display:block;margin:10px 0 0;border-radius:12px;overflow:hidden;line-height:0}
 /* « Pro offert 1 mois » : 2e option du cadenas Pro, vers la page Lolly Bet (11/11/2026). */
 .po-carte{display:grid;gap:8px;padding:18px 16px 16px;border:1px solid rgba(32,213,239,.55);border-radius:16px;background:#0a1420;background-image:radial-gradient(120% 90% at 100% 0%,rgba(32,213,239,.16),transparent 60%);color:#f4f7fb}
 .po-titre{margin:0;font-size:22px;line-height:1.15;font-weight:800;letter-spacing:-.02em;color:#fff}
@@ -771,8 +770,18 @@ a{color:inherit}
 .po-btn:hover{background:#5fe2f4}
 .po-btn:focus-visible{outline:2px solid #20d5ef;outline-offset:3px}
 .po-logo{display:inline-block;vertical-align:middle;margin:0 4px;height:12px;width:auto;padding:4px 7px;border-radius:6px;background:#060b12;box-shadow:inset 0 0 0 1px rgba(141,179,211,.18);box-sizing:content-box}
-.bk-banniere img{display:block;width:100%;height:auto}
-.bk-banniere:focus-visible{outline:2px solid #20d5ef;outline-offset:2px}
+/* Bloc partenaire sous le pari (12/11/2026) : la carte « Pro offert » (.po-carte) en plus serre, un seul bouton.
+   Le cadre reste discret (filet gris) : le ticket du pari, juste au-dessus, garde le seul cadre cyan. */
+.bk-offre{gap:10px;margin:14px 0 6px;padding:14px;border-color:rgba(141,179,211,.28);background-image:radial-gradient(120% 90% at 100% 0%,rgba(32,213,239,.1),transparent 60%)}
+.bk-offre-tete{display:flex;align-items:center;gap:8px;margin:0;font-size:14px;line-height:1.3;color:#c6d1de}
+.bk-offre-tete .po-logo{margin:0}
+.bk-offre-age{margin-left:auto;font-size:12px;color:#91a0b3}
+.bk-offre-titre{font-size:19px}
+.bk-offre-btn{margin-top:2px;min-height:50px;font-size:15.5px;text-align:center;line-height:1.2}
+.bk-offre-pro{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;margin:0 0 -6px;padding:4px 0 0;border-top:1px solid rgba(141,179,211,.14);color:#f4f7fb;font-size:14.5px;font-weight:600;line-height:1.3;text-decoration:none}
+.bk-offre-pro span:last-child{color:#20d5ef}
+.bk-offre-pro:hover{color:#20d5ef}
+.bk-offre-pro:focus-visible{outline:2px solid #20d5ef;outline-offset:2px;border-radius:4px}
 .sig-slip--bk{cursor:pointer;transition:border-color .15s,background-color .15s}
 .sig-slip--bk:hover,.sig-slip--bk:focus-visible{border-color:#20d5ef;outline:none}
 .sig-slip--bk .sig-odds-box{position:relative}

@@ -412,6 +412,9 @@ function matchTermine(m){
 const BK_NOMS={'1win':'1win','vavada':'Vavada','lolly':'Lolly Bet'};
 // Site de paris mis en avant (11/11/2026, Clement : Lolly Bet a la place de Vavada ; 10/11 : Vavada a la place de 1win).
 const BK_ACTIF='lolly';
+// Abonne Pro (pose par le chargement de la page des que le compte est connu) : le bloc partenaire ne lui
+// propose pas le « Pro offert ».
+let visiteurPro=false;
 // Logo officiel quand on l'a (assets/bk/<site>.png) ; sinon le nom en gras.
 // Lolly Bet (11/11/2026) : logo vectoriel officiel (site lolly-bet), pose sur une pastille sombre
 // (couleurs d'origine, rouge et blanc, lisibles sur le bouton cyan comme sur le bouton discret).
@@ -425,28 +428,31 @@ function momentParieur(m){
   const MT=window.IasharkMatchTime,ts=MT&&MT.matchTimestamp?MT.matchTimestamp(m):NaN;
   return isFinite(ts)&&Date.now()>=ts?'direct':'avant';
 }
-// Le bouton lui-meme. match : « Lyon – PSG » ; moment : 'avant' ou 'direct' ;
-// mur : page fermee (visiteur sans Pro) : « Meilleure cote trouvee chez ... » (sans le match : une ligne, 11/11/2026), bouton discret sous l'offre Pro.
-function boutonParieurHtml(match,moment,mur){
+// LE BLOC PARTENAIRE sous le pari (12/11/2026, carte blanche de Clement : « harmoniser tout ca », faire
+// cliquer « sans que la personne se sente harcelee »). Un seul cadre, la meme carte que « Pro offert 1 mois »
+// du cadenas et de la page Pro (.po-carte), dans l'ordre :
+//   1. le logo du partenaire, « notre partenaire », 18+ ;
+//   2. l'offre de bienvenue en TEXTE (« 1er pari remboursé jusqu'à 100 € »), en francais seulement : elle
+//      remplace la banniere image (rouge et jaune, hors du style du site, retiree le matin meme) ;
+//   3. UN bouton : « Parier ce match chez Lolly Bet » (ou « en direct » apres le coup d'envoi) ;
+//   4. pour qui n'est pas abonne Pro seulement : un lien d'une ligne vers la page Lolly (#pro-offert), ou
+//      l'inscription par notre lien donne 1 mois de Pro (verification a la main, jamais automatique).
+// Plus de « Meilleure cote trouvee chez ... » ici : aucune cote du partenaire n'est relevee, on ne peut pas
+// l'affirmer match par match. Montre a tous les pays (jamais cache selon le pays).
+// match : « Lyon – PSG » ; moment : 'avant' ou 'direct' ; pro : abonne Pro (pas de ligne Pro offert).
+function boutonParieurHtml(match,moment,pro){
   const bk=BK_ACTIF,nom=BK_NOMS[bk];
   // Logo officiel (espace partenaire, Materiel promotionnel) a la place du nom, sinon le nom.
-  const L=BK_LOGOS[bk],logo=L?`<img class="bk-cta-logo bk-cta-logo--${bk}" src="/assets/bk/${L.f}" alt="${esc(nom)}" width="${L.w}" height="${L.h}">`:`<b class="bk-cta-nom">${esc(nom)}</b>`;
-  const vars={match,book:'@@BK@@'};
-  const txt=!match?'@@BK@@'
-    :moment==='direct'?tf('match_page.bk_cta_live','Parier {match} en direct chez {book}',vars)
-    // Une seule formule avant le match, page ouverte ou fermee (11/11/2026, Clement : « pas 2 fois »).
-    :tf('match_page.bk_cta_mur','Meilleure cote trouvée chez {book}',vars);
-  const kind='bookmaker_'+bk+(moment==='direct'?'_direct':mur?'_mur':'');
-  return `<div class="bk-cta${mur?' bk-cta--mur':''}${match&&moment!=='direct'?' bk-cta--court':''}"><a class="bk-cta-btn" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi(kind)}><span>${String(txt).split('@@BK@@').map(esc).join(`</span>${logo}<span>`)}</span><span aria-hidden="true">→</span></a>${banniereBk(bk)}<p class="bk-cta-note">18+</p></div>`;
-}
-// Banniere officielle de l'offre de bienvenue (Lolly Bet, materiel promotionnel), cliquable,
-// sous le bouton. En francais seulement : le texte de l'image est en francais (11/11/2026, Clement).
-function banniereBk(bk){
-  // 12/11/2026 : retiree partout (Clement : « les bannieres servent a rien »).
-  return '';
-  // eslint-disable-next-line no-unreachable
-  if(bk!=='lolly'||!estFr())return '';
-  return `<a class="bk-banniere" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi('bookmaker_'+bk+'_banniere')}><img src="/assets/bk/lolly-bienvenue-fr.webp" alt="Lolly Bet : 1er pari remboursé en cash jusqu'à 100 € (+50 % sur le 2e et le 3e dépôt)" width="1428" height="428" loading="lazy" decoding="async"></a>`;
+  const L=BK_LOGOS[bk],logo=L?`<img class="po-logo" src="/assets/bk/${L.f}" alt="${esc(nom)}" width="${L.w}" height="${L.h}">`:`<b class="bk-cta-nom">${esc(nom)}</b>`;
+  const direct=moment==='direct';
+  const libelle=direct?tf('match_page.bk_btn_live','Parier en direct chez {book}',{book:nom}):tf('match_page.bk_btn','Parier ce match chez {book}',{book:nom});
+  const kind='bookmaker_'+bk+(direct?'_direct':'');
+  const tete=`<p class="bk-offre-tete">${logo}<span>${esc(t('match_page.bk_partner','notre partenaire'))}</span><span class="bk-offre-age">18+</span></p>`;
+  // L'offre de bienvenue : en francais seulement (comme la banniere qu'elle remplace).
+  const offre=estFr()?`<p class="po-titre bk-offre-titre">${esc(t('match_page.bk_offer','1er pari remboursé jusqu’à 100 €'))}</p>`:'';
+  const bouton=`<a class="po-btn bk-offre-btn" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi(kind)}><span>${esc(libelle)}</span><span aria-hidden="true">→</span></a>`;
+  const proOffert=pro||bk!=='lolly'?'':`<a class="bk-offre-pro" href="${esc(lien('lolly.html'))}#pro-offert"${suivi('lolly_pro_offert_avis')}><span>${esc(t('match_page.bk_pro_link','1 mois de Pro offert à l’inscription'))}</span><span aria-hidden="true">→</span></a>`;
+  return `<div class="bk-cta bk-offre po-carte" data-bk-match="${esc(match||'')}">${tete}${offre}${bouton}${proOffert}</div>`;
 }
 // « Pro offert 1 mois » (11/11/2026, decision de Clement) : 2e option du cadenas Pro, sous l'offre
 // payante. Mene a la page Lolly Bet (#pro-offert) : compte IASHARK, inscription chez Lolly par notre
@@ -466,7 +472,7 @@ function remplirBoutonsParieur(root,raw){
   const cartes=[...(root||document).querySelectorAll('.signal-card.avis')].filter(c=>c.querySelector('.sig-slip')&&!c.querySelector('.bk-cta'));
   cartes.forEach(c=>{
     const fx=c.querySelector('.sig-fixture'),m=fx?fx.textContent.trim():'';
-    (c.querySelector('.appel-stats')||c.querySelector('.sig-slip')).insertAdjacentHTML('afterend',boutonParieurHtml(m,moment,false));
+    (c.querySelector('.appel-stats')||c.querySelector('.sig-slip')).insertAdjacentHTML('afterend',boutonParieurHtml(m,moment,visiteurPro));
     // Le ticket du pari (cote) ouvre aussi le site de paris, discretement (11/11/2026, Clement).
     // Attributs poses apres le rendu : le HTML de l'Avis (signalCard) ne change pas.
     const slip=c.querySelector('.sig-slip');
@@ -475,7 +481,7 @@ function remplirBoutonsParieur(root,raw){
       slip.classList.add('sig-slip--bk');
       slip.setAttribute('data-track',kind);slip.setAttribute('data-track-kind',kind);
       slip.setAttribute('role','link');slip.setAttribute('tabindex','0');
-      slip.setAttribute('aria-label',tf('match_page.bk_cta_mur','Meilleure cote trouvée chez {book}',{match:m,book:BK_NOMS[BK_ACTIF]}));
+      slip.setAttribute('aria-label',tf('match_page.bk_btn','Parier ce match chez {book}',{book:BK_NOMS[BK_ACTIF]}));
       const ouvrir=()=>window.open(url,'_blank','noopener');
       slip.addEventListener('click',e=>{if(!e.target.closest('a,button'))ouvrir();});
       slip.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();ouvrir();}});
@@ -1680,6 +1686,7 @@ async function init(){
     // plus, elle ne peut pas fabriquer une analyse.
     const termine=matchTermine(raw);
     const vuePro=!!ctx.isPro&&serveurPro!==false;
+    visiteurPro=!!ctx.isPro;
     await modules;
     if(isFree&&!ctx.session){
       // Le pari du match offert (pari, cote, chance) : servi par match-data au visiteur sans compte.

@@ -87,7 +87,7 @@
   }
 
   function chipLabel(identity, plan, role){
-    var tag = role==='admin' ? 'ADMIN' : (plan==='pro' ? 'PRO' : T.free_tag);
+    var tag = role==='admin' ? 'ADMIN' : (plan==='pro' || plan==='famille' ? 'PRO' : T.free_tag);
     return truncateEmail(identity)+' · '+tag;
   }
 

@@ -943,7 +943,7 @@
       // Bouton du site de paris sous l'Avis (match-page.js#boutonParieur, 09/11/2026).
       bookmaker_1win: true, bookmaker_1win_mur: true, bookmaker_1win_direct: true, bookmaker_vavada: true, bookmaker_vavada_mur: true, bookmaker_vavada_direct: true, bookmaker_lolly: true, bookmaker_lolly_mur: true, bookmaker_lolly_direct: true, bookmaker_lolly_ticket: true, accueil_pari_offert: true,
       // Lolly Bet et « Pro offert 1 mois » (lib/lolly-page.js, match-page.js#carteProOffert, 11/11/2026).
-      lolly_page_inscription: true, lolly_page_inscription_bas: true, lolly_page_banniere: true, lolly_pro_offert_match: true, lolly_pro_compte: true, lolly_pro_lien: true, lolly_pro_declarer: true, lolly_pro_outils: true, match_recall_unlock: true, match_analysis_unlock: true, match_faq_unlock: true, match_bar_unlock: true,
+      lolly_page_inscription: true, lolly_page_inscription_bas: true, lolly_page_banniere: true, lolly_page_offre: true, lolly_pro_offert_match: true, lolly_pro_compte: true, lolly_pro_lien: true, lolly_pro_declarer: true, lolly_pro_outils: true, match_recall_unlock: true, match_analysis_unlock: true, match_faq_unlock: true, match_bar_unlock: true,
       // Buteurs du jour de l'accueil (home-scorers.js) : bouton « Debloquer »
       // du panneau, ligne floutee, carte d'un buteur (avant le 19/09/2026 :
       // kind cta, label = meme valeur).

@@ -468,3 +468,49 @@ test("C2 : la ligne « Hier » : veille a Paris et pour le visiteur, gagnes ET p
     assert.doesNotMatch(JSON.stringify(d), /%|garanti|gain|esp[ée]rance/i, l);
   }
 });
+
+test("page de paiement du 12/11 : titre d'action, un seul recapitulatif par duree, plus de liste d'avantages", () => {
+  const OP = require("../lib/offre-pro.js");
+  const plans = [{ interval: "week", amount: 4.99, text: "4,99 €" }, { interval: "month", amount: 14.99, text: "14,99 €", weeklyEquivalentText: "3,46 €" }, { interval: "year", amount: 99, text: "99 €", weeklyEquivalentText: "1,90 €", savingsPct: 44 }];
+  const maintenant = Date.UTC(2026, 10, 12, 10, 0, 0);
+  // Avec essai.
+  const essai = OP.html({ mode: "paiement", contexte: "general", plans, choisi: "month", jours: 7, connecte: true, uid: "p", maintenant });
+  assert.match(essai, /class="op-title" id="p-t">Active ton accès Pro</);
+  assert.match(essai, /<p class="op-sub">Toutes les analyses du jour sur ton compte IASHARK\.<\/p>/);
+  assert.doesNotMatch(essai, /op-benefits/, "plus de liste d'avantages sur la page de paiement");
+  assert.doesNotMatch(essai, /par semaine|soit 3,46/, "plus d'equivalent par semaine");
+  assert.deepEqual(OP.recap(plans[1], 7, maintenant).map((l) => l[1]), ["0 €", "14,99 €"]);
+  assert.match(OP.recap(plans[1], 7, maintenant)[0][0], /^Aujourd’hui · Rien n’est prélevé$/);
+  assert.match(OP.recap(plans[1], 7, maintenant)[1][0], /^Le 19 novembre · Puis chaque mois, si tu n’as pas résilié$/);
+  // Ce que la loi et les CGV demandent reste ecrit une fois : carte, premier abonnement, comment resilier.
+  assert.match(essai, /Avant le 19 novembre, tu peux résilier en ligne depuis Mon compte : tu ne paies rien\. Carte demandée\. Essai réservé à un premier abonnement\./);
+  assert.match(essai, /id="checkoutConsent"/);
+  assert.ok(essai.indexOf('id="checkoutConsent"') < essai.indexOf('id="subscribeButton"'), "les cases juste avant le bouton");
+  // Sans essai : ce qui part aujourd'hui, puis le renouvellement.
+  assert.deepEqual(OP.recap(plans[1], 0, maintenant), [["Aujourd’hui", "14,99 €"], ["Puis chaque mois, sauf résiliation", "14,99 €"]]);
+  assert.deepEqual(OP.recap(plans[0], 0, maintenant), [["Aujourd’hui", "4,99 €"], ["Puis chaque semaine, sauf résiliation", "4,99 €"]]);
+  // Annee : une ligne ; le renouvellement annuel reste ecrit une seule fois, sous le bouton (jamais « sans engagement »).
+  assert.deepEqual(OP.recap(plans[2], 0, maintenant), [["Aujourd’hui · 12 mois payés en une fois", "99 €"]]);
+  const annee = OP.html({ mode: "paiement", contexte: "general", plans, choisi: "year", jours: 0, connecte: true, uid: "y", maintenant });
+  assert.match(annee, /Payer 99 €/);
+  assert.match(annee, /44 % de moins que 12 mois au tarif mensuel/);
+  assert.match(annee, /renouvelés chaque année sauf résiliation avant l’échéance/);
+  assert.doesNotMatch(annee.slice(annee.indexOf("data-op-pay")), /Sans engagement/);
+  // La vitrine (cadenas, page Pro) ne change pas : avantages, et l'essai detaille seulement sur le mois.
+  const vitrine = OP.html({ mode: "vitrine", contexte: "abonnement", plans, choisi: "month", jours: 7, connecte: false, uid: "v", maintenant });
+  assert.match(vitrine, /op-benefits/);
+  assert.match(vitrine, /Pro par abonnement/);
+  assert.equal((vitrine.match(/class="op-essai-lignes"/g) || []).length, 1);
+  // Un contexte de match garde son titre, meme en mode paiement.
+  assert.match(OP.html({ mode: "paiement", contexte: "match", plans, choisi: "month", jours: 0, connecte: true, uid: "m" }), /Passe Pro pour ouvrir ce match/);
+  // Textes dans les 7 langues ; repli sans JS de la page avec le meme titre ; cases : plus de majuscules espacees.
+  for (const l of ["fr", "en", "es", "es-mx", "de", "it", "pt"]) {
+    const d = JSON.parse(read("i18n/dict/" + l + ".json")).offre_pro, part = JSON.parse(read("i18n/parts/vente." + l + ".json")).offre_pro;
+    for (const k of ["pay_title", "pay_sub", "recap_year_once", "recap_then_month", "recap_then_week"]) {
+      assert.ok(typeof d[k] === "string" && d[k].trim(), l + " offre_pro." + k);
+      assert.equal(part[k], d[k], l + " offre_pro." + k);
+    }
+  }
+  assert.match(read("abonnement.html"), /<h1 data-i18n="offre_pro\.pay_title">Active ton accès Pro<\/h1>/);
+  assert.doesNotMatch(read("lib/checkout-consent.js").match(/\.iash-consent-title\{[^}]*\}/)[0], /uppercase|letter-spacing/);
+});

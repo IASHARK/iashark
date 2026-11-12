@@ -2,6 +2,23 @@
 
 Changements qui affectent le calcul des probabilités, marchés, edge/Kelly ou la manière dont ils sont décidés. Journal complet et non-technique dans `IASHARK_V2_EXECUTION_STATE.md` ; ce fichier ne liste que ce qui touche le moteur lui-même.
 
+## 2026-11-11 (soir) — pari choisi parmi tous les marchés Bet365, cote 1,70-3,50 (décision de Clément, NON FUSIONNÉ : validation mathématicien + avocat du diable)
+
+- **Règle** : `config/marches-pari.json#choix_du_pari.regle = "tous_marches_bet365"` (toute autre valeur = ancienne règle). Fourchette `config/leagues.json#fiabilite.fourchette_pari` 1,70-3,50, 1,70 minimum strict, aucun repli.
+- **Bookmaker** : Bet365 seul (référence, cote affichée) ; jamais un autre bookmaker en repli ; contrôle Pinnacle sur tous les marchés (écart > 8 points : issue écartée).
+- **Candidats** : tous les marchés réglables automatiquement (corners, cartons, tirs, hors-jeu, fautes, joueurs, buteurs, scores exacts, nombre de buts, prolongation...). Liste complète : `docs/MARCHES-BET365-REGLE-11-11.md`.
+- **Marchés d'un seul côté** : chance = (1/cote)/(1+M), M = max(15 %, 3 × marge 1N2 Bet365) ; buteurs plafonnés aux buts attendus de l'équipe. Valeurs provisoires, à calibrer.
+- **Règlement ajouté** : corners (statistiques d'équipe), cartons (événements, règle Bet365 à confirmer), tirs du match à partir de 15,5.
+- **Données** : sans relevé `odds_snapshots` de moins de 12 h, le calcul relit les cotes `/odds` de son propre run (Ligue des nations du 12/11).
+- **Pile ou face exclu (décision de Clément du 12/11)** : pair / impair des buts (match, mi-temps, équipes) et des fautes, et tout marché « Odd/Even », jamais choisi (il sortait sur 34 % des matchs).
+- **Mesure sur 1 037 matchs archivés (cotes seules, sans v3, pair/impair exclu)** : un pari sur chaque match, cote moyenne 1,73 (avant 1,51), chance moyenne 54,5 % (avant 62,9 %) ; familles : corners 19 %, handicap asiatique 17 %, buts 11 %, les deux marquent 11 %, mi-temps 9 %, handicap européen 8 %, tirs 7 %, résultat 5 %, buts d'une équipe 5 %, cartons 4 %, résultat et buts 4 %.
+- **Corrections du 12/11 (mathématicien ORANGE, avocat du diable ROUGE)** :
+  - exclus du choix : joueurs et buteurs (35 % annoncés, 18 % réels), cartons 80-83 (comptage à valider par l'ingénieur données), famille mi-temps et mi-temps/fin (41,5 % réels pour 54 % annoncés) ;
+  - règlement : statistiques d'équipe (corners, tirs, fautes, hors-jeu) seulement sur un match fini en 90 minutes (FT) ; prolongé, arrêté ou statistique absente = en attente, jamais 0 ; cartons en attente sans événement de carton ou match non fini, cartons de l'entraîneur ou du banc non comptés ;
+  - combinés et Sélection en or : jambes = pari de l'ancienne règle de chaque match (marchés connus, 1,40-2,20 de `config/tickets.json`) ; le pari affiché n'y est PAS ajouté (lib/tickets-du-jour.js#candidatsAvecPariAffiche), mais une jambe doit pouvoir gagner avec le pari affiché (`lib/marches-paris.js#compatibles`) ;
+  - sélection nationale vérifiée par les cotes (Ligue des nations, éliminatoires) : Sélection IASHARK même sans le v3, donc peut être le match offert ;
+  - mesure (règlement indépendant du mathématicien, 1 023 matchs réglés) : chance annoncée 54,4 %, réussite 53,3 % (IC 95 % 50,2-56,3), cote moyenne 1,73 ; jambes des combinés (ancienne règle) : 62,9 % annoncés, 66,1 % réels, cote 1,51.
+
 ## 2026-10-06 (nuit) — corrections du contrôle ROUGE de l'avocat du diable
 
 - **Libellé affiché = pari réglé** : un pari « F… » s'affiche à partir de son CODE (`lib/market-labels.js#fluxLibelle`, 7 langues), jamais en relisant le libellé français (qui changeait de mi-temps, d'équipe ou perdait une condition dans 9 cas sur 17 vrais matchs). Vue du match, accueil, outils et tickets passent par le code ; test sur tous les codes publiables.

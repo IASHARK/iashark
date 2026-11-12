@@ -1,4 +1,6 @@
 "use strict";
+// Ecrit pour l'ancienne regle du pari (1,40-2,20, avant le 11/11/2026) : remise en memoire, voir le module.
+require("./ancienne-regle-pari.js");
 // Match offert quand le moteur v3 est allume : on EXECUTE le vrai bloc du
 // pipeline (designerMatchGratuit, .github/workflows/update-data.yml), pas une
 // copie (demande du mathematicien, 29/09/2026). Regle ecrite en clair dans le

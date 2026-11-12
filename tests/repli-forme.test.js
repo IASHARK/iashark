@@ -1,4 +1,6 @@
 "use strict";
+// Ecrit pour l'ancienne regle du pari (1,40-2,20, avant le 11/11/2026) : remise en memoire, voir le module.
+require("./ancienne-regle-pari.js");
 // REPLI DES MATCHS DE COUPE SANS PARI : CALCUL A BLANC (lib/repli-forme.js, demande de Clement et controles du 28/10/2026).
 // Aucune publication tant que config/verdicts-maths.json#repli_coupes n'est pas « GO » ; archivage prive des deux
 // variantes (forme, marche) ; zero fuite du futur ; jamais sous 1,40, jamais une cote inventee.

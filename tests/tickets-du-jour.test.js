@@ -1,4 +1,6 @@
 "use strict";
+// Ecrit pour l'ancienne regle du pari (1,40-2,20, avant le 11/11/2026) : remise en memoire, voir le module.
+require("./ancienne-regle-pari.js");
 // TICKETS DU JOUR x5 / x10, SELECTION EN OR, BUTEUR DU JOUR (demande de Clement du
 // 04/10/2026 ; regles du trader de cotes, regles-tickets.md §2 et §8, tests 1 a 11).
 const test = require("node:test");

@@ -1,4 +1,6 @@
 "use strict";
+// Ecrit pour l'ancienne regle du pari (1,40-2,20, avant le 11/11/2026) : remise en memoire, voir le module.
+require("./ancienne-regle-pari.js");
 // CORRECTIONS DE CONVERSION DU 27/10/2026 (diagnostic CONVERSION-27-10.md, sections C1 a C7).
 //   C1 : sortie gratuite sur le cadenas Pro (match offert du jour, meme source que l'accueil) ;
 //   C4 : bouton d'essai « 0 € aujourd'hui » et date du premier prelevement, sans rappel promis ;
@@ -300,11 +302,11 @@ test("C3 : la phrase de methode du trader partout ; plus de « sans les cotes »
     for (const f of ["index.html", "landing.html"]) if (fs.existsSync(path.join(ROOT, d, f))) assert.doesNotMatch(read(d + "/" + f), faux, d + "/" + f);
   }
   for (const d of ["fr", "en", "es", "gb", "mx", "za", "de", "it", "pt"]) assert.doesNotMatch(read("i18n/seo/" + d + ".json"), faux, d);
-  const phrase = "La chance vient des cotes du marché, marge retirée, ou du plus prudent entre le modèle et ces cotes ; le pari retenu est la plus forte chance dans la fourchette 1,40-2,20.";
+  const phrase = "La chance vient des cotes du marché, marge retirée, ou du plus prudent entre le modèle et ces cotes ; le pari retenu est la plus forte chance dans la fourchette 1,70-3,50.";
   assert.ok(read("fr/index.html").includes(phrase), "bloc « La méthode en bref » et FAQ");
   assert.ok(JSON.parse(read("i18n/seo/fr.json")).home.paragraphs[0].endsWith(phrase));
   // La fourchette citee est celle qui choisit le pari (lib/pronostic.js#choisirPariFourchette).
-  assert.deepEqual(JSON.parse(read("config/leagues.json")).fiabilite.fourchette_pari, { cote_min: 1.4, cote_max: 2.2, marge_sans_agree: 0 });
+  assert.deepEqual(JSON.parse(read("config/leagues.json")).fiabilite.fourchette_pari, { cote_min: 1.7, cote_max: 3.5, marge_sans_agree: 0 }); // regle du 11/11/2026
   assert.match(read("lib/pronostic.js"), /const dedans = evalues\.filter\(function \(c\) \{ return c\.dedans; \}\)\.sort\(ordre\);/);
 });
 
@@ -393,6 +395,7 @@ test("C3 : chance abaissee par prudence (comme n° 1556693) : les deux chiffres,
 test("C3 : voie du moteur v3 inchangee (controle trader 27/10 : le moteur ne bouge pas, c'est la page qui compare les chiffres)", () => {
   const P3 = require("../lib/pronostic.js");
   const CFG = JSON.parse(read("config/leagues.json"));
+  CFG.fiabilite.fourchette_pari = require("./ancienne-regle-pari.js").fourchette; // cas ecrit pour 1,40-2,20
   const V = "vérifié sur le passé";
   // Arsenal - Burnley a 1,45 / 4,60 / 7,50 : victoire d'Arsenal a 67,7 % sans marge (lib/pronostic.js#sansMargeDesCotes).
   const publier = (ch) => {

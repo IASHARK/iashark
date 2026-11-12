@@ -4,6 +4,8 @@
 // fourchette du pari 1,40-2,20) et VERDICT ORANGE du mathematicien du 06/10 (399 matchs jamais vus) : marches caches,
 // correction « petits scores » -3 points, jamais la methode puissance sans issue contraire, controle Pinnacle limite,
 // catalogue de coherence elargi.
+// Ecrit pour l'ancienne regle du pari (1,40-2,20, avant le 11/11/2026) : remise en memoire, voir le module.
+require("./ancienne-regle-pari.js");
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -25,8 +27,9 @@ function raw(bets, pin) { return { bookmakers: [{ name: "Bet365", bets }].concat
 const B1 = { id: 1, name: "Match Winner", values: v([["Home", 1.8], ["Draw", 3.6], ["Away", 4.5]]) };
 function codes(bets, pin) { return FP.selectionsDuMatch(raw(bets, pin), { match: M, couverture: TOUT }).selections.map((s) => s.code); }
 
-test("fourchette du pari : 1,40-2,20 dans config/leagues.json, sans marge pour les cotes non agreees (neutralite)", () => {
-  assert.deepEqual(LIGUES.fiabilite.fourchette_pari, { cote_min: 1.4, cote_max: 2.2, marge_sans_agree: 0 });
+test("fourchette du pari : 1,70-3,50 dans config/leagues.json depuis le 11/11/2026 (1,40-2,20 avant), sans marge pour les cotes non agreees (neutralite)", () => {
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(ROOT, "config/leagues.json"), "utf8")).fiabilite.fourchette_pari, { cote_min: 1.7, cote_max: 3.5, marge_sans_agree: 0 });
+  assert.deepEqual(LIGUES.fiabilite.fourchette_pari, { cote_min: 1.4, cote_max: 2.2, marge_sans_agree: 0 }, "ancienne regle remise en memoire pour ce fichier");
 });
 
 test("marge retiree sur le marche complet : paires plus/moins, handicaps par demi-ligne, europeen a 3 issues, double chance tiree du 1N2", () => {

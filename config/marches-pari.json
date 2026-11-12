@@ -7,7 +7,22 @@
     "tirs_seulement_si_statistiques : un pari sur les tirs (cadres ou non) seulement dans une competition ou API-Football donne les statistiques du match (league-coverage-report.json, coverage.fixtures.statistics_fixtures = true) : sinon on ne saurait pas le regler.",
     "selections_nationales : marches permis sur les matchs de selections (decision du 03/10/2026 : 1N2 et double chance seulement)."
   ],
-  "regle_version": "paris-tous-marches-2026-10-06",
+  "regle_version": "paris-tous-marches-bet365-2026-11-11",
+  "_readme_choix_du_pari": [
+    "DECISION DE CLEMENT DU 11/11/2026 (21 h 40) : le pari affiche de chaque match est choisi parmi TOUS les marches dont API-Sports donne une cote Bet365 (bookmaker 8 d'API-Football). Plus de liste d'exclusion de familles par defaut : tout est candidat, sauf un marche qu'on ne sait pas regler automatiquement apres le match (lib/flux-paris.js#EXCLUS_REGLEMENT, et les cartons : comptage du bookmaker non verifie). Cote affichee = celle de Bet365, entre config/leagues.json#fiabilite.fourchette_pari.cote_min et cote_max (1,70-3,50), 1,70 minimum strict, aucun repli dessous.",
+    "Meme methode de chance juste pour toutes les familles : marge de Bet365 retiree (methode puissance sur le marche complet), controle Pinnacle quand Pinnacle cote la meme issue (ecart de chance > ecart_max_pinnacle : issue ecartee), moteur v3 la ou il dit le marche juste (chance = le plus bas des deux).",
+    "un_seul_cote : marches sans issue contraire (buteurs, joueurs « N ou plus », paires Home / Away non contraires). Chance = (1 / cote) / (1 + M), M = max(marge_min, multiple_marge_1n2 x marge du 1N2 Bet365 du meme match) ; buteurs : en plus, la somme des chances des buteurs listes est ramenee aux buts attendus de l'equipe (marches a deux cotes de Bet365), moins part_buts_contre_son_camp. Le plus bas des deux. VALEURS A CALIBRER par le mathematicien (06/10 : joueurs 70 % annonces, 29 % reels avec 1 / cote).",
+    "regle : « tous_marches_bet365 » = regle du 11/11 ; toute autre valeur = ancienne regle (marches connus du 21/10, cotes agreees d'abord)."
+  ],
+  "choix_du_pari": {
+    "regle": "tous_marches_bet365",
+    "bookmaker_reference": "bet365",
+    "bookmaker_reference_id_api_football": 8,
+    "repli_autre_bookmaker": false,
+    "controle_pinnacle_tous_marches": true,
+    "ecart_max_pinnacle": 0.08,
+    "un_seul_cote": { "marge_min": 0.15, "multiple_marge_1n2": 3, "part_buts_contre_son_camp": 0.03 }
+  },
   "v3_justesse_acceptee": ["juste", "recalibré"],
   "v3_familles": ["TOTAL", "BTTS", "EQUIPE_DOM", "EQUIPE_EXT", "MT_TOTAL", "2MT_TOTAL", "MT"],
   "tirs_seulement_si_statistiques": true,

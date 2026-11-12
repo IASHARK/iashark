@@ -136,7 +136,9 @@ test("publiable et reglable separes : un code cache depuis sa publication se reg
   // « Match nul (2e mi-temps) » sur un 2-2 final avec 1-0 a la pause : 2e mi-temps 1-2 = perdu.
   assert.equal(FP.regler("F3:Draw", { ft: [2, 2], ht: [1, 0] }), false);
   assert.equal(FP.regler("F8:No", { ft: [1, 0], ht: [0, 0] }), true, "issue cachee : se regle quand meme");
-  assert.equal(FP.regler("F87:Over 8.5", { ft: [1, 0], ht: [0, 0], stats: { tirs_cadres: [5, 4] } }), true);
+  assert.equal(FP.regler("F87:Over 8.5", { ft: [1, 0], ht: [0, 0], statut: "FT", stats: { tirs_cadres: [5, 4] } }), true);
+  // Statistiques reglees seulement sur un match fini en 90 minutes (statut FT, avocat du diable du 12/11/2026).
+  assert.equal(FP.regler("F87:Over 8.5", { ft: [1, 0], ht: [0, 0], stats: { tirs_cadres: [5, 4] } }), null);
   // Page des resultats : un code F se regle par lib/flux-paris.js, jamais par resolveMarketWin sur son libelle.
   const fx = { fixture: { id: 1, status: { short: "FT" } }, teams: { home: { id: 1 }, away: { id: 2 } }, goals: { home: 2, away: 2 }, score: { fulltime: { home: 2, away: 2 }, halftime: { home: 1, away: 0 } } };
   assert.equal(MR.settleBet({ prediction: "Match nul (2e mi-temps)", market_id: "F3:Draw" }, fx).result, "loss");

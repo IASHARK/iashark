@@ -442,6 +442,9 @@ function boutonParieurHtml(match,moment,mur){
 // Banniere officielle de l'offre de bienvenue (Lolly Bet, materiel promotionnel), cliquable,
 // sous le bouton. En francais seulement : le texte de l'image est en francais (11/11/2026, Clement).
 function banniereBk(bk){
+  // 12/11/2026 : retiree partout (Clement : « les bannieres servent a rien »).
+  return '';
+  // eslint-disable-next-line no-unreachable
   if(bk!=='lolly'||!estFr())return '';
   return `<a class="bk-banniere" href="/go/${bk}/site" target="_blank" rel="sponsored noopener"${suivi('bookmaker_'+bk+'_banniere')}><img src="/assets/bk/lolly-bienvenue-fr.webp" alt="Lolly Bet : 1er pari remboursé en cash jusqu'à 100 € (+50 % sur le 2e et le 3e dépôt)" width="1428" height="428" loading="lazy" decoding="async"></a>`;
 }
@@ -452,8 +455,8 @@ function banniereBk(bk){
 function carteProOffert(){
   const bk='lolly',L=BK_LOGOS[bk];
   const logo=`<img class="po-logo" src="/assets/bk/${L.f}" alt="${esc(BK_NOMS[bk])}" width="${L.w}" height="${L.h}">`;
-  const txt=tf('match_page.pro_offert_text','Inscris-toi chez {book} avec notre lien',{book:'@@BK@@'});
-  return `<a class="po-carte" href="${esc(lien('lolly.html'))}#pro-offert"${suivi('lolly_pro_offert_match')}><span class="po-ou">${esc(t('match_page.pro_offert_or','Ou bien'))}</span><span class="po-corps"><b class="po-titre">${esc(t('match_page.pro_offert_title','Pro offert 1 mois'))}</b><span class="po-txt"><span>${String(txt).split('@@BK@@').map(esc).join(`</span>${logo}<span>`)}</span></span></span><span class="po-fleche" aria-hidden="true">→</span></a>`;
+  const txt=tf('match_page.pro_offert_text','Inscris-toi chez {book}, notre partenaire, avec notre lien',{book:'@@BK@@'});
+  return `<div class="po-carte"><p class="po-titre">${esc(t('match_page.pro_offert_title','Pro offert 1 mois'))}</p><p class="po-txt"><span>${String(txt).split('@@BK@@').map(esc).join(`</span>${logo}<span>`)}</span></p><a class="po-btn" href="${esc(lien('lolly.html'))}#pro-offert"${suivi('lolly_pro_offert_match')}><span>${esc(t('match_page.pro_offert_cta','Obtenir mon mois Pro offert'))}</span><span aria-hidden="true">→</span></a></div>`;
 }
 function remplirBoutonsParieur(root,raw){
   // Pose apres le rendu, sous le ticket du pari (.sig-slip, ou ses chiffres .appel-stats sur le
@@ -1459,12 +1462,13 @@ function renderProWall(raw,ctx){
   const MS=window.IasharkMatchSections;
   // Repli sans module : un lien vers l'abonnement (jamais une page vide).
   const repli=`<section class="op op--vitrine"><h2 class="op-title">${esc(t('offre_pro.title_match','Passe Pro pour ouvrir ce match'))}</h2>${boutonAction(lien('abonnement.html?duree=month&next='+encodeURIComponent(cheminMatch(raw))),t('match_v4.panel_cta','Passe Pro'),suivi('match_gate_unlock').trim())}</section>`;
-  const secs=[['offre',`<div id="offreMatch" class="gate">${repli}</div>`,null,true]];
+  // 12/11/2026 (Clement : « trop de trucs qui servent a rien ») : le Pro offert contre une inscription chez
+  // Lolly Bet, notre partenaire, passe EN PREMIER ; dessous l'offre payante ; plus de bouton bookmaker ni de banniere ici.
+  const secs=[];
   secs.push(['prooffert',carteProOffert(),null,true]);
+  secs.push(['offre',`<div id="offreMatch" class="gate">${repli}</div>`,null,true]);
   // Bouton du site de paris (Lolly Bet depuis le 11/11) discret SOUS l'offre Pro (09/11/2026, Clement) : le visiteur qui ne prend pas Pro
   // peut voir les cotes du match chez 1win (en direct apres le coup d'envoi). Aucun pari devoile.
-  const momentBk=momentParieur(pub);
-  if(momentBk!=='fini')secs.push(['bk',boutonParieurHtml(tf('match_page.sig_match_line','{home} – {away}',{home:vm.identity.home.name,away:vm.identity.away.name}),momentBk,true),null,true]);
   // Apercu HONNETE (controle UX du 04/10/2026, tour 2) : seulement ce que Pro aura sur CE match
   // (pro_sections, liste publique du calcul quotidien), de faux chiffres constants.
   const contenus=Array.isArray(pub.pro_sections)?pub.pro_sections:[];

@@ -83,3 +83,25 @@
 /* TAILWIND:DEBUT (scripts/tailwind-offre.config.js) */
 .op .tw-m-0{margin:0}.op .tw-mt-1{margin-top:.25rem}.op .tw-block{display:block}.op .tw-flex{display:flex}.op .tw-h-px{height:1px}.op .tw-min-w-0{min-width:0}.op .tw-cursor-pointer{cursor:pointer}.op .tw-flex-col{flex-direction:column}.op .tw-items-start{align-items:flex-start}.op .tw-items-center{align-items:center}.op .tw-justify-between{justify-content:space-between}.op .tw-gap-3{gap:.75rem}.op .tw-gap-5{gap:1.25rem}.op .tw-whitespace-nowrap{white-space:nowrap}.op .tw-rounded-xl{border-radius:.75rem}.op .tw-border{border-width:1px}.op .tw-border-solid{border-style:solid}.op .tw-border-white\/10{border-color:hsla(0,0%,100%,.1)}.op .tw-border-white\/15{border-color:hsla(0,0%,100%,.15)}.op .tw-bg-\[\#0c1b29\]{--tw-bg-opacity:1;background-color:rgb(12 27 41/var(--tw-bg-opacity,1))}.op .tw-bg-white\/10{background-color:hsla(0,0%,100%,.1)}.op .tw-bg-white\/5{background-color:hsla(0,0%,100%,.05)}.op .tw-p-4{padding:1rem}.op .tw-px-3{padding-left:.75rem;padding-right:.75rem}.op .tw-py-1\.5{padding-top:.375rem;padding-bottom:.375rem}.op .tw-pt-5{padding-top:1.25rem}.op .tw-text-right{text-align:right}.op .tw-text-base{font-size:1rem;line-height:1.5rem}.op .tw-text-lg{font-size:1.125rem;line-height:1.75rem}.op .tw-text-sm{font-size:.875rem;line-height:1.25rem}.op .tw-text-xl{font-size:1.25rem;line-height:1.75rem}.op .tw-text-xs{font-size:.75rem;line-height:1rem}.op .tw-font-medium{font-weight:500}.op .tw-font-semibold{font-weight:600}.op .tw-leading-none{line-height:1}.op .tw-leading-tight{line-height:1.25}.op .tw-text-ia-cyan{--tw-text-opacity:1;color:rgb(32 213 239/var(--tw-text-opacity,1))}.op .tw-text-ia-doux{--tw-text-opacity:1;color:rgb(163 177 194/var(--tw-text-opacity,1))}.op .tw-text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.op .tw-text-white\/80{color:hsla(0,0%,100%,.8)}.op .tw-transition-shadow{transition-property:box-shadow;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.op .has-\[\:checked\]\:tw-border-ia-cyan:has(:checked){--tw-border-opacity:1;border-color:rgb(32 213 239/var(--tw-border-opacity,1))}.op .has-\[\:checked\]\:tw-ring-1:has(:checked){--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow,0 0 #0000)}.op .has-\[\:checked\]\:tw-ring-ia-cyan:has(:checked){--tw-ring-opacity:1;--tw-ring-color:rgb(32 213 239/var(--tw-ring-opacity,1))}
 /* TAILWIND:FIN */
+
+/* 12/11/2026 : selecteur de duree en une ligne + une seule carte (21st.dev olewandowski1/pricing-3) */
+.op .op-seg{display:block;margin:0;padding:0;border:0;min-width:0}
+.op-seg-row{display:flex;gap:4px;padding:4px;border:1px solid rgba(163,177,194,.18);border-radius:12px;background:rgba(255,255,255,.04)}
+.op .op-seg-btn{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:50px;padding:0 8px;border-radius:9px;color:#a3b1c2;font-size:15px;font-weight:600;cursor:pointer;transition:background-color .15s ease,color .15s ease}
+.op .op-seg-btn input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;border:0}
+.op .op-seg-btn input::before{display:none}
+.op .op-seg-btn.is-on{background:#0c1b29;color:#fff;box-shadow:inset 0 0 0 1px var(--op-cyan)}
+.op .op-seg-btn:has(input:focus-visible){outline:2px solid var(--op-cyan);outline-offset:2px}
+.op-seg-badge{white-space:nowrap;font-size:11px;line-height:1.1;font-weight:700;color:var(--op-cyan)}
+.op .op-carte{display:none;margin-top:14px;padding:18px 18px 16px;border:1px solid rgba(32,213,239,.45);border-radius:14px;background:#0c1b29}
+.op .op-carte.is-on{display:block}
+.op-prix{display:flex;align-items:baseline;gap:6px;margin:0}
+.op-prix b{font-size:40px;line-height:1;font-weight:800;letter-spacing:-.02em;color:#fff}
+.op-prix span{font-size:15px;color:#a3b1c2}
+.op-prix-note{margin:6px 0 0;font-size:14px;color:#a3b1c2}
+.op-prix-note.is-trial{color:var(--op-cyan);font-weight:700}
+.op .op-carte .op-benefits{margin-top:14px}
+.op-essai-lignes{margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1);display:grid;gap:6px}
+.op-essai-lignes p{display:flex;justify-content:space-between;gap:10px;margin:0;font-size:13.5px;line-height:1.4;color:#c6d1de}
+.op-essai-lignes b{white-space:nowrap;color:#fff}
+.op-essai-lignes p:first-child b{color:var(--op-cyan)}

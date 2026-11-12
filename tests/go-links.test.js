@@ -63,9 +63,9 @@ test("page match : bouton 1win sous l'Avis, pour tous les pays, clic suivi", () 
 test("page match : bouton 1win aussi sur les matchs fermes et en direct, rien apres le match", () => {
   const src = require("fs").readFileSync(require("path").join(__dirname, "..", "match-page.js"), "utf8");
   const mur = src.slice(src.indexOf("function renderProWall(raw,ctx)"), src.indexOf("function renderAuthWall"));
-  // Sous l'offre Pro (qui reste le bouton principal), avant l'apercu flou.
-  assert.ok(mur.indexOf("['offre',") < mur.indexOf("boutonParieurHtml(") && mur.indexOf("boutonParieurHtml(") < mur.indexOf("MS.apercuFlou("));
-  assert.match(mur, /momentParieur\(pub\)/);
+  // 12/11/2026 (Clement) : plus de bouton bookmaker sous le cadenas ; le Pro offert (Lolly Bet, partenaire) passe en premier.
+  assert.ok(mur.indexOf("boutonParieurHtml(") === -1);
+  assert.ok(mur.indexOf("['prooffert',") < mur.indexOf("['offre',"));
   assert.match(src, /remplirBoutonsParieur\(root,vm\._raw\)/);
   assert.match(src, /if\(moment==='fini'\)return;/);
   const ft = require("fs").readFileSync(require("path").join(__dirname, "..", "funnel-track.js"), "utf8");

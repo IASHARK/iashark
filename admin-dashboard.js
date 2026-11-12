@@ -1249,6 +1249,12 @@
     refuse: { label: "Refusée", cls: "gone", group: "Refusées" }
   };
   var PRO_OFFERT_ORDRE = ["en_attente", "valide", "refuse"];
+  // L'identifiant declare est-il l'e-mail du compte IASHARK ? (meme regle que lib/lolly-page.js#memeEmail)
+  function proOffertMemeEmail(identifiant, email) {
+    var a = String(identifiant == null ? "" : identifiant).trim().toLowerCase();
+    var b = String(email == null ? "" : email).trim().toLowerCase();
+    return !!a && a === b;
+  }
   function proOffertStatut(s) { return PRO_OFFERT_STATUT[s] || { label: "Statut inconnu", cls: "gone", group: "Autres" }; }
   // Boutons : seulement sur une demande en attente (une décision ne se défait pas ici).
   function proOffertActions(s) {
@@ -1289,7 +1295,7 @@
 
   return {
     PARTNER_STATUS: PARTNER_STATUS, PARTNER_STYLES: PARTNER_STYLES, partnerStatus: partnerStatus, partnerStyle: partnerStyle, partnerLegal: partnerLegal,
-    PRO_OFFERT_STATUT: PRO_OFFERT_STATUT, proOffertStatut: proOffertStatut, proOffertActions: proOffertActions, proOffertTri: proOffertTri, proOffertCompte: proOffertCompte,
+    PRO_OFFERT_STATUT: PRO_OFFERT_STATUT, proOffertStatut: proOffertStatut, proOffertMemeEmail: proOffertMemeEmail, proOffertActions: proOffertActions, proOffertTri: proOffertTri, proOffertCompte: proOffertCompte,
     partnerActions: partnerActions, partnerUrl: partnerUrl, partnerLinks: partnerLinks, partnerSort: partnerSort, partnerCounts: partnerCounts, partnerMoney: partnerMoney,
     SCREENS: SCREENS, screenKey: screenKey, DIAG_FILE: DIAG_FILE, pctOf: pctOf, msText: msText, VITALS: VITALS, vitalVerdict: vitalVerdict,
     vitalValue: vitalValue, langName: langName, siteLangText: siteLangText, landingName: landingName, failReason: failReason, todoActions: todoActions,
@@ -2669,6 +2675,8 @@
       d.plan === "pro" ? "déjà abonné payant" : d.plan === "famille" ? "accès Pro offert" : "compte gratuit"
     ];
     var autres = H.num(d.meme_identifiant_ailleurs) || 0;
+    // Meme e-mail sur les deux comptes (12/11/2026) : a chercher tel quel dans le rapport Lolly Bet.
+    facts.push(H.proOffertMemeEmail(d.identifiant, d.email) ? "même e-mail chez Lolly Bet et sur IASHARK" : "identifiant différent de l'e-mail du compte");
     var fin = d.pro_jusqu_au ? fmtDay(d.pro_jusqu_au) : null;
     var busy = S.proOffertBusy;
     var boutons = UUID_RE.test(id) ? H.proOffertActions(d.statut).map(function (x) {

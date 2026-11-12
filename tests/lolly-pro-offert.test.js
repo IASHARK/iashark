@@ -53,7 +53,8 @@ test("offre Lolly : formulation exacte, jamais « 100 € offerts », pas de cod
   const sp = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, String(v).replace(/\u00a0/g, " ")]));
   const fr = sp(dict("fr").lolly_page);
   assert.equal(fr.offer_main, "1er pari remboursé en cash jusqu’à 100 €");
-  assert.equal(fr.pro_pending, "On vérifie ton inscription, ton Pro s’ouvre dès que c’est confirmé.");
+  // 12/11/2026 : l'attente dit aussi de revenir sur la page (personne n'est prevenu autrement).
+  assert.equal(fr.pro_pending, "Demande reçue. On vérifie ton inscription chez Lolly Bet : reviens sur cette page, ton Pro s’y affiche dès que c’est confirmé.");
   const emoji = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u;
   for (const l of LOCALES) {
     const txt = JSON.stringify(dict(l).lolly_page) + JSON.stringify(dict(l).match_page.pro_offert_text);
@@ -150,4 +151,68 @@ test("admin : liste a verifier, Valider / Refuser seulement en attente, texte de
   assert.match(js, /rpc\("admin_pro_offert_decider", \{ p_id: id, p_statut: to, p_note: null \}\)/);
   assert.match(js, /esc\(d\.identifiant \|\| "Identifiant vide"\)/);
   assert.match(js, /loadPartners\(\);\n\s+loadProOffert\(\);/);
+});
+
+test("meme e-mail sur les deux comptes (12/11/2026) : e-mail du compte affiche, champ deja rempli, repere dans l'admin", () => {
+  // E-mail du compte connecte : minuscules, sans espaces ; rien si inconnu ou mal forme.
+  assert.equal(LP.emailCompte({ session: { user: { email: "  Joueur@Exemple.FR " } } }), "joueur@exemple.fr");
+  assert.equal(LP.emailCompte({ user: { email: "a@b.co" } }), "a@b.co");
+  for (const c of [null, {}, { session: null }, { session: { user: {} } }, { session: { user: { email: "pas un mail" } } }, { session: { user: { email: "<x>@y.fr" } } }]) assert.equal(LP.emailCompte(c), "", JSON.stringify(c));
+  // La meme regle des deux cotes : page publique et admin.
+  for (const f of [LP.memeEmail, H.proOffertMemeEmail]) {
+    assert.equal(f("Joueur@Exemple.fr ", "joueur@exemple.fr"), true);
+    assert.equal(f("joueur_75", "joueur@exemple.fr"), false);
+    assert.equal(f("", ""), false);
+    assert.equal(f(null, undefined), false);
+  }
+  const js = read("lib/lolly-page.js");
+  // Etape 1 : l'e-mail du compte et un bouton Copier, par textContent (jamais innerHTML).
+  assert.match(js, /p\.appendChild\(el\("b", "lb-meme-email", email\)\);/);
+  assert.match(js, /navigator\.clipboard\.writeText\(email\)/);
+  assert.doesNotMatch(js, /\.innerHTML\s*=/);
+  // Etape 2 : champ deja rempli avec l'e-mail du compte, bouton qui dit l'action.
+  assert.match(js, /inp\.value = emailCompte\(ctx\);/);
+  assert.match(js, /t\("lolly_page\.pro_send", "Demander mon mois Pro"\)/);
+  // Sans compte : le compte IASHARK se cree avec le meme e-mail, en bouton a contour (un seul bouton plein sur la page).
+  assert.match(js, /el\("a", "lb-btn lb-btn--ligne", t\("lolly_page\.pro_signup"/);
+  const html = read("lolly.html");
+  assert.match(html, /<p class="lb-pas-s lb-meme" id="lbMeme" hidden><\/p>\s*<a class="lb-cta" href="\/go\/lolly\/site"/);
+  assert.equal((html.match(/class="lb-cta"/g) || []).length, 1, "un seul bouton plein dans la page");
+  // Banniere officielle : cliquable avec notre lien, cachee par defaut (montree en francais seulement).
+  assert.match(html, /<a class="lb-banniere" id="lbBanniere" hidden href="\/go\/lolly\/site" target="_blank" rel="sponsored noopener" data-track="lolly_page_banniere"/);
+  assert.match(js, /if \(ban && fr\) \{ ban\.hidden = false; if \(ligne\) ligne\.hidden = true; \}/);
+  // Inscription venue de la page Lolly : la meme consigne.
+  for (const l of LOCALES) {
+    const d = dict(l);
+    for (const k of ["same_email", "copy", "copied", "pro_send", "step_declare", "pro_need_account"]) assert.ok(String(d.lolly_page[k] || "").trim(), l + " lolly_page." + k);
+    assert.ok(String(d.auth.signup_intro_lolly || "").trim(), l + " auth.signup_intro_lolly");
+  }
+  assert.match(dict("fr").lolly_page.pro_need_account, /même e-mail que chez Lolly Bet/);
+  assert.match(dict("fr").auth.signup_intro_lolly, /même e-mail que chez Lolly Bet/);
+  // Admin : chaque demande dit si l'identifiant declare est l'e-mail du compte.
+  const adm = read("admin-dashboard.js");
+  assert.match(adm, /H\.proOffertMemeEmail\(d\.identifiant, d\.email\) \? "même e-mail chez Lolly Bet et sur IASHARK" : "identifiant différent de l'e-mail du compte"/);
+  assert.match(read("funnel-track.js"), /lolly_pro_copier: true/);
+});
+
+test("relecture « visiteur » du 12/11 : etape 1 cochee au retour, textes qui ne promettent pas plus vite que la verification", () => {
+  const js = read("lib/lolly-page.js"), css = read("assets/lolly.css");
+  // Apres l'appui sur le bouton Lolly (memorise dans le navigateur) ou des que la demande est partie.
+  assert.match(js, /root\.localStorage\.setItem\(CLE_FAIT, "1"\)/);
+  assert.match(js, /marquerEtape1\(etat === "en_attente" \|\| etat === "valide" \|\| etape1Memorisee\(\)\);/);
+  assert.match(js, /zone\.classList\.toggle\("lb-fait", !!fait\);/);
+  // Le bouton de l'etape 2 prend le relais ; celui de l'etape 1 passe en contour.
+  assert.match(css, /\.lb-fait \.lb-cta\{background:rgba\(32,213,239,\.08\)/);
+  assert.match(css, /\.lb-fait \.lb-pro-app \.lb-btn--ligne\{background:var\(--lb-cyan\)/);
+  // Memes mesures de bouton sur tout le parcours : 52 px, 16 px.
+  assert.match(css, /\.lb-btn\{min-height:52px;font-size:16px\}/);
+  assert.match(read("assets/account.css"), /\.ins #submit\{height:52px;font-size:16px;font-weight:800\}/);
+  // Verification a la main : aucun texte ne dit « tout de suite » ; l'attente dit de revenir sur la page.
+  for (const l of LOCALES) {
+    const d = dict(l);
+    assert.doesNotMatch(d.auth.signup_intro_lolly + " " + d.lolly_page.pro_pending, /tout de suite|right away|enseguida|sofort|subito|logo o teu/i, l);
+    assert.ok(String(d.match_page.bk_pro_link || "").trim(), l + " match_page.bk_pro_link");
+  }
+  assert.match(dict("fr").lolly_page.pro_pending, /^Demande reçue\. .*reviens sur cette page/);
+  assert.equal(dict("fr").match_page.bk_pro_link, "1 mois de Pro offert : voir comment");
 });

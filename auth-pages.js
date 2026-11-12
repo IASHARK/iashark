@@ -189,7 +189,7 @@
     if (!venuDeLolly(new URLSearchParams(location.search).get('next') || '')) return;
     var poser = function (el, cle, texte) { if (!el) return; el.setAttribute('data-i18n', cle); el.textContent = t(cle, texte); };
     poser(document.querySelector('[data-i18n="auth.signup_h1"]'), 'auth.signup_h1_lolly', 'Crée ton compte pour recevoir ton mois Pro');
-    poser(document.querySelector('[data-i18n="auth.signup_intro"]'), 'auth.signup_intro_lolly', 'Compte gratuit, sans carte bancaire. Tu reviens ensuite sur ta demande.');
+    poser(document.querySelector('[data-i18n="auth.signup_intro"]'), 'auth.signup_intro_lolly', 'Utilise le même e-mail que chez Lolly Bet : c’est avec lui qu’on retrouve ton inscription.');
     poser(document.querySelector('[data-i18n="auth.signup_submit"]'), 'auth.pay_step_submit', 'Créer mon compte et continuer');
     retirerPropositionPro();
   }

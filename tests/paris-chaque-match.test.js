@@ -56,18 +56,20 @@ test("competitions : les 30 championnats, les 6 coupes et les tournois du plan, 
 
 test("retires : Colombie, Perou, Afrique du Sud (et League One/Two, Championship ecossais) hors calcul, pages en 301", () => {
   const retirees = CFG.competitions_retirees.map((l) => l.key);
-  ["colombia_primera_a", "peru_primera", "south_africa_premiership", "league_one", "league_two", "scotland_championship"].forEach((k) => {
+  // 13/11/2026 (decision de Clement) : Colombie, Perou, League One/Two, Eerste Divisie, 3. Liga et Tchequie reviennent
+  // (statistiques de match + cotes chez API-Sports). Restent retirees : Afrique du Sud, Championship ecossais.
+  ["south_africa_premiership", "scotland_championship"].forEach((k) => {
     assert.ok(!parCle[k], k + " encore analyse");
     assert.ok(retirees.includes(k), k + " absent de competitions_retirees (redirections 301)");
   });
   const red = fs.readFileSync(path.join(ROOT, "_redirects"), "utf8");
-  ["primera-a-colombia", "liga-1-peru", "premier-soccer-league"].forEach((slug) => {
+  ["premier-soccer-league"].forEach((slug) => {
     ["fr", "en", "es", "gb", "mx", "za"].forEach((d) => assert.match(red, new RegExp("^/" + d + "/leagues/" + slug + "\\.html\\s+/" + d + "/\\s+301!", "m"), d + " " + slug));
   });
   const LC = require("../scripts/match-lifecycle.js");
   assert.equal(typeof LC.writeRedirects, "function");
   const C = require("../scripts/seo-common.js");
-  assert.ok(C.isRetiredLeague("colombia_primera_a") && !C.isRetiredLeague("ligue1"));
+  assert.ok(C.isRetiredLeague("south_africa_premiership") && !C.isRetiredLeague("ligue1") && !C.isRetiredLeague("colombia_primera_a"));
 });
 
 test("bornes du moteur inchangees : seules les competitions de clubs du socle sont « top » (16 apres les 3 retraits)", () => {
@@ -201,7 +203,7 @@ test("publierPronostics : jamais un pari fige remplace, jamais un match ferme ; 
   // Raison : aucune cote reelle sur un marche candidat (ou competition hors liste).
   const cas = {
     sansCote: [match({ id: 3, c1: null, cn: null, c2: null, cdc1x: null, cdc2x: null, cdc12: null, co25: null, cu25: null, p1: 50, pn: 30, p2: 20 }), P.RAISON_SANS_COTE],
-    horsListe: [match({ id: 5, league_key: "colombia_primera_a", league_id: 239 }), P.RAISON_SANS_COTE],
+    horsListe: [match({ id: 5, league_key: "south_africa_premiership", league_id: 288 }), P.RAISON_SANS_COTE],
   };
   Object.keys(cas).forEach((k) => {
     const m = Object.assign(cas[k][0], { p1: 50, pn: 30, p2: 20, lineups: { home: { formation: "4-3-3" } }, arbitre: { nom: "C. Turpin" }, analyse_card: "Texte ecrit sans pari." });

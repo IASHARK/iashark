@@ -224,8 +224,9 @@ test("selections (PR #313, point 2) : la liste /players/squads d'API-Football n'
 
 test("textes publics : la fourchette citee est celle du choix (1,70-3,50), dans chaque langue", () => {
   const fr = fs.readFileSync(path.join(ROOT, "fr/index.html"), "utf8"), en = fs.readFileSync(path.join(ROOT, "en/index.html"), "utf8");
-  assert.ok(fr.includes("entre 1,70 et 3,50") && fr.includes("fourchette 1,70-3,50"));
-  assert.ok(en.includes("between 1.70 and 3.50") && en.includes("1.70-3.50 odds range"));
+  // Texte du 13/11/2026 (regle scenario) : « la plus belle cote entre 1,70 et 3,50 parmi les paris juges probables ».
+  assert.ok(fr.includes("entre 1,70 et 3,50") && fr.includes("parmi les paris jugés probables"));
+  assert.ok(en.includes("between 1.70 and 3.50") && en.includes("among the bets we rate as likely"));
   ["fr", "en", "es", "de", "it", "pt", "gb", "mx", "za"].forEach((d) => assert.doesNotMatch(fs.readFileSync(path.join(ROOT, "i18n/seo/" + d + ".json"), "utf8"), /1[.,]40-2[.,]20/, d));
 });
 

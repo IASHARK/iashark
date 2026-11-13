@@ -4766,7 +4766,7 @@ jobs:
               if(SCN_ACTIF&&SCN_DB){
                 var scnNouveaux=allMatchsData.filter(function(m){ return m&&m.id!=null&&!GEL_FIGES[String(m.id)]&&m.no_signal!==true&&m.pronostic&&m.pronostic.moteur==='scenario'&&m.pronostic.code_flux; }).map(function(m){
                   var sp=SCENARIO_PAR[String(m.id)]||{};
-                  return {fixture_id:m.id,publie_le:m.pick_frozen_at||new Date().toISOString(),coup_envoi:new Date(parisLocalToMs(m.date)).toISOString(),code:m.pronostic.code_flux,market_id:String(m.market_id||''),famille:m.pronostic.famille_scenario||'?',sous_famille:m.pronostic.sous_famille||null,chance:m.pronostic.chance,note:m.pronostic.note,cote:m.pronostic.cote,attendus:sp.attendus||null,version:sp.version||null};
+                  return {fixture_id:m.id,publie_le:m.pick_frozen_at||new Date().toISOString(),coup_envoi:new Date(parisLocalToMs(m.date)).toISOString(),code:m.pronostic.code_flux,market_id:String(m.market_id||''),famille:m.pronostic.famille_scenario||'?',sous_famille:m.pronostic.sous_famille||null,chance:m.pronostic.chance,note:m.pronostic.note,cote:m.pronostic.cote,attendus:sp.attendus||null,version:m.pronostic.moteur_version||sp.version||null};
                 });
                 if(scnNouveaux.length){
                   var rScn=await fetch(SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/scenario_paris?on_conflict=fixture_id',{method:'POST',headers:{apikey:SUPA_SERVICE_KEY,Authorization:'Bearer '+SUPA_SERVICE_KEY,'Content-Type':'application/json',Prefer:'resolution=ignore-duplicates,return=minimal'},body:JSON.stringify(scnNouveaux)});

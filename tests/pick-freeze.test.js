@@ -657,3 +657,31 @@ test("motifAnnulation : reporte (PST ou reprogramme), annule (CANC, ABD), sinon 
   assert.equal((wf.match(/await fixturesEnAttenteParIds\(/g) || []).length, 2);
   assert.match(wf, /fixtures\?ids='\+ids\.slice\(i,i\+20\)\.join\('-'\)/);
 });
+
+// ---------------------------------------------------------------------------
+// BASCULE VERS LE MOTEUR SCENARIO (decision de Clement du 13/11/2026) : exception unique.
+// ---------------------------------------------------------------------------
+test("bascule scenario : un pari publie avant la mise en ligne est refait une fois, puis ne change plus", () => {
+  const BASC = Date.parse(F.BASCULE_SCENARIO);
+  const ko = "2026-11-15T19:45:00+00:00";
+  const pub = function (quandMs) {
+    const m = computed("vendredi", { date: "2026-11-15 20:45" });
+    const first = F.freezeAnalysis(m, null, { nowMs: quandMs, fixture: apiFixture(1001, ko), premiumRow: premiumRowOf(m) });
+    return { match: first.match, row: storedRow(first.match, first.premiumRow, new Date(quandMs).toISOString()) };
+  };
+  const frais = function () { return computed("samedi", { date: "2026-11-15 20:45" }); };
+  // Publie avant la bascule (ancien moteur) : refait, trace de l'ancien pari gardee.
+  const avant = pub(BASC - 2 * H);
+  const f1 = frais();
+  const r1 = F.freezeAnalysis(f1, avant.row, { nowMs: BASC + H, fixture: apiFixture(1001, ko), premiumRow: premiumRowOf(f1) });
+  assert.equal(r1.status, "FIRST_PUBLICATION");
+  assert.equal(r1.remplacement.motif, "moteur_scenario");
+  assert.equal(r1.remplacement.ancien.prediction, "Over 2.5");
+  assert.equal(r1.match.pari_rec, "Victoire Domicile");
+  // Le nouveau pari, publie apres la bascule, est fige au calcul suivant.
+  const apres = { match: r1.match, row: storedRow(r1.match, r1.premiumRow, new Date(BASC + H).toISOString()) };
+  const f2 = computed("vendredi", { date: "2026-11-15 20:45" });
+  const r2 = F.freezeAnalysis(f2, apres.row, { nowMs: BASC + 5 * H, fixture: apiFixture(1001, ko), premiumRow: premiumRowOf(f2) });
+  assert.equal(r2.status, "FROZEN");
+  assert.equal(r2.match.pari_rec, "Victoire Domicile");
+});

@@ -4689,6 +4689,66 @@ jobs:
               var rapportProno=PRONOSTIC.poserPronostics(allMatchsData,{configLigues:LEAGUES_CONFIG,chancesV3Par:CHANCES_V3_PRONO,figes:GEL_FIGES});
               console.log('  [PRONOSTIC] '+rapportProno.avec+' match(s) avec pronostic, '+rapportProno.sans+' sans ; '+rapportProno.selections+' selection(s) ; voies : v3='+rapportProno.voies.v3+' cotes_marche='+rapportProno.voies.cotes_marche+' modele='+rapportProno.voies.modele+'.');
             }catch(e){ console.log('::warning title=Pronostic::pronostics non poses ('+(e&&e.message)+').'); }
+          // ================= MOTEUR « SCENARIO » (plan valide par Clement le 13/11/2026) =================
+          // Le moteur predit d'abord le match (20 derniers matchs toutes competitions de chaque equipe, adversaire,
+          // arbitre, absents, fatigue, enjeu) ; la cote n'est lue qu'a la fin (lib/pronostic.js#evaluerCandidatsScenario).
+          // Formules : depot PRIVE (dossier .moteur-scenario-prive/, jamais commite). Matchs gardes en base (table privee
+          // scenario_matchs, un match demande UNE fois a API-Sports ; arret sous 3 000 appels restants). Sans moteur, sans
+          // base ou en cas d'erreur : SCENARIO_PAR reste vide, donc AUCUN nouveau pari (jamais une autre regle en secours).
+          var SCENARIO_PAR={}, SCENARIO_FERMEES=[], SCN_ACTIF=false, SCN_DB=null, SCN_MAG=null, SCN_API=null;
+          try{
+            var SCN=require('./lib/scenario.js'), SCN_D=require('./lib/scenario-donnees.js');
+            var scnRegle=PRONOSTIC.regleFlux(JSON.parse(fs.readFileSync('config/marches-pari.json','utf8')));
+            SCN_ACTIF=!!(scnRegle&&scnRegle.scenario);
+            if(SCN_ACTIF){
+              var scnMoteur=SCN.charger();
+              if(!scnMoteur) console.log('::error title=Moteur scenario::moteur prive introuvable (.moteur-scenario-prive/scenario) : aucun nouveau pari a ce calcul.');
+              else if(!(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY)) console.log('::error title=Moteur scenario::base indisponible (cle de service absente) : aucun nouveau pari a ce calcul.');
+              else{
+                SCN_DB=SCN_D.base(SUPA_URL_PIPELINE,SUPA_SERVICE_KEY); SCN_MAG=SCN_D.magasinBase(SCN_DB); SCN_API=SCN_D.client({cle:APS_KEY});
+                // 1. SUIVI : regler les paris deja publies, puis fermer toute famille sous la moitie sur ses 50 derniers paris.
+                try{
+                  var scnAttente=await SCN_DB.lire('scenario_paris','resultat=is.null&coup_envoi=lt.'+encodeURIComponent(new Date(Date.now()-3*3600e3).toISOString()),'fixture_id,code');
+                  if(scnAttente.length){
+                    await SD_collecte(scnAttente.map(function(x){ return Number(x.fixture_id); }));
+                    var scnFinis={};
+                    for(var si=0;si<scnAttente.length;si+=150) (await SCN_DB.lire('scenario_matchs','id=in.('+scnAttente.slice(si,si+150).map(function(x){ return x.fixture_id; }).join(',')+')','donnees')).forEach(function(x){ if(x.donnees) scnFinis[String(x.donnees.id)]=x.donnees; });
+                    var scnRegles=scnAttente.map(function(x){ var L=scnFinis[String(x.fixture_id)]; var r=L?SCN.reglerSuivi(x.code,L,FLUX_PARIS_REG):null; return r?{fixture_id:x.fixture_id,resultat:r,regle_le:new Date().toISOString()}:null; }).filter(Boolean);
+                    for(var sj=0;sj<scnRegles.length;sj++){ var sr=scnRegles[sj]; await fetch(SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/scenario_paris?fixture_id=eq.'+sr.fixture_id+'&resultat=is.null',{method:'PATCH',headers:{apikey:SUPA_SERVICE_KEY,Authorization:'Bearer '+SUPA_SERVICE_KEY,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({resultat:sr.resultat,regle_le:sr.regle_le})}); }
+                    console.log('  [SCENARIO] suivi : '+scnRegles.length+' pari(s) regle(s) sur '+scnAttente.length+' en attente.');
+                  }
+                  var scnTous=await SCN_DB.lire('scenario_paris','resultat=in.(gagne,perdu)&order=publie_le.desc','famille,resultat,publie_le');
+                  var scnEtat=SCN.etatFamilles(scnTous), scnDeja={};
+                  (await SCN_DB.lire('scenario_familles','','famille,fermee')).forEach(function(x){ scnDeja[x.famille]=x.fermee===true; });
+                  var scnLignes=Object.keys(scnEtat).map(function(k){ var e=scnEtat[k]; return {famille:k,fermee:e.fermee||scnDeja[k]===true,total:e.total,gagnes:e.gagnes,motif:(e.fermee||scnDeja[k]===true)?'sous la moitie sur les 50 derniers paris':null,maj_le:new Date().toISOString()}; });
+                  if(scnLignes.length) await SCN_DB.ecrire('scenario_familles',scnLignes,'famille');
+                  // Une famille fermee le reste jusqu'a ce que Clement la rouvre (ligne scenario_familles.fermee = false).
+                  Object.keys(scnDeja).forEach(function(k){ if(scnDeja[k]) SCENARIO_FERMEES.push(k); });
+                  scnLignes.forEach(function(l){
+                    if(!l.fermee||scnDeja[l.famille]===true) return;
+                    SCENARIO_FERMEES.push(l.famille);
+                    console.log('::warning title=Moteur scenario::famille « '+l.famille+' » fermee toute seule ('+l.gagnes+' gagnes sur '+l.total+').');
+                    SCN_DB.ecrire('admin_alertes',[{type:'moteur',titre:'Famille de paris fermée : '+l.famille,texte:l.gagnes+' paris gagnés sur les '+l.total+' derniers : la famille « '+l.famille+' » ne sort plus de pari tant que tu ne la rouvres pas.'}],'id').catch(function(){});
+                  });
+                }catch(e){ console.log('::warning title=Moteur scenario::suivi non fait ('+(e&&e.message)+').'); }
+                // 2. PREDIRE les matchs ouverts, non figes, qui ont un releve Bet365.
+                var scnCibles=allMatchsData.filter(function(m){ return m&&m.id!=null&&!GEL_FIGES[String(m.id)]&&(!m.status||m.status==='NS')&&FLUX_PARIS[String(m.id)]&&FLUX_PARIS[String(m.id)].raw&&m.home&&m.home.id&&m.away&&m.away.id; });
+                if(scnCibles.length){
+                  var scnArb=function(m){ return SCN_D.nomArbitre(m.arbitre&&m.arbitre.nom?m.arbitre.nom:null); };
+                  var scnEq=[]; scnCibles.forEach(function(m){ scnEq.push(m.home.id,m.away.id); });
+                  var scnLu=await SCN.collecterEtLire({api:SCN_API,magasin:SCN_MAG,equipes:scnEq,arbitres:scnCibles.map(scnArb).filter(Boolean),finMs:Date.now()+9*60000});
+                  var scnLigues=JSON.parse(fs.readFileSync('config/scenario-ligues.json','utf8')).ligues;
+                  var scnAbs=function(m,id){ return (Array.isArray(m.injuries)?m.injuries:[]).filter(function(x){ return x&&x.team===id&&x.player_id!=null; }).map(function(x){ return Number(x.player_id); }); };
+                  SCENARIO_PAR=SCN.calculer(scnMoteur,scnLu.lignes,scnLigues,scnCibles.map(function(m){
+                    return {id:m.id,t:parisLocalToMs(m.date),h:m.home.id,a:m.away.id,lg:m.league_id,ref:scnArb(m),absents:{h:scnAbs(m,m.home.id),a:scnAbs(m,m.away.id)},raw:FLUX_PARIS[String(m.id)].raw,nomDom:m.home.n,nomExt:m.away.n};
+                  }),{FP:FLUX_PARIS_REG,regle:scnRegle});
+                  var scnAvec=Object.keys(SCENARIO_PAR).filter(function(k){ return Object.keys(SCENARIO_PAR[k].issues||{}).length>0; }).length;
+                  console.log('  [SCENARIO] '+scnCibles.length+' match(s) a predire, '+scnAvec+' avec un scenario ; '+scnLu.lignes.length+' match(s) lus en base, '+scnLu.rapport.matchs_nouveaux+' nouveau(x), '+scnLu.rapport.appels+' appel(s) API-Sports'+(scnLu.rapport.arrete_quota?' ; ARRET QUOTA (moins de 3 000 appels restants)':'')+(scnLu.rapport.arrete_budget?' ; budget de temps atteint':'')+' ; moteur '+scnMoteur.version+' ; familles fermees : '+(SCENARIO_FERMEES.join(', ')||'aucune')+'.');
+                }
+              }
+            }
+            async function SD_collecte(ids){ return SCN_D.collecterMatchs(SCN_API,SCN_MAG,ids,{finMs:Date.now()+2*60000}); }
+          }catch(e){ SCENARIO_PAR={}; console.log('::error title=Moteur scenario::calcul impossible ('+String(e&&e.message||e).slice(0,160)+') : aucun nouveau pari a ce calcul.'); }
           // ================= UN PARI SUR CHAQUE MATCH (decision de Clement, 03/10/2026, 23 h) =================
           // FOURCHETTE (exigence de Clement, 04/10/2026, 2 h : « des cotes entre 1,40 et 1,70 en sec ; toutes les cases
           // remplies et justes ; c'est tout ») : lib/pronostic.js#publierPronostics decide le pari de CHAQUE match ouvert
@@ -4700,7 +4760,21 @@ jobs:
           // (config/leagues.json#fiabilite.corrections_chance ; ex. Ligue des nations 59,1 % annonces / 56,0 % reels).
           // Enfin l'option « cote plus haute » (regle A, champ premium option_cote). Journal : compteurs seulement.
           try{
-            var rapportPub=PRONOSTIC.publierPronostics(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,figes:GEL_FIGES,chancesV3Par:CHANCES_V3_PRONO,texteMarche:TEXTE_MARCHE,cotesAnjPar:LIVRES_ANJ,relevesAnj:RELEVES_ANJ,relevesAnjEvenement:RELEVES_ANJ_EV,releveAnjA:RELEVE_ANJ_A,fluxPar:FLUX_PARIS});
+            var rapportPub=PRONOSTIC.publierPronostics(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,figes:GEL_FIGES,chancesV3Par:CHANCES_V3_PRONO,texteMarche:TEXTE_MARCHE,cotesAnjPar:LIVRES_ANJ,relevesAnj:RELEVES_ANJ,relevesAnjEvenement:RELEVES_ANJ_EV,releveAnjA:RELEVE_ANJ_A,fluxPar:FLUX_PARIS,scenarioPar:SCENARIO_PAR,famillesFermees:SCENARIO_FERMEES});
+            // Suivi du moteur scenario : chaque nouveau pari publie est archive avec ce qu'on attendait (jamais reecrit ensuite).
+            try{
+              if(SCN_ACTIF&&SCN_DB){
+                var scnNouveaux=allMatchsData.filter(function(m){ return m&&m.id!=null&&!GEL_FIGES[String(m.id)]&&m.no_signal!==true&&m.pronostic&&m.pronostic.moteur==='scenario'&&m.pronostic.code_flux; }).map(function(m){
+                  var sp=SCENARIO_PAR[String(m.id)]||{};
+                  return {fixture_id:m.id,publie_le:m.pick_frozen_at||new Date().toISOString(),coup_envoi:new Date(parisLocalToMs(m.date)).toISOString(),code:m.pronostic.code_flux,market_id:String(m.market_id||''),famille:m.pronostic.famille_scenario||'?',sous_famille:m.pronostic.sous_famille||null,chance:m.pronostic.chance,note:m.pronostic.note,cote:m.pronostic.cote,attendus:sp.attendus||null,version:sp.version||null};
+                });
+                if(scnNouveaux.length){
+                  var rScn=await fetch(SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/scenario_paris?on_conflict=fixture_id',{method:'POST',headers:{apikey:SUPA_SERVICE_KEY,Authorization:'Bearer '+SUPA_SERVICE_KEY,'Content-Type':'application/json',Prefer:'resolution=ignore-duplicates,return=minimal'},body:JSON.stringify(scnNouveaux)});
+                  var scnFam={}; scnNouveaux.forEach(function(x){ scnFam[x.famille]=(scnFam[x.famille]||0)+1; });
+                  console.log('  [SCENARIO] '+scnNouveaux.length+' pari(s) du moteur scenario archive(s) ('+(rScn.ok?'ok':'echec '+rScn.status)+') : '+Object.keys(scnFam).map(function(k){ return k+' '+scnFam[k]; }).join(', ')+'.');
+                }
+              }
+            }catch(e){ console.log('::warning title=Moteur scenario::suivi des nouveaux paris non archive ('+(e&&e.message)+').'); }
             var fourchetteLog=PRONOSTIC.fourchettePari(LEAGUES_CONFIG);
             console.log('  [PARIS] fourchette '+fourchetteLog.cote_min.toFixed(2)+'-'+fourchetteLog.cote_max.toFixed(2)+' : '+rapportPub.publies+' pari(s) publie(s) ('+rapportPub.dans_fourchette+' dans la fourchette, '+rapportPub.hors_fourchette+' au plus proche ; cote agreee '+rapportPub.cote_agreee+', cote du marche '+rapportPub.cote_marche+' ; '+rapportPub.gardes+' garde(s), '+rapportPub.changes+' change(s) de marche, '+rapportPub.nouveaux+' nouveau(x)) ; '+rapportPub.sans_pari+' match(s) sans pari (dont '+rapportPub.sans_cote+' sans aucune cote reelle, '+rapportPub.retires+' pari(s) retire(s)) ; '+rapportPub.figes+' fige(s) intouche(s) ; textes d\'un autre marche retires sur '+rapportPub.textes_retires+' match(s).');
           }catch(e){ console.log('::warning title=Paris::pronostics non publies ('+(e&&e.message)+').'); }
@@ -5304,6 +5378,22 @@ jobs:
       # dossier moteur-v3/ du depot est utilise.
       # Version du moteur prive : variable MOTEUR_V3_REF (commit ou branche), sinon
       # le commit 1aee60b copie dans moteur-v3/ le 28/09/2026 (moteur-v3/SOURCE.json).
+      # MOTEUR SCENARIO (plan de Clement du 13/11/2026) : les formules et leurs reglages vivent dans le depot PRIVE
+      # IASHARK/iashark-moteur (dossier scenario/), jamais dans ce depot public. Recupere en lecture seule dans
+      # .moteur-scenario-prive/ (jamais commite : l'etape « Commit and push » n'ajoute que des fichiers nommes).
+      # Version : variable MOTEUR_SCENARIO_REF (commit ou branche), sinon la branche « scenario ».
+      # Si l'etape echoue : aucun nouveau pari a ce calcul (alerte rouge dans le journal), le site se met a jour quand meme.
+      - name: Moteur scenario - recuperer le moteur prive (lecture seule)
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          repository: IASHARK/iashark-moteur
+          ref: ${{ vars.MOTEUR_SCENARIO_REF || 'scenario' }}
+          token: ${{ secrets.MOTEUR_V3_DEPOT_PRIVE }}
+          path: .moteur-scenario-prive
+          sparse-checkout: scenario
+          persist-credentials: false
+
       - name: Moteur v3 - source du moteur (depot prive ou copie du depot)
         id: moteur_v3_source
         if: ${{ vars.MOTEUR_V3 == '1' }}

@@ -14,7 +14,10 @@ const P = require("../lib/pronostic.js");
 const ML = require("../lib/market-labels.js");
 const ROOT = path.join(__dirname, "..");
 const LIGUES = JSON.parse(fs.readFileSync(path.join(ROOT, "config/leagues.json"), "utf8"));
+// Depuis le 13/11/2026 la config du depot est sur la regle « scenario » (tests/scenario.test.js). La regle du 11/11 reste
+// dans le code (retour arriere possible en remettant choix_du_pari.regle) : ces tests la verifient en la forcant ici.
 const MARCHES = JSON.parse(fs.readFileSync(path.join(ROOT, "config/marches-pari.json"), "utf8"));
+MARCHES.choix_du_pari = Object.assign({}, MARCHES.choix_du_pari, { regle: "tous_marches_bet365" });
 const REGLE = P.regleFlux(MARCHES);
 const TOUT = new Set(["events", "statistics_fixtures", "statistics_players"]);
 

@@ -392,7 +392,7 @@ test("contenu Pro : option_cote et chance_correction premium ; cotes Pinnacle ja
 
 test("pipeline : un pari sur chaque match apres les pronostics, avant le match offert et l'ecriture des donnees", () => {
   const iProno = SCRIPT.indexOf("PRONOSTIC.poserPronostics(");
-  const iPub = SCRIPT.indexOf("PRONOSTIC.publierPronostics(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,figes:GEL_FIGES,chancesV3Par:CHANCES_V3_PRONO,texteMarche:TEXTE_MARCHE,cotesAnjPar:LIVRES_ANJ,relevesAnj:RELEVES_ANJ,relevesAnjEvenement:RELEVES_ANJ_EV,releveAnjA:RELEVE_ANJ_A,fluxPar:FLUX_PARIS})");
+  const iPub = SCRIPT.indexOf("PRONOSTIC.publierPronostics(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,figes:GEL_FIGES,chancesV3Par:CHANCES_V3_PRONO,texteMarche:TEXTE_MARCHE,cotesAnjPar:LIVRES_ANJ,relevesAnj:RELEVES_ANJ,relevesAnjEvenement:RELEVES_ANJ_EV,releveAnjA:RELEVE_ANJ_A,fluxPar:FLUX_PARIS,scenarioPar:SCENARIO_PAR,famillesFermees:SCENARIO_FERMEES})");
   const iAlign = SCRIPT.indexOf("PRONOSTIC.alignerChancesAffichees(allMatchsData,premiumRows,{configLigues:LEAGUES_CONFIG,figes:GEL_FIGES})");
   const iOpt = SCRIPT.indexOf("PRONOSTIC.poserOptionCote(allMatchsData,{configLigues:LEAGUES_CONFIG,cotesAnjPar:LIVRES_ANJ,figes:GEL_FIGES})");
   assert.ok(iProno > 0 && iPub > iProno && iAlign > iPub && iOpt > iAlign);

@@ -183,7 +183,7 @@ test("candidats des combines : chaque match ouvert (fige compris), jamais un mat
   // Pipeline : flux et candidats en memoire seulement, jamais ecrits ni journalises.
   assert.match(WF, /var FLUX_PARIS=\{\};/);
   assert.match(WF, /FLUX_PARIS\[String\(m\.id\)\]=\{selections:r\.selections,toutes:FLUX_MOD\.toutesLesCotes\(raw,\{config:CFG_FLUX\}\),raw:raw\};/);
-  assert.match(WF, /releveAnjA:RELEVE_ANJ_A,fluxPar:FLUX_PARIS\}\);/);
+  assert.match(WF, /releveAnjA:RELEVE_ANJ_A,fluxPar:FLUX_PARIS,scenarioPar:SCENARIO_PAR,famillesFermees:SCENARIO_FERMEES\}\);/);
   // 21/10/2026 : les tickets ne prennent plus que le pari affiche ; le calcul quotidien ne calcule plus ces candidats.
   assert.doesNotMatch(WF, /CANDIDATS_DU_JOUR/);
   assert.doesNotMatch(WF, /writeFileSync\([^)]*(FLUX_PARIS|CANDIDATS_DU_JOUR)/);

@@ -1,0 +1,42 @@
+name: Moteur scenario - essai a blanc
+
+# Essai a blanc du moteur « scenario » (13/11/2026) : memes fonctions que le calcul du matin, RIEN n'est publie ni
+# commite. Sert a verifier le moteur prive, la base et la collecte avant ou apres une modification, et a remplir la
+# table scenario_matchs. Le journal n'affiche que des comptes (jamais un pari : ce depot est public).
+on:
+  workflow_dispatch:
+  push:
+    branches: [moteur-scenario]
+    paths: ['.github/workflows/scenario-essai.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scenario-essai
+  cancel-in-progress: false
+
+jobs:
+  essai:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Moteur scenario - recuperer le moteur prive (lecture seule)
+        uses: actions/checkout@v4
+        with:
+          repository: IASHARK/iashark-moteur
+          ref: ${{ vars.MOTEUR_SCENARIO_REF || 'scenario' }}
+          token: ${{ secrets.MOTEUR_V3_DEPOT_PRIVE }}
+          path: .moteur-scenario-prive
+          sparse-checkout: scenario
+          persist-credentials: false
+      - name: Essai a blanc
+        env:
+          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/scenario-essai.js

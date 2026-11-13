@@ -339,7 +339,28 @@ const RAISONS={
   count_cards:'Cartons jaunes par match : {home} {homeValue}, {away} {awayValue} (total {total}).'
 };
 const NUM_VARS=['xg','teamXg','otherXg','homeTot','awayTot','homeFh','awayFh','homeXg','awayXg','totalXg','homeFor','homeAgainst','awayFor','awayAgainst','homeValue','awayValue','total'];
+// Phrase du moteur scenario (13/11/2026) : ce qu'on attend dans le match, plus au mieux UN fait marquant (arbitre,
+// absents, fatigue, favori, amical). Exemple : « 9 corners attendus, l'arbitre siffle peu. »
+const SCN_TOTAL={buts:'{n} buts attendus',tirs:'{n} tirs attendus',tirs_cadres:'{n} tirs cadrés attendus',corners:'{n} corners attendus',fautes:'{n} fautes attendues',hors_jeu:'{n} hors-jeu attendus',cartons:'{n} cartons attendus'};
+const SCN_DUO={buts:'Buts attendus : {home} {h}, {away} {a}',tirs:'Tirs attendus : {home} {h}, {away} {a}',tirs_cadres:'Tirs cadrés attendus : {home} {h}, {away} {a}',corners:'Corners attendus : {home} {h}, {away} {a}',fautes:'Fautes attendues : {home} {h}, {away} {a}',hors_jeu:'Hors-jeu attendus : {home} {h}, {away} {a}',cartons:'Cartons attendus : {home} {h}, {away} {a}'};
+const SCN_PLUS={severe:'l’arbitre siffle beaucoup',laisse:'l’arbitre siffle peu',absents:'{team} privé de {n} titulaires',absent1:'{team} privé d’un titulaire',fatigue:'{team} a peu récupéré',domine:'{team} favori',amical:'match amical'};
+function texteScenario(item){
+  const f=item&&item.scenario,v=(item&&item.vars)||{};
+  if(!f||!SCN_TOTAL[f.stat])return null;
+  const total=f.sous_famille==='total'||(f.stat==='buts'&&/total|marquent|nombre/.test(String(f.sous_famille||'')));
+  const principal=total?tf('match_page.scn_total_'+f.stat,SCN_TOTAL[f.stat],{n:fmt(f.attendu_total)})
+    :tf('match_page.scn_duo_'+f.stat,SCN_DUO[f.stat],{home:v.home,away:v.away,h:fmt(f.attendu_dom),a:fmt(f.attendu_ext)});
+  const plus=(k,vars)=>tf('match_page.scn_plus_'+k,SCN_PLUS[k],vars);
+  let extra=null;
+  if(f.arbitre==='severe'||f.arbitre==='laisse_jouer')extra=plus(f.arbitre==='severe'?'severe':'laisse');
+  else if(f.absents_dom>0||f.absents_ext>0){const dom=f.absents_dom>=f.absents_ext,n=dom?f.absents_dom:f.absents_ext;extra=n>1?plus('absents',{team:dom?v.home:v.away,n:n}):plus('absent1',{team:dom?v.home:v.away});}
+  else if(f.amical)extra=plus('amical');
+  else if(f.fatigue_dom!==f.fatigue_ext)extra=plus('fatigue',{team:f.fatigue_dom?v.home:v.away});
+  else if(f.domine)extra=plus('domine',{team:f.domine==='dom'?v.home:v.away});
+  return phrase(extra?principal+', '+extra:principal);
+}
 function texteRaison(item){
+  if(item&&item.key==='scenario')return texteScenario(item);
   if(!item||!RAISONS[item.key])return null;
   const v=Object.assign({},item.vars);
   NUM_VARS.forEach(k=>{if(v[k]!=null)v[k]=fmt(v[k]);});

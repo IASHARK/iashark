@@ -1,16 +1,28 @@
 {
  "version": 1,
- "genere_le": "2026-11-12T10:25:27.616Z",
- "jour": "2026-11-12",
+ "genere_le": "2026-11-13T07:21:51.037Z",
+ "jour": "2026-11-13",
  "debut": "2026-10-06",
  "objectif": 10,
- "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-11-12. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
+ "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-11-13. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
  "montantes": [
   {
    "rang": 1,
-   "paliers": [],
-   "gagnes": 0,
-   "cote": null,
+   "paliers": [
+    {
+     "j": "2026-11-12",
+     "f": 1528963,
+     "h": "Albania",
+     "a": "Finland",
+     "m": "over-15",
+     "p": "Plus de 1,5 but",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 1.4
+    }
+   ],
+   "gagnes": 1,
+   "cote": 1.4,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
@@ -272,10 +284,21 @@
      "c": 1.53,
      "r": "perdu",
      "cc": null
+    },
+    {
+     "j": "2026-11-12",
+     "f": 1528963,
+     "h": "Albania",
+     "a": "Finland",
+     "m": "over-15",
+     "p": "Plus de 1,5 but",
+     "c": 1.4,
+     "r": "gagne",
+     "cc": 1.4
     }
    ],
    "bilan": {
-    "gagnes": 15,
+    "gagnes": 16,
     "perdus": 6,
     "annules": 1,
     "non_regles": 0,
@@ -291,12 +314,12 @@
    "attente": null,
    "dernier": {
     "t": "perdu",
-    "j": "2026-11-09",
-    "n": 1,
-    "h": "Plymouth Parkway",
-    "a": "Berkhamsted",
+    "j": "2026-11-12",
+    "n": 0,
+    "h": "San Marino",
+    "a": "Belarus",
     "p": "Plus de 2,5 buts",
-    "k": 1.65
+    "k": 1.58
    },
    "objectifs": [
     {
@@ -537,11 +560,22 @@
      "c": 1.65,
      "r": "perdu",
      "cc": null
+    },
+    {
+     "j": "2026-11-12",
+     "f": 1528964,
+     "h": "San Marino",
+     "a": "Belarus",
+     "m": "over-25",
+     "p": "Plus de 2,5 buts",
+     "c": 1.58,
+     "r": "perdu",
+     "cc": null
     }
    ],
    "bilan": {
     "gagnes": 15,
-    "perdus": 6,
+    "perdus": 7,
     "annules": 0,
     "non_regles": 0,
     "objectifs": 1

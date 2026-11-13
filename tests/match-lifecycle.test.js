@@ -101,7 +101,7 @@ const at = (ms) => new Date(KICKOFF + ms);
 
 test("decision du 02/11/2026 : les 51 competitions ont leur page dans toutes les versions", () => {
   const leagues = JSON.parse(read("config/leagues.json")).leagues;
-  assert.equal(leagues.length, 51);
+  assert.equal(leagues.length, 102); // 51 + 51 competitions avec statistiques ajoutees le 13/11/2026
   const toutes = C.DIR_CODES.filter((d) => d !== "fr").sort();
   for (const l of leagues) assert.deepEqual(l.seoMatchDirs.slice().sort(), toutes, l.key);
 });

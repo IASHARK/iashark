@@ -23,9 +23,9 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
-      "model_output_available": true,
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
+      "model_output_available": false,
       "c1": "2.70",
       "cn": "2.99",
       "c2": "2.83",
@@ -48,14 +48,14 @@
       "btts_non": "1.71",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
-      "no_signal": false,
-      "no_signal_label": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
       "stade": {
         "nom": "Zimbru - Chisinau",
         "cap": "",
         "meteo": "",
         "temp": "9C",
-        "desc": "légère pluie",
+        "desc": "couvert",
         "wind": "7 km/h",
         "weather_source": "openweathermap",
         "weather_forecast_at": "2026-11-13T18:00:00.000Z"
@@ -188,26 +188,24 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:53:50+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:32+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-11T07:14:34.539Z",
+      "no_signal_reason": "AUCUN_PARI_SIMPLE_DANS_LA_FOURCHETTE",
       "fiabilite_cotes_marche": true,
-      "pronostic_dispo": true,
-      "selection_iashark": true,
       "nb_marches": 16,
       "pro_sections": [
         "sim",
@@ -216,7 +214,7 @@
       ],
       "is_free": true,
       "free_day": "2026-11-13",
-      "has_signal": true
+      "has_signal": false
     },
     {
       "id": 1647948,
@@ -243,22 +241,22 @@
       "status": "NS",
       "data_quality_score": 30,
       "data_quality_label": "Faible",
-      "model_output_available": true,
-      "c1": "1.50",
+      "model_output_available": false,
+      "c1": "1.51",
       "cn": "4.29",
-      "c2": "5.22",
+      "c2": "5.20",
       "co15": "1.17",
       "co25": "1.59",
       "cu25": "2.25",
       "cu15": "4.52",
       "cu35": "1.50",
       "dc1x": "1.14",
-      "dc2x": "2.41",
+      "dc2x": "2.40",
       "dc12": "1.17",
       "cdc1x": "1.14",
-      "cdc2x": "2.41",
-      "ah_dom": "1.45",
-      "ah_ext": "5.25",
+      "cdc2x": "2.40",
+      "ah_dom": "1.50",
+      "ah_ext": "4.80",
       "co35": "2.50",
       "cbtts": "1.68",
       "cbtts_non": "2.06",
@@ -266,13 +264,13 @@
       "btts_non": "2.06",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
-      "no_signal": false,
-      "no_signal_label": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
       "stade": {
         "nom": "Dijon (domicile)",
         "cap": "",
         "meteo": "",
-        "temp": "6C",
+        "temp": "5C",
         "desc": "ciel dégagé",
         "wind": "4 km/h",
         "weather_source": "openweathermap",
@@ -2415,24 +2413,23 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_AUCUN_PARI",
         "origine_probabilite": "modèle seul",
         "couverture": "données limitées",
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:50+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:34+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-12T10:25:08.985Z",
-      "pronostic_dispo": true,
+      "no_signal_reason": "AUCUN_PARI_SIMPLE_DANS_LA_FOURCHETTE",
       "nb_marches": 10,
       "pro_sections": [
         "sim",
@@ -2440,8 +2437,7 @@
         "marches"
       ],
       "is_free": false,
-      "prob_band": "moderate",
-      "has_signal": true
+      "has_signal": false
     },
     {
       "id": 1647959,
@@ -2850,7 +2846,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -2862,7 +2858,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:52+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:36+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -3518,29 +3514,25 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_AUCUN_PARI",
         "origine_probabilite": "modèle seul",
         "couverture": "données limitées",
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:51+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:35+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-12T10:25:08.985Z",
       "pronostic_dispo": true,
-      "nb_marches": 10,
-      "pro_sections": [
-        "sim",
-        "marches"
-      ],
+      "selection_voie": "scenario",
+      "pick_frozen_at": "2026-11-13T09:20:31.012Z",
       "is_free": false,
       "prob_band": "moderate",
       "has_signal": true
@@ -3568,9 +3560,9 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
-      "model_output_available": true,
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
+      "model_output_available": false,
       "c1": "2.40",
       "cn": "3.11",
       "c2": "3.00",
@@ -3593,13 +3585,13 @@
       "btts_non": "1.85",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
-      "no_signal": false,
-      "no_signal_label": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
       "stade": {
         "nom": "Municipal de Butarque - Leganes",
         "cap": "",
         "meteo": "",
-        "temp": "12C",
+        "temp": "14C",
         "desc": "couvert",
         "wind": "5 km/h",
         "weather_source": "openweathermap",
@@ -4455,30 +4447,32 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_AUCUN_PARI",
         "origine_probabilite": "modèle seul",
         "couverture": "données limitées",
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:19+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:03+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-11T07:14:34.539Z",
-      "pronostic_dispo": true,
+      "no_signal_reason": "AUCUN_PARI_SIMPLE_DANS_LA_FOURCHETTE",
+      "fiabilite_cotes_marche": true,
+      "nb_marches": 10,
       "pro_sections": [
-        "joueurs"
+        "sim",
+        "joueurs",
+        "marches"
       ],
       "is_free": false,
-      "prob_band": "moderate",
-      "has_signal": true
+      "has_signal": false
     },
     {
       "id": 1528965,
@@ -4503,28 +4497,28 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
       "model_output_available": true,
-      "c1": "9.63",
+      "c1": "9.52",
       "cn": "6.10",
       "c2": "1.29",
       "co15": "1.10",
-      "co25": "1.40",
-      "cu25": "2.88",
+      "co25": "1.42",
+      "cu25": "2.86",
       "cu15": "6.00",
-      "cu35": "1.77",
-      "dc1x": "3.65",
+      "cu35": "1.75",
+      "dc1x": "3.60",
       "dc2x": "1.07",
-      "dc12": "1.13",
-      "cdc1x": "3.65",
+      "dc12": "1.14",
+      "cdc1x": "3.60",
       "cdc2x": "1.07",
       "ah_dom": "8.50",
-      "ah_ext": "1.26",
+      "ah_ext": "1.28",
       "co35": "2.05",
-      "cbtts": "1.73",
+      "cbtts": "1.72",
       "cbtts_non": "2.00",
-      "btts_oui": "1.73",
+      "btts_oui": "1.72",
       "btts_non": "2.00",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
@@ -4534,7 +4528,7 @@
         "nom": "Rajko Mitić Stadion - Belgrade",
         "cap": "",
         "meteo": "",
-        "temp": "10C",
+        "temp": "9C",
         "desc": "légère pluie",
         "wind": "3 km/h",
         "weather_source": "openweathermap",
@@ -4654,25 +4648,25 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:53:51+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:33+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-11T07:14:34.539Z",
-      "fiabilite_cotes_marche": true,
       "pronostic_dispo": true,
+      "selection_voie": "scenario",
+      "pick_frozen_at": "2026-11-13T09:20:31.012Z",
       "nb_marches": 17,
       "pro_sections": [
         "sim",
@@ -4680,7 +4674,7 @@
         "marches"
       ],
       "is_free": false,
-      "prob_band": "good",
+      "prob_band": "moderate",
       "has_signal": true
     },
     {
@@ -4706,9 +4700,9 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
-      "model_output_available": true,
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
+      "model_output_available": false,
       "c1": "1.56",
       "cn": "4.41",
       "c2": "5.50",
@@ -4731,14 +4725,14 @@
       "btts_non": "2.10",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
-      "no_signal": false,
-      "no_signal_label": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
       "stade": {
         "nom": "Johan Cruijff Arena - Amsterdam",
         "cap": "",
         "meteo": "",
         "temp": "6C",
-        "desc": "couvert",
+        "desc": "légère pluie",
         "wind": "1 km/h",
         "weather_source": "openweathermap",
         "weather_forecast_at": "2026-11-13T21:00:00.000Z"
@@ -4871,32 +4865,32 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:53:58+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:41+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-11T07:14:34.539Z",
+      "no_signal_reason": "AUCUN_PARI_SIMPLE_DANS_LA_FOURCHETTE",
       "fiabilite_cotes_marche": true,
-      "pronostic_dispo": true,
-      "selection_iashark": true,
+      "nb_marches": 10,
       "pro_sections": [
-        "joueurs"
+        "sim",
+        "joueurs",
+        "marches"
       ],
       "is_free": false,
-      "prob_band": "good",
-      "has_signal": true
+      "has_signal": false
     },
     {
       "id": 1528967,
@@ -4921,39 +4915,39 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
-      "model_output_available": true,
-      "c1": "--",
-      "cn": "--",
-      "c2": "--",
-      "co15": "--",
-      "co25": "--",
-      "cu25": "--",
-      "cu15": "--",
-      "cu35": "--",
-      "dc1x": "--",
-      "dc2x": "--",
-      "dc12": "--",
-      "cdc1x": "--",
-      "cdc2x": "--",
-      "ah_dom": "--",
-      "ah_ext": "--",
-      "co35": "--",
-      "cbtts": "--",
-      "cbtts_non": "--",
-      "btts_oui": "--",
-      "btts_non": "--",
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
+      "model_output_available": false,
+      "c1": "1.35",
+      "cn": "4.83",
+      "c2": "8.93",
+      "co15": "1.25",
+      "co25": "1.83",
+      "cu25": "1.95",
+      "cu15": "3.73",
+      "cu35": "1.36",
+      "dc1x": "1.07",
+      "dc2x": "3.10",
+      "dc12": "1.17",
+      "cdc1x": "1.07",
+      "cdc2x": "3.10",
+      "ah_dom": "1.36",
+      "ah_ext": "9.50",
+      "co35": "3.00",
+      "cbtts": "2.14",
+      "cbtts_non": "1.63",
+      "btts_oui": "2.14",
+      "btts_non": "1.63",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
-      "no_signal": false,
-      "no_signal_label": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
       "stade": {
         "nom": "Kosicka futbalova arena - Kosice",
         "cap": "",
         "meteo": "",
-        "temp": "1C",
-        "desc": "ciel dégagé",
+        "temp": "0C",
+        "desc": "nuageux",
         "wind": "1 km/h",
         "weather_source": "openweathermap",
         "weather_forecast_at": "2026-11-13T21:00:00.000Z"
@@ -5065,33 +5059,32 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:53:52+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:34+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-11T07:14:34.539Z",
+      "no_signal_reason": "AUCUN_MARCHE_AVEC_COTE_REELLE",
       "fiabilite_cotes_marche": true,
-      "pronostic_dispo": true,
-      "nb_marches": 6,
+      "nb_marches": 14,
       "pro_sections": [
+        "sim",
         "joueurs",
         "marches"
       ],
       "is_free": false,
-      "prob_band": "moderate",
-      "has_signal": true
+      "has_signal": false
     },
     {
       "id": 1528969,
@@ -5116,28 +5109,28 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
       "model_output_available": true,
-      "c1": "4.36",
+      "c1": "4.45",
       "cn": "3.53",
-      "c2": "1.83",
-      "co15": "1.35",
+      "c2": "1.81",
+      "co15": "1.36",
       "co25": "2.10",
       "cu25": "1.73",
       "cu15": "3.04",
-      "cu35": "1.26",
-      "dc1x": "1.94",
+      "cu35": "1.25",
+      "dc1x": "1.96",
       "dc2x": "1.21",
       "dc12": "1.29",
-      "cdc1x": "1.94",
+      "cdc1x": "1.96",
       "cdc2x": "1.21",
-      "ah_dom": "4.32",
-      "ah_ext": "1.82",
-      "co35": "3.66",
-      "cbtts": "1.90",
+      "ah_dom": "4.38",
+      "ah_ext": "1.80",
+      "co35": "3.75",
+      "cbtts": "1.91",
       "cbtts_non": "1.81",
-      "btts_oui": "1.90",
+      "btts_oui": "1.91",
       "btts_non": "1.81",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
@@ -5147,7 +5140,7 @@
         "nom": "Hristo Botev Stadium - Plovdiv",
         "cap": "",
         "meteo": "",
-        "temp": "14C",
+        "temp": "13C",
         "desc": "partiellement nuageux",
         "wind": "2 km/h",
         "weather_source": "openweathermap",
@@ -5260,28 +5253,27 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:53:54+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:37+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-11T07:14:34.539Z",
-      "fiabilite_cotes_marche": true,
+      "selection_voie": "scenario",
       "pronostic_dispo": true,
-      "nb_marches": 15,
+      "pick_frozen_at": "2026-11-13T09:20:31.012Z",
+      "nb_marches": 7,
       "pro_sections": [
-        "sim",
         "joueurs",
         "marches"
       ],
@@ -5312,8 +5304,8 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
       "model_output_available": true,
       "c1": "13.00",
       "cn": "5.50",
@@ -5344,7 +5336,7 @@
         "cap": "",
         "meteo": "",
         "temp": "2C",
-        "desc": "peu nuageux",
+        "desc": "partiellement nuageux",
         "wind": "0 km/h",
         "weather_source": "openweathermap",
         "weather_forecast_at": "2026-11-13T21:00:00.000Z"
@@ -5463,25 +5455,25 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:53:55+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:38+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-11T07:14:34.539Z",
-      "fiabilite_cotes_marche": true,
       "pronostic_dispo": true,
+      "selection_voie": "scenario",
+      "pick_frozen_at": "2026-11-13T09:20:31.012Z",
       "nb_marches": 10,
       "pro_sections": [
         "sim",
@@ -5515,38 +5507,38 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
-      "model_output_available": true,
-      "c1": "--",
-      "cn": "--",
-      "c2": "--",
-      "co15": "--",
-      "co25": "--",
-      "cu25": "--",
-      "cu15": "--",
-      "cu35": "--",
-      "dc1x": "--",
-      "dc2x": "--",
-      "dc12": "--",
-      "cdc1x": "--",
-      "cdc2x": "--",
-      "ah_dom": "--",
-      "ah_ext": "--",
-      "co35": "--",
-      "cbtts": "--",
-      "cbtts_non": "--",
-      "btts_oui": "--",
-      "btts_non": "--",
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
+      "model_output_available": false,
+      "c1": "2.40",
+      "cn": "3.07",
+      "c2": "3.15",
+      "co15": "1.50",
+      "co25": "2.55",
+      "cu25": "1.51",
+      "cu15": "2.50",
+      "cu35": "1.16",
+      "dc1x": "1.36",
+      "dc2x": "1.56",
+      "dc12": "1.36",
+      "cdc1x": "1.36",
+      "cdc2x": "1.56",
+      "ah_dom": "2.37",
+      "ah_ext": "3.21",
+      "co35": "4.97",
+      "cbtts": "2.05",
+      "cbtts_non": "1.69",
+      "btts_oui": "2.05",
+      "btts_non": "1.69",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
-      "no_signal": false,
-      "no_signal_label": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
       "stade": {
         "nom": "Stade de Luxembourg - Luxembourg",
         "cap": "",
         "meteo": "",
-        "temp": "2C",
+        "temp": "1C",
         "desc": "ciel dégagé",
         "wind": "1 km/h",
         "weather_source": "openweathermap",
@@ -5659,33 +5651,32 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:53:53+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:36+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-11T07:14:34.539Z",
+      "no_signal_reason": "AUCUN_PARI_SIMPLE_DANS_LA_FOURCHETTE",
       "fiabilite_cotes_marche": true,
-      "pronostic_dispo": true,
-      "nb_marches": 10,
+      "nb_marches": 17,
       "pro_sections": [
+        "sim",
         "joueurs",
         "marches"
       ],
       "is_free": false,
-      "prob_band": "moderate",
-      "has_signal": true
+      "has_signal": false
     },
     {
       "id": 1545615,
@@ -5710,16 +5701,16 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
       "model_output_available": true,
       "c1": "1.67",
-      "cn": "3.23",
-      "c2": "6.51",
-      "co15": "1.71",
+      "cn": "3.25",
+      "c2": "6.50",
+      "co15": "1.73",
       "co25": "3.12",
-      "cu25": "1.34",
-      "cu15": "2.12",
+      "cu25": "1.33",
+      "cu15": "2.10",
       "cu35": "1.10",
       "dc1x": "1.12",
       "dc2x": "2.15",
@@ -5727,7 +5718,7 @@
       "cdc1x": "1.12",
       "cdc2x": "2.15",
       "ah_dom": "1.67",
-      "ah_ext": "5.43",
+      "ah_ext": "5.60",
       "co35": "6.50",
       "cbtts": "2.89",
       "cbtts_non": "1.36",
@@ -5735,14 +5726,14 @@
       "btts_non": "1.36",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
-      "no_signal": false,
-      "no_signal_label": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
       "stade": {
         "nom": "Estadi de la FAF - Andorra",
         "cap": "",
         "meteo": "",
-        "temp": "3C",
-        "desc": "nuageux",
+        "temp": "4C",
+        "desc": "légère pluie",
         "wind": "1 km/h",
         "weather_source": "openweathermap",
         "weather_forecast_at": "2026-11-13T21:00:00.000Z"
@@ -5875,31 +5866,32 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:53:57+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:40+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-11T07:14:34.539Z",
+      "no_signal_reason": "AUCUN_MARCHE_AVEC_COTE_REELLE",
       "fiabilite_cotes_marche": true,
-      "pronostic_dispo": true,
+      "nb_marches": 10,
       "pro_sections": [
-        "joueurs"
+        "sim",
+        "joueurs",
+        "marches"
       ],
       "is_free": false,
-      "prob_band": "moderate",
-      "has_signal": true
+      "has_signal": false
     },
     {
       "id": 1545654,
@@ -5924,8 +5916,8 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
       "model_output_available": true,
       "c1": "5.50",
       "cn": "3.32",
@@ -5955,7 +5947,7 @@
         "nom": "Ljudski vrt - Maribor",
         "cap": "",
         "meteo": "",
-        "temp": "5C",
+        "temp": "3C",
         "desc": "ciel dégagé",
         "wind": "2 km/h",
         "weather_source": "openweathermap",
@@ -6082,28 +6074,28 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:53:53+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:35+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-11T07:14:34.539Z",
-      "fiabilite_cotes_marche": true,
+      "selection_voie": "scenario",
       "pronostic_dispo": true,
-      "selection_iashark": true,
-      "nb_marches": 5,
+      "pick_frozen_at": "2026-11-13T09:20:31.012Z",
+      "nb_marches": 13,
       "pro_sections": [
+        "sim",
         "joueurs",
         "marches"
       ],
@@ -6134,29 +6126,29 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
       "model_output_available": true,
-      "c1": "1.18",
+      "c1": "1.19",
       "cn": "6.50",
-      "c2": "13.00",
-      "co15": "1.21",
-      "co25": "1.69",
-      "cu25": "2.14",
-      "cu15": "4.27",
-      "cu35": "1.44",
+      "c2": "13.96",
+      "co15": "1.22",
+      "co25": "1.75",
+      "cu25": "2.10",
+      "cu15": "4.00",
+      "cu35": "1.40",
       "dc1x": "1.03",
       "dc2x": "4.60",
-      "dc12": "1.11",
+      "dc12": "1.12",
       "cdc1x": "1.03",
       "cdc2x": "4.60",
-      "ah_dom": "1.19",
+      "ah_dom": "1.18",
       "ah_ext": "13.00",
-      "co35": "2.68",
-      "cbtts": "2.65",
-      "cbtts_non": "1.43",
-      "btts_oui": "2.65",
-      "btts_non": "1.43",
+      "co35": "2.76",
+      "cbtts": "2.70",
+      "cbtts_non": "1.40",
+      "btts_oui": "2.70",
+      "btts_non": "1.40",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
       "no_signal": false,
@@ -6165,7 +6157,7 @@
         "nom": "Hampden Park Stadium - Glasgow",
         "cap": "",
         "meteo": "",
-        "temp": "4C",
+        "temp": "5C",
         "desc": "légère pluie",
         "wind": "3 km/h",
         "weather_source": "openweathermap",
@@ -6278,25 +6270,25 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cotes moyennes multi-bookmakers",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:53:56+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:39+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-11T07:14:34.539Z",
-      "fiabilite_cotes_marche": true,
       "pronostic_dispo": true,
+      "selection_voie": "scenario",
+      "pick_frozen_at": "2026-11-13T09:20:31.012Z",
       "nb_marches": 10,
       "pro_sections": [
         "sim",
@@ -6332,7 +6324,7 @@
       "status": "NS",
       "data_quality_score": 30,
       "data_quality_label": "Faible",
-      "model_output_available": true,
+      "model_output_available": false,
       "c1": "9.35",
       "cn": "5.70",
       "c2": "1.25",
@@ -6355,13 +6347,13 @@
       "btts_non": "1.83",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
-      "no_signal": false,
-      "no_signal_label": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
       "stade": {
         "nom": "Salamanca UDS (domicile)",
         "cap": "",
         "meteo": "",
-        "temp": "11C",
+        "temp": "12C",
         "desc": "légère pluie",
         "wind": "5 km/h",
         "weather_source": "openweathermap",
@@ -7102,30 +7094,31 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
-      "market_source": "Cotes moyennes multi-bookmakers",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
+      "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_AUCUN_PARI",
         "origine_probabilite": "modèle seul",
         "couverture": "données limitées",
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:59+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:47+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-11T07:14:34.539Z",
-      "pronostic_dispo": true,
+      "no_signal_reason": "AUCUN_PARI_SIMPLE_DANS_LA_FOURCHETTE",
+      "nb_marches": 10,
       "pro_sections": [
-        "joueurs"
+        "sim",
+        "joueurs",
+        "marches"
       ],
       "is_free": false,
-      "prob_band": "moderate",
-      "has_signal": true
+      "has_signal": false
     },
     {
       "id": 1570024,
@@ -7150,8 +7143,8 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
       "model_output_available": true,
       "c1": "2.91",
       "cn": "3.55",
@@ -7183,7 +7176,7 @@
         "meteo": "",
         "temp": "14C",
         "desc": "légère pluie",
-        "wind": "5 km/h",
+        "wind": "4 km/h",
         "weather_source": "openweathermap",
         "weather_forecast_at": "2026-11-14T12:00:00.000Z"
       },
@@ -8047,26 +8040,30 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_AUCUN_PARI",
         "origine_probabilite": "modèle seul",
         "couverture": "données limitées",
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:19+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:04+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-12T08:00:27.586Z",
       "pronostic_dispo": true,
+      "selection_voie": "scenario",
+      "pick_frozen_at": "2026-11-13T09:20:31.012Z",
+      "nb_marches": 10,
       "pro_sections": [
-        "joueurs"
+        "sim",
+        "joueurs",
+        "marches"
       ],
       "is_free": false,
       "prob_band": "moderate",
@@ -10854,7 +10851,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -10866,7 +10863,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:55+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:39+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -12097,7 +12094,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -12109,7 +12106,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:52+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:37+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -15032,7 +15029,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -15044,7 +15041,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:54+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:38+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -15738,29 +15735,27 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_AUCUN_PARI",
         "origine_probabilite": "modèle seul",
         "couverture": "données limitées",
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:53+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:37+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-13T07:21:27.823Z",
       "pronostic_dispo": true,
-      "nb_marches": 10,
+      "selection_voie": "scenario",
+      "pick_frozen_at": "2026-11-13T09:20:31.012Z",
       "pro_sections": [
-        "sim",
-        "joueurs",
-        "marches"
+        "joueurs"
       ],
       "is_free": false,
       "prob_band": "moderate",
@@ -17604,7 +17599,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -17616,7 +17611,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:56+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:40+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -17650,8 +17645,8 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
       "model_output_available": true,
       "c1": "1.81",
       "cn": "3.63",
@@ -17675,8 +17670,8 @@
       "btts_non": "1.98",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
-      "no_signal": false,
-      "no_signal_label": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
       "stade": {
         "nom": "Stadiumi Fadil Vokrri - Pristina",
         "cap": "",
@@ -17808,25 +17803,24 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:53:58+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:41+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-12T08:00:27.586Z",
+      "no_signal_reason": "AUCUN_MARCHE_AVEC_COTE_REELLE",
       "fiabilite_cotes_marche": true,
-      "pronostic_dispo": true,
       "nb_marches": 10,
       "pro_sections": [
         "sim",
@@ -17834,8 +17828,7 @@
         "marches"
       ],
       "is_free": false,
-      "prob_band": "moderate",
-      "has_signal": true
+      "has_signal": false
     },
     {
       "id": 1647981,
@@ -18253,7 +18246,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -18265,7 +18258,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:56+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:41+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -20193,7 +20186,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -20205,7 +20198,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:59+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:43+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -20713,7 +20706,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -20725,7 +20718,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:58+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:42+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -21844,7 +21837,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -21856,7 +21849,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:57+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:42+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -21892,8 +21885,8 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
       "model_output_available": true,
       "c1": "2.44",
       "cn": "3.16",
@@ -21925,7 +21918,7 @@
         "meteo": "",
         "temp": "18C",
         "desc": "légère pluie",
-        "wind": "7 km/h",
+        "wind": "5 km/h",
         "weather_source": "openweathermap",
         "weather_forecast_at": "2026-11-14T15:00:00.000Z"
       },
@@ -22810,24 +22803,25 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_AUCUN_PARI",
         "origine_probabilite": "modèle seul",
         "couverture": "données limitées",
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:20+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:05+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-12T08:00:27.586Z",
       "pronostic_dispo": true,
+      "selection_voie": "scenario",
+      "pick_frozen_at": "2026-11-13T09:20:31.012Z",
       "nb_marches": 10,
       "pro_sections": [
         "sim",
@@ -22835,7 +22829,7 @@
         "marches"
       ],
       "is_free": false,
-      "prob_band": "good",
+      "prob_band": "moderate",
       "has_signal": true
     },
     {
@@ -24048,7 +24042,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -24060,7 +24054,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:01+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:46+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -24532,7 +24526,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -24544,7 +24538,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:02+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:47+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -25901,7 +25895,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cotes moyennes multi-bookmakers",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -25913,7 +25907,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:00+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:44+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -26658,7 +26652,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -26670,7 +26664,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:00+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:45+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -26832,7 +26826,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -26844,7 +26838,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:03+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:48+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -28015,7 +28009,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -28027,7 +28021,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:03+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:47+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -29164,7 +29158,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -29176,7 +29170,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:04+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:49+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -29207,8 +29201,8 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
       "model_output_available": true,
       "c1": "1.22",
       "cn": "6.97",
@@ -29238,7 +29232,7 @@
         "nom": "Ullevaal Stadion - Oslo",
         "cap": "",
         "meteo": "",
-        "temp": "1C",
+        "temp": "0C",
         "desc": "nuageux",
         "wind": "2 km/h",
         "weather_source": "openweathermap",
@@ -29351,33 +29345,30 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:53:59+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:42+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-12T08:00:27.586Z",
-      "fiabilite_cotes_marche": true,
       "pronostic_dispo": true,
-      "nb_marches": 10,
+      "selection_voie": "scenario",
+      "pick_frozen_at": "2026-11-13T09:20:31.012Z",
       "pro_sections": [
-        "sim",
-        "joueurs",
-        "marches"
+        "joueurs"
       ],
       "is_free": false,
-      "prob_band": "good",
+      "prob_band": "moderate",
       "has_signal": true
     },
     {
@@ -29403,9 +29394,9 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
-      "model_output_available": true,
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
+      "model_output_available": false,
       "c1": "3.09",
       "cn": "3.10",
       "c2": "2.45",
@@ -29428,13 +29419,13 @@
       "btts_non": "1.72",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
-      "no_signal": false,
-      "no_signal_label": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
       "stade": {
         "nom": "Boris Paichadze Dinamo Arena - Tbilisi",
         "cap": "",
         "meteo": "",
-        "temp": "13C",
+        "temp": "14C",
         "desc": "couvert",
         "wind": "5 km/h",
         "weather_source": "openweathermap",
@@ -29547,25 +29538,24 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:00+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:43+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-12T08:00:27.586Z",
+      "no_signal_reason": "AUCUN_PARI_SIMPLE_DANS_LA_FOURCHETTE",
       "fiabilite_cotes_marche": true,
-      "pronostic_dispo": true,
       "nb_marches": 10,
       "pro_sections": [
         "sim",
@@ -29573,8 +29563,7 @@
         "marches"
       ],
       "is_free": false,
-      "prob_band": "moderate",
-      "has_signal": true
+      "has_signal": false
     },
     {
       "id": 1647922,
@@ -30127,7 +30116,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -30139,7 +30128,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:10+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:55+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -30999,7 +30988,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -31011,7 +31000,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:10+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:56+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -32028,7 +32017,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -32040,7 +32029,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:19+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:05+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -32625,7 +32614,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -32637,7 +32626,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:13+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:59+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -32670,7 +32659,7 @@
       "status": "NS",
       "data_quality_score": 20,
       "data_quality_label": "Faible",
-      "model_output_available": true,
+      "model_output_available": false,
       "c1": "12.61",
       "cn": "9.40",
       "c2": "1.11",
@@ -32693,8 +32682,8 @@
       "btts_non": "1.97",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
-      "no_signal": false,
-      "no_signal_label": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
       "stade": {
         "nom": "Stade Béthunois (domicile)",
         "cap": "",
@@ -34073,24 +34062,23 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_AUCUN_PARI",
         "origine_probabilite": "modèle seul",
         "couverture": "données limitées",
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:18+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:04+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-13T07:21:27.823Z",
-      "pronostic_dispo": true,
+      "no_signal_reason": "AUCUN_MARCHE_AVEC_COTE_REELLE",
       "nb_marches": 10,
       "pro_sections": [
         "sim",
@@ -34098,8 +34086,7 @@
         "marches"
       ],
       "is_free": false,
-      "prob_band": "moderate",
-      "has_signal": true
+      "has_signal": false
     },
     {
       "id": 1647939,
@@ -34544,7 +34531,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -34556,7 +34543,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:11+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:56+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -34926,7 +34913,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -34938,7 +34925,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:15+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:01+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -35371,7 +35358,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -35383,7 +35370,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:20+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:06+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -35416,7 +35403,7 @@
       "status": "NS",
       "data_quality_score": 30,
       "data_quality_label": "Faible",
-      "model_output_available": true,
+      "model_output_available": false,
       "c1": "1.62",
       "cn": "4.00",
       "c2": "4.75",
@@ -35439,8 +35426,8 @@
       "btts_non": "2.28",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
-      "no_signal": false,
-      "no_signal_label": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
       "stade": {
         "nom": "Stade Marcel Tribut - Dunkerque",
         "cap": "",
@@ -36836,24 +36823,23 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_AUCUN_PARI",
         "origine_probabilite": "modèle seul",
         "couverture": "données limitées",
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:06+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:51+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-13T07:21:27.823Z",
-      "pronostic_dispo": true,
+      "no_signal_reason": "AUCUN_PARI_SIMPLE_DANS_LA_FOURCHETTE",
       "nb_marches": 10,
       "pro_sections": [
         "sim",
@@ -36861,8 +36847,7 @@
         "marches"
       ],
       "is_free": false,
-      "prob_band": "moderate",
-      "has_signal": true
+      "has_signal": false
     },
     {
       "id": 1647951,
@@ -37884,7 +37869,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -37896,7 +37881,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:12+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:57+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -38058,7 +38043,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -38070,7 +38055,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:19+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:05+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -39579,7 +39564,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -39591,7 +39576,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:13+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:58+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -39653,8 +39638,8 @@
         "nom": "Stade de Balmont - Lyon",
         "cap": "",
         "meteo": "",
-        "temp": "13C",
-        "desc": "nuageux",
+        "temp": "12C",
+        "desc": "légère pluie",
         "wind": "5 km/h",
         "weather_source": "openweathermap",
         "weather_forecast_at": "2026-11-14T18:00:00.000Z"
@@ -41042,7 +41027,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -41054,7 +41039,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:05+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:50+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -41469,7 +41454,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -41481,7 +41466,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:06+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:52+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -42898,7 +42883,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -42910,7 +42895,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:07+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:52+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -43754,7 +43739,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -43766,7 +43751,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:17+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:03+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -43828,7 +43813,7 @@
         "nom": "Stade Gaston Bonnet - Saint-Omer",
         "cap": "",
         "meteo": "",
-        "temp": "5C",
+        "temp": "6C",
         "desc": "ciel dégagé",
         "wind": "3 km/h",
         "weather_source": "openweathermap",
@@ -44569,7 +44554,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -44581,7 +44566,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:08+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:53+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -45240,7 +45225,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -45252,7 +45237,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:14+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:00+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -45781,7 +45766,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -45793,7 +45778,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:16+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:02+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -46209,7 +46194,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -46221,7 +46206,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:16+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:01+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -46943,7 +46928,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -46955,7 +46940,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:09+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:54+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -47820,7 +47805,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -47832,7 +47817,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:21+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:06+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -47867,9 +47852,9 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
-      "model_output_available": true,
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
+      "model_output_available": false,
       "c1": "1.91",
       "cn": "3.80",
       "c2": "3.52",
@@ -47892,8 +47877,8 @@
       "btts_non": "2.49",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
-      "no_signal": false,
-      "no_signal_label": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
       "stade": {
         "nom": "Estadi Mallorca Son Moix - Parma",
         "cap": "",
@@ -48653,24 +48638,24 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_AUCUN_PARI",
         "origine_probabilite": "modèle seul",
         "couverture": "données limitées",
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:22+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:06+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-12T08:00:27.586Z",
-      "pronostic_dispo": true,
+      "no_signal_reason": "AUCUN_PARI_SIMPLE_DANS_LA_FOURCHETTE",
+      "fiabilite_cotes_marche": true,
       "nb_marches": 10,
       "pro_sections": [
         "sim",
@@ -48678,8 +48663,7 @@
         "marches"
       ],
       "is_free": false,
-      "prob_band": "moderate",
-      "has_signal": true
+      "has_signal": false
     },
     {
       "id": 1647928,
@@ -49710,7 +49694,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -49722,7 +49706,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:21+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:07+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -49884,7 +49868,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -49896,7 +49880,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:22+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:08+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -50329,7 +50313,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -50341,7 +50325,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:27+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:14+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -51212,7 +51196,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -51224,7 +51208,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:23+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:10+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -51671,7 +51655,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -51683,7 +51667,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:26+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:13+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -52125,7 +52109,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -52137,7 +52121,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:28+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:14+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -52642,7 +52626,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -52654,7 +52638,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:25+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:11+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -52816,7 +52800,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -52828,7 +52812,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:29+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:16+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -53360,7 +53344,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -53372,7 +53356,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:29+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:15+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -54590,7 +54574,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -54602,7 +54586,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:23+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:09+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -55276,7 +55260,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -55288,7 +55272,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:26+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:12+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -55453,7 +55437,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -55465,7 +55449,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:30+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:17+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -55946,7 +55930,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -55958,7 +55942,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:24+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:10+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -58610,7 +58594,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -58622,7 +58606,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:31+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:18+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -58653,12 +58637,12 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
-      "model_output_available": true,
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
+      "model_output_available": false,
       "c1": "1.50",
-      "cn": "4.63",
-      "c2": "5.82",
+      "cn": "4.65",
+      "c2": "5.62",
       "co15": "1.14",
       "co25": "1.50",
       "cu25": "2.50",
@@ -58669,24 +58653,24 @@
       "dc12": "1.19",
       "cdc1x": "1.14",
       "cdc2x": "2.50",
-      "ah_dom": "1.50",
+      "ah_dom": "1.51",
       "ah_ext": "5.50",
       "co35": "2.30",
-      "cbtts": "1.63",
+      "cbtts": "1.62",
       "cbtts_non": "2.20",
-      "btts_oui": "1.63",
+      "btts_oui": "1.62",
       "btts_non": "2.20",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
-      "no_signal": false,
-      "no_signal_label": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
       "stade": {
         "nom": "Estádio Municipal de Braga - Braga",
         "cap": "",
         "meteo": "",
-        "temp": "13C",
+        "temp": "14C",
         "desc": "légère pluie",
-        "wind": "3 km/h",
+        "wind": "2 km/h",
         "weather_source": "openweathermap",
         "weather_forecast_at": "2026-11-14T21:00:00.000Z"
       },
@@ -58811,26 +58795,24 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:02+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:45+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-12T08:00:27.586Z",
+      "no_signal_reason": "AUCUN_PARI_SIMPLE_DANS_LA_FOURCHETTE",
       "fiabilite_cotes_marche": true,
-      "pronostic_dispo": true,
-      "selection_iashark": true,
       "nb_marches": 10,
       "pro_sections": [
         "sim",
@@ -58839,7 +58821,7 @@
       ],
       "is_free": true,
       "free_day": "2026-11-14",
-      "has_signal": true
+      "has_signal": false
     },
     {
       "id": 1528975,
@@ -58864,8 +58846,8 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
       "model_output_available": true,
       "c1": "2.44",
       "cn": "3.00",
@@ -58889,13 +58871,13 @@
       "btts_non": "1.72",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
-      "no_signal": false,
-      "no_signal_label": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
       "stade": {
         "nom": "Windsor Park - Belfast",
         "cap": "",
         "meteo": "",
-        "temp": "8C",
+        "temp": "7C",
         "desc": "légère pluie",
         "wind": "6 km/h",
         "weather_source": "openweathermap",
@@ -59022,31 +59004,32 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:03+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:46+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-12T08:00:27.586Z",
+      "no_signal_reason": "AUCUN_PARI_SIMPLE_DANS_LA_FOURCHETTE",
       "fiabilite_cotes_marche": true,
-      "pronostic_dispo": true,
+      "nb_marches": 10,
       "pro_sections": [
-        "joueurs"
+        "sim",
+        "joueurs",
+        "marches"
       ],
       "is_free": false,
-      "prob_band": "moderate",
-      "has_signal": true
+      "has_signal": false
     },
     {
       "id": 1528976,
@@ -59071,8 +59054,8 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
       "model_output_available": true,
       "c1": "1.57",
       "cn": "4.03",
@@ -59102,7 +59085,7 @@
         "nom": "Raiffeisen Arena - Linz",
         "cap": "",
         "meteo": "",
-        "temp": "2C",
+        "temp": "3C",
         "desc": "ciel dégagé",
         "wind": "3 km/h",
         "weather_source": "openweathermap",
@@ -59222,26 +59205,25 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "données limitées",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:04+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:48+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-12T08:00:27.586Z",
-      "fiabilite_cotes_marche": true,
       "pronostic_dispo": true,
-      "selection_iashark": true,
+      "selection_voie": "scenario",
+      "pick_frozen_at": "2026-11-13T09:20:31.012Z",
       "nb_marches": 10,
       "pro_sections": [
         "sim",
@@ -59275,8 +59257,8 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
       "model_output_available": true,
       "c1": "4.00",
       "cn": "3.86",
@@ -59307,7 +59289,7 @@
         "cap": "",
         "meteo": "",
         "temp": "3C",
-        "desc": "partiellement nuageux",
+        "desc": "ciel dégagé",
         "wind": "0 km/h",
         "weather_source": "openweathermap",
         "weather_forecast_at": "2026-11-14T21:00:00.000Z"
@@ -59426,25 +59408,25 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:04+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:47+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-12T08:00:27.586Z",
-      "fiabilite_cotes_marche": true,
+      "selection_voie": "scenario",
       "pronostic_dispo": true,
+      "pick_frozen_at": "2026-11-13T09:20:31.012Z",
       "nb_marches": 10,
       "pro_sections": [
         "sim",
@@ -59478,9 +59460,9 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
-      "model_output_available": true,
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
+      "model_output_available": false,
       "c1": "1.52",
       "cn": "4.27",
       "c2": "5.70",
@@ -59503,13 +59485,13 @@
       "btts_non": "2.10",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
-      "no_signal": false,
-      "no_signal_label": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
       "stade": {
         "nom": "Strawberry Arena - Solna",
         "cap": "",
         "meteo": "",
-        "temp": "-3C",
+        "temp": "1C",
         "desc": "ciel dégagé",
         "wind": "1 km/h",
         "weather_source": "openweathermap",
@@ -59622,26 +59604,24 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:01+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:44+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-12T08:00:27.586Z",
+      "no_signal_reason": "AUCUN_PARI_SIMPLE_DANS_LA_FOURCHETTE",
       "fiabilite_cotes_marche": true,
-      "pronostic_dispo": true,
-      "selection_iashark": true,
       "nb_marches": 10,
       "pro_sections": [
         "sim",
@@ -59649,8 +59629,7 @@
         "marches"
       ],
       "is_free": false,
-      "prob_band": "good",
-      "has_signal": true
+      "has_signal": false
     },
     {
       "id": 1570021,
@@ -59675,8 +59654,8 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
       "model_output_available": true,
       "c1": "2.33",
       "cn": "3.25",
@@ -59706,9 +59685,9 @@
         "nom": "Nuevo Carlos Tartiere - Oviedo",
         "cap": "",
         "meteo": "",
-        "temp": "10C",
-        "desc": "couvert",
-        "wind": "1 km/h",
+        "temp": "13C",
+        "desc": "nuageux",
+        "wind": "2 km/h",
         "weather_source": "openweathermap",
         "weather_forecast_at": "2026-11-14T21:00:00.000Z"
       },
@@ -60438,29 +60417,27 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_AUCUN_PARI",
         "origine_probabilite": "modèle seul",
         "couverture": "données limitées",
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:23+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:08+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-12T08:00:27.586Z",
       "pronostic_dispo": true,
-      "nb_marches": 10,
+      "selection_voie": "scenario",
+      "pick_frozen_at": "2026-11-13T09:20:31.012Z",
       "pro_sections": [
-        "sim",
-        "joueurs",
-        "marches"
+        "joueurs"
       ],
       "is_free": false,
       "prob_band": "moderate",
@@ -60489,8 +60466,8 @@
         "all"
       ],
       "status": "NS",
-      "data_quality_score": 60,
-      "data_quality_label": "Moyenne",
+      "data_quality_score": 30,
+      "data_quality_label": "Faible",
       "model_output_available": true,
       "c1": "1.96",
       "cn": "3.55",
@@ -61270,24 +61247,25 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_AUCUN_PARI",
         "origine_probabilite": "modèle seul",
         "couverture": "données limitées",
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:41+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:27+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-12T08:00:27.586Z",
       "pronostic_dispo": true,
+      "selection_voie": "scenario",
+      "pick_frozen_at": "2026-11-13T09:20:31.012Z",
       "nb_marches": 10,
       "pro_sections": [
         "sim",
@@ -61796,24 +61774,25 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_AUCUN_PARI",
         "origine_probabilite": "modèle seul",
         "couverture": "données limitées",
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:58+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:46+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-13T07:21:27.823Z",
       "pronostic_dispo": true,
+      "selection_voie": "scenario",
+      "pick_frozen_at": "2026-11-13T09:20:31.012Z",
       "nb_marches": 10,
       "pro_sections": [
         "sim",
@@ -61849,7 +61828,7 @@
       "status": "NS",
       "data_quality_score": 20,
       "data_quality_label": "Faible",
-      "model_output_available": true,
+      "model_output_available": false,
       "c1": "6.40",
       "cn": "4.60",
       "c2": "1.45",
@@ -61872,8 +61851,8 @@
       "btts_non": "2.00",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
-      "no_signal": false,
-      "no_signal_label": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
       "stade": {
         "nom": "Arena Condá - Chapeco",
         "cap": "",
@@ -61983,24 +61962,24 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_AUCUN_PARI",
         "origine_probabilite": "modèle seul",
         "couverture": "données limitées",
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:42+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:28+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-13T07:21:27.823Z",
-      "pronostic_dispo": true,
+      "no_signal_reason": "AUCUN_PARI_SIMPLE_DANS_LA_FOURCHETTE",
+      "fiabilite_cotes_marche": true,
       "nb_marches": 10,
       "pro_sections": [
         "sim",
@@ -62008,8 +61987,7 @@
         "marches"
       ],
       "is_free": false,
-      "prob_band": "moderate",
-      "has_signal": true
+      "has_signal": false
     },
     {
       "id": 1647997,
@@ -62165,7 +62143,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -62177,7 +62155,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:32+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:19+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -62339,7 +62317,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cotes moyennes multi-bookmakers",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -62351,7 +62329,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:24+00:00"
+          "mis_a_jour_le": "2026-11-13T09:12:08+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -62520,7 +62498,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -62532,7 +62510,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:45+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:32+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -62697,7 +62675,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -62709,7 +62687,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:42+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:30+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -62871,7 +62849,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -62883,7 +62861,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:44+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:32+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -63045,7 +63023,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -63057,7 +63035,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:46+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:33+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -63222,7 +63200,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -63234,7 +63212,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:36+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:23+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -63396,7 +63374,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -63408,7 +63386,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:49+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:37+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -63570,7 +63548,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -63582,7 +63560,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:50+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:38+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -63744,7 +63722,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -63756,7 +63734,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:42+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:29+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -63918,7 +63896,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -63930,7 +63908,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:53+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:41+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -64092,7 +64070,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -64104,7 +64082,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:33+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:20+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -64266,7 +64244,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -64278,7 +64256,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:43+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:31+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -64440,7 +64418,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -64452,7 +64430,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:39+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:26+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -64617,7 +64595,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -64629,7 +64607,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:35+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:22+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -64791,7 +64769,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -64803,7 +64781,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:51+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:39+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -64965,7 +64943,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -64977,7 +64955,7 @@
         "fiabilite_niveau": "non vérifié sur le passé / données limitées",
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:55:34+00:00"
+          "mis_a_jour_le": "2026-11-13T09:13:21+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -65139,7 +65117,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -65151,7 +65129,7 @@
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:06+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:50+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -65317,7 +65295,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -65329,7 +65307,7 @@
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:05+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:49+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -65366,7 +65344,7 @@
       "status": "NS",
       "data_quality_score": 20,
       "data_quality_label": "Faible",
-      "model_output_available": false,
+      "model_output_available": true,
       "c1": "3.75",
       "cn": "3.46",
       "c2": "2.04",
@@ -65495,7 +65473,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cotes moyennes multi-bookmakers",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -65507,7 +65485,7 @@
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:08+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:51+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -65676,7 +65654,7 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Aucune cote fiable",
       "moteur_v3": {
         "version_contrat": "1.1",
@@ -65688,7 +65666,7 @@
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:07+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:50+00:00"
         }
       },
       "stats_iashark_gratuit": null,
@@ -65854,30 +65832,27 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:09+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:53+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-13T07:21:27.823Z",
-      "fiabilite_cotes_marche": true,
       "pronostic_dispo": true,
-      "nb_marches": 10,
+      "selection_voie": "scenario",
+      "pick_frozen_at": "2026-11-13T09:20:31.012Z",
       "pro_sections": [
-        "sim",
-        "joueurs",
-        "marches"
+        "joueurs"
       ],
       "is_free": false,
       "prob_band": "moderate",
@@ -66037,27 +66012,30 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:08+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:52+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-13T07:21:27.823Z",
-      "fiabilite_cotes_marche": true,
+      "selection_voie": "scenario",
       "pronostic_dispo": true,
+      "pick_frozen_at": "2026-11-13T09:20:31.012Z",
+      "nb_marches": 10,
       "pro_sections": [
-        "joueurs"
+        "sim",
+        "joueurs",
+        "marches"
       ],
       "is_free": false,
       "prob_band": "moderate",
@@ -66111,8 +66089,8 @@
       "btts_non": "2.25",
       "cotes_1n2_source": null,
       "cotes_1n2_releve_le": null,
-      "no_signal": false,
-      "no_signal_label": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
       "stade": {
         "nom": "Riyadh Air Metropolitano - Madrid",
         "cap": "",
@@ -66217,25 +66195,24 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:11+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:55+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-13T07:21:27.823Z",
+      "no_signal_reason": "AUCUN_PARI_SIMPLE_DANS_LA_FOURCHETTE",
       "fiabilite_cotes_marche": true,
-      "pronostic_dispo": true,
       "nb_marches": 10,
       "pro_sections": [
         "sim",
@@ -66243,8 +66220,7 @@
         "marches"
       ],
       "is_free": false,
-      "prob_band": "moderate",
-      "has_signal": true
+      "has_signal": false
     },
     {
       "id": 1528985,
@@ -66400,30 +66376,27 @@
       "elo_home": null,
       "elo_away": null,
       "elo_diff": null,
-      "pipeline_sha": "c1cc59a5411019d730b2f6291eb77870a83cc72e",
+      "pipeline_sha": "44336b1fc84bc28adad9ba6feb1afddc45af7894",
       "market_source": "Cote de reference du marche",
       "moteur_v3": {
         "version_contrat": "1.1",
         "version_moteur": "3.0.0+7594318",
-        "source": "ancien moteur (pari fige avant le branchement)",
+        "source": "v3",
         "raison": "MOTEUR_V3_SELECTION_NATIONALE",
         "origine_probabilite": "modèle seul",
         "couverture": "vérifiée",
         "fiabilite_niveau": null,
         "compo": {
           "voyant": "en attente",
-          "mis_a_jour_le": "2026-11-13T08:54:10+00:00"
+          "mis_a_jour_le": "2026-11-13T09:11:54+00:00"
         }
       },
       "stats_iashark_gratuit": null,
-      "pick_frozen_at": "2026-11-13T07:21:27.823Z",
-      "fiabilite_cotes_marche": true,
       "pronostic_dispo": true,
-      "nb_marches": 10,
+      "selection_voie": "scenario",
+      "pick_frozen_at": "2026-11-13T09:20:31.012Z",
       "pro_sections": [
-        "sim",
-        "joueurs",
-        "marches"
+        "joueurs"
       ],
       "is_free": false,
       "prob_band": "moderate",
@@ -66436,22 +66409,22 @@
   },
   "run_output": {
     "run_id": "DAILY_2026-11-13",
-    "snapshot": "2026-11-13T09:02:11.262Z",
+    "snapshot": "2026-11-13T09:20:04.545Z",
     "betting_validation_status": "UNVALIDATED_SHADOW",
     "safe_pick": {
-      "generated_at": "2026-11-13T09:02:11.262Z",
+      "generated_at": "2026-11-13T09:20:04.545Z",
       "status": "NO_SAFE_SELECTION",
       "evaluated_count": 0,
       "redacted": true
     },
     "top5_scorers": {
-      "generated_at": "2026-11-13T09:02:11.262Z",
+      "generated_at": "2026-11-13T09:20:04.545Z",
       "eligible_player_count": 0,
       "count_returned": 0,
       "redacted": true
     },
     "daily_combos": {
-      "generated_at": "2026-11-13T09:02:11.262Z",
+      "generated_at": "2026-11-13T09:20:04.545Z",
       "combos": [
         {
           "combo_id": "TICKET_X5",

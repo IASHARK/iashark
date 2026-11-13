@@ -7,7 +7,7 @@
     "tirs_seulement_si_statistiques : un pari sur les tirs (cadres ou non) seulement dans une competition ou API-Football donne les statistiques du match (league-coverage-report.json, coverage.fixtures.statistics_fixtures = true) : sinon on ne saurait pas le regler.",
     "selections_nationales : marches permis sur les matchs de selections (decision du 03/10/2026 : 1N2 et double chance seulement)."
   ],
-  "regle_version": "scenario-2026-11-13",
+  "regle_version": "scenario-2026-11-13-b",
   "_readme_version": "FORMULE FIGEE (decision de Clement du 13/11/2026) : une fois en ligne, la regle ne se modifie plus de jour en jour. Tout changement = nouvel identifiant regle_version date ; il est ecrit dans le pronostic de chaque pari (pronostic.moteur_version) et dans son archive (scenario_paris.version), avec la version du moteur prive.",
   "_readme_choix_du_pari": [
     "DECISION DE CLEMENT DU 11/11/2026 (21 h 40) : le pari affiche de chaque match est choisi parmi TOUS les marches dont API-Sports donne une cote Bet365 (bookmaker 8 d'API-Football). Plus de liste d'exclusion de familles par defaut : tout est candidat, sauf un marche qu'on ne sait pas regler automatiquement apres le match (lib/flux-paris.js#EXCLUS_REGLEMENT, et les cartons : comptage du bookmaker non verifie). Cote affichee = celle de Bet365, entre config/leagues.json#fiabilite.fourchette_pari.cote_min et cote_max (1,70-3,50), 1,70 minimum strict, aucun repli dessous.",
@@ -53,7 +53,7 @@
     "Toujours exclus : pair / impair, paris d'une seule mi-temps, tranches de minutes, joueurs et buteurs (la methode du buteur du jour reste a part), ordre des buts. Cartons : toujours en attente (comptage non verifie, avocat du diable du 13/11/2026). Aucune mise, aucune esperance, nulle part."
   ],
   "scenario": {
-    "seuil_chance": 0.58,
+    "seuil_chance": 0.55, "repli_plus_probable": true,
     "ecart_max_bookmaker": 0.15,
     "familles_fermees": [
       "Cartons / total",

@@ -162,3 +162,19 @@ test("depot public : aucune formule du moteur, config sur la regle scenario, dos
   assert.strictEqual(SCN.charger(path.join(__dirname, "dossier-qui-n-existe-pas")), null, "moteur absent : null, jamais une erreur");
   assert.ok(!fs.existsSync(path.join(__dirname, "..", "scenario")), "le dossier scenario/ ne doit jamais entrer dans le depot public");
 });
+
+test("repli (decision de Clement du 13/11/2026) : aucun pari au-dessus du seuil -> le plus probable de la fourchette, jamais devant un pari qui passe le seuil", () => {
+  const CFG2 = Object.assign({}, CFG, { scenario: Object.assign({}, CFG.scenario, { repli_plus_probable: true }) });
+  const ctx2 = (issues) => Object.assign(ctx(issues), { regleFlux: PR.regleFlux(CFG2) });
+  // Rien au-dessus de 0,58 : le plus probable (Over 2.5 a 0,57) l'emporte sur la plus belle cote (Over 10.5 a 0,51).
+  const bas = { "F5:Over 2.5": I(0.52, 0.57, "Buts", "total"), "F45:Over 10.5": I(0.5, 0.51, "Corners", "total"), "F1:Home": I(0.6, 0.66, "Résultat", "1N2") };
+  const r = PR.choisirPariFourchette(M7, ctx2(bas), {});
+  assert.strictEqual(r.code_flux, "F5:Over 2.5");
+  assert.strictEqual(r.sous_seuil, true);
+  assert.strictEqual(PR.choisirPariFourchette(M7, ctx(bas), {}), null, "sans le repli : pas de pari");
+  // Un pari passe le seuil : il gagne, meme si un candidat de repli a une plus belle cote.
+  const mixte = { "F45:Over 9.5": I(0.56, 0.64, "Corners", "total"), "F5:Under 2.5": I(0.5, 0.52, "Buts", "total") };
+  assert.strictEqual(PR.choisirPariFourchette(M7, ctx2(mixte), {}).code_flux, "F45:Over 9.5");
+  // Famille fermee et cote hors fourchette : jamais en repli non plus.
+  assert.strictEqual(PR.choisirPariFourchette(M7, ctx2({ "F1:Home": I(0.6, 0.66, "Résultat", "1N2"), "F5:Under 3.5": I(0.74, 0.75, "Buts", "total") }), {}), null);
+});

@@ -328,3 +328,12 @@ test("lien d'une ligne : vraie page indexable de la version (page_dirs), sinon m
   // Sans I18N (Node) et sans versionDir injecte : repli sur match.html?id=.
   assert.equal(HL.matchHref(m, { lien: (p) => "/za/" + p }), "/za/match.html?id=1570383");
 });
+
+test("match sans cote (decision de Clement du 13/11/2026) : hors de la liste ; match cote sans pari, ferme ou deja joue : garde", () => {
+  assert.equal(HL.affichable({ id: 1, no_signal: true, no_signal_reason: "AUCUN_MARCHE_AVEC_COTE_REELLE" }), false);
+  assert.equal(HL.affichable({ id: 2, no_signal: true, no_signal_reason: "AUCUN_PARI_SIMPLE_DANS_LA_FOURCHETTE" }), true);
+  assert.equal(HL.affichable({ id: 3, no_signal: true, no_signal_reason: "FIXTURE_NOT_UPCOMING" }), true);
+  assert.equal(HL.affichable({ id: 4, has_signal: true, no_signal: false }), true);
+  assert.equal(HL.affichable({ id: 5, past: true, no_signal: true, no_signal_reason: "AUCUN_MARCHE_AVEC_COTE_REELLE" }), true);
+  assert.match(fs.readFileSync(path.join(__dirname, "..", "home-list.js"), "utf8"), /matches=\(Array\.isArray\(matches\)\?matches:\[\]\)\.filter\(affichable\);/);
+});

@@ -141,6 +141,14 @@ function renderDateStrip(days,activeDay){
 // has_signal (public) d'abord : pour un match verrouille, pari_rec n'est jamais lu.
 // Ligne d'une journee passee (onglet « Hier ») : elle n'a pas de champ
 // d'analyse et on n'en lit aucun, meme pour un abonne (tests/home-list-yesterday).
+// MATCH SANS COTE (decision de Clement du 13/11/2026 : « les matchs sans cote on n'affiche pas, ca n'a pas de valeur
+// pour nous ») : un match a venir sans aucune cote reelle (no_signal_reason AUCUN_MARCHE_AVEC_COTE_REELLE, surtout les
+// clubs amateurs de coupe) n'apparait plus dans la liste. Il y revient tout seul des qu'un calcul lui trouve une cote.
+// Les matchs joues (onglet « Hier ») et les matchs fermes ou reportes ne sont pas concernes.
+var RAISON_SANS_COTE='AUCUN_MARCHE_AVEC_COTE_REELLE';
+function affichable(m){
+  return !(m&&m.past!==true&&m.no_signal===true&&String(m.no_signal_reason||'')===RAISON_SANS_COTE);
+}
 function hasSignal(m){
   if(m&&m.past===true)return false;
   return !!(m&&(m.has_signal||m.pari_rec||m.market_id))&&!m.no_signal;
@@ -670,7 +678,7 @@ function mount(rootEl,options){
       opts=opts||{};
       if(opts.isPro!==undefined)ctx.isPro=!!opts.isPro;
       if(opts.hasAccount!==undefined)ctx.hasAccount=!!opts.hasAccount;
-      matches=Array.isArray(matches)?matches:[];
+      matches=(Array.isArray(matches)?matches:[]).filter(affichable);
       pruneFavMatches(matches,Date.now());
       state.status='ready';state.matches=matches;state.clock=H.localClock();
       state.days=buildDays(state.matches,H,state.clock);
@@ -691,7 +699,7 @@ function mount(rootEl,options){
 
 return {mount:mount,veilleListe:veilleListe,veilleAppel:veilleAppel,renderDateStrip:renderDateStrip,groupByLeague:groupByLeague,renderLeagueBlock:renderLeagueBlock,renderMatchRow:renderMatchRow,
   renderMine:renderMine,renderDayBody:renderDayBody,matchStarHtml:matchStarHtml,
-  analysisFor:analysisFor,hasSignal:hasSignal,buildDays:buildDays,countdown:countdown,matchStatus:matchStatus,derbyName:derbyName,
+  analysisFor:analysisFor,hasSignal:hasSignal,affichable:affichable,buildDays:buildDays,countdown:countdown,matchStatus:matchStatus,derbyName:derbyName,
   probBandOf:probBandOf,PROB_BANDS:PROB_BANDS,defaultHelpers:defaultHelpers,
   staticMatchPath:staticMatchPath,matchHref:matchHref};
 });

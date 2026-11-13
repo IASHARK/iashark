@@ -162,3 +162,23 @@ test("depot public : aucune formule du moteur, config sur la regle scenario, dos
   assert.strictEqual(SCN.charger(path.join(__dirname, "dossier-qui-n-existe-pas")), null, "moteur absent : null, jamais une erreur");
   assert.ok(!fs.existsSync(path.join(__dirname, "..", "scenario")), "le dossier scenario/ ne doit jamais entrer dans le depot public");
 });
+
+test("petite cote (decision de Clement du 13/11/2026) : seulement si aucun pari dans 1,70-3,50, et seulement si notre chance depasse ce que la cote exige", () => {
+  const CFG2 = Object.assign({}, CFG, { scenario: Object.assign({}, CFG.scenario, { petite_cote_min: 1.4 }) });
+  const RAW2 = { bookmakers: [{ name: "Bet365", bets: [
+    { id: 45, name: "Corners Over Under", values: [{ value: "Over 9.5", odd: "1.80" }, { value: "Under 9.5", odd: "2.00" }] },
+    { id: 5, name: "Goals Over/Under", values: [{ value: "Over 1.5", odd: "1.33" }, { value: "Under 1.5", odd: "3.30" }, { value: "Over 2.5", odd: "1.50" }, { value: "Under 2.5", odd: "2.60" }, { value: "Over 3.5", odd: "2.75" }, { value: "Under 3.5", odd: "1.44" }] },
+  ] }] };
+  const ctx2 = (issues, cfg) => Object.assign(ctx(issues), { fluxPar: { 7: { raw: RAW2 } }, regleFlux: PR.regleFlux(cfg || CFG2) });
+  // Rien de probable a 1,70 ou plus ; « Under 3.5 » a 1,44 : 0,72 >= 1/1,44 (0,694) -> pris, marque hors fourchette.
+  const sur = { "F5:Under 3.5": I(0.71, 0.72, "Buts", "total"), "F5:Over 2.5": I(0.62, 0.63, "Buts", "total"), "F5:Over 1.5": I(0.8, 0.8, "Buts", "total") };
+  const r = PR.choisirPariFourchette(M7, ctx2(sur), {});
+  assert.strictEqual(r.code_flux, "F5:Under 3.5", "Over 2.5 a 1,50 : 0,63 < 1/1,50, ecarte ; Over 1.5 a 1,33 : sous 1,40, ecarte");
+  assert.strictEqual(r.hors_fourchette, true);
+  assert.strictEqual(PR.choisirPariFourchette(M7, ctx2(sur, CFG), {}), null, "sans petite_cote_min : pas de pari");
+  // Un pari dans la fourchette existe : il gagne toujours, meme moins probable.
+  const mixte = Object.assign({ "F45:Over 9.5": I(0.56, 0.64, "Corners", "total") }, sur);
+  const g = PR.choisirPariFourchette(M7, ctx2(mixte), {});
+  assert.strictEqual(g.code_flux, "F45:Over 9.5");
+  assert.strictEqual(g.hors_fourchette, false);
+});

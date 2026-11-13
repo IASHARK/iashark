@@ -14,7 +14,10 @@ const P = require("../lib/pronostic.js");
 const ML = require("../lib/market-labels.js");
 const ROOT = path.join(__dirname, "..");
 const LIGUES = JSON.parse(fs.readFileSync(path.join(ROOT, "config/leagues.json"), "utf8"));
+// Depuis le 13/11/2026 la config du depot est sur la regle « scenario » (tests/scenario.test.js). La regle du 11/11 reste
+// dans le code (retour arriere possible en remettant choix_du_pari.regle) : ces tests la verifient en la forcant ici.
 const MARCHES = JSON.parse(fs.readFileSync(path.join(ROOT, "config/marches-pari.json"), "utf8"));
+MARCHES.choix_du_pari = Object.assign({}, MARCHES.choix_du_pari, { regle: "tous_marches_bet365" });
 const REGLE = P.regleFlux(MARCHES);
 const TOUT = new Set(["events", "statistics_fixtures", "statistics_players"]);
 
@@ -221,8 +224,9 @@ test("selections (PR #313, point 2) : la liste /players/squads d'API-Football n'
 
 test("textes publics : la fourchette citee est celle du choix (1,70-3,50), dans chaque langue", () => {
   const fr = fs.readFileSync(path.join(ROOT, "fr/index.html"), "utf8"), en = fs.readFileSync(path.join(ROOT, "en/index.html"), "utf8");
-  assert.ok(fr.includes("entre 1,70 et 3,50") && fr.includes("fourchette 1,70-3,50"));
-  assert.ok(en.includes("between 1.70 and 3.50") && en.includes("1.70-3.50 odds range"));
+  // Texte du 13/11/2026 (regle scenario) : « la plus belle cote entre 1,70 et 3,50 parmi les paris juges probables ».
+  assert.ok(fr.includes("entre 1,70 et 3,50") && fr.includes("parmi les paris jugés probables"));
+  assert.ok(en.includes("between 1.70 and 3.50") && en.includes("among the bets we rate as likely"));
   ["fr", "en", "es", "de", "it", "pt", "gb", "mx", "za"].forEach((d) => assert.doesNotMatch(fs.readFileSync(path.join(ROOT, "i18n/seo/" + d + ".json"), "utf8"), /1[.,]40-2[.,]20/, d));
 });
 

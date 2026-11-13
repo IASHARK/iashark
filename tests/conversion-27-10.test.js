@@ -302,12 +302,14 @@ test("C3 : la phrase de methode du trader partout ; plus de « sans les cotes »
     for (const f of ["index.html", "landing.html"]) if (fs.existsSync(path.join(ROOT, d, f))) assert.doesNotMatch(read(d + "/" + f), faux, d + "/" + f);
   }
   for (const d of ["fr", "en", "es", "gb", "mx", "za", "de", "it", "pt"]) assert.doesNotMatch(read("i18n/seo/" + d + ".json"), faux, d);
-  const phrase = "La chance vient des cotes du marché, marge retirée, ou du plus prudent entre le modèle et ces cotes ; le pari retenu est la plus forte chance dans la fourchette 1,70-3,50.";
+  const phrase = "La chance vient de notre calcul du match (derniers matchs de chaque équipe, adversaire du jour, arbitre) ; le pari retenu est la plus belle cote entre 1,70 et 3,50 parmi les paris jugés probables.";
   assert.ok(read("fr/index.html").includes(phrase), "bloc « La méthode en bref » et FAQ");
   assert.ok(JSON.parse(read("i18n/seo/fr.json")).home.paragraphs[0].endsWith(phrase));
   // La fourchette citee est celle qui choisit le pari (lib/pronostic.js#choisirPariFourchette).
   assert.deepEqual(JSON.parse(read("config/leagues.json")).fiabilite.fourchette_pari, { cote_min: 1.7, cote_max: 3.5, marge_sans_agree: 0 }); // regle du 11/11/2026
-  assert.match(read("lib/pronostic.js"), /const dedans = evalues\.filter\(function \(c\) \{ return c\.dedans; \}\)\.sort\(ordre\);/);
+  // Regle scenario (13/11/2026) : parmi les paris juges probables dans la fourchette, la plus belle cote (ordreScenario).
+  assert.match(read("lib/pronostic.js"), /const dedans = evalues\.filter\(function \(c\) \{ return c\.dedans; \}\)\.sort\(ctx\.regleFlux && ctx\.regleFlux\.scenario \? ordreScenario : ordre\);/);
+  assert.match(read("lib/pronostic.js"), /const ordreScenario = function \(a, b\) \{ return \(b\.cote - a\.cote\)/);
 });
 
 test("C3 : sur chaque marche du catalogue, meme regle (buteur, mi-temps et codes « F… » compris)", () => {

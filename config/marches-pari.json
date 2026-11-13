@@ -48,9 +48,9 @@
   ],
   "_readme_scenario": [
     "DECISION DE CLEMENT DU 13/11/2026 : le moteur predit D'ABORD ce qui va se passer dans le match (20 derniers matchs toutes competitions de chaque equipe, rapportes a ce que l'adversaire laisse faire, arbitre, absents, fatigue, enjeu), note le pari sur cette base, et ne regarde la cote qu'A LA FIN. Formules et reglages : depot prive IASHARK/iashark-moteur (dossier scenario/), jamais ici.",
-    "choix_du_pari.regle = « scenario ». seuil_chance : chance du moteur a partir de laquelle un pari est juge probable (0,58 avant recalage, soit environ 55 chances reelles sur 100 dans le rejeu). ecart_max_bookmaker : notre chance trop loin de celle de Bet365 = information manquante probable, issue ecartee. Parmi les issues probables cotees 1,70-3,50 (config/leagues.json#fiabilite.fourchette_pari), le pari affiche est celui qui a la plus belle cote, sans privilegier aucune famille.",
+    "choix_du_pari.regle = « scenario ». seuil_chance : chance du moteur a partir de laquelle un pari est juge probable (0,58 avant recalage ; la chance affichee est recalee sur les paris choisis dans le rejeu). ecart_max_bookmaker : notre chance trop loin de celle de Bet365 = information manquante probable, issue ecartee. Parmi les issues probables cotees 1,70-3,50 (config/leagues.json#fiabilite.fourchette_pari), le pari affiche est celui qui a la plus belle cote, sans privilegier aucune famille.",
     "familles_fermees : familles ou sous-familles sous la moitie dans le rejeu du 27/09 au 10/11/2026 (1 027 matchs). Le suivi quotidien (table scenario_paris) ferme en plus, tout seul, toute famille sous la moitie sur ses 50 derniers paris (table scenario_familles) et previent Clement.",
-    "Toujours exclus : pair / impair, paris d'une seule mi-temps, tranches de minutes, joueurs et buteurs (la methode du buteur du jour reste a part), ordre des buts. Cartons : comptes « a la Bet365 » (jaune 1, rouge 2, 90 minutes, joueurs seulement). Aucune mise, aucune esperance, nulle part."
+    "Toujours exclus : pair / impair, paris d'une seule mi-temps, tranches de minutes, joueurs et buteurs (la methode du buteur du jour reste a part), ordre des buts. Cartons : toujours en attente (comptage non verifie, avocat du diable du 13/11/2026). Aucune mise, aucune esperance, nulle part."
   ],
   "scenario": {
     "seuil_chance": 0.58,

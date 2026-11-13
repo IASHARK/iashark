@@ -46,6 +46,6 @@ const SCN = require("../lib/scenario.js"), SD = require("../lib/scenario-donnees
   });
   console.log("ESSAI A BLANC DU MOTEUR SCENARIO (" + moteur.version + ") : rien n'est publie.");
   console.log("  releves de cotes recents : " + ids.length + " match(s) ; a venir avec cotes : " + cibles.length + " ; avec un scenario : " + avec + " ; avec un pari : " + paris + ".");
-  console.log("  paris par famille : " + (Object.keys(fam).sort().map((k) => k + " " + fam[k]).join(", ") || "aucun") + (paris ? " ; note moyenne " + (sommeNote / paris).toFixed(1) + " ; cote moyenne " + (sommeCote / paris).toFixed(2) : "") + ".");
+  console.log("  paris par famille : " + (Object.keys(fam).sort().map((k) => k + " " + fam[k]).join(", ") || "aucun") + ".");
   console.log("  base : " + lu.lignes.length + " match(s) lus, " + lu.rapport.matchs_nouveaux + " nouveau(x) ; API-Sports : " + api.appels() + " appel(s), reste " + api.restant() + (lu.rapport.arrete_quota ? " ; ARRET QUOTA" : "") + (lu.rapport.arrete_budget ? " ; budget de temps atteint" : "") + ".");
 })().catch((e) => { console.log("::error title=Essai scenario::" + String((e && e.message) || e).replace(/(apikey|key|token)=[^&\s]+/gi, "$1=***").slice(0, 200)); process.exit(1); });

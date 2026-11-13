@@ -65,9 +65,9 @@ test("collecte : un match deja en base n'est jamais redemande", async () => {
   assert.strictEqual(ajoutes[0].id, 101);
 });
 
-test("regle scenario des marches : cartons et rembourse si nul ouverts ; mi-temps, pair / impair, joueurs fermes", () => {
+test("regle scenario des marches : rembourse si nul ouvert ; cartons, mi-temps, pair / impair, joueurs fermes", () => {
   const R = { tousMarches: true, scenario: true };
-  assert.strictEqual(FP.raisonExclusion(80, "Cards Over/Under", R), null);
+  [80, 81, 82, 83].forEach((b) => assert.strictEqual(FP.raisonExclusion(b, "Cards", R), FP.RAISON_CARTONS_ATTENTE));
   assert.strictEqual(FP.raisonExclusion(2, "Home/Away", R), null);
   assert.ok(FP.raisonExclusion(2, "Home/Away", { tousMarches: true }), "hors regle scenario : toujours exclu");
   [[19, "Asian Handicap First Half"], [21, "Odd/Even"], [92, "Anytime Goal Scorer"], [13, "First Half Winner"], [54, "First 10 min Winner"]].forEach(([b, nom]) => assert.ok(FP.raisonExclusion(b, nom, R), nom));
@@ -83,11 +83,17 @@ test("suivi : reglement depuis la ligne courte, fermeture d'une famille sous la 
   assert.strictEqual(SCN.reglerSuivi("F45:Over 6.5", L, FP), "perdu");
   assert.strictEqual(SCN.reglerSuivi("F80:Over 3.5", L, FP), "gagne");
   assert.strictEqual(SCN.reglerSuivi("F2:Away", L, FP), "perdu");
-  const paris = (n, g, fam) => Array.from({ length: n }, (_, i) => ({ famille: fam, resultat: i < g ? "gagne" : "perdu", publie_le: "2026-11-" + String(10 + (i % 15)) }));
-  const e = SCN.etatFamilles(paris(50, 24, "Corners").concat(paris(50, 25, "Buts"), paris(49, 10, "Tirs"), [{ famille: "Tirs", resultat: "rembourse", publie_le: "2026-11-12" }]));
+  const paris = (n, g, fam, jour) => Array.from({ length: n }, (_, i) => ({ famille: fam, resultat: i < g ? "gagne" : "perdu", publie_le: "2026-11-" + (jour || "10") + "T" + String(100000 + i).slice(1) }));
+  const tous = paris(50, 24, "Corners").concat(paris(50, 25, "Buts"), paris(49, 10, "Tirs"), [{ famille: "Tirs", resultat: "rembourse", publie_le: "2026-11-12" }]);
+  const e = SCN.etatFamilles(tous);
   assert.strictEqual(e.Corners.fermee, true, "24 sur 50 : fermee");
   assert.strictEqual(e.Buts.fermee, false, "25 sur 50 : la moitie, ouverte");
   assert.strictEqual(e.Tirs.fermee, false, "moins de 50 paris regles : pas encore jugee");
+  // Blocs sans chevauchement : un mauvais bloc suivi de 30 bons paris reste juge sur le bloc complet ; un 2e bloc complet le remplace.
+  assert.strictEqual(SCN.etatFamilles(tous.concat(paris(30, 30, "Corners", "12"))).Corners.fermee, true);
+  assert.strictEqual(SCN.etatFamilles(tous.concat(paris(50, 30, "Corners", "12"))).Corners.fermee, false);
+  // Reouverture par Clement : seuls les paris publies apres la date comptent, la famille repart de zero.
+  assert.strictEqual(SCN.etatFamilles(tous, { depuis: { Corners: "2026-11-11T000000" } }).Corners, undefined);
 });
 
 // Releve Bet365 minimal : corners (deux lignes), buts, 1N2.

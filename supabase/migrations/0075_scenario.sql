@@ -53,6 +53,8 @@ create table if not exists public.scenario_familles (
   total integer not null default 0,
   gagnes integer not null default 0,
   motif text,
+  -- Les paris ne comptent que s'ils sont publies apres « depuis ». Rouvrir une famille : fermee = false ET depuis = now().
+  depuis timestamptz not null default now(),
   maj_le timestamptz not null default now()
 );
 alter table public.scenario_familles enable row level security;

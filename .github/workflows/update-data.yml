@@ -4718,16 +4718,18 @@ jobs:
                     console.log('  [SCENARIO] suivi : '+scnRegles.length+' pari(s) regle(s) sur '+scnAttente.length+' en attente.');
                   }
                   var scnTous=await SCN_DB.lire('scenario_paris','resultat=in.(gagne,perdu)&order=publie_le.desc','famille,resultat,publie_le');
-                  var scnEtat=SCN.etatFamilles(scnTous), scnDeja={};
-                  (await SCN_DB.lire('scenario_familles','','famille,fermee')).forEach(function(x){ scnDeja[x.famille]=x.fermee===true; });
-                  var scnLignes=Object.keys(scnEtat).map(function(k){ var e=scnEtat[k]; return {famille:k,fermee:e.fermee||scnDeja[k]===true,total:e.total,gagnes:e.gagnes,motif:(e.fermee||scnDeja[k]===true)?'sous la moitie sur les 50 derniers paris':null,maj_le:new Date().toISOString()}; });
+                  // Comptes depuis scenario_familles.depuis (date de reouverture) ; blocs de 50 sans chevauchement.
+                  var scnDeja={}, scnDepuis={};
+                  (await SCN_DB.lire('scenario_familles','','famille,fermee,depuis')).forEach(function(x){ scnDeja[x.famille]=x.fermee===true; if(x.depuis) scnDepuis[x.famille]=new Date(x.depuis).toISOString(); });
+                  var scnEtat=SCN.etatFamilles(scnTous.map(function(x){ return {famille:x.famille,resultat:x.resultat,publie_le:new Date(x.publie_le).toISOString()}; }),{depuis:scnDepuis});
+                  var scnLignes=Object.keys(scnEtat).filter(function(k){ return scnDeja[k]!==true; }).map(function(k){ var e=scnEtat[k]; return {famille:k,fermee:e.fermee,total:e.total,gagnes:e.gagnes,motif:e.fermee?'sous la moitie sur un bloc de 50 paris':null,maj_le:new Date().toISOString()}; });
                   if(scnLignes.length) await SCN_DB.ecrire('scenario_familles',scnLignes,'famille');
                   // Une famille fermee le reste jusqu'a ce que Clement la rouvre (ligne scenario_familles.fermee = false).
                   Object.keys(scnDeja).forEach(function(k){ if(scnDeja[k]) SCENARIO_FERMEES.push(k); });
                   scnLignes.forEach(function(l){
                     if(!l.fermee||scnDeja[l.famille]===true) return;
                     SCENARIO_FERMEES.push(l.famille);
-                    console.log('::warning title=Moteur scenario::famille « '+l.famille+' » fermee toute seule ('+l.gagnes+' gagnes sur '+l.total+').');
+                    console.log('::warning title=Moteur scenario::famille « '+l.famille+' » fermee toute seule (bloc de 50 paris sous la moitie).');
                     SCN_DB.ecrire('admin_alertes',[{type:'moteur',titre:'Famille de paris fermée : '+l.famille,texte:l.gagnes+' paris gagnés sur les '+l.total+' derniers : la famille « '+l.famille+' » ne sort plus de pari tant que tu ne la rouvres pas.'}],'id').catch(function(){});
                   });
                 }catch(e){ console.log('::warning title=Moteur scenario::suivi non fait ('+(e&&e.message)+').'); }
@@ -4771,7 +4773,7 @@ jobs:
                 if(scnNouveaux.length){
                   var rScn=await fetch(SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/scenario_paris?on_conflict=fixture_id',{method:'POST',headers:{apikey:SUPA_SERVICE_KEY,Authorization:'Bearer '+SUPA_SERVICE_KEY,'Content-Type':'application/json',Prefer:'resolution=ignore-duplicates,return=minimal'},body:JSON.stringify(scnNouveaux)});
                   var scnFam={}; scnNouveaux.forEach(function(x){ scnFam[x.famille]=(scnFam[x.famille]||0)+1; });
-                  console.log('  [SCENARIO] '+scnNouveaux.length+' pari(s) du moteur scenario archive(s) ('+(rScn.ok?'ok':'echec '+rScn.status)+') : '+Object.keys(scnFam).map(function(k){ return k+' '+scnFam[k]; }).join(', ')+'.');
+                  console.log('  [SCENARIO] '+scnNouveaux.length+' pari(s) du moteur scenario archive(s) ('+(rScn.ok?'ok':'echec '+rScn.status)+'), '+Object.keys(scnFam).length+' famille(s).');
                 }
               }
             }catch(e){ console.log('::warning title=Moteur scenario::suivi des nouveaux paris non archive ('+(e&&e.message)+').'); }

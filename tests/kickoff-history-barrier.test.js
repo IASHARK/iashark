@@ -32,6 +32,8 @@ test('publie avant le coup d’envoi = accepte ; sans horodatage, jugement a l�
 test('la barriere est branchee avant l’ajout a l’historique', () => {
   const wf = fs.readFileSync(path.join(__dirname, '..', '.github/workflows/update-data.yml'), 'utf8');
   const barriere = wf.indexOf('!publishedBeforeKickoff(m,Date.now())');
-  const ajout = wf.indexOf('histo.predictions.unshift({');
+  // Ligne construite dans nouvelleLigne puis ajoutee (match rejoue, 10/11/2026).
+  const ajout = wf.indexOf('var nouvelleLigne={');
+  assert.ok(ajout < wf.indexOf('histo.predictions.unshift(nouvelleLigne);'));
   assert.ok(barriere > 0 && barriere < ajout);
 });

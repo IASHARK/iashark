@@ -135,6 +135,26 @@
   document.head.appendChild(s);
 })();
 
+/* Panneau Lolly Bet a l'arrivee (lib/lolly-panneau.js, 15/11/2026) : seulement
+   sur la PREMIERE page d'une visite (marque en sessionStorage, posee sur toutes
+   les pages, sauf celle quittee par la redirection de langue), jamais sur
+   connexion, inscription, compte, paiement, Pro, page Lolly ni admin. Le script
+   lui-meme limite a une fois par jour et par navigateur. */
+(function(){
+  try{
+    if(window.__iasharkLangRedirecting) return;
+    var ss = window.sessionStorage, MARK = 'iashark_lolly_arrivee';
+    if(ss.getItem(MARK)) return;
+    ss.setItem(MARK, '1');
+    if(/\/(connexion|inscription|mot-de-passe-oublie|reinitialiser-mot-de-passe|compte|abonnement|checkout-annule|checkout-succes|desinscription-email|pro|lolly|partenaires-conditions|admin|maintenance|404)(\.html)?$/.test(location.pathname)) return;
+    if(navigator.webdriver || /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|preview|facebookexternalhit|embedly/i.test(navigator.userAgent || '')) return;
+    var s = document.createElement('script');
+    s.src = '/lib/lolly-panneau.js';
+    s.defer = true;
+    document.head.appendChild(s);
+  }catch(e){}
+})();
+
 /* « Nous contacter » (pied de page) et fenetre d'essai gratuit des comptes
    gratuits connectes : lib/contact-essai.js (30/10/2026), charge sur TOUTES
    les pages depuis ce script partage, comme la mesure des visites. */

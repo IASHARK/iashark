@@ -135,6 +135,27 @@
   document.head.appendChild(s);
 })();
 
+/* Panneau Lolly Bet (lib/lolly-panneau.js, 15/11/2026) : charge sur les pages
+   non exclues (jamais connexion, inscription, compte, paiement, Pro, page Lolly ni
+   admin). __iasharkLollyArrivee = premiere page de la visite (marque en
+   sessionStorage, posee sur toutes les pages, sauf celle quittee par la redirection
+   de langue) : seul cas ou le grand panneau peut s'ouvrir ; ailleurs, seulement le
+   petit volet des inscrits connectes. Le script limite chacun a une fois par jour. */
+(function(){
+  try{
+    if(window.__iasharkLangRedirecting) return;
+    var ss = window.sessionStorage, MARK = 'iashark_lolly_arrivee';
+    window.__iasharkLollyArrivee = !ss.getItem(MARK);
+    ss.setItem(MARK, '1');
+    if(/\/(connexion|inscription|mot-de-passe-oublie|reinitialiser-mot-de-passe|compte|abonnement|checkout-annule|checkout-succes|desinscription-email|pro|lolly|partenaires-conditions|admin|maintenance|404)(\.html)?$/.test(location.pathname)) return;
+    if(navigator.webdriver || /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|preview|facebookexternalhit|embedly/i.test(navigator.userAgent || '')) return;
+    var s = document.createElement('script');
+    s.src = '/lib/lolly-panneau.js';
+    s.defer = true;
+    document.head.appendChild(s);
+  }catch(e){}
+})();
+
 /* « Nous contacter » (pied de page) et fenetre d'essai gratuit des comptes
    gratuits connectes : lib/contact-essai.js (30/10/2026), charge sur TOUTES
    les pages depuis ce script partage, comme la mesure des visites. */

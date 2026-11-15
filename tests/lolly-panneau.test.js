@@ -24,11 +24,20 @@ test("lien partenaire existant, 18+, quatre langues, aucune promesse ni emoticon
   assert.match(src, /var LIEN = "\/go\/lolly\/site"/);
   assert.match(src, /18\+/);
   for (const l of ["fr", "en", "es", "pt"]) assert.match(src, new RegExp("\\n    " + l + ": \\{"));
-  assert.match(src, /Les marchés que les autres n’ont pas/);
-  assert.match(src, /Découvrir Lolly Bet/);
+  assert.match(src, /1 mois d’IASHARK Pro offert/);
+  assert.match(src, /Obtenir mon mois Pro offert/);
+  assert.match(src, /On vérifie/);
+  assert.match(src, /lolly\.html/);
   assert.doesNotMatch(src, /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u);
   const textes = src.slice(src.indexOf("var TEXTES"), src.indexOf("function langue"));
   assert.doesNotMatch(textes.toLowerCase(), /garanti|streaming|sécuris|risques|gagne/);
+});
+
+test("volet : jamais pour un compte Pro ni avec une demande Pro offert, e-mail masque", () => {
+  assert.match(src, /ctx\.isPro \|\| ctx\.isAdmin/);
+  assert.match(src, /from\("pro_offert_demandes"\)/);
+  assert.match(src, /r\.data\.length\) return null/);
+  assert.match(src, /\\u2022\\u2022\\u2022/);
 });
 
 test("une fois par jour, mesure vu / clic / ferme acceptee par la base", () => {

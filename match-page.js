@@ -1686,7 +1686,7 @@ async function init(){
       // requete serait inutile : elle ne renverrait rien de plus.
       // C'est ce qui permet a un visiteur venu de l'onglet « Hier » d'ouvrir un
       // match joue et de voir l'analyse qu'il portait : la preuve, sans compte.
-      if(ctx.session||matchTermine(raw)){
+      if(ctx.session){
         const tot=appelPour(ctx.session);
         const result=(tot&&await tot)||await window.IasharkApp.supabase.functions.invoke('match-data',{body:{id:String(id)}});
         if(result&&result.data&&!result.error){
@@ -1731,7 +1731,11 @@ async function init(){
       renderAuthWall(raw,appel);return;
     }
     listeDuJour=list;
-    if(!isFree&&!termine&&!vuePro){renderProWall(raw,ctx);return;}
+    // 15/11/2026 (Clement : « quand t'as pas de compte tu peux cliquer sur des matchs et ca s'ouvre au lieu
+    // du panneau prix abonnement ») : depuis le 20/09, un match TERMINE s'ouvrait a tous (sections publiques,
+    // sans mur), alors que la decision du 28/09 (match-data) remet le mur payant sur les matchs termines.
+    // Desormais : tout match non offert -> mur Pro pour un non-abonne, termine ou non.
+    if(!isFree&&!vuePro){renderProWall(raw,ctx);return;}
     // Compte gratuit sur le match offert : toutes les sections, panneau Marches flou
     // (cadenas Pro sur le panneau seulement). Match termine : aucun panneau (plus rien a jouer).
     render(raw,{vuePro,verrouPro:!vuePro&&isFree&&!termine,panneau:termine?false:undefined});

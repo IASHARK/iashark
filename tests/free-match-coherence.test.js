@@ -40,7 +40,7 @@ test("match offert : le panneau « compte gratuit » ne montre aucun prix, le mu
   assert.equal((auth.match(/abonnement\.html/g) || []).length, 1, "une seule ligne vers Pro, sans prix");
   assert.match(mur, /IasharkOffrePro\.mount\(box,\{mode:'vitrine',contexte:'match'/);
   assert.match(js, /if\(isFree&&!ctx\.session\)\{\n\s*\/\/ Le pari du match offert[\s\S]{0,700}renderAuthWall\(raw,appel\);return;/, "match offert -> carte compte gratuit, jamais le mur Pro");
-  assert.match(js, /if\(!isFree&&!termine&&!vuePro\)\{renderProWall\(raw,ctx\);return;\}/);
+  assert.match(js, /if\(!isFree&&!vuePro\)\{renderProWall\(raw,ctx\);return;\}/, "match non offert, termine ou non -> mur Pro (15/11/2026)");
   assert.match(auth, /lien\('inscription\.html\?next='\+retour\)/);
 });
 

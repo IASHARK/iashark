@@ -1,5 +1,6 @@
 {
   "_readme": [
+    "REGLE DU 16/11/2026 (Clement : « pour un match donne, le combine reprend le pari affiche sur sa page ») : les jambes des combines et les paris des montantes sont de nouveau SEULEMENT le pari affiche de chaque match (meme pari, meme cote, meme chance), comme avant le 11/11. Le pari affiche etant cote 1,70 au moins depuis le 11/11, les bornes changent (avis du trader de cotes du 16/11) : jambe 1,70-2,30 (au-dela, le match n'entre dans aucun combine), chance affichee >= 50 % ; petit combine 2 ou 3 jambes, cote totale 4,00-6,00 (inchangee) ; grand combine 3 ou 4 jambes, 8,50-12,00 (inchangee) ; paliers 1,85 puis 2,30 ; montantes : la sure = le plus probable, la solide cote >= 1,80, l'audacieuse cote >= 2,00. Les mentions « 1,40-2,20 », « 3 a 5 jambes » et « 5 a 7 jambes » des paragraphes plus bas decrivent les regles d'avant. Jamais retroactif : les tickets deja publies ne changent pas.",
     "REGLE DU 06/11/2026 (Clement : « la Selection en or et la montante c'est pareil » ; « des matchs vraiment surs, des fois oser » ; carte blanche) : la Selection en or n'est plus montree comme une rubrique ; ses 3 paris nourrissent les 3 montantes, chacune avec SON style (montantes.styles) : 1 la sure = le pari affiche le plus probable ; 2 la solide = le plus probable a cote >= 1,55 ; 3 l'audacieuse = le plus probable a cote >= 1,85 ; 3 matchs differents ; rang sans pari = montante immobile (lib/run-output/jambes-du-jour.js#selectionMontantes). Toujours le pari affiche de la page (cote 1,40-2,20, chance >= 50 %).",
     "REGLE DU 28/10/2026 : CHOIX DE CLEMENT (« pour la cote a 10 le meilleur possible et 5 aussi, change de formule » ; « ticket de buteur du jour : on en donne 2, a ne pas jouer en combine, en paris simples »). La Selection en or ne change pas. Ne s'applique jamais aux tickets deja publies (table tickets_du_jour gelee) : a partir du prochain calcul. La mesure des tickets continue.",
     "Combines x5 et x10 : PALIERS DE COTE DES JAMBES (paliers_cote_jambe). Les jambes restent le pari AFFICHE de chaque match (meme pari, meme cote affichee, meme chance que la page). Chaque ticket est d'abord cherche avec les seuls paris affiches dont la cote est au plus 1,44 ; s'il n'en existe pas, au plus 1,49 ; puis 1,59 ; puis 2,20 (= la regle d'avant). Garde de chance : le ticket d'un palier bas n'est garde que si sa chance affichee (% entier) ne baisse pas par rapport au meilleur ticket fait avec toutes les jambes ; sinon c'est ce dernier. Le reste ne change pas : x5 = 3 a 5 jambes, cote totale 4,00-6,00 ; x10 = 5 a 7 jambes, 8,50-12,00 ; une jambe par match ; la plus grande chance (produit des chances affichees) ; jamais force (lib/run-output/combos.js#generateDailyCombos). Plancher des jambes, fourchettes et paliers : toujours sur la cote AFFICHEE (une cote indicative est dite telle quelle sur la page).",
@@ -14,16 +15,16 @@
     "Un ticket publie ne change plus (table tickets_du_jour, migration 0050) : la regle vaut a partir du prochain calcul, jamais retroactivement. Rien n'est produit sans le feu vert du mathematicien (config/verdicts-maths.json).",
     "fichier_buteurs_public : « retire » depuis le 04/10/2026 = buteurs-du-jour.json sans aucune entree."
   ],
-  "regle_version": "tickets-2026-11-06",
-  "x5": { "jambes": [3, 4, 5], "cote_min": 4.0, "cote_max": 6.0, "centre": 5 },
-  "x10": { "jambes": [5, 6, 7], "cote_min": 8.5, "cote_max": 12, "centre": 10 },
-  "jambe": { "cote_min": 1.4, "cote_max": 2.2, "chance_min": 50, "accepter_en_test": true },
-  "paliers_cote_jambe": [1.44, 1.49, 1.59, 2.2],
+  "regle_version": "tickets-2026-11-16",
+  "x5": { "jambes": [2, 3], "cote_min": 4.0, "cote_max": 6.0, "centre": 5 },
+  "x10": { "jambes": [3, 4], "cote_min": 8.5, "cote_max": 12, "centre": 10 },
+  "jambe": { "cote_min": 1.7, "cote_max": 2.3, "chance_min": 50, "accepter_en_test": true },
+  "paliers_cote_jambe": [1.85, 2.3],
   "coherence": { "seuil_jambe": 0.8 },
   "marge_coup_envoi_min": 15,
   "operateurs": "agrees_sinon_api_football",
   "selection_or": { "nb": 3 },
-  "montantes": { "styles": [{ "nom": "sure", "cote_min": 0 }, { "nom": "solide", "cote_min": 1.55 }, { "nom": "audacieuse", "cote_min": 1.85 }] },
+  "montantes": { "styles": [{ "nom": "sure", "cote_min": 0 }, { "nom": "solide", "cote_min": 1.8 }, { "nom": "audacieuse", "cote_min": 2.0 }] },
   "buteur_du_jour": { "nb": 2 },
   "fichier_buteurs_public": "retire"
 }

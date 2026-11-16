@@ -230,34 +230,64 @@ test("textes publics : la fourchette citee est celle du choix (1,70-3,50), dans 
   ["fr", "en", "es", "de", "it", "pt", "gb", "mx", "za"].forEach((d) => assert.doesNotMatch(fs.readFileSync(path.join(ROOT, "i18n/seo/" + d + ".json"), "utf8"), /1[.,]40-2[.,]20/, d));
 });
 
-test("combines : jambes de l'ancienne selection (1,40-2,20, config/tickets.json), un x10 se construit avec la vraie configuration", () => {
+// REGLE DU 16/11/2026 (Clement : « pour un match donne, le combine reprend le pari affiche sur sa page »). Du 13 au 17/11,
+// 2 jambes sur 43 seulement etaient le pari de la page (jambes de l'ancienne selection, regle du 11/11).
+test("combines : chaque jambe est le pari affiche de la page (meme pari, meme cote, meme chance), avec la vraie configuration", () => {
   const T = require("../lib/tickets-du-jour.js");
-  const MP = require("../lib/marches-paris.js");
   const REGLES = require("../config/tickets.json");
   const V = require("../config/verdicts-maths.json");
-  assert.deepEqual([REGLES.jambe.cote_min, REGLES.jambe.cote_max], [1.4, 2.2]);
+  assert.equal(REGLES.regle_version, "tickets-2026-11-16");
+  assert.deepEqual([REGLES.jambe.cote_min, REGLES.jambe.cote_max, REGLES.jambe.chance_min], [1.7, 2.3, 50]);
+  assert.deepEqual([REGLES.x5.jambes, REGLES.x10.jambes, REGLES.paliers_cote_jambe], [[2, 3], [3, 4], [1.85, 2.3]]);
+  assert.ok(REGLES.jambe.cote_min >= LIGUES.fiabilite.fourchette_pari.cote_min, "une jambe n'est jamais sous le minimum du pari affiche");
+  const PARIS = [["under-35", "Moins de 3,5 buts", "1.73", 54], ["away-team-under-15", "Exterieur moins de 1,5 but", "1.73", 54], ["btts-yes", "Les deux equipes marquent", "1.80", 53],
+    ["over-25", "Plus de 2,5 buts", "1.75", 55], ["under-25", "Moins de 2,5 buts", "1.83", 56], ["away-team-over-05", "Exterieur plus de 0,5 but", "2.00", 53]];
   const matchs = [], fixtureById = {};
-  for (let i = 1; i <= 8; i++) {
-    // Pari affiche de la regle du 11/11 (corners, 1,85) : jamais une jambe ; la jambe est l'ancien pari (victoire, 1,55).
-    const m = { id: 9100 + i, home: { n: "Dom" + i, id: i * 10 }, away: { n: "Ext" + i, id: i * 10 + 1 }, date: "2026-11-14 " + (14 + (i % 6)) + ":00",
-      league: "Premier League", league_key: "premier", league_id: 39, league_reliability: "validee", no_signal: false,
-      pari_rec: "Plus de 9,5 corners", market_id: "F45:Over 9.5", cote_rec: "1.85", cote_source: "bet365", chance_iashark: 52,
-      c1: "1.55", cn: "4.20", c2: "6.00", co25: "1.60", cu25: "2.40", cdc1x: "1.12", cdc2x: "2.50", cdc12: "1.25" };
+  const ajouter = (id, heure, pari, extra) => {
+    const m = Object.assign({ id: id, home: { n: "Dom" + id, id: id * 10 }, away: { n: "Ext" + id, id: id * 10 + 1 }, date: "2026-11-18 " + heure,
+      league: "UEFA Nations League", league_key: "nations_league", league_id: 5, league_reliability: "en_test", no_signal: false,
+      pari_rec: pari[1], market_id: pari[0], cote_rec: pari[2], cote_source: "bet365", chance_iashark: pari[3],
+      pronostic: { market_id: pari[0], libelle_fr: pari[1], chance: pari[3], cote: Number(pari[2]), voie: "scenario", moteur: "scenario", fiabilite: "en test", selection: false, publie: true, hors_fourchette: false },
+      // Cotes 1N2 et buts du match : l'ancienne selection y aurait pris « victoire » a 1,45 (jamais une jambe desormais).
+      c1: "1.45", cn: "4.20", c2: "6.50", co25: "1.60", cu25: "2.30", cdc1x: "1.12", cdc2x: "2.50", cdc12: "1.25" }, extra || {});
     matchs.push(m);
-    fixtureById[String(m.id)] = { fixture: { timestamp: Math.floor(Date.parse("2026-11-14T" + (14 + (i % 6)) + ":00:00+01:00") / 1000), status: { short: "NS" } } };
-  }
-  const opts = { jour: "2026-11-14", nowMs: Date.parse("2026-11-14T07:00:00Z"), fixtureById, configLigues: LIGUES, categoriesNoGo: V.categories_no_go, competitions: V.competitions_jambes };
+    fixtureById[String(id)] = { fixture: { timestamp: Math.floor(Date.parse("2026-11-18T" + heure + ":00+01:00") / 1000), status: { short: "NS" } } };
+    return m;
+  };
+  PARIS.forEach((p, i) => ajouter(9200 + i, (18 + (i % 4)) + ":00", p));
+  // Jamais des jambes : pari d'un autre marche de bookmaker (F...), pari hors fourchette, cote au-dela de 2,30, chance sous 50 %.
+  ajouter(9300, "20:00", ["F45:Over 8.5", "Plus de 8,5 corners", "1.73", 54]);
+  ajouter(9301, "20:00", ["over-15", "Plus de 1,5 but", "1.48", 62], { pronostic: { market_id: "over-15", publie: true, hors_fourchette: true, fiabilite: "en test" } });
+  ajouter(9302, "20:00", ["home-win", "Victoire Dom9302", "2.60", 51], { pronostic: { market_id: "home-win", publie: true, hors_fourchette: false, fiabilite: "en test" } });
+  ajouter(9303, "20:00", ["dc-x2", "Ext9303 ou nul", "1.90", 48], { pronostic: { market_id: "dc-x2", publie: true, hors_fourchette: false, fiabilite: "en test" } });
+  const opts = { jour: "2026-11-18", nowMs: Date.parse("2026-11-18T07:00:00Z"), fixtureById, configLigues: LIGUES, categoriesNoGo: V.categories_no_go, competitions: V.competitions_jambes };
   const c = T.calculerDuJour(matchs, opts);
-  assert.equal(c.nb_jambes, 8, JSON.stringify(c.exclus));
-  assert.ok(c.x10, "x10 construit : " + JSON.stringify(c.exclus));
-  assert.ok(c.x10.meta.cote_totale >= REGLES.x10.cote_min && c.x10.meta.cote_totale <= REGLES.x10.cote_max, String(c.x10.meta.cote_totale));
-  c.x10.contenu.jambes.forEach((j) => assert.ok(j.cote >= 1.4 && j.cote <= 2.2 && !/^F\d+:/.test(j.market_id), JSON.stringify(j)));
-  assert.ok(c.x5, "x5 construit");
-  // Une jambe qui ne peut pas gagner avec le pari affiche : jamais (ex. pari affiche « victoire Ext », jambe « victoire Dom »).
-  assert.equal(MP.compatibles("F4:Home -1.5", "dc-x2"), false);
-  assert.equal(MP.compatibles("F45:Over 9.5", "home-win"), true);
-  const contraire = matchs.map((m) => Object.assign({}, m, { market_id: "F1:Away", pari_rec: "Victoire Ext" }));
-  assert.equal(T.calculerDuJour(contraire, opts).nb_jambes, 0);
+  assert.equal(c.nb_jambes, PARIS.length, JSON.stringify(c.exclus));
+  const parId = {};
+  matchs.forEach((m) => { parId[m.id] = m; });
+  const memeQueLaPage = (j) => {
+    const m = parId[j.fixture_id];
+    assert.ok(m, "match connu");
+    assert.equal(j.market_id, m.market_id, "meme pari que la page");
+    assert.equal(j.pari, m.pari_rec, "meme libelle que la page");
+    assert.equal(j.cote, Number(m.cote_rec), "meme cote que la page");
+    assert.equal(j.chance, m.chance_iashark, "meme chance que la page");
+    assert.ok(j.fixture_id < 9300, "jamais un match dont le pari ne peut pas etre une jambe");
+  };
+  assert.ok(c.x5 && c.x10 && c.or, "petit combine, grand combine et montantes construits : " + JSON.stringify(c.exclus));
+  assert.ok([2, 3].includes(c.x5.contenu.jambes.length) && c.x5.meta.cote_totale >= 4 && c.x5.meta.cote_totale <= 6, String(c.x5.meta.cote_totale));
+  assert.ok([3, 4].includes(c.x10.contenu.jambes.length) && c.x10.meta.cote_totale >= 8.5 && c.x10.meta.cote_totale <= 12, String(c.x10.meta.cote_totale));
+  c.x5.contenu.jambes.concat(c.x10.contenu.jambes, c.or.contenu.paris).forEach(memeQueLaPage);
+  // Le pari de la page change de sens : la jambe suit (une seule source), jamais l'ancienne selection.
+  const autre = matchs.map((m) => (m.id === 9200 ? Object.assign({}, m, { market_id: "over-35", pari_rec: "Plus de 3,5 buts", cote_rec: "2.10", chance_iashark: 50,
+    pronostic: Object.assign({}, m.pronostic, { market_id: "over-35", libelle_fr: "Plus de 3,5 buts" }) }) : m));
+  const c2 = T.calculerDuJour(autre, opts);
+  const toutes = (c2.x5 ? c2.x5.contenu.jambes : []).concat(c2.x10 ? c2.x10.contenu.jambes : [], c2.or ? c2.or.contenu.paris : []);
+  toutes.filter((j) => j.fixture_id === 9200).forEach((j) => assert.equal(j.market_id, "over-35"));
+  assert.ok(toutes.every((j) => j.market_id !== "home-win"), "jamais l'ancienne selection (victoire a 1,45)");
+  // Le code ne lit plus l'ancienne selection.
+  const src = require("node:fs").readFileSync(require.resolve("../lib/tickets-du-jour.js"), "utf8");
+  assert.equal(/pariAncienneRegleParMatch\(/.test(src), false);
 });
 
 test("match offert : une selection nationale verifiee par les cotes reste une Selection IASHARK sans le v3", () => {

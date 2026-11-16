@@ -1,4 +1,6 @@
 "use strict";
+// Ecrit pour les bornes des combines d'avant le 16/11/2026 : remises en memoire, voir le module.
+require("./ancienne-regle-tickets.js");
 // Ecrit pour l'ancienne regle du pari (1,40-2,20, avant le 11/11/2026) : remise en memoire, voir le module. Les jambes
 // des combines sous la regle du 11/11 : tests/paris-tous-marches-bet365.test.js.
 require("./ancienne-regle-pari.js");

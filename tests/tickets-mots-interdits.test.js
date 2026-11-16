@@ -1,4 +1,6 @@
 "use strict";
+// Ecrit pour les bornes des combines d'avant le 16/11/2026 : remises en memoire, voir le module.
+require("./ancienne-regle-tickets.js");
 // Ecrit pour l'ancienne regle du pari (1,40-2,20, avant le 11/11/2026) : remise en memoire, voir le module.
 require("./ancienne-regle-pari.js");
 // MOTS INTERDITS dans tout ce que le serveur produit pour les tickets, la Selection en or, le

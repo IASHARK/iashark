@@ -5023,6 +5023,27 @@ jobs:
               // Equipes nationales : toujours une Selection IASHARK (decision du 03/10, inchangee).
               // Pari de repli des coupes (lib/repli-forme.js, avocat du diable du 28/10/2026) : jamais le match offert.
               var analysable=function(m){ return m && m.pari_rec && !m.no_signal && !(m.pronostic&&m.pronostic.voie==='repli_forme') && !/^repli_forme/.test(String(m.selection_voie||'')) && (!SELECTIONS.estSelectionNationale(m) || estSelectionDuJour(m)) && competitionOffrable(m) && dansFourchetteOffert(m) && eligibleForFree(FIXTURE_BY_ID[String(m.id)],OFFRE_MS); };
+              // MATCH DU SOIR, ET UN MATCH OFFERT CHAQUE JOUR (demande de Clement du 16/11/2026 : « le pari le plus sur de la
+              // journee, parmi les matchs a 18 h minimum », les visiteurs arrivent le soir depuis X et Telegram). Constat : depuis le
+              // 13/11 plus aucun match n'etait designe (les selections nationales exigeaient une « Selection IASHARK » que la regle du
+              // 11/11 ne pose plus, et les championnats de la treve sont « en test ») ; le site se rabattait seul sur le premier match
+              // de la journee (00 h 00), deja joue le soir. Regle, pour chaque jour sans match offert :
+              //  a. candidats : pronostic publie, jamais un repli des coupes, cote dans la fourchette, coup d'envoi a venir (offrable) ;
+              //  b. coup d'envoi a 18 h 00 ou plus (heure de Paris) s'il y en a ; sinon REPLI : le ou les matchs au coup d'envoi le
+              //     plus tardif de la journee ;
+              //  c. parmi eux, d'abord ceux de la regle d'avant (analysable), sinon competition verifiee ou Ligue des nations /
+              //     eliminatoires Europe, sinon les autres ; puis grandes competitions d'abord, puis le plus probable (inchange).
+              var HEURE_SOIR=18;
+              var heureParis=function(m){ var h=/^\d{4}-\d{2}-\d{2}[ T](\d{2}):(\d{2})/.exec(String(m&&m.date||'')); return h?Number(h[1])*60+Number(h[2]):null; };
+              var estDuSoir=function(m){ var h=heureParis(m); return h!==null&&h>=HEURE_SOIR*60; };
+              var offrable=function(m){ return !!(m && m.pari_rec && !m.no_signal && !(m.pronostic&&m.pronostic.voie==='repli_forme') && !/^repli_forme/.test(String(m.selection_voie||'')) && dansFourchetteOffert(m) && eligibleForFree(FIXTURE_BY_ID[String(m.id)],OFFRE_MS)); };
+              var competitionConnue=function(m){ return SELECTIONS.estSelectionNationale(m) ? SEL_OFFRABLES.indexOf(String(m.league_key||''))!==-1 : m.league_reliability!=='en_test'; };
+              var creneauDuJour=function(liste){
+                var soir=liste.filter(estDuSoir);
+                if(soir.length) return soir;
+                var tard=liste.reduce(function(b,m){ var h=heureParis(m); return h!==null&&h>b?h:b; },-1);
+                return liste.filter(function(m){ return heureParis(m)===tard; });
+              };
               // Competition connue d'abord : Ligue des nations / eliminatoires (treve), puis coupes
               // d'Europe et grands championnats, puis le reste (0 = la plus connue).
               var GRANDES_COMPETITIONS=['ldc','el','ecl','premier','laliga','seriea','bundesliga','ligue1'];
@@ -5086,7 +5107,10 @@ jobs:
                 var dejaDesigne=prevListe.some(function(p){ return p&&p.is_free===true&&String(p.free_day||jourDe(p))>=TODAY; });
                 var affiche=dejaDesigne?null:FM_REPLI.pickFreeMatch(prevListe,{day:TODAY,now:TODAY+' 00:00'});
                 var actuel=affiche&&jourDe(affiche)===TODAY?allMatchsData.filter(function(m){ return m&&String(m.id)===String(affiche.id); })[0]:null;
-                if(actuel&&actuel.pari_rec&&!actuel.no_signal){ gardes[TODAY]=actuel; console.log('  [ACCES] '+TODAY+' : match deja affiche comme offert par le site depuis minuit, garde ('+actuel.id+').'); }
+                // 16/11/2026 : ce match de secours etait le premier de la journee (00 h 00). Il n'est garde que s'il est du soir,
+                // ou si aucun match du soir ne peut etre offert aujourd'hui ; sinon la regle du soir ci-dessous choisit.
+                var soirPossible=allMatchsData.some(function(m){ return offrable(m)&&jourDe(m)===TODAY&&estDuSoir(m); });
+                if(actuel&&actuel.pari_rec&&!actuel.no_signal&&(estDuSoir(actuel)||!soirPossible)){ gardes[TODAY]=actuel; console.log('  [ACCES] '+TODAY+' : match deja affiche comme offert par le site depuis minuit, garde ('+actuel.id+').'); }
               }
               // MOTEUR_V3:DEBUT - match offert (avocat du diable C3 ; mathematicien et decision
               // de Clement du 29/09/2026, simplifiee le 21/10/2026). REGLE COMPLETE, dans cet ordre, pour chaque jour :
@@ -5138,7 +5162,7 @@ jobs:
               var jours=[];
               allMatchsData.forEach(function(m){
                 var j=jourDe(m);
-                if(analysable(m) && j>=TODAY && jours.indexOf(j)===-1) jours.push(j);
+                if((analysable(m)||offrable(m)) && j>=TODAY && jours.indexOf(j)===-1) jours.push(j);
               });
               Object.keys(gardes).forEach(function(j){ if(j>=TODAY && jours.indexOf(j)===-1) jours.push(j); });
               jours.sort();
@@ -5146,7 +5170,11 @@ jobs:
               jours.slice(0,2).forEach(function(j){
                 if(gardes[j]){ elus[j]=gardes[j]; return; }
                 if(joursDejaOfferts[j]){ console.log('::warning title=Match offert::le match offert deja designe pour '+j+' n\'est plus dans le calcul : aucun autre match offert ce jour-la.'); return; }
-                var duJour=allMatchsData.filter(function(m){ return analysable(m) && jourDe(m)===j; });
+                // Regle du 16/11/2026 (a, b, c ci-dessus) : le creneau d'abord, puis la regle d'avant parmi les matchs du creneau.
+                var duJour=allMatchsData.filter(function(m){ return (analysable(m)||offrable(m)) && jourDe(m)===j; });
+                duJour=creneauDuJour(duJour);
+                var regleAvant=duJour.filter(analysable), connus=duJour.filter(competitionConnue);
+                duJour=regleAvant.length?regleAvant:(connus.length?connus:duJour);
                 // Competition connue d'abord (03/10/2026) : seulement le meilleur rang present ce jour.
                 if(duJour.length){
                   var rangMin=Math.min.apply(null,duJour.map(rangCompetition));

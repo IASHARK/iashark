@@ -86,8 +86,8 @@ test("egalites : le plus tot, puis le plus petit numero de match (ordre fixe)", 
 });
 
 test("simplification du 21/10 : le plus probable, sans tri par ligue fiable ni par creneau", () => {
-  // 83 % a 3 h du matin contre 74 % a 20 h : le plus probable.
-  assert.deepEqual(choisir([v3(1, 83, TODAY + " 03:00"), v3(2, 74, TODAY + " 20:00")]), [1]);
+  // 16/11/2026 (Clement) : 83 % a 3 h du matin contre 74 % a 20 h : celui du soir (18 h ou plus d'abord).
+  assert.deepEqual(choisir([v3(1, 83, TODAY + " 03:00"), v3(2, 74, TODAY + " 20:00")]), [2]);
   // 83 % en ligue non verifiee (tier) contre 74 % en ligue fiable : le plus probable.
   assert.deepEqual(choisir([v3(1, 83, null, { analysis_tier: "UNVERIFIED" }), v3(2, 74)]), [1]);
   // Mais jamais une competition « en test », ni une cote sous la fourchette.
@@ -107,12 +107,16 @@ test("aucun pari v3 ce jour-la : repli sur une Selection IASHARK verifiee (decis
   // le plus probable d'une competition verifiee ; jamais une competition « en test ».
   assert.deepEqual(choisir([ancien(1, 90, null, { pronostic: { market_id: "over-15", chance: 90, selection: false } }), ancien(2, 95, null, { league_reliability: "en_test", pronostic: { market_id: "over-15", chance: 95, selection: false } })]), [1],
     "sans selection : le pronostic le plus probable d'une competition verifiee");
-  const liste = [ancien(1, 90, null, { league_reliability: "en_test", pronostic: { market_id: "over-15", chance: 90, selection: false } }), ancien(2, 80, null, { league_reliability: "en_test" })];
-  assert.deepEqual(choisir(liste), [], "ni selection ni competition verifiee : aucun match offert");
+  // 16/11/2026 : un match offert chaque jour. Que des competitions « en test » : le plus probable est offert quand meme.
+  assert.deepEqual(choisir([ancien(1, 90, null, { league_reliability: "en_test", pronostic: { market_id: "over-15", chance: 90, selection: false } }), ancien(2, 80, null, { league_reliability: "en_test" })]), [1],
+    "ni selection ni competition verifiee : le plus probable est offert (avant le 16/11 : aucun)");
+  const liste = [ancien(1, 90, null, { cote_rec: "1.20", pronostic: { market_id: "over-15", chance: 90, selection: false } }), ancien(2, 80, null, { cote_rec: "1.25" })];
+  assert.deepEqual(choisir(liste), [], "aucune cote dans la fourchette : aucun match offert");
   assert.ok(liste.every((m) => m.is_free === false), "is_free pose a false sur chaque match");
   const h = { day: TODAY, now: TODAY + " 10:00" };
   const publique = liste.map((m) => ({ id: m.id, date: m.date, is_free: m.is_free, has_signal: false, data_quality_score: 90 }));
-  assert.equal(FM.pickFreeMatch(publique, h), null, "pas de vitrine sur un match dont l'analyse n'est pas publique");
+  // Depuis le 21/10/2026 le site garde un match de secours du jour (lib/free-match.js) : l'ancienne attente « null » etait perimee.
+  assert.equal(FM.pickFreeMatchId(publique, h), 1, "sans designation : match de secours du site (repli du 21/10)");
   // Message clair sur l'accueil, traduit.
   const accueil = fs.readFileSync(path.join(root, "index.html"), "utf8");
   assert.match(accueil, /feature-loading">PAS DE MATCH OFFERT AUJOURD’HUI</);
@@ -227,7 +231,8 @@ test("match offert : Ligue des nations / eliminatoires Europe si c'est une selec
   const ldn = (id, prob, extra) => v3(id, prob, null, Object.assign({ league_id: 5, league: "UEFA Nations League", league_key: "nations_league", league_reliability: "en_test" }, extra || {}));
   assert.deepEqual(choisir([ldn(1, 70), v3(2, 90, null, { league_key: "premier" })]), [1], "competition connue d'abord : la Ligue des nations pendant la treve (decision de Clement, 03/10)");
   assert.deepEqual(choisir([ldn(1, 90, { pronostic: { market_id: "dc-1x", chance: 90, selection: false } }), v3(2, 70)]), [2], "un pronostic qui n'est pas une selection : jamais offert");
-  assert.deepEqual(choisir([v3(1, 90, null, { league_id: 10, league: "Friendlies", league_key: "other" })]), []);
+  assert.deepEqual(choisir([v3(1, 90, null, { league_id: 10, league: "Friendlies", league_key: "other" }), v3(2, 60)]), [2], "un amical ne passe jamais devant une competition connue");
+  assert.deepEqual(choisir([v3(1, 90, null, { league_id: 10, league: "Friendlies", league_key: "other" })]), [1], "16/11/2026 : seul match du jour, offert quand meme (un match offert chaque jour)");
   assert.deepEqual(choisir([ancien(1, 90, null, { league_id: 32 }), ancien(2, 60)], { eteint: true }), [2], "selection hors liste (sans cle verifiee) : jamais, moteur v3 eteint aussi");
 });
 
@@ -238,7 +243,8 @@ test("match offert : une selection nationale par les cotes du marche (sans pari 
   assert.deepEqual(choisir([nat]), [1], "seule en lice : offerte");
   // Amical avec le meme marquage : jamais.
   const ami = Object.assign({}, nat, { id: 3, league_id: 10, league: "Friendlies", league_key: "other" });
-  assert.deepEqual(choisir([ami]), []);
+  assert.deepEqual(choisir([ami, nat]), [1], "jamais devant la Ligue des nations");
+  assert.deepEqual(choisir([ami]), [3], "16/11/2026 : seul match du jour, offert quand meme");
 });
 
 test("match offert : grands championnats avant les autres, puis la plus haute chance", () => {
@@ -259,7 +265,7 @@ test("match offert : jamais un match sans selection (pronostic seul)", () => {
 // s'il est le plus probable, meme s'il etait deja designe.
 test("match offert : jamais une competition « en test », ni designee ce run ni gardee d'un run precedent", () => {
   assert.deepEqual(choisir([v3(1, 90, null, { league_reliability: "en_test" }), v3(2, 70)]), [2]);
-  assert.deepEqual(choisir([v3(1, 90, null, { league_reliability: "en_test" })]), [], "seul match : en test -> aucun match offert");
+  assert.deepEqual(choisir([v3(1, 90, null, { league_reliability: "en_test" })]), [1], "16/11/2026 : seul match du jour, en test -> offert quand meme (avant : aucun, et le site affichait un match de secours)");
   // Regle de Clement du 04/10/2026, 20 h (« le match gratuit reste le meme de 00 h a 23 h 59 ») : une designation
   // deja publiee reste jusqu'a minuit, meme si sa competition est passee « en test » (avant : remplacee).
   const matin = v3(1, 90, null, { league_reliability: "en_test" });
@@ -332,4 +338,32 @@ test("archive des matchs offerts : un match offert reporte est enregistre une fo
   assert.equal(MO.enregistrer(reg, [m], { nowIso: "2026-10-03T08:00:00Z" }), 1);
   assert.equal(reg.matchs[0].jour, "2026-10-03");
   assert.equal(MO.enregistrer(reg, [m], { nowIso: "2026-10-03T12:00:00Z" }), 0, "pas de doublon");
+});
+
+// REGLE DU 16/11/2026 (Clement : « le pari le plus sur de la journee, parmi les matchs a 18 h minimum »).
+test("match du soir : 18 h ou plus d'abord ; sinon le coup d'envoi le plus tardif ; un match offert chaque jour", () => {
+  assert.match(BLOC, /var HEURE_SOIR=18;/);
+  const sc = (id, prob, heure, extra) => ancien(id, prob, TODAY + " " + heure, Object.assign({ cote_rec: "1.75", pronostic: { market_id: "under-35", chance: prob, selection: false, voie: "scenario" } }, extra || {}));
+  // Le plus probable est a 14 h : c'est le plus probable du soir qui est offert.
+  assert.deepEqual(choisir([sc(1, 62, "00:00"), sc(2, 60, "14:00"), sc(3, 55, "18:00"), sc(4, 57, "20:45"), sc(5, 54, "21:15")]), [4]);
+  // 18 h 00 pile compte ; 17 h 59 non.
+  assert.deepEqual(choisir([sc(1, 70, "17:59"), sc(2, 51, "18:00")]), [2]);
+  // REPLI : aucun match a 18 h ou plus -> le plus tardif (le plus probable des matchs a cette heure-la).
+  assert.deepEqual(choisir([sc(1, 70, "00:00"), sc(2, 66, "13:00"), sc(3, 52, "16:00"), sc(4, 58, "16:00")]), [4]);
+  // Treve du 16/11/2026 : selections sans « Selection IASHARK » et championnats « en test » -> la Ligue des nations du soir.
+  const ldn = { league_id: 5, league: "UEFA Nations League", league_key: "nations_league", league_reliability: "en_test" };
+  assert.deepEqual(choisir([sc(1, 52, "00:00", { league_reliability: "en_test" }), sc(2, 57, "21:15", { league_reliability: "en_test" }), sc(3, 54, "20:45", ldn), sc(4, 54, "20:45", ldn)]), [3]);
+  // Le soir, la regle d'avant garde la main : une competition verifiee passe devant une competition « en test » plus probable.
+  assert.deepEqual(choisir([sc(1, 60, "20:00", { league_reliability: "en_test" }), sc(2, 55, "21:00")]), [2]);
+  // Cote hors fourchette, match commence : jamais, meme le soir.
+  assert.deepEqual(choisir([sc(1, 70, "20:00", { cote_rec: "1.20" }), sc(2, 70, "21:00", { _commence: true }), sc(3, 55, "10:00")]), [3]);
+});
+
+test("match de secours affiche depuis minuit : garde seulement s'il est du soir, ou si aucun match du soir ne peut etre offert", () => {
+  const sc = (id, prob, heure) => ancien(id, prob, TODAY + " " + heure, { cote_rec: "1.75", pronostic: { market_id: "under-35", chance: prob, selection: false } });
+  const pub = (id, heure, q) => ({ id: id, date: TODAY + " " + heure, has_signal: true, data_quality_score: q, is_free: false });
+  // Le site montrait le match de 00 h 00 : remplace par le plus probable du soir.
+  assert.deepEqual(choisir([sc(7, 60, "00:00"), sc(8, 55, "20:45")], { prev: { 7: pub(7, "00:00", 95), 8: pub(8, "20:45", 40) } }), [8]);
+  // Aucun match du soir a offrir : le match deja affiche reste (meme match toute la journee).
+  assert.deepEqual(choisir([sc(7, 60, "13:00"), sc(8, 85, "15:00")], { prev: { 7: pub(7, "13:00", 95), 8: pub(8, "15:00", 40) } }), [7]);
 });

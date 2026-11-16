@@ -52,6 +52,7 @@ test("la regle est ecrite en clair dans le bloc du pipeline", () => {
   assert.match(BLOC, /REGLE COMPLETE, dans cet ordre/);
   assert.match(BLOC, /les grands championnats d'abord/);
   assert.match(BLOC, /Ligue fiable et creneau 12 h-22 h 59 : retires le 21\/10\/2026/);
+  assert.match(BLOC, /REGLE DU 16\/11\/2026 : 18 h ou plus d'abord/);
   assert.match(BLOC, /le plus petit numero de match/);
 });
 
@@ -85,7 +86,7 @@ test("egalites : le plus tot, puis le plus petit numero de match (ordre fixe)", 
   assert.deepEqual(choisir([v3(5, 80, TODAY + " 18:00"), v3(9, 80, TODAY + " 18:00")]), [5]);
 });
 
-test("simplification du 21/10 : le plus probable, sans tri par ligue fiable ni par creneau", () => {
+test("simplification du 21/10 : le plus probable, sans tri par ligue fiable ; depuis le 16/11, le soir d'abord", () => {
   // 16/11/2026 (Clement) : 83 % a 3 h du matin contre 74 % a 20 h : celui du soir (18 h ou plus d'abord).
   assert.deepEqual(choisir([v3(1, 83, TODAY + " 03:00"), v3(2, 74, TODAY + " 20:00")]), [2]);
   // 83 % en ligue non verifiee (tier) contre 74 % en ligue fiable : le plus probable.
@@ -117,9 +118,7 @@ test("aucun pari v3 ce jour-la : repli sur une Selection IASHARK verifiee (decis
   const publique = liste.map((m) => ({ id: m.id, date: m.date, is_free: m.is_free, has_signal: false, data_quality_score: 90 }));
   // Depuis le 21/10/2026 le site garde un match de secours du jour (lib/free-match.js) : l'ancienne attente « null » etait perimee.
   assert.equal(FM.pickFreeMatchId(publique, h), 1, "sans designation : match de secours du site (repli du 21/10)");
-  // Message clair sur l'accueil, traduit.
-  const accueil = fs.readFileSync(path.join(root, "index.html"), "utf8");
-  assert.match(accueil, /feature-loading">PAS DE MATCH OFFERT AUJOURD’HUI</);
+  // (16/11/2026 : l'ancienne attente sur le texte « PAS DE MATCH OFFERT AUJOURD'HUI » de l'accueil est retiree, ce texte n'existe plus.)
   // Fichiers anciens (sans le drapeau is_free) : l'ancien repli reste possible.
   assert.equal(FM.pickFreeMatchId([{ id: 7, date: TODAY + " 20:00", has_signal: true, data_quality_score: 50 }], h), 7);
 });
@@ -366,4 +365,16 @@ test("match de secours affiche depuis minuit : garde seulement s'il est du soir,
   assert.deepEqual(choisir([sc(7, 60, "00:00"), sc(8, 55, "20:45")], { prev: { 7: pub(7, "00:00", 95), 8: pub(8, "20:45", 40) } }), [8]);
   // Aucun match du soir a offrir : le match deja affiche reste (meme match toute la journee).
   assert.deepEqual(choisir([sc(7, 60, "13:00"), sc(8, 85, "15:00")], { prev: { 7: pub(7, "13:00", 95), 8: pub(8, "15:00", 40) } }), [7]);
+});
+
+// Avocat du diable (16/11/2026) : le jour J est designe des le calcul de J-1, puis gele.
+test("lendemain : designe seulement s'il a deja un match du soir avec pari ; jamais un match de nuit gele la veille", () => {
+  const DEMAIN = "2026-10-04";
+  const sc = (id, prob, date) => ancien(id, prob, date, { cote_rec: "1.75", pronostic: { market_id: "under-35", chance: prob, selection: false } });
+  // Calcul de la veille : demain n'a que des matchs de nuit avec pari -> rien pour demain (aujourd'hui garde son repli).
+  assert.deepEqual(choisir([sc(1, 60, TODAY + " 15:00"), sc(2, 70, DEMAIN + " 01:00"), sc(3, 65, DEMAIN + " 03:30")]), [1]);
+  // Des qu'un match du soir de demain a son pari : c'est lui.
+  assert.deepEqual(choisir([sc(1, 60, TODAY + " 15:00"), sc(2, 70, DEMAIN + " 03:30"), sc(4, 55, DEMAIN + " 23:30")]).sort(), [1, 4]);
+  // Rien aujourd'hui, que de la nuit demain : aucun match offert designe (jamais le match de nuit par le dernier repli).
+  assert.deepEqual(choisir([sc(2, 70, DEMAIN + " 03:30")]), []);
 });

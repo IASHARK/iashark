@@ -5006,6 +5006,7 @@ jobs:
               // Selections nationales (decision de Clement, 03/10/2026 apres-midi : « il faut un match offert »,
               // la regle du 30/09 est levee) : Ligue des nations et eliminatoires Europe peuvent etre le match
               // offert SI le match est une Selection IASHARK (competitionOffrable) ; amicaux et autres : jamais.
+              // (16/11/2026 : le creneau du soir passe AVANT ; dans le creneau, amicaux et autres passent en dernier, quand aucun match connu n'y est offrable.)
               var SEL_OFFRABLES=((LEAGUES_CONFIG.fiabilite&&LEAGUES_CONFIG.fiabilite.selections_cotes_marche)||[]).map(String);
               var estSelectionDuJour=function(m){ return !!(m&&m.pronostic&&m.pronostic.selection===true&&m.pari_rec&&!m.no_signal); };
               var competitionOffrable=function(m){
@@ -5120,6 +5121,9 @@ jobs:
               //  3. le plus probable (chance affichee) ; a egalite le plus tot ; a egalite
               //     encore, le plus petit numero de match (ordre fixe).
               //  (Ligue fiable et creneau 12 h-22 h 59 : retires le 21/10/2026, simplification de Clement.)
+              //  REGLE DU 16/11/2026 : 18 h ou plus d'abord (sinon le coup d'envoi le plus tardif), AVANT les points 1 a 3 ; et si
+              //  aucun match du creneau ne passe le point 1 (competition verifiee), un match est offert quand meme (competition
+              //  connue d'abord). Cote : la fourchette du pari affiche (1,70-3,50 depuis le 11/11), plus 1,40.
               // JAMAIS sur la « valeur » (rejetee : CLV -5 %). Une designation precedente reste
               // jusqu'a minuit, meme si elle ne passe plus ces filtres (regle du 04/10/2026, 20 h).
               // Verifie en executant ce bloc : tests/match-offert-v3.test.js.
@@ -5172,6 +5176,10 @@ jobs:
                 if(joursDejaOfferts[j]){ console.log('::warning title=Match offert::le match offert deja designe pour '+j+' n\'est plus dans le calcul : aucun autre match offert ce jour-la.'); return; }
                 // Regle du 16/11/2026 (a, b, c ci-dessus) : le creneau d'abord, puis la regle d'avant parmi les matchs du creneau.
                 var duJour=allMatchsData.filter(function(m){ return (analysable(m)||offrable(m)) && jourDe(m)===j; });
+                // Avocat du diable (16/11/2026) : un jour A VENIR n'est designe (puis gele) que s'il a deja un match du soir avec pari ;
+                // sinon on attend le calcul suivant (le repli « le plus tardif » ne vaut que pour AUJOURD'HUI), pour ne jamais geler
+                // la veille un match de nuit alors que les paris du soir n'etaient pas encore publies.
+                if(j>TODAY && !duJour.some(estDuSoir)) return;
                 duJour=creneauDuJour(duJour);
                 var regleAvant=duJour.filter(analysable), connus=duJour.filter(competitionConnue);
                 duJour=regleAvant.length?regleAvant:(connus.length?connus:duJour);
@@ -5187,7 +5195,7 @@ jobs:
                 if(choisi) elus[j]=choisi;
               });
               if(!Object.keys(elus).length){
-                var tousAnalysables=allMatchsData.filter(function(m){ return analysable(m) && !joursDejaOfferts[jourDe(m)]; }), tousFiables=tousAnalysables.filter(tierFiable);
+                var tousAnalysables=allMatchsData.filter(function(m){ return analysable(m) && !joursDejaOfferts[jourDe(m)] && (jourDe(m)<=TODAY || estDuSoir(m)); }), tousFiables=tousAnalysables.filter(tierFiable);
                 var repli=meilleur(tousFiables.length?tousFiables:tousAnalysables);
                 if(repli) elus[jourDe(repli)||'repli']=repli;
               }

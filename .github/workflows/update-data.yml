@@ -4748,13 +4748,15 @@ jobs:
                   var scnVers=function(m){ return {id:m.id,t:parisLocalToMs(m.date),h:m.home.id,a:m.away.id,lg:m.league_id,ref:scnArb(m),absents:{h:scnAbs(m,m.home.id),a:scnAbs(m,m.away.id)},raw:FLUX_PARIS[String(m.id)].raw,nomDom:m.home.n,nomExt:m.away.n}; };
                   var scnSel=scnCibles.filter(function(m){ return PRONOSTIC.estMatchDeSelections(m,scnNatCfg); }), scnClubs=scnCibles.filter(function(m){ return !PRONOSTIC.estMatchDeSelections(m,scnNatCfg); });
                   SCENARIO_PAR=scnClubs.length?SCN.calculer(scnMoteur,scnLu.lignes,scnLigues,scnClubs.map(scnVers),{FP:FLUX_PARIS_REG,regle:scnRegle}):{};
-                  if(scnSel.length){
+                  // Selections dans leur propre bloc de secours : une panne de cette seconde lecture ne retire jamais les
+                  // paris des clubs deja calcules (avocat du diable du 17/11/2026).
+                  if(scnSel.length){ try{
                     var scnEqSel=[]; scnSel.forEach(function(m){ scnEqSel.push(m.home.id,m.away.id); });
                     var scnLuSel=await SCN.collecterEtLire({api:SCN_API,magasin:SCN_MAG,equipes:scnEqSel,arbitres:scnSel.map(scnArb).filter(Boolean),finMs:Date.now()+4*60000,fenetreJours:SCN.FENETRE_LECTURE_JOURS});
                     var scnParSel=SCN.calculer(scnMoteur,scnLuSel.lignes,scnLigues,scnSel.map(scnVers),{FP:FLUX_PARIS_REG,regle:scnRegle});
                     Object.keys(scnParSel).forEach(function(k){ SCENARIO_PAR[k]=scnParSel[k]; });
-                    console.log('  [SCENARIO] selections : '+scnSel.length+' match(s) calcules a part, '+scnLuSel.lignes.length+' match(s) lus sur '+SCN.FENETRE_LECTURE_JOURS+' jours'+(scnLuSel.rapport.arrete_quota?' ; ARRET QUOTA':'')+(scnLuSel.rapport.arrete_budget?' ; budget de temps atteint':'')+'.');
-                  }
+                    console.log('  [SCENARIO] selections : '+scnSel.length+' match(s) calcules a part, '+scnLuSel.lignes.length+' match(s) lus sur '+SCN.FENETRE_LECTURE_JOURS+' jours'+(scnLuSel.rapport.arrete_quota?' ; ARRET QUOTA':'')+(scnLuSel.rapport.arrete_budget?' ; budget de temps atteint':'')+' ; '+SCN_API.appels()+' appel(s) API-Sports au total.');
+                  }catch(eSel){ console.log('::warning title=Moteur scenario::selections non calculees ('+String(eSel&&eSel.message||eSel).slice(0,160)+') : les paris des clubs sont gardes.'); } }
                   var scnAvec=Object.keys(SCENARIO_PAR).filter(function(k){ return Object.keys(SCENARIO_PAR[k].issues||{}).length>0; }).length;
                   // Raison de fermeture de chaque match sans scenario : un compte par raison (aucun pari, aucun nom de match).
                   var scnRaisons=SCN.raisonsFermeture(SCENARIO_PAR);

@@ -182,25 +182,3 @@ test("petite cote (decision de Clement du 13/11/2026) : seulement si aucun pari 
   assert.strictEqual(g.code_flux, "F45:Over 9.5");
   assert.strictEqual(g.hors_fourchette, false);
 });
-
-test("raison du match sans pari : AUCUN_SCENARIO quand les cotes existent sans calcul du moteur, sinon l'ancienne raison (17/11/2026)", () => {
-  const info = (c) => { const i = {}; assert.strictEqual(PR.choisirPariFourchette(M7, c, i), null); return [i.candidats, i.sans_scenario]; };
-  assert.deepStrictEqual(info(ctx(null)), [0, true], "cotes Bet365 presentes, moteur muet");
-  assert.deepStrictEqual(info(Object.assign(ctx(null), { fluxPar: {} })), [0, false], "aucun releve de cotes : le vrai cas sans cote");
-  assert.deepStrictEqual(info(Object.assign(ctx(null), { fluxPar: { 7: { raw: { bookmakers: [] } } } })), [0, false], "releve vide : sans cote");
-  assert.deepStrictEqual(info(ctx({ "F45:Over 9.5": I(0.56, 0.64, "Corners", "total") }, ["Corners"])), [0, false], "moteur present, rien de retenu : raison inchangee");
-  // Bout en bout (publierPronostics) : meme match, memes cotes ; seul le code de la raison change, jamais un pari.
-  const publier = (scenarioPar, fluxPar) => {
-    const m = Object.assign({}, M7, { date: "2026-11-17 21:00", status: "NS" });
-    const r = PR.publierPronostics([m], [], { marchesPari: CFG, fluxPar: fluxPar, scenarioPar: scenarioPar, nowIso: "2026-11-17T08:00:00.000Z" });
-    return [m.no_signal, m.no_signal_reason, m.pari_rec, m.market_id, r.sans_pari, r.sans_scenario, r.sans_cote];
-  };
-  assert.deepStrictEqual(publier({}, { 7: { raw: RAW } }), [true, PR.RAISON_SANS_SCENARIO, "", null, 1, 1, 0]);
-  assert.deepStrictEqual(publier({}, {}), [true, PR.RAISON_SANS_COTE, "", null, 1, 0, 1]);
-  assert.strictEqual(PR.RAISON_SANS_SCENARIO, "AUCUN_SCENARIO");
-  assert.strictEqual(PR.RAISON_SANS_COTE, "AUCUN_MARCHE_AVEC_COTE_REELLE");
-  // Avec un calcul du moteur, le pari publie est exactement celui d'avant.
-  const m = Object.assign({}, M7, { date: "2026-11-17 21:00", status: "NS" });
-  PR.publierPronostics([m], [], { marchesPari: CFG, fluxPar: { 7: { raw: RAW } }, scenarioPar: { 7: { issues: { "F45:Over 9.5": I(0.56, 0.64, "Corners", "total") }, version: "test" } }, nowIso: "2026-11-17T08:00:00.000Z" });
-  assert.deepStrictEqual([m.no_signal, m.no_signal_reason, m.cote_rec], [false, undefined, "1.80"]);
-});

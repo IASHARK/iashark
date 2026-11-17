@@ -280,7 +280,7 @@ test("clic obligatoire (17/11/2026) : 3 etapes, jeton dans le lien, formulaire f
   assert.match(go, /AbortSignal\.timeout\(1500\)/);
   // Page : le formulaire n'est rendu que si l'etape 3 est en cours ; l'etat du clic vient de la base.
   const js = read("lib/lolly-page.js"), html = read("lolly.html");
-  assert.match(js, /if \(statuts\[2\] === "current"\) box\.appendChild\(formulaire\(ctx, etat === "refuse"\)\);/);
+  assert.match(js, /if \(statuts\[2\] === "current"\) \{ box\.appendChild\(formulaire\(ctx, etat === "refuse"\)\);/);
   assert.match(js, /app\.supabase\.rpc\("pro_offert_clic_preparer"\)/);
   assert.match(js, /app\.supabase\.rpc\("pro_offert_clic_declarer"\)/);
   assert.doesNotMatch(js, /localStorage/, "rien n'est ouvert sur la foi du navigateur");
@@ -289,9 +289,14 @@ test("clic obligatoire (17/11/2026) : 3 etapes, jeton dans le lien, formulaire f
   assert.equal((html.match(/class="may-steps__step"/g) || []).length, 3);
   assert.match(html, /id="lbDeja" type="button" hidden data-track="lolly_pro_deja_clique"/);
   for (const k of ["lolly_page_commencer", "lolly_pro_deja_clique"]) assert.match(read("funnel-track.js"), new RegExp(k + ": true"), k);
-  for (const l of LOCALES) for (const k of ["hero_text", "hero_cta", "step_account", "already_clicked", "click_seen", "pro_err_click", "st_done", "st_current", "st_todo", "steps_label"]) {
+  for (const l of LOCALES) for (const k of ["hero_text", "hero_cta", "step_account", "already_clicked", "click_seen", "pro_err_click", "st_done", "st_current", "st_todo", "steps_label", "proof"]) {
     assert.ok(String(dict(l).lolly_page[k] || "").trim(), l + " lolly_page." + k);
   }
+  // Autre preuve : repondre a l'e-mail ou envoyer une capture sur Telegram, dite en une phrase a l'etape 3.
+  for (const l of LOCALES) assert.match(dict(l).lolly_page.proof, /\{tg\}/, l);
+  assert.match(dict("fr").lolly_page.proof, /répondre à notre e-mail ou envoyer une capture/);
+  assert.match(js, /box\.appendChild\(formulaire\(ctx, etat === "refuse"\)\); box\.appendChild\(preuve\(\)\);/);
+  assert.match(js, /var TELEGRAM = "https:\/\/t\.me\/iashark_contact";/);
   // Rien ne coupe le parcours : pas de fenetre Telegram sur cette page.
   assert.match(read("lib/telegram-demande.js"), /PAGES_EXCLUES = \/\([^)]*\|lolly\)\/i/);
 });

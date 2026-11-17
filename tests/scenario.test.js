@@ -137,7 +137,7 @@ test("choix final : securite d'ecart, famille fermee par le suivi, match sans sc
 
 test("selections nationales : seulement les buts lus sur les scores, jamais le resultat ni les corners", () => {
   const cfg = JSON.parse(JSON.stringify(CFG));
-  cfg.scenario.selections_nationales = { ligues: [36, 536], buts_total: [1.5, 2.5, 3.5], buts_equipe: [0.5, 1.5], les_deux_marquent: ["No"] };
+  cfg.scenario.selections_nationales = { ligues: [5, 36, 536], buts_total: [1.5, 2.5, 3.5], buts_equipe: [], les_deux_marquent: ["No"] };
   cfg.scenario.familles_fermees = [];
   const raw = { bookmakers: [{ name: "Bet365", bets: RAW.bookmakers[0].bets.concat([
     { id: 8, name: "Both Teams Score", values: [{ value: "Yes", odd: "1.90" }, { value: "No", odd: "1.90" }] },
@@ -147,11 +147,18 @@ test("selections nationales : seulement les buts lus sur les scores, jamais le r
   const c = (m) => Object.assign(ctx(issues), { fluxPar: { 7: { raw: raw } }, regleFlux: PR.regleFlux(cfg) });
   const codes = (m) => PR.evaluerCandidatsScenario(m, c(m), FP.selectionsDuMatch(raw, { match: m, regle: PR.regleFlux(cfg) }).selections).map((x) => x.code_flux).sort();
   const can = Object.assign({}, M7, { league_id: 36, league_key: "afcon_qualifiers" });
-  assert.deepStrictEqual(codes(can), ["F16:Over 1.5", "F5:Over 2.5", "F8:No"], "CAN : buts, les deux marquent NON seulement, buts d'une equipe 1,5 ; ni 1N2 ni corners");
-  assert.deepStrictEqual(codes(Object.assign({}, M7, { league_id: 5, league: "UEFA Nations League" })), ["F16:Over 1.5", "F5:Over 2.5", "F8:No"], "Ligue des nations : reconnue par le site");
+  assert.deepStrictEqual(codes(can), ["F5:Over 2.5", "F8:No"], "CAN : buts du match et les deux marquent NON ; ni buts d'une equipe, ni 1N2, ni corners");
+  assert.deepStrictEqual(codes(Object.assign({}, M7, { league_id: 5, league: "UEFA Nations League" })), ["F5:Over 2.5", "F8:No"], "Ligue des nations : ouverte");
+  assert.deepStrictEqual(codes(Object.assign({}, M7, { league_id: 32, league: "World Cup - Qualification Europe" })), [], "competition de selections jamais mesuree : aucun pari");
+  // Suivi a part : la famille archivee d'un pari de selections ne se melange pas a celle des clubs ; une fermeture de cette famille coupe les selections seulement.
+  const cs = PR.evaluerCandidatsScenario(can, c(can), FP.selectionsDuMatch(raw, { match: can, regle: PR.regleFlux(cfg) }).selections);
+  assert.ok(cs.every((x) => x.scenario.famille === "Sélections · Buts"));
+  assert.deepStrictEqual(PR.evaluerCandidatsScenario(can, Object.assign(c(can), { famillesFermees: ["Sélections · Buts"] }), FP.selectionsDuMatch(raw, { match: can, regle: PR.regleFlux(cfg) }).selections), []);
+  const club = Object.assign({}, M7, { league_id: 61 });
+  assert.ok(PR.evaluerCandidatsScenario(club, Object.assign(c(club), { famillesFermees: ["Sélections · Buts"] }), FP.selectionsDuMatch(raw, { match: club, regle: PR.regleFlux(cfg) }).selections).length > 0);
   assert.ok(codes(Object.assign({}, M7, { league_id: 61 })).indexOf("F45:Over 9.5") !== -1, "club : toutes les familles ouvertes, comme avant");
   // Lignes hors liste (4,5 buts, equipe 2,5) : jamais sur une selection.
-  assert.strictEqual(PR.regleFlux(cfg).selectionsNationales.buts_equipe.indexOf(2.5), -1);
+  assert.deepStrictEqual(PR.regleFlux(cfg).selectionsNationales.buts_equipe, []);
 });
 
 test("fenetre de lecture et journal : 1 100 jours, une raison par match sans scenario", () => {
@@ -160,23 +167,23 @@ test("fenetre de lecture et journal : 1 100 jours, une raison par match sans sce
     { "moins de 12 matchs connus sur les 20 derniers": 2, "aucune issue cotee avec une formule": 1 });
   const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "config", "marches-pari.json"), "utf8"));
   assert.strictEqual(cfg.regle_version, "scenario-2026-11-17");
-  assert.deepStrictEqual(cfg.scenario.selections_nationales, { ligues: [36, 536], buts_total: [1.5, 2.5, 3.5], buts_equipe: [0.5, 1.5], les_deux_marquent: ["No"] });
+  assert.deepStrictEqual(cfg.scenario.selections_nationales, { ligues: [5, 36, 536], buts_total: [1.5, 2.5, 3.5], buts_equipe: [], les_deux_marquent: ["No"] });
 });
 
-test("deux calculs separes : les clubs ne voient que 400 jours (inchange), les selections 1 100 jours", () => {
-  const vues = [];
-  const moteur = { version: "faux", P: {}, M: { preparer: (l) => { vues.push(l.map((x) => x.id)); return {}; }, evaluer: () => ({ ok: false, raison: "x" }) } };
+test("deux lectures : 400 jours par defaut (clubs, comme avant), 1 100 jours seulement sur demande (selections)", async () => {
+  const lus = [];
+  const mag = { chargerEquipes: async () => {}, enregistrerEquipes: async () => {}, equipeVue: () => Date.now(), noterEquipe: () => {}, manquants: async () => [], ajouter: async () => {},
+    matchsDesEquipes: async (eq, depuis) => { lus.push(depuis); return []; }, matchsDesArbitres: async () => [] };
+  const api = { get: async () => [], appels: () => 0, restant: () => 50000 };
   const maintenant = Date.parse("2026-11-17T08:00:00Z");
-  const lignes = [{ id: 1, d: "2026-10-01T00:00:00.000Z" }, { id: 2, d: "2025-09-01T00:00:00.000Z" }, { id: 3, d: "2024-06-01T00:00:00.000Z" }];
-  const out = SCN.calculerSepare(moteur, lignes, {}, [{ id: 10, nat: false }, { id: 11, nat: true }], { maintenant: maintenant, estSelection: (m) => m.nat });
-  assert.deepStrictEqual(vues, [[1], [1, 2, 3]], "clubs : seulement la ligne de moins de 400 jours ; selections : tout");
-  assert.deepStrictEqual(Object.keys(out).sort(), ["10", "11"]);
-  SCN.calculerSepare(moteur, lignes, {}, [{ id: 10 }], { maintenant: maintenant });
-  assert.deepStrictEqual(vues[2], [1], "sans selection : un seul calcul, celui des clubs");
-  assert.strictEqual(vues.length, 3);
+  await SCN.collecterEtLire({ api: api, magasin: mag, equipes: [1, 2], maintenant: maintenant });
+  await SCN.collecterEtLire({ api: api, magasin: mag, equipes: [1, 2], maintenant: maintenant, fenetreJours: SCN.FENETRE_LECTURE_JOURS });
   assert.strictEqual(SCN.FENETRE_CLUBS_JOURS, 400);
+  assert.deepStrictEqual([...new Set(lus.slice(0, 2))], [new Date(maintenant - 400 * 86400e3).toISOString()], "clubs : 400 jours, pour le choix des adversaires comme pour la lecture");
+  assert.deepStrictEqual([...new Set(lus.slice(2))], [new Date(maintenant - 1100 * 86400e3).toISOString()]);
   assert.strictEqual(PR.estMatchDeSelections({ league_id: 36 }, { ligues: [36, 536] }), true);
   assert.strictEqual(PR.estMatchDeSelections({ league_id: 61 }, { ligues: [36, 536] }), false);
+  assert.strictEqual(SCN.calculerSepare, undefined);
 });
 
 test("note et risque : rien qui depende de la cote", () => {

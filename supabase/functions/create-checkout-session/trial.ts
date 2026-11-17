@@ -72,6 +72,16 @@ export function isLiveStatus(status: unknown): boolean {
   return LIVE_STATUSES.includes(String(status));
 }
 
+// Impaye seul (17/11/2026, Clement : « corrige ») : le Pro est retire apres le delai de grace
+// (PAST_DUE_GRACE_DAYS), mais l'abonnement reste « past_due » chez Stripe. Sans ceci, la personne
+// ne pouvait ni garder le Pro ni repayer (« deja abonne »). Jamais de second abonnement : on lui
+// ouvre la facture impayee de SON abonnement (ou, a defaut, le changement de carte du portail).
+export function needsPaymentFix(statuses: string[] | null): boolean {
+  if (!statuses || statuses.length === 0) return false;
+  const s = statuses.map(String);
+  return s.includes("past_due") && !s.includes("active") && !s.includes("trialing");
+}
+
 // Decision complete pour un compte, a partir de TOUTES ses lignes de
 // public.subscriptions (statuts, lues sous RLS ; null = lecture impossible) :
 // - abonnement vivant (actif, essai, impaye) : rien a vendre ("already_subscribed") ;

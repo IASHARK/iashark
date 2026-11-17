@@ -2,7 +2,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 import Stripe from "npm:stripe@17";
 import { validateConsent } from "./consent.ts";
 import { availability, priceMatches, resolvePriceId } from "./pricing.ts";
-import { isLiveStatus, TRIAL_INTERVALS, trialAllowedForInterval, trialDays, trialForAccount, trialSessionParams } from "./trial.ts";
+import { isLiveStatus, needsPaymentFix, TRIAL_INTERVALS, trialAllowedForInterval, trialDays, trialForAccount, trialSessionParams } from "./trial.ts";
 import { normalizeCode } from "../_shared/affiliation.ts";
 
 // Creation de session de paiement — MASTER V2.1 §3.2/§21/§23. Meme
@@ -241,6 +241,16 @@ Deno.serve(async (req: Request) => {
     .select("status")
     .eq("user_id", user.id);
   const statuses: string[] | null = pastError ? null : (pastRows || []).map((r: { status: unknown }) => String(r.status));
+  // Impaye seul : facture a regler avec une nouvelle carte, le webhook rend le Pro des qu'elle est payee.
+  if (needsPaymentFix(statuses)) {
+    const urlRegularisation = await lienRegularisation(supabaseAuth, user.id, requestedDir);
+    if (urlRegularisation) {
+      return new Response(JSON.stringify({ ok: true, processed: true, reason: "past_due_payment_fix", url: urlRegularisation }), {
+        status: 200,
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      });
+    }
+  }
   if (statuses && statuses.some(isLiveStatus)) {
     return new Response(JSON.stringify({ ok: true, processed: false, reason: "already_subscribed" }), {
       status: 200,
@@ -406,3 +416,36 @@ Deno.serve(async (req: Request) => {
     });
   }
 });
+
+// Lien pour regler un impaye (17/11/2026) : la facture ouverte de l'abonnement « past_due »
+// (page Stripe hebergee, nouvelle carte possible), sinon l'ecran « changer de carte » du portail.
+// Lectures sous RLS (ses propres lignes). Jamais bloquant : null = message habituel.
+async function lienRegularisation(supabaseAuth: any, userId: string, requestedDir: unknown): Promise<string | null> {
+  if (PAYMENT_PROVIDER !== "stripe" || !STRIPE_SECRET_KEY) return null;
+  try {
+    const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" });
+    const { data: impaye } = await supabaseAuth.from("subscriptions").select("stripe_subscription_id")
+      .eq("user_id", userId).eq("status", "past_due").order("created_at", { ascending: false }).limit(1).maybeSingle();
+    if (impaye?.stripe_subscription_id) {
+      const sub = await stripe.subscriptions.retrieve(impaye.stripe_subscription_id, { expand: ["latest_invoice"] });
+      const facture = sub.latest_invoice as Stripe.Invoice | null;
+      if (facture && typeof facture === "object" && facture.status === "open" && facture.hosted_invoice_url) {
+        return facture.hosted_invoice_url;
+      }
+    }
+    const { data: mapping } = await supabaseAuth.from("billing_customers").select("stripe_customer_id").eq("user_id", userId).maybeSingle();
+    if (!mapping?.stripe_customer_id) return null;
+    const dirs = ["fr", "en", "es", "de", "it", "pt", "gb", "za", "mx"];
+    const dirKey = typeof requestedDir === "string" ? requestedDir.toLowerCase() : "";
+    const returnUrl = SITE_URL + (dirs.includes(dirKey) ? "/" + dirKey : "") + "/compte.html#abonnement";
+    const portail = await stripe.billingPortal.sessions.create({
+      customer: mapping.stripe_customer_id,
+      return_url: returnUrl,
+      flow_data: { type: "payment_method_update" },
+    } as Stripe.BillingPortal.SessionCreateParams);
+    return portail.url;
+  } catch (e) {
+    console.error("[create-checkout-session] regularisation impaye impossible :", (e as Error).message);
+    return null;
+  }
+}

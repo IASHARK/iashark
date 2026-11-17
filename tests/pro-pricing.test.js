@@ -599,3 +599,28 @@ test("aucune reference a l'ancienne offre Edge (config, code, pages, textes, CGV
   // Accueil : "edge" y designe aussi l'ecart modele / marche ; seule l'offre est interdite.
   for (const d of ["", "fr/", "gb/", "za/", "mx/"]) assert.doesNotMatch(read(d + "index.html"), /Annual Edge|Edge Anual|annual_edge|Pro (and|y|et) Edge|offre Edge/, d + "index.html");
 });
+
+test("create-checkout-session : un impaye seul est envoye vers sa facture, jamais un second abonnement (17/11)", async () => {
+  const src = read("supabase/functions/create-checkout-session/index.ts");
+  const trial = read("supabase/functions/create-checkout-session/trial.ts");
+  const at = (x) => src.indexOf(x);
+  assert.match(trial, /export function needsPaymentFix\(statuses: string\[\] \| null\): boolean/);
+  assert.ok(at("if (needsPaymentFix(statuses))") > at("auth.getUser()"), "apres l'authentification");
+  assert.ok(at("if (needsPaymentFix(statuses))") < at("statuses.some(isLiveStatus)"), "avant le refus already_subscribed");
+  assert.ok(at("if (needsPaymentFix(statuses))") < at("stripe.checkout.sessions.create"), "jamais de nouvelle session de paiement");
+  assert.match(src, /reason: "past_due_payment_fix", url: urlRegularisation/);
+  assert.match(src, /facture\.status === "open" && facture\.hosted_invoice_url/);
+  assert.match(src, /flow_data: \{ type: "payment_method_update" \}/);
+  assert.match(src, /\.eq\("status", "past_due"\)/);
+  // Logique pure (copie de trial.ts sans les types) : impaye seul oui ; actif ou essai a cote non.
+  const body = trial.slice(trial.indexOf("export function needsPaymentFix"));
+  const fnSrc = body.slice(0, body.indexOf("\n}\n") + 2).replace("export ", "").replace(/: string\[\] \| null\): boolean/, ")");
+  const needsPaymentFix = new Function(fnSrc + "; return needsPaymentFix;")();
+  assert.strictEqual(needsPaymentFix(["past_due"]), true);
+  assert.strictEqual(needsPaymentFix(["canceled", "past_due"]), true);
+  assert.strictEqual(needsPaymentFix(["past_due", "active"]), false);
+  assert.strictEqual(needsPaymentFix(["trialing", "past_due"]), false);
+  assert.strictEqual(needsPaymentFix(["canceled"]), false);
+  assert.strictEqual(needsPaymentFix([]), false);
+  assert.strictEqual(needsPaymentFix(null), false);
+});

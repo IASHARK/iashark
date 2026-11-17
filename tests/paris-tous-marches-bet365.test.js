@@ -234,9 +234,13 @@ test("textes publics : la fourchette citee est celle du choix (1,70-3,50), dans 
 // 2 jambes sur 43 seulement etaient le pari de la page (jambes de l'ancienne selection, regle du 11/11).
 test("combines : chaque jambe est le pari affiche de la page (meme pari, meme cote, meme chance), avec la vraie configuration", () => {
   const T = require("../lib/tickets-du-jour.js");
-  const REGLES = require("../config/tickets.json");
+  const REEL = require("../config/tickets.json");
   const V = require("../config/verdicts-maths.json");
-  assert.equal(REGLES.regle_version, "tickets-2026-11-16");
+  // Depuis le 17/11/2026, les jambes des combines suivent jambes_combines (tests/tickets-jambes-faciles.test.js) ; la
+  // regle du 16/11 (jambe = pari affiche 1,70-2,30) est remise ici EN PARAMETRE pour garder sa mecanique sous controle.
+  assert.equal(REEL.regle_version, "tickets-2026-11-17");
+  const REGLES = Object.assign({}, REEL, { x5: Object.assign({}, REEL.x5, { jambes: [2, 3] }), x10: Object.assign({}, REEL.x10, { jambes: [3, 4] }), paliers_cote_jambe: [1.85, 2.3] });
+  delete REGLES.jambes_combines;
   assert.deepEqual([REGLES.jambe.cote_min, REGLES.jambe.cote_max, REGLES.jambe.chance_min], [1.7, 2.3, 50]);
   assert.deepEqual([REGLES.x5.jambes, REGLES.x10.jambes, REGLES.paliers_cote_jambe], [[2, 3], [3, 4], [1.85, 2.3]]);
   assert.ok(REGLES.jambe.cote_min >= LIGUES.fiabilite.fourchette_pari.cote_min, "une jambe n'est jamais sous le minimum du pari affiche");
@@ -260,7 +264,7 @@ test("combines : chaque jambe est le pari affiche de la page (meme pari, meme co
   ajouter(9301, "20:00", ["over-15", "Plus de 1,5 but", "1.48", 62], { pronostic: { market_id: "over-15", publie: true, hors_fourchette: true, fiabilite: "en test" } });
   ajouter(9302, "20:00", ["home-win", "Victoire Dom9302", "2.60", 51], { pronostic: { market_id: "home-win", publie: true, hors_fourchette: false, fiabilite: "en test" } });
   ajouter(9303, "20:00", ["dc-x2", "Ext9303 ou nul", "1.90", 48], { pronostic: { market_id: "dc-x2", publie: true, hors_fourchette: false, fiabilite: "en test" } });
-  const opts = { jour: "2026-11-18", nowMs: Date.parse("2026-11-18T07:00:00Z"), fixtureById, configLigues: LIGUES, categoriesNoGo: V.categories_no_go, competitions: V.competitions_jambes };
+  const opts = { jour: "2026-11-18", nowMs: Date.parse("2026-11-18T07:00:00Z"), fixtureById, configLigues: LIGUES, categoriesNoGo: V.categories_no_go, competitions: V.competitions_jambes, regles: REGLES };
   const c = T.calculerDuJour(matchs, opts);
   assert.equal(c.nb_jambes, PARIS.length, JSON.stringify(c.exclus));
   const parId = {};

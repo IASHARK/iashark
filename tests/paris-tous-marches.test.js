@@ -317,8 +317,8 @@ test("panneau Marches : un pari publie sur un nouveau marche porte exactement la
 
 test("combines : aucun pourcentage de chance affiche ; noms « Petit combiné » / « Grand combiné » ; textes des nouvelles regles", () => {
   const fr = require("../i18n/dict/fr.json").aujourdhui;
-  assert.match(fr.none_x5, /2 à 3 matchs, cote totale entre 4 et 6/); // bornes du 16/11/2026
-  assert.match(fr.none_x10, /3 à 4 matchs, cote totale entre 8,50 et 12/);
+  assert.match(fr.none_x5, /3 à 6 matchs, cote totale entre 4 et 6/); // bornes du 17/11/2026
+  assert.match(fr.none_x10, /5 à 8 matchs, cote totale entre 8,50 et 12/);
   assert.equal(fr.gold_sub, "Les 3 paris les plus probables du jour"); // regle du 21/10/2026 : les 3 plus probables
   const src = fs.readFileSync(path.join(ROOT, "lib/aujourdhui.js"), "utf8");
   assert.match(src, /Petit combiné/); assert.match(src, /Grand combiné/);

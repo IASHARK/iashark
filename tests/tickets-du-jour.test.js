@@ -223,7 +223,7 @@ test("3 bis. recherche exacte (controle du mathematicien du 04/10/2026) : egalit
 
 test("3 ter. paliers de cote des jambes (regle du 28/10/2026) : 1,44 d'abord, puis 1,49, 1,59, 2,20 ; garde de chance ; jamais force", () => {
   assert.deepEqual(REGLES.paliers_cote_jambe, [1.44, 1.49, 1.59, 2.2]);
-  assert.equal(REGLES.regle_version, "tickets-2026-11-16", "16/11/2026 : jambes = pari de la page (bornes d avant remises en memoire pour ce fichier)");
+  assert.equal(REGLES.regle_version, "tickets-2026-11-17", "17/11/2026 : jambes corrigees (bornes d avant remises en memoire pour ce fichier)");
   assert.deepEqual(COMBOS.paliersJambe(REGLES), [1.44, 1.49, 1.59, 2.2]);
   assert.deepEqual(COMBOS.paliersJambe({}), [Infinity], "sans paliers : la regle d'avant");
   // Palier garde : 4 jambes a 1,42 (68 %) = 21,38 % (affiche 21 %) ; la regle complete prendrait 3 jambes a 1,62 = 21,96 %

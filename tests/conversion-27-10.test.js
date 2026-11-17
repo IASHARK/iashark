@@ -216,7 +216,9 @@ test("C6 : textes vrais sous le match offert et sur la page Combinés (config/ti
   const c = JSON.parse(read("i18n/dict/fr.json")).combines_page;
   assert.equal(c.rule_small, T.x5.jambes[0] + " à " + T.x5.jambes[T.x5.jambes.length - 1] + " matchs, cote totale entre " + v(T.x5.cote_min) + " et " + v(T.x5.cote_max) + ". Réservé à Pro.");
   assert.equal(c.rule_big, T.x10.jambes[0] + " à " + T.x10.jambes[T.x10.jambes.length - 1] + " matchs, cote totale entre " + v(T.x10.cote_min) + " et " + v(T.x10.cote_max) + ". Avec Pro.");
-  assert.match(c.rules_note, new RegExp("entre " + v(T.jambe.cote_min) + " et " + v(T.jambe.cote_max) + " et au moins " + T.jambe.chance_min + " %"));
+  // Depuis le 17/11/2026, les jambes des combines suivent jambes_combines (les montantes gardent jambe).
+  const J = T.jambes_combines || T.jambe;
+  assert.match(c.rules_note, new RegExp("entre " + v(J.cote_min) + " et " + v(J.cote_max) + " et au moins " + J.chance_min + " %"));
   // /en/ reste en dollars (marche us).
   assert.equal(JSON.parse(read("config/markets.json")).us.currency, "USD");
 });

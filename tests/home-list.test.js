@@ -329,11 +329,36 @@ test("lien d'une ligne : vraie page indexable de la version (page_dirs), sinon m
   assert.equal(HL.matchHref(m, { lien: (p) => "/za/" + p }), "/za/match.html?id=1570383");
 });
 
-test("match sans cote (decision de Clement du 13/11/2026) : hors de la liste ; match cote sans pari, ferme ou deja joue : garde", () => {
-  assert.equal(HL.affichable({ id: 1, no_signal: true, no_signal_reason: "AUCUN_MARCHE_AVEC_COTE_REELLE" }), false);
-  assert.equal(HL.affichable({ id: 2, no_signal: true, no_signal_reason: "AUCUN_PARI_SIMPLE_DANS_LA_FOURCHETTE" }), true);
-  assert.equal(HL.affichable({ id: 3, no_signal: true, no_signal_reason: "FIXTURE_NOT_UPCOMING" }), true);
-  assert.equal(HL.affichable({ id: 4, has_signal: true, no_signal: false }), true);
-  assert.equal(HL.affichable({ id: 5, past: true, no_signal: true, no_signal_reason: "AUCUN_MARCHE_AVEC_COTE_REELLE" }), true);
-  assert.match(fs.readFileSync(path.join(__dirname, "..", "home-list.js"), "utf8"), /matches=\(Array\.isArray\(matches\)\?matches:\[\]\)\.filter\(affichable\);/);
+test("match sans pari (17/11/2026) : dans la liste, ligne normale sans zone de pari, ni cadenas ni texte d'explication", () => {
+  const H = helpers();
+  const src = fs.readFileSync(path.join(__dirname, "..", "home-list.js"), "utf8");
+  // Plus aucun match retire de la liste : les compteurs « N matchs » comptent tout ce qui est affiche.
+  assert.doesNotMatch(src, /\.filter\(affichable\)/);
+  assert.equal(HL.affichable, undefined);
+  ["AUCUN_SCENARIO", "AUCUN_MARCHE_AVEC_COTE_REELLE"].forEach((raison) => {
+    const m = { id: 1649033, league_key: "concacaf_nations_league", league: "CONCACAF Nations League", date: "2026-09-16 21:00", status: "NS",
+      home: { n: "Martinique", id: 8117 }, away: { n: "Aruba", id: 8167 }, no_signal: true, no_signal_reason: raison, no_signal_label: "Aucun signal clair sur ce match" };
+    assert.equal(HL.sansPari(m), true, raison);
+    [{}, { isPro: true }, { hasAccount: true }, { freeMatchId: 1649033 }].forEach((c) => {
+      const cx = Object.assign({ isPro: false, hasAccount: false, freeMatchId: null, nowTs: NOW }, c);
+      assert.deepEqual(HL.analysisFor(m, cx, H), { state: "bare", free: false }, raison);
+      const html = HL.renderMatchRow(m, cx, H, 0);
+      assert.match(html, /class="hl-row hl-grid is-bare/);
+      assert.match(html, /href="\/gb\/match\.html\?id=1649033"/);
+      assert.match(html, /Martinique/); assert.match(html, /Aruba/); assert.match(html, /20:00/);
+      assert.match(html, /data-sd-fid="1649033"/, "score en direct");
+      assert.doesNotMatch(html, /hl-zone|hl-probadge|hl-tag-free|home_row_lock|signal clair|Aucun pari|Débloquer|Offert/);
+      assert.doesNotMatch(html, /aria-label="[^"]*(signal|Analyse|undefined)/);
+    });
+  });
+  // Les deux matchs comptent dans l'onglet du jour, comme un match avec pari.
+  const liste = [{ id: 1, date: "2026-09-16 20:00", has_signal: true }, { id: 2, date: "2026-09-16 21:00", no_signal: true, no_signal_reason: "AUCUN_SCENARIO" },
+    { id: 3, date: "2026-09-16 22:00", no_signal: true, no_signal_reason: "AUCUN_MARCHE_AVEC_COTE_REELLE" }];
+  const jours = HL.buildDays(liste, H, { day: "2026-09-16" });
+  assert.equal(jours.filter((d) => d.day === "2026-09-16")[0].count, 3);
+  // Les autres raisons gardent leur ligne d'avant ; un match deja joue n'est pas concerne.
+  assert.equal(HL.sansPari({ id: 2, no_signal: true, no_signal_reason: "AUCUN_PARI_SIMPLE_DANS_LA_FOURCHETTE" }), false);
+  assert.equal(HL.sansPari({ id: 3, no_signal: true, no_signal_reason: "FIXTURE_NOT_UPCOMING" }), false);
+  assert.equal(HL.sansPari({ id: 4, has_signal: true, no_signal: false }), false);
+  assert.equal(HL.sansPari({ id: 5, past: true, no_signal: true, no_signal_reason: "AUCUN_MARCHE_AVEC_COTE_REELLE" }), false);
 });

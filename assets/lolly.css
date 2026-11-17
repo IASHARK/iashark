@@ -32,8 +32,9 @@ html{background:var(--lb-bg);scroll-behavior:smooth}
 .lb-pill:hover{background:#fff}
 .lb-pill:active{transform:translateY(1px)}
 .lb-pill:focus-visible{outline:2px solid var(--lb-cyan);outline-offset:3px}
-@keyframes lb-fond{from{opacity:0;transform:scale(1.08)}to{opacity:1;transform:scale(1)}}
-@keyframes lb-copie{from{opacity:0;transform:translateY(16px);filter:blur(6px)}to{opacity:1;transform:none;filter:blur(0)}}
+/* Jamais d'opacite a 0 au depart : si l'animation ne tourne pas (onglet en arriere-plan), le titre reste lisible. */
+@keyframes lb-fond{from{transform:scale(1.08)}to{transform:scale(1)}}
+@keyframes lb-copie{from{transform:translateY(16px)}to{transform:none}}
 @media (min-width:640px){
   .lb-hero{min-height:480px}
   .lb-hero-contenu{flex-direction:row;align-items:flex-end;justify-content:space-between;gap:24px;padding:40px 32px 36px}

@@ -1255,6 +1255,10 @@
     var b = String(email == null ? "" : email).trim().toLowerCase();
     return !!a && a === b;
   }
+  // Clic sur notre lien : "vu" = passage note cote serveur ; "declare" = « J'ai deja clique » (e-mail), a verifier de pres.
+  function proOffertClic(c) {
+    return c === "vu" ? "clic sur notre lien vu" : c === "declare" ? "CLIC NON VU (dit avoir cliqué depuis l'e-mail)" : "demande d'avant le contrôle du clic";
+  }
   function proOffertStatut(s) { return PRO_OFFERT_STATUT[s] || { label: "Statut inconnu", cls: "gone", group: "Autres" }; }
   // Boutons : seulement sur une demande en attente (une décision ne se défait pas ici).
   function proOffertActions(s) {
@@ -1295,7 +1299,7 @@
 
   return {
     PARTNER_STATUS: PARTNER_STATUS, PARTNER_STYLES: PARTNER_STYLES, partnerStatus: partnerStatus, partnerStyle: partnerStyle, partnerLegal: partnerLegal,
-    PRO_OFFERT_STATUT: PRO_OFFERT_STATUT, proOffertStatut: proOffertStatut, proOffertMemeEmail: proOffertMemeEmail, proOffertActions: proOffertActions, proOffertTri: proOffertTri, proOffertCompte: proOffertCompte,
+    PRO_OFFERT_STATUT: PRO_OFFERT_STATUT, proOffertStatut: proOffertStatut, proOffertMemeEmail: proOffertMemeEmail, proOffertClic: proOffertClic, proOffertActions: proOffertActions, proOffertTri: proOffertTri, proOffertCompte: proOffertCompte,
     partnerActions: partnerActions, partnerUrl: partnerUrl, partnerLinks: partnerLinks, partnerSort: partnerSort, partnerCounts: partnerCounts, partnerMoney: partnerMoney,
     SCREENS: SCREENS, screenKey: screenKey, DIAG_FILE: DIAG_FILE, pctOf: pctOf, msText: msText, VITALS: VITALS, vitalVerdict: vitalVerdict,
     vitalValue: vitalValue, langName: langName, siteLangText: siteLangText, landingName: landingName, failReason: failReason, todoActions: todoActions,
@@ -2677,6 +2681,8 @@
     var autres = H.num(d.meme_identifiant_ailleurs) || 0;
     // Meme e-mail sur les deux comptes (12/11/2026) : a chercher tel quel dans le rapport Lolly Bet.
     facts.push(H.proOffertMemeEmail(d.identifiant, d.email) ? "même e-mail chez Lolly Bet et sur IASHARK" : "identifiant différent de l'e-mail du compte");
+    // Clic sur notre lien Lolly Bet (17/11/2026, migration 0077) : note par notre redirection, ou seulement declare.
+    facts.push(H.proOffertClic(d.clic));
     var fin = d.pro_jusqu_au ? fmtDay(d.pro_jusqu_au) : null;
     var busy = S.proOffertBusy;
     var boutons = UUID_RE.test(id) ? H.proOffertActions(d.statut).map(function (x) {

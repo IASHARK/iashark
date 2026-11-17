@@ -58,6 +58,8 @@ test("v2 : cle du jour posee seulement a la fermeture ou au clic, ?lolly=1 force
   assert.match(ouvrir, /a\.addEventListener\("click", function \(\) \{\n\s+marquer\(\);/);
   assert.match(src, /var FORCE = \/\[\?&\]lolly=1\(&\|\$\)\/\.test\(location\.search\)/);
   assert.match(ouvrir, /if \(!FORCE\) \{/);
+  // 17/11/2026 : le panneau ne s'ouvre plus pour un visiteur sans compte.
+  assert.match(ouvrir, /if \(!FORCE && !inscrit\(\)\) return false;/);
   assert.doesNotMatch(src + prefs, /__iasharkLollyArrivee/);
 });
 

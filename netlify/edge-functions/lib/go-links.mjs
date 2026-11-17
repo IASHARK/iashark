@@ -47,3 +47,18 @@ export function goResponse(pathname) {
     },
   };
 }
+
+// « Pro offert 1 mois » (17/11/2026, migration 0077) : jeton de clic porte par /go/lolly/...?c=<uuid>.
+// Seuls les liens Lolly Bet le lisent ; tout ce qui n'est pas un uuid est ignore.
+// Adresse et cle PUBLIQUE de la base (les memes que app-client.js) : la fonction appelee ne fait que
+// noter le premier passage d'un jeton existant.
+export const MARQUER_URL = "https://ksvjraqitxouwiabecai.supabase.co/rest/v1/rpc/pro_offert_clic_marquer";
+export const CLE_PUBLIQUE = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzdmpyYXFpdHhvdXdpYWJlY2FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODcwMjMsImV4cCI6MjA4ODM2MzAyM30.Eh3qk4tATM40hoYxdErAllLEo1y8KNt4BSCET_fAgT8";
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+export function jetonClic(pathname, c) {
+  const parts = String(pathname || "").split("/").filter(Boolean);
+  if ((parts[1] || "").toLowerCase() !== "lolly") return null;
+  const j = String(c == null ? "" : c).trim().toLowerCase();
+  return UUID.test(j) ? j : null;
+}

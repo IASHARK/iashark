@@ -17,27 +17,78 @@
 <body class="lb-body">
 <header class="hdr"><a href="/" data-href="" class="logo"><img src="/assets/iashark-logo.png" alt="IASHARK" width="105" height="28"></a></header>
 
-<!-- Page partenaire Lolly Bet (11/11/2026). Liens affilies : /go/lolly/site seulement.
+<!-- Page partenaire Lolly Bet (11/11/2026, refaite le 17/11/2026 : parcours en 3 etapes, clic obligatoire). Liens affilies : /go/lolly/site seulement.
      Offre de bienvenue : formulation exacte de Lolly (jamais « 100 € offerts »), aucun code promo.
      « Pro offert 1 mois » : formulaire rendu par lib/lolly-page.js, table pro_offert_demandes
      (migration 0074), validation a la main dans admin.html. -->
 <main class="lb">
-  <section class="lb-ouverture" id="pro-offert" aria-labelledby="lbTitre">
+  <!-- Haut de page : composant « Hero 12 » de 21st.dev (felipemenezes098), variante compacte, porte en HTML/CSS :
+       image plein cadre, voile sombre du bas, titre + etiquette sur la meme ligne, texte, bouton pilule. -->
+  <section class="lb-hero" aria-labelledby="lbTitre">
+    <div class="lb-hero-fond" aria-hidden="true">
+      <picture><source media="(min-width:700px)" srcset="/assets/hero/stade-nuit.webp"><img src="/assets/hero/stade-nuit-portrait.webp" alt="" width="900" height="1600" decoding="async" fetchpriority="high"></picture>
+      <span class="lb-hero-voile"></span>
+    </div>
     <p class="lb-duo"><img src="/assets/iashark-logo.png" alt="IASHARK" width="90" height="24"><span aria-hidden="true">×</span><span class="lb-logo"><img src="/assets/bk/lolly.svg" alt="Lolly Bet" width="80" height="18"></span></p>
-    <h1 class="lb-h1" id="lbTitre" data-i18n="lolly_page.title">Ton Pro IASHARK offert 1 mois</h1>
-    <ol class="lb-pas lb-deux">
-      <li><span class="lb-pas-n" aria-hidden="true">1</span><div>
-        <p class="lb-pas-t" data-i18n="lolly_page.step_lolly">Inscris-toi chez Lolly Bet, notre partenaire</p>
-        <p class="lb-pas-s lb-meme" id="lbMeme" hidden></p>
-        <a class="lb-cta" href="/go/lolly/site" target="_blank" rel="sponsored noopener" data-track="lolly_page_inscription" data-track-kind="lolly_page_inscription"><span data-i18n="lolly_page.cta">S’inscrire chez Lolly Bet</span><span aria-hidden="true">→</span></a>
-      </div></li>
-      <li><span class="lb-pas-n" aria-hidden="true">2</span><div>
-        <p class="lb-pas-t" data-i18n="lolly_page.step_declare">Demande ton mois Pro</p>
-        <div class="lb-pro-app" id="lbPro" aria-live="polite"><p class="lb-pro-attente" data-i18n="lolly_page.pro_loading">Chargement…</p></div>
-      </div></li>
+    <div class="lb-hero-contenu">
+      <div class="lb-hero-copie">
+        <div class="lb-hero-titre"><h1 class="lb-h1" id="lbTitre" data-i18n="lolly_page.title">1 mois d’IASHARK Pro offert</h1><span class="lb-hero-tag" data-i18n="lolly_page.age">18+</span></div>
+        <p class="lb-hero-desc" data-i18n="lolly_page.hero_text">Inscris-toi chez Lolly Bet, notre partenaire, avec notre lien.</p>
+      </div>
+      <a class="lb-pill" href="#pro-offert" data-track="lolly_page_commencer" data-track-kind="lolly_page_commencer"><span data-i18n="lolly_page.hero_cta">Commencer</span><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M12 5v14m0 0-6-6m6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </div>
+  </section>
+
+  <!-- Parcours : composant « Steps » de 21st.dev (adit-firdaus), orientation verticale, porte en HTML/CSS :
+       pastilles pleines, halo sur l'etape en cours, trait qui se remplit quand une etape est faite.
+       Etats et contenu des etapes poses par lib/lolly-page.js. L'etape 3 ne s'ouvre qu'apres le clic
+       sur notre lien, note cote serveur (migration 0077). -->
+  <section class="lb-parcours" id="pro-offert">
+    <ol class="may-steps" id="lbSteps" data-slot="steps" data-orientation="vertical" data-size="lg" aria-label="Les étapes" data-i18n-attr="aria-label:lolly_page.steps_label">
+      <li class="may-steps__step" data-slot="step" data-status="current" aria-current="step">
+        <div class="may-steps__body">
+          <span class="may-steps__marker" aria-hidden="true">1</span>
+          <div class="may-steps__text">
+            <span class="may-steps__title" data-i18n="lolly_page.step_account">Crée ton compte IASHARK</span>
+            <div class="lb-zone" id="lbZ1"></div>
+          </div>
+          <span class="may-sr-only"></span>
+        </div>
+        <span class="may-steps__connector" aria-hidden="true"></span>
+      </li>
+      <li class="may-steps__step" data-slot="step" data-status="upcoming">
+        <div class="may-steps__body">
+          <span class="may-steps__marker" aria-hidden="true">2</span>
+          <div class="may-steps__text">
+            <span class="may-steps__title" data-i18n="lolly_page.step_lolly">Inscris-toi chez Lolly Bet</span>
+            <span class="may-steps__description" id="lbD2" hidden></span>
+            <div class="lb-zone" id="lbZ2">
+              <p class="lb-meme" id="lbMeme" hidden></p>
+              <a class="lb-cta" id="lbCta" href="/go/lolly/site" target="_blank" rel="sponsored noopener" data-track="lolly_page_inscription" data-track-kind="lolly_page_inscription"><span data-i18n="lolly_page.cta">S’inscrire chez Lolly Bet</span><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M5 12h14m0 0-6-6m6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+              <button class="lb-lien" id="lbDeja" type="button" hidden data-track="lolly_pro_deja_clique" data-track-kind="lolly_pro_deja_clique" data-i18n="lolly_page.already_clicked">J’ai déjà cliqué depuis l’e-mail</button>
+            </div>
+          </div>
+          <span class="may-sr-only"></span>
+        </div>
+        <span class="may-steps__connector" aria-hidden="true"></span>
+      </li>
+      <li class="may-steps__step" data-slot="step" data-status="upcoming">
+        <div class="may-steps__body">
+          <span class="may-steps__marker" aria-hidden="true">3</span>
+          <div class="may-steps__text">
+            <span class="may-steps__title" data-i18n="lolly_page.step_declare">Demande ton mois Pro</span>
+            <div class="lb-zone lb-pro-app" id="lbPro" aria-live="polite"></div>
+          </div>
+          <span class="may-sr-only"></span>
+        </div>
+      </li>
     </ol>
-    <a class="lb-banniere" id="lbBanniere" hidden href="/go/lolly/site" target="_blank" rel="sponsored noopener" data-track="lolly_page_banniere" data-track-kind="lolly_page_banniere"><img src="/assets/bk/lolly-bienvenue-fr.webp" alt="Lolly Bet : 1er pari remboursé jusqu’à 100 €" width="1428" height="428" decoding="async"></a>
-    <p class="lb-offre-court"><a id="lbOffreTexte" href="/go/lolly/site" target="_blank" rel="sponsored noopener" data-track="lolly_page_offre" data-track-kind="lolly_page_offre" data-i18n="lolly_page.offer_main">1er pari remboursé en cash jusqu’à 100 €</a> <span data-i18n="lolly_page.age">18+</span></p>
+    <p class="lb-etat is-ok" id="lbDejaPro" hidden data-i18n="lolly_page.pro_already">Ton compte est déjà Pro.</p>
+  </section>
+
+  <section class="lb-offre" aria-label="Lolly Bet">
+    <a class="lb-banniere" id="lbBanniere" hidden href="/go/lolly/site" target="_blank" rel="sponsored noopener" data-track="lolly_page_banniere" data-track-kind="lolly_page_banniere"><img src="/assets/bk/lolly-bienvenue-fr.webp" alt="Lolly Bet : 1er pari remboursé jusqu’à 100 €" width="1428" height="428" decoding="async" loading="lazy"></a>
+    <p class="lb-offre-court"><a id="lbOffreTexte" href="/go/lolly/site" target="_blank" rel="sponsored noopener" data-track="lolly_page_offre" data-track-kind="lolly_page_offre" data-i18n="lolly_page.offer_main">1er pari remboursé en cash jusqu’à 100 €</a> <span data-i18n="lolly_page.age">18+</span></p>
   </section>
 </main>
 

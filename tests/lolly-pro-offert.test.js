@@ -53,8 +53,8 @@ test("offre Lolly : formulation exacte, jamais « 100 € offerts », pas de cod
   const sp = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, String(v).replace(/\u00a0/g, " ")]));
   const fr = sp(dict("fr").lolly_page);
   assert.equal(fr.offer_main, "1er pari remboursé en cash jusqu’à 100 €");
-  // 12/11/2026 : l'attente dit aussi de revenir sur la page (personne n'est prevenu autrement).
-  assert.equal(fr.pro_pending, "Demande reçue. On vérifie ton inscription chez Lolly Bet : reviens sur cette page, ton Pro s’y affiche dès que c’est confirmé.");
+  // 17/11/2026 : l'attente annonce une reponse sous 24 h, sur cette page (personne n'est prevenu autrement).
+  assert.equal(fr.pro_pending, "Demande reçue. On vérifie ton inscription chez Lolly Bet et on te répond sous 24 h, ici, sur cette page.");
   const emoji = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u;
   for (const l of LOCALES) {
     const txt = JSON.stringify(dict(l).lolly_page) + JSON.stringify(dict(l).match_page.pro_offert_text);
@@ -166,18 +166,18 @@ test("meme e-mail sur les deux comptes (12/11/2026) : e-mail du compte affiche, 
     assert.equal(f(null, undefined), false);
   }
   const js = read("lib/lolly-page.js");
-  // Etape 1 : l'e-mail du compte et un bouton Copier, par textContent (jamais innerHTML).
+  // Etape 2 : l'e-mail du compte et un bouton Copier, par textContent (jamais innerHTML).
   assert.match(js, /p\.appendChild\(el\("b", "lb-meme-email", email\)\);/);
   assert.match(js, /navigator\.clipboard\.writeText\(email\)/);
   assert.doesNotMatch(js, /\.innerHTML\s*=/);
-  // Etape 2 : champ deja rempli avec l'e-mail du compte, bouton qui dit l'action.
+  // Etape 3 : champ deja rempli avec l'e-mail du compte, bouton qui dit l'action.
   assert.match(js, /inp\.value = emailCompte\(ctx\);/);
   assert.match(js, /t\("lolly_page\.pro_send", "Demander mon mois Pro"\)/);
-  // Sans compte : le compte IASHARK se cree avec le meme e-mail, en bouton a contour (un seul bouton plein sur la page).
-  assert.match(js, /el\("a", "lb-btn lb-btn--ligne", t\("lolly_page\.pro_signup"/);
+  // Sans compte : l'etape 1 cree le compte IASHARK (retour sur cette page).
+  assert.match(js, /el\("a", "lb-btn", t\("lolly_page\.pro_signup"/);
   const html = read("lolly.html");
-  assert.match(html, /<p class="lb-pas-s lb-meme" id="lbMeme" hidden><\/p>\s*<a class="lb-cta" href="\/go\/lolly\/site"/);
-  assert.equal((html.match(/class="lb-cta"/g) || []).length, 1, "un seul bouton plein dans la page");
+  assert.match(html, /<p class="lb-meme" id="lbMeme" hidden><\/p>\s*<a class="lb-cta" id="lbCta" href="\/go\/lolly\/site"/);
+  assert.equal((html.match(/class="lb-cta"/g) || []).length, 1, "un seul bouton Lolly dans le parcours");
   // Banniere officielle : cliquable avec notre lien, cachee par defaut.
   assert.match(html, /<a class="lb-banniere" id="lbBanniere" hidden href="\/go\/lolly\/site" target="_blank" rel="sponsored noopener" data-track="lolly_page_banniere"/);
   // Montree dans la langue de la page quand le partenaire a fourni la banniere (6 langues, 12/11/2026).
@@ -187,10 +187,10 @@ test("meme e-mail sur les deux comptes (12/11/2026) : e-mail du compte affiche, 
   // Inscription venue de la page Lolly : la meme consigne.
   for (const l of LOCALES) {
     const d = dict(l);
-    for (const k of ["same_email", "copy", "copied", "pro_send", "step_declare", "pro_need_account"]) assert.ok(String(d.lolly_page[k] || "").trim(), l + " lolly_page." + k);
+    for (const k of ["same_email", "copy", "copied", "pro_send", "step_declare", "step_account"]) assert.ok(String(d.lolly_page[k] || "").trim(), l + " lolly_page." + k);
     assert.ok(String(d.auth.signup_intro_lolly || "").trim(), l + " auth.signup_intro_lolly");
   }
-  assert.match(dict("fr").lolly_page.pro_need_account, /même e-mail que chez Lolly Bet/);
+  assert.equal(dict("fr").lolly_page.same_email, "Avec le même e-mail :");
   assert.match(dict("fr").auth.signup_intro_lolly, /même e-mail que chez Lolly Bet/);
   // Admin : chaque demande dit si l'identifiant declare est l'e-mail du compte.
   const adm = read("admin-dashboard.js");
@@ -198,17 +198,10 @@ test("meme e-mail sur les deux comptes (12/11/2026) : e-mail du compte affiche, 
   assert.match(read("funnel-track.js"), /lolly_pro_copier: true/);
 });
 
-test("relecture « visiteur » du 12/11 : etape 1 cochee au retour, textes qui ne promettent pas plus vite que la verification", () => {
-  const js = read("lib/lolly-page.js"), css = read("assets/lolly.css");
-  // Apres l'appui sur le bouton Lolly (memorise dans le navigateur) ou des que la demande est partie.
-  assert.match(js, /root\.localStorage\.setItem\(CLE_FAIT, "1"\)/);
-  assert.match(js, /marquerEtape1\(etat === "en_attente" \|\| etat === "valide" \|\| etape1Memorisee\(\)\);/);
-  assert.match(js, /zone\.classList\.toggle\("lb-fait", !!fait\);/);
-  // Le bouton de l'etape 2 prend le relais ; celui de l'etape 1 passe en contour.
-  assert.match(css, /\.lb-fait \.lb-cta\{background:rgba\(32,213,239,\.08\)/);
-  assert.match(css, /\.lb-fait \.lb-pro-app \.lb-btn--ligne\{background:var\(--lb-cyan\)/);
+test("relecture « visiteur » du 12/11 : memes mesures de bouton, textes qui ne promettent pas plus vite que la verification", () => {
+  const css = read("assets/lolly.css");
   // Memes mesures de bouton sur tout le parcours : 52 px, 16 px.
-  assert.match(css, /\.lb-btn\{min-height:52px;font-size:16px\}/);
+  assert.match(css, /\.lb-cta,\.lb-btn\{[^}]*min-height:52px;[^}]*font-size:16px;font-weight:800/);
   assert.match(read("assets/account.css"), /\.ins #submit\{height:52px;font-size:16px;font-weight:800\}/);
   // Verification a la main : aucun texte ne dit « tout de suite » ; l'attente dit de revenir sur la page.
   for (const l of LOCALES) {
@@ -216,7 +209,7 @@ test("relecture « visiteur » du 12/11 : etape 1 cochee au retour, textes qui n
     assert.doesNotMatch(d.auth.signup_intro_lolly + " " + d.lolly_page.pro_pending, /tout de suite|right away|enseguida|sofort|subito|logo o teu/i, l);
     assert.ok(String(d.match_page.bk_pro_link || "").trim(), l + " match_page.bk_pro_link");
   }
-  assert.match(dict("fr").lolly_page.pro_pending, /^Demande reçue\. .*reviens sur cette page/);
+  assert.match(dict("fr").lolly_page.pro_pending, /^Demande reçue\. .*sous 24 h, ici, sur cette page\.$/);
   assert.equal(dict("fr").match_page.bk_pro_link, "1 mois de Pro offert : voir comment");
 });
 
@@ -254,4 +247,76 @@ test("l'autre chemin vers le Pro (12/11/2026) : une ligne sous le deblocage des 
     assert.equal(JSON.parse(read("i18n/parts/vente." + l + ".json")).aujourdhui.pro_offert_link, v, l);
   }
   assert.doesNotMatch(read("assets/aujourdhui.css").split("\n").filter((x) => /^\.aj-offert/.test(x)).join("\n"), /uppercase|monospace/);
+});
+
+test("clic obligatoire (17/11/2026) : 3 etapes, jeton dans le lien, formulaire ferme sans clic note dans la base", async () => {
+  // Etats des etapes : compte, clic, declaration.
+  assert.deepEqual(LP.etapes("sans_compte", null), ["current", "upcoming", "upcoming"]);
+  assert.deepEqual(LP.etapes("a_declarer", null), ["complete", "current", "upcoming"]);
+  assert.deepEqual(LP.etapes("a_declarer", "vu"), ["complete", "complete", "current"]);
+  assert.deepEqual(LP.etapes("refuse", "declare"), ["complete", "complete", "current"]);
+  assert.deepEqual(LP.etapes("refuse", null), ["complete", "current", "upcoming"]);
+  assert.deepEqual(LP.etapes("en_attente", null), ["complete", "complete", "complete"]);
+  assert.deepEqual(LP.etapes("valide", "vu"), ["complete", "complete", "complete"]);
+  assert.equal(LP.etapes("deja_pro", "vu"), null);
+  for (const c of [null, undefined, "", "oui", true]) assert.equal(LP.clicFait(c), false, String(c));
+  assert.equal(LP.clicFait("vu"), true);
+  assert.equal(LP.clicFait("declare"), true);
+  // Le lien du compte porte son jeton ; tout ce qui n'est pas un uuid est ignore.
+  const J = "3f2504e0-4f89-11d3-9a0c-0305e82c3301";
+  assert.equal(LP.lienLolly(J.toUpperCase()), "/go/lolly/site?c=" + J);
+  for (const v of [null, "", "abc", J + "&x=1", "<script>"]) assert.equal(LP.lienLolly(v), "/go/lolly/site", String(v));
+  assert.equal(LP.erreurCle({ message: "pro_offert_sans_clic" }), "clic");
+  // La redirection ne lit le jeton que pour Lolly Bet, et redirige toujours.
+  const G = await import("../netlify/edge-functions/lib/go-links.mjs");
+  assert.equal(G.jetonClic("/go/lolly/site", J), J);
+  assert.equal(G.jetonClic("/go/LOLLY/x", J.toUpperCase()), J);
+  for (const [p, c] of [["/go/vavada/site", J], ["/go/lolly/site", null], ["/go/lolly/site", "1"], ["/go/lolly/site", J + "'"], ["/", J]]) assert.equal(G.jetonClic(p, c), null, p + " " + c);
+  assert.match(G.MARQUER_URL, /^https:\/\/ksvjraqitxouwiabecai\.supabase\.co\/rest\/v1\/rpc\/pro_offert_clic_marquer$/);
+  assert.match(G.CLE_PUBLIQUE, /^eyJ/);
+  assert.ok(read("app-client.js").includes(G.CLE_PUBLIQUE), "la meme cle publique que app-client.js, jamais une cle de service");
+  const go = read("netlify/edge-functions/go.ts");
+  assert.match(go, /if \(jeton\) await noterClic\(jeton\);\s+r = goResponse\(u\.pathname\);/);
+  assert.match(go, /AbortSignal\.timeout\(1500\)/);
+  // Page : le formulaire n'est rendu que si l'etape 3 est en cours ; l'etat du clic vient de la base.
+  const js = read("lib/lolly-page.js"), html = read("lolly.html");
+  assert.match(js, /if \(statuts\[2\] === "current"\) box\.appendChild\(formulaire\(ctx, etat === "refuse"\)\);/);
+  assert.match(js, /app\.supabase\.rpc\("pro_offert_clic_preparer"\)/);
+  assert.match(js, /app\.supabase\.rpc\("pro_offert_clic_declarer"\)/);
+  assert.doesNotMatch(js, /localStorage/, "rien n'est ouvert sur la foi du navigateur");
+  assert.doesNotMatch(js, /pro_offert_clic_marquer/, "seule la redirection note le clic");
+  assert.match(js, /if \(cle === "clic"\) \{ clic = null; return charger\(\); \}/);
+  assert.equal((html.match(/class="may-steps__step"/g) || []).length, 3);
+  assert.match(html, /id="lbDeja" type="button" hidden data-track="lolly_pro_deja_clique"/);
+  for (const k of ["lolly_page_commencer", "lolly_pro_deja_clique"]) assert.match(read("funnel-track.js"), new RegExp(k + ": true"), k);
+  for (const l of LOCALES) for (const k of ["hero_text", "hero_cta", "step_account", "already_clicked", "click_seen", "pro_err_click", "st_done", "st_current", "st_todo", "steps_label"]) {
+    assert.ok(String(dict(l).lolly_page[k] || "").trim(), l + " lolly_page." + k);
+  }
+  // Rien ne coupe le parcours : pas de fenetre Telegram sur cette page.
+  assert.match(read("lib/telegram-demande.js"), /PAGES_EXCLUES = \/\([^)]*\|lolly\)\/i/);
+});
+
+test("migration 0077 : clic note cote serveur, demande refusee sans clic, jamais d'auto-validation", () => {
+  const sql = read("supabase/migrations/0077_pro_offert_clic.sql");
+  assert.match(sql, /alter table public\.pro_offert_clics enable row level security;/);
+  assert.match(sql, /revoke all on public\.pro_offert_clics from public, anon, authenticated;/);
+  assert.doesNotMatch(sql, /create policy/i, "aucun acces direct a la table des clics");
+  // Seule la fonction de marquage est ouverte a la cle publique ; les deux autres demandent un compte.
+  assert.match(sql, /grant execute on function public\.pro_offert_clic_marquer\(uuid\) to anon, authenticated;/);
+  assert.match(sql, /revoke all on function public\.pro_offert_clic_preparer\(\) from public, anon;/);
+  assert.match(sql, /revoke all on function public\.pro_offert_clic_declarer\(\) from public, anon;/);
+  assert.match(sql, /set clique_le = coalesce\(clique_le, now\(\)\) where id = p_jeton;/);
+  // Le declencheur refuse sans clic, et recopie « vu » ou « declare » sur la demande.
+  const ctl = sql.slice(sql.indexOf("function public.pro_offert_demandes_controle"), sql.indexOf("-- Admin :"));
+  assert.match(ctl, /if not found or \(c\.clique_le is null and c\.declare_le is null\) then\s+raise exception 'pro_offert_sans_clic'/);
+  assert.match(ctl, /new\.clic := public\.pro_offert_clic_etat_de\(c\);/);
+  assert.match(ctl, /new\.statut := 'en_attente';/);
+  assert.match(ctl, /pro_offert_deja_demande/);
+  assert.doesNotMatch(sql, /set plan = /, "aucune ouverture de Pro ici : la validation reste dans admin_pro_offert_decider");
+  assert.match(sql, /d\.fin_appliquee_le, d\.clic, d\.clic_le, u\.email/);
+  // Admin : la mention suit le clic.
+  assert.equal(H.proOffertClic("vu"), "clic sur notre lien vu");
+  assert.match(H.proOffertClic("declare"), /^CLIC NON VU/);
+  assert.match(H.proOffertClic(null), /avant le contrôle/);
+  assert.match(read("admin-dashboard.js"), /facts\.push\(H\.proOffertClic\(d\.clic\)\);/);
 });

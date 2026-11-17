@@ -171,3 +171,24 @@ test("page match : bloc partenaire sous le pari (12/11/2026) : un cadre, la bann
   assert.match(regles, /\.bk-offre-img\{[^}]*aspect-ratio:1428\/428/);
   assert.doesNotMatch(regles, /uppercase|monospace|#(22c55e|ef4444)/i);
 });
+
+test("go : chaque clic est compte, par origine, robots marques (17/11)", async () => {
+  const { evenementClic } = await import("../netlify/edge-functions/lib/go-links.mjs");
+  const tel = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile Safari/604.1";
+  for (const s of ["site", "x", "telegram", "email"]) {
+    const e = evenementClic("/go/lolly/" + s, tel);
+    assert.strictEqual(e.event_type, "click");
+    assert.strictEqual(e.page, "/go/lolly/" + s);
+    assert.deepStrictEqual(e.metadata, { kind: "go_lolly", label: "go_lolly", source: s });
+  }
+  assert.strictEqual(evenementClic("/go/lolly", tel).metadata.source, "site");
+  assert.strictEqual(evenementClic("/go/LOLLY/inconnu", tel).metadata.source, "site");
+  assert.strictEqual(evenementClic("/go/autre/site", tel), null);
+  assert.strictEqual(evenementClic("/go/__proto__/site", tel), null);
+  for (const ua of ["Twitterbot/1.0", "TelegramBot (like TwitterBot)", "curl/8.4.0", "", null]) {
+    assert.strictEqual(evenementClic("/go/lolly/x", ua).metadata.bot, true, String(ua));
+  }
+  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "netlify", "edge-functions", "go.ts"), "utf8");
+  assert.match(src, /evenementClic\(u\.pathname, request\.headers\.get\("user-agent"\)\)/);
+  assert.match(src, /context\.waitUntil\(p\)/);
+});

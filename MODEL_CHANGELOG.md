@@ -2,6 +2,15 @@
 
 Changements qui affectent le calcul des probabilités, marchés, edge/Kelly ou la manière dont ils sont décidés. Journal complet et non-technique dans `IASHARK_V2_EXECUTION_STATE.md` ; ce fichier ne liste que ce qui touche le moteur lui-même.
 
+## 2026-11-17 — moteur scénario : les sélections nationales sont calculées (règle `scenario-2026-11-17`)
+
+- **Constat** : le 17/11, 27 matchs sur 36 n'avaient aucun scénario (éliminatoires de la CAN, Ligues des nations). Cause : le raccord ne lisait que les matchs des 400 derniers jours ; une sélection joue une dizaine de matchs par an et n'atteignait jamais 12 matchs connus sur 20.
+- **Correction** : deux lectures et deux calculs dans `update-data.yml`. Les clubs gardent la lecture d'avant (400 jours) et le même calcul. Les sélections sont lues à part sur 1 100 jours et calculées à part. Moteur privé inchangé.
+- **Sur les sélections, seulement** (`config/marches-pari.json#scenario.selections_nationales`) : plus / moins de 1,5, 2,5 et 3,5 buts et « les deux équipes marquent : non », dans trois compétitions mesurées (Ligue des nations, éliminatoires de la CAN, Ligue des nations de la Concacaf). Fermés : résultat, double chance, résultat et buts, corners (trader de cotes) ; « les deux marquent : oui » et les buts d'une équipe (le moteur les surestime de 4 à 7 points sur les sélections) ; toute autre compétition de sélections.
+- **Contrôles du 17/11** : mathématicien ORANGE (conditions appliquées), avocat du diable REJETÉ puis corrigé. Sur 677 matchs de sélections rejoués sans donnée du futur, la chance calculée par le moteur est juste en moyenne ; ce n'est PAS un taux de paris gagnés. Avec les cotes, l'échantillon est trop petit pour conclure (88 matchs, 32 paris) et le moteur ne fait pas mieux que Bet365 : aucun avantage prouvé, aucun chiffre public sur les sélections.
+- **Suivi** : les paris de sélections sont archivés dans une famille à part (« Sélections · Buts »), jamais mélangés à ceux des clubs. **Journal** : une raison par match sans scénario. **Décisions déjà affichées** : inchangées.
+- **Chantier suivant (moteur privé)** : la chance affichée sort environ 10 points trop basse sur les sélections (recalée sur des paris de clubs) ; à recaler à part.
+
 ## 2026-11-13 — moteur « scénario » : prédire le match d'abord, lire la cote à la fin (plan validé par Clément le 13/11)
 
 - **Décision de Clément** : la règle du 11/11 gardait l'issue que Bet365 jugeait la plus probable entre 1,70 et 3,50, sans aucune formule tirée de l'historique. Nouveau principe : savoir d'abord ce qui va logiquement se passer (équipes, adversaire, arbitre, absents, fatigue, enjeu), noter le pari sur cette base, ne regarder la cote qu'à la fin. Contrôle : le rejeu ci-dessous (Clément s'est passé du mathématicien pour cette mise en ligne).

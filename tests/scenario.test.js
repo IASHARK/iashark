@@ -135,6 +135,57 @@ test("choix final : securite d'ecart, famille fermee par le suivi, match sans sc
   assert.strictEqual(PR.choisirPariFourchette(M7, ctx({ "F5:Under 3.5": I(0.74, 0.75, "Buts", "total") }), {}), null);
 });
 
+test("selections nationales : seulement les buts lus sur les scores, jamais le resultat ni les corners", () => {
+  const cfg = JSON.parse(JSON.stringify(CFG));
+  cfg.scenario.selections_nationales = { ligues: [5, 36, 536], buts_total: [1.5, 2.5, 3.5], buts_equipe: [], les_deux_marquent: ["No"] };
+  cfg.scenario.familles_fermees = [];
+  const raw = { bookmakers: [{ name: "Bet365", bets: RAW.bookmakers[0].bets.concat([
+    { id: 8, name: "Both Teams Score", values: [{ value: "Yes", odd: "1.90" }, { value: "No", odd: "1.90" }] },
+    { id: 16, name: "Total - Home", values: [{ value: "Over 1.5", odd: "1.95" }, { value: "Under 1.5", odd: "1.85" }, { value: "Over 2.5", odd: "3.40" }, { value: "Under 2.5", odd: "1.30" }] }]) }] };
+  const issues = {}; ["F1:Home", "F45:Over 9.5", "F45:Over 10.5", "F5:Over 2.5", "F8:Yes", "F8:No", "F16:Over 1.5", "F16:Over 2.5"].forEach((c) => { issues[c] = I(0.56, 0.6, "Buts", "total"); });
+  issues["F16:Over 2.5"] = I(0.4, 0.42, "Buts", "équipe");
+  const c = (m) => Object.assign(ctx(issues), { fluxPar: { 7: { raw: raw } }, regleFlux: PR.regleFlux(cfg) });
+  const codes = (m) => PR.evaluerCandidatsScenario(m, c(m), FP.selectionsDuMatch(raw, { match: m, regle: PR.regleFlux(cfg) }).selections).map((x) => x.code_flux).sort();
+  const can = Object.assign({}, M7, { league_id: 36, league_key: "afcon_qualifiers" });
+  assert.deepStrictEqual(codes(can), ["F5:Over 2.5", "F8:No"], "CAN : buts du match et les deux marquent NON ; ni buts d'une equipe, ni 1N2, ni corners");
+  assert.deepStrictEqual(codes(Object.assign({}, M7, { league_id: 5, league: "UEFA Nations League" })), ["F5:Over 2.5", "F8:No"], "Ligue des nations : ouverte");
+  assert.deepStrictEqual(codes(Object.assign({}, M7, { league_id: 32, league: "World Cup - Qualification Europe" })), [], "competition de selections jamais mesuree : aucun pari");
+  // Suivi a part : la famille archivee d'un pari de selections ne se melange pas a celle des clubs ; une fermeture de cette famille coupe les selections seulement.
+  const cs = PR.evaluerCandidatsScenario(can, c(can), FP.selectionsDuMatch(raw, { match: can, regle: PR.regleFlux(cfg) }).selections);
+  assert.ok(cs.every((x) => x.scenario.famille === "Sélections · Buts"));
+  assert.deepStrictEqual(PR.evaluerCandidatsScenario(can, Object.assign(c(can), { famillesFermees: ["Sélections · Buts"] }), FP.selectionsDuMatch(raw, { match: can, regle: PR.regleFlux(cfg) }).selections), []);
+  const club = Object.assign({}, M7, { league_id: 61 });
+  assert.ok(PR.evaluerCandidatsScenario(club, Object.assign(c(club), { famillesFermees: ["Sélections · Buts"] }), FP.selectionsDuMatch(raw, { match: club, regle: PR.regleFlux(cfg) }).selections).length > 0);
+  assert.ok(codes(Object.assign({}, M7, { league_id: 61 })).indexOf("F45:Over 9.5") !== -1, "club : toutes les familles ouvertes, comme avant");
+  // Lignes hors liste (4,5 buts, equipe 2,5) : jamais sur une selection.
+  assert.deepStrictEqual(PR.regleFlux(cfg).selectionsNationales.buts_equipe, []);
+});
+
+test("fenetre de lecture et journal : 1 100 jours, une raison par match sans scenario", () => {
+  assert.strictEqual(SCN.FENETRE_LECTURE_JOURS, 1100);
+  assert.deepStrictEqual(SCN.raisonsFermeture({ 1: { issues: {}, ferme: "moins de 12 matchs connus sur les 20 derniers" }, 2: { issues: {}, ferme: "moins de 12 matchs connus sur les 20 derniers" }, 3: { issues: { a: 1 } }, 4: { issues: {} } }),
+    { "moins de 12 matchs connus sur les 20 derniers": 2, "aucune issue cotee avec une formule": 1 });
+  const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "config", "marches-pari.json"), "utf8"));
+  assert.strictEqual(cfg.regle_version, "scenario-2026-11-17");
+  assert.deepStrictEqual(cfg.scenario.selections_nationales, { ligues: [5, 36, 536], buts_total: [1.5, 2.5, 3.5], buts_equipe: [], les_deux_marquent: ["No"] });
+});
+
+test("deux lectures : 400 jours par defaut (clubs, comme avant), 1 100 jours seulement sur demande (selections)", async () => {
+  const lus = [];
+  const mag = { chargerEquipes: async () => {}, enregistrerEquipes: async () => {}, equipeVue: () => Date.now(), noterEquipe: () => {}, manquants: async () => [], ajouter: async () => {},
+    matchsDesEquipes: async (eq, depuis) => { lus.push(depuis); return []; }, matchsDesArbitres: async () => [] };
+  const api = { get: async () => [], appels: () => 0, restant: () => 50000 };
+  const maintenant = Date.parse("2026-11-17T08:00:00Z");
+  await SCN.collecterEtLire({ api: api, magasin: mag, equipes: [1, 2], maintenant: maintenant });
+  await SCN.collecterEtLire({ api: api, magasin: mag, equipes: [1, 2], maintenant: maintenant, fenetreJours: SCN.FENETRE_LECTURE_JOURS });
+  assert.strictEqual(SCN.FENETRE_CLUBS_JOURS, 400);
+  assert.deepStrictEqual([...new Set(lus.slice(0, 2))], [new Date(maintenant - 400 * 86400e3).toISOString()], "clubs : 400 jours, pour le choix des adversaires comme pour la lecture");
+  assert.deepStrictEqual([...new Set(lus.slice(2))], [new Date(maintenant - 1100 * 86400e3).toISOString()]);
+  assert.strictEqual(PR.estMatchDeSelections({ league_id: 36 }, { ligues: [36, 536] }), true);
+  assert.strictEqual(PR.estMatchDeSelections({ league_id: 61 }, { ligues: [36, 536] }), false);
+  assert.strictEqual(SCN.calculerSepare, undefined);
+});
+
 test("note et risque : rien qui depende de la cote", () => {
   assert.strictEqual(PR.risqueScenario(70), "FAIBLE"); assert.strictEqual(PR.risqueScenario(56), "MODERE"); assert.strictEqual(PR.risqueScenario(52), "ELEVE");
   assert.strictEqual(PR.risqueScenario.length, 1);

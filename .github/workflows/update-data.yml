@@ -4741,10 +4741,26 @@ jobs:
                   var scnLu=await SCN.collecterEtLire({api:SCN_API,magasin:SCN_MAG,equipes:scnEq,arbitres:scnCibles.map(scnArb).filter(Boolean),finMs:Date.now()+9*60000});
                   var scnLigues=JSON.parse(fs.readFileSync('config/scenario-ligues.json','utf8')).ligues;
                   var scnAbs=function(m,id){ return (Array.isArray(m.injuries)?m.injuries:[]).filter(function(x){ return x&&x.team===id&&x.player_id!=null; }).map(function(x){ return Number(x.player_id); }); };
-                  SCENARIO_PAR=SCN.calculer(scnMoteur,scnLu.lignes,scnLigues,scnCibles.map(function(m){
-                    return {id:m.id,t:parisLocalToMs(m.date),h:m.home.id,a:m.away.id,lg:m.league_id,ref:scnArb(m),absents:{h:scnAbs(m,m.home.id),a:scnAbs(m,m.away.id)},raw:FLUX_PARIS[String(m.id)].raw,nomDom:m.home.n,nomExt:m.away.n};
-                  }),{FP:FLUX_PARIS_REG,regle:scnRegle});
+                  // DEUX LECTURES, DEUX CALCULS (17/11/2026). Clubs : la lecture d'avant (toutes les equipes du jour, 400 jours)
+                  // et le meme calcul : rien ne change pour eux. Selections : lecture a part sur 1 100 jours (une selection
+                  // joue trop peu pour avoir 12 matchs sur 400 jours), calcul a part.
+                  var scnNatCfg=scnRegle.selectionsNationales||null;
+                  var scnVers=function(m){ return {id:m.id,t:parisLocalToMs(m.date),h:m.home.id,a:m.away.id,lg:m.league_id,ref:scnArb(m),absents:{h:scnAbs(m,m.home.id),a:scnAbs(m,m.away.id)},raw:FLUX_PARIS[String(m.id)].raw,nomDom:m.home.n,nomExt:m.away.n}; };
+                  var scnSel=scnCibles.filter(function(m){ return PRONOSTIC.estMatchDeSelections(m,scnNatCfg); }), scnClubs=scnCibles.filter(function(m){ return !PRONOSTIC.estMatchDeSelections(m,scnNatCfg); });
+                  SCENARIO_PAR=scnClubs.length?SCN.calculer(scnMoteur,scnLu.lignes,scnLigues,scnClubs.map(scnVers),{FP:FLUX_PARIS_REG,regle:scnRegle}):{};
+                  // Selections dans leur propre bloc de secours : une panne de cette seconde lecture ne retire jamais les
+                  // paris des clubs deja calcules (avocat du diable du 17/11/2026).
+                  if(scnSel.length){ try{
+                    var scnEqSel=[]; scnSel.forEach(function(m){ scnEqSel.push(m.home.id,m.away.id); });
+                    var scnLuSel=await SCN.collecterEtLire({api:SCN_API,magasin:SCN_MAG,equipes:scnEqSel,arbitres:scnSel.map(scnArb).filter(Boolean),finMs:Date.now()+4*60000,fenetreJours:SCN.FENETRE_LECTURE_JOURS});
+                    var scnParSel=SCN.calculer(scnMoteur,scnLuSel.lignes,scnLigues,scnSel.map(scnVers),{FP:FLUX_PARIS_REG,regle:scnRegle});
+                    Object.keys(scnParSel).forEach(function(k){ SCENARIO_PAR[k]=scnParSel[k]; });
+                    console.log('  [SCENARIO] selections : '+scnSel.length+' match(s) calcules a part, '+scnLuSel.lignes.length+' match(s) lus sur '+SCN.FENETRE_LECTURE_JOURS+' jours'+(scnLuSel.rapport.arrete_quota?' ; ARRET QUOTA':'')+(scnLuSel.rapport.arrete_budget?' ; budget de temps atteint':'')+' ; '+SCN_API.appels()+' appel(s) API-Sports au total.');
+                  }catch(eSel){ console.log('::warning title=Moteur scenario::selections non calculees ('+String(eSel&&eSel.message||eSel).slice(0,160)+') : les paris des clubs sont gardes.'); } }
                   var scnAvec=Object.keys(SCENARIO_PAR).filter(function(k){ return Object.keys(SCENARIO_PAR[k].issues||{}).length>0; }).length;
+                  // Raison de fermeture de chaque match sans scenario : un compte par raison (aucun pari, aucun nom de match).
+                  var scnRaisons=SCN.raisonsFermeture(SCENARIO_PAR);
+                  if(Object.keys(scnRaisons).length) console.log('  [SCENARIO] sans scenario : '+Object.keys(scnRaisons).map(function(k){ return scnRaisons[k]+' x « '+k+' »'; }).join(' ; ')+'.');
                   console.log('  [SCENARIO] '+scnCibles.length+' match(s) a predire, '+scnAvec+' avec un scenario ; '+scnLu.lignes.length+' match(s) lus en base, '+scnLu.rapport.matchs_nouveaux+' nouveau(x), '+scnLu.rapport.appels+' appel(s) API-Sports'+(scnLu.rapport.arrete_quota?' ; ARRET QUOTA (moins de 3 000 appels restants)':'')+(scnLu.rapport.arrete_budget?' ; budget de temps atteint':'')+' ; moteur '+scnMoteur.version+' ; familles fermees : '+(SCENARIO_FERMEES.join(', ')||'aucune')+'.');
                 }
               }

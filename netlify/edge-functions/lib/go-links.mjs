@@ -62,3 +62,23 @@ export function jetonClic(pathname, c) {
   const j = String(c == null ? "" : c).trim().toLowerCase();
   return UUID.test(j) ? j : null;
 }
+
+// Comptage de chaque clic vers un site de paris (17/11/2026, Clement : « compte tout ») : une ligne
+// « click » dans funnel_events par passage sur /go/<site>/<source>, d'ou qu'il vienne (site, X,
+// Telegram, e-mail). Les apercus de liens et les robots (X, Telegram, Google...) sont marques
+// bot:true pour ne pas gonfler le chiffre. Aucune donnee personnelle : ni adresse IP, ni compte.
+export const SUIVI_URL = "https://ksvjraqitxouwiabecai.supabase.co/rest/v1/funnel_events";
+const ROBOT = /bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp|telegram|discord|slack|curl|wget|python|headless|lighthouse|inspectiontool|feedfetcher|go-http|okhttp|axios|node-fetch|undici/i;
+const SOURCES_SUIVIES = { site: 1, x: 1, telegram: 1, email: 1 };
+
+export function evenementClic(pathname, userAgent) {
+  const parts = String(pathname || "").split("/").filter(Boolean);
+  const book = (parts[1] || "").toLowerCase();
+  if (!Object.prototype.hasOwnProperty.call(GO_LINKS, book)) return null;
+  const s = (parts[2] || "site").toLowerCase();
+  const source = Object.prototype.hasOwnProperty.call(SOURCES_SUIVIES, s) ? s : "site";
+  const ua = String(userAgent || "");
+  const md = { kind: "go_" + book, label: "go_" + book, source };
+  if (!ua || ROBOT.test(ua)) md.bot = true;
+  return { event_type: "click", page: "/go/" + book + "/" + source, metadata: md };
+}

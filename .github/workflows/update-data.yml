@@ -4741,10 +4741,16 @@ jobs:
                   var scnLu=await SCN.collecterEtLire({api:SCN_API,magasin:SCN_MAG,equipes:scnEq,arbitres:scnCibles.map(scnArb).filter(Boolean),finMs:Date.now()+9*60000});
                   var scnLigues=JSON.parse(fs.readFileSync('config/scenario-ligues.json','utf8')).ligues;
                   var scnAbs=function(m,id){ return (Array.isArray(m.injuries)?m.injuries:[]).filter(function(x){ return x&&x.team===id&&x.player_id!=null; }).map(function(x){ return Number(x.player_id); }); };
-                  SCENARIO_PAR=SCN.calculer(scnMoteur,scnLu.lignes,scnLigues,scnCibles.map(function(m){
+                  // Clubs : calcul inchange (lignes de 400 jours). Selections : calcul a part, sur 1 100 jours (17/11/2026).
+                  var scnNatCfg=scnRegle.selectionsNationales||null, scnLigueDe={};
+                  scnCibles.forEach(function(m){ scnLigueDe[String(m.id)]=m; });
+                  SCENARIO_PAR=SCN.calculerSepare(scnMoteur,scnLu.lignes,scnLigues,scnCibles.map(function(m){
                     return {id:m.id,t:parisLocalToMs(m.date),h:m.home.id,a:m.away.id,lg:m.league_id,ref:scnArb(m),absents:{h:scnAbs(m,m.home.id),a:scnAbs(m,m.away.id)},raw:FLUX_PARIS[String(m.id)].raw,nomDom:m.home.n,nomExt:m.away.n};
-                  }),{FP:FLUX_PARIS_REG,regle:scnRegle});
+                  }),{FP:FLUX_PARIS_REG,regle:scnRegle,estSelection:function(x){ return PRONOSTIC.estMatchDeSelections(scnLigueDe[String(x.id)],scnNatCfg); }});
                   var scnAvec=Object.keys(SCENARIO_PAR).filter(function(k){ return Object.keys(SCENARIO_PAR[k].issues||{}).length>0; }).length;
+                  // Raison de fermeture de chaque match sans scenario : un compte par raison (aucun pari, aucun nom de match).
+                  var scnRaisons=SCN.raisonsFermeture(SCENARIO_PAR);
+                  if(Object.keys(scnRaisons).length) console.log('  [SCENARIO] sans scenario : '+Object.keys(scnRaisons).map(function(k){ return scnRaisons[k]+' x « '+k+' »'; }).join(' ; ')+'.');
                   console.log('  [SCENARIO] '+scnCibles.length+' match(s) a predire, '+scnAvec+' avec un scenario ; '+scnLu.lignes.length+' match(s) lus en base, '+scnLu.rapport.matchs_nouveaux+' nouveau(x), '+scnLu.rapport.appels+' appel(s) API-Sports'+(scnLu.rapport.arrete_quota?' ; ARRET QUOTA (moins de 3 000 appels restants)':'')+(scnLu.rapport.arrete_budget?' ; budget de temps atteint':'')+' ; moteur '+scnMoteur.version+' ; familles fermees : '+(SCENARIO_FERMEES.join(', ')||'aucune')+'.');
                 }
               }

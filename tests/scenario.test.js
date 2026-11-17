@@ -135,6 +135,50 @@ test("choix final : securite d'ecart, famille fermee par le suivi, match sans sc
   assert.strictEqual(PR.choisirPariFourchette(M7, ctx({ "F5:Under 3.5": I(0.74, 0.75, "Buts", "total") }), {}), null);
 });
 
+test("selections nationales : seulement les buts lus sur les scores, jamais le resultat ni les corners", () => {
+  const cfg = JSON.parse(JSON.stringify(CFG));
+  cfg.scenario.selections_nationales = { ligues: [36, 536], buts_total: [1.5, 2.5, 3.5], buts_equipe: [0.5, 1.5], les_deux_marquent: ["No"] };
+  cfg.scenario.familles_fermees = [];
+  const raw = { bookmakers: [{ name: "Bet365", bets: RAW.bookmakers[0].bets.concat([
+    { id: 8, name: "Both Teams Score", values: [{ value: "Yes", odd: "1.90" }, { value: "No", odd: "1.90" }] },
+    { id: 16, name: "Total - Home", values: [{ value: "Over 1.5", odd: "1.95" }, { value: "Under 1.5", odd: "1.85" }, { value: "Over 2.5", odd: "3.40" }, { value: "Under 2.5", odd: "1.30" }] }]) }] };
+  const issues = {}; ["F1:Home", "F45:Over 9.5", "F45:Over 10.5", "F5:Over 2.5", "F8:Yes", "F8:No", "F16:Over 1.5", "F16:Over 2.5"].forEach((c) => { issues[c] = I(0.56, 0.6, "Buts", "total"); });
+  issues["F16:Over 2.5"] = I(0.4, 0.42, "Buts", "équipe");
+  const c = (m) => Object.assign(ctx(issues), { fluxPar: { 7: { raw: raw } }, regleFlux: PR.regleFlux(cfg) });
+  const codes = (m) => PR.evaluerCandidatsScenario(m, c(m), FP.selectionsDuMatch(raw, { match: m, regle: PR.regleFlux(cfg) }).selections).map((x) => x.code_flux).sort();
+  const can = Object.assign({}, M7, { league_id: 36, league_key: "afcon_qualifiers" });
+  assert.deepStrictEqual(codes(can), ["F16:Over 1.5", "F5:Over 2.5", "F8:No"], "CAN : buts, les deux marquent NON seulement, buts d'une equipe 1,5 ; ni 1N2 ni corners");
+  assert.deepStrictEqual(codes(Object.assign({}, M7, { league_id: 5, league: "UEFA Nations League" })), ["F16:Over 1.5", "F5:Over 2.5", "F8:No"], "Ligue des nations : reconnue par le site");
+  assert.ok(codes(Object.assign({}, M7, { league_id: 61 })).indexOf("F45:Over 9.5") !== -1, "club : toutes les familles ouvertes, comme avant");
+  // Lignes hors liste (4,5 buts, equipe 2,5) : jamais sur une selection.
+  assert.strictEqual(PR.regleFlux(cfg).selectionsNationales.buts_equipe.indexOf(2.5), -1);
+});
+
+test("fenetre de lecture et journal : 1 100 jours, une raison par match sans scenario", () => {
+  assert.strictEqual(SCN.FENETRE_LECTURE_JOURS, 1100);
+  assert.deepStrictEqual(SCN.raisonsFermeture({ 1: { issues: {}, ferme: "moins de 12 matchs connus sur les 20 derniers" }, 2: { issues: {}, ferme: "moins de 12 matchs connus sur les 20 derniers" }, 3: { issues: { a: 1 } }, 4: { issues: {} } }),
+    { "moins de 12 matchs connus sur les 20 derniers": 2, "aucune issue cotee avec une formule": 1 });
+  const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "config", "marches-pari.json"), "utf8"));
+  assert.strictEqual(cfg.regle_version, "scenario-2026-11-17");
+  assert.deepStrictEqual(cfg.scenario.selections_nationales, { ligues: [36, 536], buts_total: [1.5, 2.5, 3.5], buts_equipe: [0.5, 1.5], les_deux_marquent: ["No"] });
+});
+
+test("deux calculs separes : les clubs ne voient que 400 jours (inchange), les selections 1 100 jours", () => {
+  const vues = [];
+  const moteur = { version: "faux", P: {}, M: { preparer: (l) => { vues.push(l.map((x) => x.id)); return {}; }, evaluer: () => ({ ok: false, raison: "x" }) } };
+  const maintenant = Date.parse("2026-11-17T08:00:00Z");
+  const lignes = [{ id: 1, d: "2026-10-01T00:00:00.000Z" }, { id: 2, d: "2025-09-01T00:00:00.000Z" }, { id: 3, d: "2024-06-01T00:00:00.000Z" }];
+  const out = SCN.calculerSepare(moteur, lignes, {}, [{ id: 10, nat: false }, { id: 11, nat: true }], { maintenant: maintenant, estSelection: (m) => m.nat });
+  assert.deepStrictEqual(vues, [[1], [1, 2, 3]], "clubs : seulement la ligne de moins de 400 jours ; selections : tout");
+  assert.deepStrictEqual(Object.keys(out).sort(), ["10", "11"]);
+  SCN.calculerSepare(moteur, lignes, {}, [{ id: 10 }], { maintenant: maintenant });
+  assert.deepStrictEqual(vues[2], [1], "sans selection : un seul calcul, celui des clubs");
+  assert.strictEqual(vues.length, 3);
+  assert.strictEqual(SCN.FENETRE_CLUBS_JOURS, 400);
+  assert.strictEqual(PR.estMatchDeSelections({ league_id: 36 }, { ligues: [36, 536] }), true);
+  assert.strictEqual(PR.estMatchDeSelections({ league_id: 61 }, { ligues: [36, 536] }), false);
+});
+
 test("note et risque : rien qui depende de la cote", () => {
   assert.strictEqual(PR.risqueScenario(70), "FAIBLE"); assert.strictEqual(PR.risqueScenario(56), "MODERE"); assert.strictEqual(PR.risqueScenario(52), "ELEVE");
   assert.strictEqual(PR.risqueScenario.length, 1);

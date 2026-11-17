@@ -2,6 +2,14 @@
 
 Changements qui affectent le calcul des probabilités, marchés, edge/Kelly ou la manière dont ils sont décidés. Journal complet et non-technique dans `IASHARK_V2_EXECUTION_STATE.md` ; ce fichier ne liste que ce qui touche le moteur lui-même.
 
+## 2026-11-17 — moteur scénario : les sélections nationales sont calculées (règle `scenario-2026-11-17`)
+
+- **Constat** : le 17/11, 27 matchs sur 36 n'avaient aucun scénario (éliminatoires de la CAN, Ligues des nations). Cause : le raccord ne lisait que les matchs des 400 derniers jours ; une sélection joue une dizaine de matchs par an et n'atteignait jamais 12 matchs connus sur 20.
+- **Correction** (`lib/scenario.js#calculerSepare`) : les matchs de sélections sont calculés à part, sur 1 100 jours ; les matchs de clubs restent calculés sur 400 jours, sans aucun changement (condition du mathématicien : avec 1 100 jours pour tous, les chances des clubs bougeaient jusqu'à 6,8 points). Moteur privé inchangé.
+- **Familles permises sur les sélections** (`config/marches-pari.json#scenario.selections_nationales`) : plus / moins de 1,5, 2,5 et 3,5 buts, les deux équipes marquent : non, buts d'une équipe 0,5 et 1,5. Fermés : résultat, double chance, résultat et buts, corners (trader de cotes), et « les deux marquent : oui » (6,7 points trop haut).
+- **Mesure du mathématicien (17/11, feu ORANGE, conditions appliquées)** : 677 matchs de sélections rejoués sans donnée du futur ; ouverts 265 avec 400 jours, 667 avec 1 100 ; chance du moteur 58 % ou plus : 71,3 annoncés, 70,6 réels. Avec les cotes : 88 matchs seulement, 32 paris, trop peu pour conclure ; le moteur ne fait pas mieux que Bet365 sur ces matchs. Aucun chiffre public d'avantage sur les sélections.
+- **Journal** : une raison par match sans scénario. **Décisions déjà affichées** : inchangées.
+
 ## 2026-11-13 — moteur « scénario » : prédire le match d'abord, lire la cote à la fin (plan validé par Clément le 13/11)
 
 - **Décision de Clément** : la règle du 11/11 gardait l'issue que Bet365 jugeait la plus probable entre 1,70 et 3,50, sans aucune formule tirée de l'historique. Nouveau principe : savoir d'abord ce qui va logiquement se passer (équipes, adversaire, arbitre, absents, fatigue, enjeu), noter le pari sur cette base, ne regarder la cote qu'à la fin. Contrôle : le rejeu ci-dessous (Clément s'est passé du mathématicien pour cette mise en ligne).

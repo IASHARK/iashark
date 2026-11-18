@@ -1,10 +1,10 @@
 {
  "version": 1,
- "genere_le": "2026-11-17T11:26:26.738Z",
- "jour": "2026-11-17",
+ "genere_le": "2026-11-18T08:51:55.431Z",
+ "jour": "2026-11-18",
  "debut": "2026-10-06",
  "objectif": 10,
- "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-11-17. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
+ "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-11-18. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
  "montantes": [
   {
    "rang": 1,
@@ -63,10 +63,21 @@
      "c": 1.4,
      "r": "gagne",
      "cc": 5.49
+    },
+    {
+     "j": "2026-11-17",
+     "f": 1528992,
+     "h": "Wales",
+     "a": "Portugal",
+     "m": "away-win",
+     "p": "Victoire Portugal",
+     "c": 1.42,
+     "r": "gagne",
+     "cc": 7.8
     }
    ],
-   "gagnes": 5,
-   "cote": 5.49,
+   "gagnes": 6,
+   "cote": 7.8,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
@@ -383,10 +394,21 @@
      "c": 1.4,
      "r": "gagne",
      "cc": 5.49
+    },
+    {
+     "j": "2026-11-17",
+     "f": 1528992,
+     "h": "Wales",
+     "a": "Portugal",
+     "m": "away-win",
+     "p": "Victoire Portugal",
+     "c": 1.42,
+     "r": "gagne",
+     "cc": 7.8
     }
    ],
    "bilan": {
-    "gagnes": 20,
+    "gagnes": 21,
     "perdus": 6,
     "annules": 1,
     "non_regles": 0,
@@ -395,31 +417,19 @@
   },
   {
    "rang": 2,
-   "paliers": [
-    {
-     "j": "2026-11-16",
-     "f": 1545662,
-     "h": "FYR Macedonia",
-     "a": "Slovenia",
-     "m": "away-win",
-     "p": "Victoire Slovénie",
-     "c": 1.57,
-     "r": "gagne",
-     "cc": 1.57
-    }
-   ],
-   "gagnes": 1,
-   "cote": 1.57,
+   "paliers": [],
+   "gagnes": 0,
+   "cote": null,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
     "t": "perdu",
-    "j": "2026-11-15",
+    "j": "2026-11-17",
     "n": 1,
-    "h": "Alvarado",
-    "a": "Sarmiento de La Banda",
-    "p": "Victoire Alvarado",
-    "k": 1.57
+    "h": "Gambia",
+    "a": "Ivory Coast",
+    "p": "Victoire Côte d'Ivoire",
+    "k": 1.62
    },
    "objectifs": [
     {
@@ -715,11 +725,22 @@
      "c": 1.57,
      "r": "gagne",
      "cc": 1.57
+    },
+    {
+     "j": "2026-11-17",
+     "f": 1545892,
+     "h": "Gambia",
+     "a": "Ivory Coast",
+     "m": "away-win",
+     "p": "Victoire Côte d'Ivoire",
+     "c": 1.62,
+     "r": "perdu",
+     "cc": null
     }
    ],
    "bilan": {
     "gagnes": 17,
-    "perdus": 9,
+    "perdus": 10,
     "annules": 0,
     "non_regles": 0,
     "objectifs": 1
@@ -734,11 +755,11 @@
    "attente": null,
    "dernier": {
     "t": "perdu",
-    "j": "2026-11-14",
-    "n": 1,
-    "h": "Mallorca",
-    "a": "Cordoba",
-    "p": "Victoire Mallorca",
+    "j": "2026-11-17",
+    "n": 0,
+    "h": "Liberia",
+    "a": "Cape Verde Islands",
+    "p": "Victoire Cape Verde Islands",
     "k": 1.85
    },
    "objectifs": [],
@@ -951,11 +972,22 @@
      "c": 1.85,
      "r": "perdu",
      "cc": null
+    },
+    {
+     "j": "2026-11-17",
+     "f": 1545896,
+     "h": "Liberia",
+     "a": "Cape Verde Islands",
+     "m": "away-win",
+     "p": "Victoire Cape Verde Islands",
+     "c": 1.85,
+     "r": "perdu",
+     "cc": null
     }
    ],
    "bilan": {
     "gagnes": 12,
-    "perdus": 6,
+    "perdus": 7,
     "annules": 1,
     "non_regles": 0,
     "objectifs": 0

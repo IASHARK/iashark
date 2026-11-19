@@ -39,12 +39,12 @@
   // quand meme grace a FALLBACK, copie exacte des valeurs du dictionnaire
   // (verifiee par tests/bottom-navigation.test.js).
   var FALLBACK={
-    en:{home:'HOME',tools:'COMBOS',guides:'BLOG',account:'ACCOUNT',aria:'Main navigation'},
-    es:{home:'INICIO',tools:'COMBINADAS',guides:'BLOG',account:'CUENTA',aria:'Navegación principal'},
-    'es-mx':{home:'INICIO',tools:'PARLAYS',guides:'BLOG',account:'CUENTA',aria:'Navegación principal'},
-    de:{home:'START',tools:'KOMBIS',guides:'BLOG',account:'KONTO',aria:'Hauptnavigation'},
-    it:{home:'HOME',tools:'MULTIPLE',guides:'BLOG',account:'ACCOUNT',aria:'Navigazione principale'},
-    pt:{home:'INÍCIO',tools:'MÚLTIPLAS',guides:'BLOG',account:'CONTA',aria:'Navegação principal'}
+    en:{home:'HOME',tools:'COMBOS',chat:'CHAT',guides:'BLOG',account:'ACCOUNT',aria:'Main navigation'},
+    es:{home:'INICIO',tools:'COMBINADAS',chat:'CHAT',guides:'BLOG',account:'CUENTA',aria:'Navegación principal'},
+    'es-mx':{home:'INICIO',tools:'PARLAYS',chat:'CHAT',guides:'BLOG',account:'CUENTA',aria:'Navegación principal'},
+    de:{home:'START',tools:'KOMBIS',chat:'CHAT',guides:'BLOG',account:'KONTO',aria:'Hauptnavigation'},
+    it:{home:'HOME',tools:'MULTIPLE',chat:'CHAT',guides:'BLOG',account:'ACCOUNT',aria:'Navigazione principale'},
+    pt:{home:'INÍCIO',tools:'MÚLTIPLAS',chat:'CHAT',guides:'BLOG',account:'CONTA',aria:'Navegação principal'}
   };
   var locale=DIR_LOCALE[dir]||'fr';
   var fb=FALLBACK[locale]||null;
@@ -56,9 +56,19 @@
   var items=[
     {id:'home',href:href('index.html'),key:'nav.home',label:'Accueil',icon:'<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'},
     {id:'tools',href:href('combines.html'),key:'nav.tools',label:'Combinés',icon:'<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>'},
+    // Onglet « Chat » (19/11/2026, Clement : « entre Combines et Blog, avec un truc bleu qui clignote ») :
+    // ouvre l'assistant (lib/assistant.js) sur la page en cours, charge seulement au premier clic.
+    // Icone lucide message-circle.
+    {id:'chat',href:'#assistant',key:'nav.chat',label:'Chat',icon:'<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>'},
     {id:'blog',href:href('blog.html'),key:'nav.guides',label:'Blog',icon:'<path d="M12 5v16"/><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"/>'},
     {id:'account',href:href('compte.html'),key:'nav.account',label:'Compte',icon:'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'}
   ];
+  function assistantVu(){try{return localStorage.getItem('ias-assistant-vu')==='1';}catch(e){return false;}}
+  var assistantCharge=null;
+  function ouvrirAssistant(){
+    if(window.IasharkAssistant){window.IasharkAssistant.ouvrir();return;}
+    if(!assistantCharge){assistantCharge=document.createElement('script');assistantCharge.src='/lib/assistant.js';assistantCharge.onload=function(){if(window.IasharkAssistant)window.IasharkAssistant.ouvrir();};document.head.appendChild(assistantCharge);}
+  }
   function renderLabel(item){return t(item.key,fb?fb[item.key.split('.')[1]]:item.label);}
   function ariaLabel(){return t('geo.nav.aria_label',fb?fb.aria:'Navigation principale');}
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
@@ -69,8 +79,13 @@
   // document apres ce script, les libelles sont traduits au meme moment.
   nav.setAttribute('data-i18n-attr','aria-label:geo.nav.aria_label');
   nav.innerHTML=items.map(function(item){
-    return '<a class="site-bottom-nav__item" href="'+esc(item.href)+'"'+(active===item.id?' aria-current="page"':'')+'><svg class="site-bottom-nav__icon lucide lucide-'+(item.id==='home'?'house':item.id==='tools'?'star':item.id==='blog'?'book-open':'user')+'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+item.icon+'</svg><span class="site-bottom-nav__label" data-nav-id="'+item.id+'" data-i18n="'+item.key+'">'+esc(renderLabel(item))+'</span></a>';
+    return '<a class="site-bottom-nav__item" href="'+esc(item.href)+'"'+(active===item.id?' aria-current="page"':'')+(item.id==='chat'?' data-track="assistant_open"':'')+'>'+(item.id==='chat'&&!assistantVu()?'<span class="site-bottom-nav__point" aria-hidden="true"></span>':'')+'<svg class="site-bottom-nav__icon lucide lucide-'+(item.id==='home'?'house':item.id==='tools'?'star':item.id==='blog'?'book-open':item.id==='chat'?'message-circle':'user')+'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+item.icon+'</svg><span class="site-bottom-nav__label" data-nav-id="'+item.id+'" data-i18n="'+item.key+'">'+esc(renderLabel(item))+'</span></a>';
   }).join('');
+  var chatLien=nav.querySelector('a[href="#assistant"]');
+  if(chatLien)chatLien.addEventListener('click',function(e){e.preventDefault();ouvrirAssistant();});
+  // Lien partage iashark.com/fr/...#assistant (X, Telegram) : l'assistant s'ouvre tout seul.
+  if(location.hash==='#assistant')ouvrirAssistant();
+  window.addEventListener('hashchange',function(){if(location.hash==='#assistant')ouvrirAssistant();});
   var legacy=document.querySelector('.nav-bottom,.bottom-nav');
   if(legacy)legacy.replaceWith(nav);else document.body.appendChild(nav);
   function relabel(){
@@ -80,7 +95,7 @@
       if(el)el.textContent=renderLabel(item);
       // Liens : I18N.href peut maintenant repondre (page sans prefixe).
       var a=el&&el.parentNode;
-      if(a&&a.tagName==='A'){var h=href(item.id==='home'?'index.html':item.id==='tools'?'combines.html':item.id==='blog'?'blog.html':'compte.html');if(h)a.setAttribute('href',h);}
+      if(a&&a.tagName==='A'&&item.id!=='chat'){var h=href(item.id==='home'?'index.html':item.id==='tools'?'combines.html':item.id==='blog'?'blog.html':'compte.html');if(h)a.setAttribute('href',h);}
     });
   }
   // i18n.js peut arriver apres ce script (charge a la demande par

@@ -17,7 +17,7 @@ html{background:var(--lb-bg);scroll-behavior:smooth}
 .lb [hidden]{display:none!important}
 
 /* ---------- Haut de page (Hero 12, compact) ---------- */
-.lb-hero{position:relative;isolation:isolate;display:flex;flex-direction:column;justify-content:flex-end;width:100%;min-height:clamp(330px,50svh,440px);overflow:hidden;background:var(--lb-bg)}
+.lb-hero{position:relative;isolation:isolate;display:flex;flex-direction:column;justify-content:flex-end;width:100%;min-height:clamp(240px,34svh,330px);overflow:hidden;background:var(--lb-bg)}
 .lb-hero-fond{position:absolute;inset:0;z-index:0;overflow:hidden}
 .lb-hero-fond img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 30%;animation:lb-fond .8s var(--lb-ease) both}
 .lb-hero-voile{position:absolute;inset:0;background:linear-gradient(to top,var(--lb-bg) 0%,rgba(6,11,18,.82) 28%,rgba(6,11,18,.3) 66%,rgba(6,11,18,.12) 100%)}
@@ -118,3 +118,6 @@ html{background:var(--lb-bg);scroll-behavior:smooth}
   .lb-hero-fond img,.lb-hero-copie,.lb-pill{animation:none}
   .lb-cta,.lb-btn,.lb-pill,.lb-banniere,.may-steps__marker,.may-steps__title,.may-steps__connector::after{transition:none}
 }
+
+/* Page de vente : pas de bouton Telegram flottant par-dessus le parcours (retour du 20/11). */
+#ias-tg{display:none!important}

@@ -987,6 +987,7 @@
     { key: "argent", label: "Argent", title: "Combien ça rapporte, qui arrive, qui part ?", sub: "Abonnés du moment, chaque essai, paiement, désabonnement et départ, avec la raison quand elle est donnée." },
     { key: "provenance", label: "Réseaux", title: "Quel réseau amène des gens utiles ?", sub: "Tes abonnés Telegram, X et TikTok jour par jour, puis ce que chaque réseau et chaque publication amène sur le site." },
     { key: "paris", label: "Paris", title: "Comment vont les paris ?", sub: "Les mêmes chiffres que le site, gagnés et perdus, mis à jour chaque matin." },
+    { key: "chat", label: "Chat", title: "Ce que les gens écrivent dans le chat", sub: "Toutes les conversations du chat du site. Quand quelqu'un demande un humain, tu reçois une alerte : réponds ici, il voit ta réponse en direct." },
     { key: "alertes", label: "Alertes", title: "Être prévenu sur ton téléphone", sub: "Choisis ce qui t'envoie une notification : nouveau Pro, désabonnement, paiement raté, site en panne…" },
     { key: "site", label: "Le site", title: "Est-ce que le site marche bien ?", sub: "Pannes, vitesse d'affichage et matchs qui s'affichent (ou pas) : ce qui peut faire fuir un visiteur sans qu'il le dise." },
     { key: "arrivee", label: "Arrivée", title: "Pourquoi les gens partent dès l'arrivée ?", sub: "La première page vue, le temps passé dessus et la langue : c'est là que se joue la plus grosse perte." },

@@ -6,7 +6,7 @@
   left:0;
   z-index:1000;
   display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
+  grid-template-columns:repeat(5,minmax(0,1fr));
   align-items:stretch;
   box-sizing:border-box;
   /* La zone de securite iPhone s'AJOUTE a la hauteur : avec box-sizing
@@ -81,6 +81,10 @@
   transition:transform .18s ease;
 }
 .site-bottom-nav__item[aria-current="page"] .site-bottom-nav__icon{transform:translateY(-1px) scale(1.06)}
+/* Point bleu qui clignote sur l'onglet Chat (19/11/2026) tant que l'assistant n'a jamais ete ouvert. */
+.site-bottom-nav__point{position:absolute;top:9px;left:50%;margin-left:6px;width:9px;height:9px;border-radius:50%;background:#18d3ef;box-shadow:0 0 0 2px rgba(6,11,17,.97);animation:navPoint 1.4s ease-in-out infinite;pointer-events:none}
+@keyframes navPoint{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.8)}}
+@media(prefers-reduced-motion:reduce){.site-bottom-nav__point{animation:none}}
 .site-bottom-nav__label{font:700 11.5px/1 "DM Sans",Inter,system-ui,sans-serif;letter-spacing:.05em;text-transform:uppercase}
 body{padding-bottom:calc(84px + env(safe-area-inset-bottom))!important}
 /* Un element qui recoit le focus (Tab jusqu'au bouton de paiement, cases de

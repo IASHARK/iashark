@@ -89,8 +89,8 @@ test("affichage : la bande seule (aucune ligne de texte), cote sur chaque ligne,
   assert.equal((h.rail.match(/class="bp-c">1,50</g) || []).length, 3, "la cote sur chaque ligne");
   assert.equal((h.rail.match(/bp-it bp-win/g) || []).length, 2);
   assert.equal((h.rail.match(/bp-it bp-loss/g) || []).length, 1);
-  // Ordre des coups d'envoi, gagnes et perdus melanges (jamais trie par resultat).
-  assert.deepEqual([...h.rail.matchAll(/bp-it bp-(win|loss)/g)].map((m) => m[1]), ["win", "loss", "win"]);
+  // Ordre du defile (Clement, 19/11/2026) : gagnes d'abord (serie de 4 au plus ici 2), puis le perdu ; rien de retire.
+  assert.deepEqual([...h.rail.matchAll(/bp-it bp-(win|loss)/g)].map((m) => m[1]), ["win", "win", "loss"]);
   // Code de la consommation L121-2 a L121-4 : aucun argument de gain, aucune promesse, aucun taux presente comme tel.
   const tout = h.rail + h.aria;
   assert.doesNotMatch(tout, /mise|gains?\b|garanti|€|esp[ée]rance|taux|r[ée]ussite|%|rentab|profit|b[ée]n[ée]fice/i);
@@ -290,4 +290,13 @@ test("ticket publie apres (ou a) son premier coup d'envoi, ou sans heures : jama
   // Le calcul quotidien lit ces deux heures.
   const wf = fs.readFileSync(path.join(__dirname, "..", ".github", "workflows", "update-data.yml"), "utf8");
   assert.match(wf, /tickets_du_jour\?select=jour,type,contenu,meta,publie_a,premier_coup_envoi&type=in\.\(x5,x10,or\)/);
+});
+
+// Ordre du defile (Clement, 19/11/2026) : au moins 4 gagnes d'abord, puis un perdu, un gagne ; rien n'est retire.
+test("defile : 4 gagnes d'abord, puis alternance perdu / gagne, rien de retire", () => {
+  const it = (k, g) => ({ k: k, g: g });
+  const items = [it("10", false), it("09", false), it("08", true), it("07", false), it("06", true), it("05", true), it("04", true), it("03", true), it("02", true), it("01", false)];
+  const o = B.ordreDefile(items).map((i) => i.k + (i.g ? "G" : "P"));
+  assert.deepEqual(o, ["08G", "06G", "05G", "04G", "10P", "03G", "09P", "02G", "07P", "01P"]);
+  assert.equal(B.ordreDefile([it("1", false), it("2", true)]).length, 2, "moins de 4 gagnes : tout reste, gagnes d'abord");
 });

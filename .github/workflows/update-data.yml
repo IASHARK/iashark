@@ -5341,7 +5341,9 @@ jobs:
                 canonical_registry_hash: CANONICAL_REGISTRY_HASH,
               },
             };
-            fs.writeFileSync('data.json',JSON.stringify(dataJsonPayload,null,2));
+            // Ecrit compact (19/11/2026) : en mise en page lisible, le fichier a atteint 123,8 Mo un jour de gros
+            // week-end et GitHub refuse tout fichier de plus de 100 Mo (3 calculs du 19/11 en echec).
+            fs.writeFileSync('data.json',JSON.stringify(dataJsonPayload));
             // Fichiers publics legers lus par les pages (data.json reste publie
             // pour la compatibilite : admin, closing-odds, repli des pages). MEME
             // copie assainie que data.json : aucun champ premium en plus.

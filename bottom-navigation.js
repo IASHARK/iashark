@@ -58,8 +58,8 @@
     {id:'tools',href:href('combines.html'),key:'nav.tools',label:'Combinés',icon:'<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>'},
     // Onglet « Chat » (19/11/2026, Clement : « entre Combines et Blog, avec un truc bleu qui clignote ») :
     // ouvre l'assistant (lib/assistant.js) sur la page en cours, charge seulement au premier clic.
-    // Icone lucide message-circle.
-    {id:'chat',href:'#assistant',key:'nav.chat',label:'Chat',icon:'<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>'},
+    // Icone = l'aileron du logo IASHARK (assets/aileron.png en masque CSS), demande de Clement du 19/11.
+    {id:'chat',href:'#assistant',key:'nav.chat',label:'Chat',icon:''},
     {id:'blog',href:href('blog.html'),key:'nav.guides',label:'Blog',icon:'<path d="M12 5v16"/><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"/>'},
     {id:'account',href:href('compte.html'),key:'nav.account',label:'Compte',icon:'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'}
   ];
@@ -79,7 +79,7 @@
   // document apres ce script, les libelles sont traduits au meme moment.
   nav.setAttribute('data-i18n-attr','aria-label:geo.nav.aria_label');
   nav.innerHTML=items.map(function(item){
-    return '<a class="site-bottom-nav__item" href="'+esc(item.href)+'"'+(active===item.id?' aria-current="page"':'')+(item.id==='chat'?' data-track="assistant_open"':'')+'>'+(item.id==='chat'&&!assistantVu()?'<span class="site-bottom-nav__point" aria-hidden="true"></span>':'')+'<svg class="site-bottom-nav__icon lucide lucide-'+(item.id==='home'?'house':item.id==='tools'?'star':item.id==='blog'?'book-open':item.id==='chat'?'message-circle':'user')+'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+item.icon+'</svg><span class="site-bottom-nav__label" data-nav-id="'+item.id+'" data-i18n="'+item.key+'">'+esc(renderLabel(item))+'</span></a>';
+    return '<a class="site-bottom-nav__item" href="'+esc(item.href)+'"'+(active===item.id?' aria-current="page"':'')+(item.id==='chat'?' data-track="assistant_open"':'')+'>'+(item.id==='chat'&&!assistantVu()?'<span class="site-bottom-nav__point" aria-hidden="true"></span>':'')+(item.id==='chat'?'<span class="site-bottom-nav__icon site-bottom-nav__aileron" aria-hidden="true"></span>':'<svg class="site-bottom-nav__icon lucide lucide-'+(item.id==='home'?'house':item.id==='tools'?'star':item.id==='blog'?'book-open':'user')+'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+item.icon+'</svg>')+'<span class="site-bottom-nav__label" data-nav-id="'+item.id+'" data-i18n="'+item.key+'">'+esc(renderLabel(item))+'</span></a>';
   }).join('');
   var chatLien=nav.querySelector('a[href="#assistant"]');
   if(chatLien)chatLien.addEventListener('click',function(e){e.preventDefault();ouvrirAssistant();});

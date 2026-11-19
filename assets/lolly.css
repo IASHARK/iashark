@@ -17,7 +17,7 @@ html{background:var(--lb-bg);scroll-behavior:smooth}
 .lb [hidden]{display:none!important}
 
 /* ---------- Haut de page (Hero 12, compact) ---------- */
-.lb-hero{position:relative;isolation:isolate;display:flex;flex-direction:column;justify-content:flex-end;width:100%;min-height:clamp(330px,50svh,440px);overflow:hidden;background:var(--lb-bg)}
+.lb-hero{position:relative;isolation:isolate;display:flex;flex-direction:column;justify-content:flex-end;width:100%;min-height:clamp(240px,34svh,330px);overflow:hidden;background:var(--lb-bg)}
 .lb-hero-fond{position:absolute;inset:0;z-index:0;overflow:hidden}
 .lb-hero-fond img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 30%;animation:lb-fond .8s var(--lb-ease) both}
 .lb-hero-voile{position:absolute;inset:0;background:linear-gradient(to top,var(--lb-bg) 0%,rgba(6,11,18,.82) 28%,rgba(6,11,18,.3) 66%,rgba(6,11,18,.12) 100%)}
@@ -25,7 +25,7 @@ html{background:var(--lb-bg);scroll-behavior:smooth}
 .lb-duo>img{display:block;height:22px;width:auto}
 .lb-logo{display:inline-flex;align-items:center;padding:6px 10px;border-radius:8px;background:rgba(6,11,18,.82)}
 .lb-logo img{display:block;height:16px;width:auto}
-.lb-hero-contenu{position:relative;z-index:1;display:flex;flex-direction:column;gap:20px;width:100%;max-width:1040px;margin:0 auto;padding:32px 24px 28px}
+.lb-hero-contenu{position:relative;z-index:1;display:flex;flex-direction:column;gap:20px;width:100%;max-width:1040px;margin:0 auto;padding:84px 24px 24px}
 .lb-hero-copie{display:flex;flex-direction:column;gap:14px;min-width:0;animation:lb-copie .5s var(--lb-ease) .1s both}
 .lb-hero-titre{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}
 .lb-h1{margin:0;font-family:"Anton",Impact,"Arial Narrow Bold",sans-serif;font-weight:400;font-size:clamp(46px,13.5vw,88px);line-height:.94;letter-spacing:.005em;text-transform:uppercase;text-wrap:balance;text-shadow:0 10px 40px rgba(0,0,0,.55)}
@@ -118,3 +118,6 @@ html{background:var(--lb-bg);scroll-behavior:smooth}
   .lb-hero-fond img,.lb-hero-copie,.lb-pill{animation:none}
   .lb-cta,.lb-btn,.lb-pill,.lb-banniere,.may-steps__marker,.may-steps__title,.may-steps__connector::after{transition:none}
 }
+
+/* Page de vente : pas de bouton Telegram flottant par-dessus le parcours (retour du 20/11). */
+#ias-tg{display:none!important}

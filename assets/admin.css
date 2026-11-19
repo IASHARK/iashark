@@ -1009,3 +1009,22 @@ body{--ag-accent:#20d5ef;--ag-spring:linear(0,0.009,0.035 2.1%,0.141,0.281 6.7%,
 .pr-points{gap:5px}.pr-points i{width:11px;height:11px}
 .ag-led .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 #reseauxAbos .rs-grid{margin-top:4px}
+
+/* Chat du site (20/11/2026) : liste des conversations et reponse en direct (admin-app.js). */
+.ch-liste{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.ch-ligne{width:100%;text-align:left;display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--card2);color:var(--text);font:inherit;cursor:pointer}
+.ch-ligne:hover{border-color:var(--line2)}
+.ch-ligne.ch-attente{border-color:var(--amber);background:var(--amber-wash)}
+.ch-ligne.ch-nouveau .ch-haut b::after{content:"";display:inline-block;width:7px;height:7px;margin-left:7px;border-radius:50%;background:var(--cyan);vertical-align:middle}
+.ch-haut{display:flex;justify-content:space-between;gap:10px}.ch-haut small,.ch-bas{color:var(--muted);font-size:12.5px}
+.ch-texte{color:var(--soft);font-size:14px;line-height:1.35}
+.ch-fil{list-style:none;margin:10px 0;padding:4px;display:flex;flex-direction:column;gap:8px;max-height:58vh;overflow-y:auto}
+.ch-m{max-width:85%;display:flex;flex-direction:column;gap:3px}
+.ch-m span{padding:9px 13px;border-radius:16px;font-size:14.5px;line-height:1.4;white-space:pre-wrap;word-wrap:break-word}
+.ch-m small{color:var(--muted);font-size:11.5px;padding:0 6px}
+.ch-visiteur{align-self:flex-start}.ch-visiteur span{background:var(--card3);color:var(--text)}
+.ch-robot{align-self:flex-start;opacity:.75}.ch-robot span{background:transparent;border:1px solid var(--line);color:var(--soft);font-size:13px}
+.ch-humain{align-self:flex-end;align-items:flex-end}.ch-humain span{background:var(--cyan);color:#06121a;font-weight:600}
+.ch-systeme{align-self:center;max-width:100%}.ch-systeme span{background:var(--amber-wash);color:var(--amber);font-size:12.5px;padding:5px 11px}
+.ch-form textarea{width:100%;box-sizing:border-box;min-height:64px;padding:12px 14px;border-radius:var(--r-sm);border:1px solid var(--line2);background:var(--card2);color:var(--text);font:16px/1.4 inherit;resize:vertical}
+.ch-form textarea:focus{outline:none;border-color:var(--cyan)}

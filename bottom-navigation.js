@@ -82,6 +82,8 @@
     return '<a class="site-bottom-nav__item" href="'+esc(item.href)+'"'+(active===item.id?' aria-current="page"':'')+(item.id==='chat'?' data-track="assistant_open"':'')+'>'+(item.id==='chat'&&!assistantVu()?'<span class="site-bottom-nav__point" aria-hidden="true"></span>':'')+(item.id==='chat'?'<span class="site-bottom-nav__icon site-bottom-nav__aileron" aria-hidden="true"></span>':'<svg class="site-bottom-nav__icon lucide lucide-'+(item.id==='home'?'house':item.id==='tools'?'star':item.id==='blog'?'book-open':'user')+'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+item.icon+'</svg>')+'<span class="site-bottom-nav__label" data-nav-id="'+item.id+'" data-i18n="'+item.key+'">'+esc(renderLabel(item))+'</span></a>';
   }).join('');
   var chatLien=nav.querySelector('a[href="#assistant"]');
+  // 20/11, Clement : l'onglet Chat doit etre « archi voyant », surtout pour les gens sans compte.
+  try{if(chatLien&&!localStorage.getItem('sb-ksvjraqitxouwiabecai-auth-token'))chatLien.classList.add('site-bottom-nav__item--vif');}catch(e){}
   if(chatLien)chatLien.addEventListener('click',function(e){e.preventDefault();ouvrirAssistant();});
   // Lien partage iashark.com/fr/...#assistant (X, Telegram) : l'assistant s'ouvre tout seul.
   if(location.hash==='#assistant')ouvrirAssistant();

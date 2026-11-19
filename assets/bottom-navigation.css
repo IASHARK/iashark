@@ -113,3 +113,12 @@ html{scroll-padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 .seo-foot-nav a:focus-visible{outline:2px solid #18d3ef;outline-offset:2px;border-radius:3px}
 /* Numeros d'aide jamais coupes en fin de ligne (« 09 74 75 13 » puis « 13 »). */
 a[href^="tel:"],[data-market-helpline="phone"]{white-space:nowrap}
+/* Onglet Chat bien visible pour les visiteurs sans compte (20/11/2026) : aileron dans un rond cyan
+   qui depasse de la barre, halo qui respire, libelle cyan. */
+.site-bottom-nav__item--vif{color:#20d5ef!important;overflow:visible}
+.site-bottom-nav__item--vif .site-bottom-nav__aileron{width:46px!important;height:46px!important;margin-top:-22px;border-radius:50%;background:#20d5ef;-webkit-mask:none;mask:none;position:relative;box-shadow:0 0 0 4px #060b11,0 6px 18px rgba(32,213,239,.45);animation:navVif 2.2s ease-in-out infinite}
+.site-bottom-nav__item--vif .site-bottom-nav__aileron::before{content:"";position:absolute;inset:11px;background:#060b11;-webkit-mask:url(/assets/aileron.png) center/contain no-repeat;mask:url(/assets/aileron.png) center/contain no-repeat}
+.site-bottom-nav__item--vif .site-bottom-nav__label{color:#20d5ef}
+.site-bottom-nav__item--vif .site-bottom-nav__point{top:-18px;margin-left:12px;background:#fff}
+@keyframes navVif{0%,100%{box-shadow:0 0 0 4px #060b11,0 0 0 4px rgba(32,213,239,.55),0 6px 18px rgba(32,213,239,.45)}50%{box-shadow:0 0 0 4px #060b11,0 0 0 13px rgba(32,213,239,0),0 6px 18px rgba(32,213,239,.45)}}
+@media(prefers-reduced-motion:reduce){.site-bottom-nav__item--vif .site-bottom-nav__aileron{animation:none}}

@@ -102,6 +102,7 @@
         <li><a href="#ecran-argent" data-screen-link="argent">Argent</a></li>
         <li><a href="#ecran-provenance" data-screen-link="provenance">Réseaux</a></li>
         <li><a href="#ecran-paris" data-screen-link="paris">Paris</a></li>
+        <li><a href="#ecran-chat" data-screen-link="chat">Chat<span class="tab-count tnum" id="chatTabCount" hidden></span></a></li>
         <li><a href="#ecran-alertes" data-screen-link="alertes">Alertes</a></li>
         <li><a href="#ecran-site" data-screen-link="site">Le site</a></li>
         <li><a href="#ecran-arrivee" data-screen-link="arrivee">Arrivée</a></li>
@@ -588,10 +589,17 @@
       <div id="alertes"><div class="skel skel-block"></div></div>
     </section>
 
+    <!-- Chat (20/11/2026) : conversations du chat du site, reponse en direct (admin-app.js, admin_chat_*) -->
+    <section class="section" data-screen="chat" aria-labelledby="chatTitle">
+      <h2 class="sr-only" id="chatTitle">Chat</h2>
+      <div id="chatAdmin"><div class="skel skel-block"></div></div>
+    </section>
+
     <!-- Plus (telephone) : les autres ecrans -->
     <section class="section" data-screen="plus" aria-labelledby="plusTitle">
       <h2 class="sr-only" id="plusTitle">Tous les écrans</h2>
       <ul class="plus-list">
+        <li><a href="#ecran-chat"><b>Chat</b><span>Ce que les gens écrivent, répondre en direct</span></a></li>
         <li><a href="#ecran-alertes"><b>Alertes</b><span>Notifications sur ton téléphone</span></a></li>
         <li><a href="#ecran-site"><b>Le site</b><span>Pannes, vitesse, matchs affichés</span></a></li>
         <li><a href="#ecran-arrivee"><b>Arrivée</b><span>La première page vue et la langue</span></a></li>

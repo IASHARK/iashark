@@ -86,6 +86,52 @@
   // Lien partage iashark.com/fr/...#assistant (X, Telegram) : l'assistant s'ouvre tout seul.
   if(location.hash==='#assistant')ouvrirAssistant();
   window.addEventListener('hashchange',function(){if(location.hash==='#assistant')ouvrirAssistant();});
+  // Bulle bleue au-dessus de l'onglet Chat (20/11/2026, demande de Clement : « un petit truc bleu qui s'affiche
+  // pour bien que les gens voient »). Visiteur sans compte : 12 s apres l'arrivee, une fois par jour.
+  // Inscrit gratuit : apres son match offert, a la place de l'ancienne fenetre d'essai (lib/contact-essai.js
+  // appelle IasharkChatBulle('gratuit')) ; le chat s'ouvre alors sur « qu'est-ce qui te retient ? ».
+  var BULLE={fr:['Une question sur un match ? Demande-moi.','Pourquoi tu restes en gratuit ? Je t’explique en 30 secondes.','Fermer'],
+    en:['Got a question about a match? Ask me.','Why stay on free? I’ll explain in 30 seconds.','Close'],
+    es:['¿Una pregunta sobre un partido? Pregúntame.','¿Por qué sigues en gratis? Te lo explico en 30 segundos.','Cerrar'],
+    pt:['Uma dúvida sobre um jogo? Pergunta-me.','Porque continuas no grátis? Explico-te em 30 segundos.','Fechar']};
+  function chatBulle(type){
+    if(!chatLien||document.getElementById('ias-chat-bulle')||document.documentElement.classList.contains('ias-as-ouvert'))return;
+    var seg=(location.pathname.split('/')[1]||'').toLowerCase();
+    var tx=BULLE[{en:'en',gb:'en',za:'en',es:'es',mx:'es',pt:'pt'}[seg]||'fr'];
+    if(!document.getElementById('ias-chat-bulle-st')){
+      var st=document.createElement('style');st.id='ias-chat-bulle-st';
+      st.textContent='#ias-chat-bulle{position:fixed;z-index:1000;bottom:calc(84px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:4px;max-width:min(320px,calc(100vw - 24px));padding:4px 4px 4px 14px;border-radius:16px;background:#20d5ef;color:#060b12;box-shadow:0 10px 28px rgba(0,0,0,.45);font:600 14px/1.3 Inter,system-ui,sans-serif;animation:iasBulle .3s ease-out both}'
+        +'#ias-chat-bulle::after{content:"";position:absolute;bottom:-6px;left:var(--fl,50%);width:12px;height:12px;margin-left:-6px;background:#20d5ef;transform:rotate(45deg);border-radius:2px}'
+        +'#ias-chat-bulle button{border:0;background:none;color:inherit;font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}'
+        +'#ias-chat-bulle .icb-t{padding:6px 0;text-align:left}#ias-chat-bulle .icb-x{flex:none;width:32px;height:32px;border-radius:10px;font-size:18px;line-height:1}'
+        +'@keyframes iasBulle{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}@media (prefers-reduced-motion:reduce){#ias-chat-bulle{animation:none}}';
+      document.head.appendChild(st);
+    }
+    var b=document.createElement('div');b.id='ias-chat-bulle';b.setAttribute('role','status');
+    b.innerHTML='<button type="button" class="icb-t" data-track="assistant_bulle_'+type+'">'+esc(tx[type==='gratuit'?1:0])+'</button><button type="button" class="icb-x" aria-label="'+esc(tx[2])+'">×</button>';
+    document.body.appendChild(b);
+    var tg=document.getElementById('ias-tg');if(tg)tg.style.visibility='hidden';
+    var r=chatLien.getBoundingClientRect(),w=b.offsetWidth,x=Math.max(12,Math.min(window.innerWidth-w-12,r.left+r.width/2-w/2));
+    b.style.left=x+'px';b.style.setProperty('--fl',(r.left+r.width/2-x)+'px');
+    var fin=function(){if(b.parentNode)b.parentNode.removeChild(b);if(tg)tg.style.visibility='';};
+    b.querySelector('.icb-t').addEventListener('click',function(){fin();window.__iasAsEntree=type;ouvrirAssistant();});
+    b.querySelector('.icb-x').addEventListener('click',fin);
+    setTimeout(fin,type==='gratuit'?25000:15000);
+  }
+  window.IasharkChatBulle=chatBulle;
+  (function(){
+    var jour=new Date().toISOString().slice(0,10);
+    try{
+      if(localStorage.getItem('sb-ksvjraqitxouwiabecai-auth-token'))return;
+      if(localStorage.getItem('ias-chat-bulle')===jour)return;
+    }catch(e){return;}
+    if(/connexion|inscription|abonnement|checkout|mot-de-passe|reinitialiser|admin/.test(location.pathname)||navigator.webdriver)return;
+    setTimeout(function(){
+      if(document.querySelector('dialog[open]'))return;
+      try{localStorage.setItem('ias-chat-bulle',jour);}catch(e){}
+      chatBulle('question');
+    },12000);
+  })();
   var legacy=document.querySelector('.nav-bottom,.bottom-nav');
   if(legacy)legacy.replaceWith(nav);else document.body.appendChild(nav);
   function relabel(){

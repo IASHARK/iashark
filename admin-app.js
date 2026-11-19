@@ -22,7 +22,8 @@
     ["inscrit", "Nouvel inscrit"],
     ["telegram", "Telegram laissé"],
     ["panne", "Site en panne (et quand il remarche)"],
-    ["foule", "Beaucoup de monde sur le site d'un coup"]
+    ["foule", "Beaucoup de monde sur le site d'un coup"],
+    ["chat", "Quelqu'un veut te parler dans le chat"]
   ];
   var QUOI = {
     essai: { t: "A commencé un essai Pro", c: "bleu" },
@@ -791,6 +792,88 @@
     });
   }
 
+  // =====================================================================================================
+  // Chat du site (20/11/2026) : toutes les conversations, et la reponse en direct quand quelqu'un
+  // demande un humain (alerte « chat » sur le telephone). Fonctions admin_chat_* (migration 0078).
+  // =====================================================================================================
+  var CH = { liste: null, ouverte: null, conv: null, minuteur: null, envoi: false };
+  function profilTxt(p) { return p === "pro" ? "Pro" : p === "membre" ? "Inscrit gratuit" : "Visiteur"; }
+  function etatTxt(e) { return { attente: "Attend une réponse", humain: "Tu as repris la main", occupe: "Pas de réponse à temps", robot: "Le robot répond" }[e] || ""; }
+  function chargerChat() {
+    if (CH.ouverte) return chargerConv(CH.ouverte);
+    return A().rpc("admin_chat_liste", { p_limit: 80 }).then(function (r) {
+      CH.liste = r;
+      var n = ((r && r.data) || []).filter(function (c) { return c.attente; }).length;
+      var b = $("chatTabCount"); if (b) { b.hidden = !n; b.textContent = n ? String(n) : ""; }
+      rendreChat();
+    });
+  }
+  function chargerConv(id) {
+    return A().rpc("admin_chat_messages", { p_conv: id }).then(function (r) { if (CH.ouverte === id) { CH.conv = r; rendreChat(); } });
+  }
+  function rendreChat() {
+    var el = $("chatAdmin");
+    if (!el) return;
+    if (CH.ouverte) return rendreConv(el);
+    var r = CH.liste;
+    if (r && !r.data) { A().blockError(el, r, "Chat"); return; }
+    var list = (r && r.data) || [];
+    el.innerHTML = '<section class="card section"><div class="card-head"><div><h3 class="card-title">Conversations</h3><p class="card-sub">Celles qui attendent une réponse en premier, puis les plus récentes</p></div></div>'
+      + (list.length ? '<ol class="ch-liste">' + list.map(function (c) {
+        return '<li><button type="button" class="ch-ligne' + (c.attente ? " ch-attente" : "") + (c.nouveau ? " ch-nouveau" : "") + '" data-chat="' + esc(c.id) + '">'
+          + '<span class="ch-haut"><b>' + esc(c.email || profilTxt(c.profil)) + '</b><small>' + esc(quand(c.dernier)) + "</small></span>"
+          + '<span class="ch-texte">' + esc(c.dernier_texte || "(a seulement cliqué des boutons)") + "</span>"
+          + '<span class="ch-bas">' + esc(profilTxt(c.profil) + " · " + String(c.langue || "").toUpperCase() + " · " + c.n + " message" + (c.n > 1 ? "s" : "") + (c.etat !== "robot" ? " · " + etatTxt(c.etat) : "")) + "</span></button></li>";
+      }).join("") + "</ol>" : A().emptyHtml("Aucune conversation pour le moment", "Dès que quelqu'un écrit dans le chat du site, ça apparaît ici.")) + "</section>";
+  }
+  function rendreConv(el) {
+    var r = CH.conv, d = (r && r.data) || {}, c = d.conversation || {}, msgs = d.messages || [];
+    var garde = $("chRep") ? $("chRep").value : "";
+    el.innerHTML = '<section class="card section ch-conv"><div class="card-head"><div><button type="button" class="btn btn-ghost" id="chRetour">Toutes les conversations</button>'
+      + '<h3 class="card-title">' + esc(c.email || profilTxt(c.profil)) + '</h3><p class="card-sub">' + esc(profilTxt(c.profil) + " · " + String(c.langue || "").toUpperCase() + (c.page ? " · " + c.page : "") + (c.etat ? " · " + etatTxt(c.etat) : "")) + "</p></div></div>"
+      + '<ol class="ch-fil" id="chFil">' + msgs.map(function (m) {
+        return '<li class="ch-m ch-' + esc(m.a) + '"><span>' + esc(m.t) + "</span><small>" + esc((m.a === "visiteur" ? "La personne" : m.a === "robot" ? "Robot" : m.a === "humain" ? "Toi" : "") + " " + A().fmtTime(m.at)) + "</small></li>";
+      }).join("") + "</ol>"
+      + '<form class="ch-form" id="chForm"><textarea id="chRep" rows="2" maxlength="2000" placeholder="Ta réponse, elle s\'affiche tout de suite dans son chat"></textarea>'
+      + '<div class="card-actions"><button type="submit" class="btn" id="chEnvoyer"' + (CH.envoi ? " disabled" : "") + '>Envoyer</button>'
+      + '<button type="button" class="btn btn-ghost" data-chat-vite="Salut, c\'est l\'équipe IASHARK, je suis là. Je t\'écoute.">Je suis là</button>'
+      + (c.etat === "humain" || c.etat === "attente" ? '<button type="button" class="btn btn-ghost" id="chRendre">Rendre au robot</button>' : "") + "</div></form></section>";
+    var t = $("chRep"); if (t && garde) t.value = garde;
+    var f = $("chFil"); if (f) f.scrollTop = f.scrollHeight;
+  }
+  function envoyerChat(texte) {
+    texte = String(texte || "").trim();
+    if (!texte || !CH.ouverte || CH.envoi) return;
+    CH.envoi = true;
+    A().rpc("admin_chat_repondre", { p_conv: CH.ouverte, p_texte: texte }).then(function (r) {
+      CH.envoi = false;
+      if (!r || r.error || !r.data || !r.data.ok) { A().toast("Pas envoyé, réessaie."); return; }
+      var t = $("chRep"); if (t) t.value = "";
+      chargerConv(CH.ouverte);
+    });
+  }
+  function minuteurChat(actif) {
+    if (CH.minuteur) { clearInterval(CH.minuteur); CH.minuteur = null; }
+    if (actif) CH.minuteur = setInterval(function () { if (!document.hidden) chargerChat(); }, 5000);
+  }
+  document.addEventListener("submit", function (e) {
+    if (!e.target || e.target.id !== "chForm") return;
+    e.preventDefault();
+    var t = $("chRep"); envoyerChat(t && t.value);
+  });
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    if (!t || !t.closest) return;
+    var l = t.closest("[data-chat]");
+    if (l) { CH.ouverte = l.getAttribute("data-chat"); CH.conv = null; $("chatAdmin").innerHTML = '<div class="skel skel-block"></div>'; chargerConv(CH.ouverte); return; }
+    if (t.closest("#chRetour")) { CH.ouverte = null; CH.conv = null; chargerChat(); return; }
+    var v = t.closest("[data-chat-vite]");
+    if (v) { envoyerChat(v.getAttribute("data-chat-vite")); return; }
+    if (t.closest("#chRendre")) {
+      A().rpc("admin_chat_rendre", { p_conv: CH.ouverte }).then(function () { A().toast("Le robot reprend la conversation."); chargerConv(CH.ouverte); });
+    }
+  });
+
   // ---------- Clics ----------
   document.addEventListener("click", function (e) {
     var t = e.target;
@@ -835,6 +918,7 @@
       chargerReseaux();
       if (!charge || A().S.screen === "paris") chargerParis();
       if (A().S.screen === "alertes") chargerAlertes();
+      if (A().S.screen === "chat") chargerChat();
       charge = true;
     },
     membres: function () { listes(); chercher(); },
@@ -844,6 +928,8 @@
     ecran: function (key) {
       onglet(key);
       if (key === "alertes") chargerAlertes();
+      minuteurChat(key === "chat");
+      if (key === "chat") chargerChat();
       if (key === "paris" && !E.paris) chargerParis();
       if (key === "aujourdhui" && E.carte) setTimeout(function () { E.carte.invalidateSize(); }, 60);
     }

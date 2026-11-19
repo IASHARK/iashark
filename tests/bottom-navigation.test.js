@@ -47,10 +47,13 @@ test('toutes les pages publiques chargent la navigation inférieure partagée',(
   }
 });
 
-test('la navigation partagée contient exactement les quatre destinations validées',()=>{
+test('la navigation partagée contient exactement les cinq destinations validées',()=>{
   const js=fs.readFileSync(path.join(root,'bottom-navigation.js'),'utf8');
   // 21/10/2026 : l'onglet « Outils » devient « Combinés » et ouvre la page des combinés du jour.
-  for(const label of ['Accueil','Combinés','Blog','Compte'])assert.match(js,new RegExp("label:'"+label+"'"));
+  // 19/11/2026 : onglet « Chat » entre Combinés et Blog, il ouvre l'assistant (lib/assistant.js).
+  for(const label of ['Accueil','Combinés','Chat','Blog','Compte'])assert.match(js,new RegExp("label:'"+label+"'"));
+  assert.match(js,/href:'#assistant'/);
+  assert.match(js,/'\/lib\/assistant\.js'/);
   assert.doesNotMatch(js,/label:'Marchés'/);
   assert.match(js,/aria-current/);
   assert.match(js,/href:href\('combines\.html'\)/);

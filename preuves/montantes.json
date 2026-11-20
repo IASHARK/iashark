@@ -1,16 +1,28 @@
 {
  "version": 1,
- "genere_le": "2026-11-19T17:27:41.346Z",
- "jour": "2026-11-19",
+ "genere_le": "2026-11-20T09:15:29.160Z",
+ "jour": "2026-11-20",
  "debut": "2026-10-06",
  "objectif": 10,
- "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-11-19. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
+ "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-11-20. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
  "montantes": [
   {
    "rang": 1,
-   "paliers": [],
-   "gagnes": 0,
-   "cote": null,
+   "paliers": [
+    {
+     "j": "2026-11-19",
+     "f": 1492453,
+     "h": "Flamengo",
+     "a": "Atletico Paranaense",
+     "m": "away-team-over-05",
+     "p": "Atletico Paranaense : plus de 0,5 but",
+     "c": 1.83,
+     "r": "gagne",
+     "cc": 1.83
+    }
+   ],
+   "gagnes": 1,
+   "cote": 1.83,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
@@ -349,10 +361,21 @@
      "c": 1.83,
      "r": "perdu",
      "cc": null
+    },
+    {
+     "j": "2026-11-19",
+     "f": 1492453,
+     "h": "Flamengo",
+     "a": "Atletico Paranaense",
+     "m": "away-team-over-05",
+     "p": "Atletico Paranaense : plus de 0,5 but",
+     "c": 1.83,
+     "r": "gagne",
+     "cc": 1.83
     }
    ],
    "bilan": {
-    "gagnes": 21,
+    "gagnes": 22,
     "perdus": 7,
     "annules": 1,
     "non_regles": 0,
@@ -361,9 +384,21 @@
   },
   {
    "rang": 2,
-   "paliers": [],
-   "gagnes": 0,
-   "cote": null,
+   "paliers": [
+    {
+     "j": "2026-11-19",
+     "f": 1643062,
+     "h": "Al-Wasl FC",
+     "a": "Hatta SC",
+     "m": "btts-yes",
+     "p": "Les deux équipes marquent",
+     "c": 1.8,
+     "r": "gagne",
+     "cc": 1.8
+    }
+   ],
+   "gagnes": 1,
+   "cote": 1.8,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
@@ -691,10 +726,21 @@
      "c": 1.83,
      "r": "perdu",
      "cc": null
+    },
+    {
+     "j": "2026-11-19",
+     "f": 1643062,
+     "h": "Al-Wasl FC",
+     "a": "Hatta SC",
+     "m": "btts-yes",
+     "p": "Les deux équipes marquent",
+     "c": 1.8,
+     "r": "gagne",
+     "cc": 1.8
     }
    ],
    "bilan": {
-    "gagnes": 17,
+    "gagnes": 18,
     "perdus": 11,
     "annules": 0,
     "non_regles": 0,
@@ -703,9 +749,21 @@
   },
   {
    "rang": 3,
-   "paliers": [],
-   "gagnes": 0,
-   "cote": null,
+   "paliers": [
+    {
+     "j": "2026-11-19",
+     "f": 1643063,
+     "h": "Al Ain",
+     "a": "Al-Dhafra",
+     "m": "btts-yes",
+     "p": "Les deux équipes marquent",
+     "c": 2,
+     "r": "gagne",
+     "cc": 2
+    }
+   ],
+   "gagnes": 1,
+   "cote": 2,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
@@ -938,10 +996,21 @@
      "c": 1.85,
      "r": "perdu",
      "cc": null
+    },
+    {
+     "j": "2026-11-19",
+     "f": 1643063,
+     "h": "Al Ain",
+     "a": "Al-Dhafra",
+     "m": "btts-yes",
+     "p": "Les deux équipes marquent",
+     "c": 2,
+     "r": "gagne",
+     "cc": 2
     }
    ],
    "bilan": {
-    "gagnes": 12,
+    "gagnes": 13,
     "perdus": 7,
     "annules": 1,
     "non_regles": 0,

@@ -1,60 +1,26 @@
 {
  "version": 1,
- "genere_le": "2026-11-22T08:39:59.687Z",
- "jour": "2026-11-22",
+ "genere_le": "2026-11-23T08:46:49.833Z",
+ "jour": "2026-11-23",
  "debut": "2026-10-06",
  "objectif": 10,
- "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-11-22. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
+ "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-11-23. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
  "montantes": [
   {
    "rang": 1,
-   "paliers": [
-    {
-     "j": "2026-11-19",
-     "f": 1492453,
-     "h": "Flamengo",
-     "a": "Atletico Paranaense",
-     "m": "away-team-over-05",
-     "p": "Atletico Paranaense : plus de 0,5 but",
-     "c": 1.83,
-     "r": "gagne",
-     "cc": 1.83
-    },
-    {
-     "j": "2026-11-20",
-     "f": 1551888,
-     "h": "De Graafschap",
-     "a": "MVV",
-     "m": "under-35",
-     "p": "Moins de 3,5 buts",
-     "c": 1.8,
-     "r": "gagne",
-     "cc": 3.29
-    },
-    {
-     "j": "2026-11-21",
-     "f": 1552226,
-     "h": "Feyenoord",
-     "a": "Excelsior",
-     "m": "btts-yes",
-     "p": "Les deux équipes marquent",
-     "c": 1.8,
-     "r": "gagne",
-     "cc": 5.93
-    }
-   ],
-   "gagnes": 3,
-   "cote": 5.93,
+   "paliers": [],
+   "gagnes": 0,
+   "cote": null,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
     "t": "perdu",
-    "j": "2026-11-18",
-    "n": 6,
-    "h": "USA",
-    "a": "Haiti",
-    "p": "Les deux équipes marquent",
-    "k": 1.83
+    "j": "2026-11-22",
+    "n": 3,
+    "h": "FK Sarajevo",
+    "a": "Siroki Brijeg",
+    "p": "Moins de 2,5 buts",
+    "k": 1.75
    },
    "objectifs": [
     {
@@ -416,11 +382,22 @@
      "c": 1.8,
      "r": "gagne",
      "cc": 5.93
+    },
+    {
+     "j": "2026-11-22",
+     "f": 1635105,
+     "h": "FK Sarajevo",
+     "a": "Siroki Brijeg",
+     "m": "under-25",
+     "p": "Moins de 2,5 buts",
+     "c": 1.75,
+     "r": "perdu",
+     "cc": null
     }
    ],
    "bilan": {
     "gagnes": 24,
-    "perdus": 7,
+    "perdus": 8,
     "annules": 1,
     "non_regles": 0,
     "objectifs": 1
@@ -435,12 +412,12 @@
    "attente": null,
    "dernier": {
     "t": "perdu",
-    "j": "2026-11-21",
-    "n": 2,
-    "h": "Kawasaki Frontale",
-    "a": "Avispa Fukuoka",
-    "p": "Plus de 2,5 buts",
-    "k": 1.85
+    "j": "2026-11-22",
+    "n": 0,
+    "h": "Atalanta",
+    "a": "Inter",
+    "p": "Moins de 3,5 buts",
+    "k": 1.8
    },
    "objectifs": [
     {
@@ -791,11 +768,22 @@
      "c": 1.85,
      "r": "perdu",
      "cc": null
+    },
+    {
+     "j": "2026-11-22",
+     "f": 1550198,
+     "h": "Atalanta",
+     "a": "Inter",
+     "m": "under-35",
+     "p": "Moins de 3,5 buts",
+     "c": 1.8,
+     "r": "perdu",
+     "cc": null
     }
    ],
    "bilan": {
     "gagnes": 19,
-    "perdus": 12,
+    "perdus": 13,
     "annules": 0,
     "non_regles": 0,
     "objectifs": 1
@@ -803,55 +791,24 @@
   },
   {
    "rang": 3,
-   "paliers": [
-    {
-     "j": "2026-11-19",
-     "f": 1643063,
-     "h": "Al Ain",
-     "a": "Al-Dhafra",
-     "m": "btts-yes",
-     "p": "Les deux équipes marquent",
-     "c": 2,
-     "r": "gagne",
-     "cc": 2
-    },
-    {
-     "j": "2026-11-20",
-     "f": 1567962,
-     "h": "SKN ST. Polten",
-     "a": "Voitsberg",
-     "m": "home-team-under-15",
-     "p": "SKN ST. Polten : moins de 1,5 but",
-     "c": 2,
-     "r": "gagne",
-     "cc": 4
-    },
-    {
-     "j": "2026-11-21",
-     "f": 1565532,
-     "h": "Kolos Kovalivka",
-     "a": "FC Kharkiv",
-     "m": "over-25",
-     "p": "Plus de 2,5 buts",
-     "c": 2.05,
-     "r": "gagne",
-     "cc": 8.2
-    }
-   ],
-   "gagnes": 3,
-   "cote": 8.2,
+   "paliers": [],
+   "gagnes": 0,
+   "cote": null,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
-    "t": "perdu",
-    "j": "2026-11-17",
-    "n": 0,
-    "h": "Liberia",
-    "a": "Cape Verde Islands",
-    "p": "Victoire Cape Verde Islands",
-    "k": 1.85
+    "t": "objectif",
+    "j": "2026-11-22",
+    "n": 4,
+    "c": 16.4
    },
-   "objectifs": [],
+   "objectifs": [
+    {
+     "j": "2026-11-22",
+     "n": 4,
+     "c": 16.4
+    }
+   ],
    "historique": [
     {
      "j": "2026-10-06",
@@ -1105,14 +1062,26 @@
      "c": 2.05,
      "r": "gagne",
      "cc": 8.2
+    },
+    {
+     "j": "2026-11-22",
+     "f": 1649495,
+     "h": "Inter Miami",
+     "a": "Columbus Crew",
+     "m": "total-shots-under-28_5",
+     "p": "Moins de 28,5 tirs",
+     "c": 2,
+     "r": "gagne",
+     "cc": 16.4,
+     "o": 1
     }
    ],
    "bilan": {
-    "gagnes": 15,
+    "gagnes": 16,
     "perdus": 7,
     "annules": 1,
     "non_regles": 0,
-    "objectifs": 0
+    "objectifs": 1
    }
   }
  ]

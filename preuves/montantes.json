@@ -1,38 +1,26 @@
 {
  "version": 1,
- "genere_le": "2026-11-24T11:07:15.693Z",
- "jour": "2026-11-24",
+ "genere_le": "2026-11-25T09:51:50.273Z",
+ "jour": "2026-11-25",
  "debut": "2026-10-06",
  "objectif": 10,
- "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-11-24. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
+ "regle": "Montante n = pari classe n de la Selection en or de chaque jour (table tickets_du_jour, type or, publiee avant son premier coup d'envoi), depuis le 2026-10-06, jours avant le 2026-11-25. Pari regle par lib/bandeau-preuves.js#creerRegleur (archive, meme marche, sinon score final), sinon par un calcul precedent, sinon par les faits du match chez API-Sports (score reglementaire, score a la pause, buts sans contre son camp, minutes jouees). Gagne : palier suivant, cote cumulee = produit des cotes gagnees (au centime, moitie vers le haut). Perdu : retour au palier 1. Annule (match reporte, annule ou abandonne ; buteur qui n'a pas joue) : ne compte pas. Un jour sans Selection en or ne casse pas la serie. Cote 10 atteinte : objectif annonce, retour au palier 1. Pas de resultat : en attente ; aucune donnee 72 h apres la fin du match : non regle, retour au palier 1 (jamais compte gagne). historique : tous les paris depuis le debut, cc = cote cumulee apres le pari.",
  "montantes": [
   {
    "rang": 1,
-   "paliers": [
-    {
-     "j": "2026-11-23",
-     "f": 1651120,
-     "h": "Vancouver Whitecaps",
-     "a": "Real Salt Lake",
-     "m": "under-35",
-     "p": "Moins de 3,5 buts",
-     "c": 1.73,
-     "r": "gagne",
-     "cc": 1.73
-    }
-   ],
-   "gagnes": 1,
-   "cote": 1.73,
+   "paliers": [],
+   "gagnes": 0,
+   "cote": null,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
     "t": "perdu",
-    "j": "2026-11-22",
-    "n": 3,
-    "h": "FK Sarajevo",
-    "a": "Siroki Brijeg",
-    "p": "Moins de 2,5 buts",
-    "k": 1.75
+    "j": "2026-11-24",
+    "n": 1,
+    "h": "Kyoto Sanga",
+    "a": "Pohang Steelers",
+    "p": "Kyoto Sanga : plus de 1,5 but",
+    "k": 1.73
    },
    "objectifs": [
     {
@@ -416,11 +404,22 @@
      "c": 1.73,
      "r": "gagne",
      "cc": 1.73
+    },
+    {
+     "j": "2026-11-24",
+     "f": 1629983,
+     "h": "Kyoto Sanga",
+     "a": "Pohang Steelers",
+     "m": "home-team-over-15",
+     "p": "Kyoto Sanga : plus de 1,5 but",
+     "c": 1.73,
+     "r": "perdu",
+     "cc": null
     }
    ],
    "bilan": {
     "gagnes": 25,
-    "perdus": 8,
+    "perdus": 9,
     "annules": 1,
     "non_regles": 0,
     "objectifs": 1
@@ -428,31 +427,19 @@
   },
   {
    "rang": 2,
-   "paliers": [
-    {
-     "j": "2026-11-23",
-     "f": 1649568,
-     "h": "Instituto Cordoba",
-     "a": "Huracan",
-     "m": "total-shots-over-24_5",
-     "p": "Plus de 24,5 tirs",
-     "c": 1.83,
-     "r": "gagne",
-     "cc": 1.83
-    }
-   ],
-   "gagnes": 1,
-   "cote": 1.83,
+   "paliers": [],
+   "gagnes": 0,
+   "cote": null,
    "etat": "en_cours",
    "attente": null,
    "dernier": {
     "t": "perdu",
-    "j": "2026-11-22",
-    "n": 0,
-    "h": "Atalanta",
-    "a": "Inter",
-    "p": "Moins de 3,5 buts",
-    "k": 1.8
+    "j": "2026-11-24",
+    "n": 1,
+    "h": "Newcastle Jets",
+    "a": "Kashiwa Reysol",
+    "p": "Kashiwa Reysol : plus de 2,5 buts",
+    "k": 1.83
    },
    "objectifs": [
     {
@@ -825,11 +812,22 @@
      "c": 1.83,
      "r": "gagne",
      "cc": 1.83
+    },
+    {
+     "j": "2026-11-24",
+     "f": 1629981,
+     "h": "Newcastle Jets",
+     "a": "Kashiwa Reysol",
+     "m": "away-team-over-25",
+     "p": "Kashiwa Reysol : plus de 2,5 buts",
+     "c": 1.83,
+     "r": "perdu",
+     "cc": null
     }
    ],
    "bilan": {
     "gagnes": 20,
-    "perdus": 13,
+    "perdus": 14,
     "annules": 0,
     "non_regles": 0,
     "objectifs": 1
@@ -844,12 +842,12 @@
    "attente": null,
    "dernier": {
     "t": "perdu",
-    "j": "2026-11-23",
+    "j": "2026-11-24",
     "n": 0,
-    "h": "Internacional",
-    "a": "Vitoria",
-    "p": "Internacional : moins de 1,5 but",
-    "k": 2.1
+    "h": "Oxford United",
+    "a": "Tottenham Hotspur U21",
+    "p": "Oxford United : plus de 2,5 buts",
+    "k": 2
    },
    "objectifs": [
     {
@@ -1134,11 +1132,22 @@
      "c": 2.1,
      "r": "perdu",
      "cc": null
+    },
+    {
+     "j": "2026-11-24",
+     "f": 1588868,
+     "h": "Oxford United",
+     "a": "Tottenham Hotspur U21",
+     "m": "home-team-over-25",
+     "p": "Oxford United : plus de 2,5 buts",
+     "c": 2,
+     "r": "perdu",
+     "cc": null
     }
    ],
    "bilan": {
     "gagnes": 16,
-    "perdus": 8,
+    "perdus": 9,
     "annules": 1,
     "non_regles": 0,
     "objectifs": 1

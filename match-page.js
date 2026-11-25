@@ -1426,7 +1426,7 @@ function render(raw,o){
   if(!par.film)par.scenario=[scenarioCarte(vm),t('match_v4.nav_scenario','Scénario')];
   par.buteurs=[marchesJoueursCarte(vm,dit)];
   par.questions=[faqCarte(vm),t('match_page.nav_questions','Questions')];
-  const LIB_GROUPE={equipes:t('match_v4.nav_teams','Équipes'),joueurs:t('match_v4.nav_players','Joueurs')};
+  const LIB_GROUPE={equipes:t('match_v4.nav_teams','Équipes'),joueurs:t('match_v4.nav_players','Buteurs')};
   const vus={};
   ORDRE_PAGE.forEach(k=>{
     if(!(par[k]&&par[k][0]))return;
@@ -1491,6 +1491,28 @@ function sortieGratuite(raw,list){
     return {href:lien('match.html?id='+m.id),match:tf('match_page.sig_match_line','{home} – {away}',{home:h,away:a})};
   }catch(e){return null;}
 }
+// TEST A/B « PAGE OUVERTE » (25/11/2026, decision de Clement). Groupe A : le mur actuel (offre +
+// apercu flou). Groupe B : sous l'offre, les blocs PUBLICS du match (forme, classement, comparatif,
+// compositions), lus dans la copie publique (publicCopy) : aucun champ premium, l'Avis, le pari,
+// les buteurs et les marches restent sous cadenas. Un groupe par navigateur, tire au hasard une
+// seule fois (localStorage iashark_ab_page), jamais pour qui refuse les cookies (groupe A, rien
+// d'ecrit). ?ab=A ou ?ab=B force le groupe (controles). funnel-track.js ajoute ab_page a chaque
+// mesure ; PostHog recoit la meme propriete.
+function groupeAB(){
+  try{
+    if(localStorage.getItem('iashark_cookie_consent')==='refused')return 'A';
+    const force=(new URLSearchParams(location.search).get('ab')||'').toUpperCase();
+    let g=force==='A'||force==='B'?force:localStorage.getItem('iashark_ab_page');
+    if(g!=='A'&&g!=='B')g=Math.random()<0.5?'A':'B';
+    localStorage.setItem('iashark_ab_page',g);
+    try{if(window.posthog&&window.posthog.register)window.posthog.register({ab_page_match:g});}catch(e){}
+    return g;
+  }catch(e){return 'A';}
+}
+function blocsPublics(vm){
+  return [['forme',formeCarte(vm)],['classement',classementCarte(vm)],['comparatif',comparatifCarte(vm)],['compos',compoCarte(vm)]]
+    .filter(x=>x[1]).map(x=>[x[0],x[1],null,false]);
+}
 function renderProWall(raw,ctx){
   const vm=viewModel(publicCopy(raw));
   const pub=vm._raw;
@@ -1507,6 +1529,7 @@ function renderProWall(raw,ctx){
   // Apercu HONNETE (controle UX du 04/10/2026, tour 2) : seulement ce que Pro aura sur CE match
   // (pro_sections, liste publique du calcul quotidien), de faux chiffres constants.
   const contenus=Array.isArray(pub.pro_sections)?pub.pro_sections:[];
+  if(groupeAB()==='B')secs.push(...blocsPublics(vm));
   if(MS){const ap=MS.apercuFlou({contenus,pari:etatAnalyse(pub)==='ready'});if(ap)secs.push(['apercu',ap,null,true]);}
   // Panneau flou (ordinateur) : un cadenas et la ligne « Ce que tu debloques », SANS bouton :
   // le seul bouton de la page est celui du composant de paiement (controle UX du 04/10).
@@ -1536,6 +1559,7 @@ function renderAuthWall(raw,appel){
     ${lignePro}
   </section>`;
   const secs=pari?[['appel',pari,null,true],['offre',carte,null,true]]:[['offre',carte,null,true]];
+  if(groupeAB()==='B')secs.push(...blocsPublics(vm));
   // Apercu de ce que voit un COMPTE GRATUIT sur ce match : toutes les sections sauf le panneau
   // Marches (decision de Clement du 04/10/2026), donc la liste publique pro_sections (ce qui existe
   // vraiment sur ce match, aucun chiffre) ; repli : ce que montre la copie publique. Faux chiffres

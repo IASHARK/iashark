@@ -146,6 +146,12 @@
     if (FLAGS.internal) md.internal = true;
     if (FLAGS.qa) md.qa = true;
     if (FLAGS.bot) md.bot = true;
+    // Test A/B « page ouverte » (match-page.js#groupeAB, 25/11/2026) : le groupe A ou B de ce
+    // navigateur, lu seulement (jamais tire ici), pour comparer inscriptions et paiements.
+    try {
+      var ab = localStorage.getItem("iashark_ab_page");
+      if (ab === "A" || ab === "B") md.ab_page = ab;
+    } catch (e) {}
     return md;
   }
   // Pages internes jamais mesurees (on ne compte pas le proprietaire).

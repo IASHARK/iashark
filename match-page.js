@@ -1566,6 +1566,16 @@ function renderAuthWall(raw,appel){
   // constants.
   if(MS){const pub=vm._raw,contenus=Array.isArray(pub.pro_sections)?pub.pro_sections:MS.contenusPro(pub);const ap=MS.apercuFlou({offert:true,contenus,pari:etatAnalyse(pub)==='ready'});if(ap)secs.push(['apercu',ap,null,true]);}
   paint(vm,secs,{sansStats:true});
+  // INSCRIPTION SUR LA PAGE (25/11/2026, decision de Clement) : le bouton du cadenas ouvre le
+  // formulaire a sa place (lib/inscription-rapide.js) ; la moitie des visiteurs partait au
+  // changement de page. Module absent ou pas encore charge : le lien vers inscription.html reste.
+  const boutonCompte=root.querySelector('#sec-offre [data-track="match_avis_unlock"]');
+  if(boutonCompte){
+    besoin('IasharkInscriptionRapide','/lib/inscription-rapide.js').then(IR=>{
+      if(!IR)return;
+      boutonCompte.addEventListener('click',ev=>{if(IR.ouvrir(boutonCompte))ev.preventDefault();});
+    });
+  }
 }
 // Apercu : en-tete du match (donnees publiques, aucune sortie du modele) et
 // place reservee du signal / mur d'acces, le temps de lire la session.

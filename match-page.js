@@ -1519,11 +1519,12 @@ function renderProWall(raw,ctx){
   const MS=window.IasharkMatchSections;
   // Repli sans module : un lien vers l'abonnement (jamais une page vide).
   const repli=`<section class="op op--vitrine"><h2 class="op-title">${esc(t('offre_pro.title_match','Passe Pro pour ouvrir ce match'))}</h2>${boutonAction(lien('abonnement.html?duree=month&next='+encodeURIComponent(cheminMatch(raw))),t('match_v4.panel_cta','Passe Pro'),suivi('match_gate_unlock').trim())}</section>`;
-  // 12/11/2026 (Clement : « trop de trucs qui servent a rien ») : le Pro offert contre une inscription chez
-  // Lolly Bet, notre partenaire, passe EN PREMIER ; dessous l'offre payante ; plus de bouton bookmaker ni de banniere ici.
+  // 12/11/2026 (Clement : « trop de trucs qui servent a rien ») : plus de bouton bookmaker ni de banniere ici.
+  // 25/11/2026 (Clement, strategie « une offre principale par profil ») : l'essai Pro passe EN PREMIER, le Pro
+  // offert contre une inscription chez Lolly Bet, notre partenaire, juste dessous (2 demandes en 2 semaines en tete).
   const secs=[];
-  secs.push(['prooffert',carteProOffert(),null,true]);
   secs.push(['offre',`<div id="offreMatch" class="gate">${repli}</div>`,null,true]);
+  secs.push(['prooffert',carteProOffert(),null,true]);
   // Bouton du site de paris (Lolly Bet depuis le 11/11) discret SOUS l'offre Pro (09/11/2026, Clement) : le visiteur qui ne prend pas Pro
   // peut voir les cotes du match chez 1win (en direct apres le coup d'envoi). Aucun pari devoile.
   // Apercu HONNETE (controle UX du 04/10/2026, tour 2) : seulement ce que Pro aura sur CE match

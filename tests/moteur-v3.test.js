@@ -676,8 +676,10 @@ test("C1 : repli « aucun » par defaut dans le pipeline, alerte visible si le m
 });
 
 test("C2 : chaque pari archive porte son moteur (v3 / ancien) et sa version, jusque dans predictions_archive", () => {
-  const debut = WF.indexOf("histo.predictions.unshift({");
-  const bloc = WF.slice(WF.indexOf("var alreadyExists=histo.predictions.find("), WF.indexOf("});", debut));
+  // Ligne construite dans nouvelleLigne puis ajoutee par histo.predictions.unshift(nouvelleLigne) (match rejoue, 10/11/2026).
+  const debut = WF.indexOf("var nouvelleLigne={");
+  assert.ok(debut !== -1);
+  const bloc = WF.slice(WF.indexOf("var alreadyExists="), WF.indexOf("histo.predictions.unshift(nouvelleLigne);", debut));
   assert.match(bloc, /var moteurPari=\(m\.v3_pari&&m\.moteur_v3&&m\.moteur_v3\.source==='v3'\)\?'v3':'ancien';/);
   assert.match(bloc, /var moteurVersion=moteurPari==='v3'\?\(m\.moteur_v3\.version_moteur\|\|null\):MODEL_VERSION;/);
   assert.match(bloc, /moteur:moteurPari,\s*moteur_version:moteurVersion,/);
